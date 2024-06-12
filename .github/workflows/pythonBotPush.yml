@@ -17,4 +17,4 @@ jobs:
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          script: "cd /root/FreiFahren_BE-NLP && git fetch --all && git reset --hard origin/main && sudo systemctl daemon-reload && sudo systemctl restart telegrambotService.service"
+          script: "cd /root/Freifahren-main/ && git fetch --all && git reset --hard origin/main && sudo systemctl daemon-reload && sudo systemctl restart telegrambotService.service"
