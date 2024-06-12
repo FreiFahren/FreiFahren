@@ -1,0 +1,38 @@
+name: Deploy Go App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Go App
+        run: go build
+      - name: Copy Go App to Server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.IP_ADDRESS }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          source: backend
+          target: /root/backend
+      - name: Overwrite data with github repo and then Restart Go App Service
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.IP_ADDRESS }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            mkdir -p /root/backend/data
+            cd /root/backend/data
+            FILES=$(curl -s https://api.github.com/repos/FreiFahren/backend/contents/data | jq -r '.[] | select(.name | endswith(".json")) | .download_url')
+            for FILE in $FILES; do
+              curl -O $FILE
+            done
+            sudo systemctl restart freifahren-backend.service
