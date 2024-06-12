@@ -34,7 +34,7 @@ const Datenschutz = () => {
                     <li>Station</li>
                     <li>Richtung (optional)</li>
                     <li>Uhrzeit der Meldung</li>
-                    <li>Beschreibungstext</li>
+                    <li>Beschreibungstext (optional)</li>
                 </ul>
                 <p>
                     Diese Daten werden zur Verbesserung der Nutzererfahrung analysiert und nicht an Dritte weitergegeben. Die Daten werden ausschließlich intern verwendet.
