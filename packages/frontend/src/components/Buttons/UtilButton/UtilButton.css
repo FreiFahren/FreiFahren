@@ -1,0 +1,14 @@
+button.util-button {
+    bottom: var(--distance-from-edge-default);
+    left: var(--distance-from-edge-default);
+    flex-direction: column;
+}
+
+.util-button span {
+    display: block;
+    height: 4px;
+    width: 85%;
+    border-radius: var(--borderRadius-default);
+    background-color: var(--color-primary);
+    margin: var(--margin-xs) 0;
+}

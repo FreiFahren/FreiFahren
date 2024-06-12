@@ -1,0 +1,18 @@
+button.close-button {
+    top: -40px;
+    left: 10px;
+    z-index: var(--zIndex-closeButton);
+    box-shadow: var(--boxShadow-light);
+}
+
+.close-button::after {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 20px;
+    border-right: 4px solid var(--color-primary);
+    border-bottom: 4px solid var(--color-primary);
+    transform: rotate(45deg);
+    position: absolute;
+    margin-bottom: 5px;
+}

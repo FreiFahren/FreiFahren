@@ -1,0 +1,74 @@
+.util-modal {
+    display: flex !important;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.util-modal h1 {
+    margin-right: var(--margin-s);
+}
+
+.util-modal div:first-child {
+  gap: var(--margin-l);
+  margin: 0 0 auto 0;
+}
+
+.util-modal li a svg{
+    height: 25px;
+    width: 25px;
+}
+
+.util-modal ul {
+    position: relative;
+    width: 65%;
+    max-width: 300px;
+    margin-top: var(--margin-m);
+    margin-right: 0;
+}
+
+.util-modal div:last-of-type {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: var(--padding-m) 0;
+}
+
+.util-modal ul:first-of-type {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0 var(--margin-s) 0 0;
+    flex-grow: 1;
+    width: 0;
+}
+
+.util-modal ul:last-of-type {
+    display: flex;
+    justify-content: flex-end;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.util-modal li {
+    margin-right: var(--margin-m);
+}
+  
+.util-modal li:last-child {
+    margin-right: 0;
+}
+
+@media (max-width: 500px) {
+    .util-modal .align-child-on-line button {
+        font-size: var(--font-xs);
+    }
+
+    .util-modal h1 {
+        font-size: var(--font-l);
+    }
+
+    .util-modal ul {
+        margin-right: 1%;
+    }
+}

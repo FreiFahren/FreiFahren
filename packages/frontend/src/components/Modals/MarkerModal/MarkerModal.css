@@ -1,0 +1,125 @@
+.marker-modal h2 span {
+    padding: var(--padding-xxs);
+    border-radius: 2px;
+    color: var(--color-background);
+}
+
+.info-popup.marker-modal h2{
+    margin-bottom: var(--text-relation-weak);
+}
+
+.marker-modal.info-popup.modal .description {
+    background-color: var(--color-gray);
+    border-radius: var(--borderRadius-small);
+    padding: var(--padding-s);
+    margin-top: var(--margin-m);
+    width: fit-content;
+    color: var(--color-white);
+}
+
+.marker-modal.info-popup .distance {
+    margin-top: var(--margin-s);
+    min-height: 20.5px;
+}
+
+/* LINE STYLES */
+
+.S1 {
+    background-color: #da6ba2;
+}
+
+.S2 {
+    background-color: #007734;
+}
+
+.S3 {
+    background-color: #0066ad;
+}
+
+.S25 {
+    background-color: #007734;
+}
+
+.S26 {
+    background-color: #007734;
+}
+
+.S5 {
+    background-color: #eb7405;
+}
+
+.S41 {
+    background-color: #ad5937;
+}
+
+.S42 {
+    background-color: #cb6418;
+}
+
+.S45 {
+    background-color: #cd9c53;
+}
+
+.S46 {
+    background-color: #cd9c53;
+}
+
+.S47 {
+    background-color: #cd9c53;
+}
+
+.S7 {
+    background-color: #816da6;
+}
+
+.S75 {
+    background-color: #816da6;
+}
+
+.S8 {
+    background-color: #6a2;
+}
+
+.S85 {
+    background-color: #6a2;
+}
+
+.S9 {
+    background-color: #992746;
+}
+
+.U1 {
+    background-color: #7DAD4C;
+}
+
+.U2 {
+    background-color: #DA421E;
+}
+
+.U3 {
+    background-color: #16683D;
+}
+
+.U4 {
+    background-color: #F0D722;
+}
+
+.U5 {
+    background-color: #7E5330;
+}
+
+.U6 {
+    background-color: #8C6DAB;
+}
+
+.U7 {
+    background-color: #528DBA;
+}
+
+.U8 {
+    background-color: #224F86;
+}
+
+.U9 {
+    background-color: #F3791D;
+}

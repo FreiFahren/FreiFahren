@@ -1,0 +1,28 @@
+.inspector-marker {
+  cursor: pointer;
+  background-color: var(--color-red);
+  border-radius: 50%;
+  box-shadow: var(--boxShadow-marker);
+  border: var(--border-marker);
+}
+
+.live{
+  height: 22px;
+  width: 22px;
+  display: block;
+  border-radius: 50%;
+  background-color: var(--color-red);
+  animation:pulse 3500ms infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: var(--color-red) 0 0 0 0;
+  }
+  50% {
+    box-shadow: var(--color-red) 0 0 0 0;
+  }
+  75% {
+    box-shadow: var(--boxShadow-marker-pulse);
+  }
+}

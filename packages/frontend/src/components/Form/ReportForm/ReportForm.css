@@ -1,0 +1,78 @@
+.red-highlight {
+    font-size: var(--font-xl);
+    color: var(--color-red);
+}
+
+.red-highlight#warning-span {
+    font-size: var(--font-xs);
+    margin-top: var(--margin-m);
+}
+
+.report-form form > div:nth-child(2) {
+    position: relative; 
+}
+
+.report-form label {
+    border-radius: var(--borderRadius-default);
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.report-form label a {
+    color: var(--color-primary);
+    margin: 0 2px;
+}
+
+.line-direction-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: -20px;
+}
+.line-select-container {
+    width: 35%;
+    margin-right: 0.5rem;
+}
+
+.direction-select-container {
+    width: 65%;
+}
+
+.select-field {
+    text-align: center;
+}
+
+#privacy-label {
+    text-align: left;
+    font-size: var(--font-xs);
+}
+
+.report-form textarea {
+    position: relative;
+    font-size: var(--font-s);
+    font-weight: 400;
+    border: 1px solid var(--color-light-gray);
+    border-radius: var(--borderRadius-small);
+    width: calc(100% - 16px);
+    height: 3rem;
+    resize: none;
+    transition: ease-in-out var(--transition-default);
+    padding: var(--padding-s);
+}
+
+.report-form textarea:hover {
+    border: 1px solid var(--color-light-gray-hover);
+}
+
+.report-form textarea::placeholder {
+    font-weight: 400;
+    margin: var(--margin-m);
+    color: var(--color-box-text);
+}
+
+.report-form .message-field {
+    margin-bottom: var(--margin-m);
+    width: 100%;
+}

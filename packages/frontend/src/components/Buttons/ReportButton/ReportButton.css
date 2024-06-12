@@ -1,0 +1,25 @@
+.report-button {
+    position: fixed;
+    height: 90px;
+    min-height: auto;
+    min-width: auto;
+    width: 90px;
+    bottom: var(--distance-from-edge-default);
+    right: var(--distance-from-edge-default);
+    padding: var(--padding-s);
+    cursor: pointer;
+    background-color: var(--incentive-blue);
+    border: 2px solid var(--color-white);
+    border-radius: 50%;
+    box-shadow: var(--boxShadow-default);
+    overflow: hidden;
+    z-index: var(--zIndex-button);
+}
+
+@media (max-width: 400px) {
+    .report-button {
+        height: 70px;
+        width: 70px;
+        padding: var(--padding-xs);
+    }
+}

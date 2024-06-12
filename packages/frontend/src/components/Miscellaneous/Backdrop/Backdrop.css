@@ -1,0 +1,7 @@
+.backdrop {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    z-index: var(--zIndex-backdrop);
+    background-color: rgba(0, 0, 0, 0.5);
+}
