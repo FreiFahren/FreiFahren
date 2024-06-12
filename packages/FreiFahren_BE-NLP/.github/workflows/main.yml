@@ -1,0 +1,20 @@
+name: Deploy Python App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: fetch and deploy python App Service
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.IP_ADDRESS }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: "cd /root/FreiFahren_BE-NLP && git fetch --all && git reset --hard origin/main && sudo systemctl daemon-reload && sudo systemctl restart telegrambotService.service"

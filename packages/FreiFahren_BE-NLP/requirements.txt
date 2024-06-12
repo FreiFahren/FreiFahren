@@ -1,0 +1,17 @@
+pyTelegramBotAPI
+fuzzywuzzy 
+python-Levenshtein
+python-dotenv
+
+flake8
+flake8-quotes
+pep8-naming
+flake8-unused-arguments
+flake8-bugbear
+
+watchdog
+openai
+
+spacy
+
+psycopg2-binary
