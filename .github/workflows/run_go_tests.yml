@@ -20,7 +20,7 @@ jobs:
 
       - name: 'Create env file'
         run: |
-          touch .env
+          cd packages/backend/ &&  touch .env
           echo export DB_USER="${{ secrets.DB_USER }}"  >> .env
           echo export DB_HOST="${{ secrets.DB_HOST }}"  >> .env
           echo export DB_PORT="${{ secrets.DB_PORT }}"  >> .env
@@ -32,7 +32,7 @@ jobs:
 
           
       - name: Build
-        run: go build
+        run: cd packages/backend/ &&  go build
 
       - name: Run tests
-        run: go test ./...
+        run: cd packages/backend/ &&  go test ./...

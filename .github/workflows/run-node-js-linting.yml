@@ -1,4 +1,4 @@
-name: Node JS Linting
+name: Node JS Linting (frontend)
 
 on:
   pull_request:
