@@ -20,7 +20,7 @@ jobs:
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          source: /root/FreiFahren/packages/backend/backend
+          source: /packages/backend/backend
           target: /root/FreiFahren/packages/backend
       - name: Restart Go Service
         uses: appleboy/ssh-action@v1.0.3
