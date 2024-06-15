@@ -1,4 +1,4 @@
-name: Lint
+name: Node JS Linting
 
 on:
   pull_request:

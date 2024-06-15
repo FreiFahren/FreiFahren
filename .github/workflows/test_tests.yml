@@ -1,4 +1,4 @@
-name: Run Tests
+name: Run Node.js Tests (frontend)
 
 on:
   pull_request:
@@ -18,7 +18,7 @@ jobs:
         node-version: '16'
 
     - name: Install dependencies
-      run: npm install
+      run: cd packages/frontend/ && npm install
 
     - name: Run Tests
-      run: npx jest
+      run: cd packages/frontend/ && npx jest

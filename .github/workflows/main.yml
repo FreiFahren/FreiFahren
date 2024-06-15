@@ -1,4 +1,4 @@
-name: Deploy Go App
+name: Deploy Go App (backend)
 
 on:
   push:

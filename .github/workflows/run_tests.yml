@@ -1,4 +1,4 @@
-name: Run Tests
+name: Run Go Tests (backend)
 
 on:
   pull_request:
