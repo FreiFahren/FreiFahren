@@ -13,7 +13,6 @@ jobs:
       - name: Build Go App
         run: |
           cd ./packages/backend/ && go build
-          pwd
       - name: Copy Go App to Server
         uses: appleboy/scp-action@master
         with:
@@ -21,7 +20,7 @@ jobs:
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          source: ./backend
+          source: /root/FreiFahren/packages/backend/backend
           target: /root/FreiFahren/packages/backend
       - name: Restart Go Service
         uses: appleboy/ssh-action@v1.0.3
