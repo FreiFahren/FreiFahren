@@ -1,0 +1,6 @@
+.DS_Store
+.env
+Rstats/output/*.json
+Rstats/ticket_data*.json
+build/
+segmentEndpoints.json
