@@ -1,4 +1,4 @@
-name: Lint
+name: Run Node.js Tests (frontend)
 
 on:
   pull_request:
@@ -16,8 +16,9 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: '16'
+
     - name: Install dependencies
       run: cd packages/frontend/ && npm install
 
-    - name: Run ESLint
-      run: cd packages/frontend/ && npm run lint
+    - name: Run Tests
+      run: cd packages/frontend/ && npx jest
