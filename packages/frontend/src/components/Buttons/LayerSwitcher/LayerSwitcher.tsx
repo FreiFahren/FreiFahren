@@ -2,11 +2,11 @@ import './LayerSwitcher.css';
 import React, {useState} from 'react';
 
 interface LayerSwitcherProps {
-   onClick: () => void;
+   changeLayer: (layer: string) => void;
    isRiskLayerOpen: boolean;
 }
 
-const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ onClick, isRiskLayerOpen }) => {
+const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ changeLayer, isRiskLayerOpen }) => {
   const [areLayerOptionsVisible, setAreLayerOptionsVisible] = useState(false);
   
    return (
@@ -26,7 +26,7 @@ const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ onClick, isRiskLayerOpen 
 
       {areLayerOptionsVisible && (
             <div className='layer-options small-button align-child-on-line'>
-              <div>
+              <div onClick={()=> changeLayer('risk')}>
                 <img 
                   src={process.env.PUBLIC_URL + '/icons/risk.png'} 
                   alt='Showing how the risk layer looks like'
@@ -34,7 +34,7 @@ const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ onClick, isRiskLayerOpen 
                 ></img>
                 <p>Risiko</p>
               </div>
-              <div>
+              <div onClick={()=> changeLayer('line')}>
                 <img 
                   src={process.env.PUBLIC_URL + '/icons/lines.png'} 
                   alt='Showing how the line layer looks like'

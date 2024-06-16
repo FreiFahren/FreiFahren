@@ -112,6 +112,15 @@ function App() {
     fetchReports();
   }, [appUIState]);
 
+
+  function changeLayer(clickedLayer: string) {
+    if (clickedLayer === 'risk') {
+      setAppUIState({ ...appUIState, isRiskLayerOpen: true });
+    } else {
+      setAppUIState({ ...appUIState, isRiskLayerOpen: false });
+    }
+  }
+
   return (
     <div className='App'>
       {appUIState.isFirstOpen &&
@@ -155,7 +164,7 @@ function App() {
         isRiskLayerOpen={appUIState.isRiskLayerOpen}
       />
       <LayerSwitcher
-        onClick={() => setAppUIState({ ...appUIState, isRiskLayerOpen: !appUIState.isRiskLayerOpen })}
+        changeLayer={changeLayer}
         isRiskLayerOpen={appUIState.isRiskLayerOpen}
       />
       <UtilButton onClick={toggleUtilModal} />
