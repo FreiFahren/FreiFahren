@@ -8,3 +8,25 @@
   padding: var(--padding-s);
 }
 
+.layer-options {
+    top: var(--distance-from-edge-default);
+    right: 100px;
+    width: fit-content;
+    height: 60px;
+    padding: var(--padding-xs);
+}
+
+.layer-options div {
+    width: 50px;
+    height: 50px;
+}
+
+.layer-options p {
+    text-align: center;
+    font-size: var(--font-xxs);
+}
+
+.layer-options img {
+    width: 35px;
+    height: 35px;
+}
