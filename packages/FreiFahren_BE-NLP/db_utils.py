@@ -1,3 +1,4 @@
+from datetime import datetime
 import psycopg2
 from psycopg2 import sql
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
@@ -40,6 +41,7 @@ def create_table_if_not_exists():
 
 
 def insert_ticket_info(
+    timestamp: datetime,
     message,
     author,
     line,
@@ -53,6 +55,7 @@ def insert_ticket_info(
 
     # Prepare the JSON data payload
     data = {
+        'timestamp': timestamp.isoformat(),
         'line': line,
         'station': station_name,
         'direction': direction_name,
@@ -63,6 +66,7 @@ def insert_ticket_info(
     headers = {
         'Content-Type': 'application/json'
     }
+    
     response = requests.post(url + '/newInspector', json=data, headers=headers)
 
     if response.status_code != 200:

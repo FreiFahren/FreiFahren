@@ -1,6 +1,7 @@
 import os
 import telebot
-import datetime
+import pytz
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from verify_info import verify_direction, verify_line
 from process_message import (
@@ -112,18 +113,20 @@ def get_station_id(station_name):
     return None
 
 
-def process_new_message(author_id, message, current_time, conversations):
+def process_new_message(timestamp, author_id, message, conversations):
     info = extract_ticket_inspector_info(message.text)
-    if info.get('line') or info.get('station') or info.get('direction'):
-        print('Found Info:\nLine:\t\t', info.get('line'), '\nStation:\t', info.get('station'), '\nDirection:\t', info.get('direction'))
+    if(type(info) == dict):
+        if info.get('line') or info.get('station') or info.get('direction'):
+            print('Found Info:\nLine:\t\t', info.get('line'), '\nStation:\t', info.get('station'), '\nDirection:\t', info.get('direction'))
 
-        insert_ticket_info(
-            None, # Dont save the message
-            None, # Dont save the author
-            info.get('line'),
-            info.get('station'),
-            info.get('direction'),
-        )
+            insert_ticket_info(
+                timestamp,
+                None, # Dont save the message
+                None, # Dont save the author
+                info.get('line'),
+                info.get('station'),
+                info.get('direction'),
+            )
     else:
         print('No valuable information found')
 
@@ -132,6 +135,9 @@ if __name__ == '__main__':
     load_dotenv()
     BOT_TOKEN = os.getenv('BOT_TOKEN')
     BACKEND_URL = os.getenv('BACKEND_URL')
+
+    utc = pytz.UTC
+    cet = pytz.timezone('CET')
 
     bot = telebot.TeleBot(BOT_TOKEN)
     conversations = {}
@@ -145,8 +151,12 @@ if __name__ == '__main__':
     @bot.message_handler(func=lambda message: message)
     def get_info(message):
         author_id = message.from_user.id
-        current_time = datetime.datetime.now()
-        
-        process_new_message(author_id, message, current_time, conversations)
+        timestamp = datetime.fromtimestamp(message.date, utc).astimezone(cet)           
+        if timestamp.second or timestamp.microsecond:
+            timestamp = timestamp.replace(second=0, microsecond=0) + timedelta(minutes=1)
+        else:
+            timestamp = timestamp.replace(second=0, microsecond=0)
+            
+        process_new_message(timestamp, author_id, message, conversations)
 
     bot.infinity_polling()

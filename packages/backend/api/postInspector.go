@@ -35,9 +35,7 @@ func PostInspector(c echo.Context) error {
 		return structs.HandleErrorEchoContext(c, err, "Error filling missing columns: %v")
 	}
 
-	now := time.Now().Truncate(time.Minute).Add(time.Minute)
-
-	if err := database.InsertTicketInfo(&now, pointers.AuthorPtr, pointers.MessagePtr, pointers.LinePtr, pointers.StationNamePtr, pointers.StationIDPtr, pointers.DirectionNamePtr, pointers.DirectionIDPtr); err != nil {
+	if err := database.InsertTicketInfo(pointers.TimestampPtr, pointers.AuthorPtr, pointers.MessagePtr, pointers.LinePtr, pointers.StationNamePtr, pointers.StationIDPtr, pointers.DirectionNamePtr, pointers.DirectionIDPtr); err != nil {
 		return fmt.Errorf("(postInspector.go) failed to insert ticket info into database: %v", err)
 	}
 
@@ -57,6 +55,16 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 	pointers := &structs.InsertPointers{}
 
 	// Assign pointers for values to be potentially inserted as NULL
+
+	if req.Timestamp != (time.Time{}) {
+		pointers.TimestampPtr = &req.Timestamp
+		response.Timestamp = req.Timestamp
+	} else {
+		timestamp := time.Now().Truncate(time.Minute).Add(time.Minute)
+		pointers.TimestampPtr = &timestamp
+		response.Timestamp = *pointers.TimestampPtr
+	}
+
 	if req.Line != "" {
 		pointers.LinePtr = &req.Line
 		response.Line = req.Line
