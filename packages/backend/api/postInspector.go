@@ -76,7 +76,7 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 		if directionID, found := FindStationId(req.DirectionName, stations); found {
 			pointers.DirectionNamePtr = &req.DirectionName
 			pointers.DirectionIDPtr = &directionID
-			response.Direction = structs.Station{Name: req.DirectionName, ID: directionID}
+			response.Direction = structs.Station{Name: req.DirectionName, ID: directionID, Coordinates: structs.Coordinates(stations[directionID].Coordinates), Lines: stations[directionID].Lines}
 		} else {
 			return nil, nil, fmt.Errorf("direction not found: %v", req.DirectionName)
 		}
@@ -117,10 +117,18 @@ func fillMissingColumnsUsingProvidedData(dataToInsert *structs.ResponseData, poi
 }
 
 func assignLineIfSingleOption(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, station structs.StationListEntry) error {
+	// If there is only one line for the station, assign it
 	if len(station.Lines) == 1 {
 		dataToInsert.Line = station.Lines[0]
 		pointers.LinePtr = &dataToInsert.Line
 	}
+
+	// if there is only one line for the direction, assign it
+	if len(dataToInsert.Direction.Lines) == 1 {
+		dataToInsert.Line = dataToInsert.Direction.Lines[0]
+		pointers.LinePtr = &dataToInsert.Line
+	}
+
 	return nil
 }
 
