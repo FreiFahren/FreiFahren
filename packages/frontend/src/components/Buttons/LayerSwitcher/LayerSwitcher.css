@@ -30,3 +30,8 @@
     width: 35px;
     height: 35px;
 }
+
+.layer-options img.active {
+    border: 2px solid var(--color-primary);
+    border-radius: var(--borderRadius-medium);
+}
