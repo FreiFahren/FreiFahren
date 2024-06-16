@@ -42,8 +42,6 @@ def create_table_if_not_exists():
 
 def insert_ticket_info(
     timestamp: datetime,
-    message,
-    author,
     line,
     station_name,
     direction_name
@@ -60,7 +58,7 @@ def insert_ticket_info(
         'station': station_name,
         'direction': direction_name,
         'author': None,
-        'message': message
+        'message': 'from bot'
     }
 
     headers = {
@@ -70,4 +68,5 @@ def insert_ticket_info(
     response = requests.post(url + '/newInspector', json=data, headers=headers)
 
     if response.status_code != 200:
+
         print('Failed to send data to the backend. Status code:', response.status_code, 'Response:', response.text)
