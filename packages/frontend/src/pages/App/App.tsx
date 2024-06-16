@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import Map from '../../components/Map/Map';
-import LayerSwitcher from '../../components/Miscellaneous/LayerSwitcher/LayerSwitcher';
+import LayerSwitcher from '../../components/Buttons/LayerSwitcher/LayerSwitcher';
 import ReportButton from '../../components/Buttons/ReportButton/ReportButton';
 import ReportForm from '../../components/Form/ReportForm/ReportForm';
 import LegalDisclaimer from '../../components/Modals/LegalDisclaimer/LegalDisclaimer';
