@@ -3,5 +3,4 @@
     height: 100vh;
     position: absolute;
     z-index: var(--zIndex-backdrop);
-    background-color: rgba(0, 0, 0, 0.5);
 }
