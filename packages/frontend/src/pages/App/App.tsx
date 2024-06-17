@@ -11,7 +11,7 @@ import StatsPopUp from '../../components/Miscellaneous/StatsPopUp/StatsPopUp';
 import AskForLocation from '../../components/Miscellaneous/AskForLocation/AskForLocation';
 import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton';
 import { highlightElement, useModalAnimation, currentColorTheme, setColorThemeInLocalStorage } from '../../utils/uiUtils';
-import Backdrop from '../../components/Miscellaneous/Backdrop/Backdrop';
+import Backdrop from '../../../src/components/Miscellaneous/Backdrop/Backdrop';
 import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils';
 import './App.css';
 
@@ -38,6 +38,11 @@ const initialAppUIState: AppUIState = {
 function App() {
   const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState);
   const [userPosition, setUserPosition] = useState<{ lng: number, lat: number } | null>(null);
+  const [appMounted, setAppMounted] = useState(false);
+
+  useEffect(() => {
+    setAppMounted(true);
+  }, []);
 
   const handleFormSubmit = () => {
     setAppUIState(appUIState => ({ ...appUIState, formSubmitted: !appUIState.formSubmitted }));
@@ -123,7 +128,7 @@ function App() {
 
   return (
     <div className='App'>
-      {appUIState.isFirstOpen &&
+      {appUIState.isFirstOpen && appMounted &&
         <>
           <LegalDisclaimer
             className={appUIState.isFirstOpen ? 'open center-animation' : ''}
@@ -154,6 +159,7 @@ function App() {
         </>
       )}
 
+      <div id="portal-root"></div>
       <Map
         isFirstOpen={appUIState.isFirstOpen}
         formSubmitted={appUIState.formSubmitted}
