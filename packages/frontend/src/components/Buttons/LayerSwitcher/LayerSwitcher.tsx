@@ -10,6 +10,12 @@ interface LayerSwitcherProps {
 
 const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ changeLayer, isRiskLayerOpen }) => {
   const [areLayerOptionsVisible, setAreLayerOptionsVisible] = useState(false);
+
+  const closeModalAndHighlightSelectedLayer = (layer: string) => {
+    changeLayer(layer);
+    setAreLayerOptionsVisible(false);
+  };
+
   
    return (
     <>
@@ -27,26 +33,26 @@ const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ changeLayer, isRiskLayerO
       {areLayerOptionsVisible && (
         <>
           <Backdrop onClick={()=> setAreLayerOptionsVisible(false)} BackgroundColor={'rgba(0, 0, 0, 0)'}/>
-          <div className='layer-options small-button align-child-on-line'>
-            <div onClick={()=> changeLayer('risk')}>
-              <img 
-                src={process.env.PUBLIC_URL + '/icons/risk.png'} 
-                alt='Showing how the risk layer looks like'
-                className={isRiskLayerOpen ? 'active' : ''}
-              />
-              <p>Risiko</p>
-            </div>
-            <div onClick={()=> changeLayer('line')}>
-              <img 
-                src={process.env.PUBLIC_URL + '/icons/lines.png'} 
-                alt='Showing how the line layer looks like'
-                className={isRiskLayerOpen ? '' : 'active'}
-              />
-              <p>Linien</p>
-            </div>
-          </div>
         </>
       )}
+      <div className={`layer-options small-button align-child-on-line ${areLayerOptionsVisible ? 'visible': ''}`}>
+        <div onClick={()=> closeModalAndHighlightSelectedLayer('risk')}>
+          <img 
+            src={process.env.PUBLIC_URL + '/icons/risk.png'} 
+            alt='Showing how the risk layer looks like'
+            className={isRiskLayerOpen ? 'active' : ''}
+          />
+          <p>Risiko</p>
+        </div>
+        <div onClick={()=> closeModalAndHighlightSelectedLayer('line')}>
+          <img 
+            src={process.env.PUBLIC_URL + '/icons/lines.png'} 
+            alt='Showing how the line layer looks like'
+            className={isRiskLayerOpen ? '' : 'active'}
+          />
+          <p>Linien</p>
+        </div>
+      </div>
     </>
    );
 };

@@ -14,6 +14,13 @@
     width: fit-content;
     height: 60px;
     padding: var(--padding-xs);
+    opacity: 0;
+    transition: var(--transition-default);
+}
+
+.layer-options.visible {
+    z-index: var(--zIndex-modal);
+    opacity: 1;
 }
 
 .layer-options div {
