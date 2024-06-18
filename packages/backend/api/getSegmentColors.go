@@ -120,7 +120,7 @@ func getSegmentFiles() ([]os.FileInfo, error) {
 }
 
 func getLastModifiedTime(file os.FileInfo) (time.Time, error) {
-	modTime := file.ModTime()
+	modTime := file.ModTime().UTC()
 	// Truncate time to the nearest second to match the precision typically used in HTTP headers
 	modTime = modTime.Truncate(time.Second)
 	return modTime, nil

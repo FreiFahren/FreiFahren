@@ -78,7 +78,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
         const lastReportTime = localStorage.getItem('lastReportTime');
         const reportCooldownMinutes = 15;
 
-        if (lastReportTime && Date.now() - parseInt(lastReportTime) < (reportCooldownMinutes * 60 * 1000)) {
+        if (lastReportTime && Date.now() - new Date(lastReportTime).getTime() < (reportCooldownMinutes * 60 * 1000)) {
             highlightElement('report-form');
             createWarningSpan('station-select-div', `Du kannst nur alle ${reportCooldownMinutes} Minuten eine Meldung abgeben!`);
             hasError = true;
@@ -112,7 +112,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
         await reportInspector(lineInput!, stationInput!, directionInput!, textField!);
 
         // Save the timestamp of the report to prevent spamming
-        localStorage.setItem('lastReportTime', Date.now().toString());
+        localStorage.setItem('lastReportTime', new Date().toISOString());
 
         closeModal();
         onFormSubmit(); // Notify App component about the submission

@@ -123,6 +123,9 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector) (utils.Ticke
 	cleanedLine := strings.ReplaceAll(ticketInfo.Line.String, "\n", "")
 	cleanedMessage := strings.ReplaceAll(ticketInfo.Message.String, "\n", "")
 
+	if cleanedMessage == "BOT" {
+		cleanedMessage = ""
+	}
 	stationLat, stationLon, err := IdToCoordinates(cleanedStationId)
 	if err != nil {
 		return utils.TicketInspectorResponse{}, err
