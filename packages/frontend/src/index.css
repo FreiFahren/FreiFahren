@@ -74,6 +74,7 @@
   --border-marker: 3px solid #FFFFFF;
 
   --distance-from-edge-default: 25px;
+  --button-size: 60px;
 }
 
 :root.light{
@@ -269,9 +270,9 @@ span {
   background-color: var(--color-background);
   border-radius: var(--borderRadius-default);
   box-shadow: var(--boxShadow-default);
-  width: 60px;
-  min-width: 60px;
-  height: 60px;
+  width: var(--button-size);
+  min-width: var(--button-size);
+  height: var(--button-size);
   border: var(--border-default);
   z-index: var(--zIndex-button);
 }

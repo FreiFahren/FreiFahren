@@ -117,13 +117,8 @@ function App() {
     fetchReports();
   }, [appUIState]);
 
-
   function changeLayer(clickedLayer: string) {
-    if (clickedLayer === 'risk') {
-      setAppUIState({ ...appUIState, isRiskLayerOpen: true });
-    } else {
-      setAppUIState({ ...appUIState, isRiskLayerOpen: false });
-    }
+    setAppUIState({ ...appUIState, isRiskLayerOpen: clickedLayer === 'risk' });
   }
 
   return (
@@ -159,7 +154,7 @@ function App() {
         </>
       )}
 
-      <div id="portal-root"></div>
+      <div id='portal-root'></div>
       <Map
         isFirstOpen={appUIState.isFirstOpen}
         formSubmitted={appUIState.formSubmitted}
