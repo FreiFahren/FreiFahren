@@ -101,8 +101,8 @@ if __name__ == '__main__':
 
     @bot.message_handler(func=lambda message: message)
     def get_info(message):
-        author_id = message.from_user.id
         timestamp = datetime.fromtimestamp(message.date, utc)
+        # timestamps are rounded to the nearest minute to avoid saving personal data
         if timestamp.second or timestamp.microsecond:
             timestamp = timestamp.replace(second=0, microsecond=0) + timedelta(minutes=1)
         else:
