@@ -35,6 +35,7 @@
   --font-xl: 1.5rem;
 
   --borderRadius-small: 4px;
+  --borderRadius-medium: 12px;
   --borderRadius-default: 16px;
 
   --boxShadow-default: 0 8px 16px rgba(0, 0, 0, 0.5);
@@ -73,6 +74,7 @@
   --border-marker: 3px solid #FFFFFF;
 
   --distance-from-edge-default: 25px;
+  --button-size: 60px;
 }
 
 :root.light{
@@ -262,17 +264,17 @@ span {
   color: var(--color-primary);
 }
 
-button.small-button {
-    position: fixed;
-    cursor: pointer;
-    background-color: var(--color-background);
-    border-radius: var(--borderRadius-default);
-    box-shadow: var(--boxShadow-default);
-    width: 60px;
-    min-width: 60px;
-    height: 60px;
-    border: var(--border-default);
-    z-index: var(--zIndex-button);
+.small-button {
+  position: fixed;
+  cursor: pointer;
+  background-color: var(--color-background);
+  border-radius: var(--borderRadius-default);
+  box-shadow: var(--boxShadow-default);
+  width: var(--button-size);
+  min-width: var(--button-size);
+  height: var(--button-size);
+  border: var(--border-default);
+  z-index: var(--zIndex-button);
 }
 
 button .plus {

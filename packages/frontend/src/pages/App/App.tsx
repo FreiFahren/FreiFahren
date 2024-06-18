@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import Map from '../../components/Map/Map';
-import LayerSwitcher from '../../components/Miscellaneous/LayerSwitcher/LayerSwitcher';
+import LayerSwitcher from '../../components/Buttons/LayerSwitcher/LayerSwitcher';
 import ReportButton from '../../components/Buttons/ReportButton/ReportButton';
 import ReportForm from '../../components/Form/ReportForm/ReportForm';
 import LegalDisclaimer from '../../components/Modals/LegalDisclaimer/LegalDisclaimer';
@@ -11,7 +11,7 @@ import StatsPopUp from '../../components/Miscellaneous/StatsPopUp/StatsPopUp';
 import AskForLocation from '../../components/Miscellaneous/AskForLocation/AskForLocation';
 import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton';
 import { highlightElement, useModalAnimation, currentColorTheme, setColorThemeInLocalStorage } from '../../utils/uiUtils';
-import Backdrop from '../../components/Miscellaneous/Backdrop/Backdrop';
+import Backdrop from '../../../src/components/Miscellaneous/Backdrop/Backdrop';
 import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils';
 import './App.css';
 
@@ -38,6 +38,11 @@ const initialAppUIState: AppUIState = {
 function App() {
   const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState);
   const [userPosition, setUserPosition] = useState<{ lng: number, lat: number } | null>(null);
+  const [appMounted, setAppMounted] = useState(false);
+
+  useEffect(() => {
+    setAppMounted(true);
+  }, []);
 
   const handleFormSubmit = () => {
     setAppUIState(appUIState => ({ ...appUIState, formSubmitted: !appUIState.formSubmitted }));
@@ -112,9 +117,13 @@ function App() {
     fetchReports();
   }, [appUIState]);
 
+  function changeLayer(clickedLayer: string) {
+    setAppUIState({ ...appUIState, isRiskLayerOpen: clickedLayer === 'risk' });
+  }
+
   return (
     <div className='App'>
-      {appUIState.isFirstOpen &&
+      {appUIState.isFirstOpen && appMounted &&
         <>
           <LegalDisclaimer
             className={appUIState.isFirstOpen ? 'open center-animation' : ''}
@@ -145,6 +154,7 @@ function App() {
         </>
       )}
 
+      <div id='portal-root'></div>
       <Map
         isFirstOpen={appUIState.isFirstOpen}
         formSubmitted={appUIState.formSubmitted}
@@ -155,7 +165,7 @@ function App() {
         isRiskLayerOpen={appUIState.isRiskLayerOpen}
       />
       <LayerSwitcher
-        onClick={() => setAppUIState({ ...appUIState, isRiskLayerOpen: !appUIState.isRiskLayerOpen })}
+        changeLayer={changeLayer}
         isRiskLayerOpen={appUIState.isRiskLayerOpen}
       />
       <UtilButton onClick={toggleUtilModal} />
