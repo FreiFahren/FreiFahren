@@ -21,7 +21,7 @@ func CreatePoolTestTable() {
 	sql := `
 	CREATE TABLE IF NOT EXISTS pool_test (
 		id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-		timestamp TIMESTAMP NOT NULL DEFAULT NOW() AT TIMEZONE 'UTC',
+		timestamp TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
 		message TEXT,
 		author BIGINT,
 		line VARCHAR(3),
