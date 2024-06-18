@@ -92,7 +92,6 @@ if __name__ == '__main__':
     utc = pytz.UTC
     
     bot = telebot.TeleBot(BOT_TOKEN)
-    conversations = {}
 
     create_table_if_not_exists()
 
@@ -109,6 +108,6 @@ if __name__ == '__main__':
         else:
             timestamp = timestamp.replace(second=0, microsecond=0)
             
-        process_new_message(timestamp, author_id, message, conversations)
+        process_new_message(timestamp, message)
 
     bot.infinity_polling()
