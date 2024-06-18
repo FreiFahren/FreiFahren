@@ -106,7 +106,7 @@ func FetchAndAddHistoricData(ticketInfoList []utils.TicketInspector, remaining i
 	}
 
 	excludedStationIDs := utils.GetKeysFromMap(currentStationIDs)
-	historicDataList, err := database.GetHistoricStations(time.Now(), remaining, 24, excludedStationIDs)
+	historicDataList, err := database.GetHistoricStations(time.Now().UTC(), remaining, 24, excludedStationIDs)
 	if err != nil {
 		return nil, err
 	}

@@ -60,7 +60,7 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 		pointers.TimestampPtr = &req.Timestamp
 		response.Timestamp = req.Timestamp
 	} else {
-		timestamp := time.Now().Truncate(time.Minute).Add(time.Minute)
+		timestamp := time.Now().UTC().Truncate(time.Minute).Add(time.Minute)
 		pointers.TimestampPtr = &timestamp
 		response.Timestamp = *pointers.TimestampPtr
 	}

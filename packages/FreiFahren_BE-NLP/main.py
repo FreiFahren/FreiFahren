@@ -90,8 +90,7 @@ if __name__ == '__main__':
     BACKEND_URL = os.getenv('BACKEND_URL')
 
     utc = pytz.UTC
-    cet = pytz.timezone('CET')
-
+    
     bot = telebot.TeleBot(BOT_TOKEN)
     conversations = {}
 
@@ -104,7 +103,7 @@ if __name__ == '__main__':
     @bot.message_handler(func=lambda message: message)
     def get_info(message):
         author_id = message.from_user.id
-        timestamp = datetime.fromtimestamp(message.date, utc).astimezone(cet)
+        timestamp = datetime.fromtimestamp(message.date, utc)
         if timestamp.second or timestamp.microsecond:
             timestamp = timestamp.replace(second=0, microsecond=0) + timedelta(minutes=1)
         else:

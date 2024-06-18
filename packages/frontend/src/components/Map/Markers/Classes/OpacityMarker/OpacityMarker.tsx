@@ -21,8 +21,7 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index,
     // By using useMemo, we can avoid recalculating the timestamp on every render
     const adjustedTimestamp = useMemo(() => {
         const tempTimestamp = new Date(timestamp);
-        const cetTimestamp = tempTimestamp.setHours(tempTimestamp.getHours() - 2);
-        return new Date(cetTimestamp);
+        return new Date(tempTimestamp);
     }, [timestamp]);
 
     const markerRef = useRef<maplibregl.Marker>(null);

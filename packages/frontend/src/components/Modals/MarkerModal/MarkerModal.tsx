@@ -18,7 +18,6 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
 
   const adjustedTimestamp = useMemo(() => {
     const tempTimestamp = new Date(timestamp);
-    tempTimestamp.setHours(tempTimestamp.getHours() - 2); // Adjust for UTC to local
     return tempTimestamp;
   }, [timestamp]);
   const currentTime = new Date().getTime();
