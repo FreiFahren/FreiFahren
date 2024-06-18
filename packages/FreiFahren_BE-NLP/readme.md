@@ -2,7 +2,7 @@
 
 ## Overview
 
-Freifahren is an innovative project designed to map the presence of ticket inspectors across the Berlin public transport network. By offering a live map that tracks inspectors in real-time, the initiative seeks to inform and empower users to navigate the city with added confidence. The project leverages community-driven data from the [Freifahren Telegram group](https://t.me/freifahren_BE), where users report sightings of ticket inspectors. This repository focuses on the natural language processing (NLP) and data handling of these community reports to maintain high accuracy and reliability.
+This repository focuses on the natural language processing (NLP) and data handling of these community reports to maintain high accuracy and reliability.
 
 **Current Accuracy:** As of now, our system successfully processes 82.7% of incoming messages with perfect accuracy, while the remaining 17.3% encounter minor errors.
 
@@ -16,7 +16,7 @@ Freifahren is an innovative project designed to map the presence of ticket inspe
 
 1. First, clone the repository to your local machine:
    ```bash
-   git clone https://github.com/FreiFahren/FreiFahren_BE-NLP
+   git clone https://github.com/brandesdavid/FreiFahren
 2. Install the necessary Python packages:
     `pip install -r requirements.txt`
 3. Acquire a Bot API Token by creating a new bot through [BotFather](https://t.me/botFather) and set it as the BOT_TOKEN environment variable.

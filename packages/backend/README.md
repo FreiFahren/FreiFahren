@@ -2,8 +2,7 @@
 
 ## Overview
 
-Freifahren is an innovative project designed to map the presence of ticket inspectors across the Berlin public transport network. By offering a live map that tracks inspectors in real-time, the initiative seeks to inform and empower users to navigate the city with added confidence. The project leverages community-driven data from the [Freifahren Telegram group](https://t.me/freifahren_BE), where users report sightings of ticket inspectors. This repository is the backend that powers the Freifahren web application.
-
+This repository is the backend that powers the Freifahren web application and API. The backend is responsible for handling requests from the frontend, processing data, and interacting with the database. It also includes a risk model that predicts the likelihood of ticket inspectors appearing at different locations based on current reports.
 
 ## Getting Started
 
@@ -16,7 +15,7 @@ Freifahren is an innovative project designed to map the presence of ticket inspe
 
 1. Clone the repository
    ```sh
-   git clone https://github.com/FreiFahren/backend
+   git clone https://github.com/brandesdavid/FreiFahren
     ```
 
 2. Install Go packages
