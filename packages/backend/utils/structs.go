@@ -53,15 +53,17 @@ type TicketInspector struct {
 
 // Is used when posting a new inspector
 type InspectorRequest struct {
-	Line          string `json:"line"`
-	StationName   string `json:"station"`
-	DirectionName string `json:"direction"`
-	Author        int64  `json:"author,omitempty"`
-	Message       string `json:"message,omitempty"`
+	Timestamp     time.Time `json:"timestamp"`
+	Line          string    `json:"line"`
+	StationName   string    `json:"station"`
+	DirectionName string    `json:"direction"`
+	Author        int64     `json:"author,omitempty"`
+	Message       string    `json:"message,omitempty"`
 }
 
 // InsertPointers holds pointers to the fields necessary for inserting data into the database.
 type InsertPointers struct {
+	TimestampPtr     *time.Time
 	AuthorPtr        *int64
 	MessagePtr       *string
 	LinePtr          *string
@@ -73,11 +75,12 @@ type InsertPointers struct {
 
 // When sending the response of what was posted
 type ResponseData struct {
-	Line      string  `json:"line"`
-	Station   Station `json:"station"`
-	Direction Station `json:"direction"`
-	Author    int64   `json:"author,omitempty"`
-	Message   string  `json:"message,omitempty"`
+	Timestamp time.Time `json:"timestamp"`
+	Line      string    `json:"line"`
+	Station   Station   `json:"station"`
+	Direction Station   `json:"direction"`
+	Author    int64     `json:"author,omitempty"`
+	Message   string    `json:"message,omitempty"`
 }
 
 // getAllStationsAndLines.go

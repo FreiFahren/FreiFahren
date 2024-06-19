@@ -1,6 +1,7 @@
 import os
 import telebot
-import datetime
+import pytz
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from verify_info import verify_direction, verify_line
 from process_message import (
@@ -55,51 +56,6 @@ def extract_ticket_inspector_info(unformatted_text):
         return None
 
 
-def merge_messages(author_id, message, conversations, current_time):
-    last_message = conversations[author_id][-1]
-    last_message_time = last_message['time']
-    time_difference = current_time - last_message_time
-
-    # If the last message was sent less than 60 seconds ago, merge the messages
-    if time_difference.total_seconds() <= 60:
-        last_known_message = last_message['text']
-        merged_text = f'{last_message["text"]} {message.text}'
-        last_message['text'] = merged_text
-        last_message['time'] = current_time
-        info = extract_ticket_inspector_info(merged_text)
-        last_message['info'] = info
-
-        if info:
-
-            # Initialize station_id and direction_id to None
-            station_id = None
-            direction_id = None
-            author_id = None
-
-            # Make a request to the server to get the ids
-            if info.get('station'):
-                station_id = get_station_id(info.get('station'))
-            if info.get('direction'):
-                direction_id = get_station_id(info.get('direction'))
-
-            update_info(
-                last_known_message,
-                current_time,
-                merged_text,
-                author_id,
-                info.get('line'),
-                info.get('station'),
-                station_id,
-                info.get('direction'),
-                direction_id
-            )
-            print('Found Merged Info:\nLine:\t\t', info.get('line'), '\nStation:\t', info.get('station'), '\nDirection:\t', info.get('direction'))
-        else:
-            print('No valuable information found')
-    else:
-        process_new_message(author_id, message, current_time, conversations)
-
-
 stations_dict = load_data('data/stations_list_main.json')
 
 
@@ -112,18 +68,18 @@ def get_station_id(station_name):
     return None
 
 
-def process_new_message(author_id, message, current_time, conversations):
+def process_new_message(timestamp, message):
     info = extract_ticket_inspector_info(message.text)
-    if info.get('line') or info.get('station') or info.get('direction'):
-        print('Found Info:\nLine:\t\t', info.get('line'), '\nStation:\t', info.get('station'), '\nDirection:\t', info.get('direction'))
+    if (type(info) is dict):
+        if info.get('line') or info.get('station') or info.get('direction'):
+            print('Found Info:\nLine:\t\t', info.get('line'), '\nStation:\t', info.get('station'), '\nDirection:\t', info.get('direction'))
 
-        insert_ticket_info(
-            None, # Dont save the message
-            None, # Dont save the author
-            info.get('line'),
-            info.get('station'),
-            info.get('direction'),
-        )
+            insert_ticket_info(
+                timestamp,
+                info.get('line'),
+                info.get('station'),
+                info.get('direction'),
+            )
     else:
         print('No valuable information found')
 
@@ -133,8 +89,9 @@ if __name__ == '__main__':
     BOT_TOKEN = os.getenv('BOT_TOKEN')
     BACKEND_URL = os.getenv('BACKEND_URL')
 
+    utc = pytz.UTC
+    
     bot = telebot.TeleBot(BOT_TOKEN)
-    conversations = {}
 
     create_table_if_not_exists()
 
@@ -144,9 +101,13 @@ if __name__ == '__main__':
 
     @bot.message_handler(func=lambda message: message)
     def get_info(message):
-        author_id = message.from_user.id
-        current_time = datetime.datetime.now()
-        
-        process_new_message(author_id, message, current_time, conversations)
+        timestamp = datetime.fromtimestamp(message.date, utc)
+        # timestamps are rounded to the nearest minute to avoid saving personal data
+        if timestamp.second or timestamp.microsecond:
+            timestamp = timestamp.replace(second=0, microsecond=0) + timedelta(minutes=1)
+        else:
+            timestamp = timestamp.replace(second=0, microsecond=0)
+            
+        process_new_message(timestamp, message)
 
     bot.infinity_polling()

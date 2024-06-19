@@ -21,7 +21,7 @@ func CreatePoolTestTable() {
 	sql := `
 	CREATE TABLE IF NOT EXISTS pool_test (
 		id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-		timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
+		timestamp TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
 		message TEXT,
 		author BIGINT,
 		line VARCHAR(3),
@@ -114,7 +114,7 @@ func TestGetLatestStationCoordinatesConcurrency(t *testing.T) {
 			remaining := 7
 			currentStationIDs := []string{"U-PL", "SU-A", "SU-S"}
 
-			_, err = database.GetHistoricStations(time.Now(), remaining, 24, currentStationIDs)
+			_, err = database.GetHistoricStations(time.Now().UTC(), remaining, 24, currentStationIDs)
 			if err != nil {
 				errs <- err
 			}
@@ -124,7 +124,7 @@ func TestGetLatestStationCoordinatesConcurrency(t *testing.T) {
 
 			// Enter a random ticket info into the database (on the pool test table)
 
-			now := time.Now()
+			now := time.Now().UTC()
 			message := "Platz der Lufbrücke"
 			author := rand.Int63()
 			line := "U6"

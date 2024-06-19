@@ -12,7 +12,7 @@ import (
 // On Saturdays the threshold decreases from 18:00 to 24:00.
 // The threshold is reduced by 50% if it is a weekend.
 func CalculateHistoricDataThreshold() int {
-	currentTime := time.Now().Local()
+	currentTime := time.Now().UTC()
 	hour := currentTime.Hour()
 	minute := currentTime.Minute()
 

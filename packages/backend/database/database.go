@@ -84,7 +84,7 @@ func BackupDatabase() {
 	defer conn.Close(context.Background())
 
 	// format means: Mon Jan 2 15:04:05 MST 2006
-	backupTableName := "backup_" + time.Now().Format("20060102_150405")
+	backupTableName := "backup_" + time.Now().UTC().Format("20060102_150405")
 	query := fmt.Sprintf("CREATE TABLE %s AS SELECT * FROM ticket_info", backupTableName)
 
 	_, err = conn.Exec(context.Background(), query)
@@ -97,7 +97,7 @@ func CreateTicketInfoTable() {
 	sql := `
 	CREATE TABLE IF NOT EXISTS ticket_info (
 		id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-		timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
+		timestamp TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
 		message TEXT,
 		author BIGINT,
 		line VARCHAR(3),
@@ -245,11 +245,12 @@ func GetLatestTicketInspectors() ([]utils.TicketInspector, error) {
 	sql := `SELECT timestamp, station_id, direction_id, line,
 			CASE WHEN author IS NULL THEN message ELSE NULL END as message
 			FROM ticket_info
-			WHERE timestamp >= NOW() - INTERVAL '60 minutes'
+			WHERE timestamp >= NOW() AT TIME ZONE 'UTC' - INTERVAL '60 minutes'
 			AND station_name IS NOT NULL
 			AND station_id IS NOT NULL;`
 
 	rows, err := pool.Query(context.Background(), sql)
+
 	log.Println("(database.go) Getting recent station coordinates...")
 
 	if err != nil {
@@ -265,7 +266,6 @@ func GetLatestTicketInspectors() ([]utils.TicketInspector, error) {
 		if err := rows.Scan(&ticketInfo.Timestamp, &ticketInfo.StationID, &ticketInfo.DirectionID, &ticketInfo.Line, &ticketInfo.Message); err != nil {
 			return nil, fmt.Errorf("(database.go) error scanning row (latest station coordinate data): %w", err)
 		}
-
 		ticketInfoList = append(ticketInfoList, ticketInfo)
 	}
 
@@ -293,7 +293,7 @@ func GetLatestUpdateTime() (time.Time, error) {
 func GetNumberOfSubmissionsInLast24Hours() (int, error) {
 	var count int
 
-	sql := `SELECT COUNT(*) FROM ticket_info WHERE timestamp >= NOW() - INTERVAL '24 hours';`
+	sql := `SELECT COUNT(*) FROM ticket_info WHERE timestamp >= NOW() AT TIME ZONE 'UTC' - INTERVAL '24 hours';`
 
 	err := pool.QueryRow(context.Background(), sql).Scan(&count)
 	if err != nil {
@@ -305,7 +305,7 @@ func GetNumberOfSubmissionsInLast24Hours() (int, error) {
 }
 
 func RoundOldTimestamp() {
-	sql := `UPDATE ticket_info SET timestamp = DATE_TRUNC('hour', timestamp) WHERE timestamp < NOW() - INTERVAL '1 hour';`
+	sql := `UPDATE ticket_info SET timestamp = DATE_TRUNC('hour', timestamp) WHERE timestamp < NOW() AT TIME ZONE 'UTC' - INTERVAL '1 hour';`
 
 	_, err := pool.Exec(context.Background(), sql)
 	if err != nil {

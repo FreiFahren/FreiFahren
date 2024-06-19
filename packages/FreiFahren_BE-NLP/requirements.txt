@@ -2,7 +2,7 @@ pyTelegramBotAPI
 fuzzywuzzy 
 python-Levenshtein
 python-dotenv
-
+numpy<2,>=1.26.0
 flake8
 flake8-quotes
 pep8-naming

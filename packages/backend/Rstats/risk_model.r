@@ -14,7 +14,6 @@ if (!require("pacman")) {
     library(pacman)
 }
 
-
 p_load(dotenv)
 p_load(magrittr)
 p_load(ggplot2)
@@ -243,9 +242,9 @@ classify_risk = function(...){
 ###################################################################################
 
 segments = readRDS("Rstats/segments_v4.RDS")
-now = Sys.time() %>% setattr("tzone","CET")
-from = format(now - (60*60)) %>% as.POSIXct(tz="CET")
-suffix = format(Sys.time(), "%Y-%m-%dT%H:%M:%S", tz = "CET")
+now = Sys.time() %>% setattr("tzone","UTC")
+from = format(now - (60*60)) %>% as.POSIXct(tz="UTC")
+suffix = format(Sys.time(), "%Y-%m-%dT%H:%M:%S", tz = "UTC")
 
 # Load data from JSON file instead of database
 ticket_info <- jsonlite::fromJSON("Rstats/ticket_data.json")
@@ -262,7 +261,7 @@ if (!is.data.frame(ticket_info) || nrow(ticket_info) == 0) {
     stringsAsFactors = FALSE  # Avoid factor conversion
   )
 } else {
-  ticket_info$timestamp <- as.POSIXct(ticket_info$timestamp, format = "%Y-%m-%dT%H:%M:%S", tz = "CET")
+  ticket_info$timestamp <- as.POSIXct(ticket_info$timestamp, format = "%Y-%m-%dT%H:%M:%S", tz = "UTC")
 
   # Ensure all expected columns are present
   necessary_columns <- c("timestamp", "line", "station_name", "station_id", "direction_id", "direction_name")
