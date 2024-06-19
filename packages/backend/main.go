@@ -8,10 +8,12 @@ import (
 	"github.com/FreiFahren/backend/api"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
+	_ "github.com/FreiFahren/backend/docs"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	cron "github.com/robfig/cron/v3"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 type (
@@ -79,6 +81,8 @@ func main() {
 	})
 
 	apiHOST.Use(middleware.CORS())
+
+	apiHOST.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// Close the database connection when the main function returns
 	defer database.ClosePool()

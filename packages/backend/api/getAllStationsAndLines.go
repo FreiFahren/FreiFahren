@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// ölolüdkpakdapd fdadjnaooh
 func GetAllStationsAndLines(c echo.Context) error {
 	var StationsAndLinesList = data.GetStationsAndLinesList()
 
