@@ -53,6 +53,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/list": {
+            "get": {
+                "description": "This endpoint returns a comprehensive list of all train stations and lines.\nOptionally, it can return only a list of lines or stations based on the provided query parameters.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "City Data"
+                ],
+                "summary": "Retrieves stations and lines information",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Set to 'true' to retrieve only the list of lines.",
+                        "name": "lines",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Set to 'true' to retrieve only the list of stations.",
+                        "name": "stations",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.AllStationsAndLinesList"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error: Unable to process the request.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/recent": {
             "get": {
                 "description": "Fetches the most recent ticket inspector reports from the database and returns them as a JSON array.\nIf there are not enough recent reports, the endpoint will fetch additional historic reports to meet the required amount.\nThe required amount is determined by the current time of the day and the day of the week, ensuring the most relevant and timely information is provided to the user.",
@@ -136,7 +179,41 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "utils.AllStationsAndLinesList": {
+            "type": "object",
+            "properties": {
+                "lines": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "stations": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/utils.StationListEntry"
+                    }
+                }
+            }
+        },
         "utils.Coordinates": {
+            "type": "object",
+            "properties": {
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                }
+            }
+        },
+        "utils.CoordinatesEntry": {
             "type": "object",
             "properties": {
                 "latitude": {
@@ -155,6 +232,23 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "lines": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "utils.StationListEntry": {
+            "type": "object",
+            "properties": {
+                "coordinates": {
+                    "$ref": "#/definitions/utils.CoordinatesEntry"
                 },
                 "lines": {
                     "type": "array",

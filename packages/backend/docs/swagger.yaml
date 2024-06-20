@@ -1,6 +1,28 @@
 basePath: /
 definitions:
+  utils.AllStationsAndLinesList:
+    properties:
+      lines:
+        items:
+          additionalProperties:
+            items:
+              type: string
+            type: array
+          type: object
+        type: array
+      stations:
+        additionalProperties:
+          $ref: '#/definitions/utils.StationListEntry'
+        type: object
+    type: object
   utils.Coordinates:
+    properties:
+      latitude:
+        type: number
+      longitude:
+        type: number
+    type: object
+  utils.CoordinatesEntry:
     properties:
       latitude:
         type: number
@@ -13,6 +35,17 @@ definitions:
         $ref: '#/definitions/utils.Coordinates'
       id:
         type: string
+      lines:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+    type: object
+  utils.StationListEntry:
+    properties:
+      coordinates:
+        $ref: '#/definitions/utils.CoordinatesEntry'
       lines:
         items:
           type: string
@@ -69,6 +102,36 @@ paths:
           schema:
             type: string
       summary: Retrieve Station ID by Name
+      tags:
+      - City Data
+  /list:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        This endpoint returns a comprehensive list of all train stations and lines.
+        Optionally, it can return only a list of lines or stations based on the provided query parameters.
+      parameters:
+      - description: Set to 'true' to retrieve only the list of lines.
+        in: query
+        name: lines
+        type: string
+      - description: Set to 'true' to retrieve only the list of stations.
+        in: query
+        name: stations
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.AllStationsAndLinesList'
+        "500":
+          description: 'Internal Server Error: Unable to process the request.'
+          schema:
+            type: string
+      summary: Retrieves stations and lines information
       tags:
       - City Data
   /recent:

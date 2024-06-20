@@ -105,7 +105,7 @@ func main() {
 	// Return the name for given id
 	apiHOST.GET("/station", api.GetStationName)
 
-	// Return all stations with their id (used for suggestions on the frontend)
+	// Return all stations with their id
 	apiHOST.GET("/list", api.GetAllStationsAndLines)
 
 	// Return the distance between two stations
