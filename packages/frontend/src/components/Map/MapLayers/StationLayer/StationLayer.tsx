@@ -62,9 +62,6 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations, textColor }) => {
                 layout={{
                     'text-field': ['get', 'name'],
                     'text-size': 12,
-                    'icon-allow-overlap': true,
-                    'text-allow-overlap': true,
-
                     'icon-image': [
                         'case',
                         ['any',
@@ -101,21 +98,21 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations, textColor }) => {
                         'sbahn_icon'
 
                     ],
-
                     'icon-anchor': 'bottom',
                     'text-offset': [0, 1],
                 }}
                 paint={{
                     'text-color': textColor,
-                    'text-halo-color': '#ffffff',
+                    'text-halo-color': 'black',
                     'text-halo-width': 0.2,
                     'text-opacity': [
                         'step',
                         ['zoom'],
                         ['case', ['in', ['get', 'name'], ['literal', firstPriorityStations]], 1, 0],
-                        12, ['case', ['any', ['in', ['get', 'name'], ['literal', firstPriorityStations]], ['in', ['get', 'name'], ['literal', secondPriorityStations]]], 1, 0],
+                        11, ['case', ['in', ['get', 'name'], ['literal', firstPriorityStations]], 1, 0],
+                        11.5, ['case', ['any', ['in', ['get', 'name'], ['literal', firstPriorityStations]], ['in', ['get', 'name'], ['literal', secondPriorityStations]]], 1, 0],
                         13, 1,
-                        15, 0
+                        14, 1
                     ],
                     'icon-opacity': [
                         'step',

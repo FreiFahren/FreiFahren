@@ -7,6 +7,7 @@ interface RegularLineLayerProps {
 }
 
 const RegularLineLayer: React.FC<RegularLineLayerProps> = ({ linesGeoJSON, textColor }) => {
+    const firstPriorityLines = ['U1', 'U2', 'U3', 'U4', 'U5', 'U6', 'U7', 'U8', 'U9']
     return (
         <>
             <Source id='line-data' type='geojson' data={linesGeoJSON}>
@@ -28,6 +29,7 @@ const RegularLineLayer: React.FC<RegularLineLayerProps> = ({ linesGeoJSON, textC
                 type='symbol'
                 source='line-data'
                 layout={{
+
                     'text-field': ['get', 'line'],
                     'text-size': 13,
                     'symbol-placement': 'line',
@@ -41,7 +43,7 @@ const RegularLineLayer: React.FC<RegularLineLayerProps> = ({ linesGeoJSON, textC
                         'interpolate',
                         ['linear'],
                         ['zoom'],
-                        11, 0,
+                        11, ['case', ['in', ['get', 'line'], ['literal', firstPriorityLines]], 1, 0],
                         12, 1
                     ]
                 }}
