@@ -29,6 +29,36 @@ definitions:
       longitude:
         type: number
     type: object
+  utils.InspectorRequest:
+    properties:
+      author:
+        type: integer
+      direction:
+        type: string
+      line:
+        type: string
+      message:
+        type: string
+      station:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  utils.ResponseData:
+    properties:
+      author:
+        type: integer
+      direction:
+        $ref: '#/definitions/utils.Station'
+      line:
+        type: string
+      message:
+        type: string
+      station:
+        $ref: '#/definitions/utils.Station'
+      timestamp:
+        type: string
+    type: object
   utils.Station:
     properties:
       coordinates:
@@ -170,6 +200,37 @@ paths:
       summary: Retrieves stations and lines information
       tags:
       - City Data
+  /newInspectors:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Accepts a JSON payload with details about a ticket inspector's current location.
+        This endpoint validates the provided data, processes necessary computations for linking stations and lines,
+        inserts the data into the database, and triggers an update to the risk model used in operational analysis.
+      parameters:
+      - description: Data about the inspector's location and activity
+        in: body
+        name: inspectorData
+        required: true
+        schema:
+          $ref: '#/definitions/utils.InspectorRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully processed and inserted the inspector data with
+            computed linkages and risk model updates.
+          schema:
+            $ref: '#/definitions/utils.ResponseData'
+        "400":
+          description: 'Bad Request: Missing or incorrect parameters provided.'
+        "500":
+          description: 'Internal Server Error: Error during data processing or database
+            insertion.'
+      summary: Submit ticket inspector data
+      tags:
+      - Basic Functions
   /recent:
     get:
       consumes:

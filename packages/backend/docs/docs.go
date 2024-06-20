@@ -145,6 +145,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/newInspectors": {
+            "post": {
+                "description": "Accepts a JSON payload with details about a ticket inspector's current location.\nThis endpoint validates the provided data, processes necessary computations for linking stations and lines,\ninserts the data into the database, and triggers an update to the risk model used in operational analysis.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Basic Functions"
+                ],
+                "summary": "Submit ticket inspector data",
+                "parameters": [
+                    {
+                        "description": "Data about the inspector's location and activity",
+                        "name": "inspectorData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/utils.InspectorRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully processed and inserted the inspector data with computed linkages and risk model updates.",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ResponseData"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request: Missing or incorrect parameters provided."
+                    },
+                    "500": {
+                        "description": "Internal Server Error: Error during data processing or database insertion."
+                    }
+                }
+            }
+        },
         "/recent": {
             "get": {
                 "description": "Fetches the most recent ticket inspector reports from the database and returns them as a JSON array.\nIf there are not enough recent reports, the endpoint will fetch additional historic reports to meet the required amount.\nThe required amount is determined by the current time of the day and the day of the week, ensuring the most relevant and timely information is provided to the user.",
@@ -270,6 +310,52 @@ const docTemplate = `{
                 },
                 "longitude": {
                     "type": "number"
+                }
+            }
+        },
+        "utils.InspectorRequest": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "integer"
+                },
+                "direction": {
+                    "type": "string"
+                },
+                "line": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "station": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "utils.ResponseData": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "integer"
+                },
+                "direction": {
+                    "$ref": "#/definitions/utils.Station"
+                },
+                "line": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "station": {
+                    "$ref": "#/definitions/utils.Station"
+                },
+                "timestamp": {
+                    "type": "string"
                 }
             }
         },

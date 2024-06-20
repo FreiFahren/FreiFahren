@@ -9,6 +9,7 @@ import (
 	"math"
 
 	"github.com/FreiFahren/backend/data"
+	_ "github.com/FreiFahren/backend/docs"
 	utils "github.com/FreiFahren/backend/utils"
 	"github.com/labstack/echo/v4"
 )

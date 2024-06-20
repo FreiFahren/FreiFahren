@@ -13,7 +13,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// GetRecentTicketInspectorInfo retrieves information about recent ticket inspector reports.
 // @Summary Retrieve information about recent ticket inspector reports
 // @Description Fetches the most recent ticket inspector reports from the database and returns them as a JSON array.
 // @Description If there are not enough recent reports, the endpoint will fetch additional historic reports to meet the required amount.

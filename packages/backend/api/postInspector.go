@@ -9,13 +9,27 @@ import (
 	"github.com/FreiFahren/backend/Rstats"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
+	_ "github.com/FreiFahren/backend/docs"
 	structs "github.com/FreiFahren/backend/utils"
 
 	"github.com/labstack/echo/v4"
 )
 
+// @Summary Submit ticket inspector data
+// @Description Accepts a JSON payload with details about a ticket inspector's current location.
+// @Description This endpoint validates the provided data, processes necessary computations for linking stations and lines,
+// @Description inserts the data into the database, and triggers an update to the risk model used in operational analysis.
+//
+// @Tags Basic Functions
+// @Accept json
+// @Produce json
+//
+// @Param inspectorData body structs.InspectorRequest true "Data about the inspector's location and activity"
+// @Success 200 {object} structs.ResponseData "Successfully processed and inserted the inspector data with computed linkages and risk model updates."
+// @Failure 400 "Bad Request: Missing or incorrect parameters provided."
+// @Failure 500 "Internal Server Error: Error during data processing or database insertion."
+// @Router /newInspectors [post]
 func PostInspector(c echo.Context) error {
-
 	var req structs.InspectorRequest
 	if err := c.Bind(&req); err != nil {
 		return structs.HandleErrorEchoContext(c, err, "Error binding request in postInspector: %v")
