@@ -22,12 +22,12 @@ type (
 	}
 )
 
-//	@title			FreiFahren API
+//	@title			FreiFahren API Documentation
 //	@version		1.0
 //	@description	API for the FreiFahren project, responsible for collecting and serving data about ticket inspectors on public transport.
 
-//	@host		localhost:8080
-//	@BasePath	/
+// @host		localhost:8080
+// @BasePath	/
 func main() {
 	// Load .env file
 	err := godotenv.Overload()

@@ -49,7 +49,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "FreiFahren API",
+	Title:            "FreiFahren API Documentation",
 	Description:      "API for the FreiFahren project, responsible for collecting and serving data about ticket inspectors on public transport.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

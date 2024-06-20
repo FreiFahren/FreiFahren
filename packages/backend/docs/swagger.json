@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "description": "API for the FreiFahren project, responsible for collecting and serving data about ticket inspectors on public transport.",
-        "title": "FreiFahren API",
+        "title": "FreiFahren API Documentation",
         "contact": {},
         "version": "1.0"
     },

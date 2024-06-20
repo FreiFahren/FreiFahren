@@ -43,6 +43,11 @@ This repository is the backend that powers the Freifahren web application and AP
     go run main.go
     ```
 
+  Or if you want to run the application with hot reloading of the server and swag documentation, you can use the following command:
+    ```sh
+    reflex -c reflex.conf
+    ```
+
 
 ## Embedded Binary
 
