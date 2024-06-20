@@ -24,7 +24,7 @@ func IdToStationName(id string) (string, error) {
 // @Summary      Retrieve Name by Station ID
 // @Description  Fetches the name of a station by its unique identifier from the StationsMap.
 // @Description  The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-A" for the station "Alexanderplatz".
-// @Tags         City Data
+// @Tags         data
 // @Accept       json
 // @Produce      json
 // @Param		 id query string true "Station Id"

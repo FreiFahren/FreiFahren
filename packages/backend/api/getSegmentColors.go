@@ -26,7 +26,7 @@ import (
 // @Success 200 {object} utils.RiskModelResponse "Successfully retrieved the color-coded risk levels for each segment."
 // @Success 304 {none} nil "No changes: The data has not been modified since the last request date provided in the 'If-Modified-Since' header."
 // @Failure 500 "Internal Server Error: Error during the processing of the request."
-// @Router /risk/segments [get]
+// @Router /risk-prediction/getSegmentColors [get]
 func GetSegmentColors(c echo.Context) error {
 	segmentsFiles, err := getSegmentFiles()
 	if err != nil {

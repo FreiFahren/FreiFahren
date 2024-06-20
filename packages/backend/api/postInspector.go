@@ -20,7 +20,7 @@ import (
 // @Description This endpoint validates the provided data, processes necessary computations for linking stations and lines,
 // @Description inserts the data into the database, and triggers an update to the risk model used in operational analysis.
 //
-// @Tags Basic Functions
+// @Tags basics
 // @Accept json
 // @Produce json
 //
@@ -28,7 +28,7 @@ import (
 // @Success 200 {object} structs.ResponseData "Successfully processed and inserted the inspector data with computed linkages and risk model updates."
 // @Failure 400 "Bad Request: Missing or incorrect parameters provided."
 // @Failure 500 "Internal Server Error: Error during data processing or database insertion."
-// @Router /newInspectors [post]
+// @Router /basics/newInspector [post]
 func PostInspector(c echo.Context) error {
 	var req structs.InspectorRequest
 	if err := c.Bind(&req); err != nil {

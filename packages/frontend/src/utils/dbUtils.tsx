@@ -53,7 +53,7 @@ export async function getRecentDataWithIfModifiedSince(endpointUrl: string, last
 
 export async function getAllStationsList(): Promise<StationList> {
   try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/list?stations=true`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/data/list?stations=true`);
       const data = await response.json();
       return data;
   } catch (error) {
@@ -64,7 +64,7 @@ export async function getAllStationsList(): Promise<StationList> {
 
 export async function getAllLinesList(): Promise<LinesList> {
   try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/list?lines=true`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/data/list?lines=true`);
       const data = await response.json();
       return data;
   } catch (error) {
@@ -81,7 +81,7 @@ export async function reportInspector(line: selectOption, station: selectOption,
         message: message === '' ? null : message,
     });
 
-    fetch(`${process.env.REACT_APP_API_URL}/newInspector`, {
+    fetch(`${process.env.REACT_APP_API_URL}/basics/newInspector`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -103,7 +103,7 @@ export async function getStationDistance(userLat: number | undefined, userLon: n
     }
 
     try {
-        const url = `${process.env.REACT_APP_API_URL}/distance?inspectorStationId=${encodeURIComponent(inspectorStationId)}&userLat=${userLat}&userLon=${userLon}`;
+        const url = `${process.env.REACT_APP_API_URL}/transit/distance?inspectorStationId=${encodeURIComponent(inspectorStationId)}&userLat=${userLat}&userLon=${userLon}`;
         const response = await fetch(url);
         const data = await response.json();
 
@@ -121,7 +121,7 @@ export async function getStationDistance(userLat: number | undefined, userLon: n
 
 export async function getNumberOfReportsInLast24Hours(): Promise<number> {
     try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/stats`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/statistics/stats`);
         const reportNumber = await response.json();
         return reportNumber;
     } catch (error) {

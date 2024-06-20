@@ -96,29 +96,29 @@ func main() {
 	// Ensure the required table exists
 	database.CreateTicketInfoTable()
 
-	// Return the id for given name
-	apiHOST.GET("/id", api.GetStationId)
+	// Post a new ticket inspector
+	apiHOST.POST("/basics/newInspector", api.PostInspector)
 
 	// Return the recent ticket inspector info
-	apiHOST.GET("/recent", api.GetRecentTicketInspectorInfo)
+	apiHOST.GET("/basics/recent", api.GetRecentTicketInspectorInfo)
 
 	// Return the name for given id
-	apiHOST.GET("/station", api.GetStationName)
+	apiHOST.GET("/data/station", api.GetStationName)
 
 	// Return all stations with their id
-	apiHOST.GET("/list", api.GetAllStationsAndLines)
+	apiHOST.GET("/data/list", api.GetAllStationsAndLines)
+
+	// Return the id for given name
+	apiHOST.GET("/data/id", api.GetStationId)
 
 	// Return the distance between two stations
-	apiHOST.GET("/distance", api.GetStationDistance)
-
-	// Post a new ticket inspector
-	apiHOST.POST("/newInspector", api.PostInspector)
+	apiHOST.GET("/transit/distance", api.GetStationDistance)
 
 	// Get usage statistics
-	apiHOST.GET("/stats", api.GetStats)
+	apiHOST.GET("/statistics/stats", api.GetStats)
 
 	// Get the list of highlighted segments and their colors
-	apiHOST.GET("/getSegmentColors", api.GetSegmentColors)
+	apiHOST.GET("/risk-prediction/getSegmentColors", api.GetSegmentColors)
 
 	apiHOST.Start(":8080")
 

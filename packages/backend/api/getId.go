@@ -26,13 +26,13 @@ func FindStationId(name string, stationsMap map[string]utils.StationListEntry) (
 // @Summary      Retrieve Station ID by Name
 // @Description  Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.
 // @Description  The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-A" for the station "Alexanderplatz".
-// @Tags         City Data
+// @Tags         data
 // @Accept       json
 // @Produce      json
 // @Param		 name query string true "Station name", case and whitespace insensitive
 // @Success      200 {string} string "The station id"
 // @Failure      404 {string} string "Station not found"
-// @Router       /id [get]
+// @Router       /data//id [get]
 func GetStationId(c echo.Context) error {
 	name := c.QueryParam("name")
 	fmt.Printf("receiving name: %s\n", name)

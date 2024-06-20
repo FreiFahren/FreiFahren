@@ -15,137 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/distance": {
-            "get": {
-                "description": "Returns the shortest number of stations between an inspector's station and a given user's latitude and longitude coordinates.\nThe distance calculation employs Dijkstra's algorithm to determine the minimal stops required to reach the nearest station from the given coordinates.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Transit"
-                ],
-                "summary": "Calculate shortest distance to a station",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The station ID of the inspector's current location.",
-                        "name": "inspectorStationId",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "The latitude of the user's location.",
-                        "name": "userLat",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "The longitude of the user's location.",
-                        "name": "userLon",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "The shortest distance in terms of the number of station stops between the inspector's station and the user's location.",
-                        "schema": {
-                            "type": "int"
-                        }
-                    },
-                    "500": {
-                        "description": "An error occurred in processing the request."
-                    }
-                }
-            }
-        },
-        "/id": {
-            "get": {
-                "description": "Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.\nThe Ids have format Line prefix that has the format \"SU\" followed by an abbreviation of the station name. For example \"SU-A\" for the station \"Alexanderplatz\".",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "City Data"
-                ],
-                "summary": "Retrieve Station ID by Name",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Station name",
-                        "name": "name",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "The station id",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Station not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/list": {
-            "get": {
-                "description": "This endpoint returns a comprehensive list of all train stations and lines.\nOptionally, it can return only a list of lines or stations based on the provided query parameters.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "City Data"
-                ],
-                "summary": "Retrieves stations and lines information",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Set to 'true' to retrieve only the list of lines.",
-                        "name": "lines",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Set to 'true' to retrieve only the list of stations.",
-                        "name": "stations",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/utils.AllStationsAndLinesList"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error: Unable to process the request.",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/newInspectors": {
+        "/basics/newInspector": {
             "post": {
                 "description": "Accepts a JSON payload with details about a ticket inspector's current location.\nThis endpoint validates the provided data, processes necessary computations for linking stations and lines,\ninserts the data into the database, and triggers an update to the risk model used in operational analysis.",
                 "consumes": [
@@ -155,7 +25,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Basic Functions"
+                    "basics"
                 ],
                 "summary": "Submit ticket inspector data",
                 "parameters": [
@@ -185,7 +55,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/recent": {
+        "/basics/recent": {
             "get": {
                 "description": "Fetches the most recent ticket inspector reports from the database and returns them as a JSON array.\nIf there are not enough recent reports, the endpoint will fetch additional historic reports to meet the required amount.\nThe required amount is determined by the current time of the day and the day of the week, ensuring the most relevant and timely information is provided to the user.",
                 "consumes": [
@@ -195,7 +65,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Basic Functions"
+                    "basics"
                 ],
                 "summary": "Retrieve information about recent ticket inspector reports",
                 "parameters": [
@@ -228,7 +98,88 @@ const docTemplate = `{
                 }
             }
         },
-        "/risk/segments": {
+        "/data//id": {
+            "get": {
+                "description": "Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.\nThe Ids have format Line prefix that has the format \"SU\" followed by an abbreviation of the station name. For example \"SU-A\" for the station \"Alexanderplatz\".",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "data"
+                ],
+                "summary": "Retrieve Station ID by Name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Station name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The station id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Station not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/data/list": {
+            "get": {
+                "description": "This endpoint returns a comprehensive list of all train stations and lines.\nOptionally, it can return only a list of lines or stations based on the provided query parameters.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "data"
+                ],
+                "summary": "Retrieves stations and lines information",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Set to 'true' to retrieve only the list of lines.",
+                        "name": "lines",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Set to 'true' to retrieve only the list of stations.",
+                        "name": "stations",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.AllStationsAndLinesList"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error: Unable to process the request.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/risk-prediction/getSegmentColors": {
             "get": {
                 "description": "Fetches the latest risk assessments for transit segments, returned as color codes representing the risk level. You can find out more about the risk level calculation in the documentation.\nThe response includes the last modified timestamp of the risk model data to support conditional GET requests.",
                 "consumes": [
@@ -278,7 +229,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "City Data"
+                    "data"
                 ],
                 "summary": "Retrieve Name by Station ID",
                 "parameters": [
@@ -306,7 +257,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/stats": {
+        "/statistics/stats": {
             "get": {
                 "description": "Fetches the total number of submissions recorded in the database over the past 24 hours.",
                 "consumes": [
@@ -328,6 +279,55 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error: Unable to fetch statistics from the database."
+                    }
+                }
+            }
+        },
+        "/transit/distance": {
+            "get": {
+                "description": "Returns the shortest number of stations between an inspector's station and a given user's latitude and longitude coordinates.\nThe distance calculation employs Dijkstra's algorithm to determine the minimal stops required to reach the nearest station from the given coordinates.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transit"
+                ],
+                "summary": "Calculate shortest distance to a station",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The station ID of the inspector's current location.",
+                        "name": "inspectorStationId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "The latitude of the user's location.",
+                        "name": "userLat",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "The longitude of the user's location.",
+                        "name": "userLon",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The shortest distance in terms of the number of station stops between the inspector's station and the user's location.",
+                        "schema": {
+                            "type": "int"
+                        }
+                    },
+                    "500": {
+                        "description": "An error occurred in processing the request."
                     }
                 }
             }

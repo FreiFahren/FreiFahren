@@ -11,14 +11,14 @@ import (
 // @Summary Retrieves stations and lines information
 // @Description This endpoint returns a comprehensive list of all train stations and lines.
 // @Description Optionally, it can return only a list of lines or stations based on the provided query parameters.
-// @Tags City Data
+// @Tags data
 // @Accept  json
 // @Produce  json
 // @Param   lines      query     string  false  "Set to 'true' to retrieve only the list of lines."
 // @Param   stations   query     string  false  "Set to 'true' to retrieve only the list of stations."
 // @Success 200 {object} utils.AllStationsAndLinesList
 // @Failure 500 {string} string "Internal Server Error: Unable to process the request."
-// @Router /list [get]
+// @Router /data/list [get]
 func GetAllStationsAndLines(c echo.Context) error {
 	var StationsAndLinesList = data.GetStationsAndLinesList()
 

@@ -16,7 +16,7 @@ import (
 // @Produce json
 // @Success 200 {integer} integer "Number of submissions in the last 24 hours"
 // @Failure 500 "Internal Server Error: Unable to fetch statistics from the database."
-// @Router /stats [get]
+// @Router /statistics/stats [get]
 func GetStats(c echo.Context) error {
 	stats, err := database.GetNumberOfSubmissionsInLast24Hours()
 	if err != nil {

@@ -116,100 +116,7 @@ info:
   title: FreiFahren API Documentation
   version: "1.0"
 paths:
-  /distance:
-    get:
-      consumes:
-      - application/json
-      description: |-
-        Returns the shortest number of stations between an inspector's station and a given user's latitude and longitude coordinates.
-        The distance calculation employs Dijkstra's algorithm to determine the minimal stops required to reach the nearest station from the given coordinates.
-      parameters:
-      - description: The station ID of the inspector's current location.
-        in: query
-        name: inspectorStationId
-        required: true
-        type: string
-      - description: The latitude of the user's location.
-        in: query
-        name: userLat
-        required: true
-        type: string
-      - description: The longitude of the user's location.
-        in: query
-        name: userLon
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: The shortest distance in terms of the number of station stops
-            between the inspector's station and the user's location.
-          schema:
-            type: int
-        "500":
-          description: An error occurred in processing the request.
-      summary: Calculate shortest distance to a station
-      tags:
-      - Transit
-  /id:
-    get:
-      consumes:
-      - application/json
-      description: |-
-        Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.
-        The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-A" for the station "Alexanderplatz".
-      parameters:
-      - description: Station name
-        in: query
-        name: name
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: The station id
-          schema:
-            type: string
-        "404":
-          description: Station not found
-          schema:
-            type: string
-      summary: Retrieve Station ID by Name
-      tags:
-      - City Data
-  /list:
-    get:
-      consumes:
-      - application/json
-      description: |-
-        This endpoint returns a comprehensive list of all train stations and lines.
-        Optionally, it can return only a list of lines or stations based on the provided query parameters.
-      parameters:
-      - description: Set to 'true' to retrieve only the list of lines.
-        in: query
-        name: lines
-        type: string
-      - description: Set to 'true' to retrieve only the list of stations.
-        in: query
-        name: stations
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/utils.AllStationsAndLinesList'
-        "500":
-          description: 'Internal Server Error: Unable to process the request.'
-          schema:
-            type: string
-      summary: Retrieves stations and lines information
-      tags:
-      - City Data
-  /newInspectors:
+  /basics/newInspector:
     post:
       consumes:
       - application/json
@@ -239,8 +146,8 @@ paths:
             insertion.'
       summary: Submit ticket inspector data
       tags:
-      - Basic Functions
-  /recent:
+      - basics
+  /basics/recent:
     get:
       consumes:
       - application/json
@@ -275,8 +182,65 @@ paths:
             type: string
       summary: Retrieve information about recent ticket inspector reports
       tags:
-      - Basic Functions
-  /risk/segments:
+      - basics
+  /data//id:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.
+        The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-A" for the station "Alexanderplatz".
+      parameters:
+      - description: Station name
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The station id
+          schema:
+            type: string
+        "404":
+          description: Station not found
+          schema:
+            type: string
+      summary: Retrieve Station ID by Name
+      tags:
+      - data
+  /data/list:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        This endpoint returns a comprehensive list of all train stations and lines.
+        Optionally, it can return only a list of lines or stations based on the provided query parameters.
+      parameters:
+      - description: Set to 'true' to retrieve only the list of lines.
+        in: query
+        name: lines
+        type: string
+      - description: Set to 'true' to retrieve only the list of stations.
+        in: query
+        name: stations
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.AllStationsAndLinesList'
+        "500":
+          description: 'Internal Server Error: Unable to process the request.'
+          schema:
+            type: string
+      summary: Retrieves stations and lines information
+      tags:
+      - data
+  /risk-prediction/getSegmentColors:
     get:
       consumes:
       - application/json
@@ -335,8 +299,8 @@ paths:
             type: string
       summary: Retrieve Name by Station ID
       tags:
-      - City Data
-  /stats:
+      - data
+  /statistics/stats:
     get:
       consumes:
       - application/json
@@ -355,4 +319,40 @@ paths:
       summary: Get statistics on recent submissions
       tags:
       - Statistics
+  /transit/distance:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Returns the shortest number of stations between an inspector's station and a given user's latitude and longitude coordinates.
+        The distance calculation employs Dijkstra's algorithm to determine the minimal stops required to reach the nearest station from the given coordinates.
+      parameters:
+      - description: The station ID of the inspector's current location.
+        in: query
+        name: inspectorStationId
+        required: true
+        type: string
+      - description: The latitude of the user's location.
+        in: query
+        name: userLat
+        required: true
+        type: string
+      - description: The longitude of the user's location.
+        in: query
+        name: userLon
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The shortest distance in terms of the number of station stops
+            between the inspector's station and the user's location.
+          schema:
+            type: int
+        "500":
+          description: An error occurred in processing the request.
+      summary: Calculate shortest distance to a station
+      tags:
+      - transit
 swagger: "2.0"

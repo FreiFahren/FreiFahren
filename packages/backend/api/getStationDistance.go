@@ -29,7 +29,7 @@ var linesList map[string][]string
 //
 // @Description The distance calculation employs Dijkstra's algorithm to determine the minimal stops required to reach the nearest station from the given coordinates.
 //
-// @Tags Transit
+// @Tags transit
 // @Accept  json
 // @Produce  json
 // @Param   inspectorStationId   query   string  true   "The station ID of the inspector's current location."
@@ -37,7 +37,7 @@ var linesList map[string][]string
 // @Param   userLon              query   string  true   "The longitude of the user's location."
 // @Success 200 {int} int "The shortest distance in terms of the number of station stops between the inspector's station and the user's location."
 // @Failure 500 "An error occurred in processing the request."
-// @Router /distance [get]
+// @Router /transit/distance [get]
 func GetStationDistance(c echo.Context) error {
 	var err error
 
