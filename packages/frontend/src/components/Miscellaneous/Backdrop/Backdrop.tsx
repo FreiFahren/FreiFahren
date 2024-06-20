@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 
 import './Backdrop.css';
@@ -9,20 +9,33 @@ interface BackdropProps {
 }
 
 const Backdrop: React.FC<BackdropProps> = ({ onClick, BackgroundColor }) => {
-    // Close the backdrop when the user scrolls or touches the screen
-    useEffect(() => {
-        window.addEventListener('scroll', onClick, { passive: true });
-        window.addEventListener('touchmove', onClick, { passive: true });
+    const backdropRef = useRef<HTMLDivElement>(null);
 
+    useEffect(() => {
+        const backdrop = backdropRef.current;
+
+        const handleScroll = (event: Event) => {
+            if (event.target === backdrop) {
+                onClick();
+            }
+        };
+
+        // avoid closing the backdrop when scrolling on anything but the backdrop
+        if (backdrop) {
+            backdrop.addEventListener('scroll', handleScroll, { passive: true });
+            backdrop.addEventListener('touchmove', handleScroll, { passive: true });
+        }
         return () => {
-            window.removeEventListener('scroll', onClick);
-            window.removeEventListener('touchmove', onClick);
+            if (backdrop) {
+                backdrop.removeEventListener('scroll', handleScroll);
+                backdrop.removeEventListener('touchmove', handleScroll);
+            }
         };
     }, [onClick]);
 
-    // Render in the portal-root to avoid overlapping with Map component
     return ReactDOM.createPortal(
         <div
+            ref={backdropRef}
             className='backdrop'
             onClick={onClick}
             data-testid='backdrop'
