@@ -1,7 +1,38 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "API for the FreiFahren project, responsible for collecting and serving data about ticket inspectors on public transport.",
+        "title": "FreiFahren API",
+        "contact": {},
+        "version": "1.0"
     },
-    "paths": {}
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/accounts": {
+            "get": {
+                "description": "get accounts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "List accounts",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "email",
+                        "description": "name search by q",
+                        "name": "q",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
+        }
+    }
 }

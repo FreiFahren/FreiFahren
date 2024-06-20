@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/FreiFahren/backend/data"
+	_ "github.com/FreiFahren/backend/docs"
 	"github.com/FreiFahren/backend/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -22,6 +23,15 @@ func FindStationId(name string, stationsMap map[string]utils.StationListEntry) (
 	return "", false
 }
 
+// ListAccounts lists all existing accounts
+//
+//	@Summary      List accounts
+//	@Description  get accounts
+//	@Tags         accounts
+//	@Accept       json
+//	@Produce      json
+//	@Param        q    query     string  false  "name search by q"  Format(email)
+//	@Router       /accounts [get]
 func GetStationId(c echo.Context) error {
 	name := c.QueryParam("name")
 	fmt.Printf("receiving name: %s\n", name)
