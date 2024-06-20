@@ -228,6 +228,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/risk/segments": {
+            "get": {
+                "description": "Fetches the latest risk assessments for transit segments, returned as color codes representing the risk level.\nThe response includes the last modified timestamp of the risk model data to support conditional GET requests.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Risk Prediction"
+                ],
+                "summary": "Get risk colors for segments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Standard HTTP header used to make conditional requests; the response will include the risk colors only if they have changed since this date and time.",
+                        "name": "If-Modified-Since",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved the color-coded risk levels for each segment.",
+                        "schema": {
+                            "$ref": "#/definitions/utils.RiskModelResponse"
+                        }
+                    },
+                    "304": {
+                        "description": "No changes: The data has not been modified since the last request date provided in the 'If-Modified-Since' header.",
+                        "schema": {
+                            "type": "none"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error: Error during the processing of the request."
+                    }
+                }
+            }
+        },
         "/station": {
             "get": {
                 "description": "Fetches the name of a station by its unique identifier from the StationsMap.\nThe Ids have format Line prefix that has the format \"SU\" followed by an abbreviation of the station name. For example \"SU-A\" for the station \"Alexanderplatz\".",
@@ -382,6 +422,20 @@ const docTemplate = `{
                 },
                 "timestamp": {
                     "type": "string"
+                }
+            }
+        },
+        "utils.RiskModelResponse": {
+            "type": "object",
+            "properties": {
+                "last_modified": {
+                    "type": "string"
+                },
+                "segment_colors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         },

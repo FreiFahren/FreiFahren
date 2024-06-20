@@ -10,10 +10,23 @@ import (
 
 	"github.com/FreiFahren/backend/Rstats"
 	"github.com/FreiFahren/backend/data"
+	_ "github.com/FreiFahren/backend/docs"
 	"github.com/FreiFahren/backend/utils"
 	"github.com/labstack/echo/v4"
 )
 
+// @Summary Get risk colors for segments
+// @Description Fetches the latest risk assessments for transit segments, returned as color codes representing the risk level.
+// @Description The response includes the last modified timestamp of the risk model data to support conditional GET requests.
+//
+// @Tags Risk Prediction
+// @Accept json
+// @Produce json
+// @Param If-Modified-Since header string false "Standard HTTP header used to make conditional requests; the response will include the risk colors only if they have changed since this date and time."
+// @Success 200 {object} utils.RiskModelResponse "Successfully retrieved the color-coded risk levels for each segment."
+// @Success 304 {none} nil "No changes: The data has not been modified since the last request date provided in the 'If-Modified-Since' header."
+// @Failure 500 "Internal Server Error: Error during the processing of the request."
+// @Router /risk/segments [get]
 func GetSegmentColors(c echo.Context) error {
 	segmentsFiles, err := getSegmentFiles()
 	if err != nil {
