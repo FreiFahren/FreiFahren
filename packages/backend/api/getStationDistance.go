@@ -23,6 +23,20 @@ var stationsList map[string]utils.StationListEntry
 var stationIDs []string
 var linesList map[string][]string
 
+// @Summary Calculate shortest distance to a station
+// @Description Returns the shortest number of stations between an inspector's station and a given user's latitude and longitude coordinates.
+//
+// @Description The distance calculation employs Dijkstra's algorithm to determine the minimal stops required to reach the nearest station from the given coordinates.
+//
+// @Tags Transit
+// @Accept  json
+// @Produce  json
+// @Param   inspectorStationId   query   string  true   "The station ID of the inspector's current location."
+// @Param   userLat              query   string  true   "The latitude of the user's location."
+// @Param   userLon              query   string  true   "The longitude of the user's location."
+// @Success 200 {int} int "The shortest distance in terms of the number of station stops between the inspector's station and the user's location."
+// @Failure 500 "An error occurred in processing the request."
+// @Router /distance [get]
 func GetStationDistance(c echo.Context) error {
 	var err error
 

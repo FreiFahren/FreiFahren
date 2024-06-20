@@ -15,6 +15,55 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/distance": {
+            "get": {
+                "description": "Returns the shortest number of stations between an inspector's station and a given user's latitude and longitude coordinates.\nThe distance calculation employs Dijkstra's algorithm to determine the minimal stops required to reach the nearest station from the given coordinates.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transit"
+                ],
+                "summary": "Calculate shortest distance to a station",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The station ID of the inspector's current location.",
+                        "name": "inspectorStationId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "The latitude of the user's location.",
+                        "name": "userLat",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "The longitude of the user's location.",
+                        "name": "userLon",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The shortest distance in terms of the number of station stops between the inspector's station and the user's location.",
+                        "schema": {
+                            "type": "int"
+                        }
+                    },
+                    "500": {
+                        "description": "An error occurred in processing the request."
+                    }
+                }
+            }
+        },
         "/id": {
             "get": {
                 "description": "Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.\nThe Ids have format Line prefix that has the format \"SU\" followed by an abbreviation of the station name. For example \"SU-A\" for the station \"Alexanderplatz\".",

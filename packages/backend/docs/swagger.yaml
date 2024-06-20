@@ -77,6 +77,42 @@ info:
   title: FreiFahren API Documentation
   version: "1.0"
 paths:
+  /distance:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Returns the shortest number of stations between an inspector's station and a given user's latitude and longitude coordinates.
+        The distance calculation employs Dijkstra's algorithm to determine the minimal stops required to reach the nearest station from the given coordinates.
+      parameters:
+      - description: The station ID of the inspector's current location.
+        in: query
+        name: inspectorStationId
+        required: true
+        type: string
+      - description: The latitude of the user's location.
+        in: query
+        name: userLat
+        required: true
+        type: string
+      - description: The longitude of the user's location.
+        in: query
+        name: userLon
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The shortest distance in terms of the number of station stops
+            between the inspector's station and the user's location.
+          schema:
+            type: int
+        "500":
+          description: An error occurred in processing the request.
+      summary: Calculate shortest distance to a station
+      tags:
+      - Transit
   /id:
     get:
       consumes:
