@@ -89,7 +89,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     const [segmentRiskData, setSegmentRiskData] = useState<RiskData | null>(null);
     useEffect(() => {
         async function prepareRiskData() {
-        const segmentRiskData = await getRecentDataWithIfModifiedSince(`${process.env.REACT_APP_API_URL}/getSegmentColors`, null);
+        const segmentRiskData = await getRecentDataWithIfModifiedSince(`${process.env.REACT_APP_API_URL}/risk-prediction/getSegmentColors`, null);
         setSegmentRiskData(segmentRiskData);
         }
 

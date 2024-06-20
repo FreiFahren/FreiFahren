@@ -8,10 +8,12 @@ import (
 	"github.com/FreiFahren/backend/api"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
+	_ "github.com/FreiFahren/backend/docs"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	cron "github.com/robfig/cron/v3"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 type (
@@ -20,6 +22,12 @@ type (
 	}
 )
 
+//	@title			FreiFahren API Documentation
+//	@version		1.0
+//	@description	API for the FreiFahren project, responsible for collecting and serving data about ticket inspectors on public transport.
+
+// @host		localhost:8080
+// @BasePath	/
 func main() {
 	// Load .env file
 	err := godotenv.Overload()
@@ -80,35 +88,37 @@ func main() {
 
 	apiHOST.Use(middleware.CORS())
 
+	apiHOST.GET("/swagger/*", echoSwagger.WrapHandler)
+
 	// Close the database connection when the main function returns
 	defer database.ClosePool()
 
 	// Ensure the required table exists
 	database.CreateTicketInfoTable()
 
-	// Return the id for given name
-	apiHOST.GET("/id", api.GetStationId)
+	// Post a new ticket inspector
+	apiHOST.POST("/basics/newInspector", api.PostInspector)
 
-	// Return the last known inspectors
-	apiHOST.GET("/recent", api.GetRecentTicketInspectorInfo)
+	// Return the recent ticket inspector info
+	apiHOST.GET("/basics/recent", api.GetRecentTicketInspectorInfo)
 
 	// Return the name for given id
-	apiHOST.GET("/station", api.GetStationName)
+	apiHOST.GET("/data/station", api.GetStationName)
 
-	// Return all stations with their id (used for suggestions on the frontend)
-	apiHOST.GET("/list", api.GetAllStationsAndLines)
+	// Return all stations with their id
+	apiHOST.GET("/data/list", api.GetAllStationsAndLines)
+
+	// Return the id for given name
+	apiHOST.GET("/data/id", api.GetStationId)
 
 	// Return the distance between two stations
-	apiHOST.GET("/distance", api.GetStationDistance)
-
-	// Post a new ticket inspector
-	apiHOST.POST("/newInspector", api.PostInspector)
+	apiHOST.GET("/transit/distance", api.GetStationDistance)
 
 	// Get usage statistics
-	apiHOST.GET("/stats", api.GetStats)
+	apiHOST.GET("/statistics/stats", api.GetStats)
 
 	// Get the list of highlighted segments and their colors
-	apiHOST.GET("/getSegmentColors", api.GetSegmentColors)
+	apiHOST.GET("/risk-prediction/getSegmentColors", api.GetSegmentColors)
 
 	apiHOST.Start(":8080")
 

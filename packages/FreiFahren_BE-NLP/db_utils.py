@@ -65,7 +65,7 @@ def insert_ticket_info(
         'Content-Type': 'application/json'
     }
     
-    response = requests.post(url + '/newInspector', json=data, headers=headers)
+    response = requests.post(url + '/basics/newInspector', json=data, headers=headers)
 
     if response.status_code != 200:
 

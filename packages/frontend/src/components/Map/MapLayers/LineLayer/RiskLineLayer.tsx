@@ -34,7 +34,7 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ linesGeoJSON, textColor, 
     useEffect(() => {
         const fetchSegmentHighlightColors = async () => {
             try {
-                const response = await getRecentDataWithIfModifiedSince(`${process.env.REACT_APP_API_URL}/getSegmentColors`, lastUpdateTimestamp.current);
+                const response = await getRecentDataWithIfModifiedSince(`${process.env.REACT_APP_API_URL}/risk-prediction/getSegmentColors`, lastUpdateTimestamp.current);
                 if (response) {
                     const { last_modified, segment_colors } = response;
                     lastUpdateTimestamp.current = last_modified;

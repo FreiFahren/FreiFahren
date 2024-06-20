@@ -13,6 +13,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// @Summary Retrieve information about recent ticket inspector reports
+// @Description Fetches the most recent ticket inspector reports from the database and returns them as a JSON array.
+// @Description If there are not enough recent reports, the endpoint will fetch additional historic reports to meet the required amount.
+// @Description The required amount is determined by the current time of the day and the day of the week, ensuring the most relevant and timely information is provided to the user.
+//
+// @Tags basics
+// @Accept json
+// @Produce json
+// @Param If-Modified-Since header string false "Standard HTTP header used to make conditional requests; the response will include the requested data only if it has changed since this date and time."
+// @Success 200 {object} []utils.TicketInspectorResponse "A JSON array of ticket inspector information, each entry includes details such as timestamp, station, direction, line, and historic flag."
+// @Failure 304 {object} nil "Returns an empty response indicating that the requested data has not changed since the time provided in the 'If-Modified-Since' header."
+// @Failure 500 {string} string "Internal Server Error: An error occurred while processing the request."
+// @Router /basics/recent [get]
 func GetRecentTicketInspectorInfo(c echo.Context) error {
 	databaseLastModified, err := database.GetLatestUpdateTime()
 	if err != nil {
