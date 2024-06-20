@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/id": {
             "get": {
-                "description": "Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.\nThe Ids have format Line prefix that has the format \"SU\" followed by an abbreviation of the station name. For example \"SU-Al\" for the station \"Alexanderplatz\".",
+                "description": "Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.\nThe Ids have format Line prefix that has the format \"SU\" followed by an abbreviation of the station name. For example \"SU-A\" for the station \"Alexanderplatz\".",
                 "consumes": [
                     "application/json"
                 ],
@@ -89,6 +89,44 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error: An error occurred while processing the request.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/station": {
+            "get": {
+                "description": "Fetches the name of a station by its unique identifier from the StationsMap.\nThe Ids have format Line prefix that has the format \"SU\" followed by an abbreviation of the station name. For example \"SU-A\" for the station \"Alexanderplatz\".",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "City Data"
+                ],
+                "summary": "Retrieve Name by Station ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Station Id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The station id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Error getting station name",
                         "schema": {
                             "type": "string"
                         }

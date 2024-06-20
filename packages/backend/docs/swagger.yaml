@@ -50,7 +50,7 @@ paths:
       - application/json
       description: |-
         Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.
-        The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-Al" for the station "Alexanderplatz".
+        The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-A" for the station "Alexanderplatz".
       parameters:
       - description: Station name
         in: query
@@ -107,4 +107,31 @@ paths:
       summary: Retrieve information about recent ticket inspector reports
       tags:
       - Basic Functions
+  /station:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Fetches the name of a station by its unique identifier from the StationsMap.
+        The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-A" for the station "Alexanderplatz".
+      parameters:
+      - description: Station Id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The station id
+          schema:
+            type: string
+        "404":
+          description: Error getting station name
+          schema:
+            type: string
+      summary: Retrieve Name by Station ID
+      tags:
+      - City Data
 swagger: "2.0"
