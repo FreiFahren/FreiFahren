@@ -230,7 +230,7 @@ const docTemplate = `{
         },
         "/risk/segments": {
             "get": {
-                "description": "Fetches the latest risk assessments for transit segments, returned as color codes representing the risk level.\nThe response includes the last modified timestamp of the risk model data to support conditional GET requests.",
+                "description": "Fetches the latest risk assessments for transit segments, returned as color codes representing the risk level. You can find out more about the risk level calculation in the documentation.\nThe response includes the last modified timestamp of the risk model data to support conditional GET requests.",
                 "consumes": [
                     "application/json"
                 ],
