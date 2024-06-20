@@ -7,21 +7,31 @@ info:
   title: FreiFahren API Documentation
   version: "1.0"
 paths:
-  /accounts:
+  /id:
     get:
       consumes:
       - application/json
-      description: get accounts
+      description: |-
+        Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.
+        The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-Al" for the station "Alexanderplatz".
       parameters:
-      - description: name search by q
-        format: email
+      - description: Station name
         in: query
-        name: q
+        name: name
+        required: true
         type: string
       produces:
       - application/json
-      responses: {}
-      summary: List accounts
+      responses:
+        "200":
+          description: The station id
+          schema:
+            type: string
+        "404":
+          description: Station not found
+          schema:
+            type: string
+      summary: Retrieve Station ID by Name
       tags:
-      - accounts
+      - City Data
 swagger: "2.0"

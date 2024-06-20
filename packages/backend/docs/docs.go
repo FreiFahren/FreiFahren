@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/accounts": {
+        "/id": {
             "get": {
-                "description": "get accounts",
+                "description": "Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.\nThe Ids have format Line prefix that has the format \"SU\" followed by an abbreviation of the station name. For example \"SU-Al\" for the station \"Alexanderplatz\".",
                 "consumes": [
                     "application/json"
                 ],
@@ -25,19 +25,32 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "accounts"
+                    "City Data"
                 ],
-                "summary": "List accounts",
+                "summary": "Retrieve Station ID by Name",
                 "parameters": [
                     {
                         "type": "string",
-                        "format": "email",
-                        "description": "name search by q",
-                        "name": "q",
-                        "in": "query"
+                        "description": "Station name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "The station id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Station not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         }
     }
