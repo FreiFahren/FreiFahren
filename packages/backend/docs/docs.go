@@ -52,6 +52,106 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/recent": {
+            "get": {
+                "description": "Fetches the most recent ticket inspector reports from the database and returns them as a JSON array.\nIf there are not enough recent reports, the endpoint will fetch additional historic reports to meet the required amount.\nThe required amount is determined by the current time of the day and the day of the week, ensuring the most relevant and timely information is provided to the user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Basic Functions"
+                ],
+                "summary": "Retrieve information about recent ticket inspector reports",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Standard HTTP header used to make conditional requests; the response will include the requested data only if it has changed since this date and time.",
+                        "name": "If-Modified-Since",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A JSON array of ticket inspector information, each entry includes details such as timestamp, station, direction, line, and historic flag.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/utils.TicketInspectorResponse"
+                            }
+                        }
+                    },
+                    "304": {
+                        "description": "Returns an empty response indicating that the requested data has not changed since the time provided in the 'If-Modified-Since' header."
+                    },
+                    "500": {
+                        "description": "Internal Server Error: An error occurred while processing the request.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "utils.Coordinates": {
+            "type": "object",
+            "properties": {
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                }
+            }
+        },
+        "utils.Station": {
+            "type": "object",
+            "properties": {
+                "coordinates": {
+                    "$ref": "#/definitions/utils.Coordinates"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lines": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "utils.TicketInspectorResponse": {
+            "type": "object",
+            "properties": {
+                "direction": {
+                    "$ref": "#/definitions/utils.Station"
+                },
+                "isHistoric": {
+                    "type": "boolean"
+                },
+                "line": {
+                    "description": "String is used so that it can easily be handled by the frontend",
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "station": {
+                    "$ref": "#/definitions/utils.Station"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
         }
     }
 }`
