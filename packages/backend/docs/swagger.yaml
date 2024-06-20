@@ -294,4 +294,23 @@ paths:
       summary: Retrieve Name by Station ID
       tags:
       - City Data
+  /stats:
+    get:
+      consumes:
+      - application/json
+      description: Fetches the total number of submissions recorded in the database
+        over the past 24 hours.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Number of submissions in the last 24 hours
+          schema:
+            type: integer
+        "500":
+          description: 'Internal Server Error: Unable to fetch statistics from the
+            database.'
+      summary: Get statistics on recent submissions
+      tags:
+      - Statistics
 swagger: "2.0"
