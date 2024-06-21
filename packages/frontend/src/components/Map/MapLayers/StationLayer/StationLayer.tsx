@@ -62,6 +62,7 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations, textColor }) => {
                 layout={{
                     'text-field': ['get', 'name'],
                     'text-size': 12,
+                    'text-allow-overlap': true,
                     'icon-image': [
                         'case',
                         ['any',

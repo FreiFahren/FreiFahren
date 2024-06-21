@@ -35,7 +35,8 @@ const RegularLineLayer: React.FC<RegularLineLayerProps> = ({ linesGeoJSON, textC
                     'symbol-placement': 'line',
                     'text-anchor': 'top',
                     'text-offset': [0, 1.5],
-                    'text-keep-upright': true
+                    'text-keep-upright': true,
+                    'text-optional': true
                 }}
                 paint={{
                     'text-color': textColor,
@@ -43,7 +44,7 @@ const RegularLineLayer: React.FC<RegularLineLayerProps> = ({ linesGeoJSON, textC
                         'interpolate',
                         ['linear'],
                         ['zoom'],
-                        11, ['case', ['in', ['get', 'line'], ['literal', firstPriorityLines]], 1, 0],
+                        10, ['case', ['in', ['get', 'line'], ['literal', firstPriorityLines]], 1, 0],
                         12, 1
                     ]
                 }}
