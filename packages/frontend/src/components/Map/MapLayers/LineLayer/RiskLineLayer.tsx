@@ -1,7 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Source, Layer } from 'react-map-gl/maplibre';
 
-import { getRecentDataWithIfModifiedSince } from '../../../../utils/dbUtils';
 import { RiskData } from 'src/utils/types';
 
 interface RiskLineLayerProps {
@@ -25,31 +24,8 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ linesGeoJSON, textColor, 
         };
     };
 
-    const [updatedGeoJSON, setUpdatedGeoJSON] = useState<GeoJSON.FeatureCollection<GeoJSON.LineString>>(
-        initializeWithColor(linesGeoJSON, preloadedRiskData?.segment_colors)
-    );
-
-    const lastUpdateTimestamp = useRef<string | null>(null);
-
-    useEffect(() => {
-        const fetchSegmentHighlightColors = async () => {
-            try {
-                const response = await getRecentDataWithIfModifiedSince(`${process.env.REACT_APP_API_URL}/risk-prediction/getSegmentColors`, lastUpdateTimestamp.current);
-                if (response) {
-                    const { last_modified, segment_colors } = response;
-                    lastUpdateTimestamp.current = last_modified;
-
-                    const newGeoJSON = initializeWithColor(linesGeoJSON, segment_colors);
-                    setUpdatedGeoJSON(newGeoJSON);
-                }
-            } catch (error) {
-                console.error('Error fetching segment colors:', error);
-            }
-        };
-
-        const interval = setInterval(fetchSegmentHighlightColors, 5*1000);
-        return () => clearInterval(interval);
-    }, [linesGeoJSON]);
+    const updatedGeoJSON = initializeWithColor(linesGeoJSON, preloadedRiskData?.segment_colors);
+    useState<GeoJSON.FeatureCollection<GeoJSON.LineString>>(updatedGeoJSON);
 
     return (
         <>
