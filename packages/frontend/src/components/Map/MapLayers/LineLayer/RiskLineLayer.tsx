@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from 'react';
 import { Source, Layer } from 'react-map-gl/maplibre';
 
 import { RiskData } from 'src/utils/types';
+import { useRiskData } from 'src/contexts/RiskDataContext';
 
 interface RiskLineLayerProps {
     preloadedRiskData: RiskData | null;
@@ -10,7 +12,11 @@ interface RiskLineLayerProps {
 }
 
 const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ linesGeoJSON, textColor, preloadedRiskData }) => {
-    const initializeWithColor = (geoJSON: GeoJSON.FeatureCollection<GeoJSON.LineString>, segmentColors?: {[key: string]: string}) => {
+    const { segmentRiskData, refreshRiskData } = useRiskData();
+    const [geoJSON, setGeoJSON] = useState(linesGeoJSON);
+
+    // Function to apply color updates to GeoJSON
+    const applySegmentColors = (segmentColors?: {[key: string]: string}) => {
         const defaultColor = '#13C184'; // lowest risk color
         return {
             ...geoJSON,
@@ -24,12 +30,32 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ linesGeoJSON, textColor, 
         };
     };
 
-    const updatedGeoJSON = initializeWithColor(linesGeoJSON, preloadedRiskData?.segment_colors);
-    useState<GeoJSON.FeatureCollection<GeoJSON.LineString>>(updatedGeoJSON);
+    // If the segment risk data changes, update the GeoJSON
+    useEffect(() => {
+        if (segmentRiskData && segmentRiskData.segment_colors) {
+            setGeoJSON(applySegmentColors(segmentRiskData.segment_colors));
+        }
+    }, [segmentRiskData]);
+
+    // Initialize with preloaded data
+    useEffect(() => {
+        if (preloadedRiskData && preloadedRiskData.segment_colors) {
+            setGeoJSON(applySegmentColors(preloadedRiskData.segment_colors));
+        }
+    }, [preloadedRiskData, linesGeoJSON]);
+
+    // Periodically fetch new risk data to account for changes
+    useEffect(() => {
+        const interval = setInterval(() => {
+            refreshRiskData();
+            console.log('Called every 5 seconds');
+        }, 5 * 1000);
+        return () => clearInterval(interval);
+    }, [refreshRiskData]);
 
     return (
         <>
-            <Source id='risk-line-data' type='geojson' data={updatedGeoJSON}>
+            <Source id='risk-line-data' type='geojson' data={geoJSON}>
                 <Layer
                     id='risk-line-layer'
                     type='line'

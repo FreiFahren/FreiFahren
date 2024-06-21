@@ -5,6 +5,7 @@ import { OpacityMarker } from './Classes/OpacityMarker/OpacityMarker';
 import MarkerModal from '../../Modals/MarkerModal/MarkerModal';
 import { CloseButton } from '../../Buttons/CloseButton/CloseButton';
 import { useModalAnimation } from '../../../utils/uiUtils';
+import { useRiskData } from '../../../contexts/RiskDataContext';
 
 export interface MarkersProps {
 	formSubmitted: boolean;
@@ -39,6 +40,7 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
 	const [ticketInspectorList, setTicketInspectorList] = useState<MarkerData[]>([]);
 	const lastReceivedInspectorTimestamp = useRef<string | null>(null);
 	const [selectedMarker, setSelectedMarker] = useState<MarkerData | null>(null);
+	const riskData = useRiskData();
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -51,6 +53,7 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
 
 					if (filteredNewInspectors.length > 0) {
 						lastReceivedInspectorTimestamp.current = newTicketInspectorList[0].timestamp;
+						riskData.refreshRiskData(); // refresh risk data when new inspectors are fetched
 						return [...currentList, ...filteredNewInspectors];
 					}
 
@@ -63,7 +66,7 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
 		const interval = setInterval(fetchData, 5*1000);
 
 		return () => clearInterval(interval);
-	}, [formSubmitted]);
+	}, [formSubmitted, riskData]);
 
 	const {
 		isOpen: isMarkerModalOpen,
