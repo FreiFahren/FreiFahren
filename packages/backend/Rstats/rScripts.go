@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/utils"
 )
@@ -109,8 +110,15 @@ func simplifyAndSaveTicketInspectors(ticketInspectors []utils.TicketInspector, f
 
 		// Handle nullable fields
 		if ticket.Line.Valid {
-			simplified.Line = ticket.Line.String
+			simplified.Lines = append(simplified.Lines, ticket.Line.String)
+		} else {
+			// If no line is specified, get all possible lines for the station
+			stations := data.GetStationsList()
+			LinesOfStation := stations[simplified.StationID].Lines
+
+			simplified.Lines = append(simplified.Lines, LinesOfStation...)
 		}
+
 		if ticket.DirectionID.Valid {
 			simplified.DirectionID = ticket.DirectionID.String
 		}
