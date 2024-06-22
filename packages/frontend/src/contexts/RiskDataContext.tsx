@@ -19,7 +19,6 @@ export const RiskDataProvider = ({ children }: { children: React.ReactNode }) =>
             `${process.env.REACT_APP_API_URL}/risk-prediction/getSegmentColors`,
             lastModified
         );
-        console.log('Risk data fetched', results);
         if (results) {
             setSegmentRiskData(results);
             setLastModified(results.last_modified);

@@ -48,8 +48,7 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ linesGeoJSON, textColor, 
     useEffect(() => {
         const interval = setInterval(() => {
             refreshRiskData();
-            console.log('Called every 5 seconds');
-        }, 5 * 1000);
+        }, 30 * 1000);
         return () => clearInterval(interval);
     }, [refreshRiskData]);
 
