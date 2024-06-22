@@ -98,7 +98,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/data//id": {
+        "/data/id": {
             "get": {
                 "description": "Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.\nThe Ids have format Line prefix that has the format \"SU\" followed by an abbreviation of the station name. For example \"SU-A\" for the station \"Alexanderplatz\".",
                 "consumes": [

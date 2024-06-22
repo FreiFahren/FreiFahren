@@ -13,6 +13,7 @@ import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton';
 import { highlightElement, useModalAnimation, currentColorTheme, setColorThemeInLocalStorage } from '../../utils/uiUtils';
 import Backdrop from '../../../src/components/Miscellaneous/Backdrop/Backdrop';
 import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils';
+import { RiskDataProvider } from '../../contexts/RiskDataContext';
 import './App.css';
 
 type AppUIState = {
@@ -155,15 +156,17 @@ function App() {
       )}
 
       <div id='portal-root'></div>
-      <Map
-        isFirstOpen={appUIState.isFirstOpen}
-        formSubmitted={appUIState.formSubmitted}
-        userPosition={userPosition}
-        setUserPosition={setUserPosition}
-        currentColorTheme={appUIState.currentColorTheme}
-        openAskForLocation={openAskForLocation}
-        isRiskLayerOpen={appUIState.isRiskLayerOpen}
-      />
+      <RiskDataProvider>
+        <Map
+          isFirstOpen={appUIState.isFirstOpen}
+          formSubmitted={appUIState.formSubmitted}
+          userPosition={userPosition}
+          setUserPosition={setUserPosition}
+          currentColorTheme={appUIState.currentColorTheme}
+          openAskForLocation={openAskForLocation}
+          isRiskLayerOpen={appUIState.isRiskLayerOpen}
+        />
+      </RiskDataProvider>
       <LayerSwitcher
         changeLayer={changeLayer}
         isRiskLayerOpen={appUIState.isRiskLayerOpen}

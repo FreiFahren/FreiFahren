@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useRef } from 'react';
 import {
     LngLatBoundsLike,
     LngLatLike,
@@ -13,10 +13,9 @@ import stationsData from '../../data/StationsList.json';
 import StationLayer from './MapLayers/StationLayer/StationLayer';
 import RiskLineLayer from './MapLayers/LineLayer/RiskLineLayer';
 import RegularLineLayer from './MapLayers/LineLayer/RegularLineLayer';
-import { getRecentDataWithIfModifiedSince } from '../../utils/dbUtils';
 import { convertStationsToGeoJSON } from '../../utils/mapUtils';
 import './Map.css';
-import { RiskData } from '../../utils/types';
+import { useRiskData } from '../../contexts/RiskDataContext';
 
 const Map = lazy(() => import('react-map-gl/maplibre'));
 
@@ -86,15 +85,15 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     }, [isRiskLayerOpen, map]);
 
     // preload colors before risklayer component mounts to instantly show the highlighted segments
-    const [segmentRiskData, setSegmentRiskData] = useState<RiskData | null>(null);
+    const { segmentRiskData, refreshRiskData } = useRiskData();
+    const hasRefreshed = useRef(false); // To prevent refreshing on every render
     useEffect(() => {
-        async function prepareRiskData() {
-        const segmentRiskData = await getRecentDataWithIfModifiedSince(`${process.env.REACT_APP_API_URL}/risk-prediction/getSegmentColors`, null);
-        setSegmentRiskData(segmentRiskData);
+        if (isFirstOpen && !hasRefreshed.current) {
+            // Refresh or load risk data on initial open
+            refreshRiskData();
+            hasRefreshed.current = true;
         }
-
-        prepareRiskData();
-    }, [isFirstOpen]);
+    }, [isFirstOpen, refreshRiskData]);
 
     return (
         <div id='map-container' data-testid='map-container'>

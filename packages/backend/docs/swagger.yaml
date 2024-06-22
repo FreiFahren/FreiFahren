@@ -183,7 +183,7 @@ paths:
       summary: Retrieve information about recent ticket inspector reports
       tags:
       - basics
-  /data//id:
+  /data/id:
     get:
       consumes:
       - application/json

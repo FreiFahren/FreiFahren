@@ -16,18 +16,22 @@ import (
 )
 
 // @Summary Submit ticket inspector data
+//
 // @Description Accepts a JSON payload with details about a ticket inspector's current location.
 // @Description This endpoint validates the provided data, processes necessary computations for linking stations and lines,
 // @Description inserts the data into the database, and triggers an update to the risk model used in operational analysis.
 //
 // @Tags basics
+//
 // @Accept json
 // @Produce json
 //
 // @Param inspectorData body structs.InspectorRequest true "Data about the inspector's location and activity"
+//
 // @Success 200 {object} structs.ResponseData "Successfully processed and inserted the inspector data with computed linkages and risk model updates."
 // @Failure 400 "Bad Request: Missing or incorrect parameters provided."
 // @Failure 500 "Internal Server Error: Error during data processing or database insertion."
+//
 // @Router /basics/newInspector [post]
 func PostInspector(c echo.Context) error {
 	var req structs.InspectorRequest
@@ -65,16 +69,16 @@ func PostInspector(c echo.Context) error {
 func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *structs.InsertPointers, error) {
 	var stations = data.GetStationsList()
 
+	// Using pointers to allow for nil values
 	response := &structs.ResponseData{}
 	pointers := &structs.InsertPointers{}
 
-	// Assign pointers for values to be potentially inserted as NULL
-
-	if req.Timestamp != (time.Time{}) {
+	// Check if the timestamp is provided, otherwise use the current time
+	if req.Timestamp != (time.Time{}) { // time.time{} is the zero value for time.Time
 		pointers.TimestampPtr = &req.Timestamp
 		response.Timestamp = req.Timestamp
 	} else {
-		timestamp := time.Now().UTC().Truncate(time.Minute).Add(time.Minute)
+		timestamp := time.Now().UTC().Truncate(time.Minute)
 		pointers.TimestampPtr = &timestamp
 		response.Timestamp = *pointers.TimestampPtr
 	}
