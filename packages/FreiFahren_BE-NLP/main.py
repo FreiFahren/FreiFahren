@@ -1,7 +1,7 @@
 import os
 import telebot
 import pytz
-from datetime import datetime, timedelta
+from datetime import datetime
 from dotenv import load_dotenv
 from verify_info import verify_direction, verify_line
 from process_message import (
