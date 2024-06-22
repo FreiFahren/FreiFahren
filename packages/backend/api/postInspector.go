@@ -65,16 +65,16 @@ func PostInspector(c echo.Context) error {
 func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *structs.InsertPointers, error) {
 	var stations = data.GetStationsList()
 
+	// Using pointers to allow for nil values
 	response := &structs.ResponseData{}
 	pointers := &structs.InsertPointers{}
 
-	// Assign pointers for values to be potentially inserted as NULL
-
-	if req.Timestamp != (time.Time{}) {
+	// Check if the timestamp is provided, otherwise use the current time
+	if req.Timestamp != (time.Time{}) { // time.time{} is the zero value for time.Time
 		pointers.TimestampPtr = &req.Timestamp
 		response.Timestamp = req.Timestamp
 	} else {
-		timestamp := time.Now().UTC().Truncate(time.Minute).Add(time.Minute)
+		timestamp := time.Now().UTC().Truncate(time.Minute)
 		pointers.TimestampPtr = &timestamp
 		response.Timestamp = *pointers.TimestampPtr
 	}
