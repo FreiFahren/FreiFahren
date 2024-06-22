@@ -10,12 +10,17 @@ import (
 )
 
 // @Summary Get statistics on recent submissions
+//
 // @Description Fetches the total number of submissions recorded in the database over the past 24 hours.
+//
 // @Tags Statistics
+//
 // @Accept json
 // @Produce json
+//
 // @Success 200 {integer} integer "Number of submissions in the last 24 hours"
 // @Failure 500 "Internal Server Error: Unable to fetch statistics from the database."
+//
 // @Router /statistics/stats [get]
 func GetStats(c echo.Context) error {
 	stats, err := database.GetNumberOfSubmissionsInLast24Hours()
