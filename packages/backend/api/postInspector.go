@@ -160,17 +160,17 @@ func assignLineIfSingleOption(dataToInsert *structs.ResponseData, pointers *stru
 
 func determineDirectionIfImplied(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, line []string, stationID string) error {
 	var stations = data.GetStationsList()
-
 	isStationUnqiueToOneLine := len(stations[dataToInsert.Station.ID].Lines) == 1
 
+	lastStationID := line[len(line)-1]
+	firstStationID := line[0]
+
 	if isStationUnqiueToOneLine {
-		if line[0] == stationID {
-			secondStationID := line[1]
-			if secondStation, found := stations[secondStationID]; found {
-				setDirection(dataToInsert, pointers, secondStationID, secondStation)
+		if firstStationID == stationID {
+			if lastStation, found := stations[lastStationID]; found {
+				setDirection(dataToInsert, pointers, lastStationID, lastStation)
 			}
-		} else if line[len(line)-1] == stationID {
-			firstStationID := line[0]
+		} else if lastStationID == stationID {
 			if firstStation, found := stations[firstStationID]; found {
 				setDirection(dataToInsert, pointers, firstStationID, firstStation)
 			}
