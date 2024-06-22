@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/FreiFahren/backend/Rstats"
@@ -160,23 +161,38 @@ func assignLineIfSingleOption(dataToInsert *structs.ResponseData, pointers *stru
 
 func determineDirectionIfImplied(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, line []string, stationID string) error {
 	var stations = data.GetStationsList()
+	isStationUniqueToOneLine := checkIfStationIsUniqueToOneLineOfType(stations[stationID], dataToInsert.Line)
 
-	isStationUnqiueToOneLine := len(stations[dataToInsert.Station.ID].Lines) == 1
+	lastStationID := line[len(line)-1]
+	firstStationID := line[0]
 
-	if isStationUnqiueToOneLine {
-		if line[0] == stationID {
-			secondStationID := line[1]
-			if secondStation, found := stations[secondStationID]; found {
-				setDirection(dataToInsert, pointers, secondStationID, secondStation)
+	if isStationUniqueToOneLine {
+		if firstStationID == stationID {
+			if lastStation, found := stations[lastStationID]; found {
+				setDirection(dataToInsert, pointers, lastStationID, lastStation)
 			}
-		} else if line[len(line)-1] == stationID {
-			firstStationID := line[0]
+		} else if lastStationID == stationID {
 			if firstStation, found := stations[firstStationID]; found {
 				setDirection(dataToInsert, pointers, firstStationID, firstStation)
 			}
 		}
 	}
 	return nil
+}
+
+// checks if a station is uniquely served by one line of the specified type (e.g., 'S' or 'U').
+func checkIfStationIsUniqueToOneLineOfType(station structs.StationListEntry, line string) bool {
+	// The first character of the line determines if it is a sbahn or ubahn
+	linePrefix := line[0]
+
+	count := 0
+	for _, line := range station.Lines {
+		if strings.HasPrefix(line, string(linePrefix)) {
+			count++
+		}
+	}
+
+	return count == 1 // return true if there is only one line of the specified type
 }
 
 func setDirection(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, stationID string, station structs.StationListEntry) {
