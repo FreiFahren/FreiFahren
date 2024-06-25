@@ -56,6 +56,7 @@ def extract_ticket_inspector_info(unformatted_text):
 
 stations_dict = load_data('data/stations_list_main.json')
 
+
 def process_new_message(timestamp, message):
     info = extract_ticket_inspector_info(message.text)
     if (type(info) is dict):

@@ -41,6 +41,7 @@ def set_ringbahn_directionless(ticket_inspector):
 
     return ticket_inspector
 
+
 def verify_direction(ticket_inspector, text):
     logger.debug('verifying direction')
 

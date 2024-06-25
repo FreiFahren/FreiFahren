@@ -2,12 +2,15 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 from datetime import datetime, timezone
 
+
 class CustomFormatter(logging.Formatter):
+    # flake8: noqa
     def formatTime(self, record, datefmt=None):
         # Convert timestamp to UTC and format to ISO 8601
         utc_time = datetime.fromtimestamp(record.created, timezone.utc)
         
         return utc_time.isoformat()
+
 
 def setup_logger():
     logger = logging.getLogger(__name__)

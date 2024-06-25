@@ -7,6 +7,7 @@ import os
 
 logger = setup_logger()
 
+
 def load_data(filename):
     logger.debug('loading data')
 
