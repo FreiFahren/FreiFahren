@@ -95,7 +95,6 @@ if __name__ == '__main__':
     create_table_if_not_exists()
 
     logger.info('Bot is running...')
-    print('Bot is running...')
 
     DEV_CHAT_ID = os.getenv('DEV_CHAT_ID')
     FREIFAHREN_BE_CHAT_ID = os.getenv('FREIFAHREN_BE_CHAT_ID')
