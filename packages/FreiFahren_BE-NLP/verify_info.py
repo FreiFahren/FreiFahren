@@ -1,7 +1,12 @@
 from process_message import lines_with_stations, find_station, remove_direction_and_keyword, load_data
+from logging_utils import setup_logger
+
+logger = setup_logger()
 
 
 def handle_ringbahn(text):
+    logger.debug('handling ringbahn')
+    
     ring_keywords = ['ring', 'ringbahn']
     # remove commas and dots from the text
     text = text.replace(',', '').replace('.', '')
@@ -15,6 +20,8 @@ def handle_ringbahn(text):
 
 
 def verify_line(ticket_inspector, text):
+    logger.debug('verifying line')
+
     # If there is only one line traversing the station, set the line to that line
     if ticket_inspector.line is None and ticket_inspector.station is not None:
         stations_list_main = load_data('data/stations_list_main.json')
@@ -27,12 +34,16 @@ def verify_line(ticket_inspector, text):
 
 
 def set_ringbahn_directionless(ticket_inspector):
+    logger.debug('setting ringbahn directionless')
+
     if ticket_inspector.line == 'S41' or ticket_inspector.line == 'S42':
         ticket_inspector.direction = None
 
     return ticket_inspector
 
 def verify_direction(ticket_inspector, text):
+    logger.debug('verifying direction')
+
     if ticket_inspector.line is None:
         return ticket_inspector
 
@@ -50,6 +61,8 @@ def verify_direction(ticket_inspector, text):
 
 
 def get_final_stations_of_line(line):
+    logger.debug('getting final stations of line')
+
     final_stations_of_line = []
     final_stations_of_line.append(lines_with_stations[line][0])
     final_stations_of_line.append(lines_with_stations[line][-1])
@@ -57,12 +70,16 @@ def get_final_stations_of_line(line):
 
 
 def get_words_after_line(text, line):
+    logger.debug('getting words after line')
+
     line_index = text.rfind(line)
     after_line = text[line_index + len(line):].strip()
     return after_line.split()
 
 
 def check_if_station_is_actually_direction(text, ticket_inspector):
+    logger.debug('checking if station is actually direction')
+
     if ticket_inspector.direction is None or ticket_inspector.station is None:
         return ticket_inspector
 
@@ -95,6 +112,8 @@ def check_if_station_is_actually_direction(text, ticket_inspector):
 
 
 def correct_direction(ticket_inspector, lines_with_stations):
+    logger.debug('correcting direction')
+
     line = ticket_inspector.line
     direction = ticket_inspector.direction
     station = ticket_inspector.station
@@ -125,6 +144,8 @@ def correct_direction(ticket_inspector, lines_with_stations):
 
 
 def check_for_line_through_station(ticket_inspector, stations_list_main):
+    logger.debug('checking for line through station')
+
     station_name = ticket_inspector.station.strip().lower().replace(' ', '')
 
     for _key, station_info in stations_list_main.items():

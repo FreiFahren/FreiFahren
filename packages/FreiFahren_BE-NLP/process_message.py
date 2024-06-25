@@ -8,6 +8,8 @@ import os
 logger = setup_logger()
 
 def load_data(filename):
+    logger.debug('loading data')
+
     base_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(base_dir, filename)
     with open(file_path, 'r') as f:
@@ -25,6 +27,8 @@ if stations_with_synonyms is None:
    
 
 def format_text_for_line_search(text):
+    logger.debug('formatting text for line search')
+
     # Replace commas, dots, dashes, and slashes with spaces
     text = text.replace(',', ' ').replace('.', ' ').replace('-', ' ').replace('/', ' ')
     words = text.split()
@@ -43,6 +47,8 @@ def format_text_for_line_search(text):
 
 
 def process_matches(matches_per_word):
+    logger.debug('processing matches')
+
     # Decide what to return based on the collected matches
     if len(matches_per_word) == 1:
         return sorted(matches_per_word[list(matches_per_word.keys())[0]], key=len, reverse=True)[0]
@@ -54,6 +60,8 @@ def process_matches(matches_per_word):
 
 
 def find_line(text, lines):
+    logger.debug('finding the line')
+
     formatted_text = format_text_for_line_search(text)
     if formatted_text is None:
         return None
@@ -71,6 +79,8 @@ def find_line(text, lines):
 
 
 def format_text(text):
+    logger.debug('formatting text')
+
     text = text.lower().replace('.', ' ').replace(',', ' ')
     # Remove all isolated 's' and 'u' to reduce noise
     text = re.sub(r'\b(s|u)\b', '', text)
@@ -78,6 +88,8 @@ def format_text(text):
 
 
 def get_all_stations(line=None):
+    logger.debug('getting all stations for the line', line)
+
     all_stations = []
     line = line.upper() if line is not None else None
 
@@ -104,6 +116,8 @@ def get_all_stations(line=None):
 
 
 def get_best_match(text, items, threshold=75):
+    logger.debug('getting the best match')
+
     match = process.extractOne(text, items)
     best_match, score = match
     if score >= threshold:
@@ -112,6 +126,8 @@ def get_best_match(text, items, threshold=75):
 
 
 def find_match_in_stations(best_match, stations_with_synonyms):
+    logger.debug('finding the match in stations for the best match: ', best_match)
+
     for station_type in stations_with_synonyms.values():
         for station, synonyms in station_type.items():
             if best_match in [station.lower()] + [synonym.lower() for synonym in synonyms]:
@@ -120,6 +136,8 @@ def find_match_in_stations(best_match, stations_with_synonyms):
 
 
 def find_station(text, ticket_inspector, threshold=75):
+    logger.debug('finding the station')
+
     all_stations = get_all_stations(ticket_inspector.line)
     
     # Use the NER Model to get the unrecognized stations from the text
@@ -146,6 +164,8 @@ def find_station(text, ticket_inspector, threshold=75):
 
 
 def check_for_spam(text):
+    logger.debug('checking for spam')
+
     if len(text) > 250:
         return True
 
@@ -171,6 +191,8 @@ def check_for_spam(text):
 
 
 def remove_direction_and_keyword(text, direction_keyword, direction):
+    logger.debug('removing direction and keyword for the keyword: ', direction_keyword, ' and direction: ', direction)
+
     replace_segment = f'{direction_keyword} {direction}'.strip()
     if replace_segment in text:
         # If the exact match is found, replace it
@@ -188,6 +210,8 @@ direction_keywords = ['nach', 'richtung', 'bis', 'zu', 'to', 'towards', 'directi
 
 
 def find_direction(text, ticket_inspector):
+    logger.debug('finding the direction')
+    
     words = text.split()
     word_after_keyword = None  # Because we want to use it outside the loop
 
