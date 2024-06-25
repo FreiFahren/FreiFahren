@@ -88,7 +88,7 @@ def format_text(text):
 
 
 def get_all_stations(line=None):
-    logger.debug('getting all stations for the line', line)
+    logger.debug('Getting all stations for the line: %s', line)
 
     all_stations = []
     line = line.upper() if line is not None else None
@@ -191,7 +191,7 @@ def check_for_spam(text):
 
 
 def remove_direction_and_keyword(text, direction_keyword, direction):
-    logger.debug('removing direction and keyword for the keyword: ', direction_keyword, ' and direction: ', direction)
+    logger.debug('removing direction and keyword for the keyword: %s and direction: %s', direction_keyword, direction)
 
     replace_segment = f'{direction_keyword} {direction}'.strip()
     if replace_segment in text:

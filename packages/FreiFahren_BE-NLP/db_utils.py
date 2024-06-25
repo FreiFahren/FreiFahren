@@ -21,7 +21,7 @@ def create_connection():
     conn = psycopg2.connect(dbname=db_name, user=db_user, password=db_password, host=db_host, port=db_port)
     if conn is None:
         logger.error('Failed to connect to the database')
-        logger.debug('DB_NAME:', db_name, 'DB_USER:', db_user, 'DB_PASSWORD:', db_password, 'DB_HOST:', db_host, 'DB_PORT:', db_port)
+        logger.debug('DB_NAME: %s, DB_USER: %s, DB_PASSWORD: %s, DB_HOST: %s, DB_PORT: %s', db_name, db_user, db_password, db_host, db_port)
         raise Exception('Failed to connect to the database')
     else:
         logger.info('Connected to the database')
@@ -78,8 +78,8 @@ def insert_ticket_info(
     response = requests.post(url + '/basics/newInspector', json=data, headers=headers)
 
     if response.status_code != 200:
-        logger.error('Failed to send data to the backend. Status code:', response.status_code, 'Response:', response.text)
-        logger.debug('Failed request data:', data)
-        logger.debug('Failed request headers:', headers)
+        logger.error('Failed to send data to the backend. Status code: %s Response: %s', response.status_code, response.text)
+        logger.debug('Failed request data: %s', data)
+        logger.debug('Failed request headers: %s', headers)
     else:
         logger.info('Data sent to the backend successfully')
