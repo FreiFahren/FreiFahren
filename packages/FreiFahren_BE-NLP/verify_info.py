@@ -32,27 +32,6 @@ def set_ringbahn_directionless(ticket_inspector):
 
     return ticket_inspector
 
-
-def handle_get_off(text, ticket_inspector):
-    getting_off_keywords = [
-        'ausgestiegen',
-        'raus',
-        'aussteigen',
-        'got off',
-        'get off',
-        'getting off',
-        'steigen aus',
-    ]
-
-    # if any of the keywords are in the text return True
-    for keyword in getting_off_keywords:
-        if keyword in text:
-            # When getting off, we only know they are at a station
-            ticket_inspector.line = None
-            ticket_inspector.direction = None
-            return ticket_inspector
-
-
 def verify_direction(ticket_inspector, text):
     if ticket_inspector.line is None:
         return ticket_inspector

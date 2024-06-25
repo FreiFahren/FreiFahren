@@ -14,8 +14,7 @@ from process_message import (
     check_for_spam
 )
 from db_utils import create_table_if_not_exists, insert_ticket_info
-from verify_info import handle_get_off
-from logging_utils import setup_logger3
+from logging_utils import setup_logger
 
 
 class TicketInspector:
@@ -47,9 +46,6 @@ def extract_ticket_inspector_info(unformatted_text):
 
     # With the found info we can cross check the direction and line
     if found_line or found_station or found_direction:
-        # direction and line should be None if the ticket inspector got off the train
-        handle_get_off(text, ticket_inspector)
-
         verify_direction(ticket_inspector, text)
         verify_line(ticket_inspector, text)
 
@@ -59,16 +55,6 @@ def extract_ticket_inspector_info(unformatted_text):
 
 
 stations_dict = load_data('data/stations_list_main.json')
-
-
-def get_station_id(station_name):
-    station_name = station_name.strip().lower().replace(' ', '')
-
-    for station_code, station_info in stations_dict.items():
-        if station_info['name'].strip().lower().replace(' ', '') == station_name:
-            return station_code
-    return None
-
 
 def process_new_message(timestamp, message):
     info = extract_ticket_inspector_info(message.text)
