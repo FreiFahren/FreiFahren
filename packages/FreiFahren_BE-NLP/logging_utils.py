@@ -19,8 +19,8 @@ def setup_logger():
     if not logger.handlers:
         logger.setLevel(logging.DEBUG)  # Set the log level to DEBUG to capture all types of logs
 
-        # Keep no backups, for data minimization purposes
-        file_handler = TimedRotatingFileHandler('app.log', when='midnight', interval=1, backupCount=0, utc=True)
+        # rotate file at midnight and keep 7 days of logs
+        file_handler = TimedRotatingFileHandler('app.log', when='midnight', interval=1, backupCount=7, utc=True)
 
         # Create formatters and add it to handlers
         log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)'

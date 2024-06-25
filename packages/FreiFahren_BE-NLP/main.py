@@ -79,7 +79,7 @@ def process_new_message(timestamp, message):
                 info.get('direction'),
             )
     else:
-        logger.info('No info found')
+        logger.info('No line, station or direction found in the message')
 
 
 if __name__ == '__main__':

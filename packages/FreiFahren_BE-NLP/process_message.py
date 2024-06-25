@@ -9,7 +9,7 @@ logger = setup_logger()
 
 
 def load_data(filename):
-    logger.debug('loading data')
+    logger.debug('loading data from file: %s', filename)
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(base_dir, filename)
