@@ -59,8 +59,17 @@ stations_dict = load_data('data/stations_list_main.json')
 def process_new_message(timestamp, message):
     info = extract_ticket_inspector_info(message.text)
     if (type(info) is dict):
-        if info.get('line') or info.get('station') or info.get('direction'):
-            logger.info('Found Info:\nLine:\t\t%s\nStation:\t%s\nDirection:\t%s', info.get('line'), info.get('station'), info.get('direction'))
+        found_items = []
+        if info.get('line'):
+            found_items.append('line')
+        if info.get('station'):
+            found_items.append('station')
+        if info.get('direction'):
+            found_items.append('direction')
+        
+        # Avoid logging the actual data to avoid storing data with which the user could be identified
+        if found_items:
+            logger.info('Found Info: %s', ', '.join(found_items))
 
             insert_ticket_info(
                 timestamp,
@@ -93,7 +102,8 @@ if __name__ == '__main__':
 
     @bot.message_handler(func=lambda message: message)
     def get_info(message):
-        logger.info('Message received')
+        logger.info('------------------------')
+        logger.info('MESSAGE RECEIVED')
         timestamp = datetime.fromtimestamp(message.date, utc)
         # Round the timestamp to the last minute
         timestamp = timestamp.replace(second=0, microsecond=0)

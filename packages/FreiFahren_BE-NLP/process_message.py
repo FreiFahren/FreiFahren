@@ -126,7 +126,7 @@ def get_best_match(text, items, threshold=75):
 
 
 def find_match_in_stations(best_match, stations_with_synonyms):
-    logger.debug('finding the match in stations for the best match: ', best_match)
+    logger.debug('finding the match in stations for the best match: %s', best_match)
 
     for station_type in stations_with_synonyms.values():
         for station, synonyms in station_type.items():

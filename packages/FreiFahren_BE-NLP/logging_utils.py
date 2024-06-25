@@ -6,17 +6,10 @@ class CustomFormatter(logging.Formatter):
     def formatTime(self, record, datefmt=None):
         # Convert timestamp to UTC and format to ISO 8601
         utc_time = datetime.fromtimestamp(record.created, timezone.utc)
-        if record.levelno == logging.INFO:
-            # Round to the nearest minute to avoid storing data with which the user could be identified
-            modified = utc_time.replace(second=0, microsecond=0)
-        else:
-            # Keep full timestamp for other levels
-            modified = utc_time
         
-        return modified.isoformat()
+        return utc_time.isoformat()
 
 def setup_logger():
-    # Create a custom logger
     logger = logging.getLogger(__name__)
     
     # Check if logger already has handlers
