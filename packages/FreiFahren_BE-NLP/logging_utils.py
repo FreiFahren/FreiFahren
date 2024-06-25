@@ -18,16 +18,19 @@ class CustomFormatter(logging.Formatter):
 def setup_logger():
     # Create a custom logger
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)  # Set the log level to DEBUG to capture all types of logs
+    
+    # Check if logger already has handlers
+    if not logger.handlers:
+        logger.setLevel(logging.DEBUG)  # Set the log level to DEBUG to capture all types of logs
 
-    # Keep no backups, for data minimization purposes
-    file_handler = TimedRotatingFileHandler('app.log', when='midnight', interval=1, backupCount=0, utc=True)
+        # Keep no backups, for data minimization purposes
+        file_handler = TimedRotatingFileHandler('app.log', when='midnight', interval=1, backupCount=0, utc=True)
 
-    # Create formatters and add it to handlers
-    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)'
-    formatter = CustomFormatter(log_format)
-    file_handler.setFormatter(formatter)
+        # Create formatters and add it to handlers
+        log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)'
+        formatter = CustomFormatter(log_format)
+        file_handler.setFormatter(formatter)
 
-    logger.addHandler(file_handler)
+        logger.addHandler(file_handler)
 
     return logger
