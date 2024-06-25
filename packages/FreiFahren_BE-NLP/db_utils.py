@@ -5,6 +5,9 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import os
 from dotenv import load_dotenv
 import requests
+from logging_utils import setup_logger
+
+logger = setup_logger()
 
 
 def create_connection():
@@ -14,7 +17,15 @@ def create_connection():
     db_password = os.getenv('DB_PASSWORD')
     db_host = os.getenv('DB_HOST')
     db_port = os.getenv('DB_PORT')
+
     conn = psycopg2.connect(dbname=db_name, user=db_user, password=db_password, host=db_host, port=db_port)
+    if conn is None:
+        logger.error('Failed to connect to the database')
+        logger.debug('DB_NAME:', db_name, 'DB_USER:', db_user, 'DB_PASSWORD:', db_password, 'DB_HOST:', db_host, 'DB_PORT:', db_port)
+        raise Exception('Failed to connect to the database')
+    else:
+        logger.info('Connected to the database')
+
     return conn
 
 
@@ -35,7 +46,6 @@ def create_table_if_not_exists():
             direction_id VARCHAR(10)
         );
     '''))
-    print('created table')
     cursor.close()
     conn.close()
 
@@ -48,7 +58,7 @@ def insert_ticket_info(
 ):
     url = os.getenv('BACKEND_URL')
     if url is None:
-        print('BACKEND_URL is not set')
+        logger.error('BACKEND_URL is not set')
         return
 
     # Prepare the JSON data payload
@@ -68,5 +78,8 @@ def insert_ticket_info(
     response = requests.post(url + '/basics/newInspector', json=data, headers=headers)
 
     if response.status_code != 200:
-
-        print('Failed to send data to the backend. Status code:', response.status_code, 'Response:', response.text)
+        logger.error('Failed to send data to the backend. Status code:', response.status_code, 'Response:', response.text)
+        logger.debug('Failed request data:', data)
+        logger.debug('Failed request headers:', headers)
+    else:
+        logger.info('Data sent to the backend successfully')

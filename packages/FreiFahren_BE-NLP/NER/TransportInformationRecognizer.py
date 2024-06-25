@@ -8,8 +8,6 @@ class TransportInformationRecognizer:
         self.model_path = os.path.join(base_dir, model_path)
         self.nlp = spacy.load(f'{self.model_path}')
 
-        print(f'model {self.model_path} loaded')
-
     # input: text message (string)
     # return: a list of all recognized stations in the text
     def get_recognized_stations(self, text: str) -> list:

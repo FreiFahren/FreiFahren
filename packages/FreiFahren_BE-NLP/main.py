@@ -15,6 +15,7 @@ from process_message import (
 )
 from db_utils import create_table_if_not_exists, insert_ticket_info
 from verify_info import handle_get_off
+from logging_utils import setup_logger3
 
 
 class TicketInspector:
@@ -28,6 +29,7 @@ def extract_ticket_inspector_info(unformatted_text):
     # Initial guards to avoid unnecessary processing
     if '?' in unformatted_text or check_for_spam(unformatted_text):
         ticket_inspector = TicketInspector(line=None, station=None, direction=None)
+        logger.info('Message is not getting processed')
         return ticket_inspector.__dict__
 
     found_line = find_line(unformatted_text, lines_with_stations)
@@ -72,7 +74,7 @@ def process_new_message(timestamp, message):
     info = extract_ticket_inspector_info(message.text)
     if (type(info) is dict):
         if info.get('line') or info.get('station') or info.get('direction'):
-            print('Found Info:\nLine:\t\t', info.get('line'), '\nStation:\t', info.get('station'), '\nDirection:\t', info.get('direction'))
+            logger.info('Found Info:\nLine:\t\t%s\nStation:\t%s\nDirection:\t%s', info.get('line'), info.get('station'), info.get('direction'))
 
             insert_ticket_info(
                 timestamp,
@@ -81,10 +83,12 @@ def process_new_message(timestamp, message):
                 info.get('direction'),
             )
     else:
-        print('No valuable information found')
+        logger.info('No info found')
 
 
 if __name__ == '__main__':
+    logger = setup_logger()
+
     load_dotenv()
     BOT_TOKEN = os.getenv('BOT_TOKEN')
     BACKEND_URL = os.getenv('BACKEND_URL')
@@ -95,12 +99,13 @@ if __name__ == '__main__':
 
     create_table_if_not_exists()
 
-    print('Bot is running...')
+    logger.info('Bot is running...')
     DEV_CHAT_ID = os.getenv('DEV_CHAT_ID')
     FREIFAHREN_BE_CHAT_ID = os.getenv('FREIFAHREN_BE_CHAT_ID')
 
     @bot.message_handler(func=lambda message: message)
     def get_info(message):
+        logger.info('Message received')
         timestamp = datetime.fromtimestamp(message.date, utc)
         # Round the timestamp to the last minute
         timestamp = timestamp.replace(second=0, microsecond=0)

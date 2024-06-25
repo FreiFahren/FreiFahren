@@ -2,8 +2,10 @@ import re
 import json
 from fuzzywuzzy import process
 from NER.TransportInformationRecognizer import TextProcessor
+from logging_utils import setup_logger
 import os
 
+logger = setup_logger()
 
 def load_data(filename):
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -13,7 +15,13 @@ def load_data(filename):
 
 
 lines_with_stations = load_data('data/stations_and_lines.json')
+if lines_with_stations is None:
+    logger.error('Failed to load the stations and lines data')
+    raise Exception('Failed to load the stations and lines data')
 stations_with_synonyms = load_data('data/synonyms.json')
+if stations_with_synonyms is None:
+    logger.error('Failed to load the synonyms data')
+    raise Exception('Failed to load the synonyms data')
    
 
 def format_text_for_line_search(text):
@@ -116,6 +124,7 @@ def find_station(text, ticket_inspector, threshold=75):
     
     # Use the NER Model to get the unrecognized stations from the text
     ner_results = TextProcessor.process_text(text)
+    logger.info('NER results: %s', ner_results)
 
     for ner_result in ner_results:
         # Get the fuzzy match of the NER result with the stations
