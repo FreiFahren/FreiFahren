@@ -68,7 +68,7 @@ def insert_ticket_info(
         'station': station_name,
         'direction': direction_name,
         'author': None,
-        'message': 'BOT'
+        'message': None
     }
 
     headers = {
