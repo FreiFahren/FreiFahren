@@ -1,3 +1,12 @@
+export {}; // to make this file a module
+
+declare global {
+    interface Window {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        pirsch: (eventName: string, options: { duration: number; meta: Record<string, any> }) => void;
+    }
+}
+
 export interface StationGeoJSON {
     type: string;
     features: {

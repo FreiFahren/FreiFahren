@@ -71,6 +71,11 @@ const ReportForm: React.FC<ReportFormProps> = ({
 
     const emptyOption = '' as unknown as selectOption;
 
+    const [startTime, setStartTime] = useState<Date | null>(null);
+    useEffect(() => {
+        setStartTime(new Date()); // Set the start time when the form is opened
+    }, []);
+
     const validateReportForm = async () => {
         let hasError = false;
 
@@ -110,6 +115,21 @@ const ReportForm: React.FC<ReportFormProps> = ({
 
         const { lineInput, stationInput, directionInput, textField } = reportFormState;
         await reportInspector(lineInput!, stationInput!, directionInput!, textField!);
+
+        const endTime = new Date();
+        const durationInSeconds = startTime ? Math.round((endTime.getTime() - startTime.getTime()) / 1000) : 0;
+
+        // Triggering custom event for analytics when the report is successfully submitted
+        if (window.pirsch) {
+            window.pirsch('Report Submitted', {
+                duration: durationInSeconds,
+                meta: {
+                    Station: stationInput!.label,
+                    Line: lineInput?.label,
+                    Direction: directionInput?.label
+                }
+            });
+        }
 
         // Save the timestamp of the report to prevent spamming
         localStorage.setItem('lastReportTime', new Date().toISOString());
