@@ -6,10 +6,10 @@ from datetime import datetime, timezone
 class CustomFormatter(logging.Formatter):
     # flake8: noqa
     def formatTime(self, record, datefmt=None):
-        # Convert timestamp to UTC and format to ISO 8601
-        utc_time = datetime.fromtimestamp(record.created, timezone.utc)
+        # Convert timestamp to local time and format to ISO 8601
+        local_time = datetime.fromtimestamp(record.created)  # Assumes local timezone
         
-        return utc_time.isoformat()
+        return local_time.isoformat()
 
 
 def setup_logger():
