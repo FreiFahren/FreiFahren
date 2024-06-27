@@ -17,4 +17,11 @@ jobs:
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          script: "cd /root/FreiFahren/ && git fetch --all && git reset --hard origin/main && sudo systemctl daemon-reload && sudo systemctl restart telegrambotService.service"
+          script: |
+            cd /root/FreiFahren/ && \
+            git fetch --all && \
+            git reset --hard origin/main && \
+            sed -i 's/IS_PUSH=0/IS_PUSH=1/' /root/FreiFahren/packages/.crash_env && \
+            sudo systemctl daemon-reload && \
+            sudo systemctl restart telegrambotService.service && \
+            sed -i 's/IS_PUSH=1/IS_PUSH=0/' /root/FreiFahren/packages/.crash_env
