@@ -111,6 +111,18 @@ const ReportForm: React.FC<ReportFormProps> = ({
         const { lineInput, stationInput, directionInput, textField } = reportFormState;
         await reportInspector(lineInput!, stationInput!, directionInput!, textField!);
 
+        // Triggering custom event for analytics when the report is successfully submitted
+        if (window.pirsch) {
+            window.pirsch('Report Submitted', {
+                duration: 1,
+                meta: {
+                    Station: stationInput!.label,
+                    Line: lineInput?.label,
+                    Direction: directionInput?.label
+                }
+            });
+        }
+
         // Save the timestamp of the report to prevent spamming
         localStorage.setItem('lastReportTime', new Date().toISOString());
 
