@@ -23,7 +23,6 @@ jobs:
         run: |
           echo "export DB_URL=/app/test.sqlite3" >> .env.test
           echo "export HOST_DB_URL=$RUNNER_TEMP/test.sqlite3" >> .env.test
-          cat .env
           docker compose version
           docker --version
 
