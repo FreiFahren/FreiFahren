@@ -172,18 +172,11 @@ func GetHistoricStations(
 
 func GetLatestTicketInspectors() ([]utils.TicketInspector, error) {
 	sql := `
-		SELECT
-			timestamp, station_id, direction_id, line,
-			CASE WHEN author IS NULL THEN 
-				message 
-			ELSE
-				NULL 
-			END AS message 
+		SELECT timestamp, station_id, direction_id, line,
+		CASE WHEN author IS NULL THEN  message ELSE NULL END AS message 
 		FROM ticket_info
-		WHERE 
-			datetime(timestamp) >= datetime('now', '-60 minutes') AND
-			station_name IS NOT NULL AND
-			station_id IS NOT NULL;`
+		WHERE datetime(timestamp) >= datetime('now', '-60 minutes')
+		AND station_name IS NOT NULL AND station_id IS NOT NULL;`
 
 	rows, err := db.Query(sql)
 	log.Println("Getting recent station coordinates...")
