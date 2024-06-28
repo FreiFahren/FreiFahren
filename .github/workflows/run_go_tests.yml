@@ -12,27 +12,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.22.1
-
+      - name: Install just
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to $RUNNER_TEMP
+          chmod +x $RUNNER_TEMP/just
       - name: 'Create env file'
         run: |
           cd packages/backend/ &&  touch .env
-          echo export DB_USER="${{ secrets.DB_USER }}"  >> .env
-          echo export DB_HOST="${{ secrets.DB_HOST }}"  >> .env
-          echo export DB_PORT="${{ secrets.DB_PORT }}"  >> .env
-          echo export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"  >> .env
-          echo export DB_NAME = "${{ secrets.DB_NAME }}"  >> .env  
+          echo "export DB_URL=/app/test.sqlite3" >> .env
+          echo "export HOST_DB_URL=$RUNNER_TEMP/test.sqlite3" >> .env
           cat .env
-          pwd
-          ls
-
-          
-      - name: Build
-        run: cd packages/backend/ &&  go build
 
       - name: Run tests
-        run: cd packages/backend/ &&  go test ./...
+        run: $RUNNER_TEMP/just test
