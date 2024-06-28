@@ -21,9 +21,9 @@ jobs:
           chmod +x $RUNNER_TEMP/just
       - name: 'Create env file'
         run: |
-          touch .env.test
-          echo "export DB_URL=/app/test.sqlite3" >> .env
-          echo "export HOST_DB_URL=$(pwd)/test.sqlite3" >> .env
+          touch .env
+          echo "export DB_URL=/app/test.sqlite3" >> .env.test
+          echo "export HOST_DB_URL=$(pwd)/test.sqlite3" >> .env.test
           docker compose version
           docker --version
 

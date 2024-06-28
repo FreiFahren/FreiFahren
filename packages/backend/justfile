@@ -1,8 +1,11 @@
 set dotenv-load
 set positional-arguments
 
+env file:
+  set -a; source .env.{{file}}; set +a
+
 shell container:
-  docker compose exec {{container}} /bin/bash
+  docker compose exec{{container}} /bin/bash
 
 dev:
   #!/bin/bash
@@ -23,12 +26,16 @@ setup_db:
 
 seed_test_db:
   #!/bin/bash
-  rm -f test.sqlite3
-  sqlite3 test.sqlite3 < database/schema.sql
-  sqlite3 test.sqlite3 --cmd ".mode csv" ".import database/seed.csv ticket_info" ".exit"
+  set -a; source .env.test; set +a
+  rm -f $HOST_DB_URL
+  sqlite3 $HOST_DB_URL < database/schema.sql
+  sqlite3 $HOST_DB_URL --cmd ".mode csv" ".import database/seed.csv ticket_info" ".exit"
 
 test: seed_test_db
   #!/bin/bash
+  set -a; source .env.test; set +a
+
+  echo $HOST_DB_URL
   echo "Running tests"
 
   docker compose -f compose.yaml -f compose.test.yaml up -d --build --force-recreate
