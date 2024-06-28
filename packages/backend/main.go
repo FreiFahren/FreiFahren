@@ -13,7 +13,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	cron "github.com/robfig/cron/v3"
+	"github.com/rs/zerolog"
 	echoSwagger "github.com/swaggo/echo-swagger"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type (
@@ -29,10 +31,23 @@ type (
 // @host		localhost:8080
 // @BasePath	/
 func main() {
+	logFile := &lumberjack.Logger{
+		Filename:   "app.log",
+		MaxSize:    10,
+		MaxBackups: 7,
+		MaxAge:     7,
+		Compress:   true,
+		LocalTime:  true,
+	}
+
+	// Create a logger that writes to the file
+	logger := zerolog.New(logFile).With().Timestamp().Logger()
+
 	// Load .env file
 	err := godotenv.Overload()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		logger.Panic().Msg("Error loading .env file")
+		logger.Panic().Str("Error", err.Error())
 	}
 
 	data.EmbedJSONFiles()
@@ -73,6 +88,8 @@ func main() {
 	}
 
 	c.Start()
+
+	logger.Info().Msg("Server is running...")
 
 	// Hosts
 	hosts := map[string]*Host{}
