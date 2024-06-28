@@ -22,16 +22,14 @@ This repository is the backend that powers the Freifahren web application and AP
 
 1. Create a `.env` file in the root directory and add the following environment variables
     ```sh
-    POSTGRES_USER
-    POSTGRES_PASSWORD
-    POSTGRES_PORT  
-    POSTGRES_DB
-    PGDATABASE="$POSTGRES_DB"
-    DB_READER
-    DB_READER_PASSWORD
+    DB_URL=/app/db.sqlite3 # The path to the database file inside the container
+    HOST_DB_URL=/path/to/host/db/file # The actual location you want the db file to be on your system
     ```
+If you want to run tests locally, you also need a `.env.test` file with overrides for the above values (or just an empty file if you want to use the same values)
 
-2. Run the application for development
+For prod, `.env.prod` should contain the overrides.
+
+2. Run the application for development, with hot reloading
     ```sh
     just dev
     ```
