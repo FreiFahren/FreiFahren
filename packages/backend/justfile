@@ -2,18 +2,18 @@ set dotenv-load
 set positional-arguments
 
 shell container:
-  docker-compose exec {{container}} /bin/bash
+  docker compose exec {{container}} /bin/bash
 
 dev:
   #!/bin/bash
   echo "Starting development server"
 
-  docker-compose build && {
+  docker compose build && {
     trap 'kill $(jobs -p)' SIGINT SIGTERM EXIT;
     
-    docker-compose watch &
+    docker compose watch &
    
-    docker-compose logs -f --no-log-prefix &
+    docker compose logs -f --no-log-prefix &
 
     wait;
   }
@@ -31,23 +31,23 @@ test: seed_test_db
   #!/bin/bash
   echo "Running tests"
 
-  docker-compose -f compose.yaml -f compose.test.yaml up -d --build --force-recreate
+  docker compose -f compose.yaml -f compose.test.yaml up -d --build --force-recreate
 
-  docker-compose logs -f &
+  docker compose logs -f &
 
-  container_id=$(docker-compose ps -q api)
+  container_id=$(docker compose ps -q api)
   exit_code=$(docker wait $container_id)
 
-  docker-compose down
+  docker compose down
 
   exit $exit_code
 
 prod:
   echo "Starting production server"
-  docker-compose -f compose.yaml -f compose.prod.yaml up -d --build
+  docker compose -f compose.yaml -f compose.prod.yaml up -d --build
 
 logs:
-  docker-compose logs -f
+  docker compose logs -f
 
 clean:
-  docker-compose down --volumes
+  docker compose down --volumes
