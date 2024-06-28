@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/FreiFahren/backend/Rstats"
@@ -9,13 +8,12 @@ import (
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	_ "github.com/FreiFahren/backend/docs"
+	"github.com/FreiFahren/backend/logger"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	cron "github.com/robfig/cron/v3"
-	"github.com/rs/zerolog"
 	echoSwagger "github.com/swaggo/echo-swagger"
-	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type (
@@ -31,23 +29,13 @@ type (
 // @host		localhost:8080
 // @BasePath	/
 func main() {
-	logFile := &lumberjack.Logger{
-		Filename:   "app.log",
-		MaxSize:    10,
-		MaxBackups: 7,
-		MaxAge:     7,
-		Compress:   true,
-		LocalTime:  true,
-	}
-
-	// Create a logger that writes to the file
-	logger := zerolog.New(logFile).With().Timestamp().Logger()
+	logger.Init()
 
 	// Load .env file
 	err := godotenv.Overload()
 	if err != nil {
-		logger.Panic().Msg("Error loading .env file")
-		logger.Panic().Str("Error", err.Error())
+		logger.Log.Panic().Msg("Error loading .env file")
+		logger.Log.Panic().Str("Error", err.Error())
 	}
 
 	data.EmbedJSONFiles()
@@ -55,7 +43,8 @@ func main() {
 	// Create a new connection pool, for concurrency
 	database.CreatePool()
 	if err != nil {
-		log.Fatal("Error while creating a pool :(")
+		logger.Log.Error().Msg("Could not create connection pool")
+		logger.Log.Error().Str("Error", err.Error())
 	}
 
 	// Generate the inital risk segments
@@ -68,7 +57,8 @@ func main() {
 		database.BackupDatabase()
 	})
 	if err != nil {
-		log.Fatalf("(main.go) Could not schedule backup job: %v", err)
+		logger.Log.Error().Msg("Could not schedule backup job")
+		logger.Log.Error().Str("Error", err.Error())
 	}
 
 	// Update the risk model even if there are no reports for a long time
@@ -76,7 +66,8 @@ func main() {
 		Rstats.RunRiskModel()
 	})
 	if err != nil {
-		log.Fatalf("Could not schedule risk model update job: %v", err)
+		logger.Log.Error().Msg("Could not schedule risk model update job")
+		logger.Log.Error().Str("Error", err.Error())
 	}
 
 	// round the older timestamps
@@ -84,12 +75,11 @@ func main() {
 		database.RoundOldTimestamp()
 	})
 	if err != nil {
-		log.Fatalf("Could not schedule timestamp rounding job: %v", err)
+		logger.Log.Error().Msg("Could not schedule timestamp rounding job")
+		logger.Log.Error().Str("Error", err.Error())
 	}
 
 	c.Start()
-
-	logger.Info().Msg("Server is running...")
 
 	// Hosts
 	hosts := map[string]*Host{}
@@ -138,6 +128,7 @@ func main() {
 	apiHOST.GET("/risk-prediction/getSegmentColors", api.GetSegmentColors)
 
 	apiHOST.Start(":8080")
+	logger.Log.Info().Msg("Server is running...")
 
 	defer apiHOST.Close()
 }
