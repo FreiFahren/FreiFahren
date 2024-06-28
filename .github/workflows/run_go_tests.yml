@@ -8,6 +8,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/backend
 
     steps:
       - name: Checkout code
@@ -18,7 +21,6 @@ jobs:
           chmod +x $RUNNER_TEMP/just
       - name: 'Create env file'
         run: |
-          cd packages/backend/ &&  touch .env
           echo "export DB_URL=/app/test.sqlite3" >> .env
           echo "export HOST_DB_URL=$RUNNER_TEMP/test.sqlite3" >> .env
           cat .env
