@@ -8,40 +8,37 @@ This repository is the backend that powers the Freifahren web application and AP
 
 ### Prerequisites
 
-- Go version 1.22 or later
-- PostgreSQL 13 or later
+- [Docker with Docker Compose](https://docs.docker.com/desktop/install/mac-install/)
+- [just](https://github.com/casey/just)
 
 ### Installation
 
-1. Clone the repository
+1. Simply clone the repository
    ```sh
    git clone https://github.com/brandesdavid/FreiFahren
     ```
-
-2. Install Go packages
-    ```sh
-    go mod download
-    ```
-
-3. Set up the database
 
 ### Running the application
 
 1. Create a `.env` file in the root directory and add the following environment variables
     ```sh
-    DB_USER
-    DB_PASSWORD
-    DB_HOST
-    DB_PORT
-    DB_NAME
+    POSTGRES_USER
+    POSTGRES_PASSWORD
+    POSTGRES_PORT  
+    POSTGRES_DB
+    PGDATABASE="$POSTGRES_DB"
     DB_READER
     DB_READER_PASSWORD
     ```
 
-2. Run the application
+2. Run the application for development
     ```sh
-    go run main.go
+    just dev
     ```
+3. Run tests
+   ```sh
+   just test
+   ```
 
   Or if you want to run the application with hot reloading of the server and swag documentation, you can use the following command:
     ```sh

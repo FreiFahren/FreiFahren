@@ -1,0 +1,53 @@
+set dotenv-load
+set positional-arguments
+
+shell container:
+  docker-compose exec {{container}} /bin/bash
+
+dev:
+  #!/bin/bash
+  echo "Starting development server"
+
+  docker-compose build && {
+    trap 'kill $(jobs -p)' SIGINT SIGTERM EXIT;
+    
+    docker-compose watch &
+   
+    docker-compose logs -f --no-log-prefix &
+
+    wait;
+  }
+
+setup_db:
+  sqlite3 db.sqlite3 < database/schema.sql
+
+seed_test_db:
+  #!/bin/bash
+  rm -f test.sqlite3
+  sqlite3 test.sqlite3 < database/schema.sql
+  sqlite3 test.sqlite3 --cmd ".mode csv" ".import database/seed.csv ticket_info" ".exit"
+
+test: seed_test_db
+  #!/bin/bash
+  echo "Running tests"
+
+  docker-compose -f compose.yaml -f compose.test.yaml up -d --build --force-recreate
+
+  docker-compose logs -f &
+
+  container_id=$(docker-compose ps -q api)
+  exit_code=$(docker wait $container_id)
+
+  docker-compose down
+
+  exit $exit_code
+
+prod:
+  echo "Starting production server"
+  docker-compose -f compose.yaml -f compose.prod.yaml up -d --build
+
+logs:
+  docker-compose logs -f
+
+clean:
+  docker-compose down --volumes

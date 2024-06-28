@@ -1,6 +1,7 @@
 .DS_Store
-.env
+.env*
 Rstats/output/*.json
 Rstats/ticket_data*.json
 build/
 segmentEndpoints.json
+*.sqlite3

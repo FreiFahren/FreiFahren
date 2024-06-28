@@ -10,7 +10,6 @@ import (
 )
 
 func IdToStationName(id string) (string, error) {
-
 	var stations = data.GetStationsList()
 
 	station, ok := stations[id]

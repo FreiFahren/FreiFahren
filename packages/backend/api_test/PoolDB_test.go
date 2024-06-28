@@ -1,7 +1,6 @@
 package api_test
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"math/rand"
@@ -10,29 +9,29 @@ import (
 	"testing"
 	"time"
 
+	"database/sql"
+
 	"github.com/FreiFahren/backend/database"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/joho/godotenv"
+	_ "github.com/mattn/go-sqlite3"
 )
 
-var testPool *pgxpool.Pool
+var testdb *sql.DB
 
-func CreatePoolTestTable() {
+func CreateTestTable() {
 	sql := `
-	CREATE TABLE IF NOT EXISTS pool_test (
-		id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-		timestamp TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
-		message TEXT,
-		author BIGINT,
-		line VARCHAR(3),
-		station_name VARCHAR(255),
-		station_id VARCHAR(10),
-		direction_name VARCHAR(255),
-		direction_id VARCHAR(10)
-	);
-	`
+		CREATE TABLE IF NOT EXISTS pool_test (
+			id TEXT DEFAULT (lower(hex(randomblob(16)))) PRIMARY KEY,
+			timestamp DATETIME NOT NULL DEFAULT (datetime('now')),
+			message TEXT,
+			author INTEGER,
+			line TEXT(3),
+			station_name TEXT,
+			station_id TEXT(10),
+			direction_name TEXT,
+			direction_id TEXT(10)
+		);`
 
-	_, err := testPool.Exec(context.Background(), sql)
+	_, err := testdb.Exec(sql)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "(PoolDB_test.go) Failed to create pool table: %v\n", err)
 		os.Exit(1)
@@ -40,8 +39,7 @@ func CreatePoolTestTable() {
 	fmt.Println("Table created or already exists.")
 }
 
-func InsertPoolInfo(timestamp *time.Time, message *string, author *int64, line, stationName, stationId, directionName, directionId *string) error {
-
+func InsertInfo(timestamp *time.Time, message *string, author *int64, line, stationName, stationId, directionName, directionId *string) error {
 	sql := `
     INSERT INTO pool_test (timestamp, message, author, line, station_name, station_id, direction_name, direction_id)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
@@ -50,7 +48,7 @@ func InsertPoolInfo(timestamp *time.Time, message *string, author *int64, line, 
 	// Convert *string and *int64 directly to interface{} for pgx
 	values := []interface{}{timestamp, message, author, line, stationName, stationId, directionName, directionId}
 
-	_, err := testPool.Exec(context.Background(), sql, values...)
+	_, err := testdb.Exec(sql, values...)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "(PoolDB_test.go) Failed to insert ticket info: %v\n", err)
@@ -59,36 +57,29 @@ func InsertPoolInfo(timestamp *time.Time, message *string, author *int64, line, 
 	return nil
 }
 
-func CreateTestPool() {
+func OpenTestDB() {
 	var err error
 
-	p, err := pgxpool.NewWithConfig(context.Background(), database.Config())
+	p, err := sql.Open("sqlite3", os.Getenv("DB_URL"))
 	if err != nil {
 		log.Fatal("Error while creating connection to the database!!")
 	}
 
-	testPool = p
+	testdb = p
 
 }
 
 func setup() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	CreateTestPool()
-	database.CreatePool()
-	CreatePoolTestTable()
+	OpenTestDB()
+	database.OpenDB()
+	CreateTestTable()
 }
 
 func teardown() {
-
-	if testPool != nil {
-		testPool.Close()
+	if testdb != nil {
+		testdb.Close()
 	}
-	database.ClosePool()
-
+	database.CloseDB()
 }
 
 func TestGetLatestStationCoordinatesConcurrency(t *testing.T) {
@@ -133,7 +124,7 @@ func TestGetLatestStationCoordinatesConcurrency(t *testing.T) {
 			directionName := "Alt-Tegel"
 			directionId := "U-ATg"
 
-			err = InsertPoolInfo(&now, &message, &author, &line, &stationName, &stationId, &directionName, &directionId)
+			err = InsertInfo(&now, &message, &author, &line, &stationName, &stationId, &directionName, &directionId)
 			if err != nil {
 				log.Fatalf("Failed to insert ticket info: %v", err)
 			}
