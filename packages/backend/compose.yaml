@@ -1,4 +1,4 @@
-version: "3.3"
+version: "3.8"
 
 name: freifahren-backend
 
@@ -9,8 +9,6 @@ services:
       target: development
     restart: unless-stopped
     env_file: .env
-    environment:
-      DB_HOST: database
     ports:
       - 8080:8080
     volumes:

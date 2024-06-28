@@ -24,6 +24,8 @@ jobs:
           echo "export DB_URL=/app/test.sqlite3" >> .env
           echo "export HOST_DB_URL=$RUNNER_TEMP/test.sqlite3" >> .env
           cat .env
+          docker-compose -v
+          docker --version
 
       - name: Run tests
         run: $RUNNER_TEMP/just test
