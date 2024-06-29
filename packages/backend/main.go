@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/FreiFahren/backend/Rstats"
@@ -9,6 +8,7 @@ import (
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	_ "github.com/FreiFahren/backend/docs"
+	"github.com/FreiFahren/backend/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	cron "github.com/robfig/cron/v3"
@@ -28,13 +28,16 @@ type (
 // @host		localhost:8080
 // @BasePath	/
 func main() {
+	logger.Init()
+	
 	data.EmbedJSONFiles()
 
 	// Create a new connection pool, for concurrency
 	err := database.OpenDB()
 
 	if err != nil {
-		log.Fatal("Error while opening database")
+		logger.Log.Error().Msg("Could not create connection pool")
+		logger.Log.Error().Str("Error", err.Error())
 	}
 
 	// Generate the inital risk segments
@@ -47,7 +50,8 @@ func main() {
 		Rstats.RunRiskModel()
 	})
 	if err != nil {
-		log.Fatalf("Could not schedule risk model update job: %v", err)
+		logger.Log.Error().Msg("Could not schedule risk model update job")
+		logger.Log.Error().Str("Error", err.Error())
 	}
 
 	// round the older timestamps
@@ -55,10 +59,13 @@ func main() {
 		database.RoundOldTimestamp()
 	})
 	if err != nil {
-		log.Fatalf("Could not schedule timestamp rounding job: %v", err)
+		logger.Log.Error().Msg("Could not schedule timestamp rounding job")
+		logger.Log.Error().Str("Error", err.Error())
 	}
 
 	c.Start()
+
+	logger.Log.Info().Msg("Server is running...")
 
 	// Hosts
 	hosts := map[string]*Host{}
