@@ -1,5 +1,5 @@
 import requests
-from config import BACKEND_URL, DEV_CHAT_ID, NLP_BOT_URL, TELEGRAM_NEXT_CHECK_TIME
+from config import BACKEND_URL, DEV_CHAT_ID, NLP_BOT_URL, TELEGRAM_NEXT_CHECK_TIME, TELEGRAM_NEXT_CHECK_TIME_CORRECT
 from bot import watcherbot
 from logger import logger
 from bot import send_message
@@ -20,18 +20,18 @@ def do_healthcheck(endpoint: str) -> tuple:
     try:
         response = requests.get(endpoint)
         response.raise_for_status()
-    except requests.exceptions.HTTPError as errh:
-        errorlist.append(errh)
-        logger.error(f'Http Error: {errh}')
-    except requests.exceptions.ConnectionError as errc:
-        errorlist.append(errc)
-        logger.error(f'Error Connecting: {errc}')
-    except requests.exceptions.Timeout as errt:
-        errorlist.append(errt)
-        logger.error(f'Timeout Error: {errt}')
-    except requests.exceptions.RequestException as err:
-        errorlist.append(err)
-        logger.error(f'Request Exception: {err}')
+    except requests.exceptions.HTTPError as HTTPError:
+        errorlist.append(HTTPError)
+        logger.error(f'Http Error: {HTTPError}')
+    except requests.exceptions.ConnectionError as ConnectionError:
+        errorlist.append(ConnectionError)
+        logger.error(f'Error Connecting: {ConnectionError}')
+    except requests.exceptions.Timeout as Timeout:
+        errorlist.append(Timeout)
+        logger.error(f'Timeout Error: {Timeout}')
+    except requests.exceptions.RequestException as RequestException:
+        errorlist.append(RequestException)
+        logger.error(f'Request Exception: {RequestException}')
     else:
         response, request_time = ping_system(endpoint)
         logger.info(f'{endpoint} is healthy. The request took {round(request_time * 1000,1)} seconds with {response}.')
@@ -52,7 +52,7 @@ def check_nlp_bot_status() -> None:
                 waiting_time = TELEGRAM_NEXT_CHECK_TIME
             else:
                 send_message(DEV_CHAT_ID, f'NLP bot is healthy! The request took {request_time * 1000} milliseconds.')
-                waiting_time = 60*20
+                waiting_time = TELEGRAM_NEXT_CHECK_TIME_CORRECT
             
             time.sleep(waiting_time)
                 

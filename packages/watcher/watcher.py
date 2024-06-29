@@ -9,15 +9,16 @@ import threading
 import subprocess
 
 def start_nlp_bot_process():
-    # Run the other bot as a subprocess
+    # Run the NLP bot process. All errors will be received
     nlp_bot = subprocess.Popen(['python3', '../FreiFahren_BE-NLP/main.py'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
-    # Continuously read its output
-    for line in iter(nlp_bot.stdout.readline, b''):
-        line = line.decode().strip()  # Decode bytes to string and remove trailing newline
-        # If the line indicates an error, handle it
-        if line:
-            handle_nlp_bot_error(line)
+    # Continuously read its output. 
+    # If we have receive a console_line, it has to be an error
+    for console_line in iter(nlp_bot.stdout.readline, b''):
+        console_line = console_line.decode().strip()  # Decode bytes to string and remove trailing newline
+        # If the console_line indicates an error, handle it
+        if console_line:
+            handle_nlp_bot_error(console_line)
         
         # Check if the process has exited
         if nlp_bot.poll() is not None:
@@ -25,15 +26,16 @@ def start_nlp_bot_process():
             send_message(DEV_CHAT_ID, "NLP bot process has exited. Please check the logs: ", nlp_bot.returncode)
             break
 
-def handle_nlp_bot_error(line):
-    logger.error(f"Error detected in other in NLP_Bot's output: {line}")
-    send_message(DEV_CHAT_ID, f"Error detected in NLP_Bot's output: {line}")
+def handle_nlp_bot_error(console_line):
+    logger.error(f"Error detected in other in NLP_Bot's output: {console_line}")
+    send_message(DEV_CHAT_ID, f"Error detected in NLP_Bot's output: {console_line}")
     check_nlp_bot_status()
 
     
 def start_watcher_threads():
     nlp_bot_thread = threading.Thread(target=start_nlp_bot_process)
     watcher_bot_thread = threading.Thread(target=start_bot)
+    
     backend_health_thread = threading.Thread(target=check_backend_status)
     nlp_bot_health_thread = threading.Thread(target=check_nlp_bot_status)
 
@@ -59,7 +61,7 @@ if __name__ == '__main__':
 
         backend_errlist, request_time = do_healthcheck(BACKEND_URL)
         if backend_errlist:
-            watcherbot.send_message(message.chat.id, f'Backend is not healthy!\nPlease check the logs for more information. The request took {request_time * 1000} milliseconds and failed with: {backend_errlist}.')
+            watcherbot.send_message(message.chat.id, f'Backend is not healthy!\nPlease check the logs for more information. \nThe request took {request_time * 1000} milliseconds and failed with: {backend_errlist}.')
         else:
             watcherbot.send_message(message.chat.id, f'Backend is healthy!\nThe request took {request_time * 1000} milliseconds.')
 
@@ -67,7 +69,7 @@ if __name__ == '__main__':
         
         nlp_errlist, request_time = do_healthcheck(NLP_BOT_URL + '/healthcheck')
         if nlp_errlist:
-            watcherbot.send_message(message.chat.id, f'NLP bot is not healthy!\n Please check the logs for more information. The request took {request_time * 1000} milliseconds and failed with: {nlp_errlist}.')
+            watcherbot.send_message(message.chat.id, f'NLP bot is not healthy!\nPlease check the logs for more information.\nThe request took {request_time * 1000} milliseconds and failed with: {nlp_errlist}.')
         else:
             watcherbot.send_message(message.chat.id, f'NLP bot is healthy!\n The request took {request_time * 1000} milliseconds.')
         
