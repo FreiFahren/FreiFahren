@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"sort"
@@ -38,24 +37,21 @@ func GetSegmentColors(c echo.Context) error {
 
 	segmentsFiles, err := getSegmentFiles()
 	if err != nil {
-		logger.Log.Error().Msg("Error reading Rstats directory")
-		logger.Log.Error().Str("Error", err.Error())
-		return utils.HandleErrorEchoContext(c, err, "Error reading Rstats directory.")
+		logger.Log.Error().Err(err).Msg("Error reading Rstats directory")
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	segmentColors, lastModified, err := loadAndParseRiskModelOutput(segmentsFiles[0])
 	if err != nil {
-		logger.Log.Error().Msg("Error loading risk model file")
-		logger.Log.Error().Str("Error", err.Error())
-		return utils.HandleErrorEchoContext(c, err, "Error loading risk model file.")
+		logger.Log.Error().Err(err).Msg("Error loading risk model file")
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	ifModifiedSince := c.Request().Header.Get("If-Modified-Since")
 	modifiedSince, err := utils.CheckIfModifiedSince(ifModifiedSince, lastModified)
 	if err != nil {
-		logger.Log.Error().Msg("Error checking if the data has been modified")
-		logger.Log.Error().Str("Error", err.Error())
-		return utils.HandleErrorEchoContext(c, err, "Error checking if the data has been modified: %v")
+		logger.Log.Error().Err(err).Msg("Error checking if the data has been modified")
+		return c.NoContent(http.StatusInternalServerError)
 	}
 	if !modifiedSince {
 		// Return 304 Not Modified if the data hasn't been modified since the provided time
@@ -108,23 +104,20 @@ func loadAndParseRiskModelOutput(file os.FileInfo) ([]utils.RiskModelJSON, time.
 
 	fileData, err := os.ReadFile(filePath)
 	if err != nil {
-		logger.Log.Error().Msg("Error reading file")
-		logger.Log.Error().Str("Error", err.Error())
-		return nil, time.Time{}, fmt.Errorf("(getSegmentColors.go) error reading file: %w", err)
+		logger.Log.Error().Err(err).Msg("Error reading file")
+		return nil, time.Time{}, err
 	}
 
 	segmentData, err := parseRiskModelJSON(fileData)
 	if err != nil {
-		logger.Log.Error().Msg("Error parsing JSON data")
-		logger.Log.Error().Str("Error", err.Error())
-		return nil, time.Time{}, fmt.Errorf("(getSegmentColors.go) error parsing JSON data: %w", err)
+		logger.Log.Error().Err(err).Msg("Error parsing JSON data")
+		return nil, time.Time{}, err
 	}
 
 	lastModified, err := getLastModifiedTime(file)
 	if err != nil {
-		logger.Log.Error().Msg("Error getting last modified time")
-		logger.Log.Error().Str("Error", err.Error())
-		return nil, time.Time{}, fmt.Errorf("(getSegmentColors.go) error getting last modified time: %w", err)
+		logger.Log.Error().Err(err).Msg("Error getting last modified time")
+		return nil, time.Time{}, err
 	}
 
 	return segmentData, lastModified, nil
@@ -135,14 +128,16 @@ func getSegmentFiles() ([]os.FileInfo, error) {
 
 	segmentsFiles, err := os.ReadDir("Rstats/output/")
 	if err != nil {
-		logger.Log.Error().Msg("Error reading Rstats directory")
-		logger.Log.Error().Str("Error", err.Error())
+		logger.Log.Error().Err(err).Msg("Error reading Rstats directory")
 		return nil, err
 	}
 
 	if len(segmentsFiles) == 0 {
 		Rstats.RunRiskModel()
-		return nil, fmt.Errorf("no files found in output directory")
+		err := os.ErrNotExist
+
+		logger.Log.Error().Err(err).Msg("No files found in output directory")
+		return nil, err
 	}
 
 	// Convert os.DirEntry to os.FileInfo and sort the files by modification time, most recent first
@@ -150,8 +145,7 @@ func getSegmentFiles() ([]os.FileInfo, error) {
 	for _, entry := range segmentsFiles {
 		info, err := entry.Info()
 		if err != nil {
-			logger.Log.Error().Msg("Error getting file info")
-			logger.Log.Error().Str("Error", err.Error())
+			logger.Log.Error().Err(err).Msg("Error getting file info")
 			return nil, err
 		}
 		fileInfos = append(fileInfos, info)
@@ -178,9 +172,8 @@ func parseRiskModelJSON(fileData []byte) ([]utils.RiskModelJSON, error) {
 
 	var segmentData []utils.RiskModelJSON
 	if err := json.Unmarshal(fileData, &segmentData); err != nil {
-		logger.Log.Error().Msg("Error unmarshalling JSON")
-		logger.Log.Error().Str("Error", err.Error())
-		return nil, fmt.Errorf("(getSegmentColors.go) error unmarshalling JSON: %w", err)
+		logger.Log.Error().Err(err).Msg("Error unmarshalling JSON")
+		return nil, err
 	}
 	return segmentData, nil
 }

@@ -53,15 +53,13 @@ func GetStationDistance(c echo.Context) error {
 
 	userLat, err := utils.ParseStringToFloat(c.QueryParam("userLat"))
 	if err != nil {
-		logger.Log.Error().Msg("Error parsing userLat")
-		logger.Log.Error().Str("Error", err.Error())
-		return utils.HandleErrorEchoContext(c, err, "Error parsing userLat: %v")
+		logger.Log.Error().Err(err).Msg("Error parsing userLat")
+		return c.NoContent(http.StatusInternalServerError)
 	}
 	userLon, err := utils.ParseStringToFloat(c.QueryParam("userLon"))
 	if err != nil {
-		logger.Log.Error().Msg("Error parsing userLon")
-		logger.Log.Error().Str("Error", err.Error())
-		return utils.HandleErrorEchoContext(c, err, "Error parsing userLon: %v")
+		logger.Log.Error().Err(err).Msg("Error parsing userLon")
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	kmDistance := utils.CalculateDistance(inspectorStationCoordinates.Latitude, inspectorStationCoordinates.Longitude, userLat, userLon)
@@ -110,8 +108,7 @@ func GetAdjacentStationsID(stationId string) []string {
 		currentStationID, err := utils.GetIndexOfStationID(stationId, linesList[line])
 
 		if currentStationID == -1 && err != nil {
-			logger.Log.Error().Msg("Error getting the station ID")
-			logger.Log.Error().Str("Error", err.Error())
+			logger.Log.Error().Err(err).Msg("Error getting the station ID")
 		}
 
 		// get the adjacent stations one station before and one station after the current station

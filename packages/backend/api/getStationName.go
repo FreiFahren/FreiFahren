@@ -6,7 +6,6 @@ import (
 
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/logger"
-	"github.com/FreiFahren/backend/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,7 +16,9 @@ func IdToStationName(id string) (string, error) {
 
 	station, ok := stations[id]
 	if !ok {
-		return "", fmt.Errorf("station ID %s not found", id)
+		err := fmt.Errorf("station ID %s not found", id)
+		logger.Log.Error().Err(err)
+		return "", err
 	}
 
 	return station.Name, nil
@@ -45,9 +46,9 @@ func GetStationName(c echo.Context) error {
 	id := c.QueryParam("id")
 
 	id, err := IdToStationName(id)
-
 	if err != nil {
-		return utils.HandleErrorEchoContext(c, err, "Error getting station name: %v")
+		logger.Log.Error().Err(err).Msg("Error getting station name")
+		return c.NoContent(http.StatusNotFound)
 	}
 
 	return c.JSON(http.StatusOK, id)

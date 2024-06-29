@@ -40,7 +40,7 @@ func PostInspector(c echo.Context) error {
 	var req structs.InspectorRequest
 	if err := c.Bind(&req); err != nil {
 		logger.Log.Error().Err(err).Msg("Error binding request in postInspector")
-		return structs.HandleErrorEchoContext(c, err, "Error binding request in postInspector: %v")
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	// Check if all parameters are empty
@@ -50,7 +50,7 @@ func PostInspector(c echo.Context) error {
 			Str("Station", req.StationName).
 			Str("Direction", req.DirectionName).
 			Msg("At least one of 'line', 'station', or 'direction' must be provided")
-		return echo.NewHTTPError(http.StatusBadRequest, "At least one of 'line', 'station', or 'direction' must be provided")
+		return c.NoContent(http.StatusBadRequest)
 	}
 
 	dataToInsert, pointers, err := processRequestData(req)
@@ -60,11 +60,12 @@ func PostInspector(c echo.Context) error {
 
 	if err := fillMissingColumnsUsingProvidedData(dataToInsert, pointers); err != nil {
 		logger.Log.Error().Err(err).Msg("Error filling missing columns in postInspector")
-		return structs.HandleErrorEchoContext(c, err, "Error filling missing columns: %v")
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	if err := database.InsertTicketInfo(pointers.TimestampPtr, pointers.AuthorPtr, pointers.MessagePtr, pointers.LinePtr, pointers.StationNamePtr, pointers.StationIDPtr, pointers.DirectionNamePtr, pointers.DirectionIDPtr); err != nil {
 		logger.Log.Error().Err(err).Msg("Error inserting ticket info in postInspector")
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	// Based on the new data, generate new risk segments
@@ -106,7 +107,9 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 			pointers.StationIDPtr = &stationID
 			response.Station = structs.Station{Name: req.StationName, ID: stationID}
 		} else {
-			return nil, nil, fmt.Errorf("station not found: %v", req.StationName)
+			err := fmt.Errorf("station not found: %v", req.StationName)
+			logger.Log.Error().Err(err)
+			return nil, nil, err
 		}
 	}
 
@@ -116,7 +119,9 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 			pointers.DirectionIDPtr = &directionID
 			response.Direction = structs.Station{Name: req.DirectionName, ID: directionID, Coordinates: structs.Coordinates(stations[directionID].Coordinates), Lines: stations[directionID].Lines}
 		} else {
-			return nil, nil, fmt.Errorf("direction not found: %v", req.DirectionName)
+			err := fmt.Errorf("direction not found: %v", req.DirectionName)
+			logger.Log.Error().Err(err)
+			return nil, nil, err
 		}
 	}
 
