@@ -59,17 +59,17 @@ if __name__ == '__main__':
 
         backend_errlist, request_time = do_healthcheck(BACKEND_URL)
         if backend_errlist:
-            watcherbot.send_message(message.chat.id, f'**Backend is not healthy!**\nPlease check the logs for more information. The request took __{request_time * 1000}__ milliseconds and failed with: {backend_errlist}.')
+            watcherbot.send_message(message.chat.id, f'Backend is not healthy!\nPlease check the logs for more information. The request took __{request_time * 1000}__ milliseconds and failed with: {backend_errlist}.')
         else:
-            watcherbot.send_message(message.chat.id, f'**Backend is healthy!**\nThe request took __{request_time * 1000}__ milliseconds.')
+            watcherbot.send_message(message.chat.id, f'Backend is healthy!\nThe request took __{request_time * 1000}__ milliseconds.')
 
-        watcherbot.send_message(message.chat.id, 'Checking the **NLP bot** health...')
+        watcherbot.send_message(message.chat.id, 'Checking the NLP bot health...')
         
         nlp_errlist, request_time = do_healthcheck(NLP_BOT_URL + '/healthcheck')
         if nlp_errlist:
-            watcherbot.send_message(message.chat.id, f'**NLP bot is not healthy!**\n Please check the logs for more information. The request took __{request_time * 1000}__ milliseconds and failed with: {nlp_errlist}.')
+            watcherbot.send_message(message.chat.id, f'NLP bot is not healthy!\n Please check the logs for more information. The request took __{request_time * 1000}__ milliseconds and failed with: {nlp_errlist}.')
         else:
-            watcherbot.send_message(message.chat.id, f'**NLP bot is healthy!**\n The request took __{request_time * 1000}__ milliseconds.')
+            watcherbot.send_message(message.chat.id, f'NLP bot is healthy!\n The request took __{request_time * 1000}__ milliseconds.')
         
     start_watcher_threads()
     
