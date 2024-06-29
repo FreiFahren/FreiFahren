@@ -45,6 +45,7 @@ def send_message(user_id: str, message: str) -> None:
 # curl -X POST -H "Content-Type: application/json" -d '{"error_message":"Test error message"}' http://127.0.0.1:5000/backend-failure
 @app.route('/failure-report', methods=['POST'])
 def backend_failure() -> tuple:
+    print(request.json)
     system_name = request.json.get('system_name', '')
     error_message = request.json.get('error_message', '')
     

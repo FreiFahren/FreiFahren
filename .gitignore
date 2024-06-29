@@ -2,3 +2,4 @@
 settings.json
 *log
 .env
+__pycache__
