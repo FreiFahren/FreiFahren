@@ -7,7 +7,10 @@ env file:
 shell container:
   docker compose exec{{container}} /bin/bash
 
-dev:
+setup_db:
+  sqlite3 db.sqlite3 < database/schema.sql
+
+dev: setup_db
   #!/bin/bash
   echo "Starting development server"
 
@@ -21,17 +24,7 @@ dev:
     wait;
   }
 
-setup_db:
-  sqlite3 db.sqlite3 < database/schema.sql
-
-seed_test_db:
-  #!/bin/bash
-  set -a; source .env.test; set +a
-  rm -f $HOST_DB_URL
-  sqlite3 $HOST_DB_URL < database/schema.sql
-  sqlite3 $HOST_DB_URL --cmd ".mode csv" ".import database/seed.csv ticket_info" ".exit"
-
-test: seed_test_db
+test:
   #!/bin/bash
   set -a; source .env.test; set +a
 
