@@ -2,6 +2,7 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 from datetime import datetime
 
+
 class CustomFormatter(logging.Formatter):
     def formatTime(self, record, datefmt=None):
         # Convert timestamp to local time and format to ISO 8601
@@ -28,3 +29,5 @@ def setup_logger():
         logger.addHandler(file_handler)
 
     return logger
+
+logger = setup_logger()
