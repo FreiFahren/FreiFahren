@@ -63,7 +63,16 @@ func PostInspector(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	if err := database.InsertTicketInfo(pointers.TimestampPtr, pointers.AuthorPtr, pointers.MessagePtr, pointers.LinePtr, pointers.StationNamePtr, pointers.StationIDPtr, pointers.DirectionNamePtr, pointers.DirectionIDPtr); err != nil {
+	if err := database.InsertTicketInfo(
+		pointers.TimestampPtr,
+		pointers.AuthorPtr,
+		pointers.MessagePtr,
+		pointers.LinePtr,
+		pointers.StationNamePtr,
+		pointers.StationIDPtr,
+		pointers.DirectionNamePtr,
+		pointers.DirectionIDPtr,
+	); err != nil {
 		logger.Log.Error().Err(err).Msg("Error inserting ticket info in postInspector")
 		return c.NoContent(http.StatusInternalServerError)
 	}
