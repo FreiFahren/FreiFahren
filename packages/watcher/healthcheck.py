@@ -1,5 +1,5 @@
 import requests
-from config import BACKEND_URL, DEV_CHAT_ID, NLP_BOT_URL, TELEGRAM_NEXT_CHECK_TIME, TELEGRAM_NEXT_CHECK_TIME_CORRECT
+from config import BACKEND_URL, DEV_CHAT_ID, NLP_BOT_URL, TELEGRAM_NEXT_CHECK_TIME
 from bot import watcherbot
 from logger import logger
 from bot import send_message
@@ -49,11 +49,6 @@ def check_nlp_bot_status() -> None:
             errorlist, request_time = do_healthcheck(NLP_BOT_URL + '/healthcheck')
             if errorlist:
                 send_message(DEV_CHAT_ID, f'NLP bot is not healthy! Please check the logs for more information. Error list: {errorlist}')
-                waiting_time = TELEGRAM_NEXT_CHECK_TIME
-            else:
-                send_message(DEV_CHAT_ID, f'NLP bot is healthy! The request took {request_time * 1000} milliseconds.')
-                waiting_time = TELEGRAM_NEXT_CHECK_TIME_CORRECT
-            
             time.sleep(waiting_time)
                 
         except Exception as e:
