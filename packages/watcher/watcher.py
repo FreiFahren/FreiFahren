@@ -24,8 +24,10 @@ TELEGRAM_RESPONSE_MESSAGE = 'Yes, I am alive'
 
 watcherbot = telebot.TeleBot(DEV_BOT_TOKEN)
 
+
 def start_bot():
     watcherbot.infinity_polling()
+
 
 def send_message(user_id: str, message: str) -> None:
     """Send a message to a user or chat id.
@@ -39,6 +41,7 @@ def send_message(user_id: str, message: str) -> None:
     except Exception as e:
         logger.error(f'Failed to send message to user {user_id}: {e}')
 
+
 # curl -X POST -H "Content-Type: application/json" -d '{"error_message":"Test error message"}' http://127.0.0.1:5000/backend-failure
 @app.route('/failure-report', methods=['POST'])
 def backend_failure() -> tuple:
@@ -50,6 +53,7 @@ def backend_failure() -> tuple:
     
     return {'status': 'success'}, 200
 
+
 def check_backend_status() -> None:
     while True:
         errorlist, _ = do_backend_healthcheck()
@@ -60,22 +64,14 @@ def check_backend_status() -> None:
                 logger.error(f'Failed to send message: {e}')
         time.sleep(20)
 
-def handle_telegram_bot_status_message(message, response_queue) -> None:
-    """Handle the response from the Telegram bot.
 
-    Args:
-        message (Message): The incoming message.
-        response_queue (Queue): The queue to put the response status in.
-    """
+def handle_telegram_bot_status_message(message, response_queue) -> None:
     if message.text == TELEGRAM_RESPONSE_MESSAGE:
         response_queue.put(True)
         send_message(DEV_CHAT_ID,  'Woohoo! The bot is alive! Next check in 20 minutes')
 
+
 def do_telegram_bot_healthcheck() -> None:
-    """Asks if the Telegram bot is alive every 60 seconds. 
-        If the bot is not alive, it sends a message to the users.
-        If the bot is alive, it waits 20 minutes before asking again.
-    """
     waiting_time = TELEGRAM_NEXT_CHECK_TIME
     while True:
         try:
@@ -97,6 +93,7 @@ def do_telegram_bot_healthcheck() -> None:
         except Exception as e:
             logger.error(f'Failed to send message: {e}')
 
+
 def ping_backend() -> tuple:
     start_time = time.time()
     response = requests.get(BACKEND_URL)
@@ -104,6 +101,7 @@ def ping_backend() -> tuple:
     request_time = end_time - start_time
     
     return response, request_time
+
 
 def do_backend_healthcheck() -> tuple:
     errorlist = []
@@ -130,6 +128,7 @@ def do_backend_healthcheck() -> tuple:
     
     return errorlist, request_time
 
+
 def start_watcher_threads():
     bot_thread = threading.Thread(target=start_bot)
     backend_health_thread = threading.Thread(target=check_backend_status)
@@ -139,6 +138,7 @@ def start_watcher_threads():
     backend_health_thread.start()
     check_telegram_status_thread.start()
     
+
 if __name__ == '__main__':
     logger = setup_logger()
 
