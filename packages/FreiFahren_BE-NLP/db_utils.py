@@ -67,7 +67,7 @@ def insert_ticket_info(
         'line': line,
         'station': station_name,
         'direction': direction_name,
-        'author': None,
+        'author': 98111116, # ASCII code for 'Bot' to identify telegram reports
         'message': None
     }
 
