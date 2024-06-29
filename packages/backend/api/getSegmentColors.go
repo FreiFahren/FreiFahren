@@ -11,6 +11,7 @@ import (
 	"github.com/FreiFahren/backend/Rstats"
 	"github.com/FreiFahren/backend/data"
 	_ "github.com/FreiFahren/backend/docs"
+	"github.com/FreiFahren/backend/logger"
 	"github.com/FreiFahren/backend/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -33,19 +34,27 @@ import (
 //
 // @Router /risk-prediction/getSegmentColors [get]
 func GetSegmentColors(c echo.Context) error {
+	logger.Log.Info().Msg("GET /risk-prediction/getSegmentColors")
+
 	segmentsFiles, err := getSegmentFiles()
 	if err != nil {
+		logger.Log.Error().Msg("Error reading Rstats directory")
+		logger.Log.Error().Str("Error", err.Error())
 		return utils.HandleErrorEchoContext(c, err, "Error reading Rstats directory.")
 	}
 
 	segmentColors, lastModified, err := loadAndParseRiskModelOutput(segmentsFiles[0])
 	if err != nil {
+		logger.Log.Error().Msg("Error loading risk model file")
+		logger.Log.Error().Str("Error", err.Error())
 		return utils.HandleErrorEchoContext(c, err, "Error loading risk model file.")
 	}
 
 	ifModifiedSince := c.Request().Header.Get("If-Modified-Since")
 	modifiedSince, err := utils.CheckIfModifiedSince(ifModifiedSince, lastModified)
 	if err != nil {
+		logger.Log.Error().Msg("Error checking if the data has been modified")
+		logger.Log.Error().Str("Error", err.Error())
 		return utils.HandleErrorEchoContext(c, err, "Error checking if the data has been modified: %v")
 	}
 	if !modifiedSince {
@@ -72,6 +81,8 @@ func GetSegmentColors(c echo.Context) error {
 }
 
 func AssignSameColorToSegmentsWithSameStations(segmentColorsMap map[string]string, duplicates map[string][]string) {
+	logger.Log.Debug().Msg("Assigning same color to segments with same stations")
+
 	for original, duplicatesArray := range duplicates {
 		if color, found := segmentColorsMap[original]; found {
 			originalPrefix := getSegmentType(original)
@@ -85,24 +96,34 @@ func AssignSameColorToSegmentsWithSameStations(segmentColorsMap map[string]strin
 }
 
 func getSegmentType(segmentID string) string {
+	logger.Log.Debug().Msg("Getting segment type")
+
 	return segmentID[:1] // By getting the first character we know if it is a Ubahn or Sbahn segment
 }
 
 func loadAndParseRiskModelOutput(file os.FileInfo) ([]utils.RiskModelJSON, time.Time, error) {
+	logger.Log.Debug().Msg("Loading and parsing risk model output")
+
 	filePath := "Rstats/output/" + file.Name()
 
 	fileData, err := os.ReadFile(filePath)
 	if err != nil {
+		logger.Log.Error().Msg("Error reading file")
+		logger.Log.Error().Str("Error", err.Error())
 		return nil, time.Time{}, fmt.Errorf("(getSegmentColors.go) error reading file: %w", err)
 	}
 
 	segmentData, err := parseRiskModelJSON(fileData)
 	if err != nil {
+		logger.Log.Error().Msg("Error parsing JSON data")
+		logger.Log.Error().Str("Error", err.Error())
 		return nil, time.Time{}, fmt.Errorf("(getSegmentColors.go) error parsing JSON data: %w", err)
 	}
 
 	lastModified, err := getLastModifiedTime(file)
 	if err != nil {
+		logger.Log.Error().Msg("Error getting last modified time")
+		logger.Log.Error().Str("Error", err.Error())
 		return nil, time.Time{}, fmt.Errorf("(getSegmentColors.go) error getting last modified time: %w", err)
 	}
 
@@ -110,8 +131,12 @@ func loadAndParseRiskModelOutput(file os.FileInfo) ([]utils.RiskModelJSON, time.
 }
 
 func getSegmentFiles() ([]os.FileInfo, error) {
+	logger.Log.Debug().Msg("Getting segment files")
+
 	segmentsFiles, err := os.ReadDir("Rstats/output/")
 	if err != nil {
+		logger.Log.Error().Msg("Error reading Rstats directory")
+		logger.Log.Error().Str("Error", err.Error())
 		return nil, err
 	}
 
@@ -125,6 +150,8 @@ func getSegmentFiles() ([]os.FileInfo, error) {
 	for _, entry := range segmentsFiles {
 		info, err := entry.Info()
 		if err != nil {
+			logger.Log.Error().Msg("Error getting file info")
+			logger.Log.Error().Str("Error", err.Error())
 			return nil, err
 		}
 		fileInfos = append(fileInfos, info)
@@ -138,6 +165,8 @@ func getSegmentFiles() ([]os.FileInfo, error) {
 }
 
 func getLastModifiedTime(file os.FileInfo) (time.Time, error) {
+	logger.Log.Debug().Msg("Getting last modified time")
+
 	modTime := file.ModTime().UTC()
 	// Truncate time to the nearest second to match the precision typically used in HTTP headers
 	modTime = modTime.Truncate(time.Second)
@@ -145,8 +174,12 @@ func getLastModifiedTime(file os.FileInfo) (time.Time, error) {
 }
 
 func parseRiskModelJSON(fileData []byte) ([]utils.RiskModelJSON, error) {
+	logger.Log.Debug().Msg("Parsing risk model JSON")
+
 	var segmentData []utils.RiskModelJSON
 	if err := json.Unmarshal(fileData, &segmentData); err != nil {
+		logger.Log.Error().Msg("Error unmarshalling JSON")
+		logger.Log.Error().Str("Error", err.Error())
 		return nil, fmt.Errorf("(getSegmentColors.go) error unmarshalling JSON: %w", err)
 	}
 	return segmentData, nil

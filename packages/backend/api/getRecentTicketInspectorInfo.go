@@ -9,6 +9,7 @@ import (
 
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
+	"github.com/FreiFahren/backend/logger"
 	"github.com/FreiFahren/backend/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -32,8 +33,12 @@ import (
 //
 // @Router /basics/recent [get]
 func GetRecentTicketInspectorInfo(c echo.Context) error {
+	logger.Log.Info().Msg("GET /basics/recent")
+
 	databaseLastModified, err := database.GetLatestUpdateTime()
 	if err != nil {
+		logger.Log.Error().Msg("Error getting latest update time")
+		logger.Log.Error().Str("Error", err.Error())
 		return utils.HandleErrorEchoContext(c, err, "Error getting latest update time: %v")
 	}
 
@@ -41,6 +46,8 @@ func GetRecentTicketInspectorInfo(c echo.Context) error {
 	ifModifiedSince := c.Request().Header.Get("If-Modified-Since")
 	modifiedSince, err := utils.CheckIfModifiedSince(ifModifiedSince, databaseLastModified)
 	if err != nil {
+		logger.Log.Error().Msg("Error checking if the data has been modified")
+		logger.Log.Error().Str("Error", err.Error())
 		return utils.HandleErrorEchoContext(c, err, "Error checking if the data has been modified: %v")
 	}
 	if !modifiedSince {
@@ -52,6 +59,8 @@ func GetRecentTicketInspectorInfo(c echo.Context) error {
 	// or if the If-Modified-Since header was not provided
 	ticketInfoList, err := database.GetLatestTicketInspectors()
 	if err != nil {
+		logger.Log.Error().Msg("Error getting latest station coordinates")
+		logger.Log.Error().Str("Error", err.Error())
 		return utils.HandleErrorEchoContext(c, err, "Error getting latest station coordinates: %v")
 	}
 
@@ -61,6 +70,8 @@ func GetRecentTicketInspectorInfo(c echo.Context) error {
 		numberOfHistoricDataToFetch := currentHistoricDataThreshold - len(ticketInfoList)
 		ticketInfoList, err = FetchAndAddHistoricData(ticketInfoList, numberOfHistoricDataToFetch)
 		if err != nil {
+			logger.Log.Error().Msg("Error fetching and adding historic data")
+			logger.Log.Error().Str("Error", err.Error())
 			return utils.HandleErrorEchoContext(c, err, "Error fetching and adding historic data: %v")
 		}
 
@@ -70,6 +81,8 @@ func GetRecentTicketInspectorInfo(c echo.Context) error {
 	for _, ticketInfo := range ticketInfoList {
 		ticketInspector, err := constructTicketInspectorInfo(ticketInfo)
 		if err != nil {
+			logger.Log.Error().Msg("Error constructing ticket inspector info")
+			logger.Log.Error().Str("Error", err.Error())
 			return utils.HandleErrorEchoContext(c, err, "Error constructing ticket inspector info: %v")
 		}
 		ticketInspectorList = append(ticketInspectorList, ticketInspector)
@@ -81,6 +94,7 @@ func GetRecentTicketInspectorInfo(c echo.Context) error {
 }
 
 func IdToCoordinates(id string) (float64, float64, error) {
+	logger.Log.Debug().Msg("Getting station coordinates")
 
 	var stations = data.GetStationsList()
 
@@ -93,6 +107,8 @@ func IdToCoordinates(id string) (float64, float64, error) {
 }
 
 func RemoveDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse) []utils.TicketInspectorResponse {
+	logger.Log.Debug().Msg("Removing duplicate stations")
+
 	uniqueStations := make(map[string]utils.TicketInspectorResponse)
 	for _, ticketInspector := range ticketInspectorList {
 		stationID := ticketInspector.Station.ID
@@ -118,6 +134,8 @@ func RemoveDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse
 }
 
 func FetchAndAddHistoricData(ticketInfoList []utils.TicketInspector, remaining int) ([]utils.TicketInspector, error) {
+	logger.Log.Debug().Msg("Fetching and adding historic data")
+
 	currentStationIDs := make(map[string]bool)
 	for _, ticketInfo := range ticketInfoList {
 		currentStationIDs[ticketInfo.StationID] = true
@@ -136,6 +154,8 @@ func FetchAndAddHistoricData(ticketInfoList []utils.TicketInspector, remaining i
 }
 
 func constructTicketInspectorInfo(ticketInfo utils.TicketInspector) (utils.TicketInspectorResponse, error) {
+	logger.Log.Debug().Msg("Constructing ticket inspector info")
+
 	cleanedStationId := strings.ReplaceAll(ticketInfo.StationID, "\n", "")
 	cleanedDirectionId := strings.ReplaceAll(ticketInfo.DirectionID.String, "\n", "")
 	cleanedLine := strings.ReplaceAll(ticketInfo.Line.String, "\n", "")
@@ -147,11 +167,15 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector) (utils.Ticke
 	}
 	stationLat, stationLon, err := IdToCoordinates(cleanedStationId)
 	if err != nil {
+		logger.Log.Error().Msg("Error getting station coordinates")
+		logger.Log.Error().Str("Error", err.Error())
 		return utils.TicketInspectorResponse{}, err
 	}
 
 	stationName, err := IdToStationName(cleanedStationId)
 	if err != nil {
+		logger.Log.Error().Msg("Error getting station name")
+		logger.Log.Error().Str("Error", err.Error())
 		return utils.TicketInspectorResponse{}, err
 	}
 
@@ -159,10 +183,14 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector) (utils.Ticke
 	if ticketInfo.DirectionID.Valid {
 		directionName, err = IdToStationName(cleanedDirectionId)
 		if err != nil {
+			logger.Log.Error().Msg("Error getting direction name")
+			logger.Log.Error().Str("Error", err.Error())
 			return utils.TicketInspectorResponse{}, err
 		}
 		directionLat, directionLon, err = IdToCoordinates(cleanedDirectionId)
 		if err != nil {
+			logger.Log.Error().Msg("Error getting direction coordinates")
+			logger.Log.Error().Str("Error", err.Error())
 			return utils.TicketInspectorResponse{}, err
 		}
 	}

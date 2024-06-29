@@ -81,6 +81,8 @@ func main() {
 
 	c.Start()
 
+	logger.Log.Info().Msg("Server is running...")
+
 	// Hosts
 	hosts := map[string]*Host{}
 
@@ -128,7 +130,6 @@ func main() {
 	apiHOST.GET("/risk-prediction/getSegmentColors", api.GetSegmentColors)
 
 	apiHOST.Start(":8080")
-	logger.Log.Info().Msg("Server is running...")
 
 	defer apiHOST.Close()
 }

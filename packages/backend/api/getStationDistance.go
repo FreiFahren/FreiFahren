@@ -2,7 +2,6 @@ package api
 
 import (
 	"container/list"
-	"log"
 	"net/http"
 	"sort"
 
@@ -10,6 +9,7 @@ import (
 
 	"github.com/FreiFahren/backend/data"
 	_ "github.com/FreiFahren/backend/docs"
+	"github.com/FreiFahren/backend/logger"
 	utils "github.com/FreiFahren/backend/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -43,6 +43,8 @@ var linesList map[string][]string
 //
 // @Router /transit/distance [get]
 func GetStationDistance(c echo.Context) error {
+	logger.Log.Info().Msg("GET /transit/distance")
+
 	var err error
 
 	inspectorStationId := c.QueryParam("inspectorStationId")
@@ -51,10 +53,14 @@ func GetStationDistance(c echo.Context) error {
 
 	userLat, err := utils.ParseStringToFloat(c.QueryParam("userLat"))
 	if err != nil {
+		logger.Log.Error().Msg("Error parsing userLat")
+		logger.Log.Error().Str("Error", err.Error())
 		return utils.HandleErrorEchoContext(c, err, "Error parsing userLat: %v")
 	}
 	userLon, err := utils.ParseStringToFloat(c.QueryParam("userLon"))
 	if err != nil {
+		logger.Log.Error().Msg("Error parsing userLon")
+		logger.Log.Error().Str("Error", err.Error())
 		return utils.HandleErrorEchoContext(c, err, "Error parsing userLon: %v")
 	}
 
@@ -71,6 +77,8 @@ func GetStationDistance(c echo.Context) error {
 }
 
 func ReadAndCreateSortedStationsListAndLinesList() (map[string]utils.StationListEntry, []string, map[string][]string) {
+	logger.Log.Debug().Msg("Reading and creating sorted stations list and lines list")
+
 	stationsList = data.GetStationsList()
 
 	// Create a slice of the station IDs
@@ -91,6 +99,8 @@ func ReadAndCreateSortedStationsListAndLinesList() (map[string]utils.StationList
 // ---- dijkstra
 
 func GetAdjacentStationsID(stationId string) []string {
+	logger.Log.Debug().Msg("Getting adjacent station ids")
+
 	stationLines := stationsList[stationId].Lines
 
 	adjacentStations := make([]string, 0)
@@ -100,7 +110,8 @@ func GetAdjacentStationsID(stationId string) []string {
 		currentStationID, err := utils.GetIndexOfStationID(stationId, linesList[line])
 
 		if currentStationID == -1 && err != nil {
-			log.Fatalf("(getStationsDistance.go) Error getting station ID: %v", err)
+			logger.Log.Error().Msg("Error getting the station ID")
+			logger.Log.Error().Str("Error", err.Error())
 		}
 
 		// get the adjacent stations one station before and one station after the current station
@@ -120,6 +131,8 @@ func GetAdjacentStationsID(stationId string) []string {
 }
 
 func initializeQueue(startStation string) (*list.List, map[string]int, map[string]string) {
+	logger.Log.Debug().Msg("Initializing queue")
+
 	queue := list.New()
 	distances := make(map[string]int)
 	lines := make(map[string]string)
@@ -144,6 +157,8 @@ func initializeQueue(startStation string) (*list.List, map[string]int, map[strin
 }
 
 func findSmallestDistanceStation(queue *list.List) StationNode {
+	logger.Log.Debug().Msg("Finding the smallest distance station")
+
 	var currentStation StationNode
 	for firstQueueElement := queue.Front(); firstQueueElement != nil; firstQueueElement = firstQueueElement.Next() {
 		station := firstQueueElement.Value.(StationNode)
@@ -155,6 +170,8 @@ func findSmallestDistanceStation(queue *list.List) StationNode {
 }
 
 func removeStationFromQueue(queue *list.List, stationId string) {
+	logger.Log.Debug().Msg("Removing station from queue")
+
 	// here we remove the station from the queue,
 	// but we don't need to remove any duplicate stations, as space complexity may come down but time complexity exponentially highly increase
 	// also dijkstra works fine with duplicate stations in the queue because it will always choose the station with the smallest distance
@@ -167,6 +184,8 @@ func removeStationFromQueue(queue *list.List, stationId string) {
 }
 
 func updateDistances(queue *list.List, currentStation StationNode, distances map[string]int, lines map[string]string) {
+	logger.Log.Debug().Msg("Updating distances")
+
 	for _, adjacentStationId := range GetAdjacentStationsID(currentStation.id) {
 		// each distance from one station to another is 1
 		newDistance := currentStation.distance + 1
@@ -180,8 +199,9 @@ func updateDistances(queue *list.List, currentStation StationNode, distances map
 	}
 }
 
-// this is the dijkstra algorithm
 func FindShortestDistance(startStation string, userLat, userLon float64) int {
+	logger.Log.Debug().Msg("Finding the shortest distance")
+
 	ReadAndCreateSortedStationsListAndLinesList()
 
 	endStation := utils.GetNearestStationID(stationIDs, stationsList, userLat, userLon)

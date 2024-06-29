@@ -5,11 +5,13 @@ import (
 	"net/http"
 
 	"github.com/FreiFahren/backend/data"
+	"github.com/FreiFahren/backend/logger"
 	"github.com/FreiFahren/backend/utils"
 	"github.com/labstack/echo/v4"
 )
 
 func IdToStationName(id string) (string, error) {
+	logger.Log.Debug().Msg("Transforming station ID to station name")
 
 	var stations = data.GetStationsList()
 
@@ -38,6 +40,8 @@ func IdToStationName(id string) (string, error) {
 //
 // @Router       /station [get]
 func GetStationName(c echo.Context) error {
+	logger.Log.Info().Msg("GET /station")
+
 	id := c.QueryParam("id")
 
 	id, err := IdToStationName(id)

@@ -7,11 +7,14 @@ import (
 
 	"github.com/FreiFahren/backend/data"
 	_ "github.com/FreiFahren/backend/docs"
+	"github.com/FreiFahren/backend/logger"
 	"github.com/FreiFahren/backend/utils"
 	"github.com/labstack/echo/v4"
 )
 
 func FindStationId(name string, stationsMap map[string]utils.StationListEntry) (string, bool) {
+	logger.Log.Debug().Msg("Finding station id")
+
 	name = strings.ToLower(strings.ReplaceAll(name, " ", ""))
 	for id, station := range stationsMap {
 		stationName := strings.ToLower(strings.ReplaceAll(station.Name, " ", ""))
@@ -40,8 +43,9 @@ func FindStationId(name string, stationsMap map[string]utils.StationListEntry) (
 //
 // @Router       /data/id [get]
 func GetStationId(c echo.Context) error {
+	logger.Log.Info().Msg("GET /data/id")
+
 	name := c.QueryParam("name")
-	fmt.Printf("receiving name: %s\n", name)
 
 	var stations = data.GetStationsList()
 
