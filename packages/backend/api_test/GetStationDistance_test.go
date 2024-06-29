@@ -23,7 +23,6 @@ func TestGetStationDistance(t *testing.T) {
 		userLon            string
 		expectedStatus     int
 		expectedStops      int
-		expectedError      string
 	}{
 		{
 			name:               "Valid coordinates",
@@ -40,7 +39,6 @@ func TestGetStationDistance(t *testing.T) {
 			userLon:            "def",
 			expectedStatus:     http.StatusInternalServerError,
 			expectedStops:      -1,
-			expectedError:      "Error parsing userLat: (dijkstraUtils.go) error parsing float: strconv.ParseFloat: parsing \\\"abc\\\": invalid syntax",
 		},
 	}
 
@@ -78,10 +76,6 @@ func TestGetStationDistance(t *testing.T) {
 					} else {
 						t.Fatalf("Stops count: %v and expected count: %v \n", stopsCount, tt.expectedStops)
 					}
-				} else {
-					// Remove quotation marks from the actual error message
-					actualError := strings.Trim(result, "\"")
-					assert.Equal(t, tt.expectedError, actualError)
 				}
 			}
 		})

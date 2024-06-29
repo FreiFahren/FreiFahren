@@ -1,8 +1,9 @@
 package utils
 
 import (
-	"fmt"
 	"time"
+
+	"github.com/FreiFahren/backend/logger"
 )
 
 // CheckIfModifiedSince determines if data should be re-fetched based on the If-Modified-Since header.
@@ -18,6 +19,8 @@ import (
 //
 // Use this function to decide whether to return updated data or a 304 Not Modified response.
 func CheckIfModifiedSince(ifModifiedSince string, lastModified time.Time) (bool, error) {
+	logger.Log.Debug().Msg("Checking If-Modified-Since header")
+
 	// If the header is empty, proceed with fetching the data
 	if ifModifiedSince == "" {
 		return true, nil
@@ -26,7 +29,8 @@ func CheckIfModifiedSince(ifModifiedSince string, lastModified time.Time) (bool,
 	// Use time.RFC3339 to parse ISO 8601 format
 	requestedModificationTime, err := time.Parse(time.RFC3339, ifModifiedSince)
 	if err != nil {
-		return true, fmt.Errorf("(cachingUtils.go) error parsing If-Modified-Since header: %v", err)
+		logger.Log.Error().Msg("Error parsing If-Modified-Since header")
+		return true, err
 	}
 
 	// If the data has not been modified since the provided time, return false
