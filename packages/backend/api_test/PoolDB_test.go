@@ -23,7 +23,6 @@ func CreateTestTable() {
 			id TEXT DEFAULT (lower(hex(randomblob(16)))) PRIMARY KEY,
 			timestamp DATETIME NOT NULL DEFAULT (datetime('now')),
 			message TEXT,
-			author INTEGER,
 			line TEXT(3),
 			station_name TEXT,
 			station_id TEXT(10),

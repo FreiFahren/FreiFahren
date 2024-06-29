@@ -1,7 +1,10 @@
 services:
   api:
     env_file: .env.test
-    restart: "no"
+    restart: no
     build:
       context: .
       target: test
+  nginx:
+    restart: no
+    entrypoint: /bin/false

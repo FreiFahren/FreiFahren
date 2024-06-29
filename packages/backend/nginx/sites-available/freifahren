@@ -1,0 +1,14 @@
+server {
+        listen 80;
+        listen [::]:80;
+
+        root /var/www/freifahren/html;
+        index index.html index.htm index.nginx-debian.html;
+
+        server_name api.freifahren.org www.api.freifahren.org;
+	access_log  off;
+    	error_log off;	
+        location / {
+                try_files $uri $uri/ =404;
+        }
+}
