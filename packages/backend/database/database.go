@@ -66,8 +66,8 @@ func getLastNonHistoricTimestamp() (time.Time, error) {
 	row := db.QueryRow(sqlTimestamp)
 	var lastNonHistoricTimestampString string
 	if err = row.Scan(&lastNonHistoricTimestampString); err != nil {
-		return time.Time{}, fmt.Errorf("(database.go) failed to scan timestamp: %v", err)
 		logger.Log.Error().Err(err).Msg("Failed to get last non-historic timestamp")
+		return time.Time{}, err
 	}
 
 	var lastNonHistoricTimestamp time.Time
