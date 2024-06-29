@@ -22,8 +22,9 @@ jobs:
       - name: 'Create env file'
         run: |
           touch .env
-          echo "export DB_URL=/app/test.sqlite3" >> .env.test
-          echo "export HOST_DB_URL=$(pwd)/test.sqlite3" >> .env.test
+          echo "CGO_ENABLED=1" >> .env.test
+          echo "DB_URL=/app/test.sqlite3" >> .env.test
+          echo "HOST_DB_URL=$(pwd)/test.sqlite3" >> .env.test
           docker compose version
           docker --version
 
