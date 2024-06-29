@@ -14,10 +14,12 @@ from process_message import (
     check_for_spam
 )
 from db_utils import create_table_if_not_exists, insert_ticket_info
+from app import app
 from logging_utils import setup_logger
 import traceback
 import requests
 import sys
+import threading
 sys.path.append('..')
 from watcher.config import TELEGRAM_RESPONSE_MESSAGE, TELEGRAM_CHECKING_MESSAGE
 class TicketInspector:
@@ -91,7 +93,8 @@ def handle_exception(exc_type, exc_value, exc_traceback):
     requests.post(WATCHER_URL, json={"error_message": error_message})
     logger.error('Unhandled exception', exc_info=(exc_type, exc_value, exc_traceback))
     
-
+def start_bot():
+    bot.infinity_polling()
 
 if __name__ == '__main__':
     logger = setup_logger()
@@ -140,4 +143,8 @@ if __name__ == '__main__':
             
         process_new_message(timestamp, message)
 
-    bot.infinity_polling()
+    bot_thread = threading.Thread(target=start_bot)
+
+    bot_thread.start()
+    
+    app.run(port=5001)

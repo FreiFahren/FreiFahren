@@ -11,9 +11,9 @@ def backend_failure() -> tuple:
     system_name = request.json.get('system', '')
     error_message = request.json.get('error_message', '')
     
-    send_message(DEV_CHAT_ID, f'{system_name} send an error message: {error_message} in file {file_name}')
+    send_message(DEV_CHAT_ID, f'{system_name} send an error message: {error_message}.')
     
-    logger.error(f'Received {system_name} failure: {error_message} in file {file_name}')
+    logger.error(f'Received {system_name} failure: {error_message}.')
     
     return {'status': 'success'}, 200
 
