@@ -17,5 +17,5 @@ func Init() {
 		LocalTime:  true,
 	}
 
-	Log = zerolog.New(logFile).With().Timestamp().Logger()
+	Log = zerolog.New(logFile).With().Timestamp().Caller().Logger()
 }
