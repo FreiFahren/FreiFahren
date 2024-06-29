@@ -335,7 +335,7 @@ func GetNumberOfSubmissionsInLast24Hours() (int, error) {
 func RoundOldTimestamp() {
 	logger.Log.Debug().Msg("Rounding old timestamps")
 
-	sql := `UPDATE ticket_info SET timestamp = DATE_TRUNC('hour', timestamp) WHERE timestamp < NOW() AT TIME ZONE 'UTC' - INTERVAL '1 hour';`
+	sql := `UPDATE ticket_info SET timestamp = DATE_TRUNC('hour', timestamp) WHERE timestamp < NOW() AT TIME ZONE 'UTC' - INTERVAL '4 hour';`
 
 	_, err := pool.Exec(context.Background(), sql)
 	if err != nil {

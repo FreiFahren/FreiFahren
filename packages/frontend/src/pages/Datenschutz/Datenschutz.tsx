@@ -39,7 +39,7 @@ const Datenschutz = () => {
                 </ul>
                 <p>
                     Diese Daten werden zur Verbesserung der Nutzererfahrung analysiert und nicht an Dritte weitergegeben. Die Daten werden ausschließlich intern verwendet.
-                    Ebenfalls wird die Uhrzeit bis auf die Minute innerhalb der ersten Stunde nach der Meldung abgerundet, nach einer Stunde wird die Uhrzeit auf die Stunde abgerundet.
+                    Ebenfalls wird die Uhrzeit bis auf die Minute innerhalb der ersten Stunde nach der Meldung abgerundet, nach Vier Stunde wird die Uhrzeit auf die Stunde abgerundet.
                 </p>
                 <h2>4. Anonymität</h2>
                 <p>
