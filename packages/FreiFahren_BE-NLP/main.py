@@ -14,9 +14,14 @@ from process_message import (
     check_for_spam
 )
 from db_utils import create_table_if_not_exists, insert_ticket_info
+from app import app
 from logging_utils import setup_logger
-
-
+import traceback
+import requests
+import sys
+import threading
+sys.path.append('..')
+from watcher.config import WATCHER_URL
 class TicketInspector:
     def __init__(self, line, station, direction):
         self.line = line
@@ -82,13 +87,24 @@ def process_new_message(timestamp, message):
         logger.info('No line, station or direction found in the message')
 
 
+def handle_exception(exc_type, exc_value, exc_traceback):
+    """Handle uncaught exceptions by sending a POST request with exception info."""
+    error_message = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+    requests.post(WATCHER_URL, json={"error_message": error_message})
+    logger.error('Unhandled exception', exc_info=(exc_type, exc_value, exc_traceback))
+    
+def start_bot():
+    bot.infinity_polling()
+
 if __name__ == '__main__':
     logger = setup_logger()
 
+    sys.excepthook = handle_exception
+    
     load_dotenv()
     BOT_TOKEN = os.getenv('BOT_TOKEN')
     BACKEND_URL = os.getenv('BACKEND_URL')
-
+   
     utc = pytz.UTC
     
     bot = telebot.TeleBot(BOT_TOKEN)
@@ -97,17 +113,26 @@ if __name__ == '__main__':
 
     logger.info('Bot is running...')
 
-    DEV_CHAT_ID = os.getenv('DEV_CHAT_ID')
-    FREIFAHREN_BE_CHAT_ID = os.getenv('FREIFAHREN_BE_CHAT_ID')
-
     @bot.message_handler(func=lambda message: message)
     def get_info(message):
         logger.info('------------------------')
-        logger.info('MESSAGE RECEIVED')
         timestamp = datetime.fromtimestamp(message.date, utc)
         # Round the timestamp to the last minute
         timestamp = timestamp.replace(second=0, microsecond=0)
             
         process_new_message(timestamp, message)
+        
+        logger.info('------------------------')
+        logger.info('MESSAGE RECEIVED')
+        timestamp = datetime.fromtimestamp(message.date, utc)
+        
+        # Round the timestamp to the last minute
+        timestamp = timestamp.replace(second=0, microsecond=0)
+            
+        process_new_message(timestamp, message)
 
-    bot.infinity_polling()
+    bot_thread = threading.Thread(target=start_bot)
+
+    bot_thread.start()
+    
+    app.run(port=5001)
