@@ -116,16 +116,9 @@ if __name__ == '__main__':
     @bot.message_handler(func=lambda message: message)
     def get_info(message):
         logger.info('------------------------')
-        timestamp = datetime.fromtimestamp(message.date, utc)
-        # Round the timestamp to the last minute
-        timestamp = timestamp.replace(second=0, microsecond=0)
-            
-        process_new_message(timestamp, message)
-        
-        logger.info('------------------------')
         logger.info('MESSAGE RECEIVED')
-        timestamp = datetime.fromtimestamp(message.date, utc)
         
+        timestamp = datetime.fromtimestamp(message.date, utc)
         # Round the timestamp to the last minute
         timestamp = timestamp.replace(second=0, microsecond=0)
             
