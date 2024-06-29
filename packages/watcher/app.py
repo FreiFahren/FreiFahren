@@ -6,7 +6,7 @@ from logger import logger
 
 app = Flask(__name__)
 
-@app.route('/failure-report', methods=['POST'])
+@app.route('/report-failure', methods=['POST'])
 def backend_failure() -> tuple:
     system_name = request.json.get('system_name', '')
     error_message = request.json.get('error_message', '')

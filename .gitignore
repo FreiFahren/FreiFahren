@@ -3,3 +3,4 @@ settings.json
 *log
 .env
 __pycache__
+packages/watcher/app.log.*
