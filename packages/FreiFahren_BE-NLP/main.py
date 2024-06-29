@@ -21,7 +21,7 @@ import requests
 import sys
 import threading
 sys.path.append('..')
-from watcher.config import TELEGRAM_RESPONSE_MESSAGE, TELEGRAM_CHECKING_MESSAGE
+from watcher.config import DEV_CHAT_ID
 class TicketInspector:
     def __init__(self, line, station, direction):
         self.line = line
@@ -104,38 +104,28 @@ if __name__ == '__main__':
     load_dotenv()
     BOT_TOKEN = os.getenv('BOT_TOKEN')
     BACKEND_URL = os.getenv('BACKEND_URL')
-    WATCHER_URL = os.getenv('WATCHER_URL')
-
+   
     utc = pytz.UTC
     
     bot = telebot.TeleBot(BOT_TOKEN)
 
     create_table_if_not_exists()
 
-    print('Bot is running...')
     logger.info('Bot is running...')
-
-    DEV_CHAT_ID = os.getenv('DEV_CHAT_ID')
-    FREIFAHREN_BE_CHAT_ID = os.getenv('FREIFAHREN_BE_CHAT_ID')
 
     @bot.message_handler(func=lambda message: message)
     def get_info(message):
-        if message.text == f'{TELEGRAM_CHECKING_MESSAGE}':
-            bot.send_message(message.chat.id, f'{TELEGRAM_RESPONSE_MESSAGE}')
-            logger.info('Checkup ID received')
-            logger.info('------------------------')
-        else:
-            logger.info('------------------------')
-            logger.info('MESSAGE RECEIVED')
-            timestamp = datetime.fromtimestamp(message.date, utc)
-            # Round the timestamp to the last minute
-            timestamp = timestamp.replace(second=0, microsecond=0)
-                
-            process_new_message(timestamp, message)
+        logger.info('------------------------')
+        timestamp = datetime.fromtimestamp(message.date, utc)
+        # Round the timestamp to the last minute
+        timestamp = timestamp.replace(second=0, microsecond=0)
             
+        process_new_message(timestamp, message)
+        
         logger.info('------------------------')
         logger.info('MESSAGE RECEIVED')
         timestamp = datetime.fromtimestamp(message.date, utc)
+        
         # Round the timestamp to the last minute
         timestamp = timestamp.replace(second=0, microsecond=0)
             

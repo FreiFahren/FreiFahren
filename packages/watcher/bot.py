@@ -1,5 +1,5 @@
 import telebot
-from config import DEV_BOT_TOKEN, DEV_BOT_CHAT_ID, DEV_CHAT_ID, NLP_BOT_URL, TELEGRAM_NEXT_CHECK_TIME, TELEGRAM_RESPONSE_MESSAGE
+from config import DEV_BOT_TOKEN, DEV_BOT_CHAT_ID, DEV_CHAT_ID, NLP_BOT_URL, TELEGRAM_NEXT_CHECK_TIME
 from logger import logger
 
 
@@ -19,16 +19,3 @@ def send_message(chat_id: str, message: str) -> None:
         watcherbot.send_message(chat_id, message)
     except Exception as e:
         logger.error(f'Failed to send message to user {chat_id}: {e}')
-
-
-def handle_nlp_bot_status_message(message, response_queue) -> None:
-    """Handle the response from the Telegram bot.
-
-    Args:
-        message (Message): The incoming message.
-        response_queue (Queue): The queue to put the response status in.
-    """
-    if message.text == TELEGRAM_RESPONSE_MESSAGE:
-        response_queue.put(True)
-        send_message(DEV_BOT_CHAT_ID,  'Woohoo! The bot is alive! Next check in 20 minutes')
-
