@@ -21,7 +21,7 @@ import requests
 import sys
 import threading
 sys.path.append('..')
-from watcher.config import DEV_CHAT_ID
+from watcher.config import DEV_CHAT_ID, WATCHER_URL
 class TicketInspector:
     def __init__(self, line, station, direction):
         self.line = line

@@ -1,5 +1,5 @@
 import telebot
-from config import DEV_BOT_TOKEN, DEV_BOT_CHAT_ID, DEV_CHAT_ID, NLP_BOT_URL, TELEGRAM_NEXT_CHECK_TIME
+from config import DEV_BOT_TOKEN
 from logger import logger
 
 
