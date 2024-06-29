@@ -32,16 +32,3 @@ def handle_nlp_bot_status_message(message, response_queue) -> None:
         response_queue.put(True)
         send_message(DEV_BOT_CHAT_ID,  'Woohoo! The bot is alive! Next check in 20 minutes')
 
-def do_nlp_bot_healthcheck() -> None:
-    """Pings the NLP bot's healthcheck endpoint every 60 seconds. 
-        If the bot is not alive, it sends a message to the users.
-        If the bot is alive, it waits 20 minutes before pinging again.
-    """
-    waiting_time = TELEGRAM_NEXT_CHECK_TIME
-    while True:
-        try:
-            do_healthcheck(NLP_BOT_URL)
-
-        except Exception as e:
-            send_message(DEV_CHAT_ID, f'Failed to check the NLP bot status: {e}')
-            logger.error(f'Failed to check the NLP bot status: {e}')

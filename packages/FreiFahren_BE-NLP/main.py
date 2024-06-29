@@ -120,9 +120,7 @@ if __name__ == '__main__':
 
     @bot.message_handler(func=lambda message: message)
     def get_info(message):
-        print('Message received')
         if message.text == f'{TELEGRAM_CHECKING_MESSAGE}':
-            print('Checkup ID received')
             bot.send_message(message.chat.id, f'{TELEGRAM_RESPONSE_MESSAGE}')
             logger.info('Checkup ID received')
             logger.info('------------------------')

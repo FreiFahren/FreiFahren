@@ -49,7 +49,7 @@ def check_nlp_bot_status() -> None:
             errorlist, request_time = do_healthcheck(NLP_BOT_URL + '/healthcheck')
             if errorlist:
                 send_message(DEV_CHAT_ID, f'NLP bot is not healthy! Please check the logs for more information. Error list: {errorlist}')
-                waiting_time = 60
+                waiting_time = TELEGRAM_NEXT_CHECK_TIME
             else:
                 send_message(DEV_CHAT_ID, f'NLP bot is healthy! The request took {request_time * 1000} milliseconds.')
                 waiting_time = 60*20
