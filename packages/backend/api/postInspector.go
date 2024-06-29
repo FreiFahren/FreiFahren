@@ -2,7 +2,6 @@ package api
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -11,6 +10,7 @@ import (
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	_ "github.com/FreiFahren/backend/docs"
+	"github.com/FreiFahren/backend/logger"
 	structs "github.com/FreiFahren/backend/utils"
 
 	"github.com/labstack/echo/v4"
@@ -35,39 +35,60 @@ import (
 //
 // @Router /basics/newInspector [post]
 func PostInspector(c echo.Context) error {
+	logger.Log.Info().Msg("POST /basics/newInspector")
+
 	var req structs.InspectorRequest
 	if err := c.Bind(&req); err != nil {
-		return structs.HandleErrorEchoContext(c, err, "Error binding request in postInspector: %v")
+		logger.Log.Error().Err(err).Msg("Error binding request in postInspector")
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	// Check if all parameters are empty
 	if req.Line == "" && req.StationName == "" && req.DirectionName == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "At least one of 'line', 'station', or 'direction' must be provided")
+		logger.Log.Error().
+			Str("Line", req.Line).
+			Str("Station", req.StationName).
+			Str("Direction", req.DirectionName).
+			Msg("At least one of 'line', 'station', or 'direction' must be provided")
+		return c.NoContent(http.StatusBadRequest)
 	}
 
 	dataToInsert, pointers, err := processRequestData(req)
 	if err != nil {
-		return structs.HandleErrorEchoContext(c, err, "Error processing request data in postInspector: %v")
+		logger.Log.Error().Err(err).Msg("Error processing request data in postInspector")
 	}
 
 	if err := fillMissingColumnsUsingProvidedData(dataToInsert, pointers); err != nil {
-		return structs.HandleErrorEchoContext(c, err, "Error filling missing columns: %v")
+		logger.Log.Error().Err(err).Msg("Error filling missing columns in postInspector")
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	if err := database.InsertTicketInfo(pointers.TimestampPtr, pointers.AuthorPtr, pointers.MessagePtr, pointers.LinePtr, pointers.StationNamePtr, pointers.StationIDPtr, pointers.DirectionNamePtr, pointers.DirectionIDPtr); err != nil {
-		return fmt.Errorf("(postInspector.go) failed to insert ticket info into database: %v", err)
+	if err := database.InsertTicketInfo(
+		pointers.TimestampPtr,
+		pointers.AuthorPtr,
+		pointers.MessagePtr,
+		pointers.LinePtr,
+		pointers.StationNamePtr,
+		pointers.StationIDPtr,
+		pointers.DirectionNamePtr,
+		pointers.DirectionIDPtr,
+	); err != nil {
+		logger.Log.Error().Err(err).Msg("Error inserting ticket info in postInspector")
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	// Based on the new data, generate new risk segments
 	err = Rstats.RunRiskModel()
 	if err != nil {
-		log.Printf("(postInspector.go) Failed to run risk model: %v", err)
+		logger.Log.Error().Err(err).Msg("Error running risk model in postInspector")
 	}
 
 	return c.JSON(http.StatusOK, dataToInsert)
 }
 
 func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *structs.InsertPointers, error) {
+	logger.Log.Debug().Msg("Processing ticket info for insertion")
+
 	var stations = data.GetStationsList()
 
 	// Using pointers to allow for nil values
@@ -95,7 +116,9 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 			pointers.StationIDPtr = &stationID
 			response.Station = structs.Station{Name: req.StationName, ID: stationID}
 		} else {
-			return nil, nil, fmt.Errorf("station not found: %v", req.StationName)
+			err := fmt.Errorf("station not found: %v", req.StationName)
+			logger.Log.Error().Err(err)
+			return nil, nil, err
 		}
 	}
 
@@ -105,7 +128,9 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 			pointers.DirectionIDPtr = &directionID
 			response.Direction = structs.Station{Name: req.DirectionName, ID: directionID, Coordinates: structs.Coordinates(stations[directionID].Coordinates), Lines: stations[directionID].Lines}
 		} else {
-			return nil, nil, fmt.Errorf("direction not found: %v", req.DirectionName)
+			err := fmt.Errorf("direction not found: %v", req.DirectionName)
+			logger.Log.Error().Err(err)
+			return nil, nil, err
 		}
 	}
 
@@ -119,23 +144,28 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 		response.Message = req.Message
 	}
 
-	log.Printf("Processed ticket info for insertion: %v", response)
+	logger.Log.Info().Msg("Processed ticket info for insertion")
+	logger.Log.Info().Interface("Response", response).Msg("Response data")
 
 	return response, pointers, nil
 }
 
 func fillMissingColumnsUsingProvidedData(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers) error {
+	logger.Log.Debug().Msg("Filling missing columns using provided data")
+
 	var stations = data.GetStationsList()
 	var lines = data.GetLinesList()
 
 	if dataToInsert.Line == "" && dataToInsert.Station.ID != "" {
 		if err := assignLineIfSingleOption(dataToInsert, pointers, stations[dataToInsert.Station.ID]); err != nil {
+			logger.Log.Error().Err(err).Msg("Error assigning line if single option in postInspector")
 			return err
 		}
 	}
 
 	if dataToInsert.Direction.ID == "" && dataToInsert.Line != "" && dataToInsert.Station.ID != "" {
 		if err := determineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.ID); err != nil {
+			logger.Log.Error().Err(err).Msg("Error determining direction if implied in postInspector")
 			return err
 		}
 	}
@@ -144,6 +174,8 @@ func fillMissingColumnsUsingProvidedData(dataToInsert *structs.ResponseData, poi
 }
 
 func assignLineIfSingleOption(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, station structs.StationListEntry) error {
+	logger.Log.Debug().Msg("Assigning line if single option")
+
 	// If there is only one line for the station, assign it
 	if len(station.Lines) == 1 {
 		dataToInsert.Line = station.Lines[0]
@@ -160,6 +192,8 @@ func assignLineIfSingleOption(dataToInsert *structs.ResponseData, pointers *stru
 }
 
 func determineDirectionIfImplied(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, line []string, stationID string) error {
+	logger.Log.Debug().Msg("Determining direction if implied")
+
 	var stations = data.GetStationsList()
 	isStationUniqueToOneLine := checkIfStationIsUniqueToOneLineOfType(stations[stationID], dataToInsert.Line)
 
@@ -182,6 +216,8 @@ func determineDirectionIfImplied(dataToInsert *structs.ResponseData, pointers *s
 
 // checks if a station is uniquely served by one line of the specified type (e.g., 'S' or 'U').
 func checkIfStationIsUniqueToOneLineOfType(station structs.StationListEntry, line string) bool {
+	logger.Log.Debug().Msg("Checking if station is unique to one line of the specified type")
+
 	// The first character of the line determines if it is a sbahn or ubahn
 	linePrefix := line[0]
 
@@ -196,6 +232,8 @@ func checkIfStationIsUniqueToOneLineOfType(station structs.StationListEntry, lin
 }
 
 func setDirection(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, stationID string, station structs.StationListEntry) {
+	logger.Log.Debug().Msg("Setting direction")
+
 	dataToInsert.Direction = structs.Station{Name: station.Name, ID: stationID, Coordinates: structs.Coordinates(station.Coordinates)}
 	pointers.DirectionIDPtr = &stationID
 	directionName := station.Name

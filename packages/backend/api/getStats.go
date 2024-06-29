@@ -5,7 +5,7 @@ import (
 
 	"github.com/FreiFahren/backend/database"
 	_ "github.com/FreiFahren/backend/docs"
-	structs "github.com/FreiFahren/backend/utils"
+	"github.com/FreiFahren/backend/logger"
 	"github.com/labstack/echo/v4"
 )
 
@@ -23,9 +23,12 @@ import (
 //
 // @Router /statistics/stats [get]
 func GetStats(c echo.Context) error {
+	logger.Log.Info().Msg("GET /statistics/stats")
+
 	stats, err := database.GetNumberOfSubmissionsInLast24Hours()
 	if err != nil {
-		return structs.HandleErrorEchoContext(c, err, "Error getting stats: %v")
+		logger.Log.Error().Err(err).Msg("Error getting stats")
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	return c.JSON(http.StatusOK, stats)
