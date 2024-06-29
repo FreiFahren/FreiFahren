@@ -1,6 +1,5 @@
 .DS_Store
 settings.json
-packages/watcher/.env
-packages/watcher/app.log
-packages/watcher/app.log.*
-packages/watcher/__pycache__/
+*log
+.env
+__pycache__

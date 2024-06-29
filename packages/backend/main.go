@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"errors"
 	"net/http"
 
 	"github.com/FreiFahren/backend/Rstats"
@@ -9,6 +9,7 @@ import (
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	_ "github.com/FreiFahren/backend/docs"
+	"github.com/FreiFahren/backend/logger"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -29,10 +30,13 @@ type (
 // @host		localhost:8080
 // @BasePath	/
 func main() {
+	logger.Init()
+
 	// Load .env file
 	err := godotenv.Overload()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		logger.Log.Panic().Msg("Error loading .env file")
+		logger.Log.Panic().Str("Error", err.Error())
 	}
 
 	data.EmbedJSONFiles()
@@ -40,7 +44,8 @@ func main() {
 	// Create a new connection pool, for concurrency
 	database.CreatePool()
 	if err != nil {
-		log.Fatal("Error while creating a pool :(")
+		logger.Log.Error().Msg("Could not create connection pool")
+		logger.Log.Error().Str("Error", err.Error())
 	}
 
 	// Generate the inital risk segments
@@ -53,7 +58,8 @@ func main() {
 		database.BackupDatabase()
 	})
 	if err != nil {
-		log.Fatalf("(main.go) Could not schedule backup job: %v", err)
+		logger.Log.Error().Msg("Could not schedule backup job")
+		logger.Log.Error().Str("Error", err.Error())
 	}
 
 	// Update the risk model even if there are no reports for a long time
@@ -61,7 +67,8 @@ func main() {
 		Rstats.RunRiskModel()
 	})
 	if err != nil {
-		log.Fatalf("Could not schedule risk model update job: %v", err)
+		logger.Log.Error().Msg("Could not schedule risk model update job")
+		logger.Log.Error().Str("Error", err.Error())
 	}
 
 	// round the older timestamps
@@ -69,10 +76,18 @@ func main() {
 		database.RoundOldTimestamp()
 	})
 	if err != nil {
-		log.Fatalf("Could not schedule timestamp rounding job: %v", err)
+		logger.Log.Error().Msg("Could not schedule timestamp rounding job")
+		logger.Log.Error().Str("Error", err.Error())
 	}
 
 	c.Start()
+
+	logger.Log.Info().Msg("Server is running...")
+	// test error for testing
+	err = errors.New("this is a test error")
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error loading .env file")
+	}
 
 	// Hosts
 	hosts := map[string]*Host{}

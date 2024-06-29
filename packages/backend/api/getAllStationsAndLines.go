@@ -5,6 +5,7 @@ import (
 
 	"github.com/FreiFahren/backend/data"
 	_ "github.com/FreiFahren/backend/docs"
+	"github.com/FreiFahren/backend/logger"
 	"github.com/labstack/echo/v4"
 )
 
@@ -26,6 +27,8 @@ import (
 //
 // @Router /data/list [get]
 func GetAllStationsAndLines(c echo.Context) error {
+	logger.Log.Info().Msg("GET /data/list")
+
 	var StationsAndLinesList = data.GetStationsAndLinesList()
 
 	// only get the lines

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/FreiFahren/backend/logger"
 	echo "github.com/labstack/echo/v4"
 )
 
@@ -14,6 +15,8 @@ func ToRadians(deg float64) float64 {
 }
 
 func CalculateDistance(lat1, lon1, lat2, lon2 float64) float64 {
+	logger.Log.Debug().Msg("Calculating distance")
+
 	const R = 6371 // Radius of the earth in km
 
 	dLat := ToRadians(lat2 - lat1)
@@ -33,19 +36,24 @@ func CalculateDistance(lat1, lon1, lat2, lon2 float64) float64 {
 }
 
 func GetIndexOfStationID(stationId string, linesOfStation []string) (int, error) {
+	logger.Log.Debug().Msg("Getting index of station ID")
+
 	for i, station := range linesOfStation {
 		if station == stationId {
 			return i, nil
 		}
 	}
 
-	return -1, fmt.Errorf("(dijkstraUtils.go) station not found with the given ID: %v", stationId) // Return -1 if the stationID is not found in the array
+	return -1, fmt.Errorf("station not found with the given ID: %v", stationId) // Return -1 if the stationID is not found in the array
 }
 
 func ParseStringToFloat(str string) (float64, error) {
+	logger.Log.Debug().Msg("Parsing string to float")
+
 	val, err := strconv.ParseFloat(str, 64)
 	if err != nil {
-		return 0, fmt.Errorf("(dijkstraUtils.go) error parsing float: %v", err)
+		logger.Log.Error().Msg("Error parsing string to float")
+		return 0, err
 	}
 	return val, nil
 }
@@ -55,6 +63,8 @@ func HandleErrorEchoContext(c echo.Context, err error, message string) error {
 }
 
 func RemoveDuplicateAdjacentStations(elements []string) []string {
+	logger.Log.Debug().Msg("Removing duplicate adjacent stations")
+
 	visited := make(map[string]bool)
 	uniqueElements := make([]string, 0)
 	for _, element := range elements {
@@ -68,6 +78,8 @@ func RemoveDuplicateAdjacentStations(elements []string) []string {
 }
 
 func GetNearestStationID(stationIDs []string, stationsList map[string]StationListEntry, userLat, userLon float64) string {
+	logger.Log.Debug().Msg("Getting nearest station ID")
+
 	var nearestStation string
 	var shortestDistance float64 = math.MaxFloat64
 

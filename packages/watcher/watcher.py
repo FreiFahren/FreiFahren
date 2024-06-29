@@ -7,6 +7,7 @@ from logger import logger
 import threading
 
 
+
 def start_watcher_threads():
     bot_thread = threading.Thread(target=start_bot)
     backend_health_thread = threading.Thread(target=check_backend_status)
@@ -16,6 +17,7 @@ def start_watcher_threads():
     backend_health_thread.start()
     check_telegram_status_thread.start()
     
+
 if __name__ == '__main__':
     logger = setup_logger()
 

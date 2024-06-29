@@ -3,9 +3,9 @@ package data
 import (
 	_ "embed"
 	"encoding/json"
-	"log"
 	"sync"
 
+	"github.com/FreiFahren/backend/logger"
 	utils "github.com/FreiFahren/backend/utils"
 )
 
@@ -30,6 +30,8 @@ var (
 )
 
 func EmbedJSONFiles() {
+	logger.Log.Debug().Msg("Embedding JSON files")
+
 	var err error
 
 	dataLock.Lock()
@@ -37,33 +39,37 @@ func EmbedJSONFiles() {
 
 	stationsAndLinesList, err = ReadStationsAndLinesListFromBytes(embeddedStationsAndLinesList)
 	if err != nil {
-		log.Fatalf("(embedJSONFiles.Go) Error reading StationsAndLinesList: %v", err)
+		logger.Log.Error().Err(err).Msg("Error reading StationsAndLinesList")
 	}
 
 	linesList, err = ReadLinesListFromBytes(embeddedLinesList)
 	if err != nil {
-		log.Fatalf("(embedJSONFiles.Go) Error reading LinesList: %v", err)
+		logger.Log.Error().Err(err).Msg("Error reading LinesList")
 	}
 
 	stationsList, err = ReadStationsListFromBytes(embeddedStationsList)
 	if err != nil {
-		log.Fatalf("(embedJSONFiles.Go) Error reading StationsList: %v", err)
+		logger.Log.Error().Err(err).Msg("Error reading StationsList")
 	}
 
 	err = json.Unmarshal(embeddedDuplicateSegments, &DuplicateSegments)
 	if err != nil {
-		log.Fatalf("(embedJSONFiles.Go) Error occurred during unmarshalling (duplicateSegments.json). %v", err)
+		logger.Log.Error().Err(err).Msg("Error reading DuplicateSegments")
 	}
 
 }
 
 func GetDuplicateSegments() map[string][]string {
+	logger.Log.Debug().Msg("Getting duplicate segments")
+
 	dataLock.RLock()
 	defer dataLock.RUnlock()
 
 	return DuplicateSegments
 }
 func GetStationsAndLinesList() utils.AllStationsAndLinesList {
+	logger.Log.Debug().Msg("Getting stations and lines list")
+
 	dataLock.RLock()
 	defer dataLock.RUnlock()
 
@@ -71,6 +77,8 @@ func GetStationsAndLinesList() utils.AllStationsAndLinesList {
 }
 
 func GetLinesList() map[string][]string {
+	logger.Log.Debug().Msg("Getting lines list")
+
 	dataLock.RLock()
 	defer dataLock.RUnlock()
 
@@ -78,6 +86,8 @@ func GetLinesList() map[string][]string {
 }
 
 func GetStationsList() map[string]utils.StationListEntry {
+	logger.Log.Debug().Msg("Getting stations list")
+
 	dataLock.RLock()
 	defer dataLock.RUnlock()
 
@@ -87,6 +97,8 @@ func GetStationsList() map[string]utils.StationListEntry {
 // Embedder functions to save the JSON files into the go binary
 
 func ReadStationsAndLinesListFromBytes(byteValue []byte) (utils.AllStationsAndLinesList, error) {
+	logger.Log.Debug().Msg("Reading stations and lines list from bytes")
+
 	var AllStationsAndLinesList utils.AllStationsAndLinesList
 	err := json.Unmarshal(byteValue, &AllStationsAndLinesList)
 	if err != nil {
@@ -97,6 +109,8 @@ func ReadStationsAndLinesListFromBytes(byteValue []byte) (utils.AllStationsAndLi
 }
 
 func ReadLinesListFromBytes(byteValue []byte) (map[string][]string, error) {
+	logger.Log.Debug().Msg("Reading lines list from bytes")
+
 	var linesList map[string][]string
 	err := json.Unmarshal(byteValue, &linesList)
 	if err != nil {
@@ -107,6 +121,8 @@ func ReadLinesListFromBytes(byteValue []byte) (map[string][]string, error) {
 }
 
 func ReadStationsListFromBytes(byteValue []byte) (map[string]utils.StationListEntry, error) {
+	logger.Log.Debug().Msg("Reading stations list from bytes")
+
 	var linesList map[string]utils.StationListEntry
 	err := json.Unmarshal(byteValue, &linesList)
 	if err != nil {
