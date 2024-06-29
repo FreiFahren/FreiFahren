@@ -3,7 +3,6 @@ package logger
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -23,23 +22,21 @@ type APIHook struct {
 }
 
 func (h *APIHook) Run(e *zerolog.Event, level zerolog.Level, message string) {
-	fmt.Println("APIHook Run")
 	if level >= zerolog.ErrorLevel {
 		wg.Add(1)
 		go func() {
-			fmt.Println("APIHook go func")
-			// Prepare the payload
-			payload := map[string]string{"error_message": message}
+			payload := map[string]string{
+				"error_message": message,
+				"system":        "backend",
+			}
 			jsonPayload, err := json.Marshal(payload)
 			if err != nil {
-				fmt.Println("Error marshalling JSON")
 				return
 			}
 
 			// Make the POST request
 			resp, err := http.Post(h.Endpoint, "application/json", bytes.NewBuffer(jsonPayload))
 			if err != nil {
-				fmt.Println("Error sending error message to API")
 				return
 			}
 			defer resp.Body.Close()
@@ -63,9 +60,8 @@ func Init() {
 		return filepath.Base(file) + ":" + strconv.Itoa(line)
 	}
 
-	Log = zerolog.New(logFile).With().Timestamp().Caller().Logger()
+	Log = zerolog.New(logFile).Level(zerolog.DebugLevel).With().Timestamp().Caller().Logger()
 
-	// Set up API hook
-	apiEndpoint := os.Getenv("WATCHER_HOST") + "/failure-report"
-	Log.Hook(&APIHook{Endpoint: apiEndpoint})
+	apiEndpoint := os.Getenv("WATCHER_HOST") + "/report-failure"
+	Log = Log.Hook(&APIHook{Endpoint: apiEndpoint})
 }

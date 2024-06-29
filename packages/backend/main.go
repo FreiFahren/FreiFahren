@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/FreiFahren/backend/Rstats"
@@ -83,11 +82,6 @@ func main() {
 	c.Start()
 
 	logger.Log.Info().Msg("Server is running...")
-	// test error for testing
-	err = errors.New("this is a test error")
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error loading .env file")
-	}
 
 	// Hosts
 	hosts := map[string]*Host{}
