@@ -7,13 +7,13 @@ class CustomFormatter(logging.Formatter):
     def formatTime(self, record, datefmt=None):
         # Convert timestamp to local time and format to ISO 8601
         local_time = datetime.fromtimestamp(record.created)  # Assumes local timezone
-        
+
         return local_time.isoformat()
 
 
 def setup_logger():
     logger = logging.getLogger(__name__)
-    
+
     # Check if logger already has handlers
     if not logger.handlers:
         logger.setLevel(logging.DEBUG)  # Set the log level to DEBUG to capture all types of logs
@@ -29,5 +29,6 @@ def setup_logger():
         logger.addHandler(file_handler)
 
     return logger
+
 
 logger = setup_logger()

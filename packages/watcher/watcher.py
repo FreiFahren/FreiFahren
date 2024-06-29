@@ -3,10 +3,11 @@ from config import DEV_CHAT_ID, BACKEND_URL, NLP_BOT_URL
 from bot import start_bot, watcherbot, send_message
 from healthcheck import check_backend_status, do_healthcheck, check_nlp_bot_status
 from app import app
-from logger import setup_logger, logger
+from logger import logger
 
 import threading
 import subprocess
+
 
 def start_nlp_bot_process():
     # Run the NLP bot process. All errors will be received
@@ -19,42 +20,41 @@ def start_nlp_bot_process():
         # If the console_line indicates an error, handle it
         if console_line:
             handle_nlp_bot_error(console_line)
-        
+
         # Check if the process has exited
         if nlp_bot.poll() is not None:
             logger.error("NLP bot process has exited with code ", nlp_bot.returncode)
             send_message(DEV_CHAT_ID, "NLP bot process has exited. Please check the logs: ", nlp_bot.returncode)
             break
 
+
 def handle_nlp_bot_error(console_line):
     logger.error(f"Error detected in other in NLP_Bot's output: {console_line}")
     send_message(DEV_CHAT_ID, f"Error detected in NLP_Bot's output: {console_line}")
     check_nlp_bot_status()
 
-    
+
 def start_watcher_threads():
     nlp_bot_thread = threading.Thread(target=start_nlp_bot_process)
     watcher_bot_thread = threading.Thread(target=start_bot)
-    
+
     backend_health_thread = threading.Thread(target=check_backend_status)
     nlp_bot_health_thread = threading.Thread(target=check_nlp_bot_status)
 
     # Sleep for a short time to avoid busy waiting
     nlp_bot_thread.start()
     while not nlp_bot_thread.is_alive():
-        time.sleep(0.1)  
+        time.sleep(0.1)
 
     watcher_bot_thread.start()
     while not watcher_bot_thread.is_alive():
         time.sleep(0.1)
-    
+
     backend_health_thread.start()
     nlp_bot_health_thread.start()
-    
+
 
 if __name__ == '__main__':
-    logger = setup_logger()
-
     @watcherbot.message_handler(commands=['checkhealth'])
     def healthcheck(message):
         watcherbot.send_message(message.chat.id, 'Checking the backend health...')
