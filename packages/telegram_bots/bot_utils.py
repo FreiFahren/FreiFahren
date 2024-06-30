@@ -1,7 +1,5 @@
 import telebot
-from telegram_bots.config import DEV_BOT_TOKEN
 from telegram_bots import logger
-from telegram_bots.watcher.bot import watcher_bot
 
 logger = logger.setup_logger()
 
@@ -15,6 +13,6 @@ def send_message(chat_id: str, message: str, bot) -> None:
     """
 
     try:
-        bot.send_message(chat_id, message, parse_mode='HTML')
+        bot.send_message(chat_id, message)
     except Exception as e:
         logger.error(f'Failed to send message to user {chat_id}: {e}')
