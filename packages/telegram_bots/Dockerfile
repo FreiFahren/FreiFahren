@@ -14,4 +14,4 @@ EXPOSE 5000
 EXPOSE 5001
 
 # Run the command to start the watcher
-CMD ["python3", "-m", "telegram_bot.watcher.watcher"]
+CMD ["python3", "-m", "telegram_bots.watcher.watcher"]
