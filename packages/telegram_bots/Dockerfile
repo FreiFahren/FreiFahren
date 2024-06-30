@@ -10,7 +10,8 @@ ADD ../ /app
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 5000, 5001
+EXPOSE 5000
+EXPOSE 5001
 
 # Run the command to start the watcher
 CMD ["python3", "-m", "telegram_bot.watcher.watcher"]
