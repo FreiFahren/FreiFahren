@@ -18,4 +18,4 @@ jobs:
     - name: Install dependencies
       run: cd packages && pip install -e telegram_bots
     - name: Run unittests
-      run: cd packages/telegram_bots/FreiFahren_BE_NLP/ &&  python -m unittest discover -v -s testing
+      run: cd packages/telegram_bots/ &&  python -m unittest discover -v -s testing
