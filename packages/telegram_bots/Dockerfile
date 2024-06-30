@@ -9,7 +9,7 @@ ADD ../ /app
 
 # Install any needed packages specified in requirements.txt
 CMD ["python3", "telegram_bots/setup.py"]
-
+RUN pip install -r telegram_bots/requirements.txt
 
 EXPOSE 5000
 EXPOSE 5001
