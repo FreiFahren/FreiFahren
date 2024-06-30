@@ -48,8 +48,7 @@ const Datenschutz = () => {
                 </p>
                 <h2>5. Speicherung und Zugriff</h2>
                 <p>
-                    Die erhobenen Daten werden auf Servern der Firma Digital Ocean in Frankfurt am Main gespeichert und sind unbestimmt lang gespeichert. Dauer, die der Nutzende für das Melden benötigt hat wird auf den Servern der Firma Emvi Software GmbH gespeichert.
-                    Der Zugriff auf die Daten ist streng begrenzt auf die Gesellschafter der Freifahren GbR.
+                    Die erhobenen Daten werden auf unseren eigenen Servern, die bei der Hetzner Online GmbH in Deutschland gehostet sind, gespeichert. Die Speicherdauer der Daten ist unbefristet. Auch die Dauer, die der Nutzende für das Melden benötigt hat, wird auf diesen Servern gespeichert. Der Zugriff auf die Daten ist streng begrenzt auf die Gesellschafter der Freifahren GbR.
                 </p>
                 <h2>6. Rechte der Nutzer</h2>
                 <p>
