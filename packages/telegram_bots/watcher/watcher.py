@@ -14,23 +14,21 @@ def start_nlp_bot_process():
     logger.info('Starting the NLP bot process...')
     # Run the NLP bot process. All errors will be received
     nlp_bot_process = subprocess.Popen(['python3', '-m', 'telegram_bots.FreiFahren_BE_NLP.main'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    # Continuously read its output. 
-    # If we have receive a console_line, it has to be an error
-    console_lines = []
-    for line in iter(nlp_bot_process.stdout.readline, b''):
-        line = line.decode().strip()  # Decode bytes to string and remove trailing newline
-        console_lines.append(line)
+    
+    # Collect all output lines into a list
+    output_lines = nlp_bot_process.stdout.readlines()
+    output_lines = [line.decode().strip() for line in output_lines]  # Decode bytes to string and remove trailing newline
 
-    # Now all lines are collected in console_lines list
-    for console_line in console_lines:
-        if console_line:  # If the console_line is not empty
+    # Now all output lines are in the output_lines list
+    for console_line in output_lines:
+        # If the console_line indicates an error, handle it
+        if console_line:
             handle_nlp_bot_error(console_line)
 
-        # Check if the process has exited
-        if nlp_bot_process.poll() is not None:
-            logger.error("NLP bot process has exited with code ", nlp_bot_process.returncode)
-            send_message(DEV_CHAT_ID, "NLP bot process has exited. Please check the logs: ", nlp_bot_process.returncode, watcher_bot)
-            break
+    # Check if the process has exited
+    if nlp_bot_process.poll() is not None:
+        logger.error("NLP bot process has exited with code ", nlp_bot_process.returncode)
+        send_message(DEV_CHAT_ID, "NLP bot process has exited. Please check the logs: ", nlp_bot_process.returncode, watcher_bot)
 
 
 def handle_nlp_bot_error(console_line):
