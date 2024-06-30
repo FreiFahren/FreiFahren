@@ -16,6 +16,7 @@ from telegram_bots.FreiFahren_BE_NLP.process_message import (
 from telegram_bots.FreiFahren_BE_NLP.db_utils import create_table_if_not_exists, insert_ticket_info
 from telegram_bots.FreiFahren_BE_NLP.app import app
 from telegram_bots.logger import setup_logger
+from telegram_bots.bot import start_bot
 import traceback
 import requests
 import sys
@@ -93,9 +94,7 @@ def handle_exception(exc_type, exc_value, exc_traceback):
     error_message = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
     requests.post(WATCHER_URL, json={"error_message": error_message})
     logger.error('Unhandled exception', exc_info=(exc_type, exc_value, exc_traceback))
-    
-def start_bot():
-    bot.infinity_polling()
+
 
 if __name__ == '__main__':
     logger = setup_logger()
@@ -125,7 +124,7 @@ if __name__ == '__main__':
             
         process_new_message(timestamp, message)
 
-    bot_thread = threading.Thread(target=start_bot)
+    bot_thread = threading.Thread(target=bot.start_bot)
 
     bot_thread.start()
     

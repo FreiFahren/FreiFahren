@@ -1,6 +1,6 @@
 from flask import Flask, request
 from telegram_bots.config import DEV_CHAT_ID
-from telegram_bots.watcher.bot import send_message
+from telegram_bots.bot import send_message
 from telegram_bots import logger
 
 

@@ -1,6 +1,6 @@
 import time
 from telegram_bots.config import DEV_CHAT_ID, BACKEND_URL, NLP_BOT_URL
-from telegram_bots.watcher.bot import start_bot, watcherbot, send_message
+from telegram_bots.bot import start_bot, watcherbot, send_message
 from telegram_bots.watcher.healthcheck import check_backend_status, do_healthcheck, check_nlp_bot_status
 from telegram_bots.watcher.app import app
 import threading
