@@ -16,10 +16,14 @@ def start_nlp_bot_process():
     nlp_bot_process = subprocess.Popen(['python3', '-m', 'telegram_bots.FreiFahren_BE_NLP.main'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     # Continuously read its output. 
     # If we have receive a console_line, it has to be an error
-    for console_line in iter(nlp_bot_process.stdout.readline, b''):
-        console_line = console_line.decode().strip()  # Decode bytes to string and remove trailing newline
-        # If the console_line indicates an error, handle it
-        if console_line:
+    console_lines = []
+    for line in iter(nlp_bot_process.stdout.readline, b''):
+        line = line.decode().strip()  # Decode bytes to string and remove trailing newline
+        console_lines.append(line)
+
+    # Now all lines are collected in console_lines list
+    for console_line in console_lines:
+        if console_line:  # If the console_line is not empty
             handle_nlp_bot_error(console_line)
 
         # Check if the process has exited
