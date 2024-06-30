@@ -8,7 +8,7 @@ WORKDIR /app
 ADD ../ /app
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r telegram_bot/requirements.txt
 
 EXPOSE 5000
 EXPOSE 5001
