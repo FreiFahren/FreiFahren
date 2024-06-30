@@ -1,9 +1,9 @@
 import time
 from telegram_bots.config import DEV_CHAT_ID, BACKEND_URL, NLP_BOT_URL
-from telegram_bots.bot_utils import start_bot, send_message
+from telegram_bots.bot_utils import send_message
 from telegram_bots.watcher.healthcheck import check_backend_status, do_healthcheck, check_nlp_bot_status
 from telegram_bots.watcher.app import app
-from telegram_bots.watcher.bot import watcher_bot
+from telegram_bots.watcher.bot import watcher_bot, start_bot
 import threading
 import subprocess
 from telegram_bots import logger
@@ -13,9 +13,7 @@ logger = logger.setup_logger()
 def start_nlp_bot_process():
     logger.info('Starting the NLP bot process...')
     # Run the NLP bot process. All errors will be received
-    nlp_bot_process = subprocess.Popen(['python3', 'telegram_bots/FreiFahren_BE_NLP/main.py'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    logger.info('NLP bot process started')
-
+    nlp_bot_process = subprocess.Popen(['python3', '-m', 'telegram_bots.FreiFahren_BE_NLP.main'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     # Continuously read its output. 
     # If we have receive a console_line, it has to be an error
     for console_line in iter(nlp_bot_process.stdout.readline, b''):
@@ -41,23 +39,15 @@ def start_watcher_threads():
     logger.info('Starting the watcher threads...')
 
     nlp_bot_thread = threading.Thread(target=start_nlp_bot_process)
-    watcher_bot_thread = threading.Thread(target=start_bot, args=(watcher_bot))
-
+    watcher_bot_thread = threading.Thread(target=start_bot)
 
     backend_health_thread = threading.Thread(target=check_backend_status)
     nlp_bot_health_thread = threading.Thread(target=check_nlp_bot_status)
 
-
-    # Sleep for a short time to avoid busy waiting
     logger.debug('NLP bot thread started')
 
     nlp_bot_thread.start()
-    while not nlp_bot_thread.is_alive():
-        time.sleep(0.1)
-
     watcher_bot_thread.start()
-    while not watcher_bot_thread.is_alive():
-        time.sleep(0.1)
 
     backend_health_thread.start()
     nlp_bot_health_thread.start()

@@ -5,3 +5,6 @@ import telebot
 from telegram_bots.config import DEV_BOT_TOKEN
 
 watcher_bot = telebot.TeleBot(DEV_BOT_TOKEN)
+
+def start_bot():
+    watcher_bot.infinity_polling()

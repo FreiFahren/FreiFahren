@@ -13,11 +13,10 @@ from telegram_bots.FreiFahren_BE_NLP.process_message import (
     load_data,
     check_for_spam
 )
-from telegram_bots.FreiFahren_BE_NLP.db_utils import create_table_if_not_exists, insert_ticket_info
+from telegram_bots.FreiFahren_BE_NLP.db_utils import insert_ticket_info
 from telegram_bots.FreiFahren_BE_NLP.app import app
 from telegram_bots.logger import setup_logger
-from telegram_bots.bot_utils import start_bot
-from telegram_bots. FreiFahren_BE_NLP.bot import nlp_bot
+from telegram_bots. FreiFahren_BE_NLP.bot import nlp_bot, start_bot
 import traceback
 import requests
 import sys
@@ -114,7 +113,7 @@ if __name__ == '__main__':
             
         process_new_message(timestamp, message)
 
-    bot_thread = threading.Thread(target=start_bot, args=(nlp_bot))
+    bot_thread = threading.Thread(target=start_bot)
 
     bot_thread.start()
 
