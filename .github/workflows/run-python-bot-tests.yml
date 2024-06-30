@@ -16,8 +16,6 @@ jobs:
       with:
         python-version: '3.9' 
     - name: Install dependencies
-      run: |
-        cd packages/telegram_bots/FreiFahren_BE_NLP/ && python -m pip install --upgrade pip
-        python -m pip install -r requirements.txt
+      run: cd packages && pip install -e telegram_bots
     - name: Run unittests
       run: cd packages/telegram_bots/FreiFahren_BE_NLP/ &&  python -m unittest discover -v -s testing

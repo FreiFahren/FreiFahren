@@ -1,10 +1,13 @@
 import unittest
 import sys
 import os
-# Add the parent folder to the Python module search path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from testing.remove_direction_and_keyword_test import TestRemoveDirectionAndKeyword
-from testing.check_for_spam_test import TestCheckForSpam
+
+# root directory of the project
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+sys.path.insert(0, root_dir)
+
+from telegram_bots.FreiFahren_BE_NLP.testing.remove_direction_and_keyword_test import TestRemoveDirectionAndKeyword
+from telegram_bots.FreiFahren_BE_NLP.testing.check_for_spam_test import TestCheckForSpam
 
 red = '\033[91m'
 reset = '\033[0m'
