@@ -13,7 +13,8 @@ def send_message(chat_id: str, message: str, bot) -> None:
         message (str): The message to send.
         bot (telebot.TeleBot): The bot to use to send the message.
     """
+
     try:
-        bot.send_message(chat_id, message, parse_mode='Markdown')
+        bot.send_message(chat_id, message, parse_mode='HTML')
     except Exception as e:
         logger.error(f'Failed to send message to user {chat_id}: {e}')

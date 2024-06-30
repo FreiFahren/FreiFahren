@@ -24,14 +24,14 @@ def report_inspector() -> tuple:
     logger.info(f'Received a report from an inspector: Line: {line}, Station: {station}, Direction: {direction}, Message: {message}')
 
     telegram_message = 'Über app.freifahren.org gab es folgende Meldung:'
-    telegram_message += f'\n\n'
-    telegram_message += f'\n**Station**: {station}'
+    telegram_message += '\n'
+    telegram_message += f'\n<b>Station</b>: {station}'
     if line:
-        telegram_message += f'\n**Line**: {line}'
+        telegram_message += f'\n<b>Line</b>: {line}'
     if direction:
-        telegram_message += f'\n**Richtung**: {direction}'
+        telegram_message += f'\n<b>Richtung</b>: {direction}'
     if message:
-        telegram_message += f'\n**Beschreibung**: {message}'
+        telegram_message += f'\n<b>Beschreibung</b>: {message}'
     
     send_message(FREIFAHREN_CHAT_ID, telegram_message, nlp_bot)
 
