@@ -8,7 +8,7 @@ WORKDIR /app
 ADD ../ /app
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r telegram_bots/requirements.txt
+CMD ["python3", "setup.py"]
 
 EXPOSE 5000
 EXPOSE 5001
