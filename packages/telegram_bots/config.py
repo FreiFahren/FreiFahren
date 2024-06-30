@@ -4,9 +4,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+BACKEND_URL = os.getenv('BACKEND_URL')
+
 DEV_BOT_TOKEN = os.getenv('DEV_BOT_TOKEN')
 DEV_CHAT_ID = os.getenv('DEV_CHAT_ID')
+
 FREIFAHREN_CHAT_ID = os.getenv('FREIFAHREN_CHAT_ID')
+NLP_BOT_TOKEN = os.getenv('NLP_BOT_TOKEN')
 
 WATCHER_URL = os.getenv('WATCHER_URL')
 NLP_BOT_URL = os.getenv('NLP_BOT_URL')

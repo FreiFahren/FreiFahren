@@ -21,7 +21,7 @@ import traceback
 import requests
 import sys
 import threading
-from telegram_bots.config import WATCHER_URL
+from telegram_bots.config import WATCHER_URL, BACKEND_URL, NLP_BOT_TOKEN
 
 
 class TicketInspector:
@@ -100,14 +100,10 @@ if __name__ == '__main__':
     logger = setup_logger()
 
     sys.excepthook = handle_exception
-    
-    load_dotenv()
-    BOT_TOKEN = os.getenv('BOT_TOKEN')
-    BACKEND_URL = os.getenv('BACKEND_URL')
    
     utc = pytz.UTC
     
-    bot = telebot.TeleBot(BOT_TOKEN)
+    bot = telebot.TeleBot(NLP_BOT_TOKEN)
 
     create_table_if_not_exists()
 
@@ -124,8 +120,8 @@ if __name__ == '__main__':
             
         process_new_message(timestamp, message)
 
-    #bot_thread = threading.Thread(target=bot.start_bot)
+    bot_thread = threading.Thread(target=bot.start_bot)
 
-    #bot_thread.start()
+    bot_thread.start()
     
     app.run(port=5001)
