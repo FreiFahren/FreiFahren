@@ -124,8 +124,8 @@ if __name__ == '__main__':
             
         process_new_message(timestamp, message)
 
-    bot_thread = threading.Thread(target=bot.start_bot)
+    #bot_thread = threading.Thread(target=bot.start_bot)
 
-    bot_thread.start()
+    #bot_thread.start()
     
     app.run(port=5001)
