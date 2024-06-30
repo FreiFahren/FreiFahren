@@ -2,7 +2,7 @@ import re
 import json
 from fuzzywuzzy import process
 from telegram_bots.FreiFahren_BE_NLP.NER.TransportInformationRecognizer import TextProcessor
-from telegram_bots.FreiFahren_BE_NLP.logger import setup_logger
+from telegram_bots.logger import setup_logger
 import os
 
 logger = setup_logger()

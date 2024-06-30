@@ -3,7 +3,7 @@ import telebot
 import pytz
 from datetime import datetime
 from dotenv import load_dotenv
-from verify_info import verify_direction, verify_line
+from telegram_bots.FreiFahren_BE_NLP.verify_info import verify_direction, verify_line
 from telegram_bots.FreiFahren_BE_NLP.process_message import (
     find_line,
     find_direction,
