@@ -3,8 +3,8 @@ import telebot
 import pytz
 from datetime import datetime
 from dotenv import load_dotenv
-from verify_info import verify_direction, verify_line
-from process_message import (
+from telegram_bots.FreiFahren_BE_NLP.verify_info import verify_direction, verify_line
+from telegram_bots.FreiFahren_BE_NLP.process_message import (
     find_line,
     find_direction,
     find_station,
@@ -13,21 +13,22 @@ from process_message import (
     load_data,
     check_for_spam
 )
-from db_utils import create_table_if_not_exists, insert_ticket_info
-from app import app
-from logging_utils import setup_logger
+from telegram_bots.FreiFahren_BE_NLP.db_utils import insert_ticket_info
+from telegram_bots.FreiFahren_BE_NLP.app import app
+from telegram_bots.logger import setup_logger
+from telegram_bots. FreiFahren_BE_NLP.bot import nlp_bot, start_bot
 import traceback
 import requests
 import sys
 import threading
-sys.path.append('..')
-from watcher.config import WATCHER_URL
+from telegram_bots.config import WATCHER_URL, BACKEND_URL
+
+
 class TicketInspector:
     def __init__(self, line, station, direction):
         self.line = line
         self.station = station
         self.direction = direction
-
 
 def extract_ticket_inspector_info(unformatted_text):
     # Initial guards to avoid unnecessary processing
@@ -92,40 +93,21 @@ def handle_exception(exc_type, exc_value, exc_traceback):
     error_message = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
     requests.post(WATCHER_URL, json={"error_message": error_message})
     logger.error('Unhandled exception', exc_info=(exc_type, exc_value, exc_traceback))
-    
-def start_bot():
-    bot.infinity_polling()
+
 
 if __name__ == '__main__':
     logger = setup_logger()
-
     sys.excepthook = handle_exception
-    
-    load_dotenv()
-    BOT_TOKEN = os.getenv('BOT_TOKEN')
-    BACKEND_URL = os.getenv('BACKEND_URL')
-   
     utc = pytz.UTC
-    
-    bot = telebot.TeleBot(BOT_TOKEN)
-
-    create_table_if_not_exists()
 
     logger.info('Bot is running...')
 
-    @bot.message_handler(func=lambda message: message)
+    @nlp_bot.message_handler(func=lambda message: message)
     def get_info(message):
         logger.info('------------------------')
-        timestamp = datetime.fromtimestamp(message.date, utc)
-        # Round the timestamp to the last minute
-        timestamp = timestamp.replace(second=0, microsecond=0)
-            
-        process_new_message(timestamp, message)
-        
-        logger.info('------------------------')
         logger.info('MESSAGE RECEIVED')
-        timestamp = datetime.fromtimestamp(message.date, utc)
         
+        timestamp = datetime.fromtimestamp(message.date, utc)
         # Round the timestamp to the last minute
         timestamp = timestamp.replace(second=0, microsecond=0)
             
@@ -134,5 +116,7 @@ if __name__ == '__main__':
     bot_thread = threading.Thread(target=start_bot)
 
     bot_thread.start()
+
+    logger.info('Starting the nlp bot...')
     
     app.run(port=5001)
