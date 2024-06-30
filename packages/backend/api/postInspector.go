@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -252,7 +253,8 @@ func setDirection(dataToInsert *structs.ResponseData, pointers *structs.InsertPo
 func notifyTelegramBotAboutReport(data *structs.ResponseData) error {
 	logger.Log.Debug().Msg("Notifying Telegram bot about report")
 
-	flaskEndpoint := "http://localhost:5001/report-inspector"
+	NLP_BOT_ENDPOINT := os.Getenv("NLP_BOT_URL")
+	flaskEndpoint := NLP_BOT_ENDPOINT + "/report-inspector"
 
 	reportData := map[string]interface{}{
 		"line":      data.Line,
