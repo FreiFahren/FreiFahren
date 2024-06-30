@@ -22,9 +22,10 @@ This repository focuses on the natural language processing (NLP) and data handli
 3. Acquire a Bot API Token by creating a new bot through [BotFather](https://t.me/botFather) and set it as the BOT_TOKEN environment variable.
 
 ### Running the Bot
-Execute the following command to start the bot:
-`python main.py`
+Execute the following command to start the bot from the package's root directory:
+`python3 -m telegram_bots.watcher.watcher`
 
+This will launch the watcher bot, which will start the NLP Bot as a subprocess, watch the errors and begin processing messages from the designated Telegram group.
 Upon launch, the bot begins processing messages from the Telegram group, applying our custom NLP algorithms to extract and validate data in real-time.
 
 ## How it Works
