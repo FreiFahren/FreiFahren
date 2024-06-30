@@ -21,8 +21,9 @@ def start_nlp_bot_process():
 
     # Now all output lines are in the output_lines list
     for console_line in output_lines:
-        # If the console_line indicates an error, handle it
+    # If the console_line indicates an error, handle it
         if console_line:
+            print(console_line)  # Print the line before handling the error
             handle_nlp_bot_error(console_line)
 
     # Check if the process has exited
