@@ -8,7 +8,8 @@ WORKDIR /app
 ADD ../ /app
 
 # Install any needed packages specified in requirements.txt
-CMD ["python3", "setup.py"]
+CMD ["python3", "telegram_bots/setup.py"]
+
 
 EXPOSE 5000
 EXPOSE 5001
