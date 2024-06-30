@@ -16,12 +16,13 @@ from telegram_bots.FreiFahren_BE_NLP.process_message import (
 from telegram_bots.FreiFahren_BE_NLP.db_utils import create_table_if_not_exists, insert_ticket_info
 from telegram_bots.FreiFahren_BE_NLP.app import app
 from telegram_bots.logger import setup_logger
-from telegram_bots.bot import start_bot
+from telegram_bots.bot_utils import start_bot
+from telegram_bots. FreiFahren_BE_NLP.bot import nlp_bot
 import traceback
 import requests
 import sys
 import threading
-from telegram_bots.config import WATCHER_URL, BACKEND_URL, NLP_BOT_TOKEN
+from telegram_bots.config import WATCHER_URL, BACKEND_URL
 
 
 class TicketInspector:
@@ -29,7 +30,6 @@ class TicketInspector:
         self.line = line
         self.station = station
         self.direction = direction
-
 
 def extract_ticket_inspector_info(unformatted_text):
     # Initial guards to avoid unnecessary processing
@@ -98,18 +98,12 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 
 if __name__ == '__main__':
     logger = setup_logger()
-
     sys.excepthook = handle_exception
-   
     utc = pytz.UTC
-    
-    bot = telebot.TeleBot(NLP_BOT_TOKEN)
-
-    create_table_if_not_exists()
 
     logger.info('Bot is running...')
 
-    @bot.message_handler(func=lambda message: message)
+    @nlp_bot.message_handler(func=lambda message: message)
     def get_info(message):
         logger.info('------------------------')
         logger.info('MESSAGE RECEIVED')
@@ -120,8 +114,10 @@ if __name__ == '__main__':
             
         process_new_message(timestamp, message)
 
-    bot_thread = threading.Thread(target=bot.start_bot)
+    bot_thread = threading.Thread(target=start_bot(nlp_bot))
 
     bot_thread.start()
+
+    logger.info('Starting the nlp bot...')
     
     app.run(port=5001)

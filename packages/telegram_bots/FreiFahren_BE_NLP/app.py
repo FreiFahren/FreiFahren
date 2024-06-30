@@ -1,7 +1,8 @@
 from flask import Flask, request
 from telegram_bots.logger import setup_logger
-from telegram_bots.bot import send_message
+from telegram_bots.bot_utils import send_message
 from telegram_bots.config import FREIFAHREN_CHAT_ID
+from telegram_bots.FreiFahren_BE_NLP.bot import nlp_bot
 
 app = Flask(__name__)
 
@@ -22,15 +23,16 @@ def report_inspector() -> tuple:
 
     logger.info(f'Received a report from an inspector: Line: {line}, Station: {station}, Direction: {direction}, Message: {message}')
 
-    telegram_message = ' Über app.freifahren.org gab es folgende Meldung:'
-    telegram_message += f'\nStation: {station}'
+    telegram_message = 'Über app.freifahren.org gab es folgende Meldung:'
+    telegram_message += f'\n\n'
+    telegram_message += f'\n**Station**: {station}'
     if line:
-        telegram_message += f'\nLine: {line}'
+        telegram_message += f'\n**Line**: {line}'
     if direction:
-        telegram_message += f'\nRichtung: {direction}'
+        telegram_message += f'\n**Richtung**: {direction}'
     if message:
-        telegram_message += f'\nBeschreibung: {message}'
+        telegram_message += f'\n**Beschreibung**: {message}'
     
-    send_message(FREIFAHREN_CHAT_ID, telegram_message)
+    send_message(FREIFAHREN_CHAT_ID, telegram_message, nlp_bot)
 
     return {'status': 'success'}, 200

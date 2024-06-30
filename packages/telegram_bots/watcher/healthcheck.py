@@ -1,6 +1,7 @@
 import requests
 from telegram_bots.config import BACKEND_URL, DEV_CHAT_ID, NLP_BOT_URL, TELEGRAM_NEXT_CHECK_TIME
-from telegram_bots.bot import watcherbot, send_message
+from telegram_bots.bot_utils import send_message
+from telegram_bots.watcher.bot import watcher_bot
 from telegram_bots import logger
 import time
 
@@ -51,11 +52,11 @@ def check_nlp_bot_status() -> None:
         try:
             errorlist, request_time = do_healthcheck(NLP_BOT_URL + '/healthcheck')
             if errorlist:
-                send_message(DEV_CHAT_ID, f'NLP bot is not healthy! Please check the logs for more information. Error list: {errorlist}')
+                send_message(DEV_CHAT_ID, f'NLP bot is not healthy! Please check the logs for more information. Error list: {errorlist}', watcher_bot)
             time.sleep(waiting_time)
 
         except Exception as e:
-            send_message(DEV_CHAT_ID, f'Failed to check the NLP bot status: {e}')
+            send_message(DEV_CHAT_ID, f'Failed to check the NLP bot status: {e}', watcher_bot)
             logger.error(f'Failed to check the NLP bot status: {e}')\
 
 
@@ -65,7 +66,7 @@ def check_backend_status() -> None:
         errorlist, _ = do_healthcheck(BACKEND_URL)
         if errorlist:
             try:
-                watcherbot.send_message(DEV_CHAT_ID, 'Backend is not healthy! Please check the logs for more information.')
+                send_message(DEV_CHAT_ID, 'Backend is not healthy! Please check the logs for more information.', watcher_bot)
             except Exception as e:
                 logger.error(f'Failed to send message: {e}')
         time.sleep(20)
