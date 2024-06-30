@@ -1,9 +1,10 @@
 import telebot
-from config import DEV_BOT_TOKEN
-from logger import logger
+from telegram_bots.config import DEV_BOT_TOKEN
+from telegram_bots import logger
 
 
 watcherbot = telebot.TeleBot(DEV_BOT_TOKEN)
+logger = logger.setup_logger()
 
 def start_bot():
     watcherbot.infinity_polling()

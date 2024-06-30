@@ -5,7 +5,7 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import os
 from dotenv import load_dotenv
 import requests
-from logging_utils import setup_logger
+from telegram_bots.logger import setup_logger
 
 logger = setup_logger()
 

@@ -4,7 +4,7 @@ import pytz
 from datetime import datetime
 from dotenv import load_dotenv
 from verify_info import verify_direction, verify_line
-from process_message import (
+from telegram_bots.FreiFahren_BE_NLP.process_message import (
     find_line,
     find_direction,
     find_station,
@@ -13,15 +13,16 @@ from process_message import (
     load_data,
     check_for_spam
 )
-from db_utils import create_table_if_not_exists, insert_ticket_info
-from app import app
-from logging_utils import setup_logger
+from telegram_bots.FreiFahren_BE_NLP.db_utils import create_table_if_not_exists, insert_ticket_info
+from telegram_bots.FreiFahren_BE_NLP.app import app
+from telegram_bots.logger import setup_logger
 import traceback
 import requests
 import sys
 import threading
-sys.path.append('..')
-from watcher.config import WATCHER_URL
+from telegram_bots.config import WATCHER_URL
+
+
 class TicketInspector:
     def __init__(self, line, station, direction):
         self.line = line

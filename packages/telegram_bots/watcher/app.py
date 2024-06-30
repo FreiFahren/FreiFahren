@@ -1,10 +1,11 @@
 from flask import Flask, request
-from config import DEV_CHAT_ID
-from bot import send_message
-from logger import logger
+from telegram_bots.config import DEV_CHAT_ID
+from telegram_bots.watcher.bot import send_message
+from telegram_bots import logger
 
 
 app = Flask(__name__)
+logger = logger.setup_logger()
 
 
 @app.route('/report-failure', methods=['POST'])

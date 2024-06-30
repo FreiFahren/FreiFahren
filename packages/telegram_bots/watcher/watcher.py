@@ -1,12 +1,13 @@
 import time
-from config import DEV_CHAT_ID, BACKEND_URL, NLP_BOT_URL
-from bot import start_bot, watcherbot, send_message
-from healthcheck import check_backend_status, do_healthcheck, check_nlp_bot_status
-from app import app
-from logger import logger
-
+from telegram_bots.config import DEV_CHAT_ID, BACKEND_URL, NLP_BOT_URL
+from telegram_bots.watcher.bot import start_bot, watcherbot, send_message
+from telegram_bots.watcher.healthcheck import check_backend_status, do_healthcheck, check_nlp_bot_status
+from telegram_bots.watcher.app import app
 import threading
 import subprocess
+from telegram_bots import logger
+
+logger = logger.setup_logger()
 
 
 def start_nlp_bot_process():

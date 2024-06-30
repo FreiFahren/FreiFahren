@@ -1,10 +1,10 @@
 import requests
-from config import BACKEND_URL, DEV_CHAT_ID, NLP_BOT_URL, TELEGRAM_NEXT_CHECK_TIME
-from bot import watcherbot
-from logger import logger
-from bot import send_message
+from telegram_bots.config import BACKEND_URL, DEV_CHAT_ID, NLP_BOT_URL, TELEGRAM_NEXT_CHECK_TIME
+from telegram_bots.watcher.bot import watcherbot, send_message
+from telegram_bots import logger
 import time
 
+logger = logger.setup_logger()
 
 def ping_system(endpoint: str) -> tuple:
     start_time = time.time()

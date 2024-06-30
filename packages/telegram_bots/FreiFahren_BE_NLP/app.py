@@ -1,8 +1,5 @@
 from flask import Flask, request
-from logging_utils import setup_logger
-
-import sys 
-sys.path.append('../')
+from telegram_bots.logger import setup_logger
 
 app = Flask(__name__)
 
