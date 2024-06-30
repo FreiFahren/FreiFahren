@@ -11,21 +11,23 @@ from telegram_bots import logger
 logger = logger.setup_logger()
 
 def start_nlp_bot_process():
+    logger.info('Starting the NLP bot process...')
     # Run the NLP bot process. All errors will be received
-    nlp_bot = subprocess.Popen(['python3', 'telegram_bots/FreiFahren_BE_NLP/main.py'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    nlp_bot_process = subprocess.Popen(['python3', 'telegram_bots/FreiFahren_BE_NLP/main.py'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    logger.info('NLP bot process started')
 
     # Continuously read its output. 
     # If we have receive a console_line, it has to be an error
-    for console_line in iter(nlp_bot.stdout.readline, b''):
+    for console_line in iter(nlp_bot_process.stdout.readline, b''):
         console_line = console_line.decode().strip()  # Decode bytes to string and remove trailing newline
         # If the console_line indicates an error, handle it
         if console_line:
             handle_nlp_bot_error(console_line)
 
         # Check if the process has exited
-        if nlp_bot.poll() is not None:
-            logger.error("NLP bot process has exited with code ", nlp_bot.returncode)
-            send_message(DEV_CHAT_ID, "NLP bot process has exited. Please check the logs: ", nlp_bot.returncode, watcher_bot)
+        if nlp_bot_process.poll() is not None:
+            logger.error("NLP bot process has exited with code ", nlp_bot_process.returncode)
+            send_message(DEV_CHAT_ID, "NLP bot process has exited. Please check the logs: ", nlp_bot_process.returncode, watcher_bot)
             break
 
 
@@ -36,13 +38,19 @@ def handle_nlp_bot_error(console_line):
 
 
 def start_watcher_threads():
+    logger.info('Starting the watcher threads...')
+
     nlp_bot_thread = threading.Thread(target=start_nlp_bot_process)
-    watcher_bot_thread = threading.Thread(target=start_bot(watcher_bot))
+    watcher_bot_thread = threading.Thread(target=start_bot, args=(watcher_bot))
+
 
     backend_health_thread = threading.Thread(target=check_backend_status)
     nlp_bot_health_thread = threading.Thread(target=check_nlp_bot_status)
 
+
     # Sleep for a short time to avoid busy waiting
+    logger.debug('NLP bot thread started')
+
     nlp_bot_thread.start()
     while not nlp_bot_thread.is_alive():
         time.sleep(0.1)
@@ -57,8 +65,6 @@ def start_watcher_threads():
 
 if __name__ == '__main__':
     logger.info('Starting the watcher bot...')
-
-    start_watcher_threads()
 
     @watcher_bot.message_handler(commands=['checkhealth'])
     def healthcheck(message):
@@ -78,4 +84,5 @@ if __name__ == '__main__':
         else:
             send_message(message.chat.id, f'NLP bot is healthy!\n The request took {request_time * 1000} milliseconds.', watcher_bot)
     
+    start_watcher_threads()
     app.run(port=5000)

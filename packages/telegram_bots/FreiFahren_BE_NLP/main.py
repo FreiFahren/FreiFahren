@@ -114,7 +114,7 @@ if __name__ == '__main__':
             
         process_new_message(timestamp, message)
 
-    bot_thread = threading.Thread(target=start_bot(nlp_bot))
+    bot_thread = threading.Thread(target=start_bot, args=(nlp_bot))
 
     bot_thread.start()
 

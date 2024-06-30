@@ -1,10 +1,11 @@
 import telebot
 from telegram_bots.config import DEV_BOT_TOKEN
 from telegram_bots import logger
-
+from telegram_bots.watcher.bot import watcher_bot
 logger = logger.setup_logger()
 
-def start_bot(bot):
+def start_bot(bot: telebot.TeleBot) -> None:
+
     bot.infinity_polling()
 
 def send_message(chat_id: str, message: str, bot) -> None:
