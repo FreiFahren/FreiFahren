@@ -55,7 +55,7 @@ func InsertTicketInfo(timestamp *time.Time, author *int64, message, line, statio
 	return nil
 }
 
-func getLastNonHistoricTimestamp() (time.Time, error) {
+func getLastNonHistoricTimestamp() (*time.Time, error) {
 	var err error
 	logger.Log.Debug().Msg("Getting last non-historic timestamp")
 
@@ -64,20 +64,24 @@ func getLastNonHistoricTimestamp() (time.Time, error) {
         FROM ticket_info;
     `
 	row := db.QueryRow(sqlTimestamp)
-	var lastNonHistoricTimestampString string
+	var lastNonHistoricTimestampString sql.NullString
 	if err = row.Scan(&lastNonHistoricTimestampString); err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to get last non-historic timestamp")
-		return time.Time{}, err
+		return nil, err
+	}
+
+	if !lastNonHistoricTimestampString.Valid {
+		return nil, nil
 	}
 
 	var lastNonHistoricTimestamp time.Time
-	lastNonHistoricTimestamp, err = time.Parse("2006-01-02 15:04:05", lastNonHistoricTimestampString)
+	lastNonHistoricTimestamp, err = time.Parse("2006-01-02 15:04:05", lastNonHistoricTimestampString.String)
 
 	if err != nil {
-		return time.Time{}, fmt.Errorf("failed to parse timestamp: %v", err)
+		return nil, fmt.Errorf("failed to parse timestamp: %v", err)
 	}
 
-	return lastNonHistoricTimestamp, nil
+	return &lastNonHistoricTimestamp, nil
 }
 
 func executeGetHistoricStationsSQL(hour, weekday, remaining int, excludedStationIDs []string, lastNonHistoricTimestamp time.Time) ([]utils.TicketInspector, error) {
@@ -151,10 +155,14 @@ func GetHistoricStations(
 		return nil, err
 	}
 
+	if lastNonHistoricTimestamp == nil {
+		return []utils.TicketInspector{}, nil
+	}
+
 	hour := timestamp.Hour()
 	weekday := int(timestamp.Weekday())
 
-	ticketInfoList, err := executeGetHistoricStationsSQL(hour, weekday, remaining, excludedStationIDs, lastNonHistoricTimestamp)
+	ticketInfoList, err := executeGetHistoricStationsSQL(hour, weekday, remaining, excludedStationIDs, *lastNonHistoricTimestamp)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to execute get historic stations SQL")
 		return nil, err
