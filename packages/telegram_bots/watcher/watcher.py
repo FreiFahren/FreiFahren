@@ -77,5 +77,5 @@ if __name__ == '__main__':
         else:
             send_message(message.chat.id, f'NLP bot is healthy!\n The request took {request_time * 1000} milliseconds.', watcher_bot)
     
-    start_watcher_threads()
-    app.run(port=5000)
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=5000)
