@@ -28,9 +28,8 @@ test:
   #!/bin/bash
   set -a; source .env.test; set +a
 
-  just setup_db
+  sqlite3 $HOST_DB_URL < database/schema.sql
 
-  echo $HOST_DB_URL
   echo "Running tests"
 
   docker compose -f compose.yaml -f compose.test.yaml up -d --build --force-recreate
