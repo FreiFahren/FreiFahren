@@ -1,8 +1,11 @@
 package api
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -81,6 +84,13 @@ func PostInspector(c echo.Context) error {
 	err = Rstats.RunRiskModel()
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error running risk model in postInspector")
+	}
+
+	if pointers.AuthorPtr == nil { // reports from the web app do not have an author ID
+		if err := notifyTelegramBotAboutReport(dataToInsert); err != nil {
+			logger.Log.Error().Err(err).Msg("Error notifying Telegram bot about report in postInspector")
+			// Do not return an error here, as we want to continue processing the request
+		}
 	}
 
 	return c.JSON(http.StatusOK, dataToInsert)
@@ -238,4 +248,38 @@ func setDirection(dataToInsert *structs.ResponseData, pointers *structs.InsertPo
 	pointers.DirectionIDPtr = &stationID
 	directionName := station.Name
 	pointers.DirectionNamePtr = &directionName
+}
+
+func notifyTelegramBotAboutReport(data *structs.ResponseData) error {
+	logger.Log.Debug().Msg("Notifying Telegram bot about report")
+
+	NLP_BOT_ENDPOINT := os.Getenv("NLP_BOT_URL")
+	flaskEndpoint := NLP_BOT_ENDPOINT + "/report-inspector"
+
+	reportData := map[string]interface{}{
+		"line":      data.Line,
+		"station":   data.Station.Name,
+		"direction": data.Direction.Name,
+		"message":   data.Message,
+	}
+
+	jsonData, err := json.Marshal(reportData)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error marshalling report data in postInspector")
+		return err
+	}
+
+	resp, err := http.Post(flaskEndpoint, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error posting to Flask endpoint in postInspector")
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		logger.Log.Error().Str("status", resp.Status).Msg("Error in Flask endpoint response in postInspector")
+		return err
+	}
+
+	return nil
 }

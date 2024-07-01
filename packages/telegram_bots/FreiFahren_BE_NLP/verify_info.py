@@ -1,5 +1,5 @@
-from process_message import lines_with_stations, find_station, remove_direction_and_keyword, load_data
-from logging_utils import setup_logger
+from telegram_bots.FreiFahren_BE_NLP.process_message import lines_with_stations, find_station, remove_direction_and_keyword, load_data
+from telegram_bots.logger import setup_logger
 
 logger = setup_logger()
 

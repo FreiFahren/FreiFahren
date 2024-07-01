@@ -4,7 +4,7 @@ const Datenschutz = () => {
             <div className='legal-text'>
                 <h1>Datenschutzerklärung für die App "Freifahren"</h1>
                 <br />
-                <p>Letze aktualisierung: 12.06.2024</p>
+                <p>Letze aktualisierung: 30.06.2024</p>
                 <h2>Rechtsgrundlagen der Datenverarbeitung</h2>
                 <p>Die Verarbeitung personenbezogener Daten in unserer App erfolgt auf Basis der folgenden Rechtsgrundlagen gemäß der Datenschutz-Grundverordnung (DSGVO):</p>
                 <ul>
@@ -38,8 +38,9 @@ const Datenschutz = () => {
                     <li>Dauer, die der Nutzende für das Melden benötigt hat</li>
                 </ul>
                 <p>
-                    Diese Daten werden zur Verbesserung der Nutzererfahrung analysiert und nicht an Dritte weitergegeben. Die Daten werden ausschließlich intern verwendet.
-                    Ebenfalls wird die Uhrzeit bis auf die Minute innerhalb der ersten Stunde nach der Meldung abgerundet, nach einer Stunde wird die Uhrzeit auf die Stunde abgerundet.
+                    Die gemeldeten Daten werden anderen Nutzern der App zur Verfügung gestellt, um ihnen die Möglichkeit zu geben, sich über die aktuelle Situation in den öffentlichen Verkehrsmitteln zu informieren.
+                    Desweiteren werden die Informationen in die FreiFahren_BE Telegram Gruppe weitergeleitet. Diese Datenübermittlung dient dem Austausch und der Information über Ticketkontrollen innerhalb der Community.
+                    Es werden keine personenbezogenen Daten der Nutzer gespeichert. Die Meldungen sind anonym, und es können keine Rückschlüsse auf einzelne Personen gezogen werden.
                 </p>
                 <h2>4. Anonymität</h2>
                 <p>
@@ -47,8 +48,7 @@ const Datenschutz = () => {
                 </p>
                 <h2>5. Speicherung und Zugriff</h2>
                 <p>
-                    Die erhobenen Daten werden auf Servern der Firma Digital Ocean in Frankfurt am Main gespeichert und sind unbestimmt lang gespeichert. Dauer, die der Nutzende für das Melden benötigt hat wird auf den Servern der Firma Emvi Software GmbH gespeichert.
-                    Der Zugriff auf die Daten ist streng begrenzt auf die Gesellschafter der Freifahren GbR.
+                    Die erhobenen Daten werden auf unseren eigenen Servern, die bei der Hetzner Online GmbH in Deutschland gehostet sind, gespeichert. Die Speicherdauer der Daten ist unbefristet. Auch die Dauer, die der Nutzende für das Melden benötigt hat, wird auf diesen Servern gespeichert. Der Zugriff auf die Daten ist streng begrenzt auf die Gesellschafter der Freifahren GbR.
                 </p>
                 <h2>6. Rechte der Nutzer</h2>
                 <p>

@@ -278,7 +278,7 @@ func RoundOldTimestamp() {
 	sql := `
 		UPDATE ticket_info
 		SET timestamp = strftime('%Y-%m-%d %H:00:00', timestamp)
-		WHERE timestamp < datetime('now', '-1 hour');`
+		WHERE timestamp < datetime('now', '-4 hours');`
 
 	_, err := db.Exec(sql)
 	if err != nil {
