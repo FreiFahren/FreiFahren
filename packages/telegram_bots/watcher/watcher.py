@@ -71,7 +71,7 @@ if __name__ == '__main__':
 
         send_message(message.chat.id, 'Checking the NLP bot health...', watcher_bot)
         
-        nlp_errlist, request_time = do_healthcheck(NLP_BOT_URL + '/healthcheck', watcher_bot)
+        nlp_errlist, request_time = do_healthcheck(NLP_BOT_URL + '/healthcheck')
         if nlp_errlist:
             send_message(message.chat.id, f'NLP bot is not healthy!\nPlease check the logs for more information.\nThe request took {request_time * 1000} milliseconds and failed with: {nlp_errlist}.', watcher_bot)
         else:
