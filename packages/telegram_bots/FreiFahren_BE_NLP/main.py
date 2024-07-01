@@ -120,6 +120,6 @@ if __name__ == "__main__":
     logger.info("Waitress serve NLP_BOT")
 
     from waitress import serve
-    serve(nlp_app, host='0.0.0.0', port=5000)
+    serve(nlp_app, host='0.0.0.0', port=5001)
     
 
