@@ -1,3 +1,5 @@
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 import time
 from telegram_bots.config import DEV_CHAT_ID, BACKEND_URL, NLP_BOT_URL
 from telegram_bots.bot_utils import send_message
@@ -78,4 +80,7 @@ if __name__ == '__main__':
             send_message(message.chat.id, f'NLP bot is healthy!\n The request took {request_time * 1000} milliseconds.', watcher_bot)
     
     start_watcher_threads()
-    app.run(port=5000)
+    app.wsgi_app =ProxyFix(
+        app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+    )
+    app.run(port=5000, debug=False, host='0.0.0.0')

@@ -1,5 +1,4 @@
-import os
-import telebot
+from werkzeug.middleware.proxy_fix import ProxyFix
 import pytz
 from datetime import datetime
 from dotenv import load_dotenv
@@ -101,7 +100,7 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 if __name__ == "__main__":
     logger = setup_logger()
 
-    NLP_BOT_TOKEN = "6515475322:AAGj9UvD4MoiuWzPBySF4RRWntSvWagTgVs"
+    ***REMOVED***
     sys.excepthook = handle_exception
     utc = pytz.UTC
 
@@ -123,5 +122,7 @@ if __name__ == "__main__":
     bot_thread.start()
 
     logger.info("Starting the nlp bot...")
-
-    app.run(port=5001)
+    app.wsgi_app =ProxyFix(
+        app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+    )
+    app.run(debug=False, host='0.0.0.0', port=5001)
