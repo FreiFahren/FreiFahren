@@ -8,7 +8,7 @@ shell container:
   docker compose exec{{container}} /bin/bash
 
 setup_db:
-  sqlite3 db.sqlite3 < database/schema.sql
+  sqlite3 $HOST_DB_URL < database/schema.sql
 
 dev: setup_db
   #!/bin/bash
@@ -27,6 +27,8 @@ dev: setup_db
 test:
   #!/bin/bash
   set -a; source .env.test; set +a
+
+  just setup_db
 
   echo $HOST_DB_URL
   echo "Running tests"
