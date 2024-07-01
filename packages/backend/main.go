@@ -32,7 +32,6 @@ func main() {
 	
 	data.EmbedJSONFiles()
 
-	// Create a new connection pool, for concurrency
 	err := database.OpenDB()
 
 	if err != nil {
