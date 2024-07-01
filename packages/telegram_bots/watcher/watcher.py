@@ -2,7 +2,7 @@ import time
 from telegram_bots.config import DEV_CHAT_ID, BACKEND_URL, NLP_BOT_URL
 from telegram_bots.bot_utils import send_message
 from telegram_bots.watcher.healthcheck import check_backend_status, do_healthcheck, check_nlp_bot_status
-from telegram_bots.watcher.app import app
+from telegram_bots.watcher.app import watcher_app
 from telegram_bots.watcher.bot import watcher_bot, start_bot
 import threading
 import subprocess
@@ -77,5 +77,11 @@ if __name__ == '__main__':
         else:
             send_message(message.chat.id, f'NLP bot is healthy!\n The request took {request_time * 1000} milliseconds.', watcher_bot)
     
+    start_watcher_threads()
+    logger.info("Waitress serve WATCHER_BOT")
+        
     from waitress import serve
-    serve(app, host="0.0.0.0", port=5000)
+    serve(watcher_app, host='0.0.0.0', port=5000)
+    
+
+    

@@ -1,8 +1,5 @@
-import os
-import telebot
 import pytz
 from datetime import datetime
-from dotenv import load_dotenv
 from telegram_bots.FreiFahren_BE_NLP.verify_info import verify_direction, verify_line
 from telegram_bots.FreiFahren_BE_NLP.process_message import (
     find_line,
@@ -14,7 +11,7 @@ from telegram_bots.FreiFahren_BE_NLP.process_message import (
     check_for_spam,
 )
 from telegram_bots.FreiFahren_BE_NLP.db_utils import insert_ticket_info
-from telegram_bots.FreiFahren_BE_NLP.app import app
+from telegram_bots.FreiFahren_BE_NLP.app import nlp_app
 from telegram_bots.logger import setup_logger
 from telegram_bots.FreiFahren_BE_NLP.bot import nlp_bot, start_bot
 import traceback
@@ -118,10 +115,11 @@ if __name__ == "__main__":
         process_new_message(timestamp, message)
 
     bot_thread = threading.Thread(target=start_bot)
-
-    bot_thread.start()
-
     logger.info("Starting the nlp bot...")
+    bot_thread.start()
+    logger.info("Waitress serve NLP_BOT")
 
     from waitress import serve
-    serve(app, host="0.0.0.0", port=5001)
+    serve(nlp_app, host='0.0.0.0', port=5000)
+    
+
