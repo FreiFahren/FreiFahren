@@ -101,7 +101,7 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 if __name__ == "__main__":
     logger = setup_logger()
 
-    ***REMOVED***
+    NLP_BOT_TOKEN = "6515475322:AAGj9UvD4MoiuWzPBySF4RRWntSvWagTgVs"
     sys.excepthook = handle_exception
     utc = pytz.UTC
 
