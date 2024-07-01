@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ActionMeta } from 'react-select/';
 import AutocompleteInputForm, { selectOption } from '../AutocompleteInputForm/AutocompleteInputForm';
 
-import { LinesList, StationList, getAllLinesList, reportInspector } from '../../../utils/dbUtils';
+import { LinesList, StationList, getAllLinesList, reportInspector, sendAnalyticsEvent } from '../../../utils/dbUtils';
 import {
     highlightElement,
     redefineDirectionOptions,
@@ -119,17 +119,14 @@ const ReportForm: React.FC<ReportFormProps> = ({
         const endTime = new Date();
         const durationInSeconds = startTime ? Math.round((endTime.getTime() - startTime.getTime()) / 1000) : 0;
 
-        // Triggering custom event for analytics when the report is successfully submitted
-        if (window.pirsch) {
-            window.pirsch('Report Submitted', {
-                duration: durationInSeconds,
-                meta: {
-                    Station: stationInput!.label,
-                    Line: lineInput?.label,
-                    Direction: directionInput?.label
-                }
-            });
-        }
+        sendAnalyticsEvent('Report Submitted', {
+            duration: durationInSeconds,
+            meta: {
+                Station: stationInput!.label,
+                Line: lineInput?.label,
+                Direction: directionInput?.label
+            }
+        });
 
         // Save the timestamp of the report to prevent spamming
         localStorage.setItem('lastReportTime', new Date().toISOString());
