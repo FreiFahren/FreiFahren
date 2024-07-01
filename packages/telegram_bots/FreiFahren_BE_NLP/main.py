@@ -1,7 +1,6 @@
 from werkzeug.middleware.proxy_fix import ProxyFix
 import pytz
 from datetime import datetime
-from dotenv import load_dotenv
 from telegram_bots.FreiFahren_BE_NLP.verify_info import verify_direction, verify_line
 from telegram_bots.FreiFahren_BE_NLP.process_message import (
     find_line,
@@ -100,7 +99,6 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 if __name__ == "__main__":
     logger = setup_logger()
 
-    ***REMOVED***
     sys.excepthook = handle_exception
     utc = pytz.UTC
 
@@ -122,7 +120,5 @@ if __name__ == "__main__":
     bot_thread.start()
 
     logger.info("Starting the nlp bot...")
-    app.wsgi_app =ProxyFix(
-        app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
-    )
-    app.run(debug=False, host='0.0.0.0', port=5001)
+    from waitress import serve
+    serve(app, host='0.0.0.0', port=5001)
