@@ -74,8 +74,12 @@ const Datenschutz = () => {
                 </p>
                 <h2>11. Einsatz von Analysetools</h2>
                 <p>
-                    Wir verwenden auf unserer App die Analyse-Software Pirsch, um allgemeine Nutzungsinformationen wie Seitenaufrufe und Sitzungsdaten zu erfassen. Zusätzlich erfasst Pirsch, wie viele Meldungen über unsere App abgegeben werden und wie lange Nutzer für die Abgabe einer Meldung benötigen.
+                    Wir verwenden auf unserer App die Analyse-Software Pirsch, um allgemeine Nutzungsinformationen wie Seitenaufrufe und Sitzungsdaten zu erfassen. Zusätzlich erfasst Pirsch, folgende Informationen:
                 </p>
+                <ul>
+                    <li>Wie viele Meldungen über unsere App abgegeben werden und wie lange für die Abgabe einer Meldung benötigt wurde.</li>
+                    <li>Wie häufig die Risikolinienebene betrachtet wurde.</li>
+                </ul>
                 <p>
                     Diese Daten sind nicht personenbezogen; es werden keine Informationen gesammelt, die eine Identifizierung der Nutzer ermöglichen. Die Nutzung von Pirsch erfolgt auf Grundlage unserer berechtigten Interessen an einer statistischen Analyse des Nutzerverhaltens, um unsere App zu optimieren.
                 </p>

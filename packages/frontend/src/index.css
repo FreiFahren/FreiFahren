@@ -255,7 +255,7 @@ span {
 
 .legal-text {
   overflow-y: scroll;
-  max-height: 100vh;
+  max-height: calc(100vh - 25px);
   background-color: var(--color-background);
   padding: 25px;
 }
