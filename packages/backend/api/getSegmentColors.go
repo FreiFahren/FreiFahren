@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/FreiFahren/backend/Rstats"
-	"github.com/FreiFahren/backend/data"
 	_ "github.com/FreiFahren/backend/docs"
 	"github.com/FreiFahren/backend/utils"
 	"github.com/labstack/echo/v4"
@@ -59,33 +58,12 @@ func GetSegmentColors(c echo.Context) error {
 		segmentColorsMap[segment.Sid] = segment.Color
 	}
 
-	duplicates := data.GetDuplicateSegments()
-
-	AssignSameColorToSegmentsWithSameStations(segmentColorsMap, duplicates)
-
 	RiskModelResponse := utils.RiskModelResponse{
 		LastModified:  lastModified.Format("2006-01-02T15:04:05Z07:00"),
 		SegmentColors: segmentColorsMap,
 	}
 
 	return c.JSONPretty(http.StatusOK, RiskModelResponse, "  ")
-}
-
-func AssignSameColorToSegmentsWithSameStations(segmentColorsMap map[string]string, duplicates map[string][]string) {
-	for original, duplicatesArray := range duplicates {
-		if color, found := segmentColorsMap[original]; found {
-			originalPrefix := getSegmentType(original)
-			for _, duplicate := range duplicatesArray {
-				if originalPrefix == getSegmentType(duplicate) { // Only assign the color if the segment type is the same
-					segmentColorsMap[duplicate] = color
-				}
-			}
-		}
-	}
-}
-
-func getSegmentType(segmentID string) string {
-	return segmentID[:1] // By getting the first character we know if it is a Ubahn or Sbahn segment
 }
 
 func loadAndParseRiskModelOutput(file os.FileInfo) ([]utils.RiskModelJSON, time.Time, error) {
