@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "freifahren",
+    "slug": "Freifahren",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      [ "expo-dev-launcher", { "launchMode": "most-recent" } ],
+      "@maplibre/maplibre-react-native"
+    ],
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.Freifahren"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.anonymous.Freifahren"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
