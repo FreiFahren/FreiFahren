@@ -1,0 +1,149 @@
+{
+  "extends": [
+    "airbnb",
+    "airbnb-typescript",
+    "airbnb/hooks",
+    "@react-native",
+    "prettier"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json",
+    "sourceType": "module"
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "prefer-arrow",
+    "unicorn",
+    "simple-import-sort",
+    "reanimated",
+    "react-native"
+  ],
+  "overrides": [
+    {
+      "files": ["**/*.stories.tsx"],
+      "rules": {
+        "import/no-default-export": ["off"]
+      }
+    }
+  ],
+  "rules": {
+    "eqeqeq": ["error", "always"],
+    "no-console": "error",
+    "max-classes-per-file": "off",
+    "no-warning-comments": "warn",
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "ForInStatement",
+        "message": "for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array."
+      },
+      {
+        "selector": "LabeledStatement",
+        "message": "Labels are a form of GOTO; using them makes code confusing and hard to maintain and understand."
+      },
+      {
+        "selector": "WithStatement",
+        "message": "`with` is disallowed in strict mode because it makes code impossible to predict and optimize."
+      }
+    ],
+    "padding-line-between-statements": [
+      "error",
+      { "blankLine": "always", "prev": ["const", "let", "var"], "next": "*" },
+      {
+        "blankLine": "any",
+        "prev": ["const", "let", "var"],
+        "next": ["const", "let", "var"]
+      }
+    ],
+    "prefer-destructuring": [
+      "error",
+      {
+        "array": true,
+        "object": true
+      }
+    ],
+    "prefer-arrow-callback": "error",
+    "import/order": "off",
+    "import/no-namespace": "error",
+    "import/no-self-import": "error",
+    "import/no-default-export": "error",
+    "import/prefer-default-export": "off",
+    "react/jsx-props-no-spreading": "off",
+    "react/require-default-props": "off",
+    "react/destructuring-assignment": [
+      "error",
+      "always",
+      { "destructureInSignature": "always" }
+    ],
+    "react/function-component-definition": [
+      "error",
+      {
+        "namedComponents": "arrow-function",
+        "unnamedComponents": "arrow-function"
+      }
+    ],
+    "no-param-reassign": [
+      "error",
+      {
+        "props": true,
+        "ignorePropertyModificationsFor": ["zustandState", "draft"]
+      }
+    ],
+    "prefer-arrow/prefer-arrow-functions": [
+      "error",
+      {
+        "disallowPrototype": true
+      }
+    ],
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/prefer-nullish-coalescing": "error",
+    "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/no-unnecessary-condition": "warn",
+    "@typescript-eslint/strict-boolean-expressions": [
+      "error",
+      {
+        "allowNumber": false
+      }
+    ],
+    "unicorn/no-useless-spread": "error",
+    "unicorn/prevent-abbreviations": [
+      "error",
+      {
+        "replacements": {
+          "err": false,
+          "e": {
+            "err": true
+          },
+          "prop": false,
+          "props": false,
+          "ref": false,
+          "param": false,
+          "params": false,
+          "res": false,
+          "i": false,
+          "prev": false,
+          "acc": false,
+          "curr": false,
+          "val": false,
+          "temp": false,
+          "tmp": {
+            "temp": true
+          },
+          "dev": false,
+          "env": false
+        }
+      }
+    ],
+    "react-native/no-unused-styles": "error",
+    "react-native/split-platform-components": "error",
+    "react-native/no-inline-styles": "off",
+    "react-native/no-color-literals": "off",
+    "react-native/no-raw-text": ["error", { "skip": ["ForgetText"] }],
+    "react-native/no-single-element-style-arrays": "error",
+    "react/jsx-uses-react": "off",
+    "react/react-in-jsx-scope": "off"
+  }
+}
