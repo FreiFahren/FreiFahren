@@ -67,9 +67,6 @@ var embeddedLinesList []byte
 
 //go:embed StationsList.json
 var embeddedStationsList []byte
-
-//go:embed duplicateSegments.json
-var embeddedDuplicateSegments []byte
 ```
 
 When commenting the ````//go:embed ...```  lines, go will compile these bytes into the binary too.

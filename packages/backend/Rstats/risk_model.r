@@ -5,6 +5,7 @@
 ##### Johann-Friedrich Salzmann
 #
 ################################################################################
+#setwd("packages/backend")
 
 rm(list = ls(envir = globalenv()),envir = globalenv())
 
@@ -14,6 +15,7 @@ if (!require("pacman")) {
     library(pacman)
 }
 
+#p_load(dotenv)
 p_load(magrittr)
 p_load(ggplot2)
 p_load(tidyverse)
@@ -37,6 +39,14 @@ as.numeric.factor = . %>% as.numeric(levels(.))[.]
 "%?%" = function(x, y) list(x = x, y = y)
 "%:%" = function(xy, z) if(xy$x) xy$y else z
 pmin2_na = function(a,b) pmin(coalesce(a,b),coalesce(b,a))
+
+# Get the environment variables
+#load_dot_env(".env")
+#DB_NAME = Sys.getenv("DB_NAME")
+#DB_HOST = Sys.getenv("DB_HOST")
+#DB_PORT = Sys.getenv("DB_PORT")
+#DB_USER = Sys.getenv("DB_READER")
+#DB_PASSWORD = Sys.getenv("DB_READER_PASSWORD")
 
 ################################################################################
 
@@ -104,6 +114,7 @@ FreifahrenRiskClassifier = R6::R6Class("FreifahrenRiskClassifier",
          as_tibble() %>%
          rename(r_neigh = r) %>%
          select(line, r_neigh)
+       n_ring = self$segments %>% filter(line == "S41") %>% nrow()
 
        station_based = self$data %>%
          left_join(self$segments, join_by(line,overlaps(r_st1_,r_st2_,r,r))) %>%
@@ -120,10 +131,13 @@ FreifahrenRiskClassifier = R6::R6Class("FreifahrenRiskClassifier",
          group_by(id) %>%
          filter(n_match == 1 | (n_match > 1 & ((r!=r_st & r<=r_neigh) | (r==r_st & r>=r_neigh)))) %>%
          mutate(
-           delta_r_bidirect = ifelse(dir == 0,1,dir)*(r_neigh-r),
+           delta_r_bidirect_default = ifelse(dir == 0,1,dir)*(r_neigh-r),
+           delta_r_bidirect_ring = pmin(r_neigh-r,abs(r_neigh-r-n_ring)),
+           delta_r_bidirect = ifelse(ring,delta_r_bidirect_ring,delta_r_bidirect_default),
            delta_r_direct = pmax(delta_r_bidirect,0),
+           waiver_multi = ifelse(multi,.2,1),
            m_direct_risk = self$.d_direct(delta_r_direct) * direct_risk,
-           m_bidirect_risk = self$.d_bidirect(delta_r_bidirect) * bidirect_risk,
+           m_bidirect_risk = self$.d_bidirect(delta_r_bidirect) * bidirect_risk * waiver_multi,
            m_line_risk = self$.d_line(delta_r_bidirect) * line_risk
          ) %>%
          select(id,line,r_neigh,starts_with("m_")) %>%
@@ -143,7 +157,9 @@ FreifahrenRiskClassifier = R6::R6Class("FreifahrenRiskClassifier",
          as_tibble() %>%
          select(line,r,stop_from,stop_to,network) %>%
          left_join(marginal_risk, join_by(line,r)) %>%
-         group_by(network,stop_from,stop_to) %>% #stop_from,stop_to, # line,r
+         rowwise() %>%
+         mutate(ft = paste(sort(c(stop_from, stop_to)), collapse = " ")) %>%
+         group_by(network,ft) %>% #stop_from,stop_to, # line,r
          summarise(
            m_direct_risk = coalesce(pmin(1,sum(m_direct_risk, na.rm = T)),0),
            m_bidirect_risk = coalesce(pmin(1,sum(m_bidirect_risk, na.rm = T)),0),
@@ -154,7 +170,10 @@ FreifahrenRiskClassifier = R6::R6Class("FreifahrenRiskClassifier",
          mutate(score = replace_na(m_sum,0))
 
        self$segments %<>%
-         left_join(aggregate_risk, join_by(network,stop_from,stop_to)) # #stop_from,stop_to # line,r
+         rowwise() %>%
+         mutate(ft = paste(sort(c(stop_from, stop_to)), collapse = " ")) %>%
+         ungroup %>%
+         left_join(aggregate_risk, join_by(network,ft)) # #stop_from,stop_to # line,r
      },
 
      .direct_risk = function(row){
@@ -231,45 +250,33 @@ classify_risk = function(...){
 
 ###################################################################################
 
-segments = readRDS("Rstats/segments_v4.RDS")
-now = Sys.time() %>% setattr("tzone","UTC")
-from = format(now - (60*60)) %>% as.POSIXct(tz="UTC")
-suffix = format(Sys.time(), "%Y-%m-%dT%H:%M:%S", tz = "UTC")
+ticket_info = read_csv("Rstats/ticket_data.csv") %>% #fromJSON("Rstats/ticket_data.json",)
+  mutate(Lines = strsplit(Lines, "\\|")) %>%
+  rename(timestamp = Timestamp, station_id = StationID, line = Lines, direction_id = DirectionID)
+segments = readRDS("Rstats/segments_v5.RDS")
+now = Sys.time() %>% setattr("tzone","UTC") # now = as_datetime("2024-07-02 12:33:00")
+from = format(now - (60*60)) %>% as.POSIXct(tz = "UTC")
+suffix = format(Sys.time(), "%Y-%m-%dT%H.%M.%S", tz = "UTC")
 
-# Load data from JSON file instead of database
-ticket_info <- jsonlite::fromJSON("Rstats/ticket_data.json")
 
-# Convert timestamp to POSIXct format if data is not empty
 if (!is.data.frame(ticket_info) || nrow(ticket_info) == 0) {
-  ticket_info <- data.frame(
-    timestamp = as.POSIXct(character()),  # create an empty POSIXct column for timestamp
-    line = character(),
-    station_name = character(),
-    station_id = character(),
-    direction_id = character(),
-    direction_name = character(),
-    stringsAsFactors = FALSE  # Avoid factor conversion
-  )
-} else {
-  ticket_info$timestamp <- as.POSIXct(ticket_info$timestamp, format = "%Y-%m-%dT%H:%M:%S", tz = "UTC")
-
-  # Ensure all expected columns are present
-  necessary_columns <- c("timestamp", "line", "station_name", "station_id", "direction_id", "direction_name")
-  missing_columns <- setdiff(necessary_columns, names(ticket_info))
-  
-  # Add missing columns as empty
-  for (col in missing_columns) {
-    ticket_info[[col]] <- vector(mode = "character", length = nrow(ticket_info))
-  }
+  write_json(tibble(), "Rstats/output/risk_model_" %.% suffix %.% ".json")
+  stop("No reports to analyse")
 }
 
-# Extract the necessary columns without filtering for time or sorting as the data is already sorted
 exc = ticket_info %>%
-  select(timestamp, line, station_name, station_id, direction_id, direction_name)
-
+  rowwise() %>%
+  mutate(
+    timestamp = as.POSIXct(timestamp, format = "%Y-%m-%dT%H:%M:%S", tz = "UTC"),
+    line = list(unique(recode(line,"S42"="S41"))),
+    multi = length(line)>1,
+  ) %>%
+  unnest(line) %>%
+  mutate(ring = line == "S41") %>%
+  select(timestamp, line, station_id, direction_id, multi, ring)
 
 risk_model = segments %>%
-  classify_risk(exc, now) %>%
+  classify_risk(exc, now) %>% # risk_model %>% mapview(zcol="color", color=.$color, alpha=1)
   as_tibble() %>%
   filter(score > .2) %>%
   select(sid, line, color)
