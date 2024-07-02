@@ -3,8 +3,7 @@ package Rstats
 import (
 	"bytes"
 	_ "embed"
-	"encoding/csv"
-	"fmt"
+	"encoding/json"
 	"log"
 	"os"
 	"os/exec"
@@ -13,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/logger"
 	"github.com/FreiFahren/backend/utils"
@@ -22,7 +20,7 @@ import (
 //go:embed risk_model.r
 var embeddedRiskModelScript []byte
 
-//go:embed segments_v5.RDS
+//go:embed segments_v4.RDS
 var embeddedSegmentsRDS []byte
 
 func RunRiskModel() error {
@@ -31,7 +29,7 @@ func RunRiskModel() error {
 	basePath := "."
 	scriptPath := filepath.Join(basePath, "Rstats")
 	outputPath := filepath.Join(scriptPath, "output")
-	csvPath := filepath.Join(scriptPath, "ticket_data.csv")
+	jsonPath := filepath.Join(scriptPath, "ticket_data.json")
 
 	if _, err := os.Stat(scriptPath); os.IsNotExist(err) {
 		if err = os.Mkdir(scriptPath, 0755); err != nil {
@@ -47,12 +45,12 @@ func RunRiskModel() error {
 		}
 	}
 
-	err := os.WriteFile("Rstats/segments_v5.RDS", embeddedSegmentsRDS, 0644)
+	err := os.WriteFile("Rstats/segments_v4.RDS", embeddedSegmentsRDS, 0644)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to write segments_v4.RDS")
 	}
 
-	if err := fetchAndSaveRecentTicketInspectors(csvPath); err != nil {
+	if err := fetchAndSaveRecentTicketInspectors(jsonPath); err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to fetch and save recent ticket inspectors")
 		return err
 	}
@@ -70,7 +68,7 @@ func RunRiskModel() error {
 	return nil
 }
 
-func fetchAndSaveRecentTicketInspectors(csvPath string) error {
+func fetchAndSaveRecentTicketInspectors(jsonPath string) error {
 	logger.Log.Debug().Msg("Fetching and saving recent ticket inspectors")
 
 	ticketInspectors, err := database.GetLatestTicketInspectors()
@@ -79,7 +77,7 @@ func fetchAndSaveRecentTicketInspectors(csvPath string) error {
 		return err
 	}
 
-	if err := simplifyAndSaveTicketInspectors(ticketInspectors, csvPath); err != nil {
+	if err := simplifyAndSaveTicketInspectors(ticketInspectors, jsonPath); err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to simplify and save ticket inspectors")
 		return err
 	}
@@ -108,51 +106,46 @@ func executeRiskModelScript() error {
 func simplifyAndSaveTicketInspectors(ticketInspectors []utils.TicketInspector, filePath string) error {
 	logger.Log.Debug().Msg("Simplifying and saving ticket inspectors")
 
-	file, err := os.Create(filePath)
-	if err != nil {
-		return fmt.Errorf("(rScripts.go) failed to create CSV file: %w", err)
-	}
-	defer file.Close()
+	var simplifiedTickets []utils.SimplifiedTicketInspector
 
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
-
-	// Write CSV header
-	header := []string{"Timestamp", "StationID", "Lines", "DirectionID"}
-	if err := writer.Write(header); err != nil {
-		return fmt.Errorf("(rScripts.go) failed to write CSV header: %w", err)
-	}
-
-	// If no ticket inspectors, just write the header
+	// If no ticket inspectors, write an empty JSON array to the file
 	if len(ticketInspectors) == 0 {
+		emptyJson := []byte("[]")
+		if err := os.WriteFile(filePath, emptyJson, 0644); err != nil {
+			logger.Log.Error().Err(err).Msg("Failed to write empty JSON data to file")
+			return err
+		}
 		return nil
 	}
 
 	for _, ticket := range ticketInspectors {
-		var lines []string
+		simplified := utils.SimplifiedTicketInspector{
+			Timestamp: ticket.Timestamp.Format(time.RFC3339),
+			StationID: ticket.StationID,
+		}
+
+		// Handle nullable fields
 		if ticket.Line.Valid {
-			lines = append(lines, ticket.Line.String)
-		} else {
-			stations := data.GetStationsList()
-			lines = stations[ticket.StationID].Lines
+			simplified.Line = ticket.Line.String
 		}
-
-		directionID := ""
 		if ticket.DirectionID.Valid {
-			directionID = ticket.DirectionID.String
+			simplified.DirectionID = ticket.DirectionID.String
 		}
 
-		row := []string{
-			ticket.Timestamp.Format(time.RFC3339),
-			ticket.StationID,
-			strings.Join(lines, "|"), // Join multiple lines with a pipe character
-			directionID,
-		}
+		simplifiedTickets = append(simplifiedTickets, simplified)
+	}
 
-		if err := writer.Write(row); err != nil {
-			logger.Log.Error().Err(err).Msg("Failed to write row")
-			return err
-		}
+	// Serialize simplified data to JSON
+	data, err := json.MarshalIndent(simplifiedTickets, "", "  ")
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Failed to marshal JSON data")
+		return err
+	}
+
+	// Save to file
+	if err := os.WriteFile(filePath, data, 0644); err != nil {
+		logger.Log.Error().Err(err).Msg("Failed to write JSON data to file")
+		return err
 	}
 
 	return nil

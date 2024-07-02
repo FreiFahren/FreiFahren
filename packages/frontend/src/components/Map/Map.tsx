@@ -8,7 +8,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 import MarkerContainer from './Markers/MarkerContainer';
 import LocationMarker from './Markers/Classes/LocationMarker/LocationMarker';
-import linesGeoJSON from '../../data/segments_v5.json'
+import linesGeoJSON from '../../data/lineSegments.json'
 import stationsData from '../../data/StationsList.json';
 import StationLayer from './MapLayers/StationLayer/StationLayer';
 import RiskLineLayer from './MapLayers/LineLayer/RiskLineLayer';
