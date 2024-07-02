@@ -21,7 +21,7 @@ import (
 //go:embed risk_model.r
 var embeddedRiskModelScript []byte
 
-//go:embed segments_v4.RDS
+//go:embed segments_v5.RDS
 var embeddedSegmentsRDS []byte
 
 func RunRiskModel() error {
@@ -42,7 +42,7 @@ func RunRiskModel() error {
 		}
 	}
 
-	err := os.WriteFile("Rstats/segments_v4.RDS", embeddedSegmentsRDS, 0644)
+	err := os.WriteFile("Rstats/segments_v5.RDS", embeddedSegmentsRDS, 0644)
 	if err != nil {
 		log.Fatalf("(rScripts.go) Failed to write file: %v", err)
 	}
