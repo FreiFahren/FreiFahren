@@ -197,8 +197,8 @@ func GetLatestTicketInspectors() ([]utils.TicketInspector, error) {
 		SELECT timestamp, station_id, direction_id, line,
 		CASE WHEN author IS NULL THEN  message ELSE NULL END AS message 
 		FROM ticket_info
-		WHERE datetime(timestamp) >= datetime('now', '-60 minutes')
-		AND station_name IS NOT NULL AND station_id IS NOT NULL;`
+		WHERE station_name IS NOT NULL AND station_id IS NOT NULL;`
+	// WHERE datetime(timestamp) >= datetime('now', '-60 minutes')
 
 	logger.Log.Info().Msg("Getting latest ticket inspectors")
 
@@ -219,6 +219,7 @@ func GetLatestTicketInspectors() ([]utils.TicketInspector, error) {
 			logger.Log.Error().Err(err).Msg("Error scanning row")
 			return nil, err
 		}
+		// logger.Log.Debug().Msgf("Timestamp: %v, StationID: %s, DirectionID: %s, Line: %s, Message: %s", ticketInfo.Timestamp, ticketInfo.StationID, ticketInfo.DirectionID, ticketInfo.Line, ticketInfo.Message)
 		ticketInfoList = append(ticketInfoList, ticketInfo)
 	}
 

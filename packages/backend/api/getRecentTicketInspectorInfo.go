@@ -152,6 +152,8 @@ func FetchAndAddHistoricData(ticketInfoList []utils.TicketInspector, remaining i
 func constructTicketInspectorInfo(ticketInfo utils.TicketInspector) (utils.TicketInspectorResponse, error) {
 	logger.Log.Debug().Msg("Constructing ticket inspector info")
 
+	logger.Log.Debug().Msgf("Station ID: %s", ticketInfo.StationID)
+
 	cleanedStationId := strings.ReplaceAll(ticketInfo.StationID, "\n", "")
 	cleanedDirectionId := strings.ReplaceAll(ticketInfo.DirectionID.String, "\n", "")
 	cleanedLine := strings.ReplaceAll(ticketInfo.Line.String, "\n", "")
