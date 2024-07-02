@@ -1,18 +1,16 @@
 button.util-button {
     bottom: var(--distance-from-edge-default);
     left: var(--distance-from-edge-default);
-    flex-direction: column;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    flex-direction: column;
 }
-
-.util-button span {
-    flex: 0 1 auto;
+.small-button span {
     display: block;
     height: 4px;
-    width: 1.5em;
-    border-radius: var(--borderRadius-default);
+    width: 25px;
+    border-radius: 3px;
     background-color: var(--color-primary);
-    margin: var(--margin-xs) auto;
+    margin: 3px 5px;
 }
