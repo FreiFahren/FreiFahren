@@ -3,7 +3,7 @@ package Rstats
 import (
 	"bytes"
 	_ "embed"
-	"encoding/json"
+	"encoding/csv"
 	"fmt"
 	"log"
 	"os"
@@ -28,7 +28,7 @@ func RunRiskModel() error {
 	basePath := "."
 	scriptPath := filepath.Join(basePath, "Rstats")
 	outputPath := filepath.Join(scriptPath, "output")
-	jsonPath := filepath.Join(scriptPath, "ticket_data.json")
+	csvPath := filepath.Join(scriptPath, "ticket_data.csv")
 
 	if _, err := os.Stat(scriptPath); os.IsNotExist(err) {
 		if err = os.Mkdir(scriptPath, 0755); err != nil {
@@ -47,7 +47,7 @@ func RunRiskModel() error {
 		log.Fatalf("(rScripts.go) Failed to write file: %v", err)
 	}
 
-	if err := fetchAndSaveRecentTicketInspectors(jsonPath); err != nil {
+	if err := fetchAndSaveRecentTicketInspectors(csvPath); err != nil {
 		return fmt.Errorf("(rScripts.go) failed to fetch data and save: %w", err)
 	}
 
@@ -62,13 +62,13 @@ func RunRiskModel() error {
 	return nil
 }
 
-func fetchAndSaveRecentTicketInspectors(jsonPath string) error {
+func fetchAndSaveRecentTicketInspectors(csvPath string) error {
 	ticketInspectors, err := database.GetLatestTicketInspectors()
 	if err != nil {
 		return fmt.Errorf("(rScripts.go) failed to fetch tickets: %w", err)
 	}
 
-	if err := simplifyAndSaveTicketInspectors(ticketInspectors, jsonPath); err != nil {
+	if err := simplifyAndSaveTicketInspectors(ticketInspectors, csvPath); err != nil {
 		return fmt.Errorf("(rScripts.go) failed to simplify and save ticket inspectors: %w", err)
 	}
 
@@ -91,50 +91,51 @@ func executeRiskModelScript() error {
 }
 
 func simplifyAndSaveTicketInspectors(ticketInspectors []utils.TicketInspector, filePath string) error {
-	var simplifiedTickets []utils.SimplifiedTicketInspector
 
-	// If no ticket inspectors, write an empty JSON array to the file
+	file, err := os.Create(filePath)
+	if err != nil {
+		return fmt.Errorf("(rScripts.go) failed to create CSV file: %w", err)
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	// Write CSV header
+	header := []string{"Timestamp", "StationID", "Lines", "DirectionID"}
+	if err := writer.Write(header); err != nil {
+		return fmt.Errorf("(rScripts.go) failed to write CSV header: %w", err)
+	}
+
+	// If no ticket inspectors, just write the header
 	if len(ticketInspectors) == 0 {
-		emptyJson := []byte("[]")
-		if err := os.WriteFile(filePath, emptyJson, 0644); err != nil {
-			return fmt.Errorf("(rScripts.go) failed to write empty JSON data to file: %w", err)
-		}
 		return nil
 	}
 
 	for _, ticket := range ticketInspectors {
-		simplified := utils.SimplifiedTicketInspector{
-			Timestamp: ticket.Timestamp.Format(time.RFC3339),
-			StationID: ticket.StationID,
-		}
-
-		// Handle nullable fields
+		var lines []string
 		if ticket.Line.Valid {
-			simplified.Lines = append(simplified.Lines, ticket.Line.String)
+			lines = append(lines, ticket.Line.String)
 		} else {
-			// If no line is specified, get all possible lines for the station
 			stations := data.GetStationsList()
-			LinesOfStation := stations[simplified.StationID].Lines
-
-			simplified.Lines = append(simplified.Lines, LinesOfStation...)
+			lines = stations[ticket.StationID].Lines
 		}
 
+		directionID := ""
 		if ticket.DirectionID.Valid {
-			simplified.DirectionID = ticket.DirectionID.String
+			directionID = ticket.DirectionID.String
 		}
 
-		simplifiedTickets = append(simplifiedTickets, simplified)
-	}
+		row := []string{
+			ticket.Timestamp.Format(time.RFC3339),
+			ticket.StationID,
+			strings.Join(lines, "|"), // Join multiple lines with a pipe character
+			directionID,
+		}
 
-	// Serialize simplified data to JSON
-	data, err := json.MarshalIndent(simplifiedTickets, "", "  ")
-	if err != nil {
-		return fmt.Errorf("(rScripts.go) failed to marshal data to JSON: %w", err)
-	}
-
-	// Save to file
-	if err := os.WriteFile(filePath, data, 0644); err != nil {
-		return fmt.Errorf("(rScripts.go) failed to write JSON data to file: %w", err)
+		if err := writer.Write(row); err != nil {
+			return fmt.Errorf("(rScripts.go) failed to write CSV row: %w", err)
+		}
 	}
 
 	return nil
