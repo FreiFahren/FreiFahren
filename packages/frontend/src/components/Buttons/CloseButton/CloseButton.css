@@ -15,4 +15,5 @@ button.close-button {
     transform: rotate(45deg);
     position: absolute;
     margin-bottom: 5px;
+    border-radius: 3px;
 }

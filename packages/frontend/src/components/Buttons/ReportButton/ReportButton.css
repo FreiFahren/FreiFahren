@@ -18,8 +18,8 @@
 
 @media (max-width: 400px) {
     .report-button {
-        height: 70px;
-        width: 70px;
+        height: 60px;
+        width: 60px;
         padding: var(--padding-xs);
     }
 }
