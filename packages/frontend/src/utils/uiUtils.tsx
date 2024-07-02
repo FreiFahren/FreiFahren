@@ -57,6 +57,9 @@ export const redefineStationOptions = (option: selectOption, linesList: LinesLis
 
 // when a line is selected, the direction options are redefined, giving only the first and last station of the line
 export const redefineDirectionOptions = (option: selectOption, linesList: LinesList, stationsList: StationsList): selectOption[] => {
+    if (!option || !option.value || !linesList || !stationsList) {
+        return [];
+    }
 	const length = linesList[option.value].length;
 	const { 0: firstStationId, [length - 1]: lastStationId } = linesList[option.value];
 	const newDirectionOptions = [

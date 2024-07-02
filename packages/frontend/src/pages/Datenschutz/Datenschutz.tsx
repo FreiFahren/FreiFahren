@@ -4,7 +4,7 @@ const Datenschutz = () => {
             <div className='legal-text'>
                 <h1>Datenschutzerklärung für die App "Freifahren"</h1>
                 <br />
-                <p>Letze aktualisierung: 12.06.2024</p>
+                <p>Letze aktualisierung: 30.06.2024</p>
                 <h2>Rechtsgrundlagen der Datenverarbeitung</h2>
                 <p>Die Verarbeitung personenbezogener Daten in unserer App erfolgt auf Basis der folgenden Rechtsgrundlagen gemäß der Datenschutz-Grundverordnung (DSGVO):</p>
                 <ul>
@@ -35,10 +35,12 @@ const Datenschutz = () => {
                     <li>Richtung (optional)</li>
                     <li>Uhrzeit der Meldung</li>
                     <li>Beschreibungstext (optional)</li>
+                    <li>Dauer, die der Nutzende für das Melden benötigt hat</li>
                 </ul>
                 <p>
-                    Diese Daten werden zur Verbesserung der Nutzererfahrung analysiert und nicht an Dritte weitergegeben. Die Daten werden ausschließlich intern verwendet.
-                    Ebenfalls wird die Uhrzeit bis auf die Minute innerhalb der ersten Stunde nach der Meldung abgerundet, nach einer Stunde wird die Uhrzeit auf die Stunde abgerundet.
+                    Die gemeldeten Daten werden anderen Nutzern der App zur Verfügung gestellt, um ihnen die Möglichkeit zu geben, sich über die aktuelle Situation in den öffentlichen Verkehrsmitteln zu informieren.
+                    Desweiteren werden die Informationen in die FreiFahren_BE Telegram Gruppe weitergeleitet. Diese Datenübermittlung dient dem Austausch und der Information über Ticketkontrollen innerhalb der Community.
+                    Es werden keine personenbezogenen Daten der Nutzer gespeichert. Die Meldungen sind anonym, und es können keine Rückschlüsse auf einzelne Personen gezogen werden.
                 </p>
                 <h2>4. Anonymität</h2>
                 <p>
@@ -46,8 +48,7 @@ const Datenschutz = () => {
                 </p>
                 <h2>5. Speicherung und Zugriff</h2>
                 <p>
-                    Die erhobenen Daten werden auf Servern der Firma Digital Ocean in Frankfurt am Main gespeichert und sind unbestimmt lang gespeichert.
-                    Der Zugriff auf die Daten ist streng begrenzt auf die Gesellschafter der Freifahren GbR.
+                    Die erhobenen Daten werden auf unseren eigenen Servern, die bei der Hetzner Online GmbH in Deutschland gehostet sind, gespeichert. Die Speicherdauer der Daten ist unbefristet. Auch die Dauer, die der Nutzende für das Melden benötigt hat, wird auf diesen Servern gespeichert. Der Zugriff auf die Daten ist streng begrenzt auf die Gesellschafter der Freifahren GbR.
                 </p>
                 <h2>6. Rechte der Nutzer</h2>
                 <p>
@@ -71,7 +72,24 @@ const Datenschutz = () => {
                     Durch den FreiFahren Telegram Bot werden Nachrichten aus der Freifahren_BE Gruppe, mit Zustimmung der Admins, ausgewertet. Die Nachrichten werden nicht gespeichert und nur für die Echtzeit-Auswertung verwendet.
                     Es werden lediglich die nicht deterministisch extrahierten Informationen (Richtung, Linie und Station) aus den Nachrichten gespeichert. Die Uhrzeit wird abgerundet um die Anonymität zu gewährleisten.
                 </p>
-                <h2>11. Salvatorische Klausel</h2>
+                <h2>11. Einsatz von Analysetools</h2>
+                <p>
+                    Wir verwenden auf unserer App die Analyse-Software Pirsch, um allgemeine Nutzungsinformationen wie Seitenaufrufe und Sitzungsdaten zu erfassen. Zusätzlich erfasst Pirsch, folgende Informationen:
+                </p>
+                <ul>
+                    <li>Wie viele Meldungen über unsere App abgegeben werden und wie lange für die Abgabe einer Meldung benötigt wurde.</li>
+                    <li>Wie häufig die Risikolinienebene betrachtet wurde.</li>
+                </ul>
+                <p>
+                    Diese Daten sind nicht personenbezogen; es werden keine Informationen gesammelt, die eine Identifizierung der Nutzer ermöglichen. Die Nutzung von Pirsch erfolgt auf Grundlage unserer berechtigten Interessen an einer statistischen Analyse des Nutzerverhaltens, um unsere App zu optimieren.
+                </p>
+                <p>
+                    Die durch Pirsch erfassten Daten werden auf den Servern der Emvi Software GmbH gespeichert. Die erhobenen Daten werden ausschließlich intern verwendet.
+                </p>
+                <p>
+                    Nutzer haben das Recht, jederzeit Widerspruch gegen diese Form der Datenverarbeitung einzulegen, indem sie die Nutzung der App einstellen.
+                </p>
+                <h2>12. Salvatorische Klausel</h2>
                 <p>
                     Sollten einzelne Bestimmungen dieser Datenschutzerklärung ganz oder teilweise nicht rechtswirksam oder nicht durchführbar sein oder ihre Rechtswirksamkeit oder Durchführbarkeit später verlieren, soll hierdurch die Gültigkeit der übrigen Bestimmungen der Datenschutzerklärung nicht berührt werden.
                     Anstelle der unwirksamen oder undurchführbaren Bestimmungen soll eine Regelung treten, die dem Zweck der unwirksamen oder undurchführbaren Bestimmung in rechtswirksamer und durchführbarer Weise wirtschaftlich am nächsten kommt.

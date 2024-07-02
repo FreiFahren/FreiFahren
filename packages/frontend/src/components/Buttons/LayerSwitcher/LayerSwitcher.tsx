@@ -2,6 +2,7 @@ import React, {useState, useCallback} from 'react';
 
 import './LayerSwitcher.css';
 import Backdrop from '../../../../src/components/Miscellaneous/Backdrop/Backdrop';
+import { sendAnalyticsEvent } from '../../../../src/utils/dbUtils';
 
 interface LayerSwitcherProps {
    changeLayer: (layer: string) => void;
@@ -14,7 +15,10 @@ const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ changeLayer, isRiskLayerO
   const closeModalAndHighlightSelectedLayer = useCallback((layer: string) => {
     changeLayer(layer);
     setAreLayerOptionsVisible(false);
-  }, [changeLayer]);
+
+    if (layer === 'risk' && !isRiskLayerOpen) sendAnalyticsEvent('Risk Layer Opened');
+
+  }, [changeLayer, isRiskLayerOpen]);
 
    return (
     <>

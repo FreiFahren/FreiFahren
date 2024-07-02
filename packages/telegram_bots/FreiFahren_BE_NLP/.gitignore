@@ -1,0 +1,9 @@
+.env
+/__pycache__
+NER/__pycache__
+```
+.DS_Store
+
+.vscode/settings.json
+*.pyc
+*.log*

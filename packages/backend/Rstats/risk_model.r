@@ -25,7 +25,6 @@ p_load(jsonlite)
 p_load(boot)
 p_load(extraDistr)
 p_load(dbplyr)
-p_load(RPostgres)
 p_load(data.table)
 
 "%cin%" = function(x,y){str_detect(y,x)}

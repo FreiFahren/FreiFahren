@@ -12,7 +12,7 @@
     top: var(--distance-from-edge-default);
     right: 100px;
     width: fit-content;
-    height: var(--button-size);
+    height: 60px;
     padding: var(--padding-xs);
     opacity: 0;
     transition: var(--transition-default);
