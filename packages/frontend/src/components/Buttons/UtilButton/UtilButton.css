@@ -7,8 +7,8 @@ button.util-button {
 .util-button span {
     display: block;
     height: 4px;
-    width: 85%;
+    width: 70%;
     border-radius: var(--borderRadius-default);
     background-color: var(--color-primary);
-    margin: var(--margin-xs) 0;
+    margin: var(--margin-xs) auto;
 }
