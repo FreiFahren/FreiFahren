@@ -8,6 +8,7 @@ button.util-button {
 }
 
 .util-button span {
+    flex: 0 1 auto;
     display: block;
     height: 4px;
     width: 70%;
@@ -15,3 +16,11 @@ button.util-button {
     background-color: var(--color-primary);
     margin: var(--margin-xs) auto;
 }
+
+@media only screen and (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    /* Increase width for high DPI screens */
+    .util-button span {
+        width: 80%;
+    }
+}
+
