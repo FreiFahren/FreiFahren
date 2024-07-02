@@ -18,10 +18,14 @@ var embeddedLinesList []byte
 //go:embed StationsList.json
 var embeddedStationsList []byte
 
+//go:embed duplicateSegments.json
+var embeddedDuplicateSegments []byte
+
 var (
 	stationsAndLinesList utils.AllStationsAndLinesList
 	linesList            map[string][]string
 	stationsList         map[string]utils.StationListEntry
+	DuplicateSegments    map[string][]string
 	dataLock             sync.RWMutex
 )
 
@@ -47,8 +51,22 @@ func EmbedJSONFiles() {
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error reading StationsList")
 	}
+
+	err = json.Unmarshal(embeddedDuplicateSegments, &DuplicateSegments)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error reading DuplicateSegments")
+	}
+
 }
 
+func GetDuplicateSegments() map[string][]string {
+	logger.Log.Debug().Msg("Getting duplicate segments")
+
+	dataLock.RLock()
+	defer dataLock.RUnlock()
+
+	return DuplicateSegments
+}
 func GetStationsAndLinesList() utils.AllStationsAndLinesList {
 	logger.Log.Debug().Msg("Getting stations and lines list")
 
