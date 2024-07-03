@@ -16,6 +16,10 @@ if (!require("pacman")) {
 }
 
 #p_load(dotenv)
+install.packages("readr")
+install.packages("haven")
+install.packages("tidyverse")
+
 p_load(magrittr)
 p_load(ggplot2)
 p_load(tidyverse)
