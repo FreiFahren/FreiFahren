@@ -35,5 +35,9 @@ RUN Rscript -e "install.packages(c('tidyverse', 'pacman'));"
 # Set the working directory to the directory where the Dockerfile and risk_model.r script are located
 WORKDIR /home/docker
 
+COPY risk_model.r .
+COPY risk_model.r segments_v4.RDS .
+RUN mkdir -p /home/docker/output && \
+    chown -R docker:docker /home/docker
 # Run the risk_model.r script
 RUN ls -la
