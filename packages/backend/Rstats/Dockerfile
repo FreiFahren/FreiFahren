@@ -37,7 +37,6 @@ WORKDIR /home/docker
 
 COPY risk_model.r .
 COPY risk_model.r segments_v4.RDS .
-RUN mkdir -p /home/docker/output && \
-    chown -R docker:docker /home/docker
+RUN mkdir -p /home/docker/output 
 # Run the risk_model.r script
 RUN ls -la
