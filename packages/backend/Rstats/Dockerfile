@@ -26,6 +26,7 @@ RUN apt-get clean all && \
         libgdal-dev \
         libgeos-dev \
         libproj-dev \
+        openssh-server \  # Install the OpenSSH server package
     && apt-get clean all && \
     apt-get purge && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
