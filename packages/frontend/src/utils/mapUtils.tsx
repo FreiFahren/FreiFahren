@@ -55,7 +55,12 @@ export const watchPosition = async (
         (error) => {
             console.error('Error obtaining position:', error.message);
             onPositionChanged(null);
-            openAskForLocation();
+
+            // if after a couple of seconds the user hasn't given permission, ask for it
+            // this way we can be sure it is not being caused by a short timeout
+            setTimeout(() => {
+                openAskForLocation();
+            }, 5 * 1000);
         },
         options
     );
