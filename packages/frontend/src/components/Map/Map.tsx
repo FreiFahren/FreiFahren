@@ -86,6 +86,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
 
     // preload colors before risklayer component mounts to instantly show the highlighted segments
     const { segmentRiskData, refreshRiskData } = useRiskData();
+
     const hasRefreshed = useRef(false); // To prevent refreshing on every render
     useEffect(() => {
         if (isFirstOpen && !hasRefreshed.current) {
