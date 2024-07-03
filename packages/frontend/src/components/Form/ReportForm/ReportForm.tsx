@@ -130,6 +130,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
 
         // Save the timestamp of the report to prevent spamming
         localStorage.setItem('lastReportTime', new Date().toISOString());
+        console.log('Report submitted:', reportFormState);
 
         closeModal();
         onFormSubmit(); // Notify App component about the submission
