@@ -228,30 +228,36 @@ func GetLatestTicketInspectors() ([]utils.TicketInspector, error) {
 		return nil, err
 	}
 
+	logger.Log.Printf("Found %d ticket inspectors", len(ticketInfoList))
+
 	return ticketInfoList, nil
 }
 
-func GetLatestUpdateTime() (time.Time, error) {
+func GetLatestUpdateTime() (*time.Time, error) {
 	logger.Log.Debug().Msg("Getting latest update time")
 
-	var lastUpdateTimeString string
+	var lastUpdateTimeString sql.NullString
 
 	sql := `SELECT MAX(timestamp) FROM ticket_info;`
 
 	err := db.QueryRow(sql).Scan(&lastUpdateTimeString)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to get latest update time")
-		return time.Time{}, err
+		return &time.Time{}, err
+	}
+
+	if !lastUpdateTimeString.Valid {
+		return nil, nil
 	}
 
 	var lastUpdateTime time.Time
-	lastUpdateTime, err = time.Parse("2006-01-02 15:04:05", lastUpdateTimeString)
+	lastUpdateTime, err = time.Parse("2006-01-02 15:04:05", lastUpdateTimeString.String)
 
 	if err != nil {
 		log.Fatalf("Failed to parse timestamp: %v\n", err)
 	}
 
-	return lastUpdateTime, nil
+	return &lastUpdateTime, nil
 }
 
 func GetNumberOfSubmissionsInLast24Hours() (int, error) {

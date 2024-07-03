@@ -54,7 +54,7 @@ prod:
   docker compose -f compose.yaml -f compose.prod.yaml up -d --build
 
 logs:
-  docker compose logs -f
+  docker compose exec api tail -f /app/app.log
 
 clean:
   docker compose down --volumes
