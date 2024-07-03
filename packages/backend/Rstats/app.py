@@ -37,4 +37,4 @@ def health():
 
 
 if __name__ == '__main__':
-    waitress.serve(app, port=7878, host='127.0.0.1')
+    waitress.serve(app, port=7878, host='0.0.0.0')
