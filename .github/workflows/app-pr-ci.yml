@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version-file: ".tool-versions"
+          node-version-file: "packages/app/.tool-versions"
       - name: Install Dependencies
         run: npm ci
       - name: Lint
