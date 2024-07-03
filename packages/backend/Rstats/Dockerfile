@@ -35,4 +35,4 @@ RUN Rscript -e "install.packages(c('tidyverse', 'pacman'));"
 
 WORKDIR /home/rstudio
 
-CMD [Rscript, Rstats/risk_model.r]
+RUN Rscript Rstats/risk_model.r
