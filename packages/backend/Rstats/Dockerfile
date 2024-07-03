@@ -32,9 +32,8 @@ RUN apt-get clean all && \
 
 RUN Rscript -e "install.packages(c('tidyverse', 'pacman'));"
 
-
 # Set the working directory to the directory where the Dockerfile and risk_model.r script are located
 WORKDIR /home/docker
 
 # Run the risk_model.r script
-RUN Rscript risk_model.r
+RUN ls -la
