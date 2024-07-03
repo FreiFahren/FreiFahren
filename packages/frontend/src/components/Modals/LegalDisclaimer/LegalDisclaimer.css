@@ -1,0 +1,11 @@
+.legal-disclaimer > ul {
+    position: relative;
+    top: var(--padding-m); /* used padding as the parent div is using padding-l to keep in sync*/
+    display: flex;
+    justify-content: flex-end;
+}
+
+.legal-disclaimer > ul > li {
+    margin-left: var(--margin-xs);
+    font-size: var(--font-xxs);
+}
