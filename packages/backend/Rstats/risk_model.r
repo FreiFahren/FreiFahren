@@ -16,9 +16,10 @@ if (!require("pacman")) {
 }
 
 #p_load(dotenv)
-install.packages("readr")
-install.packages("haven")
-install.packages("tidyverse")
+install.packages("readr", repos = "https://cloud.r-project.org/")
+install.packages("haven", repos = "https://cloud.r-project.org/")
+install.packages("tidyverse", repos = "https://cloud.r-project.org/")
+
 
 p_load(magrittr)
 p_load(ggplot2)
