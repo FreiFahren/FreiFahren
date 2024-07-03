@@ -172,7 +172,7 @@ func CleanupOldFiles(outputPath string) error {
 		}
 	}
 
-	// Delete oldest files if there are more than 10
+	// Delete oldest files if there are more than 10 files
 	if len(jsonFiles) > 10 {
 		sort.Slice(jsonFiles, func(i, j int) bool {
 			return jsonFiles[i].ModTime().Before(jsonFiles[j].ModTime())
