@@ -28,8 +28,12 @@ export const RiskDataProvider = ({ children }: { children: React.ReactNode }) =>
                 setSegmentRiskData(results);
                 setLastModified(results.last_modified);
             }
+            else {
+                setSegmentRiskData(null);
+            }
         } catch (error) {
             console.error('Failed to fetch risk data:', error);
+            setSegmentRiskData(null);
         }
     }, [lastModified]);
 

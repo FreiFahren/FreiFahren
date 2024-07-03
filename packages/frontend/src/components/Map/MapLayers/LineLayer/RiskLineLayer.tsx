@@ -32,9 +32,7 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ linesGeoJSON, textColor, 
 
     // If the segment risk data changes, update the GeoJSON
     useEffect(() => {
-        if (segmentRiskData && segmentRiskData.segment_colors) {
-            setGeoJSON(applySegmentColors(segmentRiskData.segment_colors));
-        }
+        setGeoJSON(applySegmentColors(segmentRiskData?.segment_colors));
     }, [segmentRiskData]);
 
     // Initialize with preloaded data

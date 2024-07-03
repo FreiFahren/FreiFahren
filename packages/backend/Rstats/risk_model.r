@@ -14,7 +14,9 @@ if (!require("pacman")) {
     library(pacman)
 }
 
-p_load(dotenv)
+install.packages("readr")
+install.packages("haven")
+install.packages("tidyverse")
 p_load(magrittr)
 p_load(ggplot2)
 p_load(tidyverse)
@@ -24,7 +26,6 @@ p_load(jsonlite)
 p_load(boot)
 p_load(extraDistr)
 p_load(dbplyr)
-p_load(RPostgres)
 p_load(data.table)
 
 "%cin%" = function(x,y){str_detect(y,x)}
@@ -39,14 +40,6 @@ as.numeric.factor = . %>% as.numeric(levels(.))[.]
 "%?%" = function(x, y) list(x = x, y = y)
 "%:%" = function(xy, z) if(xy$x) xy$y else z
 pmin2_na = function(a,b) pmin(coalesce(a,b),coalesce(b,a))
-
-# Get the environment variables
-load_dot_env(".env")
-DB_NAME = Sys.getenv("DB_NAME")
-DB_HOST = Sys.getenv("DB_HOST")
-DB_PORT = Sys.getenv("DB_PORT")
-DB_USER = Sys.getenv("DB_READER")
-DB_PASSWORD = Sys.getenv("DB_READER_PASSWORD")
 
 ################################################################################
 
