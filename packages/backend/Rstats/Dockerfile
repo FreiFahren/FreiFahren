@@ -32,17 +32,6 @@ RUN apt-get clean all && \
     apt-get purge && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Setup SSH server
-RUN mkdir /var/run/sshd
-RUN echo 'root:jff99' | chpasswd
-RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-
-# SSH login fix. Otherwise user is kicked off after login
-RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
-
-ENV NOTVISIBLE "in users profile"
-RUN echo "export VISIBLE=now" >> /etc/profile
-
 RUN Rscript -e "install.packages(c('tidyverse', 'pacman'));"
 
 # Set the working directory to the directory where the Dockerfile and risk_model.r script are located
@@ -55,5 +44,7 @@ COPY risk_model.r .
 COPY segments_v4.RDS /home/docker/Rstats
 RUN echo '[{"timestamp": "2024-06-30T15:27:00Z","station_id": "SU-A","line": "U8"},{"timestamp": "2024-06-30T15:38:00Z","station_id": "SU-A","line": "U8"},{"timestamp": "2024-06-30T15:28:00Z","station_id": "SU-A","line": "U8"},{"timestamp": "2024-06-30T15:30:00Z","station_id": "SU-A","line": "U8"},{"timestamp": "2024-06-30T15:35:00Z","station_id": "SU-A","line": "U8"}]' > Rstats/ticket_data.json
 
+RUN pip install --no-cache-dir -r requirements.txt
+
 # Run the risk_model.r script
-RUN Rscript risk_model.r
+RUN app.py
