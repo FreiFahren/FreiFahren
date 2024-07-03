@@ -41,7 +41,7 @@ RUN mkdir -p /home/docker/Rstats
 RUN mkdir -p /home/docker/Rstats/output 
 
 COPY risk_model.r .
-COPY segments_v4.RDS /home/docker/Rstats
+COPY Rstats/segments_v4.RDS /home/docker/Rstats
 RUN echo '[{"timestamp": "2024-06-30T15:27:00Z","station_id": "SU-A","line": "U8"},{"timestamp": "2024-06-30T15:38:00Z","station_id": "SU-A","line": "U8"},{"timestamp": "2024-06-30T15:28:00Z","station_id": "SU-A","line": "U8"},{"timestamp": "2024-06-30T15:30:00Z","station_id": "SU-A","line": "U8"},{"timestamp": "2024-06-30T15:35:00Z","station_id": "SU-A","line": "U8"}]' > Rstats/ticket_data.json
 
 RUN pip install --no-cache-dir -r requirements.txt
