@@ -1,0 +1,41 @@
+name: deploy project
+on:
+  pull_request:
+    paths:
+      - 'packages/backend/**'
+      - 'packages/frontend/**'
+      - 'packages/telegram_bots/**'
+
+jobs:
+  deploy-backend:
+    if: contains(github.event.pull_request.changed_files, 'packages/backend/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: themarkwill/coolify-actions@v0.0.3 #deploy
+        with:
+          coolify-url: ${{ secrets.COOLIFY_URL }} # Required
+          coolify-app-id: ${{ secrets.COOLIFY_APP_ID_BACKEND }}  # Required
+          coolify-token: ${{ secrets.COOLIFY_TOKEN }} # Required
+
+  deploy-frontend:
+    if: contains(github.event.pull_request.changed_files, 'packages/frontend/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: themarkwill/coolify-actions@v0.0.3 #deploy
+        with:
+          coolify-url: ${{ secrets.COOLIFY_URL }} # Required
+          coolify-app-id: ${{ secrets.COOLIFY_APP_ID_FRONTEND }}  # Required
+          coolify-token: ${{ secrets.COOLIFY_TOKEN }} # Required
+
+  deploy-telegram-bots:
+    if: contains(github.event.pull_request.changed_files, 'packages/telegram_bots/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: themarkwill/coolify-actions@v0.0.3 #deploy
+        with:
+          coolify-url: ${{ secrets.COOLIFY_URL }} # Required
+          coolify-app-id: ${{ secrets.COOLIFY_APP_ID_TELEGRAM_BOTS }}  # Required
+          coolify-token: ${{ secrets.COOLIFY_TOKEN }} # Required
