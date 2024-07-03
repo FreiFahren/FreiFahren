@@ -28,7 +28,12 @@ function deg2rad(deg: number) {
  * Subscribes to user's geolocation changes and executes callback functions based on the result.
  * @param {Function} onPositionChanged Callback that handles position data.
  * @param {Function} openAskForLocation Callback that handles failures in obtaining geolocation.
- * @param {Object} options Configuration options for geolocation.
+ * @param {Object} options Configuration options for geolocation. Default values are:
+ * {
+ *    enableHighAccuracy: true,
+ *    timeout: 15 seconds,
+ *    maximumAge: 15 seconds
+ * }
  * @returns {Function} Unsubscribe function to stop watching position.
  */
 export const watchPosition = async (
