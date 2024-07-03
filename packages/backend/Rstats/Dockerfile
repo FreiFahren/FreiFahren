@@ -50,4 +50,4 @@ RUN echo '[{"timestamp": "2024-06-30T15:27:00Z","station_id": "SU-A","line": "U8
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Run the risk_model.r script
-RUN python3 app.py
+CMD ["python3", "app.py"]
