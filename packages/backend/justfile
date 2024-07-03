@@ -10,13 +10,7 @@ shell container:
 setup_db:
   sqlite3 $HOST_DB_URL < database/schema.sql
 
-seed_db:
-  #!/bin/bash
-  rm -f $HOST_DB_URL
-  sqlite3 $HOST_DB_URL < database/schema.sql
-  sqlite3 $HOST_DB_URL --cmd ".mode csv" ".import database/seed.csv ticket_info" ".exit"
-
-dev: setup_db
+dev:
   #!/bin/bash
   echo "Starting development server"
 
