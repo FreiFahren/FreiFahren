@@ -14,9 +14,8 @@ if (!require("pacman")) {
     library(pacman)
 }
 
-install.packages("readr")
-install.packages("haven")
-install.packages("tidyverse")
+p_load(readr)
+p_load(haven)
 p_load(magrittr)
 p_load(ggplot2)
 p_load(tidyverse)
