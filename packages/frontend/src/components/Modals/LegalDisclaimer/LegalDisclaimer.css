@@ -1,6 +1,6 @@
 .legal-disclaimer > ul {
     position: relative;
-    top: var(--padding-m); /* used padding as the parent div is using padding-l to keep in sync*/
+    top: 10px;
     display: flex;
     justify-content: flex-end;
 }
