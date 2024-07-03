@@ -41,7 +41,7 @@ export const watchPosition = async (
     openAskForLocation: () => void,
     options: object = {
         enableHighAccuracy: true,
-        timeout: 15*1000,
+        timeout: 10*1000,
         maximumAge: 15*1000
     }
 ): Promise<() => void> => {
