@@ -28,7 +28,12 @@ function deg2rad(deg: number) {
  * Subscribes to user's geolocation changes and executes callback functions based on the result.
  * @param {Function} onPositionChanged Callback that handles position data.
  * @param {Function} openAskForLocation Callback that handles failures in obtaining geolocation.
- * @param {Object} options Configuration options for geolocation.
+ * @param {Object} options Configuration options for geolocation. Default values are:
+ * {
+ *    enableHighAccuracy: true,
+ *    timeout: 15 seconds,
+ *    maximumAge: 15 seconds
+ * }
  * @returns {Function} Unsubscribe function to stop watching position.
  */
 export const watchPosition = async (
@@ -36,7 +41,7 @@ export const watchPosition = async (
     openAskForLocation: () => void,
     options: object = {
         enableHighAccuracy: true,
-        timeout: 15*1000,
+        timeout: 10*1000,
         maximumAge: 15*1000
     }
 ): Promise<() => void> => {
@@ -50,7 +55,12 @@ export const watchPosition = async (
         (error) => {
             console.error('Error obtaining position:', error.message);
             onPositionChanged(null);
-            openAskForLocation();
+
+            // if after a couple of seconds the user hasn't given permission, ask for it
+            // this way we can be sure it is not being caused by a short timeout
+            setTimeout(() => {
+                openAskForLocation();
+            }, 5 * 1000);
         },
         options
     );

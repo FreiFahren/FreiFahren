@@ -1,0 +1,29 @@
+name: App PR CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "releases/**"
+
+concurrency:
+  group: ${{ github.ref	 }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: "packages/app/.tool-versions"
+      - name: Install Dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
