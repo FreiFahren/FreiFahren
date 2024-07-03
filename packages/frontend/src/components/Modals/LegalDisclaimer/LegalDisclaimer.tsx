@@ -1,4 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+
+import './LegalDisclaimer.css'
 
 interface LegalDisclaimerProps {
     closeModal: () => void;
@@ -22,9 +25,13 @@ const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ closeModal, className
           <p>Mir ist bewusst, dass die aktive Nutzung der App während der Fahrt andere Fahrgäste stören und gegen die Nutzungsbedingungen des Verkehrsbetriebs verstoßen kann.</p>
         </li>
       </ol>
-    <div>
-      <button onClick={closeModal}>Ich bestätige</button>
-    </div>
+      <div>
+        <button onClick={closeModal}>Ich bestätige</button>
+      </div>
+      <ul className='align-child-on-line'>
+        <li><Link to='/impressum'>Impressum</Link></li>
+        <li><Link to='/Datenschutz'>Datenschutz</Link></li>
+      </ul>
     </div>
   );
 }
