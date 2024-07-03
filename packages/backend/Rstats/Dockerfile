@@ -9,6 +9,7 @@ ENV R_LIBS=/usr/local/lib/R/site-library
 # Specify the R library path as a mount point
 VOLUME /usr/local/lib/R/site-library
 
+# Install the OpenSSH server package
 RUN apt-get clean all && \
     apt-get update && \
     apt-get upgrade -y && \
@@ -26,7 +27,7 @@ RUN apt-get clean all && \
         libgdal-dev \
         libgeos-dev \
         libproj-dev \
-        openssh-server \  # Install the OpenSSH server package
+        openssh-server \
     && apt-get clean all && \
     apt-get purge && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -49,7 +50,6 @@ WORKDIR /home/docker
 
 RUN mkdir -p /home/docker/Rstats
 RUN mkdir -p /home/docker/Rstats/output 
-
 
 COPY risk_model.r .
 COPY segments_v4.RDS /home/docker/Rstats
