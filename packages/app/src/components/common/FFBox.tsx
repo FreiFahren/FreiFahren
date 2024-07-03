@@ -9,7 +9,7 @@ export const FFBox = (props: FFBoxProps) => (
     borderRadius={24}
     borderColor="bg2"
     borderWidth={3}
-    p={4}
+    p={3}
     {...props}
   />
 );
