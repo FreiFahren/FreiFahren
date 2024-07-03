@@ -14,6 +14,7 @@ RUN apt-get clean all && \
     apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y \
+        python3-pip \
         libcurl4-openssl-dev \
         libssl-dev libxml2-dev \
         libfontconfig1-dev \
@@ -27,7 +28,6 @@ RUN apt-get clean all && \
         libgdal-dev \
         libgeos-dev \
         libproj-dev \
-        openssh-server \
     && apt-get clean all && \
     apt-get purge && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
