@@ -21,7 +21,6 @@ const OptionContainer = ({
       borderWidth={3}
       opacity={isSelected ? 1 : 0.5}
       borderColor={isSelected ? theme.colors.selected : theme.colors.bg2}
-      // bg={isSelected ? "selected" : "bg"}
       alignItems="center"
       justifyContent="center"
       position="relative"
