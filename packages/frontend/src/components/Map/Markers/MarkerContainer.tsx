@@ -66,7 +66,7 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
 
 					// Set the latest timestamp from the fetched data
 					lastReceivedInspectorTimestamp.current = newTicketInspectorList[0].timestamp;
-					riskData.refreshRiskData(); // Refresh risk data when new inspectors are fetched
+					riskData.refreshRiskData();
 
 					// Convert the map back to an array for the state
 					return Array.from(updatedList.values());
