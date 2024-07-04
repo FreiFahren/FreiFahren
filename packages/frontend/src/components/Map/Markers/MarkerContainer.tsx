@@ -48,16 +48,28 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
 
 			if (newTicketInspectorList.length > 0) {
 				setTicketInspectorList(currentList => {
-					const existingStationIds = new Set(currentList.map(inspector => inspector.station.id));
-					const filteredNewInspectors = newTicketInspectorList.filter((inspector: { station: { id: string; }; }) => !existingStationIds.has(inspector.station.id));
+					// Create a map to track the most recent entry per station ID
+					const updatedList = new Map(currentList.map(inspector => [inspector.station.id, inspector]));
 
-					if (filteredNewInspectors.length > 0) {
-						lastReceivedInspectorTimestamp.current = newTicketInspectorList[0].timestamp;
-						riskData.refreshRiskData(); // refresh risk data when new inspectors are fetched
-						return [...currentList, ...filteredNewInspectors];
-					}
+					newTicketInspectorList.forEach((newInspector: MarkerData) => {
+						const existingInspector = updatedList.get(newInspector.station.id);
+						if (existingInspector) {
+							// Compare timestamps to decide if we need to update
+							if (new Date(newInspector.timestamp) > new Date(existingInspector.timestamp)) {
+								updatedList.set(newInspector.station.id, newInspector);
+							}
+						} else {
+							// If no existing inspector with the same ID, add the new one
+							updatedList.set(newInspector.station.id, newInspector);
+						}
+					});
 
-					return currentList;
+					// Set the latest timestamp from the fetched data
+					lastReceivedInspectorTimestamp.current = newTicketInspectorList[0].timestamp;
+					riskData.refreshRiskData(); // Refresh risk data when new inspectors are fetched
+
+					// Convert the map back to an array for the state
+					return Array.from(updatedList.values());
 				});
 			}
 		};
