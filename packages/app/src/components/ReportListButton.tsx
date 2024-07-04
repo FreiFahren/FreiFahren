@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
-import { Spinner, Stack, Text, View } from "native-base";
+import { Stack, Text, View } from "native-base";
 import {
   ComponentProps,
   forwardRef,
@@ -12,6 +12,7 @@ import {
 import { useReports } from "../api/queries";
 import { FFButton } from "./common/FFButton";
 import { FFScrollSheet } from "./common/FFSheet";
+import { FFSpinner } from "./common/FFSpinner";
 import { ReportItem } from "./common/ReportItem";
 
 export const ReportListSheet = forwardRef(
@@ -27,7 +28,7 @@ export const ReportListSheet = forwardRef(
           <Text color="fg">Keine aktuellen Meldungen</Text>
         ) : reports === undefined ? (
           <View flex={1}>
-            <Spinner />
+            <FFSpinner />
           </View>
         ) : (
           <View mt={4}>
