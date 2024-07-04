@@ -1,9 +1,9 @@
 import { Button } from "native-base";
-import { ComponentProps } from "react";
+import { ComponentProps, PropsWithChildren } from "react";
 
-type FFButtonProps = ComponentProps<typeof Button>;
+type FFButtonProps = PropsWithChildren<ComponentProps<typeof Button>>;
 
-export const FFButton = (props: FFButtonProps) => (
+export const FFButton = ({ children, ...props }: FFButtonProps) => (
   <Button
     backgroundColor="bg"
     borderRadius={24}
@@ -11,5 +11,7 @@ export const FFButton = (props: FFButtonProps) => (
     borderWidth={3}
     p={3}
     {...props}
-  />
+  >
+    {children}
+  </Button>
 );
