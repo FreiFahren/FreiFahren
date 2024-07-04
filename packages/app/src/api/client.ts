@@ -1,3 +1,6 @@
+import axios from "axios";
+import { Platform } from "react-native";
+import DeviceInfo from "react-native-device-info";
 import { z } from "zod";
 
 import { config } from "../config";
@@ -21,9 +24,16 @@ export const reportSchema = z
 
 export type Report = z.infer<typeof reportSchema>;
 
+const client = axios.create({
+  baseURL: config.FF_API_BASE_URL,
+  headers: {
+    "ff-app-version": DeviceInfo.getVersion(),
+    "ff-platform": Platform.OS,
+  },
+});
+
 const getReports = async (): Promise<Report[]> => {
-  const response = await fetch(`${config.FF_API_BASE_URL}/basics/recent`);
-  const data = await response.json();
+  const { data } = await client.get("basics/recent");
 
   return reportSchema.array().parse(data);
 };
@@ -46,18 +56,9 @@ type PostReport = {
 };
 
 const postReport = async (report: PostReport) => {
-  const response = await fetch(
-    `${config.FF_API_BASE_URL}/basics/newInspector`,
-    {
-      method: "POST",
-      body: JSON.stringify(report),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  const { data } = await axios.post("basics/newInspector", report);
 
-  return response.json();
+  return data;
 };
 
 export const api = {

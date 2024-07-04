@@ -1,5 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { Box, Text, View } from "native-base";
+import { Box } from "native-base";
 import { useEffect } from "react";
 import { Pressable } from "react-native";
 import Animated, {
@@ -11,9 +11,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { Report } from "../../api";
-import { stations } from "../../data";
 import { FFBox } from "../common/FFBox";
-import { FFLineTag } from "../common/FFLineTag";
 import { ReportItem } from "../common/ReportItem";
 
 const animationConfig = {
@@ -30,8 +28,6 @@ export const ReportDetailsNotification = ({
   report,
   onClose,
 }: ReportDetailsNotificationProps) => {
-  const station = stations[report.stationId];
-
   const animation = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
