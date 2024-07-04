@@ -14,6 +14,7 @@ import { Report } from "../../api";
 import { stations } from "../../data";
 import { FFBox } from "../common/FFBox";
 import { FFLineTag } from "../common/FFLineTag";
+import { ReportItem } from "../common/ReportItem";
 
 const animationConfig = {
   duration: 400,
@@ -26,10 +27,10 @@ type ReportDetailsNotificationProps = {
 };
 
 export const ReportDetailsNotification = ({
-  report: { stationId, timestamp },
+  report,
   onClose,
 }: ReportDetailsNotificationProps) => {
-  const station = stations[stationId];
+  const station = stations[report.stationId];
 
   const animation = useSharedValue(1);
 
@@ -48,32 +49,11 @@ export const ReportDetailsNotification = ({
   return (
     <Box safeAreaTop position="absolute" top={0} left={0} right={0} px={4}>
       <Animated.View style={animatedStyle}>
-        <FFBox>
-          <View
-            flexDir="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <View>
-              <View flexDir="row" alignItems="center">
-                {station.lines.map((line) => (
-                  <FFLineTag key={line} line={line} />
-                ))}
-                <Text color="white" bold ml={1}>
-                  {station.name}
-                </Text>
-              </View>
-              <Text color="fg" mt={1}>
-                {new Date(timestamp).toLocaleString("de-DE", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </Text>
-            </View>
-            <Pressable onPress={handleClose} hitSlop={10}>
-              <MaterialIcons name="close" color="white" size={32} />
-            </Pressable>
-          </View>
+        <FFBox flexDir="row" alignItems="center" justifyContent="space-between">
+          <ReportItem report={report} />
+          <Pressable onPress={handleClose} hitSlop={10}>
+            <MaterialIcons name="close" color="white" size={32} />
+          </Pressable>
         </FFBox>
       </Animated.View>
     </Box>

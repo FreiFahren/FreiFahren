@@ -9,42 +9,10 @@ import {
   useRef,
 } from "react";
 
-import { type Report } from "../api/client";
 import { useReports } from "../api/queries";
-import { stations } from "../data";
 import { FFButton } from "./common/FFButton";
 import { FFScrollSheet } from "./common/FFSheet";
-
-type ReportItemProps = {
-  report: Report;
-};
-
-const ReportItem = ({ report }: ReportItemProps) => {
-  const station = stations[report.stationId];
-
-  return (
-    <Stack space={2}>
-      <View flexDir="row" alignItems="center">
-        {station.lines.map((line) => (
-          <View key={line} bg={`lines.${line}`} px={1} borderRadius={4} mr={1}>
-            <Text color="white" bold>
-              {line}
-            </Text>
-          </View>
-        ))}
-        <Text color="white" bold ml={1}>
-          {station.name}
-        </Text>
-      </View>
-      <Text color="fg">
-        {report.timestamp.toLocaleTimeString("de-DE", {
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
-      </Text>
-    </Stack>
-  );
-};
+import { ReportItem } from "./common/ReportItem";
 
 export const ReportListSheet = forwardRef(
   (_props: PropsWithChildren<{}>, ref: Ref<BottomSheetModalMethods>) => {
