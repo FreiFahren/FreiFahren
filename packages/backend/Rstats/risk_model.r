@@ -239,7 +239,7 @@ from = format(now - (60*60)) %>% as.POSIXct(tz="UTC")
 suffix = format(Sys.time(), "%Y-%m-%dT%H:%M:%S", tz = "UTC")
 
 # Load data from JSON file instead of database
-ticket_info <- jsonlite::fromJSON("Rstats/ticket_data.json")
+ticket_info <- jsonlite::fromJSON("data.json")
 
 # Convert timestamp to POSIXct format if data is not empty
 if (!is.data.frame(ticket_info) || nrow(ticket_info) == 0) {
