@@ -89,7 +89,6 @@ func executeRiskModelScript(jsonPath string, outputPath string) error {
 		logger.Log.Error().Err(err).Msg("Failed to create request")
 		return err
 	}
-	fmt.Printf("req: %v", req)
 
 	// Set the content type to JSON
 	req.Header.Set("Content-Type", "application/json")
@@ -115,8 +114,8 @@ func executeRiskModelScript(jsonPath string, outputPath string) error {
 	timestamp := time.Now().Format("2006-01-02T15:04:05")
 
 	// Construct the filename with the timestamp
-	filename := fmt.Sprintf("risk_model_%s.json", timestamp)
-
+	filename := fmt.Sprintf("rizz_model%s.json", timestamp)
+	fmt.Printf("respBody: %v", respBody)
 	// Save the response body to a file
 	outputPath = filepath.Join(outputPath, filename)
 	err = ioutil.WriteFile(outputPath, respBody, 0644)
