@@ -89,6 +89,7 @@ func executeRiskModelScript(jsonPath string, outputPath string) error {
 		logger.Log.Error().Err(err).Msg("Failed to create request")
 		return err
 	}
+	fmt.Printf("req: %v", req)
 
 	// Set the content type to JSON
 	req.Header.Set("Content-Type", "application/json")

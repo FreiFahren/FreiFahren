@@ -18,7 +18,8 @@ def get_newest_file():
 @app.route('/run', methods=['POST'])
 def run():
     ticket_data = flask.request.json
-    with open('../ticket_data.json', 'w') as f:
+    print(ticket_data)
+    with open('data.json', 'w') as f:
         json.dump(ticket_data, f)
         
     result = subprocess.run(['Rscript', 'risk_model.r'], stdout=subprocess.PIPE)
@@ -29,6 +30,7 @@ def run():
     
     with open(newest_file, 'r') as f:
         data = json.load(f)
+        
         return data, 200
 
 @app.route('/health', methods=['GET'])
