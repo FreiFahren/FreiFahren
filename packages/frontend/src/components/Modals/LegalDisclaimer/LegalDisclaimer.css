@@ -1,0 +1,11 @@
+.legal-disclaimer > ul {
+    position: relative;
+    top: 10px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.legal-disclaimer > ul > li {
+    margin-left: var(--margin-xs);
+    font-size: var(--font-xxs);
+}

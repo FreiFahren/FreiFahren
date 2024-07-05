@@ -1,32 +1,28 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
-import { Box, Button, Spinner, Text, View } from "native-base";
+import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
+import { Box, Button, Row, Text, useTheme, View } from "native-base";
 import {
   ComponentProps,
   forwardRef,
   PropsWithChildren,
   Ref,
+  useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { Modal } from "react-native";
+import { LayoutAnimation } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
 import { useSubmitReport } from "../api/queries";
 import { lines, stations } from "../data";
+import { Theme } from "../theme";
 import { FFButton } from "./common/FFButton";
+import { FFCarousellSelect } from "./common/FFCarousellSelect";
 import { FFLineTag } from "./common/FFLineTag";
-import { FFSelect } from "./common/FFSelect";
-
-// TODO: ugly
-// TODO: add direction, validation, etc
-// TODO: More ergonomic components
-
-type FormType = {
-  line?: string;
-  stationId?: string;
-};
+import { FFScrollSheet } from "./common/FFSheet";
+import { FFSpinner } from "./common/FFSpinner";
 
 type ReportModalMethods = {
   open: () => void;
@@ -37,112 +33,183 @@ export const ReportModal = forwardRef(
   (_props: PropsWithChildren<{}>, ref: Ref<ReportModalMethods>) => {
     const { mutateAsync: submitReport, isPending } = useSubmitReport();
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const theme = useTheme() as Theme;
+
+    const sheetRef = useRef<BottomSheetModalMethods>(null);
 
     useImperativeHandle(ref, () => ({
-      open: () => setIsModalOpen(true),
-      close: () => setIsModalOpen(false),
+      open: () => sheetRef.current?.present(),
+      close: () => sheetRef.current?.close(),
     }));
 
-    const {
-      handleSubmit,
-      watch,
-      control,
-      reset: resetForm,
-    } = useForm<FormType>();
+    const [lineType, setLineType] = useState<"u" | "s">("u");
 
-    const selectedLine = watch("line");
+    const [selectedLine, setSelectedLine] = useState<string | null>(null);
 
-    const stationOptions =
-      selectedLine === undefined ? [] : lines[selectedLine];
+    const [selectedDirection, setSelectedDirection] = useState<string | null>(
+      null
+    );
+
+    const [selectedStation, setSelectedStation] = useState<string | null>(null);
+
+    const isValid =
+      selectedLine !== null &&
+      selectedStation !== null &&
+      selectedDirection !== null;
+
+    useEffect(() => setSelectedLine(null), [lineType]);
+    useEffect(() => {
+      setSelectedDirection(null);
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    }, [selectedLine]);
+    useEffect(() => setSelectedStation(null), [selectedLine]);
+
+    const lineOptions = useMemo(
+      () =>
+        Object.keys(lines).filter((line) =>
+          line.toLowerCase().startsWith(lineType)
+        ),
+      [lineType]
+    );
+
+    const directionOptions =
+      selectedLine === null
+        ? []
+        : [
+            lines[selectedLine][0],
+            lines[selectedLine][lines[selectedLine].length - 1],
+          ];
+
+    const stationOptions = selectedLine === null ? [] : lines[selectedLine];
 
     const close = () => {
-      setIsModalOpen(false);
-      resetForm();
+      sheetRef.current?.close();
+
+      setLineType("u");
+      setSelectedLine(null);
     };
 
-    const onSubmit: SubmitHandler<FormType> = async ({ line, stationId }) => {
-      if (line === undefined || stationId === undefined) return;
+    const onSubmit = async () => {
+      if (!isValid) return;
 
       await submitReport({
-        line,
-        station: stations[stationId].name,
-        direction: "",
+        line: selectedLine,
+        station: selectedStation,
+        direction: selectedDirection,
       });
+
       close();
     };
 
     return (
-      <Modal
-        visible={isModalOpen}
-        animationType="slide"
-        presentationStyle="fullScreen"
-        onRequestClose={close}
-      >
-        <BottomSheetModalProvider>
-          <Box
-            flex={1}
-            bg="bg"
-            pt={7}
-            px={4}
-            safeArea
-            justifyContent="space-between"
-          >
-            <Text bold fontSize="xl" mb={4} color="white">
-              Kontrolle Melden
-            </Text>
-            <View flexDirection="row">
-              <FFSelect
-                control={control}
-                name="line"
-                title="Linie"
-                options={Object.keys(lines)}
-                placeholder="Linie"
-                optionContainerProps={{
-                  flexDir: "row",
-                  flexWrap: "wrap",
-                  justifyContent: "space-evenly",
-                }}
-                sheetProps={{ snapPoints: ["45%"] }}
+      <FFScrollSheet ref={sheetRef} onDismiss={close}>
+        <Box
+          justifyContent="space-between"
+          overflow="visible"
+          position="relative"
+          safeAreaBottom
+          flex={1}
+        >
+          <Text bold fontSize="2xl" mb={4} color="white">
+            Kontrolle Melden
+          </Text>
+          <FFCarousellSelect
+            options={["u", "s"]}
+            selectedOption={lineType}
+            onSelect={setLineType}
+            containerProps={{ py: 3, flex: 1 }}
+            renderOption={(option) =>
+              option === "u" ? (
+                <View borderRadius={8} px={4} py={1} bg="lines.U7">
+                  <Text color="white" fontSize="xl" fontWeight="bold">
+                    U
+                  </Text>
+                </View>
+              ) : (
+                <View borderRadius={999} px={3} py={1} bg="lines.S25">
+                  <Text color="white" fontSize="xl" fontWeight="bold">
+                    S
+                  </Text>
+                </View>
+              )
+            }
+          />
+          <Text fontSize="xl" fontWeight="bold" color="white" mt={4} mb={2}>
+            Linie
+          </Text>
+          <View mx={-4}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: theme.space[5] }}
+            >
+              <FFCarousellSelect
+                options={lineOptions}
+                selectedOption={selectedLine}
+                onSelect={setSelectedLine}
+                containerProps={{ py: 3, px: 4 }}
                 renderOption={(line) => (
-                  <FFLineTag
-                    line={line}
-                    textProps={{ fontSize: "2xl" }}
-                    px={2}
-                    width="65px"
-                  />
+                  <FFLineTag line={line} textProps={{ fontSize: "2xl" }} />
                 )}
               />
-              <FFSelect
-                control={control}
-                name="stationId"
-                title="Station"
-                options={stationOptions}
-                placeholder="Station"
-                scrollable
-                renderOption={(id) =>
-                  selectedLine !== undefined && (
-                    <View flexDir="row">
-                      <FFLineTag line={selectedLine} mr={2} />
-                      <Text bold color="white">
-                        {stations[id].name}
-                      </Text>
-                    </View>
-                  )
-                }
+            </ScrollView>
+          </View>
+          {selectedLine !== null && (
+            <>
+              <Text fontSize="xl" fontWeight="bold" color="white" mt={4} mb={2}>
+                Richtung
+              </Text>
+              <FFCarousellSelect
+                vertical
+                options={directionOptions}
+                selectedOption={selectedDirection}
+                onSelect={setSelectedDirection}
+                containerProps={{ py: 3, px: 4 }}
+                renderOption={(direction) => (
+                  <Row alignSelf="flex-start">
+                    <Text bold color="white">
+                      {stations[direction].name}
+                    </Text>
+                  </Row>
+                )}
               />
-            </View>
-            <View>
-              <Button onPress={handleSubmit(onSubmit)} isDisabled={isPending}>
-                {isPending ? <Spinner /> : "Melden"}
-              </Button>
-              <Button onPress={close} mt={4} variant="outline">
-                <Text color="white">Abbrechen</Text>
-              </Button>
-            </View>
-          </Box>
-        </BottomSheetModalProvider>
-      </Modal>
+              <Text fontSize="xl" fontWeight="bold" color="white" mt={4} mb={2}>
+                Station
+              </Text>
+              <ScrollView style={{ height: 250 }}>
+                <FFCarousellSelect
+                  vertical
+                  options={stationOptions}
+                  selectedOption={selectedStation}
+                  onSelect={setSelectedStation}
+                  containerProps={{ py: 3, px: 4 }}
+                  renderOption={(station) => (
+                    <Row alignSelf="flex-start">
+                      <Text bold color="white">
+                        {stations[station].name}
+                      </Text>
+                    </Row>
+                  )}
+                />
+              </ScrollView>
+            </>
+          )}
+          <FFButton
+            onPress={onSubmit}
+            isDisabled={isPending || !isValid}
+            bg="selected"
+            mt={8}
+          >
+            {isPending ? (
+              <FFSpinner />
+            ) : (
+              <Text color="white" fontSize="lg" fontWeight="bold">
+                Melden
+              </Text>
+            )}
+          </FFButton>
+        </Box>
+      </FFScrollSheet>
     );
   }
 );

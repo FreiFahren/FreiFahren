@@ -2,8 +2,8 @@ import { Box, Text, View } from "native-base";
 
 import { useReports } from "./api/queries";
 import { FFBox } from "./components/common/FFBox";
+import { FFSpinner } from "./components/common/FFSpinner";
 import { FFMapView } from "./components/FFMapView";
-import { FFSpinner } from "./components/FFSpinner";
 import { ReportButton } from "./components/ReportButton";
 import { ReportListButton } from "./components/ReportListButton";
 

@@ -5,9 +5,9 @@ import (
 	_ "embed"
 	"encoding/csv"
 	"fmt"
-	"log"
+	"io/ioutil"
+	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -18,12 +18,6 @@ import (
 	"github.com/FreiFahren/backend/logger"
 	"github.com/FreiFahren/backend/utils"
 )
-
-//go:embed risk_model.r
-var embeddedRiskModelScript []byte
-
-//go:embed segments_v5.RDS
-var embeddedSegmentsRDS []byte
 
 func RunRiskModel() error {
 	logger.Log.Debug().Msg("Running risk model")
@@ -47,17 +41,12 @@ func RunRiskModel() error {
 		}
 	}
 
-	err := os.WriteFile("Rstats/segments_v5.RDS", embeddedSegmentsRDS, 0644)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Failed to write segments_v4.RDS")
-	}
-
 	if err := fetchAndSaveRecentTicketInspectors(csvPath); err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to fetch and save recent ticket inspectors")
 		return err
 	}
 
-	if err := executeRiskModelScript(); err != nil {
+	if err := executeRiskModelScript(csvPath, outputPath); err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to execute risk model script")
 		return err
 	}
@@ -87,21 +76,57 @@ func fetchAndSaveRecentTicketInspectors(csvPath string) error {
 	return nil
 }
 
-func executeRiskModelScript() error {
-	logger.Log.Debug().Msg("Executing risk model script")
-
-	runRscriptCmd := exec.Command("Rscript", "-")
-
-	// Set the R script as the standard input
-	runRscriptCmd.Stdin = bytes.NewReader(embeddedRiskModelScript)
-
-	outputFromRscript, err := runRscriptCmd.CombinedOutput()
+func executeRiskModelScript(jsonPath string, outputPath string) error {
+	// Read the file
+	data, err := ioutil.ReadFile(jsonPath)
 	if err != nil {
-		log.Println(string(outputFromRscript))
-		logger.Log.Error().Err(err).Msg("Failed to run Rscript")
+		logger.Log.Error().Err(err).Msg("Failed to read file")
 		return err
 	}
-	logger.Log.Info().Str("Rscript output", string(outputFromRscript))
+
+	// Create a new POST request with the file content as the request body
+	req, err := http.NewRequest("POST", os.Getenv("RISK_API_URL")+"/run", bytes.NewBuffer(data))
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Failed to create request")
+		return err
+	}
+
+	// Set the content type to JSON
+	req.Header.Set("Content-Type", "application/json")
+
+	// Send the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Failed to send request")
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Read the response
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Failed to read response body")
+		return err
+	}
+	logger.Log.Debug().Msgf("Response body: %s", respBody)
+
+	// Get the current time and format it as a string
+	timestamp := time.Now().Format("2006-01-02T15:04:05")
+
+	// Construct the filename with the timestamp
+	filename := fmt.Sprintf("risk_model%s.json", timestamp)
+	fmt.Printf("respBody: %v", respBody)
+	// Save the response body to a file
+	outputPath = filepath.Join(outputPath, filename)
+	err = ioutil.WriteFile(outputPath, respBody, 0644)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Failed to write response body to file")
+		return err
+	}
+
+	logger.Log.Debug().Msgf("Response body saved to %s", outputPath)
+
 	return nil
 }
 
@@ -154,6 +179,8 @@ func simplifyAndSaveTicketInspectors(ticketInspectors []utils.TicketInspector, f
 			return err
 		}
 	}
+
+	logger.Log.Debug().Msg("Ticket inspectors saved to file successfully " + filePath)
 
 	return nil
 }

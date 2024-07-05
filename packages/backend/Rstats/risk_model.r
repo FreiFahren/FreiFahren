@@ -15,12 +15,8 @@ if (!require("pacman")) {
     library(pacman)
 }
 
-#p_load(dotenv)
-install.packages("readr", repos = "https://cloud.r-project.org/")
-install.packages("haven", repos = "https://cloud.r-project.org/")
-install.packages("tidyverse", repos = "https://cloud.r-project.org/")
-
-
+p_load(readr)
+p_load(haven)
 p_load(magrittr)
 p_load(ggplot2)
 p_load(tidyverse)
@@ -263,6 +259,8 @@ now = Sys.time() %>% setattr("tzone","UTC") # now = as_datetime("2024-07-02 12:3
 from = format(now - (60*60)) %>% as.POSIXct(tz = "UTC")
 suffix = format(Sys.time(), "%Y-%m-%dT%H.%M.%S", tz = "UTC")
 
+# Load data from JSON file instead of database
+ticket_info <- jsonlite::fromJSON("data.json")
 
 if (!is.data.frame(ticket_info) || nrow(ticket_info) == 0) {
   write_json(tibble(), "Rstats/output/risk_model_" %.% suffix %.% ".json")

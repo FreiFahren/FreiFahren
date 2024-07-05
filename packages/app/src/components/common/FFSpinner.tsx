@@ -9,7 +9,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { theme } from "../theme";
+import { theme } from "../../theme";
 
 const styles = StyleSheet.create({
   spinner: {
