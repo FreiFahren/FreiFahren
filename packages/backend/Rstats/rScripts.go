@@ -76,9 +76,9 @@ func fetchAndSaveRecentTicketInspectors(csvPath string) error {
 	return nil
 }
 
-func executeRiskModelScript(jsonPath string, outputPath string) error {
+func executeRiskModelScript(csvPath string, outputPath string) error {
 	// Read the file
-	data, err := ioutil.ReadFile(jsonPath)
+	data, err := ioutil.ReadFile(csvPath)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to read file")
 		return err
@@ -92,7 +92,7 @@ func executeRiskModelScript(jsonPath string, outputPath string) error {
 	}
 
 	// Set the content type to JSON
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", "text/csv")
 
 	// Send the request
 	client := &http.Client{}

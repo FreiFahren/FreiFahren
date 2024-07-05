@@ -254,13 +254,13 @@ classify_risk = function(...){
 ticket_info = read_csv("Rstats/ticket_data.csv") %>% #fromJSON("Rstats/ticket_data.json",)
   mutate(Lines = strsplit(Lines, "\\|")) %>%
   rename(timestamp = Timestamp, station_id = StationID, line = Lines, direction_id = DirectionID)
-segments = readRDS("Rstats/segments_v5.RDS")
+segments = readRDS("Rstats/segments/segments_v5.RDS")
 now = Sys.time() %>% setattr("tzone","UTC") # now = as_datetime("2024-07-02 12:33:00")
 from = format(now - (60*60)) %>% as.POSIXct(tz = "UTC")
 suffix = format(Sys.time(), "%Y-%m-%dT%H.%M.%S", tz = "UTC")
 
 # Load data from JSON file instead of database
-ticket_info <- jsonlite::fromJSON("data.json")
+# ticket_info <- jsonlite::fromJSON("data.json")
 
 if (!is.data.frame(ticket_info) || nrow(ticket_info) == 0) {
   write_json(tibble(), "Rstats/output/risk_model_" %.% suffix %.% ".json")
