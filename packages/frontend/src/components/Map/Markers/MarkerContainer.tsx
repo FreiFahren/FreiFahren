@@ -55,7 +55,7 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
 						const existingInspector = updatedList.get(newInspector.station.id);
 						if (existingInspector) {
 							// Compare timestamps and wether it is historic to decide if we need to update
-							if (new Date(newInspector.timestamp) > new Date(existingInspector.timestamp) && newInspector.isHistoric === false) {
+							if (new Date(newInspector.timestamp) >= new Date(existingInspector.timestamp) && newInspector.isHistoric === false) {
 								updatedList.set(newInspector.station.id, newInspector);
 							}
 						} else {
