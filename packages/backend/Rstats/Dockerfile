@@ -41,7 +41,7 @@ RUN mkdir -p /home/docker/Rstats
 RUN mkdir -p /home/docker/Rstats/output 
 
 COPY risk_model.r .
-COPY Rstats/segments_v4.RDS /home/docker/Rstats
+COPY Rstats/segments/segments_v5.RDS /home/docker/Rstats/segments/
 COPY requirements.txt .
 COPY app.py .
 
