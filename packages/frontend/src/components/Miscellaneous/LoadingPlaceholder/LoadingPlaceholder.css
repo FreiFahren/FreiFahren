@@ -1,0 +1,8 @@
+.loading-placeholder {
+    background-color: var(--color-gray);
+    width: 100%;
+    height: 100%;
+    border-radius: var(--borderRadius-small);
+    min-width: 20px;
+    min-height: 20px;
+}
