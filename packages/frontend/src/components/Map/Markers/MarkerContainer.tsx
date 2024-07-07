@@ -36,6 +36,8 @@ export type MarkerData = {
 	message?: string;
 };
 
+const toRFC1123 = (timestamp: string): string => new Date(timestamp).toUTCString();
+
 const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, userPosition }) => {
 	const [ticketInspectorList, setTicketInspectorList] = useState<MarkerData[]>([]);
 	const lastReceivedInspectorTimestamp = useRef<string | null>(null);
@@ -44,7 +46,10 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const newTicketInspectorList = await getRecentDataWithIfModifiedSince(`${process.env.REACT_APP_API_URL}/basics/recent`, lastReceivedInspectorTimestamp.current) || [];
+			const newTicketInspectorList = await getRecentDataWithIfModifiedSince(
+				`${process.env.REACT_APP_API_URL}/basics/recent`,
+				lastReceivedInspectorTimestamp.current === null ? null : toRFC1123(lastReceivedInspectorTimestamp.current)
+			) || [];
 
 			if (newTicketInspectorList.length > 0) {
 				setTicketInspectorList(currentList => {
