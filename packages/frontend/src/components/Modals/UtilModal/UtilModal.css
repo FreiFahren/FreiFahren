@@ -13,9 +13,9 @@
   margin: 0 0 auto 0;
 }
 
-.util-modal li a svg{
-    height: 25px;
-    width: 25px;
+.util-modal li a img{
+    height: 20px;
+    width: 20px;
 }
 
 .util-modal ul {

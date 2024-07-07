@@ -145,7 +145,7 @@ label {
   color: var(--color-primary);
 }
 
-.dark svg {
+.dark svg, .dark img[src$=".svg"] {
   filter: invert(1);
 }
 
