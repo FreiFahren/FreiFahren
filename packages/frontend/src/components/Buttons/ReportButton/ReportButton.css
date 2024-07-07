@@ -8,10 +8,8 @@
     right: var(--distance-from-edge-default);
     padding: var(--padding-s);
     cursor: pointer;
-    background-color: var(--incentive-blue);
     border: 2px solid var(--color-white);
     border-radius: 50%;
-    box-shadow: var(--boxShadow-default);
     overflow: hidden;
     z-index: var(--zIndex-button);
 }

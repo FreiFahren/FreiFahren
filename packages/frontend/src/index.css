@@ -177,6 +177,12 @@ button:hover {
   color: var(--color-primary);
 }
 
+button.action {
+  background-color: var(--incentive-blue);
+  color: var(--color-white);
+  box-shadow: var(--boxShadow-default);
+}
+
 button a {
   color: var(--color-background);
   font-size: var(--font-s);

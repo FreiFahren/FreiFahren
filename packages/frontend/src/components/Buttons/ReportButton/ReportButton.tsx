@@ -9,7 +9,7 @@ interface ReportButtonProps {
 const ReportButton: React.FC<ReportButtonProps> = ({ onClick }) => {
 
     return (
-        <button className='report-button center-child' onClick={onClick} aria-label='report ticketinspector'>
+        <button className='report-button action center-child' onClick={onClick} aria-label='report ticketinspector'>
             <div className='plus'>
                 <span></span>
                 <span></span>

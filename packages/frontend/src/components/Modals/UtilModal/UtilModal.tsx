@@ -23,7 +23,7 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                 {children}
                 <div className='align-child-on-line'>
                     <h1>Informationen</h1>
-                    <button onClick={() => setIsFeedbackModalOpen(true)}>
+                    <button className='action' onClick={() => setIsFeedbackModalOpen(true)}>
                         Gib uns Feedback!
                     </button>
                 </div>
