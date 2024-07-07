@@ -8,8 +8,7 @@ import (
 )
 
 func TestCheckIfModifiedSince(t *testing.T) {
-	// Define a fixed time for "lastModified"
-	lastModifiedTime, _ := time.Parse(time.RFC3339, "2024-01-01T12:00:00Z")
+	lastModifiedTime, _ := time.Parse(time.RFC1123, "Mon, 01 Jan 2024 12:00:00 GMT")
 
 	tests := []struct {
 		name             string
