@@ -36,11 +36,9 @@ export type MarkerData = {
 	message?: string;
 };
 
-const toRFC1123 = (timestamp: string): string => new Date(timestamp).toUTCString();
-
 const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, userPosition }) => {
 	const [ticketInspectorList, setTicketInspectorList] = useState<MarkerData[]>([]);
-	const lastReceivedInspectorTimestamp = useRef<string | null>(null);
+	const lastReceivedInspectorTime = useRef<Date | null>(null);
 	const [selectedMarker, setSelectedMarker] = useState<MarkerData | null>(null);
 	const riskData = useRiskData();
 
@@ -48,7 +46,7 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
 		const fetchData = async () => {
 			const newTicketInspectorList = await getRecentDataWithIfModifiedSince(
 				`${process.env.REACT_APP_API_URL}/basics/recent`,
-				lastReceivedInspectorTimestamp.current === null ? null : toRFC1123(lastReceivedInspectorTimestamp.current)
+				lastReceivedInspectorTime.current,
 			) || [];
 
 			if (newTicketInspectorList.length > 0) {
@@ -70,7 +68,7 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
 					});
 
 					// Set the latest timestamp from the fetched data
-					lastReceivedInspectorTimestamp.current = newTicketInspectorList[0].timestamp;
+					lastReceivedInspectorTime.current = new Date(newTicketInspectorList[0].timestamp);
 					riskData.refreshRiskData();
 
 					// Convert the map back to an array for the state

@@ -25,12 +25,12 @@ export type LinesList = Record<string, string[]>;
  * @returns {Promise<any | null>} A promise that resolves to the fetched data if successful, or null if there is no new data or an error occurs.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getRecentDataWithIfModifiedSince(endpointUrl: string, lastUpdateTimestamp: string | null): Promise<any | null> {
+export async function getRecentDataWithIfModifiedSince(endpointUrl: string, lastUpdate: Date | null): Promise<any | null> {
     try {
         const headers = new Headers();
         // Include the If-Modified-Since header only if lastUpdateTimestamp is available
-        if (lastUpdateTimestamp) {
-            headers.append('If-Modified-Since', lastUpdateTimestamp);
+        if (lastUpdate) {
+            headers.append('If-Modified-Since', lastUpdate.toUTCString())
         }
 
         // Make the request with optional If-Modified-Since header
