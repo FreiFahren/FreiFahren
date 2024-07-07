@@ -12,6 +12,7 @@ import './LoadingPlaceholder.css';
  * animation to indicate a loading state.
  *
  * In order to use this anywhere please make sure it has a parent element with a sensible width and height.
+ * Simply add a state to track when the content is loading and render this component conditionally.
 */
 const LoadingPlaceholder: React.FC = () => {
     return (
