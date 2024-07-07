@@ -69,11 +69,11 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ openAnimationClass }) => 
             <h2>Über uns</h2>
             <p>
                 FreiFahren ist ein nicht-kommerzielles Open-Source-Projekt, das sich zum Ziel gesetzt hat, den Zugang zum öffentlichen Nahverkehr zu erleichtern.
-                Wir sind stets offen für neue Mithelfer auf unserem GitHub.
+                Wir sind stets offen für neue Mithelfende auf unserem GitHub.
             </p>
             <p>
-                Ein Großteil der Meldungen stammt aus der FreiFahren_BE Telegram-Gruppe.
-                Dank der Admins und unserem Telegram-Bot extrahieren wir relevante Daten aus den Nachrichten.
+                Ein Großteil der Meldungen stammt aus der <a href='https://t.me/freifahren_BE'>FreiFahren_BE Telegram-Gruppe</a>.
+                Vielen Dank an die Admins, dass wir mit unserem Telegram Bot die relevanten Informationen extrahieren dürfen.
             </p>
         </div>
     );
