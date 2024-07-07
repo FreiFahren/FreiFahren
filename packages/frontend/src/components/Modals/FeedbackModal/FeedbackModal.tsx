@@ -19,7 +19,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ openAnimationClass }) => 
                     <img
                     className='profile-picture'
                     src={process.env.PUBLIC_URL + '/icons/profiles/joff.jpeg'}
-                    alt='Joff Github Profile Picture'
+                    alt='Joff Github Profile'
                     />
                     <p>Joff</p>
                     <div>
@@ -38,7 +38,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ openAnimationClass }) => 
                     <img
                     className='profile-picture'
                     src={process.env.PUBLIC_URL + '/icons/profiles/johan.jpeg'}
-                    alt='Johan Github Profile Picture'
+                    alt='Johan Github Profile'
                     />
                     <p>Johan</p>
                     <div>
@@ -57,7 +57,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ openAnimationClass }) => 
                     <img
                     className='profile-picture'
                     src={process.env.PUBLIC_URL + '/icons/profiles/moritz.jpeg'}
-                    alt='Moritz Github Profile Picture'
+                    alt='Moritz Github Profile'
                     />
                     <p>Moritz</p>
                     <div>
@@ -73,7 +73,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ openAnimationClass }) => 
                     <img
                     className='profile-picture'
                     src={process.env.PUBLIC_URL + '/icons/profiles/david.jpeg'}
-                    alt='David Github Profile Picture'
+                    alt='David Github Profile'
                     />
                     <p>David</p>
                     <div>
