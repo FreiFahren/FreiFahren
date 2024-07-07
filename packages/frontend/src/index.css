@@ -145,7 +145,7 @@ label {
   color: var(--color-primary);
 }
 
-.dark svg {
+.dark svg, .dark img[src$=".svg"] {
   filter: invert(1);
 }
 
@@ -175,6 +175,12 @@ button:hover {
 
 :root.dark button a {
   color: var(--color-primary);
+}
+
+button.action {
+  background-color: var(--incentive-blue);
+  color: var(--color-white);
+  box-shadow: var(--boxShadow-default);
 }
 
 button a {
