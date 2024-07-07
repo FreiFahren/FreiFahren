@@ -26,14 +26,14 @@ func TestCheckIfModifiedSince(t *testing.T) {
 		},
 		{
 			name:             "Correct header, not modified",
-			ifModifiedSince:  "2024-01-01T12:00:00Z",
+			ifModifiedSince:  "Mon, 01 Jan 2024 12:00:00 GMT",
 			lastModified:     lastModifiedTime,
 			expectedModified: false,
 			expectError:      false,
 		},
 		{
 			name:             "Correct header, modified",
-			ifModifiedSince:  "2023-12-31T11:00:00Z",
+			ifModifiedSince:  "Sun, 31 Dec 2023 11:00:00 GMT",
 			lastModified:     lastModifiedTime,
 			expectedModified: true,
 			expectError:      false,
