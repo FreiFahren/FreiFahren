@@ -19,13 +19,13 @@ interface LoadingPlaceholderProps {
  * Behavior:
  * 1. Waits for an initial delay before showing. Inorder to avoid flickering.
  * 2. If content loads before this delay, the placeholder is never shown.
- * 3. Once shown, it remains visible for at least the minDisplayTime.
+ * 3. Once shown, it remains visible for at least the minDisplayTime, even if the content loads before that to avoid flickering.
  *
  * In order to use this anywhere, please make sure it has a parent element with a sensible width and height.
  *
  * @param {Object} props - Component props
  * @param {boolean} props.isLoading - Whether the content is currently loading
- * @param {number} [props.initialDelay=100] - Initial delay in milliseconds before showing the loading placeholder
+ * @param {number} [props.initialDelay=50] - Initial delay in milliseconds before showing the loading placeholder
  * @param {number} [props.minDisplayTime=1000] - Minimum time in milliseconds to display the placeholder once shown
  * @returns {JSX.Element | null} A div with loading animation or null if not shown
  */
@@ -46,13 +46,15 @@ const LoadingPlaceholder: React.FC<LoadingPlaceholderProps> = ({
                 setShouldShow(true);
                 setStartTime(Date.now());
             }, initialDelay);
-        } else if (!isLoading && shouldShow && startTime) {
+        } else if (shouldShow && startTime) {
             const elapsedTime = Date.now() - startTime;
             const remainingTime = Math.max(0, minDisplayTime - elapsedTime);
 
             displayTimer = setTimeout(() => {
-                setShouldShow(false);
-                setStartTime(null);
+                if (!isLoading) {
+                    setShouldShow(false);
+                    setStartTime(null);
+                }
             }, remainingTime);
         }
 
