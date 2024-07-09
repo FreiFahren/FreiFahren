@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import './LoadingPlaceholder.css';
+import './Skeleton.css';
 
-interface UseLoadingPlaceholderProps {
+interface UseSkeletonProps {
     isLoading: boolean;
     initialDelay?: number;
     minDisplayTime?: number;
 }
 
-export const useLoadingPlaceholder = ({
+export const useSkeleton = ({
     isLoading,
     initialDelay = 100,
     minDisplayTime = 1000
-  }: UseLoadingPlaceholderProps) => {
+  }: UseSkeletonProps) => {
     const [shouldShow, setShouldShow] = useState(false);
     const [startTime, setStartTime] = useState<number | null>(null);
 
@@ -45,7 +45,7 @@ export const useLoadingPlaceholder = ({
       return shouldShow;
 };
 
-const LoadingPlaceholder: React.FC = () => {
+const Skeleton: React.FC = () => {
   return (
     <div className='loading-placeholder'>
       <div className='loading-animation'></div>
@@ -53,4 +53,4 @@ const LoadingPlaceholder: React.FC = () => {
   );
 };
 
-export default LoadingPlaceholder;
+export default Skeleton;
