@@ -26,7 +26,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
 
   // isLoading is used to avoid showing the placeholder when the location is not available
   const [isLoading, setIsLoading] = useState(false);
-  const showPlaceholder = useSkeleton({ isLoading });
+  const showSkeleton = useSkeleton({ isLoading });
 
   const [stationDistance, setStationDistance] = useState<number | null>(null);
   useEffect(() => {
@@ -48,7 +48,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
       <div>
         <p>{elapsedTimeMessage(elapsedTime, isHistoric)}</p>
         <p className='distance'>
-          {showPlaceholder ? <Skeleton /> : stationDistanceMessage(stationDistance)}
+          {showSkeleton ? <Skeleton /> : stationDistanceMessage(stationDistance)}
         </p>
         {selectedMarker.message && <p className='description'>{selectedMarker.message}</p>}
       </div>
