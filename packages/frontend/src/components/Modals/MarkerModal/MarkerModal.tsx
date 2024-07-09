@@ -3,7 +3,7 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { MarkerData } from '../../Map/Markers/MarkerContainer'
 import { elapsedTimeMessage, stationDistanceMessage } from '../../../utils/mapUtils';
 import { getStationDistance } from '../../../utils/dbUtils';
-import LoadingPlaceholder from '../../Miscellaneous/LoadingPlaceholder/LoadingPlaceholder';
+import LoadingPlaceholder, {useLoadingPlaceholder} from '../../Miscellaneous/LoadingPlaceholder/LoadingPlaceholder';
 import './MarkerModal.css'
 
 interface MarkerModalProps {
@@ -24,7 +24,10 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
   const currentTime = new Date().getTime();
   const elapsedTime = currentTime - adjustedTimestamp.getTime();
 
+  // isLoading is used to avoid showing the placeholder when the location is not available
   const [isLoading, setIsLoading] = useState(false);
+  const showPlaceholder = useLoadingPlaceholder({ isLoading });
+
   const [stationDistance, setStationDistance] = useState<number | null>(null);
   useEffect(() => {
     const fetchDistance = async () => {
@@ -45,7 +48,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
       <div>
         <p>{elapsedTimeMessage(elapsedTime, isHistoric)}</p>
         <p className='distance'>
-          {isLoading ? <LoadingPlaceholder isLoading={isLoading}/> : stationDistanceMessage(stationDistance)}
+          {showPlaceholder ? <LoadingPlaceholder /> : stationDistanceMessage(stationDistance)}
         </p>
         {selectedMarker.message && <p className='description'>{selectedMarker.message}</p>}
       </div>
