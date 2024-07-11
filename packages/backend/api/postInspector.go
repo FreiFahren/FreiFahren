@@ -61,7 +61,7 @@ func PostInspector(c echo.Context) error {
 		logger.Log.Error().Err(err).Msg("Error processing request data in postInspector")
 	}
 
-	if err := fillMissingColumnsUsingProvidedData(dataToInsert, pointers); err != nil {
+	if err := postProcessInspectorData(dataToInsert, pointers); err != nil {
 		logger.Log.Error().Err(err).Msg("Error filling missing columns in postInspector")
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -160,7 +160,7 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 	return response, pointers, nil
 }
 
-func fillMissingColumnsUsingProvidedData(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers) error {
+func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers) error {
 	logger.Log.Debug().Msg("Filling missing columns using provided data")
 
 	var stations = data.GetStationsList()
@@ -178,6 +178,14 @@ func fillMissingColumnsUsingProvidedData(dataToInsert *structs.ResponseData, poi
 			logger.Log.Error().Err(err).Msg("Error determining direction if implied in postInspector")
 			return err
 		}
+	}
+
+	// If the direction is the same as the station, remove the direction
+	if dataToInsert.Direction.ID == dataToInsert.Station.ID {
+		dataToInsert.Direction = structs.Station{}
+		pointers.DirectionIDPtr = nil
+		pointers.DirectionNamePtr = nil
+		logger.Log.Debug().Msg("Removed direction because it was the same as the station")
 	}
 
 	return nil
