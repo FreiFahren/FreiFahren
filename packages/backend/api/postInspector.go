@@ -188,12 +188,19 @@ func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 		logger.Log.Debug().Msg("Removed direction because it was the same as the station")
 	}
 
-	// If Direction is not on the same given line, remove it
+	// If Direction is not on the same given line, remove the direction
 	if dataToInsert.Direction.ID != "" && !structs.StringInSlice(dataToInsert.Line, dataToInsert.Direction.Lines) {
 		dataToInsert.Direction = structs.Station{}
 		pointers.DirectionIDPtr = nil
 		pointers.DirectionNamePtr = nil
 		logger.Log.Debug().Msg("Removed direction because it was not on the same line")
+	}
+
+	// if Station is not on the given line, remove the line
+	if dataToInsert.Station.ID != "" && !structs.StringInSlice(dataToInsert.Line, dataToInsert.Station.Lines) {
+		dataToInsert.Line = ""
+		pointers.LinePtr = nil
+		logger.Log.Debug().Msg("Removed line because the station was not on it")
 	}
 
 	return nil
