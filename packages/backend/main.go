@@ -5,6 +5,7 @@ import (
 
 	"github.com/FreiFahren/backend/Rstats"
 	"github.com/FreiFahren/backend/api"
+	"github.com/FreiFahren/backend/api/getStationDistance"
 	"github.com/FreiFahren/backend/api/postInspector"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
@@ -122,7 +123,7 @@ func main() {
 	apiHOST.GET("/data/id", api.GetStationId)
 
 	// Return the distance between two stations
-	apiHOST.GET("/transit/distance", api.GetStationDistance)
+	apiHOST.GET("/transit/distance", getStationDistance.GetStationDistance)
 
 	// Get usage statistics
 	apiHOST.GET("/statistics/stats", api.GetStats)

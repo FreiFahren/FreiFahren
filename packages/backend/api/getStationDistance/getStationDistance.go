@@ -1,4 +1,4 @@
-package api
+package getStationDistance
 
 import (
 	"container/list"
@@ -62,7 +62,7 @@ func GetStationDistance(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	kmDistance := utils.CalculateDistance(inspectorStationCoordinates.Latitude, inspectorStationCoordinates.Longitude, userLat, userLon)
+	kmDistance := calculateDistance(inspectorStationCoordinates.Latitude, inspectorStationCoordinates.Longitude, userLat, userLon)
 
 	// If the user is less than 1 km away from the station, we just return 1 station distance
 	if kmDistance < 1 {
@@ -105,7 +105,7 @@ func GetAdjacentStationsID(stationId string) []string {
 
 	// Get the adjacent stations for each line the station is on
 	for _, line := range stationLines {
-		currentStationID, err := utils.GetIndexOfStationID(stationId, linesList[line])
+		currentStationID, err := getIndexOfStationID(stationId, linesList[line])
 
 		if currentStationID == -1 && err != nil {
 			logger.Log.Error().Err(err).Msg("Error getting the station ID")
@@ -122,7 +122,7 @@ func GetAdjacentStationsID(stationId string) []string {
 	}
 
 	// Remove duplicates
-	adjacentStations = utils.RemoveDuplicateAdjacentStations(adjacentStations)
+	adjacentStations = removeDuplicateAdjacentStations(adjacentStations)
 
 	return adjacentStations
 }
@@ -201,7 +201,7 @@ func FindShortestDistance(startStation string, userLat, userLon float64) int {
 
 	ReadAndCreateSortedStationsListAndLinesList()
 
-	endStation := utils.GetNearestStationID(stationIDs, stationsList, userLat, userLon)
+	endStation := GetNearestStationID(stationIDs, stationsList, userLat, userLon)
 
 	// Initialize the queue, distances, lines and a map to keep track of visited stations
 	visited := make(map[string]bool)

@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/FreiFahren/backend/api"
+	"github.com/FreiFahren/backend/api/getStationDistance"
 	"github.com/FreiFahren/backend/data"
 )
 
@@ -26,7 +26,7 @@ func TestFindShortestDistance(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			distances := api.FindShortestDistance(tt.startStation, tt.userLat, tt.userLon)
+			distances := getStationDistance.FindShortestDistance(tt.startStation, tt.userLat, tt.userLon)
 			fmt.Printf("Distances: %v\n", distances)
 			if !reflect.DeepEqual(distances, tt.expectedLength) {
 				t.Errorf("FindShortestPath(%s, %f, %f) = %v; expected %v", tt.startStation, tt.userLat, tt.userLon, distances, tt.expectedLength)

@@ -3,7 +3,7 @@ package api_test
 import (
 	"testing"
 
-	"github.com/FreiFahren/backend/api"
+	"github.com/FreiFahren/backend/api/getStationDistance"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/utils"
 )
@@ -30,8 +30,8 @@ func TestGetNearestStation(t *testing.T) {
 	data.EmbedJSONFiles()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			stationsList, stationIDs, linesList = api.ReadAndCreateSortedStationsListAndLinesList()
-			nearestStation := utils.GetNearestStationID(stationIDs, stationsList, tt.userLat, tt.userLon)
+			stationsList, stationIDs, linesList = getStationDistance.ReadAndCreateSortedStationsListAndLinesList()
+			nearestStation := getStationDistance.GetNearestStationID(stationIDs, stationsList, tt.userLat, tt.userLon)
 			if !contains(tt.expectedStations, nearestStation) {
 				t.Errorf("GetNearestStation(%.13f, %.13f) = %s; expected one of %v", tt.userLat, tt.userLon, nearestStation, tt.expectedStations)
 
