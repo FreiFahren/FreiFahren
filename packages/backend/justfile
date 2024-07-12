@@ -1,0 +1,54 @@
+set dotenv-load
+set positional-arguments
+
+env file:
+  set -a; source .env.{{file}}; set +a
+
+shell container:
+  docker compose exec {{container}} /bin/bash
+
+setup_db:
+  sqlite3 $HOST_DB_URL < database/schema.sql
+
+dev:
+  #!/bin/bash
+  echo "Starting development server"
+
+  docker compose build && {
+    trap 'kill $(jobs -p)' SIGINT SIGTERM EXIT;
+    
+    docker compose watch &
+   
+    docker compose logs -f --no-log-prefix &
+
+    wait;
+  }
+
+test:
+  #!/bin/bash
+  set -a; source .env.test; set +a
+
+  sqlite3 $HOST_DB_URL < database/schema.sql
+
+  echo "Running tests"
+
+  docker compose -f compose.yaml -f compose.test.yaml up -d --build --force-recreate
+
+  docker compose logs -f &
+
+  container_id=$(docker compose ps -q api)
+  exit_code=$(docker wait $container_id)
+
+  docker compose down
+
+  exit $exit_code
+
+prod:
+  echo "Starting production server"
+  docker compose -f compose.yaml -f compose.prod.yaml up -d --build
+
+logs:
+  docker compose exec api tail -f /app/app.log
+
+clean:
+  docker compose down --volumes

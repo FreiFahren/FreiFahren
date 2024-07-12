@@ -1,0 +1,22 @@
+name: freifahren-backend
+
+services:
+  api:
+    build:
+      context: .
+      target: development
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - 8080:8080
+    volumes:
+      - ${HOST_DB_URL}:${DB_URL}
+    develop:
+      watch:
+        - action: sync+restart
+          path: .
+          target: /app/
+        - action: rebuild
+          path: go.mod
+        - action: rebuild
+          path: go.sum

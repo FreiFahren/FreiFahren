@@ -1,0 +1,6 @@
+services:
+  api:
+    env_file: .env.prod
+    build:
+      context: .
+      target: production

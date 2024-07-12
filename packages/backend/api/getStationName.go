@@ -11,7 +11,6 @@ import (
 
 func IdToStationName(id string) (string, error) {
 	logger.Log.Debug().Msg("Transforming station ID to station name")
-
 	var stations = data.GetStationsList()
 
 	station, ok := stations[id]

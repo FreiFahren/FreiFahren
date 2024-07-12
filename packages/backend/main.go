@@ -9,7 +9,6 @@ import (
 	"github.com/FreiFahren/backend/database"
 	_ "github.com/FreiFahren/backend/docs"
 	"github.com/FreiFahren/backend/logger"
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	cron "github.com/robfig/cron/v3"
@@ -30,18 +29,11 @@ type (
 // @BasePath	/
 func main() {
 	logger.Init()
-
-	// Load .env file
-	err := godotenv.Overload()
-	if err != nil {
-		logger.Log.Panic().Msg("Error loading .env file")
-		logger.Log.Panic().Str("Error", err.Error())
-	}
-
+	
 	data.EmbedJSONFiles()
 
-	// Create a new connection pool, for concurrency
-	database.CreatePool()
+	err := database.OpenDB()
+
 	if err != nil {
 		logger.Log.Error().Msg("Could not create connection pool")
 		logger.Log.Error().Str("Error", err.Error())
@@ -51,15 +43,6 @@ func main() {
 	Rstats.RunRiskModel()
 
 	c := cron.New()
-
-	// Schedule a job to backup the database every day at midnight
-	_, err = c.AddFunc("0 0 * * *", func() {
-		database.BackupDatabase()
-	})
-	if err != nil {
-		logger.Log.Error().Msg("Could not schedule backup job")
-		logger.Log.Error().Str("Error", err.Error())
-	}
 
 	// Update the risk model even if there are no reports for a long time
 	_, err = c.AddFunc("*/10 * * * *", func() {
@@ -100,10 +83,7 @@ func main() {
 	apiHOST.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// Close the database connection when the main function returns
-	defer database.ClosePool()
-
-	// Ensure the required table exists
-	database.CreateTicketInfoTable()
+	defer database.CloseDB()
 
 	// Post a new ticket inspector
 	apiHOST.POST("/basics/newInspector", api.PostInspector)

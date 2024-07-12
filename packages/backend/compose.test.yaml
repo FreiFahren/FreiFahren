@@ -1,0 +1,7 @@
+services:
+  api:
+    env_file: .env.test
+    restart: "no"
+    build:
+      context: .
+      target: test
