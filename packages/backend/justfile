@@ -14,7 +14,7 @@ dev:
   #!/bin/bash
   echo "Starting development server"
 
-  docker compose build && {
+  docker compose -f compose.yaml -f compose.local.yaml build && {
     trap 'kill $(jobs -p)' SIGINT SIGTERM EXIT;
     
     docker compose watch &
@@ -45,7 +45,7 @@ test:
 
 prod:
   echo "Starting production server"
-  docker compose -f compose.yaml -f compose.prod.yaml up -d --build
+  docker compose -f compose.yaml up -d --build
 
 logs:
   docker compose exec api tail -f /app/app.log
