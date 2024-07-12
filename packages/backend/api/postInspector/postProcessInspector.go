@@ -15,7 +15,7 @@ func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 	var lines = data.GetLinesList()
 
 	if dataToInsert.Line == "" && dataToInsert.Station.ID != "" {
-		if err := AssignLineIfSingleOption(dataToInsert, pointers, stations[dataToInsert.Station.ID]); err != nil {
+		if err := AssignLineIfSingleOption(dataToInsert, pointers, stations[dataToInsert.Station.ID], stations[dataToInsert.Direction.ID]); err != nil {
 			logger.Log.Error().Err(err).Msg("Error assigning line if single option in postInspector")
 			return err
 		}
@@ -33,6 +33,16 @@ func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 		dataToInsert.Direction = structs.Station{}
 		pointers.DirectionIDPtr = nil
 		pointers.DirectionNamePtr = nil
+
+		if dataToInsert.Line != "" {
+			// in case the direction was the same as the station, but the line was provided, we can determine the correct direction
+			// e.g. Line: U6, Station: Alt-Mariendorf, Direction: Alt-Mariendorf it should be removed and reset to Kurt-Schumacher-Platz
+			if err := DetermineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.ID); err != nil {
+				logger.Log.Error().Err(err).Msg("Error determining direction if implied in postInspector")
+				return err
+			}
+		}
+
 		logger.Log.Debug().Msg("Removed direction because it was the same as the station")
 	}
 
@@ -40,6 +50,12 @@ func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 	if dataToInsert.Station.ID != "" && !structs.StringInSlice(dataToInsert.Line, stations[dataToInsert.Station.ID].Lines) {
 		dataToInsert.Line = ""
 		pointers.LinePtr = nil
+
+		// try to assign the line if the station is uniquely served by one line
+		if err := AssignLineIfSingleOption(dataToInsert, pointers, stations[dataToInsert.Station.ID], stations[dataToInsert.Direction.ID]); err != nil {
+			logger.Log.Error().Err(err).Msg("Error assigning line if single option in postInspector")
+			return err
+		}
 		logger.Log.Debug().Msg("Removed line because the station was not on it")
 	}
 
@@ -55,7 +71,7 @@ func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 }
 
 // If a station is uniquely served by one line, assign it.
-func AssignLineIfSingleOption(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, station structs.StationListEntry) error {
+func AssignLineIfSingleOption(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, station structs.StationListEntry, direction structs.StationListEntry) error {
 	logger.Log.Debug().Msg("Assigning line if single option")
 
 	// If there is only one line for the station, assign it
@@ -68,8 +84,8 @@ func AssignLineIfSingleOption(dataToInsert *structs.ResponseData, pointers *stru
 	}
 
 	// if there is only one line for the direction, assign it
-	if len(dataToInsert.Direction.Lines) == 1 {
-		dataToInsert.Line = dataToInsert.Direction.Lines[0]
+	if len(direction.Lines) == 1 {
+		dataToInsert.Line = direction.Lines[0]
 		pointers.LinePtr = &dataToInsert.Line
 		logger.Log.Debug().Msg("Assigned line because the direction was the only option for the station")
 	}

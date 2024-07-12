@@ -14,6 +14,7 @@ func TestAssignLineIfSingleOption(t *testing.T) {
 		dataToInsert   utils.ResponseData
 		pointers       utils.InsertPointers
 		station        utils.StationListEntry
+		direction      utils.StationListEntry
 		expectedLine   string
 		expectedPtrNil bool
 	}{
@@ -25,6 +26,9 @@ func TestAssignLineIfSingleOption(t *testing.T) {
 			station: utils.StationListEntry{
 				Lines: []string{"Line1"},
 			},
+			direction: utils.StationListEntry{
+				Lines: []string{},
+			},
 			expectedLine:   "Line1",
 			expectedPtrNil: false,
 		},
@@ -35,6 +39,9 @@ func TestAssignLineIfSingleOption(t *testing.T) {
 			},
 			station: utils.StationListEntry{
 				Lines: []string{"Line1", "Line3"},
+			},
+			direction: utils.StationListEntry{
+				Lines: []string{"Line2"},
 			},
 			expectedLine:   "Line2",
 			expectedPtrNil: false,
@@ -48,6 +55,9 @@ func TestAssignLineIfSingleOption(t *testing.T) {
 			station: utils.StationListEntry{
 				Lines: []string{"Line1", "Line2"},
 			},
+			direction: utils.StationListEntry{
+				Lines: []string{"Line3", "Line4"},
+			},
 			expectedLine:   "",
 			expectedPtrNil: true,
 		},
@@ -60,6 +70,9 @@ func TestAssignLineIfSingleOption(t *testing.T) {
 			station: utils.StationListEntry{
 				Lines: []string{},
 			},
+			direction: utils.StationListEntry{
+				Lines: []string{},
+			},
 			expectedLine:   "",
 			expectedPtrNil: true,
 		},
@@ -69,7 +82,7 @@ func TestAssignLineIfSingleOption(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			pointers := &utils.InsertPointers{}
 
-			err := postInspector.AssignLineIfSingleOption(&tc.dataToInsert, pointers, tc.station)
+			err := postInspector.AssignLineIfSingleOption(&tc.dataToInsert, pointers, tc.station, tc.direction)
 			if err != nil {
 				t.Errorf("Unexpected error: %v", err)
 			}
