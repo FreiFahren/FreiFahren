@@ -42,17 +42,18 @@ func GetRecentTicketInspectorInfo(c echo.Context) error {
 	}
 
 	// Check if the data has been modified since the provided time
-	ifModifiedSince := c.Request().Header.Get("If-Modified-Since")
-	modifiedSince, err := utils.CheckIfModifiedSince(ifModifiedSince, databaseLastModified)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error checking if the data has been modified")
-		return c.NoContent(http.StatusInternalServerError)
+	if databaseLastModified != nil {
+		ifModifiedSince := c.Request().Header.Get("If-Modified-Since")
+		modifiedSince, err := utils.CheckIfModifiedSince(ifModifiedSince, *databaseLastModified)
+		if err != nil {
+			logger.Log.Error().Err(err).Msg("Error checking if the data has been modified")
+			return c.NoContent(http.StatusInternalServerError)
+		}
+		if !modifiedSince {
+			// Return 304 Not Modified if the data hasn't been modified since the provided time
+			return c.NoContent(http.StatusNotModified)
+		}
 	}
-	if !modifiedSince {
-		// Return 304 Not Modified if the data hasn't been modified since the provided time
-		return c.NoContent(http.StatusNotModified)
-	}
-
 	// Proceed with fetching and processing the data if it was modified
 	// or if the If-Modified-Since header was not provided
 	ticketInfoList, err := database.GetLatestTicketInspectors()
@@ -151,6 +152,8 @@ func FetchAndAddHistoricData(ticketInfoList []utils.TicketInspector, remaining i
 
 func constructTicketInspectorInfo(ticketInfo utils.TicketInspector) (utils.TicketInspectorResponse, error) {
 	logger.Log.Debug().Msg("Constructing ticket inspector info")
+
+	logger.Log.Debug().Msgf("Station ID: %s", ticketInfo.StationID)
 
 	cleanedStationId := strings.ReplaceAll(ticketInfo.StationID, "\n", "")
 	cleanedDirectionId := strings.ReplaceAll(ticketInfo.DirectionID.String, "\n", "")
