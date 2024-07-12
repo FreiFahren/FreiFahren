@@ -8,35 +8,40 @@ This repository is the backend that powers the Freifahren web application and AP
 
 ### Prerequisites
 
-- [Docker with Docker Compose](https://docs.docker.com/desktop/install/mac-install/)
-- [just](https://github.com/casey/just)
+- Go version 1.22 or later
+- PostgreSQL 13 or later
 
 ### Installation
 
-1. Simply clone the repository
+1. Clone the repository
    ```sh
    git clone https://github.com/brandesdavid/FreiFahren
     ```
+
+2. Install Go packages
+    ```sh
+    go mod download
+    ```
+
+3. Set up the database
 
 ### Running the application
 
 1. Create a `.env` file in the root directory and add the following environment variables
     ```sh
-    DB_URL=/app/db.sqlite3 # The path to the database file inside the container
-    HOST_DB_URL=/path/to/host/db/file # The actual location you want the db file to be on your system
+    DB_USER
+    DB_PASSWORD
+    DB_HOST
+    DB_PORT
+    DB_NAME
+    DB_READER
+    DB_READER_PASSWORD
     ```
-If you want to run tests locally, you also need a `.env.test` file with overrides for the above values (or just an empty file if you want to use the same values)
 
-For prod, `.env.prod` should contain the overrides.
-
-2. Run the application for development, with hot reloading
+2. Run the application
     ```sh
-    just dev
+    go run main.go
     ```
-3. Run tests
-   ```sh
-   just test
-   ```
 
   Or if you want to run the application with hot reloading of the server and swag documentation, you can use the following command:
     ```sh
