@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/FreiFahren/backend/Rstats"
-	"github.com/FreiFahren/backend/api"
+	"github.com/FreiFahren/backend/api/getId"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	_ "github.com/FreiFahren/backend/docs"
@@ -121,7 +121,7 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 	}
 
 	if req.StationName != "" {
-		if stationID, found := api.FindStationId(req.StationName, stations); found {
+		if stationID, found := getId.FindStationId(req.StationName, stations); found {
 			pointers.StationNamePtr = &req.StationName
 			pointers.StationIDPtr = &stationID
 			response.Station = structs.Station{Name: req.StationName, ID: stationID}
@@ -133,7 +133,7 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 	}
 
 	if req.DirectionName != "" {
-		if directionID, found := api.FindStationId(req.DirectionName, stations); found {
+		if directionID, found := getId.FindStationId(req.DirectionName, stations); found {
 			pointers.DirectionNamePtr = &req.DirectionName
 			pointers.DirectionIDPtr = &directionID
 			response.Direction = structs.Station{Name: req.DirectionName, ID: directionID, Coordinates: structs.Coordinates(stations[directionID].Coordinates), Lines: stations[directionID].Lines}

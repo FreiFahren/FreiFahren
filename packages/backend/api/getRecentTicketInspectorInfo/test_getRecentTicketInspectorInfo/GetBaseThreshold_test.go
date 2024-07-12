@@ -1,4 +1,4 @@
-package api_test
+package getRecentTicketInspectorInfo_test
 
 import (
 	"math"

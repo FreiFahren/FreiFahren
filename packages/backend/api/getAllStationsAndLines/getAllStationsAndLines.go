@@ -1,4 +1,4 @@
-package api
+package getAllStationsAndLines
 
 import (
 	"net/http"

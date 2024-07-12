@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/FreiFahren/backend/api"
+	"github.com/FreiFahren/backend/api/getStationName"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/logger"
@@ -164,7 +164,7 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector) (utils.Ticke
 		return utils.TicketInspectorResponse{}, err
 	}
 
-	stationName, err := api.IdToStationName(cleanedStationId)
+	stationName, err := getStationName.IdToStationName(cleanedStationId)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting station name")
 		return utils.TicketInspectorResponse{}, err
@@ -172,7 +172,7 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector) (utils.Ticke
 
 	directionName, directionLat, directionLon := "", float64(0), float64(0)
 	if ticketInfo.DirectionID.Valid {
-		directionName, err = api.IdToStationName(cleanedDirectionId)
+		directionName, err = getStationName.IdToStationName(cleanedDirectionId)
 		if err != nil {
 			logger.Log.Error().Err(err).Msg("Error getting direction name")
 			return utils.TicketInspectorResponse{}, err

@@ -1,4 +1,4 @@
-package api
+package getSegmentColors
 
 import (
 	"encoding/json"

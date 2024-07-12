@@ -1,4 +1,4 @@
-package api_test
+package test_getStationDistance
 
 import (
 	"testing"

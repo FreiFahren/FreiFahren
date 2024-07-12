@@ -1,4 +1,4 @@
-package api
+package getStats
 
 import (
 	"net/http"
