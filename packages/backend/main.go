@@ -5,6 +5,7 @@ import (
 
 	"github.com/FreiFahren/backend/Rstats"
 	"github.com/FreiFahren/backend/api"
+	"github.com/FreiFahren/backend/api/postInspector"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	_ "github.com/FreiFahren/backend/docs"
@@ -106,7 +107,7 @@ func main() {
 	database.CreateTicketInfoTable()
 
 	// Post a new ticket inspector
-	apiHOST.POST("/basics/newInspector", api.PostInspector)
+	apiHOST.POST("/basics/newInspector", postInspector.PostInspector)
 
 	// Return the recent ticket inspector info
 	apiHOST.GET("/basics/recent", api.GetRecentTicketInspectorInfo)
