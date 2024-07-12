@@ -34,8 +34,6 @@ import (
 //
 // @Router /basics/recent [get]
 func GetRecentTicketInspectorInfo(c echo.Context) error {
-	logger.Log.Info().Msg("GET /basics/recent")
-
 	databaseLastModified, err := database.GetLatestUpdateTime()
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting latest update time")

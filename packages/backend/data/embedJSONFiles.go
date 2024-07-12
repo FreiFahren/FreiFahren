@@ -26,8 +26,6 @@ var (
 )
 
 func EmbedJSONFiles() {
-	logger.Log.Debug().Msg("Embedding JSON files")
-
 	var err error
 
 	dataLock.Lock()
@@ -50,8 +48,6 @@ func EmbedJSONFiles() {
 }
 
 func GetStationsAndLinesList() utils.AllStationsAndLinesList {
-	logger.Log.Debug().Msg("Getting stations and lines list")
-
 	dataLock.RLock()
 	defer dataLock.RUnlock()
 
@@ -59,8 +55,6 @@ func GetStationsAndLinesList() utils.AllStationsAndLinesList {
 }
 
 func GetLinesList() map[string][]string {
-	logger.Log.Debug().Msg("Getting lines list")
-
 	dataLock.RLock()
 	defer dataLock.RUnlock()
 
@@ -68,8 +62,6 @@ func GetLinesList() map[string][]string {
 }
 
 func GetStationsList() map[string]utils.StationListEntry {
-	logger.Log.Debug().Msg("Getting stations list")
-
 	dataLock.RLock()
 	defer dataLock.RUnlock()
 
@@ -91,8 +83,6 @@ func ReadStationsAndLinesListFromBytes(byteValue []byte) (utils.AllStationsAndLi
 }
 
 func ReadLinesListFromBytes(byteValue []byte) (map[string][]string, error) {
-	logger.Log.Debug().Msg("Reading lines list from bytes")
-
 	var linesList map[string][]string
 	err := json.Unmarshal(byteValue, &linesList)
 	if err != nil {
@@ -103,8 +93,6 @@ func ReadLinesListFromBytes(byteValue []byte) (map[string][]string, error) {
 }
 
 func ReadStationsListFromBytes(byteValue []byte) (map[string]utils.StationListEntry, error) {
-	logger.Log.Debug().Msg("Reading stations list from bytes")
-
 	var linesList map[string]utils.StationListEntry
 	err := json.Unmarshal(byteValue, &linesList)
 	if err != nil {

@@ -19,6 +19,8 @@ import (
 // This function iterates through each element in the provided slice and compares it with the target string 'a'.
 // If a match is found, it returns true. Otherwise, it returns false after checking all elements in the slice.
 func StringInSlice(a string, list []string) bool {
+	// log the incomming values
+	logger.Log.Debug().Msgf("StringInSlice: a: %s, list: %v", a, list)
 	for _, b := range list {
 		if b == a {
 			return true
@@ -59,8 +61,6 @@ func ParseStringToFloat(str string) (float64, error) {
 //
 // Use this function to decide whether to return updated data or a 304 Not Modified response.
 func CheckIfModifiedSince(ifModifiedSince string, lastModified time.Time) (bool, error) {
-	logger.Log.Debug().Msg("Checking If-Modified-Since header")
-
 	// If the header is empty, proceed with fetching the data
 	if ifModifiedSince == "" {
 		return true, nil

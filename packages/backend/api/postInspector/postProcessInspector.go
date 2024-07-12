@@ -37,14 +37,14 @@ func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 	}
 
 	// if Station is not on the given line, remove the line
-	if dataToInsert.Station.ID != "" && !structs.StringInSlice(dataToInsert.Line, dataToInsert.Station.Lines) {
+	if dataToInsert.Station.ID != "" && !structs.StringInSlice(dataToInsert.Line, stations[dataToInsert.Station.ID].Lines) {
 		dataToInsert.Line = ""
 		pointers.LinePtr = nil
 		logger.Log.Debug().Msg("Removed line because the station was not on it")
 	}
 
 	// If Direction is not on the same given line, remove the direction
-	if dataToInsert.Direction.ID != "" && !structs.StringInSlice(dataToInsert.Line, dataToInsert.Direction.Lines) {
+	if dataToInsert.Direction.ID != "" && !structs.StringInSlice(dataToInsert.Line, stations[dataToInsert.Station.ID].Lines) {
 		dataToInsert.Direction = structs.Station{}
 		pointers.DirectionIDPtr = nil
 		pointers.DirectionNamePtr = nil
@@ -62,12 +62,16 @@ func AssignLineIfSingleOption(dataToInsert *structs.ResponseData, pointers *stru
 	if len(station.Lines) == 1 {
 		dataToInsert.Line = station.Lines[0]
 		pointers.LinePtr = &dataToInsert.Line
+
+		logger.Log.Debug().Msg("Assigned line because it was the only option for the station")
+		return nil // returning early to avoid overwriting the line if station and direction dont match
 	}
 
 	// if there is only one line for the direction, assign it
 	if len(dataToInsert.Direction.Lines) == 1 {
 		dataToInsert.Line = dataToInsert.Direction.Lines[0]
 		pointers.LinePtr = &dataToInsert.Line
+		logger.Log.Debug().Msg("Assigned line because the direction was the only option for the station")
 	}
 
 	return nil
