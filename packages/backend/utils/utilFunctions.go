@@ -80,3 +80,20 @@ func CheckIfModifiedSince(ifModifiedSince string, lastModified time.Time) (bool,
 		return true, nil
 	}
 }
+
+// GetKeysFromMap returns the keys of a map as a slice of strings.
+//
+// Parameters:
+//   - m: The map from which to extract the keys.
+//
+// Returns:
+//   - A slice of strings containing the keys of the map.
+//
+// This function iterates over the keys of the provided map and appends them to a slice of strings.
+func GetKeysFromMap(m map[string]bool) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
+}

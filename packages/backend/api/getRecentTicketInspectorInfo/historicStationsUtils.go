@@ -1,4 +1,4 @@
-package utils
+package getRecentTicketInspectorInfo
 
 import (
 	"time"
@@ -13,7 +13,7 @@ import (
 // linearly increases to 7 between 7:00 to 9:00.
 // On Saturdays the threshold decreases from 18:00 to 24:00.
 // The threshold is reduced by 50% if it is a weekend.
-func CalculateHistoricDataThreshold() int {
+func calculateHistoricDataThreshold() int {
 	logger.Log.Debug().Msg("Calculating historic data threshold")
 
 	currentTime := time.Now().UTC()
@@ -69,14 +69,4 @@ func calculateWeekendAdjustment(currentTime time.Time, threshold int) float64 {
 		return float64(threshold) * 0.5
 	}
 	return 0.0
-}
-
-func GetKeysFromMap(m map[string]bool) []string {
-	logger.Log.Debug().Msg("Getting keys from map")
-
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	return keys
 }

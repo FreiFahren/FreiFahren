@@ -5,6 +5,7 @@ import (
 
 	"github.com/FreiFahren/backend/Rstats"
 	"github.com/FreiFahren/backend/api"
+	"github.com/FreiFahren/backend/api/getRecentTicketInspectorInfo"
 	"github.com/FreiFahren/backend/api/getStationDistance"
 	"github.com/FreiFahren/backend/api/postInspector"
 	"github.com/FreiFahren/backend/data"
@@ -111,7 +112,7 @@ func main() {
 	apiHOST.POST("/basics/newInspector", postInspector.PostInspector)
 
 	// Return the recent ticket inspector info
-	apiHOST.GET("/basics/recent", api.GetRecentTicketInspectorInfo)
+	apiHOST.GET("/basics/recent", getRecentTicketInspectorInfo.GetRecentTicketInspectorInfo)
 
 	// Return the name for given id
 	apiHOST.GET("/data/station", api.GetStationName)

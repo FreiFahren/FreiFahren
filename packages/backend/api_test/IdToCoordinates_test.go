@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/FreiFahren/backend/api"
+	"github.com/FreiFahren/backend/api/getRecentTicketInspectorInfo"
 	"github.com/FreiFahren/backend/data"
 )
 
@@ -27,7 +27,7 @@ func TestIdToCoordinates(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.id, func(t *testing.T) {
-			latitude, longitude, err := api.IdToCoordinates(tt.id)
+			latitude, longitude, err := getRecentTicketInspectorInfo.IdToCoordinates(tt.id)
 			if err != nil {
 
 				dir, err := os.Getwd()
