@@ -15,14 +15,14 @@ func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 	var lines = data.GetLinesList()
 
 	if dataToInsert.Line == "" && dataToInsert.Station.ID != "" {
-		if err := assignLineIfSingleOption(dataToInsert, pointers, stations[dataToInsert.Station.ID]); err != nil {
+		if err := AssignLineIfSingleOption(dataToInsert, pointers, stations[dataToInsert.Station.ID]); err != nil {
 			logger.Log.Error().Err(err).Msg("Error assigning line if single option in postInspector")
 			return err
 		}
 	}
 
 	if dataToInsert.Direction.ID == "" && dataToInsert.Line != "" && dataToInsert.Station.ID != "" {
-		if err := determineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.ID); err != nil {
+		if err := DetermineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.ID); err != nil {
 			logger.Log.Error().Err(err).Msg("Error determining direction if implied in postInspector")
 			return err
 		}
@@ -55,7 +55,7 @@ func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 }
 
 // If a station is uniquely served by one line, assign it.
-func assignLineIfSingleOption(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, station structs.StationListEntry) error {
+func AssignLineIfSingleOption(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, station structs.StationListEntry) error {
 	logger.Log.Debug().Msg("Assigning line if single option")
 
 	// If there is only one line for the station, assign it
@@ -75,11 +75,11 @@ func assignLineIfSingleOption(dataToInsert *structs.ResponseData, pointers *stru
 
 // If by the combination of line and station the direction can be determined, set it.
 // Example: Line: U3, Station: Krumme Lanke, the only possible direction is Warschauer Straße
-func determineDirectionIfImplied(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, line []string, stationID string) error {
+func DetermineDirectionIfImplied(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, line []string, stationID string) error {
 	logger.Log.Debug().Msg("Determining direction if implied")
 
 	var stations = data.GetStationsList()
-	isStationUniqueToOneLine := checkIfStationIsUniqueToOneLineOfType(stations[stationID], dataToInsert.Line)
+	isStationUniqueToOneLine := CheckIfStationIsUniqueToOneLineOfType(stations[stationID], dataToInsert.Line)
 
 	lastStationID := line[len(line)-1]
 	firstStationID := line[0]
@@ -99,7 +99,7 @@ func determineDirectionIfImplied(dataToInsert *structs.ResponseData, pointers *s
 }
 
 // checks if a station is uniquely served by one line of the specified type (e.g., 'S' or 'U').
-func checkIfStationIsUniqueToOneLineOfType(station structs.StationListEntry, line string) bool {
+func CheckIfStationIsUniqueToOneLineOfType(station structs.StationListEntry, line string) bool {
 	logger.Log.Debug().Msg("Checking if station is unique to one line of the specified type")
 
 	// The first character of the line determines if it is a sbahn or ubahn
