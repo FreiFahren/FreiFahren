@@ -7,7 +7,7 @@ type LineTagProps = {
 } & ComponentProps<typeof View>;
 
 export const FFLineTag = ({ line, textProps, ...props }: LineTagProps) => (
-  <View bg={`lines.${line}`} px={1} borderRadius={4} mr={1} {...props}>
+  <View bg={`lines.${line}`} px={2} borderRadius={4} {...props}>
     <Text color="white" textAlign="center" bold {...textProps}>
       {line}
     </Text>

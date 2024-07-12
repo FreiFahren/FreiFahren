@@ -38,26 +38,41 @@ export type MarkerData = {
 
 const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, userPosition }) => {
 	const [ticketInspectorList, setTicketInspectorList] = useState<MarkerData[]>([]);
-	const lastReceivedInspectorTimestamp = useRef<string | null>(null);
+	const lastReceivedInspectorTime = useRef<Date | null>(null);
 	const [selectedMarker, setSelectedMarker] = useState<MarkerData | null>(null);
 	const riskData = useRiskData();
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const newTicketInspectorList = await getRecentDataWithIfModifiedSince(`${process.env.REACT_APP_API_URL}/basics/recent`, lastReceivedInspectorTimestamp.current) || [];
+			const newTicketInspectorList = await getRecentDataWithIfModifiedSince(
+				`${process.env.REACT_APP_API_URL}/basics/recent`,
+				lastReceivedInspectorTime.current,
+			) || [];
 
 			if (newTicketInspectorList.length > 0) {
 				setTicketInspectorList(currentList => {
-					const existingStationIds = new Set(currentList.map(inspector => inspector.station.id));
-					const filteredNewInspectors = newTicketInspectorList.filter((inspector: { station: { id: string; }; }) => !existingStationIds.has(inspector.station.id));
+					// Create a map to track the most recent entry per station ID
+					const updatedList = new Map(currentList.map(inspector => [inspector.station.id, inspector]));
 
-					if (filteredNewInspectors.length > 0) {
-						lastReceivedInspectorTimestamp.current = newTicketInspectorList[0].timestamp;
-						riskData.refreshRiskData(); // refresh risk data when new inspectors are fetched
-						return [...currentList, ...filteredNewInspectors];
-					}
+					newTicketInspectorList.forEach((newInspector: MarkerData) => {
+						const existingInspector = updatedList.get(newInspector.station.id);
+						if (existingInspector) {
+							// Compare timestamps and wether it is historic to decide if we need to update
+							if (new Date(newInspector.timestamp) >= new Date(existingInspector.timestamp) && newInspector.isHistoric === false) {
+								updatedList.set(newInspector.station.id, newInspector);
+							}
+						} else {
+							// If no existing inspector with the same ID, add the new one
+							updatedList.set(newInspector.station.id, newInspector);
+						}
+					});
 
-					return currentList;
+					// Set the latest timestamp from the fetched data
+					lastReceivedInspectorTime.current = new Date(newTicketInspectorList[0].timestamp);
+					riskData.refreshRiskData();
+
+					// Convert the map back to an array for the state
+					return Array.from(updatedList.values());
 				});
 			}
 		};

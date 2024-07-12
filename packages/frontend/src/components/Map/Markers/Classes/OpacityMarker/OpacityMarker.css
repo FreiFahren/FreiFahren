@@ -12,6 +12,9 @@
   display: block;
   border-radius: 50%;
   background-color: var(--color-red);
+}
+
+.pulse {
   animation:pulse 3500ms infinite;
 }
 

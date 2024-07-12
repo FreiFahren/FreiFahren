@@ -9,14 +9,14 @@ const defaultRefreshRiskData = async (): Promise<void> => {
 const RiskDataContext = createContext({
     segmentRiskData: null as RiskData | null,
     refreshRiskData: defaultRefreshRiskData,
-    lastModified: null as string | null
+    lastModified: null as Date | null
 });
 
 export const useRiskData = () => useContext(RiskDataContext);
 
 export const RiskDataProvider = ({ children }: { children: React.ReactNode }) => {
     const [segmentRiskData, setSegmentRiskData] = useState<RiskData | null>(null);
-    const [lastModified, setLastModified] = useState<string | null>(null);
+    const [lastModified, setLastModified] = useState<Date | null>(null);
 
     const refreshRiskData = useCallback(async () => {
         try {
@@ -26,10 +26,7 @@ export const RiskDataProvider = ({ children }: { children: React.ReactNode }) =>
             );
             if (results) {
                 setSegmentRiskData(results);
-                setLastModified(results.last_modified);
-            }
-            else {
-                setSegmentRiskData(null);
+                setLastModified(new Date(results.last_modified));
             }
         } catch (error) {
             console.error('Failed to fetch risk data:', error);

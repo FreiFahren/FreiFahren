@@ -34,10 +34,10 @@ type TicketInspectorResponse struct {
 
 // Is used to simplify the data before saving it to a file
 type SimplifiedTicketInspector struct {
-	Timestamp   string `json:"timestamp"`
-	StationID   string `json:"station_id"`
-	Line        string `json:"line,omitempty"`
-	DirectionID string `json:"direction_id,omitempty"`
+	Timestamp   string   `json:"timestamp"`
+	StationID   string   `json:"station_id"`
+	Lines       []string `json:"line,omitempty"`
+	DirectionID string   `json:"direction_id,omitempty"`
 }
 
 // Is used within the backend primarily to fetch from the database

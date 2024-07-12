@@ -124,14 +124,15 @@ function App() {
 
   return (
     <div className='App'>
-      {appUIState.isFirstOpen && appMounted &&
+      {appUIState.isFirstOpen && appMounted && (
         <>
-          <LegalDisclaimer
-            className={appUIState.isFirstOpen ? 'open center-animation' : ''}
-            closeModal={closeLegalDisclaimer}
-          />
-          <Backdrop onClick={() => highlightElement('legal-disclaimer')} />
-        </>}
+        <LegalDisclaimer
+          openAnimationClass={appUIState.isFirstOpen ? 'open center-animation' : ''}
+          closeModal={closeLegalDisclaimer}
+        />
+        <Backdrop onClick={() => highlightElement('legal-disclaimer')} />
+      </>
+      )}
       {isUtilOpen && (
         <>
           <UtilModal

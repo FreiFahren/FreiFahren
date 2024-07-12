@@ -26,6 +26,8 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index,
 
     const markerRef = useRef<maplibregl.Marker>(null);
 
+    const [isWithin30Mins, setIsWithin30Mins] = useState(false);
+
     useEffect(() => {
         let intervalId: NodeJS.Timeout;
         if (!isFirstOpen) {
@@ -41,6 +43,9 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index,
                         newOpacity = 0.20;
                     }
                     setOpacity(newOpacity);
+
+                    // indicate that the marker should not pulse anymore
+                    setIsWithin30Mins(elapsedTime <= 30 * 60 * 1000);
 
                     if (elapsedTime >= timeToFade) {
                         setOpacity(0);
@@ -74,7 +79,7 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index,
             style={{ opacity: opacity.toString()}}
             onClick={()=> onMarkerClick(markerData)}
         >
-            <span className='live' />
+            <span className={`live ${isWithin30Mins ? 'pulse' : ''}`} />
         </Marker>
     );
 };

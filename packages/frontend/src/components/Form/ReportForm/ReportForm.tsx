@@ -174,7 +174,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
             try {
                 setReportFormState(prevState => ({ ...prevState, isLoadingLines: true }));
                 const storedList = JSON.parse(localStorage.getItem('linesList') || 'null');
-                let list = {};
+                let list: LinesList;
 
                 if (storedList === null || (Date.now() - storedList.timestamp) > 24 * 60 * 60 * 1000) { // 24 hours check
                     const fetchedList = await getAllLinesList();

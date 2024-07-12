@@ -60,6 +60,7 @@ export const redefineDirectionOptions = (option: selectOption, linesList: LinesL
     if (!option || !option.value || !linesList || !stationsList) {
         return [];
     }
+
 	const length = linesList[option.value].length;
 	const { 0: firstStationId, [length - 1]: lastStationId } = linesList[option.value];
 	const newDirectionOptions = [

@@ -7,6 +7,7 @@ export const theme = extendTheme({
     danger: "#EE4E4D",
     fg: "#8F91A2",
     success: "#C9F299",
+    selected: "#22d6f2",
     lines: {
       U1: "#88ad58",
       U2: "#ca4c2b",
@@ -36,3 +37,5 @@ export const theme = extendTheme({
     },
   },
 });
+
+export type Theme = typeof theme;

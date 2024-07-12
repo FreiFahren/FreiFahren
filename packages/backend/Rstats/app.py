@@ -1,6 +1,7 @@
 import waitress
 import flask
 import subprocess
+import csv
 import json
 
 import os
@@ -15,21 +16,33 @@ def get_newest_file():
     newest_file = max(list_of_files, key=os.path.getctime)  # get the newest file
     return newest_file
 
+def clean_output_directory():
+    files = glob.glob('Rstats/output/*')
+    for f in files:
+        os.remove(f)
+
 @app.route('/run', methods=['POST'])
 def run():
-    ticket_data = flask.request.json
-    with open('../ticket_data.json', 'w') as f:
-        json.dump(ticket_data, f)
-        
+    clean_output_directory()
+    ticket_data = flask.request.content_type == 'text/csv' and list(csv.reader(flask.request.data.decode().splitlines())) or 'Error: Invalid content type'
+    print(ticket_data)
+
+    # Save the received data as a CSV file
+    with open('Rstats/ticket_data.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerows(ticket_data)
+
     result = subprocess.run(['Rscript', 'risk_model.r'], stdout=subprocess.PIPE)
     newest_file = get_newest_file()
-    
+
     if newest_file is None:
         return "Error: No output file found", 500
-    
+
     with open(newest_file, 'r') as f:
         data = json.load(f)
-        return data, 200
+
+    return data, 200
+
 
 @app.route('/health', methods=['GET'])
 def health():

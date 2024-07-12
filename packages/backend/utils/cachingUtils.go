@@ -26,8 +26,8 @@ func CheckIfModifiedSince(ifModifiedSince string, lastModified time.Time) (bool,
 		return true, nil
 	}
 
-	// Use time.RFC3339 to parse ISO 8601 format
-	requestedModificationTime, err := time.Parse(time.RFC3339, ifModifiedSince)
+	// Use time.RFC1123 to parse HTTP date format
+	requestedModificationTime, err := time.Parse(time.RFC1123, ifModifiedSince)
 	if err != nil {
 		logger.Log.Error().Msg("Error parsing If-Modified-Since header")
 		return true, err

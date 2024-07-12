@@ -6,9 +6,10 @@ import './Backdrop.css';
 interface BackdropProps {
     onClick: () => void;
     BackgroundColor?: string;
+    Zindex?: number;
 }
 
-const Backdrop: React.FC<BackdropProps> = ({ onClick, BackgroundColor }) => {
+const Backdrop: React.FC<BackdropProps> = ({ onClick, BackgroundColor, Zindex }) => {
     const backdropRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -39,7 +40,10 @@ const Backdrop: React.FC<BackdropProps> = ({ onClick, BackgroundColor }) => {
             className='backdrop'
             onClick={onClick}
             data-testid='backdrop'
-            style={{ backgroundColor: BackgroundColor || 'rgba(0, 0, 0, 0.5)' }}
+            style={{
+                backgroundColor: BackgroundColor || 'rgba(0, 0, 0, 0.5)',
+                zIndex: Zindex || 1 // should be same as --zIndex-backdrop
+            }}
         />,
         document.getElementById('portal-root') as HTMLElement
     );
