@@ -1,4 +1,4 @@
-package getRecentTicketInspectorInfo
+package inspector
 
 import (
 	"time"

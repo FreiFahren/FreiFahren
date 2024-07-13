@@ -1,9 +1,9 @@
-package test_postInspector
+package test_inspector
 
 import (
 	"testing"
 
-	"github.com/FreiFahren/backend/api/postInspector"
+	"github.com/FreiFahren/backend/api/inspector"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/utils"
 	"github.com/stretchr/testify/assert"
@@ -73,7 +73,7 @@ func TestDetermineDirectionIfImplied(t *testing.T) {
 		stations := data.GetStationsList()
 
 		t.Run(tt.name, func(t *testing.T) {
-			err := postInspector.DetermineDirectionIfImplied(tt.dataToInsert, tt.pointers, tt.line, tt.stationID, stations)
+			err := inspector.DetermineDirectionIfImplied(tt.dataToInsert, tt.pointers, tt.line, tt.stationID, stations)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expectedResult, tt.dataToInsert.Direction)
 		})

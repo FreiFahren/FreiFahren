@@ -1,4 +1,4 @@
-package getRecentTicketInspectorInfo
+package inspector
 
 import (
 	"fmt"
@@ -32,8 +32,10 @@ import (
 // @Failure 304 {object} nil "Returns an empty response indicating that the requested data has not changed since the time provided in the 'If-Modified-Since' header."
 // @Failure 500 {string} string "Internal Server Error: An error occurred while processing the request."
 //
-// @Router /basics/recent [get]
-func GetRecentTicketInspectorInfo(c echo.Context) error {
+// @Router /basics/inspectors [get]
+func GetTicketInspectorsInfo(c echo.Context) error {
+	logger.Log.Info().Msg("GET /basics/inspectors")
+
 	databaseLastModified, err := database.GetLatestUpdateTime()
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting latest update time")
@@ -82,7 +84,7 @@ func GetRecentTicketInspectorInfo(c echo.Context) error {
 		ticketInspectorList = append(ticketInspectorList, ticketInspector)
 	}
 
-	filteredTicketInspectorList := RemoveDuplicateStations(ticketInspectorList)
+	filteredTicketInspectorList := removeDuplicateStations(ticketInspectorList)
 
 	return c.JSONPretty(http.StatusOK, filteredTicketInspectorList, "")
 }
@@ -100,7 +102,7 @@ func IdToCoordinates(id string) (float64, float64, error) {
 	return station.Coordinates.Latitude, station.Coordinates.Longitude, nil
 }
 
-func RemoveDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse) []utils.TicketInspectorResponse {
+func removeDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse) []utils.TicketInspectorResponse {
 	logger.Log.Debug().Msg("Removing duplicate stations")
 
 	uniqueStations := make(map[string]utils.TicketInspectorResponse)

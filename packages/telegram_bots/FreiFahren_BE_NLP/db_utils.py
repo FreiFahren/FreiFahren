@@ -33,7 +33,7 @@ def insert_ticket_info(
         'Content-Type': 'application/json'
     }
     
-    response = requests.post(url + '/basics/newInspector', json=data, headers=headers)
+    response = requests.post(url + '/basics/inspectors', json=data, headers=headers)
 
     if response.status_code != 200:
         logger.error('Failed to send data to the backend. Status code: %s Response: %s', response.status_code, response.text)

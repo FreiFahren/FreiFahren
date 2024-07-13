@@ -1,4 +1,4 @@
-package postInspector
+package inspector
 
 import (
 	"bytes"
@@ -36,9 +36,9 @@ import (
 // @Failure 400 "Bad Request: Missing or incorrect parameters provided."
 // @Failure 500 "Internal Server Error: Error during data processing or database insertion."
 //
-// @Router /basics/newInspector [post]
+// @Router /basics/inspectors [post]
 func PostInspector(c echo.Context) error {
-	logger.Log.Info().Msg("POST /basics/newInspector")
+	logger.Log.Info().Msg("POST /basics/Inspector")
 
 	var req structs.InspectorRequest
 	if err := c.Bind(&req); err != nil {

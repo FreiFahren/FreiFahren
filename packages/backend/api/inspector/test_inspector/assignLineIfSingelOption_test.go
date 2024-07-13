@@ -1,10 +1,10 @@
-package test_postInspector
+package test_inspector
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/FreiFahren/backend/api/postInspector"
+	"github.com/FreiFahren/backend/api/inspector"
 	"github.com/FreiFahren/backend/utils"
 )
 
@@ -82,7 +82,7 @@ func TestAssignLineIfSingleOption(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			pointers := &utils.InsertPointers{}
 
-			err := postInspector.AssignLineIfSingleOption(&tc.dataToInsert, pointers, tc.station, tc.direction)
+			err := inspector.AssignLineIfSingleOption(&tc.dataToInsert, pointers, tc.station, tc.direction)
 			if err != nil {
 				t.Errorf("Unexpected error: %v", err)
 			}

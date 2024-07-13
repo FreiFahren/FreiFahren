@@ -82,7 +82,7 @@ export async function reportInspector(line: selectOption, station: selectOption,
         message: message === '' ? null : message,
     });
 
-    fetch(`${process.env.REACT_APP_API_URL}/basics/newInspector`, {
+    fetch(`${process.env.REACT_APP_API_URL}/basics/inspectors`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
