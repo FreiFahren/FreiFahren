@@ -10,7 +10,7 @@ import (
 	"github.com/FreiFahren/backend/api/getStationDistance"
 	"github.com/FreiFahren/backend/api/getStationName"
 	"github.com/FreiFahren/backend/api/getStats"
-	"github.com/FreiFahren/backend/api/inspector"
+	"github.com/FreiFahren/backend/api/inspectors"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	_ "github.com/FreiFahren/backend/docs"
@@ -111,8 +111,8 @@ func main() {
 	// Ensure the required table exists
 	database.CreateTicketInfoTable()
 
-	apiHOST.POST("/basics/inspectors", inspector.PostInspector)
-	apiHOST.GET("/basics/inspectors", inspector.GetTicketInspectorsInfo)
+	apiHOST.POST("/basics/inspectors", inspectors.PostInspector)
+	apiHOST.GET("/basics/inspectors", inspectors.GetTicketInspectorsInfo)
 
 	apiHOST.GET("/data/station", getStationName.GetStationName)
 

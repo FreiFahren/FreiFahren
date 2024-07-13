@@ -1,4 +1,4 @@
-package test_inspector
+package test_inspectors
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/FreiFahren/backend/api/inspector"
+	"github.com/FreiFahren/backend/api/inspectors"
 	"github.com/FreiFahren/backend/data"
 )
 
@@ -27,7 +27,7 @@ func TestIdToCoordinates(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.id, func(t *testing.T) {
-			latitude, longitude, err := inspector.IdToCoordinates(tt.id)
+			latitude, longitude, err := inspectors.IdToCoordinates(tt.id)
 			if err != nil {
 
 				dir, err := os.Getwd()

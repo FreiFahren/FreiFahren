@@ -1,11 +1,11 @@
-package test_inspector
+package test_inspectors
 
 import (
 	"math"
 	"testing"
 	"time"
 
-	"github.com/FreiFahren/backend/api/inspector"
+	"github.com/FreiFahren/backend/api/inspectors"
 )
 
 func TestBaseThreshold(t *testing.T) {
@@ -29,7 +29,7 @@ func TestBaseThreshold(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.dateTime, func(t *testing.T) {
 			currentTime, _ := time.Parse(layout, tc.dateTime)
-			result := inspector.GetBaseThreshold(currentTime.Hour(), currentTime.Minute(), currentTime)
+			result := inspectors.GetBaseThreshold(currentTime.Hour(), currentTime.Minute(), currentTime)
 			roundedResult := math.Round(result*100) / 100
 			if roundedResult != tc.expected {
 				t.Errorf("BaseThreshold(%s) = %v; want %v", tc.dateTime, roundedResult, tc.expected)
