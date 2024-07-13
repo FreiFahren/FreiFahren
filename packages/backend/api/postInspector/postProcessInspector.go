@@ -22,7 +22,7 @@ func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 	}
 
 	if dataToInsert.Direction.ID == "" && dataToInsert.Line != "" && dataToInsert.Station.ID != "" {
-		if err := DetermineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.ID); err != nil {
+		if err := DetermineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.ID, stations); err != nil {
 			logger.Log.Error().Err(err).Msg("Error determining direction if implied in postInspector")
 			return err
 		}
@@ -37,7 +37,7 @@ func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 		if dataToInsert.Line != "" {
 			// in case the direction was the same as the station, but the line was provided, we can determine the correct direction
 			// e.g. Line: U6, Station: Alt-Mariendorf, Direction: Alt-Mariendorf it should be removed and reset to Kurt-Schumacher-Platz
-			if err := DetermineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.ID); err != nil {
+			if err := DetermineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.ID, stations); err != nil {
 				logger.Log.Error().Err(err).Msg("Error determining direction if implied in postInspector")
 				return err
 			}
@@ -58,7 +58,7 @@ func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 		}
 		// try to determine the direction if the line was found
 		if dataToInsert.Line != "" {
-			if err := DetermineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.ID); err != nil {
+			if err := DetermineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.ID, stations); err != nil {
 				logger.Log.Error().Err(err).Msg("Error determining direction if implied in postInspector")
 				return err
 			}
@@ -103,10 +103,15 @@ func AssignLineIfSingleOption(dataToInsert *structs.ResponseData, pointers *stru
 
 // If by the combination of line and station the direction can be determined, set it.
 // Example: Line: U3, Station: Krumme Lanke, the only possible direction is Warschauer Straße
-func DetermineDirectionIfImplied(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, line []string, stationID string) error {
+func DetermineDirectionIfImplied(
+	dataToInsert *structs.ResponseData,
+	pointers *structs.InsertPointers,
+	line []string,
+	stationID string,
+	stations map[string]structs.StationListEntry,
+) error {
 	logger.Log.Debug().Msg("Determining direction if implied")
 
-	var stations = data.GetStationsList()
 	isStationUniqueToOneLine := CheckIfStationIsUniqueToOneLineOfType(stations[stationID], dataToInsert.Line)
 
 	lastStationID := line[len(line)-1]
