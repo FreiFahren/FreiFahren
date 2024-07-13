@@ -1,4 +1,4 @@
-package api
+package getAllStationsAndLines
 
 import (
 	"net/http"
@@ -34,7 +34,7 @@ func GetAllStationsAndLines(c echo.Context) error {
 	// only get the lines
 	isLineList := c.QueryParam("lines")
 	if isLineList == "true" {
-		linesList = data.GetLinesList()
+		linesList := data.GetLinesList()
 
 		return c.JSONPretty(http.StatusOK, linesList, "  ")
 	}
@@ -42,7 +42,7 @@ func GetAllStationsAndLines(c echo.Context) error {
 	// only get the stations
 	isStationList := c.QueryParam("stations")
 	if isStationList == "true" {
-		stationsList = data.GetStationsList()
+		stationsList := data.GetStationsList()
 
 		return c.JSONPretty(http.StatusOK, stationsList, "  ")
 	}

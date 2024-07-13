@@ -1,4 +1,4 @@
-package api
+package getRecentTicketInspectorInfo
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/FreiFahren/backend/api/getStationName"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/logger"
@@ -33,8 +34,6 @@ import (
 //
 // @Router /basics/recent [get]
 func GetRecentTicketInspectorInfo(c echo.Context) error {
-	logger.Log.Info().Msg("GET /basics/recent")
-
 	databaseLastModified, err := database.GetLatestUpdateTime()
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting latest update time")
@@ -61,7 +60,7 @@ func GetRecentTicketInspectorInfo(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	currentHistoricDataThreshold := utils.CalculateHistoricDataThreshold()
+	currentHistoricDataThreshold := calculateHistoricDataThreshold()
 
 	if len(ticketInfoList) < currentHistoricDataThreshold {
 		numberOfHistoricDataToFetch := currentHistoricDataThreshold - len(ticketInfoList)
@@ -163,7 +162,7 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector) (utils.Ticke
 		return utils.TicketInspectorResponse{}, err
 	}
 
-	stationName, err := IdToStationName(cleanedStationId)
+	stationName, err := getStationName.IdToStationName(cleanedStationId)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting station name")
 		return utils.TicketInspectorResponse{}, err
@@ -171,7 +170,7 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector) (utils.Ticke
 
 	directionName, directionLat, directionLon := "", float64(0), float64(0)
 	if ticketInfo.DirectionID.Valid {
-		directionName, err = IdToStationName(cleanedDirectionId)
+		directionName, err = getStationName.IdToStationName(cleanedDirectionId)
 		if err != nil {
 			logger.Log.Error().Err(err).Msg("Error getting direction name")
 			return utils.TicketInspectorResponse{}, err

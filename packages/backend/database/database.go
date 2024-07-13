@@ -301,8 +301,6 @@ func GetLatestTicketInspectors() ([]utils.TicketInspector, error) {
 }
 
 func GetLatestUpdateTime() (time.Time, error) {
-	logger.Log.Debug().Msg("Getting latest update time")
-
 	var lastUpdateTime time.Time
 
 	sql := `SELECT MAX(timestamp) FROM ticket_info;`

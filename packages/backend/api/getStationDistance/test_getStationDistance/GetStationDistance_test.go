@@ -1,6 +1,4 @@
-// FILEPATH: /Users/david/Documents/GitHub/backend/api_test/getStationDistance_test.go
-
-package api_test
+package test_getStationDistance
 
 import (
 	"net/http"
@@ -12,7 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/FreiFahren/backend/api"
+	"github.com/FreiFahren/backend/api/getStationDistance"
 )
 
 func TestGetStationDistance(t *testing.T) {
@@ -61,7 +59,7 @@ func TestGetStationDistance(t *testing.T) {
 			c := e.NewContext(req, rec)
 
 			// Call the function and check the status code
-			if assert.NoError(t, api.GetStationDistance(c)) {
+			if assert.NoError(t, getStationDistance.GetStationDistance(c)) {
 				assert.Equal(t, tt.expectedStatus, rec.Code)
 
 				// Check the response body

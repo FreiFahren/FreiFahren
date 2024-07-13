@@ -4,7 +4,14 @@ import (
 	"net/http"
 
 	"github.com/FreiFahren/backend/Rstats"
-	"github.com/FreiFahren/backend/api"
+	"github.com/FreiFahren/backend/api/getAllStationsAndLines"
+	"github.com/FreiFahren/backend/api/getId"
+	"github.com/FreiFahren/backend/api/getRecentTicketInspectorInfo"
+	"github.com/FreiFahren/backend/api/getSegmentColors"
+	"github.com/FreiFahren/backend/api/getStationDistance"
+	"github.com/FreiFahren/backend/api/getStationName"
+	"github.com/FreiFahren/backend/api/getStats"
+	"github.com/FreiFahren/backend/api/postInspector"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	_ "github.com/FreiFahren/backend/docs"
@@ -106,28 +113,28 @@ func main() {
 	database.CreateTicketInfoTable()
 
 	// Post a new ticket inspector
-	apiHOST.POST("/basics/newInspector", api.PostInspector)
+	apiHOST.POST("/basics/newInspector", postInspector.PostInspector)
 
 	// Return the recent ticket inspector info
-	apiHOST.GET("/basics/recent", api.GetRecentTicketInspectorInfo)
+	apiHOST.GET("/basics/recent", getRecentTicketInspectorInfo.GetRecentTicketInspectorInfo)
 
 	// Return the name for given id
-	apiHOST.GET("/data/station", api.GetStationName)
+	apiHOST.GET("/data/station", getStationName.GetStationName)
 
 	// Return all stations with their id
-	apiHOST.GET("/data/list", api.GetAllStationsAndLines)
+	apiHOST.GET("/data/list", getAllStationsAndLines.GetAllStationsAndLines)
 
 	// Return the id for given name
-	apiHOST.GET("/data/id", api.GetStationId)
+	apiHOST.GET("/data/id", getId.GetStationId)
 
 	// Return the distance between two stations
-	apiHOST.GET("/transit/distance", api.GetStationDistance)
+	apiHOST.GET("/transit/distance", getStationDistance.GetStationDistance)
 
 	// Get usage statistics
-	apiHOST.GET("/statistics/stats", api.GetStats)
+	apiHOST.GET("/statistics/stats", getStats.GetStats)
 
 	// Get the list of highlighted segments and their colors
-	apiHOST.GET("/risk-prediction/getSegmentColors", api.GetSegmentColors)
+	apiHOST.GET("/risk-prediction/getSegmentColors", getSegmentColors.GetSegmentColors)
 
 	apiHOST.Start(":8080")
 
