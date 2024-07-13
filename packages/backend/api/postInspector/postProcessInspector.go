@@ -56,6 +56,14 @@ func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 			logger.Log.Error().Err(err).Msg("Error assigning line if single option in postInspector")
 			return err
 		}
+		// try to determine the direction if the line was found
+		if dataToInsert.Line != "" {
+			if err := DetermineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.ID); err != nil {
+				logger.Log.Error().Err(err).Msg("Error determining direction if implied in postInspector")
+				return err
+			}
+		}
+
 		logger.Log.Debug().Msg("Removed line because the station was not on it")
 	}
 
