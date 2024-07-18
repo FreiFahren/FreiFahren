@@ -120,23 +120,25 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 		response.Line = req.Line
 	}
 
-	// Assign station ID
+	// Assign station
 	if req.StationID != "" {
 		pointers.StationIDPtr = &req.StationID
 		response.Station = structs.Station{ID: req.StationID}
 
 		if station, found := stations[req.StationID]; found {
 			response.Station.Name = station.Name
+			pointers.StationNamePtr = &station.Name
 		}
 	}
 
-	// Assign direction ID
+	// Assign direction
 	if req.DirectionID != "" {
 		pointers.DirectionIDPtr = &req.DirectionID
 		response.Direction = structs.Station{ID: req.DirectionID}
 
 		if direction, found := stations[req.DirectionID]; found {
 			response.Direction.Name = direction.Name
+			pointers.DirectionNamePtr = &direction.Name
 		}
 	}
 
