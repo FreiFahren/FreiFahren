@@ -58,7 +58,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Accepts a JSON payload with details about a ticket inspector's current location.\nThis endpoint validates the provided data, processes necessary computations for linking stations and lines,\ninserts the data into the database, and triggers an update to the risk model used in operational analysis.",
+                "description": "Accepts a JSON payload with details about a ticket inspector's current location.\nThis endpoint validates the provided data, processes necessary computations for linking stations and lines,\ninserts the data into the database, and triggers an update to the risk model used in operational analysis.\nIf the 'timestamp' field is not provided in the request, the current UTC time truncated to the nearest minute is used automatically.",
                 "consumes": [
                     "application/json"
                 ],
@@ -78,6 +78,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/utils.InspectorRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Timestamp of the report in ISO 8601 format (e.g., 2006-01-02T15:04:05Z); if not provided, the current time is used",
+                        "name": "timestamp",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -381,9 +387,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "author": {
+                    "description": "is always null or 98111116 (ASCII for \"BOT\") when getting data from the telegram bot",
                     "type": "integer"
                 },
-                "direction": {
+                "directionId": {
                     "type": "string"
                 },
                 "line": {
@@ -392,7 +399,7 @@ const docTemplate = `{
                 "message": {
                     "type": "string"
                 },
-                "station": {
+                "stationId": {
                     "type": "string"
                 },
                 "timestamp": {

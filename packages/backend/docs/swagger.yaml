@@ -32,14 +32,16 @@ definitions:
   utils.InspectorRequest:
     properties:
       author:
+        description: is always null or 98111116 (ASCII for "BOT") when getting data
+          from the telegram bot
         type: integer
-      direction:
+      directionId:
         type: string
       line:
         type: string
       message:
         type: string
-      station:
+      stationId:
         type: string
       timestamp:
         type: string
@@ -159,6 +161,7 @@ paths:
         Accepts a JSON payload with details about a ticket inspector's current location.
         This endpoint validates the provided data, processes necessary computations for linking stations and lines,
         inserts the data into the database, and triggers an update to the risk model used in operational analysis.
+        If the 'timestamp' field is not provided in the request, the current UTC time truncated to the nearest minute is used automatically.
       parameters:
       - description: Data about the inspector's location and activity
         in: body
@@ -166,6 +169,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/utils.InspectorRequest'
+      - description: Timestamp of the report in ISO 8601 format (e.g., 2006-01-02T15:04:05Z);
+          if not provided, the current time is used
+        in: query
+        name: timestamp
+        type: string
       produces:
       - application/json
       responses:
