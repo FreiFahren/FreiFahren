@@ -5,27 +5,23 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import os
 import requests
 from telegram_bots.logger import setup_logger
+from telegram_bots.config import BACKEND_URL
 
 logger = setup_logger()
 
 def insert_ticket_info(
     timestamp: datetime,
     line,
-    station_name,
-    direction_name
+    station_id,
+    direction_id,
 ):
-    url = os.getenv('BACKEND_URL')
-    if url is None:
-        logger.error('BACKEND_URL is not set')
-        return
-
     # Prepare the JSON data payload
     data = {
         'timestamp': timestamp.isoformat(),
         'line': line,
-        'station': station_name,
-        'direction': direction_name,
-        'author': 98111116, # ASCII code for 'Bot' to ident
+        'station': station_id,
+        'direction': direction_id,
+        'author': 98111116, # ASCII code for 'Bot' to identefy messages sent by the bot
         'message': None
     }
 
