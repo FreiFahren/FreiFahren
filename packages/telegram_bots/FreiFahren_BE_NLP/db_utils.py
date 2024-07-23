@@ -17,7 +17,6 @@ def insert_ticket_info(
 ):
 
     logger.info('Inserting ticket info into the database')
-    logger.debug('Timestamp: %s, Line: %s, Station: %s, Direction: %s', timestamp, line, station_id, direction_id)
 
     # Prepare the JSON data payload
     url = BACKEND_URL + '/basics/inspectors'
@@ -41,4 +40,37 @@ def insert_ticket_info(
         logger.debug('Failed request headers: %s', headers)
     else:
         logger.info('Data sent to the backend successfully')
-        logger.debug("data: %s", data)
+
+
+def fetch_id(name, entity_type):
+    if not name:
+        return None
+
+    url = f"{BACKEND_URL}/data/id?name={name}"
+    
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()  # Raises an HTTPError for bad responses (4xx or 5xx)
+        
+        data = response.json()
+        station_id = data.get('id')
+        
+        if station_id:
+            logger.info(f"Received {entity_type} id from the backend: {station_id}")
+            return station_id
+        else:
+            logger.error(f"Unexpected response format from backend: {data}")
+            return None
+
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            logger.info(f"Station not found: {e.response.json().get('error', 'No error message provided')}")
+        else:
+            logger.error(f"HTTP error occurred: {e}")
+        return None
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error fetching {entity_type} id: {e}")
+        return None
+    except ValueError as e:  # Includes JSONDecodeError
+        logger.error(f"Error decoding JSON response: {e}")
+        return None
