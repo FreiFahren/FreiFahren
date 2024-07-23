@@ -98,6 +98,7 @@ func PostInspector(c echo.Context) error {
 
 func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *structs.InsertPointers, error) {
 	logger.Log.Debug().Msg("Processing ticket info for insertion")
+	logger.Log.Info().Interface("Request", req).Msg("Request data")
 
 	var stations = data.GetStationsList()
 
@@ -152,7 +153,6 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 		response.Message = req.Message
 	}
 
-	logger.Log.Info().Msg("Processed ticket info for insertion")
 	logger.Log.Info().Interface("Response", response).Msg("Response data")
 
 	return response, pointers, nil

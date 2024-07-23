@@ -209,11 +209,15 @@ paths:
         "200":
           description: The station id
           schema:
-            type: string
+            additionalProperties:
+              type: string
+            type: object
         "404":
-          description: Station not found
+          description: Error message
           schema:
-            type: string
+            additionalProperties:
+              type: string
+            type: object
       summary: Retrieve Station ID by Name
       tags:
       - data

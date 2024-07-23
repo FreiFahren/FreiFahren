@@ -15,25 +15,30 @@ def insert_ticket_info(
     station_id,
     direction_id,
 ):
+
+    logger.info('Inserting ticket info into the database')
+    logger.debug('Timestamp: %s, Line: %s, Station: %s, Direction: %s', timestamp, line, station_id, direction_id)
+
     # Prepare the JSON data payload
+    url = BACKEND_URL + '/basics/inspectors'
     data = {
         'timestamp': timestamp.isoformat(),
         'line': line,
-        'station': station_id,
-        'direction': direction_id,
+        'stationId': station_id,
+        'directionId': direction_id,
         'author': 98111116, # ASCII code for 'Bot' to identefy messages sent by the bot
         'message': None
     }
-
     headers = {
         'Content-Type': 'application/json'
     }
     
-    response = requests.post(url + '/basics/inspectors', json=data, headers=headers)
+    response = requests.post(url, json=data, headers=headers)
 
     if response.status_code != 200:
-        logger.error('Failed to send data to the backend. Status code: %s Response: %s', response.status_code, response.text)
+        logger.error('Failed to send data to the url: %s. Status code: %s Response: %s', url, response.status_code, response.text)
         logger.debug('Failed request data: %s', data)
         logger.debug('Failed request headers: %s', headers)
     else:
         logger.info('Data sent to the backend successfully')
+        logger.debug("data: %s", data)
