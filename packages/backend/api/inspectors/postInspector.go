@@ -45,6 +45,7 @@ func PostInspector(c echo.Context) error {
 		logger.Log.Error().Err(err).Msg("Error binding request in postInspector")
 		return c.NoContent(http.StatusInternalServerError)
 	}
+	logger.Log.Debug().Interface("Request", req).Msg("Request data")
 
 	// Check if all parameters are empty
 	if req.Line == "" && req.StationID == "" && req.DirectionID == "" {
