@@ -62,7 +62,9 @@ func RunRiskModel() error {
 func fetchAndSaveRecentTicketInspectors(csvPath string) error {
 	logger.Log.Debug().Msg("Fetching and saving recent ticket inspectors")
 
-	ticketInspectors, err := database.GetLatestTicketInspectors()
+	startTime := time.Now().UTC().Add(-time.Hour)
+	endTime := time.Now().UTC()
+	ticketInspectors, err := database.GetLatestTicketInspectors(startTime, endTime)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to get latest ticket inspectors")
 		return err

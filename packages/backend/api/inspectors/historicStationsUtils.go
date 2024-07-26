@@ -3,7 +3,9 @@ package inspectors
 import (
 	"time"
 
+	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/logger"
+	"github.com/FreiFahren/backend/utils"
 )
 
 // The threshold is calculated based on the current time of day and the day of the week.
@@ -69,4 +71,35 @@ func calculateWeekendAdjustment(currentTime time.Time, threshold int) float64 {
 		return float64(threshold) * 0.5
 	}
 	return 0.0
+}
+
+// FetchAndAddHistoricData fetches and adds historic data to the list of ticket inspectors.
+//
+// parameters:
+// ticketInfoList: the list of ticket inspectors
+// remaining: the number of historic data to fetch
+// startTime: the time to start fetching historic data from
+//
+// returns:
+// the list of ticket inspectors with the historic data added
+// an error if one occurred
+func FetchAndAddHistoricData(ticketInfoList []utils.TicketInspector, remaining int, startTime time.Time) ([]utils.TicketInspector, error) {
+	logger.Log.Debug().Msg("Fetching and adding historic data")
+
+	currentStationIDs := make(map[string]bool)
+	for _, ticketInfo := range ticketInfoList {
+		currentStationIDs[ticketInfo.StationID] = true
+	}
+
+	excludedStationIDs := utils.GetKeysFromMap(currentStationIDs)
+	historicDataList, err := database.GetHistoricStations(startTime, remaining, 24, excludedStationIDs)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error getting historic stations")
+		return nil, err
+	}
+
+	// Add the historic data to the list
+	ticketInfoList = append(ticketInfoList, historicDataList...)
+
+	return ticketInfoList, nil
 }
