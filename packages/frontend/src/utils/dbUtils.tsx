@@ -95,7 +95,7 @@ export async function reportInspector(line: selectOption, station: selectOption,
     const directionId = direction ? await fetchStationId(direction.label) : null;
 
     const requestBody = JSON.stringify({
-        lineId: line ? line.value : '',
+        line: line ? line.value : '',
         stationId: stationId || '',
         directionId: directionId || '',
         message: message || '',
