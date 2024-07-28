@@ -276,32 +276,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/statistics/stats": {
-            "get": {
-                "description": "Fetches the total number of submissions recorded in the database over the past 24 hours.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Statistics"
-                ],
-                "summary": "Get statistics on recent submissions",
-                "responses": {
-                    "200": {
-                        "description": "Number of submissions in the last 24 hours",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error: Unable to fetch statistics from the database."
-                    }
-                }
-            }
-        },
         "/transit/distance": {
             "get": {
                 "description": "Returns the shortest number of stations between an inspector's station and a given user's latitude and longitude coordinates.\nThe distance calculation employs Dijkstra's algorithm to determine the minimal stops required to reach the nearest station from the given coordinates.",

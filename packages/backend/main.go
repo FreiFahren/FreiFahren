@@ -9,7 +9,6 @@ import (
 	"github.com/FreiFahren/backend/api/getSegmentColors"
 	"github.com/FreiFahren/backend/api/getStationDistance"
 	"github.com/FreiFahren/backend/api/getStationName"
-	"github.com/FreiFahren/backend/api/getStats"
 	"github.com/FreiFahren/backend/api/inspectors"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
@@ -121,8 +120,6 @@ func main() {
 	apiHOST.GET("/data/id", getId.GetStationId)
 
 	apiHOST.GET("/transit/distance", getStationDistance.GetStationDistance)
-
-	apiHOST.GET("/statistics/stats", getStats.GetStats)
 
 	apiHOST.GET("/risk-prediction/getSegmentColors", getSegmentColors.GetSegmentColors)
 
