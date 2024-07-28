@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/basics/inspectors": {
             "get": {
-                "description": "Fetches ticket inspector reports from the database within a specified time range.",
+                "description": "This endpoint retrieves ticket inspector reports from the database within a specified time range.\nIt supports filtering by start and end timestamps,\nand checks if the data has been modified since the last request using the \"If-Modified-Since\" header.",
                 "consumes": [
                     "application/json"
                 ],

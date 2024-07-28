@@ -13,15 +13,23 @@ import (
 )
 
 // @Summary Retrieve information about ticket inspector reports
-// @Description Fetches ticket inspector reports from the database within a specified time range.
+//
+// @Description This endpoint retrieves ticket inspector reports from the database within a specified time range.
+// @Description It supports filtering by start and end timestamps,
+// @Description and checks if the data has been modified since the last request using the "If-Modified-Since" header.
+//
 // @Tags basics
+//
 // @Accept json
 // @Produce json
+//
 // @Param start query string false "Start timestamp (RFC3339 format)"
 // @Param end query string false "End timestamp (RFC3339 format)"
+//
 // @Success 200 {object} []utils.TicketInspectorResponse
 // @Failure 400 {string} string "Bad Request"
 // @Failure 500 {string} string "Internal Server Error"
+//
 // @Router /basics/inspectors [get]
 func GetTicketInspectorsInfo(c echo.Context) error {
 	logger.Log.Info().Msg("GET /basics/inspectors")
