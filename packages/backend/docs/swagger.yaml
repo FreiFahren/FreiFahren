@@ -252,7 +252,7 @@ paths:
       summary: Retrieves stations and lines information
       tags:
       - data
-  /risk-prediction/getSegmentColors:
+  /risk-prediction/segmentColors:
     get:
       consumes:
       - application/json
