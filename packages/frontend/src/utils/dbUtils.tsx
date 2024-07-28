@@ -141,9 +141,33 @@ export async function getStationDistance(userLat: number | undefined, userLon: n
 
 export async function getNumberOfReportsInLast24Hours(): Promise<number> {
     try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/statistics/stats`);
-        const reportNumber = await response.json();
-        return reportNumber;
+        // Calculate the start and end times for the last 24 hours in UTC
+        const endTime = new Date().toISOString();
+        const startTime = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+        // Construct the URL with query parameters
+        const url = new URL(`${process.env.REACT_APP_API_URL}/basics/inspectors`);
+        url.searchParams.append('start', startTime);
+        url.searchParams.append('end', endTime);
+
+        const response = await fetch(url.toString());
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const reports = await response.json();
+
+        // Ensure that the response is an array
+        if (!Array.isArray(reports)) {
+            console.error('Unexpected response format:', reports);
+            return 0;
+        }
+
+        // filter out historic reports
+        const filteredReports = reports.filter((report: { isHistoric: boolean }) => !report.isHistoric);
+
+        return filteredReports.length;
     } catch (error) {
         console.error('Error:', error);
         return 0;
