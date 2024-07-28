@@ -8,8 +8,23 @@
   height: 100%;
 }
 
-
-
 .maplibregl-ctrl-bottom-right  {
   display: none;
+}
+
+.map-attribution {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding: 0 var(--padding-xs);
+  font-size: var(--font-xxxs);
+}
+
+.map-attribution a {
+  color: var(--color-box-text);
+  text-decoration: none;
+}
+
+.map-attribution a:hover {
+  text-decoration: underline;
 }
