@@ -128,6 +128,10 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     <StationLayer stations={stationGeoJSON} textColor={textColor} />
                 </Suspense>
             </Map>
+            <div className='map-attribution'>
+                <a href='https://www.jawg.io/' target='_blank' rel='noopener noreferrer'>© JawgMaps</a> |
+                <a href='https://www.openstreetmap.org/copyright' target='_blank' rel='noopener noreferrer'>© OSM contributors</a>
+            </div>
         </div>
     );
 };
