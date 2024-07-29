@@ -92,7 +92,6 @@ def handle_exception(exc_type, exc_value, exc_traceback):
         traceback.format_exception(exc_type, exc_value, exc_traceback)
     )
     requests.post(WATCHER_URL, json={"error_message": error_message})
-    logger.error("Unhandled exception", exc_info=(exc_type, exc_value, exc_traceback))
 
 
 if __name__ == "__main__":
@@ -118,6 +117,8 @@ if __name__ == "__main__":
     logger.info("Starting the nlp bot...")
     bot_thread.start()
     logger.info("Waitress serve NLP_BOT")
+
+    print(10/0) # should cause an error
 
     from waitress import serve
     serve(nlp_app, host='0.0.0.0', port=6001)

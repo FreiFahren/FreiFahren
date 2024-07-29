@@ -1,42 +1,44 @@
-import time
 from telegram_bots.config import DEV_CHAT_ID, BACKEND_URL, NLP_BOT_URL
 from telegram_bots.bot_utils import send_message
 from telegram_bots.watcher.healthcheck import check_backend_status, do_healthcheck, check_nlp_bot_status
-from telegram_bots.watcher.app import watcher_app
+from telegram_bots.watcher.app import watcher_app, handle_nlp_bot_error
 from telegram_bots.watcher.bot import watcher_bot, start_bot
-import threading
-import subprocess
 from telegram_bots import logger
+
+import threading
+import time
+import subprocess
 
 logger = logger.setup_logger()
 
+def read_output(pipe, callback):
+    for line in iter(pipe.readline, ''):
+        callback(line.strip())
+
 def start_nlp_bot_process():
     logger.info('Starting the NLP bot process...')
-    # Run the NLP bot process. All errors will be received
-    nlp_bot_process = subprocess.Popen(['python3', '-m', 'telegram_bots.FreiFahren_BE_NLP.main'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     
-    # Collect all output lines into a list
-    output_lines = nlp_bot_process.stdout.readlines()
-    output_lines = [line.decode().strip() for line in output_lines]  # Decode bytes to string and remove trailing newline
-
-    # Now all output lines are in the output_lines list
-    for console_line in output_lines:
-    # If the console_line indicates an error, handle it
-        if console_line:
-            print(console_line)  # Print the line before handling the error
-            handle_nlp_bot_error(console_line)
-
-    # Check if the process has exited
-    if nlp_bot_process.poll() is not None:
-        logger.error("NLP bot process has exited with code ", nlp_bot_process.returncode)
-        send_message(DEV_CHAT_ID, "NLP bot process has exited. Please check the logs: ", nlp_bot_process.returncode, watcher_bot)
-
-
-def handle_nlp_bot_error(console_line):
-    logger.error(f"Error detected in other in NLP_Bot's output: {console_line}")
-    send_message(DEV_CHAT_ID, f"Error detected in NLP_Bot's output: {console_line}", watcher_bot)
-    check_nlp_bot_status()
-
+    # Run the NLP bot process
+    nlp_bot_process = subprocess.Popen(['python3', '-m', 'telegram_bots.FreiFahren_BE_NLP.main'], 
+                                       stdout=subprocess.PIPE, 
+                                       stderr=subprocess.PIPE,
+                                       bufsize=1,
+                                       universal_newlines=True)
+    
+    # Create thread to read stderr (we only need to monitor errors)
+    stderr_thread = threading.Thread(target=read_output, args=(nlp_bot_process.stderr, handle_nlp_bot_error))
+    
+    # Start the thread
+    stderr_thread.start()
+    
+    # Monitor the process
+    while True:
+        if nlp_bot_process.poll() is not None:
+            logger.error(f"NLP bot process has exited with code {nlp_bot_process.returncode}")
+            send_message(DEV_CHAT_ID, f"NLP bot process has exited with code {nlp_bot_process.returncode}. Please check the logs.", watcher_bot)
+            break
+        
+        time.sleep(1)  # Check every second
 
 def start_watcher_threads():
     logger.info('Starting the watcher threads...')

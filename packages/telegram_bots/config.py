@@ -6,7 +6,7 @@ load_dotenv()
 
 BACKEND_URL = os.getenv('BACKEND_URL')
 
-DEV_BOT_TOKEN = os.getenv('DEV_BOT_TOKEN')
+WATCHER_BOT_TOKEN = os.getenv('WATCHER_BOT_TOKEN')
 DEV_CHAT_ID = os.getenv('DEV_CHAT_ID')
 
 FREIFAHREN_CHAT_ID = os.getenv('FREIFAHREN_CHAT_ID')
