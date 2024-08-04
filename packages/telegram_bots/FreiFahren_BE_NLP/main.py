@@ -10,15 +10,16 @@ from telegram_bots.FreiFahren_BE_NLP.process_message import (
     load_data,
     check_for_spam,
 )
-from telegram_bots.FreiFahren_BE_NLP.db_utils import insert_ticket_info
+from telegram_bots.FreiFahren_BE_NLP.db_utils import insert_ticket_info, fetch_id
 from telegram_bots.FreiFahren_BE_NLP.app import nlp_app
 from telegram_bots.logger import setup_logger
 from telegram_bots.FreiFahren_BE_NLP.bot import nlp_bot, start_bot
 import traceback
 import requests
+import json
 import sys
 import threading
-from telegram_bots.config import WATCHER_URL
+from telegram_bots.config import WATCHER_URL, BACKEND_URL
 
 
 class TicketInspector:
@@ -61,29 +62,20 @@ def extract_ticket_inspector_info(unformatted_text):
 stations_dict = load_data("data/stations_list_main.json")
 
 
-def process_new_message(timestamp, message):
-    info = extract_ticket_inspector_info(message.text)
-    if type(info) is dict:
-        found_items = []
-        if info.get("line"):
-            found_items.append("line")
-        if info.get("station"):
-            found_items.append("station")
-        if info.get("direction"):
-            found_items.append("direction")
+def process_new_message(timestamp, message_text):
+    info = extract_ticket_inspector_info(message_text)
+    logger.info("Found information in the message: %s", info)
 
-        # Avoid logging the actual data to avoid storing data with which the user could be identified
-        if found_items:
-            logger.info("Found Info: %s", ", ".join(found_items))
+    if not isinstance(info, dict) or not any(info.get(key) for key in ["line", "station", "direction"]):
+        logging.info("No valid information found in the message.")
+        return
+    
+    # Retrieve IDs from backend
+    station_id = fetch_id(info.get("station"), "station")
+    direction_id = fetch_id(info.get("direction"), "direction")
 
-            insert_ticket_info(
-                timestamp,
-                info.get("line"),
-                info.get("station"),
-                info.get("direction"),
-            )
-    else:
-        logger.info("No line, station or direction found in the message")
+    # Insert ticket information
+    insert_ticket_info(timestamp, info.get("line"), station_id, direction_id)
 
 
 def handle_exception(exc_type, exc_value, exc_traceback):
@@ -112,7 +104,7 @@ if __name__ == "__main__":
         # Round the timestamp to the last minute
         timestamp = timestamp.replace(second=0, microsecond=0)
 
-        process_new_message(timestamp, message)
+        process_new_message(timestamp, message.text)
 
     bot_thread = threading.Thread(target=start_bot)
     logger.info("Starting the nlp bot...")

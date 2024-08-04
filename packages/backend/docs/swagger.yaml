@@ -32,14 +32,16 @@ definitions:
   utils.InspectorRequest:
     properties:
       author:
+        description: is always null or 98111116 (ASCII for "BOT") when getting data
+          from the telegram bot
         type: integer
-      direction:
+      directionId:
         type: string
       line:
         type: string
       message:
         type: string
-      station:
+      stationId:
         type: string
       timestamp:
         type: string
@@ -116,7 +118,43 @@ info:
   title: FreiFahren API Documentation
   version: "1.0"
 paths:
-  /basics/newInspector:
+  /basics/inspectors:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        This endpoint retrieves ticket inspector reports from the database within a specified time range.
+        It supports filtering by start and end timestamps,
+        and checks if the data has been modified since the last request using the "If-Modified-Since" header.
+      parameters:
+      - description: Start timestamp (RFC3339 format)
+        in: query
+        name: start
+        type: string
+      - description: End timestamp (RFC3339 format)
+        in: query
+        name: end
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/utils.TicketInspectorResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Retrieve information about ticket inspector reports
+      tags:
+      - basics
     post:
       consumes:
       - application/json
@@ -124,6 +162,7 @@ paths:
         Accepts a JSON payload with details about a ticket inspector's current location.
         This endpoint validates the provided data, processes necessary computations for linking stations and lines,
         inserts the data into the database, and triggers an update to the risk model used in operational analysis.
+        If the 'timestamp' field is not provided in the request, the current UTC time truncated to the nearest minute is used automatically.
       parameters:
       - description: Data about the inspector's location and activity
         in: body
@@ -131,6 +170,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/utils.InspectorRequest'
+      - description: Timestamp of the report in ISO 8601 format (e.g., 2006-01-02T15:04:05Z);
+          if not provided, the current time is used
+        in: query
+        name: timestamp
+        type: string
       produces:
       - application/json
       responses:
@@ -145,42 +189,6 @@ paths:
           description: 'Internal Server Error: Error during data processing or database
             insertion.'
       summary: Submit ticket inspector data
-      tags:
-      - basics
-  /basics/recent:
-    get:
-      consumes:
-      - application/json
-      description: |-
-        Fetches the most recent ticket inspector reports from the database and returns them as a JSON array.
-        If there are not enough recent reports, the endpoint will fetch additional historic reports to meet the required amount.
-        The required amount is determined by the current time of the day and the day of the week, ensuring the most relevant and timely information is provided to the user.
-      parameters:
-      - description: Standard HTTP header used to make conditional requests; the response
-          will include the requested data only if it has changed since this date and
-          time.
-        in: header
-        name: If-Modified-Since
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: A JSON array of ticket inspector information, each entry includes
-            details such as timestamp, station, direction, line, and historic flag.
-          schema:
-            items:
-              $ref: '#/definitions/utils.TicketInspectorResponse'
-            type: array
-        "304":
-          description: Returns an empty response indicating that the requested data
-            has not changed since the time provided in the 'If-Modified-Since' header.
-        "500":
-          description: 'Internal Server Error: An error occurred while processing
-            the request.'
-          schema:
-            type: string
-      summary: Retrieve information about recent ticket inspector reports
       tags:
       - basics
   /data/id:
@@ -202,11 +210,15 @@ paths:
         "200":
           description: The station id
           schema:
-            type: string
+            additionalProperties:
+              type: string
+            type: object
         "404":
-          description: Station not found
+          description: Error message
           schema:
-            type: string
+            additionalProperties:
+              type: string
+            type: object
       summary: Retrieve Station ID by Name
       tags:
       - data
@@ -240,7 +252,7 @@ paths:
       summary: Retrieves stations and lines information
       tags:
       - data
-  /risk-prediction/getSegmentColors:
+  /risk-prediction/segment-colors:
     get:
       consumes:
       - application/json
@@ -300,25 +312,6 @@ paths:
       summary: Retrieve Name by Station ID
       tags:
       - data
-  /statistics/stats:
-    get:
-      consumes:
-      - application/json
-      description: Fetches the total number of submissions recorded in the database
-        over the past 24 hours.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Number of submissions in the last 24 hours
-          schema:
-            type: integer
-        "500":
-          description: 'Internal Server Error: Unable to fetch statistics from the
-            database.'
-      summary: Get statistics on recent submissions
-      tags:
-      - Statistics
   /transit/distance:
     get:
       consumes:

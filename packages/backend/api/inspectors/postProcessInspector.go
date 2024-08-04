@@ -1,4 +1,4 @@
-package postInspector
+package inspectors
 
 import (
 	"strings"

@@ -9,9 +9,59 @@
     "host": "localhost:8080",
     "basePath": "/",
     "paths": {
-        "/basics/newInspector": {
+        "/basics/inspectors": {
+            "get": {
+                "description": "This endpoint retrieves ticket inspector reports from the database within a specified time range.\nIt supports filtering by start and end timestamps,\nand checks if the data has been modified since the last request using the \"If-Modified-Since\" header.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "basics"
+                ],
+                "summary": "Retrieve information about ticket inspector reports",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start timestamp (RFC3339 format)",
+                        "name": "start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End timestamp (RFC3339 format)",
+                        "name": "end",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/utils.TicketInspectorResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "post": {
-                "description": "Accepts a JSON payload with details about a ticket inspector's current location.\nThis endpoint validates the provided data, processes necessary computations for linking stations and lines,\ninserts the data into the database, and triggers an update to the risk model used in operational analysis.",
+                "description": "Accepts a JSON payload with details about a ticket inspector's current location.\nThis endpoint validates the provided data, processes necessary computations for linking stations and lines,\ninserts the data into the database, and triggers an update to the risk model used in operational analysis.\nIf the 'timestamp' field is not provided in the request, the current UTC time truncated to the nearest minute is used automatically.",
                 "consumes": [
                     "application/json"
                 ],
@@ -31,6 +81,12 @@
                         "schema": {
                             "$ref": "#/definitions/utils.InspectorRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Timestamp of the report in ISO 8601 format (e.g., 2006-01-02T15:04:05Z); if not provided, the current time is used",
+                        "name": "timestamp",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -45,49 +101,6 @@
                     },
                     "500": {
                         "description": "Internal Server Error: Error during data processing or database insertion."
-                    }
-                }
-            }
-        },
-        "/basics/recent": {
-            "get": {
-                "description": "Fetches the most recent ticket inspector reports from the database and returns them as a JSON array.\nIf there are not enough recent reports, the endpoint will fetch additional historic reports to meet the required amount.\nThe required amount is determined by the current time of the day and the day of the week, ensuring the most relevant and timely information is provided to the user.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "basics"
-                ],
-                "summary": "Retrieve information about recent ticket inspector reports",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Standard HTTP header used to make conditional requests; the response will include the requested data only if it has changed since this date and time.",
-                        "name": "If-Modified-Since",
-                        "in": "header"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "A JSON array of ticket inspector information, each entry includes details such as timestamp, station, direction, line, and historic flag.",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/utils.TicketInspectorResponse"
-                            }
-                        }
-                    },
-                    "304": {
-                        "description": "Returns an empty response indicating that the requested data has not changed since the time provided in the 'If-Modified-Since' header."
-                    },
-                    "500": {
-                        "description": "Internal Server Error: An error occurred while processing the request.",
-                        "schema": {
-                            "type": "string"
-                        }
                     }
                 }
             }
@@ -118,13 +131,19 @@
                     "200": {
                         "description": "The station id",
                         "schema": {
-                            "type": "string"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "404": {
-                        "description": "Station not found",
+                        "description": "Error message",
                         "schema": {
-                            "type": "string"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -173,7 +192,7 @@
                 }
             }
         },
-        "/risk-prediction/getSegmentColors": {
+        "/risk-prediction/segment-colors": {
             "get": {
                 "description": "Fetches the latest risk assessments for transit segments, returned as color codes representing the risk level. You can find out more about the risk level calculation in the documentation.\nThe response includes the last modified timestamp of the risk model data to support conditional GET requests.",
                 "consumes": [
@@ -247,32 +266,6 @@
                         "schema": {
                             "type": "string"
                         }
-                    }
-                }
-            }
-        },
-        "/statistics/stats": {
-            "get": {
-                "description": "Fetches the total number of submissions recorded in the database over the past 24 hours.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Statistics"
-                ],
-                "summary": "Get statistics on recent submissions",
-                "responses": {
-                    "200": {
-                        "description": "Number of submissions in the last 24 hours",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error: Unable to fetch statistics from the database."
                     }
                 }
             }
@@ -377,9 +370,10 @@
             "type": "object",
             "properties": {
                 "author": {
+                    "description": "is always null or 98111116 (ASCII for \"BOT\") when getting data from the telegram bot",
                     "type": "integer"
                 },
-                "direction": {
+                "directionId": {
                     "type": "string"
                 },
                 "line": {
@@ -388,7 +382,7 @@
                 "message": {
                     "type": "string"
                 },
-                "station": {
+                "stationId": {
                     "type": "string"
                 },
                 "timestamp": {

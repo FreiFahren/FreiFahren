@@ -1,9 +1,9 @@
-package test_postInspector
+package test_inspectors
 
 import (
 	"testing"
 
-	"github.com/FreiFahren/backend/api/postInspector"
+	"github.com/FreiFahren/backend/api/inspectors"
 	"github.com/FreiFahren/backend/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -59,7 +59,7 @@ func TestCheckIfStationIsUniqueToOneLineOfType(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			result := postInspector.CheckIfStationIsUniqueToOneLineOfType(tc.station, tc.line)
+			result := inspectors.CheckIfStationIsUniqueToOneLineOfType(tc.station, tc.line)
 			assert.Equal(t, tc.expected, result, "Expected and actual results should match")
 		})
 	}

@@ -45,7 +45,7 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
 	useEffect(() => {
 		const fetchData = async () => {
 			const newTicketInspectorList = await getRecentDataWithIfModifiedSince(
-				`${process.env.REACT_APP_API_URL}/basics/recent`,
+				`${process.env.REACT_APP_API_URL}/basics/inspectors`,
 				lastReceivedInspectorTime.current,
 			) || [];
 

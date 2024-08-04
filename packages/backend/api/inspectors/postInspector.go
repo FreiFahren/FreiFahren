@@ -1,15 +1,13 @@
-package postInspector
+package inspectors
 
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/FreiFahren/backend/Rstats"
-	"github.com/FreiFahren/backend/api/getId"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	_ "github.com/FreiFahren/backend/docs"
@@ -24,6 +22,7 @@ import (
 // @Description Accepts a JSON payload with details about a ticket inspector's current location.
 // @Description This endpoint validates the provided data, processes necessary computations for linking stations and lines,
 // @Description inserts the data into the database, and triggers an update to the risk model used in operational analysis.
+// @Description If the 'timestamp' field is not provided in the request, the current UTC time truncated to the nearest minute is used automatically.
 //
 // @Tags basics
 //
@@ -31,27 +30,29 @@ import (
 // @Produce json
 //
 // @Param inspectorData body structs.InspectorRequest true "Data about the inspector's location and activity"
+// @Param timestamp query string false "Timestamp of the report in ISO 8601 format (e.g., 2006-01-02T15:04:05Z); if not provided, the current time is used"
 //
 // @Success 200 {object} structs.ResponseData "Successfully processed and inserted the inspector data with computed linkages and risk model updates."
 // @Failure 400 "Bad Request: Missing or incorrect parameters provided."
 // @Failure 500 "Internal Server Error: Error during data processing or database insertion."
 //
-// @Router /basics/newInspector [post]
+// @Router /basics/inspectors [post]
 func PostInspector(c echo.Context) error {
-	logger.Log.Info().Msg("POST /basics/newInspector")
+	logger.Log.Info().Msg("POST /basics/Inspector")
 
 	var req structs.InspectorRequest
 	if err := c.Bind(&req); err != nil {
 		logger.Log.Error().Err(err).Msg("Error binding request in postInspector")
 		return c.NoContent(http.StatusInternalServerError)
 	}
+	logger.Log.Debug().Interface("Request", req).Msg("Request data")
 
 	// Check if all parameters are empty
-	if req.Line == "" && req.StationName == "" && req.DirectionName == "" {
+	if req.Line == "" && req.StationID == "" && req.DirectionID == "" {
 		logger.Log.Error().
 			Str("Line", req.Line).
-			Str("Station", req.StationName).
-			Str("Direction", req.DirectionName).
+			Str("Station", req.StationID).
+			Str("Direction", req.DirectionID).
 			Msg("At least one of 'line', 'station', or 'direction' must be provided")
 		return c.NoContent(http.StatusBadRequest)
 	}
@@ -98,15 +99,15 @@ func PostInspector(c echo.Context) error {
 
 func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *structs.InsertPointers, error) {
 	logger.Log.Debug().Msg("Processing ticket info for insertion")
+	logger.Log.Info().Interface("Request", req).Msg("Request data")
 
 	var stations = data.GetStationsList()
 
-	// Using pointers to allow for nil values
 	response := &structs.ResponseData{}
 	pointers := &structs.InsertPointers{}
 
-	// Check if the timestamp is provided, otherwise use the current time
-	if req.Timestamp != (time.Time{}) { // time.time{} is the zero value for time.Time
+	// Assign current or provided timestamp
+	if req.Timestamp != (time.Time{}) {
 		pointers.TimestampPtr = &req.Timestamp
 		response.Timestamp = req.Timestamp
 	} else {
@@ -115,46 +116,44 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 		response.Timestamp = *pointers.TimestampPtr
 	}
 
+	// Assign line
 	if req.Line != "" {
 		pointers.LinePtr = &req.Line
 		response.Line = req.Line
 	}
 
-	if req.StationName != "" {
-		if stationID, found := getId.FindStationId(req.StationName, stations); found {
-			pointers.StationNamePtr = &req.StationName
-			pointers.StationIDPtr = &stationID
-			response.Station = structs.Station{Name: req.StationName, ID: stationID}
-		} else {
-			err := fmt.Errorf("station not found: %v", req.StationName)
-			logger.Log.Error().Err(err)
-			return nil, nil, err
+	// Assign station
+	if req.StationID != "" {
+		pointers.StationIDPtr = &req.StationID
+		response.Station = structs.Station{ID: req.StationID}
+
+		if station, found := stations[req.StationID]; found {
+			response.Station.Name = station.Name
+			pointers.StationNamePtr = &station.Name
 		}
 	}
 
-	if req.DirectionName != "" {
-		if directionID, found := getId.FindStationId(req.DirectionName, stations); found {
-			pointers.DirectionNamePtr = &req.DirectionName
-			pointers.DirectionIDPtr = &directionID
-			response.Direction = structs.Station{Name: req.DirectionName, ID: directionID, Coordinates: structs.Coordinates(stations[directionID].Coordinates), Lines: stations[directionID].Lines}
-		} else {
-			err := fmt.Errorf("direction not found: %v", req.DirectionName)
-			logger.Log.Error().Err(err)
-			return nil, nil, err
+	// Assign direction
+	if req.DirectionID != "" {
+		pointers.DirectionIDPtr = &req.DirectionID
+		response.Direction = structs.Station{ID: req.DirectionID}
+
+		if direction, found := stations[req.DirectionID]; found {
+			response.Direction.Name = direction.Name
+			pointers.DirectionNamePtr = &direction.Name
 		}
 	}
 
+	// Assign author and message if present
 	if req.Author != 0 {
 		pointers.AuthorPtr = &req.Author
 		response.Author = req.Author
 	}
-
 	if req.Message != "" {
 		pointers.MessagePtr = &req.Message
 		response.Message = req.Message
 	}
 
-	logger.Log.Info().Msg("Processed ticket info for insertion")
 	logger.Log.Info().Interface("Response", response).Msg("Response data")
 
 	return response, pointers, nil

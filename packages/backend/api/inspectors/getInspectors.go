@@ -1,39 +1,39 @@
-package getRecentTicketInspectorInfo
+package inspectors
 
 import (
-	"fmt"
 	"net/http"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/FreiFahren/backend/api/getStationName"
-	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/logger"
 	"github.com/FreiFahren/backend/utils"
 	"github.com/labstack/echo/v4"
 )
 
-// @Summary Retrieve information about recent ticket inspector reports
+// @Summary Retrieve information about ticket inspector reports
 //
-// @Description Fetches the most recent ticket inspector reports from the database and returns them as a JSON array.
-// @Description If there are not enough recent reports, the endpoint will fetch additional historic reports to meet the required amount.
-// @Description The required amount is determined by the current time of the day and the day of the week, ensuring the most relevant and timely information is provided to the user.
+// @Description This endpoint retrieves ticket inspector reports from the database within a specified time range.
+// @Description It supports filtering by start and end timestamps,
+// @Description and checks if the data has been modified since the last request using the "If-Modified-Since" header.
 //
 // @Tags basics
 //
 // @Accept json
 // @Produce json
 //
-// @Param If-Modified-Since header string false "Standard HTTP header used to make conditional requests; the response will include the requested data only if it has changed since this date and time."
+// @Param start query string false "Start timestamp (RFC3339 format)"
+// @Param end query string false "End timestamp (RFC3339 format)"
 //
-// @Success 200 {object} []utils.TicketInspectorResponse "A JSON array of ticket inspector information, each entry includes details such as timestamp, station, direction, line, and historic flag."
-// @Failure 304 {object} nil "Returns an empty response indicating that the requested data has not changed since the time provided in the 'If-Modified-Since' header."
-// @Failure 500 {string} string "Internal Server Error: An error occurred while processing the request."
+// @Success 200 {object} []utils.TicketInspectorResponse
+// @Failure 400 {string} string "Bad Request"
+// @Failure 500 {string} string "Internal Server Error"
 //
-// @Router /basics/recent [get]
-func GetRecentTicketInspectorInfo(c echo.Context) error {
+// @Router /basics/inspectors [get]
+func GetTicketInspectorsInfo(c echo.Context) error {
+	logger.Log.Info().Msg("GET /basics/inspectors")
+
 	databaseLastModified, err := database.GetLatestUpdateTime()
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting latest update time")
@@ -54,9 +54,14 @@ func GetRecentTicketInspectorInfo(c echo.Context) error {
 
 	// Proceed with fetching and processing the data if it was modified
 	// or if the If-Modified-Since header was not provided
-	ticketInfoList, err := database.GetLatestTicketInspectors()
+	start := c.QueryParam("start")
+	end := c.QueryParam("end")
+
+	startTime, endTime := GetTimeRange(start, end)
+
+	ticketInfoList, err := database.GetLatestTicketInspectors(startTime, endTime)
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error getting latest station coordinates")
+		logger.Log.Error().Err(err).Msg("Error getting ticket inspectors")
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
@@ -64,7 +69,7 @@ func GetRecentTicketInspectorInfo(c echo.Context) error {
 
 	if len(ticketInfoList) < currentHistoricDataThreshold {
 		numberOfHistoricDataToFetch := currentHistoricDataThreshold - len(ticketInfoList)
-		ticketInfoList, err = FetchAndAddHistoricData(ticketInfoList, numberOfHistoricDataToFetch)
+		ticketInfoList, err = FetchAndAddHistoricData(ticketInfoList, numberOfHistoricDataToFetch, startTime)
 		if err != nil {
 			logger.Log.Error().Err(err).Msg("Error fetching and adding historic data")
 			return c.NoContent(http.StatusInternalServerError)
@@ -82,25 +87,12 @@ func GetRecentTicketInspectorInfo(c echo.Context) error {
 		ticketInspectorList = append(ticketInspectorList, ticketInspector)
 	}
 
-	filteredTicketInspectorList := RemoveDuplicateStations(ticketInspectorList)
+	filteredTicketInspectorList := removeDuplicateStations(ticketInspectorList)
 
 	return c.JSONPretty(http.StatusOK, filteredTicketInspectorList, "")
 }
 
-func IdToCoordinates(id string) (float64, float64, error) {
-	logger.Log.Debug().Msg("Getting station coordinates")
-
-	var stations = data.GetStationsList()
-
-	station, ok := stations[id]
-	if !ok {
-		return 0, 0, fmt.Errorf("station ID %s not found", id)
-	}
-
-	return station.Coordinates.Latitude, station.Coordinates.Longitude, nil
-}
-
-func RemoveDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse) []utils.TicketInspectorResponse {
+func removeDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse) []utils.TicketInspectorResponse {
 	logger.Log.Debug().Msg("Removing duplicate stations")
 
 	uniqueStations := make(map[string]utils.TicketInspectorResponse)
@@ -125,27 +117,6 @@ func RemoveDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse
 	})
 
 	return filteredTicketInspectorList
-}
-
-func FetchAndAddHistoricData(ticketInfoList []utils.TicketInspector, remaining int) ([]utils.TicketInspector, error) {
-	logger.Log.Debug().Msg("Fetching and adding historic data")
-
-	currentStationIDs := make(map[string]bool)
-	for _, ticketInfo := range ticketInfoList {
-		currentStationIDs[ticketInfo.StationID] = true
-	}
-
-	excludedStationIDs := utils.GetKeysFromMap(currentStationIDs)
-	historicDataList, err := database.GetHistoricStations(time.Now().UTC(), remaining, 24, excludedStationIDs)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error getting historic stations")
-		return nil, err
-	}
-
-	// Add the historic data to the list
-	ticketInfoList = append(ticketInfoList, historicDataList...)
-
-	return ticketInfoList, nil
 }
 
 func constructTicketInspectorInfo(ticketInfo utils.TicketInspector) (utils.TicketInspectorResponse, error) {

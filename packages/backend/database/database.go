@@ -213,7 +213,7 @@ func executeGetHistoricStationsSQL(hour, weekday, remaining int, excludedStation
 }
 
 func GetHistoricStations(
-	timestamp time.Time,
+	startTime time.Time,
 	remaining int,
 	maxRecursiveCalls int,
 	excludedStationIDs []string,
@@ -230,8 +230,8 @@ func GetHistoricStations(
 		return nil, err
 	}
 
-	hour := timestamp.Hour()
-	weekday := int(timestamp.Weekday())
+	hour := startTime.Hour()
+	weekday := int(startTime.Weekday())
 
 	ticketInfoList, err := executeGetHistoricStationsSQL(hour, weekday, remaining, excludedStationIDs, lastNonHistoricTimestamp)
 	if err != nil {
@@ -243,7 +243,7 @@ func GetHistoricStations(
 	remaining -= len(ticketInfoList)
 
 	if remaining > 0 && maxRecursiveCalls > 0 {
-		broaderTimestamp := timestamp.Add(-1 * time.Hour)
+		broaderTimestamp := startTime.Add(-1 * time.Hour)
 		// Add the new station IDs to the list of excluded station IDs
 		for _, ticketInfo := range ticketInfoList {
 			excludedStationIDs = append(excludedStationIDs, ticketInfo.StationID)
@@ -261,19 +261,19 @@ func GetHistoricStations(
 	return ticketInfoList, nil
 }
 
-func GetLatestTicketInspectors() ([]utils.TicketInspector, error) {
+func GetLatestTicketInspectors(start, end time.Time) ([]utils.TicketInspector, error) {
 	logger.Log.Debug().Msg("Getting latest ticket inspectors")
 
 	sql := `SELECT timestamp, station_id, direction_id, line,
-			CASE WHEN author IS NULL THEN message ELSE NULL END as message
-			FROM ticket_info
-			WHERE timestamp >= NOW() AT TIME ZONE 'UTC' - INTERVAL '60 minutes'
-			AND station_name IS NOT NULL
-			AND station_id IS NOT NULL;`
+            CASE WHEN author IS NULL THEN message ELSE NULL END as message
+            FROM ticket_info
+            WHERE timestamp >= $1 AND timestamp <= $2
+            AND station_name IS NOT NULL
+            AND station_id IS NOT NULL;`
 
 	logger.Log.Info().Msg("Getting latest ticket inspectors")
 
-	rows, err := pool.Query(context.Background(), sql)
+	rows, err := pool.Query(context.Background(), sql, start, end)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to get latest ticket inspectors")
 		return nil, err

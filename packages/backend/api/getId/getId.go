@@ -1,7 +1,6 @@
 package getId
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -38,8 +37,8 @@ func FindStationId(name string, stationsMap map[string]utils.StationListEntry) (
 //
 // @Param		 name query string true "Station name", case and whitespace insensitive
 //
-// @Success      200 {string} string "The station id"
-// @Failure      404 {string} string "Station not found"
+// @Success      200 {object} map[string]string "The station id"
+// @Failure      404 {object} map[string]string "Error message"
 //
 // @Router       /data/id [get]
 func GetStationId(c echo.Context) error {
@@ -51,9 +50,9 @@ func GetStationId(c echo.Context) error {
 
 	id, found := FindStationId(name, stations)
 	if found {
-		fmt.Printf("returned id: %s\n", id)
-		return c.JSON(http.StatusOK, id)
+		logger.Log.Debug().Msg("Returned Id")
+		return c.JSON(http.StatusOK, map[string]string{"id": id})
 	}
 
-	return c.JSON(http.StatusNotFound, "Station not found")
+	return c.JSON(http.StatusNotFound, map[string]string{"error": "Station not found"})
 }

@@ -21,7 +21,7 @@ export const RiskDataProvider = ({ children }: { children: React.ReactNode }) =>
     const refreshRiskData = useCallback(async () => {
         try {
             const results = await getRecentDataWithIfModifiedSince(
-                `${process.env.REACT_APP_API_URL}/risk-prediction/getSegmentColors`,
+                `${process.env.REACT_APP_API_URL}/risk-prediction/segment-colors`,
                 lastModified
             );
             if (results) {

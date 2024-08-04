@@ -15,7 +15,7 @@ This will start the watcher bot which will start the NLP bot as a sub process.
 create a .env file in the folder next to the config.py and add these variables:
 ```env
 BOT_TOKEN=<Telegram bot NLP token>
-DEV_BOT_TOKEN=<Telegram watcher bot token>
+WATCHER_BOT_TOKEN=<Telegram watcher bot token>
 DEV_CHAT_ID=<ID where messages should be send, developer chat>
 FREIFAHREN_BE_CHAT_ID=<Chat id>
 
@@ -24,8 +24,8 @@ DB_HOST=
 DB_PORT=
 DB_PASSWORD=
 
-BACKEND_URL=<localhost:8080>
-NLP_BOT_URL=<127.0.0.1:5001>
-WATCHER_URL=<127.0.0.1:5000>
+BACKEND_URL=<http://localhost:8080>
+NLP_BOT_URL=<http://127.0.0.1:6001>
+WATCHER_URL=<http://127.0.0.1:6000>
 
 ```

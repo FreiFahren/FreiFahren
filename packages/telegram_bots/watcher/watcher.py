@@ -14,7 +14,9 @@ def start_nlp_bot_process():
     logger.info('Starting the NLP bot process...')
     # Run the NLP bot process. All errors will be received
     nlp_bot_process = subprocess.Popen(['python3', '-m', 'telegram_bots.FreiFahren_BE_NLP.main'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    
+
+    # Note: something about this does not seem to work, needs to be fixed and unit tested
+    #     
     # Collect all output lines into a list
     output_lines = nlp_bot_process.stdout.readlines()
     output_lines = [line.decode().strip() for line in output_lines]  # Decode bytes to string and remove trailing newline
