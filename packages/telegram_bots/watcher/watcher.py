@@ -18,27 +18,37 @@ def read_output(pipe, callback):
 def start_nlp_bot_process():
     logger.info('Starting the NLP bot process...')
     
-    # Run the NLP bot process
     nlp_bot_process = subprocess.Popen(['python3', '-m', 'telegram_bots.FreiFahren_BE_NLP.main'], 
                                        stdout=subprocess.PIPE, 
                                        stderr=subprocess.PIPE,
                                        bufsize=1,
                                        universal_newlines=True)
     
-    # Create thread to read stderr (we only need to monitor errors)
+    # Create threads to read both stdout and stderr
+    stdout_thread = threading.Thread(target=read_output, args=(nlp_bot_process.stdout, print))
     stderr_thread = threading.Thread(target=read_output, args=(nlp_bot_process.stderr, handle_nlp_bot_error))
     
-    # Start the thread
+    stdout_thread.start()
     stderr_thread.start()
     
     # Monitor the process
     while True:
-        if nlp_bot_process.poll() is not None:
-            logger.error(f"NLP bot process has exited with code {nlp_bot_process.returncode}")
-            send_message(DEV_CHAT_ID, f"NLP bot process has exited with code {nlp_bot_process.returncode}. Please check the logs.", watcher_bot)
+        exit_code = nlp_bot_process.poll()
+        if exit_code is not None:
+            error_message = f"NLP bot process has exited with code {exit_code}. Please check the logs."
+            handle_nlp_bot_error(error_message)
+            if exit_code != 0:
+                # Read any remaining output from stderr
+                stderr_output, _ = nlp_bot_process.communicate()
+                if stderr_output:
+                    handle_nlp_bot_error(stderr_output)
             break
         
         time.sleep(1)  # Check every second
+
+    # Wait for output reading threads to finish
+    stdout_thread.join()
+    stderr_thread.join()
 
 def start_watcher_threads():
     logger.info('Starting the watcher threads...')

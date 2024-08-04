@@ -1,5 +1,3 @@
-import pytz
-from datetime import datetime
 from telegram_bots.FreiFahren_BE_NLP.verify_info import verify_direction, verify_line
 from telegram_bots.FreiFahren_BE_NLP.process_message import (
     find_line,
@@ -14,6 +12,7 @@ from telegram_bots.FreiFahren_BE_NLP.db_utils import insert_ticket_info
 from telegram_bots.FreiFahren_BE_NLP.app import nlp_app
 from telegram_bots.logger import setup_logger
 from telegram_bots.FreiFahren_BE_NLP.bot import nlp_bot, start_bot
+from telegram_bots.watcher.app import handle_nlp_bot_error
 import traceback
 import requests
 import sys
@@ -84,43 +83,3 @@ def process_new_message(timestamp, message):
             )
     else:
         logger.info("No line, station or direction found in the message")
-
-
-def handle_exception(exc_type, exc_value, exc_traceback):
-    """Handle uncaught exceptions by sending a POST request with exception info."""
-    error_message = "".join(
-        traceback.format_exception(exc_type, exc_value, exc_traceback)
-    )
-    requests.post(WATCHER_URL, json={"error_message": error_message})
-
-
-if __name__ == "__main__":
-    logger = setup_logger()
-
-    sys.excepthook = handle_exception
-    utc = pytz.UTC
-
-    logger.info("Bot is running...")
-
-    @nlp_bot.message_handler(func=lambda message: message)
-    def get_info(message):
-        logger.info("------------------------")
-        logger.info("MESSAGE RECEIVED")
-
-        timestamp = datetime.fromtimestamp(message.date, utc)
-        # Round the timestamp to the last minute
-        timestamp = timestamp.replace(second=0, microsecond=0)
-
-        process_new_message(timestamp, message)
-
-    bot_thread = threading.Thread(target=start_bot)
-    logger.info("Starting the nlp bot...")
-    bot_thread.start()
-    logger.info("Waitress serve NLP_BOT")
-
-    print(10/0) # should cause an error
-
-    from waitress import serve
-    serve(nlp_app, host='0.0.0.0', port=6001)
-    
-
