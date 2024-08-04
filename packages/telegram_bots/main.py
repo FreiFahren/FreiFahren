@@ -2,17 +2,16 @@ from flask import Flask, request
 from telebot import TeleBot
 from waitress import serve
 from telegram_bots.config import (
-    WATCHER_BOT_TOKEN, 
-    NLP_BOT_TOKEN, 
     DEV_CHAT_ID, 
     BACKEND_URL, 
     NLP_BOT_URL,
     TELEGRAM_NEXT_CHECK_TIME
 )
 from telegram_bots.watcher.healthcheck import do_healthcheck, check_backend_status, check_nlp_bot_status
-from telegram_bots.FreiFahren_BE_NLP.main import process_new_message
+from telegram_bots.FreiFahren_BE_NLP.nlp import process_new_message
 from telegram_bots.logger import setup_logger
 from telegram_bots.bot_utils import send_message
+from telegram_bots.bots import watcher_bot, nlp_bot
 
 from datetime import datetime
 import traceback
@@ -24,8 +23,6 @@ import sys
 
 
 app = Flask(__name__)
-watcher_bot = TeleBot(WATCHER_BOT_TOKEN)
-nlp_bot = TeleBot(NLP_BOT_TOKEN)
 logger = setup_logger()
 
 

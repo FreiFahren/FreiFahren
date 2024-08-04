@@ -5,7 +5,7 @@ import os
 # move up one directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from main import extract_ticket_inspector_info
+from nlp import extract_ticket_inspector_info
 from test_cases import test_cases
 
 red = '\033[91m'

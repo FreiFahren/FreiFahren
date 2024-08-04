@@ -1,7 +1,7 @@
 import requests
 from telegram_bots.config import BACKEND_URL, DEV_CHAT_ID, NLP_BOT_URL, TELEGRAM_NEXT_CHECK_TIME
 from telegram_bots.bot_utils import send_message
-from telegram_bots.watcher.bot import watcher_bot
+from telegram_bots.bots import watcher_bot
 from telegram_bots import logger
 import time
 

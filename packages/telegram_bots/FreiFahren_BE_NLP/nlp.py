@@ -9,15 +9,9 @@ from telegram_bots.FreiFahren_BE_NLP.process_message import (
     check_for_spam,
 )
 from telegram_bots.FreiFahren_BE_NLP.db_utils import insert_ticket_info
-from telegram_bots.FreiFahren_BE_NLP.app import nlp_app
 from telegram_bots.logger import setup_logger
-from telegram_bots.FreiFahren_BE_NLP.bot import nlp_bot, start_bot
-from telegram_bots.watcher.app import handle_nlp_bot_error
-import traceback
-import requests
-import sys
-import threading
-from telegram_bots.config import WATCHER_URL
+
+logger = setup_logger()
 
 
 class TicketInspector:
