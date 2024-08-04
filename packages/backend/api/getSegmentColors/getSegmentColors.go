@@ -30,9 +30,9 @@ import (
 // @Success 304 {none} nil "No changes: The data has not been modified since the last request date provided in the 'If-Modified-Since' header."
 // @Failure 500 "Internal Server Error: Error during the processing of the request."
 //
-// @Router /risk-prediction/segmentColors [get]
+// @Router /risk-prediction/segment-colors [get]
 func GetSegmentColors(c echo.Context) error {
-	logger.Log.Info().Msg("GET /risk-prediction/segmentColors")
+	logger.Log.Info().Msg("GET /risk-prediction/segment-colors")
 
 	segmentsFiles, err := getSegmentFiles()
 	if err != nil {

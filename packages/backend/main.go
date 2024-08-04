@@ -121,7 +121,7 @@ func main() {
 
 	apiHOST.GET("/transit/distance", getStationDistance.GetStationDistance)
 
-	apiHOST.GET("/risk-prediction/segmentColors", getSegmentColors.GetSegmentColors)
+	apiHOST.GET("/risk-prediction/segment-colors", getSegmentColors.GetSegmentColors)
 
 	apiHOST.Start(":8080")
 
