@@ -4,8 +4,8 @@ from waitress import serve
 from telegram_bots.config import (
     DEV_CHAT_ID, 
     BACKEND_URL, 
-    NLP_BOT_URL,
-    TELEGRAM_NEXT_CHECK_TIME
+    TELEGRAM_NEXT_CHECK_TIME,
+    TELEGERAM_BOTS_URL
 )
 from telegram_bots.watcher.healthcheck import do_healthcheck, check_backend_status, check_nlp_bot_status
 from telegram_bots.FreiFahren_BE_NLP.nlp import process_new_message
@@ -49,7 +49,7 @@ def healthcheck(message):
 
     send_message(message.chat.id, 'Checking the NLP bot health...', watcher_bot)
     
-    nlp_errlist, request_time = do_healthcheck(NLP_BOT_URL + '/healthcheck')
+    nlp_errlist, request_time = do_healthcheck(TELEGERAM_BOTS_URL + '/healthcheck')
     if nlp_errlist:
         send_message(message.chat.id, f'NLP bot is not healthy!\nPlease check the logs for more information.\nThe request took {request_time * 1000} milliseconds and failed with: {nlp_errlist}.', watcher_bot)
     else:
