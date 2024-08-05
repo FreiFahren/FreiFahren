@@ -53,12 +53,12 @@ type TicketInspector struct {
 
 // Is used when posting a new inspector
 type InspectorRequest struct {
-	Timestamp     time.Time `json:"timestamp"`
-	Line          string    `json:"line"`
-	StationName   string    `json:"station"`
-	DirectionName string    `json:"direction"`
-	Author        int64     `json:"author,omitempty"`
-	Message       string    `json:"message,omitempty"`
+	Timestamp   time.Time `json:"timestamp"`
+	Line        string    `json:"line"`
+	StationID   string    `json:"stationId"`
+	DirectionID string    `json:"directionId"`
+	Author      int64     `json:"author,omitempty"` // is always null or 98111116 (ASCII for "BOT") when getting data from the telegram bot
+	Message     string    `json:"message,omitempty"`
 }
 
 // InsertPointers holds pointers to the fields necessary for inserting data into the database.

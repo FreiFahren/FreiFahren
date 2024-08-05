@@ -54,26 +54,23 @@ def extract_ticket_inspector_info(unformatted_text):
 stations_dict = load_data("data/stations_list_main.json")
 
 
-def process_new_message(timestamp, message):
-    info = extract_ticket_inspector_info(message.text)
-    if type(info) is dict:
-        found_items = []
-        if info.get("line"):
-            found_items.append("line")
-        if info.get("station"):
-            found_items.append("station")
-        if info.get("direction"):
-            found_items.append("direction")
+def process_new_message(timestamp, message_text):
+    info = extract_ticket_inspector_info(message_text)
+    logger.info("Found information in the message: %s", info)
 
-        # Avoid logging the actual data to avoid storing data with which the user could be identified
-        if found_items:
-            logger.info("Found Info: %s", ", ".join(found_items))
+    if not isinstance(info, dict) or not any(info.get(key) for key in ["line", "station", "direction"]):
+        logging.info("No valid information found in the message.")
+        return
+    
+        # Retrieve IDs from backend
+        station_id = fetch_id(info.get("station"), "station")
+        direction_id = fetch_id(info.get("direction"), "direction")
 
-            insert_ticket_info(
-                timestamp,
-                info.get("line"),
-                info.get("station"),
-                info.get("direction"),
-            )
+        insert_ticket_info(
+            timestamp,
+            info.get("line"),
+            info.get("station"),
+            info.get("direction")
+        )
     else:
         logger.info("No line, station or direction found in the message")

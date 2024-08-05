@@ -112,7 +112,9 @@ func TestGetLatestStationCoordinatesConcurrency(t *testing.T) {
 			t.Logf("Running test %d", i)
 
 			// Call the function with the pool (on the real database)
-			_, err := database.GetLatestTicketInspectors()
+			startTime := time.Now().UTC().Add(-time.Hour)
+			endTime := time.Now().UTC()
+			_, err := database.GetLatestTicketInspectors(startTime, endTime)
 			if err != nil {
 				errs <- err
 			}
