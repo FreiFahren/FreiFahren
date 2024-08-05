@@ -35,7 +35,7 @@ def get_info(message):
     timestamp = datetime.fromtimestamp(message.date, utc)
     timestamp = timestamp.replace(second=0, microsecond=0)
 
-    process_new_message(timestamp, message)
+    process_new_message(timestamp, message.text)
 
 @watcher_bot.message_handler(commands=['checkhealth'])
 def healthcheck(message):

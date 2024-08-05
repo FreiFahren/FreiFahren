@@ -59,7 +59,7 @@ def process_new_message(timestamp, message_text):
     logger.info("Found information in the message: %s", info)
 
     if not isinstance(info, dict) or not any(info.get(key) for key in ["line", "station", "direction"]):
-        logging.info("No valid information found in the message.")
+        logger.info("No valid information found in the message.")
         return
     
         # Retrieve IDs from backend
