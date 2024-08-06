@@ -63,12 +63,19 @@ func Init() {
 		LocalTime:  true,
 	}
 
+	// Create a console writer
+	consoleWriter := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: "2006-01-02 15:04:05"}
+
+	// Create a multi-writer that writes to both file and console
+	multi := zerolog.MultiLevelWriter(logFile, consoleWriter)
+
 	// only show the filename and line number
 	zerolog.CallerMarshalFunc = func(_ uintptr, file string, line int) string {
 		return filepath.Base(file) + ":" + strconv.Itoa(line)
 	}
 
-	Log = zerolog.New(logFile).Level(zerolog.DebugLevel).With().Timestamp().Caller().Logger()
+	// Use the multi-writer when creating the logger
+	Log = zerolog.New(multi).Level(zerolog.DebugLevel).With().Timestamp().Caller().Logger()
 
 	apiEndpoint := os.Getenv("WATCHER_HOST") + "/report-failure"
 	Log = Log.Hook(&APIHook{Endpoint: apiEndpoint})
