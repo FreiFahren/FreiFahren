@@ -10,6 +10,7 @@ from telegram_bots.FreiFahren_BE_NLP.process_message import (
 )
 from telegram_bots.FreiFahren_BE_NLP.db_utils import insert_ticket_info
 from telegram_bots.logger import setup_logger
+from telegram_bots.FreiFahren_BE_NLP.db_utils import fetch_id
 
 logger = setup_logger()
 
@@ -58,10 +59,7 @@ def process_new_message(timestamp, message_text):
     info = extract_ticket_inspector_info(message_text)
     logger.info("Found information in the message: %s", info)
 
-    if not isinstance(info, dict) or not any(info.get(key) for key in ["line", "station", "direction"]):
-        logger.info("No valid information found in the message.")
-        return
-    
+    if isinstance(info, dict) and any(info.get(key) for key in ["line", "station", "direction"]):
         # Retrieve IDs from backend
         station_id = fetch_id(info.get("station"), "station")
         direction_id = fetch_id(info.get("direction"), "direction")
@@ -73,4 +71,4 @@ def process_new_message(timestamp, message_text):
             info.get("direction")
         )
     else:
-        logger.info("No line, station or direction found in the message")
+        logger.info("No valid information found in the message.")
