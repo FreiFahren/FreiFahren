@@ -87,9 +87,12 @@ def report_inspector() -> tuple:
 
 @app.route('/report-failure', methods=['POST'])
 def report_failure():
-    error_message = request.json.get('error_message', '')
-    logger.error(f"Error detected in NLP_Bot's output: {error_message}")
-    send_message(DEV_CHAT_ID, f"Error detected in NLP_Bot's output: {error_message}", watcher_bot)
+    console_line = request.json.get('console_line', '')
+    system = request.json.get('system', '')
+    
+    error_message = f"Error in {system}: {console_line}"
+    logger.error(error_message)
+    send_message(DEV_CHAT_ID, error_message, watcher_bot)
     return {'status': 'success'}, 200
 
 
@@ -140,7 +143,7 @@ if __name__ == '__main__':
     except Exception as e:
         error_message = f"Error in combined bot: {str(e)}\n{traceback.format_exc()}"
         logger.error(error_message)
-        requests.post(f"{BACKEND_URL}/report-failure", json={"error_message": error_message})
+        requests.post(f"{BACKEND_URL}/report-failure", json={"console_line": error_message, "system": "combined_bot"})
         sys.exit(1)  # Exit with error code
 
 # to keep the main thread running
