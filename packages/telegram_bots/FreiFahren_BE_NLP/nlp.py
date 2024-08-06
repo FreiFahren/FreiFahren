@@ -67,8 +67,8 @@ def process_new_message(timestamp, message_text):
         insert_ticket_info(
             timestamp,
             info.get("line"),
-            info.get("station"),
-            info.get("direction")
+            station_id,
+            direction_id
         )
     else:
         logger.info("No valid information found in the message.")
