@@ -1,31 +1,77 @@
-# Overview
+# FreiFahren Telegram Bot System Documentation
 
-This is a folder containing the code for the Telegram bots used in the FreiFahren project. The NLP Bot is being used to process the messages being sent by the users to collect the data about the ticket inspectors. The watcher bot is being used to monitor the status of the services (NLP Bot and the backend) and to send the notifications to the users if any of the services are down.
+## Overview
 
-To run the bots you should run the following command from the root of the packages folder:
+This system combines a Natural Language Processing (NLP) bot and a Watcher bot into a single application. It processes messages about ticket inspectors in Berlin's public transportation system and monitors the health of the backend.
 
-```bash
-python3 -m telegram_bots.watcher.watcher
+### Components
+1. **NLP Bot**: Processes incoming messages to extract information about ticket inspectors.
+2. **Watcher Bot**: Monitors the health of the backend and the NLP bot.
+3. **Flask Application**: Provides endpoints for health checks and error reporting.
+
+### Architecture
+
+The system runs as a single process with multiple threads:
+- Main Thread: Runs the Flask application
+- NLP Bot Thread: Handles Telegram messages
+- Watcher Bot Thread: Responds to health check commands and sends error reports
+- Backend Health Check Thread: Periodically checks backend health
+- NLP Health Check Thread: Periodically checks NLP bot health
+
+## Setup
+
+### Environment Variables
+
+Create a .env file in the root directory with the following content:
+```shell
+BACKEND_URL=http://127.0.0.1:8080
+WATCHER_BOT_TOKEN=
+NLP_BOT_TOKEN=
+TELEGERAM_BOTS_URL=http://127.0.0.1:6000
+DEV_CHAT_ID=
 ```
 
-This will start the watcher bot which will start the NLP bot as a sub process.
+You can get the Watcher and NLP bot tokens from the BotFather. The DEV_CHAT_ID is the chat ID of the developer chat.
 
-# environment variables
-
-create a .env file in the folder next to the config.py and add these variables:
-```env
-BOT_TOKEN=<Telegram bot NLP token>
-WATCHER_BOT_TOKEN=<Telegram watcher bot token>
-DEV_CHAT_ID=<ID where messages should be send, developer chat>
-FREIFAHREN_BE_CHAT_ID=<Chat id>
-
-DB_USER=
-DB_HOST=
-DB_PORT=
-DB_PASSWORD=
-
-BACKEND_URL=<http://localhost:8080>
-NLP_BOT_URL=<http://127.0.0.1:6001>
-WATCHER_URL=<http://127.0.0.1:6000>
-
+### Dependencies
+install the dependencies by running:
+```shell
+pip install -r requirements.txt
 ```
+
+### Running the Application
+Run the application by executing the following command in the packages directory:
+```shell
+python3 -m telegram_bots.main
+```
+This will start all components in a single process.
+
+## How it Works
+
+1. **Initialization**:
+- The main script sets up the Flask app, NLP bot, and Watcher bot.
+- It starts separate threads for NLP bot polling, Watcher bot polling, and health checks.
+
+2. **NLP Bot**:
+- Listens for incoming Telegram messages.
+- Processes messages to extract ticket inspector information.
+- Sends extracted data to the backend.
+
+3. **Watcher Bot**:
+- Responds to /checkhealth commands.
+- Sends error reports to the developer chat.
+
+4. **Health Checks**:
+- Periodically checks the health of the backend and NLP bot.
+
+5. **Flask Application**:
+- Provides a /healthcheck endpoint for external health monitoring.
+- Offers a /report-inspector endpoint for manual reporting.
+- Includes a /report-failure endpoint for error reporting from other components.
+
+6. **Error Handling**:
+- Uses a global thread exception handler to catch and report unhandled exceptions
+- implements a run_safely function to wrap thread targets for additional error catching.
+
+## Logging
+- The system uses a custom logger that writes to both a file (app.log) and the console.

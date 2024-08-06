@@ -1,6 +1,3 @@
-from flask import Flask, request
-from telebot import TeleBot
-from waitress import serve
 from telegram_bots.config import (
     DEV_CHAT_ID, 
     BACKEND_URL, 
@@ -13,7 +10,10 @@ from telegram_bots.logger import setup_logger
 from telegram_bots.bot_utils import send_message
 from telegram_bots.bots import watcher_bot, nlp_bot
 
+from flask import Flask, request
 from datetime import datetime
+from telebot import TeleBot
+from waitress import serve
 import traceback
 import threading
 import requests
