@@ -31,6 +31,7 @@ func (h *APIHook) Run(e *zerolog.Event, level zerolog.Level, message string) {
 				"console_line": message,
 				"system":       "backend",
 			}
+			Log.Info().Msg("Sending error to the API with the following payload: " + message)
 			jsonPayload, err := json.Marshal(payload)
 			if err != nil {
 				return

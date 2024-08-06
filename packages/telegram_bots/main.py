@@ -93,6 +93,7 @@ def report_failure():
     error_message = f"Error in {system}: {console_line}"
     logger.error(error_message)
     send_message(DEV_CHAT_ID, error_message, watcher_bot)
+    
     return {'status': 'success'}, 200
 
 
