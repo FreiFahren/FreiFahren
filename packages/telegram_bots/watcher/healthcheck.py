@@ -37,7 +37,6 @@ def do_healthcheck(endpoint: str) -> tuple:
         logger.error(f'Request Exception: {request_exception}')
     else:
         response, request_time = ping_system(endpoint)
-        logger.info(f'{endpoint} is healthy. The request took {round(request_time * 1000,1)} seconds with {response}.')
     return errorlist, request_time
 
 
