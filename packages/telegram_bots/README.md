@@ -36,7 +36,7 @@ You can get the Watcher and NLP bot tokens from the BotFather. The DEV_CHAT_ID i
 ### Dependencies
 install the dependencies by running:
 ```shell
-pip install -r requirements.txt
+pip3 install -e .
 ```
 
 ### Running the Application

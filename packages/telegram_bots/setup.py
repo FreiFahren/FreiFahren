@@ -15,7 +15,6 @@ setup(
         "pep8-naming",
         "flake8-unused-arguments",
         "flake8-bugbear",
-        "numpy<2,>=1.26.0",
         "pytz",
         "watchdog",
         "spacy",
