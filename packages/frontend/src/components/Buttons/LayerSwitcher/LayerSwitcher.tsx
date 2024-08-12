@@ -12,11 +12,17 @@ interface LayerSwitcherProps {
 const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ changeLayer, isRiskLayerOpen }) => {
   const [areLayerOptionsVisible, setAreLayerOptionsVisible] = useState(false);
 
-  const closeModalAndHighlightSelectedLayer = useCallback((layer: string) => {
+  const closeModalAndHighlightSelectedLayer = useCallback(async (layer: string) => {
     changeLayer(layer);
     setAreLayerOptionsVisible(false);
 
-    if (layer === 'risk' && !isRiskLayerOpen) sendAnalyticsEvent('Risk Layer Opened');
+    if (layer === 'risk' && !isRiskLayerOpen) {
+      try {
+        await sendAnalyticsEvent('Risk Layer Opened');
+      } catch (error) {
+        console.error('Failed to send analytics event:', error);
+      }
+    }
 
   }, [changeLayer, isRiskLayerOpen]);
 

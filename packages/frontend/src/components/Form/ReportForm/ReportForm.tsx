@@ -119,14 +119,18 @@ const ReportForm: React.FC<ReportFormProps> = ({
         const endTime = new Date();
         const durationInSeconds = startTime ? Math.round((endTime.getTime() - startTime.getTime()) / 1000) : 0;
 
-        sendAnalyticsEvent('Report Submitted', {
-            duration: durationInSeconds,
-            meta: {
+        try {
+            await sendAnalyticsEvent('Report Submitted', {
+              duration: durationInSeconds,
+              meta: {
                 Station: stationInput!.label,
                 Line: lineInput?.label,
                 Direction: directionInput?.label
-            }
-        });
+              }
+            });
+          } catch (error) {
+            console.error('Failed to send analytics event:', error);
+          }
 
         // Save the timestamp of the report to prevent spamming
         localStorage.setItem('lastReportTime', new Date().toISOString());

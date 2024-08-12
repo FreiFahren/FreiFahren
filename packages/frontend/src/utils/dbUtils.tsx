@@ -178,10 +178,19 @@ export function getDataFromLocalStorage(key: string) {
     return localStorage.getItem(key);
 }
 
-export function sendAnalyticsEvent(eventName: string, options?: AnalyticsOptions): void {
-    if (window.pirsch) {
-      window.pirsch(eventName, options || {});
-    } else {
-      console.warn('Pirsch SDK not loaded');
-    }
+export function sendAnalyticsEvent(eventName: string, options?: AnalyticsOptions): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (window.pirsch) {
+        try {
+          window.pirsch(eventName, options || {});
+          resolve();
+        } catch (error) {
+          console.error(`Failed to send event: ${eventName}`, error);
+          reject(error);
+        }
+      } else {
+        console.warn('Pirsch SDK not loaded');
+        reject(new Error('Pirsch SDK not loaded'));
+      }
+    });
   }
