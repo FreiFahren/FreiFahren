@@ -2,7 +2,7 @@ import React, {useState, useCallback} from 'react';
 
 import './LayerSwitcher.css';
 import Backdrop from '../../../../src/components/Miscellaneous/Backdrop/Backdrop';
-import { sendAnalyticsEvent } from '../../../../src/utils/dbUtils';
+import { sendAnalyticsEvent } from '../../../../src/utils/analytics';
 
 interface LayerSwitcherProps {
    changeLayer: (layer: string) => void;

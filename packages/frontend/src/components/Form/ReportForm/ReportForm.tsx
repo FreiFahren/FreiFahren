@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { ActionMeta } from 'react-select/';
 import AutocompleteInputForm, { selectOption } from '../AutocompleteInputForm/AutocompleteInputForm';
 
-import { LinesList, StationList, getAllLinesList, reportInspector, sendAnalyticsEvent } from '../../../utils/dbUtils';
+import { LinesList, StationList, getAllLinesList, reportInspector } from '../../../utils/dbUtils';
+import { sendAnalyticsEvent } from '../../../utils/analytics';
 import {
     highlightElement,
     redefineDirectionOptions,
