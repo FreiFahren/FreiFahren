@@ -119,6 +119,12 @@ const ReportForm: React.FC<ReportFormProps> = ({
         const endTime = new Date();
         const durationInSeconds = startTime ? Math.round((endTime.getTime() - startTime.getTime()) / 1000) : 0;
 
+        async function finalizeSubmission() {
+            localStorage.setItem('lastReportTime', new Date().toISOString()); // Save the timestamp of the report to prevent spamming
+            closeModal();
+            onFormSubmit(); // Notify App component about the submission
+        }
+
         try {
             await sendAnalyticsEvent('Report Submitted', {
               duration: durationInSeconds,
@@ -128,15 +134,12 @@ const ReportForm: React.FC<ReportFormProps> = ({
                 Direction: directionInput?.label
               }
             });
+
+            finalizeSubmission();
           } catch (error) {
             console.error('Failed to send analytics event:', error);
+            finalizeSubmission();
           }
-
-        // Save the timestamp of the report to prevent spamming
-        localStorage.setItem('lastReportTime', new Date().toISOString());
-
-        closeModal();
-        onFormSubmit(); // Notify App component about the submission
     };
 
     async function verifyUserLocation(

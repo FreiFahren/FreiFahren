@@ -193,4 +193,4 @@ export function sendAnalyticsEvent(eventName: string, options?: AnalyticsOptions
         reject(new Error('Pirsch SDK not loaded'));
       }
     });
-  }
+}
