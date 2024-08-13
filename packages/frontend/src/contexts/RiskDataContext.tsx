@@ -9,13 +9,19 @@ const defaultRefreshRiskData = async (): Promise<void> => {
 const RiskDataContext = createContext({
     segmentRiskData: null as RiskData | null,
     refreshRiskData: defaultRefreshRiskData,
-    lastModified: null as Date | null
+    lastModified: null as Date | null,
 });
 
 export const useRiskData = () => useContext(RiskDataContext);
 
-export const RiskDataProvider = ({ children }: { children: React.ReactNode }) => {
-    const [segmentRiskData, setSegmentRiskData] = useState<RiskData | null>(null);
+export const RiskDataProvider = ({
+    children,
+}: {
+    children: React.ReactNode;
+}) => {
+    const [segmentRiskData, setSegmentRiskData] = useState<RiskData | null>(
+        null
+    );
     const [lastModified, setLastModified] = useState<Date | null>(null);
 
     const refreshRiskData = useCallback(async () => {
@@ -35,7 +41,9 @@ export const RiskDataProvider = ({ children }: { children: React.ReactNode }) =>
     }, [lastModified]);
 
     return (
-        <RiskDataContext.Provider value={{ segmentRiskData, refreshRiskData, lastModified }}>
+        <RiskDataContext.Provider
+            value={{ segmentRiskData, refreshRiskData, lastModified }}
+        >
             {children}
         </RiskDataContext.Provider>
     );

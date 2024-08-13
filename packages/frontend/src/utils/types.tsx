@@ -4,7 +4,10 @@ export {}; // to make this file a module
 
 declare global {
     interface Window {
-        pirsch: (eventName: string, options: { duration?: number; meta?: Record<string, any> }) => void;
+        pirsch: (
+            eventName: string,
+            options: { duration?: number; meta?: Record<string, any> }
+        ) => void;
     }
 }
 

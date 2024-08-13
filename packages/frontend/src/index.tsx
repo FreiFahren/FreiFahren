@@ -9,18 +9,18 @@ import Datenschutz from './pages/Datenschutz/Datenschutz';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
+    document.getElementById('root') as HTMLElement
 );
 root.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path='/' element={<App />} />
-        <Route path='/impressum' element={<Impressum />} />
-        <Route path='/datenschutz' element={<Datenschutz />} />
-      </Routes>
-    </BrowserRouter>
-  </React.StrictMode>
+    <React.StrictMode>
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<App />} />
+                <Route path="/impressum" element={<Impressum />} />
+                <Route path="/datenschutz" element={<Datenschutz />} />
+            </Routes>
+        </BrowserRouter>
+    </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

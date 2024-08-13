@@ -9,7 +9,11 @@ interface BackdropProps {
     Zindex?: number;
 }
 
-const Backdrop: React.FC<BackdropProps> = ({ onClick, BackgroundColor, Zindex }) => {
+const Backdrop: React.FC<BackdropProps> = ({
+    onClick,
+    BackgroundColor,
+    Zindex,
+}) => {
     const backdropRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -23,8 +27,12 @@ const Backdrop: React.FC<BackdropProps> = ({ onClick, BackgroundColor, Zindex })
 
         // avoid closing the backdrop when scrolling on anything but the backdrop
         if (backdrop) {
-            backdrop.addEventListener('scroll', handleScroll, { passive: true });
-            backdrop.addEventListener('touchmove', handleScroll, { passive: true });
+            backdrop.addEventListener('scroll', handleScroll, {
+                passive: true,
+            });
+            backdrop.addEventListener('touchmove', handleScroll, {
+                passive: true,
+            });
         }
         return () => {
             if (backdrop) {
@@ -37,12 +45,12 @@ const Backdrop: React.FC<BackdropProps> = ({ onClick, BackgroundColor, Zindex })
     return ReactDOM.createPortal(
         <div
             ref={backdropRef}
-            className='backdrop'
+            className="backdrop"
             onClick={onClick}
-            data-testid='backdrop'
+            data-testid="backdrop"
             style={{
                 backgroundColor: BackgroundColor || 'rgba(0, 0, 0, 0.5)',
-                zIndex: Zindex || 1 // should be same as --zIndex-backdrop
+                zIndex: Zindex || 1, // should be same as --zIndex-backdrop
             }}
         />,
         document.getElementById('portal-root') as HTMLElement

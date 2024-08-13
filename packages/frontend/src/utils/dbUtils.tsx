@@ -2,17 +2,17 @@ import { selectOption } from '../components/Form/AutocompleteInputForm/Autocompl
 import { AnalyticsOptions } from './types';
 
 export interface StationProperty {
-	name: string;
-	coordinates: {
-		latitude: number;
-		longitude: number;
-	};
-	lines: string[];
+    name: string;
+    coordinates: {
+        latitude: number;
+        longitude: number;
+    };
+    lines: string[];
 }
 
 export type LineProperty = {
     [key: string]: string[];
-}
+};
 
 export type StationList = Record<string, StationProperty>;
 export type LinesList = Record<string, string[]>;
@@ -25,12 +25,15 @@ export type LinesList = Record<string, string[]>;
  * @returns {Promise<any | null>} A promise that resolves to the fetched data if successful, or null if there is no new data or an error occurs.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getRecentDataWithIfModifiedSince(endpointUrl: string, lastUpdate: Date | null): Promise<any | null> {
+export async function getRecentDataWithIfModifiedSince(
+    endpointUrl: string,
+    lastUpdate: Date | null
+): Promise<any | null> {
     try {
         const headers = new Headers();
         // Include the If-Modified-Since header only if lastUpdateTimestamp is available
         if (lastUpdate) {
-            headers.append('If-Modified-Since', lastUpdate.toUTCString())
+            headers.append('If-Modified-Since', lastUpdate.toUTCString());
         }
 
         // Make the request with optional If-Modified-Since header
@@ -53,25 +56,29 @@ export async function getRecentDataWithIfModifiedSince(endpointUrl: string, last
 }
 
 export async function getAllStationsList(): Promise<StationList> {
-  try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/data/list?stations=true`);
-      const data = await response.json();
-      return data;
-  } catch (error) {
-      console.error('Error:', error);
-      return {};
-  }
+    try {
+        const response = await fetch(
+            `${process.env.REACT_APP_API_URL}/data/list?stations=true`
+        );
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error:', error);
+        return {};
+    }
 }
 
 export async function getAllLinesList(): Promise<LinesList> {
-  try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/data/list?lines=true`);
-      const data = await response.json();
-      return data;
-  } catch (error) {
-      console.error('Error:', error);
-      return {};
-  }
+    try {
+        const response = await fetch(
+            `${process.env.REACT_APP_API_URL}/data/list?lines=true`
+        );
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error:', error);
+        return {};
+    }
 }
 
 async function fetchStationId(stationName: string): Promise<string | null> {
@@ -80,7 +87,9 @@ async function fetchStationId(stationName: string): Promise<string | null> {
     }
 
     try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/data/id?name=${stationName}`);
+        const response = await fetch(
+            `${process.env.REACT_APP_API_URL}/data/id?name=${stationName}`
+        );
         const stationJson = await response.json();
         return stationJson.id;
     } catch (error) {
@@ -89,10 +98,17 @@ async function fetchStationId(stationName: string): Promise<string | null> {
     }
 }
 
-export async function reportInspector(line: selectOption, station: selectOption, direction: selectOption, message: string) {
+export async function reportInspector(
+    line: selectOption,
+    station: selectOption,
+    direction: selectOption,
+    message: string
+) {
     // when the user doesn't select a line, station or direction, the value is undefined
     const stationId = station ? await fetchStationId(station.label) : null;
-    const directionId = direction ? await fetchStationId(direction.label) : null;
+    const directionId = direction
+        ? await fetchStationId(direction.label)
+        : null;
 
     const requestBody = JSON.stringify({
         line: line ? line.value : '',
@@ -104,20 +120,24 @@ export async function reportInspector(line: selectOption, station: selectOption,
     fetch(`${process.env.REACT_APP_API_URL}/basics/inspectors`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
         },
-        body: requestBody
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .catch((error) => console.error('Error:', error));
+        body: requestBody,
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .catch((error) => console.error('Error:', error));
 }
 
-export async function getStationDistance(userLat: number | undefined, userLon: number | undefined, inspectorStationId: string): Promise<number | null> {
+export async function getStationDistance(
+    userLat: number | undefined,
+    userLon: number | undefined,
+    inspectorStationId: string
+): Promise<number | null> {
     if (userLat === undefined || userLon === undefined) {
         return null;
     }
@@ -135,7 +155,7 @@ export async function getStationDistance(userLat: number | undefined, userLon: n
         }
     } catch (error) {
         console.error('Error fetching distance:', error);
-        return null;  // Return null if there's an error during the fetch.
+        return null; // Return null if there's an error during the fetch.
     }
 }
 
@@ -143,10 +163,14 @@ export async function getNumberOfReportsInLast24Hours(): Promise<number> {
     try {
         // Calculate the start and end times for the last 24 hours in UTC
         const endTime = new Date().toISOString();
-        const startTime = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        const startTime = new Date(
+            Date.now() - 24 * 60 * 60 * 1000
+        ).toISOString();
 
         // Construct the URL with query parameters
-        const url = new URL(`${process.env.REACT_APP_API_URL}/basics/inspectors`);
+        const url = new URL(
+            `${process.env.REACT_APP_API_URL}/basics/inspectors`
+        );
         url.searchParams.append('start', startTime);
         url.searchParams.append('end', endTime);
 
@@ -165,7 +189,9 @@ export async function getNumberOfReportsInLast24Hours(): Promise<number> {
         }
 
         // filter out historic reports
-        const filteredReports = reports.filter((report: { isHistoric: boolean }) => !report.isHistoric);
+        const filteredReports = reports.filter(
+            (report: { isHistoric: boolean }) => !report.isHistoric
+        );
 
         return filteredReports.length;
     } catch (error) {
@@ -178,10 +204,13 @@ export function getDataFromLocalStorage(key: string) {
     return localStorage.getItem(key);
 }
 
-export function sendAnalyticsEvent(eventName: string, options?: AnalyticsOptions): void {
+export function sendAnalyticsEvent(
+    eventName: string,
+    options?: AnalyticsOptions
+): void {
     if (window.pirsch) {
-      window.pirsch(eventName, options || {});
+        window.pirsch(eventName, options || {});
     } else {
-      console.warn('Pirsch SDK not loaded');
+        console.warn('Pirsch SDK not loaded');
     }
-  }
+}

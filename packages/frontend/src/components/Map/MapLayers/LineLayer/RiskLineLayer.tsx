@@ -11,22 +11,28 @@ interface RiskLineLayerProps {
     textColor: string;
 }
 
-const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ linesGeoJSON, textColor, preloadedRiskData }) => {
+const RiskLineLayer: React.FC<RiskLineLayerProps> = ({
+    linesGeoJSON,
+    textColor,
+    preloadedRiskData,
+}) => {
     const { segmentRiskData, refreshRiskData } = useRiskData();
     const [geoJSON, setGeoJSON] = useState(linesGeoJSON);
 
     // Function to apply color updates to GeoJSON
-    const applySegmentColors = (segmentColors?: {[key: string]: string}) => {
+    const applySegmentColors = (segmentColors?: { [key: string]: string }) => {
         const defaultColor = '#13C184'; // lowest risk color
         return {
             ...geoJSON,
-            features: geoJSON.features.map(feature => ({
+            features: geoJSON.features.map((feature) => ({
                 ...feature,
                 properties: {
                     ...feature.properties,
-                    line_color: segmentColors ? segmentColors[feature.properties?.sid] || defaultColor : defaultColor
-                }
-            }))
+                    line_color: segmentColors
+                        ? segmentColors[feature.properties?.sid] || defaultColor
+                        : defaultColor,
+                },
+            })),
         };
     };
 
@@ -52,14 +58,14 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ linesGeoJSON, textColor, 
 
     return (
         <>
-            <Source id='risk-line-data' type='geojson' data={geoJSON}>
+            <Source id="risk-line-data" type="geojson" data={geoJSON}>
                 <Layer
-                    id='risk-line-layer'
-                    type='line'
-                    source='risk-line-data'
+                    id="risk-line-layer"
+                    type="line"
+                    source="risk-line-data"
                     layout={{
                         'line-join': 'round',
-                        'line-cap': 'round'
+                        'line-cap': 'round',
                     }}
                     paint={{
                         'line-color': ['get', 'line_color'],
@@ -67,16 +73,16 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ linesGeoJSON, textColor, 
                     }}
                 />
                 <Layer
-                    id='risk-label-layer'
-                    type='symbol'
-                    source='risk-line-data'
+                    id="risk-label-layer"
+                    type="symbol"
+                    source="risk-line-data"
                     layout={{
                         'text-field': ['get', 'line'],
                         'text-size': 15,
                         'symbol-placement': 'line',
                         'text-anchor': 'top',
                         'text-offset': [0, 1.5],
-                        'text-keep-upright': true
+                        'text-keep-upright': true,
                     }}
                     paint={{
                         'text-color': textColor,
@@ -84,9 +90,11 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ linesGeoJSON, textColor, 
                             'interpolate',
                             ['linear'],
                             ['zoom'],
-                            11, 0,
-                            12, 1
-                        ]
+                            11,
+                            0,
+                            12,
+                            1,
+                        ],
                     }}
                 />
             </Source>

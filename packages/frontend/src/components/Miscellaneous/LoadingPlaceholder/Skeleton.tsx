@@ -29,39 +29,45 @@ interface UseSkeletonProps {
 export const useSkeleton = ({
     isLoading,
     initialDelay = 100,
-    minDisplayTime = 1000
-  }: UseSkeletonProps) => {
+    minDisplayTime = 1000,
+}: UseSkeletonProps) => {
     const [shouldShowSkeleton, setShouldShowSkeleton] = useState(false);
     const [startTime, setStartTime] = useState<number | null>(null);
 
     useEffect(() => {
-      let initialTimer: NodeJS.Timeout; // is used to give the api some time to respond
-      let minDisplayTimer: NodeJS.Timeout; // is used to avoid flickering if api responds very quickly after initialTimer
+        let initialTimer: NodeJS.Timeout; // is used to give the api some time to respond
+        let minDisplayTimer: NodeJS.Timeout; // is used to avoid flickering if api responds very quickly after initialTimer
 
-      if (isLoading && !shouldShowSkeleton) {
-        initialTimer = setTimeout(() => {
-          setShouldShowSkeleton(true);
-          setStartTime(Date.now());
-        }, initialDelay);
-      } else if (shouldShowSkeleton && startTime) {
-        const elapsedTime = Date.now() - startTime;
-        const remainingTime = Math.max(0, minDisplayTime - elapsedTime);
+        if (isLoading && !shouldShowSkeleton) {
+            initialTimer = setTimeout(() => {
+                setShouldShowSkeleton(true);
+                setStartTime(Date.now());
+            }, initialDelay);
+        } else if (shouldShowSkeleton && startTime) {
+            const elapsedTime = Date.now() - startTime;
+            const remainingTime = Math.max(0, minDisplayTime - elapsedTime);
 
-        minDisplayTimer = setTimeout(() => {
-            if (!isLoading) {
-              setShouldShowSkeleton(false);
-              setStartTime(null);
-            }
-          }, remainingTime);
+            minDisplayTimer = setTimeout(() => {
+                if (!isLoading) {
+                    setShouldShowSkeleton(false);
+                    setStartTime(null);
+                }
+            }, remainingTime);
         }
 
         return () => {
-          clearTimeout(initialTimer);
-          clearTimeout(minDisplayTimer);
+            clearTimeout(initialTimer);
+            clearTimeout(minDisplayTimer);
         };
-      }, [isLoading, shouldShowSkeleton, startTime, initialDelay, minDisplayTime]);
+    }, [
+        isLoading,
+        shouldShowSkeleton,
+        startTime,
+        initialDelay,
+        minDisplayTime,
+    ]);
 
-      return shouldShowSkeleton;
+    return shouldShowSkeleton;
 };
 
 /**
@@ -83,11 +89,11 @@ export const useSkeleton = ({
  * );
  */
 const Skeleton: React.FC = () => {
-  return (
-    <div className='loading-placeholder'>
-      <div className='loading-animation'></div>
-    </div>
-  );
+    return (
+        <div className="loading-placeholder">
+            <div className="loading-animation"></div>
+        </div>
+    );
 };
 
 export default Skeleton;

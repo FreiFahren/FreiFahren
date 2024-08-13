@@ -14,7 +14,13 @@ interface OpacityMarkerProps {
     onMarkerClick: (markerData: MarkerData) => void;
 }
 
-export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index, isFirstOpen, formSubmitted, onMarkerClick }) => {
+export const OpacityMarker: React.FC<OpacityMarkerProps> = ({
+    markerData,
+    index,
+    isFirstOpen,
+    formSubmitted,
+    onMarkerClick,
+}) => {
     const [opacity, setOpacity] = useState(0);
     const { timestamp, station, line, isHistoric } = markerData;
 
@@ -34,13 +40,14 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index,
             if (!isHistoric) {
                 const calculateOpacity = () => {
                     const currentTime = new Date().getTime();
-                    const elapsedTime = currentTime - adjustedTimestamp.getTime();
+                    const elapsedTime =
+                        currentTime - adjustedTimestamp.getTime();
                     const timeToFade = 60 * 60 * 1000;
-                    let newOpacity = Math.max(0, 1 - (elapsedTime / timeToFade));
+                    let newOpacity = Math.max(0, 1 - elapsedTime / timeToFade);
 
                     // When the opacity is too low the marker is not visible
-                    if (newOpacity <= 0.20) {
-                        newOpacity = 0.20;
+                    if (newOpacity <= 0.2) {
+                        newOpacity = 0.2;
                     }
                     setOpacity(newOpacity);
 
@@ -63,7 +70,14 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index,
             }
             return () => clearInterval(intervalId);
         }
-    }, [adjustedTimestamp, isHistoric, isFirstOpen, opacity, station.name, formSubmitted]);
+    }, [
+        adjustedTimestamp,
+        isHistoric,
+        isFirstOpen,
+        opacity,
+        station.name,
+        formSubmitted,
+    ]);
 
     if (opacity <= 0) {
         return null;
@@ -73,11 +87,11 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index,
         <Marker
             key={`${line}-${index}`}
             ref={markerRef}
-            className='inspector-marker'
+            className="inspector-marker"
             latitude={station.coordinates.latitude}
             longitude={station.coordinates.longitude}
-            style={{ opacity: opacity.toString()}}
-            onClick={()=> onMarkerClick(markerData)}
+            style={{ opacity: opacity.toString() }}
+            onClick={() => onMarkerClick(markerData)}
         >
             <span className={`live ${isWithin30Mins ? 'pulse' : ''}`} />
         </Marker>

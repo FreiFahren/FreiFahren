@@ -1,21 +1,28 @@
-import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import reactHooksPlugin from 'eslint-plugin-react-hooks';
+import globals from "globals";
+import pluginJs from "@eslint/js";
+import tseslint from "typescript-eslint";
+import pluginReact from "eslint-plugin-react";
+import pluginPrettier from "eslint-plugin-prettier";
 
-export default tseslint.config(
-  eslint.configs.recommended,
+export default [
+  { files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"] },
+  { languageOptions: { globals: globals.browser } },
+  pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
+  pluginReact.configs.flat.recommended,
   {
+    // Adding Airbnb style guide
+    rules: {
+      ...require("eslint-config-airbnb").rules,
+    },
+  },
+  {
+    // Integrate Prettier as a plugin
     plugins: {
-      'react-hooks': reactHooksPlugin,
+      prettier: pluginPrettier,
     },
     rules: {
-      'quotes': ['error', 'single'],
-      'jsx-quotes': ['error', 'prefer-single'],
-      'no-trailing-spaces': ['error'],
-      'no-multiple-empty-lines': ['error', { 'max': 1 }],
-      'no-console': ['error', { allow: ['warn', 'error'] }],
-      'react-hooks/exhaustive-deps': 'warn',
-    }
-  }
-);
+      "prettier/prettier": "error",
+    },
+  },
+];
