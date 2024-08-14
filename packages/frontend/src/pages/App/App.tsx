@@ -14,6 +14,7 @@ import { highlightElement, useModalAnimation, currentColorTheme, setColorThemeIn
 import Backdrop from '../../../src/components/Miscellaneous/Backdrop/Backdrop';
 import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils';
 import { RiskDataProvider } from '../../contexts/RiskDataContext';
+import { sendSavedEvents } from '../../utils/analytics';
 import './App.css';
 
 type AppUIState = {
@@ -121,6 +122,10 @@ function App() {
   function changeLayer(clickedLayer: string) {
     setAppUIState({ ...appUIState, isRiskLayerOpen: clickedLayer === 'risk' });
   }
+
+  useEffect(() => {
+    sendSavedEvents();
+}, []);
 
   return (
     <div className='App'>

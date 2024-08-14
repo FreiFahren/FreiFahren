@@ -1,5 +1,4 @@
 import { selectOption } from '../components/Form/AutocompleteInputForm/AutocompleteInputForm';
-import { AnalyticsOptions } from './types';
 
 export interface StationProperty {
 	name: string;
@@ -173,15 +172,3 @@ export async function getNumberOfReportsInLast24Hours(): Promise<number> {
         return 0;
     }
 }
-
-export function getDataFromLocalStorage(key: string) {
-    return localStorage.getItem(key);
-}
-
-export function sendAnalyticsEvent(eventName: string, options?: AnalyticsOptions): void {
-    if (window.pirsch) {
-      window.pirsch(eventName, options || {});
-    } else {
-      console.warn('Pirsch SDK not loaded');
-    }
-  }

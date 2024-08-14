@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { ActionMeta } from 'react-select/';
 import AutocompleteInputForm, { selectOption } from '../AutocompleteInputForm/AutocompleteInputForm';
 
-import { LinesList, StationList, getAllLinesList, reportInspector, sendAnalyticsEvent } from '../../../utils/dbUtils';
+import { LinesList, StationList, getAllLinesList, reportInspector } from '../../../utils/dbUtils';
+import { sendAnalyticsEvent } from '../../../utils/analytics';
 import {
     highlightElement,
     redefineDirectionOptions,
@@ -119,20 +120,27 @@ const ReportForm: React.FC<ReportFormProps> = ({
         const endTime = new Date();
         const durationInSeconds = startTime ? Math.round((endTime.getTime() - startTime.getTime()) / 1000) : 0;
 
-        sendAnalyticsEvent('Report Submitted', {
-            duration: durationInSeconds,
-            meta: {
+        async function finalizeSubmission() {
+            localStorage.setItem('lastReportTime', new Date().toISOString()); // Save the timestamp of the report to prevent spamming
+            closeModal();
+            onFormSubmit(); // Notify App component about the submission
+        }
+
+        try {
+            await sendAnalyticsEvent('Report Submitted', {
+              duration: durationInSeconds,
+              meta: {
                 Station: stationInput!.label,
                 Line: lineInput?.label,
                 Direction: directionInput?.label
-            }
-        });
+              }
+            });
 
-        // Save the timestamp of the report to prevent spamming
-        localStorage.setItem('lastReportTime', new Date().toISOString());
-
-        closeModal();
-        onFormSubmit(); // Notify App component about the submission
+            finalizeSubmission();
+          } catch (error) {
+            console.error('Failed to send analytics event:', error);
+            finalizeSubmission();
+          }
     };
 
     async function verifyUserLocation(

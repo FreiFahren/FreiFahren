@@ -17,6 +17,12 @@ export interface AnalyticsOptions {
     meta?: AnalyticsMeta;
 }
 
+export type SavedEvent = {
+    eventName: string;
+    options: AnalyticsOptions;
+    timestamp: number;
+};
+
 export interface StationGeoJSON {
     type: string;
     features: {
