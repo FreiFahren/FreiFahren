@@ -16,7 +16,7 @@ class Inspector(BaseModel):
     direction: str
     message: str
 
-@app.post("/Instagram/Stories")
+@app.post("/instagram/stories")
 async def create_instagram_story(story: StoryRequest):
     inspector = Inspector(
         line=story.line,
