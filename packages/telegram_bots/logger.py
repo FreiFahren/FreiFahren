@@ -1,14 +1,12 @@
 import logging
+import sys
 from logging.handlers import TimedRotatingFileHandler
 from datetime import datetime, timezone
 
 
 class CustomFormatter(logging.Formatter):
-    # flake8: noqa
     def formatTime(self, record, datefmt=None):
-        # Convert timestamp to local time and format to ISO 8601
-        local_time = datetime.fromtimestamp(record.created)  # Assumes local timezone
-        
+        local_time = datetime.fromtimestamp(record.created)
         return local_time.isoformat()
 
 
@@ -22,11 +20,17 @@ def setup_logger():
         # rotate file at midnight and keep 7 days of logs
         file_handler = TimedRotatingFileHandler('app.log', when='midnight', interval=1, backupCount=7, utc=True)
 
+        # Create console handler
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setLevel(logging.ERROR)
+
         # Create formatters and add it to handlers
         log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)'
         formatter = CustomFormatter(log_format)
         file_handler.setFormatter(formatter)
+        console_handler.setFormatter(formatter)
 
         logger.addHandler(file_handler)
+        logger.addHandler(console_handler)
 
     return logger

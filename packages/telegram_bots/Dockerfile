@@ -4,11 +4,14 @@ FROM python:3.9
 # Set the working directory in the container to /app
 WORKDIR /app
 
-# Add the parent directory contents into the container at /app
-ADD ../ /app
+# Add the current directory contents into the container at /app
+ADD . /app
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r telegram_bots/requirements.txt
+# Install the required packages using the setup.py in editable mode
+RUN pip install --no-cache-dir -e .
 
-# Run the command to start the watcher
-CMD ["python3", "-m", "telegram_bots.watcher.watcher"]
+# Copy the .env file into the container
+COPY .env /app/.env
+
+# Run the command to start the main application
+CMD ["python3", "-m", "telegram_bots.main"]

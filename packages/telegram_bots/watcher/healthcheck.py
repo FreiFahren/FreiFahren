@@ -1,7 +1,7 @@
 import requests
-from telegram_bots.config import BACKEND_URL, DEV_CHAT_ID, NLP_BOT_URL, TELEGRAM_NEXT_CHECK_TIME
+from telegram_bots.config import BACKEND_URL, DEV_CHAT_ID, TELEGERAM_BOTS_URL, TELEGRAM_NEXT_CHECK_TIME
 from telegram_bots.bot_utils import send_message
-from telegram_bots.watcher.bot import watcher_bot
+from telegram_bots.bots import watcher_bot
 from telegram_bots import logger
 import time
 
@@ -37,8 +37,6 @@ def do_healthcheck(endpoint: str) -> tuple:
         logger.error(f'Request Exception: {request_exception}')
     else:
         response, request_time = ping_system(endpoint)
-        logger.info(f'{endpoint} is healthy. The request took {round(request_time * 1000,1)} seconds with {response}.')
-        print(f'{endpoint} is healthy. The request took {round(request_time * 1000,1)} seconds with {response}.')
     return errorlist, request_time
 
 
@@ -50,7 +48,7 @@ def check_nlp_bot_status() -> None:
     waiting_time = TELEGRAM_NEXT_CHECK_TIME
     while True:
         try:
-            errorlist, request_time = do_healthcheck(NLP_BOT_URL + '/healthcheck')
+            errorlist, request_time = do_healthcheck(TELEGERAM_BOTS_URL + '/healthcheck')
             if errorlist:
                 send_message(DEV_CHAT_ID, f'NLP bot is not healthy! Please check the logs for more information. Error list: {errorlist}', watcher_bot)
             time.sleep(waiting_time)
