@@ -3,3 +3,4 @@ pre-commit==3.8.0
 FastAPI==0.112.0
 uvicorn==0.30.6
 Pydantic==2.7.0
+pillow==10.4.0
