@@ -5,8 +5,12 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 def create_image(inspector: Inspector) -> io.BytesIO:
+    aspect_ratio = 9 / 16
+    width = 1080
+    height = int(width / aspect_ratio)
+
     # Create a new image with a black background
-    img = Image.new('RGB', (1080, 1920), color='black')
+    img = Image.new('RGB', (width, height), color='black')
     d = ImageDraw.Draw(img)
 
     # Load the default font
