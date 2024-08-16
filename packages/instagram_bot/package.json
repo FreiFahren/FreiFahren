@@ -12,10 +12,11 @@
   "dependencies": {
     "@hono/zod-validator": "^0.2.2",
     "hono": "^4.5.5",
+    "node-fetch": "^3.3.2",
     "sharp": "^0.33.5",
     "zod": "^3.23.8"
   },
   "scripts": {
-  "start": "bun run src/index.ts"
+    "start": "bun run src/index.ts"
   }
 }
