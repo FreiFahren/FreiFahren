@@ -1,0 +1,21 @@
+{
+  "name": "instagrambot",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/sharp": "^0.32.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.2.2",
+    "hono": "^4.5.5",
+    "sharp": "^0.33.5",
+    "zod": "^3.23.8"
+  },
+  "scripts": {
+  "start": "bun run src/index.ts"
+  }
+}
