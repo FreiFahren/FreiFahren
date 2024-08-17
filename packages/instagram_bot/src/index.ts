@@ -3,27 +3,82 @@ import { zValidator } from '@hono/zod-validator';
 import { StoryRequestSchema, type StoryRequest, type Inspector, type TokenResponse, type InstagramAccountResponse, type AccountsResponse } from './models';
 import { createImage } from './image';
 import fetch from 'node-fetch';
+import fs from 'fs/promises';
 
 const app = new Hono();
 
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
-const SHORT_LIVED_ACCESS_TOKEN = process.env.SHORT_LIVED_ACCESS_TOKEN;
 const PAGE_ID = process.env.PAGE_ID;
+const TOKEN_FILE = 'instagram_token.json';
 
-async function exchangeToken(shortLivedToken: string | undefined): Promise<string> {
+interface TokenData {
+  accessToken: string;
+  expiresAt: number;
+}
+
+async function saveTokenData(data: TokenData): Promise<void> {
+  await fs.writeFile(TOKEN_FILE, JSON.stringify(data));
+}
+
+async function getTokenData(): Promise<TokenData | null> {
+  try {
+    const data = await fs.readFile(TOKEN_FILE, 'utf-8');
+    return JSON.parse(data) as TokenData;
+  } catch (error) {
+    return null;
+  }
+}
+
+async function refreshLongLivedToken(currentToken: string): Promise<TokenData> {
+  const response = await fetch(`https://graph.facebook.com/v20.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&fb_exchange_token=${currentToken}`);
+  const data = await response.json() as TokenResponse & { expires_in?: number };
+  if (!data.access_token) {
+    throw new Error('Failed to refresh long-lived token');
+  }
+  const expiresIn = data.expires_in || 60 * 24 * 60 * 60; // 60 days in seconds
+  const expiresAt = Date.now() + expiresIn * 1000;
+  return { accessToken: data.access_token, expiresAt };
+}
+
+async function exchangeToken(shortLivedToken: string): Promise<TokenData> {
   const response = await fetch(`https://graph.facebook.com/v20.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&fb_exchange_token=${shortLivedToken}`);
-  const data = await response.json() as TokenResponse;
+  const data = await response.json() as TokenResponse & { expires_in?: number };
   if (!data.access_token) {
     console.error('Token exchange failed:', data);
     throw new Error('Failed to exchange token');
   }
-  return data.access_token;
+  console.log('Token exchanged successfully:', data);
+  
+  const expiresIn = 60 * 24 * 60 * 60; // 60 days in seconds
+  const expiresAt = Date.now() + expiresIn * 1000;
+  
+  return { accessToken: data.access_token, expiresAt };
 }
 
-async function getInstagramUserToken(longLivedToken: string): Promise<{ pageAccessToken: string; instagramAccountId: string }> {
-  // Fetch the specific page data
-  const pageResponse = await fetch(`https://graph.facebook.com/v20.0/${PAGE_ID}?fields=access_token,instagram_business_account&access_token=${longLivedToken}`);
+async function getValidAccessToken(): Promise<string> {
+  let tokenData = await getTokenData();
+
+  if (!tokenData) {
+    // If no token exists, exchange the short-lived token for a long-lived one
+    const shortLivedToken = process.env.SHORT_LIVED_ACCESS_TOKEN;
+    if (!shortLivedToken) {
+      throw new Error('Missing SHORT_LIVED_ACCESS_TOKEN environment variable');
+    }
+    tokenData = await exchangeToken(shortLivedToken);
+    await saveTokenData(tokenData);
+  } else if (tokenData.expiresAt - Date.now() < 7 * 24 * 60 * 60 * 1000) {
+    // If token expires in less than 7 days, refresh it
+    console.log('Token expiring soon. Refreshing...');
+    tokenData = await refreshLongLivedToken(tokenData.accessToken);
+    await saveTokenData(tokenData);
+  }
+
+  return tokenData.accessToken;
+}
+
+async function getInstagramUserToken(accessToken: string): Promise<{ pageAccessToken: string; instagramAccountId: string }> {
+  const pageResponse = await fetch(`https://graph.facebook.com/v20.0/${PAGE_ID}?fields=access_token,instagram_business_account&access_token=${accessToken}`);
   if (!pageResponse.ok) {
     const errorData = await pageResponse.json();
     console.error('Error fetching page data:', errorData);
@@ -58,17 +113,11 @@ app.post('/instagram/stories', zValidator('json', StoryRequestSchema), async (c)
 
     // Save the image to a file
     const folderPath = './images';
-    await Bun.write(`${folderPath}/story.png`, imgBuffer);
+    await fs.mkdir(folderPath, { recursive: true });
+    await fs.writeFile(`${folderPath}/story.png`, imgBuffer);
 
-    // Exchange token and get Instagram user token
-    if (!SHORT_LIVED_ACCESS_TOKEN) {
-      return c.json({ status: 'error', message: 'Missing SHORT_LIVED_ACCESS_TOKEN' }, 400);
-    }
-
-    const longLivedToken = await exchangeToken(SHORT_LIVED_ACCESS_TOKEN);
-    console.log('Long-lived token obtained:', longLivedToken);
-
-    const { pageAccessToken, instagramAccountId } = await getInstagramUserToken(longLivedToken);
+    const accessToken = await getValidAccessToken();
+    const { pageAccessToken, instagramAccountId } = await getInstagramUserToken(accessToken);
 
     console.log('Instagram Account ID:', instagramAccountId);
     console.log('Page Access Token:', pageAccessToken);
