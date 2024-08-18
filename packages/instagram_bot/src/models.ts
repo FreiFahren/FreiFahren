@@ -1,30 +1,35 @@
-import { z } from 'zod'
+export interface Inspector {
+    timestamp: string
+    station: Station
+    direction: Station
+    line: string
+    isHistoric: boolean
+}
 
-export const StoryRequestSchema = z.object({
-	line: z.string(),
-	station: z.string(),
-	direction: z.string(),
-	message: z.string(),
-})
-
-export type StoryRequest = z.infer<typeof StoryRequestSchema>
-
-export type Inspector = StoryRequest
+export interface Station {
+    id: string
+    name: string
+    coordinates: {
+        latitude: number
+        longitude: number
+    }
+    lines: string[]
+}
 
 export interface TokenResponse {
-	access_token: string
+    access_token: string
 }
 
 export interface PageData {
-	access_token: string
+    access_token: string
 }
 
 export interface AccountsResponse {
-	data: PageData[]
+    data: PageData[]
 }
 
 export interface InstagramAccountResponse {
-	instagram_business_account: {
-		id: string
-	}
+    instagram_business_account: {
+        id: string
+    }
 }

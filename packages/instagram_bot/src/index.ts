@@ -1,4 +1,4 @@
-import { StoryRequestSchema, type StoryRequest, type Inspector } from './models'
+import { type Inspector } from './models'
 import { createImage } from './image'
 import { createMediaContainer, publishMedia } from './instagram'
 import { getInstagramUserToken, getValidAccessToken } from './auth'
@@ -22,9 +22,9 @@ async function fetchInspectorData() {
     return (await response.json()) as Inspector[]
 }
 
-async function createAndPostStory(inspector: Inspector) {
+async function createAndPostStory(inspectors: Inspector[]) {
     try {
-        const imgBuffer = await createImage(inspector)
+        const imgBuffer = await createImage(inspectors)
 
         // Save the image to a file
         const folderPath = './images'
@@ -51,25 +51,9 @@ async function createAndPostStory(inspector: Inspector) {
     }
 }
 
-// Hourly cron job to fetch data and post stories
-/*
-cron.schedule('0 * * * *', async () => {
-    try {
-        const inspectors = await fetchInspectorData()
-        for (const inspector of inspectors) {
-            await createAndPostStory(inspector)
-            // Wait for 1 minute between posts to avoid rate limiting
-            await new Promise((resolve) => setTimeout(resolve, 60000))
-        }
-    } catch (error) {
-        console.error('Error in hourly cron job:', error)
-    }
-})
-*/
-// run on startup for testing
 try {
     const inspectors = await fetchInspectorData()
-    console.log(inspectors)
+    await createAndPostStory(inspectors)
 } catch (error) {
     console.error('Error in hourly cron job:', error)
 }
