@@ -97,12 +97,6 @@ func PostInspector(c echo.Context) error {
 		}
 	}
 
-	// Notify Instagram API to post a story
-	instagramEndpoint := os.Getenv("INSTAGRAM_API_URL") + "/instagram/stories"
-	if err := notifyOtherServiceAboutReport(instagramEndpoint, dataToInsert, "Instagram API"); err != nil {
-		logger.Log.Error().Err(err).Msg("Error sending data to Instagram API in postInspector")
-	}
-
 	return c.JSON(http.StatusOK, dataToInsert)
 }
 
