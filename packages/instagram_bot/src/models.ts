@@ -20,16 +20,15 @@ export interface TokenResponse {
     access_token: string
 }
 
+export interface TokenData {
+    accessToken: string
+    expiresAt: number
+}
+
 export interface PageData {
     access_token: string
-}
-
-export interface AccountsResponse {
-    data: PageData[]
-}
-
-export interface InstagramAccountResponse {
     instagram_business_account: {
         id: string
     }
+    id: string
 }
