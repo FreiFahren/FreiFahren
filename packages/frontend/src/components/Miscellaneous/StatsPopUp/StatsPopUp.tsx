@@ -16,7 +16,7 @@ const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports }) =
     const timeForPopOutAnimation = 0.5 * 1000
 
     const updateMessageAndShowPopup = async () => {
-        setMessage('<p>Über<strong> 26.000 Meldende</strong><br /> in Berlin</p>')
+        setMessage('<p>Über<strong> 27.000 Meldende</strong><br /> in Berlin</p>')
         setPopOut(true)
     }
 

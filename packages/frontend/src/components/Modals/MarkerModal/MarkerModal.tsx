@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo } from 'react'
-
 import { MarkerData } from '../../Map/Markers/MarkerContainer'
 import { elapsedTimeMessage, stationDistanceMessage } from '../../../utils/mapUtils'
 import { getStationDistance } from '../../../utils/dbUtils'
@@ -24,17 +23,20 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
     const currentTime = new Date().getTime()
     const elapsedTime = currentTime - adjustedTimestamp.getTime()
 
-    // isLoading is used to avoid showing the placeholder when the location is not available
     const [isLoading, setIsLoading] = useState(false)
-    const showSkeleton = useSkeleton({ isLoading })
-
     const [stationDistance, setStationDistance] = useState<number | null>(null)
+    const [initialLoad, setInitialLoad] = useState(true)
+
+    // Only show skeleton on initial load
+    const showSkeleton = useSkeleton({ isLoading: isLoading && initialLoad })
+
     useEffect(() => {
         const fetchDistance = async () => {
             setIsLoading(true)
             const distance = await getStationDistance(userLat, userLng, station.id)
             setStationDistance(distance)
             setIsLoading(false)
+            setInitialLoad(false)
         }
 
         fetchDistance()
