@@ -29,8 +29,8 @@ COPY . .
 # Create a directory for storing images
 RUN mkdir -p images
 
-# Make sure the app user owns the images directory
-RUN chown -R bun:bun images
+# Make sure the app user owns the cwd directory
+RUN chown -R bun:bun ./
 
 # Switch back to the bun user
 USER bun

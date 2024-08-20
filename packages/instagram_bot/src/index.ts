@@ -31,7 +31,7 @@ async function createAndPostStory(inspectors: Inspector[]) {
         await fs.mkdir(folderPath, { recursive: true })
         const imageName = `story_${Date.now()}.jpg`
         const imagePath = path.join(folderPath, imageName)
-        await fs.writeFile(imagePath, imgBuffer)
+        await fs.writeFile(imagePath, Uint8Array.from(imgBuffer))
 
         // public URL of the image, as required by Instagram Graph API
         const imageUrl = `${process.env.APP_URL}/images/${imageName}`
