@@ -13,7 +13,6 @@ import fetch from 'node-fetch'
 const app = new Hono()
 
 app.use('/images/*', serveStatic({ root: './' }))
-app.use('/fonts/*', serveStatic({ root: './' }))
 
 async function fetchInspectorData() {
     const response = await fetch(`${process.env.API_URL}/basics/inspectors`)
