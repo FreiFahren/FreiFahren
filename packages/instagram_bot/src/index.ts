@@ -32,6 +32,13 @@ async function createAndPostStory(inspectors: Inspector[]) {
         const imageName = `story_${Date.now()}.jpg`
         const imagePath = path.join(folderPath, imageName)
         await fs.writeFile(imagePath, Uint8Array.from(imgBuffer))
+        
+        let count = 0
+        while(!(await fetch(`${process.env.APP_URL}/images/${imageName}`)).ok && count < 10) {
+            console.log('Waiting for image to be available...')
+            await new Promise((resolve) => setTimeout(resolve, 1000))
+            count++
+        }
 
         // public URL of the image, as required by Instagram Graph API
         const imageUrl = `${process.env.APP_URL}/images/${imageName}`
@@ -48,6 +55,10 @@ async function createAndPostStory(inspectors: Inspector[]) {
         console.error('Error creating and posting story:', error)
     }
 }
+
+setTimeout(() => {
+    throw new Error('Code execution timed out after 5 seconds')
+}, 5000);
 
 // run once initially
 try {
