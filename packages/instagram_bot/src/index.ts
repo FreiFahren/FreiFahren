@@ -49,12 +49,15 @@ async function createAndPostStory(inspectors: Inspector[]) {
     }
 }
 
-try {
-    const inspectors = await fetchInspectorData()
-    await createAndPostStory(inspectors)
-} catch (error) {
-    console.error('Error in hourly cron job:', error)
-}
+// Hourly cron job to fetch data and post story
+cron.schedule('0 * * * *', async () => {
+    try {
+        const inspectors = await fetchInspectorData()
+        await createAndPostStory(inspectors)
+    } catch (error) {
+        console.error('Error in hourly cron job:', error)
+    }
+})
 
 // Daily cron job to delete old images
 cron.schedule('0 0 * * *', async () => {
