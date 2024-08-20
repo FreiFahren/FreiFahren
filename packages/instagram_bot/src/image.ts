@@ -131,7 +131,7 @@ export async function createImage(inspectors: Inspector[]): Promise<Buffer> {
     const width = 1080
     const height = 1920
 
-    const fontPath = `${process.env.APP_URL}/fonts/static/Raleway-Regular.ttf`
+    const fontPath = `${process.env.APP_URL}/fonts/Raleway/static/Raleway-Regular.ttf`
     const fontBase64 = await loadFont(fontPath)
 
     const inspectorSvgs = inspectors.map(createInspectorSvg).join('')
