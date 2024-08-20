@@ -3,6 +3,8 @@ package inspectors
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -87,10 +89,11 @@ func PostInspector(c echo.Context) error {
 		logger.Log.Error().Err(err).Msg("Error running risk model in postInspector")
 	}
 
-	if pointers.AuthorPtr == nil { // reports from the web app do not have an author ID
-		if err := notifyTelegramBotAboutReport(dataToInsert); err != nil {
+	// Notify Telegram bot if there's no author (web app report)
+	if pointers.AuthorPtr == nil {
+		telegramEndpoint := os.Getenv("NLP_BOT_URL") + "/report-inspector"
+		if err := notifyOtherServiceAboutReport(telegramEndpoint, dataToInsert, "Telegram bot"); err != nil {
 			logger.Log.Error().Err(err).Msg("Error notifying Telegram bot about report in postInspector")
-			// Do not return an error here, as we want to continue processing the request
 		}
 	}
 
@@ -159,36 +162,35 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 	return response, pointers, nil
 }
 
-func notifyTelegramBotAboutReport(data *structs.ResponseData) error {
-	logger.Log.Debug().Msg("Notifying Telegram bot about report")
+func notifyOtherServiceAboutReport(endpoint string, data *structs.ResponseData, serviceName string) error {
+	logger.Log.Debug().Str("service", serviceName).Msg("Sending data")
 
-	NLP_BOT_ENDPOINT := os.Getenv("NLP_BOT_URL")
-	flaskEndpoint := NLP_BOT_ENDPOINT + "/report-inspector"
-
-	reportData := map[string]interface{}{
+	payload := map[string]string{
 		"line":      data.Line,
 		"station":   data.Station.Name,
 		"direction": data.Direction.Name,
 		"message":   data.Message,
 	}
 
-	jsonData, err := json.Marshal(reportData)
+	jsonData, err := json.Marshal(payload)
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error marshalling report data in postInspector")
+		logger.Log.Error().Err(err).Str("service", serviceName).Msg("Error marshalling data")
 		return err
 	}
 
-	resp, err := http.Post(flaskEndpoint, "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.Post(endpoint, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error posting to Flask endpoint in postInspector")
+		logger.Log.Error().Err(err).Str("service", serviceName).Msg("Error posting data")
 		return err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		logger.Log.Error().Str("status", resp.Status).Msg("Error in Flask endpoint response in postInspector")
-		return err
+		errMsg := fmt.Sprintf("Non-OK response: %s", resp.Status)
+		logger.Log.Error().Str("status", resp.Status).Str("service", serviceName).Msg(errMsg)
+		return errors.New(errMsg)
 	}
 
+	logger.Log.Info().Str("service", serviceName).Msg("Successfully sent data")
 	return nil
 }
