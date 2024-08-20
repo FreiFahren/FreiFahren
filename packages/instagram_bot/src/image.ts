@@ -1,15 +1,15 @@
 import sharp from 'sharp'
 import { type Inspector } from './models'
-import fs from 'fs/promises'
-import path from 'path'
 
 function estimateTextWidth(text: string, fontSize: number): number {
     return text.length * fontSize * 0.6
 }
 
 async function loadFont(fontPath: string): Promise<string> {
-    const fontData = await fs.readFile(fontPath)
-    return fontData.toString('base64')
+    const response = await fetch(fontPath)
+    const fontData = await response.arrayBuffer()
+    const fontBase64 = Buffer.from(fontData).toString('base64')
+    return fontBase64
 }
 
 function getLineColor(line: string): string {
