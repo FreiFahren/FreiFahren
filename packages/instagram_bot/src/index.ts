@@ -56,10 +56,6 @@ async function createAndPostStory(inspectors: Inspector[]) {
     }
 }
 
-setTimeout(() => {
-    throw new Error('Code execution timed out after 5 seconds')
-}, 5000);
-
 // run once initially
 try {
     const inspectors = await fetchInspectorData()
