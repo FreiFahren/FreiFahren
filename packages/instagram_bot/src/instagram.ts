@@ -24,16 +24,8 @@ export async function createMediaContainer(
     pageAccessToken: string,
     imageUrl: string
 ): Promise<string> {
-    const response = await fetch(`https://graph.facebook.com/v20.0/${instagramAccountId}/media`, {
+    const response = await fetch(`https://graph.facebook.com/v20.0/${instagramAccountId}/media?image_url=${imageUrl}&media_type=STORIES&access_token=${pageAccessToken}`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            image_url: imageUrl,
-            media_type: 'STORIES',
-            access_token: pageAccessToken,
-        }),
     })
 
     if (!response.ok) {
