@@ -4,7 +4,7 @@
     color: var(--color-background);
 }
 
-.info-popup.marker-modal h2{
+.info-popup.marker-modal h2 {
     margin-bottom: var(--text-relation-weak);
 }
 
@@ -89,37 +89,37 @@
 }
 
 .U1 {
-    background-color: #7DAD4C;
+    background-color: #7dad4c;
 }
 
 .U2 {
-    background-color: #DA421E;
+    background-color: #da421e;
 }
 
 .U3 {
-    background-color: #16683D;
+    background-color: #16683d;
 }
 
 .U4 {
-    background-color: #F0D722;
+    background-color: #f0d722;
 }
 
 .U5 {
-    background-color: #7E5330;
+    background-color: #7e5330;
 }
 
 .U6 {
-    background-color: #8C6DAB;
+    background-color: #8c6dab;
 }
 
 .U7 {
-    background-color: #528DBA;
+    background-color: #528dba;
 }
 
 .U8 {
-    background-color: #224F86;
+    background-color: #224f86;
 }
 
 .U9 {
-    background-color: #F3791D;
+    background-color: #f3791d;
 }

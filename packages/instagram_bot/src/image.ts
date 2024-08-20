@@ -73,8 +73,8 @@ function createInspectorSvg(inspector: Inspector, index: number): string {
             <text x="${
                 lineX + lineBgWidth / 2
             }" y="10" font-family="Raleway" font-size="40" font-weight="bold" fill="white" text-anchor="middle">${
-            inspector.line
-        }</text>
+                inspector.line
+            }</text>
         `
         directionX = lineX + lineBgWidth + 40
     }

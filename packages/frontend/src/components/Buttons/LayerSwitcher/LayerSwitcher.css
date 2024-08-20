@@ -1,11 +1,11 @@
 .layer-switcher {
-  top: var(--distance-from-edge-default);
-  right: var(--distance-from-edge-default);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--padding-s);
+    top: var(--distance-from-edge-default);
+    right: var(--distance-from-edge-default);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--padding-s);
 }
 
 .layer-options {

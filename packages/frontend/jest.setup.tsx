@@ -1,1 +1,1 @@
-global.URL.createObjectURL = jest.fn();
+global.URL.createObjectURL = jest.fn()

@@ -1,19 +1,5 @@
 {
-    "U1": [
-        "SU-WA",
-        "U-S",
-        "U-Gr",
-        "U-Kbo",
-        "U-Pr",
-        "U-HaT",
-        "U-Mo",
-        "U-Go",
-        "U-Kus",
-        "U-Nm",
-        "U-Wt",
-        "U-Kfu",
-        "U-U"
-    ],
+    "U1": ["SU-WA", "U-S", "U-Gr", "U-Kbo", "U-Pr", "U-HaT", "U-Mo", "U-Go", "U-Kus", "U-Nm", "U-Wt", "U-Kfu", "U-U"],
     "U2": [
         "SU-PA",
         "U-VIN",
@@ -71,13 +57,7 @@
         "U-Ot",
         "U-Kr"
     ],
-    "U4": [
-        "U-Nm",
-        "U-V",
-        "U-Bpu",
-        "U-RS",
-        "SU-Ip"
-    ],
+    "U4": ["U-Nm", "U-V", "U-Bpu", "U-RS", "SU-Ip"],
     "U5": [
         "U-Hö",
         "U-LL",
@@ -603,27 +583,8 @@
         "SU-MNI",
         "S-We"
     ],
-    "S75": [
-        "S-Wb",
-        "S-HSH",
-        "S-Gs",
-        "S-Spl",
-        "S-FfO",
-        "S-ULi",
-        "S-Np",
-        "S-Okz",
-        "SU-WA",
-        "S-Ost"
-    ],
-    "S47": [
-        "S-Spf",
-        "S-Os",
-        "S-Sw",
-        "S-Bsw",
-        "S-KLH",
-        "SU-Nk",
-        "SU-HMS"
-    ],
+    "S75": ["S-Wb", "S-HSH", "S-Gs", "S-Spl", "S-FfO", "S-ULi", "S-Np", "S-Okz", "SU-WA", "S-Ost"],
+    "S47": ["S-Spf", "S-Os", "S-Sw", "S-Bsw", "S-KLH", "SU-Nk", "SU-HMS"],
     "S85": [
         "S-Gr",
         "S-Ad",

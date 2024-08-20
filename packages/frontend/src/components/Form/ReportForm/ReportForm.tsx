@@ -1,44 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import { ActionMeta } from 'react-select/';
-import AutocompleteInputForm, { selectOption } from '../AutocompleteInputForm/AutocompleteInputForm';
+import React, { useEffect, useState } from 'react'
+import { ActionMeta } from 'react-select/'
+import AutocompleteInputForm, { selectOption } from '../AutocompleteInputForm/AutocompleteInputForm'
 
-import { LinesList, StationList, getAllLinesList, reportInspector } from '../../../utils/dbUtils';
-import { sendAnalyticsEvent } from '../../../utils/analytics';
+import { LinesList, StationList, getAllLinesList, reportInspector } from '../../../utils/dbUtils'
+import { sendAnalyticsEvent } from '../../../utils/analytics'
 import {
     highlightElement,
     redefineDirectionOptions,
     redefineLineOptions,
     redefineStationOptions,
     createWarningSpan,
-    handleTextareaInput
-} from '../../../utils/uiUtils';
-import { calculateDistance } from '../../../utils/mapUtils';
-import stationData from '../../../data/StationsList.json';
-import './ReportForm.css';
+    handleTextareaInput,
+} from '../../../utils/uiUtils'
+import { calculateDistance } from '../../../utils/mapUtils'
+import stationData from '../../../data/StationsList.json'
+import './ReportForm.css'
 
 interface ReportFormProps {
-    closeModal: () => void;
-    onFormSubmit: () => void;
-    className?: string;
-    userPosition?: { lat: number, lng: number } | null;
+    closeModal: () => void
+    onFormSubmit: () => void
+    className?: string
+    userPosition?: { lat: number; lng: number } | null
 }
 
 type reportFormState = {
-    lineInput: selectOption | undefined;
-    stationInput: selectOption | undefined;
-    directionInput: selectOption | undefined;
-    lineOptions: selectOption[];
-    stationOptions: selectOption[];
-    directionOptions: selectOption[];
-    stationsList: StationList;
-    linesList: LinesList;
-    isLoadingLines: boolean;
-    isLoadingStations: boolean;
-	isStationSelected: boolean;
-	isPrivacyChecked: boolean;
-	isValid: boolean;
-    textField: string;
-};
+    lineInput: selectOption | undefined
+    stationInput: selectOption | undefined
+    directionInput: selectOption | undefined
+    lineOptions: selectOption[]
+    stationOptions: selectOption[]
+    directionOptions: selectOption[]
+    stationsList: StationList
+    linesList: LinesList
+    isLoadingLines: boolean
+    isLoadingStations: boolean
+    isStationSelected: boolean
+    isPrivacyChecked: boolean
+    isValid: boolean
+    textField: string
+}
 
 const initialState: reportFormState = {
     lineInput: undefined,
@@ -47,298 +47,328 @@ const initialState: reportFormState = {
     lineOptions: [],
     stationOptions: [],
     directionOptions: [],
-    stationsList: localStorage.getItem('stationsList') ? JSON.parse(localStorage.getItem('stationsList')!) : {} as StationList,
-    linesList: localStorage.getItem('linesList') ? JSON.parse(localStorage.getItem('linesList')!) : {} as LinesList,
+    stationsList: localStorage.getItem('stationsList')
+        ? JSON.parse(localStorage.getItem('stationsList')!)
+        : ({} as StationList),
+    linesList: localStorage.getItem('linesList') ? JSON.parse(localStorage.getItem('linesList')!) : ({} as LinesList),
     isLoadingLines: true,
     isLoadingStations: true,
-	isStationSelected: false,
-	isPrivacyChecked: false,
-	isValid: false,
-    textField: ''
-};
-
-const redHighlight = (text: string) => {
-    return <>{text}<span className='red-highlight'>*</span></>
+    isStationSelected: false,
+    isPrivacyChecked: false,
+    isValid: false,
+    textField: '',
 }
 
-const ReportForm: React.FC<ReportFormProps> = ({
-    closeModal,
-    onFormSubmit,
-    className,
-    userPosition
-}) => {
+const redHighlight = (text: string) => {
+    return (
+        <>
+            {text}
+            <span className="red-highlight">*</span>
+        </>
+    )
+}
 
-    const [reportFormState, setReportFormState] = useState<reportFormState>(initialState);
+const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, className, userPosition }) => {
+    const [reportFormState, setReportFormState] = useState<reportFormState>(initialState)
 
-    const emptyOption = '' as unknown as selectOption;
+    const emptyOption = '' as unknown as selectOption
 
-    const [startTime, setStartTime] = useState<Date | null>(null);
+    const [startTime, setStartTime] = useState<Date | null>(null)
     useEffect(() => {
-        setStartTime(new Date()); // Set the start time when the form is opened
-    }, []);
+        setStartTime(new Date()) // Set the start time when the form is opened
+    }, [])
 
     const validateReportForm = async () => {
-        let hasError = false;
+        let hasError = false
 
         // Check for last report time to prevent spamming
-        const lastReportTime = localStorage.getItem('lastReportTime');
-        const reportCooldownMinutes = 15;
+        const lastReportTime = localStorage.getItem('lastReportTime')
+        const reportCooldownMinutes = 15
 
-        if (lastReportTime && Date.now() - new Date(lastReportTime).getTime() < (reportCooldownMinutes * 60 * 1000)) {
-            highlightElement('report-form');
-            createWarningSpan('station-select-div', `Du kannst nur alle ${reportCooldownMinutes} Minuten eine Meldung abgeben!`);
-            hasError = true;
+        if (lastReportTime && Date.now() - new Date(lastReportTime).getTime() < reportCooldownMinutes * 60 * 1000) {
+            highlightElement('report-form')
+            createWarningSpan(
+                'station-select-div',
+                `Du kannst nur alle ${reportCooldownMinutes} Minuten eine Meldung abgeben!`
+            )
+            hasError = true
         }
 
         if (reportFormState.stationInput === undefined || reportFormState.stationInput === emptyOption) {
-            highlightElement('station-select-component__control');
-            hasError = true;
+            highlightElement('station-select-component__control')
+            hasError = true
         }
 
         if (!(document.getElementById('privacy-checkbox') as HTMLInputElement).checked) {
-            highlightElement('privacy-label');
-            hasError = true;
+            highlightElement('privacy-label')
+            hasError = true
         }
 
-        const locationError = await verifyUserLocation(reportFormState.stationInput, reportFormState.stationsList);
+        const locationError = await verifyUserLocation(reportFormState.stationInput, reportFormState.stationsList)
         if (locationError) {
-            hasError = true;
+            hasError = true
         }
 
-        return hasError; // Return true if there's an error, false otherwise
-    };
+        return hasError // Return true if there's an error, false otherwise
+    }
 
     const handleSubmit = async (event: React.FormEvent) => {
-        event.preventDefault();
+        event.preventDefault()
 
-        const hasError = await validateReportForm();
-        if (hasError) return; // Abort submission if there are validation errors
+        const hasError = await validateReportForm()
+        if (hasError) return // Abort submission if there are validation errors
 
-        const { lineInput, stationInput, directionInput, textField } = reportFormState;
-        await reportInspector(lineInput!, stationInput!, directionInput!, textField!);
+        const { lineInput, stationInput, directionInput, textField } = reportFormState
+        await reportInspector(lineInput!, stationInput!, directionInput!, textField!)
 
-        const endTime = new Date();
-        const durationInSeconds = startTime ? Math.round((endTime.getTime() - startTime.getTime()) / 1000) : 0;
+        const endTime = new Date()
+        const durationInSeconds = startTime ? Math.round((endTime.getTime() - startTime.getTime()) / 1000) : 0
 
         async function finalizeSubmission() {
-            localStorage.setItem('lastReportTime', new Date().toISOString()); // Save the timestamp of the report to prevent spamming
-            closeModal();
-            onFormSubmit(); // Notify App component about the submission
+            localStorage.setItem('lastReportTime', new Date().toISOString()) // Save the timestamp of the report to prevent spamming
+            closeModal()
+            onFormSubmit() // Notify App component about the submission
         }
 
         try {
             await sendAnalyticsEvent('Report Submitted', {
-              duration: durationInSeconds,
-              meta: {
-                Station: stationInput!.label,
-                Line: lineInput?.label,
-                Direction: directionInput?.label
-              }
-            });
+                duration: durationInSeconds,
+                meta: {
+                    Station: stationInput!.label,
+                    Line: lineInput?.label,
+                    Direction: directionInput?.label,
+                },
+            })
 
-            finalizeSubmission();
-          } catch (error) {
-            console.error('Failed to send analytics event:', error);
-            finalizeSubmission();
-          }
-    };
+            finalizeSubmission()
+        } catch (error) {
+            console.error('Failed to send analytics event:', error)
+            finalizeSubmission()
+        }
+    }
 
     async function verifyUserLocation(
         stationInput: selectOption | undefined,
         stationsList: StationList
     ): Promise<boolean> {
-        if (!stationInput) return false;
+        if (!stationInput) return false
 
-        const station = stationsList[stationInput.value];
-        if (!station) return false;
+        const station = stationsList[stationInput.value]
+        if (!station) return false
 
-        const distance = userPosition ? calculateDistance(userPosition.lat, userPosition.lng, station.coordinates.latitude, station.coordinates.longitude) : 0;
+        const distance = userPosition
+            ? calculateDistance(
+                  userPosition.lat,
+                  userPosition.lng,
+                  station.coordinates.latitude,
+                  station.coordinates.longitude
+              )
+            : 0
 
         // Checks if the user is more than 5 km away from the station
         if (5 < distance) {
-            highlightElement('report-form');
-            createWarningSpan('station-select-div', 'Du bist zu weit von der Station entfernt. Bitte wähle die richtige Station!');
-            return true; // Indicates an error
+            highlightElement('report-form')
+            createWarningSpan(
+                'station-select-div',
+                'Du bist zu weit von der Station entfernt. Bitte wähle die richtige Station!'
+            )
+            return true // Indicates an error
         }
 
-        return false;
+        return false
     }
 
     const refreshOptions = async (type: 'lines' | 'stations') => {
         if (type === 'stations') {
             // Directly use local JSON data for stations
-            const options = Object.keys(stationData).map(key => ({
+            const options = Object.keys(stationData).map((key) => ({
                 value: key,
-                label: stationData[key as keyof typeof stationData].name
-            }));
-            setReportFormState(prevState => ({
+                label: stationData[key as keyof typeof stationData].name,
+            }))
+            setReportFormState((prevState) => ({
                 ...prevState,
                 stationsList: stationData,
                 stationOptions: options,
-                isLoadingStations: false
-            }));
+                isLoadingStations: false,
+            }))
         } else if (type === 'lines') {
             // Fetch lines data from backend and cache it
             try {
-                setReportFormState(prevState => ({ ...prevState, isLoadingLines: true }));
-                const storedList = JSON.parse(localStorage.getItem('linesList') || 'null');
-                let list: LinesList;
+                setReportFormState((prevState) => ({ ...prevState, isLoadingLines: true }))
+                const storedList = JSON.parse(localStorage.getItem('linesList') || 'null')
+                let list: LinesList
 
-                if (storedList === null || (Date.now() - storedList.timestamp) > 24 * 60 * 60 * 1000) { // 24 hours check
-                    const fetchedList = await getAllLinesList();
+                if (storedList === null || Date.now() - storedList.timestamp > 24 * 60 * 60 * 1000) {
+                    // 24 hours check
+                    const fetchedList = await getAllLinesList()
                     if (JSON.stringify(storedList?.list) !== JSON.stringify(fetchedList)) {
-                        list = fetchedList;
-                        localStorage.setItem('linesList', JSON.stringify({ list, timestamp: Date.now() }));
+                        list = fetchedList
+                        localStorage.setItem('linesList', JSON.stringify({ list, timestamp: Date.now() }))
                     } else {
-                        list = storedList.list;
+                        list = storedList.list
                     }
                 } else {
-                    list = storedList.list;
+                    list = storedList.list
                 }
 
-                const options = Object.keys(list).map(key => ({ value: key, label: key }));
-                setReportFormState(prevState => ({
+                const options = Object.keys(list).map((key) => ({ value: key, label: key }))
+                setReportFormState((prevState) => ({
                     ...prevState,
                     linesList: list,
                     lineOptions: options,
-                    isLoadingLines: false
-                }));
+                    isLoadingLines: false,
+                }))
             } catch (error) {
-                console.error('Failed to fetch lines:', error);
-                setReportFormState(prevState => ({ ...prevState, isLoadingLines: false }));
+                console.error('Failed to fetch lines:', error)
+                setReportFormState((prevState) => ({ ...prevState, isLoadingLines: false }))
             }
         }
-    };
+    }
 
     const handleOnLineChange = (option: selectOption, action: ActionMeta<unknown>) => {
         if (action.action === 'clear') {
-            setReportFormState(prevState => ({ ...prevState, lineInput: emptyOption, directionInput: emptyOption, directionOptions: [] }));
-            refreshOptions('stations');
-            return;
+            setReportFormState((prevState) => ({
+                ...prevState,
+                lineInput: emptyOption,
+                directionInput: emptyOption,
+                directionOptions: [],
+            }))
+            refreshOptions('stations')
+            return
         }
 
-        setReportFormState(prevState =>
-        ({
+        setReportFormState((prevState) => ({
             ...prevState,
             lineInput: option,
             directionOptions: redefineDirectionOptions(option, reportFormState.linesList, reportFormState.stationsList),
-            stationOptions: redefineStationOptions(option, reportFormState.linesList, reportFormState.stationsList)
-        }));
-
+            stationOptions: redefineStationOptions(option, reportFormState.linesList, reportFormState.stationsList),
+        }))
     }
 
     const handleOnStationChange = (option: selectOption, action: ActionMeta<unknown>) => {
         if (action.action === 'clear') {
-            setReportFormState(prevState => ({ ...prevState, stationInput: emptyOption, lineInput: emptyOption, directionInput: emptyOption, isStationSelected: false}));
-            refreshOptions('stations');
-            refreshOptions('lines');
-            return;
+            setReportFormState((prevState) => ({
+                ...prevState,
+                stationInput: emptyOption,
+                lineInput: emptyOption,
+                directionInput: emptyOption,
+                isStationSelected: false,
+            }))
+            refreshOptions('stations')
+            refreshOptions('lines')
+            return
         }
 
         // Remove the warning span if a new station is selected
-        const warningSpan = document.getElementById('warning-span');
+        const warningSpan = document.getElementById('warning-span')
         if (warningSpan) {
-            warningSpan.remove(); // This will remove the warning span from the DOM
+            warningSpan.remove() // This will remove the warning span from the DOM
         }
 
-        setReportFormState(prevState => ({
-			...prevState,
-			stationInput: option,
-			lineOptions: redefineLineOptions(option, reportFormState.stationsList),
-			isStationSelected: true
-		}));
-    };
+        setReportFormState((prevState) => ({
+            ...prevState,
+            stationInput: option,
+            lineOptions: redefineLineOptions(option, reportFormState.stationsList),
+            isStationSelected: true,
+        }))
+    }
 
     useEffect(() => {
         const fetchData = async () => {
-            await refreshOptions('stations');
-            await refreshOptions('lines');
+            await refreshOptions('stations')
+            await refreshOptions('lines')
         }
 
-        fetchData();
-    }, []);
+        fetchData()
+    }, [])
 
-	useEffect(() => {
-		// Directly set isValid based on the condition
-		const valid = reportFormState.isStationSelected && reportFormState.isPrivacyChecked;
-		setReportFormState(prevState => ({ ...prevState, isValid: valid }));
-	}, [reportFormState.isStationSelected, reportFormState.isPrivacyChecked]);
+    useEffect(() => {
+        // Directly set isValid based on the condition
+        const valid = reportFormState.isStationSelected && reportFormState.isPrivacyChecked
+        setReportFormState((prevState) => ({ ...prevState, isValid: valid }))
+    }, [reportFormState.isStationSelected, reportFormState.isPrivacyChecked])
 
     return (
-        <div className={`report-form container modal ${className}`} id='report-form'>
+        <div className={`report-form container modal ${className}`} id="report-form">
             <h1>Neue Meldung</h1>
             <form onSubmit={handleSubmit}>
-                <div id='station-select-div'>
+                <div id="station-select-div">
                     <AutocompleteInputForm
-                        className='select-field station'
-                        classNamePrefix='station-select-component'
+                        className="select-field station"
+                        classNamePrefix="station-select-component"
                         options={reportFormState.stationOptions}
                         placeholder={redHighlight('Station')}
                         defaultInputValue={reportFormState.stationInput}
                         onChange={(value, action) => handleOnStationChange(value as selectOption, action)}
                         isDisabled={reportFormState.isLoadingStations}
                     />
-
                 </div>
-                <div className='line-direction-container'>
-                    <div className='line-select-container'>
+                <div className="line-direction-container">
+                    <div className="line-select-container">
                         <AutocompleteInputForm
-                            className='select-field line'
+                            className="select-field line"
                             options={reportFormState.lineOptions}
                             defaultInputValue={reportFormState.lineInput}
-                            placeholder='Linie'
+                            placeholder="Linie"
                             onChange={(value, action) => handleOnLineChange(value as selectOption, action)}
                             isDropdownIndicator={false}
                             isIndicatorSeparator={false}
                             isDisabled={reportFormState.isLoadingLines}
                         />
                     </div>
-                    <div className='direction-select-container'>
+                    <div className="direction-select-container">
                         <AutocompleteInputForm
-                            className='select-field direction'
+                            className="select-field direction"
                             options={reportFormState.directionOptions}
-                            placeholder='Richtung'
+                            placeholder="Richtung"
                             defaultInputValue={reportFormState.directionInput}
-                            onChange={(option) => setReportFormState(prevState => ({ ...prevState, directionInput: option as selectOption }))}
+                            onChange={(option) =>
+                                setReportFormState((prevState) => ({
+                                    ...prevState,
+                                    directionInput: option as selectOption,
+                                }))
+                            }
                             isDropdownIndicator={false}
                             isIndicatorSeparator={false}
                             isDisabled={reportFormState.isLoadingStations}
                         />
                     </div>
                 </div>
-                <div className='message-field'>
+                <div className="message-field">
                     <textarea
-                        placeholder='Beschreibung'
+                        placeholder="Beschreibung"
                         value={reportFormState.textField}
-                        onChange={(event) => setReportFormState(prevState => ({ ...prevState, textField: event.target.value }))}
+                        onChange={(event) =>
+                            setReportFormState((prevState) => ({ ...prevState, textField: event.target.value }))
+                        }
                         onInput={handleTextareaInput}
                         maxLength={250}
                     />
                 </div>
                 <div>
-                    <label htmlFor='privacy-checkbox' id='privacy-label'>
+                    <label htmlFor="privacy-checkbox" id="privacy-label">
                         <input
-                            type='checkbox'
-                            id='privacy-checkbox'
-                            name='privacy-checkbox'
-							onChange={() => setReportFormState(prevState => ({ ...prevState, isPrivacyChecked: !prevState.isPrivacyChecked }))}
+                            type="checkbox"
+                            id="privacy-checkbox"
+                            name="privacy-checkbox"
+                            onChange={() =>
+                                setReportFormState((prevState) => ({
+                                    ...prevState,
+                                    isPrivacyChecked: !prevState.isPrivacyChecked,
+                                }))
+                            }
                         />
-                        Ich stimme der{' '}
-                        <a href='/datenschutz'> Datenschutzerklärung </a> zu.{' '}
-                        {redHighlight('')}
+                        Ich stimme der <a href="/datenschutz"> Datenschutzerklärung </a> zu. {redHighlight('')}
                     </label>
                 </div>
                 <div>
-				<button
-					type='submit'
-					className={reportFormState.isValid ? '' : 'button-gray'}
-				>
-					Melden
-				</button>
+                    <button type="submit" className={reportFormState.isValid ? '' : 'button-gray'}>
+                        Melden
+                    </button>
                 </div>
             </form>
         </div>
-    );
-};
+    )
+}
 
-export default ReportForm;
+export default ReportForm

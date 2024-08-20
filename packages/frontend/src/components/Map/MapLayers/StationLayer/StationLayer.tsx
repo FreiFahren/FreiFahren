@@ -1,71 +1,90 @@
-import React, { useEffect } from 'react';
-import { Source, Layer, useMap, MapRef } from 'react-map-gl/maplibre';
+import React, { useEffect } from 'react'
+import { Source, Layer, useMap, MapRef } from 'react-map-gl/maplibre'
 
-import { StationGeoJSON } from '../../../../utils/types';
+import { StationGeoJSON } from '../../../../utils/types'
 
-const ubahn_icon = `${process.env.PUBLIC_URL}/icons/ubahn.svg`;
-const sbahn_icon = `${process.env.PUBLIC_URL}/icons/sbahn.svg`;
+const ubahn_icon = `${process.env.PUBLIC_URL}/icons/ubahn.svg`
+const sbahn_icon = `${process.env.PUBLIC_URL}/icons/sbahn.svg`
 
 interface StationLayerProps {
-    stations: StationGeoJSON;
-    textColor: string;
+    stations: StationGeoJSON
+    textColor: string
 }
 class IconFactory {
     constructor(private map: MapRef | undefined) {}
 
     createImage(name: string, src: string) {
-        const image = new Image(12, 12);
-        image.src = src;
+        const image = new Image(12, 12)
+        image.src = src
         image.onload = () => {
             if (!this.map?.hasImage(name)) {
-                this.map?.addImage(name, image);
+                this.map?.addImage(name, image)
             }
-        };
+        }
     }
 }
 
 const StationLayer: React.FC<StationLayerProps> = ({ stations, textColor }) => {
-    const map = useMap();
+    const map = useMap()
 
     useEffect(() => {
-        const currentMap = map.current;
-        const iconFactory = new IconFactory(currentMap);
-        iconFactory.createImage('ubahn-icon', ubahn_icon);
-        iconFactory.createImage('sbahn-icon', sbahn_icon);
+        const currentMap = map.current
+        const iconFactory = new IconFactory(currentMap)
+        iconFactory.createImage('ubahn-icon', ubahn_icon)
+        iconFactory.createImage('sbahn-icon', sbahn_icon)
 
         return () => {
-            if(currentMap?.hasImage('ubahn-icon') && currentMap?.hasImage('sbahn-icon')) {
-                currentMap?.removeImage('ubahn-icon');
-                currentMap?.removeImage('sbahn-icon');
+            if (currentMap?.hasImage('ubahn-icon') && currentMap?.hasImage('sbahn-icon')) {
+                currentMap?.removeImage('ubahn-icon')
+                currentMap?.removeImage('sbahn-icon')
             }
-        };
-    }, [map]);
+        }
+    }, [map])
 
-    const firstPriorityStations = ['Hauptbahnhof', 'Gesundbrunnen', 'Jungfernheide', 'Ostkreuz', 'Südkreuz', 'Westkreuz'];
-    const secondPriorityStations = ['Potsdamer Platz', 'Friedrichstraße', 'Zoologischer Garten', 'Warschauer Straße', 'Alexanderplatz', 'Kottbusser Tor', 'Hermannplatz', 'Neukölln', 'Tempelhof', 'Hermannstraße']
+    const firstPriorityStations = [
+        'Hauptbahnhof',
+        'Gesundbrunnen',
+        'Jungfernheide',
+        'Ostkreuz',
+        'Südkreuz',
+        'Westkreuz',
+    ]
+    const secondPriorityStations = [
+        'Potsdamer Platz',
+        'Friedrichstraße',
+        'Zoologischer Garten',
+        'Warschauer Straße',
+        'Alexanderplatz',
+        'Kottbusser Tor',
+        'Hermannplatz',
+        'Neukölln',
+        'Tempelhof',
+        'Hermannstraße',
+    ]
 
     return (
-        <Source id='stationSource' type='geojson' data={stations}>
+        <Source id="stationSource" type="geojson" data={stations}>
             <Layer
-                id='stationLayer'
-                type='circle'
+                id="stationLayer"
+                type="circle"
                 paint={{
                     'circle-radius': 2,
                     'circle-color': '#ffffff',
                     'circle-stroke-width': 1,
-                    'circle-stroke-color': '#000000'
+                    'circle-stroke-color': '#000000',
                 }}
             />
             <Layer
-                id='stationNameLayer'
-                type='symbol'
+                id="stationNameLayer"
+                type="symbol"
                 layout={{
                     'text-field': ['get', 'name'],
                     'text-size': 12,
                     'text-allow-overlap': true,
                     'icon-image': [
                         'case',
-                        ['any',
+                        [
+                            'any',
                             ['in', 'S1', ['get', 'lines']],
                             ['in', 'S2', ['get', 'lines']],
                             ['in', 'S3', ['get', 'lines']],
@@ -83,7 +102,8 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations, textColor }) => {
                             ['in', 'S85', ['get', 'lines']],
                         ],
                         'sbahn-icon',
-                        ['any',
+                        [
+                            'any',
                             ['in', 'U1', ['get', 'lines']],
                             ['in', 'U2', ['get', 'lines']],
                             ['in', 'U3', ['get', 'lines']],
@@ -96,8 +116,7 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations, textColor }) => {
                         ],
                         'ubahn-icon',
 
-                        'sbahn_icon'
-
+                        'sbahn_icon',
                     ],
                     'icon-anchor': 'bottom',
                     'text-offset': [0, 1],
@@ -110,23 +129,48 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations, textColor }) => {
                         'step',
                         ['zoom'],
                         ['case', ['in', ['get', 'name'], ['literal', firstPriorityStations]], 1, 0],
-                        11, ['case', ['in', ['get', 'name'], ['literal', firstPriorityStations]], 1, 0],
-                        11.5, ['case', ['any', ['in', ['get', 'name'], ['literal', firstPriorityStations]], ['in', ['get', 'name'], ['literal', secondPriorityStations]]], 1, 0],
-                        13, 1,
-                        14, 1
+                        11,
+                        ['case', ['in', ['get', 'name'], ['literal', firstPriorityStations]], 1, 0],
+                        11.5,
+                        [
+                            'case',
+                            [
+                                'any',
+                                ['in', ['get', 'name'], ['literal', firstPriorityStations]],
+                                ['in', ['get', 'name'], ['literal', secondPriorityStations]],
+                            ],
+                            1,
+                            0,
+                        ],
+                        13,
+                        1,
+                        14,
+                        1,
                     ],
                     'icon-opacity': [
                         'step',
                         ['zoom'],
                         ['case', ['in', ['get', 'name'], ['literal', firstPriorityStations]], 1, 0],
-                        12, ['case', ['any', ['in', ['get', 'name'], ['literal', firstPriorityStations]], ['in', ['get', 'name'], ['literal', secondPriorityStations]]], 1, 0],
-                        13, 1,
-                        15, 0
-                    ]
+                        12,
+                        [
+                            'case',
+                            [
+                                'any',
+                                ['in', ['get', 'name'], ['literal', firstPriorityStations]],
+                                ['in', ['get', 'name'], ['literal', secondPriorityStations]],
+                            ],
+                            1,
+                            0,
+                        ],
+                        13,
+                        1,
+                        15,
+                        0,
+                    ],
                 }}
             />
         </Source>
-    );
-};
+    )
+}
 
-export default StationLayer;
+export default StationLayer

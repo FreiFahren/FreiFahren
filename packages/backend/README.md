@@ -8,17 +8,19 @@ This repository is the backend that powers the Freifahren web application and AP
 
 ### Prerequisites
 
-- Go version 1.22 or later
-- PostgreSQL 13 or later
+-   Go version 1.22 or later
+-   PostgreSQL 13 or later
 
 ### Installation
 
 1. Clone the repository
-   ```sh
-   git clone https://github.com/brandesdavid/FreiFahren
+
+    ```sh
+    git clone https://github.com/brandesdavid/FreiFahren
     ```
 
 2. Install Go packages
+
     ```sh
     go mod download
     ```
@@ -28,6 +30,7 @@ This repository is the backend that powers the Freifahren web application and AP
 ### Running the application
 
 1. Create a `.env` file in the root directory and add the following environment variables
+
     ```sh
     DB_USER
     DB_PASSWORD
@@ -43,20 +46,19 @@ This repository is the backend that powers the Freifahren web application and AP
     go run main.go
     ```
 
-  Or if you want to run the application with hot reloading of the server and swag documentation, you can use the following command:
-    ```sh
+Or if you want to run the application with hot reloading of the server and swag documentation, you can use the following command:
+`sh
     reflex -c reflex.conf
-    ```
-
+    `
 
 ## Embedded Binary
 
 When building this project, go compiles every external data like JSON files or executables into the same binary.
-This helps us synchronize our data, when running the backend, as it is standalone and can be run anywhere, without needing external dependencies. 
+This helps us synchronize our data, when running the backend, as it is standalone and can be run anywhere, without needing external dependencies.
 
 # Add new data to the embedding:
 
-In embedJSONFiles.go, take a look at 
+In embedJSONFiles.go, take a look at
 
 ```go
 //go:embed StationsAndLinesList.json
@@ -69,7 +71,7 @@ var embeddedLinesList []byte
 var embeddedStationsList []byte
 ```
 
-When commenting the ````//go:embed ...```  lines, go will compile these bytes into the binary too.
-To get the json data from the binary, you should extract it like a normal file using JSON.unmarshal (take a look at ```ReadStationsAndLinesListFromBytes```) etc...
+When commenting the ``//go:embed ...` lines, go will compile these bytes into the binary too.
+To get the json data from the binary, you should extract it like a normal file using JSON.unmarshal (take a look at `ReadStationsAndLinesListFromBytes`) etc...
 Go treats those binaries like files in the working directory.
-It is recommended to write a helper function to unmarshal the json or other binaries, that can be used in other projects, like ```GetStationsList()```.
+It is recommended to write a helper function to unmarshal the json or other binaries, that can be used in other projects, like `GetStationsList()`.

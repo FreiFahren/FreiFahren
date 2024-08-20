@@ -26,12 +26,12 @@
 
 @keyframes popout {
     0% {
-      transform: translate3d(-50%, -50%, 0) scale(1);
-      opacity: 1;
+        transform: translate3d(-50%, -50%, 0) scale(1);
+        opacity: 1;
     }
     100% {
-      transform: translate3d(-50%, -50%, 0) scale(0.4);
-      opacity: 0;
+        transform: translate3d(-50%, -50%, 0) scale(0.4);
+        opacity: 0;
     }
 }
 
