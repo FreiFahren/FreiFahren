@@ -69,9 +69,7 @@ function createInspectorSvg(inspector: Inspector, index: number): string {
         const lineBgWidth = lineWidth + 20
         const lineBgHeight = 50
         svg += `
-            <rect x="${
-                lineX - 2.5
-            }" y="-30" width="${lineBgWidth}" height="${lineBgHeight}" rx="8" ry="8" fill="${lineColor}" />
+            <rect x="${lineX}" y="-30" width="${lineBgWidth}" height="${lineBgHeight}" rx="8" ry="8" fill="${lineColor}" />
             <text x="${
                 lineX + lineBgWidth / 2
             }" y="10" font-family="Raleway" font-size="40" font-weight="bold" fill="white" text-anchor="middle">${
