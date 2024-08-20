@@ -33,7 +33,7 @@ async function createAndPostStory(inspectors: Inspector[]) {
         const imagePath = path.join(folderPath, imageName)
         await fs.writeFile(imagePath, imgBuffer)
 
-        // Use the URL of your Coolify-hosted application
+        // public URL of the image, as required by Instagram Graph API
         const imageUrl = `${process.env.APP_URL}/images/${imageName}`
 
         const accessToken = await getValidAccessToken()
@@ -42,10 +42,8 @@ async function createAndPostStory(inspectors: Inspector[]) {
         // Create media container
         const creationId = await createMediaContainer(instagramAccountId, pageAccessToken, imageUrl)
 
-        // Publish media
         const mediaId = await publishMedia(instagramAccountId, pageAccessToken, creationId)
-
-        console.log('Story posted successfully. Media ID:', mediaId)
+        console.log('Story posted successfully:', mediaId)
     } catch (error) {
         console.error('Error creating and posting story:', error)
     }
@@ -72,7 +70,6 @@ cron.schedule('0 0 * * *', async () => {
         // Delete files older than 7 days
         if (fileAge > 7 * 24 * 60 * 60 * 1000) {
             await fs.unlink(filePath)
-            console.log(`Deleted old file: ${file}`)
         }
     }
 })

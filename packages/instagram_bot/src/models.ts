@@ -32,3 +32,11 @@ export interface PageData {
     }
     id: string
 }
+
+export interface MediaContainerResponse {
+    id: string
+}
+
+export interface PublishMediaResponse {
+    id: string
+}
