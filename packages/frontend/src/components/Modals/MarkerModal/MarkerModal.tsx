@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useMemo, useRef } from 'react'
 import { MarkerData } from '../../Map/Markers/MarkerContainer'
 import { elapsedTimeMessage, stationDistanceMessage } from '../../../utils/mapUtils'
 import { getStationDistance } from '../../../utils/dbUtils'
@@ -25,10 +25,11 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
 
     const [isLoading, setIsLoading] = useState(false)
     const [stationDistance, setStationDistance] = useState<number | null>(null)
-    const [initialLoad, setInitialLoad] = useState(true)
+    const [shouldShowSkeleton, setShouldShowSkeleton] = useState(true)
 
-    // Only show skeleton on initial load
-    const showSkeleton = useSkeleton({ isLoading: isLoading && initialLoad })
+    const prevStationId = useRef(station.id)
+
+    const showSkeleton = useSkeleton({ isLoading: isLoading && shouldShowSkeleton })
 
     useEffect(() => {
         const fetchDistance = async () => {
@@ -36,7 +37,15 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
             const distance = await getStationDistance(userLat, userLng, station.id)
             setStationDistance(distance)
             setIsLoading(false)
-            setInitialLoad(false)
+            // to avoid showing the skeleton when pos changes due to watchPosition
+            setShouldShowSkeleton(false)
+        }
+
+        // only show skeleton if the station changes
+        if (station.id !== prevStationId.current) {
+            setShouldShowSkeleton(true)
+            setStationDistance(null)
+            prevStationId.current = station.id
         }
 
         fetchDistance()
