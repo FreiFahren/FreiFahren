@@ -31,7 +31,14 @@ async function createAndPostStory(inspectors: Inspector[]) {
         await fs.mkdir(folderPath, { recursive: true })
         const imageName = `story_${Date.now()}.jpg`
         const imagePath = path.join(folderPath, imageName)
-        await fs.writeFile(imagePath, imgBuffer)
+        await fs.writeFile(imagePath, Uint8Array.from(imgBuffer))
+        
+        let count = 0
+        while(!(await fetch(`${process.env.APP_URL}/images/${imageName}`)).ok && count < 10) {
+            console.log('Waiting for image to be available...')
+            await new Promise((resolve) => setTimeout(resolve, 1000))
+            count++
+        }
 
         // public URL of the image, as required by Instagram Graph API
         const imageUrl = `${process.env.APP_URL}/images/${imageName}`
@@ -47,6 +54,14 @@ async function createAndPostStory(inspectors: Inspector[]) {
     } catch (error) {
         console.error('Error creating and posting story:', error)
     }
+}
+
+// run once initially
+try {
+    const inspectors = await fetchInspectorData()
+    await createAndPostStory(inspectors)
+} catch (error) {
+    console.error('Error in hourly cron job:', error)
 }
 
 // Hourly cron job to fetch data and post story
