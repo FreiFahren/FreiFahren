@@ -1,23 +1,23 @@
 name: Node JS Linting (frontend)
 
 on:
-  pull_request:
-    branches: [ main ]
+    pull_request:
+        branches: [main]
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
+    lint:
+        runs-on: ubuntu-latest
 
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v2
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'
-    - name: Install dependencies
-      run: cd packages/frontend/ && npm install
+            - name: Set up Node.js
+              uses: actions/setup-node@v2
+              with:
+                  node-version: '16'
+            - name: Install dependencies
+              run: cd packages/frontend/ && npm install
 
-    - name: Run ESLint
-      run: cd packages/frontend/ && npm run lint
+            - name: Run ESLint
+              run: cd packages/frontend/ && npm run lint

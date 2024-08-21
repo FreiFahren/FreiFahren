@@ -9,11 +9,11 @@
 }
 
 .util-modal div:first-child {
-  gap: var(--margin-l);
-  margin: 0 0 auto 0;
+    gap: var(--margin-l);
+    margin: 0 0 auto 0;
 }
 
-.util-modal li a img{
+.util-modal li a img {
     height: 20px;
     width: 20px;
 }
@@ -54,7 +54,7 @@
 .util-modal li {
     margin-right: var(--margin-m);
 }
-  
+
 .util-modal li:last-child {
     margin-right: 0;
 }

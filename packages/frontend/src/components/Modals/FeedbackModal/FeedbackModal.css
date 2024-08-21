@@ -9,7 +9,8 @@
     padding: var(--padding-s) 0;
 }
 
-.feedback-modal li img, .feedback-modal li p {
+.feedback-modal li img,
+.feedback-modal li p {
     margin-right: var(--margin-s);
 }
 
@@ -31,4 +32,3 @@
     width: 20px;
     height: 20px;
 }
-  

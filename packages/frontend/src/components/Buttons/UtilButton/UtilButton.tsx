@@ -1,19 +1,19 @@
-import React from 'react';
+import React from 'react'
 
-import './UtilButton.css';
+import './UtilButton.css'
 
 interface UtilButtonProps {
-    onClick: () => void;
+    onClick: () => void
 }
 
 const UtilButton: React.FC<UtilButtonProps> = ({ onClick }) => {
     return (
-        <button className='util-button small-button' onClick={onClick} aria-label='utility info'>
-            <span/>
-            <span/>
-            <span/>
+        <button className="util-button small-button" onClick={onClick} aria-label="utility info">
+            <span />
+            <span />
+            <span />
         </button>
-    );
-};
+    )
+}
 
-export default UtilButton;
+export default UtilButton

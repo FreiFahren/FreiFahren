@@ -57,7 +57,7 @@ function createInspectorSvg(inspector: Inspector, index: number): string {
             <rect x="${lineX}" y="-30" width="${lineBgWidth}" height="${lineBgHeight}" rx="8" ry="8" fill="${lineColor}" />
             <text x="${
                 lineX + lineBgWidth / 2
-            }" y="10" font-family="Arial, sans-serif" font-size="40" font-weight="bold" fill="white" text-anchor="middle">${
+            }" y="10" font-family="Raleway" font-size="40" font-weight="bold" fill="white" text-anchor="middle">${
             inspector.line
         }</text>
         `

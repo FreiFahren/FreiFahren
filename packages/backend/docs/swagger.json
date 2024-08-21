@@ -12,15 +12,9 @@
         "/basics/inspectors": {
             "get": {
                 "description": "This endpoint retrieves ticket inspector reports from the database within a specified time range.\nIt supports filtering by start and end timestamps,\nand checks if the data has been modified since the last request using the \"If-Modified-Since\" header.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "basics"
-                ],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["basics"],
                 "summary": "Retrieve information about ticket inspector reports",
                 "parameters": [
                     {
@@ -62,15 +56,9 @@
             },
             "post": {
                 "description": "Accepts a JSON payload with details about a ticket inspector's current location.\nThis endpoint validates the provided data, processes necessary computations for linking stations and lines,\ninserts the data into the database, and triggers an update to the risk model used in operational analysis.\nIf the 'timestamp' field is not provided in the request, the current UTC time truncated to the nearest minute is used automatically.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "basics"
-                ],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["basics"],
                 "summary": "Submit ticket inspector data",
                 "parameters": [
                     {
@@ -108,15 +96,9 @@
         "/data/id": {
             "get": {
                 "description": "Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.\nThe Ids have format Line prefix that has the format \"SU\" followed by an abbreviation of the station name. For example \"SU-A\" for the station \"Alexanderplatz\".",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "data"
-                ],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["data"],
                 "summary": "Retrieve Station ID by Name",
                 "parameters": [
                     {
@@ -152,15 +134,9 @@
         "/data/list": {
             "get": {
                 "description": "This endpoint returns a comprehensive list of all train stations and lines.\nOptionally, it can return only a list of lines or stations based on the provided query parameters.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "data"
-                ],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["data"],
                 "summary": "Retrieves stations and lines information",
                 "parameters": [
                     {
@@ -195,15 +171,9 @@
         "/risk-prediction/segment-colors": {
             "get": {
                 "description": "Fetches the latest risk assessments for transit segments, returned as color codes representing the risk level. You can find out more about the risk level calculation in the documentation.\nThe response includes the last modified timestamp of the risk model data to support conditional GET requests.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Risk Prediction"
-                ],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["Risk Prediction"],
                 "summary": "Get risk colors for segments",
                 "parameters": [
                     {
@@ -235,15 +205,9 @@
         "/station": {
             "get": {
                 "description": "Fetches the name of a station by its unique identifier from the StationsMap.\nThe Ids have format Line prefix that has the format \"SU\" followed by an abbreviation of the station name. For example \"SU-A\" for the station \"Alexanderplatz\".",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "data"
-                ],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["data"],
                 "summary": "Retrieve Name by Station ID",
                 "parameters": [
                     {
@@ -273,15 +237,9 @@
         "/transit/distance": {
             "get": {
                 "description": "Returns the shortest number of stations between an inspector's station and a given user's latitude and longitude coordinates.\nThe distance calculation employs Dijkstra's algorithm to determine the minimal stops required to reach the nearest station from the given coordinates.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "transit"
-                ],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "tags": ["transit"],
                 "summary": "Calculate shortest distance to a station",
                 "parameters": [
                     {
