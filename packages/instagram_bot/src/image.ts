@@ -37,7 +37,7 @@ function getLineColor(line: string): string {
 }
 
 function createInspectorSvg(inspector: Inspector, index: number): string {
-    const yOffset = 250 + index * 100
+    const yOffset = 275 + index * 100
     const stationWidth = estimateTextWidth(inspector.station.name, 40)
     let lineX = stationWidth + 120
     let directionX = lineX
@@ -76,7 +76,7 @@ function createSvgContent(width: number, height: number, inspectorSvgs: string):
     return `
         <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
             <rect width="100%" height="100%" fill="#232323"/>
-            <text x="70" y="175" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="white">Aktuelle Meldungen</text>
+            <text x="70" y="190" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="white">Aktuelle Meldungen</text>
             ${inspectorSvgs}
             <text x="70" y="${
                 height - 60
