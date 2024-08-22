@@ -340,3 +340,41 @@ func RoundOldTimestamp() {
 		logger.Log.Panic().Err(err).Msg("Failed to round old timestamps")
 	}
 }
+
+// Gets the the station id that is most common in the given list of stations.
+//
+// Parameters:
+//   - stations: A list of station IDs.
+//
+// Returns:
+//   - The most common station ID.
+//   - An error if something went wrong.
+func GetMostCommonStationId(stations []string) (string, error) {
+    logger.Log.Debug().Msg("Getting most common station ID")
+
+    sql := `
+        SELECT station_id
+        FROM ticket_info
+        WHERE station_id = ANY($1)
+        GROUP BY station_id
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    `
+
+    rows, err := pool.Query(context.Background(), sql, pq.Array(stations))
+    if err != nil {
+        logger.Log.Error().Err(err).Msg("Failed to get most common station ID")
+        return "", err
+    }
+    defer rows.Close()
+
+    var stationID string
+    if rows.Next() {
+        if err := rows.Scan(&stationID); err != nil {
+            logger.Log.Error().Err(err).Msg("Error scanning row")
+            return "", err
+        }
+    }
+
+    return stationID, nil
+}
