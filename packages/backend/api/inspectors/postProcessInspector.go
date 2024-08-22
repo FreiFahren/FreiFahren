@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/FreiFahren/backend/data"
+	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/logger"
 	structs "github.com/FreiFahren/backend/utils"
 )
@@ -17,6 +18,14 @@ func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 	if dataToInsert.Line == "" && dataToInsert.Station.ID != "" {
 		if err := AssignLineIfSingleOption(dataToInsert, pointers, stations[dataToInsert.Station.ID], stations[dataToInsert.Direction.ID]); err != nil {
 			logger.Log.Error().Err(err).Msg("Error assigning line if single option in postInspector")
+			return err
+		}
+	}
+
+	if dataToInsert.Station.ID == "" && dataToInsert.Line != "" {
+		stationsOnLine := lines[dataToInsert.Line]
+		if err := guessStation(dataToInsert, pointers, stationsOnLine); err != nil {
+			logger.Log.Error().Err(err).Msg("Error guessing station ID in postInspector")
 			return err
 		}
 	}
@@ -73,6 +82,33 @@ func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 		pointers.DirectionIDPtr = nil
 		pointers.DirectionNamePtr = nil
 		logger.Log.Debug().Msg("Removed direction because it was not on the same line")
+	}
+
+	return nil
+}
+
+func guessStation(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, stationsOnLine []string) error {
+	logger.Log.Debug().Msg("Guessing station ID based on line")
+
+	// Query the database to find the most common station on this line
+	mostCommonStation, err := database.GetMostCommonStationId(stationsOnLine)
+	if err != nil {
+		logger.Log.Error().Err(err).Str("line", dataToInsert.Line).Msg("Error querying for most common station")
+		return err
+	}
+
+	if mostCommonStation != "" {
+		dataToInsert.Station.ID = mostCommonStation
+		pointers.StationIDPtr = &mostCommonStation
+
+		// Get the station name from the stations list
+		stations := data.GetStationsList()
+		if station, found := stations[mostCommonStation]; found {
+			dataToInsert.Station.Name = station.Name
+			pointers.StationNamePtr = &station.Name
+		}
+
+		logger.Log.Info().Str("line", dataToInsert.Line).Str("guessedStation", mostCommonStation).Msg("Guessed station ID based on line")
 	}
 
 	return nil
