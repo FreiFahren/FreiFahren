@@ -341,6 +341,14 @@ func RoundOldTimestamp() {
 	}
 }
 
+// Gets the the station id that is most common in the given list of stations.
+//
+// Parameters:
+//   - stations: A list of station IDs.
+//
+// Returns:
+//   - The most common station ID.
+//   - An error if something went wrong.
 func GetMostCommonStationId(stations []string) (string, error) {
     logger.Log.Debug().Msg("Getting most common station ID")
 

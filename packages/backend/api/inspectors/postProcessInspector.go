@@ -87,6 +87,18 @@ func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 	return nil
 }
 
+// Given a request with a line but no station, guess the station based on the most common station on the line.
+//
+// Parameters:
+// 		- dataToInsert: The data to insert into the database.
+// 		- pointers: The pointers to the fields necessary for inserting data into the database.
+// 		- stationsOnLine: The list of stations on the line.
+//
+// Returns:
+//		- An error if there was a problem querying the database.
+//
+// This function queries the database to find the most common station on the line and assigns it to the dataToInsert. 
+// This is being done to avoid storing useless data, as we would otherwise serve historic data to the users, which is not very accurate.
 func guessStation(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, stationsOnLine []string) error {
 	logger.Log.Debug().Msg("Guessing station ID based on line")
 
