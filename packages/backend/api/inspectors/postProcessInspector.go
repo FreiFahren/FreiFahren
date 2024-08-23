@@ -15,7 +15,7 @@ func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 	var stations = data.GetStationsList()
 	var lines = data.GetLinesList()
 
-	if dataToInsert.Line == "" && dataToInsert.Station.ID != "" {
+	if dataToInsert.Line == "" && (dataToInsert.Station.ID != "" || dataToInsert.Direction.ID != "") {
 		if err := AssignLineIfSingleOption(dataToInsert, pointers, stations[dataToInsert.Station.ID], stations[dataToInsert.Direction.ID]); err != nil {
 			logger.Log.Error().Err(err).Msg("Error assigning line if single option in postInspector")
 			return err
