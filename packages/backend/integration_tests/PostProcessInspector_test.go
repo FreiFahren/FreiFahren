@@ -71,7 +71,7 @@ func TestPostProcessInspectorData(t *testing.T) {
 	// Define test cases
 	testCases := []TestCase{
 		// Tests for AssignLineIfSingleOption
-		createTestCase("Imply line from direction", "", "U-U", "", "U1", "U-HaT", "U-U"),
+		createTestCase("Imply line from direction", "", "U-U", "", "U1", "U-Kbo", "U-U"),
 		createTestCase("Imply line from station", "U-Tk", "", "", "U5", "U-Tk", ""),
 		createTestCase("Imply line from station and direction", "U-Tk", "SU-H", "", "U5", "U-Tk", "SU-H"),
 		createTestCase("Don't imply line if station and direction are missing", "", "", "", "", "", ""),
