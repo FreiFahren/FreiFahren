@@ -25,6 +25,35 @@ import sys
 app = Flask(__name__)
 logger = setup_logger()
 
+MAX_RESTARTS = 3
+
+class RestartableThread(threading.Thread):
+    def __init__(self, target, name, args=()):
+        super().__init__(target=self.run_with_restart, name=name, daemon=True)
+        self.target_func = target
+        self.restart_count = 0
+        self.args = args
+        
+    def run_with_restart(self):
+        while self.restart_count < MAX_RESTARTS:
+            try:
+                self.target_func(*self.args)
+    
+            except Exception as e:
+                self.restart_count += 1
+                error_message = f"Thread {self.name} stopped. Restarting ({self.restart_count}/{MAX_RESTARTS})..."
+                logger.error(f"{error_message} Error: {str(e)}")
+                send_message(DEV_CHAT_ID, error_message, watcher_bot)
+                
+                if self.restart_count >= MAX_RESTARTS:
+                    final_message = f"Thread {self.name} has reached max restarts. Stopping."
+                    logger.critical(final_message)
+                    send_message(DEV_CHAT_ID, final_message, watcher_bot)
+                    break
+                time.sleep(5)  # Wait before restarting
+        
+        logger.critical(f"Thread {self.name} has terminated.")
+
 
 @nlp_bot.message_handler(func=lambda message: True)
 def get_info(message):
@@ -135,8 +164,8 @@ def run_safely(func, bot_name):
             report_failure_to_devs(bot_name, str(e))
             
             if attempt > max_retries:
-                logger.critical(f"{bot_name} exceeded maximum retries. Stopping thread.")
-                break
+                logger.critical(f"{bot_name} exceeded maximum retries. Raising exception to trigger restart.")
+                raise  # This will trigger the thread restart mechanism
             
             wait_time = exponential_backoff(attempt)
             logger.info(f"{bot_name}: Retrying in {wait_time} seconds... (Attempt {attempt}/{max_retries})")
@@ -154,16 +183,16 @@ if __name__ == '__main__':
         threading.excepthook = thread_exception_handler
         
         # Start the NLP bot polling in a separate thread
-        nlp_thread = threading.Thread(target=lambda: run_safely(nlp_bot.polling, "NLP Bot"), daemon=True, name="NLP Bot")
+        nlp_thread = RestartableThread(target=lambda: run_safely(nlp_bot.polling, "NLP Bot"), name="NLP Bot")
         nlp_thread.start()
 
         # Start the watcher bot polling in a separate thread
-        watcher_thread = threading.Thread(target=lambda: run_safely(watcher_bot.polling, "Watcher Bot"), daemon=True, name="Watcher Bot")
+        watcher_thread = RestartableThread(target=lambda: run_safely(watcher_bot.polling, "Watcher Bot"), name="Watcher Bot")
         watcher_thread.start()
 
         # Start health check threads
-        backend_health_thread = threading.Thread(target=lambda: run_safely(check_backend_status, "Backend Health Check"), daemon=True, name="Backend Health Check")
-        nlp_health_thread = threading.Thread(target=lambda: run_safely(check_nlp_bot_status, "NLP Health Check"), daemon=True, name="NLP Health Check")
+        backend_health_thread = RestartableThread(target=lambda: run_safely(check_backend_status, "Backend Health Check"), name="Backend Health Check")
+        nlp_health_thread = RestartableThread(target=lambda: run_safely(check_nlp_bot_status, "NLP Health Check"), name="NLP Health Check")
         backend_health_thread.start()
         nlp_health_thread.start()
         
@@ -177,6 +206,10 @@ if __name__ == '__main__':
         requests.post(f"{BACKEND_URL}/report-failure", json={"console_line": error_message, "system": "combined_bot"})
         sys.exit(1)  # Exit with error code
 
-# to keep the main thread running
+    # Keep the main thread running and monitor other threads
     while True:
         time.sleep(10)
+        for thread in [nlp_thread, watcher_thread, backend_health_thread, nlp_health_thread]:
+            if not thread.is_alive() and thread.restart_count >= MAX_RESTARTS:
+                logger.critical(f"Thread {thread.name} is dead and cannot be restarted. Exiting program.")
+                sys.exit(1)
