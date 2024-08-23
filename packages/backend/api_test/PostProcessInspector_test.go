@@ -12,36 +12,69 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestCase represents a single test case for PostProcessInspectorData
+type TestCase struct {
+	name           string
+	stationID      string
+	directionID    string
+	line           string
+	expectedLine   string
+	expectedStation string
+}
+
+// createTestCase is a factory function for creating test cases
+func createTestCase(name, stationID, directionID, line, expectedLine, expectedStation string) TestCase {
+	return TestCase{
+		name:           name,
+		stationID:      stationID,
+		directionID:    directionID,
+		line:           line,
+		expectedLine:   expectedLine,
+		expectedStation: expectedStation,
+	}
+}
+
+// runPostProcessTest executes a single test case
+func runPostProcessTest(t *testing.T, tc TestCase) {
+	dataToInsert := &structs.ResponseData{
+		Timestamp: time.Now(),
+		Station:   structs.Station{ID: tc.stationID},
+		Direction: structs.Station{ID: tc.directionID},
+		Line:      tc.line,
+	}
+	pointers := &structs.InsertPointers{
+		StationIDPtr:   &dataToInsert.Station.ID,
+		DirectionIDPtr: &dataToInsert.Direction.ID,
+		LinePtr:        &dataToInsert.Line,
+	}
+
+	err := inspectors.PostProcessInspectorData(dataToInsert, pointers)
+
+	assert.NoError(t, err)
+	assert.Equal(t, tc.expectedLine, dataToInsert.Line, "Line should be %s", tc.expectedLine)
+	assert.NotNil(t, pointers.LinePtr, "LinePtr should not be nil")
+	if pointers.LinePtr != nil {
+		assert.Equal(t, tc.expectedLine, *pointers.LinePtr, "LinePtr should point to %s", tc.expectedLine)
+	}
+	assert.Equal(t, tc.expectedStation, dataToInsert.Station.ID, "Station ID should be %s", tc.expectedStation)
+}
+
 func TestPostProcessInspectorData(t *testing.T) {
-	// set up for testing
+	// Setup test environment
 	godotenv.Overload()
 	data.EmbedJSONFiles()
 	database.CreatePool()
+	defer database.ClosePool()
 
-	t.Run("Imply line from direction", func(t *testing.T) {
-		// Arrange
-		dataToInsert := &structs.ResponseData{
-			Timestamp: time.Now(),
-			Direction: structs.Station{ID: "U-U", Name: "Uhlandstraße"},
-			Station:   structs.Station{ID: ""},
-			Line:      "",
-		}
-		pointers := &structs.InsertPointers{
-			DirectionIDPtr:   &dataToInsert.Direction.ID,
-			DirectionNamePtr: &dataToInsert.Direction.Name,
-			StationIDPtr:     &dataToInsert.Station.ID,
-			LinePtr:          &dataToInsert.Line,
-		}
+	// Define test cases
+	testCases := []TestCase{
+		createTestCase("Imply line from direction", "", "U-U", "", "U1", "U-HaT"),
+	}
 
-		// Act
-		err := inspectors.PostProcessInspectorData(dataToInsert, pointers)
-
-		// Assert
-		assert.NoError(t, err)
-		assert.Equal(t, "U1", dataToInsert.Line, "Line should be U1")
-		assert.NotNil(t, pointers.LinePtr, "LinePtr should not be nil")
-		if pointers.LinePtr != nil {
-			assert.Equal(t, "U1", *pointers.LinePtr, "LinePtr should point to U1")
-		}
-	})
+	// Run test cases
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			runPostProcessTest(t, tc)
+		})
+	}
 }
