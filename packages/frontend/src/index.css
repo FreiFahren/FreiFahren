@@ -301,29 +301,6 @@ button .plus {
     height: 100%;
 }
 
-.report-button .plus span {
-    position: absolute;
-    background-color: var(--color-white);
-    border-radius: 1px;
-    box-shadow: var(--boxShadow-default);
-}
-
-.report-button .plus span:first-child {
-    height: 4px;
-    width: 50%;
-    left: 25%;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.report-button .plus span:last-child {
-    width: 4px;
-    height: 50%;
-    top: 25%;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
 .button-gray {
     background-color: var(--color-gray) !important;
 }

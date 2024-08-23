@@ -9,10 +9,13 @@ import UtilButton from '../../components/Buttons/UtilButton/UtilButton';
 import UtilModal from '../../components/Modals/UtilModal/UtilModal';
 import StatsPopUp from '../../components/Miscellaneous/StatsPopUp/StatsPopUp';
 import AskForLocation from '../../components/Miscellaneous/AskForLocation/AskForLocation';
+import Backdrop from '../../../src/components/Miscellaneous/Backdrop/Backdrop';
+import ListButton from 'src/components/Buttons/ListButton/ListButton';
+import ListModal from 'src/components/Modals/ListModal/ListModal';
+
+import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils';
 import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton';
 import { highlightElement, useModalAnimation, currentColorTheme, setColorThemeInLocalStorage } from '../../utils/uiUtils';
-import Backdrop from '../../../src/components/Miscellaneous/Backdrop/Backdrop';
-import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils';
 import { RiskDataProvider } from '../../contexts/RiskDataContext';
 import { sendSavedEvents } from '../../utils/analytics';
 import './App.css';
@@ -25,6 +28,7 @@ type AppUIState = {
   isAskForLocationOpen: boolean;
   currentColorTheme: string;
   isRiskLayerOpen: boolean;
+  isListModalOpen: boolean;
 };
 
 const initialAppUIState: AppUIState = {
@@ -35,6 +39,7 @@ const initialAppUIState: AppUIState = {
   isAskForLocationOpen: false,
   currentColorTheme: currentColorTheme(),
   isRiskLayerOpen: false,
+  isListModalOpen: false,
 };
 
 function App() {
@@ -160,13 +165,19 @@ function App() {
           <Backdrop onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
         </>
       )}
+      {appUIState.isListModalOpen && (
+        <>
+          <ListModal className={`open center-animation`}/>
+          <Backdrop onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
+        </>
+      )}
 
       <div id='portal-root'></div>
       <RiskDataProvider>
         <Map
           isFirstOpen={appUIState.isFirstOpen}
           formSubmitted={appUIState.formSubmitted}
-          userPosition={userPosition}
+          userPosition={userPosition} 
           setUserPosition={setUserPosition}
           currentColorTheme={appUIState.currentColorTheme}
           openAskForLocation={openAskForLocation}
@@ -177,6 +188,7 @@ function App() {
         changeLayer={changeLayer}
         isRiskLayerOpen={appUIState.isRiskLayerOpen}
       />
+      <ListButton onClick={() => setAppUIState({...appUIState, isListModalOpen: !appUIState.isListModalOpen})}/>
       <UtilButton onClick={toggleUtilModal} />
       <ReportButton onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })} />
       {appUIState.isStatsPopUpOpen &&  statsData !== 0 && <StatsPopUp numberOfReports={statsData} className={'open center-animation'} />}
