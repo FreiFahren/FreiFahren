@@ -9,7 +9,7 @@ import (
 	structs "github.com/FreiFahren/backend/utils"
 )
 
-func postProcessInspectorData(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers) error {
+func PostProcessInspectorData(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers) error {
 	logger.Log.Debug().Msg("Filling missing columns using provided data")
 
 	var stations = data.GetStationsList()
