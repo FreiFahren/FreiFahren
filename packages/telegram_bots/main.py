@@ -1,7 +1,6 @@
 from telegram_bots.config import (
     DEV_CHAT_ID, 
     BACKEND_URL, 
-    TELEGRAM_NEXT_CHECK_TIME,
     TELEGERAM_BOTS_URL
 )
 from telegram_bots.watcher.healthcheck import do_healthcheck, check_backend_status, check_nlp_bot_status
@@ -10,13 +9,14 @@ from telegram_bots.logger import setup_logger
 from telegram_bots.bot_utils import send_message
 from telegram_bots.bots import watcher_bot, nlp_bot
 
+from telebot.apihelper import ApiTelegramException
 from flask import Flask, request
 from datetime import datetime
-from telebot import TeleBot
 from waitress import serve
 import traceback
 import threading
 import requests
+import random
 import time
 import pytz
 import sys
@@ -90,30 +90,60 @@ def report_failure():
     console_line = request.json.get('console_line', '')
     system = request.json.get('system', '')
     
-    error_message = f"Error in {system}: {console_line}"
-    logger.error(error_message)
-    send_message(DEV_CHAT_ID, error_message, watcher_bot)
+    report_failure_to_devs(system, console_line)
     
     return {'status': 'success'}, 200
 
 
 # save running helper functions
+def report_failure_to_devs(system, console_line):
+    error_message = f"Error in {system}: {console_line}"
+    logger.error(error_message)
+    send_message(DEV_CHAT_ID, error_message, watcher_bot)
+
 def thread_exception_handler(args):
     if isinstance(args, threading.ExceptHookArgs):
         exc_type, exc_value, exc_traceback = args.exc_type, args.exc_value, args.exc_traceback
     else:
         exc_type, exc_value, exc_traceback = sys.exc_info()
     
-    logger.error("Uncaught exception in thread:", 
-                 exc_info=(exc_type, exc_value, exc_traceback))
-    send_message(DEV_CHAT_ID, f"Uncaught exception in thread: {exc_value}", watcher_bot)
+    console_line = f"Uncaught exception in thread: {exc_value}, {traceback.format_exc()}, {exc_traceback}"
+    report_failure_to_devs("Thread Exception Handler", console_line)
 
-def run_safely(func):
-    try:
-        func()
-    except Exception as e:
-        logger.error(f"Error in thread {threading.current_thread().name}: {str(e)}", exc_info=True)
-        send_message(DEV_CHAT_ID, f"Error in thread {threading.current_thread().name}: {str(e)}", watcher_bot)
+def exponential_backoff(attempt, max_delay=300):
+    return min(max_delay, (2 ** attempt) + (random.randint(0, 1000) / 1000))
+
+def run_safely(func, bot_name):
+    attempt = 0
+    max_retries = 10
+    
+    while True:
+        try:
+            func()
+            attempt = 0  # Reset attempt count on success
+        except ApiTelegramException as e:
+            attempt += 1
+            if e.error_code == 502:
+                wait_time = exponential_backoff(attempt)
+                logger.error(f"{bot_name}: Received 502 error. Attempt {attempt}. Retrying in {wait_time} seconds...")
+                time.sleep(wait_time)
+            else:
+                report_failure_to_devs(bot_name, f"Telegram API error: {str(e)}")
+                time.sleep(10)
+        except Exception as e:
+            attempt += 1
+            report_failure_to_devs(bot_name, str(e))
+            
+            if attempt > max_retries:
+                logger.critical(f"{bot_name} exceeded maximum retries. Stopping thread.")
+                break
+            
+            wait_time = exponential_backoff(attempt)
+            logger.info(f"{bot_name}: Retrying in {wait_time} seconds... (Attempt {attempt}/{max_retries})")
+            time.sleep(wait_time)
+
+    logger.critical(f"{bot_name} thread has stopped.")
+    report_failure_to_devs(bot_name, "thread has stopped.")
 
 
 if __name__ == '__main__':
@@ -124,16 +154,16 @@ if __name__ == '__main__':
         threading.excepthook = thread_exception_handler
         
         # Start the NLP bot polling in a separate thread
-        nlp_thread = threading.Thread(target=lambda: run_safely(nlp_bot.polling), daemon=True, name="NLP Bot")
+        nlp_thread = threading.Thread(target=lambda: run_safely(nlp_bot.polling, "NLP Bot"), daemon=True, name="NLP Bot")
         nlp_thread.start()
-        
+
         # Start the watcher bot polling in a separate thread
-        watcher_thread = threading.Thread(target=lambda: run_safely(watcher_bot.polling), daemon=True, name="Watcher Bot")
+        watcher_thread = threading.Thread(target=lambda: run_safely(watcher_bot.polling, "Watcher Bot"), daemon=True, name="Watcher Bot")
         watcher_thread.start()
-        
+
         # Start health check threads
-        backend_health_thread = threading.Thread(target=lambda: run_safely(check_backend_status), daemon=True, name="Backend Health Check")
-        nlp_health_thread = threading.Thread(target=lambda: run_safely(check_nlp_bot_status), daemon=True, name="NLP Health Check")
+        backend_health_thread = threading.Thread(target=lambda: run_safely(check_backend_status, "Backend Health Check"), daemon=True, name="Backend Health Check")
+        nlp_health_thread = threading.Thread(target=lambda: run_safely(check_nlp_bot_status, "NLP Health Check"), daemon=True, name="NLP Health Check")
         backend_health_thread.start()
         nlp_health_thread.start()
         

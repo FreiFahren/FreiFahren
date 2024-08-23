@@ -1,4 +1,3 @@
-import telebot
 from telegram_bots import logger
 
 logger = logger.setup_logger()
