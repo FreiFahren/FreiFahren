@@ -9,13 +9,14 @@ import (
 	structs "github.com/FreiFahren/backend/utils"
 )
 
-func PostProcessInspectorData(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers) error {
+	func PostProcessInspectorData(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers) error {
 	logger.Log.Debug().Msg("Filling missing columns using provided data")
 
 	var stations = data.GetStationsList()
 	var lines = data.GetLinesList()
-
-	if dataToInsert.Line == "" && (dataToInsert.Station.ID != "" || dataToInsert.Direction.ID != "") {
+	
+	// avoid overwriting the line if station and direction dont match
+	if dataToInsert.Line == "" && (dataToInsert.Station.ID == "" || dataToInsert.Direction.ID == "") {
 		if err := AssignLineIfSingleOption(dataToInsert, pointers, stations[dataToInsert.Station.ID], stations[dataToInsert.Direction.ID]); err != nil {
 			logger.Log.Error().Err(err).Msg("Error assigning line if single option in postInspector")
 			return err
@@ -38,7 +39,7 @@ func PostProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 	}
 
 	// If the direction is the same as the station, remove the direction
-	if dataToInsert.Direction.ID == dataToInsert.Station.ID {
+	if dataToInsert.Direction.ID == dataToInsert.Station.ID && dataToInsert.Direction.ID != "" {
 		dataToInsert.Direction = structs.Station{}
 		pointers.DirectionIDPtr = nil
 		pointers.DirectionNamePtr = nil

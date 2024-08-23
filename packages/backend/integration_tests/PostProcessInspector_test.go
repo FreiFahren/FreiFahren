@@ -1,4 +1,4 @@
-package integaration_tests
+package integration_tests
 
 import (
 	"testing"
@@ -78,7 +78,16 @@ func TestPostProcessInspectorData(t *testing.T) {
 		createTestCase("Dont imply line if it is already set", "U-Tk", "SU-H", "U5", "U5", "U-Tk", "SU-H"),
 		createTestCase("Don't imply line if there are multiple options", "U-Kbo", "", "", "", "U-Kbo", ""),
 		// Tests for guessStation
-		createtestCase("Guess the station when line and no station")
+		createTestCase("Guess the station when line and no station", "", "", "U2", "U2", "SU-A", ""),
+		createTestCase("Don't guess the station when the line is not set", "", "SU-H", "", "", "", ""),
+		createTestCase("Don't guess the station when the station is already set", "SU-A", "", "U2", "U2", "SU-A", ""),
+		// Tests for DetermineDirectionIfImplied
+		createTestCase("Imply direction and Line from station", "U-Mf", "", "", "U6", "U-Mf", "U-Sch"),
+		createTestCase("Imply direction from station and line", "SU-PA", "", "U2", "U2", "SU-PA", "U-Rl"),
+		createTestCase("Imply direction just from station", "U-Kr", "", "", "U3", "U-Kr", "SU-WA"),
+		// Test if station is not on the line
+		createTestCase("Remove line if station is not on the line", "U-Kbo", "", "U2", "", "U-Kbo", ""),
+		createTestCase("Remove line if not on station and reset if possible", "U-Kr", "", "U2", "U3", "U-Kr", "SU-WA"),
 
 	}
 
