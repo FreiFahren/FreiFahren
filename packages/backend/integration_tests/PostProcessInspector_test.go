@@ -1,4 +1,4 @@
-package api_test
+package integaration_tests
 
 import (
 	"testing"
@@ -20,10 +20,11 @@ type TestCase struct {
 	line           string
 	expectedLine   string
 	expectedStation string
+	expectedDirection string
 }
 
 // createTestCase is a factory function for creating test cases
-func createTestCase(name, stationID, directionID, line, expectedLine, expectedStation string) TestCase {
+func createTestCase(name, stationID, directionID, line, expectedLine, expectedStation, expectedDirection string) TestCase {
 	return TestCase{
 		name:           name,
 		stationID:      stationID,
@@ -31,6 +32,7 @@ func createTestCase(name, stationID, directionID, line, expectedLine, expectedSt
 		line:           line,
 		expectedLine:   expectedLine,
 		expectedStation: expectedStation,
+		expectedDirection: expectedDirection,
 	}
 }
 
@@ -52,11 +54,11 @@ func runPostProcessTest(t *testing.T, tc TestCase) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, tc.expectedLine, dataToInsert.Line, "Line should be %s", tc.expectedLine)
-	assert.NotNil(t, pointers.LinePtr, "LinePtr should not be nil")
 	if pointers.LinePtr != nil {
 		assert.Equal(t, tc.expectedLine, *pointers.LinePtr, "LinePtr should point to %s", tc.expectedLine)
 	}
 	assert.Equal(t, tc.expectedStation, dataToInsert.Station.ID, "Station ID should be %s", tc.expectedStation)
+	assert.Equal(t, tc.expectedDirection, dataToInsert.Direction.ID, "Direction ID should be %s", tc.expectedDirection)
 }
 
 func TestPostProcessInspectorData(t *testing.T) {
@@ -68,7 +70,16 @@ func TestPostProcessInspectorData(t *testing.T) {
 
 	// Define test cases
 	testCases := []TestCase{
-		createTestCase("Imply line from direction", "", "U-U", "", "U1", "U-HaT"),
+		// Tests for AssignLineIfSingleOption
+		createTestCase("Imply line from direction", "", "U-U", "", "U1", "U-HaT", "U-U"),
+		createTestCase("Imply line from station", "U-Tk", "", "", "U5", "U-Tk", ""),
+		createTestCase("Imply line from station and direction", "U-Tk", "SU-H", "", "U5", "U-Tk", "SU-H"),
+		createTestCase("Don't imply line if station and direction are missing", "", "", "", "", "", ""),
+		createTestCase("Dont imply line if it is already set", "U-Tk", "SU-H", "U5", "U5", "U-Tk", "SU-H"),
+		createTestCase("Don't imply line if there are multiple options", "U-Kbo", "", "", "", "U-Kbo", ""),
+		// Tests for guessStation
+		createtestCase("Guess the station when line and no station")
+
 	}
 
 	// Run test cases
