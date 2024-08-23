@@ -64,7 +64,7 @@ func PostInspector(c echo.Context) error {
 		logger.Log.Error().Err(err).Msg("Error processing request data in postInspector")
 	}
 
-	if err := postProcessInspectorData(dataToInsert, pointers); err != nil {
+	if err := PostProcessInspectorData(dataToInsert, pointers); err != nil {
 		logger.Log.Error().Err(err).Msg("Error filling missing columns in postInspector")
 		return c.NoContent(http.StatusInternalServerError)
 	}

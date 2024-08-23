@@ -75,3 +75,13 @@ When commenting the ``//go:embed ...` lines, go will compile these bytes into th
 To get the json data from the binary, you should extract it like a normal file using JSON.unmarshal (take a look at `ReadStationsAndLinesListFromBytes`) etc...
 Go treats those binaries like files in the working directory.
 It is recommended to write a helper function to unmarshal the json or other binaries, that can be used in other projects, like `GetStationsList()`.
+
+## testing
+
+To run the tests, you can use the following command:
+
+```sh
+go test ./...
+```
+
+if you want to add some tests, please add integration tests to the integration_tests folder and unit tests are saved in the package_test folder that is in the same folder as the package that you want to test.
