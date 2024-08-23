@@ -8,7 +8,8 @@ interface ListButtonProps {
 
 const ListButton: React.FC<ListButtonProps> = ({ onClick }) => {
     return (
-        <button className="list-button small-button streched" onClick={onClick}>
+        <button className="list-button small-button streched align-child-on-line" onClick={onClick}>
+            <img className="svg" src={`${process.env.PUBLIC_URL}/icons/list.svg`} />
             <p>Liste</p>
         </button>
     )

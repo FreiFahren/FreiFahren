@@ -9,3 +9,14 @@
     border: var(--border-default);
     overflow: hidden;
 }
+
+@media (max-width: 400px) {
+    .list-button {
+        bottom: 100px;
+    }
+}
+
+.list-button img {
+    height: 30px;
+    width: 30px;
+}
