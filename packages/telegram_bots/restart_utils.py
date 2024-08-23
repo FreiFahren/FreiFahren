@@ -106,6 +106,7 @@ def run_safely(func: callable, bot_name: str) -> None:
             if e.error_code == 502:
                 wait_time = exponential_backoff(attempt)
                 logger.error(f"{bot_name}: Received 502 error. Attempt {attempt}. Retrying in {wait_time} seconds...")
+                send_message(DEV_CHAT_ID, f"{bot_name}: Received 502 error. Retrying in {wait_time} seconds...", watcher_bot)
                 time.sleep(wait_time)
             else:
                 report_failure_to_devs(bot_name, f"Telegram API error: {str(e)}")
