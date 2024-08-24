@@ -6,34 +6,11 @@ import MarkerModal from '../../Modals/MarkerModal/MarkerModal'
 import { CloseButton } from '../../Buttons/CloseButton/CloseButton'
 import { useModalAnimation } from '../../../utils/uiUtils'
 import { useRiskData } from '../../../contexts/RiskDataContext'
-
+import { MarkerData } from '../../../utils/types'
 export interface MarkersProps {
     formSubmitted: boolean
     isFirstOpen: boolean
     userPosition?: { lng: number; lat: number } | null | null
-}
-
-export type MarkerData = {
-    timestamp: string
-    station: {
-        id: string
-        name: string
-        coordinates: {
-            latitude: number
-            longitude: number
-        }
-    }
-    direction: {
-        id: string
-        name: string
-        coordinates: {
-            latitude: number
-            longitude: number
-        }
-    }
-    line: string
-    isHistoric: boolean
-    message?: string
 }
 
 const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, userPosition }) => {

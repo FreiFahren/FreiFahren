@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react'
-import { MarkerData } from '../../Map/Markers/MarkerContainer'
+import { MarkerData } from 'src/utils/types'
 import { elapsedTimeMessage, stationDistanceMessage } from '../../../utils/mapUtils'
 import { getStationDistance } from '../../../utils/dbUtils'
 import Skeleton, { useSkeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'

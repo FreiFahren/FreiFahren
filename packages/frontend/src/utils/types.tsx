@@ -46,3 +46,26 @@ export interface RiskData {
 export interface SegmentColors {
     [key: string]: string
 }
+
+export type MarkerData = {
+    timestamp: string
+    station: {
+        id: string
+        name: string
+        coordinates: {
+            latitude: number
+            longitude: number
+        }
+    }
+    direction: {
+        id: string
+        name: string
+        coordinates: {
+            latitude: number
+            longitude: number
+        }
+    }
+    line: string
+    isHistoric: boolean
+    message?: string
+}
