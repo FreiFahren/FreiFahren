@@ -26,7 +26,7 @@ const ListModal: React.FC<ListModalProps> = ({ className }) => {
 
             // sort to make it easier for the user to find the most recent entries
             const sortedList = inspectorList.sort((a: MarkerData, b: MarkerData) => {
-                return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+                return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
             })
             setTicketInspectorList(sortedList)
             lastReceivedInspectorTime.current = new Date(sortedList[0].timestamp)
