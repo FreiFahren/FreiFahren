@@ -57,7 +57,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
             <h1>{station.name}</h1>
             {(direction.name !== '' || line !== '') && (
                 <h2>
-                    <span className={line}>{line}</span> {direction.name}
+                    <span className={`line-label ${line}`}>{line}</span> {direction.name}
                 </h2>
             )}
             <div>

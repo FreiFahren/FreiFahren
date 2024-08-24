@@ -1,5 +1,5 @@
 .list-button {
-    height: 50px;
+    height: 45px;
     min-height: auto;
     min-width: auto;
     width: 100px;
@@ -17,6 +17,6 @@
 }
 
 .list-button img {
-    height: 30px;
-    width: 30px;
+    height: 25px;
+    width: 25px;
 }
