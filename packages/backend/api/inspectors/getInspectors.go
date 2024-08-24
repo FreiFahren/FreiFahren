@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/FreiFahren/backend/api/getStationName"
 	"github.com/FreiFahren/backend/database"
@@ -74,7 +75,6 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 			logger.Log.Error().Err(err).Msg("Error fetching and adding historic data")
 			return c.NoContent(http.StatusInternalServerError)
 		}
-
 	}
 
 	ticketInspectorList := []utils.TicketInspectorResponse{}
@@ -87,9 +87,14 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 		ticketInspectorList = append(ticketInspectorList, ticketInspector)
 	}
 
-	filteredTicketInspectorList := removeDuplicateStations(ticketInspectorList)
+	// Remove duplicates if start and end time are one hour apart
+	// This is done to prevent the MarkerModal from showing the same station twice, whilst the ListModal should show duplicates
+	if endTime.Sub(startTime) == time.Hour {
+		ticketInspectorList = removeDuplicateStations(ticketInspectorList)
+	}
 
-	return c.JSONPretty(http.StatusOK, filteredTicketInspectorList, "")
+	logger.Log.Debug().Msgf("Returning %d ticket inspectors", len(ticketInspectorList))
+	return c.JSONPretty(http.StatusOK, ticketInspectorList, "")
 }
 
 func removeDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse) []utils.TicketInspectorResponse {

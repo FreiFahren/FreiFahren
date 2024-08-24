@@ -8,17 +8,18 @@ import (
 	"github.com/FreiFahren/backend/logger"
 )
 
-// GetTimeRange returns the start and end time of the time range
+// GetTimeRange parses and validates the provided start and end times, falling back to default values if necessary.
 //
 // Parameters:
-//   - start: The start time of the time range in RFC 3339 format.
-//   - end: The end time of the time range in RFC 3339 format.
+//   - start: The desired start time in RFC 3339 format. If invalid, defaults to one hour ago.
+//   - end: The desired end time in RFC 3339 format. If invalid, defaults to the current time.
 //
 // Returns:
-//   - The start time of the time range in RFC 3339 format.
-//   - The end time of the time range in RFC 3339 format.
+//   - A time.Time representing the validated start time.
+//   - A time.Time representing the validated end time.
 //
-// This function is being used to get the start and end time of the time range.
+// This function ensures a valid time range is always returned, even if the input parameters are invalid or missing.
+// It's useful for filtering data queries or setting boundaries for time-based operations.
 func GetTimeRange(start, end string) (time.Time, time.Time) {
 	logger.Log.Debug().Msg("Getting the time range of the ")
 
