@@ -43,7 +43,9 @@ const ListModal: React.FC<ListModalProps> = ({ className }) => {
                 return (
                     <div key={ticketInspector.station.id + ticketInspector.timestamp}>
                         <div className="align-child-on-line">
-                            {ticketInspector.line && <h4 className="S41 line-label">{ticketInspector.line}</h4>}
+                            {ticketInspector.line && (
+                                <h4 className={`${ticketInspector.line} line-label`}>{ticketInspector.line}</h4>
+                            )}
                             <h4>{ticketInspector.station.name}</h4>
                         </div>
                         <div>
