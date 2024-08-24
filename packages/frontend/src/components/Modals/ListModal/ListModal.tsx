@@ -41,12 +41,17 @@ const ListModal: React.FC<ListModalProps> = ({ className }) => {
                 return (
                     <div>
                         <div className="align-child-on-line">
-                            <h4 className="S41 line-label">{ticketInspector.line}</h4>
+                            {ticketInspector.line && <h4 className="S41 line-label">{ticketInspector.line}</h4>}
                             <h4>{ticketInspector.station.name}</h4>
                         </div>
                         <div>
                             <p>
-                                vor {elapsedTime} min, richtung: <span>{ticketInspector.direction.name}</span>
+                                vor {elapsedTime} min
+                                {ticketInspector.direction.name && (
+                                    <>
+                                        , Richtung: <span>{ticketInspector.direction.name}</span>
+                                    </>
+                                )}
                             </p>
                         </div>
                     </div>
