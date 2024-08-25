@@ -1,351 +1,351 @@
 basePath: /
 definitions:
-    utils.AllStationsAndLinesList:
-        properties:
-            lines:
-                items:
-                    additionalProperties:
-                        items:
-                            type: string
-                        type: array
-                    type: object
-                type: array
-            stations:
-                additionalProperties:
-                    $ref: '#/definitions/utils.StationListEntry'
-                type: object
+  utils.AllStationsAndLinesList:
+    properties:
+      lines:
+        items:
+          additionalProperties:
+            items:
+              type: string
+            type: array
+          type: object
+        type: array
+      stations:
+        additionalProperties:
+          $ref: '#/definitions/utils.StationListEntry'
         type: object
-    utils.Coordinates:
-        properties:
-            latitude:
-                type: number
-            longitude:
-                type: number
+    type: object
+  utils.Coordinates:
+    properties:
+      latitude:
+        type: number
+      longitude:
+        type: number
+    type: object
+  utils.CoordinatesEntry:
+    properties:
+      latitude:
+        type: number
+      longitude:
+        type: number
+    type: object
+  utils.InspectorRequest:
+    properties:
+      author:
+        description: is always null or 98111116 (ASCII for "BOT") when getting data
+          from the telegram bot
+        type: integer
+      directionId:
+        type: string
+      line:
+        type: string
+      message:
+        type: string
+      stationId:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  utils.ResponseData:
+    properties:
+      author:
+        type: integer
+      direction:
+        $ref: '#/definitions/utils.Station'
+      line:
+        type: string
+      message:
+        type: string
+      station:
+        $ref: '#/definitions/utils.Station'
+      timestamp:
+        type: string
+    type: object
+  utils.RiskModelResponse:
+    properties:
+      last_modified:
+        type: string
+      segment_colors:
+        additionalProperties:
+          type: string
         type: object
-    utils.CoordinatesEntry:
-        properties:
-            latitude:
-                type: number
-            longitude:
-                type: number
-        type: object
-    utils.InspectorRequest:
-        properties:
-            author:
-                description: is always null or 98111116 (ASCII for "BOT") when getting data
-                    from the telegram bot
-                type: integer
-            directionId:
-                type: string
-            line:
-                type: string
-            message:
-                type: string
-            stationId:
-                type: string
-            timestamp:
-                type: string
-        type: object
-    utils.ResponseData:
-        properties:
-            author:
-                type: integer
-            direction:
-                $ref: '#/definitions/utils.Station'
-            line:
-                type: string
-            message:
-                type: string
-            station:
-                $ref: '#/definitions/utils.Station'
-            timestamp:
-                type: string
-        type: object
-    utils.RiskModelResponse:
-        properties:
-            last_modified:
-                type: string
-            segment_colors:
-                additionalProperties:
-                    type: string
-                type: object
-        type: object
-    utils.Station:
-        properties:
-            coordinates:
-                $ref: '#/definitions/utils.Coordinates'
-            id:
-                type: string
-            lines:
-                items:
-                    type: string
-                type: array
-            name:
-                type: string
-        type: object
-    utils.StationListEntry:
-        properties:
-            coordinates:
-                $ref: '#/definitions/utils.CoordinatesEntry'
-            lines:
-                items:
-                    type: string
-                type: array
-            name:
-                type: string
-        type: object
-    utils.TicketInspectorResponse:
-        properties:
-            direction:
-                $ref: '#/definitions/utils.Station'
-            isHistoric:
-                type: boolean
-            line:
-                description: String is used so that it can easily be handled by the frontend
-                type: string
-            message:
-                type: string
-            station:
-                $ref: '#/definitions/utils.Station'
-            timestamp:
-                type: string
-        type: object
+    type: object
+  utils.Station:
+    properties:
+      coordinates:
+        $ref: '#/definitions/utils.Coordinates'
+      id:
+        type: string
+      lines:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+    type: object
+  utils.StationListEntry:
+    properties:
+      coordinates:
+        $ref: '#/definitions/utils.CoordinatesEntry'
+      lines:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+    type: object
+  utils.TicketInspectorResponse:
+    properties:
+      direction:
+        $ref: '#/definitions/utils.Station'
+      isHistoric:
+        type: boolean
+      line:
+        description: String is used so that it can easily be handled by the frontend
+        type: string
+      message:
+        type: string
+      station:
+        $ref: '#/definitions/utils.Station'
+      timestamp:
+        type: string
+    type: object
 host: localhost:8080
 info:
-    contact: {}
-    description: API for the FreiFahren project, responsible for collecting and serving
-        data about ticket inspectors on public transport.
-    title: FreiFahren API Documentation
-    version: '1.0'
+  contact: {}
+  description: API for the FreiFahren project, responsible for collecting and serving
+    data about ticket inspectors on public transport.
+  title: FreiFahren API Documentation
+  version: "1.0"
 paths:
-    /basics/inspectors:
-        get:
-            consumes:
-                - application/json
-            description: |-
-                This endpoint retrieves ticket inspector reports from the database within a specified time range.
-                It supports filtering by start and end timestamps,
-                and checks if the data has been modified since the last request using the "If-Modified-Since" header.
-            parameters:
-                - description: Start timestamp (RFC3339 format)
-                  in: query
-                  name: start
-                  type: string
-                - description: End timestamp (RFC3339 format)
-                  in: query
-                  name: end
-                  type: string
-            produces:
-                - application/json
-            responses:
-                '200':
-                    description: OK
-                    schema:
-                        items:
-                            $ref: '#/definitions/utils.TicketInspectorResponse'
-                        type: array
-                '400':
-                    description: Bad Request
-                    schema:
-                        type: string
-                '500':
-                    description: Internal Server Error
-                    schema:
-                        type: string
-            summary: Retrieve information about ticket inspector reports
-            tags:
-                - basics
-        post:
-            consumes:
-                - application/json
-            description: |-
-                Accepts a JSON payload with details about a ticket inspector's current location.
-                This endpoint validates the provided data, processes necessary computations for linking stations and lines,
-                inserts the data into the database, and triggers an update to the risk model used in operational analysis.
-                If the 'timestamp' field is not provided in the request, the current UTC time truncated to the nearest minute is used automatically.
-            parameters:
-                - description: Data about the inspector's location and activity
-                  in: body
-                  name: inspectorData
-                  required: true
-                  schema:
-                      $ref: '#/definitions/utils.InspectorRequest'
-                - description: Timestamp of the report in ISO 8601 format (e.g., 2006-01-02T15:04:05Z);
-                      if not provided, the current time is used
-                  in: query
-                  name: timestamp
-                  type: string
-            produces:
-                - application/json
-            responses:
-                '200':
-                    description: Successfully processed and inserted the inspector data with
-                        computed linkages and risk model updates.
-                    schema:
-                        $ref: '#/definitions/utils.ResponseData'
-                '400':
-                    description: 'Bad Request: Missing or incorrect parameters provided.'
-                '500':
-                    description: 'Internal Server Error: Error during data processing or database
-                        insertion.'
-            summary: Submit ticket inspector data
-            tags:
-                - basics
-    /data/id:
-        get:
-            consumes:
-                - application/json
-            description: |-
-                Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.
-                The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-A" for the station "Alexanderplatz".
-            parameters:
-                - description: Station name
-                  in: query
-                  name: name
-                  required: true
-                  type: string
-            produces:
-                - application/json
-            responses:
-                '200':
-                    description: The station id
-                    schema:
-                        additionalProperties:
-                            type: string
-                        type: object
-                '404':
-                    description: Error message
-                    schema:
-                        additionalProperties:
-                            type: string
-                        type: object
-            summary: Retrieve Station ID by Name
-            tags:
-                - data
-    /data/list:
-        get:
-            consumes:
-                - application/json
-            description: |-
-                This endpoint returns a comprehensive list of all train stations and lines.
-                Optionally, it can return only a list of lines or stations based on the provided query parameters.
-            parameters:
-                - description: Set to 'true' to retrieve only the list of lines.
-                  in: query
-                  name: lines
-                  type: string
-                - description: Set to 'true' to retrieve only the list of stations.
-                  in: query
-                  name: stations
-                  type: string
-            produces:
-                - application/json
-            responses:
-                '200':
-                    description: OK
-                    schema:
-                        $ref: '#/definitions/utils.AllStationsAndLinesList'
-                '500':
-                    description: 'Internal Server Error: Unable to process the request.'
-                    schema:
-                        type: string
-            summary: Retrieves stations and lines information
-            tags:
-                - data
-    /risk-prediction/segment-colors:
-        get:
-            consumes:
-                - application/json
-            description: |-
-                Fetches the latest risk assessments for transit segments, returned as color codes representing the risk level. You can find out more about the risk level calculation in the documentation.
-                The response includes the last modified timestamp of the risk model data to support conditional GET requests.
-            parameters:
-                - description: Standard HTTP header used to make conditional requests; the response
-                      will include the risk colors only if they have changed since this date and
-                      time.
-                  in: header
-                  name: If-Modified-Since
-                  type: string
-            produces:
-                - application/json
-            responses:
-                '200':
-                    description: Successfully retrieved the color-coded risk levels for each
-                        segment.
-                    schema:
-                        $ref: '#/definitions/utils.RiskModelResponse'
-                '304':
-                    description: "No changes: The data has not been modified since the last
-                        request date provided in the 'If-Modified-Since' header."
-                    schema:
-                        type: none
-                '500':
-                    description: 'Internal Server Error: Error during the processing of the
-                        request.'
-            summary: Get risk colors for segments
-            tags:
-                - Risk Prediction
-    /station:
-        get:
-            consumes:
-                - application/json
-            description: |-
-                Fetches the name of a station by its unique identifier from the StationsMap.
-                The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-A" for the station "Alexanderplatz".
-            parameters:
-                - description: Station Id
-                  in: query
-                  name: id
-                  required: true
-                  type: string
-            produces:
-                - application/json
-            responses:
-                '200':
-                    description: The station id
-                    schema:
-                        type: string
-                '404':
-                    description: Error getting station name
-                    schema:
-                        type: string
-            summary: Retrieve Name by Station ID
-            tags:
-                - data
-    /transit/distance:
-        get:
-            consumes:
-                - application/json
-            description: |-
-                Returns the shortest number of stations between an inspector's station and a given user's latitude and longitude coordinates.
-                The distance calculation employs Dijkstra's algorithm to determine the minimal stops required to reach the nearest station from the given coordinates.
-            parameters:
-                - description: The station ID of the inspector's current location.
-                  in: query
-                  name: inspectorStationId
-                  required: true
-                  type: string
-                - description: The latitude of the user's location.
-                  in: query
-                  name: userLat
-                  required: true
-                  type: string
-                - description: The longitude of the user's location.
-                  in: query
-                  name: userLon
-                  required: true
-                  type: string
-            produces:
-                - application/json
-            responses:
-                '200':
-                    description: The shortest distance in terms of the number of station stops
-                        between the inspector's station and the user's location.
-                    schema:
-                        type: int
-                '500':
-                    description: An error occurred in processing the request.
-            summary: Calculate shortest distance to a station
-            tags:
-                - transit
-swagger: '2.0'
+  /basics/inspectors:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        This endpoint retrieves ticket inspector reports from the database within a specified time range.
+        It supports filtering by start and end timestamps,
+        and checks if the data has been modified since the last request using the "If-Modified-Since" header.
+      parameters:
+      - description: Start timestamp (RFC3339 format)
+        in: query
+        name: start
+        type: string
+      - description: End timestamp (RFC3339 format)
+        in: query
+        name: end
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/utils.TicketInspectorResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Retrieve information about ticket inspector reports
+      tags:
+      - basics
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Accepts a JSON payload with details about a ticket inspector's current location.
+        This endpoint validates the provided data, processes necessary computations for linking stations and lines,
+        inserts the data into the database, and triggers an update to the risk model used in operational analysis.
+        If the 'timestamp' field is not provided in the request, the current UTC time truncated to the nearest minute is used automatically.
+      parameters:
+      - description: Data about the inspector's location and activity
+        in: body
+        name: inspectorData
+        required: true
+        schema:
+          $ref: '#/definitions/utils.InspectorRequest'
+      - description: Timestamp of the report in ISO 8601 format (e.g., 2006-01-02T15:04:05Z);
+          if not provided, the current time is used
+        in: query
+        name: timestamp
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully processed and inserted the inspector data with
+            computed linkages and risk model updates.
+          schema:
+            $ref: '#/definitions/utils.ResponseData'
+        "400":
+          description: 'Bad Request: Missing or incorrect parameters provided.'
+        "500":
+          description: 'Internal Server Error: Error during data processing or database
+            insertion.'
+      summary: Submit ticket inspector data
+      tags:
+      - basics
+  /data/id:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.
+        The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-A" for the station "Alexanderplatz".
+      parameters:
+      - description: Station name
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The station id
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Error message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Retrieve Station ID by Name
+      tags:
+      - data
+  /data/list:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        This endpoint returns a comprehensive list of all train stations and lines.
+        Optionally, it can return only a list of lines or stations based on the provided query parameters.
+      parameters:
+      - description: Set to 'true' to retrieve only the list of lines.
+        in: query
+        name: lines
+        type: string
+      - description: Set to 'true' to retrieve only the list of stations.
+        in: query
+        name: stations
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.AllStationsAndLinesList'
+        "500":
+          description: 'Internal Server Error: Unable to process the request.'
+          schema:
+            type: string
+      summary: Retrieves stations and lines information
+      tags:
+      - data
+  /risk-prediction/segment-colors:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Fetches the latest risk assessments for transit segments, returned as color codes representing the risk level. You can find out more about the risk level calculation in the documentation.
+        The response includes the last modified timestamp of the risk model data to support conditional GET requests.
+      parameters:
+      - description: Standard HTTP header used to make conditional requests; the response
+          will include the risk colors only if they have changed since this date and
+          time.
+        in: header
+        name: If-Modified-Since
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved the color-coded risk levels for each
+            segment.
+          schema:
+            $ref: '#/definitions/utils.RiskModelResponse'
+        "304":
+          description: 'No changes: The data has not been modified since the last
+            request date provided in the ''If-Modified-Since'' header.'
+          schema:
+            type: none
+        "500":
+          description: 'Internal Server Error: Error during the processing of the
+            request.'
+      summary: Get risk colors for segments
+      tags:
+      - Risk Prediction
+  /station:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Fetches the name of a station by its unique identifier from the StationsMap.
+        The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-A" for the station "Alexanderplatz".
+      parameters:
+      - description: Station Id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The station id
+          schema:
+            type: string
+        "404":
+          description: Error getting station name
+          schema:
+            type: string
+      summary: Retrieve Name by Station ID
+      tags:
+      - data
+  /transit/distance:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Returns the shortest number of stations between an inspector's station and a given user's latitude and longitude coordinates.
+        The distance calculation employs Dijkstra's algorithm to determine the minimal stops required to reach the nearest station from the given coordinates.
+      parameters:
+      - description: The station ID of the inspector's current location.
+        in: query
+        name: inspectorStationId
+        required: true
+        type: string
+      - description: The latitude of the user's location.
+        in: query
+        name: userLat
+        required: true
+        type: string
+      - description: The longitude of the user's location.
+        in: query
+        name: userLon
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The shortest distance in terms of the number of station stops
+            between the inspector's station and the user's location.
+          schema:
+            type: int
+        "500":
+          description: An error occurred in processing the request.
+      summary: Calculate shortest distance to a station
+      tags:
+      - transit
+swagger: "2.0"

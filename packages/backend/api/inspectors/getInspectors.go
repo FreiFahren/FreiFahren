@@ -79,7 +79,7 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 
 	ticketInspectorList := []utils.TicketInspectorResponse{}
 	for _, ticketInfo := range ticketInfoList {
-		ticketInspector, err := constructTicketInspectorInfo(ticketInfo)
+		ticketInspector, err := constructTicketInspectorInfo(ticketInfo, startTime, endTime)
 		if err != nil {
 			logger.Log.Error().Err(err).Msg("Error constructing ticket inspector info")
 			return c.NoContent(http.StatusInternalServerError)
@@ -124,7 +124,7 @@ func removeDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse
 	return filteredTicketInspectorList
 }
 
-func constructTicketInspectorInfo(ticketInfo utils.TicketInspector) (utils.TicketInspectorResponse, error) {
+func constructTicketInspectorInfo(ticketInfo utils.TicketInspector, startTime time.Time, endTime time.Time) (utils.TicketInspectorResponse, error) {
 	logger.Log.Debug().Msg("Constructing ticket inspector info")
 
 	cleanedStationId := strings.ReplaceAll(ticketInfo.StationID, "\n", "")
@@ -156,6 +156,12 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector) (utils.Ticke
 			logger.Log.Error().Err(err).Msg("Error getting direction coordinates")
 			return utils.TicketInspectorResponse{}, err
 		}
+	}
+
+	if ticketInfo.IsHistoric {
+		// As the historic data is not a real entry it has no timestamp, so we need to calculate one
+		ticketInfo.Timestamp = calculateHistoricDataTimestamp(startTime, endTime)
+		logger.Log.Debug().Msgf("Setting timestamp to %s for historic data", ticketInfo.Timestamp)
 	}
 
 	ticketInspectorInfo := utils.TicketInspectorResponse{
