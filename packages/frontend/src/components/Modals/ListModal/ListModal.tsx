@@ -24,12 +24,8 @@ const ListModal: React.FC<ListModalProps> = ({ className }) => {
                     lastReceivedInspectorTime.current
                 )) || [] // in case the server returns, 304 Not Modified
 
-            // sort to make it easier for the user to find the most recent entries
-            const sortedList = inspectorList.sort((a: MarkerData, b: MarkerData) => {
-                return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-            })
-            setTicketInspectorList(sortedList)
-            lastReceivedInspectorTime.current = new Date(sortedList[0].timestamp)
+            setTicketInspectorList(inspectorList)
+            lastReceivedInspectorTime.current = new Date(inspectorList[0].timestamp)
         }
         fetchInspectorList()
     }, [currentTime])

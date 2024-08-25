@@ -89,9 +89,17 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 
 	// Remove duplicates if start and end time are one hour apart
 	// This is done to prevent the MarkerModal from showing the same station twice, whilst the ListModal should show duplicates
-	if endTime.Sub(startTime) == time.Hour {
+	if endTime.Sub(startTime) <= time.Hour {
 		ticketInspectorList = removeDuplicateStations(ticketInspectorList)
 	}
+
+	// Sort the list by timestamp, then by station name if timestamps are equal
+	sort.Slice(ticketInspectorList, func(i, j int) bool {
+		if ticketInspectorList[i].Timestamp.Equal(ticketInspectorList[j].Timestamp) {
+			return ticketInspectorList[i].Station.Name < ticketInspectorList[j].Station.Name
+		}
+		return ticketInspectorList[i].Timestamp.After(ticketInspectorList[j].Timestamp)
+	})
 
 	logger.Log.Debug().Msgf("Returning %d ticket inspectors", len(ticketInspectorList))
 	return c.JSONPretty(http.StatusOK, ticketInspectorList, "")
@@ -112,14 +120,6 @@ func removeDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse
 	for _, ticketInspector := range uniqueStations {
 		filteredTicketInspectorList = append(filteredTicketInspectorList, ticketInspector)
 	}
-
-	// Sort the list by timestamp, then by station name if timestamps are equal
-	sort.Slice(filteredTicketInspectorList, func(i, j int) bool {
-		if filteredTicketInspectorList[i].Timestamp.Equal(filteredTicketInspectorList[j].Timestamp) {
-			return filteredTicketInspectorList[i].Station.Name < filteredTicketInspectorList[j].Station.Name
-		}
-		return filteredTicketInspectorList[i].Timestamp.After(filteredTicketInspectorList[j].Timestamp)
-	})
 
 	return filteredTicketInspectorList
 }
