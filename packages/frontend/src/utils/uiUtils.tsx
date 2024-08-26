@@ -133,3 +133,49 @@ export const handleTextareaInput = (event: React.ChangeEvent<HTMLTextAreaElement
         target.style.height = `${target.scrollHeight}px`
     }
 }
+
+export const stationDistanceMessage = (stationDistance: number | null): JSX.Element | null => {
+    if (!stationDistance || stationDistance === null || stationDistance < 1) return null
+    return (
+        <div>
+            {stationDistance > 1 ? <strong>{stationDistance} Stationen </strong> : <strong>eine Station </strong>}
+            von dir entfernt
+        </div>
+    )
+}
+
+/**
+ * Generates a JSX Element displaying a human-readable message about elapsed time.
+ *
+ * @param {number} elapsedTimeInMinutes - The elapsed time in minutes.
+ * @returns {JSX.Element} A span element containing the formatted time message.
+ *
+ * The function handles three cases:
+ * 1. If the elapsed time is more than 60 minutes, it displays the time in hours.
+ * 2. If the elapsed time is 1 minute or less, it displays "Jetzt".
+ * 3. For any other duration, it displays the time in minutes.
+ */
+export const elapsedTimeMessage = (elapsedTimeInMinutes: number): JSX.Element => {
+    if (elapsedTimeInMinutes > 60) {
+        return (
+            <span>
+                Vor <strong>{Math.floor(elapsedTimeInMinutes / 60)} Stunden</strong>
+            </span>
+        )
+    }
+    if (elapsedTimeInMinutes == 60) {
+        return <span>Vor einer Stunde</span>
+    }
+    if (elapsedTimeInMinutes <= 1) {
+        return (
+            <span>
+                <strong>Jetzt</strong>
+            </span>
+        )
+    }
+    return (
+        <span>
+            Vor <strong>{elapsedTimeInMinutes} Minuten</strong>
+        </span>
+    )
+}

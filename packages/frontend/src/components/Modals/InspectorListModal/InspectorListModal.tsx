@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react'
 
 import { MarkerData } from 'src/utils/types'
 import { getRecentDataWithIfModifiedSince } from 'src/utils/dbUtils'
+import { elapsedTimeMessage } from 'src/utils/uiUtils'
 import './InspectorListModal.css'
 
 interface InspectorListModalProps {
@@ -53,7 +54,7 @@ const InspectorListModal: React.FC<InspectorListModalProps> = ({ className }) =>
                         </div>
                         <div>
                             <p>
-                                vor {elapsedTime} min
+                                {elapsedTimeMessage(elapsedTime)}
                                 {ticketInspector.direction.name && (
                                     <>
                                         , Richtung: <span>{ticketInspector.direction.name}</span>

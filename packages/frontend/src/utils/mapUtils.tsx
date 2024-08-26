@@ -59,43 +59,6 @@ export const watchPosition = async (
     return () => navigator.geolocation.clearWatch(watchId)
 }
 
-export const stationDistanceMessage = (stationDistance: number | null): JSX.Element | null => {
-    if (!stationDistance || stationDistance === null || stationDistance < 1) return null
-    return (
-        <div>
-            {stationDistance > 1 ? <strong>{stationDistance} Stationen </strong> : <strong>eine Station </strong>}
-            von dir entfernt
-        </div>
-    )
-}
-
-export const elapsedTimeMessage = (elapsedTime: number, isHistoric: boolean): JSX.Element => {
-    if (elapsedTime > 45 * 60 * 1000 || isHistoric) {
-        return (
-            <span>
-                Vor mehr als <strong>45 Minuten</strong> gemeldet.
-            </span>
-        )
-    } else {
-        const minutes = Math.max(1, Math.floor(elapsedTime / (60 * 1000)))
-        return <span>{formatElapsedTime(minutes)}</span>
-    }
-}
-
-const formatElapsedTime = (minutes: number): JSX.Element => {
-    const minuteWord = minutes === 1 ? 'Minute' : 'Minuten'
-    const minuteCount = minutes === 1 ? 'einer' : minutes
-    return (
-        <span>
-            Vor{' '}
-            <strong>
-                {minuteCount} {minuteWord}
-            </strong>{' '}
-            gemeldet.
-        </span>
-    )
-}
-
 export function convertStationsToGeoJSON(stationsData: { [key: string]: StationProperty }) {
     return {
         type: 'FeatureCollection',
