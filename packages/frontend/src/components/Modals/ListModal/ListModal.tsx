@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 
 import { MarkerData } from 'src/utils/types'
 import { getRecentDataWithIfModifiedSince } from 'src/utils/dbUtils'
@@ -10,22 +10,29 @@ interface ListModalProps {
 
 const ListModal: React.FC<ListModalProps> = ({ className }) => {
     const [ticketInspectorList, setTicketInspectorList] = useState<MarkerData[]>([])
-    const lastReceivedInspectorTime = useRef<Date | null>(null)
 
     const currentTime = useMemo(() => new Date().getTime(), [])
     useEffect(() => {
         const fetchInspectorList = async () => {
             const startTimeInRFC3339 = new Date(currentTime - 1000 * 60 * 60 * 24).toISOString()
-            const endTimeInRFC3339 = new Date(currentTime).toISOString()
+            const endTimeInRFC3339 = new Date(currentTime - 1000 * 60 * 60).toISOString()
 
-            const inspectorList =
+            // Request them seperately to ensure that the list will contain the currently display historic data
+            // otherwise the historic data would not be included as the 24 hour request would be above the historic data threshold
+            const previousDayInspectorList =
                 (await getRecentDataWithIfModifiedSince(
                     `${process.env.REACT_APP_API_URL}/basics/inspectors?start=${startTimeInRFC3339}&end=${endTimeInRFC3339}`,
-                    lastReceivedInspectorTime.current
+                    null // no caching to make it less error prone
                 )) || [] // in case the server returns, 304 Not Modified
 
+            // in order to ensure that the list will contain the currently display historic data
+            const lastHourInspectorList =
+                (await getRecentDataWithIfModifiedSince(`${process.env.REACT_APP_API_URL}/basics/inspectors`, null)) ||
+                []
+
+            const inspectorList = [...lastHourInspectorList, ...previousDayInspectorList]
+
             setTicketInspectorList(inspectorList)
-            lastReceivedInspectorTime.current = new Date(inspectorList[0].timestamp)
         }
         fetchInspectorList()
     }, [currentTime])
