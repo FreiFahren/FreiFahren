@@ -2,13 +2,13 @@ import React, { useState, useMemo, useEffect } from 'react'
 
 import { MarkerData } from 'src/utils/types'
 import { getRecentDataWithIfModifiedSince } from 'src/utils/dbUtils'
-import './ListModal.css'
+import './InspectorListModal.css'
 
-interface ListModalProps {
+interface InspectorListModalProps {
     className?: string
 }
 
-const ListModal: React.FC<ListModalProps> = ({ className }) => {
+const InspectorListModal: React.FC<InspectorListModalProps> = ({ className }) => {
     const [ticketInspectorList, setTicketInspectorList] = useState<MarkerData[]>([])
 
     const currentTime = useMemo(() => new Date().getTime(), [])
@@ -68,4 +68,4 @@ const ListModal: React.FC<ListModalProps> = ({ className }) => {
     )
 }
 
-export default ListModal
+export default InspectorListModal

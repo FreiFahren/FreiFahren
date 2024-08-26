@@ -10,8 +10,8 @@ import UtilModal from '../../components/Modals/UtilModal/UtilModal';
 import StatsPopUp from '../../components/Miscellaneous/StatsPopUp/StatsPopUp';
 import AskForLocation from '../../components/Miscellaneous/AskForLocation/AskForLocation';
 import Backdrop from '../../../src/components/Miscellaneous/Backdrop/Backdrop';
-import ListButton from 'src/components/Buttons/ListButton/ListButton';
-import ListModal from 'src/components/Modals/ListModal/ListModal';
+import InspectorListButton from 'src/components/Buttons/InspectorListButton/InspectorListButton';
+import InspectorListModal from 'src/components/Modals/InspectorListModal/InspectorListModal';
 
 import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils';
 import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton';
@@ -167,7 +167,7 @@ function App() {
       )}
       {appUIState.isListModalOpen && (
         <>
-          <ListModal className={`open center-animation`}/>
+          <InspectorListModal className={`open center-animation`}/>
           <Backdrop onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
         </>
       )}
@@ -188,7 +188,7 @@ function App() {
         changeLayer={changeLayer}
         isRiskLayerOpen={appUIState.isRiskLayerOpen}
       />
-      <ListButton onClick={() => setAppUIState({...appUIState, isListModalOpen: !appUIState.isListModalOpen})}/>
+      <InspectorListButton onClick={() => setAppUIState({...appUIState, isListModalOpen: !appUIState.isListModalOpen})}/>
       <UtilButton onClick={toggleUtilModal} />
       <ReportButton onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })} />
       {appUIState.isStatsPopUpOpen &&  statsData !== 0 && <StatsPopUp numberOfReports={statsData} className={'open center-animation'} />}
