@@ -3,20 +3,14 @@
     min-height: auto;
     min-width: auto;
     width: 100px;
-    bottom: 150px;
-    right: var(--distance-from-edge-default);
+    bottom: var(--distance-from-edge-default);
+    left: var(--distance-from-edge-default);
     padding: var(--padding-s);
     border: var(--border-default);
     overflow: hidden;
 }
 
-@media (max-width: 400px) {
-    .list-button {
-        bottom: 100px;
-    }
-}
-
 .list-button img {
-    height: 25px;
-    width: 25px;
+    height: 23px;
+    width: 23px;
 }

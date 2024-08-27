@@ -7,11 +7,11 @@ interface UtilButtonProps {
 }
 
 const UtilButton: React.FC<UtilButtonProps> = ({ onClick }) => {
+    const settingsSvg = `${process.env.PUBLIC_URL}/icons/settings.svg`
+
     return (
         <button className="util-button small-button" onClick={onClick} aria-label="utility info">
-            <span />
-            <span />
-            <span />
+            <img src={settingsSvg} alt="settings" />
         </button>
     )
 }
