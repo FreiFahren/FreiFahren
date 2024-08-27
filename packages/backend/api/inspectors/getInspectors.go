@@ -72,29 +72,10 @@ func GetTicketInspectorsInfo(c echo.Context) error {
             copy(result, cachedInspectorList) // copy to ensure thread safety
             cacheMutex.RUnlock()
             return c.JSONPretty(http.StatusOK, result, "")
-        }
-        cacheMutex.RUnlock()
-    }
-
-	databaseLastModified, err := database.GetLatestInspectorsTimestamp()
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error getting latest update time")
-		return c.NoContent(http.StatusInternalServerError)
+		}
+		cacheMutex.RUnlock()
 	}
 
-	// Check if the data has been modified since the provided time
-	modifiedSince, err := utils.CheckIfModifiedSince(ifModifiedSince, databaseLastModified)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error checking if the data has been modified")
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	if !modifiedSince {
-		// Return 304 Not Modified if the data hasn't been modified since the provided time
-		return c.NoContent(http.StatusNotModified)
-	}
-
-	// Proceed with fetching and processing the data if it was modified
-	// or if the If-Modified-Since header was not provided
 	ticketInfoList, err := database.GetLatestTicketInspectors(startTime, endTime)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting ticket inspectors")
@@ -129,6 +110,12 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 		}
 		return ticketInspectorList[i].Timestamp.After(ticketInspectorList[j].Timestamp)
 	})
+
+	databaseLastModified, err := database.GetLatestInspectorsTimestamp()
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error getting latest update time")
+		return c.NoContent(http.StatusInternalServerError)
+	}
 
 	// Remove duplicates if start and end time are one hour apart
 	// This is done to prevent the MarkerModal from showing the same station twice, whilst the ListModal should show duplicates
