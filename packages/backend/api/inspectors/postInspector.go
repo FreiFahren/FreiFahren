@@ -83,6 +83,9 @@ func PostInspector(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
+	// set the cache to be expired
+	cacheExpiration = time.Time{}
+
 	// Based on the new data, generate new risk segments
 	err = Rstats.RunRiskModel()
 	if err != nil {

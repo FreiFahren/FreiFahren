@@ -71,6 +71,7 @@ func GetTicketInspectorsInfo(c echo.Context) error {
             result := make([]utils.TicketInspectorResponse, len(cachedInspectorList))
             copy(result, cachedInspectorList) // copy to ensure thread safety
             cacheMutex.RUnlock()
+			logger.Log.Debug().Msgf("Returning cached inspector list for one-hour range: %v", result)
             return c.JSONPretty(http.StatusOK, result, "")
 		}
 		cacheMutex.RUnlock()

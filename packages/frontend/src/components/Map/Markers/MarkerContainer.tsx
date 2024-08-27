@@ -49,7 +49,13 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
                     })
 
                     // Set the latest timestamp from the fetched data
-                    lastReceivedInspectorTime.current = new Date(newTicketInspectorList[0].timestamp)
+                    lastReceivedInspectorTime.current = new Date(
+                        Math.max(
+                            ...newTicketInspectorList.map((inspector: MarkerData) =>
+                                new Date(inspector.timestamp).getTime()
+                            )
+                        )
+                    )
                     riskData.refreshRiskData()
 
                     // Convert the map back to an array for the state
