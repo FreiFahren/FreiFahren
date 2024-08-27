@@ -277,7 +277,7 @@ func GetLatestTicketInspectors(start, end time.Time) ([]utils.TicketInspector, e
 	return ticketInfoList, nil
 }
 
-func GetLatestUpdateTime() (time.Time, error) {
+func GetLatestInspectorsTimestamp() (time.Time, error) {
 	var lastUpdateTime time.Time
 
 	sql := `SELECT MAX(timestamp) FROM ticket_info;`

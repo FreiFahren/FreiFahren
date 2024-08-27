@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/FreiFahren/backend/api/getStationName"
@@ -11,6 +12,14 @@ import (
 	"github.com/FreiFahren/backend/logger"
 	"github.com/FreiFahren/backend/utils"
 	"github.com/labstack/echo/v4"
+)
+
+var (
+	cachedInspectorList []utils.TicketInspectorResponse
+	cacheMutex sync.RWMutex
+	cacheExpiration time.Time
+	cacheDuration = 1 * time.Hour
+	cacheLastModified   time.Time
 )
 
 // @Summary Retrieve information about ticket inspector reports
@@ -35,14 +44,45 @@ import (
 func GetTicketInspectorsInfo(c echo.Context) error {
 	logger.Log.Info().Msg("GET /basics/inspectors")
 
-	databaseLastModified, err := database.GetLatestUpdateTime()
+	start := c.QueryParam("start")
+	end := c.QueryParam("end")
+
+	startTime, endTime := GetTimeRange(start, end)
+	isOneHourRange := endTime.Sub(startTime) == time.Hour
+
+	ifModifiedSince := c.Request().Header.Get("If-Modified-Since")
+
+	// Check if cached data is still valid for one-hour range requests
+	if isOneHourRange {
+        cacheMutex.RLock()
+        cacheValid := !cacheExpiration.IsZero() && time.Now().Before(cacheExpiration) && len(cachedInspectorList) > 0
+        if cacheValid {
+            // Check if-modified-since to avoid rerendering in the frontend when same data is returned
+            modifiedSince, err := utils.CheckIfModifiedSince(ifModifiedSince, cacheLastModified)
+            if err != nil {
+                logger.Log.Error().Err(err).Msg("Error checking if the data has been modified")
+            }
+            if !modifiedSince {
+                cacheMutex.RUnlock()
+                return c.NoContent(http.StatusNotModified)
+            }
+            logger.Log.Debug().Msg("Returning cached inspector list for one-hour range")
+            c.Response().Header().Set("Last-Modified", cacheLastModified.Format(time.RFC1123))
+            result := make([]utils.TicketInspectorResponse, len(cachedInspectorList))
+            copy(result, cachedInspectorList) // copy to ensure thread safety
+            cacheMutex.RUnlock()
+            return c.JSONPretty(http.StatusOK, result, "")
+        }
+        cacheMutex.RUnlock()
+    }
+
+	databaseLastModified, err := database.GetLatestInspectorsTimestamp()
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting latest update time")
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	// Check if the data has been modified since the provided time
-	ifModifiedSince := c.Request().Header.Get("If-Modified-Since")
 	modifiedSince, err := utils.CheckIfModifiedSince(ifModifiedSince, databaseLastModified)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error checking if the data has been modified")
@@ -55,11 +95,6 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 
 	// Proceed with fetching and processing the data if it was modified
 	// or if the If-Modified-Since header was not provided
-	start := c.QueryParam("start")
-	end := c.QueryParam("end")
-
-	startTime, endTime := GetTimeRange(start, end)
-
 	ticketInfoList, err := database.GetLatestTicketInspectors(startTime, endTime)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting ticket inspectors")
@@ -87,12 +122,6 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 		ticketInspectorList = append(ticketInspectorList, ticketInspector)
 	}
 
-	// Remove duplicates if start and end time are one hour apart
-	// This is done to prevent the MarkerModal from showing the same station twice, whilst the ListModal should show duplicates
-	if endTime.Sub(startTime) <= time.Hour {
-		ticketInspectorList = removeDuplicateStations(ticketInspectorList)
-	}
-
 	// Sort the list by timestamp, then by station name if timestamps are equal
 	sort.Slice(ticketInspectorList, func(i, j int) bool {
 		if ticketInspectorList[i].Timestamp.Equal(ticketInspectorList[j].Timestamp) {
@@ -100,6 +129,19 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 		}
 		return ticketInspectorList[i].Timestamp.After(ticketInspectorList[j].Timestamp)
 	})
+
+	// Remove duplicates if start and end time are one hour apart
+	// This is done to prevent the MarkerModal from showing the same station twice, whilst the ListModal should show duplicates
+	if isOneHourRange {
+		ticketInspectorList = removeDuplicateStations(ticketInspectorList)
+
+		// update the cache for one-hour range requests
+		cacheMutex.Lock()
+		cachedInspectorList = ticketInspectorList
+		cacheExpiration = time.Now().Add(cacheDuration)
+		cacheLastModified = databaseLastModified // so that the cache time is same as the inspectors timestamp
+		cacheMutex.Unlock()
+	}
 
 	logger.Log.Debug().Msgf("Returning %d ticket inspectors", len(ticketInspectorList))
 	return c.JSONPretty(http.StatusOK, ticketInspectorList, "")
