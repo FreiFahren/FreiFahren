@@ -132,10 +132,6 @@ function App() {
     sendSavedEvents();
   }, []);
 
-  useEffect(() => {
-    console.log(appUIState.isListModalOpen)
-  }, [appUIState.isListModalOpen])
-
   return (
     <div className='App'>
       {appUIState.isFirstOpen && appMounted && (

@@ -164,7 +164,11 @@ export const elapsedTimeMessage = (elapsedTimeInMinutes: number): JSX.Element =>
         )
     }
     if (elapsedTimeInMinutes === 60) {
-        return <span>Vor einer Stunde</span>
+        return (
+            <span>
+                Vor einer <strong>Stunde</strong>
+            </span>
+        )
     }
     if (elapsedTimeInMinutes <= 1) {
         return (

@@ -30,6 +30,19 @@ const InspectorListModal: React.FC<InspectorListModalProps> = ({ className }) =>
             const lastHourInspectorList =
                 (await getRecentDataWithIfModifiedSince(`${process.env.REACT_APP_API_URL}/basics/inspectors`, null)) ||
                 []
+            // sort the inspector list by timestamp
+            lastHourInspectorList.sort((b: MarkerData, a: MarkerData) => {
+                if (a.timestamp && b.timestamp) {
+                    return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+                }
+                return 0
+            })
+            previousDayInspectorList.sort((b: MarkerData, a: MarkerData) => {
+                if (a.timestamp && b.timestamp) {
+                    return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+                }
+                return 0
+            })
 
             const inspectorList = [...lastHourInspectorList, ...previousDayInspectorList]
 
