@@ -27,10 +27,23 @@ const InspectorListModal: React.FC<InspectorListModalProps> = ({ className }) =>
                     null // no caching to make it less error prone
                 )) || [] // in case the server returns, 304 Not Modified
 
-            const inspectorList = [...lastHourInspectorList, ...previousDayInspectorList]
+            // Separate historic inspectors from lastHourInspectorList
+            const historicInspectors = lastHourInspectorList.filter((inspector) => inspector.isHistoric)
+            const recentInspectors = lastHourInspectorList.filter((inspector) => !inspector.isHistoric)
 
-            // sort inspectorList so that the most recent data is at the top
-            inspectorList.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+            // sort each list so that the most recent data is at the top
+            recentInspectors.sort(
+                (a: MarkerData, b: MarkerData) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+            )
+            historicInspectors.sort(
+                (a: MarkerData, b: MarkerData) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+            )
+            previousDayInspectorList.sort(
+                (a: MarkerData, b: MarkerData) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+            )
+
+            // Combine the lists so that first are the recent inspectors, then the historic inspectors and then the previous day inspectors
+            const inspectorList = [...recentInspectors, ...historicInspectors, ...previousDayInspectorList]
 
             setTicketInspectorList(inspectorList)
         }

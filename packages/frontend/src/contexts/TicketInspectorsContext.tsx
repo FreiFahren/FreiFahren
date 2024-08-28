@@ -23,9 +23,11 @@ export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> =
     const riskData = useRiskData()
 
     const refreshInspectorsData = useCallback(async () => {
+        const endTime = new Date().toISOString()
+        const startTime = new Date(new Date(endTime).getTime() - 60 * 60 * 1000).toISOString()
         const newTicketInspectorList =
             (await getRecentDataWithIfModifiedSince(
-                `${process.env.REACT_APP_API_URL}/basics/inspectors`,
+                `${process.env.REACT_APP_API_URL}/basics/inspectors?start=${startTime}&end=${endTime}`,
                 lastReceivedInspectorTime.current
             )) || []
 

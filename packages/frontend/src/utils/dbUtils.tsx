@@ -26,7 +26,7 @@ export type LinesList = Record<string, string[]>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getRecentDataWithIfModifiedSince(
     endpointUrl: string,
-    lastUpdate: Date | null,
+    lastUpdate: Date | null
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any | null> {
     try {
