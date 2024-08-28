@@ -5,6 +5,14 @@
     border-bottom: 1px solid #000;
 }
 
+.list-modal > div:last-child {
+    border-bottom: none;
+}
+
+.list-modal {
+    max-height: 75vh;
+}
+
 .list-modal > div p {
     color: var(--color-gray-on-dark-background);
 }
