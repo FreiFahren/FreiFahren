@@ -143,7 +143,23 @@ func InsertTicketInfo(timestamp *time.Time, author *int64, message, line, statio
 	return nil
 }
 
-func executeGetHistoricStationsSQL(hour, weekday, remaining int, excludedStationIDs []string) ([]utils.TicketInspector, error) {
+func getLastNonHistoricTimestamp() (time.Time, error) {
+	logger.Log.Debug().Msg("Getting last non-historic timestamp")
+
+	sqlTimestamp := `
+        SELECT MAX(timestamp)
+        FROM ticket_info;
+    `
+	row := pool.QueryRow(context.Background(), sqlTimestamp)
+	var lastNonHistoricTimestamp time.Time
+	if err := row.Scan(&lastNonHistoricTimestamp); err != nil {
+		logger.Log.Error().Err(err).Msg("Failed to get last non-historic timestamp")
+		return time.Time{}, err
+	}
+	return lastNonHistoricTimestamp, nil
+}
+
+func executeGetHistoricStationsSQL(hour, weekday, remaining int, excludedStationIDs []string, lastNonHistoricTimestamp time.Time) ([]utils.TicketInspector, error) {
 	logger.Log.Debug().Msg("Executing SQL query to get historic stations")
 
 	sql := `
@@ -183,6 +199,7 @@ func executeGetHistoricStationsSQL(hour, weekday, remaining int, excludedStation
 		}
 
 		// Set parameters for historic data
+		ticketInfo.Timestamp = lastNonHistoricTimestamp
 		ticketInfo.IsHistoric = true
 		ticketInfoList = append(ticketInfoList, ticketInfo)
 	}
@@ -207,10 +224,16 @@ func GetHistoricStations(
 		return nil, fmt.Errorf("maximum recursion depth exceeded")
 	}
 
+	lastNonHistoricTimestamp, err := getLastNonHistoricTimestamp()
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Failed to get last non-historic timestamp")
+		return nil, err
+	}
+
 	hour := startTime.Hour()
 	weekday := int(startTime.Weekday())
 
-	ticketInfoList, err := executeGetHistoricStationsSQL(hour, weekday, remaining, excludedStationIDs)
+	ticketInfoList, err := executeGetHistoricStationsSQL(hour, weekday, remaining, excludedStationIDs, lastNonHistoricTimestamp)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to execute get historic stations SQL")
 		return nil, err
@@ -277,7 +300,7 @@ func GetLatestTicketInspectors(start, end time.Time) ([]utils.TicketInspector, e
 	return ticketInfoList, nil
 }
 
-func GetLatestInspectorsTimestamp() (time.Time, error) {
+func GetLatestUpdateTime() (time.Time, error) {
 	var lastUpdateTime time.Time
 
 	sql := `SELECT MAX(timestamp) FROM ticket_info;`

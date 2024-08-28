@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"sort"
 	"strings"
-	"sync"
-	"time"
 
 	"github.com/FreiFahren/backend/api/getStationName"
 	"github.com/FreiFahren/backend/database"
@@ -13,109 +11,6 @@ import (
 	"github.com/FreiFahren/backend/utils"
 	"github.com/labstack/echo/v4"
 )
-
-var (
-	cachedInspectorList []utils.TicketInspectorResponse
-	cacheMutex sync.RWMutex
-	cacheExpiration time.Time
-	cacheDuration = 1 * time.Hour // as a backup if the cacheRefreshTicker is not working
-	cacheLastModified   time.Time
-	cacheRefreshTicker *time.Ticker
-)
-
-func init() {
-	cacheRefreshTicker = time.NewTicker(1 * time.Minute)
-	go refreshCacheIfNeeded()
-}
-
-func refreshCacheIfNeeded() {
-	for range cacheRefreshTicker.C {
-		cacheMutex.RLock()
-		needsRefresh := len(cachedInspectorList) == 0 || time.Since(cachedInspectorList[0].Timestamp) >= time.Hour
-		cacheMutex.RUnlock()
-
-		if needsRefresh {
-			refreshCache()
-		}
-	}
-}
-
-func refreshCache() {
-	logger.Log.Info().Msg("Refreshing inspector cache")
-	endTime := time.Now()
-	startTime := endTime.Add(-1 * time.Hour)
-
-	newTicketInfoList, err := database.GetLatestTicketInspectors(startTime, endTime)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error fetching new inspector data")
-		return
-	}
-
-	cacheMutex.Lock()
-	defer cacheMutex.Unlock()
-
-	currentHistoricDataThreshold := calculateHistoricDataThreshold()
-
-	// Create a map of existing inspectors for quick lookup
-	existingInspectors := make(map[string]utils.TicketInspector)
-	for _, inspector := range cachedInspectorList {
-		existingInspectors[inspector.Station.ID] = utils.ConvertTicketInspectorResponseToTicketInspector(inspector)
-	}
-
-	updatedInspectorList := []utils.TicketInspector{}
-
-	// Process new ticket info
-	for _, newTicketInfo := range newTicketInfoList {
-		// Case B: New inspector reported or update existing inspector
-		if _, exists := existingInspectors[newTicketInfo.StationID]; !exists || newTicketInfo.Timestamp.After(existingInspectors[newTicketInfo.StationID].Timestamp) {
-			updatedInspectorList = append(updatedInspectorList, newTicketInfo)
-			delete(existingInspectors, newTicketInfo.StationID)
-		}
-	}
-
-	// Add remaining valid inspectors from the existing cache
-	for _, inspector := range existingInspectors {
-		if time.Since(inspector.Timestamp) < time.Hour {
-			updatedInspectorList = append(updatedInspectorList, inspector)
-		}
-	}
-
-	// Case A: Add historic data if needed
-	if len(updatedInspectorList) < currentHistoricDataThreshold {
-		numberOfHistoricDataToFetch := currentHistoricDataThreshold - len(updatedInspectorList)
-		
-		historicData, err := FetchAndAddHistoricData(updatedInspectorList, numberOfHistoricDataToFetch, startTime)
-		if err != nil {
-			logger.Log.Error().Err(err).Msg("Error fetching and adding historic data")
-		} else {
-			updatedInspectorList = historicData
-		}
-	}
-
-	// Sort the list
-	sort.Slice(updatedInspectorList, func(i, j int) bool {
-		if updatedInspectorList[i].Timestamp.Equal(updatedInspectorList[j].Timestamp) {
-			return updatedInspectorList[i].StationID < updatedInspectorList[j].StationID
-		}
-		return updatedInspectorList[i].Timestamp.After(updatedInspectorList[j].Timestamp)
-	})
-
-	// Convert back to TicketInspectorResponse for caching
-	cachedInspectorList = make([]utils.TicketInspectorResponse, len(updatedInspectorList))
-	for i, inspector := range updatedInspectorList {
-		response, err := constructTicketInspectorInfo(inspector, startTime, endTime)
-		if err != nil {
-			logger.Log.Error().Err(err).Msg("Error constructing ticket inspector info")
-			continue
-		}
-		cachedInspectorList[i] = response
-	}
-
-	cacheExpiration = time.Now().Add(cacheDuration)
-	cacheLastModified = time.Now()
-
-	logger.Log.Info().Msgf("Cache refreshed with %d inspectors", len(cachedInspectorList))
-}
 
 // @Summary Retrieve information about ticket inspector reports
 //
@@ -138,40 +33,31 @@ func refreshCache() {
 // @Router /basics/inspectors [get]
 func GetTicketInspectorsInfo(c echo.Context) error {
 	logger.Log.Info().Msg("GET /basics/inspectors")
-	logger.Log.Debug().Msgf("Cache expiration: %s", cacheExpiration)
 
+	databaseLastModified, err := database.GetLatestUpdateTime()
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error getting latest update time")
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	// Check if the data has been modified since the provided time
+	ifModifiedSince := c.Request().Header.Get("If-Modified-Since")
+	modifiedSince, err := utils.CheckIfModifiedSince(ifModifiedSince, databaseLastModified)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error checking if the data has been modified")
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	if !modifiedSince {
+		// Return 304 Not Modified if the data hasn't been modified since the provided time
+		return c.NoContent(http.StatusNotModified)
+	}
+
+	// Proceed with fetching and processing the data if it was modified
+	// or if the If-Modified-Since header was not provided
 	start := c.QueryParam("start")
 	end := c.QueryParam("end")
 
 	startTime, endTime := GetTimeRange(start, end)
-	isOneHourRange := endTime.Sub(startTime) == time.Hour
-
-	ifModifiedSince := c.Request().Header.Get("If-Modified-Since")
-
-	// Check if cached data is still valid for one-hour range requests
-	if isOneHourRange {
-        cacheMutex.RLock()
-        cacheValid := !cacheExpiration.IsZero() && time.Now().Before(cacheExpiration) && len(cachedInspectorList) > 0
-        if cacheValid {
-            // Check if-modified-since to avoid rerendering in the frontend when same data is returned
-            modifiedSince, err := utils.CheckIfModifiedSince(ifModifiedSince, cacheLastModified)
-            if err != nil {
-                logger.Log.Error().Err(err).Msg("Error checking if the data has been modified")
-            }
-            if !modifiedSince {
-                cacheMutex.RUnlock()
-                return c.NoContent(http.StatusNotModified)
-            }
-            logger.Log.Debug().Msg("Returning cached inspector list for one-hour range")
-            c.Response().Header().Set("Last-Modified", cacheLastModified.Format(time.RFC1123))
-            result := make([]utils.TicketInspectorResponse, len(cachedInspectorList))
-            copy(result, cachedInspectorList) // copy to ensure thread safety
-            cacheMutex.RUnlock()
-			logger.Log.Debug().Msgf("Returning cached inspector list for one-hour range: %v", result)
-            return c.JSONPretty(http.StatusOK, result, "")
-		}
-		cacheMutex.RUnlock()
-	}
 
 	ticketInfoList, err := database.GetLatestTicketInspectors(startTime, endTime)
 	if err != nil {
@@ -188,11 +74,12 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 			logger.Log.Error().Err(err).Msg("Error fetching and adding historic data")
 			return c.NoContent(http.StatusInternalServerError)
 		}
+
 	}
 
 	ticketInspectorList := []utils.TicketInspectorResponse{}
 	for _, ticketInfo := range ticketInfoList {
-		ticketInspector, err := constructTicketInspectorInfo(ticketInfo, startTime, endTime)
+		ticketInspector, err := constructTicketInspectorInfo(ticketInfo)
 		if err != nil {
 			logger.Log.Error().Err(err).Msg("Error constructing ticket inspector info")
 			return c.NoContent(http.StatusInternalServerError)
@@ -200,35 +87,9 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 		ticketInspectorList = append(ticketInspectorList, ticketInspector)
 	}
 
-	// Sort the list by timestamp, then by station name if timestamps are equal
-	sort.Slice(ticketInspectorList, func(i, j int) bool {
-		if ticketInspectorList[i].Timestamp.Equal(ticketInspectorList[j].Timestamp) {
-			return ticketInspectorList[i].Station.Name < ticketInspectorList[j].Station.Name
-		}
-		return ticketInspectorList[i].Timestamp.After(ticketInspectorList[j].Timestamp)
-	})
+	filteredTicketInspectorList := removeDuplicateStations(ticketInspectorList)
 
-	databaseLastModified, err := database.GetLatestInspectorsTimestamp()
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error getting latest update time")
-		return c.NoContent(http.StatusInternalServerError)
-	}
-
-	// Remove duplicates if start and end time are one hour apart
-	// This is done to prevent the MarkerModal from showing the same station twice, whilst the ListModal should show duplicates
-	if isOneHourRange {
-		ticketInspectorList = removeDuplicateStations(ticketInspectorList)
-
-		// update the cache for one-hour range requests
-		cacheMutex.Lock()
-		cachedInspectorList = ticketInspectorList
-		cacheExpiration = time.Now().Add(cacheDuration)
-		cacheLastModified = databaseLastModified // so that the cache time is same as the inspectors timestamp
-		cacheMutex.Unlock()
-	}
-
-	logger.Log.Debug().Msgf("Returning %d ticket inspectors", len(ticketInspectorList))
-	return c.JSONPretty(http.StatusOK, ticketInspectorList, "")
+	return c.JSONPretty(http.StatusOK, filteredTicketInspectorList, "")
 }
 
 func removeDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse) []utils.TicketInspectorResponse {
@@ -247,10 +108,18 @@ func removeDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse
 		filteredTicketInspectorList = append(filteredTicketInspectorList, ticketInspector)
 	}
 
+	// Sort the list by timestamp, then by station name if timestamps are equal
+	sort.Slice(filteredTicketInspectorList, func(i, j int) bool {
+		if filteredTicketInspectorList[i].Timestamp.Equal(filteredTicketInspectorList[j].Timestamp) {
+			return filteredTicketInspectorList[i].Station.Name < filteredTicketInspectorList[j].Station.Name
+		}
+		return filteredTicketInspectorList[i].Timestamp.After(filteredTicketInspectorList[j].Timestamp)
+	})
+
 	return filteredTicketInspectorList
 }
 
-func constructTicketInspectorInfo(ticketInfo utils.TicketInspector, startTime time.Time, endTime time.Time) (utils.TicketInspectorResponse, error) {
+func constructTicketInspectorInfo(ticketInfo utils.TicketInspector) (utils.TicketInspectorResponse, error) {
 	logger.Log.Debug().Msg("Constructing ticket inspector info")
 
 	cleanedStationId := strings.ReplaceAll(ticketInfo.StationID, "\n", "")
@@ -282,12 +151,6 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector, startTime ti
 			logger.Log.Error().Err(err).Msg("Error getting direction coordinates")
 			return utils.TicketInspectorResponse{}, err
 		}
-	}
-
-	if ticketInfo.IsHistoric {
-		// As the historic data is not a real entry it has no timestamp, so we need to calculate one
-		ticketInfo.Timestamp = calculateHistoricDataTimestamp(startTime, endTime)
-		logger.Log.Debug().Msgf("Setting timestamp to %s for historic data", ticketInfo.Timestamp)
 	}
 
 	ticketInspectorInfo := utils.TicketInspectorResponse{
