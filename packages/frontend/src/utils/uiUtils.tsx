@@ -155,18 +155,25 @@ export const stationDistanceMessage = (stationDistance: number | null): JSX.Elem
  * 2. If the elapsed time is 1 minute or less, it displays "Jetzt".
  * 3. For any other duration, it displays the time in minutes.
  */
-export const elapsedTimeMessage = (elapsedTimeInMinutes: number): JSX.Element => {
+export const elapsedTimeMessage = (elapsedTimeInMinutes: number, isHistoric: boolean): JSX.Element => {
+    if (isHistoric || (elapsedTimeInMinutes > 45 && elapsedTimeInMinutes < 60)) {
+        return (
+            <span>
+                Vor mehr als <strong>45 Minuten</strong>
+            </span>
+        )
+    }
+    if (Math.floor(elapsedTimeInMinutes / 60) === 1) {
+        return (
+            <span>
+                Vor einer <strong>Stunde</strong>
+            </span>
+        )
+    }
     if (elapsedTimeInMinutes > 60) {
         return (
             <span>
                 Vor <strong>{Math.floor(elapsedTimeInMinutes / 60)} Stunden</strong>
-            </span>
-        )
-    }
-    if (elapsedTimeInMinutes === 60) {
-        return (
-            <span>
-                Vor einer <strong>Stunde</strong>
             </span>
         )
     }

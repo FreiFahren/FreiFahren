@@ -31,6 +31,11 @@ const InspectorListModal: React.FC<InspectorListModalProps> = ({ className }) =>
             const historicInspectors = lastHourInspectorList.filter((inspector) => inspector.isHistoric)
             const recentInspectors = lastHourInspectorList.filter((inspector) => !inspector.isHistoric)
 
+            // remove historic inspectors from previousDayInspectorList
+            const filteredPreviousDayInspectorList = previousDayInspectorList.filter(
+                (inspector: MarkerData) => !inspector.isHistoric
+            )
+
             // sort each list so that the most recent data is at the top
             recentInspectors.sort(
                 (a: MarkerData, b: MarkerData) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -38,12 +43,12 @@ const InspectorListModal: React.FC<InspectorListModalProps> = ({ className }) =>
             historicInspectors.sort(
                 (a: MarkerData, b: MarkerData) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
             )
-            previousDayInspectorList.sort(
+            filteredPreviousDayInspectorList.sort(
                 (a: MarkerData, b: MarkerData) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
             )
 
             // Combine the lists so that first are the recent inspectors, then the historic inspectors and then the previous day inspectors
-            const inspectorList = [...recentInspectors, ...historicInspectors, ...previousDayInspectorList]
+            const inspectorList = [...recentInspectors, ...historicInspectors, ...filteredPreviousDayInspectorList]
 
             setTicketInspectorList(inspectorList)
         }
@@ -55,7 +60,7 @@ const InspectorListModal: React.FC<InspectorListModalProps> = ({ className }) =>
             <h1>Aktuelle Meldungen</h1>
             {ticketInspectorList.map((ticketInspector) => {
                 const inspectorTimestamp = new Date(ticketInspector.timestamp).getTime()
-                const elapsedTime = Math.floor((currentTime - inspectorTimestamp) / 60000) // Convert to minutes
+                const elapsedTime = Math.floor((currentTime - inspectorTimestamp) / (60 * 1000)) // Convert to minutes
                 return (
                     <div key={ticketInspector.station.id + ticketInspector.timestamp}>
                         <div className="align-child-on-line">
@@ -66,7 +71,7 @@ const InspectorListModal: React.FC<InspectorListModalProps> = ({ className }) =>
                         </div>
                         <div>
                             <p>
-                                {elapsedTimeMessage(elapsedTime)}
+                                {elapsedTimeMessage(elapsedTime, ticketInspector.isHistoric)}
                                 {ticketInspector.direction.name && (
                                     <>
                                         , Richtung: <span>{ticketInspector.direction.name}</span>
