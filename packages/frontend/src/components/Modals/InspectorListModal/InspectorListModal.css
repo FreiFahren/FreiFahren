@@ -1,0 +1,30 @@
+.list-modal > div {
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--margin-m);
+    border-bottom: 1px solid #000;
+}
+
+.list-modal > div:last-child {
+    border-bottom: none;
+}
+
+.list-modal {
+    max-height: 75vh;
+}
+
+.list-modal > div p {
+    color: var(--color-gray-on-dark-background);
+}
+
+.list-modal > div span {
+    color: var(--color-primary);
+}
+
+.list-modal > div > div {
+    justify-content: left;
+}
+
+.list-modal > div > div:first-child h4 {
+    margin-right: var(--margin-s);
+}

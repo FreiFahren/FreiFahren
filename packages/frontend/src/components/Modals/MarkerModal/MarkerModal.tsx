@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react'
-import { MarkerData } from '../../Map/Markers/MarkerContainer'
-import { elapsedTimeMessage, stationDistanceMessage } from '../../../utils/mapUtils'
+import { MarkerData } from 'src/utils/types'
+import { stationDistanceMessage, elapsedTimeMessage } from '../../../utils/uiUtils'
 import { getStationDistance } from '../../../utils/dbUtils'
 import Skeleton, { useSkeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
 import './MarkerModal.css'
@@ -14,14 +14,14 @@ interface MarkerModalProps {
 }
 
 const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selectedMarker, userLat, userLng }) => {
-    const { timestamp, station, line, direction, isHistoric } = selectedMarker
+    const { timestamp, station, line, direction } = selectedMarker
 
     const adjustedTimestamp = useMemo(() => {
         const tempTimestamp = new Date(timestamp)
         return tempTimestamp
     }, [timestamp])
     const currentTime = new Date().getTime()
-    const elapsedTime = currentTime - adjustedTimestamp.getTime()
+    const elapsedTimeInMinutes = Math.floor((currentTime - adjustedTimestamp.getTime()) / 60000)
 
     const [isLoading, setIsLoading] = useState(false)
     const [stationDistance, setStationDistance] = useState<number | null>(null)
@@ -57,11 +57,11 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
             <h1>{station.name}</h1>
             {(direction.name !== '' || line !== '') && (
                 <h2>
-                    <span className={line}>{line}</span> {direction.name}
+                    <span className={`line-label ${line}`}>{line}</span> {direction.name}
                 </h2>
             )}
             <div>
-                <p>{elapsedTimeMessage(elapsedTime, isHistoric)}</p>
+                <p>{elapsedTimeMessage(elapsedTimeInMinutes, selectedMarker.isHistoric)}</p>
                 <p className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage(stationDistance)}</p>
                 {selectedMarker.message && <p className="description">{selectedMarker.message}</p>}
             </div>

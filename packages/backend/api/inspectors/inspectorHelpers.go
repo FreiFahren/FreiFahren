@@ -20,17 +20,24 @@ import (
 //
 // This function is being used to get the start and end time of the time range.
 func GetTimeRange(start, end string) (time.Time, time.Time) {
-	logger.Log.Debug().Msg("Getting the time range of the ")
+	logger.Log.Debug().Msg("Getting the time range")
 
 	now := time.Now().UTC()
-	startTime, err := time.Parse(time.RFC3339, start)
-	if err != nil {
-		startTime = now.Add(-1 * time.Hour)
+	startTime := now.Add(-1 * time.Hour)
+	endTime := now
+
+	if start != "" && end != "" {
+		parsedStart, err := time.Parse(time.RFC3339, start)
+		if err == nil {
+			startTime = parsedStart
+		}
+
+		parsedEnd, err := time.Parse(time.RFC3339, end)
+		if err == nil {
+			endTime = parsedEnd
+		}
 	}
-	endTime, err := time.Parse(time.RFC3339, end)
-	if err != nil {
-		endTime = now
-	}
+
 	return startTime, endTime
 }
 

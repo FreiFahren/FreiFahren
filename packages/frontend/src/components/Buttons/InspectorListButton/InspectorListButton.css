@@ -1,0 +1,16 @@
+.list-button {
+    height: 45px;
+    min-height: auto;
+    min-width: auto;
+    width: 100px;
+    bottom: var(--distance-from-edge-default);
+    left: var(--distance-from-edge-default);
+    padding: var(--padding-s);
+    border: var(--border-default);
+    overflow: hidden;
+}
+
+.list-button img {
+    height: 23px;
+    width: 23px;
+}
