@@ -18,9 +18,104 @@ var (
 	cachedInspectorList []utils.TicketInspectorResponse
 	cacheMutex sync.RWMutex
 	cacheExpiration time.Time
-	cacheDuration = 1 * time.Hour
+	cacheDuration = 1 * time.Hour // as a backup if the cacheRefreshTicker is not working
 	cacheLastModified   time.Time
+	cacheRefreshTicker *time.Ticker
 )
+
+func init() {
+	cacheRefreshTicker = time.NewTicker(1 * time.Minute)
+	go refreshCacheIfNeeded()
+}
+
+func refreshCacheIfNeeded() {
+	for range cacheRefreshTicker.C {
+		cacheMutex.RLock()
+		needsRefresh := len(cachedInspectorList) == 0 || time.Since(cachedInspectorList[0].Timestamp) >= time.Hour
+		cacheMutex.RUnlock()
+
+		if needsRefresh {
+			refreshCache()
+		}
+	}
+}
+
+func refreshCache() {
+	logger.Log.Info().Msg("Refreshing inspector cache")
+	endTime := time.Now()
+	startTime := endTime.Add(-1 * time.Hour)
+
+	newTicketInfoList, err := database.GetLatestTicketInspectors(startTime, endTime)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error fetching new inspector data")
+		return
+	}
+
+	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
+
+	currentHistoricDataThreshold := calculateHistoricDataThreshold()
+
+	// Create a map of existing inspectors for quick lookup
+	existingInspectors := make(map[string]utils.TicketInspector)
+	for _, inspector := range cachedInspectorList {
+		existingInspectors[inspector.Station.ID] = utils.ConvertTicketInspectorResponseToTicketInspector(inspector)
+	}
+
+	updatedInspectorList := []utils.TicketInspector{}
+
+	// Process new ticket info
+	for _, newTicketInfo := range newTicketInfoList {
+		// Case B: New inspector reported or update existing inspector
+		if _, exists := existingInspectors[newTicketInfo.StationID]; !exists || newTicketInfo.Timestamp.After(existingInspectors[newTicketInfo.StationID].Timestamp) {
+			updatedInspectorList = append(updatedInspectorList, newTicketInfo)
+			delete(existingInspectors, newTicketInfo.StationID)
+		}
+	}
+
+	// Add remaining valid inspectors from the existing cache
+	for _, inspector := range existingInspectors {
+		if time.Since(inspector.Timestamp) < time.Hour {
+			updatedInspectorList = append(updatedInspectorList, inspector)
+		}
+	}
+
+	// Case A: Add historic data if needed
+	if len(updatedInspectorList) < currentHistoricDataThreshold {
+		numberOfHistoricDataToFetch := currentHistoricDataThreshold - len(updatedInspectorList)
+		
+		historicData, err := FetchAndAddHistoricData(updatedInspectorList, numberOfHistoricDataToFetch, startTime)
+		if err != nil {
+			logger.Log.Error().Err(err).Msg("Error fetching and adding historic data")
+		} else {
+			updatedInspectorList = historicData
+		}
+	}
+
+	// Sort the list
+	sort.Slice(updatedInspectorList, func(i, j int) bool {
+		if updatedInspectorList[i].Timestamp.Equal(updatedInspectorList[j].Timestamp) {
+			return updatedInspectorList[i].StationID < updatedInspectorList[j].StationID
+		}
+		return updatedInspectorList[i].Timestamp.After(updatedInspectorList[j].Timestamp)
+	})
+
+	// Convert back to TicketInspectorResponse for caching
+	cachedInspectorList = make([]utils.TicketInspectorResponse, len(updatedInspectorList))
+	for i, inspector := range updatedInspectorList {
+		response, err := constructTicketInspectorInfo(inspector, startTime, endTime)
+		if err != nil {
+			logger.Log.Error().Err(err).Msg("Error constructing ticket inspector info")
+			continue
+		}
+		cachedInspectorList[i] = response
+	}
+
+	cacheExpiration = time.Now().Add(cacheDuration)
+	cacheLastModified = time.Now()
+
+	logger.Log.Info().Msgf("Cache refreshed with %d inspectors", len(cachedInspectorList))
+}
 
 // @Summary Retrieve information about ticket inspector reports
 //
@@ -43,6 +138,7 @@ var (
 // @Router /basics/inspectors [get]
 func GetTicketInspectorsInfo(c echo.Context) error {
 	logger.Log.Info().Msg("GET /basics/inspectors")
+	logger.Log.Debug().Msgf("Cache expiration: %s", cacheExpiration)
 
 	start := c.QueryParam("start")
 	end := c.QueryParam("end")

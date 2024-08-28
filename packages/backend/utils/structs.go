@@ -165,3 +165,14 @@ type RiskModelResponse struct {
 	LastModified  string            `json:"last_modified"`
 	SegmentColors map[string]string `json:"segment_colors"`
 }
+
+func ConvertTicketInspectorResponseToTicketInspector(ticketInspectorResponse TicketInspectorResponse) TicketInspector {
+	return TicketInspector{
+		Timestamp:   ticketInspectorResponse.Timestamp,
+		StationID:   ticketInspectorResponse.Station.ID,
+		Line:        sql.NullString{String: ticketInspectorResponse.Line, Valid: ticketInspectorResponse.Line != ""},
+		DirectionID: sql.NullString{String: ticketInspectorResponse.Direction.ID, Valid: ticketInspectorResponse.Direction.ID != ""},
+		IsHistoric:  ticketInspectorResponse.IsHistoric,
+		Message:     sql.NullString{String: ticketInspectorResponse.Message, Valid: ticketInspectorResponse.Message != ""},
+	}
+}

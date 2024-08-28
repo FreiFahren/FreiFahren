@@ -83,7 +83,8 @@ func PostInspector(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	// set the cache to be expired
+	// Todo: Remeber to improve this so that it does not remove the historic data that is still relevant
+	// set the cache to be expired 
 	cacheExpiration = time.Time{}
 
 	// Based on the new data, generate new risk segments
