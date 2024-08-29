@@ -71,6 +71,7 @@
     --text-relation-weak: 3.2%;
 
     --border-default: 2px solid #000;
+    --border-weak: 1px solid #000;
     --border-marker: 3px solid #ffffff;
 
     --distance-from-edge-default: 25px;

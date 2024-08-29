@@ -1,0 +1,12 @@
+.report-form h1 {
+    margin-bottom: var(--margin-m);
+}
+
+.entity {
+    width: 30px;
+    height: 85%;
+    border-radius: var(--borderRadius-small);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
