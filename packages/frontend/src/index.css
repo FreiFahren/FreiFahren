@@ -274,6 +274,16 @@ span {
     border: 2px solid var(--color-red) !important;
 }
 
+.red-highlight {
+    font-size: var(--font-xl);
+    color: var(--color-red);
+}
+
+.red-highlight#warning-span {
+    font-size: var(--font-xs);
+    margin-top: var(--margin-m);
+}
+
 .legal-text {
     overflow-y: scroll;
     max-height: calc(100vh - 25px);
