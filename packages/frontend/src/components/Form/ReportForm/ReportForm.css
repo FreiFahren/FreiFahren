@@ -1,5 +1,5 @@
-.report-form h1 {
-    margin-bottom: var(--margin-m);
+.report-form > form > div {
+    margin-top: var(--margin-m);
 }
 
 .entity {
