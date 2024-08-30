@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import './ReportForm.css'
 
 import SelectField from '../SelectField/SelectField'
@@ -36,13 +36,13 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
         } else {
             setPossibleLines(allLines)
         }
+        console.log('Possible Lines:', possibleLines)
     }, [selectedEntity, allLines])
 
-    const handleEntitySelect = (entity: string) => {
+    const handleEntitySelect = useCallback((entity: string) => {
+        console.log('New Entity:', entity)
         setSelectedEntity(entity)
-        console.log(selectedEntity)
-        console.log(possibleLines)
-    }
+    }, [])
 
     return (
         <div className={`report-form container modal ${className}`}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import './SelectField.css'
 
 interface SelectFieldProps {
@@ -9,27 +9,37 @@ interface SelectFieldProps {
 }
 
 const SelectField: React.FC<SelectFieldProps> = ({ children, containerClassName, fieldClassName, onSelect }) => {
-    const [selected, setSelected] = useState<React.ReactNode>(null)
+    const [selected, setSelected] = useState<string | null>(null)
 
-    const handleSelect = (child: React.ReactNode) => {
-        setSelected(child)
-        if (onSelect && React.isValidElement(child)) {
-            const selectedValue = child.props.children.props.children
-            onSelect(selectedValue)
-        }
-    }
+    const handleSelect = useCallback(
+        (child: React.ReactNode) => {
+            if (React.isValidElement(child)) {
+                const selectedValue = child.props.children.props.children
+                setSelected(selectedValue)
+                console.log('Selected Value:', selectedValue)
+                if (onSelect) {
+                    onSelect(selectedValue)
+                }
+            }
+        },
+        [onSelect]
+    )
 
     return (
         <div className={`select-field-container ${containerClassName}`}>
-            {React.Children.map(children, (child, index) => (
-                <div
-                    key={index}
-                    className={`select-field ${selected === child ? 'selected' : ''} ${fieldClassName}`}
-                    onClick={() => handleSelect(child)}
-                >
-                    {child}
-                </div>
-            ))}
+            {React.Children.map(
+                children,
+                (child, index) =>
+                    React.isValidElement(child) && (
+                        <div
+                            key={index}
+                            className={`select-field ${selected === child.props.children.props.children ? 'selected' : ''} ${fieldClassName}`}
+                            onClick={() => handleSelect(child)}
+                        >
+                            {child}
+                        </div>
+                    )
+            )}
         </div>
     )
 }
