@@ -47,6 +47,10 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
         [updatePossibleLines]
     )
 
+    const handleLineSelect = useCallback((line: string) => {
+        console.log('Selected Line:', line)
+    }, [])
+
     return (
         <div className={`report-form container modal ${className}`}>
             <form>
@@ -57,16 +61,27 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                         fieldClassName="entity-type-selector"
                         onSelect={handleEntitySelect}
                     >
-                        <div className="entity U8">
+                        <div className="line U8">
                             <strong>U</strong>
                         </div>
-                        <div className="entity S2">
+                        <div className="line S2">
                             <strong>S</strong>
                         </div>
                     </SelectField>
                 </div>
                 <div>
                     <h2>Linie</h2>
+                    <SelectField
+                        containerClassName="align-child-on-line long-selector"
+                        onSelect={handleLineSelect}
+                        fieldClassName=""
+                    >
+                        {Object.keys(possibleLines).map((line) => (
+                            <div key={line} className={`line ${line}`}>
+                                <strong>{line}</strong>
+                            </div>
+                        ))}
+                    </SelectField>
                 </div>
             </form>
         </div>

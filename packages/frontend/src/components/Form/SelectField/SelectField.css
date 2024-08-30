@@ -15,6 +15,11 @@
     border: 1.5px solid var(--incentive-blue);
 }
 
+.long-selector {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
 .large-selector {
     height: 30px;
 }

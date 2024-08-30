@@ -5,7 +5,7 @@ interface SelectFieldProps {
     children: React.ReactNode
     containerClassName?: string
     fieldClassName?: string
-    onSelect?: (selectedValue: string) => void
+    onSelect: (selectedValue: string) => void
 }
 
 const SelectField: React.FC<SelectFieldProps> = ({ children, containerClassName, fieldClassName, onSelect }) => {
@@ -17,9 +17,7 @@ const SelectField: React.FC<SelectFieldProps> = ({ children, containerClassName,
                 const selectedValue = child.props.children.props.children
                 setSelected(selectedValue)
                 console.log('Selected Value:', selectedValue)
-                if (onSelect) {
-                    onSelect(selectedValue)
-                }
+                onSelect(selectedValue)
             }
         },
         [onSelect]

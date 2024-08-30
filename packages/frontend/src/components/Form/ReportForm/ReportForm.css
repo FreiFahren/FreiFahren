@@ -2,8 +2,12 @@
     margin-top: var(--margin-m);
 }
 
-.entity {
-    width: 30px;
+.report-form > form > div > div {
+    margin-top: var(--margin-s);
+}
+
+.line {
+    width: 35px;
     height: 85%;
     border-radius: var(--borderRadius-small);
     display: flex;
