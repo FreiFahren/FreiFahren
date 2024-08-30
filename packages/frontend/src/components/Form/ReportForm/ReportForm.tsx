@@ -11,7 +11,6 @@ interface ReportFormProps {
 }
 
 const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, className, userPosition }) => {
-    const [selectedEntity, setSelectedEntity] = useState<string | null>(null)
     const [allLines, setAllLines] = useState<LinesList>({})
     const [possibleLines, setPossibleLines] = useState<LinesList>({})
 
@@ -19,30 +18,34 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
         const fetchLines = async () => {
             const lines = await getAllLinesList()
             setAllLines(lines)
-            setPossibleLines(lines) // Initialize possibleLines with all lines
+            setPossibleLines(lines) // Set possible lines to all lines initially
         }
         fetchLines()
     }, [])
 
-    useEffect(() => {
-        if (selectedEntity) {
-            const filteredLines: LinesList = Object.entries(allLines).reduce((acc, [line, stations]) => {
-                if (line.startsWith(selectedEntity)) {
-                    acc[line] = stations
-                }
-                return acc
-            }, {} as LinesList)
-            setPossibleLines(filteredLines)
-        } else {
-            setPossibleLines(allLines)
-        }
-        console.log('Possible Lines:', possibleLines)
-    }, [selectedEntity, allLines])
+    const updatePossibleLines = useCallback(
+        (entity: string | null) => {
+            if (entity) {
+                const filteredLines: LinesList = Object.entries(allLines).reduce((acc, [line, stations]) => {
+                    if (line.startsWith(entity)) {
+                        acc[line] = stations
+                    }
+                    return acc
+                }, {} as LinesList)
+                setPossibleLines(filteredLines)
+            } else {
+                setPossibleLines(allLines)
+            }
+        },
+        [allLines]
+    )
 
-    const handleEntitySelect = useCallback((entity: string) => {
-        console.log('New Entity:', entity)
-        setSelectedEntity(entity)
-    }, [])
+    const handleEntitySelect = useCallback(
+        (entity: string) => {
+            updatePossibleLines(entity)
+        },
+        [updatePossibleLines]
+    )
 
     return (
         <div className={`report-form container modal ${className}`}>
