@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import './ReportForm.css'
 
 import SelectField from '../SelectField/SelectField'
-import { getAllLinesList, LinesList } from '../../../utils/dbUtils'
+import { getAllLinesList, LinesList, getAllStationsList, StationList } from '../../../utils/dbUtils'
 interface ReportFormProps {
     closeModal: () => void
     onFormSubmit: () => void
@@ -12,7 +12,13 @@ interface ReportFormProps {
 
 const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, className, userPosition }) => {
     const [allLines, setAllLines] = useState<LinesList>({})
+    const [allStations, setAllStations] = useState<StationList>({})
+
+    const [currentEntity, setCurrentEntity] = useState<string | null>(null)
+    const [currentLine, setCurrentLine] = useState<string | null>(null)
+
     const [possibleLines, setPossibleLines] = useState<LinesList>({})
+    const [possibleStations, setPossibleStations] = useState<StationList>({})
 
     useEffect(() => {
         const fetchLines = async () => {
@@ -20,14 +26,55 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
             setAllLines(lines)
             setPossibleLines(lines) // Set possible lines to all lines initially
         }
+        const fetchStations = async () => {
+            const stations = await getAllStationsList()
+            setAllStations(stations)
+            setPossibleStations(stations)
+        }
+
         fetchLines()
+        fetchStations()
     }, [])
 
+    const updatePossibleStations = useCallback(
+        (currentEntity: string | null, currentLine: string | null) => {
+            if (currentEntity) {
+                const filteredStations: StationList = Object.entries(allStations).reduce(
+                    (acc, [stationName, stationData]) => {
+                        if (stationData.lines.some((line) => line.startsWith(currentEntity))) {
+                            acc[stationName] = stationData
+                        }
+                        return acc
+                    },
+                    {} as StationList
+                )
+                setPossibleStations(filteredStations)
+            }
+            if (currentLine) {
+                const filteredStations: StationList = Object.entries(allStations).reduce(
+                    (acc, [stationName, stationData]) => {
+                        if (stationData.lines.some((stationLine) => stationLine === currentLine)) {
+                            acc[stationName] = stationData
+                        }
+                        return acc
+                    },
+                    {} as StationList
+                )
+                setPossibleStations(filteredStations)
+            }
+        },
+        [allStations]
+    )
+
     const updatePossibleLines = useCallback(
-        (entity: string | null) => {
-            if (entity) {
+        (currentEntity: string | null, currentLine: string | null) => {
+            console.log('currentEntity', currentEntity)
+            console.log('currentLine', currentLine)
+            if (currentLine) {
+                setPossibleLines({ [currentLine]: allLines[currentLine] })
+            } else if (currentEntity) {
                 const filteredLines: LinesList = Object.entries(allLines).reduce((acc, [line, stations]) => {
-                    if (line.startsWith(entity)) {
+                    if (line.startsWith(currentEntity)) {
                         acc[line] = stations
                     }
                     return acc
@@ -40,15 +87,39 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
         [allLines]
     )
 
-    const handleEntitySelect = useCallback(
+    const refreshForm = useCallback(
         (entity: string) => {
-            updatePossibleLines(entity)
+            setCurrentEntity(entity)
+            setCurrentLine(null)
+            updatePossibleLines(entity, null)
+            updatePossibleStations(entity, null)
         },
-        [updatePossibleLines]
+        [updatePossibleLines, updatePossibleStations]
     )
 
-    const handleLineSelect = useCallback((line: string) => {
-        console.log('Selected Line:', line)
+    const handleEntitySelect = useCallback(
+        (entity: string) => {
+            if (currentEntity) {
+                refreshForm(entity)
+            } else {
+                setCurrentEntity(entity)
+                updatePossibleLines(entity, currentLine)
+                updatePossibleStations(entity, currentLine)
+            }
+        },
+        [updatePossibleLines, updatePossibleStations, currentLine, currentEntity, refreshForm]
+    )
+
+    const handleLineSelect = useCallback(
+        (line: string) => {
+            setCurrentLine(line)
+            updatePossibleStations(currentEntity, line)
+        },
+        [updatePossibleStations, currentEntity]
+    )
+
+    const handleStationSelect = useCallback((station: string) => {
+        console.log('Selected Station:', station)
     }, [])
 
     return (
@@ -71,14 +142,20 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                 </div>
                 <div>
                     <h2>Linie</h2>
-                    <SelectField
-                        containerClassName="align-child-on-line long-selector"
-                        onSelect={handleLineSelect}
-                        fieldClassName=""
-                    >
+                    <SelectField containerClassName="align-child-on-line long-selector" onSelect={handleLineSelect}>
                         {Object.keys(possibleLines).map((line) => (
                             <div key={line} className={`line ${line}`}>
                                 <strong>{line}</strong>
+                            </div>
+                        ))}
+                    </SelectField>
+                </div>
+                <div>
+                    <h2>Station</h2>
+                    <SelectField onSelect={handleStationSelect}>
+                        {Object.keys(possibleStations).map((station) => (
+                            <div key={station}>
+                                <strong>{station}</strong>
                             </div>
                         ))}
                     </SelectField>
