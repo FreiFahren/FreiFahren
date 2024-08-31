@@ -90,11 +90,13 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
     const refreshForm = useCallback(
         (entity: string) => {
             setCurrentEntity(entity)
-            setCurrentLine(null)
+            if (!currentLine?.startsWith(entity)) {
+                setCurrentLine(null)
+            }
             updatePossibleLines(entity, null)
             updatePossibleStations(entity, null)
         },
-        [updatePossibleLines, updatePossibleStations]
+        [updatePossibleLines, updatePossibleStations, currentLine]
     )
 
     const handleEntitySelect = useCallback(
