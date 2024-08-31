@@ -17,6 +17,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
     const [currentEntity, setCurrentEntity] = useState<string | null>(null)
     const [currentLine, setCurrentLine] = useState<string | null>(null)
     const [currentStation, setCurrentStation] = useState<string | null>(null)
+    const [currentDirection, setCurrentDirection] = useState<string | null>(null)
 
     const [possibleLines, setPossibleLines] = useState<LinesList>({})
     const [possibleStations, setPossibleStations] = useState<StationList>({})
@@ -136,6 +137,11 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
         [currentStation]
     )
 
+    const handleDirectionSelect = useCallback((direction: string | null) => {
+        setCurrentDirection(direction)
+        console.log(direction)
+    }, [])
+
     return (
         <div className={`report-form container modal ${className}`}>
             <form>
@@ -183,6 +189,25 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                         ))}
                     </SelectField>
                 </div>
+                {currentLine && (
+                    <div>
+                        <h2>Richtung</h2>
+                        <SelectField
+                            onSelect={handleDirectionSelect}
+                            value={currentDirection}
+                            containerClassName="align-child-on-line"
+                        >
+                            <div>
+                                <strong>{allStations[allLines[currentLine][0]].name}</strong>
+                            </div>
+                            <div>
+                                <strong>
+                                    {allStations[allLines[currentLine][allLines[currentLine].length - 1]].name}
+                                </strong>
+                            </div>
+                        </SelectField>
+                    </div>
+                )}
             </form>
         </div>
     )
