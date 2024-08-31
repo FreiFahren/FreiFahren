@@ -125,9 +125,16 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
         [updatePossibleStations, currentEntity, currentLine]
     )
 
-    const handleStationSelect = useCallback((station: string | null) => {
-        console.log('Selected Station:', station)
-    }, [])
+    const handleStationSelect = useCallback(
+        (station: string | null) => {
+            if (station === null || station === currentStation) {
+                setCurrentStation(null)
+            } else {
+                setCurrentStation(station)
+            }
+        },
+        [currentStation]
+    )
 
     return (
         <div className={`report-form container modal ${className}`}>
@@ -164,10 +171,14 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                 </div>
                 <div>
                     <h2>Station</h2>
-                    <SelectField onSelect={handleStationSelect} value={currentStation}>
-                        {Object.keys(possibleStations).map((station) => (
-                            <div key={station}>
-                                <strong>{station}</strong>
+                    <SelectField
+                        onSelect={handleStationSelect}
+                        value={currentStation}
+                        containerClassName="align-child-column"
+                    >
+                        {Object.entries(possibleStations).map(([stationKey, stationData]) => (
+                            <div key={stationKey}>
+                                <strong>{stationData.name}</strong>
                             </div>
                         ))}
                     </SelectField>
