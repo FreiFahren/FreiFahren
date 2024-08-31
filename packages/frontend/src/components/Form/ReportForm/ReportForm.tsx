@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect, useCallback } from 'react'
 import './ReportForm.css'
 
@@ -39,8 +40,10 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
     }, [])
 
     const updatePossibleStations = useCallback(
-        (currentEntity: string | null, currentLine: string | null) => {
-            if (currentEntity) {
+        (currentEntity: string | null, currentLine: string | null, currentStation: string | null) => {
+            if (currentStation) {
+                setPossibleStations({ [currentStation]: allStations[currentStation] })
+            } else if (currentEntity) {
                 const filteredStations: StationList = Object.entries(allStations).reduce(
                     (acc, [stationName, stationData]) => {
                         if (stationData.lines.some((line) => line.startsWith(currentEntity))) {
@@ -95,7 +98,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                 setCurrentLine(null)
             }
             updatePossibleLines(entity, null)
-            updatePossibleStations(entity, null)
+            updatePossibleStations(entity, null, null)
         },
         [updatePossibleLines, updatePossibleStations, currentLine]
     )
@@ -107,34 +110,46 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
             } else {
                 setCurrentEntity(entity)
                 updatePossibleLines(entity, currentLine)
-                updatePossibleStations(entity, currentLine)
+                updatePossibleStations(entity, currentLine, currentStation)
             }
         },
-        [updatePossibleLines, updatePossibleStations, currentLine, refreshForm]
+        [refreshForm, updatePossibleLines, currentLine, updatePossibleStations, currentStation]
     )
 
     const handleLineSelect = useCallback(
         (line: string | null) => {
             if (line === null || line === currentLine) {
                 setCurrentLine(null)
-                updatePossibleStations(currentEntity, null)
+                updatePossibleStations(currentEntity, null, null)
             } else {
                 setCurrentLine(line)
-                updatePossibleStations(currentEntity, line)
+                updatePossibleStations(currentEntity, line, currentStation)
             }
         },
-        [updatePossibleStations, currentEntity, currentLine]
+        [updatePossibleStations, currentEntity, currentLine, currentStation]
     )
 
     const handleStationSelect = useCallback(
-        (station: string | null) => {
-            if (station === null || station === currentStation) {
+        (stationName: string | null) => {
+            if (stationName === null || stationName === currentStation) {
                 setCurrentStation(null)
+                updatePossibleStations(currentEntity, currentLine, null)
             } else {
-                setCurrentStation(station)
+                const foundStationEntry = Object.entries(allStations).find(
+                    ([_, stationData]) => stationData.name === stationName
+                )
+                if (foundStationEntry) {
+                    const [stationId] = foundStationEntry
+                    setCurrentStation(stationId)
+                    updatePossibleStations(currentEntity, currentLine, stationId)
+                } else {
+                    console.warn(`Station "${stationName}" not found in allStations`)
+                    setCurrentStation(null)
+                    updatePossibleStations(currentEntity, currentLine, null)
+                }
             }
         },
-        [currentStation]
+        [currentStation, updatePossibleStations, currentEntity, currentLine, allStations]
     )
 
     const handleDirectionSelect = useCallback((direction: string | null) => {
@@ -179,7 +194,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                     <h2>Station</h2>
                     <SelectField
                         onSelect={handleStationSelect}
-                        value={currentStation}
+                        value={currentStation ? allStations[currentStation].name : ''}
                         containerClassName="align-child-column"
                     >
                         {Object.entries(possibleStations).map(([stationKey, stationData]) => (
