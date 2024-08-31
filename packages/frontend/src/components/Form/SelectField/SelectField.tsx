@@ -5,22 +5,21 @@ interface SelectFieldProps {
     children: React.ReactNode
     containerClassName?: string
     fieldClassName?: string
-    onSelect: (selectedValue: string) => void
+    onSelect: (selectedValue: string | null) => void
+    value: string | null
 }
 
-const SelectField: React.FC<SelectFieldProps> = ({ children, containerClassName, fieldClassName, onSelect }) => {
-    const [selected, setSelected] = useState<string | null>(null)
-
+const SelectField: React.FC<SelectFieldProps> = ({ children, containerClassName, fieldClassName, onSelect, value }) => {
     const handleSelect = useCallback(
         (child: React.ReactNode) => {
             if (React.isValidElement(child)) {
                 const selectedValue = child.props.children.props.children
-                setSelected(selectedValue)
-                console.log('Selected Value:', selectedValue)
-                onSelect(selectedValue)
+                const newValue = value === selectedValue ? null : selectedValue // Toggle selection
+                console.log('Selected Value:', newValue)
+                onSelect(newValue)
             }
         },
-        [onSelect]
+        [onSelect, value]
     )
 
     return (
@@ -31,7 +30,7 @@ const SelectField: React.FC<SelectFieldProps> = ({ children, containerClassName,
                     React.isValidElement(child) && (
                         <div
                             key={index}
-                            className={`select-field ${selected === child.props.children.props.children ? 'selected' : ''} ${fieldClassName}`}
+                            className={`select-field ${value === child.props.children.props.children ? 'selected' : ''} ${fieldClassName}`}
                             onClick={() => handleSelect(child)}
                         >
                             {child}

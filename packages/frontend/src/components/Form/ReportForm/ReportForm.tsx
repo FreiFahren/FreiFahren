@@ -16,6 +16,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
 
     const [currentEntity, setCurrentEntity] = useState<string | null>(null)
     const [currentLine, setCurrentLine] = useState<string | null>(null)
+    const [currentStation, setCurrentStation] = useState<string | null>(null)
 
     const [possibleLines, setPossibleLines] = useState<LinesList>({})
     const [possibleStations, setPossibleStations] = useState<StationList>({})
@@ -49,8 +50,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                     {} as StationList
                 )
                 setPossibleStations(filteredStations)
-            }
-            if (currentLine) {
+            } else if (currentLine) {
                 const filteredStations: StationList = Object.entries(allStations).reduce(
                     (acc, [stationName, stationData]) => {
                         if (stationData.lines.some((stationLine) => stationLine === currentLine)) {
@@ -61,6 +61,8 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                     {} as StationList
                 )
                 setPossibleStations(filteredStations)
+            } else {
+                setPossibleStations(allStations)
             }
         },
         [allStations]
@@ -68,8 +70,6 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
 
     const updatePossibleLines = useCallback(
         (currentEntity: string | null, currentLine: string | null) => {
-            console.log('currentEntity', currentEntity)
-            console.log('currentLine', currentLine)
             if (currentLine) {
                 setPossibleLines({ [currentLine]: allLines[currentLine] })
             } else if (currentEntity) {
@@ -98,8 +98,8 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
     )
 
     const handleEntitySelect = useCallback(
-        (entity: string) => {
-            if (currentEntity) {
+        (entity: string | null) => {
+            if (entity) {
                 refreshForm(entity)
             } else {
                 setCurrentEntity(entity)
@@ -107,18 +107,23 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                 updatePossibleStations(entity, currentLine)
             }
         },
-        [updatePossibleLines, updatePossibleStations, currentLine, currentEntity, refreshForm]
+        [updatePossibleLines, updatePossibleStations, currentLine, refreshForm]
     )
 
     const handleLineSelect = useCallback(
-        (line: string) => {
-            setCurrentLine(line)
-            updatePossibleStations(currentEntity, line)
+        (line: string | null) => {
+            if (line === null || line === currentLine) {
+                setCurrentLine(null)
+                updatePossibleStations(currentEntity, null)
+            } else {
+                setCurrentLine(line)
+                updatePossibleStations(currentEntity, line)
+            }
         },
-        [updatePossibleStations, currentEntity]
+        [updatePossibleStations, currentEntity, currentLine]
     )
 
-    const handleStationSelect = useCallback((station: string) => {
+    const handleStationSelect = useCallback((station: string | null) => {
         console.log('Selected Station:', station)
     }, [])
 
@@ -131,6 +136,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                         containerClassName="align-child-on-line large-selector"
                         fieldClassName="entity-type-selector"
                         onSelect={handleEntitySelect}
+                        value={currentEntity}
                     >
                         <div className="line U8">
                             <strong>U</strong>
@@ -142,7 +148,11 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                 </div>
                 <div>
                     <h2>Linie</h2>
-                    <SelectField containerClassName="align-child-on-line long-selector" onSelect={handleLineSelect}>
+                    <SelectField
+                        containerClassName="align-child-on-line long-selector"
+                        onSelect={handleLineSelect}
+                        value={currentLine}
+                    >
                         {Object.keys(possibleLines).map((line) => (
                             <div key={line} className={`line ${line}`}>
                                 <strong>{line}</strong>
@@ -152,7 +162,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                 </div>
                 <div>
                     <h2>Station</h2>
-                    <SelectField onSelect={handleStationSelect}>
+                    <SelectField onSelect={handleStationSelect} value={currentStation}>
                         {Object.keys(possibleStations).map((station) => (
                             <div key={station}>
                                 <strong>{station}</strong>
