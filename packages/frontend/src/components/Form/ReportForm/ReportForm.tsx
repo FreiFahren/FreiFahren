@@ -154,7 +154,6 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
 
     const handleDirectionSelect = useCallback((direction: string | null) => {
         setCurrentDirection(direction)
-        console.log(direction)
     }, [])
 
     return (
