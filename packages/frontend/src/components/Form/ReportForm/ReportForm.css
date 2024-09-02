@@ -1,8 +1,8 @@
-.report-form > form > div {
+.report-form > form > section {
     margin-top: var(--margin-m);
 }
 
-.report-form > form > div > * {
+.report-form > form > section > * {
     margin-top: var(--margin-s);
 }
 

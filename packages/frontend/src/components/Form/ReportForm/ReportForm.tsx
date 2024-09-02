@@ -91,22 +91,22 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
         <div className={`report-form container modal ${className}`}>
             <form>
                 <h1>Neue Meldung</h1>
-                <div>
+                <section>
                     <SelectField
                         containerClassName="align-child-on-line large-selector"
                         fieldClassName="entity-type-selector"
                         onSelect={handleEntitySelect}
                         value={currentEntity}
                     >
-                        <div className="line U8">
+                        <span className="line U8">
                             <strong>U</strong>
-                        </div>
-                        <div className="line S2">
+                        </span>
+                        <span className="line S2">
                             <strong>S</strong>
-                        </div>
+                        </span>
                     </SelectField>
-                </div>
-                <div>
+                </section>
+                <section>
                     <h2>Linie</h2>
                     <SelectField
                         containerClassName="align-child-on-line long-selector"
@@ -114,13 +114,13 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                         value={currentLine}
                     >
                         {Object.keys(possibleLines).map((line) => (
-                            <div key={line} className={`line ${line}`}>
+                            <span key={line} className={`line ${line}`}>
                                 <strong>{line}</strong>
-                            </div>
+                            </span>
                         ))}
                     </SelectField>
-                </div>
-                <div>
+                </section>
+                <section>
                     <h2>Station</h2>
                     <SelectField
                         onSelect={handleStationSelect}
@@ -133,34 +133,34 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                             </div>
                         ))}
                     </SelectField>
-                </div>
+                </section>
                 {currentLine && (
-                    <div>
+                    <section>
                         <h3>Richtung</h3>
                         <SelectField
                             onSelect={handleDirectionSelect}
                             value={currentDirection}
                             containerClassName="align-child-on-line"
                         >
-                            <div>
+                            <span>
                                 <strong>{allStations[allLines[currentLine][0]].name}</strong>
-                            </div>
-                            <div>
+                            </span>
+                            <span>
                                 <strong>
                                     {allStations[allLines[currentLine][allLines[currentLine].length - 1]].name}
                                 </strong>
-                            </div>
+                            </span>
                         </SelectField>
-                    </div>
+                    </section>
                 )}
-                <div className="description-field">
+                <section className="description-field">
                     <h3>Beschreibung</h3>
                     <textarea
                         placeholder="Beschreibung"
                         onChange={(e) => setDescription(e.target.value)}
                         value={description}
                     />
-                </div>
+                </section>
             </form>
         </div>
     )
@@ -169,7 +169,6 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
 export default ReportForm
 
 //Todo:
-// - Semantic HTML
-// - More refactoring
 // - better comments
 // - Station Select is wider than Direction select
+// - when station is selected and then line the station will be deleted
