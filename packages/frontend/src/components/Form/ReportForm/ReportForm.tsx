@@ -74,9 +74,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
 
     const updatePossibleLines = useCallback(
         (currentEntity: string | null, currentLine: string | null) => {
-            if (currentLine) {
-                setPossibleLines({ [currentLine]: allLines[currentLine] })
-            } else if (currentEntity) {
+            if (currentEntity) {
                 const filteredLines: LinesList = Object.entries(allLines).reduce((acc, [line, stations]) => {
                     if (line.startsWith(currentEntity)) {
                         acc[line] = stations
