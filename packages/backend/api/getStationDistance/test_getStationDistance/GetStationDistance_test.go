@@ -17,24 +17,21 @@ func TestGetStationDistance(t *testing.T) {
 	tests := []struct {
 		name               string
 		inspectorStationId string
-		userLat            string
-		userLon            string
+		userStationId      string
 		expectedStatus     int
 		expectedStops      int
 	}{
 		{
 			name:               "Valid coordinates",
 			inspectorStationId: "U-Ado",
-			userLat:            "52.51188493793791",
-			userLon:            "13.322164399678371",
+			userStationId:      "S-PH",
 			expectedStatus:     http.StatusOK,
-			expectedStops:      4,
+			expectedStops:      12,
 		},
 		{
 			name:               "Invalid coordinates",
 			inspectorStationId: "sss",
-			userLat:            "abc",
-			userLon:            "def",
+			userStationId:      "abc",
 			expectedStatus:     http.StatusInternalServerError,
 			expectedStops:      -1,
 		},
@@ -49,8 +46,7 @@ func TestGetStationDistance(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			q := req.URL.Query()
 			q.Add("inspectorStationId", tt.inspectorStationId)
-			q.Add("userLat", tt.userLat)
-			q.Add("userLon", tt.userLon)
+			q.Add("userStationId", tt.userStationId)
 
 			req.URL.RawQuery = q.Encode()
 

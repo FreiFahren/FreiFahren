@@ -1,5 +1,4 @@
 import { selectOption } from '../components/Form/AutocompleteInputForm/AutocompleteInputForm'
-
 export interface StationProperty {
     name: string
     coordinates: {
@@ -126,16 +125,16 @@ export async function reportInspector(
 }
 
 export async function getStationDistance(
-    userLat: number | undefined,
-    userLon: number | undefined,
+    userStationId: string,
     inspectorStationId: string
 ): Promise<number | null> {
-    if (userLat === undefined || userLon === undefined) {
+    if (userStationId === '' || inspectorStationId === '') {
         return null
     }
 
+
     try {
-        const url = `${process.env.REACT_APP_API_URL}/transit/distance?inspectorStationId=${encodeURIComponent(inspectorStationId)}&userLat=${userLat}&userLon=${userLon}`
+        const url = `${process.env.REACT_APP_API_URL}/transit/distance?inspectorStationId=${encodeURIComponent(inspectorStationId)}&userStationId=${encodeURIComponent(userStationId)}`
         const response = await fetch(url)
         const data = await response.json()
 

@@ -2,10 +2,9 @@ package getStationDistance
 
 import (
 	"container/list"
+	"math"
 	"net/http"
 	"sort"
-
-	"math"
 
 	"github.com/FreiFahren/backend/data"
 	_ "github.com/FreiFahren/backend/docs"
@@ -45,31 +44,25 @@ var linesList map[string][]string
 func GetStationDistance(c echo.Context) error {
 	logger.Log.Info().Msg("GET /transit/distance")
 
-	var err error
-
 	inspectorStationId := c.QueryParam("inspectorStationId")
 
+	stationsList, stationIDs, linesList = ReadAndCreateSortedStationsListAndLinesList()
 	inspectorStationCoordinates := stationsList[inspectorStationId].Coordinates
 
-	userLat, err := utils.ParseStringToFloat(c.QueryParam("userLat"))
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error parsing userLat")
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	userLon, err := utils.ParseStringToFloat(c.QueryParam("userLon"))
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error parsing userLon")
-		return c.NoContent(http.StatusInternalServerError)
-	}
+	userStationId := c.QueryParam("userStationId")
 
-	kmDistance := calculateDistance(inspectorStationCoordinates.Latitude, inspectorStationCoordinates.Longitude, userLat, userLon)
+	userStationIdCoordinates := stationsList[userStationId].Coordinates
+	if userStationIdCoordinates.Latitude == 0.0 || userStationIdCoordinates.Longitude == 0.0 {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	kmDistance := calculateDistance(inspectorStationCoordinates.Latitude, inspectorStationCoordinates.Longitude, userStationIdCoordinates.Latitude, userStationIdCoordinates.Longitude)
 
 	// If the user is less than 1 km away from the station, we just return 1 station distance
 	if kmDistance < 1 {
 		return c.JSON(http.StatusOK, 1)
 	}
 
-	distances := FindShortestDistance(inspectorStationId, userLat, userLon)
+	distances := FindShortestDistance(inspectorStationId, userStationId)
 
 	return c.JSON(http.StatusOK, distances)
 }
@@ -97,7 +90,6 @@ func ReadAndCreateSortedStationsListAndLinesList() (map[string]utils.StationList
 // ---- dijkstra
 
 func GetAdjacentStationsID(stationId string) []string {
-	logger.Log.Debug().Msg("Getting adjacent station ids")
 
 	stationLines := stationsList[stationId].Lines
 
@@ -154,7 +146,6 @@ func initializeQueue(startStation string) (*list.List, map[string]int, map[strin
 }
 
 func findSmallestDistanceStation(queue *list.List) StationNode {
-	logger.Log.Debug().Msg("Finding the smallest distance station")
 
 	var currentStation StationNode
 	for firstQueueElement := queue.Front(); firstQueueElement != nil; firstQueueElement = firstQueueElement.Next() {
@@ -167,7 +158,6 @@ func findSmallestDistanceStation(queue *list.List) StationNode {
 }
 
 func removeStationFromQueue(queue *list.List, stationId string) {
-	logger.Log.Debug().Msg("Removing station from queue")
 
 	// here we remove the station from the queue,
 	// but we don't need to remove any duplicate stations, as space complexity may come down but time complexity exponentially highly increase
@@ -181,7 +171,6 @@ func removeStationFromQueue(queue *list.List, stationId string) {
 }
 
 func updateDistances(queue *list.List, currentStation StationNode, distances map[string]int, lines map[string]string) {
-	logger.Log.Debug().Msg("Updating distances")
 
 	for _, adjacentStationId := range GetAdjacentStationsID(currentStation.id) {
 		// each distance from one station to another is 1
@@ -196,12 +185,12 @@ func updateDistances(queue *list.List, currentStation StationNode, distances map
 	}
 }
 
-func FindShortestDistance(startStation string, userLat, userLon float64) int {
+func FindShortestDistance(startStation string, userStationId string) int {
 	logger.Log.Debug().Msg("Finding the shortest distance")
 
 	ReadAndCreateSortedStationsListAndLinesList()
 
-	endStation := GetNearestStationID(stationIDs, stationsList, userLat, userLon)
+	endStation := userStationId
 
 	// Initialize the queue, distances, lines and a map to keep track of visited stations
 	visited := make(map[string]bool)
