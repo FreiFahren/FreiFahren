@@ -174,6 +174,4 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
 export default ReportForm
 
 //Todo:
-// - better comments
 // - Station Select is wider than Direction select
-// - when station is selected and then line the station will be deleted

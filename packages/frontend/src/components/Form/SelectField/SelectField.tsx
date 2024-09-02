@@ -8,7 +8,16 @@ interface SelectFieldProps {
     onSelect: (selectedValue: string | null) => void
     value: string | null
 }
-
+/**
+ * SelectField component allows for the selection of a single value from a list of options.
+ * It is used in the ReportForm component to select entities, lines, stations, and directions.
+ *
+ * @param {React.ReactNode} children - The child elements to be rendered as selectable options.
+ * @param {string} [containerClassName] - Optional class name for the container div.
+ * @param {string} [fieldClassName] - Optional class name for each selectable field.
+ * @param {function} onSelect - Callback function to handle the selection of an option.
+ * @param {string | null} value - The currently selected value.
+ */
 const SelectField: React.FC<SelectFieldProps> = ({ children, containerClassName, fieldClassName, onSelect, value }) => {
     const handleSelect = useCallback(
         (child: React.ReactNode) => {
