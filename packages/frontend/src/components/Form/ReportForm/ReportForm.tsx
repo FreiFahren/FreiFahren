@@ -68,10 +68,15 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
         setCurrentDirection(null)
     }, [])
 
-    const handleLineSelect = useCallback((line: string | null) => {
-        setCurrentLine(line)
-        setCurrentStation(null)
-    }, [])
+    const handleLineSelect = useCallback(
+        (line: string | null) => {
+            setCurrentLine(line)
+            if (line && currentStation && !allLines[line].includes(currentStation)) {
+                setCurrentStation(null)
+            }
+        },
+        [allLines, currentStation]
+    )
 
     const handleStationSelect = useCallback(
         (stationName: string | null) => {
