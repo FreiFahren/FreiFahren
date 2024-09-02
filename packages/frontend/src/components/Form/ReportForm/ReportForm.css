@@ -42,3 +42,8 @@
     margin-bottom: var(--margin-m);
     width: 100%;
 }
+
+.report-form img {
+    width: 20px;
+    height: 20px;
+}

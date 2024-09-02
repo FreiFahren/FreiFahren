@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
+
 import './ReportForm.css'
 import SelectField from '../SelectField/SelectField'
 import { getAllLinesList, LinesList, getAllStationsList, StationList } from '../../../utils/dbUtils'
@@ -11,6 +12,8 @@ interface ReportFormProps {
     userPosition?: { lat: number; lng: number } | null
 }
 
+const search_icon = `${process.env.PUBLIC_URL}/icons/search.svg`
+
 const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, className, userPosition }) => {
     const [allLines, setAllLines] = useState<LinesList>({})
     const [allStations, setAllStations] = useState<StationList>({})
@@ -20,6 +23,10 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
     const [currentStation, setCurrentStation] = useState<string | null>(null)
     const [currentDirection, setCurrentDirection] = useState<string | null>(null)
     const [description, setDescription] = useState<string>('')
+
+    // New state for search input
+    const [showSearchBox, setShowSearchBox] = useState<boolean>(false)
+    const [stationSearch, setStationSearch] = useState<string>('')
 
     useEffect(() => {
         const fetchLinesAndStations = async () => {
@@ -41,25 +48,37 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
     }, [allLines, currentEntity])
 
     const possibleStations = useMemo(() => {
-        if (currentStation) return { [currentStation]: allStations[currentStation] }
-        if (currentLine) {
-            return Object.entries(allStations)
+        let stations = allStations
+        if (currentStation) {
+            stations = { [currentStation]: allStations[currentStation] }
+        } else if (currentLine) {
+            stations = Object.entries(allStations)
                 .filter(([, stationData]) => stationData.lines.includes(currentLine))
                 .reduce((acc, [stationName, stationData]) => {
                     acc[stationName] = stationData
                     return acc
                 }, {} as StationList)
-        }
-        if (currentEntity) {
-            return Object.entries(allStations)
+        } else if (currentEntity) {
+            stations = Object.entries(allStations)
                 .filter(([, stationData]) => stationData.lines.some((line) => line.startsWith(currentEntity)))
                 .reduce((acc, [stationName, stationData]) => {
                     acc[stationName] = stationData
                     return acc
                 }, {} as StationList)
         }
-        return allStations
-    }, [allStations, currentEntity, currentLine, currentStation])
+
+        // Filter stations based on search input
+        if (stationSearch) {
+            stations = Object.entries(stations)
+                .filter(([, stationData]) => stationData.name.toLowerCase().includes(stationSearch.toLowerCase()))
+                .reduce((acc, [stationName, stationData]) => {
+                    acc[stationName] = stationData
+                    return acc
+                }, {} as StationList)
+        }
+
+        return stations
+    }, [allStations, currentEntity, currentLine, currentStation, stationSearch])
 
     const handleEntitySelect = useCallback((entity: string | null) => {
         setCurrentEntity(entity)
@@ -126,7 +145,18 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                     </SelectField>
                 </section>
                 <section>
-                    <h2>Station</h2>
+                    <div className="align-child-on-line">
+                        <h2>Station</h2>
+                        <img src={search_icon} onClick={() => setShowSearchBox(!showSearchBox)}></img>
+                    </div>
+                    {showSearchBox && (
+                        <input
+                            type="text"
+                            placeholder="Search for a station"
+                            value={stationSearch}
+                            onChange={(e) => setStationSearch(e.target.value)}
+                        />
+                    )}
                     <SelectField
                         onSelect={handleStationSelect}
                         value={currentStation ? allStations[currentStation].name : ''}
@@ -172,6 +202,3 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
 }
 
 export default ReportForm
-
-//Todo:
-// - Station Select is wider than Direction select
