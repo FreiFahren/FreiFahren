@@ -43,10 +43,10 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
         (currentEntity: string | null, currentLine: string | null, currentStation: string | null) => {
             if (currentStation) {
                 setPossibleStations({ [currentStation]: allStations[currentStation] })
-            } else if (currentEntity) {
+            } else if (currentLine) {
                 const filteredStations: StationList = Object.entries(allStations).reduce(
                     (acc, [stationName, stationData]) => {
-                        if (stationData.lines.some((line) => line.startsWith(currentEntity))) {
+                        if (stationData.lines.some((stationLine) => stationLine === currentLine)) {
                             acc[stationName] = stationData
                         }
                         return acc
@@ -54,10 +54,10 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                     {} as StationList
                 )
                 setPossibleStations(filteredStations)
-            } else if (currentLine) {
+            } else if (currentEntity) {
                 const filteredStations: StationList = Object.entries(allStations).reduce(
                     (acc, [stationName, stationData]) => {
-                        if (stationData.lines.some((stationLine) => stationLine === currentLine)) {
+                        if (stationData.lines.some((line) => line.startsWith(currentEntity))) {
                             acc[stationName] = stationData
                         }
                         return acc
