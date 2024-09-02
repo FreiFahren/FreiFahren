@@ -2,6 +2,19 @@
     margin-top: var(--margin-m);
 }
 
+.report-form > form > section > div:has(> img) {
+    margin-top: var(--margin-l);
+    margin-bottom: var(--margin-m);
+    height: 2rem;
+}
+
+.report-form input {
+    height: 2rem;
+    width: 50%;
+    border-radius: var(--borderRadius-small);
+    border: 1px solid var(--color-light-gray);
+}
+
 .report-form > form > section > * {
     margin-top: var(--margin-s);
 }

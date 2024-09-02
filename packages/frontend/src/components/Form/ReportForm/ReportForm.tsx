@@ -103,6 +103,8 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                 ([, stationData]) => stationData.name === stationName
             )
             setCurrentStation(foundStationEntry ? foundStationEntry[0] : null)
+            setStationSearch('')
+            setShowSearchBox(false)
         },
         [allStations]
     )
@@ -147,16 +149,16 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                 <section>
                     <div className="align-child-on-line">
                         <h2>Station</h2>
+                        {showSearchBox && (
+                            <input
+                                type="text"
+                                placeholder="Suche nach einer Station"
+                                value={stationSearch}
+                                onChange={(e) => setStationSearch(e.target.value)}
+                            />
+                        )}
                         <img src={search_icon} onClick={() => setShowSearchBox(!showSearchBox)}></img>
                     </div>
-                    {showSearchBox && (
-                        <input
-                            type="text"
-                            placeholder="Search for a station"
-                            value={stationSearch}
-                            onChange={(e) => setStationSearch(e.target.value)}
-                        />
-                    )}
                     <SelectField
                         onSelect={handleStationSelect}
                         value={currentStation ? allStations[currentStation].name : ''}
