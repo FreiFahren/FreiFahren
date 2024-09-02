@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import './ReportForm.css'
-
 import SelectField from '../SelectField/SelectField'
 import { getAllLinesList, LinesList, getAllStationsList, StationList } from '../../../utils/dbUtils'
+
 interface ReportFormProps {
     closeModal: () => void
     onFormSubmit: () => void
@@ -19,141 +19,68 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
     const [currentLine, setCurrentLine] = useState<string | null>(null)
     const [currentStation, setCurrentStation] = useState<string | null>(null)
     const [currentDirection, setCurrentDirection] = useState<string | null>(null)
-
-    const [possibleLines, setPossibleLines] = useState<LinesList>({})
-    const [possibleStations, setPossibleStations] = useState<StationList>({})
-
     const [description, setDescription] = useState<string>('')
 
     useEffect(() => {
-        const fetchLines = async () => {
-            const lines = await getAllLinesList()
+        const fetchLinesAndStations = async () => {
+            const [lines, stations] = await Promise.all([getAllLinesList(), getAllStationsList()])
             setAllLines(lines)
-            setPossibleLines(lines) // Set possible lines to all lines initially
-        }
-        const fetchStations = async () => {
-            const stations = await getAllStationsList()
             setAllStations(stations)
-            setPossibleStations(stations)
         }
-
-        fetchLines()
-        fetchStations()
+        fetchLinesAndStations()
     }, [])
 
-    const updatePossibleStations = useCallback(
-        (currentEntity: string | null, currentLine: string | null, currentStation: string | null) => {
-            if (currentStation) {
-                setPossibleStations({ [currentStation]: allStations[currentStation] })
-            } else if (currentLine) {
-                const filteredStations: StationList = Object.entries(allStations).reduce(
-                    (acc, [stationName, stationData]) => {
-                        if (stationData.lines.some((stationLine) => stationLine === currentLine)) {
-                            acc[stationName] = stationData
-                        }
-                        return acc
-                    },
-                    {} as StationList
-                )
-                setPossibleStations(filteredStations)
-            } else if (currentEntity) {
-                const filteredStations: StationList = Object.entries(allStations).reduce(
-                    (acc, [stationName, stationData]) => {
-                        if (stationData.lines.some((line) => line.startsWith(currentEntity))) {
-                            acc[stationName] = stationData
-                        }
-                        return acc
-                    },
-                    {} as StationList
-                )
-                setPossibleStations(filteredStations)
-            } else {
-                setPossibleStations(allStations)
-            }
-        },
-        [allStations]
-    )
+    const possibleLines = useMemo(() => {
+        if (!currentEntity) return allLines
+        return Object.entries(allLines)
+            .filter(([line]) => line.startsWith(currentEntity))
+            .reduce((acc, [line, stations]) => {
+                acc[line] = stations
+                return acc
+            }, {} as LinesList)
+    }, [allLines, currentEntity])
 
-    const updatePossibleLines = useCallback(
-        (currentEntity: string | null, currentLine: string | null) => {
-            if (currentEntity) {
-                const filteredLines: LinesList = Object.entries(allLines).reduce((acc, [line, stations]) => {
-                    if (line.startsWith(currentEntity)) {
-                        acc[line] = stations
-                    }
+    const possibleStations = useMemo(() => {
+        if (currentStation) return { [currentStation]: allStations[currentStation] }
+        if (currentLine) {
+            return Object.entries(allStations)
+                .filter(([, stationData]) => stationData.lines.includes(currentLine))
+                .reduce((acc, [stationName, stationData]) => {
+                    acc[stationName] = stationData
                     return acc
-                }, {} as LinesList)
-                setPossibleLines(filteredLines)
-            } else {
-                setPossibleLines(allLines)
-            }
-        },
-        [allLines]
-    )
+                }, {} as StationList)
+        }
+        if (currentEntity) {
+            return Object.entries(allStations)
+                .filter(([, stationData]) => stationData.lines.some((line) => line.startsWith(currentEntity)))
+                .reduce((acc, [stationName, stationData]) => {
+                    acc[stationName] = stationData
+                    return acc
+                }, {} as StationList)
+        }
+        return allStations
+    }, [allStations, currentEntity, currentLine, currentStation])
 
-    const refreshForm = useCallback(
-        (entity: string) => {
-            setCurrentEntity(entity)
-            if (!currentLine?.startsWith(entity)) {
-                setCurrentLine(null)
-            }
-            updatePossibleLines(entity, null)
-            updatePossibleStations(entity, null, null)
-        },
-        [updatePossibleLines, updatePossibleStations, currentLine]
-    )
+    const handleEntitySelect = useCallback((entity: string | null) => {
+        setCurrentEntity(entity)
+        setCurrentLine(null)
+        setCurrentStation(null)
+        setCurrentDirection(null)
+    }, [])
 
-    const handleEntitySelect = useCallback(
-        (entity: string | null) => {
-            if (entity) {
-                refreshForm(entity)
-            } else {
-                setCurrentEntity(entity)
-                updatePossibleLines(entity, currentLine)
-                updatePossibleStations(entity, currentLine, currentStation)
-            }
-        },
-        [refreshForm, updatePossibleLines, currentLine, updatePossibleStations, currentStation]
-    )
-
-    const handleLineSelect = useCallback(
-        (line: string | null) => {
-            if (line === null || line === currentLine) {
-                setCurrentLine(null)
-                updatePossibleStations(currentEntity, null, null)
-            } else if (currentStation && !allStations[currentStation].lines.includes(line)) {
-                setCurrentLine(line)
-                setCurrentStation(null)
-                updatePossibleStations(currentEntity, line, null)
-            } else {
-                setCurrentLine(line)
-                updatePossibleStations(currentEntity, line, currentStation)
-            }
-        },
-        [updatePossibleStations, currentEntity, currentLine, currentStation, allStations]
-    )
+    const handleLineSelect = useCallback((line: string | null) => {
+        setCurrentLine(line)
+        setCurrentStation(null)
+    }, [])
 
     const handleStationSelect = useCallback(
         (stationName: string | null) => {
-            if (stationName === null || stationName === currentStation) {
-                setCurrentStation(null)
-                updatePossibleStations(currentEntity, currentLine, null)
-            } else {
-                const foundStationEntry = Object.entries(allStations).find(
-                    ([_, stationData]) => stationData.name === stationName
-                )
-                if (foundStationEntry) {
-                    const [stationId] = foundStationEntry
-                    setCurrentStation(stationId)
-                    updatePossibleStations(currentEntity, currentLine, stationId)
-                } else {
-                    console.warn(`Station "${stationName}" not found in allStations`)
-                    setCurrentStation(null)
-                    updatePossibleStations(currentEntity, currentLine, null)
-                }
-            }
+            const foundStationEntry = Object.entries(allStations).find(
+                ([, stationData]) => stationData.name === stationName
+            )
+            setCurrentStation(foundStationEntry ? foundStationEntry[0] : null)
         },
-        [currentStation, updatePossibleStations, currentEntity, currentLine, allStations]
+        [allStations]
     )
 
     const handleDirectionSelect = useCallback((direction: string | null) => {
@@ -209,7 +136,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                 </div>
                 {currentLine && (
                     <div>
-                        <h2>Richtung</h2>
+                        <h3>Richtung</h3>
                         <SelectField
                             onSelect={handleDirectionSelect}
                             value={currentDirection}
@@ -227,7 +154,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                     </div>
                 )}
                 <div className="description-field">
-                    <h2>Beschreibung</h2>
+                    <h3>Beschreibung</h3>
                     <textarea
                         placeholder="Beschreibung"
                         onChange={(e) => setDescription(e.target.value)}
