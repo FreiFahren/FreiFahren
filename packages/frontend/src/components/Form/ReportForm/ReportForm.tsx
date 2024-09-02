@@ -121,12 +121,16 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
             if (line === null || line === currentLine) {
                 setCurrentLine(null)
                 updatePossibleStations(currentEntity, null, null)
+            } else if (currentStation && !allStations[currentStation].lines.includes(line)) {
+                setCurrentLine(line)
+                setCurrentStation(null)
+                updatePossibleStations(currentEntity, line, null)
             } else {
                 setCurrentLine(line)
                 updatePossibleStations(currentEntity, line, currentStation)
             }
         },
-        [updatePossibleStations, currentEntity, currentLine, currentStation]
+        [updatePossibleStations, currentEntity, currentLine, currentStation, allStations]
     )
 
     const handleStationSelect = useCallback(
