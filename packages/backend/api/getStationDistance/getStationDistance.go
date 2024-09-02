@@ -52,11 +52,13 @@ func GetStationDistance(c echo.Context) error {
 	userStationId := c.QueryParam("userStationId")
 
 	userStationIdCoordinates := stationsList[userStationId].Coordinates
+	if userStationIdCoordinates.Latitude == 0.0 || userStationIdCoordinates.Longitude == 0.0 {
+		return c.NoContent(http.StatusInternalServerError)
+	}
 	kmDistance := calculateDistance(inspectorStationCoordinates.Latitude, inspectorStationCoordinates.Longitude, userStationIdCoordinates.Latitude, userStationIdCoordinates.Longitude)
 
 	// If the user is less than 1 km away from the station, we just return 1 station distance
 	if kmDistance < 1 {
-		logger.Log.Info().Msg("User is less than 1 km away from")
 		return c.JSON(http.StatusOK, 1)
 	}
 

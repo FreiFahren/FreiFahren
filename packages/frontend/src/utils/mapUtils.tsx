@@ -1,11 +1,11 @@
 import { StationProperty } from './dbUtils'
 
-export function getNearestStation(stations: { [key: string]: StationProperty }, lat1?: number, lon1?: number) {
-    if (!lat1 || !lon1) return null
+export function getNearestStation(stations: { [key: string]: StationProperty }, userLat?: number, userLon?: number) {
+    if (!userLat || !userLon) return null
     let nearestStation = null
     let nearestDistance = Infinity
     for (const [key, station] of Object.entries(stations)) {
-        const distance = calculateDistance(lat1!, lon1!, station.coordinates.latitude, station.coordinates.longitude)
+        const distance = calculateDistance(userLat!, userLon!, station.coordinates.latitude, station.coordinates.longitude)
         if (distance < nearestDistance) {
             nearestDistance = distance
             nearestStation = { key, ...station }

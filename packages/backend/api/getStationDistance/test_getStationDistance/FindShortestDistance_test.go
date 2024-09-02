@@ -18,7 +18,7 @@ func TestFindShortestDistance(t *testing.T) {
 		userStation    string
 		expectedLength int
 	}{
-		{"Station path should be 8 from Ernst Reuter Platz to Platz der Luftbrücke", "U-RP", "U-Pl", 8},
+		{"Station path should be 8 from Ernst Reuter Platz to Platz der Luftbrücke", "U-RP", "U-PL", 8},
 		{"S7 Ahrensfelde to Potsdam Hauptbahnof", "S-Ah", "S-PH", 28},
 	}
 	data.EmbedJSONFiles()
