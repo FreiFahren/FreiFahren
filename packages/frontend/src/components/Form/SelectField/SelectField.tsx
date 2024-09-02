@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useCallback } from 'react'
 import './SelectField.css'
 
 interface SelectFieldProps {
@@ -15,7 +15,6 @@ const SelectField: React.FC<SelectFieldProps> = ({ children, containerClassName,
             if (React.isValidElement(child)) {
                 const selectedValue = child.props.children.props.children
                 const newValue = value === selectedValue ? null : selectedValue // Toggle selection
-                console.log('Selected Value:', newValue)
                 onSelect(newValue)
             }
         },

@@ -23,6 +23,8 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
     const [possibleLines, setPossibleLines] = useState<LinesList>({})
     const [possibleStations, setPossibleStations] = useState<StationList>({})
 
+    const [description, setDescription] = useState<string>('')
+
     useEffect(() => {
         const fetchLines = async () => {
             const lines = await getAllLinesList()
@@ -224,9 +226,23 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                         </SelectField>
                     </div>
                 )}
+                <div className="description-field">
+                    <h2>Beschreibung</h2>
+                    <textarea
+                        placeholder="Beschreibung"
+                        onChange={(e) => setDescription(e.target.value)}
+                        value={description}
+                    />
+                </div>
             </form>
         </div>
     )
 }
 
 export default ReportForm
+
+//Todo:
+// - Semantic HTML
+// - More refactoring
+// - better comments
+// - Station Select is wider than Direction select
