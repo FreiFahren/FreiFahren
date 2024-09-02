@@ -1,5 +1,19 @@
 import { StationProperty } from './dbUtils'
 
+export function getNearestStation(stations: { [key: string]: StationProperty }, lat1?: number, lon1?: number) {
+    if (!lat1 || !lon1) return null
+    let nearestStation = null
+    let nearestDistance = Infinity
+    for (const [key, station] of Object.entries(stations)) {
+        const distance = calculateDistance(lat1!, lon1!, station.coordinates.latitude, station.coordinates.longitude)
+        if (distance < nearestDistance) {
+            nearestDistance = distance
+            nearestStation = { key, ...station }
+        }
+    }
+    return nearestStation
+}
+
 export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
     const R = 6371 // Radius of the earth in km
     const dLat = deg2rad(lat2 - lat1)
