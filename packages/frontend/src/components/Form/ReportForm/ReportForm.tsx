@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 
 import './ReportForm.css'
 import SelectField from '../SelectField/SelectField'
@@ -43,6 +43,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
 
     const [showSearchBox, setShowSearchBox] = useState<boolean>(false)
     const [stationSearch, setStationSearch] = useState<string>('')
+    const searchInputRef = useRef<HTMLInputElement>(null)
 
     const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
 
@@ -125,6 +126,15 @@ const ReportForm: React.FC<ReportFormProps> = ({
         },
         [allStations]
     )
+
+    const toggleSearchBox = useCallback(() => {
+        setShowSearchBox((prev) => !prev)
+        setTimeout(() => {
+            if (searchInputRef.current) {
+                searchInputRef.current.focus()
+            }
+        }, 0)
+    }, [])
 
     const handleDirectionSelect = useCallback((direction: string | null) => {
         setCurrentDirection(direction)
@@ -267,13 +277,10 @@ const ReportForm: React.FC<ReportFormProps> = ({
                                 placeholder="Suche eine Station"
                                 value={stationSearch}
                                 onChange={(e) => setStationSearch(e.target.value)}
+                                ref={searchInputRef}
                             />
                         )}
-                        <img
-                            src={search_icon}
-                            onClick={() => setShowSearchBox(!showSearchBox)}
-                            alt="icon to search for a station"
-                        ></img>
+                        <img src={search_icon} onClick={toggleSearchBox} alt="icon to search for a station"></img>
                     </div>
                     <SelectField
                         onSelect={handleStationSelect}
