@@ -1,5 +1,14 @@
 import { StationProperty } from './dbUtils'
 
+/**
+ * Calculates the distance between two geographical points using the Haversine formula.
+ *
+ * @param {number} lat1 - The latitude of the first point in decimal degrees.
+ * @param {number} lon1 - The longitude of the first point in decimal degrees.
+ * @param {number} lat2 - The latitude of the second point in decimal degrees.
+ * @param {number} lon2 - The longitude of the second point in decimal degrees.
+ * @returns {number} The distance between the two points in kilometers.
+ */
 export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
     const R = 6371 // Radius of the earth in km
     const dLat = deg2rad(lat2 - lat1)

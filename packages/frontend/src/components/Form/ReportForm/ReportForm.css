@@ -8,7 +8,7 @@
     height: 2rem;
 }
 
-.report-form input {
+.report-form .search-input {
     height: 2rem;
     width: 50%;
     border-radius: var(--borderRadius-small);
@@ -59,4 +59,8 @@
 .report-form img {
     width: 20px;
     height: 20px;
+}
+
+.report-form label:has(> input[type='checkbox']) {
+    font-size: var(--font-xs);
 }

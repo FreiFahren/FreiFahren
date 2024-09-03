@@ -3,18 +3,35 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react'
 
 import './ReportForm.css'
 import SelectField from '../SelectField/SelectField'
-import { getAllLinesList, LinesList, getAllStationsList, StationList } from '../../../utils/dbUtils'
+import { getAllLinesList, LinesList, getAllStationsList, StationList, reportInspector } from '../../../utils/dbUtils'
+import { sendAnalyticsEvent } from '../../../utils/analytics'
+import { highlightElement, createWarningSpan } from '../../../utils/uiUtils'
+import { calculateDistance } from '../../../utils/mapUtils'
+
+const redHighlight = (text: string) => {
+    return (
+        <>
+            {text}
+            <span className="red-highlight">*</span>
+        </>
+    )
+}
 
 interface ReportFormProps {
     closeModal: () => void
-    onFormSubmit: () => void
+    notifyParentAboutSubmission: () => void
     className?: string
     userPosition?: { lat: number; lng: number } | null
 }
 
 const search_icon = `${process.env.PUBLIC_URL}/icons/search.svg`
 
-const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, className, userPosition }) => {
+const ReportForm: React.FC<ReportFormProps> = ({
+    closeModal,
+    notifyParentAboutSubmission,
+    className,
+    userPosition,
+}) => {
     const [allLines, setAllLines] = useState<LinesList>({})
     const [allStations, setAllStations] = useState<StationList>({})
 
@@ -24,9 +41,12 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
     const [currentDirection, setCurrentDirection] = useState<string | null>(null)
     const [description, setDescription] = useState<string>('')
 
-    // New state for search input
     const [showSearchBox, setShowSearchBox] = useState<boolean>(false)
     const [stationSearch, setStationSearch] = useState<string>('')
+
+    const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
+
+    const startTime = new Date()
 
     useEffect(() => {
         const fetchLinesAndStations = async () => {
@@ -37,6 +57,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
         fetchLinesAndStations()
     }, [])
 
+    // filter the lines based on entity
     const possibleLines = useMemo(() => {
         if (!currentEntity) return allLines
         return Object.entries(allLines)
@@ -47,6 +68,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
             }, {} as LinesList)
     }, [allLines, currentEntity])
 
+    // filter the stations based on entity, line, station, and search input
     const possibleStations = useMemo(() => {
         let stations = allStations
         if (currentStation) {
@@ -67,7 +89,6 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                 }, {} as StationList)
         }
 
-        // Filter stations based on search input
         if (stationSearch) {
             stations = Object.entries(stations)
                 .filter(([, stationData]) => stationData.name.toLowerCase().includes(stationSearch.toLowerCase()))
@@ -113,9 +134,103 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
         setCurrentDirection(direction)
     }, [])
 
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault()
+
+        const hasError = await validateReportForm()
+        if (hasError) return // Abort submission if there are validation errors
+
+        await reportInspector(currentLine!, currentStation!, currentDirection!, description)
+
+        const endTime = new Date()
+        const durationInSeconds = startTime ? Math.round((endTime.getTime() - startTime.getTime()) / 1000) : 0
+
+        async function finalizeSubmission() {
+            localStorage.setItem('lastReportTime', new Date().toISOString()) // Save the timestamp of the report to prevent spamming
+            closeModal()
+            notifyParentAboutSubmission()
+        }
+
+        try {
+            await sendAnalyticsEvent('Report Submitted', {
+                duration: durationInSeconds,
+                meta: {
+                    Station: currentStation!,
+                    Line: currentLine!,
+                    Direction: currentDirection!,
+                },
+            })
+
+            finalizeSubmission()
+        } catch (error) {
+            console.error('Failed to send analytics event:', error)
+            finalizeSubmission()
+        }
+    }
+
+    const validateReportForm = async () => {
+        let hasError = false
+
+        // Check for last report time to prevent spamming
+        const lastReportTime = localStorage.getItem('lastReportTime')
+        const reportCooldownMinutes = 15
+
+        if (lastReportTime && Date.now() - new Date(lastReportTime).getTime() < reportCooldownMinutes * 60 * 1000) {
+            highlightElement('report-form')
+            createWarningSpan(
+                'station-select-div',
+                `Du kannst nur alle ${reportCooldownMinutes} Minuten eine Meldung abgeben!`
+            )
+            hasError = true
+        }
+
+        if (!currentStation) {
+            highlightElement('station-select-div')
+            createWarningSpan('station-select-div', 'Du hast keine Station ausgewählt. Bitte wähle eine Station aus!')
+            hasError = true
+        }
+
+        if (!(document.getElementById('privacy-checkbox') as HTMLInputElement).checked) {
+            highlightElement('privacy-label')
+            hasError = true
+        }
+
+        const locationError = await verifyUserLocation(currentStation, allStations)
+        if (locationError) {
+            hasError = true
+        }
+
+        return hasError // Return true if there's an error, false otherwise
+    }
+
+    async function verifyUserLocation(station: string | null, stationsList: StationList): Promise<boolean> {
+        if (!station) return false
+
+        const distance = userPosition
+            ? calculateDistance(
+                  userPosition.lat,
+                  userPosition.lng,
+                  stationsList[station].coordinates.latitude,
+                  stationsList[station].coordinates.longitude
+              )
+            : 0
+
+        // Checks if the user is more than 5 km away from the station
+        if (5 < distance) {
+            highlightElement('report-form')
+            createWarningSpan(
+                'station-select-div',
+                'Du bist zu weit von der Station entfernt. Bitte wähle die richtige Station!'
+            )
+            return true // Indicates an error
+        }
+
+        return false
+    }
+
     return (
         <div className={`report-form container modal ${className}`}>
-            <form>
+            <form onSubmit={handleSubmit}>
                 <h1>Neue Meldung</h1>
                 <section>
                     <SelectField
@@ -147,10 +262,11 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                     </SelectField>
                 </section>
                 <section>
-                    <div className="align-child-on-line">
+                    <div className="align-child-on-line" id="station-select-div">
                         <h2>Station</h2>
                         {showSearchBox && (
                             <input
+                                className="search-input"
                                 type="text"
                                 placeholder="Suche nach einer Station"
                                 value={stationSearch}
@@ -197,6 +313,25 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onFormSubmit, class
                         onChange={(e) => setDescription(e.target.value)}
                         value={description}
                     />
+                </section>
+                <section>
+                    <div>
+                        <label htmlFor="privacy-checkbox" id="privacy-label">
+                            <input
+                                type="checkbox"
+                                id="privacy-checkbox"
+                                name="privacy-checkbox"
+                                checked={isPrivacyChecked}
+                                onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
+                            />
+                            Ich stimme der <a href="/datenschutz"> Datenschutzerklärung </a> zu. {redHighlight('')}
+                        </label>
+                    </div>
+                    <div>
+                        <button type="submit" className={isPrivacyChecked && currentStation ? '' : 'button-gray'}>
+                            Melden
+                        </button>
+                    </div>
                 </section>
             </form>
         </div>
