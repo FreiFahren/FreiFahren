@@ -1,9 +1,4 @@
-.report-form > form > section {
-    margin-top: var(--margin-m);
-}
-
 .report-form > form > section > div:has(> img) {
-    margin-top: var(--margin-l);
     margin-bottom: var(--margin-m);
     height: 2rem;
 }
@@ -13,6 +8,7 @@
     width: 50%;
     border-radius: var(--borderRadius-small);
     border: 1px solid var(--color-light-gray);
+    font-size: var(--font-s);
 }
 
 .report-form > form > section > * {
@@ -21,7 +17,7 @@
 
 .line {
     width: 35px;
-    height: 85%;
+    height: 100%;
     border-radius: var(--borderRadius-small);
     display: flex;
     justify-content: center;
@@ -35,7 +31,7 @@
     border: 1px solid var(--color-light-gray);
     border-radius: var(--borderRadius-small);
     width: calc(100% - 16px);
-    height: 3rem;
+    height: 2rem;
     resize: none;
     transition: ease-in-out var(--transition-default);
     padding: var(--padding-s);
@@ -51,11 +47,6 @@
     color: var(--color-box-text);
 }
 
-.report-form .description-field {
-    margin-bottom: var(--margin-m);
-    width: 100%;
-}
-
 .report-form img {
     width: 20px;
     height: 20px;
@@ -63,4 +54,19 @@
 
 .report-form label:has(> input[type='checkbox']) {
     font-size: var(--font-xs);
+}
+
+div.report-form {
+    padding: var(--padding-m);
+}
+
+.report-form section:has(> div#station-select-div) > .select-field-container {
+    display: block;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.report-form section:has(> div#station-select-div) > .select-field-container > .select-field {
+    margin-top: var(--margin-s);
+    margin-bottom: var(--margin-s);
 }

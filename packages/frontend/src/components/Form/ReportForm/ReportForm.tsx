@@ -74,12 +74,9 @@ const ReportForm: React.FC<ReportFormProps> = ({
         if (currentStation) {
             stations = { [currentStation]: allStations[currentStation] }
         } else if (currentLine) {
-            stations = Object.entries(allStations)
-                .filter(([, stationData]) => stationData.lines.includes(currentLine))
-                .reduce((acc, [stationName, stationData]) => {
-                    acc[stationName] = stationData
-                    return acc
-                }, {} as StationList)
+            stations = Object.fromEntries(
+                allLines[currentLine].map((stationKey) => [stationKey, allStations[stationKey]])
+            )
         } else if (currentEntity) {
             stations = Object.entries(allStations)
                 .filter(([, stationData]) => stationData.lines.some((line) => line.startsWith(currentEntity)))
@@ -88,7 +85,6 @@ const ReportForm: React.FC<ReportFormProps> = ({
                     return acc
                 }, {} as StationList)
         }
-
         if (stationSearch) {
             stations = Object.entries(stations)
                 .filter(([, stationData]) => stationData.name.toLowerCase().includes(stationSearch.toLowerCase()))
@@ -99,7 +95,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
         }
 
         return stations
-    }, [allStations, currentEntity, currentLine, currentStation, stationSearch])
+    }, [allLines, allStations, currentEntity, currentLine, currentStation, stationSearch])
 
     const handleEntitySelect = useCallback((entity: string | null) => {
         setCurrentEntity(entity)
@@ -268,12 +264,16 @@ const ReportForm: React.FC<ReportFormProps> = ({
                             <input
                                 className="search-input"
                                 type="text"
-                                placeholder="Suche nach einer Station"
+                                placeholder="Suche eine Station"
                                 value={stationSearch}
                                 onChange={(e) => setStationSearch(e.target.value)}
                             />
                         )}
-                        <img src={search_icon} onClick={() => setShowSearchBox(!showSearchBox)}></img>
+                        <img
+                            src={search_icon}
+                            onClick={() => setShowSearchBox(!showSearchBox)}
+                            alt="icon to search for a station"
+                        ></img>
                     </div>
                     <SelectField
                         onSelect={handleStationSelect}
@@ -339,3 +339,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
 }
 
 export default ReportForm
+
+// Todo:
+// - Add smooth animations for everything
+// - Add anayltics to track how often the search icon and entity selector are used

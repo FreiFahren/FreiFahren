@@ -9,6 +9,7 @@
     padding: var(--padding-s);
     width: 100%;
     height: 100%;
+    box-sizing: border-box;
 }
 
 .selected {
@@ -21,7 +22,7 @@
 }
 
 .large-selector {
-    height: 30px;
+    height: 40px;
 }
 
 .medium-selector {
