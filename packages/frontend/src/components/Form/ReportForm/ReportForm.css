@@ -85,3 +85,8 @@ div.report-form {
     margin-top: var(--margin-s);
     margin-bottom: var(--margin-s);
 }
+
+.report-form button {
+    background-color: var(--incentive-blue);
+    color: var(--color-white);
+}

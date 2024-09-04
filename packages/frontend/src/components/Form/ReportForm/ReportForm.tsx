@@ -279,7 +279,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
                     </section>
                     <section>
                         <div className="align-child-on-line" id="station-select-div">
-                            <h2>Station</h2>
+                            <h2>Station {redHighlight('')}</h2>
                             <input
                                 className={`search-input ${showSearchBox ? 'expanded' : ''}`}
                                 type="text"
