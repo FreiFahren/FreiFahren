@@ -159,7 +159,7 @@ function App() {
         <>
           <ReportForm
             closeModal={() => setAppUIState({ ...appUIState, isReportFormOpen: false })}
-            onFormSubmit={handleFormSubmit}
+            notifyParentAboutSubmission={handleFormSubmit}
             className={'open center-animation'}
             userPosition={userPosition}
           />

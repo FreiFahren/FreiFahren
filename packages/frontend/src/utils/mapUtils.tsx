@@ -1,11 +1,25 @@
 import { StationProperty } from './dbUtils'
 
+/**
+ * Calculates the distance between two geographical points using the Haversine formula.
+ *
+ * @param {number} lat1 - The latitude of the first point in decimal degrees.
+ * @param {number} lon1 - The longitude of the first point in decimal degrees.
+ * @param {number} lat2 - The latitude of the second point in decimal degrees.
+ * @param {number} lon2 - The longitude of the second point in decimal degrees.
+ * @returns {number} The distance between the two points in kilometers.
+ */
 export function getNearestStation(stations: { [key: string]: StationProperty }, userLat?: number, userLon?: number) {
     if (!userLat || !userLon) return null
     let nearestStation = null
     let nearestDistance = Infinity
     for (const [key, station] of Object.entries(stations)) {
-        const distance = calculateDistance(userLat!, userLon!, station.coordinates.latitude, station.coordinates.longitude)
+        const distance = calculateDistance(
+            userLat!,
+            userLon!,
+            station.coordinates.latitude,
+            station.coordinates.longitude
+        )
         if (distance < nearestDistance) {
             nearestDistance = distance
             nearestStation = { key, ...station }

@@ -1,4 +1,3 @@
-import { selectOption } from '../components/Form/AutocompleteInputForm/AutocompleteInputForm'
 export interface StationProperty {
     name: string
     coordinates: {
@@ -76,33 +75,9 @@ export async function getAllLinesList(): Promise<LinesList> {
     }
 }
 
-async function fetchStationId(stationName: string): Promise<string | null> {
-    if (!stationName) {
-        return null
-    }
-
-    try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/data/id?name=${stationName}`)
-        const stationJson = await response.json()
-        return stationJson.id
-    } catch (error) {
-        console.error('Error:', error)
-        return null
-    }
-}
-
-export async function reportInspector(
-    line: selectOption,
-    station: selectOption,
-    direction: selectOption,
-    message: string
-) {
-    // when the user doesn't select a line, station or direction, the value is undefined
-    const stationId = station ? await fetchStationId(station.label) : null
-    const directionId = direction ? await fetchStationId(direction.label) : null
-
+export async function reportInspector(line: string, stationId: string, directionId: string, message: string) {
     const requestBody = JSON.stringify({
-        line: line ? line.value : '',
+        line: line,
         stationId: stationId || '',
         directionId: directionId || '',
         message: message || '',
@@ -124,14 +99,10 @@ export async function reportInspector(
         .catch((error) => console.error('Error:', error))
 }
 
-export async function getStationDistance(
-    userStationId: string,
-    inspectorStationId: string
-): Promise<number | null> {
+export async function getStationDistance(userStationId: string, inspectorStationId: string): Promise<number | null> {
     if (userStationId === '' || inspectorStationId === '') {
         return null
     }
-
 
     try {
         const url = `${process.env.REACT_APP_API_URL}/transit/distance?inspectorStationId=${encodeURIComponent(inspectorStationId)}&userStationId=${encodeURIComponent(userStationId)}`

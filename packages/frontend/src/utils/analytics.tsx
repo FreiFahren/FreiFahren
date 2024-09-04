@@ -5,7 +5,7 @@ import { AnalyticsOptions, SavedEvent } from './types'
  * If the SDK is not loaded or an error occurs, the event is saved locally for later retry.
  *
  * @param {string} eventName - The name of the event to send.
- * @param {AnalyticsOptions} [options] - Optional parameters for the event.
+ * @param {AnalyticsOptions} [options] - Optional parameters for the event. Metadata that you want to send with the event.
  * @returns {Promise<void>} A promise that resolves if the event is sent successfully, or rejects with an error.
  */
 export function sendAnalyticsEvent(eventName: string, options?: AnalyticsOptions): Promise<void> {
@@ -34,13 +34,13 @@ export function sendAnalyticsEvent(eventName: string, options?: AnalyticsOptions
  * @param {AnalyticsOptions} options - The parameters for the event.
  */
 export function saveUnsuccessfulEvent(eventName: string, options: AnalyticsOptions): void {
-    const savedEvents: SavedEvent[] = JSON.parse(localStorage.getItem('unsent_analytics_events') || '[]')
+    const savedEvents: SavedEvent[] = JSON.parse(localStorage.getItem('unsentAnalyticsEvents') || '[]')
     savedEvents.push({
         eventName,
         options,
         timestamp: Date.now(),
     })
-    localStorage.setItem('unsent_analytics_events', JSON.stringify(savedEvents))
+    localStorage.setItem('unsentAnalyticsEvents', JSON.stringify(savedEvents))
 }
 
 /**
@@ -50,7 +50,7 @@ export function saveUnsuccessfulEvent(eventName: string, options: AnalyticsOptio
  * @returns {Promise<void>} A promise that resolves when all events have been processed.
  */
 export async function sendSavedEvents(): Promise<void> {
-    const savedEvents: SavedEvent[] = JSON.parse(localStorage.getItem('unsent_analytics_events') || '[]')
+    const savedEvents: SavedEvent[] = JSON.parse(localStorage.getItem('unsentAnalyticsEvents') || '[]')
     const remainingEvents: SavedEvent[] = []
 
     for (const event of savedEvents) {
@@ -66,5 +66,5 @@ export async function sendSavedEvents(): Promise<void> {
         }
     }
 
-    localStorage.setItem('unsent_analytics_events', JSON.stringify(remainingEvents))
+    localStorage.setItem('unsentAnalyticsEvents', JSON.stringify(remainingEvents))
 }
