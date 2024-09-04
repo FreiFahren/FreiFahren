@@ -237,107 +237,109 @@ const ReportForm: React.FC<ReportFormProps> = ({
     return (
         <div className={`report-form container modal ${className}`}>
             <form onSubmit={handleSubmit}>
-                <h1>Neue Meldung</h1>
-                <section>
-                    <SelectField
-                        containerClassName="align-child-on-line large-selector"
-                        fieldClassName="entity-type-selector"
-                        onSelect={handleEntitySelect}
-                        value={currentEntity}
-                    >
-                        <span className="line U8">
-                            <strong>U</strong>
-                        </span>
-                        <span className="line S2">
-                            <strong>S</strong>
-                        </span>
-                    </SelectField>
-                </section>
-                <section>
-                    <h2>Linie</h2>
-                    <SelectField
-                        containerClassName="align-child-on-line long-selector"
-                        onSelect={handleLineSelect}
-                        value={currentLine}
-                    >
-                        {Object.keys(possibleLines).map((line) => (
-                            <span key={line} className={`line ${line}`}>
-                                <strong>{line}</strong>
-                            </span>
-                        ))}
-                    </SelectField>
-                </section>
-                <section>
-                    <div className="align-child-on-line" id="station-select-div">
-                        <h2>Station</h2>
-                        <input
-                            className={`search-input ${showSearchBox ? 'expanded' : ''}`}
-                            type="text"
-                            placeholder="Suche eine Station"
-                            value={stationSearch}
-                            onChange={(e) => setStationSearch(e.target.value)}
-                            ref={searchInputRef}
-                        />
-                        <img src={search_icon} onClick={toggleSearchBox} alt="icon to search for a station"></img>
-                    </div>
-                    <SelectField
-                        onSelect={handleStationSelect}
-                        value={currentStation ? allStations[currentStation].name : ''}
-                        containerClassName="align-child-column"
-                    >
-                        {Object.entries(possibleStations).map(([stationKey, stationData]) => (
-                            <div key={stationKey}>
-                                <strong>{stationData.name}</strong>
-                            </div>
-                        ))}
-                    </SelectField>
-                </section>
-                {currentLine && (
+                <div>
+                    <h1>Neue Meldung</h1>
                     <section>
-                        <h3>Richtung</h3>
                         <SelectField
-                            onSelect={handleDirectionSelect}
-                            value={currentDirection}
-                            containerClassName="align-child-on-line"
+                            containerClassName="align-child-on-line large-selector"
+                            fieldClassName="entity-type-selector"
+                            onSelect={handleEntitySelect}
+                            value={currentEntity}
                         >
-                            <span>
-                                <strong>{allStations[allLines[currentLine][0]].name}</strong>
+                            <span className="line U8">
+                                <strong>U</strong>
                             </span>
-                            <span>
-                                <strong>
-                                    {allStations[allLines[currentLine][allLines[currentLine].length - 1]].name}
-                                </strong>
+                            <span className="line S2">
+                                <strong>S</strong>
                             </span>
                         </SelectField>
                     </section>
-                )}
-                <section className="description-field">
-                    <h3>Beschreibung</h3>
-                    <textarea
-                        placeholder="Beschreibung"
-                        onChange={(e) => setDescription(e.target.value)}
-                        value={description}
-                    />
-                </section>
-                <section>
-                    <div>
-                        <label htmlFor="privacy-checkbox" id="privacy-label">
+                    <section>
+                        <h2>Linie</h2>
+                        <SelectField
+                            containerClassName="align-child-on-line long-selector"
+                            onSelect={handleLineSelect}
+                            value={currentLine}
+                        >
+                            {Object.keys(possibleLines).map((line) => (
+                                <span key={line} className={`line ${line}`}>
+                                    <strong>{line}</strong>
+                                </span>
+                            ))}
+                        </SelectField>
+                    </section>
+                    <section>
+                        <div className="align-child-on-line" id="station-select-div">
+                            <h2>Station</h2>
                             <input
-                                type="checkbox"
-                                id="privacy-checkbox"
-                                name="privacy-checkbox"
-                                checked={isPrivacyChecked}
-                                onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
+                                className={`search-input ${showSearchBox ? 'expanded' : ''}`}
+                                type="text"
+                                placeholder="Suche eine Station"
+                                value={stationSearch}
+                                onChange={(e) => setStationSearch(e.target.value)}
+                                ref={searchInputRef}
                             />
-                            Ich stimme der <a href="/datenschutz"> Datenschutzerklärung </a> zu. {redHighlight('')}
-                        </label>
-                    </div>
-                    <div>
-                        <button type="submit" className={isPrivacyChecked && currentStation ? '' : 'button-gray'}>
-                            Melden
-                        </button>
-                    </div>
-                </section>
+                            <img src={search_icon} onClick={toggleSearchBox} alt="icon to search for a station"></img>
+                        </div>
+                        <SelectField
+                            onSelect={handleStationSelect}
+                            value={currentStation ? allStations[currentStation].name : ''}
+                            containerClassName="align-child-column"
+                        >
+                            {Object.entries(possibleStations).map(([stationKey, stationData]) => (
+                                <div key={stationKey}>
+                                    <strong>{stationData.name}</strong>
+                                </div>
+                            ))}
+                        </SelectField>
+                    </section>
+                    {currentLine && (
+                        <section>
+                            <h3>Richtung</h3>
+                            <SelectField
+                                onSelect={handleDirectionSelect}
+                                value={currentDirection}
+                                containerClassName="align-child-on-line"
+                            >
+                                <span>
+                                    <strong>{allStations[allLines[currentLine][0]].name}</strong>
+                                </span>
+                                <span>
+                                    <strong>
+                                        {allStations[allLines[currentLine][allLines[currentLine].length - 1]].name}
+                                    </strong>
+                                </span>
+                            </SelectField>
+                        </section>
+                    )}
+                    <section className="description-field">
+                        <h3>Beschreibung</h3>
+                        <textarea
+                            placeholder="Beschreibung"
+                            onChange={(e) => setDescription(e.target.value)}
+                            value={description}
+                        />
+                    </section>
+                    <section>
+                        <div>
+                            <label htmlFor="privacy-checkbox" id="privacy-label">
+                                <input
+                                    type="checkbox"
+                                    id="privacy-checkbox"
+                                    name="privacy-checkbox"
+                                    checked={isPrivacyChecked}
+                                    onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
+                                />
+                                Ich stimme der <a href="/datenschutz"> Datenschutzerklärung </a> zu. {redHighlight('')}
+                            </label>
+                        </div>
+                        <div>
+                            <button type="submit" className={isPrivacyChecked && currentStation ? '' : 'button-gray'}>
+                                Melden
+                            </button>
+                        </div>
+                    </section>
+                </div>
             </form>
         </div>
     )

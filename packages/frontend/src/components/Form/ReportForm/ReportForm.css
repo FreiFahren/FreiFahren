@@ -77,7 +77,7 @@ div.report-form {
 
 .report-form section:has(> div#station-select-div) > .select-field-container {
     display: block;
-    max-height: 250px;
+    max-height: calc(100vh - 475px);
     overflow-y: auto;
 }
 
