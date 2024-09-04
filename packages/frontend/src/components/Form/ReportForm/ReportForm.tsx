@@ -137,9 +137,15 @@ const ReportForm: React.FC<ReportFormProps> = ({
         }, 0)
     }, [])
 
-    const handleDirectionSelect = useCallback((direction: string | null) => {
-        setCurrentDirection(direction)
-    }, [])
+    const handleDirectionSelect = useCallback(
+        (directionName: string | null) => {
+            const foundStationEntry = Object.entries(allStations).find(
+                ([, stationData]) => stationData.name === directionName
+            )
+            setCurrentDirection(foundStationEntry ? foundStationEntry[0] : null)
+        },
+        [allStations]
+    )
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault()
@@ -301,7 +307,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
                             <h3>Richtung</h3>
                             <SelectField
                                 onSelect={handleDirectionSelect}
-                                value={currentDirection}
+                                value={currentDirection ? allStations[currentDirection].name : ''}
                                 containerClassName="align-child-on-line"
                             >
                                 <span>
