@@ -99,17 +99,13 @@ export async function reportInspector(line: string, stationId: string, direction
         .catch((error) => console.error('Error:', error))
 }
 
-export async function getStationDistance(
-    userLat: number | undefined,
-    userLon: number | undefined,
-    inspectorStationId: string
-): Promise<number | null> {
-    if (userLat === undefined || userLon === undefined) {
+export async function getStationDistance(userStationId: string, inspectorStationId: string): Promise<number | null> {
+    if (userStationId === '' || inspectorStationId === '') {
         return null
     }
 
     try {
-        const url = `${process.env.REACT_APP_API_URL}/transit/distance?inspectorStationId=${encodeURIComponent(inspectorStationId)}&userLat=${userLat}&userLon=${userLon}`
+        const url = `${process.env.REACT_APP_API_URL}/transit/distance?inspectorStationId=${encodeURIComponent(inspectorStationId)}&userStationId=${encodeURIComponent(userStationId)}`
         const response = await fetch(url)
         const data = await response.json()
 

@@ -3,9 +3,6 @@ package getStationDistance
 import (
 	"fmt"
 	"math"
-
-	"github.com/FreiFahren/backend/logger"
-	utils "github.com/FreiFahren/backend/utils"
 )
 
 func toRadians(deg float64) float64 {
@@ -13,7 +10,6 @@ func toRadians(deg float64) float64 {
 }
 
 func calculateDistance(lat1, lon1, lat2, lon2 float64) float64 {
-	logger.Log.Debug().Msg("Calculating distance")
 
 	const R = 6371 // Radius of the earth in km
 
@@ -34,7 +30,6 @@ func calculateDistance(lat1, lon1, lat2, lon2 float64) float64 {
 }
 
 func getIndexOfStationID(stationId string, linesOfStation []string) (int, error) {
-	logger.Log.Debug().Msg("Getting index of station ID")
 
 	for i, station := range linesOfStation {
 		if station == stationId {
@@ -46,7 +41,6 @@ func getIndexOfStationID(stationId string, linesOfStation []string) (int, error)
 }
 
 func removeDuplicateAdjacentStations(elements []string) []string {
-	logger.Log.Debug().Msg("Removing duplicate adjacent stations")
 
 	visited := make(map[string]bool)
 	uniqueElements := make([]string, 0)
@@ -58,26 +52,4 @@ func removeDuplicateAdjacentStations(elements []string) []string {
 		uniqueElements = append(uniqueElements, element)
 	}
 	return uniqueElements
-}
-
-func GetNearestStationID(stationIDs []string, stationsList map[string]utils.StationListEntry, userLat, userLon float64) string {
-	logger.Log.Debug().Msg("Getting nearest station ID")
-
-	var nearestStation string
-	var shortestDistance float64 = math.MaxFloat64
-
-	for _, id := range stationIDs {
-		station := stationsList[id]
-		distance := calculateDistance(userLat, userLon, station.Coordinates.Latitude, station.Coordinates.Longitude)
-		if distance <= 0.010 {
-			return id // If the user is around 10m at the station, we can return it immediately
-		}
-		if distance < shortestDistance || (distance == shortestDistance && id < nearestStation) {
-			shortestDistance = distance
-			nearestStation = id
-		}
-
-	}
-
-	return nearestStation
 }

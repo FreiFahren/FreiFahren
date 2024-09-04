@@ -9,6 +9,25 @@ import { StationProperty } from './dbUtils'
  * @param {number} lon2 - The longitude of the second point in decimal degrees.
  * @returns {number} The distance between the two points in kilometers.
  */
+export function getNearestStation(stations: { [key: string]: StationProperty }, userLat?: number, userLon?: number) {
+    if (!userLat || !userLon) return null
+    let nearestStation = null
+    let nearestDistance = Infinity
+    for (const [key, station] of Object.entries(stations)) {
+        const distance = calculateDistance(
+            userLat!,
+            userLon!,
+            station.coordinates.latitude,
+            station.coordinates.longitude
+        )
+        if (distance < nearestDistance) {
+            nearestDistance = distance
+            nearestStation = { key, ...station }
+        }
+    }
+    return nearestStation
+}
+
 export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
     const R = 6371 // Radius of the earth in km
     const dLat = deg2rad(lat2 - lat1)
