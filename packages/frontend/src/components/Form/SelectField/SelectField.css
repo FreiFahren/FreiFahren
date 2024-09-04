@@ -10,10 +10,11 @@
     width: 100%;
     height: 100%;
     box-sizing: border-box;
+    transition: border var(--transition-default);
 }
 
 .selected {
-    border: 1.5px solid var(--incentive-blue);
+    border: 1px solid var(--incentive-blue);
 }
 
 .long-selector {
