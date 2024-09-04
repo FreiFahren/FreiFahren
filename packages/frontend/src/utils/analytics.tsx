@@ -5,7 +5,7 @@ import { AnalyticsOptions, SavedEvent } from './types'
  * If the SDK is not loaded or an error occurs, the event is saved locally for later retry.
  *
  * @param {string} eventName - The name of the event to send.
- * @param {AnalyticsOptions} [options] - Optional parameters for the event.
+ * @param {AnalyticsOptions} [options] - Optional parameters for the event. Metadata that you want to send with the event.
  * @returns {Promise<void>} A promise that resolves if the event is sent successfully, or rejects with an error.
  */
 export function sendAnalyticsEvent(eventName: string, options?: AnalyticsOptions): Promise<void> {

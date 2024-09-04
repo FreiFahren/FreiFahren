@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 
 import './ReportForm.css'
@@ -44,6 +43,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
     const [showSearchBox, setShowSearchBox] = useState<boolean>(false)
     const [stationSearch, setStationSearch] = useState<string>('')
     const searchInputRef = useRef<HTMLInputElement>(null)
+    const [searchUsed, setSearchUsed] = useState<boolean>(false)
 
     const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
 
@@ -129,6 +129,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
 
     const toggleSearchBox = useCallback(() => {
         setShowSearchBox((prev) => !prev)
+        setSearchUsed(true)
         setTimeout(() => {
             if (searchInputRef.current) {
                 searchInputRef.current.focus()
@@ -164,6 +165,8 @@ const ReportForm: React.FC<ReportFormProps> = ({
                     Station: currentStation!,
                     Line: currentLine!,
                     Direction: currentDirection!,
+                    Entity: currentEntity!,
+                    SearchUsed: searchUsed,
                 },
             })
 
@@ -346,7 +349,3 @@ const ReportForm: React.FC<ReportFormProps> = ({
 }
 
 export default ReportForm
-
-// Todo:
-// - Add smooth animations for everything
-// - Add anayltics to track how often the search icon and entity selector are used
