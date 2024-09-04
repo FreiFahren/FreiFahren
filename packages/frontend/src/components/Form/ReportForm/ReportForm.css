@@ -1,14 +1,29 @@
 .report-form > form > section > div:has(> img) {
     margin-bottom: var(--margin-m);
-    height: 2rem;
 }
 
 .report-form .search-input {
-    height: 2rem;
-    width: 50%;
+    position: absolute;
+    transition:
+        width var(--transition-default),
+        opacity var(--transition-default),
+        visibility var(--transition-default);
+    opacity: 0;
+    height: 1.5rem;
+    right: 45px;
+    width: 0;
     border-radius: var(--borderRadius-small);
     border: 1px solid var(--color-light-gray);
     font-size: var(--font-s);
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.search-input.expanded {
+    width: 50%;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .report-form > form > section > * {

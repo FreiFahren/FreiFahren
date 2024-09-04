@@ -270,16 +270,14 @@ const ReportForm: React.FC<ReportFormProps> = ({
                 <section>
                     <div className="align-child-on-line" id="station-select-div">
                         <h2>Station</h2>
-                        {showSearchBox && (
-                            <input
-                                className="search-input"
-                                type="text"
-                                placeholder="Suche eine Station"
-                                value={stationSearch}
-                                onChange={(e) => setStationSearch(e.target.value)}
-                                ref={searchInputRef}
-                            />
-                        )}
+                        <input
+                            className={`search-input ${showSearchBox ? 'expanded' : ''}`}
+                            type="text"
+                            placeholder="Suche eine Station"
+                            value={stationSearch}
+                            onChange={(e) => setStationSearch(e.target.value)}
+                            ref={searchInputRef}
+                        />
                         <img src={search_icon} onClick={toggleSearchBox} alt="icon to search for a station"></img>
                     </div>
                     <SelectField
