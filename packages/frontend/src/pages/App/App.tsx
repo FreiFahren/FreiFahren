@@ -16,7 +16,8 @@ import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext
 
 import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils';
 import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton';
-import { highlightElement, useModalAnimation, currentColorTheme, setColorThemeInLocalStorage } from '../../utils/uiUtils';
+import { highlightElement, currentColorTheme, setColorThemeInLocalStorage } from '../../utils/uiUtils';
+import { useModalAnimation } from '../../hooks/useModalAnimation';
 import { RiskDataProvider } from '../../contexts/RiskDataContext';
 import { sendSavedEvents } from '../../utils/analytics';
 import './App.css';
@@ -167,7 +168,7 @@ function App() {
         </>
       )}
       <div id='portal-root'></div>
-      <RiskDataProvider>
+      <RiskDataProvider>s
         <TicketInspectorsProvider>
             <Map
             isFirstOpen={appUIState.isFirstOpen}
