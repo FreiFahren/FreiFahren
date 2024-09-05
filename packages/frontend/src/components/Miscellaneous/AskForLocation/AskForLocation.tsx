@@ -3,10 +3,10 @@ import { useState, useEffect } from 'react'
 import './AskForLocation.css'
 import AutocompleteInputForm, { selectOption } from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
 import StationsList from '../../../data/StationsList.json'
+import { useLocation } from '../../../contexts/LocationContext'
 
 interface AskForLocationProps {
     className: string
-    setUserPosition: (coordinates: { lat: number; lng: number }) => void
     children?: React.ReactNode
     closeModal: () => void
 }
@@ -16,7 +16,9 @@ interface Option {
     label: string
 }
 
-const AskForLocation: React.FC<AskForLocationProps> = ({ className, setUserPosition, children, closeModal }) => {
+const AskForLocation: React.FC<AskForLocationProps> = ({ className, children, closeModal }) => {
+    const { setUserPosition } = useLocation()
+
     const emptyOption = '' as unknown as selectOption
 
     const [isValid, setIsValid] = useState(false)

@@ -12,12 +12,14 @@ import AskForLocation from '../../components/Miscellaneous/AskForLocation/AskFor
 import Backdrop from '../../../src/components/Miscellaneous/Backdrop/Backdrop';
 import InspectorListButton from 'src/components/Buttons/InspectorListButton/InspectorListButton';
 import InspectorListModal from 'src/components/Modals/InspectorListModal/InspectorListModal';
-import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext';
 
-import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils';
+import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext'
+import { RiskDataProvider } from '../../contexts/RiskDataContext';
+import { useLocation } from '../../contexts/LocationContext';
+
+import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils'
 import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton';
 import { highlightElement, useModalAnimation, currentColorTheme, setColorThemeInLocalStorage } from '../../utils/uiUtils';
-import { RiskDataProvider } from '../../contexts/RiskDataContext';
 import { sendSavedEvents } from '../../utils/analytics';
 import './App.css';
 
@@ -26,7 +28,6 @@ type AppUIState = {
   formSubmitted: boolean;
   isFirstOpen: boolean;
   isStatsPopUpOpen: boolean;
-  isAskForLocationOpen: boolean;
   currentColorTheme: string;
   isRiskLayerOpen: boolean;
   isListModalOpen: boolean;
@@ -37,7 +38,6 @@ const initialAppUIState: AppUIState = {
   formSubmitted: false,
   isFirstOpen: true,
   isStatsPopUpOpen: false,
-  isAskForLocationOpen: false,
   currentColorTheme: currentColorTheme(),
   isRiskLayerOpen: false,
   isListModalOpen: false,
@@ -45,7 +45,6 @@ const initialAppUIState: AppUIState = {
 
 function App() {
   const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState);
-  const [userPosition, setUserPosition] = useState<{ lng: number, lat: number } | null>(null);
   const [appMounted, setAppMounted] = useState(false);
 
   useEffect(() => {
@@ -75,16 +74,12 @@ function App() {
     }
   };
 
-  const setStationAsUserPosition = (stationCoordinates: { lat: number; lng: number }) => {
-    setUserPosition(stationCoordinates);
-    setAppUIState(prev => ({ ...prev, isAskForLocationOpen: false }));
-  };
+  const { isAskForLocationOpen, closeAskForLocation } = useLocation();
 
+
+  // Todo: fix this
   const {
-    isOpen: isAskForLocationOpen,
     isAnimatingOut: isAskForLocationAnimatingOut,
-    openModal: openAskForLocation,
-    closeModal: closeAskForLocation
   } = useModalAnimation();
 
   function toggleColorTheme() {
@@ -102,10 +97,14 @@ function App() {
     }
   }
 
-  // add theme class on first render
+  // run on app mount
   useEffect(() => {
+    // set the color theme by manipulating the root element
     const root = document.documentElement;
     root.classList.add(currentColorTheme());
+
+    // send saved events to the backend
+    sendSavedEvents();
   }, []);
 
   // preloading the stats popup data
@@ -128,10 +127,6 @@ function App() {
   function changeLayer(clickedLayer: string) {
     setAppUIState({ ...appUIState, isRiskLayerOpen: clickedLayer === 'risk' });
   }
-
-  useEffect(() => {
-    sendSavedEvents();
-  }, []);
 
   return (
     <div className='App'>
@@ -161,7 +156,6 @@ function App() {
             closeModal={() => setAppUIState({ ...appUIState, isReportFormOpen: false })}
             notifyParentAboutSubmission={handleFormSubmit}
             className={'open center-animation'}
-            userPosition={userPosition}
           />
           <Backdrop onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
         </>
@@ -170,24 +164,21 @@ function App() {
       <RiskDataProvider>
         <TicketInspectorsProvider>
             <Map
-            isFirstOpen={appUIState.isFirstOpen}
-            formSubmitted={appUIState.formSubmitted}
-            userPosition={userPosition} 
-            setUserPosition={setUserPosition}
-            currentColorTheme={appUIState.currentColorTheme}
-            openAskForLocation={openAskForLocation}
-            isRiskLayerOpen={appUIState.isRiskLayerOpen}
-            />
-            <LayerSwitcher
-              changeLayer={changeLayer}
+              isFirstOpen={appUIState.isFirstOpen}
+              formSubmitted={appUIState.formSubmitted}
+              currentColorTheme={appUIState.currentColorTheme}
               isRiskLayerOpen={appUIState.isRiskLayerOpen}
-            />
-            {appUIState.isListModalOpen && (
-              <>
-                <InspectorListModal className={`open center-animation`}/>
-                <Backdrop onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
-              </>
-            )}
+              />
+              <LayerSwitcher
+                changeLayer={changeLayer}
+                isRiskLayerOpen={appUIState.isRiskLayerOpen}
+              />
+              {appUIState.isListModalOpen && (
+                <>
+                  <InspectorListModal className={`open center-animation`}/>
+                  <Backdrop onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
+                </>
+              )}
         </TicketInspectorsProvider>
       </RiskDataProvider>
       <InspectorListButton onClick={() => setAppUIState({...appUIState, isListModalOpen: !appUIState.isListModalOpen})}/>
@@ -196,7 +187,6 @@ function App() {
       {appUIState.isStatsPopUpOpen &&  statsData !== 0 && <StatsPopUp numberOfReports={statsData} className={'open center-animation'} />}
       {isAskForLocationOpen && !appUIState.isFirstOpen &&
         <AskForLocation
-          setUserPosition={setStationAsUserPosition}
           className={`open ${isAskForLocationAnimatingOut ? 'slide-out' : 'slide-in'}`}
           closeModal={closeAskForLocation}
         >

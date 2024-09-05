@@ -2,16 +2,17 @@ import React, { useCallback, useEffect } from 'react'
 import { Marker } from 'react-map-gl/maplibre'
 
 import { watchPosition } from '../../../../../utils/mapUtils'
+import { useLocation } from '../../../../../contexts/LocationContext'
 
 import './LocationMarker.css'
 
 interface LocationMarkerProps {
     userPosition: { lng: number; lat: number } | null
-    setUserPosition: (position: { lng: number; lat: number } | null) => void
-    openAskForLocation: () => void
 }
 
-const LocationMarker: React.FC<LocationMarkerProps> = ({ userPosition, setUserPosition, openAskForLocation }) => {
+const LocationMarker: React.FC<LocationMarkerProps> = ({ userPosition }) => {
+    const { setUserPosition, openAskForLocation } = useLocation()
+
     const fetchPosition = useCallback(async () => {
         const stopWatching = await watchPosition(setUserPosition, openAskForLocation)
         return () => stopWatching()

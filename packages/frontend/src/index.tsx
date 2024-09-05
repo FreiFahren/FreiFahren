@@ -8,12 +8,21 @@ import Impressum from './pages/Impressum/Impressum'
 import Datenschutz from './pages/Datenschutz/Datenschutz'
 import reportWebVitals from './reportWebVitals'
 
+import { LocationProvider } from './contexts/LocationContext'
+
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(
     <React.StrictMode>
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<App />} />
+                <Route
+                    path="/"
+                    element={
+                        <LocationProvider>
+                            <App />
+                        </LocationProvider>
+                    }
+                />
                 <Route path="/impressum" element={<Impressum />} />
                 <Route path="/datenschutz" element={<Datenschutz />} />
             </Routes>

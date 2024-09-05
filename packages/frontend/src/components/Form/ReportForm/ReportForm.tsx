@@ -6,6 +6,7 @@ import { getAllLinesList, LinesList, getAllStationsList, StationList, reportInsp
 import { sendAnalyticsEvent } from '../../../utils/analytics'
 import { highlightElement, createWarningSpan } from '../../../utils/uiUtils'
 import { calculateDistance } from '../../../utils/mapUtils'
+import { useLocation } from '../../../contexts/LocationContext'
 
 const redHighlight = (text: string) => {
     return (
@@ -20,17 +21,12 @@ interface ReportFormProps {
     closeModal: () => void
     notifyParentAboutSubmission: () => void
     className?: string
-    userPosition?: { lat: number; lng: number } | null
 }
 
 const search_icon = `${process.env.PUBLIC_URL}/icons/search.svg`
 
-const ReportForm: React.FC<ReportFormProps> = ({
-    closeModal,
-    notifyParentAboutSubmission,
-    className,
-    userPosition,
-}) => {
+const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSubmission, className }) => {
+    const { userPosition } = useLocation()
     const [allLines, setAllLines] = useState<LinesList>({})
     const [allStations, setAllStations] = useState<StationList>({})
 
