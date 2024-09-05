@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useCallback } from 'react'
+import React, { createContext, useState, useContext, useCallback, useRef } from 'react'
 import { watchPosition } from '../utils/mapUtils'
 
 interface LocationContextType {
@@ -23,8 +23,15 @@ export const useLocation = () => {
 export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [userPosition, setUserPosition] = useState<{ lng: number; lat: number } | null>(null)
     const [isAskForLocationOpen, setIsAskForLocationOpen] = useState(false)
+    const hasAskedForLocationBeenOpenedRef = useRef(false) // avoid overwriting the state with a new value on every render
 
-    const openAskForLocation = useCallback(() => setIsAskForLocationOpen(true), [])
+    // this is to prevent the ask for location modal from opening when the user has already opened it once
+    const openAskForLocation = useCallback(() => {
+        if (!hasAskedForLocationBeenOpenedRef.current) {
+            setIsAskForLocationOpen(true)
+            hasAskedForLocationBeenOpenedRef.current = true
+        }
+    }, [])
     const closeAskForLocation = useCallback(() => setIsAskForLocationOpen(false), [])
 
     const initializeLocationTracking = useCallback(() => {
