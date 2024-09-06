@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { OpacityMarker } from './Classes/OpacityMarker/OpacityMarker'
 import MarkerModal from '../../Modals/MarkerModal/MarkerModal'
 import { CloseButton } from '../../Buttons/CloseButton/CloseButton'
-import { useModalAnimation } from '../../../utils/uiUtils'
+import { useModalAnimation } from '../../../hooks/UseModalAnimation'
 import { useTicketInspectors } from '../../../contexts/TicketInspectorsContext'
 import { MarkerData } from '../../../utils/types'
 export interface MarkersProps {

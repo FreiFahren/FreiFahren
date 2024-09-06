@@ -19,7 +19,8 @@ import { useLocation } from '../../contexts/LocationContext';
 
 import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils'
 import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton';
-import { highlightElement, useModalAnimation, currentColorTheme, setColorThemeInLocalStorage } from '../../utils/uiUtils';
+import { highlightElement, currentColorTheme, setColorThemeInLocalStorage } from '../../utils/uiUtils';
+import { useModalAnimation } from '../../hooks/UseModalAnimation';
 import { sendSavedEvents } from '../../utils/analytics';
 import './App.css';
 
