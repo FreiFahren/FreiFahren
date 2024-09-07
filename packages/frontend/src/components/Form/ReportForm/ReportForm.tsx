@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 
 import SelectField from '../SelectField/SelectField'
 import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
 
-import { getAllLinesList, LinesList, getAllStationsList, StationList, reportInspector } from '../../../utils/dbUtils'
+import { LinesList, StationList, reportInspector } from '../../../utils/dbUtils'
 import { sendAnalyticsEvent } from '../../../utils/analytics'
 import { highlightElement, createWarningSpan } from '../../../utils/uiUtils'
 import { calculateDistance } from '../../../utils/mapUtils'
 import { useLocation } from '../../../contexts/LocationContext'
+import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 
 import './ReportForm.css'
 
@@ -28,8 +29,7 @@ interface ReportFormProps {
 
 const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSubmission, className }) => {
     const { userPosition } = useLocation()
-    const [allLines, setAllLines] = useState<LinesList>({})
-    const [allStations, setAllStations] = useState<StationList>({})
+    const { allLines, allStations } = useStationsAndLines()
 
     const [currentEntity, setCurrentEntity] = useState<string | null>(null)
     const [currentLine, setCurrentLine] = useState<string | null>(null)
@@ -43,15 +43,6 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
     const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
 
     const startTime = new Date()
-
-    useEffect(() => {
-        const fetchLinesAndStations = async () => {
-            const [lines, stations] = await Promise.all([getAllLinesList(), getAllStationsList()])
-            setAllLines(lines)
-            setAllStations(stations)
-        }
-        fetchLinesAndStations()
-    }, [])
 
     // filter the lines based on entity
     const possibleLines = useMemo(() => {
@@ -264,18 +255,16 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                             ))}
                         </SelectField>
                     </section>
-                    <section>
-                        <AutocompleteInputForm
-                            items={possibleStations}
-                            onSelect={handleStationSelect}
-                            value={currentStation}
-                            getDisplayValue={(station) => station.name}
-                            placeholder="Suche eine Station"
-                            label="Station"
-                            required={true}
-                            setSearchUsed={setSearchUsed}
-                        />
-                    </section>
+                    <AutocompleteInputForm
+                        items={possibleStations}
+                        onSelect={handleStationSelect}
+                        value={currentStation}
+                        getDisplayValue={(station) => station.name}
+                        placeholder="Suche eine Station"
+                        label="Station"
+                        required={true}
+                        setSearchUsed={setSearchUsed}
+                    />
                     {currentLine && (
                         <section>
                             <h3>Richtung</h3>

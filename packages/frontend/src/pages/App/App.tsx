@@ -16,6 +16,7 @@ import InspectorListModal from 'src/components/Modals/InspectorListModal/Inspect
 import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext'
 import { RiskDataProvider } from '../../contexts/RiskDataContext';
 import { useLocation } from '../../contexts/LocationContext';
+import { StationsAndLinesProvider } from '../../contexts/StationsAndLinesContext';
 
 import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils'
 import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton';
@@ -151,49 +152,51 @@ function App() {
           </UtilModal>
         </>
       )}
-      {appUIState.isReportFormOpen && (
-        <>
-          <ReportForm
-            closeModal={() => setAppUIState({ ...appUIState, isReportFormOpen: false })}
-            notifyParentAboutSubmission={handleFormSubmit}
-            className={'open center-animation'}
-          />
-          <Backdrop onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
-        </>
-      )}
-      <div id='portal-root'></div>
-      <RiskDataProvider>
-        <TicketInspectorsProvider>
-            <Map
-              isFirstOpen={appUIState.isFirstOpen}
-              formSubmitted={appUIState.formSubmitted}
-              currentColorTheme={appUIState.currentColorTheme}
-              isRiskLayerOpen={appUIState.isRiskLayerOpen}
-              />
-              <LayerSwitcher
-                changeLayer={changeLayer}
+      <StationsAndLinesProvider>
+        {appUIState.isReportFormOpen && (
+          <>
+            <ReportForm
+              closeModal={() => setAppUIState({ ...appUIState, isReportFormOpen: false })}
+              notifyParentAboutSubmission={handleFormSubmit}
+              className={'open center-animation'}
+            />
+            <Backdrop onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
+          </>
+        )}
+        <div id='portal-root'></div>
+        <RiskDataProvider>
+          <TicketInspectorsProvider>
+              <Map
+                isFirstOpen={appUIState.isFirstOpen}
+                formSubmitted={appUIState.formSubmitted}
+                currentColorTheme={appUIState.currentColorTheme}
                 isRiskLayerOpen={appUIState.isRiskLayerOpen}
-              />
-              {appUIState.isListModalOpen && (
-                <>
-                  <InspectorListModal className={`open center-animation`}/>
-                  <Backdrop onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
-                </>
-              )}
-        </TicketInspectorsProvider>
-      </RiskDataProvider>
-      <InspectorListButton onClick={() => setAppUIState({...appUIState, isListModalOpen: !appUIState.isListModalOpen})}/>
+                />
+                <LayerSwitcher
+                  changeLayer={changeLayer}
+                  isRiskLayerOpen={appUIState.isRiskLayerOpen}
+                />
+                {appUIState.isListModalOpen && (
+                  <>
+                    <InspectorListModal className={`open center-animation`}/>
+                    <Backdrop onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
+                  </>
+                )}
+          </TicketInspectorsProvider>
+        </RiskDataProvider>
+        <InspectorListButton onClick={() => setAppUIState({...appUIState, isListModalOpen: !appUIState.isListModalOpen})}/>
+        {isAskForLocationOpen && !appUIState.isFirstOpen &&
+          <AskForLocation
+            className={`open ${isAskForLocationAnimatingOut ? 'slide-out' : 'slide-in'}`}
+            closeModal={closeAskForLocation}
+          >
+            <CloseButton closeModal={closeAskForLocation}></CloseButton>
+          </AskForLocation>
+        }
+      </StationsAndLinesProvider>
       <UtilButton onClick={toggleUtilModal} />
       <ReportButton onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })} />
       {appUIState.isStatsPopUpOpen &&  statsData !== 0 && <StatsPopUp numberOfReports={statsData} className={'open center-animation'} />}
-      {isAskForLocationOpen && !appUIState.isFirstOpen &&
-        <AskForLocation
-          className={`open ${isAskForLocationAnimatingOut ? 'slide-out' : 'slide-in'}`}
-          closeModal={closeAskForLocation}
-        >
-          <CloseButton closeModal={closeAskForLocation}></CloseButton>
-        </AskForLocation>
-      }
     </div>
   );
 }

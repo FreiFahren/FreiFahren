@@ -3,8 +3,8 @@ import { MarkerData } from 'src/utils/types'
 import { stationDistanceMessage, elapsedTimeMessage } from '../../../utils/uiUtils'
 import { getStationDistance } from '../../../utils/dbUtils'
 import { getNearestStation } from '../../../utils/mapUtils'
+import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 import Skeleton, { useSkeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
-import stationsList from '../../../data/StationsList.json'
 
 import './MarkerModal.css'
 
@@ -17,6 +17,7 @@ interface MarkerModalProps {
 }
 
 const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selectedMarker, userLat, userLng }) => {
+    const { allStations } = useStationsAndLines()
     const { timestamp, station, line, direction } = selectedMarker
 
     const adjustedTimestamp = useMemo(() => {
@@ -37,9 +38,9 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
     useEffect(() => {
         const fetchDistance = async () => {
             setIsLoading(true)
-            const userStation = getNearestStation(stationsList, userLat, userLng);
+            const userStation = getNearestStation(allStations, userLat, userLng)
             if (userStation === null) return
-            const distance = await getStationDistance(userStation.key, station.id);
+            const distance = await getStationDistance(userStation.key, station.id)
             setStationDistance(distance)
             setIsLoading(false)
             // to avoid showing the skeleton when pos changes due to watchPosition
@@ -54,7 +55,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
         }
 
         fetchDistance()
-    }, [userLat, userLng, station.id])
+    }, [userLat, userLng, station.id, allStations])
 
     return (
         <div className={`marker-modal info-popup modal ${className}`}>

@@ -5,7 +5,6 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import MarkerContainer from './Markers/MarkerContainer'
 import LocationMarker from './Markers/Classes/LocationMarker/LocationMarker'
 import linesGeoJSON from '../../data/segments_v5.json'
-import stationsData from '../../data/StationsList.json'
 import StationLayer from './MapLayers/StationLayer/StationLayer'
 import RiskLineLayer from './MapLayers/LineLayer/RiskLineLayer'
 import RegularLineLayer from './MapLayers/LineLayer/RegularLineLayer'
@@ -13,6 +12,7 @@ import { convertStationsToGeoJSON } from '../../utils/mapUtils'
 import './Map.css'
 import { useRiskData } from '../../contexts/RiskDataContext'
 import { useLocation } from '../../contexts/LocationContext'
+import { useStationsAndLines } from '../../contexts/StationsAndLinesContext'
 
 const Map = lazy(() => import('react-map-gl/maplibre'))
 
@@ -36,8 +36,8 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
 
     const map = useRef<MapRef>(null)
-
-    const stationGeoJSON = convertStationsToGeoJSON(stationsData)
+    const { allStations } = useStationsAndLines()
+    const stationGeoJSON = convertStationsToGeoJSON(allStations)
 
     const { userPosition, initializeLocationTracking } = useLocation()
     useEffect(() => {
