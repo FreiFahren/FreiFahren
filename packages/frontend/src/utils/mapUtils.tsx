@@ -28,6 +28,15 @@ export function getNearestStation(stations: { [key: string]: StationProperty }, 
     return nearestStation
 }
 
+/**
+ * Calculates the distance between two geographical points using the Haversine formula.
+ *
+ * @param {number} lat1 - The latitude of the first point in decimal degrees.
+ * @param {number} lon1 - The longitude of the first point in decimal degrees.
+ * @param {number} lat2 - The latitude of the second point in decimal degrees.
+ * @param {number} lon2 - The longitude of the second point in decimal degrees.
+ * @returns {number} The distance between the two points in kilometers.
+ */
 export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
     const R = 6371 // Radius of the earth in km
     const dLat = deg2rad(lat2 - lat1)
@@ -54,6 +63,7 @@ function deg2rad(deg: number) {
  *    timeout: 15 seconds,
  *    maximumAge: 15 seconds
  * }
+ * @param {number} distanceThreshold The distance in meters that the user has to move before the location is updated.
  * @returns {Function} Unsubscribe function to stop watching position.
  */
 export const watchPosition = async (
@@ -63,14 +73,30 @@ export const watchPosition = async (
         enableHighAccuracy: true,
         timeout: 10 * 1000,
         maximumAge: 15 * 1000,
-    }
+    },
+    distanceThreshold: number = 50
 ): Promise<() => void> => {
+    let lastPosition: { lng: number; lat: number } | null = null
     const watchId = navigator.geolocation.watchPosition(
         (position) => {
-            onPositionChanged({
+            const newPosition = {
                 lng: position.coords.longitude,
                 lat: position.coords.latitude,
-            })
+            }
+
+            if (lastPosition) {
+                const distance =
+                    calculateDistance(lastPosition.lat, lastPosition.lng, newPosition.lat, newPosition.lng) * 1000 // Convert km to meters
+
+                if (distance >= distanceThreshold) {
+                    onPositionChanged(newPosition)
+                    lastPosition = newPosition
+                }
+            } else {
+                // First position update
+                onPositionChanged(newPosition)
+                lastPosition = newPosition
+            }
         },
         (error) => {
             console.error('Error obtaining position:', error.message)
