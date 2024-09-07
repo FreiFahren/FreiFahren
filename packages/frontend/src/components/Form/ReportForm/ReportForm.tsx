@@ -1,12 +1,15 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 
-import './ReportForm.css'
 import SelectField from '../SelectField/SelectField'
+import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
+
 import { getAllLinesList, LinesList, getAllStationsList, StationList, reportInspector } from '../../../utils/dbUtils'
 import { sendAnalyticsEvent } from '../../../utils/analytics'
 import { highlightElement, createWarningSpan } from '../../../utils/uiUtils'
 import { calculateDistance } from '../../../utils/mapUtils'
 import { useLocation } from '../../../contexts/LocationContext'
+
+import './ReportForm.css'
 
 const redHighlight = (text: string) => {
     return (
@@ -23,8 +26,6 @@ interface ReportFormProps {
     className?: string
 }
 
-const search_icon = `${process.env.PUBLIC_URL}/icons/search.svg`
-
 const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSubmission, className }) => {
     const { userPosition } = useLocation()
     const [allLines, setAllLines] = useState<LinesList>({})
@@ -36,9 +37,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
     const [currentDirection, setCurrentDirection] = useState<string | null>(null)
     const [description, setDescription] = useState<string>('')
 
-    const [showSearchBox, setShowSearchBox] = useState<boolean>(false)
     const [stationSearch, setStationSearch] = useState<string>('')
-    const searchInputRef = useRef<HTMLInputElement>(null)
     const [searchUsed, setSearchUsed] = useState<boolean>(false)
 
     const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
@@ -118,20 +117,9 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
             )
             setCurrentStation(foundStationEntry ? foundStationEntry[0] : null)
             setStationSearch('')
-            setShowSearchBox(false)
         },
         [allStations]
     )
-
-    const toggleSearchBox = useCallback(() => {
-        setShowSearchBox((prev) => !prev)
-        setSearchUsed(true)
-        setTimeout(() => {
-            if (searchInputRef.current) {
-                searchInputRef.current.focus()
-            }
-        }, 0)
-    }, [])
 
     const handleDirectionSelect = useCallback(
         (directionName: string | null) => {
@@ -167,7 +155,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                     Station: currentStation!,
                     Line: currentLine!,
                     Direction: currentDirection!,
-                    Entity: currentEntity!,
+                    Entity: Boolean(currentEntity),
                     SearchUsed: searchUsed,
                 },
             })
@@ -189,15 +177,18 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         if (lastReportTime && Date.now() - new Date(lastReportTime).getTime() < reportCooldownMinutes * 60 * 1000) {
             highlightElement('report-form')
             createWarningSpan(
-                'station-select-div',
+                'searchable-select-div',
                 `Du kannst nur alle ${reportCooldownMinutes} Minuten eine Meldung abgeben!`
             )
             hasError = true
         }
 
         if (!currentStation) {
-            highlightElement('station-select-div')
-            createWarningSpan('station-select-div', 'Du hast keine Station ausgewählt. Bitte wähle eine Station aus!')
+            highlightElement('searchable-select-div')
+            createWarningSpan(
+                'searchable-select-div',
+                'Du hast keine Station ausgewählt. Bitte wähle eine Station aus!'
+            )
             hasError = true
         }
 
@@ -230,7 +221,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         if (5 < distance) {
             highlightElement('report-form')
             createWarningSpan(
-                'station-select-div',
+                'searchable-select-div',
                 'Du bist zu weit von der Station entfernt. Bitte wähle die richtige Station!'
             )
             return true // Indicates an error
@@ -274,29 +265,16 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                         </SelectField>
                     </section>
                     <section>
-                        <div className="align-child-on-line" id="station-select-div">
-                            <h2>Station {redHighlight('')}</h2>
-                            <input
-                                className={`search-input ${showSearchBox ? 'expanded' : ''}`}
-                                type="text"
-                                placeholder="Suche eine Station"
-                                value={stationSearch}
-                                onChange={(e) => setStationSearch(e.target.value)}
-                                ref={searchInputRef}
-                            />
-                            <img src={search_icon} onClick={toggleSearchBox} alt="icon to search for a station"></img>
-                        </div>
-                        <SelectField
+                        <AutocompleteInputForm
+                            items={possibleStations}
                             onSelect={handleStationSelect}
-                            value={currentStation ? allStations[currentStation].name : ''}
-                            containerClassName="align-child-column"
-                        >
-                            {Object.entries(possibleStations).map(([stationKey, stationData]) => (
-                                <div key={stationKey}>
-                                    <strong>{stationData.name}</strong>
-                                </div>
-                            ))}
-                        </SelectField>
+                            value={currentStation}
+                            getDisplayValue={(station) => station.name}
+                            placeholder="Suche eine Station"
+                            label="Station"
+                            required={true}
+                            setSearchUsed={setSearchUsed}
+                        />
                     </section>
                     {currentLine && (
                         <section>
