@@ -1,7 +1,12 @@
-.select-field {
-    text-align: center;
+.ask-for-location section:has(> div#searchable-select-div) > .select-field-container {
+    max-height: calc(50vh - 200px);
+    overflow-y: auto;
 }
 
-.station-select-component__control {
-    width: 100%;
+.ask-for-location .search-input.expanded {
+    width: 33%;
+}
+
+.ask-for-location button {
+    margin-top: var(--margin-m);
 }

@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 
 import './AskForLocation.css'
 import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
 import { useLocation } from '../../../contexts/LocationContext'
-
+import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 interface AskForLocationProps {
     className: string
     children?: React.ReactNode
@@ -11,21 +11,47 @@ interface AskForLocationProps {
 }
 
 const AskForLocation: React.FC<AskForLocationProps> = ({ className, children, closeModal }) => {
-    const [isValid, setIsValid] = useState(false)
     const { setUserPosition } = useLocation()
+    const { allStations } = useStationsAndLines()
+
+    const [selectedStation, setSelectedStation] = useState<string | null>(null)
+
+    const handleSelect = useCallback(
+        (key: string | null) => {
+            const foundStationEntry = Object.entries(allStations).find(([, stationData]) => stationData.name === key)
+            setSelectedStation(foundStationEntry ? foundStationEntry[0] : null)
+        },
+        [allStations]
+    )
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        closeModal()
+        if (selectedStation && allStations[selectedStation]) {
+            const station = allStations[selectedStation]
+            setUserPosition({
+                lat: station.coordinates.latitude,
+                lng: station.coordinates.longitude,
+            })
+            closeModal()
+        }
     }
+
     return (
         <div className={`ask-for-location info-popup modal ${className}`}>
             {children}
             <form onSubmit={handleSubmit}>
-                <h1>Was ist deine nächste Station?</h1>
-                <p>Wir konnten deinen Standort nicht finden</p>
+                <h1>Wir konnten deinen Standort nicht finden</h1>
+                <AutocompleteInputForm
+                    items={allStations}
+                    onSelect={handleSelect}
+                    value={selectedStation}
+                    getDisplayValue={(station) => station.name}
+                    placeholder="Station suchen..."
+                    label="Nächste Station"
+                    required={false}
+                />
 
-                <button type="submit" className={isValid ? '' : 'button-gray'}>
+                <button type="submit" className={selectedStation ? '' : 'button-gray'} disabled={!selectedStation}>
                     Standort setzen
                 </button>
             </form>

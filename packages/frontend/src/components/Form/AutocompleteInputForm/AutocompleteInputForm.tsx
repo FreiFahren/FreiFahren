@@ -1,5 +1,8 @@
 import React, { useState, useRef, useCallback } from 'react'
+
 import SelectField from '../SelectField/SelectField'
+
+import './AutocompleteInputForm.css'
 
 interface AutocompleteInputFormProps<T> {
     items: Record<string, T>
@@ -14,6 +17,26 @@ interface AutocompleteInputFormProps<T> {
 
 const search_icon = `${process.env.PUBLIC_URL}/icons/search.svg`
 
+/**
+ * AutocompleteInputForm Component
+ *
+ * This component provides an autocomplete input form with search functionality.
+ * It allows users to select an item from a list, with the ability to filter items through a search box.
+ *
+ * @template T - The type of items in the autocomplete list
+ *
+ * @param {Object} props - The component props
+ * @param {Record<string, T>} props.items - An object containing the items to be displayed in the autocomplete list
+ * @param {(key: string | null) => void} props.onSelect - Callback function called when an item is selected
+ * @param {string | null} props.value - The currently selected value
+ * @param {(item: T) => string} props.getDisplayValue - Function to get the display value for each item
+ * @param {string} props.placeholder - Placeholder text for the input field
+ * @param {string} props.label - Label for the input field
+ * @param {boolean} [props.required=false] - Whether the field is required
+ * @param {(searchUsed: boolean) => void} [props.setSearchUsed] - Optional callback to notify when search is used
+ *
+ * @returns {React.ReactElement} The rendered AutocompleteInputForm component
+ */
 function AutocompleteInputForm<T>({
     items,
     onSelect,
