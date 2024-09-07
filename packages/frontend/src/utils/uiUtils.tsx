@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 export function highlightElement(id: string) {
     const element = document.getElementById(id)
 
@@ -31,23 +29,6 @@ export function createWarningSpan(elementId: string, message: string) {
         warningSpan.textContent = message
         document.getElementById(elementId)?.appendChild(warningSpan)
     }
-}
-
-export function useModalAnimation(timeout = 250) {
-    const [isOpen, setIsOpen] = useState(false)
-    const [isAnimatingOut, setIsAnimatingOut] = useState(false)
-
-    const openModal = () => setIsOpen(true)
-
-    const closeModal = () => {
-        setIsAnimatingOut(true)
-        setTimeout(() => {
-            setIsOpen(false)
-            setIsAnimatingOut(false)
-        }, timeout)
-    }
-
-    return { isOpen, isAnimatingOut, openModal, closeModal }
 }
 
 export const currentColorTheme = () => {

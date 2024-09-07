@@ -5,22 +5,20 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import MarkerContainer from './Markers/MarkerContainer'
 import LocationMarker from './Markers/Classes/LocationMarker/LocationMarker'
 import linesGeoJSON from '../../data/segments_v5.json'
-import stationsData from '../../data/StationsList.json'
 import StationLayer from './MapLayers/StationLayer/StationLayer'
 import RiskLineLayer from './MapLayers/LineLayer/RiskLineLayer'
 import RegularLineLayer from './MapLayers/LineLayer/RegularLineLayer'
 import { convertStationsToGeoJSON } from '../../utils/mapUtils'
 import './Map.css'
 import { useRiskData } from '../../contexts/RiskDataContext'
+import { useLocation } from '../../contexts/LocationContext'
+import { useStationsAndLines } from '../../contexts/StationsAndLinesContext'
 
 const Map = lazy(() => import('react-map-gl/maplibre'))
 
 interface FreifahrenMapProps {
     formSubmitted: boolean
-    userPosition: { lng: number; lat: number } | null | null
-    setUserPosition: (position: { lng: number; lat: number } | null) => void
     isFirstOpen: boolean
-    openAskForLocation: () => void
     currentColorTheme: string
     isRiskLayerOpen: boolean
 }
@@ -29,10 +27,7 @@ export const berlinViewPosition: { lng: number; lat: number } = { lng: 13.388, l
 
 const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     formSubmitted,
-    userPosition,
-    setUserPosition,
     isFirstOpen,
-    openAskForLocation,
     currentColorTheme,
     isRiskLayerOpen,
 }) => {
@@ -41,8 +36,15 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
 
     const map = useRef<MapRef>(null)
+    const { allStations } = useStationsAndLines()
+    const stationGeoJSON = convertStationsToGeoJSON(allStations)
 
-    const stationGeoJSON = convertStationsToGeoJSON(stationsData)
+    const { userPosition, initializeLocationTracking } = useLocation()
+    useEffect(() => {
+        if (!isFirstOpen) {
+            initializeLocationTracking()
+        }
+    }, [isFirstOpen, initializeLocationTracking])
 
     const textColor = currentColorTheme === 'light' ? '#000' : '#fff'
 
@@ -113,13 +115,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                 }
             >
                 <Suspense fallback={<div>Loading...</div>}>
-                    {!isFirstOpen && (
-                        <LocationMarker
-                            userPosition={userPosition}
-                            setUserPosition={setUserPosition}
-                            openAskForLocation={openAskForLocation}
-                        />
-                    )}
+                    {!isFirstOpen && <LocationMarker userPosition={userPosition} />}
                     <MarkerContainer
                         isFirstOpen={isFirstOpen}
                         formSubmitted={formSubmitted}

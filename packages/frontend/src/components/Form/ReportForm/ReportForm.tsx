@@ -1,11 +1,16 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 
-import './ReportForm.css'
 import SelectField from '../SelectField/SelectField'
-import { getAllLinesList, LinesList, getAllStationsList, StationList, reportInspector } from '../../../utils/dbUtils'
+import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
+
+import { LinesList, StationList, reportInspector } from '../../../utils/dbUtils'
 import { sendAnalyticsEvent } from '../../../utils/analytics'
 import { highlightElement, createWarningSpan } from '../../../utils/uiUtils'
 import { calculateDistance } from '../../../utils/mapUtils'
+import { useLocation } from '../../../contexts/LocationContext'
+import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
+
+import './ReportForm.css'
 
 const redHighlight = (text: string) => {
     return (
@@ -20,19 +25,11 @@ interface ReportFormProps {
     closeModal: () => void
     notifyParentAboutSubmission: () => void
     className?: string
-    userPosition?: { lat: number; lng: number } | null
 }
 
-const search_icon = `${process.env.PUBLIC_URL}/icons/search.svg`
-
-const ReportForm: React.FC<ReportFormProps> = ({
-    closeModal,
-    notifyParentAboutSubmission,
-    className,
-    userPosition,
-}) => {
-    const [allLines, setAllLines] = useState<LinesList>({})
-    const [allStations, setAllStations] = useState<StationList>({})
+const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSubmission, className }) => {
+    const { userPosition } = useLocation()
+    const { allLines, allStations } = useStationsAndLines()
 
     const [currentEntity, setCurrentEntity] = useState<string | null>(null)
     const [currentLine, setCurrentLine] = useState<string | null>(null)
@@ -40,23 +37,12 @@ const ReportForm: React.FC<ReportFormProps> = ({
     const [currentDirection, setCurrentDirection] = useState<string | null>(null)
     const [description, setDescription] = useState<string>('')
 
-    const [showSearchBox, setShowSearchBox] = useState<boolean>(false)
     const [stationSearch, setStationSearch] = useState<string>('')
-    const searchInputRef = useRef<HTMLInputElement>(null)
     const [searchUsed, setSearchUsed] = useState<boolean>(false)
 
     const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
 
     const startTime = new Date()
-
-    useEffect(() => {
-        const fetchLinesAndStations = async () => {
-            const [lines, stations] = await Promise.all([getAllLinesList(), getAllStationsList()])
-            setAllLines(lines)
-            setAllStations(stations)
-        }
-        fetchLinesAndStations()
-    }, [])
 
     // filter the lines based on entity
     const possibleLines = useMemo(() => {
@@ -122,20 +108,9 @@ const ReportForm: React.FC<ReportFormProps> = ({
             )
             setCurrentStation(foundStationEntry ? foundStationEntry[0] : null)
             setStationSearch('')
-            setShowSearchBox(false)
         },
         [allStations]
     )
-
-    const toggleSearchBox = useCallback(() => {
-        setShowSearchBox((prev) => !prev)
-        setSearchUsed(true)
-        setTimeout(() => {
-            if (searchInputRef.current) {
-                searchInputRef.current.focus()
-            }
-        }, 0)
-    }, [])
 
     const handleDirectionSelect = useCallback(
         (directionName: string | null) => {
@@ -171,7 +146,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
                     Station: currentStation!,
                     Line: currentLine!,
                     Direction: currentDirection!,
-                    Entity: currentEntity!,
+                    Entity: Boolean(currentEntity),
                     SearchUsed: searchUsed,
                 },
             })
@@ -193,15 +168,18 @@ const ReportForm: React.FC<ReportFormProps> = ({
         if (lastReportTime && Date.now() - new Date(lastReportTime).getTime() < reportCooldownMinutes * 60 * 1000) {
             highlightElement('report-form')
             createWarningSpan(
-                'station-select-div',
+                'searchable-select-div',
                 `Du kannst nur alle ${reportCooldownMinutes} Minuten eine Meldung abgeben!`
             )
             hasError = true
         }
 
         if (!currentStation) {
-            highlightElement('station-select-div')
-            createWarningSpan('station-select-div', 'Du hast keine Station ausgewählt. Bitte wähle eine Station aus!')
+            highlightElement('searchable-select-div')
+            createWarningSpan(
+                'searchable-select-div',
+                'Du hast keine Station ausgewählt. Bitte wähle eine Station aus!'
+            )
             hasError = true
         }
 
@@ -234,7 +212,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
         if (5 < distance) {
             highlightElement('report-form')
             createWarningSpan(
-                'station-select-div',
+                'searchable-select-div',
                 'Du bist zu weit von der Station entfernt. Bitte wähle die richtige Station!'
             )
             return true // Indicates an error
@@ -277,31 +255,16 @@ const ReportForm: React.FC<ReportFormProps> = ({
                             ))}
                         </SelectField>
                     </section>
-                    <section>
-                        <div className="align-child-on-line" id="station-select-div">
-                            <h2>Station {redHighlight('')}</h2>
-                            <input
-                                className={`search-input ${showSearchBox ? 'expanded' : ''}`}
-                                type="text"
-                                placeholder="Suche eine Station"
-                                value={stationSearch}
-                                onChange={(e) => setStationSearch(e.target.value)}
-                                ref={searchInputRef}
-                            />
-                            <img src={search_icon} onClick={toggleSearchBox} alt="icon to search for a station"></img>
-                        </div>
-                        <SelectField
-                            onSelect={handleStationSelect}
-                            value={currentStation ? allStations[currentStation].name : ''}
-                            containerClassName="align-child-column"
-                        >
-                            {Object.entries(possibleStations).map(([stationKey, stationData]) => (
-                                <div key={stationKey}>
-                                    <strong>{stationData.name}</strong>
-                                </div>
-                            ))}
-                        </SelectField>
-                    </section>
+                    <AutocompleteInputForm
+                        items={possibleStations}
+                        onSelect={handleStationSelect}
+                        value={currentStation}
+                        getDisplayValue={(station) => station.name}
+                        placeholder="Suche eine Station"
+                        label="Station"
+                        required={true}
+                        setSearchUsed={setSearchUsed}
+                    />
                     {currentLine && (
                         <section>
                             <h3>Richtung</h3>
