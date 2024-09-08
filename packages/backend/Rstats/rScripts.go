@@ -111,14 +111,12 @@ func executeRiskModelScript(csvPath string, outputPath string) error {
 		logger.Log.Error().Err(err).Msg("Failed to read response body")
 		return err
 	}
-	logger.Log.Debug().Msgf("Response body: %s", respBody)
 
 	// Get the current time and format it as a string
 	timestamp := time.Now().Format("2006-01-02T15:04:05")
 
 	// Construct the filename with the timestamp
 	filename := fmt.Sprintf("risk_model%s.json", timestamp)
-	fmt.Printf("respBody: %v", respBody)
 	// Save the response body to a file
 	outputPath = filepath.Join(outputPath, filename)
 	err = ioutil.WriteFile(outputPath, respBody, 0644)

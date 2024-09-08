@@ -711,14 +711,6 @@
         "lines": ["S7"],
         "name": "Poelchaustraße"
     },
-    "S-PeB": {
-        "coordinates": {
-            "latitude": 52.535819976809364,
-            "longitude": 13.357748515683738
-        },
-        "lines": [],
-        "name": "Perleberger Brücke"
-    },
     "S-PrA": {
         "coordinates": {
             "latitude": 52.545256519429614,
@@ -1343,14 +1335,6 @@
         "lines": ["U7"],
         "name": "Altstadt-Spandau"
     },
-    "U-ATg": {
-        "coordinates": {
-            "latitude": 52.58947177087171,
-            "longitude": 13.283754942073784
-        },
-        "lines": ["U6"],
-        "name": "Alt-Tegel"
-    },
     "U-Ado": {
         "coordinates": {
             "latitude": 52.50000451375408,
@@ -1414,14 +1398,6 @@
         },
         "lines": ["U9"],
         "name": "Birkenstraße"
-    },
-    "U-Bk": {
-        "coordinates": {
-            "latitude": 52.58184259136155,
-            "longitude": 13.29059442080316
-        },
-        "lines": ["U6"],
-        "name": "Borsigwerke"
     },
     "U-Bl": {
         "coordinates": {
@@ -1670,14 +1646,6 @@
         },
         "lines": ["U8"],
         "name": "Heinrich-Heine-Straße"
-    },
-    "U-Hh": {
-        "coordinates": {
-            "latitude": 52.57569255204089,
-            "longitude": 13.296114740381938
-        },
-        "lines": ["U6"],
-        "name": "Holzhauser Straße"
     },
     "U-Hl": {
         "coordinates": {
@@ -2007,14 +1975,6 @@
         "lines": ["U9"],
         "name": "Nauener Platz"
     },
-    "U-OTI": {
-        "coordinates": {
-            "latitude": 52.571036275224714,
-            "longitude": 13.302924319637441
-        },
-        "lines": ["U6"],
-        "name": "Otisstraße"
-    },
     "U-Ob": {
         "coordinates": {
             "latitude": 52.52560158138314,
@@ -2270,14 +2230,6 @@
         },
         "lines": ["U6"],
         "name": "Kurt-Schumacher-Platz"
-    },
-    "U-Scha": {
-        "coordinates": {
-            "latitude": 52.56681371702058,
-            "longitude": 13.312624807176945
-        },
-        "lines": ["U6"],
-        "name": "Scharnweber Straße"
     },
     "U-Se": {
         "coordinates": {
