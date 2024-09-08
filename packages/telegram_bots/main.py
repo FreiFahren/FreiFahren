@@ -85,6 +85,7 @@ def report_inspector() -> tuple:
 
 @app.route('/report-failure', methods=['POST'])
 def report_failure():
+    logger.info(f"Received a failure report: {request.json}")
     console_line = request.json.get('console_line', '')
     system = request.json.get('system', '')
     
