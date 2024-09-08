@@ -184,7 +184,7 @@ function App() {
                 )}
           </TicketInspectorsProvider>
         </RiskDataProvider>
-        <InspectorListButton onClick={() => setAppUIState({...appUIState, isListModalOpen: !appUIState.isListModalOpen})}/>
+        <InspectorListButton closeModal={() => setAppUIState({...appUIState, isListModalOpen: !appUIState.isListModalOpen})}/>
         {isAskForLocationOpen && !appUIState.isFirstOpen && !appUIState.isReportFormOpen && !appUIState.isListModalOpen && !isUtilOpen && 
           <AskForLocation
             className={`open ${isAskForLocationAnimatingOut ? 'slide-out' : 'slide-in'}`}
