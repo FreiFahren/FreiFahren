@@ -43,6 +43,8 @@ This project is an automated bot that fetches inspector data, creates an image w
     APP_URL=https://your-app-url.com
     ```
 
+    You can get your `SHORT_LIVED_ACCESS_TOKEN` by using the [Facebook Graph API Explorer](https://developers.facebook.com/tools/explorer/)
+
 2. Ensure your Facebook app has the necessary permissions: `instagram_basic`, `instagram_content_publish`, and `pages_read_engagement`.
 
 ## Usage
@@ -55,7 +57,7 @@ bun start
 
 The bot will run on port 8000 and perform the following actions:
 
--   Run a hourly job to fetch inspector data, create an image, and post it to Instagram
+-   Run a hourly job to fetch inspector data, create an image, and post it to Instagram. (It will not post during quiet hours (20:00-04:00 UTC))
 -   Run a daily job to clean up old image files
 
 ## How It Works

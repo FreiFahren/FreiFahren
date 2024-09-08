@@ -32,9 +32,9 @@ async function createAndPostStory(inspectors: Inspector[]) {
         const imageName = `story_${Date.now()}.jpg`
         const imagePath = path.join(folderPath, imageName)
         await fs.writeFile(imagePath, Uint8Array.from(imgBuffer))
-        
+
         let count = 0
-        while(!(await fetch(`${process.env.APP_URL}/images/${imageName}`)).ok && count < 10) {
+        while (!(await fetch(`${process.env.APP_URL}/images/${imageName}`)).ok && count < 10) {
             console.log('Waiting for image to be available...')
             await new Promise((resolve) => setTimeout(resolve, 1000))
             count++
@@ -64,11 +64,16 @@ try {
     console.error('Error in hourly cron job:', error)
 }
 
-// Hourly cron job to fetch data and post story
+// Hourly cron job to fetch data and post story, avoiding 20:00-04:00 UTC to not spam the followers
 cron.schedule('0 * * * *', async () => {
     try {
-        const inspectors = await fetchInspectorData()
-        await createAndPostStory(inspectors)
+        const currentHour = new Date().getUTCHours()
+        if (currentHour >= 4 && currentHour < 20) {
+            const inspectors = await fetchInspectorData()
+            await createAndPostStory(inspectors)
+        } else {
+            console.log('Skipping story post during quiet hours (20:00-04:00 UTC)')
+        }
     } catch (error) {
         console.error('Error in hourly cron job:', error)
     }
