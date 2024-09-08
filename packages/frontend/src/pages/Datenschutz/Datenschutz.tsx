@@ -4,7 +4,7 @@ const Datenschutz = () => {
             <div className="legal-text">
                 <h1>Datenschutzerklärung für die App "Freifahren"</h1>
                 <br />
-                <p>Letze aktualisierung: 30.06.2024</p>
+                <p>Letze aktualisierung: 08.09.2024</p>
                 <h2>Rechtsgrundlagen der Datenverarbeitung</h2>
                 <p>
                     Die Verarbeitung personenbezogener Daten in unserer App erfolgt auf Basis der folgenden
@@ -117,9 +117,10 @@ const Datenschutz = () => {
                 <ul>
                     <li>
                         Wie viele Meldungen über unsere App abgegeben werden und wie lange für die Abgabe einer Meldung
-                        benötigt wurde.
+                        benötigt wurde. Sowie weitere annoymisierte Parameter.
                     </li>
-                    <li>Wie häufig die Risikolinienebene betrachtet wurde.</li>
+                    <li>Ob die Risikolinienebene betrachtet wurde.</li>
+                    <li>Ob die Liste der Ticketkontrolleure betrachtet wurde.</li>
                 </ul>
                 <p>
                     Diese Daten sind nicht personenbezogen; es werden keine Informationen gesammelt, die eine
