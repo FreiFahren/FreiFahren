@@ -1,14 +1,21 @@
 import React from 'react'
 
+import { sendAnalyticsEvent } from 'src/utils/analytics'
+
 import './InspectorListButton.css'
 
 interface InspectorListButtonProps {
-    onClick: () => void
+    closeModal: () => void
 }
 
-const InspectorListButton: React.FC<InspectorListButtonProps> = ({ onClick }) => {
+const InspectorListButton: React.FC<InspectorListButtonProps> = ({ closeModal }) => {
+    const handleClick = () => {
+        closeModal()
+        sendAnalyticsEvent('InspectorList opened', {})
+    }
+
     return (
-        <button className="list-button small-button streched align-child-on-line" onClick={onClick}>
+        <button className="list-button small-button streched align-child-on-line" onClick={handleClick}>
             <img className="svg" src={`${process.env.PUBLIC_URL}/icons/list.svg`} alt="list button" />
             <p>Liste</p>
         </button>
