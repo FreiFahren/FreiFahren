@@ -6,6 +6,8 @@ import { CloseButton } from '../../Buttons/CloseButton/CloseButton'
 import { useModalAnimation } from '../../../hooks/UseModalAnimation'
 import { useTicketInspectors } from '../../../contexts/TicketInspectorsContext'
 import { MarkerData } from '../../../utils/types'
+import { sendAnalyticsEvent } from 'src/utils/analytics'
+
 export interface MarkersProps {
     formSubmitted: boolean
     isFirstOpen: boolean
@@ -25,6 +27,11 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
 
     const handleMarkerClick = (markerData: MarkerData) => {
         setSelectedMarker(markerData)
+        sendAnalyticsEvent('Marker clicked', {
+            meta: {
+                station: markerData.station.name,
+            }
+        })
         openMarkerModal()
     }
 
