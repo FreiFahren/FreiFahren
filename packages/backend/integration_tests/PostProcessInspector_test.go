@@ -73,9 +73,9 @@ func TestPostProcessInspectorData(t *testing.T) {
 		// Tests for AssignLineIfSingleOption
 		createTestCase("Imply line from direction", "", "U-U", "", "U1", "U-Kbo", "U-U"),
 		createTestCase("Imply line from station", "U-Tk", "", "", "U5", "U-Tk", ""),
-		createTestCase("Imply line from station and direction", "U-Tk", "SU-H", "", "U5", "U-Tk", "SU-H"),
+		createTestCase("Imply line from station and direction", "U-Tk", "SU-H", "", "U5", "U-Tk", "U-Hö"),
 		createTestCase("Don't imply line if station and direction are missing", "", "", "", "", "", ""),
-		createTestCase("Dont imply line if it is already set", "U-Tk", "SU-H", "U5", "U5", "U-Tk", "SU-H"),
+		createTestCase("Dont imply line if it is already set", "U-Tk", "SU-H", "U5", "U5", "U-Tk", "U-Hö"),
 		createTestCase("Don't imply line if there are multiple options", "U-Kbo", "", "", "", "U-Kbo", ""),
 		// Tests for guessStation
 		createTestCase("Guess the station when line and no station", "", "", "U2", "U2", "SU-A", ""),
@@ -88,7 +88,10 @@ func TestPostProcessInspectorData(t *testing.T) {
 		// Test if station is not on the line
 		createTestCase("Remove line if station is not on the line", "U-Kbo", "", "U2", "", "U-Kbo", ""),
 		createTestCase("Remove line if not on station and reset if possible", "U-Kr", "", "U2", "U3", "U-Kr", "SU-WA"),
-
+		// Tests for correctDirection
+		createTestCase("Set the last station as direction", "SU-A", "S-Okz", "S7", "S7", "SU-A", "S-Ah"),
+		createTestCase("Set first station as direction", "S-Okz", "SU-A", "S7", "S7", "S-Okz", "S-PH"),
+		createTestCase("Cross test with guessing station", "", "U-NA", "U6", "U6", "SU-Ts", "U-Sch"),
 	}
 
 	// Run test cases

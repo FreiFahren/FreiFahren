@@ -17,7 +17,7 @@ import (
 	var lines = data.GetLinesList()
 	
 	// avoid overwriting the line if station and direction dont match
-	if dataToInsert.Line == "" && (dataToInsert.Station.ID == "" || dataToInsert.Direction.ID == "") {
+	if dataToInsert.Line == "" && (dataToInsert.Station.ID != "" || dataToInsert.Direction.ID != "") {
 		if err := AssignLineIfSingleOption(dataToInsert, pointers, stations[dataToInsert.Station.ID], stations[dataToInsert.Direction.ID]); err != nil {
 			logger.Log.Error().Err(err).Msg("Error assigning line if single option in postInspector")
 			return err
