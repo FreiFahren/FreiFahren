@@ -48,8 +48,6 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations, textColor }) => {
         'Ostkreuz',
         'Südkreuz',
         'Westkreuz',
-    ]
-    const secondPriorityStations = [
         'Potsdamer Platz',
         'Friedrichstraße',
         'Zoologischer Garten',
@@ -60,6 +58,31 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations, textColor }) => {
         'Neukölln',
         'Tempelhof',
         'Hermannstraße',
+    ]
+    const secondPriorityStations = [
+        'Osloer Straße',
+        'Frankfurter Allee',
+        'Leopoldplatz',
+        'Weinmeisterstraße',
+        'Moritzplatz',
+        'Hallesches Tor',
+        'Rathaus Steglitz',
+        'Gleisdreieck',
+        'Prenzlauer Allee',
+        'Mehringdamm',
+        'Hansaplatz',
+        'Bernauerstraße',
+        'Landsberger Allee',
+        'Schönleinstraße',
+        'Voltastraße',
+        'WWittenbergplatz',
+        'Schönhauser Allee',
+        'Jannowitz Brücke',
+        'Bellevue',
+        'Schlesisches Tor',
+        'Nollendorfplatz',
+        'Westend',
+        'Schöneberg',
     ]
 
     return (
