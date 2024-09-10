@@ -1,4 +1,4 @@
-from telegram_bots.FreiFahren_BE_NLP.process_message import lines_with_stations, find_station, remove_direction_and_keyword, load_data
+from telegram_bots.FreiFahren_BE_NLP.process_message import lines_with_stations, find_station, remove_direction_and_keyword
 from telegram_bots.logger import setup_logger
 
 logger = setup_logger()
@@ -22,11 +22,6 @@ def handle_ringbahn(text):
 def verify_line(ticket_inspector, text):
     logger.debug('verifying line')
 
-    # If there is only one line traversing the station, set the line to that line
-    if ticket_inspector.line is None and ticket_inspector.station is not None:
-        stations_list_main = load_data('data/stations_list_main.json')
-        check_for_line_through_station(ticket_inspector, stations_list_main)
-
     # If it the ring set to S41
     if handle_ringbahn(text.lower()) and ticket_inspector.line is None:
         ticket_inspector.line = 'S41'
@@ -47,9 +42,6 @@ def verify_direction(ticket_inspector, text):
 
     if ticket_inspector.line is None:
         return ticket_inspector
-
-    # Update ticket inspector with the corrected direction returned by correct_direction
-    ticket_inspector = correct_direction(ticket_inspector, lines_with_stations)
 
     # Set direction to None if the line is S41 or S42
     set_ringbahn_directionless(ticket_inspector)
@@ -110,39 +102,6 @@ def check_if_station_is_actually_direction(text, ticket_inspector):
     ticket_inspector.station = new_station
 
     return ticket_inspector
-
-
-def correct_direction(ticket_inspector, lines_with_stations):
-    logger.debug('correcting direction')
-
-    line = ticket_inspector.line
-    direction = ticket_inspector.direction
-    station = ticket_inspector.station
-
-    stations_of_line = lines_with_stations[line]
-
-    # If direction is a final station, return ticket_inspector
-    if direction in [stations_of_line[0], stations_of_line[-1]]:
-        return ticket_inspector
-
-    # If station and direction are in the line, correct the direction
-    if station in stations_of_line and direction in stations_of_line:
-        station_index = stations_of_line.index(station)
-        direction_index = stations_of_line.index(direction)
-
-        # Correct the direction based on the station's position
-        # For example: 'S7 jetzt Alexanderplatz richtung Ostkreuz' should be to Ahrensfelde
-        if station_index < direction_index:
-            ticket_inspector.direction = stations_of_line[-1]
-        else:
-            ticket_inspector.direction = stations_of_line[0]
-
-        return ticket_inspector
-
-    # If direction is not a final station, set direction to None
-    ticket_inspector.direction = None
-    return ticket_inspector
-
 
 def check_for_line_through_station(ticket_inspector, stations_list_main):
     logger.debug('checking for line through station')
