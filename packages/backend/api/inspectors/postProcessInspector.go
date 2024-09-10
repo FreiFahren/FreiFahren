@@ -1,6 +1,7 @@
 package inspectors
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/FreiFahren/backend/data"
@@ -16,13 +17,14 @@ import (
 	var lines = data.GetLinesList()
 	
 	// avoid overwriting the line if station and direction dont match
-	if dataToInsert.Line == "" && (dataToInsert.Station.ID == "" || dataToInsert.Direction.ID == "") {
+	if dataToInsert.Line == "" && (dataToInsert.Station.ID != "" || dataToInsert.Direction.ID != "") {
 		if err := AssignLineIfSingleOption(dataToInsert, pointers, stations[dataToInsert.Station.ID], stations[dataToInsert.Direction.ID]); err != nil {
 			logger.Log.Error().Err(err).Msg("Error assigning line if single option in postInspector")
 			return err
 		}
 	}
 
+	// guess the station if the station is not provided but the line is
 	if dataToInsert.Station.ID == "" && dataToInsert.Line != "" {
 		stationsOnLine := lines[dataToInsert.Line]
 		if err := guessStation(dataToInsert, pointers, stationsOnLine); err != nil {
@@ -31,6 +33,7 @@ import (
 		}
 	}
 
+	// guess the direction if the direction is not provided but the line and station are
 	if dataToInsert.Direction.ID == "" && dataToInsert.Line != "" && dataToInsert.Station.ID != "" {
 		if err := DetermineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.ID, stations); err != nil {
 			logger.Log.Error().Err(err).Msg("Error determining direction if implied in postInspector")
@@ -83,6 +86,15 @@ import (
 		pointers.DirectionIDPtr = nil
 		pointers.DirectionNamePtr = nil
 		logger.Log.Debug().Msg("Removed direction because it was not on the same line")
+	}
+
+	// correct direction if it is implied but not correct
+	// e.g. Line: S7, Station: Alexanderplatz, Direction: Ostkreuz (should be removed and reset to Ahrensfelde)
+	if dataToInsert.Direction.ID != "" && dataToInsert.Station.ID != "" && dataToInsert.Line != "" {
+		lineStations := lines[dataToInsert.Line]
+		if len(lineStations) > 0 && (lineStations[0] != dataToInsert.Direction.ID && lineStations[len(lineStations)-1] != dataToInsert.Direction.ID) {
+			correctDirection(dataToInsert, pointers, lineStations)
+		}
 	}
 
 	return nil
@@ -204,4 +216,17 @@ func setDirection(dataToInsert *structs.ResponseData, pointers *structs.InsertPo
 	pointers.DirectionIDPtr = &stationID
 	directionName := station.Name
 	pointers.DirectionNamePtr = &directionName
+}
+
+func correctDirection(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, line []string) {
+	stationIndexOnLine := slices.Index(line, dataToInsert.Station.ID)
+	directionIndexOnLine := slices.Index(line, dataToInsert.Direction.ID)
+
+	if stationIndexOnLine > directionIndexOnLine {
+		logger.Log.Debug().Msg("Set the first station as direction")
+		setDirection(dataToInsert, pointers, line[0], data.GetStationsList()[line[0]])
+	} else {
+		logger.Log.Debug().Msg("Set the last station as direction")
+		setDirection(dataToInsert, pointers, line[len(line)-1], data.GetStationsList()[line[len(line)-1]])
+	}
 }
