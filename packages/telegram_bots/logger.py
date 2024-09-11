@@ -1,7 +1,7 @@
 import logging
 import sys
 from logging.handlers import TimedRotatingFileHandler
-from datetime import datetime, timezone
+from datetime import datetime
 
 
 class CustomFormatter(logging.Formatter):
@@ -22,7 +22,7 @@ def setup_logger():
 
         # Create console handler
         console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setLevel(logging.ERROR)
+        console_handler.setLevel(logging.DEBUG)
 
         # Create formatters and add it to handlers
         log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)'

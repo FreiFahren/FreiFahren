@@ -94,6 +94,7 @@ def run_safely(func: callable, bot_name: str) -> None:
     Raises:
         Exception: When the maximum number of retries is exceeded.
     """
+    logger.info(f"Running {bot_name} with error handling...")
     attempt = 0
     max_retries = 10
     
