@@ -28,7 +28,7 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
     const handleMarkerClick = (markerData: MarkerData) => {
         setSelectedMarker(markerData)
         const now = new Date()
-        const ageInMinutes = Math.floor((now.getTime() - new Date(markerData.timestamp).getTime()) / 60*1000)
+        const ageInMinutes = Math.floor((now.getTime() - new Date(markerData.timestamp).getTime()) / (60 * 1000))
         sendAnalyticsEvent('Marker clicked', {
             meta: {
                 station: markerData.station.name,
