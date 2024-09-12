@@ -23,7 +23,9 @@ interface FreifahrenMapProps {
     isRiskLayerOpen: boolean
 }
 
-export const berlinViewPosition: { lng: number; lat: number } = { lng: 13.388, lat: 52.5162 }
+const berlinViewPosition: { lng: number; lat: number } = { lng: 13.388, lat: 52.5162 }
+const github_icon = `${process.env.PUBLIC_URL}/icons/github.svg`
+const instagram_icon = `${process.env.PUBLIC_URL}/icons/instagram.svg`
 
 const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     formSubmitted,
@@ -136,14 +138,22 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     <StationLayer stations={stationGeoJSON} textColor={textColor} />
                 </Suspense>
             </Map>
+            <div className="social-media">
+                    <a href="https://github.com/FreiFahren/FreiFahren" target="_blank" rel="noopener noreferrer">
+                        <img src={github_icon} alt="GitHub" />
+                    </a>
+                    <a href="https://www.instagram.com/frei.fahren/" target="_blank" rel="noopener noreferrer">
+                        <img src={instagram_icon} alt="Instagram" />
+                    </a>
+            </div>
             <div className="map-attribution">
-                <a href="https://www.jawg.io/" target="_blank" rel="noopener noreferrer">
-                    © JawgMaps
-                </a>{' '}
-                |
-                <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">
-                    © OSM contributors
-                </a>
+                    <a href="https://www.jawg.io/" target="_blank" rel="noopener noreferrer">
+                            © JawgMaps
+                    </a>{' '}
+                    |
+                    <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">
+                        © OSM contributors
+                    </a>
             </div>
         </div>
     )
