@@ -32,7 +32,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     isRiskLayerOpen,
 }) => {
     const SouthWestBounds: LngLatLike = { lng: 12.8364646484805, lat: 52.23115511676795 }
-    const NorthEastBounds: LngLatLike = { lng: 13.88044556529124, lat: 52.77063424239867 }
+    const NorthEastBounds: LngLatLike = { lng: 14.00044556529124, lat: 52.77063424239867 }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
 
     const map = useRef<MapRef>(null)
