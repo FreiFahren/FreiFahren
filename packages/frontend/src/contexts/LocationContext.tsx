@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useCallback, useRef } from 'react'
 import { watchPosition } from '../utils/mapUtils'
+import { sendAnalyticsEvent } from 'src/utils/analytics';
 
 interface LocationContextType {
     userPosition: { lng: number; lat: number } | null
@@ -21,9 +22,10 @@ export const useLocation = () => {
 }
 
 export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [userPosition, setUserPosition] = useState<{ lng: number; lat: number } | null>(null)
+    const [userPosition, setUserPositionState] = useState<{ lng: number; lat: number } | null>(null)
     const [isAskForLocationOpen, setIsAskForLocationOpen] = useState(false)
     const hasAskedForLocationBeenOpenedRef = useRef(false) // avoid overwriting the state with a new value on every render
+    const hasLocationEventBeenSentRef = useRef(false) // avoid sending the location event on every render
 
     // this is to prevent the ask for location modal from opening when the user has already opened it once
     const openAskForLocation = useCallback(() => {
@@ -34,9 +36,21 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }, [])
     const closeAskForLocation = useCallback(() => setIsAskForLocationOpen(false), [])
 
+    const setUserPosition = useCallback((position: { lng: number; lat: number } | null) => {
+        setUserPositionState(position);
+        if (position && !hasLocationEventBeenSentRef.current) {
+            sendAnalyticsEvent('User Position has been set', {
+                meta: {
+                    source: hasAskedForLocationBeenOpenedRef.current ? 'Ask for location Modal' : 'Browser location API'
+                }
+            });
+            hasLocationEventBeenSentRef.current = true
+        }
+    }, []);
+
     const initializeLocationTracking = useCallback(() => {
         watchPosition(setUserPosition, openAskForLocation)
-    }, [openAskForLocation])
+    }, [openAskForLocation, setUserPosition])
 
     return (
         <LocationContext.Provider
