@@ -87,13 +87,13 @@ func calculateWeekendAdjustment(currentTime time.Time, threshold int) float64 {
 func FetchAndAddHistoricData(ticketInfoList []utils.TicketInspector, remaining int, startTime time.Time) ([]utils.TicketInspector, error) {
 	logger.Log.Debug().Msg("Fetching and adding historic data")
 
-	currentStationIDs := make(map[string]bool)
+	currentStationIds := make(map[string]bool)
 	for _, ticketInfo := range ticketInfoList {
-		currentStationIDs[ticketInfo.StationID] = true
+		currentStationIds[ticketInfo.StationId] = true
 	}
 
-	excludedStationIDs := utils.GetKeysFromMap(currentStationIDs)
-	historicDataList, err := database.GetHistoricStations(startTime, remaining, 24, excludedStationIDs)
+	excludedStationIds := utils.GetKeysFromMap(currentStationIds)
+	historicDataList, err := database.GetHistoricStations(startTime, remaining, 24, excludedStationIds)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting historic stations")
 		return nil, err

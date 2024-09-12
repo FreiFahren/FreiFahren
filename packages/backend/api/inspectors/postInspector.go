@@ -50,11 +50,11 @@ func PostInspector(c echo.Context) error {
 	logger.Log.Debug().Interface("Request", req).Msg("Request data")
 
 	// Check if all parameters are empty
-	if req.Line == "" && req.StationID == "" && req.DirectionID == "" {
+	if req.Line == "" && req.StationId == "" && req.DirectionId == "" {
 		logger.Log.Error().
 			Str("Line", req.Line).
-			Str("Station", req.StationID).
-			Str("Direction", req.DirectionID).
+			Str("Station", req.StationId).
+			Str("Direction", req.DirectionId).
 			Msg("At least one of 'line', 'station', or 'direction' must be provided")
 		return c.NoContent(http.StatusBadRequest)
 	}
@@ -75,9 +75,9 @@ func PostInspector(c echo.Context) error {
 		pointers.MessagePtr,
 		pointers.LinePtr,
 		pointers.StationNamePtr,
-		pointers.StationIDPtr,
+		pointers.StationIdPtr,
 		pointers.DirectionNamePtr,
-		pointers.DirectionIDPtr,
+		pointers.DirectionIdPtr,
 	); err != nil {
 		logger.Log.Error().Err(err).Msg("Error inserting ticket info in postInspector")
 		return c.NoContent(http.StatusInternalServerError)
@@ -126,22 +126,22 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 	}
 
 	// Assign station
-	if req.StationID != "" {
-		pointers.StationIDPtr = &req.StationID
-		response.Station = structs.Station{ID: req.StationID}
+	if req.StationId != "" {
+		pointers.StationIdPtr = &req.StationId
+		response.Station = structs.Station{Id: req.StationId}
 
-		if station, found := stations[req.StationID]; found {
+		if station, found := stations[req.StationId]; found {
 			response.Station.Name = station.Name
 			pointers.StationNamePtr = &station.Name
 		}
 	}
 
 	// Assign direction
-	if req.DirectionID != "" {
-		pointers.DirectionIDPtr = &req.DirectionID
-		response.Direction = structs.Station{ID: req.DirectionID}
+	if req.DirectionId != "" {
+		pointers.DirectionIdPtr = &req.DirectionId
+		response.Direction = structs.Station{Id: req.DirectionId}
 
-		if direction, found := stations[req.DirectionID]; found {
+		if direction, found := stations[req.DirectionId]; found {
 			response.Direction.Name = direction.Name
 			pointers.DirectionNamePtr = &direction.Name
 		}

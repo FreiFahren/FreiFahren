@@ -17,40 +17,40 @@ import (
 	var lines = data.GetLinesList()
 	
 	// avoid overwriting the line if station and direction dont match
-	if dataToInsert.Line == "" && (dataToInsert.Station.ID != "" || dataToInsert.Direction.ID != "") {
-		if err := AssignLineIfSingleOption(dataToInsert, pointers, stations[dataToInsert.Station.ID], stations[dataToInsert.Direction.ID]); err != nil {
+	if dataToInsert.Line == "" && (dataToInsert.Station.Id != "" || dataToInsert.Direction.Id != "") {
+		if err := AssignLineIfSingleOption(dataToInsert, pointers, stations[dataToInsert.Station.Id], stations[dataToInsert.Direction.Id]); err != nil {
 			logger.Log.Error().Err(err).Msg("Error assigning line if single option in postInspector")
 			return err
 		}
 	}
 
 	// guess the station if the station is not provided but the line is
-	if dataToInsert.Station.ID == "" && dataToInsert.Line != "" {
+	if dataToInsert.Station.Id == "" && dataToInsert.Line != "" {
 		stationsOnLine := lines[dataToInsert.Line]
 		if err := guessStation(dataToInsert, pointers, stationsOnLine); err != nil {
-			logger.Log.Error().Err(err).Msg("Error guessing station ID in postInspector")
+			logger.Log.Error().Err(err).Msg("Error guessing station Id in postInspector")
 			return err
 		}
 	}
 
 	// guess the direction if the direction is not provided but the line and station are
-	if dataToInsert.Direction.ID == "" && dataToInsert.Line != "" && dataToInsert.Station.ID != "" {
-		if err := DetermineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.ID, stations); err != nil {
+	if dataToInsert.Direction.Id == "" && dataToInsert.Line != "" && dataToInsert.Station.Id != "" {
+		if err := DetermineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.Id, stations); err != nil {
 			logger.Log.Error().Err(err).Msg("Error determining direction if implied in postInspector")
 			return err
 		}
 	}
 
 	// If the direction is the same as the station, remove the direction
-	if dataToInsert.Direction.ID == dataToInsert.Station.ID && dataToInsert.Direction.ID != "" {
+	if dataToInsert.Direction.Id == dataToInsert.Station.Id && dataToInsert.Direction.Id != "" {
 		dataToInsert.Direction = structs.Station{}
-		pointers.DirectionIDPtr = nil
+		pointers.DirectionIdPtr = nil
 		pointers.DirectionNamePtr = nil
 
 		if dataToInsert.Line != "" {
 			// in case the direction was the same as the station, but the line was provided, we can determine the correct direction
 			// e.g. Line: U6, Station: Alt-Mariendorf, Direction: Alt-Mariendorf it should be removed and reset to Kurt-Schumacher-Platz
-			if err := DetermineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.ID, stations); err != nil {
+			if err := DetermineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.Id, stations); err != nil {
 				logger.Log.Error().Err(err).Msg("Error determining direction if implied in postInspector")
 				return err
 			}
@@ -60,18 +60,18 @@ import (
 	}
 
 	// if Station is not on the given line, remove the line
-	if dataToInsert.Station.ID != "" && !structs.StringInSlice(dataToInsert.Line, stations[dataToInsert.Station.ID].Lines) {
+	if dataToInsert.Station.Id != "" && !structs.StringInSlice(dataToInsert.Line, stations[dataToInsert.Station.Id].Lines) {
 		dataToInsert.Line = ""
 		pointers.LinePtr = nil
 
 		// try to assign the line if the station is uniquely served by one line
-		if err := AssignLineIfSingleOption(dataToInsert, pointers, stations[dataToInsert.Station.ID], stations[dataToInsert.Direction.ID]); err != nil {
+		if err := AssignLineIfSingleOption(dataToInsert, pointers, stations[dataToInsert.Station.Id], stations[dataToInsert.Direction.Id]); err != nil {
 			logger.Log.Error().Err(err).Msg("Error assigning line if single option in postInspector")
 			return err
 		}
 		// try to determine the direction if the line was found
 		if dataToInsert.Line != "" {
-			if err := DetermineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.ID, stations); err != nil {
+			if err := DetermineDirectionIfImplied(dataToInsert, pointers, lines[dataToInsert.Line], dataToInsert.Station.Id, stations); err != nil {
 				logger.Log.Error().Err(err).Msg("Error determining direction if implied in postInspector")
 				return err
 			}
@@ -81,18 +81,18 @@ import (
 	}
 
 	// If Direction is not on the same given line, remove the direction
-	if dataToInsert.Direction.ID != "" && !structs.StringInSlice(dataToInsert.Line, stations[dataToInsert.Station.ID].Lines) {
+	if dataToInsert.Direction.Id != "" && !structs.StringInSlice(dataToInsert.Line, stations[dataToInsert.Station.Id].Lines) {
 		dataToInsert.Direction = structs.Station{}
-		pointers.DirectionIDPtr = nil
+		pointers.DirectionIdPtr = nil
 		pointers.DirectionNamePtr = nil
 		logger.Log.Debug().Msg("Removed direction because it was not on the same line")
 	}
 
 	// correct direction if it is implied but not correct
 	// e.g. Line: S7, Station: Alexanderplatz, Direction: Ostkreuz (should be removed and reset to Ahrensfelde)
-	if dataToInsert.Direction.ID != "" && dataToInsert.Station.ID != "" && dataToInsert.Line != "" {
+	if dataToInsert.Direction.Id != "" && dataToInsert.Station.Id != "" && dataToInsert.Line != "" {
 		lineStations := lines[dataToInsert.Line]
-		if len(lineStations) > 0 && (lineStations[0] != dataToInsert.Direction.ID && lineStations[len(lineStations)-1] != dataToInsert.Direction.ID) {
+		if len(lineStations) > 0 && (lineStations[0] != dataToInsert.Direction.Id && lineStations[len(lineStations)-1] != dataToInsert.Direction.Id) {
 			correctDirection(dataToInsert, pointers, lineStations)
 		}
 	}
@@ -113,7 +113,7 @@ import (
 // This function queries the database to find the most common station on the line and assigns it to the dataToInsert. 
 // This is being done to avoid storing useless data, as we would otherwise serve historic data to the users, which is not very accurate.
 func guessStation(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, stationsOnLine []string) error {
-	logger.Log.Debug().Msg("Guessing station ID based on line")
+	logger.Log.Debug().Msg("Guessing station Id based on line")
 
 	// Query the database to find the most common station on this line
 	mostCommonStation, err := database.GetMostCommonStationId(stationsOnLine)
@@ -123,8 +123,8 @@ func guessStation(dataToInsert *structs.ResponseData, pointers *structs.InsertPo
 	}
 
 	if mostCommonStation != "" {
-		dataToInsert.Station.ID = mostCommonStation
-		pointers.StationIDPtr = &mostCommonStation
+		dataToInsert.Station.Id = mostCommonStation
+		pointers.StationIdPtr = &mostCommonStation
 
 		// Get the station name from the stations list
 		stations := data.GetStationsList()
@@ -133,7 +133,7 @@ func guessStation(dataToInsert *structs.ResponseData, pointers *structs.InsertPo
 			pointers.StationNamePtr = &station.Name
 		}
 
-		logger.Log.Info().Str("line", dataToInsert.Line).Str("guessedStation", mostCommonStation).Msg("Guessed station ID based on line")
+		logger.Log.Info().Str("line", dataToInsert.Line).Str("guessedStation", mostCommonStation).Msg("Guessed station Id based on line")
 	}
 
 	return nil
@@ -168,24 +168,24 @@ func DetermineDirectionIfImplied(
 	dataToInsert *structs.ResponseData,
 	pointers *structs.InsertPointers,
 	line []string,
-	stationID string,
+	stationId string,
 	stations map[string]structs.StationListEntry,
 ) error {
 	logger.Log.Debug().Msg("Determining direction if implied")
 
-	isStationUniqueToOneLine := CheckIfStationIsUniqueToOneLineOfType(stations[stationID], dataToInsert.Line)
+	isStationUniqueToOneLine := CheckIfStationIsUniqueToOneLineOfType(stations[stationId], dataToInsert.Line)
 
-	lastStationID := line[len(line)-1]
-	firstStationID := line[0]
+	lastStationId := line[len(line)-1]
+	firstStationId := line[0]
 
 	if isStationUniqueToOneLine {
-		if firstStationID == stationID {
-			if lastStation, found := stations[lastStationID]; found {
-				setDirection(dataToInsert, pointers, lastStationID, lastStation)
+		if firstStationId == stationId {
+			if lastStation, found := stations[lastStationId]; found {
+				setDirection(dataToInsert, pointers, lastStationId, lastStation)
 			}
-		} else if lastStationID == stationID {
-			if firstStation, found := stations[firstStationID]; found {
-				setDirection(dataToInsert, pointers, firstStationID, firstStation)
+		} else if lastStationId == stationId {
+			if firstStation, found := stations[firstStationId]; found {
+				setDirection(dataToInsert, pointers, firstStationId, firstStation)
 			}
 		}
 	}
@@ -209,18 +209,18 @@ func CheckIfStationIsUniqueToOneLineOfType(station structs.StationListEntry, lin
 	return count == 1 // return true if there is only one line of the specified type
 }
 
-func setDirection(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, stationID string, station structs.StationListEntry) {
+func setDirection(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, stationId string, station structs.StationListEntry) {
 	logger.Log.Debug().Msg("Setting direction")
 
-	dataToInsert.Direction = structs.Station{Name: station.Name, ID: stationID, Coordinates: structs.Coordinates(station.Coordinates)}
-	pointers.DirectionIDPtr = &stationID
+	dataToInsert.Direction = structs.Station{Name: station.Name, Id: stationId, Coordinates: structs.Coordinates(station.Coordinates)}
+	pointers.DirectionIdPtr = &stationId
 	directionName := station.Name
 	pointers.DirectionNamePtr = &directionName
 }
 
 func correctDirection(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, line []string) {
-	stationIndexOnLine := slices.Index(line, dataToInsert.Station.ID)
-	directionIndexOnLine := slices.Index(line, dataToInsert.Direction.ID)
+	stationIndexOnLine := slices.Index(line, dataToInsert.Station.Id)
+	directionIndexOnLine := slices.Index(line, dataToInsert.Direction.Id)
 
 	if stationIndexOnLine > directionIndexOnLine {
 		logger.Log.Debug().Msg("Set the first station as direction")

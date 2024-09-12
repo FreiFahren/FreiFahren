@@ -10,13 +10,13 @@ import (
 )
 
 func IdToStationName(id string) (string, error) {
-	logger.Log.Debug().Msg("Transforming station ID to station name")
+	logger.Log.Debug().Msg("Transforming station Id to station name")
 
 	var stations = data.GetStationsList()
 
 	station, ok := stations[id]
 	if !ok {
-		err := fmt.Errorf("station ID %s not found", id)
+		err := fmt.Errorf("station Id %s not found", id)
 		logger.Log.Error().Err(err)
 		return "", err
 	}
@@ -24,7 +24,7 @@ func IdToStationName(id string) (string, error) {
 	return station.Name, nil
 }
 
-// @Summary      Retrieve Name by Station ID
+// @Summary      Retrieve Name by Station Id
 //
 // @Description  Fetches the name of a station by its unique identifier from the StationsMap.
 // @Description  The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-A" for the station "Alexanderplatz".

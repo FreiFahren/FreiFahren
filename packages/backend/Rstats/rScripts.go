@@ -143,7 +143,7 @@ func simplifyAndSaveTicketInspectors(ticketInspectors []utils.TicketInspector, f
 	defer writer.Flush()
 
 	// Write CSV header
-	header := []string{"Timestamp", "StationID", "Lines", "DirectionID"}
+	header := []string{"Timestamp", "StationId", "Lines", "DirectionId"}
 	if err := writer.Write(header); err != nil {
 		return fmt.Errorf("(rScripts.go) failed to write CSV header: %w", err)
 	}
@@ -159,19 +159,19 @@ func simplifyAndSaveTicketInspectors(ticketInspectors []utils.TicketInspector, f
 			lines = append(lines, ticket.Line.String)
 		} else {
 			stations := data.GetStationsList()
-			lines = stations[ticket.StationID].Lines
+			lines = stations[ticket.StationId].Lines
 		}
 
-		directionID := ""
-		if ticket.DirectionID.Valid {
-			directionID = ticket.DirectionID.String
+		directionId := ""
+		if ticket.DirectionId.Valid {
+			directionId = ticket.DirectionId.String
 		}
 
 		row := []string{
 			ticket.Timestamp.Format(time.RFC3339),
-			ticket.StationID,
+			ticket.StationId,
 			strings.Join(lines, "|"), // Join multiple lines with a pipe character
-			directionID,
+			directionId,
 		}
 
 		if err := writer.Write(row); err != nil {

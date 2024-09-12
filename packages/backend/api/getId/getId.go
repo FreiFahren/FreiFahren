@@ -25,7 +25,7 @@ func FindStationId(name string, stationsMap map[string]utils.StationListEntry) (
 	return "", false
 }
 
-// @Summary      Retrieve Station ID by Name
+// @Summary      Retrieve Station Id by Name
 //
 // @Description  Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.
 // @Description  The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-A" for the station "Alexanderplatz".

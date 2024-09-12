@@ -41,17 +41,17 @@ func GetTimeRange(start, end string) (time.Time, time.Time) {
 	return startTime, endTime
 }
 
-// IdToCoordinates returns the latitude and longitude of a station given its ID
+// IdToCoordinates returns the latitude and longitude of a station given its Id
 //
 // Parameters:
-// - id: The ID of the station to get the coordinates for
+// - id: The Id of the station to get the coordinates for
 //
 // Returns:
 // - The latitude of the station
 // - The longitude of the station
-// - An error if the station ID is not found
+// - An error if the station Id is not found
 //
-// This function is using the data package to get the list of stations and then find the station with the given ID and return its coordinates.
+// This function is using the data package to get the list of stations and then find the station with the given Id and return its coordinates.
 func IdToCoordinates(id string) (float64, float64, error) {
 	logger.Log.Debug().Msg("Getting station coordinates")
 
@@ -59,7 +59,7 @@ func IdToCoordinates(id string) (float64, float64, error) {
 
 	station, ok := stations[id]
 	if !ok {
-		return 0, 0, fmt.Errorf("station ID %s not found", id)
+		return 0, 0, fmt.Errorf("station Id %s not found", id)
 	}
 
 	return station.Coordinates.Latitude, station.Coordinates.Longitude, nil
