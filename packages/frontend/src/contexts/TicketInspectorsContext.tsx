@@ -33,7 +33,7 @@ export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> =
 
         if (newTicketInspectorList.length > 0) {
             setTicketInspectorList((currentList) => {
-                // Create a map to track the most recent entry per station ID
+                // Create a map to track the most recent entry per station Id
                 const updatedList = new Map(currentList.map((inspector) => [inspector.station.id, inspector]))
 
                 newTicketInspectorList.forEach((newInspector: MarkerData) => {
@@ -47,7 +47,7 @@ export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> =
                             updatedList.set(newInspector.station.id, newInspector)
                         }
                     } else {
-                        // If no existing inspector with the same ID, add the new one
+                        // If no existing inspector with the same Id, add the new one
                         updatedList.set(newInspector.station.id, newInspector)
                     }
                 })

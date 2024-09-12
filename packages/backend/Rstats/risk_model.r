@@ -253,7 +253,7 @@ classify_risk = function(...){
 
 ticket_info = read_csv("Rstats/ticket_data.csv") %>% #fromJSON("Rstats/ticket_data.json",)
   mutate(Lines = strsplit(Lines, "\\|")) %>%
-  rename(timestamp = Timestamp, station_id = StationID, line = Lines, direction_id = DirectionID)
+  rename(timestamp = Timestamp, station_id = StationId, line = Lines, direction_id = DirectionId)
 segments = readRDS("Rstats/segments/segments_v5.RDS")
 now = Sys.time() %>% setattr("tzone","UTC") # now = as_datetime("2024-07-02 12:33:00")
 from = format(now - (60*60)) %>% as.POSIXct(tz = "UTC")

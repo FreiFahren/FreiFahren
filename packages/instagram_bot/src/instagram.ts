@@ -8,11 +8,11 @@ import fetch from 'node-fetch'
  * This is the first step in a two-step process for posting a story to Instagram.
  * It prepares the media (in this case, an image) for publishing without actually posting it.
  *
- * @param {string} instagramAccountId - The ID of the Instagram business account
+ * @param {string} instagramAccountId - The Id of the Instagram business account
  * @param {string} pageAccessToken - The access token for the associated Facebook Page
  * @param {string} imageUrl - The URL of the image to be posted as a story
  *
- * @returns {Promise<string>} A promise that resolves to the ID of the created media container
+ * @returns {Promise<string>} A promise that resolves to the Id of the created media container
  *
  * @throws {Error} If the API request fails or returns an unexpected response
  *
@@ -24,9 +24,12 @@ export async function createMediaContainer(
     pageAccessToken: string,
     imageUrl: string
 ): Promise<string> {
-    const response = await fetch(`https://graph.facebook.com/v20.0/${instagramAccountId}/media?image_url=${imageUrl}&media_type=STORIES&access_token=${pageAccessToken}`, {
-        method: 'POST',
-    })
+    const response = await fetch(
+        `https://graph.facebook.com/v20.0/${instagramAccountId}/media?image_url=${imageUrl}&media_type=STORIES&access_token=${pageAccessToken}`,
+        {
+            method: 'POST',
+        }
+    )
 
     if (!response.ok) {
         const errorData = await response.json()
@@ -42,13 +45,13 @@ export async function createMediaContainer(
  * Publishes a previously created media container as an Instagram Story.
  *
  * This is the second step in the two-step process for posting a story to Instagram.
- * It takes the ID of a media container created by createMediaContainer() and publishes it as a story.
+ * It takes the Id of a media container created by createMediaContainer() and publishes it as a story.
  *
- * @param {string} instagramAccountId - The ID of the Instagram business account
+ * @param {string} instagramAccountId - The Id of the Instagram business account
  * @param {string} pageAccessToken - The access token for the associated Facebook Page
- * @param {string} creationId - The ID of the media container to publish, obtained from createMediaContainer()
+ * @param {string} creationId - The Id of the media container to publish, obtained from createMediaContainer()
  *
- * @returns {Promise<string>} A promise that resolves to the ID of the published media
+ * @returns {Promise<string>} A promise that resolves to the Id of the published media
  *
  * @throws {Error} If the API request fails or returns an unexpected response
  *

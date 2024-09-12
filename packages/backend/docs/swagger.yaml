@@ -219,7 +219,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Retrieve Station ID by Name
+      summary: Retrieve Station Id by Name
       tags:
       - data
   /data/list:
@@ -309,7 +309,7 @@ paths:
           description: Error getting station name
           schema:
             type: string
-      summary: Retrieve Name by Station ID
+      summary: Retrieve Name by Station Id
       tags:
       - data
   /transit/distance:
@@ -320,7 +320,7 @@ paths:
         Returns the shortest number of stations between an inspector's station and a given user's latitude and longitude coordinates.
         The distance calculation employs Dijkstra's algorithm to determine the minimal stops required to reach the nearest station from the given coordinates.
       parameters:
-      - description: The station ID of the inspector's current location.
+      - description: The station Id of the inspector's current location.
         in: query
         name: inspectorStationId
         required: true

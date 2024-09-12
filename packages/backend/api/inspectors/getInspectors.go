@@ -102,9 +102,9 @@ func removeDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse
 
 	uniqueStations := make(map[string]utils.TicketInspectorResponse)
 	for _, ticketInspector := range ticketInspectorList {
-		stationID := ticketInspector.Station.ID
-		if existingInspector, ok := uniqueStations[stationID]; !ok || ticketInspector.Timestamp.After(existingInspector.Timestamp) {
-			uniqueStations[stationID] = ticketInspector
+		stationId := ticketInspector.Station.Id
+		if existingInspector, ok := uniqueStations[stationId]; !ok || ticketInspector.Timestamp.After(existingInspector.Timestamp) {
+			uniqueStations[stationId] = ticketInspector
 		}
 	}
 
@@ -127,8 +127,8 @@ func removeDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse
 func constructTicketInspectorInfo(ticketInfo utils.TicketInspector, startTime time.Time, endTime time.Time) (utils.TicketInspectorResponse, error) {
 	logger.Log.Debug().Msg("Constructing ticket inspector info")
 
-	cleanedStationId := strings.ReplaceAll(ticketInfo.StationID, "\n", "")
-	cleanedDirectionId := strings.ReplaceAll(ticketInfo.DirectionID.String, "\n", "")
+	cleanedStationId := strings.ReplaceAll(ticketInfo.StationId, "\n", "")
+	cleanedDirectionId := strings.ReplaceAll(ticketInfo.DirectionId.String, "\n", "")
 	cleanedLine := strings.ReplaceAll(ticketInfo.Line.String, "\n", "")
 	cleanedMessage := strings.ReplaceAll(ticketInfo.Message.String, "\n", "")
 
@@ -145,7 +145,7 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector, startTime ti
 	}
 
 	directionName, directionLat, directionLon := "", float64(0), float64(0)
-	if ticketInfo.DirectionID.Valid {
+	if ticketInfo.DirectionId.Valid {
 		directionName, err = getStationName.IdToStationName(cleanedDirectionId)
 		if err != nil {
 			logger.Log.Error().Err(err).Msg("Error getting direction name")
@@ -167,12 +167,12 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector, startTime ti
 	ticketInspectorInfo := utils.TicketInspectorResponse{
 		Timestamp: ticketInfo.Timestamp,
 		Station: utils.Station{
-			ID:          cleanedStationId,
+			Id:          cleanedStationId,
 			Name:        stationName,
 			Coordinates: utils.Coordinates{Latitude: stationLat, Longitude: stationLon},
 		},
 		Direction: utils.Station{
-			ID:          cleanedDirectionId,
+			Id:          cleanedDirectionId,
 			Name:        directionName,
 			Coordinates: utils.Coordinates{Latitude: directionLat, Longitude: directionLon},
 		},

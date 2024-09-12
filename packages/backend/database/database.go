@@ -159,7 +159,7 @@ func getLastNonHistoricTimestamp() (time.Time, error) {
 	return lastNonHistoricTimestamp, nil
 }
 
-func executeGetHistoricStationsSQL(hour, weekday, remaining int, excludedStationIDs []string, lastNonHistoricTimestamp time.Time) ([]utils.TicketInspector, error) {
+func executeGetHistoricStationsSQL(hour, weekday, remaining int, excludedStationIds []string, lastNonHistoricTimestamp time.Time) ([]utils.TicketInspector, error) {
 	logger.Log.Debug().Msg("Executing SQL query to get historic stations")
 
 	sql := `
@@ -174,16 +174,16 @@ func executeGetHistoricStationsSQL(hour, weekday, remaining int, excludedStation
         LIMIT $3;
     `
 
-	// Remove any newlines and spaces from the excluded station IDs
-	for i, station := range excludedStationIDs {
+	// Remove any newlines and spaces from the excluded station Ids
+	for i, station := range excludedStationIds {
 		if strings.Contains(station, "\n") {
 			station = strings.ReplaceAll(station, "\n", "")
 			station = strings.ReplaceAll(station, " ", "")
-			excludedStationIDs[i] = station
+			excludedStationIds[i] = station
 		}
 	}
 
-	rows, err := pool.Query(context.Background(), sql, hour, weekday, remaining, pq.Array(excludedStationIDs))
+	rows, err := pool.Query(context.Background(), sql, hour, weekday, remaining, pq.Array(excludedStationIds))
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to execute SQL query")
 		return nil, err
@@ -193,7 +193,7 @@ func executeGetHistoricStationsSQL(hour, weekday, remaining int, excludedStation
 	var ticketInfoList []utils.TicketInspector
 	for rows.Next() {
 		var ticketInfo utils.TicketInspector
-		if err := rows.Scan(&ticketInfo.StationID); err != nil {
+		if err := rows.Scan(&ticketInfo.StationId); err != nil {
 			logger.Log.Error().Err(err).Msg("Error scanning row")
 			return nil, err
 		}
@@ -216,7 +216,7 @@ func GetHistoricStations(
 	startTime time.Time,
 	remaining int,
 	maxRecursiveCalls int,
-	excludedStationIDs []string,
+	excludedStationIds []string,
 ) ([]utils.TicketInspector, error) {
 	logger.Log.Debug().Msg("Getting historic stations")
 
@@ -233,7 +233,7 @@ func GetHistoricStations(
 	hour := startTime.Hour()
 	weekday := int(startTime.Weekday())
 
-	ticketInfoList, err := executeGetHistoricStationsSQL(hour, weekday, remaining, excludedStationIDs, lastNonHistoricTimestamp)
+	ticketInfoList, err := executeGetHistoricStationsSQL(hour, weekday, remaining, excludedStationIds, lastNonHistoricTimestamp)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to execute get historic stations SQL")
 		return nil, err
@@ -244,12 +244,12 @@ func GetHistoricStations(
 
 	if remaining > 0 && maxRecursiveCalls > 0 {
 		broaderTimestamp := startTime.Add(-1 * time.Hour)
-		// Add the new station IDs to the list of excluded station IDs
+		// Add the new station Ids to the list of excluded station Ids
 		for _, ticketInfo := range ticketInfoList {
-			excludedStationIDs = append(excludedStationIDs, ticketInfo.StationID)
+			excludedStationIds = append(excludedStationIds, ticketInfo.StationId)
 		}
 
-		moreTicketInfoList, err := GetHistoricStations(broaderTimestamp, remaining, maxRecursiveCalls-1, excludedStationIDs)
+		moreTicketInfoList, err := GetHistoricStations(broaderTimestamp, remaining, maxRecursiveCalls-1, excludedStationIds)
 		if err != nil {
 			logger.Log.Error().Err(err).Msg("Failed to get more historic stations")
 			return nil, err
@@ -285,7 +285,7 @@ func GetLatestTicketInspectors(start, end time.Time) ([]utils.TicketInspector, e
 
 	for rows.Next() {
 		var ticketInfo utils.TicketInspector
-		if err := rows.Scan(&ticketInfo.Timestamp, &ticketInfo.StationID, &ticketInfo.DirectionID, &ticketInfo.Line, &ticketInfo.Message); err != nil {
+		if err := rows.Scan(&ticketInfo.Timestamp, &ticketInfo.StationId, &ticketInfo.DirectionId, &ticketInfo.Line, &ticketInfo.Message); err != nil {
 			logger.Log.Error().Err(err).Msg("Error scanning row")
 			return nil, err
 		}
@@ -344,13 +344,13 @@ func RoundOldTimestamp() {
 // Gets the the station id that is most common in the given list of stations.
 //
 // Parameters:
-//   - stations: A list of station IDs.
+//   - stations: A list of station Ids.
 //
 // Returns:
-//   - The most common station ID.
+//   - The most common station Id.
 //   - An error if something went wrong.
 func GetMostCommonStationId(stations []string) (string, error) {
-    logger.Log.Debug().Msg("Getting most common station ID")
+    logger.Log.Debug().Msg("Getting most common station Id")
 
     sql := `
         SELECT station_id
@@ -363,18 +363,18 @@ func GetMostCommonStationId(stations []string) (string, error) {
 
     rows, err := pool.Query(context.Background(), sql, pq.Array(stations))
     if err != nil {
-        logger.Log.Error().Err(err).Msg("Failed to get most common station ID")
+        logger.Log.Error().Err(err).Msg("Failed to get most common station Id")
         return "", err
     }
     defer rows.Close()
 
-    var stationID string
+    var stationId string
     if rows.Next() {
-        if err := rows.Scan(&stationID); err != nil {
+        if err := rows.Scan(&stationId); err != nil {
             logger.Log.Error().Err(err).Msg("Error scanning row")
             return "", err
         }
     }
 
-    return stationID, nil
+    return stationId, nil
 }

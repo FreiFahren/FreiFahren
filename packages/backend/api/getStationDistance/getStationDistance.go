@@ -20,7 +20,7 @@ type StationNode struct {
 }
 
 var stationsList map[string]utils.StationListEntry
-var stationIDs []string
+var stationIds []string
 var linesList map[string][]string
 
 // @Summary Calculate shortest distance to a station
@@ -33,7 +33,7 @@ var linesList map[string][]string
 // @Accept  json
 // @Produce  json
 //
-// @Param   inspectorStationId   query   string  true   "The station ID of the inspector's current location."
+// @Param   inspectorStationId   query   string  true   "The station Id of the inspector's current location."
 // @Param   userLat              query   string  true   "The latitude of the user's location."
 // @Param   userLon              query   string  true   "The longitude of the user's location."
 //
@@ -46,7 +46,7 @@ func GetStationDistance(c echo.Context) error {
 
 	inspectorStationId := c.QueryParam("inspectorStationId")
 
-	stationsList, stationIDs, linesList = ReadAndCreateSortedStationsListAndLinesList()
+	stationsList, stationIds, linesList = ReadAndCreateSortedStationsListAndLinesList()
 	inspectorStationCoordinates := stationsList[inspectorStationId].Coordinates
 
 	userStationId := c.QueryParam("userStationId")
@@ -72,24 +72,24 @@ func ReadAndCreateSortedStationsListAndLinesList() (map[string]utils.StationList
 
 	stationsList = data.GetStationsList()
 
-	// Create a slice of the station IDs
-	stationIDs = make([]string, 0, len(stationsList))
+	// Create a slice of the station Ids
+	stationIds = make([]string, 0, len(stationsList))
 	for id := range stationsList {
-		stationIDs = append(stationIDs, id)
+		stationIds = append(stationIds, id)
 	}
 
-	// Sort the slice of station IDs, to get a more deterministic result
+	// Sort the slice of station ds, to get a more deterministic result
 	// because the order of the keys in a map is not guaranteed and golang kinda fucks up
-	sort.Strings(stationIDs)
+	sort.Strings(stationIds)
 
 	linesList = data.GetLinesList()
 
-	return stationsList, stationIDs, linesList
+	return stationsList, stationIds, linesList
 }
 
 // ---- dijkstra
 
-func GetAdjacentStationsID(stationId string) []string {
+func GetAdjacentStationsId(stationId string) []string {
 
 	stationLines := stationsList[stationId].Lines
 
@@ -97,19 +97,19 @@ func GetAdjacentStationsID(stationId string) []string {
 
 	// Get the adjacent stations for each line the station is on
 	for _, line := range stationLines {
-		currentStationID, err := getIndexOfStationID(stationId, linesList[line])
+		currentStationId, err := getIndexOfStationId(stationId, linesList[line])
 
-		if currentStationID == -1 && err != nil {
-			logger.Log.Error().Err(err).Msg("Error getting the station ID")
+		if currentStationId == -1 && err != nil {
+			logger.Log.Error().Err(err).Msg("Error getting the station Id")
 		}
 
 		// get the adjacent stations one station before and one station after the current station
-		if currentStationID > 0 {
-			adjacentStations = append(adjacentStations, linesList[line][currentStationID-1])
+		if currentStationId > 0 {
+			adjacentStations = append(adjacentStations, linesList[line][currentStationId-1])
 		}
 
-		if currentStationID < len(linesList[line])-1 {
-			adjacentStations = append(adjacentStations, linesList[line][currentStationID+1])
+		if currentStationId < len(linesList[line])-1 {
+			adjacentStations = append(adjacentStations, linesList[line][currentStationId+1])
 		}
 	}
 
@@ -127,7 +127,7 @@ func initializeQueue(startStation string) (*list.List, map[string]int, map[strin
 	lines := make(map[string]string)
 
 	// Initialize the distances and lines
-	for _, id := range stationIDs {
+	for _, id := range stationIds {
 		station := stationsList[id]
 		// if the station is the starting station, we set the distance to 0, and the line to the first line the station is on
 		// otherwise, we set the distance to infinity for the rest of the stations
@@ -172,7 +172,7 @@ func removeStationFromQueue(queue *list.List, stationId string) {
 
 func updateDistances(queue *list.List, currentStation StationNode, distances map[string]int, lines map[string]string) {
 
-	for _, adjacentStationId := range GetAdjacentStationsID(currentStation.id) {
+	for _, adjacentStationId := range GetAdjacentStationsId(currentStation.id) {
 		// each distance from one station to another is 1
 		newDistance := currentStation.distance + 1
 

@@ -13,19 +13,19 @@ func TestDetermineDirectionIfImplied(t *testing.T) {
 	// Mock data
 	stations := map[string]utils.Station{
 		"SU-WA": {
-			ID:   "SU-WA",
+			Id:   "SU-WA",
 			Name: "Warschauer Straße",
 			Lines: []string{
 				"U1", "U3", "S3", "S5", "S7", "S9", "S75",
 			},
 		},
 		"U-Kr": {
-			ID:    "U-Kr",
+			Id:    "U-Kr",
 			Name:  "Krumme Lanke",
 			Lines: []string{"U3"},
 		},
 		"U-HaT": {
-			ID:    "U-HaT",
+			Id:    "U-HaT",
 			Name:  "Hallesches Tor",
 			Lines: []string{"U1", "U3", "U6"},
 		},
@@ -42,7 +42,7 @@ func TestDetermineDirectionIfImplied(t *testing.T) {
 		dataToInsert   *utils.ResponseData
 		pointers       *utils.InsertPointers
 		line           []string
-		stationID      string
+		stationId      string
 		expectedResult utils.Station
 	}{
 		{
@@ -53,7 +53,7 @@ func TestDetermineDirectionIfImplied(t *testing.T) {
 			},
 			pointers:       &utils.InsertPointers{},
 			line:           u3Line,
-			stationID:      "SU-WA",
+			stationId:      "SU-WA",
 			expectedResult: utils.Station{}, // Direction should not be set
 		},
 		{
@@ -64,7 +64,7 @@ func TestDetermineDirectionIfImplied(t *testing.T) {
 			},
 			pointers:       &utils.InsertPointers{},
 			line:           u3Line,
-			stationID:      "U-HaT",
+			stationId:      "U-HaT",
 			expectedResult: utils.Station{}, // Direction should not be set
 		},
 	}
@@ -73,7 +73,7 @@ func TestDetermineDirectionIfImplied(t *testing.T) {
 		stations := data.GetStationsList()
 
 		t.Run(tt.name, func(t *testing.T) {
-			err := inspectors.DetermineDirectionIfImplied(tt.dataToInsert, tt.pointers, tt.line, tt.stationID, stations)
+			err := inspectors.DetermineDirectionIfImplied(tt.dataToInsert, tt.pointers, tt.line, tt.stationId, stations)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expectedResult, tt.dataToInsert.Direction)
 		})

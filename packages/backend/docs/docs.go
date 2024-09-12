@@ -123,7 +123,7 @@ const docTemplate = `{
                 "tags": [
                     "data"
                 ],
-                "summary": "Retrieve Station ID by Name",
+                "summary": "Retrieve Station Id by Name",
                 "parameters": [
                     {
                         "type": "string",
@@ -250,7 +250,7 @@ const docTemplate = `{
                 "tags": [
                     "data"
                 ],
-                "summary": "Retrieve Name by Station ID",
+                "summary": "Retrieve Name by Station Id",
                 "parameters": [
                     {
                         "type": "string",
@@ -292,7 +292,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "The station ID of the inspector's current location.",
+                        "description": "The station Id of the inspector's current location.",
                         "name": "inspectorStationId",
                         "in": "query",
                         "required": true

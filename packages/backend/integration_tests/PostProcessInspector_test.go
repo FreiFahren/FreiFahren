@@ -15,8 +15,8 @@ import (
 // TestCase represents a single test case for PostProcessInspectorData
 type TestCase struct {
 	name           string
-	stationID      string
-	directionID    string
+	stationId      string
+	directionId    string
 	line           string
 	expectedLine   string
 	expectedStation string
@@ -24,11 +24,11 @@ type TestCase struct {
 }
 
 // createTestCase is a factory function for creating test cases
-func createTestCase(name, stationID, directionID, line, expectedLine, expectedStation, expectedDirection string) TestCase {
+func createTestCase(name, stationId, directionId, line, expectedLine, expectedStation, expectedDirection string) TestCase {
 	return TestCase{
 		name:           name,
-		stationID:      stationID,
-		directionID:    directionID,
+		stationId:      stationId,
+		directionId:    directionId,
 		line:           line,
 		expectedLine:   expectedLine,
 		expectedStation: expectedStation,
@@ -40,13 +40,13 @@ func createTestCase(name, stationID, directionID, line, expectedLine, expectedSt
 func runPostProcessTest(t *testing.T, tc TestCase) {
 	dataToInsert := &structs.ResponseData{
 		Timestamp: time.Now(),
-		Station:   structs.Station{ID: tc.stationID},
-		Direction: structs.Station{ID: tc.directionID},
+		Station:   structs.Station{Id: tc.stationId},
+		Direction: structs.Station{Id: tc.directionId},
 		Line:      tc.line,
 	}
 	pointers := &structs.InsertPointers{
-		StationIDPtr:   &dataToInsert.Station.ID,
-		DirectionIDPtr: &dataToInsert.Direction.ID,
+		StationIdPtr:   &dataToInsert.Station.Id,
+		DirectionIdPtr: &dataToInsert.Direction.Id,
 		LinePtr:        &dataToInsert.Line,
 	}
 
@@ -57,8 +57,8 @@ func runPostProcessTest(t *testing.T, tc TestCase) {
 	if pointers.LinePtr != nil {
 		assert.Equal(t, tc.expectedLine, *pointers.LinePtr, "LinePtr should point to %s", tc.expectedLine)
 	}
-	assert.Equal(t, tc.expectedStation, dataToInsert.Station.ID, "Station ID should be %s", tc.expectedStation)
-	assert.Equal(t, tc.expectedDirection, dataToInsert.Direction.ID, "Direction ID should be %s", tc.expectedDirection)
+	assert.Equal(t, tc.expectedStation, dataToInsert.Station.Id, "Station Id should be %s", tc.expectedStation)
+	assert.Equal(t, tc.expectedDirection, dataToInsert.Direction.Id, "Direction Id should be %s", tc.expectedDirection)
 }
 
 func TestPostProcessInspectorData(t *testing.T) {

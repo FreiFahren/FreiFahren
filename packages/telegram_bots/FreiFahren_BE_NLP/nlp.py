@@ -60,7 +60,7 @@ def process_new_message(timestamp, message_text):
     logger.info("Found information in the message: %s", info)
 
     if isinstance(info, dict) and any(info.get(key) for key in ["line", "station", "direction"]):
-        # Retrieve IDs from backend
+        # Retrieve Ids from backend
         station_id = fetch_id(info.get("station"), "station")
         direction_id = fetch_id(info.get("direction"), "direction")
 

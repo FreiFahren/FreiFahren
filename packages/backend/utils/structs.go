@@ -9,7 +9,7 @@ import (
 // getId.go
 
 type Station struct {
-	ID          string      `json:"id"`
+	Id          string      `json:"id"`
 	Name        string      `json:"name"`
 	Coordinates Coordinates `json:"coordinates"`
 	Lines       []string    `json:"lines"`
@@ -35,17 +35,17 @@ type TicketInspectorResponse struct {
 // Is used to simplify the data before saving it to a file
 type SimplifiedTicketInspector struct {
 	Timestamp   string   `json:"timestamp"`
-	StationID   string   `json:"station_id"`
+	StationId   string   `json:"station_id"`
 	Lines       []string `json:"line,omitempty"`
-	DirectionID string   `json:"direction_id,omitempty"`
+	DirectionId string   `json:"direction_id,omitempty"`
 }
 
 // Is used within the backend primarily to fetch from the database
 type TicketInspector struct {
 	Timestamp   time.Time      `json:"timestamp"`
-	StationID   string         `json:"station_id"`
+	StationId   string         `json:"station_id"`
 	Line        sql.NullString `json:"line"`         // NullString is used to handle NULL values from the database
-	DirectionID sql.NullString `json:"direction_id"` // NullString is used to handle NULL values from the database
+	DirectionId sql.NullString `json:"direction_id"` // NullString is used to handle NULL values from the database
 	IsHistoric  bool           `json:"isHistoric"`
 	Author      sql.NullInt64  `json:"author"`  // NullInt64 is used to handle NULL BigInt values from the database
 	Message     sql.NullString `json:"message"` // NullString is used to handle NULL Text values from the database
@@ -55,8 +55,8 @@ type TicketInspector struct {
 type InspectorRequest struct {
 	Timestamp   time.Time `json:"timestamp"`
 	Line        string    `json:"line"`
-	StationID   string    `json:"stationId"`
-	DirectionID string    `json:"directionId"`
+	StationId   string    `json:"stationId"`
+	DirectionId string    `json:"directionId"`
 	Author      int64     `json:"author,omitempty"` // is always null or 98111116 (ASCII for "BOT") when getting data from the telegram bot
 	Message     string    `json:"message,omitempty"`
 }
@@ -68,9 +68,9 @@ type InsertPointers struct {
 	MessagePtr       *string
 	LinePtr          *string
 	StationNamePtr   *string
-	StationIDPtr     *string
+	StationIdPtr     *string
 	DirectionNamePtr *string
-	DirectionIDPtr   *string
+	DirectionIdPtr   *string
 }
 
 // When sending the response of what was posted
@@ -121,24 +121,24 @@ type Stopover struct {
 }
 
 type Stop struct {
-	ID   string `json:"id"`
+	Id   string `json:"id"`
 	Name string `json:"name"`
 }
 
 // the nearby station to the given coordinates
 type NearbyStations struct {
 	Type        string   `json:"type"`
-	ID          string   `json:"id"`
+	Id          string   `json:"id"`
 	Name        string   `json:"name"`
 	Location    Location `json:"location"`
 	Products    Products `json:"products"`
-	StationDHID string   `json:"stationDHID"`
+	StationDHId string   `json:"stationDHId"`
 	Distance    int      `json:"distance"`
 }
 
 type Location struct {
 	Type      string  `json:"type"`
-	ID        string  `json:"id"`
+	Id        string  `json:"id"`
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 }

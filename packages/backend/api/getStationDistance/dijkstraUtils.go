@@ -29,7 +29,7 @@ func calculateDistance(lat1, lon1, lat2, lon2 float64) float64 {
 	return distance
 }
 
-func getIndexOfStationID(stationId string, linesOfStation []string) (int, error) {
+func getIndexOfStationId(stationId string, linesOfStation []string) (int, error) {
 
 	for i, station := range linesOfStation {
 		if station == stationId {
@@ -37,7 +37,7 @@ func getIndexOfStationID(stationId string, linesOfStation []string) (int, error)
 		}
 	}
 
-	return -1, fmt.Errorf("station not found with the given ID: %v", stationId) // Return -1 if the stationID is not found in the array
+	return -1, fmt.Errorf("station not found with the given Id: %v", stationId) // Return -1 if the stationId is not found in the array
 }
 
 func removeDuplicateAdjacentStations(elements []string) []string {
