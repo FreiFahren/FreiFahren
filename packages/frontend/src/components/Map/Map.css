@@ -25,6 +25,20 @@
     text-decoration: none;
 }
 
-.map-attribution a:hover {
+.social-media {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: var(--padding-xs);
+}
+
+.social-media img {
+    width: 15px;
+    height: 15px;
+    margin-right: var(--padding-xs);
+}
+
+.map-attribution,
+.social-media img:hover {
     text-decoration: underline;
 }
