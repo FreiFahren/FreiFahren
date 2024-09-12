@@ -265,7 +265,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                         required={true}
                         setSearchUsed={setSearchUsed}
                     />
-                    {currentLine && (
+                    {currentLine && currentLine !== 'S41' && currentLine !== 'S42' &&(
                         <section>
                             <h3>Richtung</h3>
                             <SelectField
