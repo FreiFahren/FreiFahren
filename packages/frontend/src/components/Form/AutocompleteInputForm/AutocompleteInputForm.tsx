@@ -47,7 +47,7 @@ function AutocompleteInputForm<T>({
     required = false,
     setSearchUsed,
 }: AutocompleteInputFormProps<T>) {
-    const [showSearchBox, setShowSearchBox] = useState(false)
+    const [showSearchBox, setShowSearchBox] = useState(true)
     const [search, setSearch] = useState('')
     const searchInputRef = useRef<HTMLInputElement>(null)
 
