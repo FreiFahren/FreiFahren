@@ -40,14 +40,14 @@ const AskForLocation: React.FC<AskForLocationProps> = ({ className, children, cl
         <div className={`ask-for-location info-popup modal ${className}`}>
             {children}
             <form onSubmit={handleSubmit}>
-                <h1>Wir konnten deinen Standort nicht finden</h1>
+                <h1>Dein Standort konnte nicht ermittelt werden.</h1>
                 <AutocompleteInputForm
                     items={allStations}
                     onSelect={handleSelect}
                     value={selectedStation}
                     getDisplayValue={(station) => station.name}
                     placeholder="Station suchen..."
-                    label="Nächste Station"
+                    label="Deine Station"
                     required={false}
                 />
 
