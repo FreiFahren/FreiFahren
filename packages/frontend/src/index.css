@@ -76,6 +76,7 @@
 
     --distance-from-edge-default: 25px;
     --button-size: 50px;
+    --height-streched-button: 45px;
 }
 
 :root.light {
@@ -94,19 +95,8 @@ body,
 textarea,
 input[type='text'] {
     margin: 0;
-    font-family:
-        'Raleway',
-        -apple-system,
-        BlinkMacSystemFont,
-        'Segoe UI',
-        'Roboto',
-        'Oxygen',
-        'Ubuntu',
-        'Cantarell',
-        'Fira Sans',
-        'Droid Sans',
-        'Helvetica Neue',
-        sans-serif;
+    font-family: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+        'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
@@ -307,6 +297,11 @@ span {
     height: var(--button-size);
     border: var(--border-default);
     z-index: var(--zIndex-button);
+}
+
+.small-button img {
+    margin-right: var(--margin-xs);
+    margin-left: var(--margin-xs);
 }
 
 button .plus {

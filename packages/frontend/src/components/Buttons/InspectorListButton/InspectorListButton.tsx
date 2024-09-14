@@ -15,9 +15,9 @@ const InspectorListButton: React.FC<InspectorListButtonProps> = ({ closeModal })
     }
 
     return (
-        <button className="list-button small-button streched align-child-on-line" onClick={handleClick}>
+        <button className="list-button small-button align-child-on-line" onClick={handleClick}>
             <img className="svg" src={`${process.env.PUBLIC_URL}/icons/list.svg`} alt="list button" />
-            <p>Liste</p>
+            <p>Meldungen</p>
         </button>
     )
 }
