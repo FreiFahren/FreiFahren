@@ -2,15 +2,15 @@
     top: var(--distance-from-edge-default);
     right: var(--distance-from-edge-default);
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: var(--padding-s);
+    height: var(--height-streched-button);
+    width: 100px;
 }
 
 .layer-options {
     top: var(--distance-from-edge-default);
-    right: 100px;
+    right: 135px;
     width: fit-content;
     height: 60px;
     padding: var(--padding-xs);

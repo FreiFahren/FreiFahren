@@ -31,10 +31,11 @@ const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ changeLayer, isRiskLayerO
     return (
         <>
             <button
-                className="layer-switcher small-button"
+                className="layer-switcher small-button align-child-on-line"
                 onClick={() => setAreLayerOptionsVisible(!areLayerOptionsVisible)}
                 aria-label="Button to open the layer switcher"
             >
+                <p>Modus</p>
                 <img src={process.env.PUBLIC_URL + '/icons/layers.svg'} alt="Layers" />
             </button>
             {areLayerOptionsVisible && (
