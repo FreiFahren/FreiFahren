@@ -15,8 +15,8 @@ const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ closeModal, openAnima
 
     const handleClose = () => {
         const endTime = Date.now()
-        const durationInSeconds = (endTime - startTimeRef.current) / 1000
-        sendAnalyticsEvent('Legal disclaimer has been closed', { duration: durationInSeconds })
+        const durationInSeconds = Math.floor((endTime - startTimeRef.current) / 1000)
+        sendAnalyticsEvent('Legal disclaimer has been closed', { duration: durationInSeconds, meta: {} })
         closeModal()
     }
     return (
