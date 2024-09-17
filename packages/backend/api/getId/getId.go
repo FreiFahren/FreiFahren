@@ -33,7 +33,7 @@ func FindStationId(name string, stationsMap map[string]utils.StationListEntry) (
 // @Tags         data
 //
 // @Accept       json
-// @Produce      string
+// @Produce      text/plain
 //
 // @Param		 name query string true "Station name", case and whitespace insensitive
 //

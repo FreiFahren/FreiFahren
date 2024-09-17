@@ -29,11 +29,18 @@ func TestGetStationDistance(t *testing.T) {
 			expectedStops:      12,
 		},
 		{
-			name:               "Invalid coordinates",
+			name:               "Invalid Station ID",
 			inspectorStationId: "sss",
 			userStationId:      "abc",
 			expectedStatus:     http.StatusInternalServerError,
 			expectedStops:      -1,
+		},
+		{
+			name:               "Same station",
+			inspectorStationId: "U-Ado",
+			userStationId:      "U-Ado",
+			expectedStatus:     http.StatusOK,
+			expectedStops:      0,
 		},
 	}
 

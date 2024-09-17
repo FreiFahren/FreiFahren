@@ -118,7 +118,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "produces": [
-                    "application/json"
+                    "text/plain"
                 ],
                 "tags": [
                     "data"
@@ -245,7 +245,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "produces": [
-                    "application/json"
+                    "text/plain"
                 ],
                 "tags": [
                     "data"
@@ -299,15 +299,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "The latitude of the user's location.",
-                        "name": "userLat",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "The longitude of the user's location.",
-                        "name": "userLon",
+                        "description": "The station Id of the user's current location.",
+                        "name": "userStationId",
                         "in": "query",
                         "required": true
                     }
@@ -499,12 +492,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
-	Host:             "localhost:8080",
-	BasePath:         "/",
+	Version:          "",
+	Host:             "",
+	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "FreiFahren API Documentation",
-	Description:      "API for the FreiFahren project, responsible for collecting and serving data about ticket inspectors on public transport.",
+	Title:            "",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
