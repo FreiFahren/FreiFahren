@@ -13,6 +13,7 @@ import (
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/logger"
+	"github.com/FreiFahren/backend/utils"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -23,8 +24,15 @@ import (
 func SetupServer() *echo.Echo {
 	logger.Init()
 
+	// Find the .env file
+	envPath, err := utils.FindEnvFile()
+	if err != nil {
+		logger.Log.Panic().Msg("Could not locate .env file")
+		logger.Log.Panic().Str("Error", err.Error()).Send()
+	}
+
 	// Load .env file
-	err := godotenv.Overload()
+	err = godotenv.Overload(envPath)
 	if err != nil {
 		logger.Log.Panic().Msg("Error loading .env file")
 		logger.Log.Panic().Str("Error", err.Error()).Send()

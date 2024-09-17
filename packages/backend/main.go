@@ -7,13 +7,13 @@ import (
 )
 
 func main() {
-	e := server.SetupServer()
+    e := server.SetupServer()
 
-	// Close the database connection when the main function returns
-	defer database.ClosePool()
+    // Close the database connection when the main function returns
+    defer database.ClosePool()
 
-	// Start the server
-	if err := e.Start(":8080"); err != nil {
-		logger.Log.Fatal().Err(err).Msg("Shutting down the server")
-	}
+    // Start the server
+    if err := e.Start(":8080"); err != nil {
+        logger.Log.Fatal().Err(err).Msg("Shutting down the server")
+    }
 }

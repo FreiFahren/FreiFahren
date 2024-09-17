@@ -6,12 +6,12 @@ import (
 	"log"
 	"math/rand"
 	"os"
-	"path/filepath"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/FreiFahren/backend/database"
+	"github.com/FreiFahren/backend/utils"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 )
@@ -73,10 +73,13 @@ func CreateTestPool() {
 }
 
 func setup() {
-	envPath := filepath.Join("..", ".env")
+	envPath, err := utils.FindEnvFile()
+	if err != nil {
+		log.Fatal("Error finding .env file: ", err)
+	}
 
 	// Load the .env file from the constructed path
-	err := godotenv.Load(envPath)
+	err = godotenv.Load(envPath)
 	if err != nil {
 		cwd, _ := os.Getwd()
 		log.Printf("Current working directory: %s", cwd)

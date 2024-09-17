@@ -13,6 +13,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"gopkg.in/natefinch/lumberjack.v2"
+
+	"github.com/FreiFahren/backend/utils"
 )
 
 var wg sync.WaitGroup
@@ -49,7 +51,13 @@ func (h *APIHook) Run(e *zerolog.Event, level zerolog.Level, message string) {
 }
 
 func Init() {
-	err := godotenv.Load()
+
+	envPath, err := utils.FindEnvFile()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	err = godotenv.Load(envPath)
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
