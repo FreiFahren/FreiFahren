@@ -32,7 +32,7 @@ func IdToStationName(id string) (string, error) {
 // @Tags         data
 //
 // @Accept       json
-// @Produce      json
+// @Produce      string
 //
 // @Param		 id query string true "Station Id"
 //

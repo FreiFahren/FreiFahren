@@ -60,12 +60,10 @@ func TestGetStationIdEndpoint(t *testing.T) {
 			assert.Equal(t, tc.expectedStatus, rec.Code)
 
 			if tc.expectedStatus == http.StatusOK {
-				expectedBody := `{"id":"` + tc.expectedID + `"}`
-				assert.JSONEq(t, expectedBody, rec.Body.String())
+				assert.Equal(t, tc.expectedID, rec.Body.String())
 			} else {
 				// Handle error response
-				expectedBody := `{"error":"Station not found"}`
-				assert.JSONEq(t, expectedBody, rec.Body.String())
+				assert.Equal(t, "", rec.Body.String())
 			}
 		})
 	}
