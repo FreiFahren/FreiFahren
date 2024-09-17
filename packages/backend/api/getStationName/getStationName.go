@@ -51,5 +51,5 @@ func GetStationName(c echo.Context) error {
 		return c.NoContent(http.StatusNotFound)
 	}
 
-	return c.JSON(http.StatusOK, id)
+	return c.String(http.StatusOK, id)
 }
