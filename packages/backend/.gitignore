@@ -1,6 +1,6 @@
 .DS_Store
 .env
-Rstats/output/*.json
-Rstats/ticket_data*.csv
+*/Rstats/output/*.json
+*ticket_data*.csv
 build/
 segmentEndpoints.json
