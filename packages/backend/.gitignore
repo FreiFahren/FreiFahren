@@ -4,3 +4,4 @@
 *ticket_data*.csv
 build/
 segmentEndpoints.json
+/output

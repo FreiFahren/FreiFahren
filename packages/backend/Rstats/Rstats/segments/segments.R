@@ -32,6 +32,7 @@ p_load(jsonlite)
 #p_load(terra)
 p_load(boot)
 p_load(extraDistr)
+p_load(lwgeom)
 
 "%cin%" = function(x,y){str_detect(y,x)}
 "%xin%" = function(x,y){x %cin% y | y %cin% x}
@@ -178,7 +179,8 @@ segments = stations_nf %>%
 saveRDS(segments, "segments_v5.RDS")
 
 segments_json = segments %>%
-  select(sid, line, line_color, geometry)
+      select(sid, line, stop_to, stop_from, r, line_color, geometry)
+
 
 st_write(segments_json, "segments_v5.geojson")
 
