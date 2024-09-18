@@ -18,6 +18,7 @@ func TestGetStationDistance(t *testing.T) {
 		inspectorStation    string
 		expectedStatus int
 		expectedDistance string
+		expectedError    string
 	}{
 		{
 			name:           "Regular Case",
@@ -25,6 +26,7 @@ func TestGetStationDistance(t *testing.T) {
 			inspectorStation: "S-LiO",
 			expectedStatus: http.StatusOK,
 			expectedDistance: "11",
+			expectedError:    "",
 		},
 		{
 			name: "Station to itself",
@@ -32,13 +34,15 @@ func TestGetStationDistance(t *testing.T) {
 			inspectorStation: "SU-A",
 			expectedStatus: http.StatusOK,
 			expectedDistance: "0",
+			expectedError:    "",
 		},		
 		{
 			name: "Invalid Station ID",
 			userStation: "INVALID",
 			inspectorStation: "INVALIDs",
-			expectedStatus: http.StatusInternalServerError,
+			expectedStatus: http.StatusBadRequest,
 			expectedDistance: "",
+			expectedError:    "Invalid inspector station ID",
 		},
 	}
 
@@ -61,7 +65,7 @@ func TestGetStationDistance(t *testing.T) {
 			if tc.expectedStatus == http.StatusOK {
 				assert.Equal(t, tc.expectedDistance, rec.Body.String())
 			} else {
-				assert.Equal(t, "", rec.Body.String())
+				assert.Equal(t, tc.expectedError, rec.Body.String())
 			}
 		})
 	}
