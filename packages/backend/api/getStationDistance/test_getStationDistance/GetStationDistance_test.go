@@ -32,7 +32,7 @@ func TestGetStationDistance(t *testing.T) {
 			name:               "Invalid Station ID",
 			inspectorStationId: "sss",
 			userStationId:      "abc",
-			expectedStatus:     http.StatusInternalServerError,
+			expectedStatus:     http.StatusBadRequest,
 			expectedStops:      -1,
 		},
 		{

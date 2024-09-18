@@ -51,15 +51,22 @@ func GetStationDistance(c echo.Context) error {
 	}
 
 	stationsList, stationIds, linesList = ReadAndCreateSortedStationsListAndLinesList()
-	inspectorStationCoordinates := stationsList[inspectorStationId].Coordinates
 
-	userStationIdCoordinates := stationsList[userStationId].Coordinates
-	// temporary error handling as the coordinates default value is 0.0
-	if userStationIdCoordinates.Latitude == 0.0 || userStationIdCoordinates.Longitude == 0.0 {
-		return c.NoContent(http.StatusInternalServerError)
+	inspectorStation, ok := stationsList[inspectorStationId]
+	if !ok {
+		logger.Log.Error().Str("inspectorStationId", inspectorStationId).Msg("Inspector station not found in stations list")
+		return c.String(http.StatusBadRequest, "Invalid inspector station ID")
 	}
 
-	kmDistance := calculateDistance(inspectorStationCoordinates.Latitude, inspectorStationCoordinates.Longitude, userStationIdCoordinates.Latitude, userStationIdCoordinates.Longitude)
+	userStation, ok := stationsList[userStationId]
+	if !ok {
+		logger.Log.Error().Str("userStationId", userStationId).Msg("User station not found in stations list")
+		return c.String(http.StatusBadRequest, "Invalid user station ID")
+	}
+
+	inspectorStationCoordinates := inspectorStation.Coordinates
+	userStationCoordinates := userStation.Coordinates
+	kmDistance := calculateDistance(inspectorStationCoordinates.Latitude, inspectorStationCoordinates.Longitude, userStationCoordinates.Latitude, userStationCoordinates.Longitude)
 
 	// If the user is less than 1 km away from the station, we just return 1 station distance
 	if kmDistance < 1 {
