@@ -1,10 +1,12 @@
 package utils
 
 import (
+	"errors"
+	"os"
+	"path/filepath"
+	"runtime"
 	"strconv"
 	"time"
-
-	"github.com/FreiFahren/backend/logger"
 )
 
 // StringInSlice checks if a string is present in a slice of strings.
@@ -20,7 +22,6 @@ import (
 // If a match is found, it returns true. Otherwise, it returns false after checking all elements in the slice.
 func StringInSlice(a string, list []string) bool {
 	// log the incomming values
-	logger.Log.Debug().Msgf("StringInSlice: a: %s, list: %v", a, list)
 	for _, b := range list {
 		if b == a {
 			return true
@@ -42,7 +43,6 @@ func StringInSlice(a string, list []string) bool {
 func ParseStringToFloat(str string) (float64, error) {
 	val, err := strconv.ParseFloat(str, 64)
 	if err != nil {
-		logger.Log.Error().Msg("Error parsing string to float")
 		return 0, err
 	}
 	return val, nil
@@ -69,7 +69,6 @@ func CheckIfModifiedSince(ifModifiedSince string, lastModified time.Time) (bool,
 	// Use time.RFC1123 to parse HTTP date format
 	requestedModificationTime, err := time.Parse(time.RFC1123, ifModifiedSince)
 	if err != nil {
-		logger.Log.Error().Msg("Error parsing If-Modified-Since header")
 		return true, err
 	}
 
@@ -96,4 +95,44 @@ func GetKeysFromMap(m map[string]bool) []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+// FindEnvFile searches for a .env file in the current directory and up to 9 parent directories.
+//
+// This function starts from the directory of the current file and traverses up the directory tree,
+// looking for a .env file. It will search up to 10 levels (including the starting directory).
+//
+// Returns:
+//   - string: The full path to the .env file if found.
+//   - error: An error if the .env file is not found or if there's an issue accessing the file system.
+//
+// The function uses runtime.Caller to get the current file's path, then uses filepath operations
+// to navigate the directory structure. It stops searching if it reaches the root directory or
+// if it has searched 10 levels deep.
+//
+// If the .env file is not found after searching all levels, it returns os.ErrNotExist.
+
+func FindEnvFile() (string, error) {
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		return "", errors.New("unable to get caller information")
+	}
+
+	dir := filepath.Dir(filename)
+
+	for i := 0; i < 10; i++ {
+		envPath := filepath.Join(dir, ".env")
+		if _, err := os.Stat(envPath); err == nil {
+			return envPath, nil
+		}
+
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+
+	return "", os.ErrNotExist
 }

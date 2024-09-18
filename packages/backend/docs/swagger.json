@@ -1,13 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "API for the FreiFahren project, responsible for collecting and serving data about ticket inspectors on public transport.",
-        "title": "FreiFahren API Documentation",
-        "contact": {},
-        "version": "1.0"
+        "contact": {}
     },
-    "host": "localhost:8080",
-    "basePath": "/",
     "paths": {
         "/basics/inspectors": {
             "get": {
@@ -112,7 +107,7 @@
                     "application/json"
                 ],
                 "produces": [
-                    "application/json"
+                    "text/plain"
                 ],
                 "tags": [
                     "data"
@@ -239,7 +234,7 @@
                     "application/json"
                 ],
                 "produces": [
-                    "application/json"
+                    "text/plain"
                 ],
                 "tags": [
                     "data"
@@ -293,15 +288,8 @@
                     },
                     {
                         "type": "string",
-                        "description": "The latitude of the user's location.",
-                        "name": "userLat",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "The longitude of the user's location.",
-                        "name": "userLon",
+                        "description": "The station Id of the user's current location.",
+                        "name": "userStationId",
                         "in": "query",
                         "required": true
                     }

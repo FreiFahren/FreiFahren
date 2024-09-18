@@ -32,7 +32,7 @@ func IdToStationName(id string) (string, error) {
 // @Tags         data
 //
 // @Accept       json
-// @Produce      json
+// @Produce      text/plain
 //
 // @Param		 id query string true "Station Id"
 //
@@ -51,5 +51,5 @@ func GetStationName(c echo.Context) error {
 		return c.NoContent(http.StatusNotFound)
 	}
 
-	return c.JSON(http.StatusOK, id)
+	return c.String(http.StatusOK, id)
 }

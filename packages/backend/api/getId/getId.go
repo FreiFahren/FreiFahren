@@ -33,7 +33,7 @@ func FindStationId(name string, stationsMap map[string]utils.StationListEntry) (
 // @Tags         data
 //
 // @Accept       json
-// @Produce      json
+// @Produce      text/plain
 //
 // @Param		 name query string true "Station name", case and whitespace insensitive
 //
@@ -51,8 +51,8 @@ func GetStationId(c echo.Context) error {
 	id, found := FindStationId(name, stations)
 	if found {
 		logger.Log.Debug().Msg("Returned Id")
-		return c.JSON(http.StatusOK, map[string]string{"id": id})
+		return c.String(http.StatusOK, id)
 	}
 
-	return c.JSON(http.StatusNotFound, map[string]string{"error": "Station not found"})
+	return c.NoContent(http.StatusNotFound)
 }

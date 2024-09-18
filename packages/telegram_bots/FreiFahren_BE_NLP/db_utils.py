@@ -52,8 +52,7 @@ def fetch_id(name, entity_type):
         response = requests.get(url, timeout=10)
         response.raise_for_status()  # Raises an HTTPError for bad responses (4xx or 5xx)
         
-        data = response.json()
-        station_id = data.get('id')
+        station_id = response.text
         
         if station_id:
             logger.info(f"Received {entity_type} id from the backend: {station_id}")

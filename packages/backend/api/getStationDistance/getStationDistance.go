@@ -2,6 +2,7 @@ package getStationDistance
 
 import (
 	"container/list"
+	"fmt"
 	"math"
 	"net/http"
 	"sort"
@@ -34,8 +35,7 @@ var linesList map[string][]string
 // @Produce  json
 //
 // @Param   inspectorStationId   query   string  true   "The station Id of the inspector's current location."
-// @Param   userLat              query   string  true   "The latitude of the user's location."
-// @Param   userLon              query   string  true   "The longitude of the user's location."
+// @Param   userStationId   query   string  true   "The station Id of the user's current location."
 //
 // @Success 200 {int} int "The shortest distance in terms of the number of station stops between the inspector's station and the user's location."
 // @Failure 500 "An error occurred in processing the request."
@@ -45,26 +45,37 @@ func GetStationDistance(c echo.Context) error {
 	logger.Log.Info().Msg("GET /transit/distance")
 
 	inspectorStationId := c.QueryParam("inspectorStationId")
+	userStationId := c.QueryParam("userStationId")
+	if userStationId == inspectorStationId {
+		return c.String(http.StatusOK, "0")
+	}
 
 	stationsList, stationIds, linesList = ReadAndCreateSortedStationsListAndLinesList()
-	inspectorStationCoordinates := stationsList[inspectorStationId].Coordinates
 
-	userStationId := c.QueryParam("userStationId")
-
-	userStationIdCoordinates := stationsList[userStationId].Coordinates
-	if userStationIdCoordinates.Latitude == 0.0 || userStationIdCoordinates.Longitude == 0.0 {
-		return c.NoContent(http.StatusInternalServerError)
+	inspectorStation, ok := stationsList[inspectorStationId]
+	if !ok {
+		logger.Log.Error().Str("inspectorStationId", inspectorStationId).Msg("Inspector station not found in stations list")
+		return c.String(http.StatusBadRequest, "Invalid inspector station ID")
 	}
-	kmDistance := calculateDistance(inspectorStationCoordinates.Latitude, inspectorStationCoordinates.Longitude, userStationIdCoordinates.Latitude, userStationIdCoordinates.Longitude)
+
+	userStation, ok := stationsList[userStationId]
+	if !ok {
+		logger.Log.Error().Str("userStationId", userStationId).Msg("User station not found in stations list")
+		return c.String(http.StatusBadRequest, "Invalid user station ID")
+	}
+
+	inspectorStationCoordinates := inspectorStation.Coordinates
+	userStationCoordinates := userStation.Coordinates
+	kmDistance := calculateDistance(inspectorStationCoordinates.Latitude, inspectorStationCoordinates.Longitude, userStationCoordinates.Latitude, userStationCoordinates.Longitude)
 
 	// If the user is less than 1 km away from the station, we just return 1 station distance
 	if kmDistance < 1 {
-		return c.JSON(http.StatusOK, 1)
+		return c.String(http.StatusOK, "1")
 	}
 
 	distances := FindShortestDistance(inspectorStationId, userStationId)
 
-	return c.JSON(http.StatusOK, distances)
+	return c.String(http.StatusOK, fmt.Sprintf("%d", distances))
 }
 
 func ReadAndCreateSortedStationsListAndLinesList() (map[string]utils.StationListEntry, []string, map[string][]string) {
