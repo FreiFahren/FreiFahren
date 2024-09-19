@@ -2,9 +2,8 @@ import pandas as pd
 import geopandas as gpd
 import numpy as np
 import json
-from datetime import datetime, timedelta
-from scipy.special import expit  # For inv.logit
-from scipy.stats import betabinom
+from datetime import datetime
+from scipy.special import expit  # Sigmoid function
 import os
 import pytz
 
@@ -13,16 +12,9 @@ def pmin2_na(a, b):
     """Compute the element-wise minimum of two Series, ignoring NaNs."""
     return pd.concat([a, b], axis=1).min(axis=1)
 
-def dbbinom_scaled(x, alpha, beta, size, peak=1, shift=0):
-    """Scale the beta-binomial PMF."""
-    return betabinom.pmf(abs(x) + shift, size, alpha, beta) / betabinom.pmf(peak, size, alpha, beta)
-
-def s_discount(x, t, ttl=500, strn=0.2, shift=0.44):
-    """Apply a sigmoid discount based on time lag."""
-    strn_adj = strn * ttl
-    adjusted_ttl = ttl * (1 + shift)
-    discount = 1 / (1 + np.exp((t - adjusted_ttl) / strn_adj))
-    return x * discount
+def sigmoid(x, beta=1.0):
+    """Sigmoid function with adjustable steepness."""
+    return expit(beta * x)
 
 # Define the Risk Classifier class
 class FreifahrenRiskClassifier:
@@ -39,7 +31,7 @@ class FreifahrenRiskClassifier:
 
     def pre_process(self):
         # Required columns in segments
-        required_columns = ['line', 'stop_to', 'stop_from', 'r']
+        required_columns = ['line', 'stop_to', 'stop_from', 'r', 'sid']
         missing_columns = [col for col in required_columns if col not in self.segments.columns]
         
         if missing_columns:
@@ -64,192 +56,190 @@ class FreifahrenRiskClassifier:
             if col in self.segments.columns:
                 self.segments[col] = self.segments[col].astype(str).str.strip().str.upper()
 
-        # Define separate line_ranks DataFrames to prevent duplicate columns
-        line_ranks_dir1 = self.segments[['line', 'stop_to', 'r']].rename(columns={'r': 'r_dir1'})
-        line_ranks_dir2 = self.segments[['line', 'stop_from', 'r']].rename(columns={'r': 'r_dir2'})
-        line_ranks_st1 = self.segments[['line', 'stop_to', 'r']].rename(columns={'r': 'r_st1'})
-        line_ranks_st2 = self.segments[['line', 'stop_from', 'r']].rename(columns={'r': 'r_st2'})
+        # Sort segments within each line based on 'r' to establish order
+        self.segments = self.segments.sort_values(['line', 'r']).reset_index(drop=True)
+        
+        # Assign an order index within each line for easy distance calculation
+        self.segments['order'] = self.segments.groupby('line').cumcount()
 
-        # Filter data based on timestamp
-        self.data = self.data[self.data['timestamp'] <= self.current_time].copy()
-        print(f"Data after timestamp filter: {self.data.shape[0]} rows")
+        # Debug: Print segments after sorting and ordering
+        print("\nSegments after sorting and assigning order:")
+        print(self.segments[['line', 'sid', 'stop_from', 'stop_to', 'r', 'order']].head())
 
-        # Merge with r_dir1
+        # Determine direction based on 'station_id' and 'direction_id'
+        # Each direction_id is a station on the given line
+        # Compare 'r' of direction_id station with 'r' of station_id to determine direction
+        # Forward (1) if direction_id's r > station_id's r
+        # Backward (-1) if direction_id's r < station_id's r
+        # Unknown (0) if direction_id not found on the line
+
+        # Merge to get 'r' for 'station_id'
+        station_r = self.segments[['line', 'stop_from', 'r']].copy()
+        station_r = station_r.rename(columns={'stop_from': 'station_id', 'r': 'station_r'})
+        station_r = station_r[['line', 'station_id', 'station_r']]
+        station_r.drop_duplicates(inplace=True)
+
+        # Merge to get 'r' for 'direction_id' by matching both 'stop_from' and 'stop_to'
+        direction_r_from = self.segments[['line', 'stop_from', 'r']].copy()
+        direction_r_from = direction_r_from.rename(columns={'stop_from': 'direction_id', 'r': 'direction_r'})
+        direction_r_to = self.segments[['line', 'stop_to', 'r']].copy()
+        direction_r_to = direction_r_to.rename(columns={'stop_to': 'direction_id', 'r': 'direction_r'})
+        direction_r = pd.concat([direction_r_from, direction_r_to]).drop_duplicates()
+
+        # Merge station_r with data on 'line' and 'station_id'
         self.data = self.data.merge(
-            line_ranks_dir1,
+            station_r,
             how='left',
-            left_on=['line', 'direction_id'],
-            right_on=['line', 'stop_to']
-        ).drop(columns=['stop_to'], errors='ignore')
-
-        print("After merging with r_dir1:", self.data.columns.tolist())
-        print("Sample after merging with r_dir1:", self.data[['line', 'direction_id', 'r_dir1']].head())
-
-        # Check for NaNs in r_dir1
-        missing_r_dir1 = self.data['r_dir1'].isna().sum()
-        if missing_r_dir1 > 0:
-            print(f"Warning: {missing_r_dir1} entries have NaN in 'r_dir1' after merging with r_dir1.")
-
-        # Merge with r_dir2
-        self.data = self.data.merge(
-            line_ranks_dir2,
-            how='left',
-            left_on=['line', 'direction_id'],
-            right_on=['line', 'stop_from']
-        ).drop(columns=['stop_from'], errors='ignore')
-
-        print("After merging with r_dir2:", self.data.columns.tolist())
-        print("Sample after merging with r_dir2:", self.data[['line', 'direction_id', 'r_dir2']].head())
-
-        # Check for NaNs in r_dir2
-        missing_r_dir2 = self.data['r_dir2'].isna().sum()
-        if missing_r_dir2 > 0:
-            print(f"Warning: {missing_r_dir2} entries have NaN in 'r_dir2' after merging with r_dir2.")
-
-        # Merge with r_st1
-        self.data = self.data.merge(
-            line_ranks_st1,
-            how='left',
-            left_on=['line', 'station_id'],
-            right_on=['line', 'stop_to']
-        ).drop(columns=['stop_to'], errors='ignore')
-
-        print("After merging with r_st1:", self.data.columns.tolist())
-        print("Sample after merging with r_st1:", self.data[['line', 'station_id', 'r_st1']].head())
-
-        # Check for NaNs in r_st1
-        missing_r_st1 = self.data['r_st1'].isna().sum()
-        if missing_r_st1 > 0:
-            print(f"Warning: {missing_r_st1} entries have NaN in 'r_st1' after merging with r_st1.")
-
-        # Merge with r_st2
-        self.data = self.data.merge(
-            line_ranks_st2,
-            how='left',
-            left_on=['line', 'station_id'],
-            right_on=['line', 'stop_from']
-        ).drop(columns=['stop_from'], errors='ignore')
-
-        print("After merging with r_st2:", self.data.columns.tolist())
-        print("Sample after merging with r_st2:", self.data[['line', 'station_id', 'r_st2']].head())
-
-        # Check for NaNs in r_st2
-        missing_r_st2 = self.data['r_st2'].isna().sum()
-        if missing_r_st2 > 0:
-            print(f"Warning: {missing_r_st2} entries have NaN in 'r_st2' after merging with r_st2.")
-
-        # Compute r_dir and r_st
-        self.data['r_dir'] = self.data[['r_dir1', 'r_dir2']].bfill(axis=1).iloc[:, 0]
-        self.data['r_st'] = pmin2_na(self.data['r_st1'], self.data['r_st2'])
-        self.data['r_st1_'] = self.data[['r_st1', 'r_st2']].bfill(axis=1).iloc[:, 0]
-        self.data['r_st2_'] = self.data[['r_st2', 'r_st1']].bfill(axis=1).iloc[:, 0]
-
-        print("Computed 'r_dir' and 'r_st':")
-        print("r_dir sample:", self.data['r_dir'].head())
-        print("r_st sample:", self.data['r_st'].head())
-
-        # Compute direction
-        self.data['dir'] = np.where(
-            self.data['station_id'].notna(),
-            np.where(
-                self.data['r_dir'] <= self.data['r_st'],
-                -1,
-                1
-            ),
-            0
+            on=['line', 'station_id']
         )
 
-        print("Computed 'dir' sample:", self.data['dir'].head())
+        # Merge direction_r with data on 'line' and 'direction_id'
+        self.data = self.data.merge(
+            direction_r,
+            how='left',
+            on=['line', 'direction_id']
+        )
 
-        # Compute temporal lag in seconds
-        self.data['lag'] = (self.current_time - self.data['timestamp']).dt.total_seconds()
+        # Debug: Print data after merging 'station_r' and 'direction_r'
+        print("\nData after merging 'station_r' and 'direction_r':")
+        print(self.data.head())
 
-        print("Computed 'lag' sample:", self.data['lag'].head())
+        # Determine direction based on 'station_r' and 'direction_r'
+        self.data['direction'] = self.data.apply(self.determine_direction, axis=1)
 
-        # Drop unnecessary columns
-        self.data.drop(columns=['r_dir1', 'r_dir2', 'r_st1', 'r_st2'], inplace=True)
+        # Debug: Print data after determining direction
+        print("\nData after determining direction:")
+        print(self.data[['line', 'station_id', 'direction_id', 'station_r', 'direction_r', 'direction']].head())
 
-        # Debug: Print columns after preprocessing
-        print("Columns after pre_process:", self.data.columns.tolist())
-        print("Unique lines in data:", self.data['line'].unique())
-        print("Unique lines in segments:", self.segments['line'].unique())
+        # Merge data with segments to find the reported segment based on 'station_id'
+        # The reported segment is the one where 'stop_from' == 'station_id'
+        reported_segments = self.segments[['line', 'stop_from', 'sid', 'order']].copy()
+        reported_segments = reported_segments.rename(columns={'stop_from': 'station_id', 'sid': 'reported_sid', 'order': 'reported_order'})
+
+        # Merge reported_sid and reported_order based on 'line' and 'station_id'
+        self.data = self.data.merge(
+            reported_segments,
+            how='left',
+            on=['line', 'station_id']
+        )
+
+        # Debug: Print data after merging reported segments
+        print("\nData after merging reported segments:")
+        print(self.data[['line', 'station_id', 'reported_sid', 'reported_order']].head())
+
+        # Check for missing reported segments
+        missing_reported = self.data['reported_sid'].isna()
+        if missing_reported.any():
+            print(f"\nWarning: {missing_reported.sum()} reports have unmatched 'station_id'. These reports will be dropped.")
+            self.data = self.data[~missing_reported]
+
+        # Final debug: Print the processed data
+        print("\nFinal processed data:")
+        print(self.data[['line', 'station_id', 'direction_id', 'station_r', 'direction_r', 'direction', 'reported_sid', 'reported_order']])
+
+    def determine_direction(self, row):
+        """Determine direction based on station_r and direction_r."""
+        if pd.isna(row['station_r']) or pd.isna(row['direction_r']):
+            return 0  # Unknown
+        elif row['direction_r'] > row['station_r']:
+            return 1  # Forward
+        elif row['direction_r'] < row['station_r']:
+            return -1  # Backward
+        else:
+            return 0  # Unknown if equal
 
     def assess_risk(self):
-        # Compute direct_risk, bidirect_risk, line_risk
-        self.data = self.data.reset_index(drop=True)
-        self.data['id'] = self.data.index + 1  # R is 1-indexed
+        risk_records = []
 
-        # Apply risk functions
-        self.data['direct_risk'] = self.data.apply(self.direct_risk, axis=1)
-        self.data['bidirect_risk'] = self.data.apply(self.bidirect_risk, axis=1)
-        self.data['line_risk'] = self.data.apply(self.line_risk, axis=1)
+        # Parameters for sigmoid function
+        beta_forward = 0.5  # Adjusted for slower decay in correct direction
+        beta_backward = 1.25  # 2.5x beta_forward for faster decay in wrong direction
 
-        # Debug: Print direct_risk values
-        print("Direct risk values:", self.data['direct_risk'].tolist())
+        # Iterate over each ticket
+        for idx, ticket in self.data.iterrows():
+            line = ticket['line']
+            reported_order = ticket['reported_order']
+            direction = ticket['direction']  # 1 for forward, -1 for backward, 0 for unknown
 
-        # Neighbour segments
-        neighbour_segments = self.segments[['line', 'r']].rename(columns={'r': 'r_neigh'})
-        n_ring = self.segments[self.segments['line'] == 'S41'].shape[0]
+            print(f"\nProcessing report {idx+1}: Line={line}, Station={ticket['station_id']}, Direction={direction}")
 
-        # Station-based risk
-        station_based = self.data.merge(
-            self.segments,
-            on='line',
-            how='left',
-            suffixes=('', '_seg')
-        )
+            # Filter segments in the same line
+            line_segments = self.segments[self.segments['line'] == line].copy()
 
-        # Identify lines in data not present in segments
-        lines_in_data = set(self.data['line'].unique())
-        lines_in_segments = set(self.segments['line'].unique())
-        missing_lines = lines_in_data - lines_in_segments
+            # Calculate distance in segments (number of segments between reported segment and current segment)
+            line_segments['segment_distance'] = np.abs(line_segments['order'] - reported_order)
 
-        if missing_lines:
-            print(f"Warning: The following lines from ticket data are missing in segments: {missing_lines}")
+            # Determine directionality per segment
+            if direction == 1:
+                # Correct direction: towards 'stop_to'
+                line_segments['is_correct_direction'] = 1
+                beta = beta_forward
+                print("Direction: Forward")
+            elif direction == -1:
+                # Opposite direction: towards 'stop_from'
+                line_segments['is_correct_direction'] = -1
+                beta = beta_backward
+                print("Direction: Backward")
+            else:
+                # Unknown direction
+                line_segments['is_correct_direction'] = 0
+                beta = 1.0  # Default beta
+                print("Direction: Unknown")
 
-        # For demonstration, we'll compute aggregate risk as a simple sum
-        score_per_line = self.data.groupby('line')['direct_risk'].sum().clip(upper=1).reset_index()
-        print("Score per line:", score_per_line)
+            # Assign risk based on sigmoid function
+            if direction != 0:
+                line_segments['risk'] = sigmoid(-line_segments['segment_distance'] * beta)
+                print(f"Applied sigmoid with beta={beta}")
+            else:
+                # Assign minimal risk for unknown direction
+                line_segments['risk'] = 0.1
+                print("Assigned minimal risk for unknown direction")
 
-        # Merge score_per_line with segments
-        self.segments = self.segments.merge(score_per_line, on='line', how='left')
-        self.segments[self.score_col] = self.segments['direct_risk'].fillna(0)
-        print("Segments with scores:", self.segments[['line', 'score']].head())
+            # Ensure the reported segment has the highest risk
+            line_segments.loc[line_segments['segment_distance'] == 0, 'risk'] = 1.0
+            print("Assigned highest risk to the reported segment")
 
-        # Debug: Print segments after risk assessment
-        print("Segments after assess_risk:", self.segments.head())
+            # Debug: Print a summary of risks for this report
+            print("Risk distribution for this report:")
+            print(line_segments[['sid', 'segment_distance', 'risk']].head())
 
-    def direct_risk(self, row):
-        if pd.isna(row['dir']):
-            value = 0
-        elif row['dir'] == 0:
-            value = 0
-        elif row['dir'] == 1 or row['dir'] == -1:
-            value = 0.8
+            # Append to risk records
+            for _, seg in line_segments.iterrows():
+                risk_records.append({
+                    'sid': seg['sid'],
+                    'risk': seg['risk']
+                })
+
+        # Create DataFrame from risk records
+        risk_df = pd.DataFrame(risk_records)
+
+        # Debug: Print aggregated risk before normalization
+        print("\nAggregated risk before normalization:")
+        print(risk_df.groupby('sid')['risk'].sum().reset_index().head())
+
+        # Aggregate risk by segment (sum risks from multiple tickets)
+        aggregated_risk = risk_df.groupby('sid')['risk'].sum().reset_index()
+
+        # Normalize risk to be between 0 and 1
+        max_risk = aggregated_risk['risk'].max()
+        if max_risk > 0:
+            aggregated_risk['risk'] = aggregated_risk['risk'] / max_risk
         else:
-            value = 0
-        discounted = s_discount(value, row['lag'], ttl=1000, strn=0.2, shift=0.4)
-        return discounted
+            aggregated_risk['risk'] = 0
 
-    def bidirect_risk(self, row):
-        if pd.isna(row['dir']):
-            value = 0
-        elif row['dir'] == 0:
-            value = 1
-        elif row['dir'] == 1 or row['dir'] == -1:
-            value = 0.2
-        else:
-            value = 0
-        discounted = s_discount(value, row['lag'], ttl=2000, strn=0.3, shift=0.4)
-        return discounted
+        # Debug: Print aggregated risk after normalization
+        print("\nAggregated risk after normalization:")
+        print(aggregated_risk.head())
 
-    def line_risk(self, row):
-        if pd.isna(row['station_id']):
-            value = 0.1
-        else:
-            value = 0.05
-        discounted = s_discount(value, row['lag'], ttl=4000, strn=0.3, shift=0.2)
-        return discounted
+        # Merge aggregated risk back to segments
+        self.segments = self.segments.merge(
+            aggregated_risk,
+            on='sid',
+            how='left'
+        ).fillna({'risk': 0})
+
+        # Assign to score_col
+        self.segments[self.score_col] = self.segments['risk']
 
     def project_risk(self):
         # Map score to color
@@ -262,8 +252,9 @@ class FreifahrenRiskClassifier:
         choices = ["#13C184", "#FACB3F", "#F05044", "#A92725"]
         self.segments[self.projection_col] = np.select(conditions, choices, default="grey")
 
-        # Debug: Print segments after projecting risk
-        print("Segments after project_risk:", self.segments.head())
+        # Debug: Print color assignments
+        print("\nColor assignments based on risk scores:")
+        print(self.segments[['sid', 'risk', self.projection_col]].head())
 
     def get_segments(self):
         return self.segments
@@ -276,7 +267,8 @@ def main():
     # Load ticket data
     try:
         ticket_info = pd.read_csv("ticket_data.csv")
-        print("ticket_info contents:", ticket_info.head())
+        print("ticket_info contents:")
+        print(ticket_info.head())
     except FileNotFoundError:
         print("Error: 'ticket_data.csv' not found.")
         raise
@@ -309,14 +301,14 @@ def main():
     # Load segments data
     try:
         segments = gpd.read_file("Rstats/segments/segments_v5.geojson")
-        print("GeoJSON Columns:", segments.columns.tolist())
+        print("\nGeoJSON Columns:", segments.columns.tolist())
     except Exception as e:
         print(f"Error loading segments_v5.geojson: {e}")
         raise e
 
     # Verify required columns in segments
     required_segments_columns = ['line', 'stop_to', 'stop_from', 'r', 'sid', 'line_color', 'geometry']
-    print(f"Lines in segments: {segments['line'].unique()}")
+    print(f"\nLines in segments: {segments['line'].unique()}")
     missing_segments_columns = [col for col in required_segments_columns if col not in segments.columns]
     if missing_segments_columns:
         raise KeyError(f"Missing columns in segments_v5.geojson: {missing_segments_columns}")
@@ -362,7 +354,7 @@ def main():
 
     # Convert to JSON
     risk_model_json = risk_model_filtered.to_dict(orient='records')
-    print(f"risk_model_json: {risk_model_json}")
+    print(f"\nrisk_model_json: {risk_model_json}")
 
     # Write to JSON file
     output_path = f"./output/risk_model_{suffix}.json"
