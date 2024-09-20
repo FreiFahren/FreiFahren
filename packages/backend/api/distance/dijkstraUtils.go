@@ -1,4 +1,4 @@
-package getStationDistance
+package distance
 
 import (
 	"fmt"
