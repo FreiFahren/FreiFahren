@@ -74,7 +74,7 @@
     --border-weak: 1px solid #000;
     --border-marker: 3px solid #ffffff;
 
-    --distance-from-edge-default: 25px;
+    --distance-from-edge-default: 15px;
     --button-size: 50px;
     --height-streched-button: 45px;
 }
