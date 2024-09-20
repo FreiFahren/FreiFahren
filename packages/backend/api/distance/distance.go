@@ -6,6 +6,7 @@ import (
 	"math"
 	"net/http"
 	"sort"
+	"sync"
 
 	"github.com/FreiFahren/backend/data"
 	_ "github.com/FreiFahren/backend/docs"
@@ -23,6 +24,46 @@ type StationNode struct {
 var stationsList map[string]utils.StationListEntry
 var stationIds []string
 var linesList map[string][]string
+
+type DistanceCache struct {
+	cache map[string]int
+	order []string
+	mutex sync.RWMutex
+}
+
+var distanceCache = &DistanceCache{
+	cache: make(map[string]int),
+	order: make([]string, 0, 250),
+}
+
+func getCacheKey(inspectorStationId, userStationId string) string {
+	return inspectorStationId + ":" + userStationId
+}
+
+func (distanceCache *DistanceCache) getDistanceFromCache(inspectorStationId, userStationId string) (int, bool) {
+	distanceCache.mutex.RLock()
+	defer distanceCache.mutex.RUnlock()
+	distance, ok := distanceCache.cache[getCacheKey(inspectorStationId, userStationId)]
+	return distance, ok
+}
+
+func (distanceCache *DistanceCache) setDistanceInCache(inspectorStationId, userStationId string, distance int) {
+	logger.Log.Debug().Msg("Setting distance in cache")
+	distanceCache.mutex.Lock()
+	defer distanceCache.mutex.Unlock()
+	
+	key := getCacheKey(inspectorStationId, userStationId)
+
+	if _, exists := distanceCache.cache[key]; !exists {
+		if len(distanceCache.order) == 250 {
+			delete(distanceCache.cache, distanceCache.order[0])
+			distanceCache.order = distanceCache.order[1:] // remove the first element from the order slice
+		}
+		distanceCache.order = append(distanceCache.order, key)
+	}
+
+	distanceCache.cache[key] = distance
+}
 
 // @Summary Calculate shortest distance to a station
 //
@@ -50,6 +91,12 @@ func GetStationDistance(c echo.Context) error {
 		return c.String(http.StatusOK, "0")
 	}
 
+	// Check cache first
+	if cachedDistance, found := distanceCache.getDistanceFromCache(inspectorStationId, userStationId); found {
+		logger.Log.Info().Msg("Cache hit for distance calculation")
+		return c.String(http.StatusOK, fmt.Sprintf("%d", cachedDistance))
+	}
+
 	stationsList, stationIds, linesList = ReadAndCreateSortedStationsListAndLinesList()
 
 	inspectorStation, ok := stationsList[inspectorStationId]
@@ -74,6 +121,9 @@ func GetStationDistance(c echo.Context) error {
 	}
 
 	distances := FindShortestDistance(inspectorStationId, userStationId)
+
+	// Cache the result
+	distanceCache.setDistanceInCache(inspectorStationId, userStationId, distances)
 
 	return c.String(http.StatusOK, fmt.Sprintf("%d", distances))
 }
