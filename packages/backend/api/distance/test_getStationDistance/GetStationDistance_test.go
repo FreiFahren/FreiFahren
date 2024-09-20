@@ -1,4 +1,4 @@
-package test_getStationDistance
+package test_distance
 
 import (
 	"net/http"
@@ -7,10 +7,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/FreiFahren/backend/api/distance"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/FreiFahren/backend/api/getStationDistance"
 )
 
 func TestGetStationDistance(t *testing.T) {
@@ -62,7 +61,7 @@ func TestGetStationDistance(t *testing.T) {
 			c := e.NewContext(req, rec)
 
 			// Call the function and check the status code
-			if assert.NoError(t, getStationDistance.GetStationDistance(c)) {
+			if assert.NoError(t, distance.GetStationDistance(c)) {
 				assert.Equal(t, tt.expectedStatus, rec.Code)
 
 				// Check the response body

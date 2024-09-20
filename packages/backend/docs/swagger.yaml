@@ -325,7 +325,7 @@ paths:
         required: true
         type: string
       produces:
-      - application/json
+      - text/plain
       responses:
         "200":
           description: The shortest distance in terms of the number of station stops

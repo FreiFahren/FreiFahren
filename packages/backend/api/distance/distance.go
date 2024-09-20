@@ -1,4 +1,4 @@
-package getStationDistance
+package distance
 
 import (
 	"container/list"
@@ -6,6 +6,7 @@ import (
 	"math"
 	"net/http"
 	"sort"
+	"sync"
 
 	"github.com/FreiFahren/backend/data"
 	_ "github.com/FreiFahren/backend/docs"
@@ -24,6 +25,50 @@ var stationsList map[string]utils.StationListEntry
 var stationIds []string
 var linesList map[string][]string
 
+type DistanceCache struct {
+	cache map[string]int
+	order []string
+	mutex sync.RWMutex
+}
+
+var distanceCache = &DistanceCache{
+	cache: make(map[string]int),
+	order: make([]string, 0, 5000), // length of 5000 is enough as this will cover the most common cases of the 5800+ station combinations
+}
+
+func getCacheKey(stationId1, stationId2 string) string {
+	// compare the lexigraphically smaller string first to avoid duplicate entries in the cache
+	if stationId1 < stationId2 {
+		return stationId1 + ":" + stationId2
+	}
+	return stationId2 + ":" + stationId1
+}
+
+func (distanceCache *DistanceCache) getDistanceFromCache(inspectorStationId, userStationId string) (int, bool) {
+	distanceCache.mutex.RLock()
+	defer distanceCache.mutex.RUnlock()
+	distance, ok := distanceCache.cache[getCacheKey(inspectorStationId, userStationId)]
+	return distance, ok
+}
+
+func (distanceCache *DistanceCache) setDistanceInCache(inspectorStationId, userStationId string, distance int) {
+	logger.Log.Debug().Msg("Setting distance in cache")
+	distanceCache.mutex.Lock()
+	defer distanceCache.mutex.Unlock()
+	
+	key := getCacheKey(inspectorStationId, userStationId)
+
+	if _, exists := distanceCache.cache[key]; !exists {
+		if len(distanceCache.order) == 250 {
+			delete(distanceCache.cache, distanceCache.order[0])
+			distanceCache.order = distanceCache.order[1:] // remove the first element from the order slice
+		}
+		distanceCache.order = append(distanceCache.order, key)
+	}
+
+	distanceCache.cache[key] = distance
+}
+
 // @Summary Calculate shortest distance to a station
 //
 // @Description Returns the shortest number of stations between an inspector's station and a given user's latitude and longitude coordinates.
@@ -32,7 +77,7 @@ var linesList map[string][]string
 // @Tags transit
 //
 // @Accept  json
-// @Produce  json
+// @Produce  text/plain
 //
 // @Param   inspectorStationId   query   string  true   "The station Id of the inspector's current location."
 // @Param   userStationId   query   string  true   "The station Id of the user's current location."
@@ -48,6 +93,12 @@ func GetStationDistance(c echo.Context) error {
 	userStationId := c.QueryParam("userStationId")
 	if userStationId == inspectorStationId {
 		return c.String(http.StatusOK, "0")
+	}
+
+	// Check cache first
+	if cachedDistance, found := distanceCache.getDistanceFromCache(inspectorStationId, userStationId); found {
+		logger.Log.Info().Msg("Cache hit for distance calculation")
+		return c.String(http.StatusOK, fmt.Sprintf("%d", cachedDistance))
 	}
 
 	stationsList, stationIds, linesList = ReadAndCreateSortedStationsListAndLinesList()
@@ -74,6 +125,9 @@ func GetStationDistance(c echo.Context) error {
 	}
 
 	distances := FindShortestDistance(inspectorStationId, userStationId)
+
+	// Cache the result
+	distanceCache.setDistanceInCache(inspectorStationId, userStationId, distances)
 
 	return c.String(http.StatusOK, fmt.Sprintf("%d", distances))
 }
