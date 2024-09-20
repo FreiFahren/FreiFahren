@@ -299,7 +299,7 @@ span {
     z-index: var(--zIndex-button);
 }
 
-.small-button img {
+.small-button img:has(+ p) {
     margin-right: var(--margin-xs);
 }
 
