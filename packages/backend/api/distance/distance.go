@@ -36,8 +36,12 @@ var distanceCache = &DistanceCache{
 	order: make([]string, 0, 250),
 }
 
-func getCacheKey(inspectorStationId, userStationId string) string {
-	return inspectorStationId + ":" + userStationId
+func getCacheKey(stationId1, stationId2 string) string {
+	// compare the lexigraphically smaller string first to avoid duplicate entries in the cache
+	if stationId1 < stationId2 {
+		return stationId1 + ":" + stationId2
+	}
+	return stationId2 + ":" + stationId1
 }
 
 func (distanceCache *DistanceCache) getDistanceFromCache(inspectorStationId, userStationId string) (int, bool) {
