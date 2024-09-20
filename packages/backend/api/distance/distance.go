@@ -33,7 +33,7 @@ type DistanceCache struct {
 
 var distanceCache = &DistanceCache{
 	cache: make(map[string]int),
-	order: make([]string, 0, 250),
+	order: make([]string, 0, 5000), // length of 5000 is enough as this will cover the most common cases of the 5800+ station combinations
 }
 
 func getCacheKey(stationId1, stationId2 string) string {
