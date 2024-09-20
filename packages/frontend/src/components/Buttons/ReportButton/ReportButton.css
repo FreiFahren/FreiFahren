@@ -11,6 +11,7 @@
     border: 2px solid var(--color-white);
     border-radius: 50%;
     overflow: hidden;
+    margin-bottom: 15px;
     z-index: var(--zIndex-button);
 }
 

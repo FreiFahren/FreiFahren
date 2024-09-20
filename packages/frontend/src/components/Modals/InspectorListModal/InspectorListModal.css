@@ -10,7 +10,7 @@
 }
 
 .list-modal {
-    max-height: 75vh;
+    height: 75vh;
 }
 
 .list-modal > div p {

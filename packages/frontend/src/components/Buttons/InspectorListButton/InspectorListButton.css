@@ -4,6 +4,7 @@
     bottom: var(--distance-from-edge-default);
     left: var(--distance-from-edge-default);
     overflow: hidden;
+    margin-bottom: 15px;
 }
 
 .list-button img {
