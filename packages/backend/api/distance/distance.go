@@ -77,7 +77,7 @@ func (distanceCache *DistanceCache) setDistanceInCache(inspectorStationId, userS
 // @Tags transit
 //
 // @Accept  json
-// @Produce  json
+// @Produce  text/plain
 //
 // @Param   inspectorStationId   query   string  true   "The station Id of the inspector's current location."
 // @Param   userStationId   query   string  true   "The station Id of the user's current location."
