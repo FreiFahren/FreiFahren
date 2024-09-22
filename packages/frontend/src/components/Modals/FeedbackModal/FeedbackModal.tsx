@@ -18,25 +18,6 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ openAnimationClass }) => 
                 <li>
                     <img
                         className="profile-picture"
-                        src={process.env.PUBLIC_URL + '/icons/profiles/joff.jpeg'}
-                        alt="Joff Github Profile"
-                    />
-                    <p>Joff</p>
-                    <div>
-                        <a href="https://t.me/joffdd">
-                            <img src={telegram_icon} alt="telegram icon" />
-                        </a>
-                        <a href="mailto:mail@jfsalzmann.com">
-                            <img src={mail_icon} alt="mail icon" />
-                        </a>
-                        <a href="https://github.com/jfsalzmann" target="_blank" rel="noopener noreferrer">
-                            <img src={github_icon} alt="github icon" />
-                        </a>
-                    </div>
-                </li>
-                <li>
-                    <img
-                        className="profile-picture"
                         src={process.env.PUBLIC_URL + '/icons/profiles/johan.jpeg'}
                         alt="Johan Github Profile"
                     />
@@ -50,6 +31,19 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ openAnimationClass }) => 
                         </a>
                         <a href="https://github.com/johan-t" target="_blank" rel="noopener noreferrer">
                             <img src={github_icon} alt="github icon" />
+                        </a>
+                    </div>
+                </li>
+                <li>
+                    <img
+                        className="profile-picture"
+                        src={process.env.PUBLIC_URL + '/icons/profiles/joff.jpeg'}
+                        alt="Joff Github Profile"
+                    />
+                    <p>Joff</p>
+                    <div>
+                        <a href="mailto:mail@jfsalzmann.com">
+                            <img src={mail_icon} alt="mail icon" />
                         </a>
                     </div>
                 </li>
