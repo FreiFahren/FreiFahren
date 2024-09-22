@@ -47,10 +47,10 @@ export function setColorThemeInLocalStorage() {
 }
 
 export const stationDistanceMessage = (stationDistance: number | null): JSX.Element | null => {
-    if (!stationDistance || stationDistance === null || stationDistance < 1) return null
+    if (stationDistance === null) return null
     return (
         <div>
-            {stationDistance > 1 ? <strong>{stationDistance} Stationen </strong> : <strong>eine Station </strong>}
+            {stationDistance <= 1 ? <strong>eine Station </strong> : <strong>{stationDistance} Stationen </strong>}
             von dir entfernt
         </div>
     )

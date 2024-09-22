@@ -68,7 +68,9 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
             )}
             <div>
                 <p>{elapsedTimeMessage(elapsedTimeInMinutes, selectedMarker.isHistoric)}</p>
-                <p className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage(stationDistance)}</p>
+                {userLat && userLng && (
+                    <p className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage(stationDistance)}</p>
+                )}
                 {selectedMarker.message && <p className="description">{selectedMarker.message}</p>}
             </div>
         </div>
