@@ -4,7 +4,7 @@ from telegram_bots import logger
 
 logger = logger.setup_logger()
 
-def send_message(chat_id: str, message: str, bot) -> None:
+def send_message(chat_id: str, message: str, bot, parse_mode='HTML') -> None:
     """Send a message to a user or chat id.
 
     Args:
@@ -14,7 +14,7 @@ def send_message(chat_id: str, message: str, bot) -> None:
     """
 
     try:
-        bot.send_message(chat_id, message)
+        bot.send_message(chat_id, message, parse_mode=parse_mode)
     except Exception as e:
         logger.error(f'Failed to send message to user {chat_id}: {e}')
         
