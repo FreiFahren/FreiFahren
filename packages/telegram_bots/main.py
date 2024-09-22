@@ -33,7 +33,7 @@ def get_info(message):
 
     utc = pytz.UTC
     timestamp = datetime.fromtimestamp(message.date, utc).replace(second=0, microsecond=0)
-    logger.info(message)
+    
     text = message.text if message.content_type == 'text' else (message.caption or "Image without description")
     
     process_new_message(timestamp, text)
@@ -81,7 +81,7 @@ def report_inspector() -> tuple:
     if message:
         telegram_message += f'\n<b>Beschreibung</b>: {message}'
     
-    send_message(FREIFAHREN_CHAT_ID, telegram_message, nlp_bot)
+    #send_message(FREIFAHREN_CHAT_ID, telegram_message, nlp_bot)
 
     return {'status': 'success'}, 200
 
