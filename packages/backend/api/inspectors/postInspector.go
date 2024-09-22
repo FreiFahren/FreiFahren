@@ -91,7 +91,7 @@ func PostInspector(c echo.Context) error {
 
 	// Notify Telegram bot if there's no author (web app report)
 	if pointers.AuthorPtr == nil {
-		telegramEndpoint := os.Getenv("NLP_BOT_URL") + "/report-inspector"
+		telegramEndpoint := os.Getenv("TELEGRAM_BOTS_URL") + "/report-inspector"
 		if err := notifyOtherServiceAboutReport(telegramEndpoint, dataToInsert, "Telegram bot"); err != nil {
 			logger.Log.Error().Err(err).Msg("Error notifying Telegram bot about report in postInspector")
 		}
