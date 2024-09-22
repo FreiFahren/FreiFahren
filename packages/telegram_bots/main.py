@@ -1,6 +1,7 @@
 from telegram_bots.config import (
     BACKEND_URL, 
-    TELEGERAM_BOTS_URL
+    TELEGERAM_BOTS_URL,
+    FREIFAHREN_CHAT_ID
 )
 from telegram_bots.watcher.healthcheck import do_healthcheck, check_backend_status, check_nlp_bot_status
 from telegram_bots.bot_utils import send_message, report_failure_to_devs
@@ -80,8 +81,7 @@ def report_inspector() -> tuple:
     if message:
         telegram_message += f'\n<b>Beschreibung</b>: {message}'
     
-    # commented due to not being released yet
-    #send_message(FREIFAHREN_CHAT_ID, telegram_message, nlp_bot)
+    send_message(FREIFAHREN_CHAT_ID, telegram_message, nlp_bot)
 
     return {'status': 'success'}, 200
 
