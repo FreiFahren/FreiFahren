@@ -33,7 +33,7 @@ def get_info(message):
 
     utc = pytz.UTC
     timestamp = datetime.fromtimestamp(message.date, utc).replace(second=0, microsecond=0)
-    
+    logger.info(message)
     text = message.text if message.content_type == 'text' else (message.caption or "Image without description")
     
     process_new_message(timestamp, text)
