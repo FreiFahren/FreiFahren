@@ -23,12 +23,6 @@ class TicketInspector:
 
 
 def extract_ticket_inspector_info(unformatted_text):
-    # Initial guards to avoid unnecessary processing
-    if "?" in unformatted_text or check_for_spam(unformatted_text):
-        ticket_inspector = TicketInspector(line=None, station=None, direction=None)
-        logger.info("Message is not getting processed")
-        return ticket_inspector.__dict__
-
     found_line = find_line(unformatted_text, lines_with_stations)
     ticket_inspector = TicketInspector(line=found_line, station=None, direction=None)
 
@@ -56,6 +50,12 @@ stations_dict = load_data("data/stations_list_main.json")
 
 
 def process_new_message(timestamp, message_text):
+    trams = ["m1", "m2", "m4", "m5", "m6", "m8", "m10", "m13", "m17"]
+    # Initial guards to avoid unnecessary processing
+    if "?" in message_text or check_for_spam(message_text) or any(tram in message_text.lower() for tram in trams):
+        logger.info("Message is not getting processed")
+        return None
+    
     info = extract_ticket_inspector_info(message_text)
     logger.info("Found information in the message: %s", info)
 
