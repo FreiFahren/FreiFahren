@@ -45,7 +45,7 @@ const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports, onO
         }
     }, [popOut, timeForPopOutAnimation])
 
-    const handleClick = () => {
+    const handleClickOnStatsPopup = () => {
         onOpen()
         updateMessageAndShowPopup()
     }
@@ -57,7 +57,7 @@ const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports, onO
         ${popOut ? 'pop-out' : ''}
         ${!isVisible ? 'fade-out' : ''}`}
             dangerouslySetInnerHTML={{ __html: message }}
-            onClick={handleClick}
+            onClick={handleClickOnStatsPopup}
         />
     )
 }
