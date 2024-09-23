@@ -200,8 +200,8 @@ function App() {
       </StationsAndLinesProvider>
       <UtilButton onClick={toggleUtilModal} />
       <ReportButton onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })} />
-      {appUIState.isStatsPopUpOpen &&  statsData !== 0 && <StatsPopUp numberOfReports={statsData} className={'open center-animation'} onStatsClick={function (): void {
-        throw new Error('Function not implemented.');
+      {appUIState.isStatsPopUpOpen  && <StatsPopUp numberOfReports={statsData} className={'open center-animation'} onStatsClick={function (): void {
+       
       } } />}
     </div>
   );
