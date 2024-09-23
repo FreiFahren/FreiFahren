@@ -130,6 +130,10 @@ function App() {
     setAppUIState({ ...appUIState, isRiskLayerOpen: clickedLayer === 'risk' });
   }
 
+  const openInspectorListModal = () => {
+    setAppUIState(prevState => ({ ...prevState, isListModalOpen: true }));
+  };
+
   return (
     <div className='App'>
       {appUIState.isFirstOpen && appMounted && (
@@ -178,12 +182,8 @@ function App() {
                 />
                 {appUIState.isListModalOpen && (
                   <>
-                    <InspectorListModal 
-                      className={`open center-animation`}
-                      isOpen={appUIState.isListModalOpen}
-                      onClose={() => setAppUIState({ ...appUIState, isListModalOpen: false })}
-                    />
-                    <Backdrop onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
+                    <InspectorListModal className={`open center-animation`}/>
+                    <Backdrop onClick={() => setAppUIState(prevState => ({ ...prevState, isListModalOpen: false }))} />
                   </>
                 )}
           </TicketInspectorsProvider>
@@ -200,9 +200,13 @@ function App() {
       </StationsAndLinesProvider>
       <UtilButton onClick={toggleUtilModal} />
       <ReportButton onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })} />
-      {appUIState.isStatsPopUpOpen  && <StatsPopUp numberOfReports={statsData} className={'open center-animation'} onStatsClick={function (): void {
-       
-      } } />}
+      {appUIState.isStatsPopUpOpen && (
+        <StatsPopUp 
+          numberOfReports={statsData} 
+          className={'open center-animation'} 
+          onOpen={openInspectorListModal}
+        />
+      )}
     </div>
   );
 }

@@ -1,3 +1,4 @@
+
 import React from 'react'
 import { useState, useEffect, useCallback } from 'react'
 import './StatsPopUp.css'
@@ -5,10 +6,10 @@ import './StatsPopUp.css'
 interface StatsPopUpProps {
     className: string
     numberOfReports: number
-    onStatsClick: () => void
+    onOpen: () => void
 }
 
-const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports, onStatsClick }) => {
+const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports, onOpen }) => {
     const [message, setMessage] = useState(`<p><strong>${numberOfReports} Meldungen</strong><br /> heute in Berlin</p>`)
     const [popOut, setPopOut] = useState(false)
     const [isVisible, setIsVisible] = useState(true)
@@ -16,10 +17,10 @@ const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports, onS
     const timeForOneMessage = 3.5 * 1000
     const timeForPopOutAnimation = 0.5 * 1000
 
-    const updateMessageAndShowPopup = async () => {
+    const updateMessageAndShowPopup = useCallback(() => {
         setMessage('<p>Über<strong> 27.000 Meldende</strong><br /> in Berlin</p>')
         setPopOut(true)
-    }
+    }, [])
 
     const hidePopupAfterAnimation = useCallback(() => {
         setTimeout(() => {
@@ -30,11 +31,12 @@ const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports, onS
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            updateMessageAndShowPopup().then(hidePopupAfterAnimation)
+            updateMessageAndShowPopup()
+            hidePopupAfterAnimation()
         }, timeForOneMessage)
 
         return () => clearTimeout(timer)
-    }, [hidePopupAfterAnimation, timeForOneMessage])
+    }, [updateMessageAndShowPopup, hidePopupAfterAnimation, timeForOneMessage])
 
     useEffect(() => {
         if (popOut) {
@@ -43,6 +45,11 @@ const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports, onS
         }
     }, [popOut, timeForPopOutAnimation])
 
+    const handleClick = () => {
+        onOpen()
+        updateMessageAndShowPopup()
+    }
+
     return (
         <div
             className={`
@@ -50,8 +57,7 @@ const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports, onS
         ${popOut ? 'pop-out' : ''}
         ${!isVisible ? 'fade-out' : ''}`}
             dangerouslySetInnerHTML={{ __html: message }}
-            onClick={onStatsClick}
-            style={{ cursor: 'pointer' }}
+            onClick={handleClick}
         />
     )
 }
