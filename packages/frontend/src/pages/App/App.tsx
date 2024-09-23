@@ -196,7 +196,7 @@ function App() {
       </StationsAndLinesProvider>
       <UtilButton onClick={toggleUtilModal} />
       <ReportButton onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })} />
-      {appUIState.isStatsPopUpOpen &&  statsData !== 0 && <StatsPopUp numberOfReports={statsData} className={'open center-animation'} />}
+      {appUIState.isStatsPopUpOpen &&  statsData !== 0 && <StatsPopUp numberOfReports={statsData} className={'open center-animation'} openListModal={() => setAppUIState({ ...appUIState, isListModalOpen: !appUIState.isListModalOpen })} />}
     </div>
   );
 }
