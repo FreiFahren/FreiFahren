@@ -45,6 +45,9 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ openAnimationClass }) => 
                         <a href="mailto:mail@jfsalzmann.com">
                             <img src={mail_icon} alt="mail icon" />
                         </a>
+                        <a href="https://github.com/jfsalzmann" target="_blank" rel="noopener noreferrer">
+                            <img src={github_icon} alt="github icon" />
+                        </a>
                     </div>
                 </li>
                 <li>
