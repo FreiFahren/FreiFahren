@@ -30,7 +30,6 @@ logger = setup_logger()
 def get_info(message):
     logger.info("------------------------")
     logger.info("MESSAGE RECEIVED")
-    logger.debug("Message: %s", message)
 
     utc = pytz.UTC
     timestamp = datetime.fromtimestamp(message.date, utc).replace(second=0, microsecond=0)
@@ -82,7 +81,6 @@ def report_inspector() -> tuple:
     if message:
         telegram_message += f'\n<b>Beschreibung</b>: {message}'
     
-    logger.debug("Freifahren Chat ID %s", FREIFAHREN_CHAT_ID)
     send_message(FREIFAHREN_CHAT_ID, telegram_message, nlp_bot)
 
     return {'status': 'success'}, 200
