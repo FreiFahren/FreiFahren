@@ -81,7 +81,7 @@ def report_inspector() -> tuple:
     if message:
         telegram_message += f'\n<b>Beschreibung</b>: {message}'
     
-    #send_message(FREIFAHREN_CHAT_ID, telegram_message, nlp_bot)
+    send_message(FREIFAHREN_CHAT_ID, telegram_message, nlp_bot)
 
     return {'status': 'success'}, 200
 
