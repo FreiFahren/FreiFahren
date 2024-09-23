@@ -46,19 +46,21 @@ const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ changeLayer, isRiskLayerO
             <div
                 className={`layer-options small-button align-child-on-line ${areLayerOptionsVisible ? 'visible' : ''}`}
             >
-                <div onClick={() => closeModalAndHighlightSelectedLayer('risk')}>
+                <div {...(areLayerOptionsVisible ? { onClick: () => closeModalAndHighlightSelectedLayer('risk') } : {})}>
                     <img
                         src={process.env.PUBLIC_URL + '/icons/risk.png'}
                         alt="Showing how the risk layer looks like"
                         className={isRiskLayerOpen ? 'active' : ''}
+                        draggable={areLayerOptionsVisible}
                     />
                     <p>Risiko</p>
                 </div>
-                <div onClick={() => closeModalAndHighlightSelectedLayer('line')}>
+                <div {...(areLayerOptionsVisible ? { onClick: () => closeModalAndHighlightSelectedLayer('line') } : {})}>
                     <img
                         src={process.env.PUBLIC_URL + '/icons/lines.png'}
                         alt="Showing how the line layer looks like"
                         className={isRiskLayerOpen ? '' : 'active'}
+                        draggable={areLayerOptionsVisible}
                     />
                     <p>Linien</p>
                 </div>
