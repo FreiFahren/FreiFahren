@@ -178,7 +178,11 @@ function App() {
                 />
                 {appUIState.isListModalOpen && (
                   <>
-                    <InspectorListModal className={`open center-animation`}/>
+                    <InspectorListModal 
+                      className={`open center-animation`}
+                      isOpen={appUIState.isListModalOpen}
+                      onClose={() => setAppUIState({ ...appUIState, isListModalOpen: false })}
+                    />
                     <Backdrop onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
                   </>
                 )}
@@ -196,7 +200,9 @@ function App() {
       </StationsAndLinesProvider>
       <UtilButton onClick={toggleUtilModal} />
       <ReportButton onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })} />
-      {appUIState.isStatsPopUpOpen &&  statsData !== 0 && <StatsPopUp numberOfReports={statsData} className={'open center-animation'} />}
+      {appUIState.isStatsPopUpOpen &&  statsData !== 0 && <StatsPopUp numberOfReports={statsData} className={'open center-animation'} onStatsClick={function (): void {
+        throw new Error('Function not implemented.');
+      } } />}
     </div>
   );
 }

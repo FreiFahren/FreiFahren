@@ -5,9 +5,10 @@ import './StatsPopUp.css'
 interface StatsPopUpProps {
     className: string
     numberOfReports: number
+    onStatsClick: () => void
 }
 
-const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports }) => {
+const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports, onStatsClick }) => {
     const [message, setMessage] = useState(`<p><strong>${numberOfReports} Meldungen</strong><br /> heute in Berlin</p>`)
     const [popOut, setPopOut] = useState(false)
     const [isVisible, setIsVisible] = useState(true)
@@ -49,6 +50,8 @@ const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports }) =
         ${popOut ? 'pop-out' : ''}
         ${!isVisible ? 'fade-out' : ''}`}
             dangerouslySetInnerHTML={{ __html: message }}
+            onClick={onStatsClick}
+            style={{ cursor: 'pointer' }}
         />
     )
 }

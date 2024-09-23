@@ -8,9 +8,11 @@ import './InspectorListModal.css'
 
 interface InspectorListModalProps {
     className?: string
+    isOpen: boolean
+    onClose: () => void
 }
 
-const InspectorListModal: React.FC<InspectorListModalProps> = ({ className }) => {
+const InspectorListModal: React.FC<InspectorListModalProps> = ({ className, isOpen, onClose }) => {
     const [ticketInspectorList, setTicketInspectorList] = useState<MarkerData[]>([])
     const { ticketInspectorList: lastHourInspectorList } = useTicketInspectors() // inorder to keep the list in sync with the currently displayed data
 
@@ -55,8 +57,11 @@ const InspectorListModal: React.FC<InspectorListModalProps> = ({ className }) =>
         fetchInspectorList()
     }, [currentTime, lastHourInspectorList])
 
+    if (!isOpen) return null
+
     return (
         <div className={`list-modal modal container ${className}`}>
+            <button className="close-button" onClick={onClose}>×</button>
             <h1>Aktuelle Meldungen</h1>
             {ticketInspectorList.map((ticketInspector) => {
                 const inspectorTimestamp = new Date(ticketInspector.timestamp).getTime()
