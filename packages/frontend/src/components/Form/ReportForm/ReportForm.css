@@ -45,8 +45,3 @@
 div.report-form {
     padding: var(--padding-m);
 }
-
-.report-form button {
-    background-color: var(--incentive-blue);
-    color: var(--color-white);
-}
