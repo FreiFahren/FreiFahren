@@ -13,6 +13,7 @@ interface AskForLocationProps {
 const AskForLocation: React.FC<AskForLocationProps> = ({ className, children, closeModal }) => {
     const { setUserPosition } = useLocation()
     const { allStations } = useStationsAndLines()
+    const [stationsToShow, setStationsToShow] = useState(allStations)
 
     const [selectedStation, setSelectedStation] = useState<string | null>(null)
 
@@ -20,8 +21,15 @@ const AskForLocation: React.FC<AskForLocationProps> = ({ className, children, cl
         (key: string | null) => {
             const foundStationEntry = Object.entries(allStations).find(([, stationData]) => stationData.name === key)
             setSelectedStation(foundStationEntry ? foundStationEntry[0] : null)
+
+            // set the stations to show be the selected value, but when the new selected value is the same as the old one, show all stations
+            if (foundStationEntry && foundStationEntry[0] !== selectedStation) {
+                setStationsToShow({ [foundStationEntry[0]]: foundStationEntry[1] })
+            } else {
+                setStationsToShow(allStations)
+            }
         },
-        [allStations]
+        [allStations, selectedStation]
     )
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -42,7 +50,7 @@ const AskForLocation: React.FC<AskForLocationProps> = ({ className, children, cl
             <form onSubmit={handleSubmit}>
                 <h1>Dein Standort konnte nicht ermittelt werden.</h1>
                 <AutocompleteInputForm
-                    items={allStations}
+                    items={stationsToShow}
                     onSelect={handleSelect}
                     value={selectedStation}
                     getDisplayValue={(station) => station.name}
