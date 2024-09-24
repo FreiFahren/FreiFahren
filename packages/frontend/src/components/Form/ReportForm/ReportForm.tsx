@@ -42,20 +42,32 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
 
     const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
 
-    const formRef = useRef<HTMLDivElement>(null) // rename this to div container ref or something like that
+    const containerRef = useRef<HTMLDivElement>(null)
     const topElementsRef = useRef<HTMLDivElement>(null)
-    const stationListRef = useRef<HTMLDivElement>(null)
     const bottomElementsRef = useRef<HTMLDivElement>(null)
     const [stationListHeight, setStationListHeight] = useState<number | null>(null)
 
+    const MINIMUM_LIST_HEIGHT = 50
+    const PADDING_MARGIN_ALLOWANCE = 100
+
     const calculateStationListHeight = useCallback(() => {
-        if (formRef.current && topElementsRef.current && stationListRef.current && bottomElementsRef.current) {
-            const formHeight = formRef.current.clientHeight
-            const topElementsHeight = topElementsRef.current.clientHeight
-            const bottomElementsHeight = bottomElementsRef.current.clientHeight
-            const availableHeight = formHeight - topElementsHeight - bottomElementsHeight
-            const newHeight = Math.max(50, availableHeight - 100) // Minimum height of 50px - 100px to account for magins and paddings
-            setStationListHeight(newHeight)
+        const elements = {
+            container: containerRef.current,
+            topElements: topElementsRef.current,
+            bottomElements: bottomElementsRef.current,
+        }
+
+        if (Object.values(elements).every(Boolean)) {
+            const heights = {
+                container: elements.container!.clientHeight,
+                topElements: elements.topElements!.clientHeight,
+                bottomElements: elements.bottomElements!.clientHeight,
+            }
+
+            const availableHeight = heights.container - heights.topElements - heights.bottomElements
+            const adjustedHeight = availableHeight - PADDING_MARGIN_ALLOWANCE
+
+            setStationListHeight(Math.max(MINIMUM_LIST_HEIGHT, adjustedHeight))
         }
     }, [])
 
@@ -245,7 +257,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
     }
 
     return (
-        <div className={`report-form container modal ${className}`} ref={formRef}>
+        <div className={`report-form container modal ${className}`} ref={containerRef}>
             <form onSubmit={handleSubmit}>
                 <div>
                     <div ref={topElementsRef}>
@@ -280,19 +292,17 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                             </SelectField>
                         </section>
                     </div>
-                    <div ref={stationListRef}>
-                        <AutocompleteInputForm
-                            items={possibleStations}
-                            onSelect={handleStationSelect}
-                            value={currentStation}
-                            getDisplayValue={(station) => station.name}
-                            placeholder="Suche eine Station"
-                            label="Station"
-                            required={true}
-                            setSearchUsed={setSearchUsed}
-                            listHeight={stationListHeight}
-                        />
-                    </div>
+                    <AutocompleteInputForm
+                        items={possibleStations}
+                        onSelect={handleStationSelect}
+                        value={currentStation}
+                        getDisplayValue={(station) => station.name}
+                        placeholder="Suche eine Station"
+                        label="Station"
+                        required={true}
+                        setSearchUsed={setSearchUsed}
+                        listHeight={stationListHeight}
+                    />
                     <div ref={bottomElementsRef}>
                         {currentLine && currentLine !== 'S41' && currentLine !== 'S42' && (
                             <section>
