@@ -13,6 +13,7 @@ interface AutocompleteInputFormProps<T> {
     label: string
     required?: boolean
     setSearchUsed?: (searchUsed: boolean) => void
+    listHeight?: number | null
 }
 
 const search_icon = `${process.env.PUBLIC_URL}/icons/search.svg`
@@ -46,6 +47,7 @@ function AutocompleteInputForm<T>({
     label,
     required = false,
     setSearchUsed,
+    listHeight,
 }: AutocompleteInputFormProps<T>) {
     const [showSearchBox, setShowSearchBox] = useState(false)
     const [search, setSearch] = useState('')
@@ -95,17 +97,19 @@ function AutocompleteInputForm<T>({
                 />
                 <img src={search_icon} onClick={toggleSearchBox} alt="Search icon" />
             </div>
-            <SelectField
-                onSelect={handleSelect}
-                value={value ? getDisplayValue(items[value]) : ''}
-                containerClassName="align-child-column"
-            >
-                {filteredItems.map(([key, item]) => (
-                    <div key={key}>
-                        <strong>{getDisplayValue(item)}</strong>
-                    </div>
-                ))}
-            </SelectField>
+            <div className="station-list-container" style={listHeight ? { height: `${listHeight}px` } : undefined}>
+                <SelectField
+                    onSelect={handleSelect}
+                    value={value ? getDisplayValue(items[value]) : ''}
+                    containerClassName="align-child-column"
+                >
+                    {filteredItems.map(([key, item]) => (
+                        <div key={key}>
+                            <strong>{getDisplayValue(item)}</strong>
+                        </div>
+                    ))}
+                </SelectField>
+            </div>
         </section>
     )
 }

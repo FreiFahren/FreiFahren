@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 
 import SelectField from '../SelectField/SelectField'
 import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
@@ -41,6 +41,29 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
     const [searchUsed, setSearchUsed] = useState<boolean>(false)
 
     const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
+
+    const formRef = useRef<HTMLDivElement>(null) // rename this to div container ref or something like that
+    const topElementsRef = useRef<HTMLDivElement>(null)
+    const stationListRef = useRef<HTMLDivElement>(null)
+    const bottomElementsRef = useRef<HTMLDivElement>(null)
+    const [stationListHeight, setStationListHeight] = useState<number | null>(null)
+
+    const calculateStationListHeight = useCallback(() => {
+        if (formRef.current && topElementsRef.current && stationListRef.current && bottomElementsRef.current) {
+            const formHeight = formRef.current.clientHeight
+            const topElementsHeight = topElementsRef.current.clientHeight
+            const bottomElementsHeight = bottomElementsRef.current.clientHeight
+            const availableHeight = formHeight - topElementsHeight - bottomElementsHeight
+            const newHeight = Math.max(50, availableHeight - 100) // Minimum height of 50px - 100px to account for magins and paddings
+            setStationListHeight(newHeight)
+        }
+    }, [])
+
+    useEffect(() => {
+        calculateStationListHeight()
+        window.addEventListener('resize', calculateStationListHeight)
+        return () => window.removeEventListener('resize', calculateStationListHeight)
+    }, [calculateStationListHeight])
 
     const startTime = new Date()
 
@@ -222,95 +245,106 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
     }
 
     return (
-        <div className={`report-form container modal ${className}`}>
+        <div className={`report-form container modal ${className}`} ref={formRef}>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <h1>Neue Meldung</h1>
-                    <section>
-                        <SelectField
-                            containerClassName="align-child-on-line large-selector"
-                            fieldClassName="entity-type-selector"
-                            onSelect={handleEntitySelect}
-                            value={currentEntity}
-                        >
-                            <span className="line U8">
-                                <strong>U</strong>
-                            </span>
-                            <span className="line S2">
-                                <strong>S</strong>
-                            </span>
-                        </SelectField>
-                    </section>
-                    <section>
-                        <h2>Linie</h2>
-                        <SelectField
-                            containerClassName="align-child-on-line long-selector"
-                            onSelect={handleLineSelect}
-                            value={currentLine}
-                        >
-                            {Object.keys(possibleLines).map((line) => (
-                                <span key={line} className={`line ${line}`}>
-                                    <strong>{line}</strong>
-                                </span>
-                            ))}
-                        </SelectField>
-                    </section>
-                    <AutocompleteInputForm
-                        items={possibleStations}
-                        onSelect={handleStationSelect}
-                        value={currentStation}
-                        getDisplayValue={(station) => station.name}
-                        placeholder="Suche eine Station"
-                        label="Station"
-                        required={true}
-                        setSearchUsed={setSearchUsed}
-                    />
-                    {currentLine && currentLine !== 'S41' && currentLine !== 'S42' &&(
+                    <div ref={topElementsRef}>
+                        <h1>Neue Meldung</h1>
                         <section>
-                            <h3>Richtung</h3>
                             <SelectField
-                                onSelect={handleDirectionSelect}
-                                value={currentDirection ? allStations[currentDirection].name : ''}
-                                containerClassName="align-child-on-line"
+                                containerClassName="align-child-on-line large-selector"
+                                fieldClassName="entity-type-selector"
+                                onSelect={handleEntitySelect}
+                                value={currentEntity}
                             >
-                                <span>
-                                    <strong>{allStations[allLines[currentLine][0]].name}</strong>
+                                <span className="line U8">
+                                    <strong>U</strong>
                                 </span>
-                                <span>
-                                    <strong>
-                                        {allStations[allLines[currentLine][allLines[currentLine].length - 1]].name}
-                                    </strong>
+                                <span className="line S2">
+                                    <strong>S</strong>
                                 </span>
                             </SelectField>
                         </section>
-                    )}
-                    <section className="description-field">
-                        <h3>Beschreibung</h3>
-                        <textarea
-                            placeholder="Beschreibung"
-                            onChange={(e) => setDescription(e.target.value)}
-                            value={description}
+                        <section>
+                            <h2>Linie</h2>
+                            <SelectField
+                                containerClassName="align-child-on-line long-selector"
+                                onSelect={handleLineSelect}
+                                value={currentLine}
+                            >
+                                {Object.keys(possibleLines).map((line) => (
+                                    <span key={line} className={`line ${line}`}>
+                                        <strong>{line}</strong>
+                                    </span>
+                                ))}
+                            </SelectField>
+                        </section>
+                    </div>
+                    <div ref={stationListRef}>
+                        <AutocompleteInputForm
+                            items={possibleStations}
+                            onSelect={handleStationSelect}
+                            value={currentStation}
+                            getDisplayValue={(station) => station.name}
+                            placeholder="Suche eine Station"
+                            label="Station"
+                            required={true}
+                            setSearchUsed={setSearchUsed}
+                            listHeight={stationListHeight}
                         />
-                    </section>
-                    <section>
-                        <div>
-                            <label htmlFor="privacy-checkbox" id="privacy-label">
-                                <input
-                                    type="checkbox"
-                                    id="privacy-checkbox"
-                                    name="privacy-checkbox"
-                                    checked={isPrivacyChecked}
-                                    onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
-                                />
-                                Ich stimme der <a href="/datenschutz"> Datenschutzerklärung </a> zu. {redHighlight('')}
-                            </label>
-                        </div>
-                        <div>
-                            <button type="submit" className={isPrivacyChecked && currentStation ? '' : 'button-gray'}>
-                                Melden
-                            </button>
-                        </div>
-                    </section>
+                    </div>
+                    <div ref={bottomElementsRef}>
+                        {currentLine && currentLine !== 'S41' && currentLine !== 'S42' && (
+                            <section>
+                                <h3>Richtung</h3>
+                                <SelectField
+                                    onSelect={handleDirectionSelect}
+                                    value={currentDirection ? allStations[currentDirection].name : ''}
+                                    containerClassName="align-child-on-line"
+                                >
+                                    <span>
+                                        <strong>{allStations[allLines[currentLine][0]].name}</strong>
+                                    </span>
+                                    <span>
+                                        <strong>
+                                            {allStations[allLines[currentLine][allLines[currentLine].length - 1]].name}
+                                        </strong>
+                                    </span>
+                                </SelectField>
+                            </section>
+                        )}
+                        <section className="description-field">
+                            <h3>Beschreibung</h3>
+                            <textarea
+                                placeholder="Beschreibung"
+                                onChange={(e) => setDescription(e.target.value)}
+                                value={description}
+                            />
+                        </section>
+                        <section>
+                            <div>
+                                <label htmlFor="privacy-checkbox" id="privacy-label">
+                                    <input
+                                        type="checkbox"
+                                        id="privacy-checkbox"
+                                        name="privacy-checkbox"
+                                        checked={isPrivacyChecked}
+                                        onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
+                                    />
+                                    Ich stimme der <a href="/datenschutz"> Datenschutzerklärung </a> zu.{' '}
+                                    {redHighlight('')}
+                                </label>
+                            </div>
+                            <div>
+                                <button
+                                    type="submit"
+                                    className={isPrivacyChecked && currentStation ? '' : 'button-gray'}
+                                >
+                                    Melden
+                                </button>
+                            </div>
+                        </section>
+                    </div>
                 </div>
             </form>
         </div>

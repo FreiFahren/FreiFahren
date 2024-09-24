@@ -16,10 +16,7 @@ section img {
 
 .search-input {
     position: absolute;
-    transition:
-        width var(--transition-default),
-        opacity var(--transition-default),
-        visibility var(--transition-default);
+    transition: width var(--transition-default), opacity var(--transition-default), visibility var(--transition-default);
     opacity: 0;
     height: 1.5rem;
     right: 45px;

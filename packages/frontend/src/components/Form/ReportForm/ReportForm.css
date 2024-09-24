@@ -1,3 +1,28 @@
+div.report-form {
+    padding: var(--padding-m);
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh;
+    overflow: hidden;
+}
+
+.report-form > form {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.report-form > form > div {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.station-list-container {
+    flex: 1;
+    min-height: 100px;
+    overflow-y: auto;
+}
+
 .report-form > form > section > div:has(> img) {
     margin-bottom: var(--margin-m);
 }
@@ -40,8 +65,4 @@
 
 .report-form label:has(> input[type='checkbox']) {
     font-size: var(--font-xs);
-}
-
-div.report-form {
-    padding: var(--padding-m);
 }
