@@ -175,6 +175,11 @@ button {
     cursor: pointer;
 }
 
+button[type='submit'] {
+    background-color: var(--incentive-blue);
+    color: var(--color-white);
+}
+
 button:hover {
     filter: brightness(1.1);
 }
