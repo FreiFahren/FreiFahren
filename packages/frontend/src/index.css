@@ -219,12 +219,12 @@ span {
     opacity: 0;
     border: var(--border-default);
     text-align: left;
+    max-height: 75vh;
 }
 
 .container {
     top: 50%;
     transform: translate(-50%, -50%);
-    max-height: 85vh;
     overflow-y: auto;
     overflow-x: hidden;
 }

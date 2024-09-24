@@ -5,6 +5,10 @@
     justify-content: flex-end;
 }
 
+.legal-disclaimer {
+    max-height: 85vh;
+}
+
 .legal-disclaimer > ul > li {
     margin-left: var(--margin-xs);
     font-size: var(--font-xxs);
