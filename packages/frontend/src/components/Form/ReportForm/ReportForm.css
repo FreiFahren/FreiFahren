@@ -1,10 +1,10 @@
 div.report-form {
     padding: var(--padding-m);
     max-height: 85vh;
+    transition: ease-in-out var(--transition-default);
 }
 
 .station-list-container {
-    min-height: 100px;
     overflow-y: auto;
 }
 

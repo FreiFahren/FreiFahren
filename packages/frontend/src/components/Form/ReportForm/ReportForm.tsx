@@ -42,41 +42,6 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
 
     const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
 
-    const containerRef = useRef<HTMLDivElement>(null)
-    const topElementsRef = useRef<HTMLDivElement>(null)
-    const bottomElementsRef = useRef<HTMLDivElement>(null)
-    const [stationListHeight, setStationListHeight] = useState<number | null>(null)
-
-    const MINIMUM_LIST_HEIGHT = 50
-    const PADDING_MARGIN_ALLOWANCE = 100
-
-    const calculateStationListHeight = useCallback(() => {
-        const elements = {
-            container: containerRef.current,
-            topElements: topElementsRef.current,
-            bottomElements: bottomElementsRef.current,
-        }
-
-        if (Object.values(elements).every(Boolean)) {
-            const heights = {
-                container: elements.container!.clientHeight,
-                topElements: elements.topElements!.clientHeight,
-                bottomElements: elements.bottomElements!.clientHeight,
-            }
-
-            const availableHeight = heights.container - heights.topElements - heights.bottomElements
-            const adjustedHeight = availableHeight - PADDING_MARGIN_ALLOWANCE
-
-            setStationListHeight(Math.max(MINIMUM_LIST_HEIGHT, adjustedHeight))
-        }
-    }, [])
-
-    useEffect(() => {
-        calculateStationListHeight()
-        window.addEventListener('resize', calculateStationListHeight)
-        return () => window.removeEventListener('resize', calculateStationListHeight)
-    }, [calculateStationListHeight])
-
     const startTime = new Date()
 
     // filter the lines based on entity
@@ -118,6 +83,56 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
 
         return stations
     }, [allLines, allStations, currentEntity, currentLine, currentStation, stationSearch])
+
+    const containerRef = useRef<HTMLDivElement>(null)
+    const topElementsRef = useRef<HTMLDivElement>(null)
+    const bottomElementsRef = useRef<HTMLDivElement>(null)
+    const [stationListHeight, setStationListHeight] = useState<number | null>(null)
+    const [initialContainerHeight, setInitialContainerHeight] = useState<number | null>(null)
+
+    const ITEM_HEIGHT = 37
+    const PADDING_MARGIN_ALLOWANCE = 65
+
+    const calculateStationListHeight = useCallback(() => {
+        if (containerRef.current && topElementsRef.current && bottomElementsRef.current) {
+            if (initialContainerHeight === null) {
+                // Set the initial container height only once
+                setInitialContainerHeight(containerRef.current.clientHeight)
+            }
+
+            const containerHeight = initialContainerHeight || containerRef.current.clientHeight
+            const topElementsHeight = topElementsRef.current.clientHeight
+            const bottomElementsHeight = bottomElementsRef.current.clientHeight
+            const stationCount = Object.keys(possibleStations).length
+
+            // Calculate the ideal height for the station list
+            const idealListHeight = Math.min(
+                stationCount * ITEM_HEIGHT + PADDING_MARGIN_ALLOWANCE,
+                containerHeight - topElementsHeight - bottomElementsHeight - PADDING_MARGIN_ALLOWANCE
+            )
+
+            // Set the new height, ensuring it's not less than the minimum
+            setStationListHeight(idealListHeight)
+
+            // Adjust the container height
+            const newContainerHeight = Math.min(
+                topElementsHeight + idealListHeight + bottomElementsHeight + PADDING_MARGIN_ALLOWANCE,
+                initialContainerHeight || containerHeight
+            )
+            containerRef.current.style.height = `${newContainerHeight}px`
+        }
+    }, [possibleStations, initialContainerHeight])
+
+    useEffect(() => {
+        calculateStationListHeight()
+        window.addEventListener('resize', calculateStationListHeight)
+        return () => window.removeEventListener('resize', calculateStationListHeight)
+    }, [calculateStationListHeight])
+
+    // Recalculate when possibleStations change
+    useEffect(() => {
+        calculateStationListHeight()
+    }, [possibleStations, calculateStationListHeight])
 
     const handleEntitySelect = useCallback((entity: string | null) => {
         setCurrentEntity(entity)
