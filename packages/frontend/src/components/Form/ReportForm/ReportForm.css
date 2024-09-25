@@ -1,6 +1,5 @@
 div.report-form {
     padding: var(--padding-m);
-    max-height: 85vh;
     transition: ease-in-out var(--transition-default);
     overflow-y: hidden;
 }

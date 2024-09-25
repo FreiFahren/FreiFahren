@@ -109,7 +109,6 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         return stations
     }, [allLines, allStations, currentEntity, currentLine, currentStation, stationSearch])
 
-    // Simplified calculateStationListHeight function
     const calculateStationListHeight = useCallback(() => {
         if (containerRef.current && topElementsRef.current && bottomElementsRef.current) {
             const container = containerRef.current
