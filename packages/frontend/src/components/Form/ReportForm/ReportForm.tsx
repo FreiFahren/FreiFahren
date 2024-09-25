@@ -27,6 +27,9 @@ interface ReportFormProps {
     className?: string
 }
 
+const ITEM_HEIGHT = 37
+const REPORT_COOLDOWN_MINUTES = 15
+
 const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSubmission, className }) => {
     const { userPosition } = useLocation()
     const { allLines, allStations } = useStationsAndLines()
@@ -42,9 +45,25 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
 
     const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
 
-    const startTime = new Date()
+    const startTime = useRef<Date>(new Date())
 
-    // filter the lines based on entity
+    const containerRef = useRef<HTMLDivElement>(null)
+    const topElementsRef = useRef<HTMLDivElement>(null)
+    const bottomElementsRef = useRef<HTMLDivElement>(null)
+
+    const [stationListHeight, setStationListHeight] = useState<number | null>(null)
+    const [initialContainerHeight, setInitialContainerHeight] = useState<number | null>(null)
+
+    const calculateAllowance = (element: HTMLElement): number => {
+        const styles = window.getComputedStyle(element)
+        const paddingTop = parseFloat(styles.paddingTop)
+        const paddingBottom = parseFloat(styles.paddingBottom)
+        const marginTop = parseFloat(styles.marginTop)
+        const marginBottom = parseFloat(styles.marginBottom)
+        return paddingTop + paddingBottom + marginTop + marginBottom
+    }
+
+    // Calculate possible lines based on the current entity
     const possibleLines = useMemo(() => {
         if (!currentEntity) return allLines
         return Object.entries(allLines)
@@ -55,7 +74,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
             }, {} as LinesList)
     }, [allLines, currentEntity])
 
-    // filter the stations based on entity, line, station, and search input
+    // Calculate possible stations based on entity, line, station, and search input
     const possibleStations = useMemo(() => {
         let stations = allStations
         if (currentStation) {
@@ -84,55 +103,44 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         return stations
     }, [allLines, allStations, currentEntity, currentLine, currentStation, stationSearch])
 
-    const containerRef = useRef<HTMLDivElement>(null)
-    const topElementsRef = useRef<HTMLDivElement>(null)
-    const bottomElementsRef = useRef<HTMLDivElement>(null)
-    const [stationListHeight, setStationListHeight] = useState<number | null>(null)
-    const [initialContainerHeight, setInitialContainerHeight] = useState<number | null>(null)
-
-    const ITEM_HEIGHT = 37
-    const PADDING_MARGIN_ALLOWANCE = 65
-
     const calculateStationListHeight = useCallback(() => {
         if (containerRef.current && topElementsRef.current && bottomElementsRef.current) {
+            const container = containerRef.current
+            const top = topElementsRef.current
+            const bottom = bottomElementsRef.current
+
+            // Set initial container height once so that we can return to it when the user deselects a station
             if (initialContainerHeight === null) {
-                // Set the initial container height only once
-                setInitialContainerHeight(containerRef.current.clientHeight)
+                setInitialContainerHeight(container.clientHeight)
             }
 
-            const containerHeight = initialContainerHeight || containerRef.current.clientHeight
-            const topElementsHeight = topElementsRef.current.clientHeight
-            const bottomElementsHeight = bottomElementsRef.current.clientHeight
+            const containerHeight = initialContainerHeight || container.clientHeight
+            const topHeight = top.offsetHeight
+            const bottomHeight = bottom.offsetHeight
+
+            // Calculate total allowance
+            const containerAllowance = calculateAllowance(container)
+            const topAllowance = calculateAllowance(top)
+            const bottomAllowance = calculateAllowance(bottom)
+            // I have no idea why I have to multiply by 2 here, but it works
+            const totalAllowance = (containerAllowance + topAllowance + bottomAllowance) * 2
+
             const stationCount = Object.keys(possibleStations).length
+            const availableHeight = containerHeight - topHeight - bottomHeight - totalAllowance
 
-            // Calculate the ideal height for the station list
-            const idealListHeight = Math.min(
-                stationCount * ITEM_HEIGHT + PADDING_MARGIN_ALLOWANCE,
-                containerHeight - topElementsHeight - bottomElementsHeight - PADDING_MARGIN_ALLOWANCE
-            )
+            const newStationListHeight = Math.min(stationCount * ITEM_HEIGHT, availableHeight)
 
-            // Set the new height, ensuring it's not less than the minimum
-            setStationListHeight(idealListHeight)
-
-            // Adjust the container height
-            const newContainerHeight = Math.min(
-                topElementsHeight + idealListHeight + bottomElementsHeight + PADDING_MARGIN_ALLOWANCE,
-                initialContainerHeight || containerHeight
-            )
-            containerRef.current.style.height = `${newContainerHeight}px`
+            setStationListHeight(newStationListHeight)
         }
-    }, [possibleStations, initialContainerHeight])
+    }, [initialContainerHeight, possibleStations])
 
     useEffect(() => {
         calculateStationListHeight()
-        window.addEventListener('resize', calculateStationListHeight)
-        return () => window.removeEventListener('resize', calculateStationListHeight)
-    }, [calculateStationListHeight])
+        const handleResize = () => calculateStationListHeight()
 
-    // Recalculate when possibleStations change
-    useEffect(() => {
-        calculateStationListHeight()
-    }, [possibleStations, calculateStationListHeight])
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [calculateStationListHeight, possibleStations])
 
     const handleEntitySelect = useCallback((entity: string | null) => {
         setCurrentEntity(entity)
@@ -181,9 +189,9 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         await reportInspector(currentLine!, currentStation!, currentDirection!, description)
 
         const endTime = new Date()
-        const durationInSeconds = startTime ? Math.round((endTime.getTime() - startTime.getTime()) / 1000) : 0
+        const durationInSeconds = Math.round((endTime.getTime() - startTime.current.getTime()) / 1000)
 
-        async function finalizeSubmission() {
+        const finalizeSubmission = () => {
             localStorage.setItem('lastReportTime', new Date().toISOString()) // Save the timestamp of the report to prevent spamming
             closeModal()
             notifyParentAboutSubmission()
@@ -213,13 +221,12 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
 
         // Check for last report time to prevent spamming
         const lastReportTime = localStorage.getItem('lastReportTime')
-        const reportCooldownMinutes = 15
 
-        if (lastReportTime && Date.now() - new Date(lastReportTime).getTime() < reportCooldownMinutes * 60 * 1000) {
+        if (lastReportTime && Date.now() - new Date(lastReportTime).getTime() < REPORT_COOLDOWN_MINUTES * 60 * 1000) {
             highlightElement('report-form')
             createWarningSpan(
                 'searchable-select-div',
-                `Du kannst nur alle ${reportCooldownMinutes} Minuten eine Meldung abgeben!`
+                `Du kannst nur alle ${REPORT_COOLDOWN_MINUTES} Minuten eine Meldung abgeben!`
             )
             hasError = true
         }
@@ -246,7 +253,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         return hasError // Return true if there's an error, false otherwise
     }
 
-    async function verifyUserLocation(station: string | null, stationsList: StationList): Promise<boolean> {
+    const verifyUserLocation = async (station: string | null, stationsList: StationList): Promise<boolean> => {
         if (!station) return false
 
         const distance = userPosition
@@ -259,7 +266,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
             : 0
 
         // Checks if the user is more than 5 km away from the station
-        if (5 < distance) {
+        if (distance > 5) {
             highlightElement('report-form')
             createWarningSpan(
                 'searchable-select-div',
@@ -356,7 +363,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                                         checked={isPrivacyChecked}
                                         onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
                                     />
-                                    Ich stimme der <a href="/datenschutz"> Datenschutzerklärung </a> zu.{' '}
+                                    Ich stimme der <a href="/datenschutz"> Datenschutzerklärung </a> zu.
                                     {redHighlight('')}
                                 </label>
                             </div>

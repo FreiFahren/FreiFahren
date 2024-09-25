@@ -6,6 +6,7 @@ div.report-form {
 
 .station-list-container {
     overflow-y: auto;
+    transition: ease-in-out var(--transition-default);
 }
 
 .report-form > form > section > div:has(> img) {
