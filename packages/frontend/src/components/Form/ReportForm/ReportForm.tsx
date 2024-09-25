@@ -12,6 +12,11 @@ import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 
 import './ReportForm.css'
 
+const getCSSVariable = (variable: string): number => {
+    const value = getComputedStyle(document.documentElement).getPropertyValue(variable)
+    return parseFloat(value) || 0
+}
+
 const redHighlight = (text: string) => {
     return (
         <>
@@ -54,6 +59,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
     const [stationListHeight, setStationListHeight] = useState<number | null>(null)
     const [initialContainerHeight, setInitialContainerHeight] = useState<number | null>(null)
 
+    // Helper function to calculate combined padding and margin
     const calculateAllowance = (element: HTMLElement): number => {
         const styles = window.getComputedStyle(element)
         const paddingTop = parseFloat(styles.paddingTop)
@@ -103,13 +109,14 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         return stations
     }, [allLines, allStations, currentEntity, currentLine, currentStation, stationSearch])
 
+    // Simplified calculateStationListHeight function
     const calculateStationListHeight = useCallback(() => {
         if (containerRef.current && topElementsRef.current && bottomElementsRef.current) {
             const container = containerRef.current
             const top = topElementsRef.current
             const bottom = bottomElementsRef.current
 
-            // Set initial container height once so that we can return to it when the user deselects a station
+            // Set initial container height once to retrieve it when user deselects a station
             if (initialContainerHeight === null) {
                 setInitialContainerHeight(container.clientHeight)
             }
@@ -118,12 +125,19 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
             const topHeight = top.offsetHeight
             const bottomHeight = bottom.offsetHeight
 
+            const marginS = getCSSVariable('--margin-s')
+
+            // Calculate total dynamic margins
+            // two margins between top and bottom elements
+            const dynamicDivMargins = marginS * 2
+
             // Calculate total allowance
-            const containerAllowance = calculateAllowance(container)
-            const topAllowance = calculateAllowance(top)
-            const bottomAllowance = calculateAllowance(bottom)
+            const containerAllowance = calculateAllowance(container) + dynamicDivMargins
+            const topAllowance = calculateAllowance(top) + dynamicDivMargins
+            const bottomAllowance = calculateAllowance(bottom) + dynamicDivMargins
+
             // I have no idea why I have to multiply by 2 here, but it works
-            const totalAllowance = (containerAllowance + topAllowance + bottomAllowance) * 2
+            const totalAllowance = containerAllowance + topAllowance + bottomAllowance
 
             const stationCount = Object.keys(possibleStations).length
             const availableHeight = containerHeight - topHeight - bottomHeight - totalAllowance
@@ -253,7 +267,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         return hasError // Return true if there's an error, false otherwise
     }
 
-    const verifyUserLocation = async (station: string | null, stationsList: StationList): Promise<boolean> => {
+    const verifyUserLocation = (station: string | null, stationsList: StationList): boolean => {
         if (!station) return false
 
         const distance = userPosition

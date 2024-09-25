@@ -2,6 +2,7 @@ div.report-form {
     padding: var(--padding-m);
     max-height: 85vh;
     transition: ease-in-out var(--transition-default);
+    overflow-y: hidden;
 }
 
 .station-list-container {
@@ -9,12 +10,9 @@ div.report-form {
     transition: ease-in-out var(--transition-default);
 }
 
-.report-form > form > section > div:has(> img) {
-    margin-bottom: var(--margin-m);
-}
-
-.report-form > form > section > * {
+.report-form > form > div > section > * {
     margin-top: var(--margin-s);
+    margin-bottom: var(--margin-s);
 }
 
 .line {
