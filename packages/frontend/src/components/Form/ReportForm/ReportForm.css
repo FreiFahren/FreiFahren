@@ -5,11 +5,6 @@ div.report-form {
     overflow-y: hidden;
 }
 
-.station-list-container {
-    overflow-y: auto;
-    transition: ease-in-out var(--transition-default);
-}
-
 .report-form > form > div > section > * {
     margin-top: var(--margin-s);
     margin-bottom: var(--margin-s);

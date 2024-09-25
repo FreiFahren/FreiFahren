@@ -34,3 +34,9 @@ section img {
     visibility: visible;
     pointer-events: auto;
 }
+
+.station-list-container {
+    overflow-y: auto;
+    transition: ease-in-out var(--transition-default);
+    max-height: calc(100vh - 475px);
+}

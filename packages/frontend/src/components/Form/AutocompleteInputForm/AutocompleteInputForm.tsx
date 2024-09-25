@@ -97,7 +97,10 @@ function AutocompleteInputForm<T>({
                 />
                 <img src={search_icon} onClick={toggleSearchBox} alt="Search icon" />
             </div>
-            <div className="station-list-container" style={listHeight ? { height: `${listHeight}px` } : undefined}>
+            <div
+                className="station-list-container"
+                style={listHeight ? { height: `${listHeight}px`, maxHeight: '100%' } : undefined}
+            >
                 <SelectField
                     onSelect={handleSelect}
                     value={value ? getDisplayValue(items[value]) : ''}
