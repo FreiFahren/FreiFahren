@@ -13,11 +13,12 @@
 }
 
 .map-attribution {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    padding: 0 var(--padding-xs);
+    position: fixed;
+    bottom: 0px;
+    right: 5px;
+    padding: 2px 5px;
     font-size: var(--font-xxxs);
+    border-radius: 3px;
 }
 
 .map-attribution a {
@@ -26,10 +27,11 @@
 }
 
 .social-media {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    padding: var(--padding-xs);
+    position: fixed;
+    bottom: 0px;
+    left: 5px;
+    padding: 2px 5px;
+    border-radius: 3px;
 }
 
 .social-media img {
