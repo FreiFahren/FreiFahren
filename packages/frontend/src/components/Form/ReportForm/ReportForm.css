@@ -1,9 +1,12 @@
-.report-form > form > section > div:has(> img) {
-    margin-bottom: var(--margin-m);
+div.report-form {
+    padding: var(--padding-m);
+    transition: ease-in-out var(--transition-default);
+    overflow-y: hidden;
 }
 
-.report-form > form > section > * {
+.report-form > form > div > section > * {
     margin-top: var(--margin-s);
+    margin-bottom: var(--margin-s);
 }
 
 .line {
@@ -40,8 +43,4 @@
 
 .report-form label:has(> input[type='checkbox']) {
     font-size: var(--font-xs);
-}
-
-div.report-form {
-    padding: var(--padding-m);
 }

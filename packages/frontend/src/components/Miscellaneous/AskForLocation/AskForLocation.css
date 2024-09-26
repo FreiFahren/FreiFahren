@@ -14,3 +14,7 @@
 .ask-for-location h1 {
     margin-bottom: var(--margin-m);
 }
+
+.ask-for-location h2 {
+    margin-bottom: var(--margin-s);
+}

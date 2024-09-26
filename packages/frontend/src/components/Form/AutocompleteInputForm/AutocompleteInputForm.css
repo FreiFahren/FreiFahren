@@ -16,10 +16,7 @@ section img {
 
 .search-input {
     position: absolute;
-    transition:
-        width var(--transition-default),
-        opacity var(--transition-default),
-        visibility var(--transition-default);
+    transition: width var(--transition-default), opacity var(--transition-default), visibility var(--transition-default);
     opacity: 0;
     height: 1.5rem;
     right: 45px;
@@ -36,4 +33,10 @@ section img {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
+}
+
+.station-list-container {
+    overflow-y: auto;
+    transition: ease-in-out var(--transition-default);
+    max-height: calc(100vh - 475px);
 }

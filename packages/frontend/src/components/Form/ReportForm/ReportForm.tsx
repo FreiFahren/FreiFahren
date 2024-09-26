@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 
 import SelectField from '../SelectField/SelectField'
 import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
@@ -11,6 +11,11 @@ import { useLocation } from '../../../contexts/LocationContext'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 
 import './ReportForm.css'
+
+const getCSSVariable = (variable: string): number => {
+    const value = getComputedStyle(document.documentElement).getPropertyValue(variable)
+    return parseFloat(value) || 0
+}
 
 const redHighlight = (text: string) => {
     return (
@@ -27,6 +32,9 @@ interface ReportFormProps {
     className?: string
 }
 
+const ITEM_HEIGHT = 37
+const REPORT_COOLDOWN_MINUTES = 15
+
 const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSubmission, className }) => {
     const { userPosition } = useLocation()
     const { allLines, allStations } = useStationsAndLines()
@@ -42,9 +50,26 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
 
     const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
 
-    const startTime = new Date()
+    const startTime = useRef<Date>(new Date())
 
-    // filter the lines based on entity
+    const containerRef = useRef<HTMLDivElement>(null)
+    const topElementsRef = useRef<HTMLDivElement>(null)
+    const bottomElementsRef = useRef<HTMLDivElement>(null)
+
+    const [stationListHeight, setStationListHeight] = useState<number | null>(null)
+    const [initialContainerHeight, setInitialContainerHeight] = useState<number | null>(null)
+
+    // Helper function to calculate combined padding and margin
+    const calculateAllowance = (element: HTMLElement): number => {
+        const styles = window.getComputedStyle(element)
+        const paddingTop = parseFloat(styles.paddingTop)
+        const paddingBottom = parseFloat(styles.paddingBottom)
+        const marginTop = parseFloat(styles.marginTop)
+        const marginBottom = parseFloat(styles.marginBottom)
+        return paddingTop + paddingBottom + marginTop + marginBottom
+    }
+
+    // Calculate possible lines based on the current entity
     const possibleLines = useMemo(() => {
         if (!currentEntity) return allLines
         return Object.entries(allLines)
@@ -55,7 +80,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
             }, {} as LinesList)
     }, [allLines, currentEntity])
 
-    // filter the stations based on entity, line, station, and search input
+    // Calculate possible stations based on entity, line, station, and search input
     const possibleStations = useMemo(() => {
         let stations = allStations
         if (currentStation) {
@@ -83,6 +108,52 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
 
         return stations
     }, [allLines, allStations, currentEntity, currentLine, currentStation, stationSearch])
+
+    const calculateStationListHeight = useCallback(() => {
+        if (containerRef.current && topElementsRef.current && bottomElementsRef.current) {
+            const container = containerRef.current
+            const top = topElementsRef.current
+            const bottom = bottomElementsRef.current
+
+            // Set initial container height once to retrieve it when user deselects a station
+            if (initialContainerHeight === null) {
+                setInitialContainerHeight(container.clientHeight)
+            }
+
+            const containerHeight = initialContainerHeight || container.clientHeight
+            const topHeight = top.offsetHeight
+            const bottomHeight = bottom.offsetHeight
+
+            const marginS = getCSSVariable('--margin-s')
+
+            // Calculate total dynamic margins
+            // two margins between top and bottom elements
+            const dynamicDivMargins = marginS * 2
+
+            // Calculate total allowance
+            const containerAllowance = calculateAllowance(container) + dynamicDivMargins
+            const topAllowance = calculateAllowance(top) + dynamicDivMargins
+            const bottomAllowance = calculateAllowance(bottom) + dynamicDivMargins
+
+            // I have no idea why I have to multiply by 2 here, but it works
+            const totalAllowance = containerAllowance + topAllowance + bottomAllowance
+
+            const stationCount = Object.keys(possibleStations).length
+            const availableHeight = containerHeight - topHeight - bottomHeight - totalAllowance
+
+            const newStationListHeight = Math.min(stationCount * ITEM_HEIGHT, availableHeight)
+
+            setStationListHeight(newStationListHeight)
+        }
+    }, [initialContainerHeight, possibleStations])
+
+    useEffect(() => {
+        calculateStationListHeight()
+        const handleResize = () => calculateStationListHeight()
+
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [calculateStationListHeight, possibleStations])
 
     const handleEntitySelect = useCallback((entity: string | null) => {
         setCurrentEntity(entity)
@@ -131,9 +202,9 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         await reportInspector(currentLine!, currentStation!, currentDirection!, description)
 
         const endTime = new Date()
-        const durationInSeconds = startTime ? Math.round((endTime.getTime() - startTime.getTime()) / 1000) : 0
+        const durationInSeconds = Math.round((endTime.getTime() - startTime.current.getTime()) / 1000)
 
-        async function finalizeSubmission() {
+        const finalizeSubmission = () => {
             localStorage.setItem('lastReportTime', new Date().toISOString()) // Save the timestamp of the report to prevent spamming
             closeModal()
             notifyParentAboutSubmission()
@@ -163,13 +234,12 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
 
         // Check for last report time to prevent spamming
         const lastReportTime = localStorage.getItem('lastReportTime')
-        const reportCooldownMinutes = 15
 
-        if (lastReportTime && Date.now() - new Date(lastReportTime).getTime() < reportCooldownMinutes * 60 * 1000) {
+        if (lastReportTime && Date.now() - new Date(lastReportTime).getTime() < REPORT_COOLDOWN_MINUTES * 60 * 1000) {
             highlightElement('report-form')
             createWarningSpan(
                 'searchable-select-div',
-                `Du kannst nur alle ${reportCooldownMinutes} Minuten eine Meldung abgeben!`
+                `Du kannst nur alle ${REPORT_COOLDOWN_MINUTES} Minuten eine Meldung abgeben!`
             )
             hasError = true
         }
@@ -196,7 +266,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         return hasError // Return true if there's an error, false otherwise
     }
 
-    async function verifyUserLocation(station: string | null, stationsList: StationList): Promise<boolean> {
+    const verifyUserLocation = (station: string | null, stationsList: StationList): boolean => {
         if (!station) return false
 
         const distance = userPosition
@@ -209,7 +279,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
             : 0
 
         // Checks if the user is more than 5 km away from the station
-        if (5 < distance) {
+        if (distance > 5) {
             highlightElement('report-form')
             createWarningSpan(
                 'searchable-select-div',
@@ -222,39 +292,41 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
     }
 
     return (
-        <div className={`report-form container modal ${className}`}>
+        <div className={`report-form container modal ${className}`} ref={containerRef}>
             <form onSubmit={handleSubmit}>
                 <div>
-                    <h1>Neue Meldung</h1>
-                    <section>
-                        <SelectField
-                            containerClassName="align-child-on-line large-selector"
-                            fieldClassName="entity-type-selector"
-                            onSelect={handleEntitySelect}
-                            value={currentEntity}
-                        >
-                            <span className="line U8">
-                                <strong>U</strong>
-                            </span>
-                            <span className="line S2">
-                                <strong>S</strong>
-                            </span>
-                        </SelectField>
-                    </section>
-                    <section>
-                        <h2>Linie</h2>
-                        <SelectField
-                            containerClassName="align-child-on-line long-selector"
-                            onSelect={handleLineSelect}
-                            value={currentLine}
-                        >
-                            {Object.keys(possibleLines).map((line) => (
-                                <span key={line} className={`line ${line}`}>
-                                    <strong>{line}</strong>
+                    <div ref={topElementsRef}>
+                        <h1>Neue Meldung</h1>
+                        <section>
+                            <SelectField
+                                containerClassName="align-child-on-line large-selector"
+                                fieldClassName="entity-type-selector"
+                                onSelect={handleEntitySelect}
+                                value={currentEntity}
+                            >
+                                <span className="line U8">
+                                    <strong>U</strong>
                                 </span>
-                            ))}
-                        </SelectField>
-                    </section>
+                                <span className="line S2">
+                                    <strong>S</strong>
+                                </span>
+                            </SelectField>
+                        </section>
+                        <section>
+                            <h2>Linie</h2>
+                            <SelectField
+                                containerClassName="align-child-on-line long-selector"
+                                onSelect={handleLineSelect}
+                                value={currentLine}
+                            >
+                                {Object.keys(possibleLines).map((line) => (
+                                    <span key={line} className={`line ${line}`}>
+                                        <strong>{line}</strong>
+                                    </span>
+                                ))}
+                            </SelectField>
+                        </section>
+                    </div>
                     <AutocompleteInputForm
                         items={possibleStations}
                         onSelect={handleStationSelect}
@@ -264,53 +336,60 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                         label="Station"
                         required={true}
                         setSearchUsed={setSearchUsed}
+                        listHeight={stationListHeight}
                     />
-                    {currentLine && currentLine !== 'S41' && currentLine !== 'S42' &&(
-                        <section>
-                            <h3>Richtung</h3>
-                            <SelectField
-                                onSelect={handleDirectionSelect}
-                                value={currentDirection ? allStations[currentDirection].name : ''}
-                                containerClassName="align-child-on-line"
-                            >
-                                <span>
-                                    <strong>{allStations[allLines[currentLine][0]].name}</strong>
-                                </span>
-                                <span>
-                                    <strong>
-                                        {allStations[allLines[currentLine][allLines[currentLine].length - 1]].name}
-                                    </strong>
-                                </span>
-                            </SelectField>
+                    <div ref={bottomElementsRef}>
+                        {currentLine && currentLine !== 'S41' && currentLine !== 'S42' && (
+                            <section>
+                                <h3>Richtung</h3>
+                                <SelectField
+                                    onSelect={handleDirectionSelect}
+                                    value={currentDirection ? allStations[currentDirection].name : ''}
+                                    containerClassName="align-child-on-line"
+                                >
+                                    <span>
+                                        <strong>{allStations[allLines[currentLine][0]].name}</strong>
+                                    </span>
+                                    <span>
+                                        <strong>
+                                            {allStations[allLines[currentLine][allLines[currentLine].length - 1]].name}
+                                        </strong>
+                                    </span>
+                                </SelectField>
+                            </section>
+                        )}
+                        <section className="description-field">
+                            <h3>Beschreibung</h3>
+                            <textarea
+                                placeholder="Beschreibung"
+                                onChange={(e) => setDescription(e.target.value)}
+                                value={description}
+                            />
                         </section>
-                    )}
-                    <section className="description-field">
-                        <h3>Beschreibung</h3>
-                        <textarea
-                            placeholder="Beschreibung"
-                            onChange={(e) => setDescription(e.target.value)}
-                            value={description}
-                        />
-                    </section>
-                    <section>
-                        <div>
-                            <label htmlFor="privacy-checkbox" id="privacy-label">
-                                <input
-                                    type="checkbox"
-                                    id="privacy-checkbox"
-                                    name="privacy-checkbox"
-                                    checked={isPrivacyChecked}
-                                    onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
-                                />
-                                Ich stimme der <a href="/datenschutz"> Datenschutzerklärung </a> zu. {redHighlight('')}
-                            </label>
-                        </div>
-                        <div>
-                            <button type="submit" className={isPrivacyChecked && currentStation ? '' : 'button-gray'}>
-                                Melden
-                            </button>
-                        </div>
-                    </section>
+                        <section>
+                            <div>
+                                <label htmlFor="privacy-checkbox" id="privacy-label">
+                                    <input
+                                        type="checkbox"
+                                        id="privacy-checkbox"
+                                        name="privacy-checkbox"
+                                        checked={isPrivacyChecked}
+                                        onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
+                                    />
+                                    Ich stimme der <a href="/datenschutz"> Datenschutzerklärung </a> zu.
+                                    {redHighlight('')}
+                                </label>
+                            </div>
+                            <div>
+                                <button
+                                    type="submit"
+                                    className={isPrivacyChecked && currentStation ? '' : 'button-gray'}
+                                >
+                                    Melden
+                                </button>
+                            </div>
+                        </section>
+                    </div>
                 </div>
             </form>
         </div>
