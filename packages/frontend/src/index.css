@@ -150,6 +150,11 @@ label {
     color: var(--color-primary);
 }
 
+hr {
+    border: 1px solid var(--color-gray-on-dark-background);
+    border-radius: var(--borderRadius-small);
+}
+
 .dark svg,
 .dark img[src$='.svg'] {
     filter: invert(1);
@@ -289,6 +294,10 @@ span {
 
 .legal-text li {
     color: var(--color-primary);
+}
+
+.line > strong {
+    color: var(--color-white);
 }
 
 .small-button {

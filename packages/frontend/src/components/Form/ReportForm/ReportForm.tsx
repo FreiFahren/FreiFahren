@@ -291,6 +291,25 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         return false
     }
 
+    const getClosestStationsToUser = (
+        numberOfStations: number,
+        stationsList: StationList,
+        userPosition: { lat: number; lng: number }
+    ) => {
+        const distances = Object.entries(stationsList).map(([station, stationData]) => {
+            const distance = calculateDistance(
+                userPosition.lat,
+                userPosition.lng,
+                stationData.coordinates.latitude,
+                stationData.coordinates.longitude
+            )
+            return { station, stationData, distance }
+        })
+
+        distances.sort((a, b) => a.distance - b.distance)
+        return distances.slice(0, numberOfStations).map((entry) => ({ [entry.station]: entry.stationData }))
+    }
+
     return (
         <div className={`report-form container modal ${className}`} ref={containerRef}>
             <form onSubmit={handleSubmit}>
@@ -337,6 +356,14 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                         required={true}
                         setSearchUsed={setSearchUsed}
                         listHeight={stationListHeight}
+                        highlightElements={
+                            userPosition
+                                ? getClosestStationsToUser(3, allStations, userPosition).reduce(
+                                      (acc, station) => ({ ...acc, ...station }),
+                                      {}
+                                  )
+                                : undefined
+                        }
                     />
                     <div ref={bottomElementsRef}>
                         {currentLine && currentLine !== 'S41' && currentLine !== 'S42' && (
