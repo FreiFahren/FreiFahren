@@ -358,7 +358,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                         listHeight={stationListHeight}
                         highlightElements={
                             userPosition
-                                ? getClosestStationsToUser(3, allStations, userPosition).reduce(
+                                ? getClosestStationsToUser(3, possibleStations, userPosition).reduce(
                                       (acc, station) => ({ ...acc, ...station }),
                                       {}
                                   )
