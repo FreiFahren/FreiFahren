@@ -104,7 +104,7 @@ function AutocompleteInputForm<T>({
                 <img src={search_icon} onClick={toggleSearchBox} alt="Search icon" />
             </div>
             <div
-                className="station-list-container"
+                className="list-container"
                 style={listHeight ? { height: `${listHeight}px`, maxHeight: '100%' } : undefined}
             >
                 {highlightElements && !elementIsSelected && (

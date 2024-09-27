@@ -18,7 +18,7 @@
 }
 
 .long-selector {
-    overflow-x: auto;
+    overflow-x: visible;
     overflow-y: hidden;
 }
 

@@ -35,8 +35,8 @@ section img {
     pointer-events: auto;
 }
 
-.station-list-container {
-    overflow-y: auto;
+.list-container {
+    overflow-y: scroll;
     transition: ease-in-out var(--transition-default);
     max-height: calc(100vh - 475px);
     min-height: 40px;
