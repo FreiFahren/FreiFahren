@@ -14,6 +14,7 @@ interface AutocompleteInputFormProps<T> {
     required?: boolean
     setSearchUsed?: (searchUsed: boolean) => void
     listHeight?: number | null
+    highlightElements?: Record<string, T>
 }
 
 const search_icon = `${process.env.PUBLIC_URL}/icons/search.svg`
@@ -35,6 +36,8 @@ const search_icon = `${process.env.PUBLIC_URL}/icons/search.svg`
  * @param {string} props.label - Label for the input field
  * @param {boolean} [props.required=false] - Whether the field is required
  * @param {(searchUsed: boolean) => void} [props.setSearchUsed] - Optional callback to notify when search is used
+ * @param {number | null} [props.listHeight] - Optional height for the list container when not defined it will default standard css
+ * @param {Array<T>} [props.highlightElements] - Optional array of elements to highlight in the list
  *
  * @returns {React.ReactElement} The rendered AutocompleteInputForm component
  */
@@ -48,8 +51,10 @@ function AutocompleteInputForm<T>({
     required = false,
     setSearchUsed,
     listHeight,
+    highlightElements,
 }: AutocompleteInputFormProps<T>) {
     const [showSearchBox, setShowSearchBox] = useState(false)
+    const [elementIsSelected, setElementIsSelected] = useState(false)
     const [search, setSearch] = useState('')
     const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -75,10 +80,11 @@ function AutocompleteInputForm<T>({
     const handleSelect = useCallback(
         (selectedValue: string | null) => {
             onSelect(selectedValue)
+            setElementIsSelected(!elementIsSelected)
             setSearch('')
             setShowSearchBox(false)
         },
-        [onSelect]
+        [onSelect, elementIsSelected]
     )
 
     return (
@@ -101,6 +107,23 @@ function AutocompleteInputForm<T>({
                 className="station-list-container"
                 style={listHeight ? { height: `${listHeight}px`, maxHeight: '100%' } : undefined}
             >
+                {highlightElements && !elementIsSelected && (
+                    <>
+                        <SelectField
+                            onSelect={handleSelect}
+                            value={value ? getDisplayValue(items[value]) : ''}
+                            containerClassName="align-child-column highlight-list-container"
+                        >
+                            {Object.entries(highlightElements).map(([key, item]) => (
+                                <div key={key}>
+                                    <strong>{getDisplayValue(item)}</strong>
+                                </div>
+                            ))}
+                        </SelectField>
+                        <hr />
+                    </>
+                )}
+
                 <SelectField
                     onSelect={handleSelect}
                     value={value ? getDisplayValue(items[value]) : ''}
