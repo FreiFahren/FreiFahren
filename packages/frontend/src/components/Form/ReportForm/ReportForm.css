@@ -1,7 +1,6 @@
 div.report-form {
     padding: var(--padding-m);
     transition: ease-in-out var(--transition-default);
-    overflow-y: hidden;
 }
 
 .report-form > form > div > section > * {
@@ -43,4 +42,25 @@ div.report-form {
 
 .report-form label:has(> input[type='checkbox']) {
     font-size: var(--font-xs);
+    display: flex;
+    align-items: center;
+}
+
+.report-form label:has(> input[type='checkbox']) > a {
+    margin-left: var(--margin-xxs);
+    margin-right: var(--margin-xxs);
+}
+
+@media (max-width: 375px) {
+    .report-form > form > div h1 + section {
+        display: none;
+    }
+
+    .report-form label:has(> input[type='checkbox']) {
+        font-size: var(--font-xxs);
+    }
+
+    .report-form .description-field textarea {
+        height: 1.5rem;
+    }
 }
