@@ -53,7 +53,6 @@ const Datenschutz = () => {
                     <li>Richtung (optional)</li>
                     <li>Uhrzeit der Meldung</li>
                     <li>Beschreibungstext (optional)</li>
-                    <li>Dauer, die der Nutzer für das Melden benötigt hat</li>
                 </ul>
                 <p>
                     Die gemeldeten Daten werden anderen Nutzern der App temporär zur Verfügung gestellt, um ihnen die
@@ -140,6 +139,7 @@ const Datenschutz = () => {
                     <li>Welcher Marker (roter Punkt) auf der Karte angeklickt wurde.</li>
                     <li>Ob der Standort des Nutzers geteilt wurde und durch welche Methode.</li>
                     <li>Wie lange benötigt wurde, um das erste Fenster zu schließen.</li>
+                    <li>Wie das Meldeformular genutzt wurde.</li>
                 </ul>
                 <p>
                     Diese Daten sind nicht personenbezogen; es werden keine Informationen gesammelt, die eine

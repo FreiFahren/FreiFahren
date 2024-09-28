@@ -15,6 +15,7 @@ interface AutocompleteInputFormProps<T> {
     setSearchUsed?: (searchUsed: boolean) => void
     listHeight?: number | null
     highlightElements?: Record<string, T>
+    setHighlightedElementSelected?: (highlightedElementSelected: boolean) => void
 }
 
 const search_icon = `${process.env.PUBLIC_URL}/icons/search.svg`
@@ -38,6 +39,7 @@ const search_icon = `${process.env.PUBLIC_URL}/icons/search.svg`
  * @param {(searchUsed: boolean) => void} [props.setSearchUsed] - Optional callback to notify when search is used
  * @param {number | null} [props.listHeight] - Optional height for the list container when not defined it will default standard css
  * @param {Array<T>} [props.highlightElements] - Optional array of elements to highlight in the list
+ * @param {(highlightedElementSelected: boolean) => void} [props.setHighlightedElementSelected] - Optional callback to notify when a highlighted element is selected
  *
  * @returns {React.ReactElement} The rendered AutocompleteInputForm component
  */
@@ -52,6 +54,7 @@ function AutocompleteInputForm<T>({
     setSearchUsed,
     listHeight,
     highlightElements,
+    setHighlightedElementSelected,
 }: AutocompleteInputFormProps<T>) {
     const [showSearchBox, setShowSearchBox] = useState(false)
     const [elementIsSelected, setElementIsSelected] = useState(false)
@@ -78,13 +81,17 @@ function AutocompleteInputForm<T>({
     )
 
     const handleSelect = useCallback(
-        (selectedValue: string | null) => {
+        (selectedValue: string | null, isHighlighted: boolean = false) => {
             onSelect(selectedValue)
             setElementIsSelected(!elementIsSelected)
             setSearch('')
             setShowSearchBox(false)
+
+            if (isHighlighted && setHighlightedElementSelected) {
+                setHighlightedElementSelected(true)
+            }
         },
-        [onSelect, elementIsSelected]
+        [onSelect, elementIsSelected, setHighlightedElementSelected]
     )
 
     return (
@@ -110,7 +117,7 @@ function AutocompleteInputForm<T>({
                 {highlightElements && !elementIsSelected && (
                     <>
                         <SelectField
-                            onSelect={handleSelect}
+                            onSelect={(selectedValue) => handleSelect(selectedValue, true)}
                             value={value ? getDisplayValue(items[value]) : ''}
                             containerClassName="align-child-column highlight-list-container"
                         >
@@ -123,7 +130,6 @@ function AutocompleteInputForm<T>({
                         <hr />
                     </>
                 )}
-
                 <SelectField
                     onSelect={handleSelect}
                     value={value ? getDisplayValue(items[value]) : ''}
