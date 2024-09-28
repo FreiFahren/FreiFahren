@@ -10,10 +10,6 @@
     overflow-y: auto;
 }
 
-.legal-disclaimer .content ol {
-    padding-left: var(--padding-m);
-}
-
 .legal-disclaimer .content ol li::marker {
     color: var(--color-primary);
 }
