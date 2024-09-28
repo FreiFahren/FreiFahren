@@ -42,6 +42,13 @@ div.report-form {
 
 .report-form label:has(> input[type='checkbox']) {
     font-size: var(--font-xs);
+    display: flex;
+    align-items: center;
+}
+
+.report-form label:has(> input[type='checkbox']) > a {
+    margin-left: var(--margin-xxs);
+    margin-right: var(--margin-xxs);
 }
 
 @media (max-width: 375px) {
