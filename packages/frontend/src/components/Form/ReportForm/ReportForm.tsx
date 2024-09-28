@@ -365,7 +365,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                         }
                     />
                     <div ref={bottomElementsRef}>
-                        {currentLine && currentLine !== 'S41' && currentLine !== 'S42' && (
+                        {currentLine && currentLine !== 'S41' && currentLine !== 'S42' && currentStation && (
                             <section>
                                 <h3>Richtung</h3>
                                 <SelectField
