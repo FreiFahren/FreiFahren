@@ -50,6 +50,8 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
 
     const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
 
+    const [stationRecommendationSelected, setStationRecommendationSelected] = useState<boolean>(false)
+
     const startTime = useRef<Date>(new Date())
 
     const containerRef = useRef<HTMLDivElement>(null)
@@ -218,6 +220,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                     Direction: currentDirection!,
                     Entity: Boolean(currentEntity),
                     SearchUsed: searchUsed,
+                    StationRecommendationUsed: stationRecommendationSelected,
                 },
             })
 
@@ -363,6 +366,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                                   )
                                 : undefined
                         }
+                        setHighlightedElementSelected={setStationRecommendationSelected}
                     />
                     <div ref={bottomElementsRef}>
                         {currentLine && currentLine !== 'S41' && currentLine !== 'S42' && currentStation && (
