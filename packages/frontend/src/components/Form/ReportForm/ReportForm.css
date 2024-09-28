@@ -1,7 +1,6 @@
 div.report-form {
     padding: var(--padding-m);
     transition: ease-in-out var(--transition-default);
-    overflow-y: hidden;
 }
 
 .report-form > form > div > section > * {

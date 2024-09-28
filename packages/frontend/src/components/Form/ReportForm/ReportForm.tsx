@@ -135,8 +135,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
             const topAllowance = calculateAllowance(top) + dynamicDivMargins
             const bottomAllowance = calculateAllowance(bottom) + dynamicDivMargins
 
-            // I have no idea why I have to multiply by 2 here, but it works
-            const totalAllowance = containerAllowance + topAllowance + bottomAllowance
+            const totalAllowance = containerAllowance + topAllowance + bottomAllowance + marginS
 
             const stationCount = Object.keys(possibleStations).length
             const availableHeight = containerHeight - topHeight - bottomHeight - totalAllowance
