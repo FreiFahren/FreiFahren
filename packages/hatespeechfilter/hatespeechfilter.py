@@ -10,7 +10,7 @@ tokenizer = AutoTokenizer.from_pretrained("chrisrtt/gbert-multi-class-german-hat
 model = AutoModelForSequenceClassification.from_pretrained("chrisrtt/gbert-multi-class-german-hate")
 classifier = pipeline('sentiment-analysis', model=model, tokenizer=tokenizer)
 
-@app.route('/classify', methods=['POST'])
+@app.route('/classification', methods=['POST'])
 def classify_text():
     # Get the JSON data from the request
     data = request.get_json()
