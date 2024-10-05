@@ -114,7 +114,7 @@ function AutocompleteInputForm<T>({
                 className="list-container"
                 style={listHeight ? { height: `${listHeight}px`, maxHeight: '100%' } : undefined}
             >
-                {highlightElements && !elementIsSelected && (
+                {highlightElements && !elementIsSelected && !showSearchBox && (
                     <>
                         <SelectField
                             onSelect={(selectedValue) => handleSelect(selectedValue, true)}
