@@ -6,6 +6,13 @@ definitions:
       longitude:
         type: number
     type: object
+  utils.CoordinatesEntry:
+    properties:
+      latitude:
+        type: number
+      longitude:
+        type: number
+    type: object
   utils.InspectorRequest:
     properties:
       author:
@@ -53,6 +60,17 @@ definitions:
         $ref: '#/definitions/utils.Coordinates'
       id:
         type: string
+      lines:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+    type: object
+  utils.StationListEntry:
+    properties:
+      coordinates:
+        $ref: '#/definitions/utils.CoordinatesEntry'
       lines:
         items:
           type: string
@@ -237,6 +255,85 @@ paths:
       summary: Get risk colors for segments
       tags:
       - Risk Prediction
+  /stations:
+    get:
+      description: |-
+        Retrieves information about all available stations.
+        This endpoint returns a list of all stations and their details.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/utils.StationListEntry'
+            type: object
+        "500":
+          description: 'Internal Server Error: Error retrieving stations data.'
+      summary: Get all stations
+      tags:
+      - stations
+  /stations/{stationId}:
+    get:
+      description: |-
+        Retrieves information about a specific station based on its ID.
+        This endpoint returns the details of a single station.
+      parameters:
+      - description: ID of the station
+        in: path
+        name: stationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved the specified station data.
+          schema:
+            $ref: '#/definitions/utils.StationListEntry'
+        "404":
+          description: 'Station not found: The specified station does not exist.'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a single station by ID
+      tags:
+      - stations
+  /stations/search:
+    get:
+      description: |-
+        Searches for a station using the provided name and returns the matching station information.
+        This endpoint is case and whitespace insensitive and returns the first exact match found.
+      parameters:
+      - description: Name of the station to search for
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully found and retrieved the station data.
+          schema:
+            $ref: '#/definitions/utils.StationListEntry'
+        "400":
+          description: 'Bad Request: Missing station name parameter.'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: 'Station not found: No station matches the provided name.'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Search for a station by name
+      tags:
+      - stations
   /transit/distance:
     get:
       consumes:
