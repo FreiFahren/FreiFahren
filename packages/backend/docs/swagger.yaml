@@ -246,6 +246,58 @@ paths:
       summary: Retrieves stations and lines information
       tags:
       - data
+  /lines:
+    get:
+      description: |-
+        Retrieves information about all available transit lines.
+        This endpoint returns a list of all transit lines and their associated stations.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved all lines data.
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+        "500":
+          description: 'Internal Server Error: Error retrieving lines data.'
+      summary: Get all lines
+      tags:
+      - lines
+  /lines/{lineName}:
+    get:
+      description: |-
+        Retrieves information about a specific transit line.
+        This endpoint returns the details of a single line, including all its stations, based on the provided line name.
+      parameters:
+      - description: Name of the line (e.g., S1, U2)
+        in: path
+        name: lineName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved the specified line data.
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+        "404":
+          description: 'Line not found: The specified line does not exist.'
+          schema:
+            type: string
+        "500":
+          description: 'Internal Server Error: Error retrieving line data.'
+      summary: Get a single line
+      tags:
+      - lines
   /risk-prediction/segment-colors:
     get:
       consumes:
