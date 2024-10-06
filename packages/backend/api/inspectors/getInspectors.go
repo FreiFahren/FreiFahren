@@ -128,22 +128,29 @@ func removeDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse
 func constructTicketInspectorInfo(ticketInfo utils.TicketInspector, startTime time.Time, endTime time.Time) (utils.TicketInspectorResponse, error) {
 	logger.Log.Debug().Msg("Constructing ticket inspector info")
 
-	cleanedStationId := strings.ReplaceAll(ticketInfo.StationId, "\n", "")
-	cleanedDirectionId := strings.ReplaceAll(ticketInfo.DirectionId.String, "\n", "")
-	cleanedLine := strings.ReplaceAll(ticketInfo.Line.String, "\n", "")
-	cleanedMessage := strings.ReplaceAll(ticketInfo.Message.String, "\n", "")
+	cleanedStationId := strings.TrimSpace(ticketInfo.StationId)
+	cleanedDirectionId := strings.TrimSpace(ticketInfo.DirectionId.String)
+	cleanedLine := strings.TrimSpace(ticketInfo.Line.String)
+	cleanedMessage := strings.TrimSpace(ticketInfo.Message.String)
 
 	stations := data.GetStationsList()
-	station, ok := stations[cleanedStationId]
-	if !ok {
-		logger.Log.Error().Msg("Station not found")
-		return utils.TicketInspectorResponse{}, fmt.Errorf("station not found")
+	var station, direction utils.StationListEntry
+	var ok bool
+
+	if cleanedStationId != "" {
+		station, ok = stations[cleanedStationId]
+		if !ok {
+			logger.Log.Error().Msg("Station not found")
+			return utils.TicketInspectorResponse{}, fmt.Errorf("station not found")
+		}
 	}
 
-	direction, ok := stations[cleanedDirectionId]
-	if !ok {
-		logger.Log.Error().Msg("Direction not found")
-		return utils.TicketInspectorResponse{}, fmt.Errorf("direction not found")
+	if cleanedDirectionId != "" {
+		direction, ok = stations[cleanedDirectionId]
+		if !ok {
+			logger.Log.Error().Msgf("DirectionId: %s not found", cleanedDirectionId)
+			return utils.TicketInspectorResponse{}, fmt.Errorf("direction not found")
+		}
 	}
 
 	if ticketInfo.IsHistoric {
