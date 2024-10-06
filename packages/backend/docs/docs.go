@@ -240,7 +240,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
-                                "$ref": "#/definitions/utils.StationListEntry"
+                                "$ref": "#/definitions/utils.Station"
                             }
                         }
                     },
@@ -273,7 +273,10 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully found and retrieved the station data.",
                         "schema": {
-                            "$ref": "#/definitions/utils.StationListEntry"
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "#/definitions/utils.StationListEntry"
+                            }
                         }
                     },
                     "400": {

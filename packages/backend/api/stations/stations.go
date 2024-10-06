@@ -6,6 +6,7 @@ import (
 
 	"github.com/FreiFahren/backend/data"
 	_ "github.com/FreiFahren/backend/docs"
+	"github.com/FreiFahren/backend/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -18,7 +19,7 @@ import (
 //
 // @Produce json
 //
-// @Success 200 {object} map[string]utils.StationListEntry
+// @Success 200 {object} map[string]utils.Station
 // @Failure 500 "Internal Server Error: Error retrieving stations data."
 //
 // @Router /stations [get]
@@ -63,7 +64,7 @@ func GetSingleStation(c echo.Context) error {
 //
 // @Param name query string true "Name of the station to search for"
 //
-// @Success 200 {object} utils.StationListEntry "Successfully found and retrieved the station data."
+// @Success 200 {object} map[string]utils.StationListEntry "Successfully found and retrieved the station data."
 // @Failure 400 {object} map[string]string "Bad Request: Missing station name parameter."
 // @Failure 404 {object} map[string]string "Station not found: No station matches the provided name."
 //
@@ -71,17 +72,17 @@ func GetSingleStation(c echo.Context) error {
 func SearchStation(c echo.Context) error {
 	name := c.QueryParam("name")
 	if name == "" {
-		return c.JSON(http.StatusBadRequest, "Bad Request: Missing station name parameter.")
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Bad Request: Missing station name parameter."})
 	}
 
 	stations := data.GetStationsList()
 	normalizedName := strings.ToLower(strings.TrimSpace(name))
 
-	for _, station := range stations {
+	for id, station := range stations {
 		if strings.ToLower(strings.TrimSpace(station.Name)) == normalizedName {
-			return c.JSON(http.StatusOK, station)
+			return c.JSON(http.StatusOK, map[string]utils.StationListEntry{id: station})
 		}
 	}
 
-	return c.JSON(http.StatusNotFound, "Station not found: No station matches the provided name.")
+	return c.JSON(http.StatusNotFound, map[string]string{"error": "Station not found: No station matches the provided name."})
 }

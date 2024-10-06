@@ -267,7 +267,7 @@ paths:
           description: OK
           schema:
             additionalProperties:
-              $ref: '#/definitions/utils.StationListEntry'
+              $ref: '#/definitions/utils.Station'
             type: object
         "500":
           description: 'Internal Server Error: Error retrieving stations data.'
@@ -318,7 +318,9 @@ paths:
         "200":
           description: Successfully found and retrieved the station data.
           schema:
-            $ref: '#/definitions/utils.StationListEntry'
+            additionalProperties:
+              $ref: '#/definitions/utils.StationListEntry'
+            type: object
         "400":
           description: 'Bad Request: Missing station name parameter.'
           schema:
