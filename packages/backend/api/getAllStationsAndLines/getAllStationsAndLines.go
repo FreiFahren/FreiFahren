@@ -31,14 +31,6 @@ func GetAllStationsAndLines(c echo.Context) error {
 
 	var StationsAndLinesList = data.GetStationsAndLinesList()
 
-	// only get the lines
-	isLineList := c.QueryParam("lines")
-	if isLineList == "true" {
-		linesList := data.GetLinesList()
-
-		return c.JSONPretty(http.StatusOK, linesList, "  ")
-	}
-
 	// only get the stations
 	isStationList := c.QueryParam("stations")
 	if isStationList == "true" {
