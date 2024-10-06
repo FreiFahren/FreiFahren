@@ -6,6 +6,7 @@ import (
 
 	"github.com/FreiFahren/backend/data"
 	_ "github.com/FreiFahren/backend/docs"
+	"github.com/FreiFahren/backend/logger"
 	"github.com/FreiFahren/backend/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -24,6 +25,8 @@ import (
 //
 // @Router /stations [get]
 func GetAllStations(c echo.Context) error {
+	logger.Log.Info().Msg("GET /stations")
+
 	return c.JSON(http.StatusOK, data.GetStationsList())
 }
 
@@ -43,6 +46,8 @@ func GetAllStations(c echo.Context) error {
 //
 // @Router /stations/{stationId} [get]
 func GetSingleStation(c echo.Context) error {
+	logger.Log.Info().Msg("GET /stations/:stationId")
+
 	stationId := c.Param("stationId")
 	stations := data.GetStationsList()
 
@@ -70,6 +75,8 @@ func GetSingleStation(c echo.Context) error {
 //
 // @Router /stations/search [get]
 func SearchStation(c echo.Context) error {
+	logger.Log.Info().Msg("GET /stations/search")
+
 	name := c.QueryParam("name")
 	if name == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Bad Request: Missing station name parameter."})

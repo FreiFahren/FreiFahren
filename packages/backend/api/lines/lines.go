@@ -6,6 +6,7 @@ import (
 
 	"github.com/FreiFahren/backend/data"
 	_ "github.com/FreiFahren/backend/docs"
+	"github.com/FreiFahren/backend/logger"
 	"github.com/labstack/echo/v4"
 )
 
@@ -23,6 +24,8 @@ import (
 //
 // @Router /lines [get]
 func GetAllLines(c echo.Context) error {
+	logger.Log.Info().Msg("GET /lines")
+
 	return c.JSON(http.StatusOK, data.GetLinesList())
 }
 
@@ -43,6 +46,8 @@ func GetAllLines(c echo.Context) error {
 //
 // @Router /lines/{lineName} [get]
 func GetSingleLine(c echo.Context) error {
+	logger.Log.Info().Msg("GET /lines/:lineName")
+
 	lineName := strings.ToUpper(c.Param("lineName"))
 	lines := data.GetLinesList()
 
