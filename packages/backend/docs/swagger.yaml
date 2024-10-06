@@ -1,27 +1,5 @@
 definitions:
-  utils.AllStationsAndLinesList:
-    properties:
-      lines:
-        items:
-          additionalProperties:
-            items:
-              type: string
-            type: array
-          type: object
-        type: array
-      stations:
-        additionalProperties:
-          $ref: '#/definitions/utils.StationListEntry'
-        type: object
-    type: object
   utils.Coordinates:
-    properties:
-      latitude:
-        type: number
-      longitude:
-        type: number
-    type: object
-  utils.CoordinatesEntry:
     properties:
       latitude:
         type: number
@@ -75,17 +53,6 @@ definitions:
         $ref: '#/definitions/utils.Coordinates'
       id:
         type: string
-      lines:
-        items:
-          type: string
-        type: array
-      name:
-        type: string
-    type: object
-  utils.StationListEntry:
-    properties:
-      coordinates:
-        $ref: '#/definitions/utils.CoordinatesEntry'
       lines:
         items:
           type: string
@@ -185,67 +152,6 @@ paths:
       summary: Submit ticket inspector data
       tags:
       - basics
-  /data/id:
-    get:
-      consumes:
-      - application/json
-      description: |-
-        Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.
-        The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-A" for the station "Alexanderplatz".
-      parameters:
-      - description: Station name
-        in: query
-        name: name
-        required: true
-        type: string
-      produces:
-      - text/plain
-      responses:
-        "200":
-          description: The station id
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Error message
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Retrieve Station Id by Name
-      tags:
-      - data
-  /data/list:
-    get:
-      consumes:
-      - application/json
-      description: |-
-        This endpoint returns a comprehensive list of all train stations and lines.
-        Optionally, it can return only a list of lines or stations based on the provided query parameters.
-      parameters:
-      - description: Set to 'true' to retrieve only the list of lines.
-        in: query
-        name: lines
-        type: string
-      - description: Set to 'true' to retrieve only the list of stations.
-        in: query
-        name: stations
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/utils.AllStationsAndLinesList'
-        "500":
-          description: 'Internal Server Error: Unable to process the request.'
-          schema:
-            type: string
-      summary: Retrieves stations and lines information
-      tags:
-      - data
   /lines:
     get:
       description: |-
@@ -331,33 +237,6 @@ paths:
       summary: Get risk colors for segments
       tags:
       - Risk Prediction
-  /station:
-    get:
-      consumes:
-      - application/json
-      description: |-
-        Fetches the name of a station by its unique identifier from the StationsMap.
-        The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-A" for the station "Alexanderplatz".
-      parameters:
-      - description: Station Id
-        in: query
-        name: id
-        required: true
-        type: string
-      produces:
-      - text/plain
-      responses:
-        "200":
-          description: The station id
-          schema:
-            type: string
-        "404":
-          description: Error getting station name
-          schema:
-            type: string
-      summary: Retrieve Name by Station Id
-      tags:
-      - data
   /transit/distance:
     get:
       consumes:

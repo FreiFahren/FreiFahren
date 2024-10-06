@@ -1,12 +1,13 @@
 package inspectors
 
 import (
+	"fmt"
 	"net/http"
 	"sort"
 	"strings"
 	"time"
 
-	"github.com/FreiFahren/backend/api/getStationName"
+	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/logger"
 	"github.com/FreiFahren/backend/utils"
@@ -132,30 +133,17 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector, startTime ti
 	cleanedLine := strings.ReplaceAll(ticketInfo.Line.String, "\n", "")
 	cleanedMessage := strings.ReplaceAll(ticketInfo.Message.String, "\n", "")
 
-	stationLat, stationLon, err := IdToCoordinates(cleanedStationId)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error getting station coordinates")
-		return utils.TicketInspectorResponse{}, err
+	stations := data.GetStationsList()
+	station, ok := stations[cleanedStationId]
+	if !ok {
+		logger.Log.Error().Msg("Station not found")
+		return utils.TicketInspectorResponse{}, fmt.Errorf("station not found")
 	}
 
-	stationName, err := getStationName.IdToStationName(cleanedStationId)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error getting station name")
-		return utils.TicketInspectorResponse{}, err
-	}
-
-	directionName, directionLat, directionLon := "", float64(0), float64(0)
-	if ticketInfo.DirectionId.Valid {
-		directionName, err = getStationName.IdToStationName(cleanedDirectionId)
-		if err != nil {
-			logger.Log.Error().Err(err).Msg("Error getting direction name")
-			return utils.TicketInspectorResponse{}, err
-		}
-		directionLat, directionLon, err = IdToCoordinates(cleanedDirectionId)
-		if err != nil {
-			logger.Log.Error().Err(err).Msg("Error getting direction coordinates")
-			return utils.TicketInspectorResponse{}, err
-		}
+	direction, ok := stations[cleanedDirectionId]
+	if !ok {
+		logger.Log.Error().Msg("Direction not found")
+		return utils.TicketInspectorResponse{}, fmt.Errorf("direction not found")
 	}
 
 	if ticketInfo.IsHistoric {
@@ -168,13 +156,13 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector, startTime ti
 		Timestamp: ticketInfo.Timestamp,
 		Station: utils.Station{
 			Id:          cleanedStationId,
-			Name:        stationName,
-			Coordinates: utils.Coordinates{Latitude: stationLat, Longitude: stationLon},
+			Name:        station.Name,
+			Coordinates: utils.Coordinates{Latitude: station.Coordinates.Latitude, Longitude: station.Coordinates.Longitude},
 		},
 		Direction: utils.Station{
 			Id:          cleanedDirectionId,
-			Name:        directionName,
-			Coordinates: utils.Coordinates{Latitude: directionLat, Longitude: directionLon},
+			Name:        direction.Name,
+			Coordinates: utils.Coordinates{Latitude: direction.Coordinates.Latitude, Longitude: direction.Coordinates.Longitude},
 		},
 		Line:       cleanedLine,
 		IsHistoric: ticketInfo.IsHistoric,

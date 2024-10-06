@@ -111,93 +111,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/data/id": {
-            "get": {
-                "description": "Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.\nThe Ids have format Line prefix that has the format \"SU\" followed by an abbreviation of the station name. For example \"SU-A\" for the station \"Alexanderplatz\".",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "data"
-                ],
-                "summary": "Retrieve Station Id by Name",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Station name",
-                        "name": "name",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "The station id",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Error message",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/data/list": {
-            "get": {
-                "description": "This endpoint returns a comprehensive list of all train stations and lines.\nOptionally, it can return only a list of lines or stations based on the provided query parameters.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "data"
-                ],
-                "summary": "Retrieves stations and lines information",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Set to 'true' to retrieve only the list of lines.",
-                        "name": "lines",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Set to 'true' to retrieve only the list of stations.",
-                        "name": "stations",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/utils.AllStationsAndLinesList"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error: Unable to process the request.",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/lines": {
             "get": {
                 "description": "Retrieves information about all available transit lines.\nThis endpoint returns a list of all transit lines and their associated stations.",
@@ -311,44 +224,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/station": {
-            "get": {
-                "description": "Fetches the name of a station by its unique identifier from the StationsMap.\nThe Ids have format Line prefix that has the format \"SU\" followed by an abbreviation of the station name. For example \"SU-A\" for the station \"Alexanderplatz\".",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "data"
-                ],
-                "summary": "Retrieve Name by Station Id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Station Id",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "The station id",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Error getting station name",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/transit/distance": {
             "get": {
                 "description": "Returns the shortest number of stations between an inspector's station and a given user's latitude and longitude coordinates.\nThe distance calculation employs Dijkstra's algorithm to determine the minimal stops required to reach the nearest station from the given coordinates.",
@@ -393,41 +268,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "utils.AllStationsAndLinesList": {
-            "type": "object",
-            "properties": {
-                "lines": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "additionalProperties": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                },
-                "stations": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/utils.StationListEntry"
-                    }
-                }
-            }
-        },
         "utils.Coordinates": {
-            "type": "object",
-            "properties": {
-                "latitude": {
-                    "type": "number"
-                },
-                "longitude": {
-                    "type": "number"
-                }
-            }
-        },
-        "utils.CoordinatesEntry": {
             "type": "object",
             "properties": {
                 "latitude": {
@@ -507,23 +348,6 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
-                },
-                "lines": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "utils.StationListEntry": {
-            "type": "object",
-            "properties": {
-                "coordinates": {
-                    "$ref": "#/definitions/utils.CoordinatesEntry"
                 },
                 "lines": {
                     "type": "array",
