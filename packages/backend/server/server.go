@@ -5,11 +5,10 @@ import (
 
 	"github.com/FreiFahren/backend/Rstats"
 	"github.com/FreiFahren/backend/api/distance"
-	"github.com/FreiFahren/backend/api/getId"
 	"github.com/FreiFahren/backend/api/getSegmentColors"
-	"github.com/FreiFahren/backend/api/getStationName"
 	"github.com/FreiFahren/backend/api/inspectors"
 	"github.com/FreiFahren/backend/api/lines"
+	"github.com/FreiFahren/backend/api/stations"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/logger"
@@ -101,12 +100,10 @@ func SetupServer() *echo.Echo {
 	e.POST("/basics/inspectors", inspectors.PostInspector)
 	e.GET("/basics/inspectors", inspectors.GetTicketInspectorsInfo)
 
-	e.GET("/data/station", getStationName.GetStationName)
-
 	e.GET("/lines", lines.GetAllLines)
 	e.GET("/lines/:lineName", lines.GetSingleLine)
 
-	e.GET("/data/id", getId.GetStationId)
+	e.GET("/stations", stations.GetAllStations)
 
 	e.GET("/transit/distance", distance.GetStationDistance)
 
