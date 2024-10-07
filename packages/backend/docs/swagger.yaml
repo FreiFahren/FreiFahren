@@ -1,19 +1,4 @@
 definitions:
-  utils.AllStationsAndLinesList:
-    properties:
-      lines:
-        items:
-          additionalProperties:
-            items:
-              type: string
-            type: array
-          type: object
-        type: array
-      stations:
-        additionalProperties:
-          $ref: '#/definitions/utils.StationListEntry'
-        type: object
-    type: object
   utils.Coordinates:
     properties:
       latitude:
@@ -185,67 +170,58 @@ paths:
       summary: Submit ticket inspector data
       tags:
       - basics
-  /data/id:
+  /lines:
     get:
-      consumes:
-      - application/json
       description: |-
-        Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.
-        The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-A" for the station "Alexanderplatz".
+        Retrieves information about all available transit lines.
+        This endpoint returns a list of all transit lines and their associated stations.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved all lines data.
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+        "500":
+          description: 'Internal Server Error: Error retrieving lines data.'
+      summary: Get all lines
+      tags:
+      - lines
+  /lines/{lineName}:
+    get:
+      description: |-
+        Retrieves information about a specific transit line.
+        This endpoint returns the details of a single line, including all its stations, based on the provided line name.
       parameters:
-      - description: Station name
-        in: query
-        name: name
+      - description: Name of the line (e.g., S1, U2)
+        in: path
+        name: lineName
         required: true
         type: string
       produces:
-      - text/plain
+      - application/json
       responses:
         "200":
-          description: The station id
+          description: Successfully retrieved the specified line data.
           schema:
             additionalProperties:
-              type: string
+              items:
+                type: string
+              type: array
             type: object
         "404":
-          description: Error message
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Retrieve Station Id by Name
-      tags:
-      - data
-  /data/list:
-    get:
-      consumes:
-      - application/json
-      description: |-
-        This endpoint returns a comprehensive list of all train stations and lines.
-        Optionally, it can return only a list of lines or stations based on the provided query parameters.
-      parameters:
-      - description: Set to 'true' to retrieve only the list of lines.
-        in: query
-        name: lines
-        type: string
-      - description: Set to 'true' to retrieve only the list of stations.
-        in: query
-        name: stations
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/utils.AllStationsAndLinesList'
-        "500":
-          description: 'Internal Server Error: Unable to process the request.'
+          description: 'Line not found: The specified line does not exist.'
           schema:
             type: string
-      summary: Retrieves stations and lines information
+        "500":
+          description: 'Internal Server Error: Error retrieving line data.'
+      summary: Get a single line
       tags:
-      - data
+      - lines
   /risk-prediction/segment-colors:
     get:
       consumes:
@@ -279,33 +255,87 @@ paths:
       summary: Get risk colors for segments
       tags:
       - Risk Prediction
-  /station:
+  /stations:
     get:
-      consumes:
-      - application/json
       description: |-
-        Fetches the name of a station by its unique identifier from the StationsMap.
-        The Ids have format Line prefix that has the format "SU" followed by an abbreviation of the station name. For example "SU-A" for the station "Alexanderplatz".
+        Retrieves information about all available stations.
+        This endpoint returns a list of all stations and their details.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/utils.Station'
+            type: object
+        "500":
+          description: 'Internal Server Error: Error retrieving stations data.'
+      summary: Get all stations
+      tags:
+      - stations
+  /stations/{stationId}:
+    get:
+      description: |-
+        Retrieves information about a specific station based on its ID.
+        This endpoint returns the details of a single station.
       parameters:
-      - description: Station Id
-        in: query
-        name: id
+      - description: ID of the station
+        in: path
+        name: stationId
         required: true
         type: string
       produces:
-      - text/plain
+      - application/json
       responses:
         "200":
-          description: The station id
+          description: Successfully retrieved the specified station data.
           schema:
-            type: string
+            $ref: '#/definitions/utils.StationListEntry'
         "404":
-          description: Error getting station name
+          description: 'Station not found: The specified station does not exist.'
           schema:
-            type: string
-      summary: Retrieve Name by Station Id
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a single station by ID
       tags:
-      - data
+      - stations
+  /stations/search:
+    get:
+      description: |-
+        Searches for a station using the provided name and returns the matching station information.
+        This endpoint is case and whitespace insensitive and returns the first exact match found.
+      parameters:
+      - description: Name of the station to search for
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully found and retrieved the station data.
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/utils.StationListEntry'
+            type: object
+        "400":
+          description: 'Bad Request: Missing station name parameter.'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: 'Station not found: No station matches the provided name.'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Search for a station by name
+      tags:
+      - stations
   /transit/distance:
     get:
       consumes:

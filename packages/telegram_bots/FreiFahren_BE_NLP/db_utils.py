@@ -46,15 +46,16 @@ def fetch_id(name, entity_type):
     if not name:
         return None
 
-    url = f"{BACKEND_URL}/data/id?name={name}"
+    url = f"{BACKEND_URL}/stations/search?name={name}"
     
     try:
         response = requests.get(url, timeout=10)
         response.raise_for_status()  # Raises an HTTPError for bad responses (4xx or 5xx)
         
-        station_id = response.text
+        data = response.json()
         
-        if station_id:
+        if data:
+            station_id = next(iter(data.keys()))
             logger.info(f"Received {entity_type} id from the backend: {station_id}")
             return station_id
         else:
@@ -63,7 +64,7 @@ def fetch_id(name, entity_type):
 
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 404:
-            logger.info(f"Station not found: {e.response.json().get('error', 'No error message provided')}")
+            logger.info(f"{entity_type}: {name} not found: {e.response.json().get('error', 'No error message provided')}")
         else:
             logger.error(f"HTTP error occurred: {e}")
         return None

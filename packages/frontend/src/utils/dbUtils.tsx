@@ -55,7 +55,7 @@ export async function getRecentDataWithIfModifiedSince(
 
 export async function getAllStationsList(): Promise<StationList> {
     try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/data/list?stations=true`)
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/stations`)
         const data = await response.json()
         return data
     } catch (error) {
@@ -66,7 +66,7 @@ export async function getAllStationsList(): Promise<StationList> {
 
 export async function getAllLinesList(): Promise<LinesList> {
     try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/data/list?lines=true`)
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/lines`)
         const data = await response.json()
         return data
     } catch (error) {
@@ -105,7 +105,9 @@ export async function getStationDistance(userStationId: string, inspectorStation
     }
 
     try {
-        const url = `${process.env.REACT_APP_API_URL}/transit/distance?inspectorStationId=${encodeURIComponent(inspectorStationId)}&userStationId=${encodeURIComponent(userStationId)}`
+        const url = `${process.env.REACT_APP_API_URL}/transit/distance?inspectorStationId=${encodeURIComponent(
+            inspectorStationId
+        )}&userStationId=${encodeURIComponent(userStationId)}`
         const response = await fetch(url)
         const data = await response.json()
 

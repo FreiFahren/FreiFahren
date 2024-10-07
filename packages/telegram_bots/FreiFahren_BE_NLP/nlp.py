@@ -4,7 +4,7 @@ from telegram_bots.FreiFahren_BE_NLP.process_message import (
     find_direction,
     find_station,
     format_text,
-    lines_with_stations,
+    lines,
     load_data,
     check_for_spam,
 )
@@ -23,7 +23,7 @@ class TicketInspector:
 
 
 def extract_ticket_inspector_info(unformatted_text):
-    found_line = find_line(unformatted_text, lines_with_stations)
+    found_line = find_line(unformatted_text, lines)
     ticket_inspector = TicketInspector(line=found_line, station=None, direction=None)
 
     # Get the direction
@@ -44,10 +44,6 @@ def extract_ticket_inspector_info(unformatted_text):
         return ticket_inspector.__dict__
     else:
         return None
-
-
-stations_dict = load_data("data/stations_list_main.json")
-
 
 def process_new_message(timestamp, message_text):
     trams = ["m1", "m2", "m4", "m5", "m6", "m8", "m10", "m13", "m17"]

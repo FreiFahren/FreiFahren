@@ -1,4 +1,4 @@
-from telegram_bots.FreiFahren_BE_NLP.process_message import lines_with_stations, find_station, remove_direction_and_keyword
+from telegram_bots.FreiFahren_BE_NLP.process_message import find_station, remove_direction_and_keyword, lines
 from telegram_bots.logger import setup_logger
 
 logger = setup_logger()
@@ -57,8 +57,8 @@ def get_final_stations_of_line(line):
     logger.debug('getting final stations of line')
 
     final_stations_of_line = []
-    final_stations_of_line.append(lines_with_stations[line][0])
-    final_stations_of_line.append(lines_with_stations[line][-1])
+    final_stations_of_line.append(lines[line][0])
+    final_stations_of_line.append(lines[line][-1])
     return final_stations_of_line
 
 
@@ -100,18 +100,5 @@ def check_if_station_is_actually_direction(text, ticket_inspector):
 
     ticket_inspector.direction = found_station_after_line
     ticket_inspector.station = new_station
-
-    return ticket_inspector
-
-def check_for_line_through_station(ticket_inspector, stations_list_main):
-    logger.debug('checking for line through station')
-
-    station_name = ticket_inspector.station.strip().lower().replace(' ', '')
-
-    for _key, station_info in stations_list_main.items():
-        if station_info['name'].strip().lower().replace(' ', '') == station_name:
-            if len(station_info['lines']) == 1:
-                ticket_inspector.line = station_info['lines'][0]
-                return ticket_inspector
 
     return ticket_inspector

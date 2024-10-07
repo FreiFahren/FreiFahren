@@ -111,89 +111,75 @@ const docTemplate = `{
                 }
             }
         },
-        "/data/id": {
+        "/lines": {
             "get": {
-                "description": "Fetches the unique identifier for a station by its name from the StationsMap. This endpoint performs a case-insensitive search and ignores spaces in the station name.\nThe Ids have format Line prefix that has the format \"SU\" followed by an abbreviation of the station name. For example \"SU-A\" for the station \"Alexanderplatz\".",
-                "consumes": [
+                "description": "Retrieves information about all available transit lines.\nThis endpoint returns a list of all transit lines and their associated stations.",
+                "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "lines"
+                ],
+                "summary": "Get all lines",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved all lines data.",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error: Error retrieving lines data."
+                    }
+                }
+            }
+        },
+        "/lines/{lineName}": {
+            "get": {
+                "description": "Retrieves information about a specific transit line.\nThis endpoint returns the details of a single line, including all its stations, based on the provided line name.",
                 "produces": [
-                    "text/plain"
+                    "application/json"
                 ],
                 "tags": [
-                    "data"
+                    "lines"
                 ],
-                "summary": "Retrieve Station Id by Name",
+                "summary": "Get a single line",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Station name",
-                        "name": "name",
-                        "in": "query",
+                        "description": "Name of the line (e.g., S1, U2)",
+                        "name": "lineName",
+                        "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "The station id",
+                        "description": "Successfully retrieved the specified line data.",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
-                                "type": "string"
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
                     "404": {
-                        "description": "Error message",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/data/list": {
-            "get": {
-                "description": "This endpoint returns a comprehensive list of all train stations and lines.\nOptionally, it can return only a list of lines or stations based on the provided query parameters.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "data"
-                ],
-                "summary": "Retrieves stations and lines information",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Set to 'true' to retrieve only the list of lines.",
-                        "name": "lines",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Set to 'true' to retrieve only the list of stations.",
-                        "name": "stations",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/utils.AllStationsAndLinesList"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error: Unable to process the request.",
+                        "description": "Line not found: The specified line does not exist.",
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error: Error retrieving line data."
                     }
                 }
             }
@@ -238,39 +224,115 @@ const docTemplate = `{
                 }
             }
         },
-        "/station": {
+        "/stations": {
             "get": {
-                "description": "Fetches the name of a station by its unique identifier from the StationsMap.\nThe Ids have format Line prefix that has the format \"SU\" followed by an abbreviation of the station name. For example \"SU-A\" for the station \"Alexanderplatz\".",
-                "consumes": [
+                "description": "Retrieves information about all available stations.\nThis endpoint returns a list of all stations and their details.",
+                "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "stations"
+                ],
+                "summary": "Get all stations",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "#/definitions/utils.Station"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error: Error retrieving stations data."
+                    }
+                }
+            }
+        },
+        "/stations/search": {
+            "get": {
+                "description": "Searches for a station using the provided name and returns the matching station information.\nThis endpoint is case and whitespace insensitive and returns the first exact match found.",
                 "produces": [
-                    "text/plain"
+                    "application/json"
                 ],
                 "tags": [
-                    "data"
+                    "stations"
                 ],
-                "summary": "Retrieve Name by Station Id",
+                "summary": "Search for a station by name",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Station Id",
-                        "name": "id",
+                        "description": "Name of the station to search for",
+                        "name": "name",
                         "in": "query",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "The station id",
+                        "description": "Successfully found and retrieved the station data.",
                         "schema": {
-                            "type": "string"
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "#/definitions/utils.StationListEntry"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request: Missing station name parameter.",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "404": {
-                        "description": "Error getting station name",
+                        "description": "Station not found: No station matches the provided name.",
                         "schema": {
-                            "type": "string"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/stations/{stationId}": {
+            "get": {
+                "description": "Retrieves information about a specific station based on its ID.\nThis endpoint returns the details of a single station.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stations"
+                ],
+                "summary": "Get a single station by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the station",
+                        "name": "stationId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved the specified station data.",
+                        "schema": {
+                            "$ref": "#/definitions/utils.StationListEntry"
+                        }
+                    },
+                    "404": {
+                        "description": "Station not found: The specified station does not exist.",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -320,29 +382,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "utils.AllStationsAndLinesList": {
-            "type": "object",
-            "properties": {
-                "lines": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "additionalProperties": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                },
-                "stations": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/utils.StationListEntry"
-                    }
-                }
-            }
-        },
         "utils.Coordinates": {
             "type": "object",
             "properties": {

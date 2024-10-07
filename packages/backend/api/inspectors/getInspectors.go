@@ -1,12 +1,13 @@
 package inspectors
 
 import (
+	"fmt"
 	"net/http"
 	"sort"
 	"strings"
 	"time"
 
-	"github.com/FreiFahren/backend/api/getStationName"
+	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/logger"
 	"github.com/FreiFahren/backend/utils"
@@ -127,34 +128,28 @@ func removeDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse
 func constructTicketInspectorInfo(ticketInfo utils.TicketInspector, startTime time.Time, endTime time.Time) (utils.TicketInspectorResponse, error) {
 	logger.Log.Debug().Msg("Constructing ticket inspector info")
 
-	cleanedStationId := strings.ReplaceAll(ticketInfo.StationId, "\n", "")
-	cleanedDirectionId := strings.ReplaceAll(ticketInfo.DirectionId.String, "\n", "")
-	cleanedLine := strings.ReplaceAll(ticketInfo.Line.String, "\n", "")
-	cleanedMessage := strings.ReplaceAll(ticketInfo.Message.String, "\n", "")
+	cleanedStationId := strings.TrimSpace(ticketInfo.StationId)
+	cleanedDirectionId := strings.TrimSpace(ticketInfo.DirectionId.String)
+	cleanedLine := strings.TrimSpace(ticketInfo.Line.String)
+	cleanedMessage := strings.TrimSpace(ticketInfo.Message.String)
 
-	stationLat, stationLon, err := IdToCoordinates(cleanedStationId)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error getting station coordinates")
-		return utils.TicketInspectorResponse{}, err
-	}
+	stations := data.GetStationsList()
+	var station, direction utils.StationListEntry
+	var ok bool
 
-	stationName, err := getStationName.IdToStationName(cleanedStationId)
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error getting station name")
-		return utils.TicketInspectorResponse{}, err
-	}
-
-	directionName, directionLat, directionLon := "", float64(0), float64(0)
-	if ticketInfo.DirectionId.Valid {
-		directionName, err = getStationName.IdToStationName(cleanedDirectionId)
-		if err != nil {
-			logger.Log.Error().Err(err).Msg("Error getting direction name")
-			return utils.TicketInspectorResponse{}, err
+	if cleanedStationId != "" {
+		station, ok = stations[cleanedStationId]
+		if !ok {
+			logger.Log.Error().Msg("Station not found")
+			return utils.TicketInspectorResponse{}, fmt.Errorf("station not found")
 		}
-		directionLat, directionLon, err = IdToCoordinates(cleanedDirectionId)
-		if err != nil {
-			logger.Log.Error().Err(err).Msg("Error getting direction coordinates")
-			return utils.TicketInspectorResponse{}, err
+	}
+
+	if cleanedDirectionId != "" {
+		direction, ok = stations[cleanedDirectionId]
+		if !ok {
+			logger.Log.Error().Msgf("DirectionId: %s not found", cleanedDirectionId)
+			return utils.TicketInspectorResponse{}, fmt.Errorf("direction not found")
 		}
 	}
 
@@ -168,13 +163,13 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector, startTime ti
 		Timestamp: ticketInfo.Timestamp,
 		Station: utils.Station{
 			Id:          cleanedStationId,
-			Name:        stationName,
-			Coordinates: utils.Coordinates{Latitude: stationLat, Longitude: stationLon},
+			Name:        station.Name,
+			Coordinates: utils.Coordinates{Latitude: station.Coordinates.Latitude, Longitude: station.Coordinates.Longitude},
 		},
 		Direction: utils.Station{
 			Id:          cleanedDirectionId,
-			Name:        directionName,
-			Coordinates: utils.Coordinates{Latitude: directionLat, Longitude: directionLon},
+			Name:        direction.Name,
+			Coordinates: utils.Coordinates{Latitude: direction.Coordinates.Latitude, Longitude: direction.Coordinates.Longitude},
 		},
 		Line:       cleanedLine,
 		IsHistoric: ticketInfo.IsHistoric,
