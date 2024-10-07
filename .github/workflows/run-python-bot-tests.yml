@@ -20,6 +20,8 @@ jobs:
                   cd packages/telegram_bots && pip install -e .
                   cd FreiFahren_BE_NLP && pip install -r requirements.txt
             - name: Run unittests
+              env:
+                  BACKEND_URL: ${{ secrets.BACKEND_URL }}
               run: |
                   cd packages/telegram_bots
                   python -m unittest discover -v -s FreiFahren_BE_NLP/testing
