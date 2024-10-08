@@ -1,3 +1,5 @@
+import { Statistics } from './types'
+
 export interface StationProperty {
     name: string
     coordinates: {
@@ -152,6 +154,17 @@ export async function getNumberOfReportsInLast24Hours(): Promise<number> {
         const filteredReports = reports.filter((report: { isHistoric: boolean }) => !report.isHistoric)
 
         return filteredReports.length
+    } catch (error) {
+        console.error('Error:', error)
+        return 0
+    }
+}
+
+export async function fetchNumberOfReports(stationId: string): Promise<number> {
+    try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/stations/${stationId}/statistics`)
+        const data = (await response.json()) as Statistics
+        return data.numberOfReports
     } catch (error) {
         console.error('Error:', error)
         return 0

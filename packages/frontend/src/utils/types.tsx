@@ -69,3 +69,7 @@ export type MarkerData = {
     isHistoric: boolean
     message?: string
 }
+
+export type Statistics = {
+    numberOfReports: number
+}

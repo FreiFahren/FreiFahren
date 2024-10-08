@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react'
 import { MarkerData } from 'src/utils/types'
 import { stationDistanceMessage, elapsedTimeMessage } from '../../../utils/uiUtils'
-import { getStationDistance } from '../../../utils/dbUtils'
+import { getStationDistance, fetchNumberOfReports } from '../../../utils/dbUtils'
 import { getNearestStation } from '../../../utils/mapUtils'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 import Skeleton, { useSkeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
@@ -26,6 +26,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
     }, [timestamp])
     const currentTime = new Date().getTime()
     const elapsedTimeInMinutes = Math.floor((currentTime - adjustedTimestamp.getTime()) / 60000)
+    const [numberOfReports, setNumberOfReports] = useState(0)
 
     const [isLoading, setIsLoading] = useState(false)
     const [stationDistance, setStationDistance] = useState<number | null>(null)
@@ -55,6 +56,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
         }
 
         fetchDistance()
+        fetchNumberOfReports(station.id).then(setNumberOfReports)
     }, [userLat, userLng, station.id, allStations])
 
     return (
@@ -68,6 +70,11 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
             )}
             <div>
                 <p>{elapsedTimeMessage(elapsedTimeInMinutes, selectedMarker.isHistoric)}</p>
+                {numberOfReports > 0 && (
+                    <p>
+                        <strong>{numberOfReports} Mal</strong> diese Woche
+                    </p>
+                )}
                 {userLat && userLng && (
                     <p className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage(stationDistance)}</p>
                 )}
