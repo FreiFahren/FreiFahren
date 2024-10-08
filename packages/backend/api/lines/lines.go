@@ -3,10 +3,13 @@ package lines
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/FreiFahren/backend/data"
 	_ "github.com/FreiFahren/backend/docs"
 	"github.com/FreiFahren/backend/logger"
+	"github.com/FreiFahren/backend/statistics"
+	"github.com/FreiFahren/backend/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -56,4 +59,41 @@ func GetSingleLine(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusNotFound, "Line not found: The specified line does not exist.")
+}
+
+// @Summary Get line statistics
+//
+// @Description Retrieves statistics for a specific line at a specific station.
+// @Description This endpoint returns the number of reports for the specified line at the given station within the given time range.
+//
+// @Tags lines
+//
+// @Produce json
+//
+// @Param lineId path string true "ID of the line"
+// @Param stationId path string true "ID of the station"
+// @Param start query string false "Start time for the statistics (format: RFC3339)"
+// @Param end query string false "End time for the statistics (format: RFC3339)"
+//
+// @Success 200 {object} statistics.Statistics "Successfully retrieved line statistics."
+// @Failure 400 {object} error "Bad Request: Invalid time format."
+// @Failure 500 {object} error "Internal Server Error: Failed to get number of reports."
+//
+// @Router /lines/{lineId}/{stationId}/statistics [get]
+func GetLineStatistics(c echo.Context) error {
+	logger.Log.Info().Msg("GET /lines/:lineId/:stationId/statistics")
+
+	lineId := c.Param("lineId")
+	stationId := c.Param("stationId")
+	start := c.QueryParam("start")
+	end := c.QueryParam("end")
+
+	startTime, endTime := utils.GetTimeRange(start, end, 7*24*time.Hour)
+
+	stats, err := statistics.GetStatistics(stationId, lineId, startTime, endTime)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Internal Server Error: Failed to get number of reports."})
+	}
+
+	return c.JSON(http.StatusOK, stats)
 }

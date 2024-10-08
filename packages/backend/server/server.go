@@ -102,6 +102,7 @@ func SetupServer() *echo.Echo {
 
 	e.GET("/lines", lines.GetAllLines)
 	e.GET("/lines/:lineName", lines.GetSingleLine)
+	e.GET("/lines/:lineId/:stationId/statistics", lines.GetStatistics)
 
 	e.GET("/stations", stations.GetAllStations)
 	e.GET("/stations/:stationId", stations.GetSingleStation)

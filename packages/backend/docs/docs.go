@@ -140,6 +140,62 @@ const docTemplate = `{
                 }
             }
         },
+        "/lines/{lineId}/{stationId}/statistics": {
+            "get": {
+                "description": "Retrieves statistics for a specific line at a specific station.\nThis endpoint returns the number of reports for the specified line at the given station within the given time range.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lines"
+                ],
+                "summary": "Get line statistics",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the line",
+                        "name": "lineId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the station",
+                        "name": "stationId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start time for the statistics (format: RFC3339)",
+                        "name": "start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End time for the statistics (format: RFC3339)",
+                        "name": "end",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved line statistics.",
+                        "schema": {
+                            "$ref": "#/definitions/statistics.Statistics"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request: Invalid time format.",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error: Failed to get number of reports.",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/lines/{lineName}": {
             "get": {
                 "description": "Retrieves information about a specific transit line.\nThis endpoint returns the details of a single line, including all its stations, based on the provided line name.",
@@ -340,14 +396,14 @@ const docTemplate = `{
         },
         "/stations/{stationId}/statistics": {
             "get": {
-                "description": "Retrieves statistics for a specific station, optionally filtered by line.\nThis endpoint returns the number of reports for the specified station and/or line within the given time range.",
+                "description": "Retrieves statistics for a specific station.\nThis endpoint returns the number of reports for the specified station within the given time range.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "stations"
                 ],
-                "summary": "Get statistics",
+                "summary": "Get station statistics",
                 "parameters": [
                     {
                         "type": "string",
@@ -379,8 +435,12 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully retrieved station statistics.",
                         "schema": {
-                            "$ref": "#/definitions/stations.Statistics"
+                            "$ref": "#/definitions/statistics.Statistics"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request: Invalid time format.",
+                        "schema": {}
                     },
                     "500": {
                         "description": "Internal Server Error: Failed to get number of reports.",
@@ -433,7 +493,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "stations.Statistics": {
+        "statistics.Statistics": {
             "type": "object",
             "properties": {
                 "numberOfReports": {

@@ -1,5 +1,5 @@
 definitions:
-  stations.Statistics:
+  statistics.Statistics:
     properties:
       numberOfReports:
         type: integer
@@ -196,6 +196,46 @@ paths:
       summary: Get all lines
       tags:
       - lines
+  /lines/{lineId}/{stationId}/statistics:
+    get:
+      description: |-
+        Retrieves statistics for a specific line at a specific station.
+        This endpoint returns the number of reports for the specified line at the given station within the given time range.
+      parameters:
+      - description: ID of the line
+        in: path
+        name: lineId
+        required: true
+        type: string
+      - description: ID of the station
+        in: path
+        name: stationId
+        required: true
+        type: string
+      - description: 'Start time for the statistics (format: RFC3339)'
+        in: query
+        name: start
+        type: string
+      - description: 'End time for the statistics (format: RFC3339)'
+        in: query
+        name: end
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved line statistics.
+          schema:
+            $ref: '#/definitions/statistics.Statistics'
+        "400":
+          description: 'Bad Request: Invalid time format.'
+          schema: {}
+        "500":
+          description: 'Internal Server Error: Failed to get number of reports.'
+          schema: {}
+      summary: Get line statistics
+      tags:
+      - lines
   /lines/{lineName}:
     get:
       description: |-
@@ -309,8 +349,8 @@ paths:
   /stations/{stationId}/statistics:
     get:
       description: |-
-        Retrieves statistics for a specific station, optionally filtered by line.
-        This endpoint returns the number of reports for the specified station and/or line within the given time range.
+        Retrieves statistics for a specific station.
+        This endpoint returns the number of reports for the specified station within the given time range.
       parameters:
       - description: ID of the station
         in: path
@@ -335,11 +375,14 @@ paths:
         "200":
           description: Successfully retrieved station statistics.
           schema:
-            $ref: '#/definitions/stations.Statistics'
+            $ref: '#/definitions/statistics.Statistics'
+        "400":
+          description: 'Bad Request: Invalid time format.'
+          schema: {}
         "500":
           description: 'Internal Server Error: Failed to get number of reports.'
           schema: {}
-      summary: Get statistics
+      summary: Get station statistics
       tags:
       - stations
   /stations/search:
