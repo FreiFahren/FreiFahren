@@ -56,8 +56,11 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
         }
 
         fetchDistance()
-        fetchNumberOfReports(station.id).then(setNumberOfReports)
     }, [userLat, userLng, station.id, allStations])
+
+    useEffect(() => {
+        fetchNumberOfReports(station.id).then(setNumberOfReports)
+    }, [station.id])
 
     return (
         <div className={`marker-modal info-popup modal ${className}`}>
