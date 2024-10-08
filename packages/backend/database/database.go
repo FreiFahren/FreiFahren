@@ -379,13 +379,29 @@ func GetMostCommonStationId(stations []string) (string, error) {
 	return stationId, nil
 }
 
-func GetNumberOfReports(stationId string, startTime, endTime time.Time) (int, error) {
-	logger.Log.Debug().Msgf("Getting number of reports for station %s", stationId)
+func GetNumberOfReports(stationId, lineId string, startTime, endTime time.Time) (int, error) {
+	logger.Log.Debug().Msgf("Getting number of reports for station %s and line %s", stationId, lineId)
 
-	sql := `SELECT COUNT(*) FROM ticket_info WHERE station_id = $1 AND timestamp >= $2 AND timestamp <= $3;`
+	sql := `SELECT COUNT(*) FROM ticket_info WHERE timestamp >= $1 AND timestamp <= $2`
+	params := []interface{}{startTime, endTime}
+	paramCount := 2
+
+	if stationId != "" {
+		paramCount++
+		sql += fmt.Sprintf(" AND station_id = $%d", paramCount)
+		params = append(params, stationId)
+	}
+
+	if lineId != "" {
+		paramCount++
+		sql += fmt.Sprintf(" AND line = $%d", paramCount)
+		params = append(params, lineId)
+	}
+
+	sql += ";"
 
 	var count int
-	err := pool.QueryRow(context.Background(), sql, stationId, startTime, endTime).Scan(&count)
+	err := pool.QueryRow(context.Background(), sql, params...).Scan(&count)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to get number of reports")
 		return 0, err

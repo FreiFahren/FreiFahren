@@ -23,7 +23,7 @@ func GetStationStatistics(c echo.Context) error {
 
 	startTime, endTime := utils.GetTimeRange(start, end, 7*24*time.Hour)
 
-	numberOfReports, err := database.GetNumberOfReports(stationId, startTime, endTime)
+	numberOfReports, err := database.GetNumberOfReports(stationId, "", startTime, endTime)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to get number of reports")
 		return c.NoContent(http.StatusInternalServerError)
