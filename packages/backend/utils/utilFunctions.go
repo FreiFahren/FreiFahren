@@ -147,9 +147,9 @@ func FindEnvFile() (string, error) {
 //   - The end time of the time range in RFC 3339 format.
 //
 // This function is being used to get the start and end time of the time range.
-func GetTimeRange(start, end string) (time.Time, time.Time) {
+func GetTimeRange(start, end string, defaultTimeRange time.Duration) (time.Time, time.Time) {
 	now := time.Now().UTC()
-	startTime := now.Add(-1 * time.Hour)
+	startTime := now.Add(-1 * defaultTimeRange)
 	endTime := now
 
 	if start != "" && end != "" {
