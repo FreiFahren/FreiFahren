@@ -338,6 +338,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/stations/{stationId}/statistics": {
+            "get": {
+                "description": "Retrieves statistics for a specific station, optionally filtered by line.\nThis endpoint returns the number of reports for the specified station and/or line within the given time range.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stations"
+                ],
+                "summary": "Get statistics",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the station",
+                        "name": "stationId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the line (optional)",
+                        "name": "lineId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start time for the statistics (format: RFC3339)",
+                        "name": "start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End time for the statistics (format: RFC3339)",
+                        "name": "end",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved station statistics.",
+                        "schema": {
+                            "$ref": "#/definitions/stations.Statistics"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error: Failed to get number of reports.",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/transit/distance": {
             "get": {
                 "description": "Returns the shortest number of stations between an inspector's station and a given user's latitude and longitude coordinates.\nThe distance calculation employs Dijkstra's algorithm to determine the minimal stops required to reach the nearest station from the given coordinates.",
@@ -382,6 +433,14 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "stations.Statistics": {
+            "type": "object",
+            "properties": {
+                "numberOfReports": {
+                    "type": "integer"
+                }
+            }
+        },
         "utils.Coordinates": {
             "type": "object",
             "properties": {

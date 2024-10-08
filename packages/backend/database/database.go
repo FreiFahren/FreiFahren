@@ -379,6 +379,9 @@ func GetMostCommonStationId(stations []string) (string, error) {
 	return stationId, nil
 }
 
+// GetNumberOfReports gets the number of reports for a given station and line.
+//
+// Will filter by station and line if they are not empty. Returns 0 if no reports are found.
 func GetNumberOfReports(stationId, lineId string, startTime, endTime time.Time) (int, error) {
 	logger.Log.Debug().Msgf("Getting number of reports for station %s and line %s", stationId, lineId)
 

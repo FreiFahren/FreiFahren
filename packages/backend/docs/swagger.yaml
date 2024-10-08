@@ -1,4 +1,9 @@
 definitions:
+  stations.Statistics:
+    properties:
+      numberOfReports:
+        type: integer
+    type: object
   utils.Coordinates:
     properties:
       latitude:
@@ -299,6 +304,42 @@ paths:
               type: string
             type: object
       summary: Get a single station by ID
+      tags:
+      - stations
+  /stations/{stationId}/statistics:
+    get:
+      description: |-
+        Retrieves statistics for a specific station, optionally filtered by line.
+        This endpoint returns the number of reports for the specified station and/or line within the given time range.
+      parameters:
+      - description: ID of the station
+        in: path
+        name: stationId
+        required: true
+        type: string
+      - description: ID of the line (optional)
+        in: query
+        name: lineId
+        type: string
+      - description: 'Start time for the statistics (format: RFC3339)'
+        in: query
+        name: start
+        type: string
+      - description: 'End time for the statistics (format: RFC3339)'
+        in: query
+        name: end
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved station statistics.
+          schema:
+            $ref: '#/definitions/stations.Statistics'
+        "500":
+          description: 'Internal Server Error: Failed to get number of reports.'
+          schema: {}
+      summary: Get statistics
       tags:
       - stations
   /stations/search:
