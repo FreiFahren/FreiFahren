@@ -59,7 +59,7 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 	start := c.QueryParam("start")
 	end := c.QueryParam("end")
 
-	startTime, endTime := utils.GetTimeRange(start, end)
+	startTime, endTime := utils.GetTimeRange(start, end, time.Hour)
 
 	ticketInfoList, err := database.GetLatestTicketInspectors(startTime, endTime)
 	if err != nil {

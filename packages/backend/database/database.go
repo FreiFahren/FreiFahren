@@ -350,9 +350,9 @@ func RoundOldTimestamp() {
 //   - The most common station Id.
 //   - An error if something went wrong.
 func GetMostCommonStationId(stations []string) (string, error) {
-    logger.Log.Debug().Msg("Getting most common station Id")
+	logger.Log.Debug().Msg("Getting most common station Id")
 
-    sql := `
+	sql := `
         SELECT station_id
         FROM ticket_info
         WHERE station_id = ANY($1)
@@ -361,20 +361,35 @@ func GetMostCommonStationId(stations []string) (string, error) {
         LIMIT 1
     `
 
-    rows, err := pool.Query(context.Background(), sql, pq.Array(stations))
-    if err != nil {
-        logger.Log.Error().Err(err).Msg("Failed to get most common station Id")
-        return "", err
-    }
-    defer rows.Close()
+	rows, err := pool.Query(context.Background(), sql, pq.Array(stations))
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Failed to get most common station Id")
+		return "", err
+	}
+	defer rows.Close()
 
-    var stationId string
-    if rows.Next() {
-        if err := rows.Scan(&stationId); err != nil {
-            logger.Log.Error().Err(err).Msg("Error scanning row")
-            return "", err
-        }
-    }
+	var stationId string
+	if rows.Next() {
+		if err := rows.Scan(&stationId); err != nil {
+			logger.Log.Error().Err(err).Msg("Error scanning row")
+			return "", err
+		}
+	}
 
-    return stationId, nil
+	return stationId, nil
+}
+
+func GetNumberOfReports(stationId string, startTime, endTime time.Time) (int, error) {
+	logger.Log.Debug().Msgf("Getting number of reports for station %s", stationId)
+
+	sql := `SELECT COUNT(*) FROM ticket_info WHERE station_id = $1 AND timestamp >= $2 AND timestamp <= $3;`
+
+	var count int
+	err := pool.QueryRow(context.Background(), sql, stationId, startTime, endTime).Scan(&count)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Failed to get number of reports")
+		return 0, err
+	}
+
+	return count, nil
 }
