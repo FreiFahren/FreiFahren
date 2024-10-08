@@ -59,7 +59,7 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 	start := c.QueryParam("start")
 	end := c.QueryParam("end")
 
-	startTime, endTime := GetTimeRange(start, end)
+	startTime, endTime := utils.GetTimeRange(start, end)
 
 	ticketInfoList, err := database.GetLatestTicketInspectors(startTime, endTime)
 	if err != nil {
@@ -140,7 +140,7 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector, startTime ti
 	if cleanedStationId != "" {
 		station, ok = stations[cleanedStationId]
 		if !ok {
-			logger.Log.Error().Msg("Station not found")
+			logger.Log.Error().Msgf("StationId: %s not found", cleanedStationId)
 			return utils.TicketInspectorResponse{}, fmt.Errorf("station not found")
 		}
 	}

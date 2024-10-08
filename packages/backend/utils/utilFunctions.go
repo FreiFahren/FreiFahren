@@ -126,7 +126,6 @@ func FindEnvFile() (string, error) {
 			return envPath, nil
 		}
 
-
 		parent := filepath.Dir(dir)
 		if parent == dir {
 			break
@@ -135,4 +134,35 @@ func FindEnvFile() (string, error) {
 	}
 
 	return "", os.ErrNotExist
+}
+
+// GetTimeRange returns the start and end time of the time range
+//
+// Parameters:
+//   - start: The start time of the time range in RFC 3339 format.
+//   - end: The end time of the time range in RFC 3339 format.
+//
+// Returns:
+//   - The start time of the time range in RFC 3339 format.
+//   - The end time of the time range in RFC 3339 format.
+//
+// This function is being used to get the start and end time of the time range.
+func GetTimeRange(start, end string) (time.Time, time.Time) {
+	now := time.Now().UTC()
+	startTime := now.Add(-1 * time.Hour)
+	endTime := now
+
+	if start != "" && end != "" {
+		parsedStart, err := time.Parse(time.RFC3339, start)
+		if err == nil {
+			startTime = parsedStart
+		}
+
+		parsedEnd, err := time.Parse(time.RFC3339, end)
+		if err == nil {
+			endTime = parsedEnd
+		}
+	}
+
+	return startTime, endTime
 }
