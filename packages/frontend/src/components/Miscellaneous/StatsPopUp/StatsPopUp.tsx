@@ -1,5 +1,6 @@
-import React from 'react'
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import './StatsPopUp.css'
 
 interface StatsPopUpProps {
@@ -9,7 +10,10 @@ interface StatsPopUpProps {
 }
 
 const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports, openListModal }) => {
-    const [message, setMessage] = useState(`<p><strong>${numberOfReports} Meldungen</strong><br /> heute in Berlin</p>`)
+    const { t } = useTranslation()
+    const [message, setMessage] = useState(
+        `<p><strong>${numberOfReports} ${t('StatsPopUp.reports')}</strong><br /> ${t('StatsPopUp.todayInBerlin')}</p>`
+    )
     const [popOut, setPopOut] = useState(false)
     const [isVisible, setIsVisible] = useState(true)
 
@@ -17,7 +21,11 @@ const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports, ope
     const timeForPopOutAnimation = 0.5 * 1000
 
     const updateMessageAndShowPopup = async () => {
-        setMessage('<p>Über<strong> 27.000 Meldende</strong><br /> in Berlin</p>')
+        setMessage(
+            `<p>${t('StatsPopUp.over')} <strong> 27.000 ${t('StatsPopUp.reporters')}</strong><br /> ${t(
+                'StatsPopUp.inBerlin'
+            )}</p>`
+        )
         setPopOut(true)
     }
 

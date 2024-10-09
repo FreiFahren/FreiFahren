@@ -64,5 +64,12 @@
         "stations": "Stationen",
         "fromYou": "von dir entfernt",
         "direction": "Richtung"
+    },
+    "StatsPopUp": {
+        "reports": "Meldungen",
+        "todayInBerlin": "heute in Berlin",
+        "over": "Über",
+        "inBerlin": "in Berlin",
+        "reporters": "Meldende"
     }
 }
