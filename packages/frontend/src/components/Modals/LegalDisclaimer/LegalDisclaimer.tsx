@@ -1,7 +1,6 @@
-import React, { useRef } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { sendAnalyticsEvent } from 'src/utils/analytics'
 
 import './LegalDisclaimer.css'
 
@@ -13,14 +12,6 @@ interface LegalDisclaimerProps {
 const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ closeModal, openAnimationClass }) => {
     const { t } = useTranslation()
 
-    const startTimeRef = useRef<number>(Date.now())
-
-    const handleClose = () => {
-        const endTime = Date.now()
-        const durationInSeconds = Math.floor((endTime - startTimeRef.current) / 1000)
-        sendAnalyticsEvent('Legal disclaimer has been closed', { duration: durationInSeconds, meta: {} })
-        closeModal()
-    }
     return (
         <div className={`legal-disclaimer container modal ${openAnimationClass}`} id="legal-disclaimer">
             <div className="content">
@@ -40,7 +31,7 @@ const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ closeModal, openAnima
                 </section>
             </div>
             <div className="footer">
-                <button onClick={handleClose}>{t('LegalDisclaimer.confirm')}</button>
+                <button onClick={closeModal}>{t('LegalDisclaimer.confirm')}</button>
                 <ul className="align-child-on-line">
                     <li>
                         <Link to="/impressum">{t('LegalDisclaimer.impressum')}</Link>
