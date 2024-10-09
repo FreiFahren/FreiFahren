@@ -10,11 +10,13 @@ i18n.use(Backend)
         fallbackLng: 'en',
         supportedLngs: ['en', 'de'],
         backend: {
-            loadPath: '/locales/{{lng}}.json', // Path to translation files
+            loadPath: '/locales/{{lng}}.json',
         },
         interpolation: {
             escapeValue: false, // React already escapes values, no need for i18n to do so
         },
     })
-
+    .catch((err) => {
+        console.error('i18n initialization error:', err)
+    })
 export default i18n
