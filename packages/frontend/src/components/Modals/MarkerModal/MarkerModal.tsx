@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import { MarkerData } from 'src/utils/types'
-import { stationDistanceMessage, elapsedTimeMessage } from '../../../utils/uiUtils'
+import { useElapsedTimeMessage, useStationDistanceMessage } from '../../../hooks/Messages'
 import { getStationDistance, fetchNumberOfReports } from '../../../utils/dbUtils'
 import { getNearestStation } from '../../../utils/mapUtils'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
@@ -17,6 +19,8 @@ interface MarkerModalProps {
 }
 
 const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selectedMarker, userLat, userLng }) => {
+    const { t } = useTranslation()
+
     const { allStations } = useStationsAndLines()
     const { timestamp, station, line, direction } = selectedMarker
 
@@ -62,6 +66,9 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
         fetchNumberOfReports(station.id).then(setNumberOfReports)
     }, [station.id])
 
+    const elapsedTimeMessage = useElapsedTimeMessage(elapsedTimeInMinutes, selectedMarker.isHistoric)
+    const stationDistanceMessage = useStationDistanceMessage(stationDistance)
+
     return (
         <div className={`marker-modal info-popup modal ${className}`}>
             {children}
@@ -72,14 +79,17 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                 </h2>
             )}
             <div>
-                <p>{elapsedTimeMessage(elapsedTimeInMinutes, selectedMarker.isHistoric)}</p>
+                <p>{elapsedTimeMessage}</p>
                 {numberOfReports > 0 && (
                     <p>
-                        <strong>{numberOfReports} Mal</strong> diese Woche
+                        <strong>
+                            {numberOfReports} {t('MarkerModal.reports')}
+                        </strong>{' '}
+                        {t('MarkerModal.thisWeek')}
                     </p>
                 )}
                 {userLat && userLng && (
-                    <p className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage(stationDistance)}</p>
+                    <p className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage}</p>
                 )}
                 {selectedMarker.message && <p className="description">{selectedMarker.message}</p>}
             </div>

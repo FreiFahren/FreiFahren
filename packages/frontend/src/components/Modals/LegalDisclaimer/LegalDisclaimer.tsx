@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import { Link } from 'react-router-dom'
-
+import { useTranslation } from 'react-i18next'
 import { sendAnalyticsEvent } from 'src/utils/analytics'
 
 import './LegalDisclaimer.css'
@@ -11,6 +11,8 @@ interface LegalDisclaimerProps {
 }
 
 const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ closeModal, openAnimationClass }) => {
+    const { t } = useTranslation()
+
     const startTimeRef = useRef<number>(Date.now())
 
     const handleClose = () => {
@@ -22,38 +24,29 @@ const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ closeModal, openAnima
     return (
         <div className={`legal-disclaimer container modal ${openAnimationClass}`} id="legal-disclaimer">
             <div className="content">
-                <h1>Bitte bestätigen Sie vor dem Fortfahren</h1>
+                <h1>{t('LegalDisclaimer.title')}</h1>
                 <section>
-                    <p>
-                        Um die Integrität unserer Community und den Geist fairer Nutzung zu wahren, bitten wir Sie, zwei
-                        wichtige Punkte zu bestätigen:
-                    </p>
+                    <p>{t('LegalDisclaimer.text')}</p>
                     <ol>
                         <li>
-                            <strong>Ich besitze ein gültiges Ticket für meine Reise.</strong>
-                            <p>
-                                Ich verstehe, dass diese App dazu dient, das Bewusstsein und die Planung im öffentlichen
-                                Nahverkehr zu verbessern, nicht aber um Regeln oder Vorschriften zu umgehen.
-                            </p>
+                            <strong>{t('LegalDisclaimer.ticket')}</strong>
+                            <p>{t('LegalDisclaimer.ticketDescription')}</p>
                         </li>
                         <li>
-                            <strong>Ich nutze die App nicht aktiv während der Fahrt.</strong>
-                            <p>
-                                Mir ist bewusst, dass die aktive Nutzung der App während der Fahrt andere Fahrgäste
-                                stören und gegen die Nutzungsbedingungen des Verkehrsbetriebs verstoßen kann.
-                            </p>
+                            <strong>{t('LegalDisclaimer.activeUsage')}</strong>
+                            <p>{t('LegalDisclaimer.activeUsageDescription')}</p>
                         </li>
                     </ol>
                 </section>
             </div>
             <div className="footer">
-                <button onClick={handleClose}>Ich bestätige</button>
+                <button onClick={handleClose}>{t('LegalDisclaimer.confirm')}</button>
                 <ul className="align-child-on-line">
                     <li>
-                        <Link to="/impressum">Impressum</Link>
+                        <Link to="/impressum">{t('LegalDisclaimer.impressum')}</Link>
                     </li>
                     <li>
-                        <Link to="/Datenschutz">Datenschutz</Link>
+                        <Link to="/Datenschutz">{t('LegalDisclaimer.privacy')}</Link>
                     </li>
                 </ul>
             </div>

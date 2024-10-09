@@ -10,23 +10,29 @@ import reportWebVitals from './reportWebVitals'
 
 import { LocationProvider } from './contexts/LocationContext'
 
+import { I18nextProvider } from 'react-i18next'
+import i18n from './i18n'
+
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
+
 root.render(
     <React.StrictMode>
-        <BrowserRouter>
-            <Routes>
-                <Route
-                    path="/"
-                    element={
-                        <LocationProvider>
-                            <App />
-                        </LocationProvider>
-                    }
-                />
-                <Route path="/impressum" element={<Impressum />} />
-                <Route path="/datenschutz" element={<Datenschutz />} />
-            </Routes>
-        </BrowserRouter>
+        <I18nextProvider i18n={i18n}>
+            <BrowserRouter>
+                <Routes>
+                    <Route
+                        path="/"
+                        element={
+                            <LocationProvider>
+                                <App />
+                            </LocationProvider>
+                        }
+                    />
+                    <Route path="/impressum" element={<Impressum />} />
+                    <Route path="/datenschutz" element={<Datenschutz />} />
+                </Routes>
+            </BrowserRouter>
+        </I18nextProvider>
     </React.StrictMode>
 )
 

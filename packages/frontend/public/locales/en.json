@@ -1,0 +1,68 @@
+{
+    "InspectorListButton": {
+        "label": "Reports"
+    },
+    "LegalDisclaimer": {
+        "title": "Please confirm before proceeding",
+        "text": "To maintain the integrity of our community and the spirit of fair use, we ask you to confirm two important points:",
+        "ticket": "I own a valid ticket for my journey.",
+        "ticketDescription": "I understand that this app is designed to improve awareness and planning in public transport, not to circumvent rules or regulations.",
+        "activeUsage": "I am not actively using the app during my journey.",
+        "activeUsageDescription": "I understand that the active use of the app during my journey can disturb other passengers and violate the terms of use of the public transport operator.",
+        "confirm": "I confirm",
+        "impressum": "Legal notice",
+        "privacy": "Privacy"
+    },
+    "UtilModal": {
+        "title": "Information",
+        "feedback-button": "Contact & Feedback",
+        "impressum": "Legal notice",
+        "privacy": "Privacy"
+    },
+    "FeedbackModal": {
+        "title": "Send your feedback to:",
+        "about-us": "About us",
+        "about-us-text": "FreiFahren is a non-commercial open-source project aimed at making public transport more accessible. We are always open to new contributors on our",
+        "telegram-group-info": "Most of the reports come from the FreiFahren_BE Telegram group. Thank you to the admins for allowing us to extract the relevant information with our Telegram bot."
+    },
+    "LayerSwitcher": {
+        "risk": "Risk",
+        "lines": "Lines",
+        "mode": "Mode"
+    },
+    "ReportForm": {
+        "title": "New report",
+        "line": "Line",
+        "searchPlaceholder": "Search for a station",
+        "station": "Station",
+        "direction": "Direction",
+        "description": "Description",
+        "descriptionPlaceholder": "Describe the inspectors",
+        "privacy1": "I agree to the",
+        "privacy2": "Privacy policy",
+        "privacy3": ".",
+        "report": "Submit"
+    },
+    "AskForLocation": {
+        "title": "Your location could not be determined.",
+        "searchPlaceholder": "Search for a station",
+        "label": "Station",
+        "setLocation": "Set location"
+    },
+    "MarkerModal": {
+        "reports": "times",
+        "thisWeek": "this week",
+        "moreThan": "More than",
+        "moreThan45Minutes": "45 minutes",
+        "oneHourAgo": "One hour ago",
+        "oneHour": "hour",
+        "hours": "hours",
+        "ago": "ago",
+        "now": "Now",
+        "minutes": "minutes",
+        "oneStation": "one station",
+        "stations": "stations",
+        "fromYou": "from you",
+        "direction": "Direction"
+    }
+}

@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import SelectField from '../SelectField/SelectField'
 import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
@@ -36,6 +37,8 @@ const ITEM_HEIGHT = 37
 const REPORT_COOLDOWN_MINUTES = 15
 
 const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSubmission, className }) => {
+    const { t } = useTranslation()
+
     const { userPosition } = useLocation()
     const { allLines, allStations } = useStationsAndLines()
 
@@ -317,7 +320,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
             <form onSubmit={handleSubmit}>
                 <div>
                     <div ref={topElementsRef}>
-                        <h1>Neue Meldung</h1>
+                        <h1>{t('ReportForm.title')}</h1>
                         <section>
                             <SelectField
                                 containerClassName="align-child-on-line large-selector"
@@ -334,7 +337,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                             </SelectField>
                         </section>
                         <section>
-                            <h2>Linie</h2>
+                            <h2>{t('ReportForm.line')}</h2>
                             <SelectField
                                 containerClassName="align-child-on-line long-selector"
                                 onSelect={handleLineSelect}
@@ -353,8 +356,8 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                         onSelect={handleStationSelect}
                         value={currentStation}
                         getDisplayValue={(station) => station.name}
-                        placeholder="Suche eine Station"
-                        label="Station"
+                        placeholder={t('ReportForm.searchPlaceholder')}
+                        label={t('ReportForm.station')}
                         required={true}
                         setSearchUsed={setSearchUsed}
                         listHeight={stationListHeight}
@@ -371,7 +374,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                     <div ref={bottomElementsRef}>
                         {currentLine && currentLine !== 'S41' && currentLine !== 'S42' && currentStation && (
                             <section>
-                                <h3>Richtung</h3>
+                                <h3>{t('ReportForm.direction')}</h3>
                                 <SelectField
                                     onSelect={handleDirectionSelect}
                                     value={currentDirection ? allStations[currentDirection].name : ''}
@@ -389,9 +392,9 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                             </section>
                         )}
                         <section className="description-field">
-                            <h3>Beschreibung</h3>
+                            <h3>{t('ReportForm.description')}</h3>
                             <textarea
-                                placeholder="Beschreibung"
+                                placeholder={t('ReportForm.descriptionPlaceholder')}
                                 onChange={(e) => setDescription(e.target.value)}
                                 value={description}
                             />
@@ -406,7 +409,8 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                                         checked={isPrivacyChecked}
                                         onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
                                     />
-                                    Ich stimme der <a href="/datenschutz"> Datenschutzerklärung </a> zu.
+                                    {t('ReportForm.privacy1')}
+                                    <a href="/datenschutz"> {t('ReportForm.privacy2')} </a> {t('ReportForm.privacy3')}
                                     {redHighlight('')}
                                 </label>
                             </div>
@@ -415,7 +419,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                                     type="submit"
                                     className={isPrivacyChecked && currentStation ? '' : 'button-gray'}
                                 >
-                                    Melden
+                                    {t('ReportForm.report')}
                                 </button>
                             </div>
                         </section>

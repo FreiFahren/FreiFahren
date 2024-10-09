@@ -1,6 +1,6 @@
 .list-button {
     height: var(--height-streched-button);
-    width: 135px;
+    width: fit-content;
     bottom: var(--distance-from-edge-default);
     left: var(--distance-from-edge-default);
     overflow: hidden;
