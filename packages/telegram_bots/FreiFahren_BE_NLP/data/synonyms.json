@@ -47,10 +47,11 @@
         "Blankenburg": [],
         "Blankenfelde": [],
         "Borgsdorf": [],
-        "Bornholmerstraße": [
+        "Bornholmer Straße": [
             "Bornholmer",
             "Bornholmerstr.",
-            "Bornholmerstrasse"
+            "Bornholmerstrasse",
+            "Bornholmer Straße"
         ],
         "Botanischer Garten": [],
         "Brandenburger Tor": [
@@ -93,16 +94,21 @@
             "Rosenthaler",
             "Rosenthalerplz"
         ],
+        "Seestraße": [
+            "Seestr.",
+            "Seestrasse"
+        ],
         "Gehrenseestraße": [
             "Gehrenseeer",
             "Gehrenseestrasse",
             "Gehrenseestr."
         ],
         "Gesundbrunnen": [],
-        "Greifswalderstraße": [
+        "Greifswalder Straße": [
             "Greifswalder",
             "Greifswalderstr.",
-            "Greifswalderstrasse"
+            "Greifswalderstrasse",
+            "Greifswalder Straße"
         ],
         "Griebnitzsee": [],
         "Grünau": [],
@@ -205,15 +211,20 @@
         "Nordbahnhof": [
             "Nordbhf"
         ],
+        "Oranienburg": [],
         "Oberspree": [],
         "Olympia-Stadion": [],
-        "Oranienburgerstraße": [
+        "Oranienburger Straße": [
             "Oranienburger",
-            "Oranienburgerstr."
+            "Oranienburgerstr.",
+            "Oranienburgerstraße",
+            "Oranienburgerstrasse"
         ],
-        "Osdorferstraße": [
+        "Osdorfer Straße": [
             "Osdorfer",
-            "Osdorferstr."
+            "Osdorferstr.",
+            "Osdorferstrasse",
+            "Osdorferstraße"
         ],
         "Ostbahnhof": [
             "Ostbhf"
@@ -276,10 +287,11 @@
         "Spandau": [],
         "Spindlersfeld": [],
         "Springpfuhl": [],
-        "Storkowerstraße": [
+        "Storkower Straße": [
             "Storkower",
             "Storkowerstr.",
-            "Storkowerstrasse"
+            "Storkowerstrasse",
+            "Storkowerstraße"
         ],
         "Strausberg": [],
         "Strausberg Nord": [],
@@ -289,10 +301,11 @@
             "Südkrz"
         ],
         "Südende": [],
-        "Sundgauerstraße": [
+        "Sundgauer Straße": [
             "Sundgauer",
             "Sundgauerstr.",
-            "Sundgauerstrasse"
+            "Sundgauerstrasse",
+            "Sundgauerstraße"
         ],
         "Tegel": [],
         "Teltow Stadt": [],
@@ -304,10 +317,11 @@
         ],
         "Waidmannslust": [],
         "Wannsee": [],
-        "Warschauerstraße": [
+        "Warschauer Straße": [
             "Warschauer",
             "Warschauerstr.",
-            "Warschauerstrasse"
+            "Warschauerstrasse",
+            "Warschauerstraße"
         ],
         "Wartenberg": [],
         "Waßmannsdorf": [],
@@ -340,9 +354,10 @@
     },
     "uBahn_stations_with_synomyms": {
         "Adenauer Platz": [],
-        "Afrikanischestraße": [
+        "Afrikanische Straße": [
             "Afrikanischestr.",
-            "afrikanische strasse"
+            "afrikanische strasse",
+            "Afrikanischestraße"
         ],
         "Alexanderplatz": [
             "Alex"
@@ -351,25 +366,37 @@
         "Alt-Mariendorf": [],
         "Alt-Tegel": [],
         "Alt-Tempelhof": [],
-        "Amrumerstraße": [
+        "Amrumer Straße": [
+            "Amrumer",
             "Amrumerstr.",
-            "Amrumerstrasse"
+            "Amrumerstrasse",
+            "Amrumerstraße"
         ],
         "Bayrischer Platz": [
             "Bayrischerplz"
         ],
-        "Berlinerstraße": [
+        "Berliner Straße": [
+            "Berliner",
             "Berlinerstr.",
-            "Berlinerstrasse"
+            "Berlinerstrasse",
+            "Berlinerstraße"
         ],
-        "Bernauerstraße": [
+        "Bernauer Straße": [
+            "Bernauer",
             "Bernauerstr.",
-            "Bernauerstrasse"
+            "Bernauerstrasse",
+            "Bernauerstraße"
         ],
         "Biesdorf-Süd": [],
         "Birkenstraße": [
             "Birkenstr.",
             "Birkenstrasse"
+        ],
+        "Augsburger Straße": [
+            "Augsburger",
+            "Augsburgerstr.",
+            "Augsburgerstrasse",
+            "Augsburgerstraße"
         ],
         "Blaschkoallee": [],
         "Blissestraße": [
@@ -398,13 +425,17 @@
         ],
         "Dahlem-Dorf": [],
         "Deutsche Oper": [],
-        "Eberswalderstraße": [
+        "Eberswalder Straße": [
+            "Eberswalder",
             "Eberswalderstr.",
-            "Eberswalderstrasse"
+            "Eberswalderstrasse",
+            "Eberswalderstraße"
         ],
-        "Eisenacherstraße": [
+        "Eisenacher Straße": [
+            "Eisenacher",
             "Eisenacherstr.",
-            "Eisenacherstrasse"
+            "Eisenacherstrasse",
+            "Eisenacherstraße"
         ],
         "Elsterwerdaer Platz": [
             "Elsterwerdaerplz"
@@ -433,6 +464,7 @@
             "Friedrichstrasse.",
             "Friedrichstrasse"
         ],
+        "Hellersdorf": [],
         "Friedrich-Wilhelm-Platz": [
             "Friedrich Wilhelm Plz",
             "Friedrich Wilhelm"
@@ -524,19 +556,28 @@
             "Kienberg",
             "Gärten der Welt"
         ],
+        "Louis-Lewin-Straße": [
+            "Louis Lewin",
+            "Louis Lewin Str",
+            "Louis Lewin Strasse"
+        ],
         "Kleistpark": [],
-        "Klosterstraße": [
+        "Kloster Straße": [
+            "Kloster",
             "Klosterstr.",
-            "Klosterstrasse"
+            "Klosterstrasse",
+            "Klosterstraße"
         ],
         "Kochstraße (Checkpoint Charlie)": [
             "Kochstr.",
             "Checkpoint Charlie",
             "Kochstrasse"
         ],
-        "Konstanzerstraße": [
+        "Konstanzer Straße": [
+            "Konstanzer",
             "Konstanzerstr.",
-            "Konstanzerstrasse"
+            "Konstanzerstrasse",
+            "Konstanzerstraße"
         ],
         "Kottbusser Tor": [
             "Kottbusser",
@@ -617,8 +658,9 @@
         "Oskar-Helene-Heim": [
             "Oskar Helene"
         ],
-        "Osloerstraße": [
+        "Osloer Straße": [
             "Osloerstr.",
+            "Osloerstraße",
             "Osloerstrasse",
             "Osloer"
         ],
@@ -663,9 +705,11 @@
             "Rathaus Stz"
         ],
         "Rehberge": [],
-        "Reinickendorferstraße": [
+        "Reinickendorfer Straße": [
+            "Reinickendorfer",
             "Reinickendorferstr.",
-            "Reinickendorferstrasse"
+            "Reinickendorferstrasse",
+            "Reinickendorferstraße"
         ],
         "Residenzstraße": [
             "Residenzstr.",
@@ -686,9 +730,11 @@
         ],
         "Rudow": [],
         "Ruhleben": [],
-        "Samariterstraße": [
+        "Samariter Straße": [
+            "Samariter",
             "Samariterstr.",
-            "Samariterstrasse"
+            "Samariterstrasse",
+            "Samariterstraße"
         ],
         "Scharnweberstraße": [
             "Scharnweberstr.",
@@ -782,10 +828,11 @@
         ],
         "Westhafen": [],
         "Westphalweg": [],
-        "Wilmersdorferstraße": [
+        "Wilmersdorfer Straße": [
             "Wilmersdorferstr.",
             "Wilmersdorferstrasse",
-            "Wilmersdorf"
+            "Wilmersdorf",
+            "Wilmersdorferstraße"
         ],
         "Wittenau": [],
         "Wittenbergplatz": [
