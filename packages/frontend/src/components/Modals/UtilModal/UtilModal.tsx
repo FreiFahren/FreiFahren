@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 import './UtilModal.css'
 import FeedbackModal from '../FeedbackModal/FeedbackModal'
@@ -17,6 +18,8 @@ const light_icon = `${process.env.PUBLIC_URL}/icons/light.svg`
 const dark_icon = `${process.env.PUBLIC_URL}/icons/dark.svg`
 
 const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, toggleColorTheme }) => {
+    const { t } = useTranslation()
+
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false)
 
     return (
@@ -24,9 +27,9 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
             <div className={`util-modal info-popup modal ${className}`}>
                 {children}
                 <div className="align-child-on-line">
-                    <h1>Informationen</h1>
+                    <h1>{t('UtilModal.title')}</h1>
                     <button className="action" onClick={() => setIsFeedbackModalOpen(true)}>
-                        Kontakt & Feedback
+                        {t('UtilModal.feedback-button')}
                     </button>
                 </div>
                 <div>
@@ -41,10 +44,10 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                     </ul>
                     <ul className="align-child-on-line">
                         <li>
-                            <Link to="/impressum">Impressum</Link>
+                            <Link to="/impressum">{t('UtilModal.impressum')}</Link>
                         </li>
                         <li>
-                            <Link to="/Datenschutz">Datenschutz</Link>
+                            <Link to="/Datenschutz">{t('UtilModal.privacy')}</Link>
                         </li>
                         <li>
                             <a

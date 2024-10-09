@@ -1,5 +1,5 @@
 import React from 'react'
-
+import { useTranslation } from 'react-i18next'
 import './FeedbackModal.css'
 
 interface FeedbackModalProps {
@@ -11,9 +11,11 @@ const mail_icon = `${process.env.PUBLIC_URL}/icons/mail.svg`
 const telegram_icon = `${process.env.PUBLIC_URL}/icons/telegram.svg`
 
 const FeedbackModal: React.FC<FeedbackModalProps> = ({ openAnimationClass }) => {
+    const { t } = useTranslation()
+
     return (
         <div className={`feedback-modal modal container ${openAnimationClass}`}>
-            <h1>Sende dein Feedback an:</h1>
+            <h1>{t('FeedbackModal.title')}</h1>
             <ul>
                 <li>
                     <img
@@ -80,20 +82,15 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ openAnimationClass }) => 
                     </div>
                 </li>
             </ul>
-            <h2>Über uns</h2>
+            <h2>{t('FeedbackModal.about-us')}</h2>
             <p>
-                FreiFahren ist ein nicht-kommerzielles Open-Source-Projekt, das sich zum Ziel gesetzt hat, den Zugang
-                zum öffentlichen Nahverkehr zu erleichtern. Wir sind stets offen für neue Mithelfende auf unserem{' '}
+                {t('FeedbackModal.about-us-text')}{' '}
                 <a href="https://github.com/FreiFahren/FreiFahren" target="_blank" rel="noopener noreferrer">
                     GitHub
                 </a>
                 .
             </p>
-            <p>
-                Ein Großteil der Meldungen stammt aus der{' '}
-                <a href="https://t.me/freifahren_BE">FreiFahren_BE Telegram-Gruppe</a>. Vielen Dank an die Admins, dass
-                wir mit unserem Telegram Bot die relevanten Informationen extrahieren dürfen.
-            </p>
+            <p>{t('FeedbackModal.telegram-group-info', { groupName: t('FeedbackModal.group-name') })}</p>
         </div>
     )
 }

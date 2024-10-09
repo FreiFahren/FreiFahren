@@ -1,5 +1,68 @@
 {
     "InspectorListButton": {
         "label": "Meldungen"
+    },
+    "LegalDisclaimer": {
+        "title": "Bitte bestätigen Sie vor dem Fortfahren",
+        "text": "Um die Integrität unserer Community und den Geist fairer Nutzung zu wahren, bitten wir Sie, zwei wichtige Punkte zu bestätigen:",
+        "ticket": "Ich besitze ein gültiges Ticket für meine Reise.",
+        "ticketDescription": "Ich verstehe, dass diese App dazu dient, das Bewusstsein und die Planung im öffentlichen Nahverkehr zu verbessern, nicht aber um Regeln oder Vorschriften zu umgehen.",
+        "activeUsage": "Ich nutze die App nicht aktiv während der Fahrt.",
+        "activeUsageDescription": "Ich verstehe, dass die aktive Nutzung der App während der Fahrt andere Fahrgäste stören und gegen die Nutzungsbedingungen des Verkehrsbetriebs verstoßen kann.",
+        "confirm": "Ich bestätige",
+        "impressum": "Impressum",
+        "privacy": "Datenschutz"
+    },
+    "UtilModal": {
+        "title": "Informationen",
+        "feedback-button": "Kontakt & Feedback",
+        "impressum": "Impressum",
+        "privacy": "Datenschutz"
+    },
+    "FeedbackModal": {
+        "title": "Sende dein Feedback an:",
+        "about-us": "Über uns",
+        "about-us-text": "FreiFahren ist ein nicht-kommerzielles Open-Source-Projekt, das sich zum Ziel gesetzt hat, den Zugang zum öffentlichen Nahverkehr zu erleichtern. Wir sind stets offen für neue Mithelfende auf unserem",
+        "telegram-group-info": "Ein Großteil der Meldungen stammt aus der FreiFahren_BE Telegram-Gruppe. Vielen Dank an die Admins, dass wir mit unserem Telegram Bot die relevanten Informationen extrahieren dürfen."
+    },
+    "LayerSwitcher": {
+        "risk": "Risiko",
+        "lines": "Linien",
+        "mode": "Modus"
+    },
+    "ReportForm": {
+        "title": "Neue Meldung",
+        "line": "Linie",
+        "searchPlaceholder": "Suche nach einer Station",
+        "station": "Station",
+        "direction": "Richtung",
+        "description": "Beschreibung",
+        "descriptionPlaceholder": "Beschreibung der Kontrollierenden",
+        "privacy1": "Ich stimme der",
+        "privacy2": "Datenschutzerklärung",
+        "privacy3": "zu.",
+        "report": "Melden"
+    },
+    "AskForLocation": {
+        "title": "Dein Standort konnte nicht ermittelt werden.",
+        "searchPlaceholder": "Suche nach einer Station",
+        "label": "Station",
+        "setLocation": "Standort setzen"
+    },
+    "MarkerModal": {
+        "reports": "Mal",
+        "thisWeek": "diese Woche",
+        "moreThan": "Vor mehr als",
+        "moreThan45Minutes": "45 Minuten",
+        "oneHourAgo": "Vor einer",
+        "oneHour": "Stunde",
+        "hours": "Stunden",
+        "ago": "vor",
+        "now": "Jetzt",
+        "minutes": "Minuten",
+        "oneStation": "eine Station",
+        "stations": "Stationen",
+        "fromYou": "von dir entfernt",
+        "direction": "Richtung"
     }
 }

@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import './AskForLocation.css'
 import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
@@ -11,6 +12,8 @@ interface AskForLocationProps {
 }
 
 const AskForLocation: React.FC<AskForLocationProps> = ({ className, children, closeModal }) => {
+    const { t } = useTranslation()
+
     const { setUserPosition } = useLocation()
     const { allStations } = useStationsAndLines()
     const [stationsToShow, setStationsToShow] = useState(allStations)
@@ -48,19 +51,19 @@ const AskForLocation: React.FC<AskForLocationProps> = ({ className, children, cl
         <div className={`ask-for-location info-popup modal ${className}`}>
             {children}
             <form onSubmit={handleSubmit}>
-                <h1>Dein Standort konnte nicht ermittelt werden.</h1>
+                <h1>{t('AskForLocation.title')}</h1>
                 <AutocompleteInputForm
                     items={stationsToShow}
                     onSelect={handleSelect}
                     value={selectedStation}
                     getDisplayValue={(station) => station.name}
-                    placeholder="Station suchen..."
-                    label="Deine Station"
+                    placeholder={t('AskForLocation.searchPlaceholder')}
+                    label={t('AskForLocation.label')}
                     required={false}
                 />
 
                 <button type="submit" className={selectedStation ? '' : 'button-gray'} disabled={!selectedStation}>
-                    Standort setzen
+                    {t('AskForLocation.setLocation')}
                 </button>
             </form>
         </div>
