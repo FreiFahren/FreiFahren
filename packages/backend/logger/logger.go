@@ -85,6 +85,8 @@ func Init() {
 	// Use the multi-writer when creating the logger
 	Log = zerolog.New(multi).Level(zerolog.DebugLevel).With().Timestamp().Caller().Logger()
 
-	apiEndpoint := os.Getenv("TELEGRAM_BOTS_URL") + "/report-failure"
-	Log = Log.Hook(&APIHook{Endpoint: apiEndpoint})
+	if os.Getenv("STATUS") != "dev" {
+		apiEndpoint := os.Getenv("TELEGRAM_BOTS_URL") + "/report-failure"
+		Log = Log.Hook(&APIHook{Endpoint: apiEndpoint})
+	}
 }
