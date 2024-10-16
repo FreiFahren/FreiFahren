@@ -1,7 +1,9 @@
-from flask import Flask, request, jsonify
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
+from typing import Dict, Any
 
-app = Flask(__name__)
+app = FastAPI()
 
 tokenizer = AutoTokenizer.from_pretrained("chrisrtt/gbert-multi-class-german-hate")
 model = AutoModelForSequenceClassification.from_pretrained(
@@ -10,20 +12,24 @@ model = AutoModelForSequenceClassification.from_pretrained(
 classifier = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer)
 
 
-@app.route("/classification", methods=["POST"])
-def classify_text():
-    data = request.get_json()
+class TextInput(BaseModel):
+    text: str
 
-    if "text" not in data:
-        return jsonify({"error": "No text provided"}), 400
 
-    text = data["text"]
+@app.post("/classification")
+def classify_text(input_data: TextInput) -> Dict[str, Any]:
+    text = input_data.text
 
     result = classifier(text)
 
     # Return True if it is hatespeech, False otherwise
-    return jsonify(result[0]["label"] not in ["No Hate Speech", "Sexist Hate Speech"])
+    return {
+        "is_hate_speech": result[0]["label"]
+        not in ["No Hate Speech", "Sexist Hate Speech"]
+    }
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=9090)
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=9090)
