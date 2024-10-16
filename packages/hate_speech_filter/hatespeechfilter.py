@@ -16,7 +16,7 @@ class TextInput(BaseModel):
     text: str
 
 
-@app.post("/classification")
+@app.post("/classification/hatespeech")
 def classify_text(input_data: TextInput) -> Dict[str, Any]:
     text = input_data.text
 
