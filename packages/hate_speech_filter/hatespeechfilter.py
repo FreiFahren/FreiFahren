@@ -22,7 +22,6 @@ def classify_text(input_data: TextInput) -> Dict[str, Any]:
 
     result = classifier(text)
 
-    # Return True if it is hatespeech, False otherwise
     return {
         "is_hate_speech": result[0]["label"]
         not in ["No Hate Speech", "Sexist Hate Speech"]
