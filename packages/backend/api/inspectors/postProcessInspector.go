@@ -1,6 +1,11 @@
 package inspectors
 
 import (
+	"bytes"
+	"encoding/json"
+	"io"
+	"net/http"
+	"os"
 	"slices"
 	"strings"
 
@@ -10,12 +15,26 @@ import (
 	structs "github.com/FreiFahren/backend/utils"
 )
 
-	func PostProcessInspectorData(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers) error {
+func PostProcessInspectorData(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers) error {
 	logger.Log.Debug().Msg("Filling missing columns using provided data")
 
 	var stations = data.GetStationsList()
 	var lines = data.GetLinesList()
-	
+
+	// check if the message is hate speech
+	if dataToInsert.Message != "" {
+		isHateSpeech, err := checkHateSpeech(dataToInsert.Message)
+		if err != nil {
+			logger.Log.Error().Err(err).Msg("Error checking for hate speech")
+			return err
+		}
+		if isHateSpeech {
+			dataToInsert.Message = ""
+			pointers.MessagePtr = nil
+			logger.Log.Info().Msg("Message classified as hate speech, removed from data")
+		}
+	}
+
 	// avoid overwriting the line if station and direction dont match
 	if dataToInsert.Line == "" && (dataToInsert.Station.Id != "" || dataToInsert.Direction.Id != "") {
 		if err := AssignLineIfSingleOption(dataToInsert, pointers, stations[dataToInsert.Station.Id], stations[dataToInsert.Direction.Id]); err != nil {
@@ -103,14 +122,14 @@ import (
 // Given a request with a line but no station, guess the station based on the most common station on the line.
 //
 // Parameters:
-// 		- dataToInsert: The data to insert into the database.
-// 		- pointers: The pointers to the fields necessary for inserting data into the database.
-// 		- stationsOnLine: The list of stations on the line.
+//   - dataToInsert: The data to insert into the database.
+//   - pointers: The pointers to the fields necessary for inserting data into the database.
+//   - stationsOnLine: The list of stations on the line.
 //
 // Returns:
-//		- An error if there was a problem querying the database.
+//   - An error if there was a problem querying the database.
 //
-// This function queries the database to find the most common station on the line and assigns it to the dataToInsert. 
+// This function queries the database to find the most common station on the line and assigns it to the dataToInsert.
 // This is being done to avoid storing useless data, as we would otherwise serve historic data to the users, which is not very accurate.
 func guessStation(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, stationsOnLine []string) error {
 	logger.Log.Debug().Msg("Guessing station Id based on line")
@@ -229,4 +248,42 @@ func correctDirection(dataToInsert *structs.ResponseData, pointers *structs.Inse
 		logger.Log.Debug().Msg("Set the last station as direction")
 		setDirection(dataToInsert, pointers, line[len(line)-1], data.GetStationsList()[line[len(line)-1]])
 	}
+}
+
+func checkHateSpeech(message string) (bool, error) {
+	baseURL := os.Getenv("CONTENT_MODERATION_SERVICE_URL")
+	url := baseURL + "/classification/hatespeech"
+	payload := map[string]string{"text": message}
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return false, err
+	}
+
+	req, err := http.NewRequest("GET", url, bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		return false, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return false, err
+	}
+
+	var result struct {
+		IsHateSpeech bool `json:"is_hate_speech"`
+	}
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return false, err
+	}
+
+	return result.IsHateSpeech, nil
 }
