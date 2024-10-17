@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 from typing import Dict, Any
@@ -17,15 +17,21 @@ class TextInput(BaseModel):
 
 
 @app.get("/classification/hatespeech")
-def classify_text(input_data: TextInput) -> Dict[str, Any]:
-    text = input_data.text
+async def classify_text(request: Request) -> Dict[str, Any]:
+    try:
+        body = await request.json()
+        text = body.get("text", "")
+        if not text:
+            raise HTTPException(status_code=400, detail="Text is required")
 
-    result = classifier(text)
+        result = classifier(text)
 
-    return {
-        "is_hate_speech": result[0]["label"]
-        not in ["No Hate Speech", "Sexist Hate Speech"]
-    }
+        return {
+            "is_hate_speech": result[0]["label"]
+            not in ["No Hate Speech", "Sexist Hate Speech"]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":
