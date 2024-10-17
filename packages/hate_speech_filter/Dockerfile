@@ -16,5 +16,5 @@ COPY . .
 # Expose port 9090
 EXPOSE 9090
 
-# Command to run the application using Waitress
-CMD ["waitress-serve", "--port=9090", "hatespeechfilter:app"]
+# Command to run the application using uvicorn
+CMD ["uvicorn", "hatespeechfilter:app", "--host", "0.0.0.0", "--port", "9090"]
