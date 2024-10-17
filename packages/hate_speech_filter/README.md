@@ -24,7 +24,7 @@ This command builds the Docker image and runs the container interactively.
 Once the application is running, you can classify text by sending a POST request to the classification endpoint. Use the following `curl` command to test the classification:
 
 ```bash
-curl -X GET http://localhost/classification/hatespeech \
+curl -X GET http://localhost:9090/classification/hatespeech \
 -H "Content-Type: application/json" \
 -d '{"text": "Fünf Kontrolleure an der S42"}'
 ```
