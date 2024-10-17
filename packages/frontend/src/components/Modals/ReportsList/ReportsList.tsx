@@ -4,13 +4,14 @@ import { MarkerData } from 'src/utils/types'
 import { getRecentDataWithIfModifiedSince } from 'src/utils/dbUtils'
 import { useElapsedTimeMessage } from 'src/hooks/Messages'
 import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
-import './InspectorListModal.css'
 
-interface InspectorListModalProps {
+import './ReportsList.css'
+
+interface ReportsListProps {
     className?: string
 }
 
-const InspectorItem: React.FC<{ ticketInspector: MarkerData; currentTime: number }> = ({
+const ReportsItem: React.FC<{ ticketInspector: MarkerData; currentTime: number }> = ({
     ticketInspector,
     currentTime,
 }) => {
@@ -41,7 +42,7 @@ const InspectorItem: React.FC<{ ticketInspector: MarkerData; currentTime: number
     )
 }
 
-const InspectorListModal: React.FC<InspectorListModalProps> = ({ className }) => {
+const ReportsList: React.FC<ReportsListProps> = ({ className }) => {
     const [ticketInspectorList, setTicketInspectorList] = useState<MarkerData[]>([])
     const { ticketInspectorList: lastHourInspectorList } = useTicketInspectors() // inorder to keep the list in sync with the currently displayed data
 
@@ -90,7 +91,7 @@ const InspectorListModal: React.FC<InspectorListModalProps> = ({ className }) =>
         <div className={`list-modal modal container ${className}`}>
             <h1>Aktuelle Meldungen</h1>
             {ticketInspectorList.map((ticketInspector) => (
-                <InspectorItem
+                <ReportsItem
                     key={ticketInspector.station.id + ticketInspector.timestamp}
                     ticketInspector={ticketInspector}
                     currentTime={currentTime}
@@ -100,4 +101,4 @@ const InspectorListModal: React.FC<InspectorListModalProps> = ({ className }) =>
     )
 }
 
-export default InspectorListModal
+export default ReportsList

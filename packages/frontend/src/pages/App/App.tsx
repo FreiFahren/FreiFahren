@@ -10,8 +10,8 @@ import UtilModal from '../../components/Modals/UtilModal/UtilModal'
 import StatsPopUp from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
 import AskForLocation from '../../components/Miscellaneous/AskForLocation/AskForLocation'
 import Backdrop from '../../../src/components/Miscellaneous/Backdrop/Backdrop'
-import InspectorListButton from 'src/components/Buttons/InspectorListButton/InspectorListButton'
-import InspectorListModal from 'src/components/Modals/InspectorListModal/InspectorListModal'
+import ReportsModalButton from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
+import ReportsList from 'src/components/Modals/ReportsList/ReportsList'
 
 import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext'
 import { RiskDataProvider } from '../../contexts/RiskDataContext'
@@ -172,13 +172,13 @@ function App() {
                         <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
                         {appUIState.isListModalOpen && (
                             <>
-                                <InspectorListModal className={`open center-animation`} />
+                                <ReportsList className={`open center-animation`} />
                                 <Backdrop onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
                             </>
                         )}
                     </TicketInspectorsProvider>
                 </RiskDataProvider>
-                <InspectorListButton
+                <ReportsModalButton
                     closeModal={() => setAppUIState({ ...appUIState, isListModalOpen: !appUIState.isListModalOpen })}
                 />
                 {isAskForLocationOpen &&
