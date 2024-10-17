@@ -14,7 +14,7 @@ const ReportsModalButton: React.FC<ReportsModalButtonProps> = ({ closeModal }) =
 
     const handleClick = () => {
         closeModal()
-        sendAnalyticsEvent('InspectorList opened', {})
+        sendAnalyticsEvent('ReportsModal opened', {})
     }
 
     return (

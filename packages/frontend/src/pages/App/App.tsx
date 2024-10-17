@@ -11,7 +11,7 @@ import StatsPopUp from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
 import AskForLocation from '../../components/Miscellaneous/AskForLocation/AskForLocation'
 import Backdrop from '../../../src/components/Miscellaneous/Backdrop/Backdrop'
 import ReportsModalButton from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
-import ReportsList from 'src/components/Modals/ReportsList/ReportsList'
+import ReportsModal from 'src/components/Modals/ReportsModal/ReportsModal'
 
 import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext'
 import { RiskDataProvider } from '../../contexts/RiskDataContext'
@@ -172,7 +172,7 @@ function App() {
                         <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
                         {appUIState.isListModalOpen && (
                             <>
-                                <ReportsList className={`open center-animation`} />
+                                <ReportsModal className={`open center-animation`} />
                                 <Backdrop onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
                             </>
                         )}
