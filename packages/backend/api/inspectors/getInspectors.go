@@ -126,8 +126,6 @@ func removeDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse
 }
 
 func constructTicketInspectorInfo(ticketInfo utils.TicketInspector, startTime time.Time, endTime time.Time) (utils.TicketInspectorResponse, error) {
-	logger.Log.Debug().Msg("Constructing ticket inspector info")
-
 	cleanedStationId := strings.TrimSpace(ticketInfo.StationId)
 	cleanedDirectionId := strings.TrimSpace(ticketInfo.DirectionId.String)
 	cleanedLine := strings.TrimSpace(ticketInfo.Line.String)
