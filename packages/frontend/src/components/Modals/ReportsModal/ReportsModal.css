@@ -1,0 +1,12 @@
+.reports-modal > section > button {
+    padding: var(--padding-xxs);
+    width: auto;
+    height: auto;
+    border-radius: 9999px;
+    background-color: var(--color-primary);
+    text-align: center;
+}
+
+.reports-modal > section > button > h3 {
+    color: var(--color-background);
+}
