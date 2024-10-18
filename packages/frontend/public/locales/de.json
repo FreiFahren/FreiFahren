@@ -71,5 +71,12 @@
         "over": "Über",
         "inBerlin": "in Berlin",
         "reporters": "Meldende"
+    },
+    "ReportsModal": {
+        "summary": "Zusammenfassung",
+        "lines": "Linien",
+        "stations": "Stationen",
+        "top5Lines": "Top 5 Linien",
+        "risk": "Risiko"
     }
 }

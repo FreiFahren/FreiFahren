@@ -1,0 +1,112 @@
+.reports-modal {
+    height: 70vh;
+}
+
+.reports-modal > section:first-child {
+    margin-bottom: var(--margin-m);
+}
+
+.reports-modal > section > button {
+    padding: var(--padding-xxs);
+    width: auto;
+    height: auto;
+    border-radius: 9999px;
+    background-color: var(--color-background);
+    border: var(--border-default);
+    text-align: center;
+}
+
+.reports-modal > section > button.active {
+    background-color: var(--color-primary);
+}
+
+.reports-modal > section > button.active > h3 {
+    color: var(--color-background);
+}
+
+.report-item {
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--margin-m);
+    border-bottom: var(--border-weak);
+}
+
+.list-modal > .report-item:last-child,
+.summary .clustered-report-item.align-child-on-line .report-item {
+    border-bottom: none;
+}
+
+.summary .clustered-report-item.align-child-on-line {
+    border-bottom: var(--border-weak);
+}
+
+.list-modal > .report-item p {
+    color: var(--color-gray-on-dark-background);
+}
+
+.list-modal > div span {
+    color: var(--color-primary);
+}
+
+.report-item > div {
+    justify-content: left;
+}
+
+.report-item > div:first-child h4 {
+    margin-right: var(--margin-s);
+}
+
+.report-item > div:first-child > p:last-child {
+    margin-left: auto;
+}
+
+.clustered-report-item {
+    position: relative;
+}
+
+.clustered-report-item button {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    min-width: 20px;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    outline: none;
+}
+
+.clustered-report-item button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    border-left: 2px solid var(--color-primary);
+    border-top: 2px solid var(--color-primary);
+    transform: translate(-50%, -25%) rotate(45deg);
+    transition: transform 0.3s ease;
+    border-radius: 1px;
+}
+
+.clustered-report-item button.expanded::before {
+    transform: translate(-50%, -75%) rotate(225deg);
+}
+
+.clustered-report-item-list .clustered-report-item .report-item {
+    margin-top: 0;
+    margin-bottom: var(--margin-xs);
+}
+
+.clustered-report-item-list {
+    width: 95%;
+    margin-left: auto;
+}
+
+section.summary .risk h2 {
+    margin-top: var(--margin-s);
+}
