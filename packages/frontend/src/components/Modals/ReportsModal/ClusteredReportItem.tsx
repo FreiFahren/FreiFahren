@@ -15,18 +15,19 @@ const ClusteredReportItem: React.FC<ClusteredReportItemProps> = ({ inspectors })
 
     const currentTime = new Date().getTime()
 
-    // clear direction to make it concise
-    const titleInspector: MarkerData = {
-        ...inspectors[0],
+    // remove the direction from all of the inspectors to make it concise
+    const inspectorsWithoutDirection = inspectors.map((inspector) => ({
+        ...inspector,
         direction: { id: '', name: '', coordinates: { latitude: 0, longitude: 0 } },
-    }
-    const expandedListWithoutTitle = inspectors.slice(1)
+    }))
+
+    const expandedListWithoutTitle = inspectorsWithoutDirection.slice(1)
 
     return (
         <>
             <div className="clustered-report-item align-child-on-line">
                 <div className="title-report-item">
-                    <ReportItem ticketInspector={titleInspector} currentTime={currentTime} />
+                    <ReportItem ticketInspector={inspectorsWithoutDirection[0]} currentTime={currentTime} />
                 </div>
                 <button
                     className={isListExpanded ? 'expanded' : ''}

@@ -134,16 +134,16 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className }) => {
             )}
             {currentTab === 'summary' && (
                 <section className="summary">
-                    <section>
-                        <h2>Top 5 Linien</h2>
+                    <section className="lines">
+                        <h2>{t('ReportsModal.top5Lines')}</h2>
                         {Array.from(sortedLinesWithReports.entries())
                             .slice(0, 5)
                             .map(([line, inspectors]) => (
                                 <ClusteredReportItem key={line} inspectors={inspectors} />
                             ))}
                     </section>
-                    <section>
-                        <h2>Risiko</h2>
+                    <section className="risk">
+                        <h2>{t('ReportsModal.risk')}</h2>
                     </section>
                 </section>
             )}

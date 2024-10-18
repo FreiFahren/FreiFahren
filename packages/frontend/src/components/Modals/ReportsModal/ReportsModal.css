@@ -3,7 +3,7 @@
 }
 
 .reports-modal > section:first-child {
-    margin-bottom: var(--margin-l);
+    margin-bottom: var(--margin-m);
 }
 
 .reports-modal > section > button {
@@ -60,10 +60,6 @@
     margin-left: auto;
 }
 
-section.summary h2 {
-    margin-bottom: var(--margin-s);
-}
-
 .clustered-report-item {
     position: relative;
 }
@@ -109,4 +105,8 @@ section.summary h2 {
 .clustered-report-item-list {
     width: 95%;
     margin-left: auto;
+}
+
+section.summary .risk h2 {
+    margin-top: var(--margin-s);
 }

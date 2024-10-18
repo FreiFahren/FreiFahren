@@ -75,6 +75,8 @@
     "ReportsModal": {
         "summary": "Zusammenfassung",
         "lines": "Linien",
-        "stations": "Stationen"
+        "stations": "Stationen",
+        "top5Lines": "Top 5 Linien",
+        "risk": "Risiko"
     }
 }
