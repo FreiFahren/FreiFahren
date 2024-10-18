@@ -32,8 +32,12 @@
 }
 
 .list-modal > .report-item:last-child,
-.clustered-report-item > .title-report-item > .report-item {
+.summary .clustered-report-item.align-child-on-line .report-item {
     border-bottom: none;
+}
+
+.summary .clustered-report-item.align-child-on-line {
+    border-bottom: var(--border-weak);
 }
 
 .list-modal > .report-item p {
@@ -97,7 +101,12 @@ section.summary h2 {
     transform: translate(-50%, -75%) rotate(225deg);
 }
 
-.clustered-report-item .report-item {
+.clustered-report-item-list .clustered-report-item .report-item {
     margin-top: 0;
     margin-bottom: var(--margin-xs);
+}
+
+.clustered-report-item-list {
+    width: 95%;
+    margin-left: auto;
 }

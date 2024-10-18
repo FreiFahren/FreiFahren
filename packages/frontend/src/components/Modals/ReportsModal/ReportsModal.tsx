@@ -136,9 +136,11 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className }) => {
                 <section className="summary">
                     <section>
                         <h2>Top 5 Linien</h2>
-                        {Array.from(sortedLinesWithReports.entries()).map(([line, inspectors]) => (
-                            <ClusteredReportItem key={line} inspectors={inspectors} />
-                        ))}
+                        {Array.from(sortedLinesWithReports.entries())
+                            .slice(0, 5)
+                            .map(([line, inspectors]) => (
+                                <ClusteredReportItem key={line} inspectors={inspectors} />
+                            ))}
                     </section>
                     <section>
                         <h2>Risiko</h2>
