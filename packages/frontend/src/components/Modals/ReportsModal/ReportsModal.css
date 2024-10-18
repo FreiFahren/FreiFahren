@@ -1,3 +1,7 @@
+.reports-modal {
+    height: 70vh;
+}
+
 .reports-modal > section > button {
     padding: var(--padding-xxs);
     width: auto;
@@ -14,4 +18,31 @@
 
 .reports-modal > section > button.active > h3 {
     color: var(--color-background);
+}
+
+.list-modal > div {
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--margin-m);
+    border-bottom: var(--border-weak);
+}
+
+.list-modal > div:last-child {
+    border-bottom: none;
+}
+
+.list-modal > div p {
+    color: var(--color-gray-on-dark-background);
+}
+
+.list-modal > div span {
+    color: var(--color-primary);
+}
+
+.list-modal > div > div {
+    justify-content: left;
+}
+
+.list-modal > div > div:first-child h4 {
+    margin-right: var(--margin-s);
 }
