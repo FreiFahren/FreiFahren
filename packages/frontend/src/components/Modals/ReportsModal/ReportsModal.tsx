@@ -50,21 +50,13 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className }) => {
                 (inspector: MarkerData) => !inspector.isHistoric
             )
 
-            // sort each list so that the most recent data is at the top
-            recentInspectors.sort(
-                (a: MarkerData, b: MarkerData) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-            )
-            historicInspectors.sort(
-                (a: MarkerData, b: MarkerData) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-            )
-            filteredPreviousDayInspectorList.sort(
-                (a: MarkerData, b: MarkerData) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-            )
+            const sortByTimestamp = (a: MarkerData, b: MarkerData): number =>
+                new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
 
-            // Combine the lists so that first are the recent inspectors, then the historic inspectors and then the previous day inspectors
-            const inspectorList = [...recentInspectors, ...historicInspectors, ...filteredPreviousDayInspectorList]
-
-            setTicketInspectorList(inspectorList)
+            const sortedLists = [recentInspectors, historicInspectors, filteredPreviousDayInspectorList].map((list) =>
+                list.sort(sortByTimestamp)
+            )
+            setTicketInspectorList(sortedLists.flat())
         }
         fetchInspectorList()
     }, [currentTime, lastHourInspectorList])
