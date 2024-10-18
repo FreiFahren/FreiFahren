@@ -2,6 +2,10 @@
     height: 70vh;
 }
 
+.reports-modal > section:first-child {
+    margin-bottom: var(--margin-l);
+}
+
 .reports-modal > section > button {
     padding: var(--padding-xxs);
     width: auto;
@@ -45,4 +49,8 @@
 
 .list-modal > div > div:first-child h4 {
     margin-right: var(--margin-s);
+}
+
+.report-item > div:first-child > p:last-child {
+    margin-left: auto;
 }
