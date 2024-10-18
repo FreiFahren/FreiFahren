@@ -24,18 +24,19 @@
     color: var(--color-background);
 }
 
-.list-modal > div {
+.report-item {
     display: flex;
     flex-direction: column;
     margin-top: var(--margin-m);
     border-bottom: var(--border-weak);
 }
 
-.list-modal > div:last-child {
+.list-modal > .report-item:last-child,
+.clustered-report-item > .title-report-item > .report-item {
     border-bottom: none;
 }
 
-.list-modal > div p {
+.list-modal > .report-item p {
     color: var(--color-gray-on-dark-background);
 }
 
@@ -43,14 +44,60 @@
     color: var(--color-primary);
 }
 
-.list-modal > div > div {
+.report-item > div {
     justify-content: left;
 }
 
-.list-modal > div > div:first-child h4 {
+.report-item > div:first-child h4 {
     margin-right: var(--margin-s);
 }
 
 .report-item > div:first-child > p:last-child {
     margin-left: auto;
+}
+
+section.summary h2 {
+    margin-bottom: var(--margin-s);
+}
+
+.clustered-report-item {
+    position: relative;
+}
+
+.clustered-report-item button {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    min-width: 20px;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    outline: none;
+}
+
+.clustered-report-item button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    border-left: 2px solid var(--color-primary);
+    border-top: 2px solid var(--color-primary);
+    transform: translate(-50%, -25%) rotate(45deg);
+    transition: transform 0.3s ease;
+    border-radius: 1px;
+}
+
+.clustered-report-item button.expanded::before {
+    transform: translate(-50%, -75%) rotate(225deg);
+}
+
+.clustered-report-item .report-item {
+    margin-top: 0;
+    margin-bottom: var(--margin-xs);
 }
