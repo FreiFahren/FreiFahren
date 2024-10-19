@@ -9,6 +9,7 @@ import ReportItem from './ReportItem'
 import ClusteredReportItem from './ClusteredReportItem'
 
 import './ReportsModal.css'
+import { useRiskData } from 'src/contexts/RiskDataContext'
 
 interface ReportsModalProps {
     className?: string
@@ -107,6 +108,48 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className }) => {
         const sortedLines = getAllLinesWithReportsSorted()
         setSortedLinesWithReports(sortedLines)
     }, [ticketInspectorList])
+
+    const { segmentRiskData } = useRiskData()
+    const [riskLines, setRiskLines] = useState<string[]>([])
+
+    const extractMostRiskLines = (segmentColors: Record<string, string>): string[] => {
+        const colorScores: Record<string, number> = {
+            '#A92725': 3, // bad
+            '#F05044': 2, // medium
+            '#FACB3F': 1, // okay
+        }
+
+        const lineScores: Record<string, number> = {}
+        Object.entries(segmentColors).forEach(([segmentId, color]) => {
+            const line = segmentId.split('-')[0]
+            const score = colorScores[color] || 0
+
+            if (!(line in lineScores) || score > lineScores[line]) {
+                lineScores[line] = score
+            }
+        })
+        return Object.entries(lineScores)
+            .sort((a, b) => b[1] - a[1]) // Sort by score descending
+            .slice(0, 8) // Take top 8
+            .map(([line]) => line) // Extract just the line names
+    }
+
+    useEffect(() => {
+        if (segmentRiskData && segmentRiskData.segment_colors) {
+            const uniqueLines = extractMostRiskLines(segmentRiskData.segment_colors)
+            if (uniqueLines.length <= 8) {
+                // fill it up with the most reported lines
+                const remainingLines = Array.from(sortedLinesWithReports.keys()).filter(
+                    (line) => !uniqueLines.includes(line)
+                )
+                uniqueLines.push(...remainingLines.slice(0, 8 - uniqueLines.length))
+            } else if (uniqueLines.length > 8) {
+                // remove the least risky lines
+                uniqueLines.splice(8)
+            }
+            setRiskLines(uniqueLines)
+        }
+    }, [segmentRiskData, sortedLinesWithReports])
 
     return (
         <div className={`reports-modal modal container ${className}`}>
