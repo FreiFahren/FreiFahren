@@ -1,5 +1,5 @@
 .reports-modal {
-    height: 70vh;
+    max-height: 70vh;
 }
 
 .reports-modal > section:first-child {
@@ -161,4 +161,12 @@ section.summary .risk h2 {
     margin: auto 0;
     height: 25px;
     width: 25px;
+}
+
+.lines {
+    min-height: 330px;
+}
+
+.risk-grid {
+    min-height: 212px;
 }
