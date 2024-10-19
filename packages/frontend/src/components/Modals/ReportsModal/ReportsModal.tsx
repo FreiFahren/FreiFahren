@@ -110,44 +110,48 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className }) => {
     }, [ticketInspectorList])
 
     const { segmentRiskData } = useRiskData()
-    const [riskLines, setRiskLines] = useState<string[]>([])
+    const [riskLines, setRiskLines] = useState<Map<string, number>>(new Map())
 
-    const extractMostRiskLines = (segmentColors: Record<string, string>): string[] => {
+    const extractMostRiskLines = (segmentColors: Record<string, string>): Map<string, number> => {
         const colorScores: Record<string, number> = {
             '#A92725': 3, // bad
             '#F05044': 2, // medium
             '#FACB3F': 1, // okay
         }
 
-        const lineScores: Record<string, number> = {}
+        const lineScores = new Map<string, number>()
         Object.entries(segmentColors).forEach(([segmentId, color]) => {
             const line = segmentId.split('-')[0]
             const score = colorScores[color] || 0
 
-            if (!(line in lineScores) || score > lineScores[line]) {
-                lineScores[line] = score
+            if (!lineScores.has(line) || score > lineScores.get(line)!) {
+                lineScores.set(line, score)
             }
         })
-        return Object.entries(lineScores)
-            .sort((a, b) => b[1] - a[1]) // Sort by score descending
-            .slice(0, 8) // Take top 8
-            .map(([line]) => line) // Extract just the line names
+        return new Map(
+            Array.from(lineScores.entries())
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 8)
+        )
     }
 
     useEffect(() => {
         if (segmentRiskData && segmentRiskData.segment_colors) {
-            const uniqueLines = extractMostRiskLines(segmentRiskData.segment_colors)
-            if (uniqueLines.length <= 8) {
-                // fill it up with the most reported lines
-                const remainingLines = Array.from(sortedLinesWithReports.keys()).filter(
-                    (line) => !uniqueLines.includes(line)
-                )
-                uniqueLines.push(...remainingLines.slice(0, 8 - uniqueLines.length))
-            } else if (uniqueLines.length > 8) {
+            const riskMap = extractMostRiskLines(segmentRiskData.segment_colors)
+            if (riskMap.size < 8) {
+                // Fill remaining slots with lines from sortedLinesWithReports
+                const remainingLines = Array.from(sortedLinesWithReports.keys())
+                    .filter((line) => !riskMap.has(line))
+                    .slice(0, 8 - riskMap.size)
+                remainingLines.forEach((line) => riskMap.set(line, 0))
+            } else if (riskMap.size > 8) {
                 // remove the least risky lines
-                uniqueLines.splice(8)
+                const leastRiskLines = Array.from(riskMap.entries())
+                    .sort((a, b) => a[1] - b[1])
+                    .slice(0, riskMap.size - 8)
+                leastRiskLines.forEach(([line]) => riskMap.delete(line))
             }
-            setRiskLines(uniqueLines)
+            setRiskLines(riskMap)
         }
     }, [segmentRiskData, sortedLinesWithReports])
 
@@ -188,8 +192,12 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className }) => {
                     <section className="risk">
                         <h2>{t('ReportsModal.risk')}</h2>
                         <div className="risk-grid">
-                            {riskLines.map((line) => (
-                                <div key={line} className="risk-grid-item">
+                            {Array.from(riskLines).map(([line, riskLevel]) => (
+                                <div key={line} className={`risk-grid-item risk-level-${riskLevel}`}>
+                                    <img
+                                        src={`/icons/risk-${riskLevel}.svg`}
+                                        alt={`Icon for risk level ${riskLevel}`}
+                                    />
                                     <h4 className={`${line} line-label`}>{line}</h4>
                                 </div>
                             ))}

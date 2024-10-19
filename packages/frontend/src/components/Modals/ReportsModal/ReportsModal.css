@@ -109,6 +109,7 @@
 
 section.summary .risk h2 {
     margin-top: var(--margin-s);
+    margin-bottom: var(--margin-s);
 }
 
 .risk-grid {
@@ -120,10 +121,41 @@ section.summary .risk h2 {
 
 .risk-grid-item {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
+    height: 75px;
+    background-color: white;
+    padding-left: var(--padding-xxs);
+    padding-right: var(--padding-xxs);
+    border-radius: var(--borderRadius-small);
+}
+
+.risk-grid-item.risk-level-0 {
+    background-color: #7cc7ab;
+}
+
+.risk-grid-item.risk-level-1 {
+    background-color: #ffe498;
+}
+
+.risk-grid-item.risk-level-2 {
+    background-color: #f16c63;
+}
+
+.risk-grid-item.risk-level-3 {
+    background-color: #f16c63;
 }
 
 .risk-grid-item h4.line-label {
-    width: 50px;
+    width: 100%;
+    margin-top: 0;
+    text-align: center;
+}
+
+.risk-grid .risk-grid-item img {
+    filter: none;
+    margin: auto 0;
+    height: 25px;
+    width: 25px;
 }
