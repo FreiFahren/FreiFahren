@@ -82,13 +82,12 @@
 .clustered-report-item button::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
+    margin-top: 8px;
     width: 10px;
     height: 10px;
     border-left: 2px solid var(--color-primary);
     border-top: 2px solid var(--color-primary);
-    transform: translate(-50%, -25%) rotate(45deg);
+    transform: translate(-50%, -50%) rotate(45deg);
     transition: transform 0.3s ease;
     border-radius: 1px;
 }
@@ -100,6 +99,10 @@
 .clustered-report-item-list .clustered-report-item .report-item {
     margin-top: 0;
     margin-bottom: var(--margin-xs);
+}
+
+.title-report-item {
+    width: 92%;
 }
 
 .clustered-report-item-list {

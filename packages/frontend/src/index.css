@@ -529,3 +529,7 @@ button .plus {
 .U9 {
     background-color: #f3791d;
 }
+
+.elapsed-time {
+    font-size: var(--font-xs);
+}
