@@ -34,7 +34,7 @@ const ClusteredReportItem: React.FC<ClusteredReportItemProps> = ({ inspectors })
                     onClick={() => setIsListExpanded(!isListExpanded)}
                 />
             </div>
-            <div className="clustered-report-item-list list-modal">
+            <div className={`clustered-report-item-list list-modal ${isListExpanded ? 'expanded' : ''}`}>
                 {isListExpanded &&
                     expandedListWithoutTitle.map((inspector) => (
                         <ReportItem

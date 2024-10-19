@@ -88,12 +88,25 @@
     border-left: 2px solid var(--color-primary);
     border-top: 2px solid var(--color-primary);
     transform: translate(-50%, -50%) rotate(45deg);
-    transition: transform 0.3s ease;
+    transition: transform var(--transition-default) ease;
     border-radius: 1px;
 }
 
 .clustered-report-item button.expanded::before {
     transform: translate(-50%, -75%) rotate(225deg);
+}
+
+.clustered-report-item-list {
+    overflow: hidden;
+    max-height: 0;
+}
+
+.clustered-report-item-list.expanded {
+    max-height: 1000px;
+    transition: max-height var(--transition-long) ease-in;
+}
+.clustered-report-item-list .inner-list {
+    padding-top: var(--padding-xs);
 }
 
 .clustered-report-item-list .clustered-report-item .report-item {
