@@ -21,7 +21,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className }) => {
     const { t } = useTranslation()
     const [currentTab, setCurrentTab] = useState<TabType>('summary')
 
-    const tabs: TabType[] = ['summary', 'lines', 'stations']
+    const tabs: TabType[] = ['summary', 'stations']
 
     const handleTabChange = (tab: TabType) => {
         setCurrentTab(tab)
