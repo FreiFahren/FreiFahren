@@ -110,3 +110,20 @@
 section.summary .risk h2 {
     margin-top: var(--margin-s);
 }
+
+.risk-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(2, auto);
+    gap: var(--margin-l);
+}
+
+.risk-grid-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.risk-grid-item h4.line-label {
+    width: 50px;
+}

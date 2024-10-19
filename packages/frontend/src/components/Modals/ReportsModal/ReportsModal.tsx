@@ -187,6 +187,13 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className }) => {
                     </section>
                     <section className="risk">
                         <h2>{t('ReportsModal.risk')}</h2>
+                        <div className="risk-grid">
+                            {riskLines.map((line) => (
+                                <div key={line} className="risk-grid-item">
+                                    <h4 className={`${line} line-label`}>{line}</h4>
+                                </div>
+                            ))}
+                        </div>
                     </section>
                 </section>
             )}
