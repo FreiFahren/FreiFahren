@@ -178,9 +178,7 @@ function App() {
                         )}
                     </TicketInspectorsProvider>
                 </RiskDataProvider>
-                <ReportsModalButton
-                    closeModal={() => setAppUIState({ ...appUIState, isListModalOpen: !appUIState.isListModalOpen })}
-                />
+                <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
                 {isAskForLocationOpen &&
                     !appUIState.isFirstOpen &&
                     !appUIState.isReportFormOpen &&

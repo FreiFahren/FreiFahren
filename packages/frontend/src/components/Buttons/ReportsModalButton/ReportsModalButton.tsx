@@ -6,14 +6,14 @@ import { sendAnalyticsEvent } from 'src/utils/analytics'
 import './ReportsModalButton.css'
 
 interface ReportsModalButtonProps {
-    closeModal: () => void
+    openModal: () => void
 }
 
-const ReportsModalButton: React.FC<ReportsModalButtonProps> = ({ closeModal }) => {
+const ReportsModalButton: React.FC<ReportsModalButtonProps> = ({ openModal }) => {
     const { t } = useTranslation()
 
     const handleClick = () => {
-        closeModal()
+        openModal()
         sendAnalyticsEvent('ReportsModal opened', {})
     }
 
