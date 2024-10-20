@@ -5,7 +5,7 @@ export const useStationDistanceMessage = (stationDistance: number | null): JSX.E
 
     if (stationDistance === null) return null
     return (
-        <div>
+        <>
             {stationDistance <= 1 ? (
                 <strong>{t('MarkerModal.oneStation')} </strong>
             ) : (
@@ -14,7 +14,7 @@ export const useStationDistanceMessage = (stationDistance: number | null): JSX.E
                 </strong>
             )}
             {t('MarkerModal.fromYou')}
-        </div>
+        </>
     )
 }
 

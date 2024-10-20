@@ -183,3 +183,7 @@ section.summary .risk h2 {
 .risk-grid {
     min-height: 212px;
 }
+
+.summary .lines > div:last-of-type .clustered-report-item {
+    border-bottom: none;
+}
