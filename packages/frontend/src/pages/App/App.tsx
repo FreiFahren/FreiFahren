@@ -127,6 +127,14 @@ function App() {
         setAppUIState({ ...appUIState, isRiskLayerOpen: clickedLayer === 'risk' })
     }
 
+    function handleRiskGridItemClick() {
+        setAppUIState((prevState) => ({
+            ...prevState,
+            isListModalOpen: false,
+            isRiskLayerOpen: true,
+        }))
+    }
+
     return (
         <div className="App">
             {appUIState.isFirstOpen && appMounted && (
@@ -172,7 +180,10 @@ function App() {
                         <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
                         {appUIState.isListModalOpen && (
                             <>
-                                <ReportsModal className={`open center-animation`} />
+                                <ReportsModal
+                                    className={`open center-animation`}
+                                    closeModal={handleRiskGridItemClick}
+                                />
                                 <Backdrop onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
                             </>
                         )}

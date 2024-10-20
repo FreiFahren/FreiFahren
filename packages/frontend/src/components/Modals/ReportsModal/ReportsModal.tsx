@@ -13,11 +13,12 @@ import { useRiskData } from 'src/contexts/RiskDataContext'
 
 interface ReportsModalProps {
     className?: string
+    closeModal: () => void
 }
 
 type TabType = 'summary' | 'lines' | 'stations'
 
-const ReportsModal: React.FC<ReportsModalProps> = ({ className }) => {
+const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) => {
     const { t } = useTranslation()
     const [currentTab, setCurrentTab] = useState<TabType>('summary')
 
@@ -193,7 +194,11 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className }) => {
                         <h2>{t('ReportsModal.risk')}</h2>
                         <div className="risk-grid">
                             {Array.from(riskLines).map(([line, riskLevel]) => (
-                                <div key={line} className={`risk-grid-item risk-level-${riskLevel}`}>
+                                <div
+                                    key={line}
+                                    className={`risk-grid-item risk-level-${riskLevel}`}
+                                    onClick={() => closeModal()}
+                                >
                                     <img
                                         src={`/icons/risk-${riskLevel}.svg`}
                                         alt={`Icon for risk level ${riskLevel}`}
