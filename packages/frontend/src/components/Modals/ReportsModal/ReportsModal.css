@@ -131,7 +131,6 @@ section.summary .risk h2 {
 .risk-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(2, auto);
     gap: var(--margin-l);
 }
 
@@ -181,7 +180,7 @@ section.summary .risk h2 {
 }
 
 .risk-grid {
-    min-height: 212px;
+    min-height: 174px;
 }
 
 .summary .lines > div:last-of-type .clustered-report-item {

@@ -73,7 +73,7 @@
         "reporters": "Meldende"
     },
     "ReportsModal": {
-        "summary": "Zusammenfassung",
+        "summary": "Übersicht",
         "lines": "Linien",
         "stations": "Stationen",
         "top5Lines": "Top 5 Linien",
