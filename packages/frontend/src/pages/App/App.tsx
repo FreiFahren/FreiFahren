@@ -10,8 +10,8 @@ import UtilModal from '../../components/Modals/UtilModal/UtilModal'
 import StatsPopUp from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
 import AskForLocation from '../../components/Miscellaneous/AskForLocation/AskForLocation'
 import Backdrop from '../../../src/components/Miscellaneous/Backdrop/Backdrop'
-import InspectorListButton from 'src/components/Buttons/InspectorListButton/InspectorListButton'
-import InspectorListModal from 'src/components/Modals/InspectorListModal/InspectorListModal'
+import ReportsModalButton from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
+import ReportsModal from 'src/components/Modals/ReportsModal/ReportsModal'
 
 import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext'
 import { RiskDataProvider } from '../../contexts/RiskDataContext'
@@ -127,6 +127,14 @@ function App() {
         setAppUIState({ ...appUIState, isRiskLayerOpen: clickedLayer === 'risk' })
     }
 
+    function handleRiskGridItemClick() {
+        setAppUIState((prevState) => ({
+            ...prevState,
+            isListModalOpen: false,
+            isRiskLayerOpen: true,
+        }))
+    }
+
     return (
         <div className="App">
             {appUIState.isFirstOpen && appMounted && (
@@ -172,15 +180,16 @@ function App() {
                         <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
                         {appUIState.isListModalOpen && (
                             <>
-                                <InspectorListModal className={`open center-animation`} />
+                                <ReportsModal
+                                    className={`open center-animation`}
+                                    closeModal={handleRiskGridItemClick}
+                                />
                                 <Backdrop onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
                             </>
                         )}
                     </TicketInspectorsProvider>
                 </RiskDataProvider>
-                <InspectorListButton
-                    closeModal={() => setAppUIState({ ...appUIState, isListModalOpen: !appUIState.isListModalOpen })}
-                />
+                <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
                 {isAskForLocationOpen &&
                     !appUIState.isFirstOpen &&
                     !appUIState.isReportFormOpen &&

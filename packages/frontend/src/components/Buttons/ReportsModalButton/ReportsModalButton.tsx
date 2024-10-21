@@ -3,18 +3,18 @@ import { useTranslation } from 'react-i18next'
 
 import { sendAnalyticsEvent } from 'src/utils/analytics'
 
-import './InspectorListButton.css'
+import './ReportsModalButton.css'
 
-interface InspectorListButtonProps {
-    closeModal: () => void
+interface ReportsModalButtonProps {
+    openModal: () => void
 }
 
-const InspectorListButton: React.FC<InspectorListButtonProps> = ({ closeModal }) => {
+const ReportsModalButton: React.FC<ReportsModalButtonProps> = ({ openModal }) => {
     const { t } = useTranslation()
 
     const handleClick = () => {
-        closeModal()
-        sendAnalyticsEvent('InspectorList opened', {})
+        openModal()
+        sendAnalyticsEvent('ReportsModal opened', {})
     }
 
     return (
@@ -25,4 +25,4 @@ const InspectorListButton: React.FC<InspectorListButtonProps> = ({ closeModal })
     )
 }
 
-export default InspectorListButton
+export default ReportsModalButton

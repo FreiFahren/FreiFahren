@@ -5,7 +5,7 @@ export const useStationDistanceMessage = (stationDistance: number | null): JSX.E
 
     if (stationDistance === null) return null
     return (
-        <div>
+        <>
             {stationDistance <= 1 ? (
                 <strong>{t('MarkerModal.oneStation')} </strong>
             ) : (
@@ -14,7 +14,7 @@ export const useStationDistanceMessage = (stationDistance: number | null): JSX.E
                 </strong>
             )}
             {t('MarkerModal.fromYou')}
-        </div>
+        </>
     )
 }
 
@@ -35,21 +35,21 @@ export const useElapsedTimeMessage = (elapsedTimeInMinutes: number, isHistoric: 
 
     if (isHistoric || (elapsedTimeInMinutes > 45 && elapsedTimeInMinutes < 60)) {
         return (
-            <span>
+            <span className="elapsed-time">
                 {t('MarkerModal.moreThan')} <strong>{t('MarkerModal.moreThan45Minutes')}</strong>
             </span>
         )
     }
     if (Math.floor(elapsedTimeInMinutes / 60) === 1) {
         return (
-            <span>
+            <span className="elapsed-time">
                 {t('MarkerModal.oneHourAgo')} <strong>{t('MarkerModal.oneHour')}</strong>
             </span>
         )
     }
     if (elapsedTimeInMinutes > 60) {
         return (
-            <span>
+            <span className="elapsed-time">
                 {currentLanguage === 'de' ? t('MarkerModal.ago') + ' ' : ''}
                 <strong>
                     {Math.floor(elapsedTimeInMinutes / 60)} {t('MarkerModal.hours')}
@@ -60,13 +60,13 @@ export const useElapsedTimeMessage = (elapsedTimeInMinutes: number, isHistoric: 
     }
     if (elapsedTimeInMinutes <= 1) {
         return (
-            <span>
+            <span className="elapsed-time">
                 <strong>{t('MarkerModal.now')}</strong>
             </span>
         )
     }
     return (
-        <span>
+        <span className="elapsed-time">
             {currentLanguage === 'de' ? t('MarkerModal.ago') + ' ' : ''}
             <strong>
                 {elapsedTimeInMinutes} {t('MarkerModal.minutes')}
