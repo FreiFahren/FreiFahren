@@ -69,6 +69,16 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
     const elapsedTimeMessage = useElapsedTimeMessage(elapsedTimeInMinutes, selectedMarker.isHistoric)
     const stationDistanceMessage = useStationDistanceMessage(stationDistance)
 
+    const [disclaimerMessage, setDisclaimerMessage] = useState('Data may be inaccurate.')
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDisclaimerMessage('Invite friends to improve accuracy.')
+        }, 5000)
+
+        return () => clearTimeout(timer)
+    }, [])
+
     return (
         <div className={`marker-modal info-popup modal ${className}`}>
             {children}
@@ -91,7 +101,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                 {userLat && userLng && (
                     <div className="footer">
                         <span className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage}</span>
-                        <span className="disclaimer">Data may be inaccurate.</span>
+                        <span className="disclaimer">{disclaimerMessage}</span>
                     </div>
                 )}
                 {selectedMarker.message && <p className="description">{selectedMarker.message}</p>}

@@ -12,19 +12,18 @@
 }
 
 .marker-modal.info-popup .footer {
-    position: relative;
+    display: flex;
+    justify-content: space-between;
     margin-top: var(--margin-s);
     min-height: 20.5px;
     color: var(--color-primary);
+    width: 100%;
 }
 
 .marker-modal.info-popup .distance {
-    font-size: var(--font-s);
+    font-size: var(--font-xs);
 }
 
 .marker-modal.info-popup .disclaimer {
     font-size: var(--font-xxs);
-    position: absolute;
-    right: 0;
-    bottom: 0;
 }
