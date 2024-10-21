@@ -89,7 +89,10 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                     </p>
                 )}
                 {userLat && userLng && (
-                    <p className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage}</p>
+                    <div className="footer">
+                        <span className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage}</span>
+                        <span className="disclaimer">Data may be inaccurate.</span>
+                    </div>
                 )}
                 {selectedMarker.message && <p className="description">{selectedMarker.message}</p>}
             </div>

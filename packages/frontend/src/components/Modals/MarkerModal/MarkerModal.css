@@ -11,7 +11,20 @@
     color: var(--color-white);
 }
 
-.marker-modal.info-popup .distance {
+.marker-modal.info-popup .footer {
+    position: relative;
     margin-top: var(--margin-s);
     min-height: 20.5px;
+    color: var(--color-primary);
+}
+
+.marker-modal.info-popup .distance {
+    font-size: var(--font-s);
+}
+
+.marker-modal.info-popup .disclaimer {
+    font-size: var(--font-xxs);
+    position: absolute;
+    right: 0;
+    bottom: 0;
 }
