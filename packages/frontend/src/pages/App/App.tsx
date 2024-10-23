@@ -56,10 +56,6 @@ function App() {
         setAppUIState((appUIState) => ({ ...appUIState, formSubmitted: !appUIState.formSubmitted }))
     }
 
-    function closeLegalDisclaimer() {
-        setAppUIState({ ...appUIState, isFirstOpen: false, isStatsPopUpOpen: true })
-    }
-
     const {
         isOpen: isUtilOpen,
         isAnimatingOut: isUtilAnimatingOut,
@@ -129,9 +125,25 @@ function App() {
         }))
     }
 
+    const shouldShowLegalDisclaimer = (): boolean => {
+        const legalDisclaimerAcceptedAt = localStorage.getItem('legalDisclaimerAcceptedAt')
+        if (!legalDisclaimerAcceptedAt) return true
+
+        const lastAcceptedDate = new Date(legalDisclaimerAcceptedAt)
+        const currentDate = new Date()
+        const oneWeek = 7 * 24 * 60 * 60 * 1000 // One week in milliseconds
+
+        return currentDate.getTime() - lastAcceptedDate.getTime() > oneWeek
+    }
+
+    function closeLegalDisclaimer() {
+        setAppUIState({ ...appUIState, isFirstOpen: false, isStatsPopUpOpen: true })
+        localStorage.setItem('legalDisclaimerAcceptedAt', new Date().toISOString())
+    }
+
     return (
         <div className="App">
-            {appUIState.isFirstOpen && appMounted && (
+            {appUIState.isFirstOpen && appMounted && shouldShowLegalDisclaimer() && (
                 <>
                     <LegalDisclaimer
                         openAnimationClass={appUIState.isFirstOpen ? 'open center-animation' : ''}
