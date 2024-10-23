@@ -22,8 +22,15 @@
 
 .marker-modal.info-popup .distance {
     font-size: var(--font-xs);
+    min-width: 100px;
 }
 
 .marker-modal.info-popup .disclaimer {
     font-size: var(--font-xxs);
+    opacity: 0;
+    transition: opacity var(--transition-long);
+}
+
+.marker-modal.info-popup .disclaimer.visible {
+    opacity: 1;
 }

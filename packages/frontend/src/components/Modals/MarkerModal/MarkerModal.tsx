@@ -70,11 +70,20 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
     const stationDistanceMessage = useStationDistanceMessage(stationDistance)
 
     const [disclaimerMessage, setDisclaimerMessage] = useState('Data may be inaccurate.')
+    const [isDisclaimerVisible, setIsDisclaimerVisible] = useState(false)
+    const TRANSITION_DURATION = 500 // Should match the transition-long duration in CSS
 
     useEffect(() => {
+        setIsDisclaimerVisible(true)
         const timer = setTimeout(() => {
-            setDisclaimerMessage('Invite friends to improve accuracy.')
-        }, 5000)
+            setIsDisclaimerVisible(false)
+
+            // Wait for fade out to complete before changing message
+            setTimeout(() => {
+                setDisclaimerMessage('Invite friends to improve accuracy.')
+                setIsDisclaimerVisible(true)
+            }, TRANSITION_DURATION)
+        }, 5 * 1000)
 
         return () => clearTimeout(timer)
     }, [])
@@ -98,12 +107,12 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                         {t('MarkerModal.thisWeek')}
                     </p>
                 )}
-                {userLat && userLng && (
-                    <div className="footer">
+                <div className="footer">
+                    {userLat && userLng && (
                         <span className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage}</span>
-                        <span className="disclaimer">{disclaimerMessage}</span>
-                    </div>
-                )}
+                    )}
+                    <span className={`disclaimer ${isDisclaimerVisible ? 'visible' : ''}`}>{disclaimerMessage}</span>
+                </div>
                 {selectedMarker.message && <p className="description">{selectedMarker.message}</p>}
             </div>
         </div>
