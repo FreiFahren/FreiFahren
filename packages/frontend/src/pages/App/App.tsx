@@ -8,14 +8,12 @@ import LegalDisclaimer from '../../components/Modals/LegalDisclaimer/LegalDiscla
 import UtilButton from '../../components/Buttons/UtilButton/UtilButton'
 import UtilModal from '../../components/Modals/UtilModal/UtilModal'
 import StatsPopUp from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
-import AskForLocation from '../../components/Miscellaneous/AskForLocation/AskForLocation'
 import Backdrop from '../../../src/components/Miscellaneous/Backdrop/Backdrop'
 import ReportsModalButton from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
 import ReportsModal from 'src/components/Modals/ReportsModal/ReportsModal'
 
 import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext'
 import { RiskDataProvider } from '../../contexts/RiskDataContext'
-import { useLocation } from '../../contexts/LocationContext'
 import { StationsAndLinesProvider } from '../../contexts/StationsAndLinesContext'
 
 import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils'
@@ -23,6 +21,7 @@ import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton'
 import { highlightElement, currentColorTheme, setColorThemeInLocalStorage } from '../../utils/uiUtils'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
 import { sendSavedEvents } from '../../utils/analytics'
+
 import './App.css'
 
 type AppUIState = {
@@ -75,11 +74,6 @@ function App() {
             openUtilModal()
         }
     }
-
-    const { isAskForLocationOpen, closeAskForLocation } = useLocation()
-
-    // Todo: fix this
-    const { isAnimatingOut: isAskForLocationAnimatingOut } = useModalAnimation()
 
     function toggleColorTheme() {
         setColorThemeInLocalStorage()
@@ -190,18 +184,6 @@ function App() {
                     </TicketInspectorsProvider>
                 </RiskDataProvider>
                 <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
-                {isAskForLocationOpen &&
-                    !appUIState.isFirstOpen &&
-                    !appUIState.isReportFormOpen &&
-                    !appUIState.isListModalOpen &&
-                    !isUtilOpen && (
-                        <AskForLocation
-                            className={`open ${isAskForLocationAnimatingOut ? 'slide-out' : 'slide-in'}`}
-                            closeModal={closeAskForLocation}
-                        >
-                            <CloseButton closeModal={closeAskForLocation}></CloseButton>
-                        </AskForLocation>
-                    )}
             </StationsAndLinesProvider>
             <UtilButton onClick={toggleUtilModal} />
             <ReportButton

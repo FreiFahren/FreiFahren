@@ -68,7 +68,6 @@ function deg2rad(deg: number) {
  */
 export const watchPosition = async (
     onPositionChanged: (position: { lng: number; lat: number } | null) => void,
-    openAskForLocation: () => void,
     options: object = {
         enableHighAccuracy: true,
         timeout: 10 * 1000,
@@ -101,12 +100,6 @@ export const watchPosition = async (
         (error) => {
             console.error('Error obtaining position:', error.message)
             onPositionChanged(null)
-
-            // if after a couple of seconds the user hasn't given permission, ask for it
-            // this way we can be sure it is not being caused by a short timeout
-            setTimeout(() => {
-                openAskForLocation()
-            }, 5 * 1000)
         },
         options
     )

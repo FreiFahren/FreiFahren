@@ -11,10 +11,10 @@ interface LocationMarkerProps {
 }
 
 const LocationMarker: React.FC<LocationMarkerProps> = ({ userPosition }) => {
-    const { setUserPosition, openAskForLocation } = useLocation()
+    const { setUserPosition } = useLocation()
 
     const fetchPosition = useCallback(async () => {
-        const stopWatching = await watchPosition(setUserPosition, openAskForLocation)
+        const stopWatching = await watchPosition(setUserPosition)
         return () => stopWatching()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setUserPosition])
