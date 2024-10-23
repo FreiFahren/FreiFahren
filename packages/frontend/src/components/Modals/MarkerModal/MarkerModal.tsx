@@ -9,6 +9,7 @@ import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 import Skeleton, { useSkeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
 
 import './MarkerModal.css'
+import { sendAnalyticsEvent } from 'src/utils/analytics'
 
 interface MarkerModalProps {
     selectedMarker: MarkerData
@@ -79,6 +80,13 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                         text: t('Share.text', 'See where ticket inspectors are in Berlin'),
                         url: window.location.href,
                     })
+                    await sendAnalyticsEvent('Marker Shared', {
+                        meta: {
+                            station: station.name,
+                            line: line,
+                            direction: direction.name,
+                        },
+                    })
                 } else {
                     await navigator.clipboard.writeText(window.location.href)
                     alert(t('Share.copied', 'Link copied to clipboard!'))
@@ -87,7 +95,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                 console.error('Error sharing:', error)
             }
         },
-        [t]
+        [t, station, line, direction]
     )
 
     const disclaimerWithLink = useMemo(
