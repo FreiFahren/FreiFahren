@@ -63,7 +63,15 @@
         "oneStation": "one station",
         "stations": "stations",
         "fromYou": "away",
-        "direction": "Direction"
+        "direction": "Direction",
+        "invite": "Invite",
+        "inviteText": "friends to improve accuracy.",
+        "disclaimer": "Data may be inaccurate."
+    },
+    "Share": {
+        "title": "Check out this app",
+        "text": "See where ticket inspectors are in Berlin",
+        "copied": "Link copied to clipboard!"
     },
     "StatsPopUp": {
         "reports": "reports",

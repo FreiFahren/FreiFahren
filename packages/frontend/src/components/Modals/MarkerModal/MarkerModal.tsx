@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react'
+import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { MarkerData } from 'src/utils/types'
@@ -69,7 +69,42 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
     const elapsedTimeMessage = useElapsedTimeMessage(elapsedTimeInMinutes, selectedMarker.isHistoric)
     const stationDistanceMessage = useStationDistanceMessage(stationDistance)
 
-    const [disclaimerMessage, setDisclaimerMessage] = useState('Data may be inaccurate.')
+    const handleShare = useCallback(
+        async (e: React.MouseEvent) => {
+            e.preventDefault()
+            try {
+                if (navigator.share) {
+                    await navigator.share({
+                        title: t('Share.title', 'Check out this app'),
+                        text: t('Share.text', 'See where ticket inspectors are in Berlin'),
+                        url: window.location.href,
+                    })
+                } else {
+                    await navigator.clipboard.writeText(window.location.href)
+                    alert(t('Share.copied', 'Link copied to clipboard!'))
+                }
+            } catch (error) {
+                console.error('Error sharing:', error)
+            }
+        },
+        [t]
+    )
+
+    const disclaimerWithLink = useMemo(
+        () => (
+            <>
+                <a href="#" onClick={handleShare} className="invite-link">
+                    {t('MarkerModal.invite', 'Invite')}
+                </a>{' '}
+                {t('MarkerModal.inviteText', 'friends to improve accuracy.')}
+            </>
+        ),
+        [t, handleShare]
+    )
+
+    const [disclaimerMessage, setDisclaimerMessage] = useState<string | JSX.Element>(
+        t('MarkerModal.disclaimer', 'Data may be inaccurate.')
+    )
     const [isDisclaimerVisible, setIsDisclaimerVisible] = useState(false)
     const TRANSITION_DURATION = 500 // Should match the transition-long duration in CSS
 
@@ -80,13 +115,13 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
 
             // Wait for fade out to complete before changing message
             setTimeout(() => {
-                setDisclaimerMessage('Invite friends to improve accuracy.')
+                setDisclaimerMessage(disclaimerWithLink)
                 setIsDisclaimerVisible(true)
             }, TRANSITION_DURATION)
         }, 5 * 1000)
 
         return () => clearTimeout(timer)
-    }, [])
+    }, [disclaimerWithLink])
 
     return (
         <div className={`marker-modal info-popup modal ${className}`}>

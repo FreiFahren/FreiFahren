@@ -34,3 +34,9 @@
 .marker-modal.info-popup .disclaimer.visible {
     opacity: 1;
 }
+
+.marker-modal.info-popup .invite-link {
+    color: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+}

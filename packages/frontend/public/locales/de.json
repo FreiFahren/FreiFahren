@@ -63,7 +63,15 @@
         "oneStation": "eine Station",
         "stations": "Stationen",
         "fromYou": "von dir entfernt",
-        "direction": "Richtung"
+        "direction": "Richtung",
+        "invite": "Teile",
+        "inviteText": "mit Freunden.",
+        "disclaimer": "Daten vielleicht ungenau."
+    },
+    "Share": {
+        "title": "Schau dir diese App an",
+        "text": "Siehe wo Kontrolleure in Berlin sind",
+        "copied": "Link kopiert!"
     },
     "StatsPopUp": {
         "reports": "Meldungen",
