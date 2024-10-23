@@ -1,8 +1,8 @@
-import de from "../assets/locales/de.json";
+import de from '../assets/locales/de.json'
 
-declare module "i18next" {
-  interface CustomTypeOptions {
-    defaultNS: "common";
-    resources: typeof de;
-  }
+declare module 'i18next' {
+    interface CustomTypeOptions {
+        defaultNS: 'common'
+        resources: typeof de
+    }
 }
