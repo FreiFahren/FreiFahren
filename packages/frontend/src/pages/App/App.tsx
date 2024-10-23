@@ -32,6 +32,7 @@ type AppUIState = {
     currentColorTheme: string
     isRiskLayerOpen: boolean
     isListModalOpen: boolean
+    isLegalDisclaimerOpen: boolean
 }
 
 const initialAppUIState: AppUIState = {
@@ -42,6 +43,7 @@ const initialAppUIState: AppUIState = {
     currentColorTheme: currentColorTheme(),
     isRiskLayerOpen: false,
     isListModalOpen: false,
+    isLegalDisclaimerOpen: false,
 }
 
 function App() {
@@ -137,13 +139,19 @@ function App() {
     }
 
     function closeLegalDisclaimer() {
-        setAppUIState({ ...appUIState, isFirstOpen: false, isStatsPopUpOpen: true })
         localStorage.setItem('legalDisclaimerAcceptedAt', new Date().toISOString())
+        setAppUIState({ ...appUIState, isFirstOpen: false, isStatsPopUpOpen: true })
     }
+
+    useEffect(() => {
+        if (!shouldShowLegalDisclaimer()) {
+            setAppUIState({ ...appUIState, isFirstOpen: false, isStatsPopUpOpen: true })
+        }
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <div className="App">
-            {appUIState.isFirstOpen && appMounted && shouldShowLegalDisclaimer() && (
+            {appMounted && shouldShowLegalDisclaimer() && (
                 <>
                     <LegalDisclaimer
                         openAnimationClass={appUIState.isFirstOpen ? 'open center-animation' : ''}
