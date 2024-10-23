@@ -1,0 +1,32 @@
+{
+  "common": {
+    "line": "Linie",
+    "direction": "Richtung",
+    "station": "Station"
+  },
+  "makeReport": {
+    "title": "Kontrolle Melden",
+    "submit": "Melden"
+  },
+  "reportList": {
+    "button": "Liste",
+    "title": "Aktuelle Meldungen",
+    "empty": "Keine aktuellen Meldungen"
+  },
+  "reportDetails": {
+    "minAgo": "vor {{minutes}} Min",
+    "direction": "Richtung",
+    "unknownDirection": "unbekannt",
+    "now": "jetzt",
+  },
+  "map": {
+    "layers": {
+      "risk": "Risiko",
+      "lines": "Linien"
+    }
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache"
+  }
+}

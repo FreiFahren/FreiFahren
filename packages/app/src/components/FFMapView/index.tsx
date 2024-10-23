@@ -1,20 +1,21 @@
 import MapLibreGL, {
   Camera,
-  LineLayer,
   MapView,
-  ShapeSource,
   UserLocation,
+  UserTrackingMode,
 } from "@maplibre/maplibre-react-native";
 import Geolocation from "@react-native-community/geolocation";
 import { noop } from "lodash";
-import { useEffect, useState } from "react";
+import { View } from "native-base";
+import { useEffect } from "react";
 import { StyleSheet } from "react-native";
 
-import { Report } from "../../api";
+import { useReports } from "../../api";
+import { useAppStore } from "../../app.store";
 import { config } from "../../config";
-import lines from "../../data/line-segments.json";
-import { ReportDetailsNotification } from "./ReportDetailsNotification";
+import { LinesLayer } from "./LinesLayer";
 import { ReportsLayer } from "./ReportsLayer";
+import { RiskLayer } from "./RiskLayer";
 import { StationLayer } from "./StationLayer";
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -36,61 +37,44 @@ const styles = StyleSheet.create({
   },
 });
 
-export const LinesLayer = () => (
-  <ShapeSource id="route-source" shape={lines as GeoJSON.GeoJSON}>
-    <LineLayer
-      id="route-layer"
-      style={{
-        lineWidth: 3,
-        lineJoin: "round",
-        lineCap: "round",
-        lineColor: ["get", "color"],
-        iconAllowOverlap: true,
-        textAllowOverlap: true,
-      }}
-    />
-  </ShapeSource>
-);
+export const FFMapView = () => {
+  const { data: reports = [] } = useReports();
 
-type FFMapViewProps = {
-  reports: Report[];
-};
-
-export const FFMapView = ({ reports }: FFMapViewProps) => {
   useEffect(() => {
     Geolocation.requestAuthorization(noop, noop);
   }, []);
 
-  const [reportToShow, setReportToShow] = useState<Report | null>(null);
+  const { layer, update: updateAppState } = useAppStore();
 
   return (
-    <>
+    <View width="100%" height="100%">
       <MapView
         style={styles.map}
         logoEnabled={false}
         styleURL={config.MAP_STYLE_URL}
-        attributionEnabled={false} // TODO: Custom attribution
+        compassEnabled={false}
+        attributionEnabled={false}
+        rotateEnabled={false}
       >
         <Camera
           defaultSettings={{
             centerCoordinate: [MAP_REGION.longitude, MAP_REGION.latitude],
-            zoomLevel: 9,
+            zoomLevel: 10,
           }}
           maxBounds={MAP_REGION.bounds}
           minZoomLevel={9}
           maxZoomLevel={13}
+          followUserMode={UserTrackingMode.Follow}
         />
         <LinesLayer />
+        <RiskLayer visible={layer === "risk"} />
         <StationLayer />
-        <ReportsLayer reports={reports} onPressReport={setReportToShow} />
+        <ReportsLayer
+          reports={reports}
+          onPressReport={(report) => updateAppState({ reportToShow: report })}
+        />
         <UserLocation visible animated />
       </MapView>
-      {reportToShow !== null && (
-        <ReportDetailsNotification
-          report={reportToShow}
-          onClose={() => setReportToShow(null)}
-        />
-      )}
-    </>
+    </View>
   );
 };

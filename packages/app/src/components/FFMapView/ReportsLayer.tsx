@@ -25,6 +25,12 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 9999,
   },
+  marker: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });
 
 // Workaround: Map pan performance issue when showing markers immediately
@@ -40,7 +46,7 @@ const useShowMarkersWithDelay = () => {
   return showMarkers;
 };
 
-const Pulse = () => {
+const usePulseAnimation = () => {
   const pulse = useSharedValue(0);
 
   useEffect(() => {
@@ -57,26 +63,21 @@ const Pulse = () => {
     );
   }, [pulse]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(pulse.value, [0, 1], [1, 0]),
+  return useAnimatedStyle(() => ({
+    opacity: interpolate(pulse.value, [0, 1], [0.8, 0]),
     transform: [
       {
         scale: interpolate(pulse.value, [0, 1], [0, 2.2]),
       },
     ],
   }));
-
-  return <Animated.View style={[styles.pulse, animatedStyle]} />;
 };
 
-type ReportsLayerProps = {
-  reports: Report[];
-  onPressReport: (report: Report) => void;
-};
+const useReportsGeoJson = (reports: Report[]) =>
+  useMemo(() => {
+    const now = Date.now();
 
-export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
-  const reportsGeoJson = useMemo(
-    () => ({
+    return {
       type: "FeatureCollection",
       features: reports.map((report) => {
         const { coordinates } = stations[report.stationId];
@@ -89,12 +90,27 @@ export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
           },
           properties: {
             id: report.stationId,
+            opacity:
+              1.4 -
+              Math.min(
+                (now - new Date(report.timestamp).getTime()) / (1000 * 60 * 60),
+                1
+              ),
           },
         };
       }),
-    }),
-    [reports]
-  );
+    };
+  }, [reports]);
+
+type ReportsLayerProps = {
+  reports: Report[];
+  onPressReport: (report: Report) => void;
+};
+
+export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
+  const reportsGeoJson = useReportsGeoJson(reports);
+
+  const pulseAnimatedStyle = usePulseAnimation();
 
   const showMarkers = useShowMarkersWithDelay();
 
@@ -110,8 +126,12 @@ export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
             key={report.stationId}
             allowOverlap
           >
-            <Pressable onPress={() => onPressReport(report)} hitSlop={10}>
-              <Pulse />
+            <Pressable
+              style={styles.marker}
+              onPress={() => onPressReport(report)}
+              hitSlop={10}
+            >
+              <Animated.View style={[styles.pulse, pulseAnimatedStyle]} />
             </Pressable>
           </MarkerView>
         ))}
@@ -126,6 +146,8 @@ export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
             circleColor: "#f00",
             circleStrokeWidth: 3,
             circleStrokeColor: "#fff",
+            circleOpacity: ["get", "opacity"],
+            circleStrokeOpacity: ["get", "opacity"],
           }}
         />
       </ShapeSource>

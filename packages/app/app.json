@@ -7,7 +7,12 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "plugins": [
-      [ "expo-dev-launcher", { "launchMode": "most-recent" } ],
+      [
+        "expo-dev-launcher",
+        {
+          "launchMode": "most-recent"
+        }
+      ],
       "@maplibre/maplibre-react-native"
     ],
     "splash": {
@@ -15,20 +20,34 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.Freifahren"
+      "bundleIdentifier": "com.anonymous.Freifahren",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app uses your location to show your current position on the map.",
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.Freifahren"
+      "package": "com.anonymous.Freifahren",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "INTERNET",
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "25e04c03-8adb-462b-a6a5-83690823b47d"
+      }
     }
   }
 }

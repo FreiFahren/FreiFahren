@@ -1,0 +1,32 @@
+{
+  "common": {
+    "line": "Line",
+    "direction": "Direction",
+    "station": "Station"
+  },
+  "makeReport": {
+    "title": "Report Inspector",
+    "submit": "Report"
+  },
+  "reportList": {
+    "button": "List",
+    "title": "Recent Reports",
+    "empty": "No recent reports"
+  },
+  "reportDetails": {
+    "minAgo": "{{minutes}}min ago",
+    "direction": "to",
+    "unknownDirection": "unknown",
+    "now": "now",
+  },
+  "map": {
+    "layers": {
+      "risk": "Risk",
+      "lines": "Lines"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language"
+  }
+}

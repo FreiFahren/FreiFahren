@@ -4,6 +4,7 @@ export const CACHE_KEYS = {
   reports: ["reports"],
   stations: ["stations"],
   lines: ["lines"],
+  risk: ["risk"],
 };
 
 export const queryClient = new QueryClient({

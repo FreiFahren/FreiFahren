@@ -8,6 +8,7 @@ export const theme = extendTheme({
     fg: "#8F91A2",
     success: "#C9F299",
     selected: "#22d6f2",
+    blue: "#68f9ff",
     lines: {
       U1: "#88ad58",
       U2: "#ca4c2b",
