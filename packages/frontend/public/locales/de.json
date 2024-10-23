@@ -11,13 +11,15 @@
         "activeUsageDescription": "Ich verstehe, dass die aktive Nutzung der App während der Fahrt andere Fahrgäste stören und gegen die Nutzungsbedingungen des Verkehrsbetriebs verstoßen kann.",
         "confirm": "Ich bestätige",
         "impressum": "Impressum",
-        "privacy": "Datenschutz"
+        "privacy": "Datenschutz",
+        "saved": "Die Bestätigung wird in Ihrem Browser gespeichert."
     },
     "UtilModal": {
         "title": "Informationen",
         "feedback-button": "Kontakt & Feedback",
         "impressum": "Impressum",
-        "privacy": "Datenschutz"
+        "privacy": "Datenschutz",
+        "terms": "Nutzungsbedingungen"
     },
     "FeedbackModal": {
         "title": "Sende dein Feedback an:",

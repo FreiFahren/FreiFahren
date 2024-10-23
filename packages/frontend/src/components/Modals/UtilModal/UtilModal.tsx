@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import './UtilModal.css'
 import FeedbackModal from '../FeedbackModal/FeedbackModal'
 import Backdrop from '../../../components/Miscellaneous/Backdrop/Backdrop'
+import LegalDisclaimer from '../LegalDisclaimer/LegalDisclaimer'
 
 interface UtilModalProps {
     className: string
@@ -21,6 +22,7 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
     const { t } = useTranslation()
 
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false)
+    const [isLegalDisclaimerOpen, setIsLegalDisclaimerOpen] = useState(false)
 
     return (
         <>
@@ -50,6 +52,9 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                             <Link to="/Datenschutz">{t('UtilModal.privacy')}</Link>
                         </li>
                         <li>
+                            <p onClick={() => setIsLegalDisclaimerOpen(true)}>{t('UtilModal.terms')}</p>
+                        </li>
+                        <li>
                             <a
                                 className="github-icon"
                                 href="https://github.com/FreiFahren/FreiFahren"
@@ -66,6 +71,15 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                 <>
                     <FeedbackModal openAnimationClass={isFeedbackModalOpen ? 'open center-animation' : ''} />
                     <Backdrop onClick={() => setIsFeedbackModalOpen(false)} Zindex={3} />
+                </>
+            )}
+            {isLegalDisclaimerOpen && (
+                <>
+                    <LegalDisclaimer
+                        closeModal={() => setIsLegalDisclaimerOpen(false)}
+                        openAnimationClass={isLegalDisclaimerOpen ? 'open center-animation high-z-index' : ''}
+                    />
+                    <Backdrop onClick={() => setIsLegalDisclaimerOpen(false)} Zindex={3} />
                 </>
             )}
         </>

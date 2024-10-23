@@ -28,6 +28,7 @@ const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ closeModal, openAnima
                             <p>{t('LegalDisclaimer.activeUsageDescription')}</p>
                         </li>
                     </ol>
+                    <p>{t('LegalDisclaimer.saved')}</p>
                 </section>
             </div>
             <div className="footer">
