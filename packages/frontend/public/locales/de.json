@@ -53,17 +53,25 @@
         "reports": "Mal",
         "thisWeek": "diese Woche",
         "moreThan": "Vor mehr als",
-        "moreThan45Minutes": "45 Minuten",
+        "moreThan45Minutes": "45 min",
         "oneHourAgo": "Vor einer",
         "oneHour": "Stunde",
         "hours": "Stunden",
         "ago": "vor",
         "now": "Jetzt",
-        "minutes": "Minuten",
+        "minutes": "min",
         "oneStation": "eine Station",
         "stations": "Stationen",
         "fromYou": "von dir entfernt",
-        "direction": "Richtung"
+        "direction": "Richtung",
+        "invite": "Teile",
+        "inviteText": "mit Freunden.",
+        "disclaimer": "Daten vielleicht ungenau."
+    },
+    "Share": {
+        "title": "Schau dir diese App an",
+        "text": "Siehe wo Kontrolleure in Berlin sind",
+        "copied": "Link kopiert!"
     },
     "StatsPopUp": {
         "reports": "Meldungen",

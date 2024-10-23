@@ -11,7 +11,32 @@
     color: var(--color-white);
 }
 
-.marker-modal.info-popup .distance {
+.marker-modal.info-popup .footer {
+    display: flex;
+    justify-content: space-between;
     margin-top: var(--margin-s);
     min-height: 20.5px;
+    color: var(--color-primary);
+    width: 100%;
+}
+
+.marker-modal.info-popup .distance {
+    font-size: var(--font-xs);
+    min-width: 100px;
+}
+
+.marker-modal.info-popup .disclaimer {
+    font-size: var(--font-xxs);
+    opacity: 0;
+    transition: opacity var(--transition-long);
+}
+
+.marker-modal.info-popup .disclaimer.visible {
+    opacity: 1;
+}
+
+.marker-modal.info-popup .invite-link {
+    color: inherit;
+    text-decoration: underline;
+    cursor: pointer;
 }

@@ -222,7 +222,7 @@ span {
     background-color: var(--color-background);
     width: 60%;
     max-width: 600px;
-    padding: var(--padding-xl);
+    padding: var(--padding-m);
     border-radius: var(--borderRadius-default);
     z-index: var(--zIndex-modal);
     display: none;
