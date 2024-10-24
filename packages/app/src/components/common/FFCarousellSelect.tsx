@@ -8,16 +8,23 @@ import { Theme } from '../../theme'
 type OptionContainerProps = {
     isSelected: boolean
     onSelect: () => void
+    hideCheck: boolean
 } & Omit<ComponentProps<typeof Pressable>, 'onPress'>
 
-const OptionContainer = ({ isSelected, onSelect, children, ...props }: PropsWithChildren<OptionContainerProps>) => {
+const OptionContainer = ({
+    isSelected,
+    onSelect,
+    children,
+    hideCheck,
+    ...props
+}: PropsWithChildren<OptionContainerProps>) => {
     const theme = useTheme() as Theme
 
     return (
         <Pressable
             borderRadius={8}
             borderWidth={2}
-            opacity={isSelected ? 1 : 0.5}
+            opacity={isSelected ? 1 : 0.7}
             borderColor={isSelected ? theme.colors.selected : theme.colors.bg2}
             alignItems="center"
             justifyContent="center"
@@ -26,7 +33,7 @@ const OptionContainer = ({ isSelected, onSelect, children, ...props }: PropsWith
             {...props}
         >
             {children}
-            {isSelected && (
+            {!hideCheck && isSelected && (
                 <View bg="selected" borderRadius="full" position="absolute" bottom={2} right={2} p={1}>
                     <FontAwesome5 name="check" size={14} color="white" />
                 </View>
@@ -48,6 +55,7 @@ type FFCarousellSelectProps<T> = {
     containerProps?: ComponentProps<typeof Pressable>
     vertical?: boolean
     collapses?: boolean
+    hideCheck?: boolean
 }
 
 export const FFCarousellSelect = <T,>({
@@ -58,6 +66,7 @@ export const FFCarousellSelect = <T,>({
     containerProps,
     vertical = false,
     collapses = false,
+    hideCheck = false,
 }: FFCarousellSelectProps<T>) => {
     const Container = vertical ? Stack : Row
 
@@ -101,6 +110,7 @@ export const FFCarousellSelect = <T,>({
                     // eslint-disable-next-line react/no-array-index-key
                     key={index}
                     isSelected={localSelectedOption === option}
+                    hideCheck={hideCheck}
                     onSelect={() => handleSelectOption(option)}
                     {...containerProps}
                 >

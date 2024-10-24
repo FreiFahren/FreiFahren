@@ -3,7 +3,6 @@ import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/typ
 import { Text, View } from 'native-base'
 import { ComponentProps, forwardRef, Ref, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Text as RNText } from 'react-native'
 
 import { FFButton } from '../common/FFButton'
 import { FFCarousellSelect } from '../common/FFCarousellSelect'
@@ -15,8 +14,8 @@ const LanguageSwitcher = () => {
     const { i18n, t } = useTranslation('settings')
 
     const languages = {
-        de: '🇩🇪',
-        en: '🇬🇧',
+        de: '🇩🇪 Deutsch',
+        en: '🇬🇧 English',
     } as const
 
     return (
@@ -25,9 +24,14 @@ const LanguageSwitcher = () => {
                 {t('language')}
             </Text>
             <FFCarousellSelect
+                hideCheck
                 options={['en', 'de'] as const}
                 renderOption={(item: Language) => (
-                    <RNText style={{ fontSize: 48, paddingHorizontal: 10 }}>{languages[item]}</RNText>
+                    <View px="6" py="2">
+                        <Text color="white" bold>
+                            {languages[item]}
+                        </Text>
+                    </View>
                 )}
                 selectedOption={i18n.language as Language}
                 onSelect={(item) => i18n.changeLanguage(item)}
