@@ -87,22 +87,24 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
 
     useEffect(() => {
         const getAllLinesWithReportsSorted = (): Map<string, MarkerData[]> => {
-            const lineCounts = new Map<string, number>()
             const lineReports = new Map<string, MarkerData[]>()
 
+            // Group reports by line
             for (const inspector of ticketInspectorList) {
                 const { line } = inspector
                 if (line === '') continue
-
-                lineCounts.set(line, (lineCounts.get(line) || 0) + 1)
                 lineReports.set(line, [...(lineReports.get(line) || []), inspector])
             }
 
-            // sort lines by count of reports
+            // Sort lines by their latest report timestamp (first item in each array)
             return new Map(
-                Array.from(lineCounts.entries())
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([line]) => [line, lineReports.get(line)!])
+                Array.from(lineReports.entries())
+                    .sort((a, b) => {
+                        const aTime = new Date(a[1][0].timestamp).getTime()
+                        const bTime = new Date(b[1][0].timestamp).getTime()
+                        return bTime - aTime
+                    })
+                    .map(([line, reports]) => [line, reports])
             )
         }
 
