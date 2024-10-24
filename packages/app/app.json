@@ -13,7 +13,17 @@
           "launchMode": "most-recent"
         }
       ],
-      "@maplibre/maplibre-react-native"
+      "@maplibre/maplibre-react-native",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "lint": {
+              "checkReleaseBuilds": false
+            }
+          }
+        }
+      ]
     ],
     "splash": {
       "image": "./assets/splash.png",
