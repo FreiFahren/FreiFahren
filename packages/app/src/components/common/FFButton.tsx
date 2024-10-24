@@ -1,17 +1,21 @@
-import { Button } from "native-base";
-import { ComponentProps, PropsWithChildren } from "react";
+import { Pressable } from 'native-base'
+import { ComponentProps, PropsWithChildren } from 'react'
 
-type FFButtonProps = PropsWithChildren<ComponentProps<typeof Button>>;
+type FFButtonProps = PropsWithChildren<ComponentProps<typeof Pressable>>
 
 export const FFButton = ({ children, ...props }: FFButtonProps) => (
-  <Button
-    backgroundColor="bg"
-    borderRadius={24}
-    borderColor="bg2"
-    borderWidth={3}
-    p={3}
-    {...props}
-  >
-    {children}
-  </Button>
-);
+    <Pressable
+        backgroundColor="bg"
+        borderRadius={24}
+        borderColor="bg2"
+        borderWidth={3}
+        flexDir="row"
+        alignItems="center"
+        justifyContent="center"
+        px={5}
+        py={3}
+        {...props}
+    >
+        {children}
+    </Pressable>
+)
