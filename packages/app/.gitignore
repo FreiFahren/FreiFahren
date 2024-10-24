@@ -41,6 +41,7 @@ local.properties
 *.hprof
 .cxx/
 *.apk
+*.aab
 
 # iOS/Xcode
 ios/

@@ -1,6 +1,7 @@
 import { Box, View } from 'native-base'
 
 import { useAppStore } from '../../app.store'
+import { Disclaimer } from '../Disclaimer'
 import { Attribution } from './Attribution'
 import { LayerSwitcher } from './LayerSwitcher'
 import { ReportButton } from './ReportButton'
@@ -43,6 +44,7 @@ export const UIOverlay = () => {
                 <View pointerEvents="box-none" flexDir="row" justifyContent="space-between" alignItems="flex-end">
                     <ReportListButton />
                     <ReportButton />
+                    <Disclaimer />
                 </View>
             </View>
         </Box>
