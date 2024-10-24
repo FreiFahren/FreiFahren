@@ -73,8 +73,8 @@
     border: none;
     cursor: pointer;
     min-width: 20px;
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 30px;
     padding: 0;
     outline: none;
 }
@@ -102,7 +102,7 @@
 }
 
 .clustered-report-item-list.expanded {
-    max-height: 1000px;
+    max-height: 2000px;
     transition: max-height var(--transition-long) ease-in;
 }
 .clustered-report-item-list .inner-list {
