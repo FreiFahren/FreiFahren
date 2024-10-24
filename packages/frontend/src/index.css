@@ -323,6 +323,10 @@ button .plus {
     height: 100%;
 }
 
+.high-z-index {
+    z-index: 10000;
+}
+
 .button-gray {
     background-color: var(--color-gray) !important;
 }

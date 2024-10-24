@@ -20,7 +20,6 @@
 
 .util-modal ul {
     position: relative;
-    width: 65%;
     max-width: 300px;
     margin-top: var(--margin-m);
     margin-right: 0;
@@ -40,7 +39,6 @@
     padding: 0;
     margin: 0 var(--margin-s) 0 0;
     flex-grow: 1;
-    width: 0;
 }
 
 .util-modal ul:last-of-type {
@@ -49,6 +47,11 @@
     list-style: none;
     padding: 0;
     margin: 0;
+}
+
+.util-modal li p {
+    cursor: pointer;
+    text-decoration: underline;
 }
 
 .util-modal li {

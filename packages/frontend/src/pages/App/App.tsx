@@ -32,6 +32,7 @@ type AppUIState = {
     currentColorTheme: string
     isRiskLayerOpen: boolean
     isListModalOpen: boolean
+    isLegalDisclaimerOpen: boolean
 }
 
 const initialAppUIState: AppUIState = {
@@ -42,6 +43,7 @@ const initialAppUIState: AppUIState = {
     currentColorTheme: currentColorTheme(),
     isRiskLayerOpen: false,
     isListModalOpen: false,
+    isLegalDisclaimerOpen: false,
 }
 
 function App() {
@@ -54,10 +56,6 @@ function App() {
 
     const handleFormSubmit = () => {
         setAppUIState((appUIState) => ({ ...appUIState, formSubmitted: !appUIState.formSubmitted }))
-    }
-
-    function closeLegalDisclaimer() {
-        setAppUIState({ ...appUIState, isFirstOpen: false, isStatsPopUpOpen: true })
     }
 
     const {
@@ -129,9 +127,31 @@ function App() {
         }))
     }
 
+    const shouldShowLegalDisclaimer = (): boolean => {
+        const legalDisclaimerAcceptedAt = localStorage.getItem('legalDisclaimerAcceptedAt')
+        if (!legalDisclaimerAcceptedAt) return true
+
+        const lastAcceptedDate = new Date(legalDisclaimerAcceptedAt)
+        const currentDate = new Date()
+        const oneWeek = 7 * 24 * 60 * 60 * 1000 // One week in milliseconds
+
+        return currentDate.getTime() - lastAcceptedDate.getTime() > oneWeek
+    }
+
+    function closeLegalDisclaimer() {
+        localStorage.setItem('legalDisclaimerAcceptedAt', new Date().toISOString())
+        setAppUIState({ ...appUIState, isFirstOpen: false, isStatsPopUpOpen: true })
+    }
+
+    useEffect(() => {
+        if (!shouldShowLegalDisclaimer()) {
+            setAppUIState({ ...appUIState, isFirstOpen: false, isStatsPopUpOpen: true })
+        }
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
     return (
         <div className="App">
-            {appUIState.isFirstOpen && appMounted && (
+            {appMounted && shouldShowLegalDisclaimer() && (
                 <>
                     <LegalDisclaimer
                         openAnimationClass={appUIState.isFirstOpen ? 'open center-animation' : ''}

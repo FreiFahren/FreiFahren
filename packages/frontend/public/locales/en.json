@@ -11,13 +11,15 @@
         "activeUsageDescription": "I understand that the active use of the app during my journey can disturb other passengers and violate the terms of use of the public transport operator.",
         "confirm": "I confirm",
         "impressum": "Legal notice",
-        "privacy": "Privacy"
+        "privacy": "Privacy",
+        "saved": "Your confirmation will be saved to your browser's local storage."
     },
     "UtilModal": {
         "title": "Information",
         "feedback-button": "Contact & Feedback",
         "impressum": "Legal notice",
-        "privacy": "Privacy"
+        "privacy": "Privacy",
+        "terms": "Terms of use"
     },
     "FeedbackModal": {
         "title": "Send your feedback to:",
