@@ -85,8 +85,7 @@ export const StationLayer = () => {
                     textColor: theme.colors.text[100],
                     textAnchor: 'bottom',
                     textSize: 12,
-                    textOffset: [0, -0.5],
-                    // textOpacity: ['step', ['zoom'], 0, 12, 1],
+                    textOffset: [0, -0.8],
                     textHaloColor: '#000000',
                     textHaloWidth: 1,
                     textOpacity: [
