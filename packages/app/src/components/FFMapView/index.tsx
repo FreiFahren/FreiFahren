@@ -57,7 +57,7 @@ export const FFMapView = () => {
                         zoomLevel: 10,
                     }}
                     maxBounds={MAP_REGION.bounds}
-                    minZoomLevel={9}
+                    minZoomLevel={7}
                     maxZoomLevel={13}
                     followUserMode={UserTrackingMode.Follow}
                 />
