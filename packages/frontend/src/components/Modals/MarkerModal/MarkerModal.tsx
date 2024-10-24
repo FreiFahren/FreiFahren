@@ -126,7 +126,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                 setDisclaimerMessage(disclaimerWithLink)
                 setIsDisclaimerVisible(true)
             }, TRANSITION_DURATION)
-        }, 5 * 1000)
+        }, 2.5 * 1000)
 
         return () => clearTimeout(timer)
     }, [disclaimerWithLink])
