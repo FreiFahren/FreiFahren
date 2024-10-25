@@ -59,7 +59,7 @@ export const Disclaimer = () => {
                     <Text color="white" mt="2">
                         {t('bullet1.text')}
                     </Text>
-                    <Text color="white" mt="8" bold>
+                    <Text color="white" mt="4" bold>
                         {t('bullet2.title')}
                     </Text>
                     <Text color="white" mt="2">

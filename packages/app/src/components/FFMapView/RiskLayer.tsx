@@ -2,7 +2,6 @@ import { LineLayer, ShapeSource } from '@maplibre/maplibre-react-native'
 import { useMemo } from 'react'
 
 import { useRiskData } from '../../api/queries'
-import { useAppStore } from '../../app.store'
 import lines from '../../data/line-segments.json'
 
 const linesWithRiskColors = (segmentColors?: { [key: string]: string }) => {
@@ -26,14 +25,8 @@ type RiskLayerProps = {
 }
 
 export const RiskLayer = ({ visible }: RiskLayerProps) => {
-    const shouldShow = useAppStore((state) => state.disclaimerGood)
     const { data: riskData } = useRiskData()
-
     const riskGeoJson = useMemo(() => linesWithRiskColors(riskData?.segmentColors), [riskData])
-
-    if (!shouldShow) {
-        return null
-    }
 
     return (
         <ShapeSource id="risk-source" shape={riskGeoJson as GeoJSON.GeoJSON}>

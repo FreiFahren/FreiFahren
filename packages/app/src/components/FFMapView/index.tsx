@@ -34,12 +34,11 @@ const styles = StyleSheet.create({
 
 export const FFMapView = () => {
     const { data: reports = [] } = useReports()
+    const { layer, disclaimerGood, update: updateAppState } = useAppStore()
 
     useEffect(() => {
         Geolocation.requestAuthorization(noop, noop)
     }, [])
-
-    const { layer, update: updateAppState } = useAppStore()
 
     return (
         <View width="100%" height="100%">
@@ -62,9 +61,13 @@ export const FFMapView = () => {
                     followUserMode={UserTrackingMode.Follow}
                 />
                 <LinesLayer />
-                <RiskLayer visible={layer === 'risk'} />
+                <RiskLayer visible={disclaimerGood && layer === 'risk'} />
                 <StationLayer />
-                <ReportsLayer reports={reports} onPressReport={(report) => updateAppState({ reportToShow: report })} />
+                <ReportsLayer
+                    visible={disclaimerGood}
+                    reports={reports}
+                    onPressReport={(report) => updateAppState({ reportToShow: report })}
+                />
                 <UserLocation visible animated />
             </MapView>
         </View>

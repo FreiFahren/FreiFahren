@@ -12,7 +12,6 @@ import Animated, {
 } from 'react-native-reanimated'
 
 import { Report } from '../../api'
-import { useAppStore } from '../../app.store'
 import { stations } from '../../data'
 
 const styles = StyleSheet.create({
@@ -96,25 +95,19 @@ const useReportsGeoJson = (reports: Report[]) =>
 
 type ReportsLayerProps = {
     reports: Report[]
+    visible: boolean
     onPressReport: (report: Report) => void
 }
 
-export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
+export const ReportsLayer = ({ reports, onPressReport, visible }: ReportsLayerProps) => {
     const reportsGeoJson = useReportsGeoJson(reports)
-
     const pulseAnimatedStyle = usePulseAnimation()
-
     const showMarkers = useShowMarkersWithDelay()
-
-    const shouldShowReports = useAppStore((state) => state.disclaimerGood)
-
-    if (!shouldShowReports) {
-        return null
-    }
 
     return (
         <>
             {showMarkers &&
+                visible &&
                 reports.map((report) => (
                     <MarkerView
                         coordinate={[
@@ -137,8 +130,8 @@ export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
                         circleColor: '#f00',
                         circleStrokeWidth: 3,
                         circleStrokeColor: '#fff',
-                        circleOpacity: ['get', 'opacity'],
-                        circleStrokeOpacity: ['get', 'opacity'],
+                        circleOpacity: visible ? ['get', 'opacity'] : 0,
+                        circleStrokeOpacity: visible ? ['get', 'opacity'] : 0,
                     }}
                 />
             </ShapeSource>
