@@ -204,7 +204,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                             className={`risk-line risk-level-${level}`}
                                             onClick={() => closeModal()}
                                         >
-                                            <img src={`/icons/risk-${level}.svg`} />
+                                            <img src={`/icons/risk-${level}.svg`} alt="Icon to show risk level" />
                                             <h4 className={`line-label ${line}`}>{line}</h4>
                                         </div>
                                     ))}
@@ -218,7 +218,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                             className={`risk-line risk-level-${level}`}
                                             onClick={() => closeModal()}
                                         >
-                                            <img src={`/icons/risk-${level}.svg`} />
+                                            <img src={`/icons/risk-${level}.svg`} alt="Icon to show risk level" />
                                             <h4 className={`line-label ${line}`}>{line}</h4>
                                         </div>
                                     ))}
@@ -232,7 +232,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                             className={`risk-line risk-level-${level}`}
                                             onClick={() => closeModal()}
                                         >
-                                            <img src={`/icons/risk-${level}.svg`} />
+                                            <img src={`/icons/risk-${level}.svg`} alt="Icon to show risk level" />
                                             <h4 className={`line-label ${line}`}>{line}</h4>
                                         </div>
                                     ))}
