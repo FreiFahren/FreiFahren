@@ -131,29 +131,17 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                 lineScores.set(line, score)
             }
         })
-        return new Map(
-            Array.from(lineScores.entries())
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 8)
-        )
+        return new Map(Array.from(lineScores.entries()).sort((a, b) => b[1] - a[1]))
     }
 
     useEffect(() => {
         if (segmentRiskData && segmentRiskData.segment_colors) {
             const riskMap = extractMostRiskLines(segmentRiskData.segment_colors)
-            if (riskMap.size < 8) {
-                // Fill remaining slots with lines from sortedLinesWithReports
-                const remainingLines = Array.from(sortedLinesWithReports.keys())
-                    .filter((line) => !riskMap.has(line))
-                    .slice(0, 8 - riskMap.size)
-                remainingLines.forEach((line) => riskMap.set(line, 0))
-            } else if (riskMap.size > 8) {
-                // remove the least risky lines
-                const leastRiskLines = Array.from(riskMap.entries())
-                    .sort((a, b) => a[1] - b[1])
-                    .slice(0, riskMap.size - 8)
-                leastRiskLines.forEach(([line]) => riskMap.delete(line))
-            }
+            Array.from(sortedLinesWithReports.entries()).forEach(([line]) => {
+                if (!riskMap.has(line)) {
+                    riskMap.set(line, 0)
+                }
+            })
             setRiskLines(riskMap)
         }
     }, [segmentRiskData, sortedLinesWithReports])
@@ -195,19 +183,54 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                     <section className="risk">
                         <h2>{t('ReportsModal.risk')}</h2>
                         <div className="risk-grid">
-                            {Array.from(riskLines).map(([line, riskLevel]) => (
-                                <div
-                                    key={line}
-                                    className={`risk-grid-item risk-level-${riskLevel}`}
-                                    onClick={() => closeModal()}
-                                >
-                                    <img
-                                        src={`/icons/risk-${riskLevel}.svg`}
-                                        alt={`Icon for risk level ${riskLevel}`}
-                                    />
-                                    <h4 className={`${line} line-label`}>{line}</h4>
+                            {Array.from(riskLines.entries()).some(([, level]) => level === 2 || level === 3) && (
+                                <div className="risk-grid-item">
+                                    {Array.from(riskLines.entries())
+                                        .filter(([, level]) => level === 2 || level === 3)
+                                        .map(([line, level]) => (
+                                            <div
+                                                key={line}
+                                                className={`risk-line risk-level-${level}`}
+                                                onClick={() => closeModal()}
+                                            >
+                                                <img src={`/icons/risk-${level}.svg`} alt="Icon to show risk level" />
+                                                <h4 className={`line-label ${line}`}>{line}</h4>
+                                            </div>
+                                        ))}
                                 </div>
-                            ))}
+                            )}
+                            {Array.from(riskLines.entries()).some(([, level]) => level === 1) && (
+                                <div className="risk-grid-item">
+                                    {Array.from(riskLines.entries())
+                                        .filter(([, level]) => level === 1)
+                                        .map(([line, level]) => (
+                                            <div
+                                                key={line}
+                                                className={`risk-line risk-level-${level}`}
+                                                onClick={() => closeModal()}
+                                            >
+                                                <img src={`/icons/risk-${level}.svg`} alt="Icon to show risk level" />
+                                                <h4 className={`line-label ${line}`}>{line}</h4>
+                                            </div>
+                                        ))}
+                                </div>
+                            )}
+                            {Array.from(riskLines.entries()).some(([, level]) => level === 0) && (
+                                <div className="risk-grid-item">
+                                    {Array.from(riskLines.entries())
+                                        .filter(([, level]) => level === 0)
+                                        .map(([line, level]) => (
+                                            <div
+                                                key={line}
+                                                className={`risk-line risk-level-${level}`}
+                                                onClick={() => closeModal()}
+                                            >
+                                                <img src={`/icons/risk-${level}.svg`} alt="Icon to show risk level" />
+                                                <h4 className={`line-label ${line}`}>{line}</h4>
+                                            </div>
+                                        ))}
+                                </div>
+                            )}
                         </div>
                     </section>
                 </section>
