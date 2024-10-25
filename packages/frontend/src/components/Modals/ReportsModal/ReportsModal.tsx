@@ -183,7 +183,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                     <section className="risk">
                         <h2>{t('ReportsModal.risk')}</h2>
                         <div className="risk-grid">
-                            <div className="risk-grid-item align-child-on-line">
+                            <div className="risk-grid-item">
                                 {Array.from(riskLines.entries())
                                     .filter(([, level]) => level === 2 || level === 3)
                                     .map(([line, level]) => (
@@ -197,7 +197,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                         </div>
                                     ))}
                             </div>
-                            <div className="risk-grid-item align-child-on-line">
+                            <div className="risk-grid-item">
                                 {Array.from(riskLines.entries())
                                     .filter(([, level]) => level === 1)
                                     .map(([line, level]) => (
@@ -211,7 +211,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                         </div>
                                     ))}
                             </div>
-                            <div className="risk-grid-item align-child-on-line">
+                            <div className="risk-grid-item">
                                 {Array.from(riskLines.entries())
                                     .filter(([, level]) => level === 0)
                                     .map(([line, level]) => (
