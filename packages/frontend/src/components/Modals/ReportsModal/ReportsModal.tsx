@@ -131,29 +131,17 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                 lineScores.set(line, score)
             }
         })
-        return new Map(
-            Array.from(lineScores.entries())
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 8)
-        )
+        return new Map(Array.from(lineScores.entries()).sort((a, b) => b[1] - a[1]))
     }
 
     useEffect(() => {
         if (segmentRiskData && segmentRiskData.segment_colors) {
             const riskMap = extractMostRiskLines(segmentRiskData.segment_colors)
-            if (riskMap.size < 8) {
-                // Fill remaining slots with lines from sortedLinesWithReports
-                const remainingLines = Array.from(sortedLinesWithReports.keys())
-                    .filter((line) => !riskMap.has(line))
-                    .slice(0, 8 - riskMap.size)
-                remainingLines.forEach((line) => riskMap.set(line, 0))
-            } else if (riskMap.size > 8) {
-                // remove the least risky lines
-                const leastRiskLines = Array.from(riskMap.entries())
-                    .sort((a, b) => a[1] - b[1])
-                    .slice(0, riskMap.size - 8)
-                leastRiskLines.forEach(([line]) => riskMap.delete(line))
-            }
+            Array.from(sortedLinesWithReports.entries()).forEach(([line]) => {
+                if (!riskMap.has(line)) {
+                    riskMap.set(line, 0)
+                }
+            })
             setRiskLines(riskMap)
         }
     }, [segmentRiskData, sortedLinesWithReports])
