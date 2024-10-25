@@ -1,0 +1,7 @@
+set dotenv-load
+set positional-arguments
+
+build platform profile:
+  #!/bin/bash
+  eas build --platform {{platform}} --local --profile {{profile}}
+

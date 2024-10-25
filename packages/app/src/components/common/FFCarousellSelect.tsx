@@ -1,80 +1,122 @@
-import { FontAwesome5 } from "@expo/vector-icons";
-import { Pressable, Row, Stack, useTheme, View } from "native-base";
-import { ComponentProps, PropsWithChildren, ReactNode } from "react";
+import { FontAwesome5 } from '@expo/vector-icons'
+import { Pressable, Row, Stack, Text, useTheme, View } from 'native-base'
+import { ComponentProps, PropsWithChildren, ReactNode, useEffect, useState } from 'react'
+import { LayoutAnimation } from 'react-native'
 
-import { Theme } from "../../theme";
+import { Theme } from '../../theme'
 
 type OptionContainerProps = {
-  isSelected: boolean;
-} & ComponentProps<typeof Pressable>;
+    isSelected: boolean
+    onSelect: () => void
+    hideCheck?: boolean
+} & Omit<ComponentProps<typeof Pressable>, 'onPress'>
 
 const OptionContainer = ({
-  isSelected,
-  children,
-  ...props
+    isSelected,
+    onSelect,
+    children,
+    hideCheck = false,
+    ...props
 }: PropsWithChildren<OptionContainerProps>) => {
-  const theme = useTheme() as Theme;
+    const theme = useTheme() as Theme
 
-  return (
-    <Pressable
-      borderRadius={8}
-      borderWidth={3}
-      opacity={isSelected ? 1 : 0.5}
-      borderColor={isSelected ? theme.colors.selected : theme.colors.bg2}
-      alignItems="center"
-      justifyContent="center"
-      position="relative"
-      {...props}
-    >
-      {children}
-      {isSelected && (
-        <View
-          bg="selected"
-          borderRadius="full"
-          position="absolute"
-          bottom={2}
-          right={2}
-          p={1}
+    return (
+        <Pressable
+            borderRadius={8}
+            borderWidth={2}
+            opacity={isSelected ? 1 : 0.7}
+            borderColor={isSelected ? theme.colors.selected : theme.colors.bg2}
+            alignItems="center"
+            justifyContent="center"
+            position="relative"
+            onPress={onSelect}
+            {...props}
         >
-          <FontAwesome5 name="check" size={14} color="white" />
-        </View>
-      )}
-    </Pressable>
-  );
-};
+            {children}
+            {!hideCheck && isSelected && (
+                <View bg="selected" borderRadius="full" position="absolute" bottom={2} right={2} p={1}>
+                    <FontAwesome5 name="check" size={14} color="white" />
+                </View>
+            )}
+        </Pressable>
+    )
+}
+
+const collapseExpandAnimationConfig = {
+    ...LayoutAnimation.Presets.easeInEaseOut,
+    duration: 400,
+}
 
 type FFCarousellSelectProps<T> = {
-  options: T[];
-  renderOption: (option: T) => ReactNode;
-  onSelect: (option: T) => void;
-  selectedOption: T | null;
-  containerProps?: ComponentProps<typeof Pressable>;
-  vertical?: boolean;
-};
+    options: T[]
+    renderOption: (option: T, isSelected: boolean) => ReactNode
+    onSelect: (option: T) => void
+    selectedOption: T | null
+    containerProps?: ComponentProps<typeof Pressable>
+    vertical?: boolean
+    collapses?: boolean
+    hideCheck?: boolean
+}
 
 export const FFCarousellSelect = <T,>({
-  options,
-  renderOption,
-  onSelect,
-  selectedOption,
-  containerProps,
-  vertical = false,
+    options,
+    renderOption,
+    onSelect,
+    selectedOption,
+    containerProps,
+    vertical = false,
+    collapses = false,
+    hideCheck = false,
 }: FFCarousellSelectProps<T>) => {
-  const Container = vertical ? Stack : Row;
+    const Container = vertical ? Stack : Row
 
-  return (
-    <Container space={2}>
-      {options.map((option, index) => (
-        <OptionContainer
-          // eslint-disable-next-line react/no-array-index-key
-          key={index}
-          isSelected={selectedOption === option}
-          onPress={() => onSelect(option)}
-          {...containerProps}
-        >
-          {renderOption(option)}
+    const [isCollapsed, setIsCollapsed] = useState(false)
+
+    const [localSelectedOption, setLocalSelectedOption] = useState(selectedOption)
+
+    useEffect(() => {
+        setLocalSelectedOption(selectedOption)
+        if (selectedOption === null) {
+            setIsCollapsed(false)
+        }
+    }, [selectedOption])
+
+    const handleSelectOption = (option: T) => {
+        setLocalSelectedOption(option)
+        if (collapses) {
+            LayoutAnimation.configureNext(collapseExpandAnimationConfig)
+            setIsCollapsed(collapses)
+        }
+        onSelect(option)
+    }
+
+    const handleExpand = () => {
+        LayoutAnimation.configureNext(collapseExpandAnimationConfig)
+        setIsCollapsed(false)
+    }
+
+    return isCollapsed ? (
+        <OptionContainer isSelected={localSelectedOption !== null} onSelect={handleExpand} {...containerProps}>
+            {localSelectedOption === null ? (
+                <Text color="fg">Nicht ausgewählt</Text>
+            ) : (
+                renderOption(localSelectedOption, true)
+            )}
         </OptionContainer>
-      ))}
-    </Container>
-  );
-};
+    ) : (
+        <Container space={2}>
+            {options.map((option, index) => (
+                <OptionContainer
+                    // eslint-disable-next-line react/no-array-index-key
+                    key={index}
+                    isSelected={localSelectedOption === option}
+                    hideCheck={hideCheck}
+                    onSelect={() => handleSelectOption(option)}
+                    {...containerProps}
+                >
+                    {renderOption(option, localSelectedOption === option)}
+                </OptionContainer>
+            ))}
+        </Container>
+    )
+}

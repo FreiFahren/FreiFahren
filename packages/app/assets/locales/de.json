@@ -1,0 +1,45 @@
+{
+  "common": {
+    "line": "Linie",
+    "direction": "Richtung",
+    "station": "Station"
+  },
+  "makeReport": {
+    "title": "Kontrolle Melden",
+    "submit": "Melden"
+  },
+  "reportList": {
+    "button": "Liste",
+    "title": "Aktuelle Meldungen",
+    "empty": "Keine aktuellen Meldungen"
+  },
+  "reportDetails": {
+    "minAgo": "vor {{minutes}} Min",
+    "direction": "Richtung",
+    "unknownDirection": "unbekannt",
+    "now": "jetzt",
+  },
+  "map": {
+    "layers": {
+      "risk": "Risiko",
+      "lines": "Linien"
+    }
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache"
+  },
+  "disclaimer": {
+    "title": "Bitte bestätige vor dem Fortfahren",
+    "subtitle": "Um die Integrität unserer Community und ethische Nutzung zu gewährleisten, bitten wir dich, zwei wichtige Punkte zu bestätigen:",
+    "bullet1": {
+      "title": "1. Ich besitze einen gültigen Fahrschein",
+      "text": "Ich verstehe, dass diese App dazu dient, das Bewusstsein und die Planung im öffentlichen Verkehr zu verbessern, und nicht, um Regeln oder Vorschriften zu umgehen."
+    },
+    "bullet2": {
+      "title": "2. Ich benutze die App nicht aktiv während der Fahrt",
+      "text": "Mir ist bewusst, dass die aktive Nutzung der App während meiner Fahrt gegen die Nutzungsbedingungen des Verkehrsunternehmens verstoßen kann."
+    },
+    "confirm": "Bestätigen"
+  },
+}

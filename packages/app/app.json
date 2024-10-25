@@ -2,33 +2,64 @@
   "expo": {
     "name": "freifahren",
     "slug": "Freifahren",
-    "version": "1.0.0",
+    "version": "0.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "plugins": [
-      [ "expo-dev-launcher", { "launchMode": "most-recent" } ],
-      "@maplibre/maplibre-react-native"
+      [
+        "expo-dev-launcher",
+        {
+          "launchMode": "most-recent"
+        }
+      ],
+      "@maplibre/maplibre-react-native",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "lint": {
+              "checkReleaseBuilds": false
+            }
+          }
+        }
+      ]
     ],
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.Freifahren"
+      "bundleIdentifier": "com.anonymous.Freifahren",
+      "buildNumber": "0.0.1",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app uses your location to show your current position on the map.",
+      }
     },
     "android": {
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.Freifahren"
+      "package": "com.anonymous.Freifahren",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "INTERNET",
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "25e04c03-8adb-462b-a6a5-83690823b47d"
+      }
     }
   }
 }
