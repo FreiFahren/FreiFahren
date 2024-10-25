@@ -44,8 +44,6 @@ export const RiskLayer = ({ visible }: RiskLayerProps) => {
                     lineJoin: 'round',
                     lineCap: 'round',
                     lineColor: ['get', 'color'],
-                    iconAllowOverlap: true,
-                    textAllowOverlap: true,
                     lineOpacity: visible ? 1 : 0,
                 }}
             />

@@ -8,14 +8,14 @@ import { Theme } from '../../theme'
 type OptionContainerProps = {
     isSelected: boolean
     onSelect: () => void
-    hideCheck: boolean
+    hideCheck?: boolean
 } & Omit<ComponentProps<typeof Pressable>, 'onPress'>
 
 const OptionContainer = ({
     isSelected,
     onSelect,
     children,
-    hideCheck,
+    hideCheck = false,
     ...props
 }: PropsWithChildren<OptionContainerProps>) => {
     const theme = useTheme() as Theme

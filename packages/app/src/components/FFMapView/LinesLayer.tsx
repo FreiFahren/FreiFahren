@@ -11,8 +11,6 @@ export const LinesLayer = () => (
                 lineJoin: 'round',
                 lineCap: 'round',
                 lineColor: ['get', 'color'],
-                iconAllowOverlap: true,
-                textAllowOverlap: true,
             }}
         />
         <SymbolLayer
