@@ -41,7 +41,7 @@ const initialAppUIState: AppUIState = {
     isFirstOpen: true,
     isStatsPopUpOpen: false,
     currentColorTheme: currentColorTheme(),
-    isRiskLayerOpen: false,
+    isRiskLayerOpen: localStorage.getItem('layer') === 'risk',
     isListModalOpen: false,
     isLegalDisclaimerOpen: false,
 }
@@ -117,13 +117,15 @@ function App() {
 
     function changeLayer(clickedLayer: string) {
         setAppUIState({ ...appUIState, isRiskLayerOpen: clickedLayer === 'risk' })
+        localStorage.setItem('layer', clickedLayer)
     }
 
     function handleRiskGridItemClick() {
+        localStorage.setItem('layer', 'risk')
         setAppUIState((prevState) => ({
             ...prevState,
             isListModalOpen: false,
-            isRiskLayerOpen: true,
+            isRiskLayerOpen: localStorage.getItem('layer') === 'risk',
         }))
     }
 
