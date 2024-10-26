@@ -1,5 +1,15 @@
 .reports-modal {
+    padding-top: 0;
     max-height: 70vh;
+}
+
+.reports-modal > section.tabs {
+    margin-top: var(--margin-m);
+    position: sticky;
+    top: 0;
+    background-color: var(--color-background);
+    padding: var(--padding-s) 0;
+    width: 100%;
 }
 
 .reports-modal > section:first-child {
@@ -201,7 +211,7 @@ section.summary .risk h2 {
 }
 
 .risk-grid {
-    min-height: 100px;
+    min-height: 69px;
 }
 
 .summary .lines > div:last-of-type .clustered-report-item {

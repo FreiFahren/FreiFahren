@@ -164,7 +164,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
 
     return (
         <div className={`reports-modal modal container ${className}`}>
-            <section className="align-child-on-line">
+            <section className="tabs align-child-on-line">
                 {tabs.map((tab) => (
                     <button
                         key={tab}
