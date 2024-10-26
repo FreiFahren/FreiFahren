@@ -8,8 +8,10 @@ import { getRecentDataWithIfModifiedSince } from 'src/utils/dbUtils'
 import ReportItem from './ReportItem'
 import ClusteredReportItem from './ClusteredReportItem'
 
-import './ReportsModal.css'
 import { useRiskData } from 'src/contexts/RiskDataContext'
+import { useStationsAndLines } from 'src/contexts/StationsAndLinesContext'
+
+import './ReportsModal.css'
 
 interface ReportsModalProps {
     className?: string
@@ -113,6 +115,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
     }, [ticketInspectorList])
 
     const { segmentRiskData } = useRiskData()
+    const { allLines } = useStationsAndLines()
     const [riskLines, setRiskLines] = useState<Map<string, LineRiskData>>(new Map())
 
     interface LineRiskData {
@@ -150,14 +153,14 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             }
 
             const riskMap = extractMostRiskLines(segmentRiskData.segment_colors)
-            Array.from(sortedLinesWithReports.entries()).forEach(([line]) => {
+            Object.keys(allLines).forEach((line) => {
                 if (!riskMap.has(line)) {
                     riskMap.set(line, { score: 0, class: 0 })
                 }
             })
             setRiskLines(riskMap)
         }
-    }, [segmentRiskData, sortedLinesWithReports])
+    }, [segmentRiskData, allLines])
 
     return (
         <div className={`reports-modal modal container ${className}`}>
