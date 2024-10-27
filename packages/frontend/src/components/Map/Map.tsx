@@ -1,5 +1,5 @@
-import React, { Suspense, lazy, useEffect, useRef } from 'react'
-import { LngLatBoundsLike, LngLatLike, MapRef } from 'react-map-gl/maplibre'
+import React, { Suspense, lazy, useCallback, useEffect, useRef } from 'react'
+import { LngLatBoundsLike, LngLatLike, MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 import MarkerContainer from './Markers/MarkerContainer'
@@ -21,6 +21,7 @@ interface FreifahrenMapProps {
     isFirstOpen: boolean
     currentColorTheme: string
     isRiskLayerOpen: boolean
+    onRotationChange: (bearing: number) => void
 }
 
 const berlinViewPosition: { lng: number; lat: number } = { lng: 13.388, lat: 52.5162 }
@@ -32,6 +33,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     isFirstOpen,
     currentColorTheme,
     isRiskLayerOpen,
+    onRotationChange,
 }) => {
     const SouthWestBounds: LngLatLike = { lng: 12.8364646484805, lat: 52.23115511676795 }
     const NorthEastBounds: LngLatLike = { lng: 14.00044556529124, lat: 52.77063424239867 }
@@ -95,6 +97,13 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
         }
     }, [isFirstOpen, refreshRiskData])
 
+    const handleRotate = useCallback(
+        (evt: ViewStateChangeEvent) => {
+            onRotationChange(evt.viewState.bearing)
+        },
+        [onRotationChange]
+    )
+
     return (
         <div id="map-container" data-testid="map-container">
             <Map
@@ -110,6 +119,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                 maxZoom={14}
                 minZoom={10}
                 maxBounds={maxBounds}
+                onRotate={handleRotate}
                 mapStyle={
                     currentColorTheme === 'light'
                         ? `https://api.jawg.io/styles/359ec2e4-39f7-4fb5-8e3a-52037d043f96.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`
@@ -139,21 +149,21 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                 </Suspense>
             </Map>
             <div className="social-media">
-                    <a href="https://github.com/FreiFahren/FreiFahren" target="_blank" rel="noopener noreferrer">
-                        <img src={github_icon} alt="GitHub" />
-                    </a>
-                    <a href="https://www.instagram.com/frei.fahren/" target="_blank" rel="noopener noreferrer">
-                        <img src={instagram_icon} alt="Instagram" />
-                    </a>
+                <a href="https://github.com/FreiFahren/FreiFahren" target="_blank" rel="noopener noreferrer">
+                    <img src={github_icon} alt="GitHub" />
+                </a>
+                <a href="https://www.instagram.com/frei.fahren/" target="_blank" rel="noopener noreferrer">
+                    <img src={instagram_icon} alt="Instagram" />
+                </a>
             </div>
             <div className="map-attribution">
-                    <a href="https://www.jawg.io/" target="_blank" rel="noopener noreferrer">
-                            © JawgMaps
-                    </a>{' '}
-                    |
-                    <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">
-                        © OSM contributors
-                    </a>
+                <a href="https://www.jawg.io/" target="_blank" rel="noopener noreferrer">
+                    © JawgMaps
+                </a>{' '}
+                |
+                <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">
+                    © OSM contributors
+                </a>
             </div>
         </div>
     )

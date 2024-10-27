@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 
 import Map from '../../components/Map/Map'
 import LayerSwitcher from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
@@ -151,6 +151,12 @@ function App() {
         }
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+    const [mapsRotation, setMapsRotation] = useState(0)
+
+    const handleRotationChange = useCallback((bearing: number) => {
+        setMapsRotation(bearing)
+    }, [])
+
     return (
         <div className="App">
             {appMounted && shouldShowLegalDisclaimer() && (
@@ -192,6 +198,7 @@ function App() {
                             formSubmitted={appUIState.formSubmitted}
                             currentColorTheme={appUIState.currentColorTheme}
                             isRiskLayerOpen={appUIState.isRiskLayerOpen}
+                            onRotationChange={handleRotationChange}
                         />
                         <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
                         {appUIState.isListModalOpen && (
@@ -208,6 +215,15 @@ function App() {
                 <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
             </StationsAndLinesProvider>
             <UtilButton onClick={toggleUtilModal} />
+            {mapsRotation !== 0 && (
+                <div className="compass-container">
+                    <div className="compass-needle" style={{ transform: `rotate(${mapsRotation}deg)` }}>
+                        <div className="arrow upper"></div>
+                        <div className="compass-circle"></div>
+                        <div className="arrow lower"></div>
+                    </div>
+                </div>
+            )}
             <ReportButton
                 onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })}
             />
