@@ -219,6 +219,7 @@ function App() {
                 <div className="compass-container">
                     <div className="compass-needle" style={{ transform: `rotate(${mapsRotation}deg)` }}>
                         <div className="arrow upper"></div>
+                        <div className="compass-circle"></div>
                         <div className="arrow lower"></div>
                     </div>
                 </div>

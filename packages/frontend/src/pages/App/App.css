@@ -24,21 +24,63 @@
     height: 20px;
 }
 
+.compass-circle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background-color: var(--color-background);
+    border-radius: 50%;
+    left: 0.5px;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+}
+
 .arrow {
     position: absolute;
-    width: 0;
-    height: 0;
-    left: -4px;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
+    width: 12px;
+    height: 10px;
+    left: -5px;
+    overflow: hidden;
 }
 
 .upper {
     top: 0;
-    border-bottom: 10px solid var(--color-red);
 }
 
 .lower {
     bottom: 0;
-    border-top: 10px solid var(--color-secondary, #666);
+}
+
+.arrow::before,
+.arrow::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    top: 0;
+}
+
+.upper::before {
+    left: 0;
+    border-left: 6px solid transparent;
+    border-bottom: 10px solid var(--color-red);
+}
+
+.upper::after {
+    right: 1px;
+    border-right: 6px solid transparent;
+    border-bottom: 10px solid #cc0000;
+}
+
+.lower::before {
+    left: 0;
+    border-left: 6px solid transparent;
+    border-top: 10px solid #666;
+}
+
+.lower::after {
+    right: 1px;
+    border-right: 6px solid transparent;
+    border-top: 10px solid #4d4d4d;
 }
