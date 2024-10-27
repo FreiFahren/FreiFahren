@@ -98,16 +98,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                 lineReports.set(line, [...(lineReports.get(line) || []), inspector])
             }
 
-            // Sort lines by their latest report timestamp (first item in each array)
-            return new Map(
-                Array.from(lineReports.entries())
-                    .sort((a, b) => {
-                        const aTime = new Date(a[1][0].timestamp).getTime()
-                        const bTime = new Date(b[1][0].timestamp).getTime()
-                        return bTime - aTime
-                    })
-                    .map(([line, reports]) => [line, reports])
-            )
+            return new Map(Array.from(lineReports.entries()).sort((a, b) => b[1].length - a[1].length))
         }
 
         const sortedLines = getAllLinesWithReportsSorted()
@@ -192,6 +183,11 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                         <h2>{t('ReportsModal.top5Lines')}</h2>
                         {Array.from(sortedLinesWithReports.entries())
                             .slice(0, 5)
+                            .sort(([, inspectorsA], [, inspectorsB]) => {
+                                const timestampA = new Date(inspectorsA[0].timestamp).getTime()
+                                const timestampB = new Date(inspectorsB[0].timestamp).getTime()
+                                return timestampB - timestampA // most recent first
+                            })
                             .map(([line, inspectors]) => (
                                 <ClusteredReportItem key={line} inspectors={inspectors} />
                             ))}
