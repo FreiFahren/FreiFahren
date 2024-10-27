@@ -11,4 +11,34 @@
     height: 35px;
     background-color: var(--color-background);
     border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s ease-out;
+}
+
+.compass-needle {
+    position: relative;
+    width: 2px;
+    height: 20px;
+}
+
+.arrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: -4px;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+}
+
+.upper {
+    top: 0;
+    border-bottom: 10px solid var(--color-red);
+}
+
+.lower {
+    bottom: 0;
+    border-top: 10px solid var(--color-secondary, #666);
 }

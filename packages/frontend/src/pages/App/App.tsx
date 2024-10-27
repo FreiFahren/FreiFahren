@@ -215,7 +215,14 @@ function App() {
                 <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
             </StationsAndLinesProvider>
             <UtilButton onClick={toggleUtilModal} />
-            {mapsRotation !== 0 && <div className="compass-container"></div>}
+            {mapsRotation !== 0 && (
+                <div className="compass-container">
+                    <div className="compass-needle">
+                        <div className="arrow upper"></div>
+                        <div className="arrow lower"></div>
+                    </div>
+                </div>
+            )}
             <ReportButton
                 onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })}
             />
