@@ -1,3 +1,14 @@
 .App {
-  text-align: center;
+    text-align: center;
+}
+
+.compass-container {
+    border: var(--border-default);
+    position: absolute;
+    top: 75px;
+    right: var(--distance-from-edge-default);
+    width: 35px;
+    height: 35px;
+    background-color: var(--color-background);
+    border-radius: 50%;
 }
