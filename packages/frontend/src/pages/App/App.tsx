@@ -217,7 +217,7 @@ function App() {
             <UtilButton onClick={toggleUtilModal} />
             {mapsRotation !== 0 && (
                 <div className="compass-container">
-                    <div className="compass-needle">
+                    <div className="compass-needle" style={{ transform: `rotate(${mapsRotation}deg)` }}>
                         <div className="arrow upper"></div>
                         <div className="arrow lower"></div>
                     </div>
