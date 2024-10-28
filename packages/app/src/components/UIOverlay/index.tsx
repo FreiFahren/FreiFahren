@@ -4,9 +4,9 @@ import { useAppStore } from '../../app.store'
 import { Disclaimer } from '../Disclaimer'
 import { Attribution } from './Attribution'
 import { LayerSwitcher } from './LayerSwitcher'
-import { ReportButton } from './ReportButton'
+import { OverviewButton } from './Overview/OverviewButton'
+import { ReportButton } from './Report/ReportButton'
 import { ReportDetailsNotification } from './ReportDetailsNotification'
-import { ReportListButton } from './ReportListButton'
 import { SettingsButton } from './SettingsButton'
 
 export const UIOverlay = () => {
@@ -42,7 +42,7 @@ export const UIOverlay = () => {
                     />
                 )}
                 <View pointerEvents="box-none" flexDir="row" justifyContent="space-between" alignItems="flex-end">
-                    <ReportListButton />
+                    <OverviewButton />
                     <ReportButton />
                     <Disclaimer />
                 </View>

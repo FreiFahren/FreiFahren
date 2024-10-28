@@ -5,13 +5,13 @@ import { ComponentProps, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Text } from 'react-native'
 
-import { Theme } from '../../theme'
-import { FFButton } from '../common/FFButton'
-import { ReportListSheet } from './ReportListSheet'
+import { Theme } from '../../../theme'
+import { FFButton } from '../../common/FFButton'
+import { OverviewSheet } from './OverviewSheet'
 
-type ReportListButtonProps = Partial<ComponentProps<typeof FFButton>>
+type OverviewButtonProps = Partial<ComponentProps<typeof FFButton>>
 
-export const ReportListButton = (props: ReportListButtonProps) => {
+export const OverviewButton = (props: OverviewButtonProps) => {
     const { t } = useTranslation('reportList')
     const sheetRef = useRef<BottomSheetModalMethods>(null)
 
@@ -32,7 +32,7 @@ export const ReportListButton = (props: ReportListButtonProps) => {
                     {t('button')}
                 </Text>
             </FFButton>
-            <ReportListSheet ref={sheetRef} />
+            <OverviewSheet ref={sheetRef} />
         </>
     )
 }
