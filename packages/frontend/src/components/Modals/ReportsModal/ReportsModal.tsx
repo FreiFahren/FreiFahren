@@ -259,12 +259,8 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                 <section className="list-modal">
                     <div style={{ width: '100%', height: '400px' }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart
-                                data={getChartData}
-                                layout="vertical"
-                                margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
-                            >
-                                <XAxis type="number" />
+                            <BarChart data={getChartData} layout="vertical">
+                                <XAxis type="number" hide />
                                 <YAxis type="category" dataKey="line" width={40} />
                                 <Tooltip />
                                 <Bar dataKey="reports" fill="#8884d8" barSize={20} />
