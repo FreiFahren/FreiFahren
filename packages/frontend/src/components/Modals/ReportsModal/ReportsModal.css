@@ -4,6 +4,7 @@
 }
 
 .reports-modal > section.tabs {
+    z-index: var(--zIndex-modal);
     margin-top: var(--margin-m);
     position: sticky;
     top: 0;
