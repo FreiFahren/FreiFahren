@@ -161,6 +161,21 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
         }))
     }, [sortedLinesWithReports])
 
+    const [isDarkTheme, setIsDarkTheme] = useState<boolean>(false)
+
+    useEffect(() => {
+        const theme = localStorage.getItem('colorTheme')
+        setIsDarkTheme(theme === 'dark')
+
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === 'theme') {
+                setIsDarkTheme(e.newValue === 'dark')
+            }
+        }
+        window.addEventListener('storage', handleStorageChange)
+        return () => window.removeEventListener('storage', handleStorageChange)
+    }, [])
+
     return (
         <div className={`reports-modal modal container ${className}`}>
             <section className="tabs align-child-on-line">
@@ -257,16 +272,29 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             )}
             {currentTab === 'lines' && (
                 <section className="list-modal">
-                    <div style={{ width: '100%', height: '400px' }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={getChartData} layout="vertical">
-                                <XAxis type="number" hide />
-                                <YAxis type="category" dataKey="line" width={40} />
-                                <Tooltip />
-                                <Bar dataKey="reports" fill="#8884d8" barSize={20} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
+                    <ResponsiveContainer
+                        width="100%"
+                        height={getChartData.length * (34 + 8)} // height of bar + margin
+                    >
+                        <BarChart data={getChartData} layout="vertical">
+                            <XAxis type="number" hide />
+                            <YAxis
+                                type="category"
+                                dataKey="line"
+                                width={40}
+                                interval={0}
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{
+                                    fontSize: 14,
+                                    fill: isDarkTheme ? '#000' : '#000000',
+                                    dx: -10,
+                                }}
+                            />
+                            <Tooltip />
+                            <Bar dataKey="reports" barSize={34} fill="#8884d8" />
+                        </BarChart>
+                    </ResponsiveContainer>
                 </section>
             )}
             {currentTab === 'stations' && (
