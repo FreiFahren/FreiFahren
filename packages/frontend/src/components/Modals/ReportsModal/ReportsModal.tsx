@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
 import { MarkerData } from 'src/utils/types'
@@ -153,6 +154,13 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
         }
     }, [segmentRiskData, allLines])
 
+    const getChartData = useMemo(() => {
+        return Array.from(sortedLinesWithReports.entries()).map(([line, reports]) => ({
+            line,
+            reports: reports.length,
+        }))
+    }, [sortedLinesWithReports])
+
     return (
         <div className={`reports-modal modal container ${className}`}>
             <section className="tabs align-child-on-line">
@@ -247,7 +255,24 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                     </section>
                 </section>
             )}
-            {currentTab === 'lines' && <section className="list-modal"></section>}
+            {currentTab === 'lines' && (
+                <section className="list-modal">
+                    <div style={{ width: '100%', height: '400px' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                                data={getChartData}
+                                layout="vertical"
+                                margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
+                            >
+                                <XAxis type="number" />
+                                <YAxis type="category" dataKey="line" width={40} />
+                                <Tooltip />
+                                <Bar dataKey="reports" fill="#8884d8" barSize={20} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </section>
+            )}
             {currentTab === 'stations' && (
                 <section className="list-modal">
                     {ticketInspectorList.map((ticketInspector) => (
