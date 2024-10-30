@@ -24,7 +24,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
     const { t } = useTranslation()
     const [currentTab, setCurrentTab] = useState<TabType>('summary')
 
-    const tabs: TabType[] = ['summary', 'stations']
+    const tabs: TabType[] = ['summary', 'lines', 'stations']
 
     const handleTabChange = (tab: TabType) => {
         setCurrentTab(tab)
@@ -166,17 +166,6 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                     </button>
                 ))}
             </section>
-            {currentTab === 'stations' && (
-                <section className="list-modal">
-                    {ticketInspectorList.map((ticketInspector) => (
-                        <ReportItem
-                            key={ticketInspector.station.id + ticketInspector.timestamp}
-                            ticketInspector={ticketInspector}
-                            currentTime={currentTime}
-                        />
-                    ))}
-                </section>
-            )}
             {currentTab === 'summary' && (
                 <section className="summary">
                     <section className="lines">
@@ -256,6 +245,18 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                             )}
                         </div>
                     </section>
+                </section>
+            )}
+            {currentTab === 'lines' && <section className="list-modal"></section>}
+            {currentTab === 'stations' && (
+                <section className="list-modal">
+                    {ticketInspectorList.map((ticketInspector) => (
+                        <ReportItem
+                            key={ticketInspector.station.id + ticketInspector.timestamp}
+                            ticketInspector={ticketInspector}
+                            currentTime={currentTime}
+                        />
+                    ))}
                 </section>
             )}
         </div>
