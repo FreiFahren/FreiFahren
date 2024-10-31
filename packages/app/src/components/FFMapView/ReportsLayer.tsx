@@ -12,7 +12,7 @@ import Animated, {
 } from 'react-native-reanimated'
 
 import { Report } from '../../api'
-import { useAppStore } from '../../app.store'
+// import { useAppStore } from '../../app.store'
 import { stations } from '../../data'
 
 const styles = StyleSheet.create({
@@ -106,11 +106,10 @@ export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
 
     const showMarkers = useShowMarkersWithDelay()
 
-    const shouldShowReports = useAppStore((state) => state.disclaimerGood)
-
+    /* const shouldShowReports = useAppStore((state) => state.disclaimerGood)
     if (!shouldShowReports) {
-        return null
-    }
+      return null
+    } */
 
     return (
         <>

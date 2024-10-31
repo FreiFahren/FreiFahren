@@ -1,6 +1,7 @@
 import { Box, View } from 'native-base'
 
 import { useAppStore } from '../../app.store'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Disclaimer } from '../Disclaimer'
 import { Attribution } from './Attribution'
 import { LayerSwitcher } from './LayerSwitcher'
@@ -44,7 +45,7 @@ export const UIOverlay = () => {
                 <View pointerEvents="box-none" flexDir="row" justifyContent="space-between" alignItems="flex-end">
                     <ReportListButton />
                     <ReportButton />
-                    <Disclaimer />
+                    {/* <Disclaimer /> */}
                 </View>
             </View>
         </Box>
