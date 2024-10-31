@@ -223,3 +223,7 @@ section.summary .risk h2 {
 .custom-tooltip p {
     margin: 0;
 }
+
+.list-modal svg {
+    filter: none;
+}

@@ -188,8 +188,8 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             <div
                 className="custom-tooltip"
                 style={{
-                    backgroundColor: isDarkTheme ? '#fff' : '#000',
-                    color: isDarkTheme ? '#000' : '#fff',
+                    backgroundColor: isDarkTheme ? '#000' : '#fff',
+                    color: isDarkTheme ? '#fff' : '#000',
                     padding: '8px',
                     borderRadius: '4px',
                 }}
@@ -312,7 +312,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                 tick={{
                                     fontSize: 16,
                                     fontWeight: 800,
-                                    fill: isDarkTheme ? '#000' : '#000000',
+                                    fill: isDarkTheme ? '#fff' : '#000',
                                     dx: -5,
                                 }}
                             />
