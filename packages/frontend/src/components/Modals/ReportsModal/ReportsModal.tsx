@@ -193,6 +193,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                 <section className="summary">
                     <section className="lines">
                         <h2>{t('ReportsModal.top5Lines')}</h2>
+                        <p>{t('ReportsModal.past24Hours')}</p>
                         {Array.from(sortedLinesWithReports.entries())
                             .slice(0, 5)
                             .sort(([, inspectorsA], [, inspectorsB]) => {
@@ -272,6 +273,8 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             )}
             {currentTab === 'lines' && (
                 <section className="list-modal">
+                    <h2>{t('ReportsModal.topLines')}</h2>
+                    <p>{t('ReportsModal.past24Hours')}</p>
                     <ResponsiveContainer
                         width="100%"
                         height={getChartData.length * (34 + 12)} // height of bar + margin
@@ -289,7 +292,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                     fontSize: 16,
                                     fontWeight: 800,
                                     fill: isDarkTheme ? '#000' : '#000000',
-                                    dx: -8,
+                                    dx: -5,
                                 }}
                             />
                             <Tooltip />
@@ -300,6 +303,8 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             )}
             {currentTab === 'stations' && (
                 <section className="list-modal">
+                    <h2>{t('ReportsModal.topStations')}</h2>
+                    <p>{t('ReportsModal.past24Hours')}</p>
                     {ticketInspectorList.map((ticketInspector) => (
                         <ReportItem
                             key={ticketInspector.station.id + ticketInspector.timestamp}
