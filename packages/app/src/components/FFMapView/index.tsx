@@ -12,6 +12,7 @@ import { LinesLayer } from './LinesLayer'
 import { ReportsLayer } from './ReportsLayer'
 import { RiskLayer } from './RiskLayer'
 import { StationLayer } from './StationLayer'
+import { RouteLayer } from './RouteLayer'
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 MapLibreGL.setAccessToken(null)
@@ -62,6 +63,7 @@ export const FFMapView = () => {
                 />
                 <LinesLayer />
                 <RiskLayer visible={disclaimerGood && layer === 'risk'} />
+                <RouteLayer />
                 <StationLayer />
                 <ReportsLayer
                     visible={disclaimerGood}

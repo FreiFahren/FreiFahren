@@ -3,18 +3,19 @@ import { LineLayer, ShapeSource, SymbolLayer } from '@maplibre/maplibre-react-na
 import { linesGeoJSON } from '../../data'
 
 export const LinesLayer = () => (
-    <ShapeSource id="route-source" shape={linesGeoJSON as GeoJSON.GeoJSON}>
+    <ShapeSource id="lines-source" shape={linesGeoJSON as GeoJSON.GeoJSON}>
         <LineLayer
-            id="route-layer"
+            id="lines-layer"
             style={{
                 lineWidth: 3,
                 lineJoin: 'round',
                 lineCap: 'round',
                 lineColor: ['get', 'color'],
+                lineOpacity: 0.5,
             }}
         />
         <SymbolLayer
-            id="route-name-layer"
+            id="lines-name-layer"
             style={{
                 textField: ['get', 'line'],
                 textColor: '#FFF',
