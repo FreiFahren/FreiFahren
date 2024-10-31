@@ -274,7 +274,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                 <section className="list-modal">
                     <ResponsiveContainer
                         width="100%"
-                        height={getChartData.length * (34 + 8)} // height of bar + margin
+                        height={getChartData.length * (34 + 12)} // height of bar + margin
                     >
                         <BarChart data={getChartData} layout="vertical">
                             <XAxis type="number" hide />
@@ -292,7 +292,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                 }}
                             />
                             <Tooltip />
-                            <Bar dataKey="reports" barSize={34} fill="#8884d8" />
+                            <Bar dataKey="reports" barSize={34} fill="#8884d8" radius={[4, 4, 4, 4]} />
                         </BarChart>
                     </ResponsiveContainer>
                 </section>
