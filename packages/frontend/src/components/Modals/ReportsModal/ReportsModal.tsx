@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts'
+import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
 
 import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
 import { MarkerData } from 'src/utils/types'
@@ -176,6 +177,29 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
         return () => window.removeEventListener('storage', handleStorageChange)
     }, [])
 
+    const CustomTooltip: React.FC<TooltipProps<ValueType, NameType>> = ({ active, payload }) => {
+        if (!active || !payload || !payload.length) return null
+
+        const data = payload[0].payload
+        const totalReports = getChartData.reduce((sum, item) => sum + item.reports, 0)
+        const percentage = ((data.reports / totalReports) * 100).toFixed(1)
+
+        return (
+            <div
+                className="custom-tooltip"
+                style={{
+                    backgroundColor: isDarkTheme ? '#fff' : '#000',
+                    color: isDarkTheme ? '#000' : '#fff',
+                    padding: '8px',
+                    borderRadius: '4px',
+                }}
+            >
+                <h4>{`${percentage}% ${t('ReportsModal.ofTotal')}`}</h4>
+                <p>{`${data.reports} ${t('ReportsModal.reports')}`}</p>
+            </div>
+        )
+    }
+
     return (
         <div className={`reports-modal modal container ${className}`}>
             <section className="tabs align-child-on-line">
@@ -275,10 +299,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                 <section className="list-modal">
                     <h2>{t('ReportsModal.topLines')}</h2>
                     <p>{t('ReportsModal.past24Hours')}</p>
-                    <ResponsiveContainer
-                        width="100%"
-                        height={getChartData.length * (34 + 12)} // height of bar + margin
-                    >
+                    <ResponsiveContainer width="100%" height={getChartData.length * (34 + 12)}>
                         <BarChart data={getChartData} layout="vertical">
                             <XAxis type="number" hide />
                             <YAxis
@@ -295,7 +316,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                     dx: -5,
                                 }}
                             />
-                            <Tooltip />
+                            <Tooltip content={<CustomTooltip />} />
                             <Bar dataKey="reports" barSize={34} fill="#7e5330" radius={[4, 4, 4, 4]} />
                         </BarChart>
                     </ResponsiveContainer>

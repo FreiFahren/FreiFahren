@@ -90,6 +90,8 @@
         "risk": "aktuelles Risiko",
         "topLines": "Top Linien",
         "topStations": "Top Stationen",
-        "past24Hours": "letzte 24 Stunden"
+        "past24Hours": "letzte 24 Stunden",
+        "ofTotal": "von allen Meldungen",
+        "reports": "Meldungen"
     }
 }

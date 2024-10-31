@@ -218,3 +218,8 @@ section.summary .risk h2 {
 .summary .lines > div:last-of-type .clustered-report-item {
     border-bottom: none;
 }
+
+.custom-tooltip h4,
+.custom-tooltip p {
+    margin: 0;
+}
