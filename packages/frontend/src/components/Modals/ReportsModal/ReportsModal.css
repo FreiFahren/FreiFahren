@@ -227,3 +227,7 @@ section.summary .risk h2 {
 .list-modal svg {
     filter: none;
 }
+
+.recharts-tooltip-cursor {
+    fill: rgba(121, 120, 120, 0.1) !important;
+}

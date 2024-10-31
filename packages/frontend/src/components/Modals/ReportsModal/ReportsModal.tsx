@@ -162,15 +162,15 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
         }))
     }, [sortedLinesWithReports])
 
-    const [isDarkTheme, setIsDarkTheme] = useState<boolean>(false)
+    const [isLightTheme, setIsLightTheme] = useState<boolean>(false)
 
     useEffect(() => {
         const theme = localStorage.getItem('colorTheme')
-        setIsDarkTheme(theme === 'dark')
+        setIsLightTheme(theme === 'light')
 
         const handleStorageChange = (e: StorageEvent) => {
             if (e.key === 'theme') {
-                setIsDarkTheme(e.newValue === 'dark')
+                setIsLightTheme(e.newValue === 'dark')
             }
         }
         window.addEventListener('storage', handleStorageChange)
@@ -188,8 +188,8 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             <div
                 className="custom-tooltip"
                 style={{
-                    backgroundColor: isDarkTheme ? '#000' : '#fff',
-                    color: isDarkTheme ? '#fff' : '#000',
+                    backgroundColor: isLightTheme ? '#fff' : '#000',
+                    color: isLightTheme ? '#000' : '#fff',
                     padding: '8px',
                     borderRadius: '4px',
                 }}
@@ -312,7 +312,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                 tick={{
                                     fontSize: 16,
                                     fontWeight: 800,
-                                    fill: isDarkTheme ? '#fff' : '#000',
+                                    fill: isLightTheme ? '#000' : '#fff',
                                     dx: -5,
                                 }}
                             />
