@@ -1,0 +1,17 @@
+{
+  "name": "route-planner",
+  "module": "index.ts",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "type": "module",
+  "dependencies": {
+    "@types/hafas-client": "^6.2.0",
+    "@types/lodash": "^4.17.12",
+    "hafas-client": "^6.3.2",
+    "lodash": "^4.17.21"
+  }
+}

@@ -1,0 +1,4000 @@
+{
+  "S-AB": {
+    "coordinates": {
+      "latitude": 52.50357773659994,
+      "longitude": 13.381471953957373
+    },
+    "lines": [
+      "S1",
+      "S2",
+      "S25",
+      "S26"
+    ],
+    "name": "Anhalter Bahnhof",
+    "hafasId": "900012101",
+    "hafasName": "S Anhalter Bahnhof (Berlin)"
+  },
+  "S-AR": {
+    "coordinates": {
+      "latitude": 52.57778462905961,
+      "longitude": 13.351216550010662
+    },
+    "lines": [
+      "S25"
+    ],
+    "name": "Alt-Reinickendorf",
+    "hafasId": "900085105",
+    "hafasName": "S Alt-Reinickendorf (Berlin)"
+  },
+  "S-Ad": {
+    "coordinates": {
+      "latitude": 52.434737049866555,
+      "longitude": 13.54158320841833
+    },
+    "lines": [
+      "S8",
+      "S9",
+      "S45",
+      "S46",
+      "S85"
+    ],
+    "name": "Adlershof",
+    "hafasId": "900193002",
+    "hafasName": "S Adlershof (Berlin)"
+  },
+  "S-Ag": {
+    "coordinates": {
+      "latitude": 52.40691304170994,
+      "longitude": 13.55827423002745
+    },
+    "lines": [
+      "S9",
+      "S45"
+    ],
+    "name": "Altglienicke",
+    "hafasId": "900195510",
+    "hafasName": "S Altglienicke (Berlin)"
+  },
+  "S-Ah": {
+    "coordinates": {
+      "latitude": 52.57133952885113,
+      "longitude": 13.565658651249521
+    },
+    "lines": [
+      "S7"
+    ],
+    "name": "Ahrensfelde",
+    "hafasId": "900170004",
+    "hafasName": "S Ahrensfelde Bhf (Berlin)"
+  },
+  "S-At": {
+    "coordinates": {
+      "latitude": 52.44803194423858,
+      "longitude": 13.360751024205456
+    },
+    "lines": [
+      "S2"
+    ],
+    "name": "Attilastraße",
+    "hafasId": "900068301",
+    "hafasName": "S Attilastr. (Berlin)"
+  },
+  "S-BC": {
+    "coordinates": {
+      "latitude": 52.41053968839731,
+      "longitude": 13.38275837674891
+    },
+    "lines": [
+      "S2"
+    ],
+    "name": "Buckower Chaussee",
+    "hafasId": "900072101",
+    "hafasName": "S Buckower Chaussee (Berlin)"
+  },
+  "S-BER": {
+    "coordinates": {
+      "latitude": 52.364271431742,
+      "longitude": 13.508200821053464
+    },
+    "lines": [
+      "S9",
+      "S45"
+    ],
+    "name": "Flughafen BER",
+    "hafasId": "900260009",
+    "hafasName": "Flughafen BER"
+  },
+  "S-BF": {
+    "coordinates": {
+      "latitude": 52.66839602833204,
+      "longitude": 13.564610758333401
+    },
+    "lines": [
+      "S2"
+    ],
+    "name": "Bernau-Friedenstal",
+    "hafasId": "900350161",
+    "hafasName": "S Bernau-Friedenstal"
+  },
+  "S-BR": {
+    "coordinates": {
+      "latitude": 52.49388707786471,
+      "longitude": 13.497701678320738
+    },
+    "lines": [
+      "S3"
+    ],
+    "name": "Betriebsbahnhof Rummelsburg",
+    "hafasId": "900160002",
+    "hafasName": "S Betriebsbahnhof Rummelsburg (Berlin)"
+  },
+  "S-Ba": {
+    "coordinates": {
+      "latitude": 52.39140543155065,
+      "longitude": 13.092963330483428
+    },
+    "lines": [
+      "S7"
+    ],
+    "name": "Babelsberg",
+    "hafasId": "900230000",
+    "hafasName": "S Babelsberg"
+  },
+  "S-Be": {
+    "coordinates": {
+      "latitude": 52.51997626355828,
+      "longitude": 13.348071841924735
+    },
+    "lines": [
+      "S3",
+      "S5",
+      "S7",
+      "S9"
+    ],
+    "name": "Bellevue",
+    "hafasId": "900003102",
+    "hafasName": "S Bellevue (Berlin)"
+  },
+  "S-Ber": {
+    "coordinates": {
+      "latitude": 52.675543484784015,
+      "longitude": 13.591720534060528
+    },
+    "lines": [
+      "S2"
+    ],
+    "name": "Bernau",
+    "hafasId": "900350160",
+    "hafasName": "S Bernau Bhf"
+  },
+  "S-Bes": {
+    "coordinates": {
+      "latitude": 52.53440300848655,
+      "longitude": 13.329392009360333
+    },
+    "lines": [
+      "S41",
+      "S42"
+    ],
+    "name": "Beusselstraße",
+    "hafasId": "900020202",
+    "hafasName": "S Beusselstr. (Berlin)"
+  },
+  "S-Bfe": {
+    "coordinates": {
+      "latitude": 52.67011051964306,
+      "longitude": 13.320403844948572
+    },
+    "lines": [
+      "S8"
+    ],
+    "name": "Bergfelde",
+    "hafasId": "900200011",
+    "hafasName": "S Bergfelde"
+  },
+  "S-Bie": {
+    "coordinates": {
+      "latitude": 52.51308715395152,
+      "longitude": 13.55584729903805
+    },
+    "lines": [
+      "S5"
+    ],
+    "name": "Biesdorf",
+    "hafasId": "900171001",
+    "hafasName": "S Biesdorf (Berlin)"
+  },
+  "S-Bk": {
+    "coordinates": {
+      "latitude": 52.51568842318139,
+      "longitude": 13.6478221856012
+    },
+    "lines": [
+      "S5"
+    ],
+    "name": "Birkenstein",
+    "hafasId": "900320026",
+    "hafasName": "S Birkenstein"
+  },
+  "S-Bl": {
+    "coordinates": {
+      "latitude": 52.59147300801217,
+      "longitude": 13.443506645985792
+    },
+    "lines": [
+      "S2",
+      "S8",
+      "S26"
+    ],
+    "name": "Blankenburg",
+    "hafasId": "900142001",
+    "hafasName": "S Blankenburg (Berlin)"
+  },
+  "S-Blf": {
+    "coordinates": {
+      "latitude": 52.33844680272185,
+      "longitude": 13.415388485417793
+    },
+    "lines": [
+      "S2"
+    ],
+    "name": "Blankenfelde",
+    "hafasId": "900245027",
+    "hafasName": "S Blankenfelde (TF) Bhf"
+  },
+  "S-Bo": {
+    "coordinates": {
+      "latitude": 52.71539933634622,
+      "longitude": 13.276473222594461
+    },
+    "lines": [
+      "S1"
+    ],
+    "name": "Borgsdorf",
+    "hafasId": "900200007",
+    "hafasName": "S Borgsdorf"
+  },
+  "S-BoG": {
+    "coordinates": {
+      "latitude": 52.447960324576485,
+      "longitude": 13.307118320342482
+    },
+    "lines": [
+      "S1"
+    ],
+    "name": "Botanischer Garten",
+    "hafasId": "900066102",
+    "hafasName": "S Botanischer Garten (Berlin)"
+  },
+  "S-BoS": {
+    "coordinates": {
+      "latitude": 52.55477089178501,
+      "longitude": 13.397822002836676
+    },
+    "lines": [
+      "S1",
+      "S2",
+      "S8",
+      "S25",
+      "S26",
+      "S85"
+    ],
+    "name": "Bornholmer Straße",
+    "hafasId": "900110011",
+    "hafasName": "S Bornholmer Str. (Berlin)"
+  },
+  "S-Bsw": {
+    "coordinates": {
+      "latitude": 52.4673986661611,
+      "longitude": 13.489898165267249
+    },
+    "lines": [
+      "S8",
+      "S9",
+      "S45",
+      "S46",
+      "S47",
+      "S85"
+    ],
+    "name": "Baumschulenweg",
+    "hafasId": "900191001",
+    "hafasName": "S Baumschulenweg (Berlin)"
+  },
+  "S-Bu": {
+    "coordinates": {
+      "latitude": 52.6358341362681,
+      "longitude": 13.49163231671804
+    },
+    "lines": [
+      "S2"
+    ],
+    "name": "Buch",
+    "hafasId": "900135001",
+    "hafasName": "S Buch (Berlin)"
+  },
+  "S-Bw": {
+    "coordinates": {
+      "latitude": 52.688643245242446,
+      "longitude": 13.288691101752022
+    },
+    "lines": [
+      "S1",
+      "S8"
+    ],
+    "name": "Birkenwerder",
+    "hafasId": "900200008",
+    "hafasName": "S Birkenwerder Bhf"
+  },
+  "S-Eid": {
+    "coordinates": {
+      "latitude": 52.577630364762996,
+      "longitude": 13.316618832296683
+    },
+    "lines": [
+      "S25"
+    ],
+    "name": "Eichborndamm",
+    "hafasId": "900096405",
+    "hafasName": "S Eichborndamm (Berlin)"
+  },
+  "S-Eiw": {
+    "coordinates": {
+      "latitude": 52.37096657996247,
+      "longitude": 13.615540946379326
+    },
+    "lines": [
+      "S8",
+      "S46"
+    ],
+    "name": "Eichwalde",
+    "hafasId": "900260004",
+    "hafasName": "S Eichwalde"
+  },
+  "S-Er": {
+    "coordinates": {
+      "latitude": 52.429422175615514,
+      "longitude": 13.75104426486513
+    },
+    "lines": [
+      "S3"
+    ],
+    "name": "Erkner",
+    "hafasId": "900310004",
+    "hafasName": "S Erkner Bhf"
+  },
+  "S-Fd": {
+    "coordinates": {
+      "latitude": 52.52625788016459,
+      "longitude": 13.760436854569804
+    },
+    "lines": [
+      "S5"
+    ],
+    "name": "Fredersdorf",
+    "hafasId": "900320006",
+    "hafasName": "S Fredersdorf"
+  },
+  "S-FfO": {
+    "coordinates": {
+      "latitude": 52.51411927342633,
+      "longitude": 13.520081500988965
+    },
+    "lines": [
+      "S5",
+      "S7",
+      "S75"
+    ],
+    "name": "Friedrichsfelde Ost",
+    "hafasId": "900171002",
+    "hafasName": "S Friedrichsfelde Ost (Berlin)"
+  },
+  "S-Fh": {
+    "coordinates": {
+      "latitude": 52.45736507304278,
+      "longitude": 13.623305780734825
+    },
+    "lines": [
+      "S3"
+    ],
+    "name": "Friedrichshagen",
+    "hafasId": "900182002",
+    "hafasName": "S Friedrichshagen (Berlin)"
+  },
+  "S-Fhn": {
+    "coordinates": {
+      "latitude": 52.63240964047816,
+      "longitude": 13.290223397230335
+    },
+    "lines": [
+      "S1",
+      "S85"
+    ],
+    "name": "Frohnau",
+    "hafasId": "900092201",
+    "hafasName": "S Frohnau (Berlin)"
+  },
+  "S-Fr": {
+    "coordinates": {
+      "latitude": 52.47073093088298,
+      "longitude": 13.341584474992203
+    },
+    "lines": [
+      "S1"
+    ],
+    "name": "Friedenau",
+    "hafasId": "900060101",
+    "hafasName": "S Friedenau (Berlin)"
+  },
+  "S-Gbs": {
+    "coordinates": {
+      "latitude": 52.394451786313994,
+      "longitude": 13.127243759465784
+    },
+    "lines": [
+      "S7"
+    ],
+    "name": "Griebnitzsee",
+    "hafasId": "900230003",
+    "hafasName": "S Griebnitzsee Bhf"
+  },
+  "S-Gr": {
+    "coordinates": {
+      "latitude": 52.412888499044215,
+      "longitude": 13.573647670695095
+    },
+    "lines": [
+      "S8",
+      "S46",
+      "S85"
+    ],
+    "name": "Grünau",
+    "hafasId": "900186001",
+    "hafasName": "S Grünau (Berlin)"
+  },
+  "S-GrA": {
+    "coordinates": {
+      "latitude": 52.39930437800666,
+      "longitude": 13.541882027160085
+    },
+    "lines": [
+      "S9",
+      "S45"
+    ],
+    "name": "Grünbergallee",
+    "hafasId": "900196001",
+    "hafasName": "S Grünbergallee (Berlin)"
+  },
+  "S-GrS": {
+    "coordinates": {
+      "latitude": 52.54024825279254,
+      "longitude": 13.438985778465877
+    },
+    "lines": [
+      "S8",
+      "S41",
+      "S42",
+      "S85"
+    ],
+    "name": "Greifswalder Straße",
+    "hafasId": "900110003",
+    "hafasName": "S Greifswalder Str. (Berlin)"
+  },
+  "S-Grw": {
+    "coordinates": {
+      "latitude": 52.488252529434845,
+      "longitude": 13.261019118032067
+    },
+    "lines": [
+      "S5",
+      "S7",
+      "S9"
+    ],
+    "name": "Grunewald",
+    "hafasId": "900048101",
+    "hafasName": "S Grunewald (Berlin)"
+  },
+  "S-Gs": {
+    "coordinates": {
+      "latitude": 52.55584435315586,
+      "longitude": 13.525830125443235
+    },
+    "lines": [
+      "S75"
+    ],
+    "name": "Gehrenseestraße",
+    "hafasId": "900150504",
+    "hafasName": "Gehrenseestr. (Berlin)"
+  },
+  "S-HM": {
+    "coordinates": {
+      "latitude": 52.522680277367414,
+      "longitude": 13.402343468615896
+    },
+    "lines": [
+      "S3",
+      "S5",
+      "S7",
+      "S9"
+    ],
+    "name": "Hackescher Markt",
+    "hafasId": "900100002",
+    "hafasName": "S Hackescher Markt (Berlin)"
+  },
+  "S-HN": {
+    "coordinates": {
+      "latitude": 52.668649888731295,
+      "longitude": 13.287044061825412
+    },
+    "lines": [
+      "S1",
+      "S1",
+      "S8"
+    ],
+    "name": "Hohen Neuendorf",
+    "hafasId": "900200009",
+    "hafasName": "S Hohen Neuendorf"
+  },
+  "S-HSH": {
+    "coordinates": {
+      "latitude": 52.56627441894349,
+      "longitude": 13.51250029042896
+    },
+    "lines": [
+      "S75"
+    ],
+    "name": "Hohenschönhausen",
+    "hafasId": "900152001",
+    "hafasName": "S Hohenschönhausen Bhf (Berlin)"
+  },
+  "S-Ha": {
+    "coordinates": {
+      "latitude": 52.49603666427379,
+      "longitude": 13.290537124322782
+    },
+    "lines": [
+      "S41",
+      "S42",
+      "S45",
+      "S46"
+    ],
+    "name": "Halensee",
+    "hafasId": "900040101",
+    "hafasName": "S Halensee (Berlin)"
+  },
+  "S-Hd": {
+    "coordinates": {
+      "latitude": 52.61849915677851,
+      "longitude": 13.307363419984938
+    },
+    "lines": [
+      "S1",
+      "S85"
+    ],
+    "name": "Hermsdorf",
+    "hafasId": "900093201",
+    "hafasName": "S Hermsdorf (Berlin)"
+  },
+  "S-Hed": {
+    "coordinates": {
+      "latitude": 52.63740854388294,
+      "longitude": 13.20607751625343
+    },
+    "lines": [
+      "S25"
+    ],
+    "name": "Hennigsdorf",
+    "hafasId": "900200000",
+    "hafasName": "S Hennigsdorf Bhf"
+  },
+  "S-Hee": {
+    "coordinates": {
+      "latitude": 52.520654395204645,
+      "longitude": 13.160242076849329
+    },
+    "lines": [
+      "S3",
+      "S9"
+    ],
+    "name": "Heerstraße",
+    "hafasId": "900037207",
+    "hafasName": "Heerstr./Magistratsweg (Berlin)"
+  },
+  "S-Hes": {
+    "coordinates": {
+      "latitude": 52.624658036905856,
+      "longitude": 13.229202890634895
+    },
+    "lines": [
+      "S25"
+    ],
+    "name": "Heiligensee",
+    "hafasId": "900091203",
+    "hafasName": "S Heiligensee (Berlin)"
+  },
+  "S-Hgm": {
+    "coordinates": {
+      "latitude": 52.54838214214601,
+      "longitude": 13.866363470338172
+    },
+    "lines": [
+      "S5"
+    ],
+    "name": "Hegermühle",
+    "hafasId": "900320003",
+    "hafasName": "S Hegermühle"
+  },
+  "S-Hi": {
+    "coordinates": {
+      "latitude": 52.457910390625926,
+      "longitude": 13.603140896836976
+    },
+    "lines": [
+      "S3"
+    ],
+    "name": "Hirschgarten",
+    "hafasId": "900182001",
+    "hafasName": "S Hirschgarten (Berlin)"
+  },
+  "S-HoM": {
+    "coordinates": {
+      "latitude": 52.51824302182709,
+      "longitude": 13.674255826143764
+    },
+    "lines": [
+      "S5"
+    ],
+    "name": "Hoppegarten",
+    "hafasId": "900320008",
+    "hafasName": "S Hoppegarten"
+  },
+  "S-HuH": {
+    "coordinates": {
+      "latitude": 52.54457691957134,
+      "longitude": 13.378447726204627
+    },
+    "lines": [
+      "S1",
+      "S2",
+      "S25",
+      "S26"
+    ],
+    "name": "Humboldthain",
+    "hafasId": "900008101",
+    "hafasName": "S Humboldthain (Berlin)"
+  },
+  "S-Hzd": {
+    "coordinates": {
+      "latitude": 52.48862989202752,
+      "longitude": 13.300230815963658
+    },
+    "lines": [
+      "S41",
+      "S42",
+      "S45",
+      "S46"
+    ],
+    "name": "Hohenzollerndamm",
+    "hafasId": "900044101",
+    "hafasName": "S Hohenzollerndamm (Berlin)"
+  },
+  "S-J": {
+    "coordinates": {
+      "latitude": 52.4461741,
+      "longitude": 13.5238518
+    },
+    "lines": [
+      "S8",
+      "S9",
+      "S45",
+      "S46",
+      "S85"
+    ],
+    "name": "Johannisthal",
+    "hafasId": "900193001",
+    "hafasName": "S Johannisthal (Berlin)"
+  },
+  "S-JLB": {
+    "coordinates": {
+      "latitude": 52.4461741,
+      "longitude": 13.5238518
+    },
+    "lines": [
+      "S1"
+    ],
+    "name": "Julius-Leber-Brücke",
+    "hafasId": "900057104",
+    "hafasName": "S Julius-Leber-Brücke (Berlin)"
+  },
+  "S-K": {
+    "coordinates": {
+      "latitude": 52.45857791566351,
+      "longitude": 13.581521161136777
+    },
+    "lines": [
+      "S3"
+    ],
+    "name": "Köpenick",
+    "hafasId": "900180001",
+    "hafasName": "S Köpenick (Berlin)"
+  },
+  "S-KLH": {
+    "coordinates": {
+      "latitude": 52.469645772584244,
+      "longitude": 13.4679334385645
+    },
+    "lines": [
+      "S45",
+      "S46",
+      "S47"
+    ],
+    "name": "Köllnische Heide",
+    "hafasId": "900077155",
+    "hafasName": "S Köllnische Heide (Berlin)"
+  },
+  "S-KWH": {
+    "coordinates": {
+      "latitude": 52.29670704088011,
+      "longitude": 13.631525985739131
+    },
+    "lines": [
+      "S46"
+    ],
+    "name": "Königs Wusterhausen",
+    "hafasId": "900260001",
+    "hafasName": "S Königs Wusterhausen Bhf"
+  },
+  "S-Kad": {
+    "coordinates": {
+      "latitude": 52.512139878787195,
+      "longitude": 13.590200553016189
+    },
+    "lines": [
+      "S5"
+    ],
+    "name": "Kaulsdorf",
+    "hafasId": "900175002",
+    "hafasName": "S Kaulsdorf (Berlin)"
+  },
+  "S-Kar": {
+    "coordinates": {
+      "latitude": 52.61521075964532,
+      "longitude": 13.469484938289156
+    },
+    "lines": [
+      "S2"
+    ],
+    "name": "Karow",
+    "hafasId": "900143001",
+    "hafasName": "S Karow Bhf (Berlin)"
+  },
+  "S-Kh": {
+    "coordinates": {
+      "latitude": 52.48047203535731,
+      "longitude": 13.527267174664189
+    },
+    "lines": [
+      "S3"
+    ],
+    "name": "Karlshorst",
+    "hafasId": "900162001",
+    "hafasName": "S Karlshorst (Berlin)"
+  },
+  "S-LaA": {
+    "coordinates": {
+      "latitude": 52.52948316342784,
+      "longitude": 13.454759154527181
+    },
+    "lines": [
+      "S8",
+      "S41",
+      "S42",
+      "S85"
+    ],
+    "name": "Landsberger Allee",
+    "hafasId": "900110004",
+    "hafasName": "S Landsberger Allee (Berlin)"
+  },
+  "S-Law": {
+    "coordinates": {
+      "latitude": 52.43877523265414,
+      "longitude": 13.342065508857331
+    },
+    "lines": [
+      "S25",
+      "S26"
+    ],
+    "name": "Lankwitz",
+    "hafasId": "900067221",
+    "hafasName": "S Lankwitz (Berlin)"
+  },
+  "S-Leh": {
+    "coordinates": {
+      "latitude": 52.741392450132224,
+      "longitude": 13.263189842284078
+    },
+    "lines": [
+      "S1"
+    ],
+    "name": "Lehnitz",
+    "hafasId": "900200006",
+    "hafasName": "S Lehnitz"
+  },
+  "S-LiO": {
+    "coordinates": {
+      "latitude": 52.4298411481567,
+      "longitude": 13.328058269052576
+    },
+    "lines": [
+      "S25",
+      "S26"
+    ],
+    "name": "Lichterfelde Ost",
+    "hafasId": "900064301",
+    "hafasName": "S Lichterfelde Ost Bhf (Berlin)"
+  },
+  "S-LiS": {
+    "coordinates": {
+      "latitude": 52.410005957714986,
+      "longitude": 13.30851909343366
+    },
+    "lines": [
+      "S25",
+      "S26"
+    ],
+    "name": "Lichterfelde Süd",
+    "hafasId": "900064201",
+    "hafasName": "S Lichterfelde Süd (Berlin)"
+  },
+  "S-LiW": {
+    "coordinates": {
+      "latitude": 52.44331324158128,
+      "longitude": 13.29358058330655
+    },
+    "lines": [
+      "S1"
+    ],
+    "name": "Lichterfelde West",
+    "hafasId": "900066101",
+    "hafasName": "S Lichterfelde West (Berlin)"
+  },
+  "S-Lir": {
+    "coordinates": {
+      "latitude": 52.386835418435936,
+      "longitude": 13.396580904558846
+    },
+    "lines": [
+      "S2"
+    ],
+    "name": "Lichtenrade",
+    "hafasId": "900074201",
+    "hafasName": "S Lichtenrade (Berlin)"
+  },
+  "S-MM": {
+    "coordinates": {
+      "latitude": 52.65475141384894,
+      "longitude": 13.38622318489405
+    },
+    "lines": [
+      "S8"
+    ],
+    "name": "Mühlenbeck-Mönchmühle",
+    "hafasId": "900200013",
+    "hafasName": "S Mühlenbeck-Mönchmühle"
+  },
+  "S-MP": {
+    "coordinates": {
+      "latitude": 52.436768613179595,
+      "longitude": 13.233230595414994
+    },
+    "lines": [
+      "S1"
+    ],
+    "name": "Mexikoplatz",
+    "hafasId": "900050301",
+    "hafasName": "S Mexikoplatz (Berlin)"
+  },
+  "S-MS": {
+    "coordinates": {
+      "latitude": 52.49864309731328,
+      "longitude": 13.270232431817675
+    },
+    "lines": [
+      "S3",
+      "S9"
+    ],
+    "name": "Messe Süd",
+    "hafasId": "900025423",
+    "hafasName": "S Messe Süd (Berlin)"
+  },
+  "S-Mad": {
+    "coordinates": {
+      "latitude": 52.51209696071558,
+      "longitude": 13.610415945916742
+    },
+    "lines": [
+      "S5"
+    ],
+    "name": "Mahlsdorf",
+    "hafasId": "900176001",
+    "hafasName": "S Mahlsdorf Bhf (Berlin)"
+  },
+  "S-Maf": {
+    "coordinates": {
+      "latitude": 52.42422531188802,
+      "longitude": 13.374693260191549
+    },
+    "lines": [
+      "S2"
+    ],
+    "name": "Marienfelde",
+    "hafasId": "900073101",
+    "hafasName": "S Marienfelde (Berlin)"
+  },
+  "S-Maw": {
+    "coordinates": {
+      "latitude": 52.360644947178145,
+      "longitude": 13.407806560648282
+    },
+    "lines": [
+      "S2"
+    ],
+    "name": "Mahlow",
+    "hafasId": "900245028",
+    "hafasName": "S Mahlow"
+  },
+  "S-Maz": {
+    "coordinates": {
+      "latitude": 52.54365475380672,
+      "longitude": 13.541356480429641
+    },
+    "lines": [
+      "S7"
+    ],
+    "name": "Marzahn",
+    "hafasId": "900170001",
+    "hafasName": "S Marzahn (Berlin)"
+  },
+  "S-MeA": {
+    "coordinates": {
+      "latitude": 52.557609954688274,
+      "longitude": 13.553551909194454
+    },
+    "lines": [
+      "S7"
+    ],
+    "name": "Mehrower Allee",
+    "hafasId": "900170003",
+    "hafasName": "S Mehrower Allee (Berlin)"
+  },
+  "S-NB": {
+    "coordinates": {
+      "latitude": 52.53227935061409,
+      "longitude": 13.387832771354482
+    },
+    "lines": [
+      "S1",
+      "S2",
+      "S25",
+      "S26"
+    ],
+    "name": "Nordbahnhof",
+    "hafasId": "900007104",
+    "hafasName": "S Nordbahnhof (Berlin)"
+  },
+  "S-NH": {
+    "coordinates": {
+      "latitude": 52.520181619783756,
+      "longitude": 13.700122761596305
+    },
+    "lines": [
+      "S5"
+    ],
+    "name": "Neuenhagen",
+    "hafasId": "900320007",
+    "hafasName": "S Neuenhagen (b Berlin)"
+  },
+  "S-NiS": {
+    "coordinates": {
+      "latitude": 52.43205972515463,
+      "longitude": 13.193159117475858
+    },
+    "lines": [
+      "S1",
+      "S7"
+    ],
+    "name": "Nikolassee",
+    "hafasId": "900052201",
+    "hafasName": "S Nikolassee (Berlin)"
+  },
+  "S-Np": {
+    "coordinates": {
+      "latitude": 52.50383098329934,
+      "longitude": 13.48531042911344
+    },
+    "lines": [
+      "S5",
+      "S7",
+      "S75"
+    ],
+    "name": "Nöldnerplatz",
+    "hafasId": "900160003",
+    "hafasName": "S Nöldnerplatz (Berlin)"
+  },
+  "S-OdS": {
+    "coordinates": {
+      "latitude": 52.41888195013442,
+      "longitude": 13.314223478292519
+    },
+    "lines": [
+      "S25",
+      "S26"
+    ],
+    "name": "Osdorfer Straße",
+    "hafasId": "900064206",
+    "hafasName": "Ostpreußendamm/Osdorfer Str. (Berlin)"
+  },
+  "S-Okz": {
+    "coordinates": {
+      "latitude": 52.50315279626426,
+      "longitude": 13.46957750161971
+    },
+    "lines": [
+      "S3",
+      "S5",
+      "S7",
+      "S8",
+      "S41",
+      "S42",
+      "S75",
+      "S85"
+    ],
+    "name": "Ostkreuz",
+    "hafasId": "900120003",
+    "hafasName": "S Ostkreuz Bhf (Berlin)"
+  },
+  "S-Or": {
+    "coordinates": {
+      "latitude": 52.753968368269284,
+      "longitude": 13.24891166803829
+    },
+    "lines": [
+      "S1"
+    ],
+    "name": "Oranienburg",
+    "hafasId": "900200005",
+    "hafasName": "S Oranienburg Bhf"
+  },
+  "S-OrS": {
+    "coordinates": {
+      "latitude": 52.52522273354742,
+      "longitude": 13.393012961994373
+    },
+    "lines": [
+      "S1",
+      "S2",
+      "S25",
+      "S26"
+    ],
+    "name": "Oranienburger Straße",
+    "hafasId": "900100007",
+    "hafasName": "S Oranienburger Str. (Berlin)"
+  },
+  "S-Os": {
+    "coordinates": {
+      "latitude": 52.4524363296818,
+      "longitude": 13.538058268000697
+    },
+    "lines": [
+      "S47"
+    ],
+    "name": "Oberspree",
+    "hafasId": "900192002",
+    "hafasName": "S Oberspree (Berlin)"
+  },
+  "S-Ost": {
+    "coordinates": {
+      "latitude": 52.51072105162612,
+      "longitude": 13.435149970948999
+    },
+    "lines": [
+      "S3",
+      "S5",
+      "S7",
+      "S9",
+      "S75"
+    ],
+    "name": "Ostbahnhof",
+    "hafasId": "900120005",
+    "hafasName": "S Ostbahnhof (Berlin)"
+  },
+  "S-PB": {
+    "coordinates": {
+      "latitude": 52.51017449977732,
+      "longitude": 13.227536848089812
+    },
+    "lines": [
+      "S3",
+      "S9"
+    ],
+    "name": "Pichelsberg",
+    "hafasId": "900025424",
+    "hafasName": "S Pichelsberg (Berlin)"
+  },
+  "S-PH": {
+    "coordinates": {
+      "latitude": 52.391795350910854,
+      "longitude": 13.06723080362724
+    },
+    "lines": [
+      "S7"
+    ],
+    "name": "Potsdam Hauptbahnhof",
+    "hafasId": "900230999",
+    "hafasName": "S Potsdam Hauptbahnhof"
+  },
+  "S-PN": {
+    "coordinates": {
+      "latitude": 52.528851317699406,
+      "longitude": 13.789018460309848
+    },
+    "lines": [
+      "S5"
+    ],
+    "name": "Petershagen Nord",
+    "hafasId": "900320005",
+    "hafasName": "S Petershagen Nord"
+  },
+  "S-Pc": {
+    "coordinates": {
+      "latitude": 52.535875107846124,
+      "longitude": 13.535580034261073
+    },
+    "lines": [
+      "S7"
+    ],
+    "name": "Poelchaustraße",
+    "hafasId": "900170005",
+    "hafasName": "S Poelchaustr. (Berlin)"
+  },
+  "S-PrA": {
+    "coordinates": {
+      "latitude": 52.545256519429614,
+      "longitude": 13.427610793078344
+    },
+    "lines": [
+      "S8",
+      "S41",
+      "S42",
+      "S85"
+    ],
+    "name": "Prenzlauer Allee",
+    "hafasId": "900110002",
+    "hafasName": "S Prenzlauer Allee (Berlin)"
+  },
+  "S-Prw": {
+    "coordinates": {
+      "latitude": 52.45991899878993,
+      "longitude": 13.35624293564004
+    },
+    "lines": [
+      "S2",
+      "S25",
+      "S26"
+    ],
+    "name": "Priesterweg",
+    "hafasId": "900058102",
+    "hafasName": "S Priesterweg (Berlin)"
+  },
+  "S-Pw": {
+    "coordinates": {
+      "latitude": 52.47858930934535,
+      "longitude": 13.473237302424081
+    },
+    "lines": [
+      "S8",
+      "S9",
+      "S85"
+    ],
+    "name": "Plänterwald",
+    "hafasId": "900191002",
+    "hafasName": "S Plänterwald (Berlin)"
+  },
+  "S-RWS": {
+    "coordinates": {
+      "latitude": 52.550735348104155,
+      "longitude": 13.547560466619132
+    },
+    "lines": [
+      "S7"
+    ],
+    "name": "Raoul-Wallenberg-Straße",
+    "hafasId": "900170002",
+    "hafasName": "S Raoul-Wallenberg-Str. (Berlin)"
+  },
+  "S-Rd": {
+    "coordinates": {
+      "latitude": 52.45163925746135,
+      "longitude": 13.689923967314684
+    },
+    "lines": [
+      "S3"
+    ],
+    "name": "Rahnsdorf",
+    "hafasId": "900183001",
+    "hafasName": "S Rahnsdorf (Berlin)"
+  },
+  "S-Rgt": {
+    "coordinates": {
+      "latitude": 52.648680714109815,
+      "longitude": 13.51360660593241
+    },
+    "lines": [
+      "S2"
+    ],
+    "name": "Röntgental",
+    "hafasId": "900350162",
+    "hafasName": "S Röntgental"
+  },
+  "S-Rub": {
+    "coordinates": {
+      "latitude": 52.50128394781751,
+      "longitude": 13.478402280168666
+    },
+    "lines": [
+      "S3"
+    ],
+    "name": "Rummelsburg",
+    "hafasId": "900160001",
+    "hafasName": "S Rummelsburg (Berlin)"
+  },
+  "S-SD": {
+    "coordinates": {
+      "latitude": 52.6139599,
+      "longitude": 13.2409545
+    },
+    "lines": [
+      "S25"
+    ],
+    "name": "Schulzendorf",
+    "hafasId": "900091205",
+    "hafasName": "S Schulzendorf (Berlin)"
+  },
+  "S-SS": {
+    "coordinates": {
+      "latitude": 52.4400237,
+      "longitude": 13.210119
+    },
+    "lines": [
+      "S1"
+    ],
+    "name": "Schlachtensee",
+    "hafasId": "900050355",
+    "hafasName": "S Schlachtensee (Berlin)"
+  },
+  "S-Sa": {
+    "coordinates": {
+      "latitude": 52.47297073778705,
+      "longitude": 13.455691446999964
+    },
+    "lines": [
+      "S41",
+      "S42"
+    ],
+    "name": "Sonnenallee",
+    "hafasId": "900077106",
+    "hafasName": "S Sonnenallee (Berlin)"
+  },
+  "S-Sau": {
+    "coordinates": {
+      "latitude": 52.39856512387104,
+      "longitude": 13.38939188857222
+    },
+    "lines": [
+      "S2"
+    ],
+    "name": "Schichauweg",
+    "hafasId": "900074202",
+    "hafasName": "S Schichauweg (Berlin)"
+  },
+  "S-Sav": {
+    "coordinates": {
+      "latitude": 52.50517768280662,
+      "longitude": 13.319067413798507
+    },
+    "lines": [
+      "S3",
+      "S5",
+      "S7",
+      "S9"
+    ],
+    "name": "Savignyplatz",
+    "hafasId": "900024203",
+    "hafasName": "S Savignyplatz (Berlin)"
+  },
+  "S-Sb": {
+    "coordinates": {
+      "latitude": 52.47934532264665,
+      "longitude": 13.351945170423448
+    },
+    "lines": [
+      "S1",
+      "S41",
+      "S42",
+      "S45",
+      "S46"
+    ],
+    "name": "Schöneberg",
+    "hafasId": "900054104",
+    "hafasName": "S Schöneberg (Berlin)"
+  },
+  "S-SbS": {
+    "coordinates": {
+      "latitude": 52.57669305295812,
+      "longitude": 13.88785499320312
+    },
+    "lines": [
+      "S5"
+    ],
+    "name": "Strausberg Stadt",
+    "hafasId": "900320002",
+    "hafasName": "S Strausberg Stadt"
+  },
+  "S-Scf": {
+    "coordinates": {
+      "latitude": 52.664700479825,
+      "longitude": 13.340044936033166
+    },
+    "lines": [
+      "S8"
+    ],
+    "name": "Schönfließ",
+    "hafasId": "900200012",
+    "hafasName": "S Schönfließ"
+  },
+  "S-Se": {
+    "coordinates": {
+      "latitude": 52.44828066344158,
+      "longitude": 13.35375098015922
+    },
+    "lines": [
+      "S25",
+      "S26"
+    ],
+    "name": "Südende",
+    "hafasId": "900063452",
+    "hafasName": "S Südende (Berlin)"
+  },
+  "S-Sf": {
+    "coordinates": {
+      "latitude": 52.39093492627191,
+      "longitude": 13.513004163911802
+    },
+    "lines": [
+      "S9",
+      "S45"
+    ],
+    "name": "Schönefeld",
+    "hafasId": "900260005",
+    "hafasName": "S Schönefeld (bei Berlin) Bhf"
+  },
+  "S-Sh": {
+    "coordinates": {
+      "latitude": 52.57150632376607,
+      "longitude": 13.380981428275703
+    },
+    "lines": [
+      "S1",
+      "S25",
+      "S85"
+    ],
+    "name": "Schönholz",
+    "hafasId": "900085201",
+    "hafasName": "S Schönholz (Berlin)"
+  },
+  "S-Skz": {
+    "coordinates": {
+      "latitude": 52.47599314817384,
+      "longitude": 13.365003992795835
+    },
+    "lines": [
+      "S2",
+      "S25",
+      "S26",
+      "S41",
+      "S42",
+      "S45",
+      "S46"
+    ],
+    "name": "Südkreuz",
+    "hafasId": "900058101",
+    "hafasName": "S Südkreuz Bhf (Berlin)"
+  },
+  "S-Spf": {
+    "coordinates": {
+      "latitude": 52.44691537220555,
+      "longitude": 13.561565579406874
+    },
+    "lines": [
+      "S47"
+    ],
+    "name": "Spindlersfeld",
+    "hafasId": "900180003",
+    "hafasName": "S Spindlersfeld (Berlin)"
+  },
+  "S-Spl": {
+    "coordinates": {
+      "latitude": 52.52704029576719,
+      "longitude": 13.536562327113188
+    },
+    "lines": [
+      "S7",
+      "S75"
+    ],
+    "name": "Springpfuhl",
+    "hafasId": "900171003",
+    "hafasName": "S Springpfuhl (Berlin)"
+  },
+  "S-St": {
+    "coordinates": {
+      "latitude": 52.53223380392106,
+      "longitude": 13.83368960314968
+    },
+    "lines": [
+      "S5"
+    ],
+    "name": "Strausberg",
+    "hafasId": "900320601",
+    "hafasName": "Eggersdorf (Strausberg), Schule"
+  },
+  "S-StN": {
+    "coordinates": {
+      "latitude": 52.590293238904195,
+      "longitude": 13.908505507535097
+    },
+    "lines": [
+      "S5"
+    ],
+    "name": "Strausberg Nord",
+    "hafasId": "900320001",
+    "hafasName": "S Strausberg Nord"
+  },
+  "S-StS": {
+    "coordinates": {
+      "latitude": 52.52375022925449,
+      "longitude": 13.464895936262337
+    },
+    "lines": [
+      "S8",
+      "S41",
+      "S42",
+      "S85"
+    ],
+    "name": "Storkower Straße",
+    "hafasId": "900110012",
+    "hafasName": "S Storkower Str. (Berlin)"
+  },
+  "S-Str": {
+    "coordinates": {
+      "latitude": 52.531945986954725,
+      "longitude": 13.2093447613249
+    },
+    "lines": [
+      "S3",
+      "S9"
+    ],
+    "name": "Stresow",
+    "hafasId": "900030202",
+    "hafasName": "S Stresow (Berlin)"
+  },
+  "S-SuS": {
+    "coordinates": {
+      "latitude": 52.436440635597336,
+      "longitude": 13.27419084043828
+    },
+    "lines": [
+      "S1"
+    ],
+    "name": "Sundgauer Straße",
+    "hafasId": "900049202",
+    "hafasName": "S Sundgauer Str. (Berlin)"
+  },
+  "S-Sw": {
+    "coordinates": {
+      "latitude": 52.45488773737367,
+      "longitude": 13.509709562039006
+    },
+    "lines": [
+      "S8",
+      "S9",
+      "S45",
+      "S46",
+      "S47",
+      "S85"
+    ],
+    "name": "Schöneweide",
+    "hafasId": "900192001",
+    "hafasName": "S Schöneweide Bhf (Berlin)"
+  },
+  "S-TP": {
+    "coordinates": {
+      "latitude": 52.49384672072847,
+      "longitude": 13.461819533243897
+    },
+    "lines": [
+      "S8",
+      "S9",
+      "S41",
+      "S42",
+      "S85"
+    ],
+    "name": "Treptower Park",
+    "hafasId": "900190001",
+    "hafasName": "S Treptower Park (Berlin)"
+  },
+  "S-TS": {
+    "coordinates": {
+      "latitude": 52.396850784626025,
+      "longitude": 13.276256805199665
+    },
+    "lines": [
+      "S25",
+      "S26"
+    ],
+    "name": "Teltow Stadt",
+    "hafasId": "900220114",
+    "hafasName": "S Teltow Stadt"
+  },
+  "S-Tg": {
+    "coordinates": {
+      "latitude": 52.51439039715447,
+      "longitude": 13.336458275641945
+    },
+    "lines": [
+      "S3",
+      "S5",
+      "S7",
+      "S9"
+    ],
+    "name": "Tiergarten",
+    "hafasId": "900003103",
+    "hafasName": "S Tiergarten (Berlin)"
+  },
+  "S-ULi": {
+    "coordinates": {
+      "latitude": 52.510675987022125,
+      "longitude": 13.498210990679752
+    },
+    "lines": [
+      "U5",
+      "S5",
+      "S7",
+      "S75"
+    ],
+    "name": "Lichtenberg",
+    "hafasId": "900160004",
+    "hafasName": "S+U Lichtenberg Bhf (Berlin)"
+  },
+  "S-UWe": {
+    "coordinates": {
+      "latitude": 52.54252098662721,
+      "longitude": 13.366096046568202
+    },
+    "lines": [
+      "U6",
+      "S41",
+      "S42"
+    ],
+    "name": "Wedding",
+    "hafasId": "900009104",
+    "hafasName": "S+U Wedding (Berlin)"
+  },
+  "S-W": {
+    "coordinates": {
+      "latitude": 52.606271853798034,
+      "longitude": 13.321191771180168
+    },
+    "lines": [
+      "S1",
+      "S85"
+    ],
+    "name": "Waidmannslust",
+    "hafasId": "900094101",
+    "hafasName": "S Waidmannslust (Berlin)"
+  },
+  "S-Wa": {
+    "coordinates": {
+      "latitude": 52.42142365719005,
+      "longitude": 13.179783408106715
+    },
+    "lines": [
+      "S1",
+      "S7"
+    ],
+    "name": "Wannsee",
+    "hafasId": "900053301",
+    "hafasName": "S Wannsee Bhf (Berlin)"
+  },
+  "S-Wb": {
+    "coordinates": {
+      "latitude": 52.57298288360968,
+      "longitude": 13.503832489572574
+    },
+    "lines": [
+      "S75"
+    ],
+    "name": "Wartenberg",
+    "hafasId": "900151001",
+    "hafasName": "S Wartenberg (Berlin)"
+  },
+  "S-Wd": {
+    "coordinates": {
+      "latitude": 52.36828545289484,
+      "longitude": 13.463432804602576
+    },
+    "lines": [
+      "S9",
+      "S45"
+    ],
+    "name": "Waßmannsdorf",
+    "hafasId": "900260080",
+    "hafasName": "S Waßmannsdorf"
+  },
+  "S-We": {
+    "coordinates": {
+      "latitude": 52.51800203972138,
+      "longitude": 13.284417179594556
+    },
+    "lines": [
+      "S41",
+      "S42",
+      "S46"
+    ],
+    "name": "Westend",
+    "hafasId": "900026207",
+    "hafasName": "S Westend (Berlin)"
+  },
+  "S-Wh": {
+    "coordinates": {
+      "latitude": 52.43849544258998,
+      "longitude": 13.72233368992778
+    },
+    "lines": [
+      "S3"
+    ],
+    "name": "Wilhelmshagen",
+    "hafasId": "900183002",
+    "hafasName": "S Wilhelmshagen (Berlin)"
+  },
+  "S-Wkz": {
+    "coordinates": {
+      "latitude": 52.50079421678501,
+      "longitude": 13.283921188791652
+    },
+    "lines": [
+      "S3",
+      "S5",
+      "S7",
+      "S9",
+      "S41",
+      "S42",
+      "S46"
+    ],
+    "name": "Westkreuz",
+    "hafasId": "900024102",
+    "hafasName": "S Westkreuz (Berlin)"
+  },
+  "S-Wld": {
+    "coordinates": {
+      "latitude": 52.31942184277858,
+      "longitude": 13.633796481223953
+    },
+    "lines": [
+      "S8",
+      "S46"
+    ],
+    "name": "Wildau",
+    "hafasId": "900260002",
+    "hafasName": "S Wildau"
+  },
+  "S-Wlh": {
+    "coordinates": {
+      "latitude": 52.46855503183164,
+      "longitude": 13.55432463299806
+    },
+    "lines": [
+      "S3"
+    ],
+    "name": "Wuhlheide",
+    "hafasId": "900180002",
+    "hafasName": "S Wuhlheide (Berlin)"
+  },
+  "S-WoS": {
+    "coordinates": {
+      "latitude": 52.565188563100236,
+      "longitude": 13.39239474937986
+    },
+    "lines": [
+      "S1",
+      "S25",
+      "S85"
+    ],
+    "name": "Wollankstraße",
+    "hafasId": "900130019",
+    "hafasName": "Wollankstr./Florastr. (Berlin)"
+  },
+  "S-Wr": {
+    "coordinates": {
+      "latitude": 52.5816925841539,
+      "longitude": 13.362240735817181
+    },
+    "lines": [
+      "S1",
+      "S85"
+    ],
+    "name": "Wilhelmsruh",
+    "hafasId": "900084101",
+    "hafasName": "S Wilhelmsruh (Berlin)"
+  },
+  "S-Ze": {
+    "coordinates": {
+      "latitude": 52.43106724989431,
+      "longitude": 13.258607052244827
+    },
+    "lines": [
+      "S1"
+    ],
+    "name": "Zehlendorf",
+    "hafasId": "900049201",
+    "hafasName": "S Zehlendorf (Berlin)"
+  },
+  "S-Zep": {
+    "coordinates": {
+      "latitude": 52.65968264914693,
+      "longitude": 13.533848153750881
+    },
+    "lines": [
+      "S2"
+    ],
+    "name": "Zepernick",
+    "hafasId": "900350163",
+    "hafasName": "S Zepernick"
+  },
+  "S-Zeu": {
+    "coordinates": {
+      "latitude": 52.34844638158367,
+      "longitude": 13.627641020513778
+    },
+    "lines": [
+      "S8",
+      "S46"
+    ],
+    "name": "Zeuthen",
+    "hafasId": "900260003",
+    "hafasName": "S Zeuthen"
+  },
+  "SU-A": {
+    "coordinates": {
+      "latitude": 52.52158475360679,
+      "longitude": 13.413909928437732
+    },
+    "lines": [
+      "U2",
+      "U5",
+      "U8",
+      "S3",
+      "S5",
+      "S7",
+      "S9"
+    ],
+    "name": "Alexanderplatz",
+    "hafasId": "900100003",
+    "hafasName": "S+U Alexanderplatz Bhf (Berlin)"
+  },
+  "SU-BRT": {
+    "coordinates": {
+      "latitude": 52.51661840399382,
+      "longitude": 13.380975569557677
+    },
+    "lines": [
+      "U5",
+      "S1",
+      "S2",
+      "S25",
+      "S26"
+    ],
+    "name": "Brandenburger Tor",
+    "hafasId": "900100025",
+    "hafasName": "S+U Brandenburger Tor (Berlin)"
+  },
+  "SU-Bs": {
+    "coordinates": {
+      "latitude": 52.477646743794764,
+      "longitude": 13.328885320245575
+    },
+    "lines": [
+      "U9",
+      "S41",
+      "S42",
+      "S45",
+      "S46"
+    ],
+    "name": "Bundesplatz",
+    "hafasId": "900044202",
+    "hafasName": "S+U Bundesplatz (Berlin)"
+  },
+  "SU-Chb": {
+    "coordinates": {
+      "latitude": 52.50503957802886,
+      "longitude": 13.304525314626375
+    },
+    "lines": [
+      "S3",
+      "S5",
+      "S7",
+      "S9",
+      "S45"
+    ],
+    "name": "Charlottenburg",
+    "hafasId": "900024101",
+    "hafasName": "S Charlottenburg Bhf (Berlin)"
+  },
+  "SU-Ff": {
+    "coordinates": {
+      "latitude": 52.513627176017735,
+      "longitude": 13.475445264188181
+    },
+    "lines": [
+      "U5",
+      "S8",
+      "S41",
+      "S42",
+      "S85"
+    ],
+    "name": "Frankfurter Allee",
+    "hafasId": "900120001",
+    "hafasName": "S+U Frankfurter Allee (Berlin)"
+  },
+  "SU-Frs": {
+    "coordinates": {
+      "latitude": 52.52024702463257,
+      "longitude": 13.387515680392795
+    },
+    "lines": [
+      "U6",
+      "S1",
+      "S2",
+      "S3",
+      "S5",
+      "S7",
+      "S9",
+      "S25",
+      "S26"
+    ],
+    "name": "Friedrichstraße",
+    "hafasId": "900100001",
+    "hafasName": "S+U Friedrichstr. Bhf (Berlin)"
+  },
+  "SU-Gb": {
+    "coordinates": {
+      "latitude": 52.548917990474564,
+      "longitude": 13.388910034420718
+    },
+    "lines": [
+      "U8",
+      "S1",
+      "S2",
+      "S25",
+      "S26",
+      "S41",
+      "S42"
+    ],
+    "name": "Gesundbrunnen",
+    "hafasId": "900007102",
+    "hafasName": "S+U Gesundbrunnen Bhf (Berlin)"
+  },
+  "SU-HBF": {
+    "coordinates": {
+      "latitude": 52.52521428361473,
+      "longitude": 13.369363030781443
+    },
+    "lines": [
+      "U5",
+      "S3",
+      "S5",
+      "S7",
+      "S9"
+    ],
+    "name": "Hauptbahnhof",
+    "hafasId": "900003201",
+    "hafasName": "S+U Berlin Hauptbahnhof"
+  },
+  "SU-HMS": {
+    "coordinates": {
+      "latitude": 52.46724851469642,
+      "longitude": 13.431478848765067
+    },
+    "lines": [
+      "U8",
+      "S41",
+      "S42",
+      "S45",
+      "S46",
+      "S47"
+    ],
+    "name": "Hermannstraße",
+    "hafasId": "900079221",
+    "hafasName": "S+U Hermannstr. (Berlin)"
+  },
+  "SU-Hb": {
+    "coordinates": {
+      "latitude": 52.479826248866374,
+      "longitude": 13.31289330772151
+    },
+    "lines": [
+      "U3",
+      "S41",
+      "S42",
+      "S45",
+      "S46"
+    ],
+    "name": "Heidelberger Platz",
+    "hafasId": "900045102",
+    "hafasName": "S+U Heidelberger Platz (Berlin)"
+  },
+  "SU-Ip": {
+    "coordinates": {
+      "latitude": 52.47898716627316,
+      "longitude": 13.343674511575102
+    },
+    "lines": [
+      "U4",
+      "S41",
+      "S42",
+      "S45",
+      "S46"
+    ],
+    "name": "Innsbrucker Platz",
+    "hafasId": "900054105",
+    "hafasName": "S+U Innsbrucker Platz (Berlin)"
+  },
+  "SU-J": {
+    "coordinates": {
+      "latitude": 52.51534963353936,
+      "longitude": 13.418168279445752
+    },
+    "lines": [
+      "U8",
+      "S3",
+      "S5",
+      "S7",
+      "S9"
+    ],
+    "name": "Jannowitzbrücke",
+    "hafasId": "900100004",
+    "hafasName": "S+U Jannowitzbrücke (Berlin)"
+  },
+  "SU-Jho": {
+    "coordinates": {
+      "latitude": 52.53078678114559,
+      "longitude": 13.300614806321846
+    },
+    "lines": [
+      "U7",
+      "S41",
+      "S42"
+    ],
+    "name": "Jungfernheide",
+    "hafasId": "900020201",
+    "hafasName": "S+U Jungfernheide Bhf (Berlin)"
+  },
+  "SU-KB": {
+    "coordinates": {
+      "latitude": 52.57862744286831,
+      "longitude": 13.333497007690767
+    },
+    "lines": [
+      "U8",
+      "S25"
+    ],
+    "name": "Karl-Bonhoeffer-Nervenklinik",
+    "hafasId": "900096458",
+    "hafasName": "S+U Karl-Bonhoeffer-Nervenklinik (Berlin)"
+  },
+  "SU-MNI": {
+    "coordinates": {
+      "latitude": 52.50770556383728,
+      "longitude": 13.28345572200206
+    },
+    "lines": [
+      "S41",
+      "S42",
+      "S46"
+    ],
+    "name": "Messe Nord/ICC",
+    "hafasId": "900024106",
+    "hafasName": "S Messe Nord/ICC (Berlin)"
+  },
+  "SU-Nk": {
+    "coordinates": {
+      "latitude": 52.469182571934425,
+      "longitude": 13.441841386333778
+    },
+    "lines": [
+      "U7",
+      "S41",
+      "S42",
+      "S45",
+      "S46",
+      "S47"
+    ],
+    "name": "Neukölln",
+    "hafasId": "900078201",
+    "hafasName": "S+U Neukölln (Berlin)"
+  },
+  "SU-PA": {
+    "coordinates": {
+      "latitude": 52.56679151700152,
+      "longitude": 13.41171577649132
+    },
+    "lines": [
+      "U2",
+      "S2",
+      "S8",
+      "S26"
+    ],
+    "name": "Pankow",
+    "hafasId": "900130002",
+    "hafasName": "S+U Pankow (Berlin)"
+  },
+  "SU-PAH": {
+    "coordinates": {
+      "latitude": 52.57806624577108,
+      "longitude": 13.429505256669756
+    },
+    "lines": [
+      "S2",
+      "S8",
+      "S26"
+    ],
+    "name": "Pankow-Heinersdorf",
+    "hafasId": "900130001",
+    "hafasName": "S Pankow-Heinersdorf (Berlin)"
+  },
+  "SU-Pd": {
+    "coordinates": {
+      "latitude": 52.50914559466656,
+      "longitude": 13.37820915242142
+    },
+    "lines": [
+      "U2",
+      "S1",
+      "S2",
+      "S25",
+      "S26"
+    ],
+    "name": "Potsdamer Platz",
+    "hafasId": "900100020",
+    "hafasName": "S+U Potsdamer Platz Bhf (Berlin)"
+  },
+  "SU-Rzu": {
+    "coordinates": {
+      "latitude": 52.45629009418093,
+      "longitude": 13.32177885644316
+    },
+    "lines": [
+      "U9",
+      "S1"
+    ],
+    "name": "Rathaus Steglitz",
+    "hafasId": "900062202",
+    "hafasName": "S+U Rathaus Steglitz (Berlin)"
+  },
+  "SU-S": {
+    "coordinates": {
+      "latitude": 52.53477813646717,
+      "longitude": 13.197446750429094
+    },
+    "lines": [
+      "S3",
+      "S9"
+    ],
+    "name": "Spandau",
+    "hafasId": "900029101",
+    "hafasName": "S Spandau Bhf (Berlin)"
+  },
+  "SU-Sd": {
+    "coordinates": {
+      "latitude": 52.51683483000147,
+      "longitude": 13.250403365391207
+    },
+    "lines": [
+      "U2",
+      "S3",
+      "S9"
+    ],
+    "name": "Olympia-Stadion",
+    "hafasId": "900025203",
+    "hafasName": "U Olympia-Stadion (Berlin)"
+  },
+  "SU-Sh": {
+    "coordinates": {
+      "latitude": 52.54938459656765,
+      "longitude": 13.414693514613475
+    },
+    "lines": [
+      "U2",
+      "S8",
+      "S41",
+      "S42",
+      "S85"
+    ],
+    "name": "Schönhauser Allee",
+    "hafasId": "900110001",
+    "hafasName": "S+U Schönhauser Allee (Berlin)"
+  },
+  "SU-Tg": {
+    "coordinates": {
+      "latitude": 52.588188657366004,
+      "longitude": 13.28968407067768
+    },
+    "lines": [
+      "S25"
+    ],
+    "name": "Tegel",
+    "hafasId": "900089303",
+    "hafasName": "S Tegel (Berlin)"
+  },
+  "SU-Ts": {
+    "coordinates": {
+      "latitude": 52.4704170148691,
+      "longitude": 13.385131628568047
+    },
+    "lines": [
+      "U6",
+      "S41",
+      "S42",
+      "S45",
+      "S46"
+    ],
+    "name": "Tempelhof",
+    "hafasId": "900068201",
+    "hafasName": "S+U Tempelhof (Berlin)"
+  },
+  "SU-WA": {
+    "coordinates": {
+      "latitude": 52.50576865500821,
+      "longitude": 13.449336563276148
+    },
+    "lines": [
+      "U1",
+      "U3",
+      "S3",
+      "S5",
+      "S7",
+      "S9",
+      "S75"
+    ],
+    "name": "Warschauer Straße",
+    "hafasId": "900120004",
+    "hafasName": "S+U Warschauer Str. (Berlin)"
+  },
+  "SU-WF": {
+    "coordinates": {
+      "latitude": 52.53627585017986,
+      "longitude": 13.34441920621967
+    },
+    "lines": [
+      "U9",
+      "S41",
+      "S42"
+    ],
+    "name": "Westhafen",
+    "hafasId": "900001201",
+    "hafasName": "S+U Westhafen (Berlin)"
+  },
+  "SU-WIU": {
+    "coordinates": {
+      "latitude": 52.59564077089752,
+      "longitude": 13.33470779255751
+    },
+    "lines": [
+      "U8",
+      "S1",
+      "S85"
+    ],
+    "name": "Wittenau",
+    "hafasId": "900096101",
+    "hafasName": "S+U Wittenau (Berlin)"
+  },
+  "SU-Wh": {
+    "coordinates": {
+      "latitude": 52.512612595867324,
+      "longitude": 13.575192957146982
+    },
+    "lines": [
+      "U5",
+      "S5"
+    ],
+    "name": "Wuhletal",
+    "hafasId": "900175001",
+    "hafasName": "S+U Wuhletal (Berlin)"
+  },
+  "SU-Y": {
+    "coordinates": {
+      "latitude": 52.49297432782316,
+      "longitude": 13.370695294049767
+    },
+    "lines": [
+      "U7",
+      "S1",
+      "S2",
+      "S25",
+      "S26"
+    ],
+    "name": "Yorckstraße",
+    "hafasId": "900058103",
+    "hafasName": "S+U Yorckstr. (Berlin)"
+  },
+  "SU-Zo": {
+    "coordinates": {
+      "latitude": 52.50715105514533,
+      "longitude": 13.331886833080347
+    },
+    "lines": [
+      "U2",
+      "U9",
+      "S3",
+      "S5",
+      "S7",
+      "S9"
+    ],
+    "name": "Zoologischer Garten",
+    "hafasId": "900023201",
+    "hafasName": "S+U Zoologischer Garten Bhf (Berlin)"
+  },
+  "U-AS": {
+    "coordinates": {
+      "latitude": 52.53884188949789,
+      "longitude": 13.206249030648536
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Altstadt-Spandau",
+    "hafasId": "900029301",
+    "hafasName": "U Altstadt Spandau (Berlin)"
+  },
+  "U-Ado": {
+    "coordinates": {
+      "latitude": 52.50000451375408,
+      "longitude": 13.307319652383967
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Adenauer Platz",
+    "hafasId": "900023302",
+    "hafasName": "U Adenauerplatz (Berlin)"
+  },
+  "U-Afr": {
+    "coordinates": {
+      "latitude": 52.56023984848616,
+      "longitude": 13.334620298220727
+    },
+    "lines": [
+      "U6"
+    ],
+    "name": "Afrikanische Straße",
+    "hafasId": "900011102",
+    "hafasName": "U Afrikanische Str. (Berlin)"
+  },
+  "U-Am": {
+    "coordinates": {
+      "latitude": 52.54233462216217,
+      "longitude": 13.3501448571524
+    },
+    "lines": [
+      "U9"
+    ],
+    "name": "Amrumer Straße",
+    "hafasId": "900009101",
+    "hafasName": "U Amrumer Str. (Berlin)"
+  },
+  "U-At": {
+    "coordinates": {
+      "latitude": 52.46552767929282,
+      "longitude": 13.385626688180338
+    },
+    "lines": [
+      "U6"
+    ],
+    "name": "Alt-Tempelhof",
+    "hafasId": "900068202",
+    "hafasName": "U Alt-Tempelhof (Berlin)"
+  },
+  "U-Au": {
+    "coordinates": {
+      "latitude": 52.500486676310686,
+      "longitude": 13.336469515686446
+    },
+    "lines": [
+      "U3"
+    ],
+    "name": "Augsburger Straße",
+    "hafasId": "900023202",
+    "hafasName": "U Augsburger Str. (Berlin)"
+  },
+  "U-B": {
+    "coordinates": {
+      "latitude": 52.537441310538384,
+      "longitude": 13.396615864950519
+    },
+    "lines": [
+      "U8"
+    ],
+    "name": "Bernauer Straße",
+    "hafasId": "900089554",
+    "hafasName": "Bernauer Str./Wassersportvereine (Berlin)"
+  },
+  "U-Beo": {
+    "coordinates": {
+      "latitude": 52.48733843166056,
+      "longitude": 13.331018866866685
+    },
+    "lines": [
+      "U7",
+      "U9"
+    ],
+    "name": "Berliner Straße",
+    "hafasId": "900230072",
+    "hafasName": "Potsdam, Schiffbauergasse/Berliner Str."
+  },
+  "U-Bi": {
+    "coordinates": {
+      "latitude": 52.53237397693337,
+      "longitude": 13.341358806477587
+    },
+    "lines": [
+      "U9"
+    ],
+    "name": "Birkenstraße",
+    "hafasId": "900002201",
+    "hafasName": "U Birkenstr. (Berlin)"
+  },
+  "U-Bl": {
+    "coordinates": {
+      "latitude": 52.4521217829363,
+      "longitude": 13.449176052255837
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Blaschkoallee",
+    "hafasId": "900080201",
+    "hafasName": "U Blaschkoallee (Berlin)"
+  },
+  "U-Bli": {
+    "coordinates": {
+      "latitude": 52.486487040682476,
+      "longitude": 13.32052211999013
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Blissestraße",
+    "hafasId": "900041102",
+    "hafasName": "U Blissestr. (Berlin)"
+  },
+  "U-Bmo": {
+    "coordinates": {
+      "latitude": 52.51151171547343,
+      "longitude": 13.30524401162657
+    },
+    "lines": [
+      "U2",
+      "U7"
+    ],
+    "name": "Bismarckstraße",
+    "hafasId": "900024201",
+    "hafasName": "U Bismarckstr. (Berlin)"
+  },
+  "U-Bo": {
+    "coordinates": {
+      "latitude": 52.48016714999761,
+      "longitude": 13.425289655450285
+    },
+    "lines": [
+      "U8"
+    ],
+    "name": "Boddinstraße",
+    "hafasId": "900079202",
+    "hafasName": "U Boddinstr. (Berlin)"
+  },
+  "U-Bpu": {
+    "coordinates": {
+      "latitude": 52.48859286130434,
+      "longitude": 13.340566036723288
+    },
+    "lines": [
+      "U4",
+      "U7"
+    ],
+    "name": "Bayrischer Platz",
+    "hafasId": "900055102",
+    "hafasName": "U Bayerischer Platz (Berlin)"
+  },
+  "U-Br": {
+    "coordinates": {
+      "latitude": 52.43782913951898,
+      "longitude": 13.448169538796577
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Britz Süd",
+    "hafasId": "900080402",
+    "hafasName": "U Britz-Süd (Berlin)"
+  },
+  "U-Bt": {
+    "coordinates": {
+      "latitude": 52.46703033372626,
+      "longitude": 13.308867296775418
+    },
+    "lines": [
+      "U3"
+    ],
+    "name": "Breitenbachplatz",
+    "hafasId": "900051202",
+    "hafasName": "U Breitenbachplatz (Berlin)"
+  },
+  "U-Bu": {
+    "coordinates": {
+      "latitude": 52.52011252969376,
+      "longitude": 13.372951427042096
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Bundestag",
+    "hafasId": "900003254",
+    "hafasName": "U Bundestag (Berlin)"
+  },
+  "U-Bue": {
+    "coordinates": {
+      "latitude": 52.497617107326164,
+      "longitude": 13.3631854921573
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Bülowstraße",
+    "hafasId": "900056104",
+    "hafasName": "U Bülowstr. (Berlin)"
+  },
+  "U-Bü": {
+    "coordinates": {
+      "latitude": 52.49960387665061,
+      "longitude": 13.54652416627269
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Biesdorf-Süd",
+    "hafasId": "900171005",
+    "hafasName": "U Biesdorf-Süd (Berlin)"
+  },
+  "U-C": {
+    "coordinates": {
+      "latitude": 52.5338368011239,
+      "longitude": 13.596393211677906
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Cottbusser Platz",
+    "hafasId": "900175006",
+    "hafasName": "U Cottbusser Platz (Berlin)"
+  },
+  "U-DD": {
+    "coordinates": {
+      "latitude": 52.457384410031835,
+      "longitude": 13.289682141177991
+    },
+    "lines": [
+      "U3"
+    ],
+    "name": "Dahlem-Dorf",
+    "hafasId": "900051303",
+    "hafasName": "U Dahlem-Dorf (Berlin)"
+  },
+  "U-E": {
+    "coordinates": {
+      "latitude": 52.50529237860792,
+      "longitude": 13.560881199885898
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Elsterwerdaer Platz",
+    "hafasId": "900171006",
+    "hafasName": "U Elsterwerdaer Platz (Berlin)"
+  },
+  "U-EB": {
+    "coordinates": {
+      "latitude": 52.541510349369474,
+      "longitude": 13.412187246893353
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Eberswalder Straße",
+    "hafasId": "900110006",
+    "hafasName": "U Eberswalder Str. (Berlin)"
+  },
+  "U-Ei": {
+    "coordinates": {
+      "latitude": 52.48957749606902,
+      "longitude": 13.350179660198677
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Eisenacher Straße",
+    "hafasId": "900054103",
+    "hafasName": "U Eisenacher Str. (Berlin)"
+  },
+  "U-FN": {
+    "coordinates": {
+      "latitude": 52.56454659447431,
+      "longitude": 13.363917069862026
+    },
+    "lines": [
+      "U8"
+    ],
+    "name": "Franz-Neumann-Platz",
+    "hafasId": "900085202",
+    "hafasName": "U Franz-Neumann-Platz (Am Schäfersee) (Berlin)"
+  },
+  "U-Fbs": {
+    "coordinates": {
+      "latitude": 52.46366858232227,
+      "longitude": 13.332704195617424
+    },
+    "lines": [
+      "S1"
+    ],
+    "name": "Feuerbachstraße",
+    "hafasId": "900063101",
+    "hafasName": "S Feuerbachstr. (Berlin)"
+  },
+  "U-Fi": {
+    "coordinates": {
+      "latitude": 52.50615420677204,
+      "longitude": 13.512846071137943
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Friedrichsfelde",
+    "hafasId": "900171002",
+    "hafasName": "S Friedrichsfelde Ost (Berlin)"
+  },
+  "U-Fpo": {
+    "coordinates": {
+      "latitude": 52.49056086919134,
+      "longitude": 13.315115415869883
+    },
+    "lines": [
+      "U3",
+      "U7"
+    ],
+    "name": "Fehrbelliner Platz",
+    "hafasId": "900041101",
+    "hafasName": "U Fehrbelliner Platz (Berlin)"
+  },
+  "U-Ft": {
+    "coordinates": {
+      "latitude": 52.515838117616056,
+      "longitude": 13.453982017388682
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Frankfurter Tor",
+    "hafasId": "900120008",
+    "hafasName": "U Frankfurter Tor (Berlin)"
+  },
+  "U-Fw": {
+    "coordinates": {
+      "latitude": 52.47213264477739,
+      "longitude": 13.328734261912842
+    },
+    "lines": [
+      "U9"
+    ],
+    "name": "Friedrich-Wilhelm-Platz",
+    "hafasId": "900061102",
+    "hafasName": "U Friedrich-Wilhelm-Platz (Berlin)"
+  },
+  "U-GK": {
+    "coordinates": {
+      "latitude": 52.528625784222356,
+      "longitude": 13.59065952539163
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Kienberg (Gärten der Welt)",
+    "hafasId": "900175005",
+    "hafasName": "U Kienberg (Gärten der Welt) (Berlin)"
+  },
+  "U-Go": {
+    "coordinates": {
+      "latitude": 52.49952468649019,
+      "longitude": 13.374029341875143
+    },
+    "lines": [
+      "U1",
+      "U2",
+      "U3"
+    ],
+    "name": "Gleisdreieck",
+    "hafasId": "900017103",
+    "hafasName": "U Gleisdreieck (Berlin)"
+  },
+  "U-Gr": {
+    "coordinates": {
+      "latitude": 52.49925912573195,
+      "longitude": 13.428040141032824
+    },
+    "lines": [
+      "U1",
+      "U3"
+    ],
+    "name": "Görlitzer Bahnhof",
+    "hafasId": "900014101",
+    "hafasName": "U Görlitzer Bahnhof (Berlin)"
+  },
+  "U-Gs": {
+    "coordinates": {
+      "latitude": 52.491287792962424,
+      "longitude": 13.39582160840456
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Gneisenaustraße",
+    "hafasId": "900016101",
+    "hafasName": "U Gneisenaustr. (Berlin)"
+  },
+  "U-Gt": {
+    "coordinates": {
+      "latitude": 52.49206864099776,
+      "longitude": 13.331002845117467
+    },
+    "lines": [
+      "U9"
+    ],
+    "name": "Güntzelstraße",
+    "hafasId": "900043201",
+    "hafasName": "U Güntzelstr. (Berlin)"
+  },
+  "U-Gz": {
+    "coordinates": {
+      "latitude": 52.462879080615835,
+      "longitude": 13.444761707804048
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Grenzallee",
+    "hafasId": "900080202",
+    "hafasName": "U Grenzallee (Berlin)"
+  },
+  "U-H": {
+    "coordinates": {
+      "latitude": 52.53668164468644,
+      "longitude": 13.606669852325496
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Hellersdorf",
+    "hafasId": "900175007",
+    "hafasName": "U Hellersdorf (Berlin)"
+  },
+  "U-Ha": {
+    "coordinates": {
+      "latitude": 52.51800512092953,
+      "longitude": 13.342038035573722
+    },
+    "lines": [
+      "U9"
+    ],
+    "name": "Hansaplatz",
+    "hafasId": "900003101",
+    "hafasName": "U Hansaplatz (Berlin)"
+  },
+  "U-HaT": {
+    "coordinates": {
+      "latitude": 52.49776431163335,
+      "longitude": 13.390640531660353
+    },
+    "lines": [
+      "U1",
+      "U3",
+      "U6"
+    ],
+    "name": "Hallesches Tor",
+    "hafasId": "900012103",
+    "hafasName": "U Hallesches Tor (Berlin)"
+  },
+  "U-He": {
+    "coordinates": {
+      "latitude": 52.510443486484434,
+      "longitude": 13.416026152345921
+    },
+    "lines": [
+      "U8"
+    ],
+    "name": "Heinrich-Heine-Straße",
+    "hafasId": "900100008",
+    "hafasName": "U Heinrich-Heine-Str. (Berlin)"
+  },
+  "U-Hl": {
+    "coordinates": {
+      "latitude": 52.536675159789525,
+      "longitude": 13.286119662034395
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Halemweg",
+    "hafasId": "900018102",
+    "hafasName": "U Halemweg (Berlin)"
+  },
+  "U-Hpu": {
+    "coordinates": {
+      "latitude": 52.48629702019309,
+      "longitude": 13.424549605923573
+    },
+    "lines": [
+      "U7",
+      "U8"
+    ],
+    "name": "Hermannplatz",
+    "hafasId": "900078101",
+    "hafasName": "U Hermannplatz (Berlin)"
+  },
+  "U-Hs": {
+    "coordinates": {
+      "latitude": 52.53870599648869,
+      "longitude": 13.233127356285706
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Haselhorst",
+    "hafasId": "900034102",
+    "hafasName": "U Haselhorst (Berlin)"
+  },
+  "U-Hv": {
+    "coordinates": {
+      "latitude": 52.513346994663635,
+      "longitude": 13.395592845606899
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Hausvogteiplatz",
+    "hafasId": "900100012",
+    "hafasName": "U Hausvogteiplatz (Berlin)"
+  },
+  "U-Hz": {
+    "coordinates": {
+      "latitude": 52.49409407138691,
+      "longitude": 13.324741572972073
+    },
+    "lines": [
+      "U3"
+    ],
+    "name": "Hohenzollernplatz",
+    "hafasId": "900043101",
+    "hafasName": "U Hohenzollernplatz (Berlin)"
+  },
+  "U-Hö": {
+    "coordinates": {
+      "latitude": 52.53845213803834,
+      "longitude": 13.633126695663236
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Hönow",
+    "hafasId": "900175010",
+    "hafasName": "U Hönow (Berlin)"
+  },
+  "U-JK": {
+    "coordinates": {
+      "latitude": 52.5364310976052,
+      "longitude": 13.293392312282265
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Jakob Kaiser Platz",
+    "hafasId": "900018101",
+    "hafasName": "U Jakob-Kaiser-Platz (Berlin)"
+  },
+  "U-Jt": {
+    "coordinates": {
+      "latitude": 52.42933817740163,
+      "longitude": 13.453318925778717
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Johannisthaler Chaussee",
+    "hafasId": "900082202",
+    "hafasName": "U Johannisthaler Chaussee (Berlin)"
+  },
+  "U-KL": {
+    "coordinates": {
+      "latitude": 52.52115789551493,
+      "longitude": 13.588918436156263
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Kaulsdorf-Nord",
+    "hafasId": "900175004",
+    "hafasName": "U Kaulsdorf-Nord (Berlin)"
+  },
+  "U-KM": {
+    "coordinates": {
+      "latitude": 52.476264793503134,
+      "longitude": 13.439340868415997
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Karl-Marx-Straße",
+    "hafasId": "900078103",
+    "hafasName": "U Karl-Marx-Str. (Berlin)"
+  },
+  "U-Ka": {
+    "coordinates": {
+      "latitude": 52.45997085595789,
+      "longitude": 13.384608775842764
+    },
+    "lines": [
+      "U6"
+    ],
+    "name": "Kaiserin-Augusta-Straße",
+    "hafasId": "900068302",
+    "hafasName": "U Kaiserin-Augusta-Str. (Berlin)"
+  },
+  "U-Kbo": {
+    "coordinates": {
+      "latitude": 52.49899215011615,
+      "longitude": 13.418309275866363
+    },
+    "lines": [
+      "U1",
+      "U3",
+      "U8"
+    ],
+    "name": "Kottbusser Tor",
+    "hafasId": "900013102",
+    "hafasName": "U Kottbusser Tor (Berlin)"
+  },
+  "U-Kd": {
+    "coordinates": {
+      "latitude": 52.51008683081932,
+      "longitude": 13.28310366028748
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Kaiserdamm",
+    "hafasId": "900026202",
+    "hafasName": "U Kaiserdamm (Berlin)"
+  },
+  "U-Kfu": {
+    "coordinates": {
+      "latitude": 52.503835118337435,
+      "longitude": 13.33139323651622
+    },
+    "lines": [
+      "U1",
+      "U9"
+    ],
+    "name": "Kurfürstendamm",
+    "hafasId": "900023203",
+    "hafasName": "U Kurfürstendamm (Berlin)"
+  },
+  "U-Kn": {
+    "coordinates": {
+      "latitude": 52.49453466670329,
+      "longitude": 13.309058026400066
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Konstanzer Straße",
+    "hafasId": "900041201",
+    "hafasName": "U Konstanzer Str. (Berlin)"
+  },
+  "U-Ko": {
+    "coordinates": {
+      "latitude": 52.51723678327738,
+      "longitude": 13.412422762101698
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Kloster Straße",
+    "hafasId": "900074104",
+    "hafasName": "Kloster-Zinna-Str. (Berlin)"
+  },
+  "U-Kr": {
+    "coordinates": {
+      "latitude": 52.44346835460266,
+      "longitude": 13.241381454626179
+    },
+    "lines": [
+      "U3"
+    ],
+    "name": "Krumme Lanke",
+    "hafasId": "900050201",
+    "hafasName": "U Krumme Lanke (Berlin)"
+  },
+  "U-Ks": {
+    "coordinates": {
+      "latitude": 52.50603991236267,
+      "longitude": 13.390597653584223
+    },
+    "lines": [
+      "U6"
+    ],
+    "name": "Kochstraße (Checkpoint Charlie)",
+    "hafasId": "900012102",
+    "hafasName": "U Kochstr./Checkpoint Charlie (Berlin)"
+  },
+  "U-Kt": {
+    "coordinates": {
+      "latitude": 52.490355022084486,
+      "longitude": 13.360240294020343
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Kleistpark",
+    "hafasId": "900054102",
+    "hafasName": "U Kleistpark (Berlin)"
+  },
+  "U-Kus": {
+    "coordinates": {
+      "latitude": 52.49997205510576,
+      "longitude": 13.361904131145394
+    },
+    "lines": [
+      "U1",
+      "U3"
+    ],
+    "name": "Kurfürstenstraße",
+    "hafasId": "900005201",
+    "hafasName": "U Kurfürstenstr. (Berlin)"
+  },
+  "U-L": {
+    "coordinates": {
+      "latitude": 52.47294946260803,
+      "longitude": 13.428319680083604
+    },
+    "lines": [
+      "U8"
+    ],
+    "name": "Leinestraße",
+    "hafasId": "900079201",
+    "hafasName": "U Leinestr. (Berlin)"
+  },
+  "U-LD": {
+    "coordinates": {
+      "latitude": 52.57541756928663,
+      "longitude": 13.338426480372704
+    },
+    "lines": [
+      "U8"
+    ],
+    "name": "Lindauer Allee",
+    "hafasId": "900086160",
+    "hafasName": "U Lindauer Allee (Berlin)"
+  },
+  "U-LL": {
+    "coordinates": {
+      "latitude": 52.538985513121645,
+      "longitude": 13.61834680851888
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Louis-Lewin-Straße",
+    "hafasId": "900175015",
+    "hafasName": "U Louis-Lewin-Str. (Berlin)"
+  },
+  "U-La": {
+    "coordinates": {
+      "latitude": 52.42464125301083,
+      "longitude": 13.462694616179675
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Lipschitzallee",
+    "hafasId": "900082201",
+    "hafasName": "U Lipschitzallee (Berlin)"
+  },
+  "U-Lpu": {
+    "coordinates": {
+      "latitude": 52.54638399263291,
+      "longitude": 13.359173363387754
+    },
+    "lines": [
+      "U6",
+      "U9"
+    ],
+    "name": "Leopoldplatz",
+    "hafasId": "900009102",
+    "hafasName": "U Leopoldplatz (Berlin)"
+  },
+  "U-Lu": {
+    "coordinates": {
+      "latitude": 52.52769587558723,
+      "longitude": 13.410483427785294
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Rosa-Luxemburg-Platz",
+    "hafasId": "900100016",
+    "hafasName": "U Rosa-Luxemburg-Platz (Berlin)"
+  },
+  "U-MB": {
+    "coordinates": {
+      "latitude": 52.50373069587255,
+      "longitude": 13.37486427537928
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Mendelssohn-Bartholdy-Park",
+    "hafasId": "900005252",
+    "hafasName": "U Mendelssohn-Bartholdy-Park (Berlin)"
+  },
+  "U-MH": {
+    "coordinates": {
+      "latitude": 52.51178744184193,
+      "longitude": 13.385103611022117
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Mohrenstraße",
+    "hafasId": "900100010",
+    "hafasName": "U Mohrenstr. (Berlin)"
+  },
+  "U-Md": {
+    "coordinates": {
+      "latitude": 52.51247776982194,
+      "longitude": 13.487067103080761
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Magdalenenstraße",
+    "hafasId": "900160005",
+    "hafasName": "U Magdalenenstr. (Berlin)"
+  },
+  "U-Me": {
+    "coordinates": {
+      "latitude": 52.49411969285654,
+      "longitude": 13.388617584781144
+    },
+    "lines": [
+      "U6",
+      "U7"
+    ],
+    "name": "Mehringdamm",
+    "hafasId": "900017101",
+    "hafasName": "U Mehringdamm (Berlin)"
+  },
+  "U-Mf": {
+    "coordinates": {
+      "latitude": 52.439693943244094,
+      "longitude": 13.387504000560341
+    },
+    "lines": [
+      "U6"
+    ],
+    "name": "Alt-Mariendorf",
+    "hafasId": "900070301",
+    "hafasName": "U Alt-Mariendorf (Berlin)"
+  },
+  "U-Mi": {
+    "coordinates": {
+      "latitude": 52.51060465728949,
+      "longitude": 13.38981249267141
+    },
+    "lines": [
+      "U2",
+      "U6"
+    ],
+    "name": "Stadtmitte",
+    "hafasId": "900100011",
+    "hafasName": "U Stadtmitte (Berlin)"
+  },
+  "U-Mk": {
+    "coordinates": {
+      "latitude": 52.5123423494104,
+      "longitude": 13.410156814535839
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Märkisches Museum",
+    "hafasId": "900100014",
+    "hafasName": "U Märkisches Museum (Berlin)"
+  },
+  "U-Mo": {
+    "coordinates": {
+      "latitude": 52.49869030287971,
+      "longitude": 13.382952782576325
+    },
+    "lines": [
+      "U1",
+      "U3",
+      "U7"
+    ],
+    "name": "Möckernbrücke",
+    "hafasId": "900017104",
+    "hafasName": "U Möckernbrücke (Berlin)"
+  },
+  "U-Mp": {
+    "coordinates": {
+      "latitude": 52.5264233799148,
+      "longitude": 13.304777771636452
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Mierendorffplatz",
+    "hafasId": "900019204",
+    "hafasName": "U Mierendorffplatz (Berlin)"
+  },
+  "U-Mr": {
+    "coordinates": {
+      "latitude": 52.503663417049296,
+      "longitude": 13.410745069576649
+    },
+    "lines": [
+      "U8"
+    ],
+    "name": "Moritzplatz",
+    "hafasId": "900013101",
+    "hafasName": "U Moritzplatz (Berlin)"
+  },
+  "U-Ms": {
+    "coordinates": {
+      "latitude": 52.517264498921804,
+      "longitude": 13.398871480364647
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Museumsinsel",
+    "hafasId": "900100537",
+    "hafasName": "U Museumsinsel (Berlin)"
+  },
+  "U-NA": {
+    "coordinates": {
+      "latitude": 52.53127506108444,
+      "longitude": 13.382158151362859
+    },
+    "lines": [
+      "U6"
+    ],
+    "name": "Naturkundemuseum",
+    "hafasId": "900100009",
+    "hafasName": "U Naturkundemuseum (Berlin)"
+  },
+  "U-Nd": {
+    "coordinates": {
+      "latitude": 52.51620172364511,
+      "longitude": 13.259259300898378
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Neu Westend",
+    "hafasId": "900026101",
+    "hafasName": "U Neu-Westend (Berlin)"
+  },
+  "U-Nm": {
+    "coordinates": {
+      "latitude": 52.49960137673452,
+      "longitude": 13.353698440274883
+    },
+    "lines": [
+      "U1",
+      "U2",
+      "U3",
+      "U4"
+    ],
+    "name": "Nollendorfplatz",
+    "hafasId": "900056102",
+    "hafasName": "U Nollendorfplatz (Berlin)"
+  },
+  "U-Np": {
+    "coordinates": {
+      "latitude": 52.5514051831702,
+      "longitude": 13.367174367036398
+    },
+    "lines": [
+      "U9"
+    ],
+    "name": "Nauener Platz",
+    "hafasId": "900009201",
+    "hafasName": "U Nauener Platz (Berlin)"
+  },
+  "U-Ob": {
+    "coordinates": {
+      "latitude": 52.52560158138314,
+      "longitude": 13.387359266990046
+    },
+    "lines": [
+      "U6"
+    ],
+    "name": "Oranienburger Tor",
+    "hafasId": "900100019",
+    "hafasName": "U Oranienburger Tor (Berlin)"
+  },
+  "U-Obi": {
+    "coordinates": {
+      "latitude": 52.511841502651464,
+      "longitude": 13.310542678017583
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Deutsche Oper",
+    "hafasId": "900022201",
+    "hafasName": "U Deutsche Oper (Berlin)"
+  },
+  "U-Olu": {
+    "coordinates": {
+      "latitude": 52.55716430726028,
+      "longitude": 13.373267488971862
+    },
+    "lines": [
+      "U8",
+      "U9"
+    ],
+    "name": "Osloer Straße",
+    "hafasId": "900009202",
+    "hafasName": "U Osloer Str. (Berlin)"
+  },
+  "U-Os": {
+    "coordinates": {
+      "latitude": 52.450372915919814,
+      "longitude": 13.269081392608598
+    },
+    "lines": [
+      "U3"
+    ],
+    "name": "Oskar-Helene-Heim",
+    "hafasId": "900051301",
+    "hafasName": "U Oskar-Helene-Heim (Berlin)"
+  },
+  "U-Ot": {
+    "coordinates": {
+      "latitude": 52.44990287012803,
+      "longitude": 13.253050230163211
+    },
+    "lines": [
+      "U3"
+    ],
+    "name": "Onkel Toms Hütte",
+    "hafasId": "900050282",
+    "hafasName": "U Onkel Toms Hütte (Berlin)"
+  },
+  "U-P": {
+    "coordinates": {
+      "latitude": 52.53790929996944,
+      "longitude": 13.247806807858922
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Paulsternstraße",
+    "hafasId": "900034101",
+    "hafasName": "U Paulsternstr. (Berlin)"
+  },
+  "U-PB": {
+    "coordinates": {
+      "latitude": 52.5742387353402,
+      "longitude": 13.348482014907574
+    },
+    "lines": [
+      "U8"
+    ],
+    "name": "Paracelsus-Bad",
+    "hafasId": "900085104",
+    "hafasName": "U Paracelsus-Bad (Berlin)"
+  },
+  "U-PL": {
+    "coordinates": {
+      "latitude": 52.486085692405766,
+      "longitude": 13.385951152366573
+    },
+    "lines": [
+      "U6"
+    ],
+    "name": "Platz der Luftbrücke",
+    "hafasId": "900017102",
+    "hafasName": "U Platz der Luftbrücke (Berlin)"
+  },
+  "U-Pi": {
+    "coordinates": {
+      "latitude": 52.44524298776193,
+      "longitude": 13.449530833941026
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Parchimer Allee",
+    "hafasId": "900080401",
+    "hafasName": "U Parchimer Allee (Berlin)"
+  },
+  "U-Pks": {
+    "coordinates": {
+      "latitude": 52.55226960744437,
+      "longitude": 13.381449722503731
+    },
+    "lines": [
+      "U8"
+    ],
+    "name": "Pankstraße",
+    "hafasId": "900009203",
+    "hafasName": "U Pankstr. (Berlin)"
+  },
+  "U-Po": {
+    "coordinates": {
+      "latitude": 52.46412347717734,
+      "longitude": 13.295754469708868
+    },
+    "lines": [
+      "U3"
+    ],
+    "name": "Podbielskiallee",
+    "hafasId": "900051302",
+    "hafasName": "U Podbielskiallee (Berlin)"
+  },
+  "U-Pr": {
+    "coordinates": {
+      "latitude": 52.498397225840904,
+      "longitude": 13.405914369467723
+    },
+    "lines": [
+      "U1",
+      "U3"
+    ],
+    "name": "Prinzenstraße",
+    "hafasId": "900013103",
+    "hafasName": "U Prinzenstr. (Berlin)"
+  },
+  "U-Ps": {
+    "coordinates": {
+      "latitude": 52.47853281937745,
+      "longitude": 13.385630063412236
+    },
+    "lines": [
+      "U6"
+    ],
+    "name": "Paradestraße",
+    "hafasId": "900068101",
+    "hafasName": "U Paradestr. (Berlin)"
+  },
+  "U-RE": {
+    "coordinates": {
+      "latitude": 52.57117800889685,
+      "longitude": 13.360469717285753
+    },
+    "lines": [
+      "U8"
+    ],
+    "name": "Residenzstraße",
+    "hafasId": "900085203",
+    "hafasName": "U Residenzstr. (Berlin)"
+  },
+  "U-RP": {
+    "coordinates": {
+      "latitude": 52.51188493793791,
+      "longitude": 13.322164399678371
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Ernst-Reuter-Platz",
+    "hafasId": "900023101",
+    "hafasName": "U Ernst-Reuter-Platz (Berlin)"
+  },
+  "U-RR": {
+    "coordinates": {
+      "latitude": 52.588372668996726,
+      "longitude": 13.325926085277757
+    },
+    "lines": [
+      "U8"
+    ],
+    "name": "Rathaus Reinickendorf",
+    "hafasId": "900096410",
+    "hafasName": "U Rathaus Reinickendorf (Berlin)"
+  },
+  "U-RS": {
+    "coordinates": {
+      "latitude": 52.48317252016258,
+      "longitude": 13.34197980163114
+    },
+    "lines": [
+      "U4"
+    ],
+    "name": "Rathaus Schöneberg",
+    "hafasId": "900054101",
+    "hafasName": "U Rathaus Schöneberg (Berlin)"
+  },
+  "U-RSp": {
+    "coordinates": {
+      "latitude": 52.53517336378184,
+      "longitude": 13.199770337041343
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Rathaus Spandau",
+    "hafasId": "900029302",
+    "hafasName": "S+U Rathaus Spandau (Berlin)"
+  },
+  "U-RUE": {
+    "coordinates": {
+      "latitude": 52.47325378847543,
+      "longitude": 13.31442029211621
+    },
+    "lines": [
+      "U3"
+    ],
+    "name": "Rüdesheimer Platz",
+    "hafasId": "900045101",
+    "hafasName": "U Rüdesheimer Platz (Berlin)"
+  },
+  "U-Ra": {
+    "coordinates": {
+      "latitude": 52.51884573517026,
+      "longitude": 13.408076953565228
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Rotes Rathaus",
+    "hafasId": "900100045",
+    "hafasName": "U Rotes Rathaus (Berlin)"
+  },
+  "U-Rb": {
+    "coordinates": {
+      "latitude": 52.556706048597306,
+      "longitude": 13.340973153055728
+    },
+    "lines": [
+      "U6"
+    ],
+    "name": "Rehberge",
+    "hafasId": "900011101",
+    "hafasName": "U Rehberge (Berlin)"
+  },
+  "U-Rd": {
+    "coordinates": {
+      "latitude": 52.41618723736849,
+      "longitude": 13.495394256545211
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Rudow",
+    "hafasId": "900083201",
+    "hafasName": "U Rudow (Berlin)"
+  },
+  "U-Ri": {
+    "coordinates": {
+      "latitude": 52.54004313886426,
+      "longitude": 13.370290663173478
+    },
+    "lines": [
+      "U6"
+    ],
+    "name": "Reinickendorfer Straße",
+    "hafasId": "900008102",
+    "hafasName": "U Reinickendorfer Str. (Berlin)"
+  },
+  "U-Rk": {
+    "coordinates": {
+      "latitude": 52.48165648057321,
+      "longitude": 13.434175596374757
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Rathaus Neukölln",
+    "hafasId": "900078102",
+    "hafasName": "U Rathaus Neukölln (Berlin)"
+  },
+  "U-Rl": {
+    "coordinates": {
+      "latitude": 52.52567316114269,
+      "longitude": 13.24141969643523
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Ruhleben",
+    "hafasId": "900025202",
+    "hafasName": "U Ruhleben (Berlin)"
+  },
+  "U-Rm": {
+    "coordinates": {
+      "latitude": 52.537020147343696,
+      "longitude": 13.26234955373954
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Rohrdamm",
+    "hafasId": "900036101",
+    "hafasName": "U Rohrdamm (Berlin)"
+  },
+  "U-Ro": {
+    "coordinates": {
+      "latitude": 52.529918168106974,
+      "longitude": 13.401069427270272
+    },
+    "lines": [
+      "U8"
+    ],
+    "name": "Rosenthaler Platz",
+    "hafasId": "900100023",
+    "hafasName": "U Rosenthaler Platz (Berlin)"
+  },
+  "U-Rw": {
+    "coordinates": {
+      "latitude": 52.51739320199016,
+      "longitude": 13.306589849135975
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Richard-Wagner-Platz",
+    "hafasId": "900022202",
+    "hafasName": "U Richard-Wagner-Platz (Berlin)"
+  },
+  "U-S": {
+    "coordinates": {
+      "latitude": 52.500839421685754,
+      "longitude": 13.441458862040918
+    },
+    "lines": [
+      "U1",
+      "U3"
+    ],
+    "name": "Schlesisches Tor",
+    "hafasId": "900014102",
+    "hafasName": "U Schlesisches Tor (Berlin)"
+  },
+  "U-ST": {
+    "coordinates": {
+      "latitude": 52.49305626902435,
+      "longitude": 13.422052068684394
+    },
+    "lines": [
+      "U8"
+    ],
+    "name": "Schönleinstraße",
+    "hafasId": "900016201",
+    "hafasName": "U Schönleinstr. (Berlin)"
+  },
+  "U-Sa": {
+    "coordinates": {
+      "latitude": 52.5147333440525,
+      "longitude": 13.46443091850088
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Samariter Straße",
+    "hafasId": "900120009",
+    "hafasName": "U Samariterstr. (Berlin)"
+  },
+  "U-Sch": {
+    "coordinates": {
+      "latitude": 52.56323316292418,
+      "longitude": 13.327117706396677
+    },
+    "lines": [
+      "U6"
+    ],
+    "name": "Kurt-Schumacher-Platz",
+    "hafasId": "900086102",
+    "hafasName": "U Kurt-Schumacher-Platz (Berlin)"
+  },
+  "U-Se": {
+    "coordinates": {
+      "latitude": 52.549804440688575,
+      "longitude": 13.353111472349383
+    },
+    "lines": [
+      "U6"
+    ],
+    "name": "Seestraße",
+    "hafasId": "420000948",
+    "hafasName": "R891 Pinnow, Teerofenstraße/ Seestraße"
+  },
+  "U-Si": {
+    "coordinates": {
+      "latitude": 52.52079169173754,
+      "longitude": 13.421109392557014
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Schillingstraße",
+    "hafasId": "900100017",
+    "hafasName": "U Schillingstr. (Berlin)"
+  },
+  "U-Sie": {
+    "coordinates": {
+      "latitude": 52.53678402739041,
+      "longitude": 13.272799996101497
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Siemensdamm",
+    "hafasId": "900035101",
+    "hafasName": "U Siemensdamm (Berlin)"
+  },
+  "U-Sk": {
+    "coordinates": {
+      "latitude": 52.53516033422582,
+      "longitude": 13.377316757053364
+    },
+    "lines": [
+      "U6"
+    ],
+    "name": "Schwartzkopffstraße",
+    "hafasId": "900100501",
+    "hafasName": "U Schwartzkopffstr. (Berlin)"
+  },
+  "U-Slo": {
+    "coordinates": {
+      "latitude": 52.46148060471478,
+      "longitude": 13.325056802665415
+    },
+    "lines": [
+      "U9"
+    ],
+    "name": "Schloßstraße",
+    "hafasId": "420000944",
+    "hafasName": "R891 Krayne, Zur Kupfermühle/ Schloßstraße (FW Feu"
+  },
+  "U-Sno": {
+    "coordinates": {
+      "latitude": 52.49643468742741,
+      "longitude": 13.331012496840088
+    },
+    "lines": [
+      "U3",
+      "U9"
+    ],
+    "name": "Spichernstraße",
+    "hafasId": "900042101",
+    "hafasName": "U Spichernstr. (Berlin)"
+  },
+  "U-So": {
+    "coordinates": {
+      "latitude": 52.51091816213409,
+      "longitude": 13.296329591640841
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Sophie-Charlotte-Platz",
+    "hafasId": "900022101",
+    "hafasName": "U Sophie-Charlotte-Platz (Berlin)"
+  },
+  "U-Sp": {
+    "coordinates": {
+      "latitude": 52.51129188431449,
+      "longitude": 13.40412770353123
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Spittelmarkt",
+    "hafasId": "900100013",
+    "hafasName": "U Spittelmarkt (Berlin)"
+  },
+  "U-Sr": {
+    "coordinates": {
+      "latitude": 52.5181030085142,
+      "longitude": 13.4315094869213
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Strausberger Platz",
+    "hafasId": "900120006",
+    "hafasName": "U Strausberger Platz (Berlin)"
+  },
+  "U-Su": {
+    "coordinates": {
+      "latitude": 52.48931793680438,
+      "longitude": 13.40767017964501
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Südstern",
+    "hafasId": "900016202",
+    "hafasName": "U Südstern (Berlin)"
+  },
+  "U-Sz": {
+    "coordinates": {
+      "latitude": 52.532389502723476,
+      "longitude": 13.412687503271002
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Senefelderplatz",
+    "hafasId": "900110005",
+    "hafasName": "U Senefelderplatz (Berlin)"
+  },
+  "U-T": {
+    "coordinates": {
+      "latitude": 52.45105589319979,
+      "longitude": 13.2817493817291
+    },
+    "lines": [
+      "U3"
+    ],
+    "name": "Freie Universität (Thielplatz)",
+    "hafasId": "900051201",
+    "hafasName": "U Freie Universität (Thielplatz) (Berlin)"
+  },
+  "U-Th": {
+    "coordinates": {
+      "latitude": 52.50999462008639,
+      "longitude": 13.272222439364015
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Theodor-Heuss-Platz",
+    "hafasId": "900026201",
+    "hafasName": "U Theodor-Heuss-Platz (Berlin)"
+  },
+  "U-Tk": {
+    "coordinates": {
+      "latitude": 52.49778992690432,
+      "longitude": 13.522938471264155
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Tierpark",
+    "hafasId": "900161002",
+    "hafasName": "U Tierpark (Berlin)"
+  },
+  "U-Tm": {
+    "coordinates": {
+      "latitude": 52.52615073182113,
+      "longitude": 13.341282507237821
+    },
+    "lines": [
+      "U9"
+    ],
+    "name": "Turmstraße",
+    "hafasId": "900003104",
+    "hafasName": "U Turmstr. (Berlin)"
+  },
+  "U-U": {
+    "coordinates": {
+      "latitude": 52.502837443202964,
+      "longitude": 13.326670737362036
+    },
+    "lines": [
+      "U1"
+    ],
+    "name": "Uhlandstraße",
+    "hafasId": "900043172",
+    "hafasName": "U Blissestr./Uhlandstr. (Berlin)"
+  },
+  "U-UDU": {
+    "coordinates": {
+      "latitude": 52.51698797927253,
+      "longitude": 13.388818251010832
+    },
+    "lines": [
+      "U5",
+      "U6"
+    ],
+    "name": "Unter den Linden",
+    "hafasId": "900100513",
+    "hafasName": "U Unter den Linden (Berlin)"
+  },
+  "U-Ull": {
+    "coordinates": {
+      "latitude": 52.45374859575384,
+      "longitude": 13.384439960604055
+    },
+    "lines": [
+      "U6"
+    ],
+    "name": "Ullsteinstraße",
+    "hafasId": "900069271",
+    "hafasName": "U Ullsteinstr. (Berlin)"
+  },
+  "U-V": {
+    "coordinates": {
+      "latitude": 52.49618363081879,
+      "longitude": 13.343181463966943
+    },
+    "lines": [
+      "U4"
+    ],
+    "name": "Viktoria-Luise-Platz",
+    "hafasId": "900055101",
+    "hafasName": "U Viktoria-Luise-Platz (Berlin)"
+  },
+  "U-VIN": {
+    "coordinates": {
+      "latitude": 52.55933475710921,
+      "longitude": 13.413277828299073
+    },
+    "lines": [
+      "U2"
+    ],
+    "name": "Vinetastraße",
+    "hafasId": "900130011",
+    "hafasName": "U Vinetastr. (Berlin)"
+  },
+  "U-Vo": {
+    "coordinates": {
+      "latitude": 52.54229213243312,
+      "longitude": 13.392854748220458
+    },
+    "lines": [
+      "U8"
+    ],
+    "name": "Voltastraße",
+    "hafasId": "900007103",
+    "hafasName": "U Voltastr. (Berlin)"
+  },
+  "U-W": {
+    "coordinates": {
+      "latitude": 52.525467894743656,
+      "longitude": 13.405019360141694
+    },
+    "lines": [
+      "U8"
+    ],
+    "name": "Weinmeisterstraße",
+    "hafasId": "900230172",
+    "hafasName": "Potsdam, Am Neuen Garten/Große Weinmeisterstr."
+  },
+  "U-WR": {
+    "coordinates": {
+      "latitude": 52.51676967487191,
+      "longitude": 13.44474125104108
+    },
+    "lines": [
+      "U5"
+    ],
+    "name": "Weberwiese",
+    "hafasId": "900120025",
+    "hafasName": "U Weberwiese (Berlin)"
+  },
+  "U-Wd": {
+    "coordinates": {
+      "latitude": 52.5066732911431,
+      "longitude": 13.306630201435127
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Wilmersdorfer Straße",
+    "hafasId": "900024202",
+    "hafasName": "U Wilmersdorfer Str. (Berlin)"
+  },
+  "U-Wk": {
+    "coordinates": {
+      "latitude": 52.42333409200771,
+      "longitude": 13.474553345421072
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Wutzkyallee",
+    "hafasId": "900083102",
+    "hafasName": "U Wutzkyallee (Berlin)"
+  },
+  "U-Wl": {
+    "coordinates": {
+      "latitude": 52.44623951880109,
+      "longitude": 13.385672060446183
+    },
+    "lines": [
+      "U6"
+    ],
+    "name": "Westphalweg",
+    "hafasId": "900070101",
+    "hafasName": "U Westphalweg (Berlin)"
+  },
+  "U-Wsg": {
+    "coordinates": {
+      "latitude": 52.46534179783416,
+      "longitude": 13.328258848165575
+    },
+    "lines": [
+      "U9"
+    ],
+    "name": "Walther-Schreiber-Platz",
+    "hafasId": "900061101",
+    "hafasName": "U Walther-Schreiber-Platz (Berlin)"
+  },
+  "U-Wt": {
+    "coordinates": {
+      "latitude": 52.50179869829708,
+      "longitude": 13.342996266063494
+    },
+    "lines": [
+      "U1",
+      "U2",
+      "U3"
+    ],
+    "name": "Wittenbergplatz",
+    "hafasId": "900056101",
+    "hafasName": "U Wittenbergplatz (Berlin)"
+  },
+  "U-Zd": {
+    "coordinates": {
+      "latitude": 52.42338668234191,
+      "longitude": 13.483921023353275
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Zwickauer Damm",
+    "hafasId": "900083101",
+    "hafasName": "U Zwickauer Damm (Berlin)"
+  },
+  "U-Zi": {
+    "coordinates": {
+      "latitude": 52.53767530952763,
+      "longitude": 13.217500629799758
+    },
+    "lines": [
+      "U7"
+    ],
+    "name": "Zitadelle",
+    "hafasId": "900033101",
+    "hafasName": "U Zitadelle (Berlin)"
+  }
+}

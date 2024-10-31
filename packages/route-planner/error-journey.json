@@ -1,0 +1,946 @@
+[
+  {
+    "type": "journey",
+    "legs": [
+      {
+        "origin": {
+          "type": "stop",
+          "id": "900058103",
+          "name": "S+U Yorckstr. (Berlin)",
+          "location": {
+            "type": "location",
+            "id": "900058103",
+            "latitude": 52.492356,
+            "longitude": 13.372209
+          },
+          "products": {
+            "suburban": true,
+            "subway": true,
+            "tram": false,
+            "bus": true,
+            "ferry": false,
+            "express": false,
+            "regional": false
+          }
+        },
+        "destination": {
+          "type": "stop",
+          "id": "900012101",
+          "name": "S Anhalter Bahnhof (Berlin)",
+          "location": {
+            "type": "location",
+            "id": "900012101",
+            "latitude": 52.504537,
+            "longitude": 13.38208
+          },
+          "products": {
+            "suburban": true,
+            "subway": false,
+            "tram": false,
+            "bus": true,
+            "ferry": false,
+            "express": false,
+            "regional": false
+          }
+        },
+        "departure": "2024-10-31T13:14:00+01:00",
+        "plannedDeparture": "2024-10-31T13:14:00+01:00",
+        "departureDelay": 0,
+        "arrival": "2024-10-31T13:16:00+01:00",
+        "plannedArrival": "2024-10-31T13:16:00+01:00",
+        "arrivalDelay": 0,
+        "reachable": true,
+        "polyline": {
+          "type": "FeatureCollection",
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "type": "stop",
+                "id": "900058103",
+                "name": "S+U Yorckstr. (Berlin)",
+                "location": {
+                  "type": "location",
+                  "id": "900058103",
+                  "latitude": 52.492356,
+                  "longitude": 13.372209
+                },
+                "products": {
+                  "suburban": true,
+                  "subway": true,
+                  "tram": false,
+                  "bus": true,
+                  "ferry": false,
+                  "express": false,
+                  "regional": false
+                }
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.37221,
+                  52.49236
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.37242,
+                  52.49503
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.3736,
+                  52.49702
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.37575,
+                  52.49839
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.37807,
+                  52.49933
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.3792,
+                  52.50025
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.38134,
+                  52.50358
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "type": "stop",
+                "id": "900012101",
+                "name": "S Anhalter Bahnhof (Berlin)",
+                "location": {
+                  "type": "location",
+                  "id": "900012101",
+                  "latitude": 52.504537,
+                  "longitude": 13.38208
+                },
+                "products": {
+                  "suburban": true,
+                  "subway": false,
+                  "tram": false,
+                  "bus": true,
+                  "ferry": false,
+                  "express": false,
+                  "regional": false
+                }
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.38208,
+                  52.50454
+                ]
+              }
+            }
+          ]
+        },
+        "tripId": "1|4883|8|86|31102024",
+        "line": {
+          "type": "line",
+          "id": "de-vbb-11000000-s-bahn-s26",
+          "fahrtNr": "18221",
+          "name": "S26",
+          "public": true,
+          "adminCode": "DBS---",
+          "productName": "S",
+          "mode": "train",
+          "product": "suburban",
+          "operator": {
+            "type": "operator",
+            "id": "s-bahn-berlin-gmbh",
+            "name": "S-Bahn Berlin GmbH"
+          }
+        },
+        "direction": "S+U Potsdamer Platz Bhf (Berlin)",
+        "currentLocation": {
+          "type": "location",
+          "latitude": 52.488248,
+          "longitude": 13.371832
+        },
+        "arrivalPlatform": "4",
+        "plannedArrivalPlatform": "4",
+        "arrivalPrognosisType": "calculated",
+        "departurePlatform": "2",
+        "plannedDeparturePlatform": "2",
+        "departurePrognosisType": "prognosed",
+        "remarks": [
+          {
+            "type": "hint",
+            "code": "FK",
+            "text": "Fahrradmitnahme möglich (S+U Yorckstr. (Berlin))"
+          },
+          {
+            "type": "hint",
+            "code": "FK",
+            "text": "Fahrradmitnahme möglich (S Anhalter Bahnhof (Berlin))"
+          }
+        ],
+        "cycle": {
+          "min": 300,
+          "max": 300,
+          "nr": 25
+        }
+      }
+    ],
+    "refreshToken": "¶HKI¶T$A=1@O=S+U Yorckstr. (Berlin)@L=900058103@a=128@$A=1@O=S Anhalter Bahnhof (Berlin)@L=900012101@a=128@$202410311314$202410311316$     S26$$1$$$$$$¶KC¶#VE#2#CF#100#CA#0#CM#0#SICT#0#AM#65#AM2#0#RT#7
+#¶KRCC¶#VE#1#¶PC¶eyJncnBJZCI6Ik9FViJ9",
+    "cycle": {
+      "min": 300
+    }
+  },
+  {
+    "type": "journey",
+    "legs": [
+      {
+        "origin": {
+          "type": "stop",
+          "id": "900058103",
+          "name": "S+U Yorckstr. (Berlin)",
+          "location": {
+            "type": "location",
+            "id": "900058103",
+            "latitude": 52.492356,
+            "longitude": 13.372209
+          },
+          "products": {
+            "suburban": true,
+            "subway": true,
+            "tram": false,
+            "bus": true,
+            "ferry": false,
+            "express": false,
+            "regional": false
+          }
+        },
+        "destination": {
+          "type": "stop",
+          "id": "900012101",
+          "name": "S Anhalter Bahnhof (Berlin)",
+          "location": {
+            "type": "location",
+            "id": "900012101",
+            "latitude": 52.504537,
+            "longitude": 13.38208
+          },
+          "products": {
+            "suburban": true,
+            "subway": false,
+            "tram": false,
+            "bus": true,
+            "ferry": false,
+            "express": false,
+            "regional": false
+          }
+        },
+        "departure": "2024-10-31T13:19:00+01:00",
+        "plannedDeparture": "2024-10-31T13:19:00+01:00",
+        "departureDelay": 0,
+        "arrival": "2024-10-31T13:21:00+01:00",
+        "plannedArrival": "2024-10-31T13:21:00+01:00",
+        "arrivalDelay": 0,
+        "reachable": true,
+        "polyline": {
+          "type": "FeatureCollection",
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "type": "stop",
+                "id": "900058103",
+                "name": "S+U Yorckstr. (Berlin)",
+                "location": {
+                  "type": "location",
+                  "id": "900058103",
+                  "latitude": 52.492356,
+                  "longitude": 13.372209
+                },
+                "products": {
+                  "suburban": true,
+                  "subway": true,
+                  "tram": false,
+                  "bus": true,
+                  "ferry": false,
+                  "express": false,
+                  "regional": false
+                }
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.37221,
+                  52.49236
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.37242,
+                  52.49503
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.3736,
+                  52.49702
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.37575,
+                  52.49839
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.37807,
+                  52.49933
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.3792,
+                  52.50025
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.38134,
+                  52.50358
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "type": "stop",
+                "id": "900012101",
+                "name": "S Anhalter Bahnhof (Berlin)",
+                "location": {
+                  "type": "location",
+                  "id": "900012101",
+                  "latitude": 52.504537,
+                  "longitude": 13.38208
+                },
+                "products": {
+                  "suburban": true,
+                  "subway": false,
+                  "tram": false,
+                  "bus": true,
+                  "ferry": false,
+                  "express": false,
+                  "regional": false
+                }
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.38208,
+                  52.50454
+                ]
+              }
+            }
+          ]
+        },
+        "tripId": "1|718|15|86|31102024",
+        "line": {
+          "type": "line",
+          "id": "de-vbb-11000000-s-bahn-s2",
+          "fahrtNr": "15954",
+          "name": "S2",
+          "public": true,
+          "adminCode": "DBS---",
+          "productName": "S",
+          "mode": "train",
+          "product": "suburban",
+          "operator": {
+            "type": "operator",
+            "id": "s-bahn-berlin-gmbh",
+            "name": "S-Bahn Berlin GmbH"
+          }
+        },
+        "direction": "S Nordbahnhof (Berlin)",
+        "currentLocation": {
+          "type": "location",
+          "latitude": 52.459923,
+          "longitude": 13.35628
+        },
+        "arrivalPlatform": "4",
+        "plannedArrivalPlatform": "4",
+        "arrivalPrognosisType": "calculated",
+        "departurePlatform": "2",
+        "plannedDeparturePlatform": "2",
+        "departurePrognosisType": "calculated",
+        "remarks": [
+          {
+            "type": "hint",
+            "code": "FK",
+            "text": "Fahrradmitnahme möglich (S+U Yorckstr. (Berlin))"
+          },
+          {
+            "type": "hint",
+            "code": "FK",
+            "text": "Fahrradmitnahme möglich (S Anhalter Bahnhof (Berlin))"
+          }
+        ],
+        "cycle": {
+          "min": 300,
+          "max": 300,
+          "nr": 25
+        }
+      }
+    ],
+    "refreshToken": "¶HKI¶T$A=1@O=S+U Yorckstr. (Berlin)@L=900058103@a=128@$A=1@O=S Anhalter Bahnhof (Berlin)@L=900012101@a=128@$202410311319$202410311321$      S2$$1$$$$$$¶KC¶#VE#2#CF#100#CA#0#CM#0#SICT#0#AM#65#AM2#0#RT#7
+#¶KRCC¶#VE#1#¶PC¶eyJncnBJZCI6Ik9FViJ9",
+    "cycle": {
+      "min": 300
+    }
+  },
+  {
+    "type": "journey",
+    "legs": [
+      {
+        "origin": {
+          "type": "stop",
+          "id": "900058103",
+          "name": "S+U Yorckstr. (Berlin)",
+          "location": {
+            "type": "location",
+            "id": "900058103",
+            "latitude": 52.492356,
+            "longitude": 13.372209
+          },
+          "products": {
+            "suburban": true,
+            "subway": true,
+            "tram": false,
+            "bus": true,
+            "ferry": false,
+            "express": false,
+            "regional": false
+          }
+        },
+        "destination": {
+          "type": "stop",
+          "id": "900012101",
+          "name": "S Anhalter Bahnhof (Berlin)",
+          "location": {
+            "type": "location",
+            "id": "900012101",
+            "latitude": 52.504537,
+            "longitude": 13.38208
+          },
+          "products": {
+            "suburban": true,
+            "subway": false,
+            "tram": false,
+            "bus": true,
+            "ferry": false,
+            "express": false,
+            "regional": false
+          }
+        },
+        "departure": "2024-10-31T13:24:00+01:00",
+        "plannedDeparture": "2024-10-31T13:24:00+01:00",
+        "departureDelay": 0,
+        "arrival": "2024-10-31T13:26:00+01:00",
+        "plannedArrival": "2024-10-31T13:26:00+01:00",
+        "arrivalDelay": 0,
+        "reachable": true,
+        "polyline": {
+          "type": "FeatureCollection",
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "type": "stop",
+                "id": "900058103",
+                "name": "S+U Yorckstr. (Berlin)",
+                "location": {
+                  "type": "location",
+                  "id": "900058103",
+                  "latitude": 52.492356,
+                  "longitude": 13.372209
+                },
+                "products": {
+                  "suburban": true,
+                  "subway": true,
+                  "tram": false,
+                  "bus": true,
+                  "ferry": false,
+                  "express": false,
+                  "regional": false
+                }
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.37221,
+                  52.49236
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.37242,
+                  52.49503
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.3736,
+                  52.49702
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.37575,
+                  52.49839
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.37807,
+                  52.49933
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.3792,
+                  52.50025
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.38134,
+                  52.50358
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "type": "stop",
+                "id": "900012101",
+                "name": "S Anhalter Bahnhof (Berlin)",
+                "location": {
+                  "type": "location",
+                  "id": "900012101",
+                  "latitude": 52.504537,
+                  "longitude": 13.38208
+                },
+                "products": {
+                  "suburban": true,
+                  "subway": false,
+                  "tram": false,
+                  "bus": true,
+                  "ferry": false,
+                  "express": false,
+                  "regional": false
+                }
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.38208,
+                  52.50454
+                ]
+              }
+            }
+          ]
+        },
+        "tripId": "1|883|17|86|31102024",
+        "line": {
+          "type": "line",
+          "id": "de-vbb-11000000-s-bahn-s25",
+          "fahrtNr": "17628",
+          "name": "S25",
+          "public": true,
+          "adminCode": "DBS---",
+          "productName": "S",
+          "mode": "train",
+          "product": "suburban",
+          "operator": {
+            "type": "operator",
+            "id": "s-bahn-berlin-gmbh",
+            "name": "S-Bahn Berlin GmbH"
+          }
+        },
+        "direction": "S+U Potsdamer Platz Bhf (Berlin)",
+        "currentLocation": {
+          "type": "location",
+          "latitude": 52.436866,
+          "longitude": 13.339264
+        },
+        "arrivalPlatform": "4",
+        "plannedArrivalPlatform": "4",
+        "arrivalPrognosisType": "calculated",
+        "departurePlatform": "2",
+        "plannedDeparturePlatform": "2",
+        "departurePrognosisType": "calculated",
+        "remarks": [
+          {
+            "type": "hint",
+            "code": "FK",
+            "text": "Fahrradmitnahme möglich (S+U Yorckstr. (Berlin))"
+          },
+          {
+            "type": "hint",
+            "code": "FK",
+            "text": "Fahrradmitnahme möglich (S Anhalter Bahnhof (Berlin))"
+          }
+        ],
+        "cycle": {
+          "min": 300,
+          "max": 300,
+          "nr": 25
+        }
+      }
+    ],
+    "refreshToken": "¶HKI¶T$A=1@O=S+U Yorckstr. (Berlin)@L=900058103@a=128@$A=1@O=S Anhalter Bahnhof (Berlin)@L=900012101@a=128@$202410311324$202410311326$     S25$$1$$$$$$¶KC¶#VE#2#CF#100#CA#0#CM#0#SICT#0#AM#65#AM2#0#RT#7
+#¶KRCC¶#VE#1#¶PC¶eyJncnBJZCI6Ik9FViJ9",
+    "cycle": {
+      "min": 300
+    }
+  },
+  {
+    "type": "journey",
+    "legs": [
+      {
+        "origin": {
+          "type": "stop",
+          "id": "900058103",
+          "name": "S+U Yorckstr. (Berlin)",
+          "location": {
+            "type": "location",
+            "id": "900058103",
+            "latitude": 52.492356,
+            "longitude": 13.372209
+          },
+          "products": {
+            "suburban": true,
+            "subway": true,
+            "tram": false,
+            "bus": true,
+            "ferry": false,
+            "express": false,
+            "regional": false
+          }
+        },
+        "destination": {
+          "type": "stop",
+          "id": "900012101",
+          "name": "S Anhalter Bahnhof (Berlin)",
+          "location": {
+            "type": "location",
+            "id": "900012101",
+            "latitude": 52.504537,
+            "longitude": 13.38208
+          },
+          "products": {
+            "suburban": true,
+            "subway": false,
+            "tram": false,
+            "bus": true,
+            "ferry": false,
+            "express": false,
+            "regional": false
+          }
+        },
+        "departure": "2024-10-31T13:29:00+01:00",
+        "plannedDeparture": "2024-10-31T13:29:00+01:00",
+        "departureDelay": 0,
+        "arrival": "2024-10-31T13:31:00+01:00",
+        "plannedArrival": "2024-10-31T13:31:00+01:00",
+        "arrivalDelay": 0,
+        "reachable": true,
+        "polyline": {
+          "type": "FeatureCollection",
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {
+                "type": "stop",
+                "id": "900058103",
+                "name": "S+U Yorckstr. (Berlin)",
+                "location": {
+                  "type": "location",
+                  "id": "900058103",
+                  "latitude": 52.492356,
+                  "longitude": 13.372209
+                },
+                "products": {
+                  "suburban": true,
+                  "subway": true,
+                  "tram": false,
+                  "bus": true,
+                  "ferry": false,
+                  "express": false,
+                  "regional": false
+                }
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.37221,
+                  52.49236
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.37242,
+                  52.49503
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.3736,
+                  52.49702
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.37575,
+                  52.49839
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.37807,
+                  52.49933
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.3792,
+                  52.50025
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.38134,
+                  52.50358
+                ]
+              }
+            },
+            {
+              "type": "Feature",
+              "properties": {
+                "type": "stop",
+                "id": "900012101",
+                "name": "S Anhalter Bahnhof (Berlin)",
+                "location": {
+                  "type": "location",
+                  "id": "900012101",
+                  "latitude": 52.504537,
+                  "longitude": 13.38208
+                },
+                "products": {
+                  "suburban": true,
+                  "subway": false,
+                  "tram": false,
+                  "bus": true,
+                  "ferry": false,
+                  "express": false,
+                  "regional": false
+                }
+              },
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  13.38208,
+                  52.50454
+                ]
+              }
+            }
+          ]
+        },
+        "tripId": "1|439|19|86|31102024",
+        "line": {
+          "type": "line",
+          "id": "de-vbb-11000000-s-bahn-s2",
+          "fahrtNr": "15344",
+          "name": "S2",
+          "public": true,
+          "adminCode": "DBS---",
+          "productName": "S",
+          "mode": "train",
+          "product": "suburban",
+          "operator": {
+            "type": "operator",
+            "id": "s-bahn-berlin-gmbh",
+            "name": "S-Bahn Berlin GmbH"
+          }
+        },
+        "direction": "S Nordbahnhof (Berlin)",
+        "currentLocation": {
+          "type": "location",
+          "latitude": 52.401376,
+          "longitude": 13.387815
+        },
+        "arrivalPlatform": "4",
+        "plannedArrivalPlatform": "4",
+        "arrivalPrognosisType": "calculated",
+        "departurePlatform": "2",
+        "plannedDeparturePlatform": "2",
+        "departurePrognosisType": "calculated",
+        "remarks": [
+          {
+            "type": "hint",
+            "code": "FK",
+            "text": "Fahrradmitnahme möglich (S+U Yorckstr. (Berlin))"
+          },
+          {
+            "type": "hint",
+            "code": "FK",
+            "text": "Fahrradmitnahme möglich (S Anhalter Bahnhof (Berlin))"
+          }
+        ],
+        "cycle": {
+          "min": 300,
+          "max": 300,
+          "nr": 25
+        }
+      }
+    ],
+    "refreshToken": "¶HKI¶T$A=1@O=S+U Yorckstr. (Berlin)@L=900058103@a=128@$A=1@O=S Anhalter Bahnhof (Berlin)@L=900012101@a=128@$202410311329$202410311331$      S2$$1$$$$$$¶KC¶#VE#2#CF#100#CA#0#CM#0#SICT#0#AM#65#AM2#0#RT#7
+#¶KRCC¶#VE#1#¶PC¶eyJncnBJZCI6Ik9FViJ9",
+    "cycle": {
+      "min": 300
+    }
+  }
+]

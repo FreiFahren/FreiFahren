@@ -1,0 +1,28 @@
+{
+	"name": "@derhuerst/br2nl",
+	"description": "Replace HTML <br> tags with newline characters.",
+	"version": "1.0.0",
+	"main": "index.js",
+	"files": [
+		"index.js",
+		"example.js"
+	],
+	"keywords": [
+		"br2nl",
+		"br",
+		"break",
+		"newline"
+	],
+	"author": "Jannis R <mail@jannisr.de>",
+	"homepage": "https://github.com/derhuerst/br2nl",
+	"repository": "derhuerst/br2nl",
+	"bugs": "https://github.com/derhuerst/br2nl/issues",
+	"license": "ISC",
+	"engines": {
+		"node": ">=6"
+	},
+	"scripts": {
+		"test": "env NODE_ENV=dev node test.js",
+		"prepublishOnly": "npm test"
+	}
+}
