@@ -77,6 +77,32 @@
     --distance-from-edge-default: 15px;
     --button-size: 50px;
     --height-streched-button: 45px;
+
+    --line-s1: #da6ba2;
+    --line-s2: #007734;
+    --line-s3: #0066ad;
+    --line-s25: #007734;
+    --line-s26: #007734;
+    --line-s5: #eb7405;
+    --line-s41: #ad5937;
+    --line-s42: #cb6418;
+    --line-s45: #cd9c53;
+    --line-s46: #cd9c53;
+    --line-s47: #cd9c53;
+    --line-s7: #816da6;
+    --line-s75: #816da6;
+    --line-s8: #6a2;
+    --line-s85: #6a2;
+    --line-s9: #992746;
+    --line-u1: #7dad4c;
+    --line-u2: #da421e;
+    --line-u3: #16683d;
+    --line-u4: #f0d722;
+    --line-u5: #7e5330;
+    --line-u6: #8c6dab;
+    --line-u7: #528dba;
+    --line-u8: #224f86;
+    --line-u9: #f3791d;
 }
 
 :root.light {
@@ -435,103 +461,103 @@ button .plus {
 }
 
 .S1 {
-    background-color: #da6ba2;
+    background-color: var(--line-s1);
 }
 
 .S2 {
-    background-color: #007734;
+    background-color: var(--line-s2);
 }
 
 .S3 {
-    background-color: #0066ad;
+    background-color: var(--line-s3);
 }
 
 .S25 {
-    background-color: #007734;
+    background-color: var(--line-s25);
 }
 
 .S26 {
-    background-color: #007734;
+    background-color: var(--line-s26);
 }
 
 .S5 {
-    background-color: #eb7405;
+    background-color: var(--line-s5);
 }
 
 .S41 {
-    background-color: #ad5937;
+    background-color: var(--line-s41);
 }
 
 .S42 {
-    background-color: #cb6418;
+    background-color: var(--line-s42);
 }
 
 .S45 {
-    background-color: #cd9c53;
+    background-color: var(--line-s45);
 }
 
 .S46 {
-    background-color: #cd9c53;
+    background-color: var(--line-s46);
 }
 
 .S47 {
-    background-color: #cd9c53;
+    background-color: var(--line-s47);
 }
 
 .S7 {
-    background-color: #816da6;
+    background-color: var(--line-s7);
 }
 
 .S75 {
-    background-color: #816da6;
+    background-color: var(--line-s75);
 }
 
 .S8 {
-    background-color: #6a2;
+    background-color: var(--line-s8);
 }
 
 .S85 {
-    background-color: #6a2;
+    background-color: var(--line-s85);
 }
 
 .S9 {
-    background-color: #992746;
+    background-color: var(--line-s9);
 }
 
 .U1 {
-    background-color: #7dad4c;
+    background-color: var(--line-u1);
 }
 
 .U2 {
-    background-color: #da421e;
+    background-color: var(--line-u2);
 }
 
 .U3 {
-    background-color: #16683d;
+    background-color: var(--line-u3);
 }
 
 .U4 {
-    background-color: #f0d722;
+    background-color: var(--line-u4);
 }
 
 .U5 {
-    background-color: #7e5330;
+    background-color: var(--line-u5);
 }
 
 .U6 {
-    background-color: #8c6dab;
+    background-color: var(--line-u6);
 }
 
 .U7 {
-    background-color: #528dba;
+    background-color: var(--line-u7);
 }
 
 .U8 {
-    background-color: #224f86;
+    background-color: var(--line-u8);
 }
 
 .U9 {
-    background-color: #f3791d;
+    background-color: var(--line-u9);
 }
 
 .elapsed-time {

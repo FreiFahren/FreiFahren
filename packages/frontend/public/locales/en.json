@@ -87,6 +87,11 @@
         "lines": "Lines",
         "stations": "Stations",
         "top5Lines": "Top 5 Lines",
-        "risk": "Current Risk"
+        "risk": "Current Risk",
+        "topLines": "Top Lines",
+        "topStations": "Top Stations",
+        "past24Hours": "Past 24 hours",
+        "ofTotal": "of all reports",
+        "reports": "reports"
     }
 }

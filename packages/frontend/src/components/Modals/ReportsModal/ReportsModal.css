@@ -14,7 +14,7 @@
 }
 
 .reports-modal > section:first-child {
-    margin-bottom: var(--margin-m);
+    margin-bottom: var(--margin-s);
 }
 
 .reports-modal > section > button {
@@ -217,4 +217,17 @@ section.summary .risk h2 {
 
 .summary .lines > div:last-of-type .clustered-report-item {
     border-bottom: none;
+}
+
+.custom-tooltip h4,
+.custom-tooltip p {
+    margin: 0;
+}
+
+.list-modal svg {
+    filter: none;
+}
+
+.recharts-tooltip-cursor {
+    fill: rgba(121, 120, 120, 0.1) !important;
 }

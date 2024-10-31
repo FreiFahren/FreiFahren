@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts'
+import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
 
 import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
 import { MarkerData } from 'src/utils/types'
@@ -24,7 +26,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
     const { t } = useTranslation()
     const [currentTab, setCurrentTab] = useState<TabType>('summary')
 
-    const tabs: TabType[] = ['summary', 'stations']
+    const tabs: TabType[] = ['summary', 'lines', 'stations']
 
     const handleTabChange = (tab: TabType) => {
         setCurrentTab(tab)
@@ -153,6 +155,56 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
         }
     }, [segmentRiskData, allLines])
 
+    const getChartData = useMemo(() => {
+        return Array.from(sortedLinesWithReports.entries()).map(([line, reports]) => ({
+            line,
+            reports: reports.length,
+        }))
+    }, [sortedLinesWithReports])
+
+    const [isLightTheme, setIsLightTheme] = useState<boolean>(false)
+
+    useEffect(() => {
+        const theme = localStorage.getItem('colorTheme')
+        setIsLightTheme(theme === 'light')
+
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === 'theme') {
+                setIsLightTheme(e.newValue === 'dark')
+            }
+        }
+        window.addEventListener('storage', handleStorageChange)
+        return () => window.removeEventListener('storage', handleStorageChange)
+    }, [])
+
+    const CustomTooltip: React.FC<TooltipProps<ValueType, NameType>> = ({ active, payload }) => {
+        if (!active || !payload || !payload.length) return null
+
+        const data = payload[0].payload
+        const totalReports = getChartData.reduce((sum, item) => sum + item.reports, 0)
+        const percentage = ((data.reports / totalReports) * 100).toFixed(1)
+
+        return (
+            <div
+                className="custom-tooltip"
+                style={{
+                    backgroundColor: isLightTheme ? '#fff' : '#000',
+                    color: isLightTheme ? '#000' : '#fff',
+                    padding: '8px',
+                    borderRadius: '4px',
+                }}
+            >
+                <h4>{`${percentage}% ${t('ReportsModal.ofTotal')}`}</h4>
+                <p>{`${data.reports} ${t('ReportsModal.reports')}`}</p>
+            </div>
+        )
+    }
+
+    const getLineColor = (line: string): string => {
+        const cssVar = `--line-${line.toLowerCase()}`
+        return getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim()
+    }
+
     return (
         <div className={`reports-modal modal container ${className}`}>
             <section className="tabs align-child-on-line">
@@ -166,21 +218,11 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                     </button>
                 ))}
             </section>
-            {currentTab === 'stations' && (
-                <section className="list-modal">
-                    {ticketInspectorList.map((ticketInspector) => (
-                        <ReportItem
-                            key={ticketInspector.station.id + ticketInspector.timestamp}
-                            ticketInspector={ticketInspector}
-                            currentTime={currentTime}
-                        />
-                    ))}
-                </section>
-            )}
             {currentTab === 'summary' && (
                 <section className="summary">
                     <section className="lines">
                         <h2>{t('ReportsModal.top5Lines')}</h2>
+                        <p>{t('ReportsModal.past24Hours')}</p>
                         {Array.from(sortedLinesWithReports.entries())
                             .slice(0, 5)
                             .sort(([, inspectorsA], [, inspectorsB]) => {
@@ -256,6 +298,59 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                             )}
                         </div>
                     </section>
+                </section>
+            )}
+            {currentTab === 'lines' && (
+                <section className="list-modal">
+                    <h2>{t('ReportsModal.topLines')}</h2>
+                    <p>{t('ReportsModal.past24Hours')}</p>
+                    <ResponsiveContainer width="100%" height={getChartData.length * (34 + 12)}>
+                        <BarChart data={getChartData} layout="vertical">
+                            <XAxis type="number" hide />
+                            <YAxis
+                                type="category"
+                                dataKey="line"
+                                width={40}
+                                interval={0}
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{
+                                    fontSize: 16,
+                                    fontWeight: 800,
+                                    fill: isLightTheme ? '#000' : '#fff',
+                                    dx: -5,
+                                }}
+                            />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Bar
+                                dataKey="reports"
+                                barSize={34}
+                                radius={[4, 4, 4, 4]}
+                                fill="#7e5330"
+                                name="reports"
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                shape={(props: any) => {
+                                    const { x, y, width, height } = props
+                                    const line = props.payload.line
+                                    const color = getLineColor(line)
+                                    return <rect x={x} y={y} width={width} height={height} fill={color} rx={4} ry={4} />
+                                }}
+                            />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </section>
+            )}
+            {currentTab === 'stations' && (
+                <section className="list-modal">
+                    <h2>{t('ReportsModal.topStations')}</h2>
+                    <p>{t('ReportsModal.past24Hours')}</p>
+                    {ticketInspectorList.map((ticketInspector) => (
+                        <ReportItem
+                            key={ticketInspector.station.id + ticketInspector.timestamp}
+                            ticketInspector={ticketInspector}
+                            currentTime={currentTime}
+                        />
+                    ))}
                 </section>
             )}
         </div>
