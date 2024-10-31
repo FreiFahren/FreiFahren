@@ -286,13 +286,14 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                 axisLine={false}
                                 tickLine={false}
                                 tick={{
-                                    fontSize: 14,
+                                    fontSize: 16,
+                                    fontWeight: 800,
                                     fill: isDarkTheme ? '#000' : '#000000',
-                                    dx: -10,
+                                    dx: -8,
                                 }}
                             />
                             <Tooltip />
-                            <Bar dataKey="reports" barSize={34} fill="#8884d8" radius={[4, 4, 4, 4]} />
+                            <Bar dataKey="reports" barSize={34} fill="#7e5330" radius={[4, 4, 4, 4]} />
                         </BarChart>
                     </ResponsiveContainer>
                 </section>
