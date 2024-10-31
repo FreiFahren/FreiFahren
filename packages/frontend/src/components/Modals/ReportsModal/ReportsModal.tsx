@@ -200,6 +200,11 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
         )
     }
 
+    const getLineColor = (line: string): string => {
+        const cssVar = `--line-${line.toLowerCase()}`
+        return getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim()
+    }
+
     return (
         <div className={`reports-modal modal container ${className}`}>
             <section className="tabs align-child-on-line">
@@ -317,7 +322,20 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                 }}
                             />
                             <Tooltip content={<CustomTooltip />} />
-                            <Bar dataKey="reports" barSize={34} fill="#7e5330" radius={[4, 4, 4, 4]} />
+                            <Bar
+                                dataKey="reports"
+                                barSize={34}
+                                radius={[4, 4, 4, 4]}
+                                fill="#7e5330"
+                                name="reports"
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                shape={(props: any) => {
+                                    const { x, y, width, height } = props
+                                    const line = props.payload.line
+                                    const color = getLineColor(line)
+                                    return <rect x={x} y={y} width={width} height={height} fill={color} rx={4} ry={4} />
+                                }}
+                            />
                         </BarChart>
                     </ResponsiveContainer>
                 </section>
