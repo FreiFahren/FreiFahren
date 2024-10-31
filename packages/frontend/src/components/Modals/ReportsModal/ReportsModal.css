@@ -14,7 +14,7 @@
 }
 
 .reports-modal > section:first-child {
-    margin-bottom: var(--margin-m);
+    margin-bottom: var(--margin-s);
 }
 
 .reports-modal > section > button {
