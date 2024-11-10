@@ -823,7 +823,8 @@
             "longitude": 13.541356480429641
         },
         "lines": [
-            "S7"
+            "S7",
+            "M6"
         ],
         "name": "Marzahn"
     },
@@ -999,7 +1000,8 @@
             "longitude": 13.535580034261073
         },
         "lines": [
-            "S7"
+            "S7",
+            "M6"
         ],
         "name": "Poelchaustraße"
     },
@@ -3675,16 +3677,6 @@
         ],
         "name": "Tino-Schwierzina-Straße"
     },
-    "M-As": {
-        "coordinates": {
-            "latitude": 52.5566797,
-            "longitude": 13.4299757
-        },
-        "lines": [
-            "M2"
-        ],
-        "name": "Am Steinberg"
-    },
     "M-Pp": {
         "coordinates": {
             "latitude": 52.55661660102684,
@@ -4012,16 +4004,6 @@
             "M5"
         ],
         "name": "Ahrenshooper Straße"
-    },
-    "M-Rd": {
-        "coordinates": {
-            "latitude": 52.5599143,
-            "longitude": 13.5101671
-        },
-        "lines": [
-            "M5"
-        ],
-        "name": "Rüdickenstraße"
     },
     "M-Ars": {
         "coordinates": {
@@ -4744,7 +4726,7 @@
         "lines": [
             "M10"
         ],
-        "name": "Arnswalder Straße"
+        "name": "Arnswalder Platz"
     },
     "M-Kn": {
         "coordinates": {
