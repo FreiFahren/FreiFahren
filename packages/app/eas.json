@@ -14,16 +14,18 @@
       "extends": "default",
       "distribution": "internal"
     },
+    "internal": {
+      "extends": "default"
+    },
+    "alpha": {
+      "extends": "default"
+    },
     "production": {
       "extends": "default",
     }
   },
   "submit": {
-    "default": {
-      "android": {
-        "serviceAccountKeyPath": "../../../freifahren-service-gcloud-key.json",
-      }
-    },
+    "default": {},
     "internal": {
       "extends": "default",
       "android": {
