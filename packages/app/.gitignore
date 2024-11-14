@@ -5,6 +5,9 @@ node_modules/
 dist/
 web-build/
 
+# EAS
+build/
+
 # Native
 *.orig.*
 *.jks

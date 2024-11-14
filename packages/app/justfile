@@ -3,5 +3,27 @@ set positional-arguments
 
 build platform profile:
   #!/bin/bash
-  eas build --platform {{platform}} --local --profile {{profile}}
+  # eas build --platform {{platform}} --local --profile {{profile}}
+  # Exit immediately if there are uncommitted changes
+  if [[ -n "$(git status --porcelain)" ]]; then
+    echo "Error: You have uncommitted changes. Please commit or stash your changes before running this script."
+    exit 1
+  fi
 
+  # Find the highest version code from "app-release/<version code>" tags
+  version_codes=()
+  for tag in $(git tag --list 'app-release/*'); do
+    version=$(echo $tag | sed 's/app-release\///g')
+    version_codes+=($version)
+  done
+  current_version=$(($(printf '%d\n' "${version_codes[@]}" | sort -n | tail -1) + 1))
+
+  command_to_run="echo 'New version code: $current_version'"
+  $command_to_run
+
+  echo "Successfully built version $current_version"
+  # Tag the current commit with the new version code
+  # git tag "app-release/$current_version"
+
+submit platform path:
+  eas submit --platform {{platform}} --path {{path}}

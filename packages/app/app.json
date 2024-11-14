@@ -36,13 +36,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.Freifahren",
-      "buildNumber": "0.0.1",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app uses your location to show your current position on the map.",
       }
     },
     "android": {
-      "versionCode": 8,
       "adaptiveIcon": {
         "foregroundImage": "./assets/app-icon-adaptive.png",
         "backgroundColor": "#2b2b2b"
