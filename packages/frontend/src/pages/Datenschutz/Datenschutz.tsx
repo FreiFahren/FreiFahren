@@ -9,7 +9,7 @@ const Datenschutz = () => {
                 <p>
                     Diese Datenschutzerklärung informiert Sie über die Art, den Umfang und den Zweck der Verarbeitung
                     personenbezogener Daten in der mobilen Anwendung "Freifahren" (im Folgenden "App"). Die App
-                    ermöglicht es Nutzern, Standorte von Ticketkontrolleuren zu melden und diese Informationen anderen
+                    ermöglicht es Nutzern, Vorfälle im öffentlichen Nahverkehr zu melden und diese Informationen anderen
                     Nutzern zur Verfügung zu stellen. Zudem werden Meldungen durch das nicht deterministische und
                     anonymisierte Auswerten der Nachrichten der Freifahren_BE Telegram-Gruppe generiert.
                 </p>
@@ -46,7 +46,7 @@ const Datenschutz = () => {
                     </li>
                 </ul>
                 <h2>4. Erhebung und Nutzung von Daten</h2>
-                <p>Die App erhebt folgende Daten, wenn eine Meldung über Ticketkontrolleure erstellt wird:</p>
+                <p>Die App erhebt folgende Daten, wenn eine Meldung erstellt wird:</p>
                 <ul>
                     <li>Linie (optional)</li>
                     <li>Station</li>
@@ -59,7 +59,7 @@ const Datenschutz = () => {
                     Möglichkeit zu geben, sich über die aktuelle Situation in den öffentlichen Verkehrsmitteln zu
                     informieren. Des Weiteren werden die Informationen in die Freifahren_BE Telegram-Gruppe
                     weitergeleitet. Diese Datenübermittlung dient dem Austausch und der Information über
-                    Ticketkontrollen innerhalb der Community.
+                    Vorfälle innerhalb der Community.
                 </p>
 
                 <h2>5. Anonymität</h2>
@@ -135,7 +135,7 @@ const Datenschutz = () => {
                         weitere anonymisierte Parameter.
                     </li>
                     <li>Ob die Risikolinienebene betrachtet wurde.</li>
-                    <li>Ob die Liste der Ticketkontrolleure betrachtet wurde.</li>
+                    <li>Ob die Liste der Meldungen betrachtet wurde.</li>
                     <li>Welcher Marker (roter Punkt) auf der Karte angeklickt wurde.</li>
                     <li>Ob der Standort des Nutzers geteilt wurde und durch welche Methode.</li>
                     <li>Wie lange benötigt wurde, um das erste Fenster zu schließen.</li>
