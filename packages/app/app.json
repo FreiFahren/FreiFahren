@@ -42,9 +42,9 @@
       }
     },
     "android": {
-      "versionCode": 6,
+      "versionCode": 8,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/app-icon.png",
+        "foregroundImage": "./assets/app-icon-adaptive.png",
         "backgroundColor": "#2b2b2b"
       },
       "package": "com.anonymous.Freifahren",
