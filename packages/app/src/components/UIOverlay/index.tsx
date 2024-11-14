@@ -1,7 +1,6 @@
 import { Box, View } from 'native-base'
 
 import { useAppStore } from '../../app.store'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Disclaimer } from '../Disclaimer'
 import { Attribution } from './Attribution'
 import { LayerSwitcher } from './LayerSwitcher'

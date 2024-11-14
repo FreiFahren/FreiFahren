@@ -12,7 +12,7 @@ import Animated, {
 } from 'react-native-reanimated'
 
 import { Report } from '../../api'
-// import { useAppStore } from '../../app.store'
+import { useAppStore } from '../../app.store'
 import { stations } from '../../data'
 
 const styles = StyleSheet.create({
@@ -106,14 +106,12 @@ export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
 
     const showMarkers = useShowMarkersWithDelay()
 
-    /* const shouldShowReports = useAppStore((state) => state.disclaimerGood)
-    if (!shouldShowReports) {
-      return null
-    } */
+    const shouldShowReports = useAppStore((state) => state.disclaimerGood)
 
     return (
         <>
             {showMarkers &&
+                shouldShowReports &&
                 reports.map((report) => (
                     <MarkerView
                         coordinate={[
@@ -138,6 +136,7 @@ export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
                         circleStrokeColor: '#fff',
                         circleOpacity: ['get', 'opacity'],
                         circleStrokeOpacity: ['get', 'opacity'],
+                        visibility: shouldShowReports ? 'visible' : 'none',
                     }}
                 />
             </ShapeSource>
