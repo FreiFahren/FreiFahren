@@ -27,7 +27,8 @@
     ],
     "splash": {
       "resizeMode": "contain",
-      "backgroundColor": "#1c1c1e"
+      "image": "./assets/app-icon.png",
+      "backgroundColor": "#2b2b2b"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -42,6 +43,10 @@
     },
     "android": {
       "versionCode": 6,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/app-icon.png",
+        "backgroundColor": "#2b2b2b"
+      },
       "package": "com.anonymous.Freifahren",
       "permissions": [
         "ACCESS_FINE_LOCATION",
