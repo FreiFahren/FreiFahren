@@ -45,7 +45,7 @@ export const UIOverlay = () => {
                 <View pointerEvents="box-none" flexDir="row" justifyContent="space-between" alignItems="flex-end">
                     <ReportListButton />
                     <ReportButton />
-                    {/* <Disclaimer /> */}
+                    <Disclaimer />
                 </View>
             </View>
         </Box>

@@ -4,9 +4,13 @@ import { Text, View } from 'native-base'
 import { ComponentProps, forwardRef, Ref, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import Constants from 'expo-constants'
+
 import { FFButton } from '../common/FFButton'
 import { FFCarousellSelect } from '../common/FFCarousellSelect'
 import { FFScrollSheet } from '../common/FFSheet'
+import { Linking } from 'react-native'
+import { config } from '../../config'
 
 type Language = 'en' | 'de'
 
@@ -43,12 +47,25 @@ const LanguageSwitcher = () => {
 const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
     const { t } = useTranslation('settings')
 
+    const openPrivacyPolicy = () => {
+        Linking.openURL(config.PRIVACY_POLICY_URL)
+    }
+
     return (
         <FFScrollSheet ref={ref}>
             <Text fontSize="xl" color="white" bold>
                 {t('title')}
             </Text>
             <LanguageSwitcher />
+            <Text
+                style={{ textDecorationLine: 'underline', marginTop: 16, color: 'white' }}
+                onPress={openPrivacyPolicy}
+            >
+                Datenschutzerklärung
+            </Text>
+            <Text fontSize="xs" textAlign="center" color="fg" mt={12}>
+                v{Constants.expoConfig?.version ?? '0.0.133'}
+            </Text>
         </FFScrollSheet>
     )
 })

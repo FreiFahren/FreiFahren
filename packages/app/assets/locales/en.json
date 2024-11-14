@@ -31,15 +31,17 @@
   },
   "disclaimer": {
     "title": "Please confirm before proceeding",
-    "subtitle": "To ensure the integrity of our community and ethical use, we ask you to confirm two important points:",
+    "subtitle": "In order for yout to best use the app, we ask you to confirm two important points:",
     "bullet1": {
-      "title": "1. I have a valid ticket",
-      "text": "I understand that this app is meant to raise awareness and improve planning in public transport, and not to circumvent rules or regulations."
+      "title": "1. The displayed data may be inaccurate",
+      "text1": "Currently, all reports come from the community. This data also forms the basis of the risk model. We cannot guarantee the completeness or accuracy of the displayed data.",
+      "text2": "In the near future, we will also include official BVG APIs to facilitate route planning based on official and reliable data."
     },
     "bullet2": {
-      "title": "2. I am not using the app actively during my trip",
-      "text": "I am aware that active use of the app during my trip may violate the transport operator's terms of service."
+      "title": "2. Your privacy is important to us",
+      "text": "We do not save any of your personal information. For a detailed privacy policy, please consult our "
     },
+    "endText": "Now you're ready to get started. Thank you!",
     "confirm": "Confirm"
   }
 }

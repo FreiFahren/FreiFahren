@@ -4,11 +4,12 @@ import { DateTime, Duration } from 'luxon'
 import { Box, Text } from 'native-base'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { View } from 'react-native'
+import { View, Linking } from 'react-native'
 
 import { useAppStore } from '../../app.store'
 import { FFButton } from '../common/FFButton'
 import { FFScrollSheet } from '../common/FFSheet'
+import { config } from '../../config'
 
 const DISCLAIMER_INTERVAL = Duration.fromObject({ days: 7 })
 
@@ -43,6 +44,10 @@ export const Disclaimer = () => {
         sheetRef.current?.dismiss()
     }
 
+    const openPrivacyPolicy = () => {
+        Linking.openURL(config.PRIVACY_POLICY_URL)
+    }
+
     return (
         <FFScrollSheet ref={sheetRef} enablePanDownToClose={false} index={0} snapPoints={[600]}>
             <Box justifyContent="space-between" flex={1} safeAreaBottom>
@@ -57,16 +62,25 @@ export const Disclaimer = () => {
                         {t('bullet1.title')}
                     </Text>
                     <Text color="white" mt="2">
-                        {t('bullet1.text')}
+                        {t('bullet1.text1')}
                     </Text>
-                    <Text color="white" mt="8" bold>
+                    <Text color="white" mt="2">
+                        {t('bullet1.text2')}
+                    </Text>
+                    <Text color="white" mt="4" bold>
                         {t('bullet2.title')}
                     </Text>
                     <Text color="white" mt="2">
                         {t('bullet2.text')}
+                        <Text style={{ textDecorationLine: 'underline' }} onPress={openPrivacyPolicy}>
+                            Datenschutzerklärung
+                        </Text>
+                    </Text>
+                    <Text color="white" mt="4">
+                        {t('endText')}
                     </Text>
                 </View>
-                <FFButton onPress={onDismiss} bg="blue" borderColor="blue" mt={4}>
+                <FFButton onPress={onDismiss} bg="blue" borderColor="blue" mt={8}>
                     <Text fontSize="xl" bold>
                         {t('confirm')}
                     </Text>
