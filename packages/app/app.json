@@ -4,8 +4,8 @@
     "slug": "Freifahren",
     "version": "0.0.1",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/app-icon.png",
+    "userInterfaceStyle": "dark",
     "plugins": [
       [
         "expo-dev-launcher",
@@ -26,9 +26,8 @@
       ]
     ],
     "splash": {
-      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#1c1c1e"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -42,11 +41,7 @@
       }
     },
     "android": {
-      "versionCode": 4,
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
+      "versionCode": 6,
       "package": "com.anonymous.Freifahren",
       "permissions": [
         "ACCESS_FINE_LOCATION",
