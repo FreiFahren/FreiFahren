@@ -2,12 +2,6 @@ set dotenv-load
 set positional-arguments
 
 build platform profile:
-  eas build --platform {{platform}} --local --profile {{profile}}
-
-submit platform profile path:
-  eas submit --platform {{platform}} --profile {{profile}} --path {{path}}
-
-push platform profile:
   #!/bin/bash
   if [[ -n "$(git status --porcelain)" ]]; then
     echo "Error: You have uncommitted changes. Please commit or stash your changes before running this script."
@@ -30,14 +24,13 @@ push platform profile:
 
   echo "New version code: $current_version"
 
-  git tag "{{platform}}-release/$current_version"
-
   output_path="build/{{platform}}/{{profile}}-$current_version"
 
-  VERSION_CODE=$current_version eas build --platform {{platform}} --local --profile {{profile}} --output $output_path
+  VERSION_CODE=$current_version eas build --platform {{platform}} --local --profile {{profile}} --output $output_path --non-interactive
+
+  git tag "{{platform}}-release/$current_version"
 
   echo "Successfully built version $current_version"
 
-  eas submit --platform {{platform}} --profile {{profile}} --path $output_path
-
-  echo "Successfully pushed {{platform}} version $current_version with profile {{profile}}"
+submit platform profile path:
+  eas submit --platform {{platform}} --profile {{profile}} --path {{path}}
