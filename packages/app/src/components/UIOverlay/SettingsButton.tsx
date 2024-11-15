@@ -1,16 +1,16 @@
 import { Ionicons } from '@expo/vector-icons'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
+import Constants from 'expo-constants'
+import { noop } from 'lodash'
 import { Text, View } from 'native-base'
 import { ComponentProps, forwardRef, Ref, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Linking } from 'react-native'
 
-import Constants from 'expo-constants'
-
+import { config } from '../../config'
 import { FFButton } from '../common/FFButton'
 import { FFCarousellSelect } from '../common/FFCarousellSelect'
 import { FFScrollSheet } from '../common/FFSheet'
-import { Linking } from 'react-native'
-import { config } from '../../config'
 
 type Language = 'en' | 'de'
 
@@ -48,7 +48,7 @@ const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
     const { t } = useTranslation('settings')
 
     const openPrivacyPolicy = () => {
-        Linking.openURL(config.PRIVACY_POLICY_URL)
+        Linking.openURL(config.PRIVACY_POLICY_URL).catch(noop)
     }
 
     return (
