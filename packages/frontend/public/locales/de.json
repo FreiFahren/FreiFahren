@@ -87,7 +87,12 @@
         "lines": "Linien",
         "stations": "Stationen",
         "top5Lines": "Top 5 Linien",
-        "risk": "aktuelles Risiko"
+        "risk": "aktuelles Risiko",
+        "topLines": "Top Linien",
+        "topStations": "Top Stationen",
+        "past24Hours": "letzte 24 Stunden",
+        "ofTotal": "von allen Meldungen",
+        "reports": "Meldungen"
     },
     "SupportPage": {
         "title": "Support",

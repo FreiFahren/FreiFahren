@@ -29,10 +29,12 @@ const ClusteredReportItem: React.FC<ClusteredReportItemProps> = ({ inspectors })
                 <div className="title-report-item">
                     <ReportItem ticketInspector={inspectorsWithoutDirection[0]} currentTime={currentTime} />
                 </div>
-                <button
-                    className={isListExpanded ? 'expanded' : ''}
-                    onClick={() => setIsListExpanded(!isListExpanded)}
-                />
+                {inspectorsWithoutDirection.length > 1 && (
+                    <button
+                        className={isListExpanded ? 'expanded' : ''}
+                        onClick={() => setIsListExpanded(!isListExpanded)}
+                    />
+                )}
             </div>
             <div className={`clustered-report-item-list list-modal ${isListExpanded ? 'expanded' : ''}`}>
                 {isListExpanded &&

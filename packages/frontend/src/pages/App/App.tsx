@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 
 import Map from '../../components/Map/Map'
 import LayerSwitcher from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
@@ -41,7 +41,7 @@ const initialAppUIState: AppUIState = {
     isFirstOpen: true,
     isStatsPopUpOpen: false,
     currentColorTheme: currentColorTheme(),
-    isRiskLayerOpen: false,
+    isRiskLayerOpen: localStorage.getItem('layer') === 'risk',
     isListModalOpen: false,
     isLegalDisclaimerOpen: false,
 }
@@ -117,13 +117,15 @@ function App() {
 
     function changeLayer(clickedLayer: string) {
         setAppUIState({ ...appUIState, isRiskLayerOpen: clickedLayer === 'risk' })
+        localStorage.setItem('layer', clickedLayer)
     }
 
     function handleRiskGridItemClick() {
+        localStorage.setItem('layer', 'risk')
         setAppUIState((prevState) => ({
             ...prevState,
             isListModalOpen: false,
-            isRiskLayerOpen: true,
+            isRiskLayerOpen: localStorage.getItem('layer') === 'risk',
         }))
     }
 
@@ -148,6 +150,12 @@ function App() {
             setAppUIState({ ...appUIState, isFirstOpen: false, isStatsPopUpOpen: true })
         }
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+    const [mapsRotation, setMapsRotation] = useState(0)
+
+    const handleRotationChange = useCallback((bearing: number) => {
+        setMapsRotation(bearing)
+    }, [])
 
     return (
         <div className="App">
@@ -190,6 +198,7 @@ function App() {
                             formSubmitted={appUIState.formSubmitted}
                             currentColorTheme={appUIState.currentColorTheme}
                             isRiskLayerOpen={appUIState.isRiskLayerOpen}
+                            onRotationChange={handleRotationChange}
                         />
                         <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
                         {appUIState.isListModalOpen && (
@@ -206,6 +215,15 @@ function App() {
                 <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
             </StationsAndLinesProvider>
             <UtilButton onClick={toggleUtilModal} />
+            {mapsRotation !== 0 && (
+                <div className="compass-container">
+                    <div className="compass-needle" style={{ transform: `rotate(${mapsRotation}deg)` }}>
+                        <div className="arrow upper"></div>
+                        <div className="compass-circle"></div>
+                        <div className="arrow lower"></div>
+                    </div>
+                </div>
+            )}
             <ReportButton
                 onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })}
             />
