@@ -12,6 +12,7 @@ import { LocationProvider } from './contexts/LocationContext'
 
 import { I18nextProvider } from 'react-i18next'
 import i18n from './i18n'
+import Support from './pages/Support/Support'
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
@@ -30,6 +31,7 @@ root.render(
                     />
                     <Route path="/impressum" element={<Impressum />} />
                     <Route path="/datenschutz" element={<Datenschutz />} />
+                    <Route path="/support" element={<Support />} />
                 </Routes>
             </BrowserRouter>
         </I18nextProvider>
