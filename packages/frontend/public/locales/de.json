@@ -39,7 +39,7 @@
         "station": "Station",
         "direction": "Richtung",
         "description": "Beschreibung",
-        "descriptionPlaceholder": "Beschreibung der Kontrollierenden",
+        "descriptionPlaceholder": "Beschreibung",
         "privacy1": "Ich stimme der",
         "privacy2": "Datenschutzerklärung",
         "privacy3": "zu.",

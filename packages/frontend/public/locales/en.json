@@ -39,7 +39,7 @@
         "station": "Station",
         "direction": "Direction",
         "description": "Description",
-        "descriptionPlaceholder": "Describe the inspectors",
+        "descriptionPlaceholder": "Description",
         "privacy1": "I agree to the",
         "privacy2": "Privacy policy",
         "privacy3": ".",
