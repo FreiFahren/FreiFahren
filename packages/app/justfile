@@ -33,4 +33,4 @@ build platform profile:
   echo "Successfully built version $current_version"
 
 submit platform profile path:
-  eas submit --platform {{platform}} --profile {{profile}} --path {{path}}
+  eas submit --platform {{platform}} --profile {{profile}} --path {{path}} --non-interactive
