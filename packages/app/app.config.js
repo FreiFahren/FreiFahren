@@ -35,7 +35,7 @@ export default {
     ],
     ios: {
       buildNumber: process.env.VERSION_CODE,
-      supportsTablet: true,
+      supportsTablet: false,
       bundleIdentifier: 'com.anonymous.Freifahren',
       infoPlist: {
         NSLocationWhenInUseUsageDescription: 'This app uses your location to show your current position on the map.',

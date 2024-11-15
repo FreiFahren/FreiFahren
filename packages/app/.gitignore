@@ -15,6 +15,7 @@ build/
 *.p12
 *.key
 *.mobileprovision
+*.ipa
 
 # Metro
 .metro-health-check*
