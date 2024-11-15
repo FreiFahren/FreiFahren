@@ -1,15 +1,15 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { pick } from 'lodash'
+import { noop, pick } from 'lodash'
 import { DateTime, Duration } from 'luxon'
 import { Box, Text } from 'native-base'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { View, Linking } from 'react-native'
+import { Linking, View } from 'react-native'
 
 import { useAppStore } from '../../app.store'
+import { config } from '../../config'
 import { FFButton } from '../common/FFButton'
 import { FFScrollSheet } from '../common/FFSheet'
-import { config } from '../../config'
 
 const DISCLAIMER_INTERVAL = Duration.fromObject({ days: 7 })
 
@@ -45,7 +45,7 @@ export const Disclaimer = () => {
     }
 
     const openPrivacyPolicy = () => {
-        Linking.openURL(config.PRIVACY_POLICY_URL)
+        Linking.openURL(config.PRIVACY_POLICY_URL).catch(noop)
     }
 
     return (

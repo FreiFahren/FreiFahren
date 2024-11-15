@@ -58,7 +58,11 @@ const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
             </Text>
             <LanguageSwitcher />
             <Text
-                style={{ textDecorationLine: 'underline', marginTop: 16, color: 'white' }}
+                style={{
+                    textDecorationLine: 'underline',
+                    marginTop: 16,
+                    color: 'white',
+                }}
                 onPress={openPrivacyPolicy}
             >
                 Datenschutzerklärung

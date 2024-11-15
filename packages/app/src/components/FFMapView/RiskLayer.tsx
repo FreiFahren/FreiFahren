@@ -15,7 +15,9 @@ const linesWithRiskColors = (segmentColors?: { [key: string]: string }) => {
             properties: {
                 ...feature.properties,
                 color:
-                    segmentColors !== undefined ? segmentColors[feature.properties.sid] ?? defaultColor : defaultColor,
+                    segmentColors !== undefined
+                        ? (segmentColors[feature.properties.sid] ?? defaultColor)
+                        : defaultColor,
             },
         })),
     }
