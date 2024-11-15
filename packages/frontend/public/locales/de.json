@@ -88,5 +88,12 @@
         "stations": "Stationen",
         "top5Lines": "Top 5 Linien",
         "risk": "aktuelles Risiko"
+    },
+    "SupportPage": {
+        "title": "Support",
+        "mobile": "Bei Problemen oder Anregungen bezüglich der Mobile-App, melde dich bitte bei Moritz unter",
+        "web": "Falls du ein Problem mit der Website hast, kontaktiere bitte Johan unter",
+        "impressum": "Impressum",
+        "privacy": "Datenschutz"
     }
 }

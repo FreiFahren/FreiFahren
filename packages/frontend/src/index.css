@@ -292,12 +292,21 @@ span {
     padding: 25px;
 }
 
+.legal-text h2 {
+  margin-top: var(--margin-m);
+}
+
 .legal-text li {
     color: var(--color-primary);
 }
 
 .line > strong {
     color: var(--color-white);
+}
+
+.row {
+  display: flex;
+  gap: var(--margin-m);
 }
 
 .small-button {

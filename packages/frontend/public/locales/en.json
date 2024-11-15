@@ -88,5 +88,12 @@
         "stations": "Stations",
         "top5Lines": "Top 5 Lines",
         "risk": "Current Risk"
+    },
+    "SupportPage": {
+        "title": "Support",
+        "mobile": "If you have a problem or question regarding the mobile app, please contact Moritz via",
+        "web": "For inquiries regarding the website, please contact the Johan via",
+        "impressum": "Legal notice",
+        "privacy": "Privacy policy"
     }
 }
