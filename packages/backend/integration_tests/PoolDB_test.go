@@ -123,7 +123,7 @@ func TestGetLatestStationCoordinatesConcurrency(t *testing.T) {
 			}
 
 			remaining := 7
-			currentStationIds := []string{"U-PL", "SU-A", "SU-S"}
+			currentStationIds := []string{"U-PL", "SUM-A", "SU-S"}
 
 			_, err = database.GetHistoricStations(time.Now().UTC(), remaining, 24, currentStationIds)
 			if err != nil {
