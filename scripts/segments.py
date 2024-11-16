@@ -54,7 +54,7 @@ overpass_gdf = gpd.read_file("export.geojson")
 overpass_gdf = overpass_gdf[overpass_gdf["ref"].notnull()]
 
 # Read stationsList.json
-with open("stationsList.json", "r") as f:
+with open("../packages/backend/data/stationsList.json", "r") as f:
     stations_json = json.load(f)
 
 stations_data = []
@@ -161,10 +161,6 @@ for line_id in lines:
             "sid": f"{line_id}-{i+1}",
             "line": line_id,
             "line_color": line_color,
-            "from_station_id": start_station["station_id"],
-            "from_station_name": start_station["name"],
-            "to_station_id": end_station["station_id"],
-            "to_station_name": end_station["name"],
         }
 
         segments_list.append({"geometry": segment, **segment_properties})
