@@ -23,7 +23,7 @@
 }
 
 .report-button .plus span:first-child {
-    height: 5px;
+    height: 4px;
     width: 50%;
     left: 25%;
     top: 50%;
@@ -31,7 +31,7 @@
 }
 
 .report-button .plus span:last-child {
-    width: 5px;
+    width: 4px;
     height: 50%;
     top: 25%;
     left: 50%;

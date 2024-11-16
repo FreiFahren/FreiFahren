@@ -4,7 +4,7 @@
 
 .select-field {
     display: flex;
-    border: var(--border-weak);
+    border: var(--border-default);
     border-radius: var(--borderRadius-small);
     padding: var(--padding-s);
     width: 100%;

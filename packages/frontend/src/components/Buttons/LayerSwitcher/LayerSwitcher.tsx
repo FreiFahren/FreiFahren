@@ -55,7 +55,7 @@ const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ changeLayer, isRiskLayerO
                     <img
                         src={process.env.PUBLIC_URL + '/icons/risk.png'}
                         alt="Showing how the risk layer looks like"
-                        className={isRiskLayerOpen ? 'active' : ''}
+                        className={isRiskLayerOpen ? 'selected' : ''}
                         draggable={areLayerOptionsVisible}
                     />
                     <p>{t('LayerSwitcher.risk')}</p>
@@ -66,7 +66,7 @@ const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ changeLayer, isRiskLayerO
                     <img
                         src={process.env.PUBLIC_URL + '/icons/lines.png'}
                         alt="Showing how the line layer looks like"
-                        className={isRiskLayerOpen ? '' : 'active'}
+                        className={isRiskLayerOpen ? '' : 'selected'}
                         draggable={areLayerOptionsVisible}
                     />
                     <p>{t('LayerSwitcher.lines')}</p>

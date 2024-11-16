@@ -41,9 +41,5 @@
     width: 35px;
     height: 35px;
     border: 2px solid transparent;
-}
-
-.layer-options img.active {
-    border: 2px solid var(--color-primary);
     border-radius: var(--borderRadius-medium);
 }
