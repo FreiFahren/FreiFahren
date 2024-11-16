@@ -161,6 +161,8 @@ for line_id in lines:
             "sid": f"{line_id}-{i+1}",
             "line": line_id,
             "line_color": line_color,
+            "from_station_id": start_station["station_id"],
+            "to_station_id": end_station["station_id"],
         }
 
         segments_list.append({"geometry": segment, **segment_properties})
