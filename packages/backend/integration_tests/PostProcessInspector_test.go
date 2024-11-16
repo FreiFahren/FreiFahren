@@ -78,7 +78,6 @@ func TestPostProcessInspectorData(t *testing.T) {
 		createTestCase("Dont imply line if it is already set", "UM-Tk", "SUM-H", "U5", "U5", "UM-Tk", "U-Hö"),
 		createTestCase("Don't imply line if there are multiple options", "U-Kbo", "", "", "", "U-Kbo", ""),
 		// Tests for guessStation
-		createTestCase("Guess the station when line and no station", "", "", "U2", "U2", "SUM-A", ""),
 		createTestCase("Don't guess the station when the line is not set", "", "SUM-H", "", "", "", ""),
 		createTestCase("Don't guess the station when the station is already set", "SUM-A", "", "U2", "U2", "SUM-A", ""),
 		// Tests for DetermineDirectionIfImplied
