@@ -1,18 +1,18 @@
-import React, { Suspense, lazy, useCallback, useEffect, useRef } from 'react'
+import React, { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { LngLatBoundsLike, LngLatLike, MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 import MarkerContainer from './Markers/MarkerContainer'
 import LocationMarker from './Markers/Classes/LocationMarker/LocationMarker'
-import linesGeoJSON from '../../data/segments.json'
 import StationLayer from './MapLayers/StationLayer/StationLayer'
 import RiskLineLayer from './MapLayers/LineLayer/RiskLineLayer'
 import RegularLineLayer from './MapLayers/LineLayer/RegularLineLayer'
 import { convertStationsToGeoJSON } from '../../utils/mapUtils'
-import './Map.css'
 import { useRiskData } from '../../contexts/RiskDataContext'
 import { useLocation } from '../../contexts/LocationContext'
 import { useStationsAndLines } from '../../contexts/StationsAndLinesContext'
+
+import './Map.css'
 
 const Map = lazy(() => import('react-map-gl/maplibre'))
 
@@ -38,6 +38,16 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     const SouthWestBounds: LngLatLike = { lng: 12.8364646484805, lat: 52.23115511676795 }
     const NorthEastBounds: LngLatLike = { lng: 14.00044556529124, lat: 52.77063424239867 }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
+
+    const [linesGeoJSON, setLinesGeoJSON] = useState<GeoJSON.FeatureCollection<GeoJSON.LineString> | null>(null)
+
+    // fetch segments at runtime to avoid having to bundle them in the frontend
+    useEffect(() => {
+        fetch(`${process.env.PUBLIC_URL}/segments.json`)
+            .then((response) => response.json())
+            .then((data) => setLinesGeoJSON(data))
+            .catch((error) => console.error('Error loading lines GeoJSON:', error))
+    }, [])
 
     const map = useRef<MapRef>(null)
     const { allStations } = useStationsAndLines()
