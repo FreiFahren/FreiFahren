@@ -3446,66 +3446,6 @@
         ],
         "name": "Zitadelle"
     },
-    "M-SchS": {
-        "coordinates": {
-            "latitude": 52.592103,
-            "longitude": 13.4110249
-        },
-        "lines": [
-            "M1"
-        ],
-        "name": "Schillerstraße"
-    },
-    "M-WmS": {
-        "coordinates": {
-            "latitude": 52.590844,
-            "longitude": 13.4062294
-        },
-        "lines": [
-            "M1"
-        ],
-        "name": "Waldemarstraße"
-    },
-    "M-NE": {
-        "coordinates": {
-            "latitude": 52.5901574,
-            "longitude": 13.4023428
-        },
-        "lines": [
-            "M1"
-        ],
-        "name": "Nordend"
-    },
-    "M-HBS": {
-        "coordinates": {
-            "latitude": 52.5875526,
-            "longitude": 13.4017828
-        },
-        "lines": [
-            "M1"
-        ],
-        "name": "Heinrich-Böll-Straße"
-    },
-    "M-KhS": {
-        "coordinates": {
-            "latitude": 52.5840207,
-            "longitude": 13.4029654
-        },
-        "lines": [
-            "M1"
-        ],
-        "name": "Kuckhoffstraße"
-    },
-    "M-HHSW": {
-        "coordinates": {
-            "latitude": 52.5806125,
-            "longitude": 13.4020889
-        },
-        "lines": [
-            "M1"
-        ],
-        "name": "Hermann-Hesse-Straße"
-    },
     "M-GrA": {
         "coordinates": {
             "latitude": 52.579025,
