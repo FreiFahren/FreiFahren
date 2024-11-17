@@ -71,8 +71,8 @@
         "disclaimer": "Data may be inaccurate."
     },
     "Share": {
-        "title": "Check out this app",
-        "text": "See where ticket inspectors are in Berlin",
+        "title": "Check out this app.",
+        "text": "See where ticket inspectors are in Berlin!\n\nHere's a report:\nStation: {{station}}\nDirection: {{direction}}\nLine: {{line}}\n",
         "copied": "Link copied to clipboard!"
     },
     "StatsPopUp": {
