@@ -132,31 +132,33 @@ function App() {
         }
     }, [initalTrackingRef])
 
-    async function changeLayer(clickedLayer: string) {
+    async function changeLayer(clickedLayer: string, source: string = 'layer switcher') {
         const previousLayer = appUIState.isRiskLayerOpen ? 'risk' : 'line'
+
+        if (previousLayer === clickedLayer) return
 
         try {
             await sendAnalyticsEvent('Layer Switch', {
                 meta: {
                     from: previousLayer,
                     to: clickedLayer,
+                    source: source,
                 },
             })
         } catch (error) {
             console.error('Failed to send layer switch analytics event:', error)
         }
 
-        setAppUIState({ ...appUIState, isRiskLayerOpen: clickedLayer === 'risk' })
+        setAppUIState((prevState) => ({
+            ...prevState,
+            isRiskLayerOpen: clickedLayer === 'risk',
+        }))
         localStorage.setItem('layer', clickedLayer)
     }
 
     function handleRiskGridItemClick() {
-        localStorage.setItem('layer', 'risk')
-        setAppUIState((prevState) => ({
-            ...prevState,
-            isListModalOpen: false,
-            isRiskLayerOpen: localStorage.getItem('layer') === 'risk',
-        }))
+        setAppUIState((prevState) => ({ ...prevState, isListModalOpen: false }))
+        changeLayer('risk', 'reports modal')
     }
 
     const shouldShowLegalDisclaimer = (): boolean => {
