@@ -17,7 +17,7 @@
 
 :root {
     --color-blue: #0075ff;
-    --incentive-blue: #68f9ff;
+    --incentive-blue: #0168dd;
     --color-red: #ff0017f5;
     --color-gray: #636363;
     --color-box-text: #807f7f;
@@ -208,11 +208,7 @@ button {
 
 button[type='submit'] {
     background-color: var(--incentive-blue);
-}
-
-.light button[type='submit'],
-button.action {
-    color: #000;
+    color: var(--color-white);
 }
 
 button:hover {
@@ -225,6 +221,7 @@ button:hover {
 
 button.action {
     background-color: var(--incentive-blue);
+    color: var(--color-white);
 }
 
 button a {

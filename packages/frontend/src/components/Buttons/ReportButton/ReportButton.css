@@ -8,16 +8,16 @@
     right: var(--distance-from-edge-default);
     padding: var(--padding-s);
     cursor: pointer;
+    border: 2px solid var(--color-white);
     border-radius: 50%;
     overflow: hidden;
     margin-bottom: 15px;
     z-index: var(--zIndex-button);
-    border: 2px solid #000;
 }
 
 .report-button .plus span {
     position: absolute;
-    background-color: #000;
+    background-color: var(--color-white);
     border-radius: 1px;
     box-shadow: var(--boxShadow-default);
 }
