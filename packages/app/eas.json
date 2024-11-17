@@ -25,7 +25,11 @@
     }
   },
   "submit": {
-    "default": {},
+    "default": {
+      "ios": {
+        "ascAppId": "6738277309"
+      }
+    },
     "internal": {
       "extends": "default",
       "android": {
