@@ -15,7 +15,9 @@ const linesWithRiskColors = (segmentColors?: { [key: string]: string }) => {
             properties: {
                 ...feature.properties,
                 color:
-                    segmentColors !== undefined ? segmentColors[feature.properties.sid] ?? defaultColor : defaultColor,
+                    segmentColors !== undefined
+                        ? (segmentColors[feature.properties.sid] ?? defaultColor)
+                        : defaultColor,
             },
         })),
     }
@@ -26,14 +28,11 @@ type RiskLayerProps = {
 }
 
 export const RiskLayer = ({ visible }: RiskLayerProps) => {
-    const shouldShow = useAppStore((state) => state.disclaimerGood)
     const { data: riskData } = useRiskData()
 
     const riskGeoJson = useMemo(() => linesWithRiskColors(riskData?.segmentColors), [riskData])
 
-    if (!shouldShow) {
-        return null
-    }
+    const shouldShow = useAppStore((state) => state.disclaimerGood)
 
     return (
         <ShapeSource id="risk-source" shape={riskGeoJson as GeoJSON.GeoJSON}>
@@ -44,7 +43,7 @@ export const RiskLayer = ({ visible }: RiskLayerProps) => {
                     lineJoin: 'round',
                     lineCap: 'round',
                     lineColor: ['get', 'color'],
-                    lineOpacity: visible ? 1 : 0,
+                    lineOpacity: visible && shouldShow ? 1 : 0,
                 }}
             />
         </ShapeSource>

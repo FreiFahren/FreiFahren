@@ -1,9 +1,13 @@
 import { Ionicons } from '@expo/vector-icons'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
+import Constants from 'expo-constants'
+import { noop } from 'lodash'
 import { Text, View } from 'native-base'
 import { ComponentProps, forwardRef, Ref, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Linking } from 'react-native'
 
+import { config } from '../../config'
 import { FFButton } from '../common/FFButton'
 import { FFCarousellSelect } from '../common/FFCarousellSelect'
 import { FFScrollSheet } from '../common/FFSheet'
@@ -43,12 +47,29 @@ const LanguageSwitcher = () => {
 const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
     const { t } = useTranslation('settings')
 
+    const openPrivacyPolicy = () => {
+        Linking.openURL(config.PRIVACY_POLICY_URL).catch(noop)
+    }
+
     return (
         <FFScrollSheet ref={ref}>
             <Text fontSize="xl" color="white" bold>
                 {t('title')}
             </Text>
             <LanguageSwitcher />
+            <Text
+                style={{
+                    textDecorationLine: 'underline',
+                    marginTop: 16,
+                    color: 'white',
+                }}
+                onPress={openPrivacyPolicy}
+            >
+                Datenschutzerklärung
+            </Text>
+            <Text fontSize="xs" textAlign="center" color="fg" mt={12}>
+                v{Constants.expoConfig?.version ?? '0.0.133'}
+            </Text>
         </FFScrollSheet>
     )
 })

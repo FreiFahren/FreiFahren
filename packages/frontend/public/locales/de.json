@@ -39,7 +39,7 @@
         "station": "Station",
         "direction": "Richtung",
         "description": "Beschreibung",
-        "descriptionPlaceholder": "Beschreibung der Kontrollierenden",
+        "descriptionPlaceholder": "Beschreibung",
         "privacy1": "Ich stimme der",
         "privacy2": "Datenschutzerklärung",
         "privacy3": "zu.",
@@ -93,5 +93,12 @@
         "past24Hours": "letzte 24 Stunden",
         "ofTotal": "von allen Meldungen",
         "reports": "Meldungen"
+    },
+    "SupportPage": {
+        "title": "Support",
+        "mobile": "Bei Problemen oder Anregungen bezüglich der Mobile-App, melde dich bitte bei Moritz unter",
+        "web": "Falls du ein Problem mit der Website hast, kontaktiere bitte Johan unter",
+        "impressum": "Impressum",
+        "privacy": "Datenschutz"
     }
 }

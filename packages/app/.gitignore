@@ -5,6 +5,9 @@ node_modules/
 dist/
 web-build/
 
+# EAS
+build/
+
 # Native
 *.orig.*
 *.jks
@@ -12,6 +15,7 @@ web-build/
 *.p12
 *.key
 *.mobileprovision
+*.ipa
 
 # Metro
 .metro-health-check*

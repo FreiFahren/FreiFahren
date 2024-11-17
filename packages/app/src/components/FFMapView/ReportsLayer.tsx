@@ -108,13 +108,10 @@ export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
 
     const shouldShowReports = useAppStore((state) => state.disclaimerGood)
 
-    if (!shouldShowReports) {
-        return null
-    }
-
     return (
         <>
             {showMarkers &&
+                shouldShowReports &&
                 reports.map((report) => (
                     <MarkerView
                         coordinate={[
@@ -139,6 +136,7 @@ export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
                         circleStrokeColor: '#fff',
                         circleOpacity: ['get', 'opacity'],
                         circleStrokeOpacity: ['get', 'opacity'],
+                        visibility: shouldShowReports ? 'visible' : 'none',
                     }}
                 />
             </ShapeSource>
