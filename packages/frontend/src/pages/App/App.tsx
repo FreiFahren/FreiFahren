@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 
 import Map from '../../components/Map/Map'
 import LayerSwitcher from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
@@ -20,7 +20,7 @@ import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils'
 import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton'
 import { highlightElement, currentColorTheme, setColorThemeInLocalStorage } from '../../utils/uiUtils'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
-import { sendSavedEvents } from '../../utils/analytics'
+import { sendAnalyticsEvent, sendSavedEvents } from '../../utils/analytics'
 
 import './App.css'
 
@@ -115,7 +115,37 @@ function App() {
         fetchReports()
     }, [appUIState])
 
-    function changeLayer(clickedLayer: string) {
+    const initalTrackingRef = useRef(false)
+    useEffect(() => {
+        if (initalTrackingRef.current) return
+
+        const initialLayer = localStorage.getItem('layer') || 'line'
+        try {
+            sendAnalyticsEvent('Initial Layer View', {
+                meta: {
+                    layer: initialLayer,
+                },
+            })
+            initalTrackingRef.current = true
+        } catch (error) {
+            console.error('Failed to send initial layer analytics event:', error)
+        }
+    }, [initalTrackingRef])
+
+    async function changeLayer(clickedLayer: string) {
+        const previousLayer = appUIState.isRiskLayerOpen ? 'risk' : 'line'
+
+        try {
+            await sendAnalyticsEvent('Layer Switch', {
+                meta: {
+                    from: previousLayer,
+                    to: clickedLayer,
+                },
+            })
+        } catch (error) {
+            console.error('Failed to send layer switch analytics event:', error)
+        }
+
         setAppUIState({ ...appUIState, isRiskLayerOpen: clickedLayer === 'risk' })
         localStorage.setItem('layer', clickedLayer)
     }

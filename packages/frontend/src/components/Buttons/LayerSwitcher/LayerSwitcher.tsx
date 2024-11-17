@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 
 import './LayerSwitcher.css'
 import Backdrop from '../../../../src/components/Miscellaneous/Backdrop/Backdrop'
-import { sendAnalyticsEvent } from '../../../../src/utils/analytics'
 
 interface LayerSwitcherProps {
     changeLayer: (layer: string) => void
@@ -12,23 +11,14 @@ interface LayerSwitcherProps {
 
 const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ changeLayer, isRiskLayerOpen }) => {
     const { t } = useTranslation()
-
     const [areLayerOptionsVisible, setAreLayerOptionsVisible] = useState(false)
 
     const closeModalAndHighlightSelectedLayer = useCallback(
-        async (layer: string) => {
-            changeLayer(layer)
+        async (selectedLayer: string) => {
+            changeLayer(selectedLayer)
             setAreLayerOptionsVisible(false)
-
-            if (layer === 'risk' && !isRiskLayerOpen) {
-                try {
-                    await sendAnalyticsEvent('Risk Layer Opened')
-                } catch (error) {
-                    console.error('Failed to send analytics event:', error)
-                }
-            }
         },
-        [changeLayer, isRiskLayerOpen]
+        [changeLayer]
     )
 
     return (
