@@ -5,7 +5,7 @@ import { ComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Report } from '../../api'
-import { stations } from '../../data'
+import { useStations } from '../../api/queries'
 import { FFLineTag } from './FFLineTag'
 
 const formatTime = (date: Date, t: TFunction<'reportDetails'>) => {
@@ -30,14 +30,14 @@ type ReportItemProps = {
 
 export const ReportItem = ({ report, ...props }: ReportItemProps) => {
     const { t } = useTranslation('reportDetails')
-    const station = stations[report.stationId]
+    const station = useStations().data?.[report.stationId]
 
     return (
         <View {...props}>
             <Row space={2} alignItems="center">
                 <FFLineTag line={report.line} />
                 <Text color="white" bold>
-                    {station.name}
+                    {station?.name}
                 </Text>
             </Row>
             <Row space={2} mt={1}>

@@ -7,7 +7,7 @@ import { LayoutAnimation } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 
 import { useSubmitReport } from '../../api'
-import { lines, stations } from '../../data'
+import { useLines, useStations } from '../../api/queries'
 import { Theme } from '../../theme'
 import { FFButton } from '../common/FFButton'
 import { FFCarousellSelect } from '../common/FFCarousellSelect'
@@ -25,6 +25,8 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
     const { t: tCommon } = useTranslation()
     const { t: tReport } = useTranslation('makeReport')
     const { mutateAsync: submitReport, isPending } = useSubmitReport()
+    const { data: stations } = useStations()
+    const { data: lines } = useLines()
 
     const theme = useTheme() as Theme
 
@@ -53,9 +55,11 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
     useEffect(() => setSelectedStation(null), [selectedLine])
 
     const lineOptions = useMemo(
-        () => Object.keys(lines).filter((line) => line.toLowerCase().startsWith(lineType)),
-        [lineType]
+        () => Object.keys(lines ?? {}).filter((line) => line.toLowerCase().startsWith(lineType)),
+        [lineType, lines]
     )
+
+    if (lines === undefined || stations === undefined) return null
 
     const directionOptions =
         selectedLine === null ? [] : [lines[selectedLine][0], lines[selectedLine][lines[selectedLine].length - 1]]

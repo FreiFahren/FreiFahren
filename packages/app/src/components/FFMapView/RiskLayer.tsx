@@ -6,7 +6,7 @@ import { useAppStore } from '../../app.store'
 import lines from '../../data/line-segments.json'
 
 const linesWithRiskColors = (segmentColors?: { [key: string]: string }) => {
-    const defaultColor = '#13C184' // lowest risk color
+    const defaultColor = '#13C184'
 
     return {
         ...lines,

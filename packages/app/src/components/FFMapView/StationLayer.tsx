@@ -1,9 +1,13 @@
 import { CircleLayer, ShapeSource, SymbolLayer } from '@maplibre/maplibre-react-native'
 
-import { stations } from '../../data'
+import { useStations } from '../../api/queries'
 import { theme } from '../../theme'
 
-const stationsAsGeoJSON = () => {
+const useStationsAsGeoJSON = () => {
+    const { data: stations } = useStations()
+
+    if (!stations) return null
+
     return {
         type: 'FeatureCollection',
         features: Object.keys(stations).map((key) => ({
@@ -19,8 +23,6 @@ const stationsAsGeoJSON = () => {
         })),
     }
 }
-
-const stationsGeoJSON = stationsAsGeoJSON()
 
 const firstPriorityStations = [
     'Hauptbahnhof',
@@ -67,6 +69,10 @@ const secondPriorityStations = [
 ]
 
 export const StationLayer = () => {
+    const stationsGeoJSON = useStationsAsGeoJSON()
+
+    if (!stationsGeoJSON) return null
+
     return (
         <ShapeSource id="stationSource" shape={stationsGeoJSON as GeoJSON.GeoJSON}>
             <CircleLayer

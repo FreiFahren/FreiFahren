@@ -5,7 +5,7 @@ import DeviceInfo from 'react-native-device-info'
 import { z } from 'zod'
 
 import { config } from '../config'
-import { stations } from '../data'
+// import { stations } from '../data'
 
 export const reportSchema = z
     .object({
@@ -25,18 +25,6 @@ export const reportSchema = z
         ...rest,
         stationId: station.id,
     }))
-    .transform((value) => {
-        if (value.line !== null) return value
-
-        if (stations[value.stationId].lines.length === 1) {
-            return {
-                ...value,
-                line: stations[value.stationId].lines[0],
-            }
-        }
-
-        return value
-    })
 
 export type Report = z.infer<typeof reportSchema>
 
@@ -66,17 +54,6 @@ const getRecentReports = async (): Promise<Report[]> => {
 
     return getReports(oneHourAgo, now)
 }
-
-const stationSchema = z.object({
-    name: z.string(),
-    coordinates: z.object({
-        latitude: z.number(),
-        longitude: z.number(),
-    }),
-    lines: z.array(z.string()),
-})
-
-export type Station = z.infer<typeof stationSchema>
 
 type PostReport = {
     line: string
@@ -109,7 +86,38 @@ export const getRiskData = async (): Promise<RiskData> => {
     return riskSchema.parse(data)
 }
 
+export const stationSchema = z.object({
+    name: z.string(),
+    coordinates: z.object({
+        latitude: z.number(),
+        longitude: z.number(),
+    }),
+    lines: z.array(z.string()),
+})
+
+export type Station = z.infer<typeof stationSchema>
+
+export const stationsSchema = z.record(stationSchema)
+export type Stations = z.infer<typeof stationsSchema>
+
+export const getStations = async (): Promise<Record<string, Station>> => {
+    const { data } = await client.get('/stations')
+
+    return stationsSchema.parse(data)
+}
+
+export const linesSchema = z.record(z.array(z.string()))
+export type Lines = z.infer<typeof linesSchema>
+
+export const getLines = async (): Promise<Record<string, string[]>> => {
+    const { data } = await client.get('/lines')
+
+    return linesSchema.parse(data)
+}
+
 export const api = {
+    getLines,
+    getStations,
     getReports,
     getRecentReports,
     postReport,

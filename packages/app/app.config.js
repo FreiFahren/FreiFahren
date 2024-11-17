@@ -1,9 +1,5 @@
 /* eslint-disable import/no-default-export */
 
-if (process.env.VERSION_CODE === undefined || process.env.VERSION_CODE === '') {
-    throw new Error('VERSION_CODE environment variable is required')
-}
-
 export default {
     expo: {
         name: 'freifahren',
@@ -50,7 +46,7 @@ export default {
             },
         },
         android: {
-            versionCode: parseInt(process.env.VERSION_CODE, 10),
+            versionCode: parseInt(process.env.VERSION_CODE ?? '1', 10),
             adaptiveIcon: {
                 foregroundImage: './assets/app-icon-adaptive.png',
                 backgroundColor: '#2b2b2b',
