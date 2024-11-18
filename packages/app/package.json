@@ -1,18 +1,21 @@
 {
   "name": "freifahren",
   "version": "0.0.3",
-  "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "start": "expo start",
+    "start": "expo start --dev-client",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "tsc --project ./tsconfig.json --noEmit && eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier --write \"./src/**/*.{ts,tsx}\"",
-    "explainFiles": "tsc --explainFiles"
+    "explainFiles": "tsc --explainFiles",
+    "prebuild": "expo prebuild",
+    "build:android": "react-native build-android --mode=release",
+    "build:ios": "react-native build-ios --mode=release"
   },
   "dependencies": {
+    "@expo/config-plugins": "^7.9.2",
     "@expo/vector-icons": "^14.0.0",
     "@formatjs/intl-relativetimeformat": "^11.2.12",
     "@gorhom/bottom-sheet": "^4.6.1",
@@ -26,8 +29,8 @@
     "axios": "^1.7.2",
     "dotenv": "^16.4.5",
     "expo": "~50.0.20",
-    "expo-build-properties": "^0.11.1",
-    "expo-constants": "^17.0.3",
+    "expo-build-properties": "~0.11.1",
+    "expo-constants": "^15.4.6",
     "expo-dev-client": "~3.3.12",
     "expo-navigation-bar": "~2.8.1",
     "expo-status-bar": "~1.11.1",
