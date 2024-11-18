@@ -257,7 +257,15 @@
     "SU-MNI",
     "S-We"
   ],
-  "S47": ["S-Spf", "S-Os", "S-Sw", "S-Bsw", "S-KLH", "SU-Nk", "SU-HMS"],
+  "S47": [
+    "S-Spf",
+    "S-Os",
+    "S-Sw",
+    "S-Bsw",
+    "S-KLH",
+    "SU-Nk",
+    "SU-HMS"
+  ],
   "S5": [
     "S-StN",
     "S-SbS",
@@ -296,7 +304,7 @@
     "S-MeA",
     "S-RWS",
     "S-Maz",
-    "S-Pc",
+    "SM-Pc",
     "S-Spl",
     "S-FfO",
     "S-ULi",
@@ -491,7 +499,13 @@
     "U-Ot",
     "U-Kr"
   ],
-  "U4": ["U-Nm", "U-V", "U-Bpu", "U-RS", "SU-Ip"],
+  "U4": [
+    "U-Nm",
+    "U-V",
+    "U-Bpu",
+    "U-RS",
+    "SU-Ip"
+  ],
   "U5": [
     "U-Hö",
     "U-LL",
