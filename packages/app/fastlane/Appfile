@@ -1,0 +1,10 @@
+# iOS
+app_identifier(ENV["APP_BUNDLE_ID"])
+
+apple_id(ENV["APPLE_ID"]) # Apple Developer Portal username
+itc_team_id(ENV["APPSTORE_CONNECT_TEAM_ID"]) # App Store Connect Team ID
+team_id(ENV["APPLE_DEVELOPER_TEAM_ID"]) # Developer Portal Team ID
+
+# Android
+json_key_file(ENV["SERVICE_ACCOUNT_KEY_FILE"])
+package_name(ENV["APP_BUNDLE_ID"])

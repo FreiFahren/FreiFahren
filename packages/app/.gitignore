@@ -5,20 +5,22 @@ node_modules/
 dist/
 web-build/
 
-# EAS
-build/
-
 # Native
 *.orig.*
 *.jks
 *.p8
 *.p12
 *.key
+*.cer
 *.mobileprovision
+*.key.json
 *.ipa
+*.dSYM.zip
 
 # Metro
 .metro-health-check*
+metro.config.js
+index.js
 
 # debug
 npm-debug.*

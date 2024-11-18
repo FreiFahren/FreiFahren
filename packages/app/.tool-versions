@@ -1,4 +1,4 @@
 java zulu-17.50.19
 nodejs 18.14.2
 ruby 3.3.3
-cocoapods 1.15.2
+fastlane 2.225.0
