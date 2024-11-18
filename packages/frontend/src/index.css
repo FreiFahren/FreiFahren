@@ -237,6 +237,7 @@ button:has(a) {
 }
 
 span {
+    color: var(--color-primary);
     user-select: none;
 }
 

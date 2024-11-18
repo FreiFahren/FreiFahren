@@ -19,7 +19,8 @@
         "feedback-button": "Kontakt & Feedback",
         "impressum": "Impressum",
         "privacy": "Datenschutz",
-        "terms": "Nutzungsbedingungen"
+        "terms": "Nutzungsbedingungen",
+        "switchLanguage": "🇬🇧version"
     },
     "FeedbackModal": {
         "title": "Sende dein Feedback an:",
@@ -100,5 +101,121 @@
         "web": "Falls du ein Problem mit der Website hast, kontaktiere bitte Johan unter",
         "impressum": "Impressum",
         "privacy": "Datenschutz"
+    },
+    "PrivacyPolicy": {
+        "title": "Datenschutzerklärung für die App \"Freifahren\"",
+        "lastUpdate": "Letzte Aktualisierung: 14.09.2024",
+        "switchLanguage": "English version",
+        "sections": {
+            "preamble": {
+                "title": "1. Präambel",
+                "content": "Diese Datenschutzerklärung informiert Sie über die Art, den Umfang und den Zweck der Verarbeitung personenbezogener Daten in der mobilen Anwendung \"Freifahren\" (im Folgenden \"App\"). Die App ermöglicht es Nutzern, Vorfälle im öffentlichen Nahverkehr zu melden und diese Informationen anderen Nutzern zur Verfügung zu stellen. Zudem werden Meldungen durch das nicht deterministische und anonymisierte Auswerten der Nachrichten der Freifahren_BE Telegram-Gruppe generiert."
+            },
+            "responsible": {
+                "title": "2. Verantwortliche Stelle",
+                "content": "Verantwortlich für die Datenverarbeitung im Rahmen dieser App ist die Freifahren GbR, vertreten durch die Gesellschafter, erreichbar unter der E-Mail-Adresse: johan@trieloff.net."
+            },
+            "legalBasis": {
+                "title": "3. Rechtsgrundlagen der Datenverarbeitung",
+                "content": "Die Verarbeitung personenbezogener Daten in unserer App erfolgt auf Basis der folgenden Rechtsgrundlagen gemäß der Datenschutz-Grundverordnung (DSGVO):",
+                "consent": "Einwilligung (Art. 6 Abs. 1 lit. a DSGVO): Die Nutzer unserer App geben ihre ausdrückliche Einwilligung zur Verarbeitung ihrer personenbezogenen Daten für spezifische Zwecke. Diese Einwilligung kann jederzeit widerrufen werden, wobei der Widerruf die Rechtmäßigkeit der bis zum Widerruf erfolgten Verarbeitung nicht berührt.",
+                "contract": "Vertragserfüllung und vorvertragliche Maßnahmen (Art. 6 Abs. 1 lit. b DSGVO): Die Verarbeitung ist notwendig zur Erfüllung eines Vertrags, dessen Vertragspartei die betroffene Person ist, oder zur Durchführung vorvertraglicher Maßnahmen, die auf Anfrage der betroffenen Person erfolgen.",
+                "legitimateInterest": "Berechtigte Interessen (Art. 6 Abs. 1 lit. f DSGVO): Die Verarbeitung ist zur Wahrung der berechtigten Interessen des Verantwortlichen oder eines Dritten erforderlich, sofern nicht die Interessen oder Grundrechte und Grundfreiheiten der betroffenen Person überwiegen."
+            },
+            "dataUsage": {
+                "title": "4. Erhebung und Nutzung von Daten",
+                "content": "Die App erhebt folgende Daten, wenn eine Meldung erstellt wird:",
+                "dataPoints": [
+                    "Linie (optional)",
+                    "Station",
+                    "Richtung (optional)",
+                    "Uhrzeit der Meldung",
+                    "Beschreibungstext (optional)"
+                ],
+                "purpose": "Die gemeldeten Daten werden anderen Nutzern der App temporär zur Verfügung gestellt, um ihnen die Möglichkeit zu geben, sich über die aktuelle Situation in den öffentlichen Verkehrsmitteln zu informieren. Des Weiteren werden die Informationen in die Freifahren_BE Telegram-Gruppe weitergeleitet. Diese Datenübermittlung dient dem Austausch und der Information über Vorfälle innerhalb der Community."
+            },
+            "anonymity": {
+                "title": "5. Anonymität",
+                "content": "Es werden keine personenbezogenen Daten der Nutzer gespeichert. Die Meldungen sind anonym, und es können keine Rückschlüsse auf einzelne Personen gezogen werden."
+            },
+            "storageAndAccess": {
+                "title": "6. Speicherung und Zugriff",
+                "content": "Die erhobenen Daten werden auf unseren eigenen Servern gespeichert, die bei der Hetzner Online GmbH in Deutschland gehostet sind. Die Speicherdauer der Daten ist unbefristet. Auch die Dauer, die der Nutzer für das Melden benötigt hat, wird auf diesen Servern gespeichert. Der Zugriff auf die Daten ist streng begrenzt auf die Gesellschafter der Freifahren GbR."
+            },
+            "userRights": {
+                "title": "7. Rechte der Nutzer",
+                "content": "Nutzer haben das Recht, Auskunft über die sie betreffenden personenbezogenen Daten zu erhalten, sowie die Berichtigung oder Löschung dieser Daten zu verlangen. Anfragen hierzu können über das Kontaktformular der App oder direkt per E-Mail an johan@trieloff.net gestellt werden."
+            },
+            "consent": {
+                "title": "8. Zustimmung zur Datenschutzerklärung",
+                "content": "Nutzer müssen dieser Datenschutzerklärung zustimmen, bevor sie eine Meldung in der App erstellen können. Diese Zustimmung ist Voraussetzung für die Nutzung der App."
+            },
+            "dataProtectionOfficer": {
+                "title": "9. Datenschutzbeauftragter",
+                "content": "Für Fragen zum Datenschutz steht Ihnen unser Datenschutzbeauftragter Johan Trieloff (johan@trieloff.net) zur Verfügung."
+            },
+            "policyChanges": {
+                "title": "10. Änderungen an der Datenschutzerklärung",
+                "content": "Wir behalten uns vor, diese Datenschutzerklärung zu ändern, um sie an geänderte Rechtslagen oder Änderungen der App sowie der Datenverarbeitung anzupassen. Nutzer werden gebeten, sich regelmäßig über den Inhalt der Datenschutzerklärung zu informieren."
+            },
+            "telegramMessages": {
+                "title": "11. Verarbeitung von Telegram-Nachrichten",
+                "content": "Durch den Freifahren Telegram Bot werden Nachrichten aus der Freifahren_BE-Gruppe mit Zustimmung der Administratoren ausgewertet. Die Nachrichten werden nicht gespeichert und nur für die Echtzeit-Auswertung verwendet. Es werden lediglich die nicht deterministisch extrahierten Informationen (Richtung, Linie und Station) aus den Nachrichten gespeichert. Die Uhrzeit wird abgerundet, um die Anonymität zu gewährleisten."
+            },
+            "analytics": {
+                "title": "12. Einsatz von Analysetools",
+                "content": "Wir verwenden in unserer App die Analyse-Software Pirsch Analytics, um allgemeine Nutzungsinformationen wie Seitenaufrufe und Sitzungsdaten zu erfassen. Bei Pirsch Analytics handelt es sich um eine cookiefreie Webanalysesoftware, die nach dem Grundsatz \"Privacy by Design\" entwickelt wurde...",
+                "dataPoints": [
+                    "Anzahl der abgegebenen Meldungen und die benötigte Zeit für die Abgabe einer Meldung sowie weitere anonymisierte Parameter.",
+                    "Ob die Risikolinienebene betrachtet wurde.",
+                    "Ob die Liste der Meldungen betrachtet wurde.",
+                    "Welcher Marker (roter Punkt) auf der Karte angeklickt wurde.",
+                    "Ob der Standort des Nutzers geteilt wurde und durch welche Methode.",
+                    "Wie lange benötigt wurde, um das erste Fenster zu schließen.",
+                    "Wie das Meldeformular genutzt wurde."
+                ],
+                "usage": "Diese Daten sind nicht personenbezogen; es werden keine Informationen gesammelt, die eine Identifizierung der Nutzer ermöglichen..."
+            },
+            "severabilityClause": {
+                "title": "13. Salvatorische Klausel",
+                "content": "Sollten einzelne Bestimmungen dieser Datenschutzerklärung ganz oder teilweise unwirksam oder undurchführbar sein oder nachträglich unwirksam oder undurchführbar werden, so wird dadurch die Gültigkeit der übrigen Bestimmungen nicht berührt..."
+            }
+        }
+    },
+    "Impressum": {
+        "title": "Impressum",
+        "switchLanguage": "English version",
+        "sections": {
+            "provider": {
+                "title": "Anbieter:",
+                "content": "Freifahren GbR"
+            },
+            "representatives": {
+                "title": "Vertreten durch die Gesellschafter:",
+                "content": ["David Brandes", "Johan Trieloff"]
+            },
+            "contact": {
+                "title": "Kontakt:",
+                "address": "Adresse: Oberhofer Platz 7, 12009 Berlin",
+                "emailLabel": "E-Mail:",
+                "email": "johan@trieloff.net"
+            },
+            "responsible": {
+                "title": "Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:",
+                "content": ["David Brandes", "Johan Trieloff"]
+            },
+            "disclaimer": {
+                "title": "Haftungsausschluss:",
+                "content": "Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen."
+            },
+            "copyright": {
+                "title": "Urheberrecht:",
+                "content": "Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet."
+            },
+            "privacy": {
+                "title": "Datenschutz:",
+                "content": "Die Nutzung unserer Webseite ist in der Regel ohne Angabe personenbezogener Daten möglich. Für weitere Informationen sehen sie unsere Datenschutzerklärung."
+            }
+        }
     }
 }
