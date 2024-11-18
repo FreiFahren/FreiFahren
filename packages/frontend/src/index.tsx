@@ -5,7 +5,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import App from './pages/App/App'
 import Impressum from './pages/Impressum/Impressum'
-import Datenschutz from './pages/Datenschutz/Datenschutz'
 import reportWebVitals from './reportWebVitals'
 
 import { LocationProvider } from './contexts/LocationContext'
@@ -13,6 +12,7 @@ import { LocationProvider } from './contexts/LocationContext'
 import { I18nextProvider } from 'react-i18next'
 import i18n from './i18n'
 import Support from './pages/Support/Support'
+import PrivacyPolicy from './pages/PrivacyPolicy/PrivacyPolicy'
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
@@ -30,7 +30,7 @@ root.render(
                         }
                     />
                     <Route path="/impressum" element={<Impressum />} />
-                    <Route path="/datenschutz" element={<Datenschutz />} />
+                    <Route path="/datenschutz" element={<PrivacyPolicy />} />
                     <Route path="/support" element={<Support />} />
                 </Routes>
             </BrowserRouter>
