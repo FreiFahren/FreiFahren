@@ -19,8 +19,7 @@
         "feedback-button": "Kontakt & Feedback",
         "impressum": "Impressum",
         "privacy": "Datenschutz",
-        "terms": "Nutzungsbedingungen",
-        "switchLanguage": "🇬🇧version"
+        "terms": "Nutzungsbedingungen"
     },
     "FeedbackModal": {
         "title": "Sende dein Feedback an:",
