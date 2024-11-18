@@ -103,6 +103,7 @@
     --line-u7: #528dba;
     --line-u8: #224f86;
     --line-u9: #f3791d;
+    --line-tram: #be1414;
 }
 
 :root.light {
@@ -237,6 +238,7 @@ button:has(a) {
 }
 
 span {
+    color: var(--color-primary);
     user-select: none;
 }
 
@@ -567,6 +569,18 @@ button .plus {
 
 .U9 {
     background-color: var(--line-u9);
+}
+
+.M1,
+.M2,
+.M4,
+.M5,
+.M6,
+.M8,
+.M10,
+.M13,
+.M17 {
+    background-color: var(--line-tram);
 }
 
 .elapsed-time {

@@ -1,5 +1,4 @@
 /* eslint-disable import/no-default-export */
-
 export default {
     expo: {
         name: 'freifahren',
@@ -34,7 +33,6 @@ export default {
         },
         assetBundlePatterns: ['**/*'],
         ios: {
-            buildNumber: process.env.VERSION_CODE,
             supportsTablet: false,
             bundleIdentifier: 'com.anonymous.Freifahren',
             usesNonExemptEncryption: false,
@@ -46,7 +44,6 @@ export default {
             },
         },
         android: {
-            versionCode: parseInt(process.env.VERSION_CODE ?? '1', 10),
             adaptiveIcon: {
                 foregroundImage: './assets/app-icon-adaptive.png',
                 backgroundColor: '#2b2b2b',

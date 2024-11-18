@@ -13,34 +13,34 @@ func TestGetStationDistance(t *testing.T) {
 	e := server.SetupServer()
 
 	tests := []struct {
-		name           string
-		userStation    string
-		inspectorStation    string
-		expectedStatus int
+		name             string
+		userStation      string
+		inspectorStation string
+		expectedStatus   int
 		expectedDistance string
 		expectedError    string
 	}{
 		{
-			name:           "Regular Case",
-			userStation:      "SU-A",
+			name:             "Regular Case",
+			userStation:      "SUM-A",
 			inspectorStation: "S-LiO",
-			expectedStatus: http.StatusOK,
+			expectedStatus:   http.StatusOK,
 			expectedDistance: "11",
 			expectedError:    "",
 		},
 		{
-			name: "Station to itself",
-			userStation: "SU-A",
-			inspectorStation: "SU-A",
-			expectedStatus: http.StatusOK,
+			name:             "Station to itself",
+			userStation:      "SUM-A",
+			inspectorStation: "SUM-A",
+			expectedStatus:   http.StatusOK,
 			expectedDistance: "0",
 			expectedError:    "",
-		},		
+		},
 		{
-			name: "Invalid Station ID",
-			userStation: "INVALID",
+			name:             "Invalid Station ID",
+			userStation:      "INVALID",
 			inspectorStation: "INVALIDs",
-			expectedStatus: http.StatusBadRequest,
+			expectedStatus:   http.StatusBadRequest,
 			expectedDistance: "",
 			expectedError:    "Invalid inspector station ID",
 		},

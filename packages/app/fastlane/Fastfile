@@ -1,0 +1,72 @@
+default_platform(:ios)
+
+fastlane_require 'dotenv'
+before_all do
+  Dotenv.load('.env')
+end
+
+platform :ios do
+  lane :beta do
+    match(type: "appstore")
+
+    build_number = sh("./get-next-build-number.sh ios").strip
+
+    increment_build_number(
+      xcodeproj: "./ios/freifahren.xcodeproj",
+      build_number: build_number
+    )
+
+    cocoapods(
+        clean_install: true,
+        podfile: "ios/Podfile"
+    )
+
+    gym(
+      workspace: "./ios/freifahren.xcworkspace",
+      export_method: "app-store",
+      configuration: "Release",
+      clean: true
+    )
+
+    sh("git tag ios-release/#{build_number}")
+
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      api_key_path: ENV["APPSTORE_CONNECT_KEY_FILE"]
+    )
+  end
+end
+
+platform :android do
+  lane :beta do
+    build_number=sh("./get-next-build-number.sh android").strip.to_i
+
+    sh("npm run prebuild")
+
+    increment_version_code(
+      version_code: build_number.to_i,
+      gradle_file_path: "android/app/build.gradle"
+    )
+
+    gradle(
+      task: "bundle",
+      project_dir: "android",
+      build_type: "Release",
+      print_command: false,
+      properties: {
+        "android.injected.signing.store.file" => ENV["KEYSTORE_FILE"],
+        "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["KEY_ALIAS"],
+        "android.injected.signing.key.password" => ENV["KEY_PASSWORD"],
+      }
+    )
+
+    upload_to_play_store(
+      track: 'internal',
+      aab: './android/app/build/outputs/bundle/release/app-release.aab',
+      json_key: ENV["SERVICE_ACCOUNT_KEY_FILE"],
+    )
+
+    sh("git tag android-release/#{build_number}")
+  end
+end
