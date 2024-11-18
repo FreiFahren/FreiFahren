@@ -45,7 +45,7 @@ COPY Rstats/segments/segments_v5.RDS /home/docker/Rstats/segments/
 COPY requirements.txt .
 COPY app.py .
 
-RUN echo '[{"timestamp": "2024-06-30T15:27:00Z","station_id": "SU-A","line": "U8"},{"timestamp": "2024-06-30T15:38:00Z","station_id": "SU-A","line": "U8"},{"timestamp": "2024-06-30T15:28:00Z","station_id": "SU-A","line": "U8"},{"timestamp": "2024-06-30T15:30:00Z","station_id": "SU-A","line": "U8"},{"timestamp": "2024-06-30T15:35:00Z","station_id": "SU-A","line": "U8"}]' > Rstats/ticket_data.json
+RUN echo '[{"timestamp": "2024-06-30T15:27:00Z","station_id": "SUM-A","line": "U8"},{"timestamp": "2024-06-30T15:38:00Z","station_id": "SUM-A","line": "U8"},{"timestamp": "2024-06-30T15:28:00Z","station_id": "SUM-A","line": "U8"},{"timestamp": "2024-06-30T15:30:00Z","station_id": "SUM-A","line": "U8"},{"timestamp": "2024-06-30T15:35:00Z","station_id": "SUM-A","line": "U8"}]' > Rstats/ticket_data.json
 
 RUN pip install --no-cache-dir -r requirements.txt
 

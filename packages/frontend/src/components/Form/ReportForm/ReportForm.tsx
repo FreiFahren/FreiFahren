@@ -334,6 +334,9 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                                 <span className="line S2">
                                     <strong>S</strong>
                                 </span>
+                                <span className="line M1">
+                                    <strong>M</strong>
+                                </span>
                             </SelectField>
                         </section>
                         <section>

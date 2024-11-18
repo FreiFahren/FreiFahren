@@ -45,26 +45,23 @@ def extract_ticket_inspector_info(unformatted_text):
     else:
         return None
 
+
 def process_new_message(timestamp, message_text):
-    trams = ["m1", "m2", "m4", "m5", "m6", "m8", "m10", "m13", "m17"]
     # Initial guards to avoid unnecessary processing
-    if "?" in message_text or check_for_spam(message_text) or any(tram in message_text.lower() for tram in trams):
+    if "?" in message_text or check_for_spam(message_text):
         logger.info("Message is not getting processed")
         return None
-    
+
     info = extract_ticket_inspector_info(message_text)
     logger.info("Found information in the message: %s", info)
 
-    if isinstance(info, dict) and any(info.get(key) for key in ["line", "station", "direction"]):
+    if isinstance(info, dict) and any(
+        info.get(key) for key in ["line", "station", "direction"]
+    ):
         # Retrieve Ids from backend
         station_id = fetch_id(info.get("station"), "station")
         direction_id = fetch_id(info.get("direction"), "direction")
 
-        insert_ticket_info(
-            timestamp,
-            info.get("line"),
-            station_id,
-            direction_id
-        )
+        insert_ticket_info(timestamp, info.get("line"), station_id, direction_id)
     else:
         logger.info("No valid information found in the message.")

@@ -14,24 +14,24 @@ import (
 
 // TestCase represents a single test case for PostProcessInspectorData
 type TestCase struct {
-	name           string
-	stationId      string
-	directionId    string
-	line           string
-	expectedLine   string
-	expectedStation string
+	name              string
+	stationId         string
+	directionId       string
+	line              string
+	expectedLine      string
+	expectedStation   string
 	expectedDirection string
 }
 
 // createTestCase is a factory function for creating test cases
 func createTestCase(name, stationId, directionId, line, expectedLine, expectedStation, expectedDirection string) TestCase {
 	return TestCase{
-		name:           name,
-		stationId:      stationId,
-		directionId:    directionId,
-		line:           line,
-		expectedLine:   expectedLine,
-		expectedStation: expectedStation,
+		name:              name,
+		stationId:         stationId,
+		directionId:       directionId,
+		line:              line,
+		expectedLine:      expectedLine,
+		expectedStation:   expectedStation,
 		expectedDirection: expectedDirection,
 	}
 }
@@ -72,26 +72,25 @@ func TestPostProcessInspectorData(t *testing.T) {
 	testCases := []TestCase{
 		// Tests for AssignLineIfSingleOption
 		createTestCase("Imply line from direction", "", "U-U", "", "U1", "U-Kbo", "U-U"),
-		createTestCase("Imply line from station", "U-Tk", "", "", "U5", "U-Tk", ""),
-		createTestCase("Imply line from station and direction", "U-Tk", "SU-H", "", "U5", "U-Tk", "U-Hö"),
+		createTestCase("Imply line from station", "U-FN", "", "", "U8", "U-FN", ""),
+		createTestCase("Imply line from station and direction", "U-FN", "SU-WIU", "", "U8", "U-FN", "SU-WIU"),
 		createTestCase("Don't imply line if station and direction are missing", "", "", "", "", "", ""),
-		createTestCase("Dont imply line if it is already set", "U-Tk", "SU-H", "U5", "U5", "U-Tk", "U-Hö"),
+		createTestCase("Dont imply line if it is already set", "UM-Tk", "SUM-H", "U5", "U5", "UM-Tk", "U-Hö"),
 		createTestCase("Don't imply line if there are multiple options", "U-Kbo", "", "", "", "U-Kbo", ""),
 		// Tests for guessStation
-		createTestCase("Guess the station when line and no station", "", "", "U2", "U2", "SU-A", ""),
-		createTestCase("Don't guess the station when the line is not set", "", "SU-H", "", "", "", ""),
-		createTestCase("Don't guess the station when the station is already set", "SU-A", "", "U2", "U2", "SU-A", ""),
+		createTestCase("Don't guess the station when the line is not set", "", "SUM-H", "", "", "", ""),
+		createTestCase("Don't guess the station when the station is already set", "SUM-A", "", "U2", "U2", "SUM-A", ""),
 		// Tests for DetermineDirectionIfImplied
 		createTestCase("Imply direction and Line from station", "U-Mf", "", "", "U6", "U-Mf", "U-Sch"),
-		createTestCase("Imply direction from station and line", "SU-PA", "", "U2", "U2", "SU-PA", "U-Rl"),
-		createTestCase("Imply direction just from station", "U-Kr", "", "", "U3", "U-Kr", "SU-WA"),
+		createTestCase("Imply direction from station and line", "SUM-PA", "", "U2", "U2", "SUM-PA", "U-Rl"),
+		createTestCase("Imply direction just from station", "U-Kr", "", "", "U3", "U-Kr", "SUM-WA"),
 		// Test if station is not on the line
 		createTestCase("Remove line if station is not on the line", "U-Kbo", "", "U2", "", "U-Kbo", ""),
-		createTestCase("Remove line if not on station and reset if possible", "U-Kr", "", "U2", "U3", "U-Kr", "SU-WA"),
+		createTestCase("Remove line if not on station and reset if possible", "U-Kr", "", "U2", "U3", "U-Kr", "SUM-WA"),
 		// Tests for correctDirection
-		createTestCase("Set the last station as direction", "SU-A", "S-Okz", "S7", "S7", "SU-A", "S-Ah"),
-		createTestCase("Set first station as direction", "S-Okz", "SU-A", "S7", "S7", "S-Okz", "S-PH"),
-		createTestCase("Cross test with guessing station", "", "U-NA", "U6", "U6", "SU-Ts", "U-Sch"),
+		createTestCase("Set the last station as direction", "SUM-A", "S-Okz", "S7", "S7", "SUM-A", "SM-Ah"),
+		createTestCase("Set first station as direction", "S-Okz", "SUM-A", "S7", "S7", "S-Okz", "S-PH"),
+		createTestCase("Cross test with guessing station", "", "UM-NA", "U6", "U6", "SU-Ts", "U-Sch"),
 	}
 
 	// Run test cases
