@@ -40,7 +40,7 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
 
     useImperativeHandle(ref, () => ({
         open: () => {
-            track({ name: 'report-sheet-opened' })
+            track({ name: 'Report Sheet Opened' })
             sheetRef.current?.present()
             openedAt.current = Date.now()
         },
@@ -89,7 +89,7 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
     const onSubmit = async () => {
         if (!isValid) return
 
-        track({ name: 'report-submitted', timeTaken: Date.now() - openedAt.current! })
+        track({ name: 'Report Submitted', timeTaken: Date.now() - openedAt.current! })
 
         await submitReport({
             line: selectedLine,

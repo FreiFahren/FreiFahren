@@ -19,7 +19,7 @@ export const ReportListButton = (props: ReportListButtonProps) => {
     const theme = useTheme() as Theme
 
     const handleOpen = () => {
-        track({ name: 'reports-viewed' })
+        track({ name: 'Reports Viewed' })
         sheetRef.current?.present()
     }
 

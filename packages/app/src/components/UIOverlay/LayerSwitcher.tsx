@@ -18,7 +18,7 @@ export const LayerSwitcher = (props: ComponentProps<typeof Row>) => {
     const { layer: currentLayer, update } = useAppStore()
 
     const handleSelect = (layer: 'risk' | 'lines') => {
-        track({ name: 'layer-selected', layer })
+        track({ name: 'Layer Selected', layer })
 
         update({ layer })
         setIsOpen(false)

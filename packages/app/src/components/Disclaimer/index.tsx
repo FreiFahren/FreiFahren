@@ -35,7 +35,7 @@ export const Disclaimer = () => {
                 return
             }
         }
-        track({ name: 'disclaimer-viewed' })
+        track({ name: 'Disclaimer Viewed' })
     }, [dismissedDisclaimerAt, update])
 
     if (disclaimerGood) {
@@ -43,13 +43,13 @@ export const Disclaimer = () => {
     }
 
     const onDismiss = () => {
-        track({ name: 'disclaimer-dismissed' })
+        track({ name: 'Disclaimer Dismissed' })
         update({ dismissedDisclaimerAt: DateTime.now().toISO() })
         sheetRef.current?.dismiss()
     }
 
     const openPrivacyPolicy = () => {
-        track({ name: 'privacy-policy-viewed', from: 'disclaimer' })
+        track({ name: 'Privacy Policy Viewed', from: 'disclaimer' })
         Linking.openURL(config.PRIVACY_POLICY_URL).catch(noop)
     }
 

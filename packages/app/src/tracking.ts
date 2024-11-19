@@ -5,17 +5,17 @@ import DeviceInfo from 'react-native-device-info'
 import { config } from './config'
 
 type Event =
-    | { name: 'app-opened' }
-    | { name: 'reports-viewed' }
-    | { name: 'report-tapped'; station: string }
-    | { name: 'layer-selected'; layer: 'risk' | 'lines' }
-    | { name: 'report-sheet-opened' }
-    | { name: 'report-submitted'; timeTaken: number }
-    | { name: 'language-selected'; language: string }
-    | { name: 'privacy-policy-viewed'; from: string }
-    | { name: 'settings-opened' }
-    | { name: 'disclaimer-viewed' }
-    | { name: 'disclaimer-dismissed' }
+    | { name: 'App Opened' }
+    | { name: 'Reports Viewed' }
+    | { name: 'Report Tapped'; station: string }
+    | { name: 'Layer Selected'; layer: 'risk' | 'lines' }
+    | { name: 'Report Sheet Opened' }
+    | { name: 'Report Submitted'; timeTaken: number }
+    | { name: 'Language Switched'; language: string }
+    | { name: 'Privacy Policy Viewed'; from: string }
+    | { name: 'Settings Opened' }
+    | { name: 'Disclaimer Viewed' }
+    | { name: 'Disclaimer Dismissed' }
 
 let client: AxiosInstance | null = null
 

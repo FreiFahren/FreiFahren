@@ -43,7 +43,7 @@ export const FFMapView = () => {
     const { layer, update: updateAppState } = useAppStore()
 
     const onPressReport = (report: Report) => {
-        track({ name: 'report-tapped', station: report.stationId })
+        track({ name: 'Report Tapped', station: report.stationId })
         updateAppState({ reportToShow: report })
     }
 

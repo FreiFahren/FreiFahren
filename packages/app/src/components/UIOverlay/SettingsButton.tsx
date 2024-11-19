@@ -24,7 +24,7 @@ const LanguageSwitcher = () => {
     } as const
 
     const handleSelect = (item: Language) => {
-        track({ name: 'language-selected', language: item })
+        track({ name: 'Language Switched', language: item })
         // eslint-disable-next-line no-console
         i18n.changeLanguage(item).catch(console.error)
     }
@@ -55,7 +55,7 @@ const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
     const { t } = useTranslation('settings')
 
     const openPrivacyPolicy = () => {
-        track({ name: 'privacy-policy-viewed', from: 'settings' })
+        track({ name: 'Privacy Policy Viewed', from: 'settings' })
         Linking.openURL(config.PRIVACY_POLICY_URL).catch(noop)
     }
 
@@ -86,7 +86,7 @@ export const SettingsButton = (props: ComponentProps<typeof FFButton>) => {
     const sheetRef = useRef<BottomSheetModalMethods>(null)
 
     const handleOpen = () => {
-        track({ name: 'settings-opened' })
+        track({ name: 'Settings Opened' })
         sheetRef.current?.present()
     }
 

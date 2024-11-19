@@ -7,7 +7,7 @@ import { track } from './tracking'
 
 export const Main = () => {
     useEffect(() => {
-        track({ name: 'app-opened' })
+        track({ name: 'App Opened' })
     }, [])
 
     return (
