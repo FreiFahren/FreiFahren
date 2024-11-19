@@ -1,28 +1,11 @@
-import { pick } from 'lodash'
-import { Pirsch } from 'pirsch-sdk/web'
-import { Dimensions } from 'react-native'
+import axios, { AxiosInstance } from 'axios'
+import { Dimensions, Platform } from 'react-native'
+import DeviceInfo from 'react-native-device-info'
 
 import { config } from './config'
 
-// Polyfill to make the web SDK work
-
-// @ts-expect-error
-globalThis.location = {
-    href: 'https://mobile.freifahren.org/',
-}
-// @ts-expect-error
-globalThis.document = {
-    title: 'Freifahren',
-    referrer: '',
-}
-// @ts-expect-error
-globalThis.screen = pick(Dimensions.get('window'), 'width', 'height')
-
-export const client = new Pirsch({
-    identificationCode: config.PIRSCH_IDENTIFICATION_CODE,
-})
-
 type Event =
+    | { name: 'app-opened' }
     | { name: 'reports-viewed' }
     | { name: 'report-tapped'; station: string }
     | { name: 'layer-selected'; layer: 'risk' | 'lines' }
@@ -34,11 +17,50 @@ type Event =
     | { name: 'disclaimer-viewed' }
     | { name: 'disclaimer-dismissed' }
 
+let client: AxiosInstance | null = null
+
+const createClient = async () => {
+    const deviceName = await DeviceInfo.getDeviceName()
+    const appVersion = DeviceInfo.getVersion()
+    const buildNumber = DeviceInfo.getBuildNumber()
+
+    const platform = Platform.OS === 'ios' ? 'iOS' : 'Android'
+
+    const userAgent = `Freifahren/${appVersion} (${platform}; ${Platform.Version}; ${deviceName}) BuildNumber/${buildNumber}`
+
+    return axios.create({
+        baseURL: config.PIRSCH_BASE_URL,
+        headers: {
+            'User-Agent': userAgent,
+        },
+    })
+}
+
 export const track = ({ name, ...eventData }: Event) => {
-    if (process.env.NODE_ENV === 'development') {
+    ;(async () => {
+        if (client === null) {
+            client = await createClient()
+        }
+
         // eslint-disable-next-line no-console
-        console.log('[Event]', name, eventData)
-    }
-    // eslint-disable-next-line no-console
-    client.event(name, undefined, eventData).catch(console.error)
+        console.log(`[Event] ${name}`, eventData)
+
+        const { width, height } = Dimensions.get('window')
+
+        await client.post('/event', {
+            identification_code: config.PIRSCH_IDENTIFICATION_CODE,
+            url: config.PIRSCH_SITE_URL,
+            title: 'Freifahren',
+            referrer: '',
+            screen_width: Math.floor(width),
+            screen_height: Math.floor(height),
+            tags: {},
+            event_name: name,
+            event_duration: 0,
+            event_meta: eventData,
+        })
+    })().catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error('Failed to track event:', error)
+    })
 }

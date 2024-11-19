@@ -1,14 +1,13 @@
-import { noop } from 'lodash'
 import { View } from 'native-base'
 import { useEffect } from 'react'
 
 import { FFMapView } from './components/FFMapView'
 import { UIOverlay } from './components/UIOverlay'
-import { client } from './tracking'
+import { track } from './tracking'
 
 export const Main = () => {
     useEffect(() => {
-        client.hit().catch(noop)
+        track({ name: 'app-opened' })
     }, [])
 
     return (
