@@ -1,6 +1,22 @@
+import { pick } from 'lodash'
 import { Pirsch } from 'pirsch-sdk/web'
+import { Dimensions } from 'react-native'
 
 import { config } from './config'
+
+// Polyfill to make the web SDK work
+
+// @ts-expect-error
+globalThis.location = {
+    href: 'https://mobile.freifahren.org/',
+}
+// @ts-expect-error
+globalThis.document = {
+    title: 'Freifahren',
+    referrer: '',
+}
+// @ts-expect-error
+globalThis.screen = pick(Dimensions.get('window'), 'width', 'height')
 
 export const client = new Pirsch({
     identificationCode: config.PIRSCH_IDENTIFICATION_CODE,
