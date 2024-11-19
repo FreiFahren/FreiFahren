@@ -1,4 +1,5 @@
 import re
+from typing import Optional, List
 import json
 from fuzzywuzzy import process
 from telegram_bots.FreiFahren_BE_NLP.NER.TransportInformationRecognizer import (
@@ -119,7 +120,7 @@ def format_text(text):
     return text
 
 
-def get_all_stations(line: str | None = None) -> list[str]:
+def get_all_stations(line: Optional[str] = None) -> List[str]:
     logger.debug("Getting all stations for the line: %s", line)
 
     all_stations = []
