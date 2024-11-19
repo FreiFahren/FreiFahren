@@ -7,20 +7,22 @@ import { useRiskData } from 'src/contexts/RiskDataContext'
 
 interface RiskLineLayerProps {
     preloadedRiskData: RiskData | null
-    linesGeoJSON: GeoJSON.FeatureCollection<GeoJSON.LineString>
+    linesGeoJSON: GeoJSON.FeatureCollection<GeoJSON.LineString> | null
     textColor: string
 }
 
 const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ linesGeoJSON, textColor, preloadedRiskData }) => {
     const { segmentRiskData, refreshRiskData } = useRiskData()
-    const [geoJSON, setGeoJSON] = useState(linesGeoJSON)
+    const [geoJSON, setGeoJSON] = useState<GeoJSON.FeatureCollection<GeoJSON.LineString> | null>(null)
 
-    // Function to apply color updates to GeoJSON
-    const applySegmentColors = (segmentColors?: { [key: string]: string }) => {
+    const applySegmentColors = (
+        data: GeoJSON.FeatureCollection<GeoJSON.LineString>,
+        segmentColors?: { [key: string]: string }
+    ) => {
         const defaultColor = '#13C184' // lowest risk color
         return {
-            ...geoJSON,
-            features: geoJSON.features.map((feature) => ({
+            ...data,
+            features: data.features.map((feature) => ({
                 ...feature,
                 properties: {
                     ...feature.properties,
@@ -32,13 +34,17 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ linesGeoJSON, textColor, 
 
     // If the segment risk data changes, update the GeoJSON
     useEffect(() => {
-        setGeoJSON(applySegmentColors(segmentRiskData?.segment_colors))
-    }, [segmentRiskData])
+        if (linesGeoJSON && segmentRiskData?.segment_colors) {
+            setGeoJSON(applySegmentColors(linesGeoJSON, segmentRiskData.segment_colors))
+        }
+    }, [segmentRiskData, linesGeoJSON])
 
     // Initialize with preloaded data
     useEffect(() => {
-        if (preloadedRiskData && preloadedRiskData.segment_colors) {
-            setGeoJSON(applySegmentColors(preloadedRiskData.segment_colors))
+        if (linesGeoJSON && preloadedRiskData?.segment_colors) {
+            setGeoJSON(applySegmentColors(linesGeoJSON, preloadedRiskData.segment_colors))
+        } else if (linesGeoJSON) {
+            setGeoJSON(applySegmentColors(linesGeoJSON))
         }
     }, [preloadedRiskData, linesGeoJSON])
 
@@ -49,6 +55,8 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ linesGeoJSON, textColor, 
         }, 30 * 1000)
         return () => clearInterval(interval)
     }, [refreshRiskData])
+
+    if (!geoJSON) return null
 
     return (
         <>
