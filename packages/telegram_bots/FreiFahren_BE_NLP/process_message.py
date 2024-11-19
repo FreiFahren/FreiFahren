@@ -156,7 +156,9 @@ def get_best_match(text, items, threshold=75):
     return None
 
 
-def find_match_in_stations(best_match: str, stations_with_synonyms: dict) -> str | None:
+def find_match_in_stations(
+    best_match: str, stations_with_synonyms: dict
+) -> Optional[str]:
     logger.debug("finding the match in stations for the best match: %s", best_match)
 
     for station, synonyms in stations_with_synonyms.items():
