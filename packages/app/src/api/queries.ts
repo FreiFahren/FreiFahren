@@ -1,7 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { api, Report, reportSchema, RiskData } from './client'
+import { api, Lines, Report, reportSchema, RiskData, Stations } from './client'
 import { CACHE_KEYS } from './queryClient'
+
+export const useLines = <T = Lines>(select?: (data: Lines) => T) =>
+    useQuery({
+        queryKey: CACHE_KEYS.lines,
+        queryFn: api.getLines,
+        staleTime: Infinity,
+        select,
+    })
+
+export const useStations = <T = Stations>(select?: (data: Stations) => T) =>
+    useQuery({
+        queryKey: CACHE_KEYS.stations,
+        queryFn: api.getStations,
+        staleTime: Infinity,
+        select,
+    })
 
 export const useReports = <T = Report[]>(select?: (data: Report[]) => T) =>
     useQuery({

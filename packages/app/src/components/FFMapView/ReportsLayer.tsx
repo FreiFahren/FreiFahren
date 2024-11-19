@@ -1,4 +1,5 @@
 import { CircleLayer, MarkerView, ShapeSource } from '@maplibre/maplibre-react-native'
+import { isNil } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { Pressable, StyleSheet } from 'react-native'
 import Animated, {
@@ -12,8 +13,8 @@ import Animated, {
 } from 'react-native-reanimated'
 
 import { Report } from '../../api'
+import { useStations } from '../../api/queries'
 import { useAppStore } from '../../app.store'
-import { stations } from '../../data'
 
 const styles = StyleSheet.create({
     pulse: {
@@ -70,8 +71,12 @@ const usePulseAnimation = () => {
     }))
 }
 
-const useReportsGeoJson = (reports: Report[]) =>
-    useMemo(() => {
+const useReportsGeoJson = (reports: Report[]) => {
+    const { data: stations } = useStations()
+
+    return useMemo(() => {
+        if (isNil(stations)) return null
+
         const now = Date.now()
 
         return {
@@ -92,7 +97,8 @@ const useReportsGeoJson = (reports: Report[]) =>
                 }
             }),
         }
-    }, [reports])
+    }, [reports, stations])
+}
 
 type ReportsLayerProps = {
     reports: Report[]
@@ -101,12 +107,12 @@ type ReportsLayerProps = {
 
 export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
     const reportsGeoJson = useReportsGeoJson(reports)
-
     const pulseAnimatedStyle = usePulseAnimation()
-
     const showMarkers = useShowMarkersWithDelay()
-
     const shouldShowReports = useAppStore((state) => state.disclaimerGood)
+    const { data: stations } = useStations()
+
+    if (isNil(stations)) return null
 
     return (
         <>

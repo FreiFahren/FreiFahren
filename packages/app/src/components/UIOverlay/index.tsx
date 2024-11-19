@@ -4,9 +4,9 @@ import { useAppStore } from '../../app.store'
 import { Disclaimer } from '../Disclaimer'
 import { Attribution } from './Attribution'
 import { LayerSwitcher } from './LayerSwitcher'
-import { ReportButton } from './ReportButton'
+import { ReportButton } from './Report/ReportButton'
 import { ReportDetailsNotification } from './ReportDetailsNotification'
-import { ReportListButton } from './ReportListButton'
+import { ReportListButton } from './ReportList/ReportListButton'
 import { SettingsButton } from './SettingsButton'
 
 export const UIOverlay = () => {

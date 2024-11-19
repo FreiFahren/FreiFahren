@@ -64,6 +64,7 @@ platform :android do
     upload_to_play_store(
       track: 'internal',
       aab: './android/app/build/outputs/bundle/release/app-release.aab',
+      skip_upload_apk: true,
       json_key: ENV["SERVICE_ACCOUNT_KEY_FILE"],
     )
 
