@@ -4,19 +4,6 @@ import DeviceInfo from 'react-native-device-info'
 
 import { config } from './config'
 
-type Event =
-    | { name: 'App Opened' }
-    | { name: 'Reports Viewed' }
-    | { name: 'Report Tapped'; station: string }
-    | { name: 'Layer Selected'; layer: 'risk' | 'lines' }
-    | { name: 'Report Sheet Opened' }
-    | { name: 'Report Submitted'; timeTaken: number }
-    | { name: 'Language Switched'; language: string }
-    | { name: 'Privacy Policy Viewed'; from: string }
-    | { name: 'Settings Opened' }
-    | { name: 'Disclaimer Viewed' }
-    | { name: 'Disclaimer Dismissed' }
-
 let client: AxiosInstance | null = null
 
 const createClient = async () => {
@@ -35,6 +22,44 @@ const createClient = async () => {
         },
     })
 }
+
+export const trackHit = () => {
+    ;(async () => {
+        if (client === null) {
+            client = await createClient()
+        }
+
+        // eslint-disable-next-line no-console
+        console.log('[Event] Hit')
+
+        const { width, height } = Dimensions.get('window')
+
+        await client.get('/hit', {
+            params: {
+                nc: Date.now(),
+                code: config.PIRSCH_IDENTIFICATION_CODE,
+                w: width,
+                h: height,
+                url: config.PIRSCH_SITE_URL,
+            },
+        })
+    })().catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error('Failed to track hit:', error)
+    })
+}
+
+type Event =
+    | { name: 'Reports Viewed' }
+    | { name: 'Report Tapped'; station: string }
+    | { name: 'Layer Selected'; layer: 'risk' | 'lines' }
+    | { name: 'Report Sheet Opened' }
+    | { name: 'Report Submitted'; timeTaken: number }
+    | { name: 'Language Switched'; language: string }
+    | { name: 'Privacy Policy Viewed'; from: string }
+    | { name: 'Settings Opened' }
+    | { name: 'Disclaimer Viewed' }
+    | { name: 'Disclaimer Dismissed' }
 
 export const track = ({ name, ...eventData }: Event) => {
     ;(async () => {
