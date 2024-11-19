@@ -5,7 +5,6 @@ import DeviceInfo from 'react-native-device-info'
 import { z } from 'zod'
 
 import { config } from '../config'
-// import { stations } from '../data'
 
 export const reportSchema = z
     .object({
