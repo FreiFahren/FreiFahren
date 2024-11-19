@@ -6,15 +6,20 @@ import { useTranslation } from 'react-i18next'
 import { LayoutAnimation } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 
-import { useSubmitReport } from '../../api'
-import { useLines, useStations } from '../../api/queries'
-import { Theme } from '../../theme'
-import { FFButton } from '../common/FFButton'
-import { FFCarousellSelect } from '../common/FFCarousellSelect'
-import { FFLineTag } from '../common/FFLineTag'
-import { FFScrollSheet } from '../common/FFSheet'
+import { useSubmitReport } from '../../../api'
+import { useLines, useStations } from '../../../api/queries'
+import { Theme } from '../../../theme'
+import { FFButton } from '../../common/FFButton'
+import { FFCarousellSelect } from '../../common/FFCarousellSelect'
+import { FFLineTag } from '../../common/FFLineTag'
+import { FFScrollSheet } from '../../common/FFSheet'
 import { SbahnIcon } from './SbahnIcon'
+import { TramIcon } from './TramIcon'
 import { UbahnIcon } from './UbahnIcon'
+
+const lineTypes = ['u' as const, 's' as const, 'm' as const]
+
+type LineType = (typeof lineTypes)[number]
 
 export type ReportSheetMethods = {
     open: () => void
@@ -37,7 +42,7 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
         close: () => sheetRef.current?.close(),
     }))
 
-    const [lineType, setLineType] = useState<'u' | 's'>('u')
+    const [lineType, setLineType] = useState<LineType>('u')
     const [selectedLine, setSelectedLine] = useState<string | null>(null)
     const [selectedDirection, setSelectedDirection] = useState<string | null>(null)
     const [selectedStation, setSelectedStation] = useState<string | null>(null)
@@ -93,11 +98,11 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
                         {tReport('title')}
                     </Text>
                     <FFCarousellSelect
-                        options={['u', 's']}
+                        options={lineTypes}
                         selectedOption={lineType}
-                        onSelect={setLineType}
+                        onSelect={(option: LineType) => setLineType(option)}
                         containerProps={{ py: 3, flex: 1 }}
-                        renderOption={(option) => (option === 'u' ? <UbahnIcon /> : <SbahnIcon />)}
+                        renderOption={(option) => ({ u: <UbahnIcon />, s: <SbahnIcon />, m: <TramIcon /> })[option]}
                     />
                     <Text fontSize="md" fontWeight="bold" color="white" mt={4} mb={2}>
                         {tCommon('line')}

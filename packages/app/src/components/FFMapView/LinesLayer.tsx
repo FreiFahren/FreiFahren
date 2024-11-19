@@ -10,7 +10,7 @@ export const LinesLayer = () => (
                 lineWidth: 3,
                 lineJoin: 'round',
                 lineCap: 'round',
-                lineColor: ['get', 'color'],
+                lineColor: ['get', 'line_color'],
             }}
         />
         <SymbolLayer

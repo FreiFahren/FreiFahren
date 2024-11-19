@@ -35,6 +35,7 @@ export const theme = extendTheme({
             S8: '#76aa3a',
             S85: '#76aa3a',
             S9: '#8e2d45',
+            tram: '#be1414',
         },
     },
 })

@@ -4,8 +4,8 @@ import { ComponentProps, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Text } from 'react-native'
 
-import { Theme } from '../../theme'
-import { FFButton } from '../common/FFButton'
+import { Theme } from '../../../theme'
+import { FFButton } from '../../common/FFButton'
 import { ReportSheet, ReportSheetMethods } from './ReportSheet'
 
 type ReportButtonProps = Omit<ComponentProps<typeof Button>, 'onPress'>
