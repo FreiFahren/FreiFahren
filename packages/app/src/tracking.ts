@@ -49,19 +49,25 @@ export const trackHit = () => {
     })
 }
 
-type Event =
-    | { name: 'Reports Viewed' }
-    | { name: 'Report Tapped'; station: string }
-    | { name: 'Layer Selected'; layer: 'risk' | 'lines' }
-    | { name: 'Report Sheet Opened' }
-    | { name: 'Report Submitted'; timeTaken: number }
-    | { name: 'Language Switched'; language: string }
-    | { name: 'Privacy Policy Viewed'; from: string }
-    | { name: 'Settings Opened' }
-    | { name: 'Disclaimer Viewed' }
-    | { name: 'Disclaimer Dismissed' }
+type BaseEvent = {
+    duration?: number
+}
 
-export const track = ({ name, ...eventData }: Event) => {
+type Event = BaseEvent &
+    (
+        | { name: 'Reports Viewed' }
+        | { name: 'Report Tapped'; station: string }
+        | { name: 'Layer Selected'; layer: 'risk' | 'lines' }
+        | { name: 'Report Sheet Opened' }
+        | { name: 'Report Submitted'; duration: number }
+        | { name: 'Language Switched'; language: string }
+        | { name: 'Privacy Policy Viewed'; from: string }
+        | { name: 'Settings Opened' }
+        | { name: 'Disclaimer Viewed' }
+        | { name: 'Disclaimer Dismissed' }
+    )
+
+export const track = ({ name, duration, ...eventData }: Event) => {
     ;(async () => {
         if (client === null) {
             client = await createClient()
@@ -81,7 +87,7 @@ export const track = ({ name, ...eventData }: Event) => {
             screen_height: Math.floor(height),
             tags: {},
             event_name: name,
-            event_duration: 0,
+            event_duration: duration ?? 0,
             event_meta: eventData,
         })
     })().catch((error) => {

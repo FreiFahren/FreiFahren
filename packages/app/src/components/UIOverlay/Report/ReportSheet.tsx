@@ -89,7 +89,7 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
     const onSubmit = async () => {
         if (!isValid) return
 
-        track({ name: 'Report Submitted', timeTaken: Date.now() - openedAt.current! })
+        track({ name: 'Report Submitted', duration: (Date.now() - openedAt.current!) / 1000 })
 
         await submitReport({
             line: selectedLine,
