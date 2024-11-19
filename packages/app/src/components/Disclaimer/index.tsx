@@ -8,6 +8,7 @@ import { Linking, View } from 'react-native'
 
 import { useAppStore } from '../../app.store'
 import { config } from '../../config'
+import { track } from '../../tracking'
 import { FFButton } from '../common/FFButton'
 import { FFScrollSheet } from '../common/FFSheet'
 
@@ -31,8 +32,10 @@ export const Disclaimer = () => {
 
             if (Math.abs(now.diff(dismissedAtDate).as('days')) <= DISCLAIMER_INTERVAL.as('days')) {
                 update({ disclaimerGood: true })
+                return
             }
         }
+        track({ name: 'disclaimer-viewed' })
     }, [dismissedDisclaimerAt, update])
 
     if (disclaimerGood) {
@@ -40,11 +43,13 @@ export const Disclaimer = () => {
     }
 
     const onDismiss = () => {
+        track({ name: 'disclaimer-dismissed' })
         update({ dismissedDisclaimerAt: DateTime.now().toISO() })
         sheetRef.current?.dismiss()
     }
 
     const openPrivacyPolicy = () => {
+        track({ name: 'privacy-policy-viewed', from: 'disclaimer' })
         Linking.openURL(config.PRIVACY_POLICY_URL).catch(noop)
     }
 
@@ -73,7 +78,7 @@ export const Disclaimer = () => {
                     <Text color="white" mt="2">
                         {t('bullet2.text')}
                         <Text style={{ textDecorationLine: 'underline' }} onPress={openPrivacyPolicy}>
-                            Datenschutzerklärung
+                            {t('bullet2.privacyPolicy')}
                         </Text>
                     </Text>
                     <Text color="white" mt="4">

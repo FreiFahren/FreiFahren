@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
 
 import { config } from '../../config'
+import { track } from '../../tracking'
 import { FFButton } from '../common/FFButton'
 import { FFCarousellSelect } from '../common/FFCarousellSelect'
 import { FFScrollSheet } from '../common/FFSheet'
@@ -21,6 +22,12 @@ const LanguageSwitcher = () => {
         de: '🇩🇪 Deutsch',
         en: '🇬🇧 English',
     } as const
+
+    const handleSelect = (item: Language) => {
+        track({ name: 'language-selected', language: item })
+        // eslint-disable-next-line no-console
+        i18n.changeLanguage(item).catch(console.error)
+    }
 
     return (
         <View>
@@ -38,7 +45,7 @@ const LanguageSwitcher = () => {
                     </View>
                 )}
                 selectedOption={i18n.language as Language}
-                onSelect={(item) => i18n.changeLanguage(item)}
+                onSelect={handleSelect}
             />
         </View>
     )
@@ -48,6 +55,7 @@ const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
     const { t } = useTranslation('settings')
 
     const openPrivacyPolicy = () => {
+        track({ name: 'privacy-policy-viewed', from: 'settings' })
         Linking.openURL(config.PRIVACY_POLICY_URL).catch(noop)
     }
 
@@ -77,10 +85,15 @@ const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
 export const SettingsButton = (props: ComponentProps<typeof FFButton>) => {
     const sheetRef = useRef<BottomSheetModalMethods>(null)
 
+    const handleOpen = () => {
+        track({ name: 'settings-opened' })
+        sheetRef.current?.present()
+    }
+
     return (
         <>
             <SettingsSheet ref={sheetRef} />
-            <FFButton onPress={() => sheetRef.current?.present()} {...props}>
+            <FFButton onPress={handleOpen} {...props}>
                 <Ionicons name="settings-sharp" size={24} color="white" />
             </FFButton>
         </>
