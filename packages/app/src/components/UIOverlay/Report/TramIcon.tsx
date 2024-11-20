@@ -4,7 +4,7 @@ import { Defs, Path, Polyline, Svg } from 'react-native-svg'
 
 export const TramIcon = (props: ComponentProps<typeof View>) => (
     <View borderRadius={5} bg="#D82020" p={1} {...props}>
-        <Svg width={36} height={36} viewBox="0 0 800 800" stroke="none" fill="#FFFFFF">
+        <Svg width={30} height={30} viewBox="0 0 800 800" stroke="none" fill="#FFFFFF">
             <Defs />
             <Polyline fill="#D82020" points="800,800 800,0 0,0 0,800" />
             <Polyline points="183.343,281.139 183.343,240.836 21.424,240.836 21.424,281.139 77.74,281.139 77.74,502.103 127.019,502.103 127.019,281.139" />

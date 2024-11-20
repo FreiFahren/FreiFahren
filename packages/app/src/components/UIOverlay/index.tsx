@@ -21,7 +21,7 @@ export const UIOverlay = () => {
             bottom={0}
             right={0}
             px={2}
-            pb={5}
+            pb={4}
             pointerEvents="box-none"
             justifyContent="space-between"
             safeArea

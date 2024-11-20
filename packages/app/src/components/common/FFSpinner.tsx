@@ -1,6 +1,6 @@
 import { View } from 'native-base'
-import React, { useEffect } from 'react'
-import { Platform, StyleSheet } from 'react-native'
+import { useEffect } from 'react'
+import { StyleSheet } from 'react-native'
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated'
 
 import { theme } from '../../theme'
@@ -24,8 +24,8 @@ interface FFSpinnerProps {
 
 export const FFSpinner = ({
     size = 10,
-    color1 = theme.colors.fg,
-    color2 = theme.colors.selected,
+    color2 = 'transparent',
+    color1 = theme.colors.bg,
     speed = 650,
 }: FFSpinnerProps) => {
     const rotation = useSharedValue(0)
@@ -44,9 +44,6 @@ export const FFSpinner = ({
     const animatedStyle = useAnimatedStyle(() => ({
         transform: [{ rotate: `${rotation.value}deg` }],
     }))
-
-    // TODO: implement spinner for android
-    if (Platform.OS === 'android') return null
 
     return (
         <View width={size} height={size}>

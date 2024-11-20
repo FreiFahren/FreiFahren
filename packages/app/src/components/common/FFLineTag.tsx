@@ -10,7 +10,7 @@ type LineTagProps = {
 
 export const FFLineTag = ({ line, textProps, ...props }: LineTagProps) => (
     <View bg={line === null ? 'gray.500' : getLineColor(line)} px={2} borderRadius={4} {...props}>
-        <Text color="white" textAlign="center" bold {...textProps}>
+        <Text color="white" textAlign="center" fontSize="md" bold {...textProps}>
             {line ?? ' ? '}
         </Text>
     </View>

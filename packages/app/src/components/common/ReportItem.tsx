@@ -42,7 +42,7 @@ export const ReportItem = ({ report, ...props }: ReportItemProps) => {
             </Row>
             <Row space={2} mt={1}>
                 <Text color="fg">
-                    {formatTime(report.timestamp, t)}
+                    {report.isHistoric ? t('historicDataLabel') : formatTime(report.timestamp, t)}
                     {`, ${t('direction')} `}
                     {isNil(report.direction?.name) ? (
                         t('unknownDirection')

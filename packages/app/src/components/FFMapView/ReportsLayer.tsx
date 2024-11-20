@@ -19,8 +19,8 @@ import { useAppStore } from '../../app.store'
 const styles = StyleSheet.create({
     pulse: {
         backgroundColor: 'red',
-        width: 20,
-        height: 20,
+        width: 25,
+        height: 25,
         borderRadius: 9999,
     },
     marker: {
@@ -92,12 +92,43 @@ const useReportsGeoJson = (reports: Report[]) => {
                     },
                     properties: {
                         id: report.stationId,
-                        opacity: 1.4 - Math.min((now - new Date(report.timestamp).getTime()) / (1000 * 60 * 60), 1),
+                        opacity: report.isHistoric
+                            ? 0.4
+                            : 1.4 - Math.min((now - new Date(report.timestamp).getTime()) / (1000 * 60 * 60), 1),
                     },
                 }
             }),
         }
     }, [reports, stations])
+}
+
+type ReportMarkerProps = {
+    onPress: () => void
+    report: Report
+    animatedStyle: ReturnType<typeof usePulseAnimation> | null
+}
+
+const ReportMarker = ({ onPress, report, animatedStyle }: ReportMarkerProps) => {
+    const { data: stations } = useStations()
+
+    if (isNil(stations)) return null
+
+    const shouldAnimate = Date.now() - report.timestamp.getTime() < 1000 * 60 * 30
+
+    return (
+        <MarkerView
+            coordinate={[
+                stations[report.stationId].coordinates.longitude,
+                stations[report.stationId].coordinates.latitude,
+            ]}
+            key={report.stationId}
+            allowOverlap
+        >
+            <Pressable style={styles.marker} onPress={onPress} hitSlop={10}>
+                {shouldAnimate && <Animated.View style={[styles.pulse, animatedStyle]} />}
+            </Pressable>
+        </MarkerView>
+    )
 }
 
 type ReportsLayerProps = {
@@ -119,24 +150,18 @@ export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
             {showMarkers &&
                 shouldShowReports &&
                 reports.map((report) => (
-                    <MarkerView
-                        coordinate={[
-                            stations[report.stationId].coordinates.longitude,
-                            stations[report.stationId].coordinates.latitude,
-                        ]}
+                    <ReportMarker
                         key={report.stationId}
-                        allowOverlap
-                    >
-                        <Pressable style={styles.marker} onPress={() => onPressReport(report)} hitSlop={10}>
-                            <Animated.View style={[styles.pulse, pulseAnimatedStyle]} />
-                        </Pressable>
-                    </MarkerView>
+                        report={report}
+                        onPress={() => onPressReport(report)}
+                        animatedStyle={pulseAnimatedStyle}
+                    />
                 ))}
             <ShapeSource id="reports-source" shape={reportsGeoJson as GeoJSON.GeoJSON}>
                 <CircleLayer
                     id="reports-layer"
                     style={{
-                        circleRadius: 6,
+                        circleRadius: 8,
                         circleColor: '#f00',
                         circleStrokeWidth: 3,
                         circleStrokeColor: '#fff',

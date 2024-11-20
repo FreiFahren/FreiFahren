@@ -18,6 +18,7 @@
     "direction": "Richtung",
     "unknownDirection": "unbekannt",
     "now": "jetzt",
+    "historicLabel": "vor mehr als 45 Minuten"
   },
   "map": {
     "layers": {

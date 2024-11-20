@@ -10,6 +10,7 @@ export const reportSchema = z
     .object({
         timestamp: z.string().transform((value) => new Date(value)),
         line: z.string().transform((value: string) => (value === '' ? null : value)),
+        isHistoric: z.boolean().default(false),
         direction: z
             .object({
                 id: z.string(),
@@ -57,12 +58,15 @@ const getRecentReports = async (): Promise<Report[]> => {
 type PostReport = {
     line: string
     stationId: string
-    directionId: string
+    directionId: string | null
     message?: string
 }
 
 const postReport = async (report: PostReport) => {
-    const { data } = await client.post('/basics/inspectors', report)
+    const { data } = await client.post('/basics/inspectors', {
+        ...report,
+        directionId: report.directionId ?? '',
+    })
 
     return data
 }
