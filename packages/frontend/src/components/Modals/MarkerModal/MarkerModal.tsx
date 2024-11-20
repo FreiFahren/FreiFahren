@@ -5,6 +5,7 @@ import { MarkerData } from 'src/utils/types'
 import { useElapsedTimeMessage, useStationDistanceMessage } from '../../../hooks/Messages'
 import { getStationDistance, fetchNumberOfReports } from '../../../utils/dbUtils'
 import { getNearestStation } from '../../../utils/mapUtils'
+import { getLineColor } from '../../../utils/uiUtils'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 import Skeleton, { useSkeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
 
@@ -137,7 +138,10 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
             <h1>{station.name}</h1>
             {(direction.name !== '' || line !== '') && (
                 <h2>
-                    <span className={`line-label ${line}`}>{line}</span> {direction.name}
+                    <span className="line-label" style={{ backgroundColor: getLineColor(line) }}>
+                        {line}
+                    </span>{' '}
+                    {direction.name}
                 </h2>
             )}
             <div>
