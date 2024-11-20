@@ -76,7 +76,7 @@ const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
                 Datenschutzerklärung
             </Text>
             <Text fontSize="xs" textAlign="center" color="fg" mt={12}>
-                v{Constants.expoConfig?.version ?? '0.0.133'}
+                v{Constants.expoConfig?.version ?? '0.0.1'}
             </Text>
         </FFScrollSheet>
     )
@@ -93,7 +93,7 @@ export const SettingsButton = (props: ComponentProps<typeof FFButton>) => {
     return (
         <>
             <SettingsSheet ref={sheetRef} />
-            <FFButton onPress={handleOpen} {...props}>
+            <FFButton px={3} py={3} onPress={handleOpen} {...props}>
                 <Ionicons name="settings-sharp" size={24} color="white" />
             </FFButton>
         </>

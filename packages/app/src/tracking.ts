@@ -32,6 +32,8 @@ export const trackHit = () => {
         // eslint-disable-next-line no-console
         console.log('[Event] Hit')
 
+        if (__DEV__) return
+
         const { width, height } = Dimensions.get('window')
 
         await client.get('/hit', {
@@ -75,6 +77,8 @@ export const track = ({ name, duration, ...eventData }: Event) => {
 
         // eslint-disable-next-line no-console
         console.log(`[Event] ${name}`, eventData)
+
+        if (__DEV__) return
 
         const { width, height } = Dimensions.get('window')
 

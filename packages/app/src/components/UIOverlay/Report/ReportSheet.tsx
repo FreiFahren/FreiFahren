@@ -14,6 +14,7 @@ import { FFButton } from '../../common/FFButton'
 import { FFCarousellSelect } from '../../common/FFCarousellSelect'
 import { FFLineTag } from '../../common/FFLineTag'
 import { FFScrollSheet } from '../../common/FFSheet'
+import { FFSpinner } from '../../common/FFSpinner'
 import { SbahnIcon } from './SbahnIcon'
 import { TramIcon } from './TramIcon'
 import { UbahnIcon } from './UbahnIcon'
@@ -55,7 +56,7 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
     const [selectedDirection, setSelectedDirection] = useState<string | null>(null)
     const [selectedStation, setSelectedStation] = useState<string | null>(null)
 
-    const isValid = selectedLine !== null && selectedStation !== null && selectedDirection !== null
+    const isValid = selectedLine !== null && selectedStation !== null
 
     useEffect(() => setSelectedLine(null), [lineType])
     useEffect(() => {
@@ -78,6 +79,10 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
         selectedLine === null ? [] : [lines[selectedLine][0], lines[selectedLine][lines[selectedLine].length - 1]]
 
     const stationOptions = selectedLine === null ? [] : lines[selectedLine]
+
+    const isDisabled = !isValid || isPending
+
+    const shouldShowDirection = !(['S41', 'S42'] as (typeof selectedLine)[]).includes(selectedLine)
 
     const close = () => {
         sheetRef.current?.close()
@@ -114,7 +119,7 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
                         containerProps={{ py: 3, flex: 1 }}
                         renderOption={(option) => ({ u: <UbahnIcon />, s: <SbahnIcon />, m: <TramIcon /> })[option]}
                     />
-                    <Text fontSize="md" fontWeight="bold" color="white" mt={4} mb={2}>
+                    <Text fontSize="lg" fontWeight="bold" color="white" mt={4} mb={2}>
                         {tCommon('line')}
                     </Text>
                     <View mx={-4}>
@@ -132,9 +137,9 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
                             />
                         </ScrollView>
                     </View>
-                    {selectedLine !== null && (
+                    {selectedLine !== null && shouldShowDirection && (
                         <>
-                            <Text fontSize="md" fontWeight="bold" color="white" mt={4} mb={2}>
+                            <Text fontSize="lg" fontWeight="bold" color="white" mt={4} mb={2}>
                                 {tCommon('direction')}
                             </Text>
                             <FFCarousellSelect
@@ -151,7 +156,11 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
                                     </Row>
                                 )}
                             />
-                            <Text fontSize="md" fontWeight="bold" color="white" mt={4} mb={2}>
+                        </>
+                    )}
+                    {selectedLine !== null && (
+                        <>
+                            <Text fontSize="lg" fontWeight="bold" color="white" mt={4} mb={2}>
                                 {tCommon('station')}
                             </Text>
                             <FFCarousellSelect
@@ -174,22 +183,29 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
                 </View>
                 <FFButton
                     onPress={onSubmit}
-                    isDisabled={isPending || !isValid}
+                    isDisabled={isDisabled}
                     bg={isPending ? 'bg' : 'blue'}
                     mt={8}
                     borderWidth={isPending ? 3 : 0}
+                    opacity={isValid ? 1 : 0.4}
                 >
-                    <Octicons name="report" size={24} color={theme.colors.bg} />
-                    <Text
-                        style={{
-                            color: theme.colors.bg,
-                            fontSize: 20,
-                            fontWeight: 'bold',
-                            marginLeft: 10,
-                        }}
-                    >
-                        {tReport('submit')}
-                    </Text>
+                    {isPending ? (
+                        <FFSpinner size={6} />
+                    ) : (
+                        <>
+                            <Octicons name="report" size={24} color={theme.colors.bg} />
+                            <Text
+                                style={{
+                                    color: theme.colors.bg,
+                                    fontSize: 20,
+                                    fontWeight: 'bold',
+                                    marginLeft: 10,
+                                }}
+                            >
+                                {tReport('submit')}
+                            </Text>
+                        </>
+                    )}
                 </FFButton>
             </Box>
         </FFScrollSheet>

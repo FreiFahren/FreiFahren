@@ -9,7 +9,7 @@ import { useAppStore } from '../../app.store'
 import { track } from '../../tracking'
 import { FFButton } from '../common/FFButton'
 
-const LAYER_BUTTON_SIZE = 45
+const LAYER_BUTTON_SIZE = 55
 
 export const LayerSwitcher = (props: ComponentProps<typeof Row>) => {
     const { t } = useTranslation('map')
@@ -54,7 +54,7 @@ export const LayerSwitcher = (props: ComponentProps<typeof Row>) => {
                                 bottom={0}
                             />
                             <View bg="rgba(0, 0, 0, 0.5)" alignSelf="stretch" alignItems="center">
-                                <Text color="white" fontSize={12}>
+                                <Text color="white" fontSize="sm">
                                     {t(`layers.${layer}`)}
                                 </Text>
                             </View>
@@ -62,7 +62,7 @@ export const LayerSwitcher = (props: ComponentProps<typeof Row>) => {
                     ))}
                 </View>
             )}
-            <FFButton onPress={() => setIsOpen((prev) => !prev)}>
+            <FFButton onPress={() => setIsOpen((prev) => !prev)} px={3} py={3}>
                 <Feather name="layers" size={24} color="white" />
             </FFButton>
         </Row>

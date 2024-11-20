@@ -6,7 +6,7 @@ type FFButtonProps = PropsWithChildren<ComponentProps<typeof Pressable>>
 export const FFButton = ({ children, ...props }: FFButtonProps) => (
     <Pressable
         backgroundColor="bg"
-        borderRadius={24}
+        borderRadius={16}
         borderColor="bg2"
         borderWidth={3}
         flexDir="row"

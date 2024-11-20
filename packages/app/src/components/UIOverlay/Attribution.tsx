@@ -23,7 +23,7 @@ export const Attribution = (props: ComponentProps<typeof Row>) => {
     ]
 
     return (
-        <Row alignSelf="flex-start" flexDir="row" space={1} {...props}>
+        <Row alignSelf="flex-start" flexDir="row" space={1} justifyContent="center" {...props}>
             {links.map((link) => (
                 <Link href={link.url} key={link.url}>
                     <Text style={{ color: theme.colors.fg, fontSize: 12 }}>{link.text}</Text>
