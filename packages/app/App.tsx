@@ -28,7 +28,6 @@ init({
 const App = () => {
     useEffect(() => {
         Promise.all([
-            NavigationBar.setBackgroundColorAsync('#00000000'),
             NavigationBar.setPositionAsync('absolute'),
             NavigationBar.setBackgroundColorAsync('#ffffff00'),
         ]).catch(noop)

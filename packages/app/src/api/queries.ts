@@ -23,9 +23,9 @@ export const useReports = <T = Report[]>(select?: (data: Report[]) => T) =>
     useQuery({
         queryKey: CACHE_KEYS.reports,
         queryFn: api.getRecentReports,
-        staleTime: 1000 * 60,
+        staleTime: 1000 * 10,
         select,
-        refetchInterval: 1000 * 60,
+        refetchInterval: 1000 * 10,
     })
 
 export const useSubmitReport = () => {

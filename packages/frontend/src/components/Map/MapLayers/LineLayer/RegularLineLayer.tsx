@@ -2,12 +2,14 @@ import React from 'react'
 import { Source, Layer } from 'react-map-gl/maplibre'
 
 interface RegularLineLayerProps {
-    linesGeoJSON: GeoJSON.FeatureCollection<GeoJSON.LineString>
+    linesGeoJSON: GeoJSON.FeatureCollection<GeoJSON.LineString> | null
     textColor: string
 }
 
 const RegularLineLayer: React.FC<RegularLineLayerProps> = ({ linesGeoJSON, textColor }) => {
     const firstPriorityLines = ['U1', 'U2', 'U3', 'U4', 'U5', 'U6', 'U7', 'U8', 'U9']
+
+    if (!linesGeoJSON) return null
     return (
         <>
             <Source id="line-data" type="geojson" data={linesGeoJSON}>
