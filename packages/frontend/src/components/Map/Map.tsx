@@ -146,14 +146,11 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     {isRiskLayerOpen ? (
                         <RiskLineLayer
                             preloadedRiskData={segmentRiskData}
-                            linesGeoJSON={linesGeoJSON as GeoJSON.FeatureCollection<GeoJSON.LineString>}
+                            linesGeoJSON={linesGeoJSON}
                             textColor={textColor}
                         />
                     ) : (
-                        <RegularLineLayer
-                            linesGeoJSON={linesGeoJSON as GeoJSON.FeatureCollection<GeoJSON.LineString>}
-                            textColor={textColor}
-                        />
+                        <RegularLineLayer linesGeoJSON={linesGeoJSON} textColor={textColor} />
                     )}
                     <StationLayer stations={stationGeoJSON} textColor={textColor} />
                 </Suspense>
