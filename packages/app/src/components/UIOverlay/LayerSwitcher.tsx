@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import linesIcon from '../../../assets/lines.png'
 import riskIcon from '../../../assets/risk.png'
 import { useAppStore } from '../../app.store'
+import { track } from '../../tracking'
 import { FFButton } from '../common/FFButton'
 
 const LAYER_BUTTON_SIZE = 45
@@ -17,6 +18,8 @@ export const LayerSwitcher = (props: ComponentProps<typeof Row>) => {
     const { layer: currentLayer, update } = useAppStore()
 
     const handleSelect = (layer: 'risk' | 'lines') => {
+        track({ name: 'Layer Selected', layer })
+
         update({ layer })
         setIsOpen(false)
     }

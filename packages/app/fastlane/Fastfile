@@ -70,4 +70,56 @@ platform :android do
 
     sh("git tag android-release/#{build_number}")
   end
+  lane :debug_preview do
+    build_number=sh("./get-next-build-number.sh android").strip.to_i
+
+    sh("npm run prebuild")
+
+    increment_version_code(
+      version_code: build_number.to_i,
+      gradle_file_path: "android/app/build.gradle"
+    )
+
+    gradle(
+      task: "assemble",
+      project_dir: "android",
+      build_type: "Debug",
+      print_command: false,
+      properties: {
+        "applicationId" => "com.anonymous.FreifahrenDebug",
+        "android.injected.signing.store.file" => ENV["KEYSTORE_FILE"],
+        "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["KEY_ALIAS"],
+        "android.injected.signing.key.password" => ENV["KEY_PASSWORD"],
+      }
+    )
+
+    sh("adb reverse tcp:8081 tcp:8081 && adb install ../android/app/build/outputs/apk/debug/app-debug.apk")
+  end
+  lane :release_preview do
+    build_number=sh("./get-next-build-number.sh android").strip.to_i
+
+    sh("npm run prebuild")
+
+    increment_version_code(
+      version_code: build_number.to_i,
+      gradle_file_path: "android/app/build.gradle"
+    )
+
+    gradle(
+      task: "assemble",
+      project_dir: "android",
+      build_type: "Release",
+      print_command: false,
+      properties: {
+        "applicationId" => "com.anonymous.FreifahrenDebug",
+        "android.injected.signing.store.file" => ENV["KEYSTORE_FILE"],
+        "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["KEY_ALIAS"],
+        "android.injected.signing.key.password" => ENV["KEY_PASSWORD"],
+      }
+    )
+
+    sh("adb reverse tcp:8081 tcp:8081 && adb install ../android/app/build/outputs/apk/release/app-release.apk")
+  end
 end

@@ -5,9 +5,10 @@ import { View } from 'native-base'
 import { useEffect } from 'react'
 import { StyleSheet } from 'react-native'
 
-import { useReports } from '../../api'
+import { Report, useReports } from '../../api'
 import { useAppStore } from '../../app.store'
 import { config } from '../../config'
+import { track } from '../../tracking'
 import { LinesLayer } from './LinesLayer'
 import { ReportsLayer } from './ReportsLayer'
 import { RiskLayer } from './RiskLayer'
@@ -41,6 +42,11 @@ export const FFMapView = () => {
 
     const { layer, update: updateAppState } = useAppStore()
 
+    const onPressReport = (report: Report) => {
+        track({ name: 'Report Tapped', station: report.stationId })
+        updateAppState({ reportToShow: report })
+    }
+
     return (
         <View width="100%" height="100%">
             <MapView
@@ -64,7 +70,7 @@ export const FFMapView = () => {
                 <LinesLayer />
                 <RiskLayer visible={layer === 'risk'} />
                 <StationLayer />
-                <ReportsLayer reports={reports} onPressReport={(report) => updateAppState({ reportToShow: report })} />
+                <ReportsLayer reports={reports} onPressReport={onPressReport} />
                 <UserLocation visible animated />
             </MapView>
         </View>

@@ -29,9 +29,7 @@ type RiskLayerProps = {
 
 export const RiskLayer = ({ visible }: RiskLayerProps) => {
     const { data: riskData } = useRiskData()
-
     const riskGeoJson = useMemo(() => linesWithRiskColors(riskData?.segmentColors), [riskData])
-
     const shouldShow = useAppStore((state) => state.disclaimerGood)
 
     return (
