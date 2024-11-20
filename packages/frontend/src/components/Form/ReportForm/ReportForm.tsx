@@ -6,7 +6,7 @@ import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputFor
 
 import { LinesList, StationList, reportInspector } from '../../../utils/dbUtils'
 import { sendAnalyticsEvent } from '../../../utils/analytics'
-import { highlightElement, createWarningSpan } from '../../../utils/uiUtils'
+import { highlightElement, createWarningSpan, getLineColor } from '../../../utils/uiUtils'
 import { calculateDistance } from '../../../utils/mapUtils'
 import { useLocation } from '../../../contexts/LocationContext'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
@@ -328,13 +328,13 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                                 onSelect={handleEntitySelect}
                                 value={currentEntity}
                             >
-                                <span className="line U8">
+                                <span className="line" style={{ backgroundColor: getLineColor('U8') }}>
                                     <strong>U</strong>
                                 </span>
-                                <span className="line S2">
+                                <span className="line" style={{ backgroundColor: getLineColor('S2') }}>
                                     <strong>S</strong>
                                 </span>
-                                <span className="line M1">
+                                <span className="line" style={{ backgroundColor: getLineColor('M1') }}>
                                     <strong>M</strong>
                                 </span>
                             </SelectField>
@@ -347,7 +347,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                                 value={currentLine}
                             >
                                 {Object.keys(possibleLines).map((line) => (
-                                    <span key={line} className={`line ${line}`}>
+                                    <span key={line} className="line" style={{ backgroundColor: getLineColor(line) }}>
                                         <strong>{line}</strong>
                                     </span>
                                 ))}

@@ -6,6 +6,7 @@ import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipCont
 import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
 import { MarkerData } from 'src/utils/types'
 import { getRecentDataWithIfModifiedSince } from 'src/utils/dbUtils'
+import { getLineColor } from 'src/utils/uiUtils'
 
 import ReportItem from './ReportItem'
 import ClusteredReportItem from './ClusteredReportItem'
@@ -200,11 +201,6 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
         )
     }
 
-    const getLineColor = (line: string): string => {
-        const cssVar = `--line-${line.toLowerCase()}`
-        return getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim()
-    }
-
     return (
         <div className={`reports-modal modal container ${className}`}>
             <section className="tabs align-child-on-line">
@@ -253,7 +249,12 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                                     src={`/icons/risk-${riskData.class}.svg`}
                                                     alt="Icon to show risk level"
                                                 />
-                                                <h4 className={`line-label ${line}`}>{line}</h4>
+                                                <h4
+                                                    className="line-label"
+                                                    style={{ backgroundColor: getLineColor(line) }}
+                                                >
+                                                    {line}
+                                                </h4>
                                             </div>
                                         ))}
                                 </div>
@@ -272,7 +273,12 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                                     src={`/icons/risk-${riskData.class}.svg`}
                                                     alt="Icon to show risk level"
                                                 />
-                                                <h4 className={`line-label ${line}`}>{line}</h4>
+                                                <h4
+                                                    className="line-label"
+                                                    style={{ backgroundColor: getLineColor(line) }}
+                                                >
+                                                    {line}
+                                                </h4>
                                             </div>
                                         ))}
                                 </div>
@@ -291,7 +297,12 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                                     src={`/icons/risk-${riskData.class}.svg`}
                                                     alt="Icon to show risk level"
                                                 />
-                                                <h4 className={`line-label ${line}`}>{line}</h4>
+                                                <h4
+                                                    className="line-label"
+                                                    style={{ backgroundColor: getLineColor(line) }}
+                                                >
+                                                    {line}
+                                                </h4>
                                             </div>
                                         ))}
                                 </div>
