@@ -18,7 +18,7 @@
     "direction": "to",
     "unknownDirection": "unknown",
     "now": "now",
-    "historic": "more than 45 minutes ago"
+    "historicLabel": "more than 45 minutes ago"
   },
   "map": {
     "layers": {
