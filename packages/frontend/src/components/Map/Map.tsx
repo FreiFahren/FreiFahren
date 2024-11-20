@@ -39,14 +39,14 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     const NorthEastBounds: LngLatLike = { lng: 14.00044556529124, lat: 52.77063424239867 }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
 
-    const [linesGeoJSON, setLinesGeoJSON] = useState<GeoJSON.FeatureCollection<GeoJSON.LineString> | null>(null)
+    const [lineSegments, setLineSegments] = useState<GeoJSON.FeatureCollection<GeoJSON.LineString> | null>(null)
 
     // fetch segments at runtime to avoid having to bundle them in the frontend
     useEffect(() => {
         fetch(`${process.env.PUBLIC_URL}/segments.json`)
             .then((response) => response.json())
-            .then((data) => setLinesGeoJSON(data))
-            .catch((error) => console.error('Error loading lines GeoJSON:', error))
+            .then((data) => setLineSegments(data))
+            .catch((error) => console.error('Error loading lines segments:', error))
     }, [])
 
     const map = useRef<MapRef>(null)
@@ -61,39 +61,6 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     }, [isFirstOpen, initializeLocationTracking])
 
     const textColor = currentColorTheme === 'light' ? '#000' : '#fff'
-
-    // Move the layers to the correct order
-    useEffect(() => {
-        const currentMap = map.current
-
-        if (currentMap) {
-            // using an interval to check, because the map is not immediately loaded
-            const intervalId = setInterval(() => {
-                if (currentMap.isStyleLoaded()) {
-                    // Once confirmed that the map is loaded, clear the interval
-                    clearInterval(intervalId)
-
-                    const moveLayerSafely = (layerId: string, beforeId: string) => {
-                        if (currentMap.getLayer(layerId) && currentMap.getLayer(beforeId)) {
-                            currentMap.moveLayer(layerId, beforeId)
-                        }
-                    }
-
-                    const lineLayerId = isRiskLayerOpen ? 'risk-line-layer' : 'line-layer'
-                    const labelLayerId = isRiskLayerOpen ? 'risk-label-layer' : 'label-layer'
-
-                    // Perform the layer moves
-                    moveLayerSafely(lineLayerId, 'stationLayer')
-                    moveLayerSafely(labelLayerId, 'stationLayer')
-                    moveLayerSafely('stationLayer', 'stationNameLayer')
-                }
-            }, 1000 * 0.1)
-
-            return () => {
-                clearInterval(intervalId)
-            }
-        }
-    }, [isRiskLayerOpen, map])
 
     // preload colors before risklayer component mounts to instantly show the highlighted segments
     const { segmentRiskData, refreshRiskData } = useRiskData()
@@ -143,16 +110,16 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                         formSubmitted={formSubmitted}
                         userPosition={userPosition}
                     />
+                    <StationLayer stations={stationGeoJSON} textColor={textColor} />
                     {isRiskLayerOpen ? (
                         <RiskLineLayer
                             preloadedRiskData={segmentRiskData}
-                            linesGeoJSON={linesGeoJSON}
+                            lineSegments={lineSegments}
                             textColor={textColor}
                         />
                     ) : (
-                        <RegularLineLayer linesGeoJSON={linesGeoJSON} textColor={textColor} />
+                        <RegularLineLayer lineSegments={lineSegments} textColor={textColor} />
                     )}
-                    <StationLayer stations={stationGeoJSON} textColor={textColor} />
                 </Suspense>
             </Map>
             <div className="social-media">
