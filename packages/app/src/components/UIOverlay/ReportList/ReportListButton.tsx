@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Text } from 'react-native'
 
 import { Theme } from '../../../theme'
+import { track } from '../../../tracking'
 import { FFButton } from '../../common/FFButton'
 import { ReportListSheet } from './ReportListSheet'
 
@@ -17,9 +18,14 @@ export const ReportListButton = (props: ReportListButtonProps) => {
 
     const theme = useTheme() as Theme
 
+    const handleOpen = () => {
+        track({ name: 'Reports Viewed' })
+        sheetRef.current?.present()
+    }
+
     return (
         <>
-            <FFButton onPress={() => sheetRef.current?.present()} {...props}>
+            <FFButton onPress={handleOpen} {...props}>
                 <Entypo name="menu" size={22} color="white" />
                 <Text
                     style={{

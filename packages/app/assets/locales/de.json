@@ -40,7 +40,8 @@
     },
     "bullet2": {
       "title": "2. Deine Privatssphäre ist uns extrem wichtig",
-      "text": "Wir speichern keinerlei persönliche Daten, aber bitte lies trotzdem unsere "
+      "text": "Wir speichern keinerlei persönliche Daten, aber bitte lies trotzdem unsere ",
+      "privacyPolicy": "Datenschutzerklärung"
     },
     "endText": "Jetzt kann es auch schon losgehen. Vielen Dank!",
     "confirm": "Bestätigen"

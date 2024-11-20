@@ -9,6 +9,7 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { useSubmitReport } from '../../../api'
 import { useLines, useStations } from '../../../api/queries'
 import { Theme } from '../../../theme'
+import { track } from '../../../tracking'
 import { FFButton } from '../../common/FFButton'
 import { FFCarousellSelect } from '../../common/FFCarousellSelect'
 import { FFLineTag } from '../../common/FFLineTag'
@@ -30,17 +31,24 @@ export type ReportSheetMethods = {
 export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<ReportSheetMethods>) => {
     const { t: tCommon } = useTranslation()
     const { t: tReport } = useTranslation('makeReport')
+    const theme = useTheme() as Theme
     const { mutateAsync: submitReport, isPending } = useSubmitReport()
     const { data: stations } = useStations()
     const { data: lines } = useLines()
-
-    const theme = useTheme() as Theme
-
     const sheetRef = useRef<BottomSheetModalMethods>(null)
 
+    const openedAt = useRef<number | null>(null)
+
     useImperativeHandle(ref, () => ({
-        open: () => sheetRef.current?.present(),
-        close: () => sheetRef.current?.close(),
+        open: () => {
+            track({ name: 'Report Sheet Opened' })
+            sheetRef.current?.present()
+            openedAt.current = Date.now()
+        },
+        close: () => {
+            sheetRef.current?.close()
+            openedAt.current = null
+        },
     }))
 
     const [lineType, setLineType] = useState<LineType>('u')
@@ -85,6 +93,8 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
 
     const onSubmit = async () => {
         if (!isValid) return
+
+        track({ name: 'Report Submitted', duration: (Date.now() - openedAt.current!) / 1000 })
 
         await submitReport({
             line: selectedLine,

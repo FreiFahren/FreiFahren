@@ -40,7 +40,8 @@
     },
     "bullet2": {
       "title": "2. Your privacy is important to us",
-      "text": "We do not save any of your personal information. For a detailed privacy policy, please consult our "
+      "text": "We do not save any of your personal information. For a detailed privacy policy, please consult our ",
+      "privacyPolicy": "Privacy Policy"
     },
     "endText": "Now you're ready to get started. Thank you!",
     "confirm": "Confirm"
