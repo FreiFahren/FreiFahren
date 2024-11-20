@@ -19,7 +19,6 @@ web-build/
 
 # Metro
 .metro-health-check*
-metro.config.js
 index.js
 
 # debug
