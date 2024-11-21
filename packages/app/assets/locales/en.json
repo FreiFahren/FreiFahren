@@ -45,5 +45,12 @@
     },
     "endText": "Now you're ready to get started. Thank you!",
     "confirm": "Confirm"
+  },
+  "privacyPolicyUpdated": {
+    "title": "Privacy Policy Update",
+    "text": "We have updated our Privacy Policy. We still do not store any personal data, your location or anything similar, but please review it anyway.",
+    "confirmText": "By continuing, you agree to the new privacy policy.",
+    "link": "New Privacy Policy",
+    "confirm": "Confirm"
   }
 }
