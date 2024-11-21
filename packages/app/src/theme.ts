@@ -119,7 +119,7 @@ export const theme = createTheme({
         },
         defaults: {
             fontSize: 16,
-            lineHeight: 24,
+            lineHeight: 22,
             fontFamily: 'Funnel Sans Regular',
             color: 'fg',
         },

@@ -34,12 +34,12 @@ export const ReportItem = ({ report, ...props }: ReportItemProps) => {
 
     return (
         <FFView {...props}>
-            <FFView gap="xs" flexDirection="row" alignItems="center">
+            <FFView gap="xxs" flexDirection="row" alignItems="center">
                 <FFLineTag line={report.line} />
                 <FFText variant="label">{station?.name}</FFText>
             </FFView>
             <FFView flexDirection="row" gap="s" mt="xxs">
-                <FFText variant="small">
+                <FFText color="darkText" fontSize={14}>
                     {report.isHistoric ? t('historicLabel') : formatTime(report.timestamp, t)}
                     {`, ${t('direction')} `}
                     {isNil(report.direction?.name) ? (

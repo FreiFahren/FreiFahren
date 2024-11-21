@@ -74,7 +74,7 @@ export const Disclaimer = () => {
                     </FFText>
                     <FFText mt="xs">{t('endText')}</FFText>
                 </FFView>
-                <FFButton variant="primary" onPress={onDismiss} mt="s">
+                <FFButton variant="primary" onPress={onDismiss} marginTop="s">
                     <FFText variant="labelLarge" fontWeight="bold">
                         {t('confirm')}
                     </FFText>
