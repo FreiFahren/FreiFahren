@@ -97,3 +97,44 @@ func GetLineStatistics(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, stats)
 }
+
+// @Summary Get all segments
+//
+// @Description Retrieves information about all available transit segments.
+// @Description A segment is the geojson lineString part of a line between two stations.
+//
+// @Tags lines
+//
+// @Produce json
+//
+// @Success 200 {object} json.RawMessage
+// @Success 304 "Not Modified"
+// @Failure 500 {object} error "Internal Server Error: Error retrieving segments data."
+//
+// @Router /lines/segments [get]
+func GetAllSegments(c echo.Context) error {
+	logger.Log.Info().Msg("GET /lines/segments")
+
+	// Get cached segments data and ETag
+	segments, etag := data.GetSegments()
+	if len(segments) == 0 {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Internal Server Error: Error retrieving segments data.",
+		})
+	}
+
+	// Check if client's cached version matches
+	if clientETag := c.Request().Header.Get("If-None-Match"); clientETag == etag {
+		logger.Log.Info().Msg("GET /lines/segments: not modified")
+		return c.NoContent(http.StatusNotModified)
+	}
+
+	// Set cache headers
+	c.Response().Header().Set("Cache-Control", "public, max-age=31536000") // Cache for 1 year
+	c.Response().Header().Set("ETag", etag)
+	logger.Log.Info().Msg("GET /lines/segments: setting ETag")
+	c.Response().Header().Set("Content-Type", "application/json")
+
+	// Return the raw JSON bytes directly
+	return c.Blob(http.StatusOK, "application/json", segments)
+}
