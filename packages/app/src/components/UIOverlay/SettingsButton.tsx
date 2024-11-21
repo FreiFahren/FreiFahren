@@ -87,7 +87,8 @@ const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
                 </FFText>
             </FFView>
             <FFText variant="small" textAlign="center" color="fg" mt="xs">
-                v{Constants.expoConfig?.version ?? '0.0.1'}{` (${__DEV__ ? 'Dev' : 'Release'})`}
+                v{Constants.expoConfig?.version ?? '0.0.1'}
+                {` (${__DEV__ ? 'Dev' : 'Release'})`}
             </FFText>
         </FFScrollSheet>
     )

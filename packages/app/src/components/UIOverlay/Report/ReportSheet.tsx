@@ -41,9 +41,9 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
 
     useImperativeHandle(ref, () => ({
         open: () => {
-            track({ name: 'Report Sheet Opened' })
             sheetRef.current?.present()
             openedAt.current = Date.now()
+            track({ name: 'Report Sheet Opened' })
         },
         close: () => {
             sheetRef.current?.close()
