@@ -75,10 +75,25 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
         async (e: React.MouseEvent) => {
             e.preventDefault()
             try {
+                let directionTextShare = direction.name
+                let lineTextShare = line
+                
+                if (direction.name === '') {
+                    directionTextShare = '?'
+                }
+
+                if (line === '') {
+                    lineTextShare = '?'
+                }
+
                 if (navigator.share) {
                     await navigator.share({
-                        title: t('Share.title', 'Check out this app'),
-                        text: t('Share.text', 'See where ticket inspectors are in Berlin'),
+                        title: t('Share.title'),
+                        text: t('Share.text', {
+                            station: station.name,
+                            direction: directionTextShare,
+                            line: lineTextShare,
+                        }),
                         url: window.location.href,
                     })
                     await sendAnalyticsEvent('Marker Shared', {
