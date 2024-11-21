@@ -1,5 +1,4 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { pick } from 'lodash'
 import { DateTime, Duration } from 'luxon'
 import { useEffect, useRef, useState } from 'react'
 
@@ -14,7 +13,7 @@ const DISCLAIMER_INTERVAL = Duration.fromObject({ days: 7 })
 const useShouldShowDisclaimer = () => {
     const [shouldShowDisclaimer, setShouldShowDisclaimer] = useState(true)
 
-    const { dismissedDisclaimerAt } = useAppStore((state) => pick(state, ['dismissedDisclaimerAt', 'appLocked']))
+    const dismissedDisclaimerAt = useAppStore((state) => state.dismissedDisclaimerAt)
 
     useEffect(() => {
         if (dismissedDisclaimerAt !== null) {
