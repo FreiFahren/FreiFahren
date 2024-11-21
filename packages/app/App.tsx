@@ -31,13 +31,13 @@ const useLoadFonts = () => {
         'Funnel Sans Medium': require('./assets/fonts/Funnel Sans Medium.ttf'),
         'Funnel Sans Regular': require('./assets/fonts/Funnel Sans Regular.ttf'),
         'Funnel Sans SemiBold': require('./assets/fonts/Funnel Sans SemiBold.ttf'),
-        'Funnel Sans Light': require('./assets/fonts/FunnelSans Light.ttf'),
+        'Funnel Sans Light': require('./assets/fonts/Funnel Sans Light.ttf'),
         'Funnel Sans Bold Italic': require('./assets/fonts/Funnel Sans Bold Italic.ttf'),
         'Funnel Sans ExtraBold Italic': require('./assets/fonts/Funnel Sans ExtraBold Italic.ttf'),
         'Funnel Sans Italic': require('./assets/fonts/Funnel Sans Italic.ttf'),
         'Funnel Sans Light Italic': require('./assets/fonts/Funnel Sans Light Italic.ttf'),
         'Funnel Sans Medium Italic': require('./assets/fonts/Funnel Sans Medium Italic.ttf'),
-        'Funnel Sans SemiBold Italic': require('./assets/fonts/FunnelSans SemiBold Italic.ttf'),
+        'Funnel Sans SemiBold Italic': require('./assets/fonts/Funnel Sans SemiBold Italic.ttf'),
     })
 
     useEffect(() => {
