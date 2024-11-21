@@ -28,7 +28,9 @@
   },
   "settings": {
     "title": "Einstellungen",
-    "language": "Sprache"
+    "language": "Sprache",
+    "privacyPolicy": "Datenschutzerklärung",
+    "support": "Support"
   },
   "disclaimer": {
     "title": "Bitte bestätige vor dem Fortfahren",

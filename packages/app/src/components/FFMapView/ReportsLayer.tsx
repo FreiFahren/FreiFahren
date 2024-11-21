@@ -1,4 +1,5 @@
 import { CircleLayer, MarkerView, ShapeSource } from '@maplibre/maplibre-react-native'
+import { useTheme } from '@shopify/restyle'
 import { isNil } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { Pressable, StyleSheet } from 'react-native'
@@ -15,6 +16,7 @@ import Animated, {
 import { Report } from '../../api'
 import { useStations } from '../../api/queries'
 import { useAppStore } from '../../app.store'
+import { Theme } from '../../theme'
 
 const styles = StyleSheet.create({
     pulse: {
@@ -143,6 +145,8 @@ export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
     const shouldShowReports = useAppStore((state) => state.disclaimerGood)
     const { data: stations } = useStations()
 
+    const theme = useTheme<Theme>()
+
     if (isNil(stations)) return null
 
     return (
@@ -162,9 +166,9 @@ export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
                     id="reports-layer"
                     style={{
                         circleRadius: 8,
-                        circleColor: '#f00',
+                        circleColor: theme.colors.danger,
                         circleStrokeWidth: 3,
-                        circleStrokeColor: '#fff',
+                        circleStrokeColor: theme.colors.whiteish,
                         circleOpacity: ['get', 'opacity'],
                         circleStrokeOpacity: ['get', 'opacity'],
                         visibility: shouldShowReports ? 'visible' : 'none',

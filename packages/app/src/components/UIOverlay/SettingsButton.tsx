@@ -2,14 +2,13 @@ import { Ionicons } from '@expo/vector-icons'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 import Constants from 'expo-constants'
 import { noop } from 'lodash'
-import { Text, View } from 'native-base'
 import { ComponentProps, forwardRef, Ref, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
 
 import { config } from '../../config'
 import { track } from '../../tracking'
-import { FFButton } from '../common/FFButton'
+import { FFButton, FFText, FFView } from '../common/base'
 import { FFCarousellSelect } from '../common/FFCarousellSelect'
 import { FFScrollSheet } from '../common/FFSheet'
 
@@ -30,24 +29,18 @@ const LanguageSwitcher = () => {
     }
 
     return (
-        <View>
-            <Text fontSize="lg" color="white" bold mt="4" mb="2">
+        <FFView>
+            <FFText variant="header2" mt="xs" mb="xxs">
                 {t('language')}
-            </Text>
+            </FFText>
             <FFCarousellSelect
                 hideCheck
                 options={['en', 'de'] as const}
-                renderOption={(item: Language) => (
-                    <View px="6" py="2">
-                        <Text color="white" bold>
-                            {languages[item]}
-                        </Text>
-                    </View>
-                )}
+                renderOption={(item: Language) => <FFText variant="label">{languages[item]}</FFText>}
                 selectedOption={i18n.language as Language}
                 onSelect={handleSelect}
             />
-        </View>
+        </FFView>
     )
 }
 
@@ -59,25 +52,43 @@ const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
         Linking.openURL(config.PRIVACY_POLICY_URL).catch(noop)
     }
 
+    const openSupportPage = () => {
+        track({ name: 'Support Page Viewed', from: 'settings' })
+        Linking.openURL(config.SUPPORT_URL).catch(noop)
+    }
+
     return (
         <FFScrollSheet ref={ref}>
-            <Text fontSize="xl" color="white" bold>
+            <FFText variant="header1" color="fg">
                 {t('title')}
-            </Text>
+            </FFText>
             <LanguageSwitcher />
-            <Text
-                style={{
-                    textDecorationLine: 'underline',
-                    marginTop: 16,
-                    color: 'white',
-                }}
-                onPress={openPrivacyPolicy}
-            >
-                Datenschutzerklärung
-            </Text>
-            <Text fontSize="xs" textAlign="center" color="fg" mt={12}>
+            <FFView flexDirection="row" gap="xs">
+                <FFText
+                    style={{
+                        textDecorationLine: 'underline',
+                        marginTop: 16,
+                        color: 'white',
+                    }}
+                    onPress={openPrivacyPolicy}
+                >
+                    {t('privacyPolicy')}
+                </FFText>
+                <FFText
+                    style={{
+                        textDecorationLine: 'underline',
+                        marginTop: 16,
+                        color: 'white',
+                        fontFamily: 'Funnel Sans',
+                    }}
+                    onPress={openSupportPage}
+                >
+                    {t('support')}
+                </FFText>
+            </FFView>
+            <FFText variant="small" textAlign="center" color="fg" mt="xs">
                 v{Constants.expoConfig?.version ?? '0.0.1'}
-            </Text>
+            </FFText>
         </FFScrollSheet>
     )
 })
@@ -93,7 +104,7 @@ export const SettingsButton = (props: ComponentProps<typeof FFButton>) => {
     return (
         <>
             <SettingsSheet ref={sheetRef} />
-            <FFButton px={3} py={3} onPress={handleOpen} {...props}>
+            <FFButton variant="square" onPress={handleOpen} {...props}>
                 <Ionicons name="settings-sharp" size={24} color="white" />
             </FFButton>
         </>

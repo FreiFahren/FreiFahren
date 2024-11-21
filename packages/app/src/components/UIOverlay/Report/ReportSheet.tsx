@@ -1,6 +1,6 @@
 import { Octicons } from '@expo/vector-icons'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
-import { Box, Row, Text, useTheme, View } from 'native-base'
+import { useTheme } from '@shopify/restyle'
 import { forwardRef, PropsWithChildren, Ref, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutAnimation } from 'react-native'
@@ -10,7 +10,7 @@ import { useSubmitReport } from '../../../api'
 import { useLines, useStations } from '../../../api/queries'
 import { Theme } from '../../../theme'
 import { track } from '../../../tracking'
-import { FFButton } from '../../common/FFButton'
+import { FFButton, FFSafeAreaView, FFText, FFView } from '../../common/base'
 import { FFCarousellSelect } from '../../common/FFCarousellSelect'
 import { FFLineTag } from '../../common/FFLineTag'
 import { FFScrollSheet } from '../../common/FFSheet'
@@ -31,11 +31,11 @@ export type ReportSheetMethods = {
 export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<ReportSheetMethods>) => {
     const { t: tCommon } = useTranslation()
     const { t: tReport } = useTranslation('makeReport')
-    const theme = useTheme() as Theme
     const { mutateAsync: submitReport, isPending } = useSubmitReport()
     const { data: stations } = useStations()
     const { data: lines } = useLines()
     const sheetRef = useRef<BottomSheetModalMethods>(null)
+    const theme = useTheme<Theme>()
 
     const openedAt = useRef<number | null>(null)
 
@@ -107,107 +107,114 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
 
     return (
         <FFScrollSheet ref={sheetRef} onDismiss={close}>
-            <Box justifyContent="space-between" overflow="visible" position="relative" flex={1} safeAreaBottom>
-                <View>
-                    <Text bold fontSize="xl" mb={4} color="white">
+            <FFSafeAreaView
+                justifyContent="space-between"
+                overflow="visible"
+                position="relative"
+                flex={1}
+                edges={['bottom']}
+            >
+                <FFView>
+                    <FFText variant="header1" mb="xs" color="fg">
                         {tReport('title')}
-                    </Text>
+                    </FFText>
                     <FFCarousellSelect
                         options={lineTypes}
                         selectedOption={lineType}
                         onSelect={(option: LineType) => setLineType(option)}
-                        containerProps={{ py: 3, flex: 1 }}
+                        containerProps={{ py: 's', flex: 1 }}
                         renderOption={(option) => ({ u: <UbahnIcon />, s: <SbahnIcon />, m: <TramIcon /> })[option]}
                     />
-                    <Text fontSize="lg" fontWeight="bold" color="white" mt={4} mb={2}>
+                    <FFText variant="header2" fontWeight="bold" color="fg" mt="xs" mb="xxs">
                         {tCommon('line')}
-                    </Text>
-                    <View mx={-4}>
+                    </FFText>
+                    <FFView style={{ marginHorizontal: -4 }}>
                         <ScrollView
                             horizontal
                             showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={{ paddingHorizontal: theme.space[5] }}
+                            contentContainerStyle={{ paddingHorizontal: theme.spacing.xs }}
                         >
                             <FFCarousellSelect
                                 options={lineOptions}
                                 selectedOption={selectedLine}
                                 onSelect={setSelectedLine}
-                                containerProps={{ py: 3, px: 4 }}
-                                renderOption={(line) => <FFLineTag line={line} textProps={{ fontSize: '2xl' }} />}
+                                containerProps={{ py: 'xs', px: 'xs' }}
+                                renderOption={(line) => <FFLineTag line={line} textProps={{ variant: 'header1' }} />}
                             />
                         </ScrollView>
-                    </View>
+                    </FFView>
                     {selectedLine !== null && shouldShowDirection && (
                         <>
-                            <Text fontSize="lg" fontWeight="bold" color="white" mt={4} mb={2}>
+                            <FFText variant="header2" fontWeight="bold" color="fg" mt="xs" mb="xxs">
                                 {tCommon('direction')}
-                            </Text>
+                            </FFText>
                             <FFCarousellSelect
                                 vertical
                                 options={directionOptions}
                                 selectedOption={selectedDirection}
                                 onSelect={setSelectedDirection}
-                                containerProps={{ py: 3, px: 4 }}
+                                containerProps={{
+                                    py: 'xs',
+                                    px: 'xs',
+                                    justifyContent: 'flex-start',
+                                }}
                                 renderOption={(direction, isSelected) => (
-                                    <Row alignSelf="flex-start">
-                                        <Text color="white" bold={isSelected}>
+                                    <FFView flexDirection="row">
+                                        <FFText fontWeight={isSelected ? 'bold' : undefined}>
                                             {stations[direction].name}
-                                        </Text>
-                                    </Row>
+                                        </FFText>
+                                    </FFView>
                                 )}
                             />
                         </>
                     )}
                     {selectedLine !== null && (
                         <>
-                            <Text fontSize="lg" fontWeight="bold" color="white" mt={4} mb={2}>
+                            <FFText variant="header2" fontWeight="bold" mt="xs" mb="xxs">
                                 {tCommon('station')}
-                            </Text>
+                            </FFText>
                             <FFCarousellSelect
                                 vertical
                                 collapses
                                 options={stationOptions}
                                 selectedOption={selectedStation}
                                 onSelect={setSelectedStation}
-                                containerProps={{ py: 3, px: 4 }}
+                                containerProps={{
+                                    py: 'xs',
+                                    px: 'xs',
+                                    justifyContent: 'flex-start',
+                                }}
                                 renderOption={(station, isSelected) => (
-                                    <Row alignSelf="flex-start">
-                                        <Text color="white" bold={isSelected}>
+                                    <FFView flexDirection="row" alignSelf="flex-start">
+                                        <FFText fontWeight={isSelected ? 'bold' : undefined}>
                                             {stations[station].name}
-                                        </Text>
-                                    </Row>
+                                        </FFText>
+                                    </FFView>
                                 )}
                             />
                         </>
                     )}
-                </View>
-                <FFButton
-                    onPress={onSubmit}
-                    isDisabled={isDisabled}
-                    bg={isPending ? 'bg' : 'blue'}
-                    mt={8}
-                    borderWidth={isPending ? 3 : 0}
-                    opacity={isValid ? 1 : 0.4}
-                >
+                </FFView>
+                <FFButton variant="primary" onPress={onSubmit} disabled={isDisabled} mt="s">
                     {isPending ? (
                         <FFSpinner size={6} />
                     ) : (
                         <>
-                            <Octicons name="report" size={24} color={theme.colors.bg} />
-                            <Text
+                            <Octicons name="report" size={24} color="white" />
+                            <FFText
                                 style={{
-                                    color: theme.colors.bg,
+                                    color: 'white',
                                     fontSize: 20,
                                     fontWeight: 'bold',
                                     marginLeft: 10,
                                 }}
                             >
                                 {tReport('submit')}
-                            </Text>
+                            </FFText>
                         </>
                     )}
                 </FFButton>
-            </Box>
+            </FFSafeAreaView>
         </FFScrollSheet>
     )
 })

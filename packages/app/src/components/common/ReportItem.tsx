@@ -1,11 +1,11 @@
 import { TFunction } from 'i18next'
 import { isNil } from 'lodash'
-import { Row, Text, View } from 'native-base'
 import { ComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Report } from '../../api'
 import { useStations } from '../../api/queries'
+import { FFText, FFView } from './base'
 import { FFLineTag } from './FFLineTag'
 
 const formatTime = (date: Date, t: TFunction<'reportDetails'>) => {
@@ -26,31 +26,29 @@ const formatTime = (date: Date, t: TFunction<'reportDetails'>) => {
 
 type ReportItemProps = {
     report: Report
-} & ComponentProps<typeof View>
+} & ComponentProps<typeof FFView>
 
 export const ReportItem = ({ report, ...props }: ReportItemProps) => {
     const { t } = useTranslation('reportDetails')
     const station = useStations().data?.[report.stationId]
 
     return (
-        <View {...props}>
-            <Row space={2} alignItems="center">
+        <FFView {...props}>
+            <FFView gap="xs" flexDirection="row" alignItems="center">
                 <FFLineTag line={report.line} />
-                <Text color="white" bold>
-                    {station?.name}
-                </Text>
-            </Row>
-            <Row space={2} mt={1}>
-                <Text color="fg">
+                <FFText variant="label">{station?.name}</FFText>
+            </FFView>
+            <FFView flexDirection="row" gap="s" mt="xxs">
+                <FFText variant="small">
                     {report.isHistoric ? t('historicLabel') : formatTime(report.timestamp, t)}
                     {`, ${t('direction')} `}
                     {isNil(report.direction?.name) ? (
                         t('unknownDirection')
                     ) : (
-                        <Text color="white">{report.direction.name}</Text>
+                        <FFText variant="labelSmall">{report.direction.name}</FFText>
                     )}
-                </Text>
-            </Row>
-        </View>
+                </FFText>
+            </FFView>
+        </FFView>
     )
 }

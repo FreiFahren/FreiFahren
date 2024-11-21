@@ -1,8 +1,9 @@
-import { View } from 'native-base'
 import { ComponentProps } from 'react'
 
-type FFBoxProps = ComponentProps<typeof View>
+import { FFView } from './base'
+
+type FFBoxProps = ComponentProps<typeof FFView>
 
 export const FFBox = (props: FFBoxProps) => (
-    <View bg="bg" borderRadius={16} borderColor="bg2" borderWidth={3} p={3} {...props} />
+    <FFView bg="bg" borderRadius="m" borderColor="bg2" borderWidth={2} p="xs" {...props} />
 )

@@ -34,7 +34,7 @@ export const ReportDetailsNotification = ({ report, onClose, ...props }: ReportD
 
     return (
         <Animated.View style={animatedStyle}>
-            <FFBox flexDir="row" alignItems="center" justifyContent="space-between" px={4} {...props}>
+            <FFBox flexDirection="row" alignItems="center" justifyContent="space-between" px="xs" {...props}>
                 <ReportItem report={report} />
                 <Pressable onPress={handleClose} hitSlop={10}>
                     <MaterialIcons name="close" color="white" size={32} />

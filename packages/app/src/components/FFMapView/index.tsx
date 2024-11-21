@@ -1,7 +1,6 @@
 import MapLibreGL, { Camera, MapView, UserLocation, UserTrackingMode } from '@maplibre/maplibre-react-native'
 import Geolocation from '@react-native-community/geolocation'
 import { noop } from 'lodash'
-import { View } from 'native-base'
 import { useEffect } from 'react'
 import { StyleSheet } from 'react-native'
 
@@ -9,6 +8,7 @@ import { Report, useReports } from '../../api'
 import { useAppStore } from '../../app.store'
 import { config } from '../../config'
 import { track } from '../../tracking'
+import { FFView } from '../common/base'
 import { LinesLayer } from './LinesLayer'
 import { ReportsLayer } from './ReportsLayer'
 import { RiskLayer } from './RiskLayer'
@@ -48,7 +48,7 @@ export const FFMapView = () => {
     }
 
     return (
-        <View width="100%" height="100%">
+        <FFView width="100%" height="100%">
             <MapView
                 style={styles.map}
                 logoEnabled={false}
@@ -63,7 +63,7 @@ export const FFMapView = () => {
                         zoomLevel: 10,
                     }}
                     maxBounds={MAP_REGION.bounds}
-                    minZoomLevel={7}
+                    minZoomLevel={9}
                     maxZoomLevel={13}
                     followUserMode={UserTrackingMode.Follow}
                 />
@@ -73,6 +73,6 @@ export const FFMapView = () => {
                 <ReportsLayer reports={reports} onPressReport={onPressReport} />
                 <UserLocation visible animated />
             </MapView>
-        </View>
+        </FFView>
     )
 }

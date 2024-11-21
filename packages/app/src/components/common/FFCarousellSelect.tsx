@@ -1,15 +1,14 @@
 import { FontAwesome5 } from '@expo/vector-icons'
-import { Pressable, Row, Stack, Text, useTheme, View } from 'native-base'
 import { ComponentProps, PropsWithChildren, ReactNode, useEffect, useState } from 'react'
 import { LayoutAnimation } from 'react-native'
 
-import { Theme } from '../../theme'
+import { FFButton, FFPressable, FFText, FFView } from './base'
 
 type OptionContainerProps = {
     isSelected: boolean
     onSelect: () => void
     hideCheck?: boolean
-} & Omit<ComponentProps<typeof Pressable>, 'onPress'>
+} & Omit<ComponentProps<typeof FFButton>, 'onPress' | 'ref'>
 
 const OptionContainer = ({
     isSelected,
@@ -18,27 +17,24 @@ const OptionContainer = ({
     hideCheck = false,
     ...props
 }: PropsWithChildren<OptionContainerProps>) => {
-    const theme = useTheme() as Theme
-
     return (
-        <Pressable
-            borderRadius={8}
+        <FFButton
+            borderRadius="m"
             borderWidth={2}
             opacity={isSelected ? 1 : 0.7}
-            borderColor={isSelected ? theme.colors.selected : theme.colors.bg2}
-            alignItems="center"
-            justifyContent="center"
+            borderColor={isSelected ? 'selected' : 'bg2'}
             position="relative"
             onPress={onSelect}
+            variant="selector"
             {...props}
         >
             {children}
             {!hideCheck && isSelected && (
-                <View bg="selected" borderRadius="full" position="absolute" bottom={2} right={2} p={1}>
+                <FFView bg="selected" borderRadius="full" position="absolute" p="xxxs" bottom={8} right={8}>
                     <FontAwesome5 name="check" size={14} color="white" />
-                </View>
+                </FFView>
             )}
-        </Pressable>
+        </FFButton>
     )
 }
 
@@ -52,7 +48,7 @@ type FFCarousellSelectProps<T> = {
     renderOption: (option: T, isSelected: boolean) => ReactNode
     onSelect: (option: T) => void
     selectedOption: T | null
-    containerProps?: ComponentProps<typeof Pressable>
+    containerProps?: ComponentProps<typeof FFPressable>
     vertical?: boolean
     collapses?: boolean
     hideCheck?: boolean
@@ -68,8 +64,6 @@ export const FFCarousellSelect = <T,>({
     collapses = false,
     hideCheck = false,
 }: FFCarousellSelectProps<T>) => {
-    const Container = vertical ? Stack : Row
-
     const [isCollapsed, setIsCollapsed] = useState(false)
 
     const [localSelectedOption, setLocalSelectedOption] = useState(selectedOption)
@@ -98,13 +92,15 @@ export const FFCarousellSelect = <T,>({
     return isCollapsed ? (
         <OptionContainer isSelected={localSelectedOption !== null} onSelect={handleExpand} {...containerProps}>
             {localSelectedOption === null ? (
-                <Text color="fg">Nicht ausgewählt</Text>
+                <FFText variant="small" color="fg">
+                    Nicht ausgewählt
+                </FFText>
             ) : (
                 renderOption(localSelectedOption, true)
             )}
         </OptionContainer>
     ) : (
-        <Container space={2}>
+        <FFView gap="xxs" flexDirection={vertical ? 'column' : 'row'}>
             {options.map((option, index) => (
                 <OptionContainer
                     // eslint-disable-next-line react/no-array-index-key
@@ -117,6 +113,6 @@ export const FFCarousellSelect = <T,>({
                     {renderOption(option, localSelectedOption === option)}
                 </OptionContainer>
             ))}
-        </Container>
+        </FFView>
     )
 }

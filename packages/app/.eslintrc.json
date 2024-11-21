@@ -134,7 +134,7 @@
     "react-native/split-platform-components": "error",
     "react-native/no-inline-styles": "off",
     "react-native/no-color-literals": "off",
-    "react-native/no-raw-text": ["error"],
+    "react-native/no-raw-text": ["error", { "skip": ["FFText"] }],
     "react-native/no-single-element-style-arrays": "error",
     "react/jsx-uses-react": "off",
     "react/react-in-jsx-scope": "off"

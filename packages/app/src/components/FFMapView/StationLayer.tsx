@@ -1,7 +1,8 @@
 import { CircleLayer, ShapeSource, SymbolLayer } from '@maplibre/maplibre-react-native'
+import { useTheme } from '@shopify/restyle'
 
 import { useStations } from '../../api/queries'
-import { theme } from '../../theme'
+import { Theme } from '../../theme'
 
 const useStationsAsGeoJSON = () => {
     const { data: stations } = useStations()
@@ -70,6 +71,7 @@ const secondPriorityStations = [
 
 export const StationLayer = () => {
     const stationsGeoJSON = useStationsAsGeoJSON()
+    const theme = useTheme<Theme>()
 
     if (!stationsGeoJSON) return null
 
@@ -88,7 +90,7 @@ export const StationLayer = () => {
                 id="stationNameLayer"
                 style={{
                     textField: ['get', 'name'],
-                    textColor: theme.colors.text[100],
+                    textColor: theme.colors.fg,
                     textAnchor: 'bottom',
                     textSize: 12,
                     textOffset: [0, -0.8],

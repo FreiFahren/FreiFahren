@@ -1,12 +1,10 @@
-import { Link, Row, useTheme } from 'native-base'
+import { noop } from 'lodash'
 import { ComponentProps } from 'react'
-import { Text } from 'react-native'
+import { Dimensions, Linking, Pressable } from 'react-native'
 
-import { Theme } from '../../theme'
+import { FFText, FFView } from '../common/base'
 
-export const Attribution = (props: ComponentProps<typeof Row>) => {
-    const theme = useTheme() as Theme
-
+export const Attribution = (props: ComponentProps<typeof FFView>) => {
     const links = [
         {
             text: 'MapLibre',
@@ -22,13 +20,34 @@ export const Attribution = (props: ComponentProps<typeof Row>) => {
         },
     ]
 
+    const { width } = Dimensions.get('screen')
+
     return (
-        <Row alignSelf="flex-start" flexDir="row" space={1} justifyContent="center" {...props}>
+        <FFView
+            gap="xxxs"
+            flexDirection="row"
+            style={{
+                transform: [{ rotate: '90deg' }],
+                justifyContent: 'center',
+                width: '100%',
+                position: 'absolute',
+                left: -width / 2 + 8,
+                top: '50%',
+                transformOrigin: 'center',
+                opacity: 0.5,
+            }}
+            {...props}
+        >
             {links.map((link) => (
-                <Link href={link.url} key={link.url}>
-                    <Text style={{ color: theme.colors.fg, fontSize: 12 }}>{link.text}</Text>
-                </Link>
+                <Pressable
+                    onPress={() => {
+                        Linking.openURL(link.url).catch(noop)
+                    }}
+                    key={link.url}
+                >
+                    <FFText variant="tiny">{link.text}</FFText>
+                </Pressable>
             ))}
-        </Row>
+        </FFView>
     )
 }

@@ -1,13 +1,10 @@
 import { Entypo } from '@expo/vector-icons'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
-import { useTheme } from 'native-base'
 import { ComponentProps, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Text } from 'react-native'
 
-import { Theme } from '../../../theme'
 import { track } from '../../../tracking'
-import { FFButton } from '../../common/FFButton'
+import { FFButton, FFText } from '../../common/base'
 import { ReportListSheet } from './ReportListSheet'
 
 type ReportListButtonProps = Partial<ComponentProps<typeof FFButton>>
@@ -16,8 +13,6 @@ export const ReportListButton = (props: ReportListButtonProps) => {
     const { t } = useTranslation('reportList')
     const sheetRef = useRef<BottomSheetModalMethods>(null)
 
-    const theme = useTheme() as Theme
-
     const handleOpen = () => {
         track({ name: 'Reports Viewed' })
         sheetRef.current?.present()
@@ -25,18 +20,11 @@ export const ReportListButton = (props: ReportListButtonProps) => {
 
     return (
         <>
-            <FFButton onPress={handleOpen} {...props}>
+            <FFButton onPress={handleOpen} variant="secondary" {...props}>
                 <Entypo name="menu" size={22} color="white" />
-                <Text
-                    style={{
-                        color: theme.colors.white,
-                        fontSize: 20,
-                        fontWeight: 'bold',
-                        marginLeft: 10,
-                    }}
-                >
+                <FFText color="fg" variant="labelLarge" ml="xxs">
                     {t('button')}
-                </Text>
+                </FFText>
             </FFButton>
             <ReportListSheet ref={sheetRef} />
         </>

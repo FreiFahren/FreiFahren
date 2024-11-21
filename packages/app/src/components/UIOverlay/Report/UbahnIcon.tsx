@@ -1,9 +1,10 @@
-import { View } from 'native-base'
 import { ComponentProps } from 'react'
 import { Path, Svg } from 'react-native-svg'
 
-export const UbahnIcon = (props: ComponentProps<typeof View>) => (
-    <View borderRadius={5} bg="#039" p={1} {...props}>
+import { FFView } from '../../common/base'
+
+export const UbahnIcon = (props: ComponentProps<typeof FFView>) => (
+    <FFView borderRadius="s" p="xxxs" style={{ backgroundColor: '#039' }} {...props}>
         <Svg enable-background="new 0 0 100 100" viewBox="0 0 100 100" width={30} height={30}>
             <Path d="M1 1h98v98H1z" fill="#039" />
             <Path
@@ -11,5 +12,5 @@ export const UbahnIcon = (props: ComponentProps<typeof View>) => (
                 fill="#fff"
             />
         </Svg>
-    </View>
+    </FFView>
 )
