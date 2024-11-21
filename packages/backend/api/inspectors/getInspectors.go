@@ -154,7 +154,6 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector, startTime ti
 	if ticketInfo.IsHistoric {
 		// As the historic data is not a real entry it has no timestamp, so we need to calculate one
 		ticketInfo.Timestamp = calculateHistoricDataTimestamp(startTime, endTime)
-		logger.Log.Debug().Msgf("Setting timestamp to %s for historic data", ticketInfo.Timestamp)
 	}
 
 	ticketInspectorInfo := utils.TicketInspectorResponse{
