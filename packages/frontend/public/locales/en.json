@@ -103,7 +103,7 @@
     },
     "PrivacyPolicy": {
         "title": "Privacy Policy for the App \"Freifahren\"",
-        "lastUpdate": "Last Update: 14.09.2024",
+        "lastUpdate": "Last Update: {{ lastUpdate }}",
         "switchLanguage": "Deutsche Version",
         "sections": {
             "preamble": {

@@ -1,14 +1,37 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '../../components/Miscellaneous/LanguageSwitcher';
 
 const PrivacyPolicy = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+
+    const [modifiedDate, setModifiedDate] = useState("");
+
+    useEffect(() => {
+        (async () => {
+            try {
+                // eslint-disable-next-line no-restricted-globals
+                const privacyPolicyMeta = await fetch(`${location.origin}/privacyPolicyMeta.json`).then((res) => res.json())
+
+                const formattedModifiedDate = new Date(privacyPolicyMeta.lastModified).toLocaleDateString(i18n.language, {
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric'
+                });
+
+                setModifiedDate(formattedModifiedDate)
+            } catch (error) {
+                // eslint-disable-next-line no-console
+                console.error('Error getting privacy policy meta', error)
+            }
+        })()
+    }, [i18n.language])
 
     return (
         <div className="legal-text">
             <h1>{t('PrivacyPolicy.title')}</h1>
             <div className="row">
-                <p>{t('PrivacyPolicy.lastUpdate')}</p>
+                <p>{t('PrivacyPolicy.lastUpdate', { lastUpdate: modifiedDate })}</p>
                 <LanguageSwitcher title={t("PrivacyPolicy.switchLanguage")} />
             </div>
 
