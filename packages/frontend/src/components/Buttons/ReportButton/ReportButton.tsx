@@ -3,12 +3,13 @@ import React, { MouseEventHandler } from 'react'
 import './ReportButton.css'
 
 interface ReportButtonProps {
-    onClick: MouseEventHandler<HTMLButtonElement>
+    openReportModal: MouseEventHandler<HTMLButtonElement>
 }
 
-const ReportButton: React.FC<ReportButtonProps> = ({ onClick }) => {
+const ReportButton: React.FC<ReportButtonProps> = ({ openReportModal }) => {
     return (
-        <button className="report-button action center-child" onClick={onClick} aria-label="report ticketinspector">
+        <button className="report-button small-button align-child-on-line" onClick={openReportModal}>
+            <p>Melden</p>
             <div className="plus">
                 <span></span>
                 <span></span>
