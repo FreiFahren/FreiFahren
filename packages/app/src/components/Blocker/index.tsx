@@ -49,9 +49,9 @@ const useShouldShowPrivacyPolicy = (newestPrivacyPolicyVersion: number | undefin
 }
 
 export const Blocker = () => {
-    const updateStore = useAppStore(({ update }) => update)
-
     const sheetRef = useRef<BottomSheetModal>(null)
+
+    const updateStore = useAppStore(({ update }) => update)
 
     const newestPrivacyPolicyVersion = usePrivacyPolicyMeta().data?.version
 

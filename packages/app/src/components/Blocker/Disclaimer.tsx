@@ -1,12 +1,10 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { noop } from 'lodash'
-import { DateTime } from 'luxon'
 import { Box, Text, View } from 'native-base'
 import { forwardRef, Ref } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
 
-import { useAppStore } from '../../app.store'
 import { config } from '../../config'
 import { track } from '../../tracking'
 import { FFButton } from '../common/FFButton'
@@ -18,14 +16,6 @@ type DisclaimerProps = {
 
 export const Disclaimer = forwardRef(({ onDismiss }: DisclaimerProps, ref: Ref<BottomSheetModal>) => {
     const { t } = useTranslation('disclaimer')
-
-    const updateStore = useAppStore(({ update }) => update)
-
-    const handleDismiss = () => {
-        track({ name: 'Disclaimer Dismissed' })
-        updateStore({ dismissedDisclaimerAt: DateTime.now().toISO() })
-        onDismiss()
-    }
 
     const openPrivacyPolicy = () => {
         track({ name: 'Privacy Policy Viewed', from: 'disclaimer' })
@@ -64,7 +54,7 @@ export const Disclaimer = forwardRef(({ onDismiss }: DisclaimerProps, ref: Ref<B
                         {t('endText')}
                     </Text>
                 </View>
-                <FFButton onPress={handleDismiss} bg="blue" borderColor="blue" mt={8}>
+                <FFButton onPress={onDismiss} bg="blue" borderColor="blue" mt={8}>
                     <Text fontSize="xl" bold>
                         {t('confirm')}
                     </Text>

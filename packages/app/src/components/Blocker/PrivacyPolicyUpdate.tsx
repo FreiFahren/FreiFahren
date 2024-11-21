@@ -6,8 +6,6 @@ import { forwardRef, Ref } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
 
-import { usePrivacyPolicyMeta } from '../../api/queries'
-import { useAppStore } from '../../app.store'
 import { config } from '../../config'
 import { track } from '../../tracking'
 import { FFButton } from '../common/FFButton'
@@ -19,17 +17,6 @@ type PrivacyPolicyUpdateProps = {
 
 export const PrivacyPolicyUpdate = forwardRef(({ onDismiss }: PrivacyPolicyUpdateProps, ref: Ref<BottomSheetModal>) => {
     const { t } = useTranslation('privacyPolicyUpdated')
-
-    const { data: privacyPolicyMeta } = usePrivacyPolicyMeta()
-
-    const updateStore = useAppStore(({ update }) => update)
-
-    const handleDismiss = () => {
-        if (privacyPolicyMeta === undefined) return
-
-        updateStore({ privacyPolicyVersion: privacyPolicyMeta.version })
-        onDismiss()
-    }
 
     const openPrivacyPolicy = () => {
         track({ name: 'Privacy Policy Viewed', from: 'update-sheet' })
@@ -61,7 +48,7 @@ export const PrivacyPolicyUpdate = forwardRef(({ onDismiss }: PrivacyPolicyUpdat
                         </Text>
                     </View>
                 </View>
-                <FFButton onPress={handleDismiss} bg="blue" borderColor="blue" mt={8}>
+                <FFButton onPress={onDismiss} bg="blue" borderColor="blue" mt={8}>
                     <Text fontSize="xl" bold>
                         {t('confirm')}
                     </Text>
