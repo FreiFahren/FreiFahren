@@ -77,6 +77,16 @@ const PrivacyPolicy = () => {
             </ul>
             <p>{t('PrivacyPolicy.sections.analytics.usage')}</p>
 
+            <h2>{t("PrivacyPolicy.sections.errorMonitoring.title")}</h2>
+            <p>{t("PrivacyPolicy.sections.errorMonitoring.description")}</p>
+            <ul>
+                <li>{t("PrivacyPolicy.sections.errorMonitoring.dataPoints.os")}</li>
+                <li>{t("PrivacyPolicy.sections.errorMonitoring.dataPoints.appVersion")}</li>
+                <li>{t("PrivacyPolicy.sections.errorMonitoring.dataPoints.device")}</li>
+                <li>{t("PrivacyPolicy.sections.errorMonitoring.dataPoints.state")}</li>
+            </ul>
+            <p>{t("PrivacyPolicy.sections.errorMonitoring.storage")}</p>
+
             <h2>{t('PrivacyPolicy.sections.severabilityClause.title')}</h2>
             <p>{t('PrivacyPolicy.sections.severabilityClause.content')}</p>
         </div>
