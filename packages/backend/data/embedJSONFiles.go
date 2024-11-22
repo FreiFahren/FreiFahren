@@ -1,10 +1,8 @@
 package data
 
 import (
-	"crypto/sha256"
 	_ "embed"
 	"encoding/json"
-	"fmt"
 	"sync"
 
 	"github.com/FreiFahren/backend/logger"
@@ -24,7 +22,6 @@ var (
 	linesList    map[string][]string
 	stationsList map[string]utils.StationListEntry
 	segments     []byte
-	segmentsETag string // Add ETag storage
 	dataLock     sync.RWMutex
 )
 
@@ -44,18 +41,15 @@ func EmbedJSONFiles() {
 		logger.Log.Error().Err(err).Msg("Error reading StationsList")
 	}
 
-	// Store segments and generate ETag
+	// load segments directly
 	segments = embeddedSegments
-	// Generate ETag from content (using first 8 chars of SHA-256 is sufficient)
-	hash := sha256.Sum256(segments)
-	segmentsETag = fmt.Sprintf(`"%x"`, hash[:4])
 }
 
-func GetSegments() ([]byte, string) {
+func GetSegments() []byte {
 	dataLock.RLock()
 	defer dataLock.RUnlock()
 
-	return segments, segmentsETag
+	return segments
 }
 
 func GetLinesList() map[string][]string {

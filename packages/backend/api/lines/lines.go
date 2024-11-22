@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/FreiFahren/backend/caching"
 	"github.com/FreiFahren/backend/data"
 	_ "github.com/FreiFahren/backend/docs"
 	"github.com/FreiFahren/backend/logger"
@@ -114,27 +115,13 @@ func GetLineStatistics(c echo.Context) error {
 // @Router /lines/segments [get]
 func GetAllSegments(c echo.Context) error {
 	logger.Log.Info().Msg("GET /lines/segments")
-
-	// Get cached segments data and ETag
-	segments, etag := data.GetSegments()
-	if len(segments) == 0 {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Internal Server Error: Error retrieving segments data.",
-		})
+	if cache, exists := caching.GlobalCacheManager.Get("segments"); exists {
+		return cache.ETagMiddleware()(func(c echo.Context) error {
+			return nil
+		})(c)
 	}
 
-	// Check if client's cached version matches
-	if clientETag := c.Request().Header.Get("If-None-Match"); clientETag == etag {
-		logger.Log.Info().Msg("GET /lines/segments: not modified")
-		return c.NoContent(http.StatusNotModified)
-	}
-
-	// Set cache headers
-	c.Response().Header().Set("Cache-Control", "public, max-age=31536000") // Cache for 1 year
-	c.Response().Header().Set("ETag", etag)
-	logger.Log.Info().Msg("GET /lines/segments: setting ETag")
-	c.Response().Header().Set("Content-Type", "application/json")
-
-	// Return the raw JSON bytes directly
-	return c.Blob(http.StatusOK, "application/json", segments)
+	// Fallback if cache doesn't exist
+	segments := data.GetSegments()
+	return c.JSONBlob(http.StatusOK, segments)
 }

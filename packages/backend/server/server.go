@@ -9,6 +9,7 @@ import (
 	"github.com/FreiFahren/backend/api/inspectors"
 	"github.com/FreiFahren/backend/api/lines"
 	"github.com/FreiFahren/backend/api/stations"
+	"github.com/FreiFahren/backend/caching"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/logger"
@@ -108,6 +109,13 @@ func SetupServer() *echo.Echo {
 
 	// Ensure the required table exists
 	database.CreateTicketInfoTable()
+
+	caching.InitCacheManager()
+	segments := data.GetSegments()
+	caching.GlobalCacheManager.Register("segments", segments, caching.CacheConfig{
+		MaxAgeInSeconds:   31536000, // 1 year
+		ContentTypeInMIME: "application/json",
+	})
 
 	e.POST("/basics/inspectors", inspectors.PostInspector)
 	e.GET("/basics/inspectors", inspectors.GetTicketInspectorsInfo)
