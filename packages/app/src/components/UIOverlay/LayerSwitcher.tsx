@@ -1,5 +1,4 @@
 import { Feather } from '@expo/vector-icons'
-import { Image, Pressable, Row, Text, View } from 'native-base'
 import { ComponentProps, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -7,11 +6,11 @@ import linesIcon from '../../../assets/lines.png'
 import riskIcon from '../../../assets/risk.png'
 import { useAppStore } from '../../app.store'
 import { track } from '../../tracking'
-import { FFButton } from '../common/FFButton'
+import { FFButton, FFImage, FFPressable, FFText, FFView } from '../common/base'
 
 const LAYER_BUTTON_SIZE = 55
 
-export const LayerSwitcher = (props: ComponentProps<typeof Row>) => {
+export const LayerSwitcher = (props: ComponentProps<typeof FFView>) => {
     const { t } = useTranslation('map')
     const [isOpen, setIsOpen] = useState(false)
 
@@ -25,24 +24,31 @@ export const LayerSwitcher = (props: ComponentProps<typeof Row>) => {
     }
 
     return (
-        <Row space={2} alignItems="flex-start" {...props}>
+        <FFView flexDirection="row" gap="xxs" alignItems="flex-start" {...props}>
             {isOpen && (
-                <View flexDir="row" borderRadius={7} bg="bg" borderWidth={3} borderColor="bg2" p={1}>
+                <FFView
+                    flexDirection="row"
+                    style={{ borderRadius: 7 }}
+                    bg="bg"
+                    borderWidth={3}
+                    borderColor="bg2"
+                    p="xxxs"
+                >
                     {(['risk', 'lines'] as const).map((layer, index) => (
-                        <Pressable
+                        <FFPressable
                             onPress={() => handleSelect(layer)}
                             hitSlop={10}
                             key={layer}
-                            borderRadius={5}
+                            borderRadius="s"
                             borderWidth={2}
                             borderColor={layer === currentLayer ? 'selected' : undefined}
-                            mr={index === 0 ? 2 : 0}
+                            mr={index === 0 ? 'xxs' : undefined}
                             justifyContent="flex-end"
                             width={LAYER_BUTTON_SIZE}
                             height={LAYER_BUTTON_SIZE}
                             overflow="hidden"
                         >
-                            <Image
+                            <FFImage
                                 source={layer === 'risk' ? riskIcon : linesIcon}
                                 width={LAYER_BUTTON_SIZE}
                                 height={LAYER_BUTTON_SIZE}
@@ -53,18 +59,22 @@ export const LayerSwitcher = (props: ComponentProps<typeof Row>) => {
                                 left={0}
                                 bottom={0}
                             />
-                            <View bg="rgba(0, 0, 0, 0.5)" alignSelf="stretch" alignItems="center">
-                                <Text color="white" fontSize="sm">
+                            <FFView
+                                style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+                                alignSelf="stretch"
+                                alignItems="center"
+                            >
+                                <FFText variant="small" color="fg">
                                     {t(`layers.${layer}`)}
-                                </Text>
-                            </View>
-                        </Pressable>
+                                </FFText>
+                            </FFView>
+                        </FFPressable>
                     ))}
-                </View>
+                </FFView>
             )}
-            <FFButton onPress={() => setIsOpen((prev) => !prev)} px={3} py={3}>
+            <FFButton variant="square" onPress={() => setIsOpen((prev) => !prev)}>
                 <Feather name="layers" size={24} color="white" />
             </FFButton>
-        </Row>
+        </FFView>
     )
 }

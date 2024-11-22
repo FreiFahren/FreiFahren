@@ -1,9 +1,10 @@
-import { View } from 'native-base'
+import { useTheme } from '@shopify/restyle'
 import { useEffect } from 'react'
 import { StyleSheet } from 'react-native'
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated'
 
-import { theme } from '../../theme'
+import { Theme } from '../../theme'
+import { FFView } from './base'
 
 const styles = StyleSheet.create({
     spinner: {
@@ -22,12 +23,8 @@ interface FFSpinnerProps {
     speed?: number
 }
 
-export const FFSpinner = ({
-    size = 10,
-    color2 = 'transparent',
-    color1 = theme.colors.bg,
-    speed = 650,
-}: FFSpinnerProps) => {
+export const FFSpinner = ({ size = 10, color2, color1, speed = 650 }: FFSpinnerProps) => {
+    const theme = useTheme<Theme>()
     const rotation = useSharedValue(0)
 
     useEffect(() => {
@@ -45,20 +42,22 @@ export const FFSpinner = ({
         transform: [{ rotate: `${rotation.value}deg` }],
     }))
 
+    const color = color1 ?? theme.colors.bg
+
     return (
-        <View width={size} height={size}>
+        <FFView width={size} height={size}>
             <Animated.View
                 style={[
                     styles.spinner,
                     {
-                        borderLeftColor: color1,
-                        borderRightColor: color1,
-                        borderBottomColor: color1,
-                        borderTopColor: color2,
+                        borderLeftColor: color,
+                        borderRightColor: color,
+                        borderBottomColor: color,
+                        borderTopColor: color2 ?? 'transparent',
                     },
                     animatedStyle,
                 ]}
             />
-        </View>
+        </FFView>
     )
 }

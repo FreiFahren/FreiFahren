@@ -3,7 +3,7 @@ export default {
     expo: {
         name: 'freifahren',
         slug: 'Freifahren',
-        version: '0.0.2',
+        version: '0.0.3',
         orientation: 'portrait',
         icon: './assets/app-icon.png',
         userInterfaceStyle: 'dark',
@@ -29,6 +29,25 @@ export default {
                 '@sentry/react-native/expo',
                 {
                     url: 'https://sentry.io/',
+                },
+            ],
+            [
+                'expo-font',
+                {
+                    fonts: [
+                        './assets/fonts/Funnel Sans Bold.ttf',
+                        './assets/fonts/Funnel Sans ExtraBold.ttf',
+                        './assets/fonts/Funnel Sans Medium.ttf',
+                        './assets/fonts/Funnel Sans Regular.ttf',
+                        './assets/fonts/Funnel Sans SemiBold.ttf',
+                        './assets/fonts/Funnel Sans Light.ttf',
+                        './assets/fonts/Funnel Sans Bold Italic.ttf',
+                        './assets/fonts/Funnel Sans Italic.ttf',
+                        './assets/fonts/Funnel Sans Light Italic.ttf',
+                        './assets/fonts/Funnel Sans Medium Italic.ttf',
+                        './assets/fonts/Funnel Sans SemiBold Italic.ttf',
+                        './assets/fonts/Funnel Sans ExtraBold Italic.ttf',
+                    ],
                 },
             ],
         ],
@@ -59,11 +78,6 @@ export default {
         },
         web: {
             favicon: './assets/favicon.png',
-        },
-        extra: {
-            eas: {
-                projectId: '25e04c03-8adb-462b-a6a5-83690823b47d',
-            },
         },
     },
 }

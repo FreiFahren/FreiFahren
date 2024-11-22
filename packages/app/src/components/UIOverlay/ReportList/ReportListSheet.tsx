@@ -1,9 +1,9 @@
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
-import { Stack, Text, View } from 'native-base'
 import { forwardRef, PropsWithChildren, Ref } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useReports } from '../../../api'
+import { FFText, FFView } from '../../common/base'
 import { FFScrollSheet } from '../../common/FFSheet'
 import { FFSpinner } from '../../common/FFSpinner'
 import { ReportItem } from '../../common/ReportItem'
@@ -14,30 +14,27 @@ export const ReportListSheet = forwardRef((_props: PropsWithChildren<{}>, ref: R
 
     return (
         <FFScrollSheet ref={ref}>
-            <Text fontSize="xl" color="white" bold>
-                {t('title')}
-            </Text>
+            <FFText variant="header1">{t('title')}</FFText>
             {reports?.length === 0 ? (
-                <Text color="fg">{t('empty')}</Text>
+                <FFText>{t('empty')}</FFText>
             ) : reports === undefined ? (
-                <View flex={1}>
+                <FFView flex={1}>
                     <FFSpinner />
-                </View>
+                </FFView>
             ) : (
-                <View mt={4}>
-                    <Stack pb={12}>
+                <FFView mt="xs">
+                    <FFView pb="s">
                         {reports.map((report, index) => (
                             <ReportItem
                                 key={`${report.stationId}-${report.timestamp.getMilliseconds()}`}
                                 report={report}
-                                py={3}
-                                pt={index === 0 ? 0 : undefined}
+                                py="xs"
                                 borderTopWidth={index === 0 ? 0 : 1}
                                 borderColor="bg2"
                             />
                         ))}
-                    </Stack>
-                </View>
+                    </FFView>
+                </FFView>
             )}
         </FFScrollSheet>
     )

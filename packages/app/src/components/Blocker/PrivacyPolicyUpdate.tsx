@@ -1,14 +1,13 @@
 import { Feather } from '@expo/vector-icons'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { noop } from 'lodash'
-import { Box, Text, View } from 'native-base'
 import { forwardRef, Ref } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
 
 import { config } from '../../config'
 import { track } from '../../tracking'
-import { FFButton } from '../common/FFButton'
+import { FFButton, FFSafeAreaView, FFText, FFView } from '../common/base'
 import { FFScrollSheet } from '../common/FFSheet'
 
 type PrivacyPolicyUpdateProps = {
@@ -25,35 +24,22 @@ export const PrivacyPolicyUpdate = forwardRef(({ onDismiss }: PrivacyPolicyUpdat
 
     return (
         <FFScrollSheet ref={ref} enablePanDownToClose={false} index={0} snapPoints={[600]}>
-            <Box justifyContent="space-between" flex={1} safeAreaBottom>
-                <View>
-                    <Text fontSize="xl" color="white" bold>
-                        {t('title')}
-                    </Text>
-                    <Text color="white" mt="4">
-                        {t('text')}
-                    </Text>
-                    <Text color="white" bold mt="4">
+            <FFSafeAreaView justifyContent="space-between" flex={1} edges={['bottom']}>
+                <FFView>
+                    <FFText variant="header1">{t('title')}</FFText>
+                    <FFText mt="xs">{t('text')}</FFText>
+                    <FFText fontFamily="Funnel Sans SemiBold" mt="xs">
                         {t('confirmText')}
-                    </Text>
-                    <View flexDir="row" alignItems="center" mt={4}>
+                    </FFText>
+                    <FFView flexDirection="row" alignItems="center" mt="xs">
                         <Feather name="arrow-right" size={16} color="white" />
-                        <Text
-                            color="white"
-                            style={{ textDecorationLine: 'underline' }}
-                            onPress={openPrivacyPolicy}
-                            ml={2}
-                        >
+                        <FFText textDecorationLine="underline" onPress={openPrivacyPolicy} ml="xxs">
                             {t('link')}
-                        </Text>
-                    </View>
-                </View>
-                <FFButton onPress={onDismiss} bg="blue" borderColor="blue" mt={8}>
-                    <Text fontSize="xl" bold>
-                        {t('confirm')}
-                    </Text>
-                </FFButton>
-            </Box>
+                        </FFText>
+                    </FFView>
+                </FFView>
+                <FFButton onPress={onDismiss} variant="primary" label={t('confirm')} mt="m" />
+            </FFSafeAreaView>
         </FFScrollSheet>
     )
 })

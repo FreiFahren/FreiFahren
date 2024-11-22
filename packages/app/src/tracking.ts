@@ -64,6 +64,7 @@ type Event = BaseEvent &
         | { name: 'Report Submitted'; duration: number }
         | { name: 'Language Switched'; language: string }
         | { name: 'Privacy Policy Viewed'; from: string }
+        | { name: 'Support Page Viewed'; from: string }
         | { name: 'Settings Opened' }
         | { name: 'Disclaimer Viewed' }
         | { name: 'Disclaimer Dismissed' }

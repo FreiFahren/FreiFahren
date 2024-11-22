@@ -1,13 +1,12 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { noop } from 'lodash'
-import { Box, Text, View } from 'native-base'
 import { forwardRef, Ref } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
 
 import { config } from '../../config'
 import { track } from '../../tracking'
-import { FFButton } from '../common/FFButton'
+import { FFButton, FFSafeAreaView, FFText, FFView } from '../common/base'
 import { FFScrollSheet } from '../common/FFSheet'
 
 type DisclaimerProps = {
@@ -24,42 +23,32 @@ export const Disclaimer = forwardRef(({ onDismiss }: DisclaimerProps, ref: Ref<B
 
     return (
         <FFScrollSheet ref={ref} enablePanDownToClose={false} index={0} snapPoints={[600]}>
-            <Box justifyContent="space-between" flex={1} safeAreaBottom>
-                <View>
-                    <Text fontSize="xl" color="white" bold>
-                        {t('title')}
-                    </Text>
-                    <Text color="white" mt="4">
-                        {t('subtitle')}
-                    </Text>
-                    <Text color="white" bold mt="4">
+            <FFSafeAreaView justifyContent="space-between" flex={1} edges={['bottom']}>
+                <FFView>
+                    <FFText variant="header1">{t('title')}</FFText>
+                    <FFText mt="xs">{t('subtitle')}</FFText>
+                    <FFText variant="header3" mt="xs">
                         {t('bullet1.title')}
-                    </Text>
-                    <Text color="white" mt="2">
-                        {t('bullet1.text1')}
-                    </Text>
-                    <Text color="white" mt="2">
-                        {t('bullet1.text2')}
-                    </Text>
-                    <Text color="white" mt="4" bold>
+                    </FFText>
+                    <FFText mt="xxs">{t('bullet1.text1')}</FFText>
+                    <FFText mt="xxs">{t('bullet1.text2')}</FFText>
+                    <FFText variant="header3" mt="xs">
                         {t('bullet2.title')}
-                    </Text>
-                    <Text color="white" mt="2">
+                    </FFText>
+                    <FFText mt="xxs">
                         {t('bullet2.text')}
-                        <Text style={{ textDecorationLine: 'underline' }} onPress={openPrivacyPolicy}>
+                        <FFText style={{ textDecorationLine: 'underline' }} onPress={openPrivacyPolicy}>
                             {t('bullet2.privacyPolicy')}
-                        </Text>
-                    </Text>
-                    <Text color="white" mt="4">
-                        {t('endText')}
-                    </Text>
-                </View>
-                <FFButton onPress={onDismiss} bg="blue" borderColor="blue" mt={8}>
-                    <Text fontSize="xl" bold>
+                        </FFText>
+                    </FFText>
+                    <FFText mt="xs">{t('endText')}</FFText>
+                </FFView>
+                <FFButton variant="primary" onPress={onDismiss} marginTop="m">
+                    <FFText variant="labelLarge" fontWeight="bold">
                         {t('confirm')}
-                    </Text>
+                    </FFText>
                 </FFButton>
-            </Box>
+            </FFSafeAreaView>
         </FFScrollSheet>
     )
 })

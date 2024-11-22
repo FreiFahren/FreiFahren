@@ -1,34 +1,28 @@
-import { Octicons } from '@expo/vector-icons'
-import { Button, useTheme } from 'native-base'
+import { Entypo } from '@expo/vector-icons'
+import { useTheme } from '@shopify/restyle'
 import { ComponentProps, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Text } from 'react-native'
 
 import { Theme } from '../../../theme'
-import { FFButton } from '../../common/FFButton'
+import { FFButton, FFText } from '../../common/base'
 import { ReportSheet, ReportSheetMethods } from './ReportSheet'
 
-type ReportButtonProps = Omit<ComponentProps<typeof Button>, 'onPress'>
+// <Octicons name="report" size={24} color={theme.colors.white} />
+
+type ReportButtonProps = Omit<ComponentProps<typeof FFButton>, 'onPress'>
 
 export const ReportButton = (props: ReportButtonProps) => {
     const { t } = useTranslation('makeReport')
     const modalRef = useRef<ReportSheetMethods>(null)
-    const theme = useTheme() as Theme
+    const theme = useTheme<Theme>()
 
     return (
         <>
-            <FFButton onPress={() => modalRef.current?.open()} bg="blue" borderColor="blue" {...props}>
-                <Octicons name="report" size={24} color={theme.colors.bg} />
-                <Text
-                    style={{
-                        color: theme.colors.bg,
-                        fontSize: 20,
-                        fontWeight: 'bold',
-                        marginLeft: 10,
-                    }}
-                >
+            <FFButton variant="primary" onPress={() => modalRef.current?.open()} {...props}>
+                <Entypo name="plus" size={20} color={theme.colors.fg} />
+                <FFText variant="labelLarge" ml="xxs">
                     {t('submit')}
-                </Text>
+                </FFText>
             </FFButton>
             <ReportSheet ref={modalRef} />
         </>
