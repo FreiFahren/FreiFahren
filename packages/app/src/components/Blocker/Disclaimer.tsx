@@ -1,52 +1,21 @@
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { noop, pick } from 'lodash'
-import { DateTime, Duration } from 'luxon'
-import { Box, Text } from 'native-base'
-import { useEffect, useRef } from 'react'
+import { noop } from 'lodash'
+import { Box, Text, View } from 'native-base'
+import { forwardRef, Ref } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Linking, View } from 'react-native'
+import { Linking } from 'react-native'
 
-import { useAppStore } from '../../app.store'
 import { config } from '../../config'
 import { track } from '../../tracking'
 import { FFButton } from '../common/FFButton'
 import { FFScrollSheet } from '../common/FFSheet'
 
-const DISCLAIMER_INTERVAL = Duration.fromObject({ days: 7 })
+type DisclaimerProps = {
+    onDismiss: () => void
+}
 
-export const Disclaimer = () => {
-    const { dismissedDisclaimerAt, disclaimerGood, update } = useAppStore((state) =>
-        pick(state, ['dismissedDisclaimerAt', 'disclaimerGood', 'update'])
-    )
-    const sheetRef = useRef<BottomSheetModal>(null)
+export const Disclaimer = forwardRef(({ onDismiss }: DisclaimerProps, ref: Ref<BottomSheetModal>) => {
     const { t } = useTranslation('disclaimer')
-
-    useEffect(() => {
-        sheetRef.current?.present()
-    }, [])
-
-    useEffect(() => {
-        if (dismissedDisclaimerAt !== null) {
-            const now = DateTime.now()
-            const dismissedAtDate = DateTime.fromISO(dismissedDisclaimerAt)
-
-            if (Math.abs(now.diff(dismissedAtDate).as('days')) <= DISCLAIMER_INTERVAL.as('days')) {
-                update({ disclaimerGood: true })
-                return
-            }
-        }
-        track({ name: 'Disclaimer Viewed' })
-    }, [dismissedDisclaimerAt, update])
-
-    if (disclaimerGood) {
-        return null
-    }
-
-    const onDismiss = () => {
-        track({ name: 'Disclaimer Dismissed' })
-        update({ dismissedDisclaimerAt: DateTime.now().toISO() })
-        sheetRef.current?.dismiss()
-    }
 
     const openPrivacyPolicy = () => {
         track({ name: 'Privacy Policy Viewed', from: 'disclaimer' })
@@ -54,7 +23,7 @@ export const Disclaimer = () => {
     }
 
     return (
-        <FFScrollSheet ref={sheetRef} enablePanDownToClose={false} index={0} snapPoints={[600]}>
+        <FFScrollSheet ref={ref} enablePanDownToClose={false} index={0} snapPoints={[600]}>
             <Box justifyContent="space-between" flex={1} safeAreaBottom>
                 <View>
                     <Text fontSize="xl" color="white" bold>
@@ -93,4 +62,4 @@ export const Disclaimer = () => {
             </Box>
         </FFScrollSheet>
     )
-}
+})

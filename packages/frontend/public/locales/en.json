@@ -103,7 +103,7 @@
     },
     "PrivacyPolicy": {
         "title": "Privacy Policy for the App \"Freifahren\"",
-        "lastUpdate": "Last Update: 14.09.2024",
+        "lastUpdate": "Last Update: {{ lastUpdate }}",
         "switchLanguage": "Deutsche Version",
         "sections": {
             "preamble": {
@@ -175,8 +175,19 @@
                 ],
                 "usage": "These data are not personal; no information is collected that would allow user identification..."
             },
+            "errorMonitoring": {
+                "title": "13. Error Monitoring and Diagnostics",
+                "description": "We use Sentry for error monitoring and crash reporting to maintain and improve our service. When the app encounters an error, we collect anonymized diagnostic information including:",
+                "dataPoints": {
+                    "os": "Operating system version",
+                    "appVersion": "App version",
+                    "device": "Device type",
+                    "state": "App state at the time of the error"
+                },
+                "storage": "This technical data is stored on Sentry's infrastructure located in the European Union for a maximum period of 30 days. We explicitly configure Sentry to not collect IP addresses. All data collection is anonymized and used solely for the purpose of identifying and fixing technical issues."
+            },
             "severabilityClause": {
-                "title": "13. Severability Clause",
+                "title": "14. Severability Clause",
                 "content": "If any provision of this Privacy Policy is found to be wholly or partially invalid or unenforceable, or if it subsequently becomes invalid or unenforceable, the validity of the remaining provisions shall not be affected..."
             }
         }
