@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/FreiFahren/backend/caching"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/logger"
@@ -44,7 +45,7 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 
 	// Check if the data has been modified since the provided time
 	ifModifiedSince := c.Request().Header.Get("If-Modified-Since")
-	modifiedSince, err := utils.CheckIfModifiedSince(ifModifiedSince, databaseLastModified)
+	modifiedSince, err := caching.CheckIfModifiedSince(ifModifiedSince, databaseLastModified)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error checking if the data has been modified")
 		return c.NoContent(http.StatusInternalServerError)
