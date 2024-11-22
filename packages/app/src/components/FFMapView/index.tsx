@@ -15,7 +15,7 @@ import { RiskLayer } from './RiskLayer'
 import { StationLayer } from './StationLayer'
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-MapLibreGL.setAccessToken(null)
+// MapLibreGL.setAccessToken(null)
 
 const MAP_REGION = {
     longitude: 13.40587,
