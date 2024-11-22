@@ -5,6 +5,7 @@ export const CACHE_KEYS = {
     stations: ['stations'],
     lines: ['lines'],
     risk: ['risk'],
+    privacyPolicyMeta: ['privacy-policy-meta'],
 }
 
 export const queryClient = new QueryClient({

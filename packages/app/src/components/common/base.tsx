@@ -25,7 +25,7 @@ import {
 } from '@shopify/restyle'
 import { isNil } from 'lodash'
 import { ComponentProps } from 'react'
-import { ActivityIndicator, Image, Pressable, StyleProp, StyleSheet, Text, TextStyle, ViewStyle } from 'react-native'
+import { ActivityIndicator, Image, Pressable, StyleProp, TextStyle, ViewStyle } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { Theme } from '../../theme'
@@ -94,23 +94,6 @@ const ButtonContainer = createRestyleComponent<RestyleButtonProps, Theme>(
     Pressable
 )
 
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-    },
-    label: {
-        color: 'white',
-        textAlign: 'center',
-        marginHorizontal: 8,
-    },
-    disabled: {
-        opacity: 0.5,
-    },
-    disabledLabel: {
-        opacity: 0.5,
-    },
-})
-
 export const FFButton = ({
     onPress,
     onPressIn,
@@ -119,11 +102,9 @@ export const FFButton = ({
     disabled = false,
     loading = false,
     label,
-    labelStyle,
     icon,
     iconPosition = 'left',
     children,
-    style,
     activeOpacity = 0.7,
     pressableStyle,
     ...rest
@@ -141,9 +122,9 @@ export const FFButton = ({
             <>
                 {!isNil(icon) && iconPosition === 'left' && icon}
                 {!isNil(label) && (
-                    <Text style={[styles.label, labelStyle, disabled === true ? styles.disabledLabel : {}]}>
+                    <FFText variant="label" opacity={disabled === true ? 0.6 : 1}>
                         {label}
-                    </Text>
+                    </FFText>
                 )}
                 {!isNil(icon) && iconPosition === 'right' && icon}
             </>
@@ -157,7 +138,8 @@ export const FFButton = ({
             onPressIn={onPressIn}
             onPressOut={onPressOut}
             onLongPress={onLongPress}
-            style={[styles.container, style ?? {}, disabled === true ? styles.disabled : {}, pressableStyle ?? {}]}
+            flexDirection="row"
+            style={pressableStyle}
             activeOpacity={activeOpacity}
             {...rest}
         >

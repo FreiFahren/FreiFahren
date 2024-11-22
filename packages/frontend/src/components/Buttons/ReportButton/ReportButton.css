@@ -1,47 +1,33 @@
 .report-button {
     position: fixed;
-    height: 90px;
-    min-height: auto;
-    min-width: auto;
-    width: 90px;
     bottom: var(--distance-from-edge-default);
+    width: 110px;
     right: var(--distance-from-edge-default);
-    padding: var(--padding-s);
-    cursor: pointer;
-    border: 2px solid var(--color-white);
-    border-radius: 50%;
-    overflow: hidden;
     margin-bottom: 15px;
+    padding-left: 10px;
     z-index: var(--zIndex-button);
+    background-color: var(--incentive-blue);
+    border: 2px solid var(--color-white);
 }
 
 .report-button .plus span {
     position: absolute;
     background-color: var(--color-white);
     border-radius: 1px;
-    box-shadow: var(--boxShadow-default);
 }
 
 .report-button .plus span:first-child {
-    height: 4px;
-    width: 50%;
+    height: 3px;
+    width: 20px;
     left: 25%;
-    top: 50%;
+    top: 48%;
     transform: translateY(-50%);
 }
 
 .report-button .plus span:last-child {
-    width: 4px;
-    height: 50%;
+    width: 3px;
+    height: 20px;
     top: 25%;
-    left: 50%;
+    left: 52%;
     transform: translateX(-50%);
-}
-
-@media (max-width: 400px) {
-    .report-button {
-        height: 60px;
-        width: 60px;
-        padding: var(--padding-xs);
-    }
 }

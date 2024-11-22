@@ -86,6 +86,11 @@ export const theme = createTheme({
             fontSize: 22,
             lineHeight: 28,
         },
+        header3: {
+            fontFamily: 'Funnel Sans Bold',
+            fontSize: 20,
+            lineHeight: 24,
+        },
         body: {
             fontSize: 16,
             lineHeight: 24,

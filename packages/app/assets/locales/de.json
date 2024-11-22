@@ -48,4 +48,11 @@
     "endText": "Jetzt kann es auch schon losgehen. Vielen Dank!",
     "confirm": "Bestätigen"
   },
+  "privacyPolicyUpdated": {
+        "title": "Neue Datenschutzerklärung",
+        "text": "Wir haben unsere Datenschutzerklärung aktualisiert. Wir speichern weiterhin keine personenbezogenen Daten, deinen Standort oder ähnliches, aber bitte lies sie dir trotzdem durch.",
+        "confirmText": "Wenn du fortfährst, erklärst du dich mit den neuen Datenschutzbestimmungen einverstanden.",
+        "link": "Neue Datenschutzerklärung",
+        "confirm": "Bestätigen"
+    }
 }

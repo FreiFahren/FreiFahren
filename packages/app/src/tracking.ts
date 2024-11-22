@@ -68,6 +68,8 @@ type Event = BaseEvent &
         | { name: 'Settings Opened' }
         | { name: 'Disclaimer Viewed' }
         | { name: 'Disclaimer Dismissed' }
+        | { name: 'Privacy Policy Blocker Shown' }
+        | { name: 'Privacy Policy Accepted' }
     )
 
 export const track = ({ name, duration, ...eventData }: Event) => {

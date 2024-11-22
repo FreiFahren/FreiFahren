@@ -257,7 +257,7 @@ function App() {
                 </div>
             )}
             <ReportButton
-                onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })}
+                openReportModal={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })}
             />
             {appUIState.isStatsPopUpOpen && statsData !== 0 && (
                 <StatsPopUp

@@ -142,7 +142,7 @@ export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
     const reportsGeoJson = useReportsGeoJson(reports)
     const pulseAnimatedStyle = usePulseAnimation()
     const showMarkers = useShowMarkersWithDelay()
-    const shouldShowReports = useAppStore((state) => state.disclaimerGood)
+    const shouldShowReports = useAppStore((state) => !state.appLocked)
     const { data: stations } = useStations()
 
     const theme = useTheme<Theme>()

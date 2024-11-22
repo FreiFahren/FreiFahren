@@ -1,6 +1,6 @@
 import { useAppStore } from '../../app.store'
+import { Blocker } from '../Blocker'
 import { FFSafeAreaView, FFView } from '../common/base'
-import { Disclaimer } from '../Disclaimer'
 import { Attribution } from './Attribution'
 import { LayerSwitcher } from './LayerSwitcher'
 import { ReportButton } from './Report/ReportButton'
@@ -50,7 +50,7 @@ export const UIOverlay = () => {
                         <ReportListButton flex={1} />
                         <ReportButton flex={1} />
                     </FFView>
-                    <Disclaimer />
+                    <Blocker />
                 </FFView>
             </FFSafeAreaView>
         </FFView>

@@ -71,8 +71,8 @@
         "disclaimer": "Daten vielleicht ungenau."
     },
     "Share": {
-        "title": "Schau dir diese App an",
-        "text": "Siehe wo Kontrolleure in Berlin sind",
+        "title": "Schau dir mal diese App an.",
+        "text": "Siehe, wo Kontrolleure in Berlin sind!\n\nHier ist eine Meldung:\nStation: {{station}}\nRichtung: {{direction}}\nLinie: {{line}}\n",
         "copied": "Link kopiert!"
     },
     "StatsPopUp": {
@@ -103,7 +103,7 @@
     },
     "PrivacyPolicy": {
         "title": "Datenschutzerklärung für die App \"Freifahren\"",
-        "lastUpdate": "Letzte Aktualisierung: 14.09.2024",
+        "lastUpdate": "Letzte Aktualisierung: {{ lastUpdate }}",
         "switchLanguage": "English version",
         "sections": {
             "preamble": {
@@ -175,8 +175,19 @@
                 ],
                 "usage": "Diese Daten sind nicht personenbezogen; es werden keine Informationen gesammelt, die eine Identifizierung der Nutzer ermöglichen..."
             },
+            "errorMonitoring": {
+                "title": "13. Fehlererkennung und Diagnose",
+                "description": "Wir verwenden Sentry zur Fehlererkennung und Absturzberichterstattung, um unseren Service zu warten und zu verbessern. Wenn die App einen Fehler feststellt, sammeln wir anonymisierte Diagnoseinformationen, einschließlich:",
+                "dataPoints": {
+                    "os": "Betriebssystemversion",
+                    "appVersion": "App-Version",
+                    "device": "Gerätetyp",
+                    "state": "App-Status zum Zeitpunkt des Fehlers"
+                },
+                "storage": "Diese technischen Daten werden auf der Infrastruktur von Sentry in der Europäischen Union für maximal 30 Tage gespeichert. Wir konfigurieren Sentry ausdrücklich so, dass keine IP-Adressen erfasst werden. Alle Datenerfassung erfolgt anonymisiert und dient ausschließlich der Identifizierung und Behebung technischer Probleme."
+            },
             "severabilityClause": {
-                "title": "13. Salvatorische Klausel",
+                "title": "14. Salvatorische Klausel",
                 "content": "Sollten einzelne Bestimmungen dieser Datenschutzerklärung ganz oder teilweise unwirksam oder undurchführbar sein oder nachträglich unwirksam oder undurchführbar werden, so wird dadurch die Gültigkeit der übrigen Bestimmungen nicht berührt..."
             }
         }

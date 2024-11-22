@@ -12,6 +12,7 @@ export const config = (() => {
                 PIRSCH_BASE_URL: z.string(),
                 PIRSCH_IDENTIFICATION_CODE: z.string(),
                 PIRSCH_SITE_URL: z.string(),
+                PRIVACY_POLICY_META_URL: z.string(),
             })
             .parse({
                 FF_API_BASE_URL: process.env.EXPO_PUBLIC_FF_API_BASE_URL,
@@ -22,6 +23,7 @@ export const config = (() => {
                 PIRSCH_BASE_URL: process.env.EXPO_PUBLIC_PIRSCH_BASE_URL,
                 PIRSCH_IDENTIFICATION_CODE: process.env.EXPO_PUBLIC_PIRSCH_IDENTIFICATION_CODE,
                 PIRSCH_SITE_URL: process.env.EXPO_PUBLIC_PIRSCH_SITE_URL,
+                PRIVACY_POLICY_META_URL: process.env.EXPO_PUBLIC_PRIVACY_POLICY_META_URL,
             })
     } catch (error) {
         // eslint-disable-next-line no-console
