@@ -23,7 +23,6 @@ export const LayerSwitcher = (props: ComponentProps<typeof FFView>) => {
         setIsOpen(false)
     }
 
-    // # EXPO_PUBLIC_MAP_STYLE_URL=https://api.jawg.io/styles/848dfeff-2d26-4044-8b83-3b1851256e3d.json?access-token=dcoHXLktQJPYzg7dTPm5KdeeOi2tq2BJuBYgwxwuebDCxEzTG49emRHnXtgMIt19
     return (
         <FFView flexDirection="row" gap="xxs" alignItems="flex-start" {...props}>
             {isOpen && (
