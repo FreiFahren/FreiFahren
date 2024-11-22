@@ -7,6 +7,7 @@ export default {
         orientation: 'portrait',
         icon: './assets/app-icon.png',
         userInterfaceStyle: 'dark',
+        newArchEnabled: true,
         plugins: [
             [
                 'expo-dev-launcher',
@@ -50,6 +51,7 @@ export default {
                     ],
                 },
             ],
+            'expo-asset',
         ],
         splash: {
             resizeMode: 'contain',
