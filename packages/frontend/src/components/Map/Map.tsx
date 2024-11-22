@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
+import React, { Suspense, lazy, useCallback, useEffect, useRef } from 'react'
 import { LngLatBoundsLike, LngLatLike, MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
@@ -11,6 +11,7 @@ import { convertStationsToGeoJSON } from '../../utils/mapUtils'
 import { useRiskData } from '../../contexts/RiskDataContext'
 import { useLocation } from '../../contexts/LocationContext'
 import { useStationsAndLines } from '../../contexts/StationsAndLinesContext'
+import { useETagCache } from '../../hooks/useETagCaching'
 
 import './Map.css'
 
@@ -39,58 +40,17 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     const NorthEastBounds: LngLatLike = { lng: 14.00044556529124, lat: 52.77063424239867 }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
 
-    const [lineSegments, setLineSegments] = useState<GeoJSON.FeatureCollection<GeoJSON.LineString> | null>(null)
+    const { data: lineSegments, error: segmentsError } = useETagCache<GeoJSON.FeatureCollection<GeoJSON.LineString>>({
+        endpoint: '/lines/segments',
+        storageKeyPrefix: 'segments',
+        onError: (error) => {
+            console.error('Error loading lines GeoJSON', error)
+        },
+    })
 
-    // fetch segments at runtime to avoid having to bundle them in the frontend
-    useEffect(() => {
-        const fetchSegments = async () => {
-            try {
-                const cachedETag = localStorage.getItem('segmentsETag')
-                const response = await fetch(`${process.env.REACT_APP_API_URL}/lines/segments`, {
-                    headers: {
-                        'If-None-Match': cachedETag || '',
-                        Accept: 'application/json',
-                    },
-                })
-
-                // Get the ETag from response headers
-                const newETag = response.headers.get('ETag')
-                console.log('Response ETag:', newETag)
-
-                if (response.status === 304) {
-                    console.log('Using cached data')
-                    const cachedData = localStorage.getItem('segmentsData')
-                    if (cachedData) {
-                        setLineSegments(JSON.parse(cachedData))
-                        return
-                    }
-                }
-
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch segments: ${response.status}`)
-                }
-
-                // Store new ETag if provided
-                if (newETag) {
-                    localStorage.setItem('segmentsETag', newETag)
-                }
-
-                const data = await response.json()
-                localStorage.setItem('segmentsData', JSON.stringify(data))
-                setLineSegments(data)
-            } catch (error) {
-                console.error('Error loading lines GeoJSON:', error)
-
-                // Fallback to cached data if available
-                const cachedData = localStorage.getItem('segmentsData')
-                if (cachedData) {
-                    setLineSegments(JSON.parse(cachedData))
-                }
-            }
-        }
-
-        fetchSegments()
-    }, []) // Empty dependency array means this runs once on mount
+    if (segmentsError) {
+        console.error('Error loading lines GeoJSON', segmentsError)
+    }
 
     const map = useRef<MapRef>(null)
     const { allStations } = useStationsAndLines()
