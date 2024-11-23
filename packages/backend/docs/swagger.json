@@ -129,33 +129,6 @@
                 }
             }
         },
-        "/lines/segments": {
-            "get": {
-                "description": "Retrieves information about all available transit segments.\nA segment is the geojson lineString part of a line between two stations.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "lines"
-                ],
-                "summary": "Get all segments",
-                "responses": {
-                    "200": {
-                        "description": "GeoJSON segments data",
-                        "schema": {
-                            "$ref": "#/definitions/utils.SegmentsCollection"
-                        }
-                    },
-                    "304": {
-                        "description": "Not Modified"
-                    },
-                    "500": {
-                        "description": "Internal Server Error: Error retrieving segments data.",
-                        "schema": {}
-                    }
-                }
-            }
-        },
         "/lines/{lineId}/{stationId}/statistics": {
             "get": {
                 "description": "Retrieves statistics for a specific line at a specific station.\nThis endpoint returns the number of reports for the specified line at the given station within the given time range.",
@@ -539,18 +512,6 @@
                 }
             }
         },
-        "utils.GeoJSONCRS": {
-            "type": "object",
-            "properties": {
-                "properties": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
         "utils.InspectorRequest": {
             "type": "object",
             "properties": {
@@ -609,71 +570,6 @@
                     "additionalProperties": {
                         "type": "string"
                     }
-                }
-            }
-        },
-        "utils.SegmentFeature": {
-            "type": "object",
-            "properties": {
-                "geometry": {
-                    "$ref": "#/definitions/utils.SegmentGeometry"
-                },
-                "properties": {
-                    "$ref": "#/definitions/utils.SegmentProperties"
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
-        "utils.SegmentGeometry": {
-            "type": "object",
-            "properties": {
-                "coordinates": {
-                    "type": "array",
-                    "items": {
-                        "type": "array",
-                        "items": {
-                            "type": "number"
-                        }
-                    }
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
-        "utils.SegmentProperties": {
-            "type": "object",
-            "properties": {
-                "line": {
-                    "type": "string"
-                },
-                "line_color": {
-                    "type": "string"
-                },
-                "sid": {
-                    "type": "string"
-                }
-            }
-        },
-        "utils.SegmentsCollection": {
-            "type": "object",
-            "properties": {
-                "crs": {
-                    "$ref": "#/definitions/utils.GeoJSONCRS"
-                },
-                "features": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/utils.SegmentFeature"
-                    }
-                },
-                "name": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
                 }
             }
         },
