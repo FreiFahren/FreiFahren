@@ -86,27 +86,27 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
 
     return (
         <div id="map-container" data-testid="map-container">
-            <Map
-                reuseMaps
-                data-testid="map"
-                ref={map}
-                id="map"
-                initialViewState={{
-                    longitude: berlinViewPosition.lng,
-                    latitude: berlinViewPosition.lat,
-                    zoom: 11,
-                }}
-                maxZoom={14}
-                minZoom={10}
-                maxBounds={maxBounds}
-                onRotate={handleRotate}
-                mapStyle={
-                    currentColorTheme === 'light'
-                        ? `https://api.jawg.io/styles/359ec2e4-39f7-4fb5-8e3a-52037d043f96.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`
-                        : `https://api.jawg.io/styles/848dfeff-2d26-4044-8b83-3b1851256e3d.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`
-                }
-            >
-                <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<div>Loading...</div>}>
+                <Map
+                    reuseMaps
+                    data-testid="map"
+                    ref={map}
+                    id="map"
+                    initialViewState={{
+                        longitude: berlinViewPosition.lng,
+                        latitude: berlinViewPosition.lat,
+                        zoom: 11,
+                    }}
+                    maxZoom={14}
+                    minZoom={10}
+                    maxBounds={maxBounds}
+                    onRotate={handleRotate}
+                    mapStyle={
+                        currentColorTheme === 'light'
+                            ? `https://api.jawg.io/styles/359ec2e4-39f7-4fb5-8e3a-52037d043f96.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`
+                            : `https://api.jawg.io/styles/848dfeff-2d26-4044-8b83-3b1851256e3d.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`
+                    }
+                >
                     {!isFirstOpen && <LocationMarker userPosition={userPosition} />}
                     <MarkerContainer
                         isFirstOpen={isFirstOpen}
@@ -123,8 +123,8 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     ) : (
                         <RegularLineLayer lineSegments={lineSegments} textColor={textColor} />
                     )}
-                </Suspense>
-            </Map>
+                </Map>
+            </Suspense>
             <div className="social-media">
                 <a href="https://github.com/FreiFahren/FreiFahren" target="_blank" rel="noopener noreferrer">
                     <img src={github_icon} alt="GitHub" />
