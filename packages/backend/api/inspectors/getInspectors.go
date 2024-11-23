@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/FreiFahren/backend/caching"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/logger"
@@ -45,7 +44,7 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 
 	// Check if the data has been modified since the provided time
 	ifModifiedSince := c.Request().Header.Get("If-Modified-Since")
-	modifiedSince, err := caching.CheckIfModifiedSince(ifModifiedSince, databaseLastModified)
+	modifiedSince, err := utils.CheckIfModifiedSince(ifModifiedSince, databaseLastModified)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error checking if the data has been modified")
 		return c.NoContent(http.StatusInternalServerError)
@@ -155,6 +154,7 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector, startTime ti
 	if ticketInfo.IsHistoric {
 		// As the historic data is not a real entry it has no timestamp, so we need to calculate one
 		ticketInfo.Timestamp = calculateHistoricDataTimestamp(startTime, endTime)
+		logger.Log.Debug().Msgf("Setting timestamp to %s for historic data", ticketInfo.Timestamp)
 	}
 
 	ticketInspectorInfo := utils.TicketInspectorResponse{

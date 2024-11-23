@@ -165,32 +165,3 @@ type RiskModelResponse struct {
 	LastModified  string            `json:"last_modified"`
 	SegmentColors map[string]string `json:"segment_colors"`
 }
-
-type GeoJSONCRS struct {
-	Type       string                 `json:"type"`
-	Properties map[string]interface{} `json:"properties"`
-}
-
-type SegmentProperties struct {
-	Sid       string `json:"sid"`
-	Line      string `json:"line"`
-	LineColor string `json:"line_color"`
-}
-
-type SegmentGeometry struct {
-	Type        string      `json:"type"`
-	Coordinates [][]float64 `json:"coordinates"`
-}
-
-type SegmentFeature struct {
-	Type       string            `json:"type"`
-	Properties SegmentProperties `json:"properties"`
-	Geometry   SegmentGeometry   `json:"geometry"`
-}
-
-type SegmentsCollection struct {
-	Type     string           `json:"type"`
-	Name     string           `json:"name"`
-	CRS      GeoJSONCRS       `json:"crs"`
-	Features []SegmentFeature `json:"features"`
-}
