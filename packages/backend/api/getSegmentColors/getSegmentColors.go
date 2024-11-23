@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/FreiFahren/backend/Rstats"
+	"github.com/FreiFahren/backend/caching"
 	_ "github.com/FreiFahren/backend/docs"
 	"github.com/FreiFahren/backend/logger"
 	"github.com/FreiFahren/backend/utils"
@@ -47,7 +48,7 @@ func GetSegmentColors(c echo.Context) error {
 	}
 
 	ifModifiedSince := c.Request().Header.Get("If-Modified-Since")
-	modifiedSince, err := utils.CheckIfModifiedSince(ifModifiedSince, lastModified)
+	modifiedSince, err := caching.CheckIfModifiedSince(ifModifiedSince, lastModified)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error checking if the data has been modified")
 		return c.NoContent(http.StatusInternalServerError)

@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
+import React, { Suspense, lazy, useCallback, useEffect, useRef } from 'react'
 import { LngLatBoundsLike, LngLatLike, MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
@@ -11,6 +11,7 @@ import { convertStationsToGeoJSON } from '../../utils/mapUtils'
 import { useRiskData } from '../../contexts/RiskDataContext'
 import { useLocation } from '../../contexts/LocationContext'
 import { useStationsAndLines } from '../../contexts/StationsAndLinesContext'
+import { useETagCache } from '../../hooks/useETagCaching'
 
 import './Map.css'
 
@@ -39,15 +40,17 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     const NorthEastBounds: LngLatLike = { lng: 14.00044556529124, lat: 52.77063424239867 }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
 
-    const [lineSegments, setLineSegments] = useState<GeoJSON.FeatureCollection<GeoJSON.LineString> | null>(null)
+    const { data: lineSegments, error: segmentsError } = useETagCache<GeoJSON.FeatureCollection<GeoJSON.LineString>>({
+        endpoint: '/lines/segments',
+        storageKeyPrefix: 'segments',
+        onError: (error) => {
+            console.error('Error loading lines GeoJSON', error)
+        },
+    })
 
-    // fetch segments at runtime to avoid having to bundle them in the frontend
-    useEffect(() => {
-        fetch(`${process.env.PUBLIC_URL}/segments.json`)
-            .then((response) => response.json())
-            .then((data) => setLineSegments(data))
-            .catch((error) => console.error('Error loading lines segments:', error))
-    }, [])
+    if (segmentsError) {
+        console.error('Error loading lines GeoJSON', segmentsError)
+    }
 
     const map = useRef<MapRef>(null)
     const { allStations } = useStationsAndLines()
@@ -83,27 +86,27 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
 
     return (
         <div id="map-container" data-testid="map-container">
-            <Map
-                reuseMaps
-                data-testid="map"
-                ref={map}
-                id="map"
-                initialViewState={{
-                    longitude: berlinViewPosition.lng,
-                    latitude: berlinViewPosition.lat,
-                    zoom: 11,
-                }}
-                maxZoom={14}
-                minZoom={10}
-                maxBounds={maxBounds}
-                onRotate={handleRotate}
-                mapStyle={
-                    currentColorTheme === 'light'
-                        ? `https://api.jawg.io/styles/359ec2e4-39f7-4fb5-8e3a-52037d043f96.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`
-                        : `https://api.jawg.io/styles/848dfeff-2d26-4044-8b83-3b1851256e3d.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`
-                }
-            >
-                <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<div>Loading...</div>}>
+                <Map
+                    reuseMaps
+                    data-testid="map"
+                    ref={map}
+                    id="map"
+                    initialViewState={{
+                        longitude: berlinViewPosition.lng,
+                        latitude: berlinViewPosition.lat,
+                        zoom: 11,
+                    }}
+                    maxZoom={14}
+                    minZoom={10}
+                    maxBounds={maxBounds}
+                    onRotate={handleRotate}
+                    mapStyle={
+                        currentColorTheme === 'light'
+                            ? `https://api.jawg.io/styles/359ec2e4-39f7-4fb5-8e3a-52037d043f96.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`
+                            : `https://api.jawg.io/styles/848dfeff-2d26-4044-8b83-3b1851256e3d.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`
+                    }
+                >
                     {!isFirstOpen && <LocationMarker userPosition={userPosition} />}
                     <MarkerContainer
                         isFirstOpen={isFirstOpen}
@@ -120,8 +123,8 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     ) : (
                         <RegularLineLayer lineSegments={lineSegments} textColor={textColor} />
                     )}
-                </Suspense>
-            </Map>
+                </Map>
+            </Suspense>
             <div className="social-media">
                 <a href="https://github.com/FreiFahren/FreiFahren" target="_blank" rel="noopener noreferrer">
                     <img src={github_icon} alt="GitHub" />
