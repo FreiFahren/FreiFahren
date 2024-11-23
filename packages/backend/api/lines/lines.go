@@ -108,7 +108,7 @@ func GetLineStatistics(c echo.Context) error {
 //
 // @Produce json
 //
-// @Success 200 {object} json.RawMessage
+// @Success 200 {object} utils.SegmentsCollection "GeoJSON segments data"
 // @Success 304 "Not Modified"
 // @Failure 500 {object} error "Internal Server Error: Error retrieving segments data."
 //
