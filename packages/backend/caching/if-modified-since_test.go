@@ -1,10 +1,8 @@
-package utils_test
+package caching
 
 import (
 	"testing"
 	"time"
-
-	"github.com/FreiFahren/backend/utils"
 )
 
 func TestCheckIfModifiedSince(t *testing.T) {
@@ -49,7 +47,7 @@ func TestCheckIfModifiedSince(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			modified, err := utils.CheckIfModifiedSince(tt.ifModifiedSince, tt.lastModified)
+			modified, err := CheckIfModifiedSince(tt.ifModifiedSince, tt.lastModified)
 			if (err != nil) != tt.expectError {
 				t.Errorf("CheckIfModifiedSince() error = %v, expectError %v", err, tt.expectError)
 			}

@@ -18,6 +18,14 @@ definitions:
       longitude:
         type: number
     type: object
+  utils.GeoJSONCRS:
+    properties:
+      properties:
+        additionalProperties: true
+        type: object
+      type:
+        type: string
+    type: object
   utils.InspectorRequest:
     properties:
       author:
@@ -58,6 +66,48 @@ definitions:
         additionalProperties:
           type: string
         type: object
+    type: object
+  utils.SegmentFeature:
+    properties:
+      geometry:
+        $ref: '#/definitions/utils.SegmentGeometry'
+      properties:
+        $ref: '#/definitions/utils.SegmentProperties'
+      type:
+        type: string
+    type: object
+  utils.SegmentGeometry:
+    properties:
+      coordinates:
+        items:
+          items:
+            type: number
+          type: array
+        type: array
+      type:
+        type: string
+    type: object
+  utils.SegmentProperties:
+    properties:
+      line:
+        type: string
+      line_color:
+        type: string
+      sid:
+        type: string
+    type: object
+  utils.SegmentsCollection:
+    properties:
+      crs:
+        $ref: '#/definitions/utils.GeoJSONCRS'
+      features:
+        items:
+          $ref: '#/definitions/utils.SegmentFeature'
+        type: array
+      name:
+        type: string
+      type:
+        type: string
     type: object
   utils.Station:
     properties:
@@ -265,6 +315,26 @@ paths:
         "500":
           description: 'Internal Server Error: Error retrieving line data.'
       summary: Get a single line
+      tags:
+      - lines
+  /lines/segments:
+    get:
+      description: |-
+        Retrieves information about all available transit segments.
+        A segment is the geojson lineString part of a line between two stations.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GeoJSON segments data
+          schema:
+            $ref: '#/definitions/utils.SegmentsCollection'
+        "304":
+          description: Not Modified
+        "500":
+          description: 'Internal Server Error: Error retrieving segments data.'
+          schema: {}
+      summary: Get all segments
       tags:
       - lines
   /risk-prediction/segment-colors:
