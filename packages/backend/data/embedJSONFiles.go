@@ -15,9 +15,13 @@ var embeddedLinesList []byte
 //go:embed StationsList.json
 var embeddedStationsList []byte
 
+//go:embed segments.json
+var embeddedSegments []byte
+
 var (
 	linesList    map[string][]string
 	stationsList map[string]utils.StationListEntry
+	segments     []byte
 	dataLock     sync.RWMutex
 )
 
@@ -36,6 +40,16 @@ func EmbedJSONFiles() {
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error reading StationsList")
 	}
+
+	// load segments directly
+	segments = embeddedSegments
+}
+
+func GetSegments() []byte {
+	dataLock.RLock()
+	defer dataLock.RUnlock()
+
+	return segments
 }
 
 func GetLinesList() map[string][]string {

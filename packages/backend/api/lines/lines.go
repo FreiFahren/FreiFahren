@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/FreiFahren/backend/caching"
 	"github.com/FreiFahren/backend/data"
 	_ "github.com/FreiFahren/backend/docs"
 	"github.com/FreiFahren/backend/logger"
@@ -96,4 +97,31 @@ func GetLineStatistics(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, stats)
+}
+
+// @Summary Get all segments
+//
+// @Description Retrieves information about all available transit segments.
+// @Description A segment is the geojson lineString part of a line between two stations.
+//
+// @Tags lines
+//
+// @Produce json
+//
+// @Success 200 {object} utils.SegmentsCollection "GeoJSON segments data"
+// @Success 304 "Not Modified"
+// @Failure 500 {object} error "Internal Server Error: Error retrieving segments data."
+//
+// @Router /lines/segments [get]
+func GetAllSegments(c echo.Context) error {
+	logger.Log.Info().Msg("GET /lines/segments")
+	if cache, exists := caching.GlobalCacheManager.Get("segments"); exists {
+		return cache.ETagMiddleware()(func(c echo.Context) error {
+			return nil
+		})(c)
+	}
+
+	// Fallback if cache doesn't exist
+	segments := data.GetSegments()
+	return c.JSONBlob(http.StatusOK, segments)
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/FreiFahren/backend/api/inspectors"
 	"github.com/FreiFahren/backend/api/lines"
 	"github.com/FreiFahren/backend/api/stations"
+	"github.com/FreiFahren/backend/caching"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/logger"
@@ -85,7 +86,19 @@ func SetupServer() *echo.Echo {
 	// Initialize Echo instance
 	e := echo.New()
 	e.Use(middleware.Recover())
-	e.Use(middleware.CORS())
+
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
+		AllowHeaders: []string{
+			echo.HeaderOrigin,
+			echo.HeaderContentType,
+			echo.HeaderAccept,
+			"If-None-Match",
+			"If-Modified-Since",
+		},
+		ExposeHeaders: []string{"ETag", "Last-Modified"},
+	}))
 
 	// Define routes
 	e.GET("/", func(c echo.Context) error {
@@ -97,10 +110,18 @@ func SetupServer() *echo.Echo {
 	// Ensure the required table exists
 	database.CreateTicketInfoTable()
 
+	caching.InitCacheManager()
+	segments := data.GetSegments()
+	caching.GlobalCacheManager.Register("segments", segments, caching.CacheConfig{
+		MaxAgeInSeconds:   31536000, // 1 year
+		ContentTypeInMIME: "application/json",
+	})
+
 	e.POST("/basics/inspectors", inspectors.PostInspector)
 	e.GET("/basics/inspectors", inspectors.GetTicketInspectorsInfo)
 
 	e.GET("/lines", lines.GetAllLines)
+	e.GET("/lines/segments", lines.GetAllSegments)
 	e.GET("/lines/:lineName", lines.GetSingleLine)
 	e.GET("/lines/:lineId/:stationId/statistics", lines.GetLineStatistics)
 

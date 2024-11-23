@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
+import React, { Suspense, lazy, useCallback, useEffect, useRef } from 'react'
 import { LngLatBoundsLike, LngLatLike, MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
@@ -11,6 +11,7 @@ import { convertStationsToGeoJSON } from '../../utils/mapUtils'
 import { useRiskData } from '../../contexts/RiskDataContext'
 import { useLocation } from '../../contexts/LocationContext'
 import { useStationsAndLines } from '../../contexts/StationsAndLinesContext'
+import { useETagCache } from '../../hooks/useETagCaching'
 
 import './Map.css'
 
@@ -39,15 +40,17 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     const NorthEastBounds: LngLatLike = { lng: 14.00044556529124, lat: 52.77063424239867 }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
 
-    const [lineSegments, setLineSegments] = useState<GeoJSON.FeatureCollection<GeoJSON.LineString> | null>(null)
+    const { data: lineSegments, error: segmentsError } = useETagCache<GeoJSON.FeatureCollection<GeoJSON.LineString>>({
+        endpoint: '/lines/segments',
+        storageKeyPrefix: 'segments',
+        onError: (error) => {
+            console.error('Error loading lines GeoJSON', error)
+        },
+    })
 
-    // fetch segments at runtime to avoid having to bundle them in the frontend
-    useEffect(() => {
-        fetch(`${process.env.PUBLIC_URL}/segments.json`)
-            .then((response) => response.json())
-            .then((data) => setLineSegments(data))
-            .catch((error) => console.error('Error loading lines segments:', error))
-    }, [])
+    if (segmentsError) {
+        console.error('Error loading lines GeoJSON', segmentsError)
+    }
 
     const map = useRef<MapRef>(null)
     const { allStations } = useStationsAndLines()
