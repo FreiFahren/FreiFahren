@@ -86,7 +86,7 @@
         "summary": "Summary",
         "lines": "Lines",
         "stations": "Stations",
-        "top5Lines": "Top 5 Lines",
+        "reportsHeading": "Current Reports",
         "risk": "Current Risk",
         "topLines": "Top Lines",
         "topStations": "Top Stations",
@@ -202,7 +202,10 @@
             },
             "representatives": {
                 "title": "Represented by the partners:",
-                "content": ["David Brandes", "Johan Trieloff"]
+                "content": [
+                    "David Brandes",
+                    "Johan Trieloff"
+                ]
             },
             "contact": {
                 "title": "Contact:",
@@ -212,7 +215,10 @@
             },
             "responsible": {
                 "title": "Responsible for content under § 55 Abs. 2 RStV:",
-                "content": ["David Brandes", "Johan Trieloff"]
+                "content": [
+                    "David Brandes",
+                    "Johan Trieloff"
+                ]
             },
             "disclaimer": {
                 "title": "Disclaimer:",

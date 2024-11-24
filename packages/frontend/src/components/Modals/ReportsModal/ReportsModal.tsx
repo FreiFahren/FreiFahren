@@ -217,15 +217,15 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             {currentTab === 'summary' && (
                 <section className="summary">
                     <section className="lines">
-                        <h2>{t('ReportsModal.top5Lines')}</h2>
+                        <h2>{t('ReportsModal.reportsHeading')}</h2>
                         <p>{t('ReportsModal.past24Hours')}</p>
                         {Array.from(sortedLinesWithReports.entries())
-                            .slice(0, 5)
                             .sort(([, inspectorsA], [, inspectorsB]) => {
                                 const timestampA = new Date(inspectorsA[0].timestamp).getTime()
                                 const timestampB = new Date(inspectorsB[0].timestamp).getTime()
                                 return timestampB - timestampA // most recent first
                             })
+                            .slice(0, 5)
                             .map(([line, inspectors]) => (
                                 <ClusteredReportItem key={line} inspectors={inspectors} />
                             ))}
