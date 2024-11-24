@@ -24,7 +24,7 @@
 }
 
 .list-button-header p {
-    font-size: var(--font-xs);
+    font-size: var(--font-xxs);
     font-weight: 400;
 }
 
@@ -47,4 +47,11 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.indicator {
+    height: 8px;
+    width: 8px;
+    border: 2px solid var(--color-white);
+    margin-left: auto;
 }
