@@ -85,7 +85,7 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({
             style={{ opacity: opacity.toString() }}
             onClick={() => onMarkerClick(markerData)}
         >
-            <span className={`live ${isWithin30Mins ? 'pulse' : ''}`} />
+            <span className={`marker live ${isWithin30Mins ? 'pulse' : ''}`} />
         </Marker>
     )
 }

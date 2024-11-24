@@ -368,6 +368,27 @@ button .plus {
     animation: slide-out var(--transition-default) ease-in forwards;
 }
 
+.live {
+    border-radius: 50%;
+    background-color: var(--color-red);
+}
+
+.pulse {
+    animation: pulse 3500ms infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: var(--color-red) 0 0 0 0;
+    }
+    50% {
+        box-shadow: var(--color-red) 0 0 0 0;
+    }
+    75% {
+        box-shadow: var(--boxShadow-marker-pulse);
+    }
+}
+
 /* FLEX STYLES */
 
 .center-child {
