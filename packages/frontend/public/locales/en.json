@@ -1,6 +1,6 @@
 {
     "InspectorListButton": {
-        "label": "Reports"
+        "label": "Current reports: "
     },
     "LegalDisclaimer": {
         "title": "Please confirm before proceeding",

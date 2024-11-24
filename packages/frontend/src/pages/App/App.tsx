@@ -242,9 +242,9 @@ function App() {
                                 <Backdrop onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
                             </>
                         )}
+                        <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
                     </TicketInspectorsProvider>
                 </RiskDataProvider>
-                <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
             </StationsAndLinesProvider>
             <UtilButton onClick={toggleUtilModal} />
             {mapsRotation !== 0 && (
