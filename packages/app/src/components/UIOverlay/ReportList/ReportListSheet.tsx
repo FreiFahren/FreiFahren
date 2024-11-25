@@ -1,4 +1,4 @@
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
+import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { forwardRef, PropsWithChildren, Ref } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -8,7 +8,7 @@ import { FFScrollSheet } from '../../common/FFSheet'
 import { FFSpinner } from '../../common/FFSpinner'
 import { ReportItem } from '../../common/ReportItem'
 
-export const ReportListSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<BottomSheetModalMethods>) => {
+export const ReportListSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<TrueSheet>) => {
     const { t } = useTranslation('reportList')
     const { data: reports } = useReports()
 

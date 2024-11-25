@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
+import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import Constants from 'expo-constants'
 import { noop } from 'lodash'
 import { ComponentProps, forwardRef, Ref, useRef } from 'react'
@@ -44,7 +44,7 @@ const LanguageSwitcher = () => {
     )
 }
 
-const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
+const SettingsSheet = forwardRef((_, ref: Ref<TrueSheet>) => {
     const { t } = useTranslation('settings')
 
     const openPrivacyPolicy = () => {
@@ -95,11 +95,11 @@ const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
 })
 
 export const SettingsButton = (props: ComponentProps<typeof FFButton>) => {
-    const sheetRef = useRef<BottomSheetModalMethods>(null)
+    const sheetRef = useRef<TrueSheet>(null)
 
     const handleOpen = () => {
         track({ name: 'Settings Opened' })
-        sheetRef.current?.present()
+        sheetRef.current?.present().catch(noop)
     }
 
     return (

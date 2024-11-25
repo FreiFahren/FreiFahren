@@ -1,10 +1,12 @@
 import { Octicons } from '@expo/vector-icons'
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
+import { TrueSheet } from '@lodev09/react-native-true-sheet'
 import { useTheme } from '@shopify/restyle'
+import { noop } from 'lodash'
 import { forwardRef, PropsWithChildren, Ref, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutAnimation } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useSubmitReport } from '../../../api'
 import { useLines, useStations } from '../../../api/queries'
@@ -34,19 +36,21 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
     const { mutateAsync: submitReport, isPending } = useSubmitReport()
     const { data: stations } = useStations()
     const { data: lines } = useLines()
-    const sheetRef = useRef<BottomSheetModalMethods>(null)
+    const sheetRef = useRef<TrueSheet>(null)
     const theme = useTheme<Theme>()
 
     const openedAt = useRef<number | null>(null)
 
+    const { bottom } = useSafeAreaInsets()
+
     useImperativeHandle(ref, () => ({
         open: () => {
-            sheetRef.current?.present()
+            sheetRef.current?.present().catch(noop)
             openedAt.current = Date.now()
             track({ name: 'Report Sheet Opened' })
         },
         close: () => {
-            sheetRef.current?.close()
+            sheetRef.current?.dismiss().catch(noop)
             openedAt.current = null
         },
     }))
@@ -60,13 +64,11 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
 
     useEffect(() => setSelectedLine(null), [lineType])
     useEffect(() => {
-        if (selectedLine !== null) {
-            sheetRef.current?.expand()
-        }
         setSelectedDirection(null)
+        setSelectedStation(null)
+        if (selectedLine !== null) sheetRef.current?.resize(1).catch(noop)
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
     }, [selectedLine])
-    useEffect(() => setSelectedStation(null), [selectedLine])
 
     const lineOptions = useMemo(
         () => Object.keys(lines ?? {}).filter((line) => line.toLowerCase().startsWith(lineType)),
@@ -85,7 +87,7 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
     const shouldShowDirection = !(['S41', 'S42'] as (typeof selectedLine)[]).includes(selectedLine)
 
     const close = () => {
-        sheetRef.current?.close()
+        sheetRef.current?.dismiss().catch(noop)
 
         setLineType('u')
         setSelectedLine(null)
@@ -106,7 +108,38 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
     }
 
     return (
-        <FFScrollSheet ref={sheetRef} onDismiss={close}>
+        <FFScrollSheet
+            ref={sheetRef}
+            onDismiss={close}
+            sizes={['medium', 'large']}
+            FooterComponent={
+                <FFButton
+                    variant="primary"
+                    onPress={onSubmit}
+                    disabled={isDisabled}
+                    marginHorizontal="s"
+                    style={{ marginBottom: bottom }}
+                >
+                    {isPending ? (
+                        <FFSpinner size={6} />
+                    ) : (
+                        <>
+                            <Octicons name="report" size={24} color="white" />
+                            <FFText
+                                style={{
+                                    color: 'white',
+                                    fontSize: 20,
+                                    fontWeight: 'bold',
+                                    marginLeft: 10,
+                                }}
+                            >
+                                {tReport('submit')}
+                            </FFText>
+                        </>
+                    )}
+                </FFButton>
+            }
+        >
             <FFSafeAreaView
                 justifyContent="space-between"
                 overflow="visible"
@@ -195,25 +228,6 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
                         </>
                     )}
                 </FFView>
-                <FFButton variant="primary" onPress={onSubmit} disabled={isDisabled} mt="s">
-                    {isPending ? (
-                        <FFSpinner size={6} />
-                    ) : (
-                        <>
-                            <Octicons name="report" size={24} color="white" />
-                            <FFText
-                                style={{
-                                    color: 'white',
-                                    fontSize: 20,
-                                    fontWeight: 'bold',
-                                    marginLeft: 10,
-                                }}
-                            >
-                                {tReport('submit')}
-                            </FFText>
-                        </>
-                    )}
-                </FFButton>
             </FFSafeAreaView>
         </FFScrollSheet>
     )
