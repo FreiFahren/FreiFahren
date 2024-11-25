@@ -1,10 +1,9 @@
 import { Octicons } from '@expo/vector-icons'
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 import { useTheme } from '@shopify/restyle'
 import { forwardRef, PropsWithChildren, Ref, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LayoutAnimation } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
+import { LayoutAnimation, ScrollView as RNScrollView } from 'react-native'
+import { ActionSheetRef, ScrollView } from 'react-native-actions-sheet'
 
 import { useSubmitReport } from '../../../api'
 import { useLines, useStations } from '../../../api/queries'
@@ -13,7 +12,7 @@ import { track } from '../../../tracking'
 import { FFButton, FFSafeAreaView, FFText, FFView } from '../../common/base'
 import { FFCarousellSelect } from '../../common/FFCarousellSelect'
 import { FFLineTag } from '../../common/FFLineTag'
-import { FFScrollSheet } from '../../common/FFSheet'
+import { FFScrollSheet, FFSheetHeader } from '../../common/FFSheet'
 import { FFSpinner } from '../../common/FFSpinner'
 import { SbahnIcon } from './SbahnIcon'
 import { TramIcon } from './TramIcon'
@@ -34,19 +33,23 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
     const { mutateAsync: submitReport, isPending } = useSubmitReport()
     const { data: stations } = useStations()
     const { data: lines } = useLines()
-    const sheetRef = useRef<BottomSheetModalMethods>(null)
+    const sheetRef = useRef<ActionSheetRef>(null)
     const theme = useTheme<Theme>()
 
     const openedAt = useRef<number | null>(null)
 
+    const isOpen = useRef(false)
+
     useImperativeHandle(ref, () => ({
         open: () => {
-            sheetRef.current?.present()
+            sheetRef.current?.show()
+            isOpen.current = true
             openedAt.current = Date.now()
             track({ name: 'Report Sheet Opened' })
         },
         close: () => {
-            sheetRef.current?.close()
+            sheetRef.current?.hide()
+            isOpen.current = false
             openedAt.current = null
         },
     }))
@@ -60,13 +63,14 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
 
     useEffect(() => setSelectedLine(null), [lineType])
     useEffect(() => {
-        if (selectedLine !== null) {
-            sheetRef.current?.expand()
-        }
+        if (isOpen.current) sheetRef.current?.snapToOffset(80)
         setSelectedDirection(null)
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
     }, [selectedLine])
     useEffect(() => setSelectedStation(null), [selectedLine])
+    useEffect(() => {
+        if (isOpen.current) sheetRef.current?.snapToOffset(80)
+    }, [selectedStation])
 
     const lineOptions = useMemo(
         () => Object.keys(lines ?? {}).filter((line) => line.toLowerCase().startsWith(lineType)),
@@ -82,13 +86,15 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
 
     const isDisabled = !isValid || isPending
 
-    const shouldShowDirection = !(['S41', 'S42'] as (typeof selectedLine)[]).includes(selectedLine)
+    const shouldShowDirection = selectedLine !== 'S42' && selectedLine !== 'S41'
 
-    const close = () => {
-        sheetRef.current?.close()
-
+    const reset = () => {
         setLineType('u')
         setSelectedLine(null)
+    }
+
+    const close = () => {
+        reset()
     }
 
     const onSubmit = async () => {
@@ -106,18 +112,10 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
     }
 
     return (
-        <FFScrollSheet ref={sheetRef} onDismiss={close}>
-            <FFSafeAreaView
-                justifyContent="space-between"
-                overflow="visible"
-                position="relative"
-                flex={1}
-                edges={['bottom']}
-            >
+        <FFScrollSheet ref={sheetRef} snapPoints={[80]} onClose={close}>
+            <FFSafeAreaView justifyContent="space-between" overflow="visible" position="relative" edges={['bottom']}>
                 <FFView>
-                    <FFText variant="header1" mb="xs" color="fg">
-                        {tReport('title')}
-                    </FFText>
+                    <FFSheetHeader title={tReport('title')} ref={sheetRef} onClose={reset} mb="xs" />
                     <FFCarousellSelect
                         options={lineTypes}
                         selectedOption={lineType}
@@ -128,7 +126,7 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
                     <FFText variant="header2" fontWeight="bold" color="fg" mt="xs" mb="xxs">
                         {tCommon('line')}
                     </FFText>
-                    <FFView style={{ marginHorizontal: -4 }}>
+                    <FFView style={{ marginHorizontal: -theme.spacing.s }}>
                         <ScrollView
                             horizontal
                             showsHorizontalScrollIndicator={false}
@@ -195,9 +193,15 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
                         </>
                     )}
                 </FFView>
-                <FFButton variant="primary" onPress={onSubmit} disabled={isDisabled} mt="s">
+                <FFButton
+                    variant="primary"
+                    onPress={onSubmit}
+                    disabled={isDisabled}
+                    marginVertical="m"
+                    opacity={isDisabled ? 0.7 : 1}
+                >
                     {isPending ? (
-                        <FFSpinner size={6} />
+                        <FFSpinner size={24} />
                     ) : (
                         <>
                             <Octicons name="report" size={24} color="white" />

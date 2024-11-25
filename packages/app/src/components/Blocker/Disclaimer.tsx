@@ -1,8 +1,8 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { noop } from 'lodash'
 import { forwardRef, Ref } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
+import { ActionSheetRef } from 'react-native-actions-sheet'
 
 import { config } from '../../config'
 import { track } from '../../tracking'
@@ -13,7 +13,7 @@ type DisclaimerProps = {
     onDismiss: () => void
 }
 
-export const Disclaimer = forwardRef(({ onDismiss }: DisclaimerProps, ref: Ref<BottomSheetModal>) => {
+export const Disclaimer = forwardRef(({ onDismiss }: DisclaimerProps, ref: Ref<ActionSheetRef>) => {
     const { t } = useTranslation('disclaimer')
 
     const openPrivacyPolicy = () => {
@@ -22,8 +22,8 @@ export const Disclaimer = forwardRef(({ onDismiss }: DisclaimerProps, ref: Ref<B
     }
 
     return (
-        <FFScrollSheet ref={ref} enablePanDownToClose={false} index={0} snapPoints={[600]}>
-            <FFSafeAreaView justifyContent="space-between" flex={1} edges={['bottom']}>
+        <FFScrollSheet ref={ref} snapPoints={[100]} closable={false}>
+            <FFSafeAreaView justifyContent="space-between" flex={1} edges={['bottom']} paddingBottom="m">
                 <FFView>
                     <FFText variant="header1">{t('title')}</FFText>
                     <FFText mt="xs">{t('subtitle')}</FFText>

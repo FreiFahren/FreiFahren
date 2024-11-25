@@ -2,7 +2,6 @@
 import 'intl-pluralrules'
 import './src/sentry'
 
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { wrap as sentryWrap } from '@sentry/react-native'
 import { ThemeProvider } from '@shopify/restyle'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -15,6 +14,7 @@ import { noop } from 'lodash'
 import { useEffect } from 'react'
 import { I18nextProvider } from 'react-i18next'
 import { StyleSheet } from 'react-native'
+import { SheetProvider } from 'react-native-actions-sheet'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
@@ -68,19 +68,21 @@ const App = () => {
     return (
         <I18nextProvider i18n={i18n}>
             <SafeAreaProvider>
-                <ThemeProvider theme={theme}>
-                    <QueryClientProvider client={queryClient}>
-                        {/* eslint-disable-next-line react/style-prop-object */}
-                        <StatusBar style="light" backgroundColor="transparent" />
-                        <GestureHandlerRootView style={StyleSheet.absoluteFill}>
-                            <BottomSheetModalProvider>
-                                <FFView flex={1} bg="bg">
-                                    <Main />
-                                </FFView>
-                            </BottomSheetModalProvider>
-                        </GestureHandlerRootView>
-                    </QueryClientProvider>
-                </ThemeProvider>
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                    <ThemeProvider theme={theme}>
+                        <QueryClientProvider client={queryClient}>
+                            {/* eslint-disable-next-line react/style-prop-object */}
+                            <StatusBar style="light" backgroundColor="transparent" />
+                            <GestureHandlerRootView style={StyleSheet.absoluteFill}>
+                                <SheetProvider>
+                                    <FFView flex={1} bg="bg">
+                                        <Main />
+                                    </FFView>
+                                </SheetProvider>
+                            </GestureHandlerRootView>
+                        </QueryClientProvider>
+                    </ThemeProvider>
+                </GestureHandlerRootView>
             </SafeAreaProvider>
         </I18nextProvider>
     )

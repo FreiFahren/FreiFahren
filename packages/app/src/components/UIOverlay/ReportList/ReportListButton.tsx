@@ -1,7 +1,7 @@
 import { Entypo } from '@expo/vector-icons'
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 import { ComponentProps, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ActionSheetRef } from 'react-native-actions-sheet'
 
 import { track } from '../../../tracking'
 import { FFButton, FFText } from '../../common/base'
@@ -11,11 +11,11 @@ type ReportListButtonProps = Partial<ComponentProps<typeof FFButton>>
 
 export const ReportListButton = (props: ReportListButtonProps) => {
     const { t } = useTranslation('reportList')
-    const sheetRef = useRef<BottomSheetModalMethods>(null)
+    const sheetRef = useRef<ActionSheetRef>(null)
 
     const handleOpen = () => {
         track({ name: 'Reports Viewed' })
-        sheetRef.current?.present()
+        sheetRef.current?.show()
     }
 
     return (

@@ -1,20 +1,20 @@
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 import { forwardRef, PropsWithChildren, Ref } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ActionSheetRef } from 'react-native-actions-sheet'
 
 import { useReports } from '../../../api'
 import { FFText, FFView } from '../../common/base'
-import { FFScrollSheet } from '../../common/FFSheet'
+import { FFScrollSheet, FFSheetHeader } from '../../common/FFSheet'
 import { FFSpinner } from '../../common/FFSpinner'
 import { ReportItem } from '../../common/ReportItem'
 
-export const ReportListSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<BottomSheetModalMethods>) => {
+export const ReportListSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<ActionSheetRef>) => {
     const { t } = useTranslation('reportList')
     const { data: reports } = useReports()
 
     return (
         <FFScrollSheet ref={ref}>
-            <FFText variant="header1">{t('title')}</FFText>
+            <FFSheetHeader title={t('title')} ref={ref} />
             {reports?.length === 0 ? (
                 <FFText>{t('empty')}</FFText>
             ) : reports === undefined ? (

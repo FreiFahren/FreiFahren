@@ -7,8 +7,6 @@ import { Theme } from '../../../theme'
 import { FFButton, FFText } from '../../common/base'
 import { ReportSheet, ReportSheetMethods } from './ReportSheet'
 
-// <Octicons name="report" size={24} color={theme.colors.white} />
-
 type ReportButtonProps = Omit<ComponentProps<typeof FFButton>, 'onPress'>
 
 export const ReportButton = (props: ReportButtonProps) => {

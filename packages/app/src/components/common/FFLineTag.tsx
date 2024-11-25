@@ -12,7 +12,7 @@ type LineTagProps = {
 
 export const FFLineTag = ({ line, textProps, ...props }: LineTagProps) => (
     <FFView bg={line === null ? 'lines.unknown' : getLineColor(line)} px="xxs" borderRadius="s" {...props}>
-        <FFText color="fg" textAlign="center" variant="body" fontWeight="bold" {...textProps}>
+        <FFText color="fg" textAlign="center" variant="labelBold" {...textProps}>
             {line ?? ' ? '}
         </FFText>
     </FFView>
