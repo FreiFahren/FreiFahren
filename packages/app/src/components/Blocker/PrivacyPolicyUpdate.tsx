@@ -23,7 +23,7 @@ export const PrivacyPolicyUpdate = forwardRef(({ onDismiss }: PrivacyPolicyUpdat
     }
 
     return (
-        <FFScrollSheet ref={ref} enablePanDownToClose={false} index={0} snapPoints={[600]}>
+        <FFScrollSheet ref={ref} enablePanDownToClose={false} index={0}>
             <FFSafeAreaView justifyContent="space-between" flex={1} edges={['bottom']}>
                 <FFView>
                     <FFText variant="header1">{t('title')}</FFText>
