@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
 import { getLineColor } from 'src/utils/uiUtils'
@@ -17,31 +17,37 @@ const ReportsModalButton: React.FC<ReportsModalButtonProps> = ({ openModal }) =>
     const [isRecent, setIsRecent] = useState(false)
     const { setLastViewed, hasViewedReport } = useLastReportView()
 
+    const latestReport =
+        ticketInspectorList.length > 0
+            ? ticketInspectorList.reduce((latest, current) => {
+                  const currentTime = new Date(current.timestamp).getTime()
+                  const latestTime = new Date(latest.timestamp).getTime()
+                  return currentTime > latestTime ? current : latest
+              }, ticketInspectorList[0])
+            : null
+
     const handleClick = () => {
         openModal()
         setLastViewed()
         sendAnalyticsEvent('ReportsModal opened', {})
     }
 
-    const latestReport = ticketInspectorList[0]
+    const checkRecent = useCallback(() => {
+        if (!latestReport) return
+
+        const currentTime = new Date().getTime()
+        const reportTime = new Date(latestReport.timestamp).getTime()
+        const elapsedTime = currentTime - reportTime
+        const isRecentReport = elapsedTime <= 30 * 60 * 1000 // 30 minutes
+
+        setIsRecent(isRecentReport && !hasViewedReport(latestReport))
+    }, [latestReport, hasViewedReport])
 
     useEffect(() => {
-        if (latestReport) {
-            const checkRecent = () => {
-                const currentTime = new Date().getTime()
-                const reportTime = new Date(latestReport.timestamp).getTime()
-                const elapsedTime = currentTime - reportTime
-                const isRecentReport = elapsedTime <= 30 * 60 * 1000 // 30 minutes
-
-                setIsRecent(isRecentReport && !hasViewedReport(latestReport))
-            }
-
-            checkRecent()
-            const interval = setInterval(checkRecent, 30 * 1000) // Check every 30 seconds
-
-            return () => clearInterval(interval)
-        }
-    }, [latestReport, hasViewedReport])
+        checkRecent()
+        const interval = setInterval(checkRecent, 30 * 1000) // Check every 30 seconds
+        return () => clearInterval(interval)
+    }, [checkRecent])
 
     return (
         <button className="list-button small-button align-child-on-line" onClick={handleClick}>
