@@ -107,13 +107,7 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
 
     return (
         <FFScrollSheet ref={sheetRef} onDismiss={close}>
-            <FFSafeAreaView
-                justifyContent="space-between"
-                overflow="visible"
-                position="relative"
-                flex={1}
-                edges={['bottom']}
-            >
+            <FFSafeAreaView overflow="visible" position="relative" flex={1} edges={['bottom']}>
                 <FFView>
                     <FFText variant="header1" mb="xs" color="fg">
                         {tReport('title')}
@@ -128,7 +122,7 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
                     <FFText variant="header2" fontWeight="bold" color="fg" mt="xs" mb="xxs">
                         {tCommon('line')}
                     </FFText>
-                    <FFView style={{ marginHorizontal: -4 }}>
+                    <FFView style={{ marginHorizontal: -theme.spacing.sm }}>
                         <ScrollView
                             horizontal
                             showsHorizontalScrollIndicator={false}
@@ -195,7 +189,13 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
                         </>
                     )}
                 </FFView>
-                <FFButton variant="primary" onPress={onSubmit} disabled={isDisabled} mt="s">
+                <FFButton
+                    variant="primary"
+                    onPress={onSubmit}
+                    disabled={isDisabled}
+                    marginTop="m"
+                    opacity={isDisabled ? 0.7 : 1}
+                >
                     {isPending ? (
                         <FFSpinner size={6} />
                     ) : (

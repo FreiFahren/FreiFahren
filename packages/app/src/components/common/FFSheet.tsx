@@ -1,8 +1,14 @@
-import { BottomSheetModal, BottomSheetModalProps, BottomSheetScrollView } from '@gorhom/bottom-sheet'
+import {
+    BottomSheetBackdrop,
+    BottomSheetBackdropProps,
+    BottomSheetModal,
+    BottomSheetModalProps,
+    BottomSheetScrollView,
+} from '@gorhom/bottom-sheet'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 import { useTheme } from '@shopify/restyle'
 import { forwardRef, PropsWithChildren, Ref } from 'react'
-import { View as RNView, ViewProps } from 'react-native'
+import { Dimensions, View as RNView, ViewProps } from 'react-native'
 
 import { Theme } from '../../theme'
 import { FFView } from './base'
@@ -40,14 +46,19 @@ const SheetBackground = ({ style, ...props }: ViewProps) => {
     )
 }
 
+const SheetBackdrop = (props: BottomSheetBackdropProps) => (
+    <BottomSheetBackdrop pressBehavior="close" style={{ backgroundColor: 'black' }} disappearsOnIndex={-1} {...props} />
+)
+
 const FFSheetBase = forwardRef(
     ({ children, ...props }: PropsWithChildren<Partial<BottomSheetModalProps>>, ref: Ref<BottomSheetModalMethods>) => (
         <BottomSheetModal
             ref={ref}
-            snapPoints={['35%', '80%']}
             index={0}
             handleComponent={SheetHandle}
             backgroundComponent={SheetBackground}
+            backdropComponent={SheetBackdrop}
+            maxDynamicContentSize={Dimensions.get('window').height * 0.9}
             {...props}
         >
             <FFView flex={1}>{children}</FFView>
@@ -67,7 +78,7 @@ export const FFSheet = forwardRef(
 export const FFScrollSheet = forwardRef(
     ({ children, ...props }: PropsWithChildren<Partial<BottomSheetModalProps>>, ref: Ref<BottomSheetModalMethods>) => (
         <FFSheetBase ref={ref} {...props}>
-            <BottomSheetScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <BottomSheetScrollView>
                 <FFView px="sm" py="sm" flex={1}>
                     {children}
                 </FFView>
