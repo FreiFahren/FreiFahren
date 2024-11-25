@@ -1,10 +1,12 @@
+import { AntDesign } from '@expo/vector-icons'
 import { useTheme } from '@shopify/restyle'
-import { forwardRef, PropsWithChildren, Ref, useMemo } from 'react'
+import { ComponentProps, forwardRef, PropsWithChildren, ReactNode, Ref, useMemo } from 'react'
+import { Platform, Pressable } from 'react-native'
 import ActionSheet, { ActionSheetProps, ActionSheetRef, ScrollView } from 'react-native-actions-sheet'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Theme } from '../../theme'
-import { FFView } from './base'
+import { FFText, FFView } from './base'
 
 const useSheetStyles = () => {
     const theme = useTheme<Theme>()
@@ -30,6 +32,40 @@ const useSheetStyles = () => {
     )
 }
 
+type FFSheetHeaderProps = {
+    title: string | ReactNode
+    onClose?: () => void
+} & ComponentProps<typeof FFView>
+
+export const FFSheetHeader = forwardRef(
+    ({ title, onClose, ...props }: FFSheetHeaderProps, ref: Ref<ActionSheetRef>) => {
+        const theme = useTheme<Theme>()
+
+        return (
+            <FFView flexDirection="row" justifyContent="space-between" alignItems="center" {...props}>
+                {typeof title === 'string' ? (
+                    <FFText variant="header1" color="fg">
+                        {title}
+                    </FFText>
+                ) : (
+                    title
+                )}
+                {Platform.OS === 'android' && (
+                    <Pressable
+                        onPress={() => {
+                            if (ref instanceof Function) return
+                            ref?.current?.hide()
+                            onClose?.()
+                        }}
+                    >
+                        <AntDesign name="close" size={28} color={theme.colors.fg} />
+                    </Pressable>
+                )}
+            </FFView>
+        )
+    }
+)
+
 export const FFSheetBase = forwardRef(
     ({ children, ...props }: PropsWithChildren<Partial<ActionSheetProps>>, ref: Ref<ActionSheetRef>) => {
         const sheetStyles = useSheetStyles()
@@ -40,7 +76,7 @@ export const FFSheetBase = forwardRef(
                 ref={ref}
                 containerStyle={sheetStyles.container}
                 indicatorStyle={sheetStyles.handle}
-                gestureEnabled={true}
+                gestureEnabled={Platform.OS === 'ios'}
                 drawUnderStatusBar={false}
                 snapPoints={[90]}
                 safeAreaInsets={{
@@ -69,8 +105,8 @@ export const FFSheet = forwardRef(
 
 export const FFScrollSheet = forwardRef(({ children, ...props }: ActionSheetProps, ref: Ref<ActionSheetRef>) => (
     <FFSheetBase ref={ref} {...props}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-            <FFView px="sm" py="xs" flex={1}>
+        <ScrollView>
+            <FFView px="sm" py="xs">
                 {children}
             </FFView>
         </ScrollView>

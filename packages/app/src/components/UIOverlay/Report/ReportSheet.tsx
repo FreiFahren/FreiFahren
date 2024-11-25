@@ -12,7 +12,7 @@ import { track } from '../../../tracking'
 import { FFButton, FFSafeAreaView, FFText, FFView } from '../../common/base'
 import { FFCarousellSelect } from '../../common/FFCarousellSelect'
 import { FFLineTag } from '../../common/FFLineTag'
-import { FFScrollSheet } from '../../common/FFSheet'
+import { FFScrollSheet, FFSheetHeader } from '../../common/FFSheet'
 import { FFSpinner } from '../../common/FFSpinner'
 import { SbahnIcon } from './SbahnIcon'
 import { TramIcon } from './TramIcon'
@@ -120,9 +120,7 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
                 edges={['bottom']}
             >
                 <FFView>
-                    <FFText variant="header1" mb="xs" color="fg">
-                        {tReport('title')}
-                    </FFText>
+                    <FFSheetHeader title={tReport('title')} ref={sheetRef} onClose={reset} mb="xs" />
                     <FFCarousellSelect
                         options={lineTypes}
                         selectedOption={lineType}

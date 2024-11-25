@@ -10,7 +10,7 @@ import { config } from '../../config'
 import { track } from '../../tracking'
 import { FFButton, FFSafeAreaView, FFText, FFView } from '../common/base'
 import { FFCarousellSelect } from '../common/FFCarousellSelect'
-import { FFScrollSheet } from '../common/FFSheet'
+import { FFScrollSheet, FFSheetHeader } from '../common/FFSheet'
 
 type Language = 'en' | 'de'
 
@@ -60,9 +60,7 @@ const SettingsSheet = forwardRef((_, ref: Ref<ActionSheetRef>) => {
     return (
         <FFScrollSheet ref={ref} snapPoints={[100]}>
             <FFSafeAreaView edges={['bottom']} paddingBottom="m">
-                <FFText variant="header1" color="fg">
-                    {t('title')}
-                </FFText>
+                <FFSheetHeader title={t('title')} ref={ref} />
                 <LanguageSwitcher />
                 <FFView flexDirection="row" gap="xs">
                     <FFText

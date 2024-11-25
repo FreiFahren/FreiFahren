@@ -68,19 +68,21 @@ const App = () => {
     return (
         <I18nextProvider i18n={i18n}>
             <SafeAreaProvider>
-                <ThemeProvider theme={theme}>
-                    <QueryClientProvider client={queryClient}>
-                        {/* eslint-disable-next-line react/style-prop-object */}
-                        <StatusBar style="light" backgroundColor="transparent" />
-                        <GestureHandlerRootView style={StyleSheet.absoluteFill}>
-                            <SheetProvider>
-                                <FFView flex={1} bg="bg">
-                                    <Main />
-                                </FFView>
-                            </SheetProvider>
-                        </GestureHandlerRootView>
-                    </QueryClientProvider>
-                </ThemeProvider>
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                    <ThemeProvider theme={theme}>
+                        <QueryClientProvider client={queryClient}>
+                            {/* eslint-disable-next-line react/style-prop-object */}
+                            <StatusBar style="light" backgroundColor="transparent" />
+                            <GestureHandlerRootView style={StyleSheet.absoluteFill}>
+                                <SheetProvider>
+                                    <FFView flex={1} bg="bg">
+                                        <Main />
+                                    </FFView>
+                                </SheetProvider>
+                            </GestureHandlerRootView>
+                        </QueryClientProvider>
+                    </ThemeProvider>
+                </GestureHandlerRootView>
             </SafeAreaProvider>
         </I18nextProvider>
     )
