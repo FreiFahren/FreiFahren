@@ -34,19 +34,22 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
     const { data: stations } = useStations()
     const { data: lines } = useLines()
     const sheetRef = useRef<ActionSheetRef>(null)
-    const scrollViewRef = useRef<RNScrollView>(null)
     const theme = useTheme<Theme>()
 
     const openedAt = useRef<number | null>(null)
 
+    const isOpen = useRef(false)
+
     useImperativeHandle(ref, () => ({
         open: () => {
             sheetRef.current?.show()
+            isOpen.current = true
             openedAt.current = Date.now()
             track({ name: 'Report Sheet Opened' })
         },
         close: () => {
             sheetRef.current?.hide()
+            isOpen.current = false
             openedAt.current = null
         },
     }))
@@ -60,14 +63,13 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
 
     useEffect(() => setSelectedLine(null), [lineType])
     useEffect(() => {
-        sheetRef.current?.snapToOffset(80)
+        if (isOpen.current) sheetRef.current?.snapToOffset(80)
         setSelectedDirection(null)
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
     }, [selectedLine])
     useEffect(() => setSelectedStation(null), [selectedLine])
     useEffect(() => {
-        sheetRef.current?.snapToOffset(80)
-        scrollViewRef.current?.scrollToEnd()
+        if (isOpen.current) sheetRef.current?.snapToOffset(80)
     }, [selectedStation])
 
     const lineOptions = useMemo(
@@ -92,7 +94,6 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
     }
 
     const close = () => {
-        sheetRef.current?.hide()
         reset()
     }
 
@@ -111,14 +112,8 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
     }
 
     return (
-        <FFScrollSheet ref={sheetRef} snapPoints={[100]} onClose={close}>
-            <FFSafeAreaView
-                justifyContent="space-between"
-                overflow="visible"
-                position="relative"
-                flex={1}
-                edges={['bottom']}
-            >
+        <FFScrollSheet ref={sheetRef} snapPoints={[80]} onClose={close}>
+            <FFSafeAreaView justifyContent="space-between" overflow="visible" position="relative" edges={['bottom']}>
                 <FFView>
                     <FFSheetHeader title={tReport('title')} ref={sheetRef} onClose={reset} mb="xs" />
                     <FFCarousellSelect

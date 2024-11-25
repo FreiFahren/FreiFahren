@@ -78,7 +78,15 @@ export const FFSheetBase = forwardRef(
                 indicatorStyle={sheetStyles.handle}
                 gestureEnabled={Platform.OS === 'ios'}
                 drawUnderStatusBar={false}
-                snapPoints={[90]}
+                snapPoints={[100]}
+                openAnimationConfig={{
+                    damping: 20,
+                    mass: 0.8,
+                    stiffness: 180,
+                    overshootClamping: false,
+                    restSpeedThreshold: 0.001,
+                    restDisplacementThreshold: 0.001,
+                }}
                 safeAreaInsets={{
                     bottom: 0,
                     left: 0,
