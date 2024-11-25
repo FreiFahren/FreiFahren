@@ -1,6 +1,6 @@
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { DateTime, Duration } from 'luxon'
 import { useEffect, useRef, useState } from 'react'
+import { ActionSheetRef } from 'react-native-actions-sheet'
 
 import { usePrivacyPolicyMeta } from '../../api/queries'
 import { useAppStore } from '../../app.store'
@@ -48,7 +48,7 @@ const useShouldShowPrivacyPolicy = (newestPrivacyPolicyVersion: number | undefin
 }
 
 export const Blocker = () => {
-    const sheetRef = useRef<BottomSheetModal>(null)
+    const sheetRef = useRef<ActionSheetRef>(null)
 
     const updateStore = useAppStore(({ update }) => update)
 
@@ -59,25 +59,25 @@ export const Blocker = () => {
 
     useEffect(() => {
         if (shouldShowDisclaimer) {
-            sheetRef.current?.present()
+            sheetRef.current?.show()
             track({ name: 'Disclaimer Viewed' })
         } else if (shouldShowPrivacyPolicy === true) {
-            sheetRef.current?.present()
+            sheetRef.current?.show()
             track({ name: 'Privacy Policy Blocker Shown' })
         } else if (shouldShowPrivacyPolicy === false) {
-            sheetRef.current?.dismiss()
+            sheetRef.current?.hide()
             updateStore({ appLocked: false })
         }
     }, [shouldShowDisclaimer, shouldShowPrivacyPolicy, updateStore])
 
     const onDismissDisclaimer = () => {
-        sheetRef.current?.dismiss()
+        sheetRef.current?.hide()
         updateStore({ dismissedDisclaimerAt: DateTime.now().toISO(), privacyPolicyVersion: newestPrivacyPolicyVersion })
         track({ name: 'Disclaimer Dismissed' })
     }
 
     const onDismissPrivacyPolicy = () => {
-        sheetRef.current?.dismiss()
+        sheetRef.current?.hide()
         updateStore({ privacyPolicyVersion: newestPrivacyPolicyVersion })
         track({ name: 'Privacy Policy Accepted' })
     }

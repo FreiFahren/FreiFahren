@@ -1,14 +1,14 @@
 import { Ionicons } from '@expo/vector-icons'
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 import Constants from 'expo-constants'
 import { noop } from 'lodash'
 import { ComponentProps, forwardRef, Ref, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
+import { ActionSheetRef } from 'react-native-actions-sheet'
 
 import { config } from '../../config'
 import { track } from '../../tracking'
-import { FFButton, FFText, FFView } from '../common/base'
+import { FFButton, FFSafeAreaView, FFText, FFView } from '../common/base'
 import { FFCarousellSelect } from '../common/FFCarousellSelect'
 import { FFScrollSheet } from '../common/FFSheet'
 
@@ -44,7 +44,7 @@ const LanguageSwitcher = () => {
     )
 }
 
-const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
+const SettingsSheet = forwardRef((_, ref: Ref<ActionSheetRef>) => {
     const { t } = useTranslation('settings')
 
     const openPrivacyPolicy = () => {
@@ -58,48 +58,50 @@ const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
     }
 
     return (
-        <FFScrollSheet ref={ref}>
-            <FFText variant="header1" color="fg">
-                {t('title')}
-            </FFText>
-            <LanguageSwitcher />
-            <FFView flexDirection="row" gap="xs">
-                <FFText
-                    style={{
-                        textDecorationLine: 'underline',
-                        marginTop: 16,
-                        color: 'white',
-                    }}
-                    onPress={openPrivacyPolicy}
-                >
-                    {t('privacyPolicy')}
+        <FFScrollSheet ref={ref} snapPoints={[100]}>
+            <FFSafeAreaView edges={['bottom']} paddingBottom="m">
+                <FFText variant="header1" color="fg">
+                    {t('title')}
                 </FFText>
-                <FFText
-                    style={{
-                        textDecorationLine: 'underline',
-                        marginTop: 16,
-                        color: 'white',
-                        fontFamily: 'Funnel Sans',
-                    }}
-                    onPress={openSupportPage}
-                >
-                    {t('support')}
+                <LanguageSwitcher />
+                <FFView flexDirection="row" gap="xs">
+                    <FFText
+                        style={{
+                            textDecorationLine: 'underline',
+                            marginTop: 16,
+                            color: 'white',
+                        }}
+                        onPress={openPrivacyPolicy}
+                    >
+                        {t('privacyPolicy')}
+                    </FFText>
+                    <FFText
+                        style={{
+                            textDecorationLine: 'underline',
+                            marginTop: 16,
+                            color: 'white',
+                            fontFamily: 'Funnel Sans',
+                        }}
+                        onPress={openSupportPage}
+                    >
+                        {t('support')}
+                    </FFText>
+                </FFView>
+                <FFText variant="small" textAlign="center" color="fg" mt="xs">
+                    v{Constants.expoConfig?.version ?? '0.0.1'}
+                    {` (${__DEV__ ? 'Dev' : 'Release'})`}
                 </FFText>
-            </FFView>
-            <FFText variant="small" textAlign="center" color="fg" mt="xs">
-                v{Constants.expoConfig?.version ?? '0.0.1'}
-                {` (${__DEV__ ? 'Dev' : 'Release'})`}
-            </FFText>
+            </FFSafeAreaView>
         </FFScrollSheet>
     )
 })
 
 export const SettingsButton = (props: ComponentProps<typeof FFButton>) => {
-    const sheetRef = useRef<BottomSheetModalMethods>(null)
+    const sheetRef = useRef<ActionSheetRef>(null)
 
     const handleOpen = () => {
         track({ name: 'Settings Opened' })
-        sheetRef.current?.present()
+        sheetRef.current?.show()
     }
 
     return (

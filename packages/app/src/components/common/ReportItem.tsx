@@ -45,7 +45,9 @@ export const ReportItem = ({ report, ...props }: ReportItemProps) => {
                     {isNil(report.direction?.name) ? (
                         t('unknownDirection')
                     ) : (
-                        <FFText variant="labelSmall">{report.direction.name}</FFText>
+                        <FFText variant="bold" fontSize={14}>
+                            {report.direction.name}
+                        </FFText>
                     )}
                 </FFText>
             </FFView>

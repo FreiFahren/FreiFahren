@@ -1,9 +1,9 @@
 import { Feather } from '@expo/vector-icons'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { noop } from 'lodash'
 import { forwardRef, Ref } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
+import { ActionSheetRef } from 'react-native-actions-sheet'
 
 import { config } from '../../config'
 import { track } from '../../tracking'
@@ -14,7 +14,7 @@ type PrivacyPolicyUpdateProps = {
     onDismiss: () => void
 }
 
-export const PrivacyPolicyUpdate = forwardRef(({ onDismiss }: PrivacyPolicyUpdateProps, ref: Ref<BottomSheetModal>) => {
+export const PrivacyPolicyUpdate = forwardRef(({ onDismiss }: PrivacyPolicyUpdateProps, ref: Ref<ActionSheetRef>) => {
     const { t } = useTranslation('privacyPolicyUpdated')
 
     const openPrivacyPolicy = () => {
@@ -23,8 +23,8 @@ export const PrivacyPolicyUpdate = forwardRef(({ onDismiss }: PrivacyPolicyUpdat
     }
 
     return (
-        <FFScrollSheet ref={ref} enablePanDownToClose={false} index={0} snapPoints={[600]}>
-            <FFSafeAreaView justifyContent="space-between" flex={1} edges={['bottom']}>
+        <FFScrollSheet ref={ref} snapPoints={[100]} closable={false}>
+            <FFSafeAreaView justifyContent="space-between" flex={1} edges={['bottom']} paddingBottom="m">
                 <FFView>
                     <FFText variant="header1">{t('title')}</FFText>
                     <FFText mt="xs">{t('text')}</FFText>
@@ -38,7 +38,7 @@ export const PrivacyPolicyUpdate = forwardRef(({ onDismiss }: PrivacyPolicyUpdat
                         </FFText>
                     </FFView>
                 </FFView>
-                <FFButton onPress={onDismiss} variant="primary" label={t('confirm')} mt="m" />
+                <FFButton onPress={onDismiss} variant="primary" label={t('confirm')} marginTop="m" />
             </FFSafeAreaView>
         </FFScrollSheet>
     )

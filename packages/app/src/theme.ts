@@ -112,6 +112,11 @@ export const theme = createTheme({
             lineHeight: 20,
             fontFamily: 'Funnel Sans SemiBold',
         },
+        labelBold: {
+            fontSize: 16,
+            lineHeight: 20,
+            fontFamily: 'Funnel Sans Bold',
+        },
         labelSmall: {
             fontSize: 12,
             lineHeight: 16,
@@ -121,6 +126,12 @@ export const theme = createTheme({
             fontSize: 20,
             lineHeight: 24,
             fontFamily: 'Funnel Sans SemiBold',
+        },
+        bold: {
+            fontSize: 16,
+            lineHeight: 22,
+            fontFamily: 'Funnel Sans SemiBold',
+            color: 'fg',
         },
         defaults: {
             fontSize: 16,
