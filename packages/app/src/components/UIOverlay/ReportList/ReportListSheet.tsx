@@ -1,8 +1,10 @@
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 import { forwardRef, PropsWithChildren, Ref } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Pressable } from 'react-native'
 
 import { useReports } from '../../../api'
+import { useAppStore } from '../../../app.store'
 import { FFText, FFView } from '../../common/base'
 import { FFScrollSheet } from '../../common/FFSheet'
 import { FFSpinner } from '../../common/FFSpinner'
@@ -10,6 +12,7 @@ import { ReportItem } from '../../common/ReportItem'
 
 export const ReportListSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<BottomSheetModalMethods>) => {
     const { t } = useTranslation('reportList')
+    const updateAppStore = useAppStore((state) => state.update)
     const { data: reports } = useReports()
 
     return (
@@ -23,17 +26,19 @@ export const ReportListSheet = forwardRef((_props: PropsWithChildren<{}>, ref: R
                 </FFView>
             ) : (
                 <FFView mt="xs">
-                    <FFView pb="s">
-                        {reports.map((report, index) => (
+                    {reports.map((report, index) => (
+                        <Pressable
+                            onPress={() => updateAppStore({ reportToShow: report })}
+                            key={`${report.stationId}-${report.timestamp.getMilliseconds()}`}
+                        >
                             <ReportItem
-                                key={`${report.stationId}-${report.timestamp.getMilliseconds()}`}
                                 report={report}
                                 py="xs"
                                 borderTopWidth={index === 0 ? 0 : 1}
                                 borderColor="bg2"
                             />
-                        ))}
-                    </FFView>
+                        </Pressable>
+                    ))}
                 </FFView>
             )}
         </FFScrollSheet>

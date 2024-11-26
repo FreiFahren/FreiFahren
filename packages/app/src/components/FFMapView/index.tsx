@@ -1,10 +1,11 @@
-import MapLibreGL, { Camera, MapView, UserLocation, UserTrackingMode } from '@maplibre/maplibre-react-native'
+import MapLibreGL, { Camera, CameraRef, MapView, UserLocation, UserTrackingMode } from '@maplibre/maplibre-react-native'
 import Geolocation from '@react-native-community/geolocation'
-import { noop } from 'lodash'
-import { useEffect } from 'react'
+import { isNil, noop } from 'lodash'
+import { useEffect, useRef } from 'react'
 import { StyleSheet } from 'react-native'
 
 import { Report, useReports } from '../../api'
+import { useStations } from '../../api/queries'
 import { useAppStore } from '../../app.store'
 import { config } from '../../config'
 import { track } from '../../tracking'
@@ -34,13 +35,29 @@ const styles = StyleSheet.create({
 })
 
 export const FFMapView = () => {
+    const cameraRef = useRef<CameraRef>(null)
+    const stations = useStations().data
     const { data: reports = [] } = useReports()
 
     useEffect(() => {
         Geolocation.requestAuthorization(noop, noop)
     }, [])
 
-    const { layer, update: updateAppState } = useAppStore()
+    const { layer, reportToShow, update: updateAppState } = useAppStore()
+
+    useEffect(() => {
+        if (!isNil(reportToShow) && stations !== undefined) {
+            const { latitude, longitude } = stations[reportToShow.stationId].coordinates
+
+            cameraRef.current?.setCamera({
+                centerCoordinate: [longitude, latitude],
+                zoomLevel: 13,
+                animationDuration: 700,
+                animationMode: 'easeTo',
+            })
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [reportToShow, stations === undefined])
 
     const onPressReport = (report: Report) => {
         track({ name: 'Report Tapped', station: report.stationId })
@@ -66,6 +83,7 @@ export const FFMapView = () => {
                     minZoomLevel={9}
                     maxZoomLevel={13}
                     followUserMode={UserTrackingMode.Follow}
+                    ref={cameraRef}
                 />
                 <LinesLayer />
                 <RiskLayer visible={layer === 'risk'} />

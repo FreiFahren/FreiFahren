@@ -18,7 +18,8 @@
     "direction": "to",
     "unknownDirection": "unknown",
     "now": "now",
-    "historicLabel": "more than 45 minutes ago"
+    "historicLabel": "more than 45 minutes ago",
+    "thisWeek": "{{count}} reports this week"
   },
   "map": {
     "layers": {

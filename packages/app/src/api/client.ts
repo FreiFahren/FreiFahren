@@ -33,7 +33,6 @@ const client = axios.create({
     headers: {
         'ff-app-version': DeviceInfo.getVersion(),
         'ff-platform': Platform.OS,
-        // 'Cache-Control': 'no-cache',
     },
 })
 
@@ -68,7 +67,7 @@ const postReport = async (report: PostReport) => {
         directionId: report.directionId ?? '',
     })
 
-    return data
+    return reportSchema.parse(data)
 }
 
 const riskSchema = z
@@ -118,6 +117,18 @@ export const getLines = async (): Promise<Record<string, string[]>> => {
     return linesSchema.parse(data)
 }
 
+export const stationStatisticsSchema = z.object({
+    numberOfReports: z.number(),
+})
+
+export type StationStatistics = z.infer<typeof stationStatisticsSchema>
+
+export const getStationStatistics = async (stationId: string) => {
+    const { data } = await client.get(`/stations/${stationId}/statistics`)
+
+    return stationStatisticsSchema.parse(data)
+}
+
 export const api = {
     getLines,
     getStations,
@@ -125,4 +136,5 @@ export const api = {
     getRecentReports,
     postReport,
     getRiskData,
+    getStationStatistics,
 }
