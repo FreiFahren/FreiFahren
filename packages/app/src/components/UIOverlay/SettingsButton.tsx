@@ -63,30 +63,15 @@ const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
                 {t('title')}
             </FFText>
             <LanguageSwitcher />
-            <FFView flexDirection="row" gap="xs">
-                <FFText
-                    style={{
-                        textDecorationLine: 'underline',
-                        marginTop: 16,
-                        color: 'white',
-                    }}
-                    onPress={openPrivacyPolicy}
-                >
+            <FFView flexDirection="row" gap="xs" mt="s">
+                <FFText variant="body" color="darkText" textDecorationLine="underline" onPress={openPrivacyPolicy}>
                     {t('privacyPolicy')}
                 </FFText>
-                <FFText
-                    style={{
-                        textDecorationLine: 'underline',
-                        marginTop: 16,
-                        color: 'white',
-                        fontFamily: 'Funnel Sans',
-                    }}
-                    onPress={openSupportPage}
-                >
+                <FFText variant="body" color="darkText" textDecorationLine="underline" onPress={openSupportPage}>
                     {t('support')}
                 </FFText>
             </FFView>
-            <FFText variant="small" textAlign="center" color="fg" mt="xs">
+            <FFText variant="small" color="darkText" textAlign="center" mt="xs">
                 v{Constants.expoConfig?.version ?? '0.0.1'}
                 {` (${__DEV__ ? 'Dev' : 'Release'})`}
             </FFText>

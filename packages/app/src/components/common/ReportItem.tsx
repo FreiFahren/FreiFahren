@@ -36,16 +36,18 @@ export const ReportItem = ({ report, ...props }: ReportItemProps) => {
         <FFView {...props}>
             <FFView gap="xxs" flexDirection="row" alignItems="center">
                 <FFLineTag line={report.line} />
-                <FFText variant="label">{station?.name}</FFText>
+                <FFText variant="labelBold">{station?.name}</FFText>
             </FFView>
             <FFView flexDirection="row" gap="s" mt="xxs">
-                <FFText color="darkText" fontSize={14}>
+                <FFText color="darkText" fontSize={15}>
                     {report.isHistoric ? t('historicLabel') : formatTime(report.timestamp, t)}
                     {`, ${t('direction')} `}
                     {isNil(report.direction?.name) ? (
                         t('unknownDirection')
                     ) : (
-                        <FFText variant="labelSmall">{report.direction.name}</FFText>
+                        <FFText variant="label" fontSize={15}>
+                            {report.direction.name}
+                        </FFText>
                     )}
                 </FFText>
             </FFView>

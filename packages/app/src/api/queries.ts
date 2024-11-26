@@ -3,7 +3,7 @@ import axios from 'axios'
 import { z } from 'zod'
 
 import { config } from '../config'
-import { api, Lines, Report, reportSchema, RiskData, Stations } from './client'
+import { api, Lines, Report, RiskData, Stations, StationStatistics } from './client'
 import { CACHE_KEYS } from './queryClient'
 
 export const useLines = <T = Lines>(select?: (data: Lines) => T) =>
@@ -36,10 +36,10 @@ export const useSubmitReport = () => {
 
     return useMutation({
         mutationFn: api.postReport,
-        onSuccess: async (newReport: unknown) => {
-            const parsedReport = reportSchema.parse(newReport)
+        onSuccess: async (newReport: Report) => {
+            queryClient.setQueryData(CACHE_KEYS.reports, (oldReports: Report[]) => [...oldReports, newReport])
 
-            queryClient.setQueryData(CACHE_KEYS.reports, (oldReports: Report[]) => [...oldReports, parsedReport])
+            return newReport
         },
     })
 }
@@ -66,4 +66,16 @@ export const usePrivacyPolicyMeta = () =>
                 })
                 .parse(data)
         },
+    })
+
+export const useStationStatistics = <T = StationStatistics>(
+    stationId: string | undefined,
+    select?: (data: StationStatistics) => T
+) =>
+    useQuery({
+        queryKey: stationId !== undefined ? CACHE_KEYS.stationStatistics(stationId) : [],
+        queryFn: () => api.getStationStatistics(stationId!),
+        staleTime: 1000 * 60,
+        select,
+        enabled: stationId !== undefined,
     })

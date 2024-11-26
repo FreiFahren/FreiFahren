@@ -6,6 +6,7 @@ export const CACHE_KEYS = {
     lines: ['lines'],
     risk: ['risk'],
     privacyPolicyMeta: ['privacy-policy-meta'],
+    stationStatistics: (stationId: string) => ['station-statistics', stationId],
 }
 
 export const queryClient = new QueryClient({

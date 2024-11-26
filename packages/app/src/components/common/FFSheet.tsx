@@ -11,7 +11,7 @@ import { forwardRef, PropsWithChildren, Ref } from 'react'
 import { Dimensions, View as RNView, ViewProps } from 'react-native'
 
 import { Theme } from '../../theme'
-import { FFView } from './base'
+import { FFSafeAreaView, FFView } from './base'
 
 export const SheetHandle = () => (
     <FFView
@@ -61,7 +61,7 @@ const FFSheetBase = forwardRef(
             maxDynamicContentSize={Dimensions.get('window').height * 0.9}
             {...props}
         >
-            <FFView flex={1}>{children}</FFView>
+            {children}
         </BottomSheetModal>
     )
 )
@@ -69,9 +69,9 @@ const FFSheetBase = forwardRef(
 export const FFSheet = forwardRef(
     ({ children, ...props }: PropsWithChildren<Partial<BottomSheetModalProps>>, ref: Ref<BottomSheetModalMethods>) => (
         <FFSheetBase ref={ref} {...props}>
-            <FFView px="sm" py="sm">
+            <FFSafeAreaView paddingHorizontal="sm" paddingVertical="sm" flex={1}>
                 {children}
-            </FFView>
+            </FFSafeAreaView>
         </FFSheetBase>
     )
 )
@@ -79,9 +79,9 @@ export const FFScrollSheet = forwardRef(
     ({ children, ...props }: PropsWithChildren<Partial<BottomSheetModalProps>>, ref: Ref<BottomSheetModalMethods>) => (
         <FFSheetBase ref={ref} {...props}>
             <BottomSheetScrollView>
-                <FFView px="sm" py="sm" flex={1}>
+                <FFSafeAreaView edges={['bottom']} paddingHorizontal="sm" paddingVertical="sm">
                     {children}
-                </FFView>
+                </FFSafeAreaView>
             </BottomSheetScrollView>
         </FFSheetBase>
     )
