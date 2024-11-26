@@ -11,6 +11,8 @@ platform :ios do
 
     build_number = sh("./get-next-build-number.sh ios").strip
 
+    sh("npm run prebuild")
+
     increment_build_number(
       xcodeproj: "./ios/freifahren.xcodeproj",
       build_number: build_number
@@ -28,12 +30,12 @@ platform :ios do
       clean: true
     )
 
-    sh("git tag ios-release/#{build_number}")
-
     upload_to_testflight(
       skip_waiting_for_build_processing: true,
       api_key_path: ENV["APPSTORE_CONNECT_KEY_FILE"]
     )
+
+    sh("git tag ios-release/#{build_number}")
   end
 end
 
