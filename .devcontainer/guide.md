@@ -11,7 +11,7 @@ Make sure to have .docker_env file in project root directory.
 
 ###
 
-Run
+Be in root directory and run
 
 ```shell
 docker compose up -d --build
