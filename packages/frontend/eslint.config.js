@@ -9,5 +9,6 @@ export default tseslint.config(eslint.configs.recommended, ...tseslint.configs.r
     rules: {
         'no-console': ['error', { allow: ['warn', 'error'] }],
         'react-hooks/exhaustive-deps': 'warn',
+        'no-extra-semi': 'off',
     },
 })
