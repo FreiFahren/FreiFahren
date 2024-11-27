@@ -263,7 +263,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
             hasError = true
         }
 
-        const locationError = await verifyUserLocation(currentStation, allStations)
+        const locationError = verifyUserLocation(currentStation, allStations)
         if (locationError) {
             hasError = true
         }

@@ -1,21 +1,23 @@
-import { useTranslation } from "react-i18next";
-import { LanguageSwitcher } from "../../components/Miscellaneous/LanguageSwitcher";
+import { useTranslation } from 'react-i18next'
+import { LanguageSwitcher } from '../../components/Miscellaneous/LanguageSwitcher/LanguageSwitcher'
 
 const Impressum = () => {
-    const { t } = useTranslation();
+    const { t } = useTranslation()
 
     return (
         <div className="legal-text">
             <h1>{t('Impressum.title')}</h1>
-            <LanguageSwitcher title={t("Impressum.switchLanguage")} />
+            <LanguageSwitcher title={t('Impressum.switchLanguage')} />
             <h2>{t('Impressum.sections.provider.title')}</h2>
             <p>{t('Impressum.sections.provider.content')}</p>
 
             <h2>{t('Impressum.sections.representatives.title')}</h2>
             <ul>
-                {(t('Impressum.sections.representatives.content', { returnObjects: true }) as string[]).map((name, index) => (
-                    <li key={index}>{name}</li>
-                ))}
+                {(t('Impressum.sections.representatives.content', { returnObjects: true }) as string[]).map(
+                    (name, index) => (
+                        <li key={index}>{name}</li>
+                    )
+                )}
             </ul>
 
             <h2>{t('Impressum.sections.contact.title')}</h2>
@@ -27,9 +29,11 @@ const Impressum = () => {
 
             <h2>{t('Impressum.sections.responsible.title')}</h2>
             <ul>
-                {(t('Impressum.sections.responsible.content', { returnObjects: true }) as string[]).map((name, index) => (
-                    <li key={index}>{name}</li>
-                ))}
+                {(t('Impressum.sections.responsible.content', { returnObjects: true }) as string[]).map(
+                    (name, index) => (
+                        <li key={index}>{name}</li>
+                    )
+                )}
             </ul>
 
             <h2>{t('Impressum.sections.disclaimer.title')}</h2>
@@ -41,7 +45,7 @@ const Impressum = () => {
             <h2>{t('Impressum.sections.privacy.title')}</h2>
             <p>{t('Impressum.sections.privacy.content')}</p>
         </div>
-    );
-};
+    )
+}
 
-export default Impressum;
+export default Impressum

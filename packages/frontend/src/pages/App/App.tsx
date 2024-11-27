@@ -15,6 +15,7 @@ import ReportsModal from 'src/components/Modals/ReportsModal/ReportsModal'
 import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext'
 import { RiskDataProvider } from '../../contexts/RiskDataContext'
 import { StationsAndLinesProvider } from '../../contexts/StationsAndLinesContext'
+import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 
 import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils'
 import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton'
@@ -225,26 +226,32 @@ function App() {
                 <div id="portal-root"></div>
                 <RiskDataProvider>
                     <TicketInspectorsProvider>
-                        <Map
-                            isFirstOpen={appUIState.isFirstOpen}
-                            formSubmitted={appUIState.formSubmitted}
-                            currentColorTheme={appUIState.currentColorTheme}
-                            isRiskLayerOpen={appUIState.isRiskLayerOpen}
-                            onRotationChange={handleRotationChange}
-                        />
-                        <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
-                        {appUIState.isListModalOpen && (
-                            <>
-                                <ReportsModal
-                                    className={`open center-animation`}
-                                    closeModal={handleRiskGridItemClick}
-                                />
-                                <Backdrop onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
-                            </>
-                        )}
+                        <ViewedReportsProvider>
+                            <Map
+                                isFirstOpen={appUIState.isFirstOpen}
+                                formSubmitted={appUIState.formSubmitted}
+                                currentColorTheme={appUIState.currentColorTheme}
+                                isRiskLayerOpen={appUIState.isRiskLayerOpen}
+                                onRotationChange={handleRotationChange}
+                            />
+                            <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
+                            {appUIState.isListModalOpen && (
+                                <>
+                                    <ReportsModal
+                                        className={`open center-animation`}
+                                        closeModal={handleRiskGridItemClick}
+                                    />
+                                    <Backdrop
+                                        onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })}
+                                    />
+                                </>
+                            )}
+                            <ReportsModalButton
+                                openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })}
+                            />
+                        </ViewedReportsProvider>
                     </TicketInspectorsProvider>
                 </RiskDataProvider>
-                <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
             </StationsAndLinesProvider>
             <UtilButton onClick={toggleUtilModal} />
             {mapsRotation !== 0 && (
