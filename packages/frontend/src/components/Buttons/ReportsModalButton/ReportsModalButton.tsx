@@ -1,9 +1,9 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
 import { getLineColor } from 'src/utils/uiUtils'
 import { sendAnalyticsEvent } from 'src/utils/analytics'
-import { useLastReportView } from 'src/hooks/useLastReportView'
+import { useViewedReports } from 'src/contexts/ViewedReportsContext'
 
 import './ReportsModalButton.css'
 
@@ -14,8 +14,7 @@ interface ReportsModalButtonProps {
 const ReportsModalButton: React.FC<ReportsModalButtonProps> = ({ openModal }) => {
     const { t } = useTranslation()
     const { ticketInspectorList } = useTicketInspectors()
-    const [isRecent, setIsRecent] = useState(false)
-    const { setLastViewed, hasViewedReport } = useLastReportView()
+    const { setLastViewed, isRecentAndUnviewed } = useViewedReports()
 
     const latestReport =
         ticketInspectorList.length > 0
@@ -28,26 +27,11 @@ const ReportsModalButton: React.FC<ReportsModalButtonProps> = ({ openModal }) =>
 
     const handleClick = () => {
         openModal()
-        setLastViewed()
+        if (latestReport) {
+            setLastViewed(latestReport)
+        }
         sendAnalyticsEvent('ReportsModal opened', {})
     }
-
-    const checkRecent = useCallback(() => {
-        if (!latestReport) return
-
-        const currentTime = new Date().getTime()
-        const reportTime = new Date(latestReport.timestamp).getTime()
-        const elapsedTime = currentTime - reportTime
-        const isRecentReport = elapsedTime <= 30 * 60 * 1000 // 30 minutes
-
-        setIsRecent(isRecentReport && !hasViewedReport(latestReport))
-    }, [latestReport, hasViewedReport])
-
-    useEffect(() => {
-        checkRecent()
-        const interval = setInterval(checkRecent, 30 * 1000) // Check every 30 seconds
-        return () => clearInterval(interval)
-    }, [checkRecent])
 
     return (
         <button className="list-button small-button align-child-on-line" onClick={handleClick}>
@@ -64,7 +48,7 @@ const ReportsModalButton: React.FC<ReportsModalButtonProps> = ({ openModal }) =>
                             </span>
                         )}
                         <p className="station-name">{latestReport.station.name}</p>
-                        {isRecent && <span className="indicator live pulse" />}
+                        {isRecentAndUnviewed(latestReport) && <span className="indicator live pulse" />}
                     </div>
                 )}
             </div>

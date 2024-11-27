@@ -7,7 +7,6 @@ import { useModalAnimation } from '../../../hooks/UseModalAnimation'
 import { useTicketInspectors } from '../../../contexts/TicketInspectorsContext'
 import { MarkerData } from '../../../utils/types'
 import { sendAnalyticsEvent } from 'src/utils/analytics'
-import { useLastReportView } from 'src/hooks/useLastReportView'
 
 export interface MarkersProps {
     formSubmitted: boolean
@@ -26,8 +25,6 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
         closeModal: closeMarkerModal,
     } = useModalAnimation()
 
-    const { setLastViewed } = useLastReportView()
-
     const handleMarkerClick = (report: MarkerData) => {
         setSelectedMarker(report)
         const now = new Date()
@@ -40,7 +37,6 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
             },
         })
         openMarkerModal()
-        setLastViewed(report)
     }
 
     return (
