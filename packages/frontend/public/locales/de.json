@@ -1,6 +1,6 @@
 {
     "InspectorListButton": {
-        "label": "Meldungen"
+        "label": "Aktuelle Meldungen: "
     },
     "LegalDisclaimer": {
         "title": "Bitte bestätigen Sie vor dem Fortfahren",
@@ -86,7 +86,7 @@
         "summary": "Übersicht",
         "lines": "Linien",
         "stations": "Stationen",
-        "top5Lines": "Top 5 Linien",
+        "reportsHeading": "Aktuelle Meldungen",
         "risk": "aktuelles Risiko",
         "topLines": "Top Linien",
         "topStations": "Top Stationen",
@@ -202,7 +202,10 @@
             },
             "representatives": {
                 "title": "Vertreten durch die Gesellschafter:",
-                "content": ["David Brandes", "Johan Trieloff"]
+                "content": [
+                    "David Brandes",
+                    "Johan Trieloff"
+                ]
             },
             "contact": {
                 "title": "Kontakt:",
@@ -212,7 +215,10 @@
             },
             "responsible": {
                 "title": "Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:",
-                "content": ["David Brandes", "Johan Trieloff"]
+                "content": [
+                    "David Brandes",
+                    "Johan Trieloff"
+                ]
             },
             "disclaimer": {
                 "title": "Haftungsausschluss:",

@@ -3,6 +3,7 @@ import './App.css'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
+import { TicketInspectorsProvider } from 'src/contexts/TicketInspectorsContext'
 
 import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton'
 import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
@@ -16,7 +17,7 @@ import { LegalDisclaimer } from '../../components/Modals/LegalDisclaimer/LegalDi
 import { UtilModal } from '../../components/Modals/UtilModal/UtilModal'
 import { RiskDataProvider } from '../../contexts/RiskDataContext'
 import { StationsAndLinesProvider } from '../../contexts/StationsAndLinesContext'
-import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext'
+import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../utils/analytics'
 import { getNumberOfReportsInLast24Hours } from '../../utils/databaseUtils'
@@ -225,26 +226,32 @@ export const App = () => {
                 <div id="portal-root" />
                 <RiskDataProvider>
                     <TicketInspectorsProvider>
-                        <FreifahrenMap
-                            isFirstOpen={appUIState.isFirstOpen}
-                            formSubmitted={appUIState.formSubmitted}
-                            currentColorTheme={appUIState.currentColorTheme}
-                            isRiskLayerOpen={appUIState.isRiskLayerOpen}
-                            onRotationChange={handleRotationChange}
-                        />
-                        <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
-                        {appUIState.isListModalOpen && (
-                            <>
-                                <ReportsModal
-                                    className="open center-animation"
-                                    closeModal={handleRiskGridItemClick}
-                                />
-                                <Backdrop onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
-                            </>
-                        )}
+                        <ViewedReportsProvider>
+                            <FreifahrenMap
+                                isFirstOpen={appUIState.isFirstOpen}
+                                formSubmitted={appUIState.formSubmitted}
+                                currentColorTheme={appUIState.currentColorTheme}
+                                isRiskLayerOpen={appUIState.isRiskLayerOpen}
+                                onRotationChange={handleRotationChange}
+                            />
+                            <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
+                            {appUIState.isListModalOpen && (
+                                <>
+                                    <ReportsModal
+                                        className="open center-animation"
+                                        closeModal={handleRiskGridItemClick}
+                                    />
+                                    <Backdrop
+                                        onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })}
+                                    />
+                                </>
+                            )}
+                            <ReportsModalButton
+                                openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })}
+                            />
+                        </ViewedReportsProvider>
                     </TicketInspectorsProvider>
                 </RiskDataProvider>
-                <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
             </StationsAndLinesProvider>
             <UtilButton onClick={toggleUtilModal} />
             {mapsRotation !== 0 && (

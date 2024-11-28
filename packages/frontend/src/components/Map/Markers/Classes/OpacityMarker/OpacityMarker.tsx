@@ -3,6 +3,7 @@ import './OpacityMarker.css'
 import maplibregl from 'maplibre-gl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Marker } from 'react-map-gl/maplibre'
+import { useViewedReports } from 'src/contexts/ViewedReportsContext'
 import { MarkerData } from 'src/utils/types'
 
 interface OpacityMarkerProps {
@@ -22,8 +23,8 @@ export const OpacityMarker = ({
 }: OpacityMarkerProps) => {
     const [opacity, setOpacity] = useState(0)
     const { timestamp, station, line, isHistoric } = markerData
+    const { setLastViewed, isRecentAndUnviewed } = useViewedReports()
 
-    // By using useMemo, we can avoid recalculating the timestamp on every render
     const adjustedTimestamp = useMemo(() => {
         const tempTimestamp = new Date(timestamp)
 
@@ -31,8 +32,6 @@ export const OpacityMarker = ({
     }, [timestamp])
 
     const markerRef = useRef<maplibregl.Marker>(null)
-
-    const [isWithin30Mins, setIsWithin30Mins] = useState(false)
 
     useEffect(() => {
         let intervalId: NodeJS.Timeout
@@ -50,9 +49,6 @@ export const OpacityMarker = ({
                         newOpacity = 0.2
                     }
                     setOpacity(newOpacity)
-
-                    // indicate that the marker should not pulse anymore
-                    setIsWithin30Mins(elapsedTime <= 30 * 60 * 1000)
 
                     if (elapsedTime >= timeToFade) {
                         setOpacity(0)
@@ -78,6 +74,13 @@ export const OpacityMarker = ({
         return null
     }
 
+    const handleMarkerClick = () => {
+        onMarkerClick(markerData)
+        setLastViewed(markerData)
+    }
+
+    const shouldPulse = isRecentAndUnviewed(markerData)
+
     return (
         <Marker
             key={`${line}-${index}`}
@@ -86,9 +89,9 @@ export const OpacityMarker = ({
             latitude={station.coordinates.latitude}
             longitude={station.coordinates.longitude}
             style={{ opacity: opacity.toString() }}
-            onClick={() => onMarkerClick(markerData)}
+            onClick={handleMarkerClick}
         >
-            <span className={`live ${isWithin30Mins ? 'pulse' : ''}`} />
+            <span className={`marker live ${shouldPulse ? 'pulse' : ''}`} />
         </Marker>
     )
 }

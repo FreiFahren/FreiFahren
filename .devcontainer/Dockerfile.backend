@@ -1,0 +1,12 @@
+FROM golang as backend
+
+WORKDIR /project
+
+COPY packages/backend/ /project
+COPY .docker_env /project/.env
+
+RUN go install
+
+EXPOSE 8080
+
+CMD ["tail", "-f", "/dev/null"]

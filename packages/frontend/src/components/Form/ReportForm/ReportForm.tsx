@@ -1,6 +1,6 @@
 import './ReportForm.css'
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useLocation } from '../../../contexts/LocationContext'
@@ -229,6 +229,7 @@ export const ReportForm = ({ closeModal, notifyParentAboutSubmission, className 
         return false
     }
 
+
     const validateReportForm = async () => {
         let hasError = false
 
@@ -266,6 +267,7 @@ export const ReportForm = ({ closeModal, notifyParentAboutSubmission, className 
 
         return hasError // Return true if there's an error, false otherwise
     }
+
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault()
 
@@ -284,19 +286,25 @@ export const ReportForm = ({ closeModal, notifyParentAboutSubmission, className 
             notifyParentAboutSubmission()
         }
 
-        sendAnalyticsEvent('Report Submitted', {
-            duration: durationInSeconds,
-            meta: {
-                Station: currentStation!,
-                Line: currentLine!,
-                Direction: currentDirection!,
-                Entity: Boolean(currentEntity),
-                SearchUsed: searchUsed,
-                StationRecommendationUsed: stationRecommendationSelected,
-            },
-        })
+        try {
+            sendAnalyticsEvent('Report Submitted', {
+                duration: durationInSeconds,
+                meta: {
+                    Station: currentStation!,
+                    Line: currentLine!,
+                    Direction: currentDirection!,
+                    Entity: Boolean(currentEntity),
+                    SearchUsed: searchUsed,
+                    StationRecommendationUsed: stationRecommendationSelected,
+                },
+            })
 
-        finalizeSubmission()
+            finalizeSubmission()
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('Failed to send analytics event:', error)
+            finalizeSubmission()
+        }
     }
 
 
