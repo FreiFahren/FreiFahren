@@ -1,6 +1,6 @@
 {
   "name": "freifahren",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android",
