@@ -24,3 +24,7 @@ FreiFahren operates by leveraging real-time, community-driven data to track the 
 5. **Community Engagement:** Users are encouraged to contribute to the community by reporting their own sightings of ticket inspectors. This helps keep the map accurate and up-to-date.
 
 By harnessing the power of community reporting and real-time data processing, FreiFahren provides a valuable tool for navigating the Berlin public transport network with confidence.
+
+# Docker
+
+To run the backend from the docker container, take a look at our Freifahren GitHub Wiki :)
