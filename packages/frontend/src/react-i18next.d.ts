@@ -1,4 +1,5 @@
 import 'react-i18next'
+
 import en from './locales/en.json'
 
 type DefaultResources = typeof en

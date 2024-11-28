@@ -1,6 +1,7 @@
-import React, { createContext, useState, useContext, useCallback, useRef } from 'react'
-import { watchPosition } from '../utils/mapUtils'
+import { createContext, PropsWithChildren, useCallback, useContext, useMemo, useRef, useState } from 'react'
 import { sendAnalyticsEvent } from 'src/utils/analytics'
+
+import { watchPosition } from '../utils/mapUtils'
 
 interface LocationContextType {
     userPosition: { lng: number; lat: number } | null
@@ -12,13 +13,14 @@ const LocationContext = createContext<LocationContextType | undefined>(undefined
 
 export const useLocation = () => {
     const context = useContext(LocationContext)
+
     if (!context) {
         throw new Error('useLocation must be used within a LocationProvider')
     }
     return context
 }
 
-export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const LocationProvider = ({ children }: PropsWithChildren) => {
     const [userPosition, setUserPositionState] = useState<{ lng: number; lat: number } | null>(null)
     const hasLocationEventBeenSentRef = useRef(false) // avoid sending the location event on every render
 
@@ -31,17 +33,17 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }, [])
 
     const initializeLocationTracking = useCallback(() => {
-        watchPosition(setUserPosition)
+        watchPosition(setUserPosition).catch((error) => {
+            // eslint-disable-next-line no-console
+            console.error('Failed to initialize location tracking:', error)
+            throw error
+        })
     }, [setUserPosition])
 
+    const context = useMemo(() => ({ userPosition, setUserPosition, initializeLocationTracking }), [initializeLocationTracking, setUserPosition, userPosition])
+
     return (
-        <LocationContext.Provider
-            value={{
-                userPosition,
-                setUserPosition,
-                initializeLocationTracking,
-            }}
-        >
+        <LocationContext.Provider value={context}>
             {children}
         </LocationContext.Provider>
     )

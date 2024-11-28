@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
+
 import { LanguageSwitcher } from '../../components/Miscellaneous/LanguageSwitcher/LanguageSwitcher'
 
-const Impressum = () => {
+export const Impressum = () => {
     const { t } = useTranslation()
 
     return (
@@ -15,6 +16,7 @@ const Impressum = () => {
             <ul>
                 {(t('Impressum.sections.representatives.content', { returnObjects: true }) as string[]).map(
                     (name, index) => (
+                        // eslint-disable-next-line react/no-array-index-key
                         <li key={index}>{name}</li>
                     )
                 )}
@@ -31,6 +33,7 @@ const Impressum = () => {
             <ul>
                 {(t('Impressum.sections.responsible.content', { returnObjects: true }) as string[]).map(
                     (name, index) => (
+                        // eslint-disable-next-line react/no-array-index-key
                         <li key={index}>{name}</li>
                     )
                 )}
@@ -47,5 +50,3 @@ const Impressum = () => {
         </div>
     )
 }
-
-export default Impressum

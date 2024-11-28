@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'
 import './Skeleton.css'
+
+import { useEffect, useState } from 'react'
 
 interface UseSkeletonProps {
     isLoading: boolean
@@ -39,7 +40,7 @@ export const useSkeleton = ({ isLoading, initialDelay = 100, minDisplayTime = 10
                 setShouldShowSkeleton(true)
                 setStartTime(Date.now())
             }, initialDelay)
-        } else if (shouldShowSkeleton && startTime) {
+        } else if (shouldShowSkeleton && startTime !== null) {
             const elapsedTime = Date.now() - startTime
             const remainingTime = Math.max(0, minDisplayTime - elapsedTime)
 
@@ -78,12 +79,8 @@ export const useSkeleton = ({ isLoading, initialDelay = 100, minDisplayTime = 10
  *   </div>
  * );
  */
-const Skeleton: React.FC = () => {
-    return (
-        <div className="loading-placeholder">
-            <div className="loading-animation"></div>
-        </div>
-    )
-}
-
-export default Skeleton
+export const Skeleton = () => (
+    <div className="loading-placeholder">
+        <div className="loading-animation" />
+    </div>
+)

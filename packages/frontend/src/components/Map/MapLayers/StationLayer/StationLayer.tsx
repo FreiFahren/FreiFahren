@@ -1,42 +1,44 @@
-import React, { useEffect } from 'react'
-import { Source, Layer, useMap, MapRef } from 'react-map-gl/maplibre'
+import { useEffect } from 'react'
+import { Layer, MapRef, Source, useMap } from 'react-map-gl/maplibre'
 
 import { StationGeoJSON } from '../../../../utils/types'
 
-const ubahn_icon = `${process.env.PUBLIC_URL}/icons/ubahn.svg`
-const sbahn_icon = `${process.env.PUBLIC_URL}/icons/sbahn.svg`
+const ubahnIcon = `${process.env.PUBLIC_URL}/icons/ubahn.svg`
+const sbahnIcon = `${process.env.PUBLIC_URL}/icons/sbahn.svg`
 
 interface StationLayerProps {
     stations: StationGeoJSON
     textColor: string
 }
 class IconFactory {
-    constructor(private map: MapRef | undefined) {}
+    constructor(private map: MapRef | undefined) { }
 
-    createImage(name: string, src: string) {
+    createImage(name: string, source: string) {
         const image = new Image(12, 12)
-        image.src = src
+
+        image.src = source
         image.onload = () => {
-            if (!this.map?.hasImage(name)) {
+            if (this.map?.hasImage(name) !== true) {
                 this.map?.addImage(name, image)
             }
         }
     }
 }
 
-const StationLayer: React.FC<StationLayerProps> = ({ stations, textColor }) => {
+export const StationLayer = ({ stations, textColor }: StationLayerProps) => {
     const map = useMap()
 
     useEffect(() => {
         const currentMap = map.current
         const iconFactory = new IconFactory(currentMap)
-        iconFactory.createImage('ubahn-icon', ubahn_icon)
-        iconFactory.createImage('sbahn-icon', sbahn_icon)
+
+        iconFactory.createImage('ubahn-icon', ubahnIcon)
+        iconFactory.createImage('sbahn-icon', sbahnIcon)
 
         return () => {
-            if (currentMap?.hasImage('ubahn-icon') && currentMap?.hasImage('sbahn-icon')) {
-                currentMap?.removeImage('ubahn-icon')
-                currentMap?.removeImage('sbahn-icon')
+            if (currentMap?.hasImage('ubahn-icon') === true && currentMap.hasImage('sbahn-icon')) {
+                currentMap.removeImage('ubahn-icon')
+                currentMap.removeImage('sbahn-icon')
             }
         }
     }, [map])
@@ -195,5 +197,3 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations, textColor }) => {
         </Source>
     )
 }
-
-export default StationLayer

@@ -1,18 +1,17 @@
+import './index.css'
+
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-
-import './index.css'
-import App from './pages/App/App'
-import Impressum from './pages/Impressum/Impressum'
-import reportWebVitals from './reportWebVitals'
+import { I18nextProvider } from 'react-i18next'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import { LocationProvider } from './contexts/LocationContext'
-
-import { I18nextProvider } from 'react-i18next'
 import i18n from './i18n'
-import Support from './pages/Support/Support'
-import PrivacyPolicy from './pages/PrivacyPolicy/PrivacyPolicy'
+import { App } from './pages/App/App'
+import { Impressum } from './pages/Impressum/Impressum'
+import { PrivacyPolicy } from './pages/PrivacyPolicy/PrivacyPolicy'
+import { Support } from './pages/Support/Support'
+import { reportWebVitals } from './reportWebVitals'
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 

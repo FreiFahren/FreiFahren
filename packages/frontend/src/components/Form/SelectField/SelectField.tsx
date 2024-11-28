@@ -1,5 +1,6 @@
-import React, { useCallback } from 'react'
 import './SelectField.css'
+
+import { Children, isValidElement, ReactNode, useCallback } from 'react'
 
 interface SelectFieldProps {
     children: React.ReactNode
@@ -18,12 +19,13 @@ interface SelectFieldProps {
  * @param {function} onSelect - Callback function to handle the selection of an option.
  * @param {string | null} value - The currently selected value.
  */
-const SelectField: React.FC<SelectFieldProps> = ({ children, containerClassName, fieldClassName, onSelect, value }) => {
+export const SelectField = ({ children, containerClassName, fieldClassName, onSelect, value }: SelectFieldProps) => {
     const handleSelect = useCallback(
-        (child: React.ReactNode) => {
-            if (React.isValidElement(child)) {
+        (child: ReactNode) => {
+            if (isValidElement(child)) {
                 const selectedValue = child.props.children.props.children
                 const newValue = value === selectedValue ? null : selectedValue // Toggle selection
+
                 onSelect(newValue)
             }
         },
@@ -32,11 +34,13 @@ const SelectField: React.FC<SelectFieldProps> = ({ children, containerClassName,
 
     return (
         <div className={`select-field-container ${containerClassName}`}>
-            {React.Children.map(
+            {Children.map(
                 children,
                 (child, index) =>
-                    React.isValidElement(child) && (
+                    isValidElement(child) && (
+                        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                         <div
+                            // eslint-disable-next-line react/no-array-index-key
                             key={index}
                             className={`select-field ${value === child.props.children.props.children ? 'selected' : ''} ${fieldClassName}`}
                             onClick={() => handleSelect(child)}
@@ -48,5 +52,3 @@ const SelectField: React.FC<SelectFieldProps> = ({ children, containerClassName,
         </div>
     )
 }
-
-export default SelectField

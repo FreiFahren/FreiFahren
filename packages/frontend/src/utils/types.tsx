@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export {} // to make this file a module
+import { z } from "zod";
+
+export { } // to make this file a module
 
 declare global {
     interface Window {
@@ -23,53 +25,65 @@ export type SavedEvent = {
     timestamp: number
 }
 
-export interface StationGeoJSON {
-    type: string
-    features: {
-        type: string
-        properties: {
-            name: string
-            lines: string[]
-        }
-        geometry: {
-            type: string
-            coordinates: number[]
-        }
-    }[]
-}
+// Station Feature Schema
+export const stationFeatureSchema = z.object({
+    type: z.string(),
+    properties: z.object({
+        name: z.string(),
+        lines: z.array(z.string())
+    }),
+    geometry: z.object({
+        type: z.string(),
+        coordinates: z.array(z.number())
+    })
+})
+export type StationFeature = z.infer<typeof stationFeatureSchema>
 
-export interface RiskData {
-    last_modified: string
-    segment_colors: SegmentColors
-}
+// Station GeoJSON Schema
+export const stationGeoJSONSchema = z.object({
+    type: z.string(),
+    features: z.array(stationFeatureSchema)
+})
+export type StationGeoJSON = z.infer<typeof stationGeoJSONSchema>
 
-export interface SegmentColors {
-    [key: string]: string
-}
+// Segment Colors Schema
+export const segmentColorsSchema = z.record(z.string())
+export type SegmentColors = z.infer<typeof segmentColorsSchema>
 
-export type MarkerData = {
-    timestamp: string
-    station: {
-        id: string
-        name: string
-        coordinates: {
-            latitude: number
-            longitude: number
-        }
-    }
-    direction: {
-        id: string
-        name: string
-        coordinates: {
-            latitude: number
-            longitude: number
-        }
-    }
-    line: string
-    isHistoric: boolean
-    message?: string
-}
+// Risk Data Schema
+export const riskDataSchema = z.object({
+    last_modified: z.string(),
+    segment_colors: segmentColorsSchema
+})
+export type RiskData = z.infer<typeof riskDataSchema>
 
-export type Statistics = {
-    numberOfReports: number
-}
+// Marker Data Schema
+export const markerDataSchema = z.object({
+    timestamp: z.string(),
+    station: z.object({
+        id: z.string(),
+        name: z.string(),
+        coordinates: z.object({
+            latitude: z.number(),
+            longitude: z.number()
+        })
+    }),
+    direction: z.object({
+        id: z.string(),
+        name: z.string(),
+        coordinates: z.object({
+            latitude: z.number(),
+            longitude: z.number()
+        })
+    }),
+    line: z.string(),
+    isHistoric: z.boolean(),
+    message: z.string().optional()
+})
+export type MarkerData = z.infer<typeof markerDataSchema>
+
+// Statistics Schema
+export const statisticsSchema = z.object({
+    numberOfReports: z.number()
+})
+export type Statistics = z.infer<typeof statisticsSchema>

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useCallback, useMemo, useEffect } from 'react'
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { MarkerData } from 'src/utils/types'
 
 const STORAGE_KEY = 'viewedReports'
@@ -21,19 +21,22 @@ const createReportId = (report: MarkerData): string => `${report.station.id}-${r
 const isReportExpired = (report: ViewedReport): boolean => {
     const currentTime = new Date().getTime()
     const reportTime = new Date(report.timestamp).getTime()
+
     return currentTime - reportTime >= MAX_AGE_MS
 }
 
 const isReportRecent = (report: MarkerData): boolean => {
     const currentTime = new Date().getTime()
     const reportTime = new Date(report.timestamp).getTime()
+
     return currentTime - reportTime <= 30 * 60 * 1000 // 30 minutes
 }
 
 const loadInitialReports = (): ViewedReport[] => {
     try {
         const stored = localStorage.getItem(STORAGE_KEY)
-        const reports = stored ? JSON.parse(stored) : []
+        const reports = stored !== null ? JSON.parse(stored) : []
+
         return reports.filter((report: ViewedReport) => !isReportExpired(report))
     } catch {
         return []
@@ -42,8 +45,8 @@ const loadInitialReports = (): ViewedReport[] => {
 
 const ViewedReportsContext = createContext<ViewedReportsContextType | null>(null)
 
-export const ViewedReportsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [reports, setReports] = React.useState<ViewedReport[]>(loadInitialReports)
+export const ViewedReportsProvider = ({ children }: PropsWithChildren) => {
+    const [reports, setReports] = useState<ViewedReport[]>(loadInitialReports)
 
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(reports))
@@ -56,6 +59,7 @@ export const ViewedReportsProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         const interval = setInterval(cleanup, 5 * 60 * 1000)
+
         return () => clearInterval(interval)
     }, [])
 
@@ -67,24 +71,22 @@ export const ViewedReportsProvider: React.FC<{ children: React.ReactNode }> = ({
 
         setReports((prev) => {
             const filtered = prev.filter((r) => r.id !== newReport.id)
+
             return [newReport, ...filtered]
         })
     }, [])
 
     const hasViewedReport = useCallback(
         (report: MarkerData): boolean => {
-            if (!report) return false
             const reportId = createReportId(report)
+
             return reports.some((r) => r.id === reportId)
         },
         [reports]
     )
 
     const isRecentAndUnviewed = useCallback(
-        (report: MarkerData): boolean => {
-            if (!report) return false
-            return isReportRecent(report) && !hasViewedReport(report)
-        },
+        (report: MarkerData): boolean => isReportRecent(report) && !hasViewedReport(report),
         [hasViewedReport]
     )
 
@@ -104,6 +106,7 @@ export const ViewedReportsProvider: React.FC<{ children: React.ReactNode }> = ({
 // custom hook to use the context
 export const useViewedReports = (): ViewedReportsContextType => {
     const context = useContext(ViewedReportsContext)
+
     if (!context) {
         throw new Error('useViewedReports must be used within a ViewedReportsProvider')
     }
