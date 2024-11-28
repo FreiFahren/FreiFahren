@@ -1,20 +1,18 @@
+import './ReportsModal.css'
+
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts'
+import { Bar, BarChart, ResponsiveContainer, Tooltip, TooltipProps,XAxis, YAxis } from 'recharts'
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
-
-import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
-import { MarkerData } from 'src/utils/types'
-import { getRecentDataWithIfModifiedSince } from 'src/utils/dbUtils'
-import { getLineColor } from 'src/utils/uiUtils'
-
-import ReportItem from './ReportItem'
-import ClusteredReportItem from './ClusteredReportItem'
-
 import { useRiskData } from 'src/contexts/RiskDataContext'
 import { useStationsAndLines } from 'src/contexts/StationsAndLinesContext'
+import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
+import { getRecentDataWithIfModifiedSince } from 'src/utils/databaseUtils'
+import { MarkerData } from 'src/utils/types'
+import { getLineColor } from 'src/utils/uiUtils'
 
-import './ReportsModal.css'
+import ClusteredReportItem from './ClusteredReportItem'
+import ReportItem from './ReportItem'
 
 interface ReportsModalProps {
     className?: string
@@ -83,8 +81,10 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             const sortedLists = [recentInspectors, historicInspectors, filteredPreviousDayInspectorList].map((list) =>
                 list.sort(sortByTimestamp)
             )
+
             setTicketInspectorList(sortedLists.flat())
         }
+
         fetchInspectorList()
     }, [currentTime, lastHourInspectorList])
 
@@ -97,6 +97,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             // Group reports by line
             for (const inspector of ticketInspectorList) {
                 const { line } = inspector
+
                 if (line === '') continue
                 lineReports.set(line, [...(lineReports.get(line) || []), inspector])
             }
@@ -105,6 +106,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
         }
 
         const sortedLines = getAllLinesWithReportsSorted()
+
         setSortedLinesWithReports(sortedLines)
     }, [ticketInspectorList])
 
@@ -136,6 +138,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                         lineScores.set(line, { score, class: score })
                     } else {
                         const currentData = lineScores.get(line)!
+
                         lineScores.set(line, {
                             score: currentData.score + score,
                             class: Math.max(currentData.class, score),
@@ -147,6 +150,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             }
 
             const riskMap = extractMostRiskLines(segmentRiskData.segment_colors)
+
             Object.keys(allLines).forEach((line) => {
                 if (!riskMap.has(line)) {
                     riskMap.set(line, { score: 0, class: 0 })
@@ -156,17 +160,16 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
         }
     }, [segmentRiskData, allLines])
 
-    const getChartData = useMemo(() => {
-        return Array.from(sortedLinesWithReports.entries()).map(([line, reports]) => ({
+    const getChartData = useMemo(() => Array.from(sortedLinesWithReports.entries()).map(([line, reports]) => ({
             line,
             reports: reports.length,
-        }))
-    }, [sortedLinesWithReports])
+        })), [sortedLinesWithReports])
 
     const [isLightTheme, setIsLightTheme] = useState<boolean>(false)
 
     useEffect(() => {
         const theme = localStorage.getItem('colorTheme')
+
         setIsLightTheme(theme === 'light')
 
         const handleStorageChange = (e: StorageEvent) => {
@@ -174,12 +177,13 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                 setIsLightTheme(e.newValue === 'dark')
             }
         }
+
         window.addEventListener('storage', handleStorageChange)
         return () => window.removeEventListener('storage', handleStorageChange)
     }, [])
 
     const CustomTooltip: React.FC<TooltipProps<ValueType, NameType>> = ({ active, payload }) => {
-        if (!active || !payload || !payload.length) return null
+        if (!active || !payload || (payload.length === 0)) return null
 
         const data = payload[0].payload
         const totalReports = getChartData.reduce((sum, item) => sum + item.reports, 0)
@@ -224,6 +228,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                             .sort(([, inspectorsA], [, inspectorsB]) => {
                                 const timestampA = new Date(inspectorsA[0].timestamp).getTime()
                                 const timestampB = new Date(inspectorsB[0].timestamp).getTime()
+
                                 return timestampB - timestampA // most recent first
                             })
                             .map(([line, inspectors]) => (
@@ -236,29 +241,29 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                             {Array.from(riskLines.entries()).some(
                                 ([, riskData]) => riskData.class === 2 || riskData.class === 3
                             ) && (
-                                <div className="risk-grid-item">
-                                    {Array.from(riskLines.entries())
-                                        .filter(([, riskData]) => riskData.class === 2 || riskData.class === 3)
-                                        .map(([line, riskData]) => (
-                                            <div
-                                                key={line}
-                                                className={`risk-line risk-level-${riskData.class}`}
-                                                onClick={() => closeModal()}
-                                            >
-                                                <img
-                                                    src={`/icons/risk-${riskData.class}.svg`}
-                                                    alt="Icon to show risk level"
-                                                />
-                                                <h4
-                                                    className="line-label"
-                                                    style={{ backgroundColor: getLineColor(line) }}
+                                    <div className="risk-grid-item">
+                                        {Array.from(riskLines.entries())
+                                            .filter(([, riskData]) => riskData.class === 2 || riskData.class === 3)
+                                            .map(([line, riskData]) => (
+                                                <div
+                                                    key={line}
+                                                    className={`risk-line risk-level-${riskData.class}`}
+                                                    onClick={() => closeModal()}
                                                 >
-                                                    {line}
-                                                </h4>
-                                            </div>
-                                        ))}
-                                </div>
-                            )}
+                                                    <img
+                                                        src={`/icons/risk-${riskData.class}.svg`}
+                                                        alt="Icon to show risk level"
+                                                    />
+                                                    <h4
+                                                        className="line-label"
+                                                        style={{ backgroundColor: getLineColor(line) }}
+                                                    >
+                                                        {line}
+                                                    </h4>
+                                                </div>
+                                            ))}
+                                    </div>
+                                )}
                             {Array.from(riskLines.entries()).some(([, riskData]) => riskData.class === 1) && (
                                 <div className="risk-grid-item">
                                     {Array.from(riskLines.entries())
@@ -342,8 +347,9 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 shape={(props: any) => {
                                     const { x, y, width, height } = props
-                                    const line = props.payload.line
+                                    const {line} = props.payload
                                     const color = getLineColor(line)
+
                                     return <rect x={x} y={y} width={width} height={height} fill={color} rx={4} ry={4} />
                                 }}
                             />

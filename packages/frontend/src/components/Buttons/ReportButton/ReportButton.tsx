@@ -1,21 +1,18 @@
-import React, { MouseEventHandler } from 'react'
-
 import './ReportButton.css'
+
+import { MouseEventHandler } from 'react'
 
 interface ReportButtonProps {
     openReportModal: MouseEventHandler<HTMLButtonElement>
 }
 
-const ReportButton: React.FC<ReportButtonProps> = ({ openReportModal }) => {
-    return (
-        <button className="report-button small-button align-child-on-line" onClick={openReportModal}>
-            <p>Melden</p>
-            <div className="plus">
-                <span></span>
-                <span></span>
-            </div>
-        </button>
-    )
-}
-
-export default ReportButton
+export const ReportButton = ({ openReportModal }: ReportButtonProps) => (
+    // eslint-disable-next-line react/button-has-type
+    <button className="report-button small-button align-child-on-line" onClick={openReportModal}>
+        <p>Melden</p>
+        <div className="plus">
+            <span />
+            <span />
+        </div>
+    </button>
+)

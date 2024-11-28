@@ -1,17 +1,19 @@
-import { useState, useCallback } from 'react'
+import './AskForLocation.css'
+
+import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import './AskForLocation.css'
-import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
 import { useLocation } from '../../../contexts/LocationContext'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
+import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
+
 interface AskForLocationProps {
     className: string
     children?: React.ReactNode
     closeModal: () => void
 }
 
-const AskForLocation: React.FC<AskForLocationProps> = ({ className, children, closeModal }) => {
+export const AskForLocation = ({ className, children, closeModal }: AskForLocationProps) => {
     const { t } = useTranslation()
 
     const { setUserPosition } = useLocation()
@@ -23,6 +25,7 @@ const AskForLocation: React.FC<AskForLocationProps> = ({ className, children, cl
     const handleSelect = useCallback(
         (key: string | null) => {
             const foundStationEntry = Object.entries(allStations).find(([, stationData]) => stationData.name === key)
+
             setSelectedStation(foundStationEntry ? foundStationEntry[0] : null)
 
             // set the stations to show be the selected value, but when the new selected value is the same as the old one, show all stations
@@ -35,10 +38,11 @@ const AskForLocation: React.FC<AskForLocationProps> = ({ className, children, cl
         [allStations, selectedStation]
     )
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        if (selectedStation && allStations[selectedStation]) {
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault()
+        if (selectedStation !== null && selectedStation in allStations) {
             const station = allStations[selectedStation]
+
             setUserPosition({
                 lat: station.coordinates.latitude,
                 lng: station.coordinates.longitude,
@@ -62,12 +66,10 @@ const AskForLocation: React.FC<AskForLocationProps> = ({ className, children, cl
                     required={false}
                 />
 
-                <button type="submit" className={selectedStation ? '' : 'button-gray'} disabled={!selectedStation}>
+                <button type="submit" className={selectedStation !== null ? '' : 'button-gray'} disabled={selectedStation === null}>
                     {t('AskForLocation.setLocation')}
                 </button>
             </form>
         </div>
     )
 }
-
-export default AskForLocation

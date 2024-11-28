@@ -4,6 +4,5 @@ interface CloseButtonProps {
     closeModal: () => void
 }
 
-export const CloseButton: React.FC<CloseButtonProps> = ({ closeModal }) => {
-    return <button className="small-button close-button center-child" onClick={closeModal}></button>
-}
+// eslint-disable-next-line jsx-a11y/control-has-associated-label, react/button-has-type
+export const CloseButton: React.FC<CloseButtonProps> = ({ closeModal }: CloseButtonProps) => <button className="small-button close-button center-child" onClick={closeModal} />

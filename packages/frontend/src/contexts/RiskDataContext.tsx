@@ -1,6 +1,7 @@
-import React, { createContext, useState, useContext, useCallback } from 'react'
-import { getRecentDataWithIfModifiedSince } from '../utils/dbUtils'
+import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import { RiskData } from 'src/utils/types'
+
+import { getRecentDataWithIfModifiedSince } from '../utils/databaseUtils'
 
 const defaultRefreshRiskData = async (): Promise<void> => {
     throw new Error('refreshRiskData is not implemented')
@@ -24,18 +25,22 @@ export const RiskDataProvider = ({ children }: { children: React.ReactNode }) =>
                 `${process.env.REACT_APP_API_URL}/risk-prediction/segment-colors`,
                 lastModified
             )
-            if (results) {
+
+            if (results !== null) {
                 setSegmentRiskData(results)
                 setLastModified(new Date(results.last_modified))
             }
         } catch (error) {
+            // eslint-disable-next-line no-console
             console.error('Failed to fetch risk data:', error)
             setSegmentRiskData(null)
         }
     }, [lastModified])
 
+    const context = useMemo(() => ({ segmentRiskData, refreshRiskData, lastModified }), [segmentRiskData, refreshRiskData, lastModified])
+
     return (
-        <RiskDataContext.Provider value={{ segmentRiskData, refreshRiskData, lastModified }}>
+        <RiskDataContext.Provider value={context}>
             {children}
         </RiskDataContext.Provider>
     )

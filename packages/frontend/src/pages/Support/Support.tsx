@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom"
 
-const Support = () => {
+export const Support = () => {
     const { t } = useTranslation()
 
     return (
@@ -25,5 +25,3 @@ const Support = () => {
         </div>
     )
 }
-
-export default Support

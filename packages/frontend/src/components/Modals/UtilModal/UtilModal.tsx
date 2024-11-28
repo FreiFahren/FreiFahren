@@ -1,11 +1,12 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-
 import './UtilModal.css'
-import FeedbackModal from '../FeedbackModal/FeedbackModal'
-import Backdrop from '../../../components/Miscellaneous/Backdrop/Backdrop'
-import LegalDisclaimer from '../LegalDisclaimer/LegalDisclaimer'
+
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
+
+import { Backdrop } from "../../Miscellaneous/Backdrop/Backdrop"
+import { FeedbackModal } from '../FeedbackModal/FeedbackModal'
+import { LegalDisclaimer } from '../LegalDisclaimer/LegalDisclaimer'
 
 interface UtilModalProps {
     className: string
@@ -14,11 +15,11 @@ interface UtilModalProps {
     toggleColorTheme: () => void
 }
 
-const github_icon = `${process.env.PUBLIC_URL}/icons/github.svg`
-const light_icon = `${process.env.PUBLIC_URL}/icons/light.svg`
-const dark_icon = `${process.env.PUBLIC_URL}/icons/dark.svg`
+const githubIcon = `${process.env.PUBLIC_URL}/icons/github.svg`
+const lightIcon = `${process.env.PUBLIC_URL}/icons/light.svg`
+const darkIcon = `${process.env.PUBLIC_URL}/icons/dark.svg`
 
-const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, toggleColorTheme }) => {
+export const UtilModal = ({ className, children, colorTheme, toggleColorTheme }: UtilModalProps) => {
     const { t } = useTranslation()
 
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false)
@@ -30,18 +31,22 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                 {children}
                 <div className="align-child-on-line">
                     <h1>{t('UtilModal.title')}</h1>
+                    {/* eslint-disable-next-line react/button-has-type */}
                     <button className="action" onClick={() => setIsFeedbackModalOpen(true)}>
                         {t('UtilModal.feedback-button')}
                     </button>
                 </div>
                 <div>
                     <ul>
-                        <li onClick={toggleColorTheme}>
-                            {colorTheme === 'light' ? (
-                                <img src={light_icon} alt="Light Icon" />
-                            ) : (
-                                <img src={dark_icon} alt="Dark Icon" />
-                            )}
+                        <li>
+                            {/* eslint-disable-next-line react/button-has-type */}
+                            <button onClick={toggleColorTheme}>
+                                {colorTheme === 'light' ? (
+                                    <img src={lightIcon} alt="Light Icon" />
+                                ) : (
+                                    <img src={darkIcon} alt="Dark Icon" />
+                                )}
+                            </button>
                         </li>
                     </ul>
                     <ul className="align-child-on-line">
@@ -52,7 +57,8 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                             <Link to="/Datenschutz">{t('UtilModal.privacy')}</Link>
                         </li>
                         <li>
-                            <p onClick={() => setIsLegalDisclaimerOpen(true)}>{t('UtilModal.terms')}</p>
+                            {/* eslint-disable-next-line react/button-has-type */}
+                            <button onClick={() => setIsLegalDisclaimerOpen(true)}>{t('UtilModal.terms')}</button>
                         </li>
                         <li>
                             <a
@@ -61,7 +67,7 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                <img src={github_icon} alt="Github Icon" />
+                                <img src={githubIcon} alt="Github Icon" />
                             </a>
                         </li>
                     </ul>
@@ -69,7 +75,7 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
             </div>
             {isFeedbackModalOpen && (
                 <>
-                    <FeedbackModal openAnimationClass={isFeedbackModalOpen ? 'open center-animation' : ''} />
+                    <FeedbackModal openAnimationClass="open center-animation" />
                     <Backdrop onClick={() => setIsFeedbackModalOpen(false)} Zindex={3} />
                 </>
             )}
@@ -77,7 +83,7 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                 <>
                     <LegalDisclaimer
                         closeModal={() => setIsLegalDisclaimerOpen(false)}
-                        openAnimationClass={isLegalDisclaimerOpen ? 'open center-animation high-z-index' : ''}
+                        openAnimationClass="open center-animation high-z-index"
                     />
                     <Backdrop onClick={() => setIsLegalDisclaimerOpen(false)} Zindex={3} />
                 </>
@@ -85,5 +91,3 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
         </>
     )
 }
-
-export default UtilModal

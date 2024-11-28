@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react'
-import ReactDOM from 'react-dom'
-
 import './Backdrop.css'
+
+import { useEffect, useRef } from 'react'
+import ReactDOM from 'react-dom'
 
 interface BackdropProps {
     onClick: () => void
@@ -9,7 +9,7 @@ interface BackdropProps {
     Zindex?: number
 }
 
-const Backdrop: React.FC<BackdropProps> = ({ onClick, BackgroundColor, Zindex }) => {
+export const Backdrop = ({ onClick, BackgroundColor, Zindex }: BackdropProps) => {
     const backdropRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -35,18 +35,17 @@ const Backdrop: React.FC<BackdropProps> = ({ onClick, BackgroundColor, Zindex })
     }, [onClick])
 
     return ReactDOM.createPortal(
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
         <div
             ref={backdropRef}
             className="backdrop"
             onClick={onClick}
             data-testid="backdrop"
             style={{
-                backgroundColor: BackgroundColor || 'rgba(0, 0, 0, 0.5)',
-                zIndex: Zindex || 1, // should be same as --zIndex-backdrop
+                backgroundColor: BackgroundColor ?? 'rgba(0, 0, 0, 0.5)',
+                zIndex: Zindex ?? 1, // should be same as --zIndex-backdrop
             }}
         />,
         document.getElementById('portal-root') as HTMLElement
     )
 }
-
-export default Backdrop

@@ -50,11 +50,11 @@ export const useElapsedTimeMessage = (elapsedTimeInMinutes: number, isHistoric: 
     if (elapsedTimeInMinutes > 60) {
         return (
             <span className="elapsed-time">
-                {currentLanguage === 'de' ? t('MarkerModal.ago') + ' ' : ''}
+                {currentLanguage === 'de' ? `${t('MarkerModal.ago')} ` : ''}
                 <strong>
                     {Math.floor(elapsedTimeInMinutes / 60)} {t('MarkerModal.hours')}
                 </strong>
-                {currentLanguage === 'en' ? ' ' + t('MarkerModal.ago') : ''}
+                {currentLanguage === 'en' ? ` ${t('MarkerModal.ago')}` : ''}
             </span>
         )
     }
@@ -67,11 +67,11 @@ export const useElapsedTimeMessage = (elapsedTimeInMinutes: number, isHistoric: 
     }
     return (
         <span className="elapsed-time">
-            {currentLanguage === 'de' ? t('MarkerModal.ago') + ' ' : ''}
+            {currentLanguage === 'de' ? `${t('MarkerModal.ago')} ` : ''}
             <strong>
                 {elapsedTimeInMinutes} {t('MarkerModal.minutes')}
             </strong>
-            {currentLanguage === 'en' ? ' ' + t('MarkerModal.ago') : ''}
+            {currentLanguage === 'en' ? ` ${t('MarkerModal.ago')}` : ''}
         </span>
     )
 }

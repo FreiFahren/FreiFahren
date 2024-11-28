@@ -1,16 +1,15 @@
-import React, { useState } from 'react'
+import './ReportsModal.css'
 
+import { useState } from 'react'
 import { MarkerData } from 'src/utils/types'
 
-import ReportItem from './ReportItem'
-
-import './ReportsModal.css'
+import { ReportItem } from './ReportItem'
 
 interface ClusteredReportItemProps {
     inspectors: MarkerData[]
 }
 
-const ClusteredReportItem: React.FC<ClusteredReportItemProps> = ({ inspectors }) => {
+export const ClusteredReportItem = ({ inspectors }: ClusteredReportItemProps) => {
     const [isListExpanded, setIsListExpanded] = useState(false)
 
     const currentTime = new Date().getTime()
@@ -30,6 +29,7 @@ const ClusteredReportItem: React.FC<ClusteredReportItemProps> = ({ inspectors })
                     <ReportItem ticketInspector={inspectorsWithoutDirection[0]} currentTime={currentTime} />
                 </div>
                 {inspectorsWithoutDirection.length > 1 && (
+                    // eslint-disable-next-line jsx-a11y/control-has-associated-label, react/button-has-type
                     <button
                         className={isListExpanded ? 'expanded' : ''}
                         onClick={() => setIsListExpanded(!isListExpanded)}
@@ -49,5 +49,3 @@ const ClusteredReportItem: React.FC<ClusteredReportItemProps> = ({ inspectors })
         </>
     )
 }
-
-export default ClusteredReportItem

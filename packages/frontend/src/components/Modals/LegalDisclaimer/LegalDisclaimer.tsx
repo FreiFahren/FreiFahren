@@ -1,15 +1,14 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-
 import './LegalDisclaimer.css'
+
+import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 
 interface LegalDisclaimerProps {
     closeModal: () => void
     openAnimationClass?: string
 }
 
-const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ closeModal, openAnimationClass }) => {
+export const LegalDisclaimer = ({ closeModal, openAnimationClass }: LegalDisclaimerProps) => {
     const { t } = useTranslation()
 
     return (
@@ -32,6 +31,7 @@ const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ closeModal, openAnima
                 </section>
             </div>
             <div className="footer">
+                {/* eslint-disable-next-line react/button-has-type */}
                 <button onClick={closeModal}>{t('LegalDisclaimer.confirm')}</button>
                 <ul className="align-child-on-line">
                     <li>
@@ -45,5 +45,3 @@ const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ closeModal, openAnima
         </div>
     )
 }
-
-export default LegalDisclaimer

@@ -1,31 +1,29 @@
-import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
+import './ReportForm.css'
+
+import React, { useCallback, useEffect,useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import SelectField from '../SelectField/SelectField'
-import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
-
-import { LinesList, StationList, reportInspector } from '../../../utils/dbUtils'
-import { sendAnalyticsEvent } from '../../../utils/analytics'
-import { highlightElement, createWarningSpan, getLineColor } from '../../../utils/uiUtils'
-import { calculateDistance } from '../../../utils/mapUtils'
 import { useLocation } from '../../../contexts/LocationContext'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
-
-import './ReportForm.css'
+import { sendAnalyticsEvent } from '../../../utils/analytics'
+import { LinesList, reportInspector,StationList } from '../../../utils/databaseUtils'
+import { calculateDistance } from '../../../utils/mapUtils'
+import { createWarningSpan, getLineColor,highlightElement } from '../../../utils/uiUtils'
+import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
+import SelectField from '../SelectField/SelectField'
 
 const getCSSVariable = (variable: string): number => {
     const value = getComputedStyle(document.documentElement).getPropertyValue(variable)
+
     return parseFloat(value) || 0
 }
 
-const redHighlight = (text: string) => {
-    return (
+const redHighlight = (text: string) => (
         <>
             {text}
             <span className="red-highlight">*</span>
         </>
     )
-}
 
 interface ReportFormProps {
     closeModal: () => void
@@ -71,6 +69,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         const paddingBottom = parseFloat(styles.paddingBottom)
         const marginTop = parseFloat(styles.marginTop)
         const marginBottom = parseFloat(styles.marginBottom)
+
         return paddingTop + paddingBottom + marginTop + marginBottom
     }
 
@@ -88,6 +87,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
     // Calculate possible stations based on entity, line, station, and search input
     const possibleStations = useMemo(() => {
         let stations = allStations
+
         if (currentStation) {
             stations = { [currentStation]: allStations[currentStation] }
         } else if (currentLine) {
@@ -181,6 +181,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
             const foundStationEntry = Object.entries(allStations).find(
                 ([, stationData]) => stationData.name === stationName
             )
+
             setCurrentStation(foundStationEntry ? foundStationEntry[0] : null)
             setStationSearch('')
         },
@@ -192,6 +193,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
             const foundStationEntry = Object.entries(allStations).find(
                 ([, stationData]) => stationData.name === directionName
             )
+
             setCurrentDirection(foundStationEntry ? foundStationEntry[0] : null)
         },
         [allStations]
@@ -201,6 +203,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         event.preventDefault()
 
         const hasError = await validateReportForm()
+
         if (hasError) return // Abort submission if there are validation errors
 
         await reportInspector(currentLine!, currentStation!, currentDirection!, description)
@@ -264,6 +267,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         }
 
         const locationError = await verifyUserLocation(currentStation, allStations)
+
         if (locationError) {
             hasError = true
         }
@@ -276,11 +280,11 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
 
         const distance = userPosition
             ? calculateDistance(
-                  userPosition.lat,
-                  userPosition.lng,
-                  stationsList[station].coordinates.latitude,
-                  stationsList[station].coordinates.longitude
-              )
+                userPosition.lat,
+                userPosition.lng,
+                stationsList[station].coordinates.latitude,
+                stationsList[station].coordinates.longitude
+            )
             : 0
 
         // Checks if the user is more than 5 km away from the station
@@ -308,6 +312,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                 stationData.coordinates.latitude,
                 stationData.coordinates.longitude
             )
+
             return { station, stationData, distance }
         })
 
@@ -361,15 +366,15 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                         getDisplayValue={(station) => station.name}
                         placeholder={t('ReportForm.searchPlaceholder')}
                         label={t('ReportForm.station')}
-                        required={true}
+                        required
                         setSearchUsed={setSearchUsed}
                         listHeight={stationListHeight}
                         highlightElements={
                             userPosition
                                 ? getClosestStationsToUser(3, possibleStations, userPosition).reduce(
-                                      (acc, station) => ({ ...acc, ...station }),
-                                      {}
-                                  )
+                                    (acc, station) => ({ ...acc, ...station }),
+                                    {}
+                                )
                                 : undefined
                         }
                         setHighlightedElementSelected={setStationRecommendationSelected}

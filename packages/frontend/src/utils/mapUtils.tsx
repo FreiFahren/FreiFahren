@@ -1,4 +1,7 @@
-import { StationProperty } from './dbUtils'
+import { StationProperty } from './databaseUtils'
+
+
+const deg2rad = (deg: number) => deg * (Math.PI / 180)
 
 /**
  * Calculates the distance between two geographical points using the Haversine formula.
@@ -9,35 +12,7 @@ import { StationProperty } from './dbUtils'
  * @param {number} lon2 - The longitude of the second point in decimal degrees.
  * @returns {number} The distance between the two points in kilometers.
  */
-export function getNearestStation(stations: { [key: string]: StationProperty }, userLat?: number, userLon?: number) {
-    if (!userLat || !userLon) return null
-    let nearestStation = null
-    let nearestDistance = Infinity
-    for (const [key, station] of Object.entries(stations)) {
-        const distance = calculateDistance(
-            userLat!,
-            userLon!,
-            station.coordinates.latitude,
-            station.coordinates.longitude
-        )
-        if (distance < nearestDistance) {
-            nearestDistance = distance
-            nearestStation = { key, ...station }
-        }
-    }
-    return nearestStation
-}
-
-/**
- * Calculates the distance between two geographical points using the Haversine formula.
- *
- * @param {number} lat1 - The latitude of the first point in decimal degrees.
- * @param {number} lon1 - The longitude of the first point in decimal degrees.
- * @param {number} lat2 - The latitude of the second point in decimal degrees.
- * @param {number} lon2 - The longitude of the second point in decimal degrees.
- * @returns {number} The distance between the two points in kilometers.
- */
-export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371 // Radius of the earth in km
     const dLat = deg2rad(lat2 - lat1)
     const dLon = deg2rad(lon2 - lon1)
@@ -46,17 +21,41 @@ export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2
         Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
     const distance = R * c // Distance in km
+
     return distance
 }
 
-function deg2rad(deg: number) {
-    return deg * (Math.PI / 180)
-}
+/**
+ * Get the nearest station to the user
+ *
+ * @param {number} userLat - The latitude of the user in decimal degrees.
+ * @param {number} userLon - The longitude of the user in decimal degrees.
+* @param {Record<string, StationProperty>} stations - The list of stations to compare to.
+* @returns {StationProperty} The closest station to the user.
+ */
+export const getNearestStation = (stations: Record<string, StationProperty>, userLat?: number, userLon?: number): StationProperty & { key: string } | null => {
+    if (userLat === undefined || userLon === undefined) return null
+    let nearestStation = null
+    let nearestDistance = Infinity
 
+    for (const [key, station] of Object.entries(stations)) {
+        const distance = calculateDistance(
+            userLat!,
+            userLon!,
+            station.coordinates.latitude,
+            station.coordinates.longitude
+        )
+
+        if (distance < nearestDistance) {
+            nearestDistance = distance
+            nearestStation = { key, ...station }
+        }
+    }
+    return nearestStation
+}
 /**
  * Subscribes to user's geolocation changes and executes callback functions based on the result.
  * @param {Function} onPositionChanged Callback that handles position data.
- * @param {Function} openAskForLocation Callback that handles failures in obtaining geolocation.
  * @param {Object} options Configuration options for geolocation. Default values are:
  * {
  *    enableHighAccuracy: true,
@@ -98,16 +97,17 @@ export const watchPosition = async (
             }
         },
         (error) => {
+            // eslint-disable-next-line no-console
             console.error('Error obtaining position:', error.message)
             onPositionChanged(null)
         },
         options
     )
+
     return () => navigator.geolocation.clearWatch(watchId)
 }
 
-export function convertStationsToGeoJSON(stationsData: { [key: string]: StationProperty }) {
-    return {
+export const convertStationsToGeoJSON = (stationsData: { [key: string]: StationProperty }) => ({
         type: 'FeatureCollection',
         features: Object.keys(stationsData).map((key) => ({
             type: 'Feature',
@@ -120,5 +120,4 @@ export function convertStationsToGeoJSON(stationsData: { [key: string]: StationP
                 coordinates: [stationsData[key].coordinates.longitude, stationsData[key].coordinates.latitude],
             },
         })),
-    }
-}
+    })
