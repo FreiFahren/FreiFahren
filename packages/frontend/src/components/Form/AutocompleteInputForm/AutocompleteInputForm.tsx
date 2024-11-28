@@ -1,8 +1,8 @@
-import React, { useState, useRef, useCallback } from 'react'
-
-import SelectField from '../SelectField/SelectField'
-
 import './AutocompleteInputForm.css'
+
+import { useCallback, useRef, useState } from 'react'
+
+import { SelectField } from '../SelectField/SelectField'
 
 interface AutocompleteInputFormProps<T> {
     items: Record<string, T>
@@ -18,7 +18,7 @@ interface AutocompleteInputFormProps<T> {
     setHighlightedElementSelected?: (highlightedElementSelected: boolean) => void
 }
 
-const search_icon = `${process.env.PUBLIC_URL}/icons/search.svg`
+const searchIcon = `${process.env.PUBLIC_URL}/icons/search.svg`
 
 /**
  * AutocompleteInputForm Component
@@ -43,7 +43,7 @@ const search_icon = `${process.env.PUBLIC_URL}/icons/search.svg`
  *
  * @returns {React.ReactElement} The rendered AutocompleteInputForm component
  */
-function AutocompleteInputForm<T>({
+export const AutocompleteInputForm = <T,>({
     items,
     onSelect,
     value,
@@ -55,7 +55,7 @@ function AutocompleteInputForm<T>({
     listHeight,
     highlightElements,
     setHighlightedElementSelected,
-}: AutocompleteInputFormProps<T>) {
+}: AutocompleteInputFormProps<T>) => {
     const [showSearchBox, setShowSearchBox] = useState(false)
     const [elementIsSelected, setElementIsSelected] = useState(false)
     const [search, setSearch] = useState('')
@@ -105,20 +105,21 @@ function AutocompleteInputForm<T>({
                     type="text"
                     placeholder={placeholder}
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={(event) => setSearch(event.target.value)}
                     ref={searchInputRef}
                 />
-                <img src={search_icon} onClick={toggleSearchBox} alt="Search icon" />
+                {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */}
+                <img src={searchIcon} onClick={toggleSearchBox} alt="Search icon" />
             </div>
             <div
                 className="list-container"
-                style={listHeight ? { height: `${listHeight}px`, maxHeight: '100%' } : undefined}
+                style={listHeight !== null ? { height: `${listHeight}px`, maxHeight: '100%' } : undefined}
             >
                 {highlightElements && !elementIsSelected && !showSearchBox && (
                     <>
                         <SelectField
                             onSelect={(selectedValue) => handleSelect(selectedValue, true)}
-                            value={value ? getDisplayValue(items[value]) : ''}
+                            value={value !== null ? getDisplayValue(items[value]) : ''}
                             containerClassName="align-child-column highlight-list-container"
                         >
                             {Object.entries(highlightElements).map(([key, item]) => (
@@ -132,7 +133,7 @@ function AutocompleteInputForm<T>({
                 )}
                 <SelectField
                     onSelect={handleSelect}
-                    value={value ? getDisplayValue(items[value]) : ''}
+                    value={value !== null ? getDisplayValue(items[value]) : ''}
                     containerClassName="align-child-column"
                 >
                     {filteredItems.map(([key, item]) => (
@@ -145,5 +146,3 @@ function AutocompleteInputForm<T>({
         </section>
     )
 }
-
-export default AutocompleteInputForm

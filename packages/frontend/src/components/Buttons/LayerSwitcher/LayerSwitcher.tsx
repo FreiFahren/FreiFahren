@@ -1,6 +1,6 @@
 import './LayerSwitcher.css'
 
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Backdrop } from "../../Miscellaneous/Backdrop/Backdrop"
@@ -10,7 +10,7 @@ interface LayerSwitcherProps {
     isRiskLayerOpen: boolean
 }
 
-export const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ changeLayer, isRiskLayerOpen }) => {
+export const LayerSwitcher = ({ changeLayer, isRiskLayerOpen }: LayerSwitcherProps) => {
     const { t } = useTranslation()
     const [areLayerOptionsVisible, setAreLayerOptionsVisible] = useState(false)
 

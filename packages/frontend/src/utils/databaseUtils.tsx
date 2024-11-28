@@ -1,6 +1,6 @@
-import { z } from 'zod'
+import { z, ZodType } from 'zod'
 
-import { RiskData, Statistics } from './types'
+import { Statistics } from './types'
 
 export interface StationProperty {
     name: string
@@ -26,11 +26,12 @@ export type LinesList = Record<string, string[]>
  * @returns {Promise<any | null>} A promise that resolves to the fetched data if successful, or null if there is no new data or an error occurs.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getRecentDataWithIfModifiedSince = async (
+export const getRecentDataWithIfModifiedSince = async <T extends ZodType>(
     endpointUrl: string,
-    lastUpdate: Date | null
+    lastUpdate: Date | null,
+    schema: T
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<RiskData | null> => {
+): Promise<z.infer<T> | null> => {
     try {
         const headers = new Headers()
 
@@ -52,10 +53,7 @@ export const getRecentDataWithIfModifiedSince = async (
 
         const data = await response.json()
 
-        return z.object({
-            last_modified: z.string(),
-            segment_colors: z.record(z.string()),
-        }).parse(data)
+        return schema.parse(data)
     } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Error:', error)

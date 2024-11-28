@@ -20,6 +20,7 @@
   "rules": {
     "eqeqeq": ["error", "always"],
     "no-console": "error",
+    "no-continue": "off",
     "max-classes-per-file": "off",
     "no-warning-comments": "warn",
     "simple-import-sort/imports": "error",

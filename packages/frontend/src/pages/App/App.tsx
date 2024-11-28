@@ -2,16 +2,16 @@ import './App.css'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
-import ReportsModal from 'src/components/Modals/ReportsModal/ReportsModal'
+import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 
 import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton'
 import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
 import { ReportButton } from '../../components/Buttons/ReportButton/ReportButton'
-import UtilButton from '../../components/Buttons/UtilButton/UtilButton'
-import ReportForm from '../../components/Form/ReportForm/ReportForm'
-import Map from '../../components/Map/Map'
+import { UtilButton } from '../../components/Buttons/UtilButton/UtilButton'
+import { ReportForm } from '../../components/Form/ReportForm/ReportForm'
+import { FreifahrenMap } from '../../components/Map/Map'
 import { Backdrop } from "../../components/Miscellaneous/Backdrop/Backdrop"
-import StatsPopUp from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
+import { StatsPopUp } from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
 import { LegalDisclaimer } from '../../components/Modals/LegalDisclaimer/LegalDisclaimer'
 import { UtilModal } from '../../components/Modals/UtilModal/UtilModal'
 import { RiskDataProvider } from '../../contexts/RiskDataContext'
@@ -225,7 +225,7 @@ export const App = () => {
                 <div id="portal-root" />
                 <RiskDataProvider>
                     <TicketInspectorsProvider>
-                        <Map
+                        <FreifahrenMap
                             isFirstOpen={appUIState.isFirstOpen}
                             formSubmitted={appUIState.formSubmitted}
                             currentColorTheme={appUIState.currentColorTheme}

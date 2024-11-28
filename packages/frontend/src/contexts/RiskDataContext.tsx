@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react'
-import { RiskData } from 'src/utils/types'
+import { RiskData, riskDataSchema } from 'src/utils/types'
 
 import { getRecentDataWithIfModifiedSince } from '../utils/databaseUtils'
 
@@ -23,7 +23,8 @@ export const RiskDataProvider = ({ children }: { children: React.ReactNode }) =>
         try {
             const results = await getRecentDataWithIfModifiedSince(
                 `${process.env.REACT_APP_API_URL}/risk-prediction/segment-colors`,
-                lastModified
+                lastModified,
+                riskDataSchema
             )
 
             if (results !== null) {

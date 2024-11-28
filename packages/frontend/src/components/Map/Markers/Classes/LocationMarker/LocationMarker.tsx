@@ -1,37 +1,39 @@
-import React, { useCallback, useEffect } from 'react'
+import './LocationMarker.css'
+
+import { useCallback, useEffect } from 'react'
 import { Marker } from 'react-map-gl/maplibre'
 
-import { watchPosition } from '../../../../../utils/mapUtils'
 import { useLocation } from '../../../../../contexts/LocationContext'
-
-import './LocationMarker.css'
+import { watchPosition } from '../../../../../utils/mapUtils'
 
 interface LocationMarkerProps {
     userPosition: { lng: number; lat: number } | null
 }
 
-const LocationMarker: React.FC<LocationMarkerProps> = ({ userPosition }) => {
+export const LocationMarker = ({ userPosition }: LocationMarkerProps) => {
     const { setUserPosition } = useLocation()
 
     const fetchPosition = useCallback(async () => {
         const stopWatching = await watchPosition(setUserPosition)
+
         return () => stopWatching()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setUserPosition])
 
     useEffect(() => {
-        fetchPosition()
+        fetchPosition().catch((error) => {
+            // eslint-disable-next-line no-console
+            console.error('Error fetching user position', error)
+        })
     }, [fetchPosition])
 
     return (
         <div data-testid="location-marker">
             {userPosition && (
                 <Marker className="location-marker" latitude={userPosition.lat} longitude={userPosition.lng}>
-                    <span></span>
+                    <span />
                 </Marker>
             )}
         </div>
     )
 }
-
-export default LocationMarker

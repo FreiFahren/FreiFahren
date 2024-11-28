@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import { useLocation } from '../../../contexts/LocationContext'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
-import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
+import { AutocompleteInputForm } from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
 
 interface AskForLocationProps {
     className: string

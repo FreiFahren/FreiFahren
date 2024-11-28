@@ -1,29 +1,31 @@
 import './ReportForm.css'
 
-import React, { useCallback, useEffect,useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useLocation } from '../../../contexts/LocationContext'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 import { sendAnalyticsEvent } from '../../../utils/analytics'
-import { LinesList, reportInspector,StationList } from '../../../utils/databaseUtils'
+import { LinesList, reportInspector, StationList } from '../../../utils/databaseUtils'
 import { calculateDistance } from '../../../utils/mapUtils'
-import { createWarningSpan, getLineColor,highlightElement } from '../../../utils/uiUtils'
-import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
-import SelectField from '../SelectField/SelectField'
+import { createWarningSpan, getLineColor, highlightElement } from '../../../utils/uiUtils'
+import { AutocompleteInputForm } from '../AutocompleteInputForm/AutocompleteInputForm'
+import { SelectField } from '../SelectField/SelectField'
 
 const getCSSVariable = (variable: string): number => {
     const value = getComputedStyle(document.documentElement).getPropertyValue(variable)
 
-    return parseFloat(value) || 0
+    const parsed = parseFloat(value)
+
+    return Number.isNaN(parsed) ? 0 : parsed
 }
 
 const redHighlight = (text: string) => (
-        <>
-            {text}
-            <span className="red-highlight">*</span>
-        </>
-    )
+    <>
+        {text}
+        <span className="red-highlight">*</span>
+    </>
+)
 
 interface ReportFormProps {
     closeModal: () => void
@@ -34,7 +36,7 @@ interface ReportFormProps {
 const ITEM_HEIGHT = 37
 const REPORT_COOLDOWN_MINUTES = 15
 
-const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSubmission, className }) => {
+export const ReportForm = ({ closeModal, notifyParentAboutSubmission, className }: ReportFormProps) => {
     const { t } = useTranslation()
 
     const { userPosition } = useLocation()
@@ -75,10 +77,11 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
 
     // Calculate possible lines based on the current entity
     const possibleLines = useMemo(() => {
-        if (!currentEntity) return allLines
+        if (currentEntity === null) return allLines
         return Object.entries(allLines)
             .filter(([line]) => line.startsWith(currentEntity))
             .reduce((acc, [line, stations]) => {
+                // eslint-disable-next-line no-param-reassign
                 acc[line] = stations
                 return acc
             }, {} as LinesList)
@@ -88,16 +91,17 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
     const possibleStations = useMemo(() => {
         let stations = allStations
 
-        if (currentStation) {
+        if (currentStation !== null) {
             stations = { [currentStation]: allStations[currentStation] }
-        } else if (currentLine) {
+        } else if (currentLine !== null) {
             stations = Object.fromEntries(
                 allLines[currentLine].map((stationKey) => [stationKey, allStations[stationKey]])
             )
-        } else if (currentEntity) {
+        } else if (currentEntity !== null) {
             stations = Object.entries(allStations)
                 .filter(([, stationData]) => stationData.lines.some((line) => line.startsWith(currentEntity)))
                 .reduce((acc, [stationName, stationData]) => {
+                    // eslint-disable-next-line no-param-reassign
                     acc[stationName] = stationData
                     return acc
                 }, {} as StationList)
@@ -106,6 +110,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
             stations = Object.entries(stations)
                 .filter(([, stationData]) => stationData.name.toLowerCase().includes(stationSearch.toLowerCase()))
                 .reduce((acc, [stationName, stationData]) => {
+                    // eslint-disable-next-line no-param-reassign
                     acc[stationName] = stationData
                     return acc
                 }, {} as StationList)
@@ -125,7 +130,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                 setInitialContainerHeight(container.clientHeight)
             }
 
-            const containerHeight = initialContainerHeight || container.clientHeight
+            const containerHeight = initialContainerHeight ?? container.clientHeight
             const topHeight = top.offsetHeight
             const bottomHeight = bottom.offsetHeight
 
@@ -169,7 +174,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
     const handleLineSelect = useCallback(
         (line: string | null) => {
             setCurrentLine(line)
-            if (line && currentStation && !allLines[line].includes(currentStation)) {
+            if (line !== null && currentStation !== null && !allLines[line].includes(currentStation)) {
                 setCurrentStation(null)
             }
         },
@@ -199,84 +204,8 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         [allStations]
     )
 
-    const handleSubmit = async (event: React.FormEvent) => {
-        event.preventDefault()
-
-        const hasError = await validateReportForm()
-
-        if (hasError) return // Abort submission if there are validation errors
-
-        await reportInspector(currentLine!, currentStation!, currentDirection!, description)
-
-        const endTime = new Date()
-        const durationInSeconds = Math.round((endTime.getTime() - startTime.current.getTime()) / 1000)
-
-        const finalizeSubmission = () => {
-            localStorage.setItem('lastReportTime', new Date().toISOString()) // Save the timestamp of the report to prevent spamming
-            closeModal()
-            notifyParentAboutSubmission()
-        }
-
-        try {
-            await sendAnalyticsEvent('Report Submitted', {
-                duration: durationInSeconds,
-                meta: {
-                    Station: currentStation!,
-                    Line: currentLine!,
-                    Direction: currentDirection!,
-                    Entity: Boolean(currentEntity),
-                    SearchUsed: searchUsed,
-                    StationRecommendationUsed: stationRecommendationSelected,
-                },
-            })
-
-            finalizeSubmission()
-        } catch (error) {
-            console.error('Failed to send analytics event:', error)
-            finalizeSubmission()
-        }
-    }
-
-    const validateReportForm = async () => {
-        let hasError = false
-
-        // Check for last report time to prevent spamming
-        const lastReportTime = localStorage.getItem('lastReportTime')
-
-        if (lastReportTime && Date.now() - new Date(lastReportTime).getTime() < REPORT_COOLDOWN_MINUTES * 60 * 1000) {
-            highlightElement('report-form')
-            createWarningSpan(
-                'searchable-select-div',
-                `Du kannst nur alle ${REPORT_COOLDOWN_MINUTES} Minuten eine Meldung abgeben!`
-            )
-            hasError = true
-        }
-
-        if (!currentStation) {
-            highlightElement('searchable-select-div')
-            createWarningSpan(
-                'searchable-select-div',
-                'Du hast keine Station ausgewählt. Bitte wähle eine Station aus!'
-            )
-            hasError = true
-        }
-
-        if (!(document.getElementById('privacy-checkbox') as HTMLInputElement).checked) {
-            highlightElement('privacy-label')
-            hasError = true
-        }
-
-        const locationError = await verifyUserLocation(currentStation, allStations)
-
-        if (locationError) {
-            hasError = true
-        }
-
-        return hasError // Return true if there's an error, false otherwise
-    }
-
     const verifyUserLocation = (station: string | null, stationsList: StationList): boolean => {
-        if (!station) return false
+        if (station === null) return false
 
         const distance = userPosition
             ? calculateDistance(
@@ -300,15 +229,86 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         return false
     }
 
+    const validateReportForm = async () => {
+        let hasError = false
+
+        // Check for last report time to prevent spamming
+        const lastReportTime = localStorage.getItem('lastReportTime')
+
+        if (lastReportTime !== null && Date.now() - new Date(lastReportTime).getTime() < REPORT_COOLDOWN_MINUTES * 60 * 1000) {
+            highlightElement('report-form')
+            createWarningSpan(
+                'searchable-select-div',
+                `Du kannst nur alle ${REPORT_COOLDOWN_MINUTES} Minuten eine Meldung abgeben!`
+            )
+            hasError = true
+        }
+
+        if (currentStation === null) {
+            highlightElement('searchable-select-div')
+            createWarningSpan(
+                'searchable-select-div',
+                'Du hast keine Station ausgewählt. Bitte wähle eine Station aus!'
+            )
+            hasError = true
+        }
+
+        if (!(document.getElementById('privacy-checkbox') as HTMLInputElement).checked) {
+            highlightElement('privacy-label')
+            hasError = true
+        }
+
+        const locationError = verifyUserLocation(currentStation, allStations)
+
+        if (locationError) {
+            hasError = true
+        }
+
+        return hasError // Return true if there's an error, false otherwise
+    }
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault()
+
+        const hasError = await validateReportForm()
+
+        if (hasError) return // Abort submission if there are validation errors
+
+        await reportInspector(currentLine!, currentStation!, currentDirection!, description)
+
+        const endTime = new Date()
+        const durationInSeconds = Math.round((endTime.getTime() - startTime.current.getTime()) / 1000)
+
+        const finalizeSubmission = () => {
+            localStorage.setItem('lastReportTime', new Date().toISOString()) // Save the timestamp of the report to prevent spamming
+            closeModal()
+            notifyParentAboutSubmission()
+        }
+
+        sendAnalyticsEvent('Report Submitted', {
+            duration: durationInSeconds,
+            meta: {
+                Station: currentStation!,
+                Line: currentLine!,
+                Direction: currentDirection!,
+                Entity: Boolean(currentEntity),
+                SearchUsed: searchUsed,
+                StationRecommendationUsed: stationRecommendationSelected,
+            },
+        })
+
+        finalizeSubmission()
+    }
+
+
     const getClosestStationsToUser = (
         numberOfStations: number,
         stationsList: StationList,
-        userPosition: { lat: number; lng: number }
+        userCoordinates: { lat: number; lng: number }
     ) => {
         const distances = Object.entries(stationsList).map(([station, stationData]) => {
             const distance = calculateDistance(
-                userPosition.lat,
-                userPosition.lng,
+                userCoordinates.lat,
+                userCoordinates.lng,
                 stationData.coordinates.latitude,
                 stationData.coordinates.longitude
             )
@@ -380,12 +380,12 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                         setHighlightedElementSelected={setStationRecommendationSelected}
                     />
                     <div ref={bottomElementsRef}>
-                        {currentLine && currentLine !== 'S41' && currentLine !== 'S42' && currentStation && (
+                        {currentLine !== null && currentLine !== 'S41' && currentLine !== 'S42' && currentStation !== null && (
                             <section>
                                 <h3>{t('ReportForm.direction')}</h3>
                                 <SelectField
                                     onSelect={handleDirectionSelect}
-                                    value={currentDirection ? allStations[currentDirection].name : ''}
+                                    value={currentDirection !== null ? allStations[currentDirection].name : ''}
                                     containerClassName="align-child-on-line"
                                 >
                                     <span>
@@ -403,7 +403,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                             <h3>{t('ReportForm.description')}</h3>
                             <textarea
                                 placeholder={t('ReportForm.descriptionPlaceholder')}
-                                onChange={(e) => setDescription(e.target.value)}
+                                onChange={(event) => setDescription(event.target.value)}
                                 value={description}
                             />
                         </section>
@@ -425,7 +425,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                             <div>
                                 <button
                                     type="submit"
-                                    className={isPrivacyChecked && currentStation ? '' : 'button-gray'}
+                                    className={isPrivacyChecked && currentStation !== null ? '' : 'button-gray'}
                                 >
                                     {t('ReportForm.report')}
                                 </button>
@@ -437,5 +437,3 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         </div>
     )
 }
-
-export default ReportForm

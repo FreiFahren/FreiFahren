@@ -1,9 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from 'react'
-import { Source, Layer } from 'react-map-gl/maplibre'
-
-import { RiskData } from 'src/utils/types'
+import { useEffect, useState } from 'react'
+import { Layer, Source } from 'react-map-gl/maplibre'
 import { useRiskData } from 'src/contexts/RiskDataContext'
+import { RiskData } from 'src/utils/types'
 
 interface RiskLineLayerProps {
     preloadedRiskData: RiskData | null
@@ -11,7 +10,7 @@ interface RiskLineLayerProps {
     textColor: string
 }
 
-const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, textColor, preloadedRiskData }) => {
+export const RiskLineLayer = ({ lineSegments, textColor, preloadedRiskData }: RiskLineLayerProps) => {
     const { segmentRiskData, refreshRiskData } = useRiskData()
     const [geoJSON, setGeoJSON] = useState<GeoJSON.FeatureCollection<GeoJSON.LineString> | null>(null)
 
@@ -20,6 +19,7 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, textColor, 
         segmentColors?: { [key: string]: string }
     ) => {
         const defaultColor = '#13C184' // lowest risk color
+
         return {
             ...data,
             features: data.features.map((feature) => ({
@@ -51,8 +51,12 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, textColor, 
     // Periodically fetch new risk data to account for changes
     useEffect(() => {
         const interval = setInterval(() => {
-            refreshRiskData()
+            refreshRiskData().catch((error) => {
+                // eslint-disable-next-line no-console
+                console.error('Error refreshing risk data', error)
+            })
         }, 30 * 1000)
+
         return () => clearInterval(interval)
     }, [refreshRiskData])
 
@@ -61,43 +65,39 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, textColor, 
     }
 
     return (
-        <>
-            <Source id="risk-line-data" type="geojson" data={geoJSON}>
-                <Layer
-                    id="risk-line-layer"
-                    type="line"
-                    beforeId="stationLayer"
-                    source="risk-line-data"
-                    layout={{
-                        'line-join': 'round',
-                        'line-cap': 'round',
-                    }}
-                    paint={{
-                        'line-color': ['get', 'line_color'],
-                        'line-width': 3,
-                    }}
-                />
-                <Layer
-                    id="risk-label-layer"
-                    type="symbol"
-                    beforeId="stationLayer"
-                    source="risk-line-data"
-                    layout={{
-                        'text-field': ['get', 'line'],
-                        'text-size': 15,
-                        'symbol-placement': 'line',
-                        'text-anchor': 'top',
-                        'text-offset': [0, 1.5],
-                        'text-keep-upright': true,
-                    }}
-                    paint={{
-                        'text-color': textColor,
-                        'text-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0, 12, 1],
-                    }}
-                />
-            </Source>
-        </>
+        <Source id="risk-line-data" type="geojson" data={geoJSON}>
+            <Layer
+                id="risk-line-layer"
+                type="line"
+                beforeId="stationLayer"
+                source="risk-line-data"
+                layout={{
+                    'line-join': 'round',
+                    'line-cap': 'round',
+                }}
+                paint={{
+                    'line-color': ['get', 'line_color'],
+                    'line-width': 3,
+                }}
+            />
+            <Layer
+                id="risk-label-layer"
+                type="symbol"
+                beforeId="stationLayer"
+                source="risk-line-data"
+                layout={{
+                    'text-field': ['get', 'line'],
+                    'text-size': 15,
+                    'symbol-placement': 'line',
+                    'text-anchor': 'top',
+                    'text-offset': [0, 1.5],
+                    'text-keep-upright': true,
+                }}
+                paint={{
+                    'text-color': textColor,
+                    'text-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0, 12, 1],
+                }}
+            />
+        </Source>
     )
 }
-
-export default RiskLineLayer

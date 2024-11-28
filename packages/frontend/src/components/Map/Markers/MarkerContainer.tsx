@@ -1,12 +1,12 @@
-import React, { useState } from 'react'
-
-import { OpacityMarker } from './Classes/OpacityMarker/OpacityMarker'
-import MarkerModal from '../../Modals/MarkerModal/MarkerModal'
-import { CloseButton } from '../../Buttons/CloseButton/CloseButton'
-import { useModalAnimation } from '../../../hooks/UseModalAnimation'
-import { useTicketInspectors } from '../../../contexts/TicketInspectorsContext'
-import { MarkerData } from '../../../utils/types'
+import { useState } from 'react'
 import { sendAnalyticsEvent } from 'src/utils/analytics'
+
+import { useTicketInspectors } from '../../../contexts/TicketInspectorsContext'
+import { useModalAnimation } from '../../../hooks/UseModalAnimation'
+import { MarkerData } from '../../../utils/types'
+import { CloseButton } from '../../Buttons/CloseButton/CloseButton'
+import { MarkerModal } from '../../Modals/MarkerModal/MarkerModal'
+import { OpacityMarker } from './Classes/OpacityMarker/OpacityMarker'
 
 export interface MarkersProps {
     formSubmitted: boolean
@@ -14,7 +14,7 @@ export interface MarkersProps {
     userPosition?: { lng: number; lat: number } | null | null
 }
 
-const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, userPosition }) => {
+export const MarkerContainer = ({ formSubmitted, isFirstOpen, userPosition }: MarkersProps) => {
     const { ticketInspectorList } = useTicketInspectors()
     const [selectedMarker, setSelectedMarker] = useState<MarkerData | null>(null)
 
@@ -29,10 +29,11 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
         setSelectedMarker(markerData)
         const now = new Date()
         const ageInMinutes = Math.floor((now.getTime() - new Date(markerData.timestamp).getTime()) / (60 * 1000))
+
         sendAnalyticsEvent('Marker clicked', {
             meta: {
                 station: markerData.station.name,
-                ageInMinutes: ageInMinutes,
+                ageInMinutes,
                 isHistoric: markerData.isHistoric,
             }
         })
@@ -41,32 +42,26 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
 
     return (
         <div>
-            {ticketInspectorList.map((ticketInspector, index) => {
-                return (
-                    <OpacityMarker
-                        isFirstOpen={isFirstOpen}
-                        markerData={ticketInspector}
-                        index={index}
-                        key={ticketInspector.station.id}
-                        formSubmitted={formSubmitted}
-                        onMarkerClick={handleMarkerClick}
-                    />
-                )
-            })}
+            {ticketInspectorList.map((ticketInspector, index) => (
+                <OpacityMarker
+                    isFirstOpen={isFirstOpen}
+                    markerData={ticketInspector}
+                    index={index}
+                    key={ticketInspector.station.id}
+                    formSubmitted={formSubmitted}
+                    onMarkerClick={handleMarkerClick}
+                />
+            ))}
             {isMarkerModalOpen && selectedMarker && (
-                <>
-                    <MarkerModal
-                        selectedMarker={selectedMarker}
-                        className={`open ${isMarkerModalAnimatingOut ? 'slide-out' : 'slide-in'}`}
-                        userLat={userPosition?.lat}
-                        userLng={userPosition?.lng}
-                    >
-                        <CloseButton closeModal={closeMarkerModal} />
-                    </MarkerModal>
-                </>
+                <MarkerModal
+                    selectedMarker={selectedMarker}
+                    className={`open ${isMarkerModalAnimatingOut ? 'slide-out' : 'slide-in'}`}
+                    userLat={userPosition?.lat}
+                    userLng={userPosition?.lng}
+                >
+                    <CloseButton closeModal={closeMarkerModal} />
+                </MarkerModal>
             )}
         </div>
     )
 }
-
-export default MarkerContainer

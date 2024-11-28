@@ -1,6 +1,6 @@
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { getRecentDataWithIfModifiedSince } from 'src/utils/databaseUtils'
-import { MarkerData } from 'src/utils/types'
+import { MarkerData, markerDataSchema } from 'src/utils/types'
 
 import { useRiskData } from './RiskDataContext'
 
@@ -30,7 +30,8 @@ export const TicketInspectorsProvider = ({ children }: PropsWithChildren) => {
         const newTicketInspectorList =
             (await getRecentDataWithIfModifiedSince(
                 `${process.env.REACT_APP_API_URL}/basics/inspectors?start=${startTime}&end=${endTime}`,
-                lastReceivedInspectorTime.current
+                lastReceivedInspectorTime.current,
+                markerDataSchema.array()
             )) ?? [] as MarkerData[]
 
         if (newTicketInspectorList instanceof Array && newTicketInspectorList.length > 0) {

@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react'
-import maplibregl from 'maplibre-gl'
-import { Marker } from 'react-map-gl/maplibre'
-
-import { MarkerData } from 'src/utils/types'
-
 import './OpacityMarker.css'
+
+import maplibregl from 'maplibre-gl'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Marker } from 'react-map-gl/maplibre'
+import { MarkerData } from 'src/utils/types'
 
 interface OpacityMarkerProps {
     markerData: MarkerData
@@ -14,19 +13,20 @@ interface OpacityMarkerProps {
     onMarkerClick: (markerData: MarkerData) => void
 }
 
-export const OpacityMarker: React.FC<OpacityMarkerProps> = ({
+export const OpacityMarker = ({
     markerData,
     index,
     isFirstOpen,
     formSubmitted,
     onMarkerClick,
-}) => {
+}: OpacityMarkerProps) => {
     const [opacity, setOpacity] = useState(0)
     const { timestamp, station, line, isHistoric } = markerData
 
     // By using useMemo, we can avoid recalculating the timestamp on every render
     const adjustedTimestamp = useMemo(() => {
         const tempTimestamp = new Date(timestamp)
+
         return new Date(tempTimestamp)
     }, [timestamp])
 
@@ -36,6 +36,7 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({
 
     useEffect(() => {
         let intervalId: NodeJS.Timeout
+
         if (!isFirstOpen) {
             if (!isHistoric) {
                 const calculateOpacity = () => {
@@ -58,6 +59,7 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({
                         clearInterval(intervalId)
                     }
                 }
+
                 // change the direct reference of the marker
                 markerRef.current?.setOpacity(opacity.toString())
 
@@ -69,6 +71,7 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({
             }
             return () => clearInterval(intervalId)
         }
+        return () => { }
     }, [adjustedTimestamp, isHistoric, isFirstOpen, opacity, station.name, formSubmitted])
 
     if (opacity <= 0) {

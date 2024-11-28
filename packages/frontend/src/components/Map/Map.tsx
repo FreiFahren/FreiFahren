@@ -1,19 +1,19 @@
-import React, { Suspense, lazy, useCallback, useEffect, useRef } from 'react'
-import { LngLatBoundsLike, LngLatLike, MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import './Map.css'
 
-import MarkerContainer from './Markers/MarkerContainer'
-import LocationMarker from './Markers/Classes/LocationMarker/LocationMarker'
-import StationLayer from './MapLayers/StationLayer/StationLayer'
-import RiskLineLayer from './MapLayers/LineLayer/RiskLineLayer'
-import RegularLineLayer from './MapLayers/LineLayer/RegularLineLayer'
-import { convertStationsToGeoJSON } from '../../utils/mapUtils'
-import { useRiskData } from '../../contexts/RiskDataContext'
+import { lazy, Suspense, useCallback, useEffect, useRef } from 'react'
+import { LngLatBoundsLike, LngLatLike, MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre'
+
 import { useLocation } from '../../contexts/LocationContext'
+import { useRiskData } from '../../contexts/RiskDataContext'
 import { useStationsAndLines } from '../../contexts/StationsAndLinesContext'
 import { useETagCache } from '../../hooks/useETagCaching'
-
-import './Map.css'
+import { convertStationsToGeoJSON } from '../../utils/mapUtils'
+import { RegularLineLayer } from './MapLayers/LineLayer/RegularLineLayer'
+import { RiskLineLayer } from './MapLayers/LineLayer/RiskLineLayer'
+import { StationLayer } from './MapLayers/StationLayer/StationLayer'
+import { LocationMarker } from './Markers/Classes/LocationMarker/LocationMarker'
+import { MarkerContainer } from './Markers/MarkerContainer'
 
 const Map = lazy(() => import('react-map-gl/maplibre'))
 
@@ -26,16 +26,16 @@ interface FreifahrenMapProps {
 }
 
 const berlinViewPosition: { lng: number; lat: number } = { lng: 13.388, lat: 52.5162 }
-const github_icon = `${process.env.PUBLIC_URL}/icons/github.svg`
-const instagram_icon = `${process.env.PUBLIC_URL}/icons/instagram.svg`
+const githubIcon = `${process.env.PUBLIC_URL}/icons/github.svg`
+const instagramIcon = `${process.env.PUBLIC_URL}/icons/instagram.svg`
 
-const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
+export const FreifahrenMap = ({
     formSubmitted,
     isFirstOpen,
     currentColorTheme,
     isRiskLayerOpen,
     onRotationChange,
-}) => {
+}: FreifahrenMapProps) => {
     const SouthWestBounds: LngLatLike = { lng: 12.8364646484805, lat: 52.23115511676795 }
     const NorthEastBounds: LngLatLike = { lng: 14.00044556529124, lat: 52.77063424239867 }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
@@ -44,11 +44,13 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
         endpoint: '/lines/segments',
         storageKeyPrefix: 'segments',
         onError: (error) => {
+            // eslint-disable-next-line no-console
             console.error('Error loading lines GeoJSON', error)
         },
     })
 
     if (segmentsError) {
+        // eslint-disable-next-line no-console
         console.error('Error loading lines GeoJSON', segmentsError)
     }
 
@@ -57,6 +59,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     const stationGeoJSON = convertStationsToGeoJSON(allStations)
 
     const { userPosition, initializeLocationTracking } = useLocation()
+
     useEffect(() => {
         if (!isFirstOpen) {
             initializeLocationTracking()
@@ -69,17 +72,21 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     const { segmentRiskData, refreshRiskData } = useRiskData()
 
     const hasRefreshed = useRef(false) // To prevent refreshing on every render
+
     useEffect(() => {
         if (isFirstOpen && !hasRefreshed.current) {
             // Refresh or load risk data on initial open
-            refreshRiskData()
+            refreshRiskData().catch((error) => {
+                // eslint-disable-next-line no-console
+                console.error('Error loading risk data', error)
+            })
             hasRefreshed.current = true
         }
     }, [isFirstOpen, refreshRiskData])
 
     const handleRotate = useCallback(
-        (evt: ViewStateChangeEvent) => {
-            onRotationChange(evt.viewState.bearing)
+        (event: ViewStateChangeEvent) => {
+            onRotationChange(event.viewState.bearing)
         },
         [onRotationChange]
     )
@@ -127,10 +134,10 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
             </Suspense>
             <div className="social-media">
                 <a href="https://github.com/FreiFahren/FreiFahren" target="_blank" rel="noopener noreferrer">
-                    <img src={github_icon} alt="GitHub" />
+                    <img src={githubIcon} alt="GitHub" />
                 </a>
                 <a href="https://www.instagram.com/frei.fahren/" target="_blank" rel="noopener noreferrer">
-                    <img src={instagram_icon} alt="Instagram" />
+                    <img src={instagramIcon} alt="Instagram" />
                 </a>
             </div>
             <div className="map-attribution">
@@ -145,5 +152,3 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
         </div>
     )
 }
-
-export default FreifahrenMap
