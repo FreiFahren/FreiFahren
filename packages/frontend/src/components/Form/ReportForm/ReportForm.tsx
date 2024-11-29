@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import SelectField from '../SelectField/SelectField'
 import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
 
-import { LinesList, StationList, reportInspector } from '../../../utils/dbUtils'
+import { LinesList, StationList, reportInspector, StationProperty } from '../../../utils/dbUtils'
 import { sendAnalyticsEvent } from '../../../utils/analytics'
 import { highlightElement, createWarningSpan, getLineColor } from '../../../utils/uiUtils'
 import { calculateDistance } from '../../../utils/mapUtils'
@@ -87,15 +87,31 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
 
     // Calculate possible stations based on entity, line, station, and search input
     const possibleStations = useMemo(() => {
-        let stations = allStations
+        // Sort station records from a station record [stationKey, station] array by station name
+        const sortStationRecordsByStationName = (
+            recordA: (string | StationProperty)[],
+            recordB: (string | StationProperty)[]
+        ) => {
+            const stationA = recordA[1] as StationProperty
+            const stationB = recordB[1] as StationProperty
+            if (stationA.name > stationB.name) return 1
+            if (stationA.name < stationB.name) return -1
+            return 0
+        }
+
+        const sortedAllStations = Object.fromEntries(Object.entries(allStations).sort(sortStationRecordsByStationName))
+        let stations = sortedAllStations
+
         if (currentStation) {
             stations = { [currentStation]: allStations[currentStation] }
         } else if (currentLine) {
             stations = Object.fromEntries(
-                allLines[currentLine].map((stationKey) => [stationKey, allStations[stationKey]])
+                allLines[currentLine]
+                    .map((stationKey) => [stationKey, allStations[stationKey]])
+                    .sort(sortStationRecordsByStationName)
             )
         } else if (currentEntity) {
-            stations = Object.entries(allStations)
+            stations = Object.entries(sortedAllStations)
                 .filter(([, stationData]) => stationData.lines.some((line) => line.startsWith(currentEntity)))
                 .reduce((acc, [stationName, stationData]) => {
                     acc[stationName] = stationData
