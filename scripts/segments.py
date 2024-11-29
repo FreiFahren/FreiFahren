@@ -53,9 +53,8 @@ overpass_gdf = gpd.read_file("export.geojson")
 # Filter features with 'ref' property (tram lines)
 overpass_gdf = overpass_gdf[overpass_gdf["ref"].notnull()]
 
-# Read stationsList.json
-with open("../packages/backend/data/stationsList.json", "r") as f:
-    stations_json = json.load(f)
+# get up to date stations from api.freifahren.org
+stations_json = requests.get("https://api.freifahren.org/stations").json()
 
 stations_data = []
 for station_id, station_info in stations_json.items():
