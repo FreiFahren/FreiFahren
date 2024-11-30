@@ -9,7 +9,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/FreiFahren/backend/Rstats"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	_ "github.com/FreiFahren/backend/docs"
@@ -81,12 +80,6 @@ func PostInspector(c echo.Context) error {
 	); err != nil {
 		logger.Log.Error().Err(err).Msg("Error inserting ticket info in postInspector")
 		return c.NoContent(http.StatusInternalServerError)
-	}
-
-	// Based on the new data, generate new risk segments
-	err = Rstats.RunRiskModel()
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error running risk model in postInspector")
 	}
 
 	// Notify Telegram bot if there's no author (web app report)

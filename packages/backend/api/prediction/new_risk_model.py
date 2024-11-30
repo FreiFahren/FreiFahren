@@ -6,13 +6,23 @@ from datetime import datetime, timedelta, timezone
 import numpy as np
 import pandas as pd
 from dataclasses import dataclass
+import os
+import logging
+import sys
+import geopandas as gpd
+
+# Configure logging to write to stderr
+logging.basicConfig(
+    level=logging.DEBUG, format="PYTHON_DEBUG: %(message)s", stream=sys.stderr
+)
+logger = logging.getLogger(__name__)
 
 
 @dataclass
 class Report:
     station_id: str
     timestamp: datetime
-    direction: Optional[str]
+    direction_id: Optional[str]
     line_id: str
 
 
@@ -54,10 +64,10 @@ class RiskPredictor:
 
         # Color scale from green to red
         self.colors = [
-            "#00FF00",  # Green
-            "#FFFF00",  # Yellow
-            "#FFA500",  # Orange
-            "#FF0000",  # Red
+            "#13C184",  # Green (default/no risk)
+            "#FACB3F",  # Yellow (low risk)
+            "#F05044",  # Red (medium risk)
+            "#A92725",  # Dark Red (high risk)
         ]
 
     def _build_network_graph(self) -> nx.DiGraph:
@@ -129,8 +139,13 @@ class RiskPredictor:
         total_risk = 0.0
 
         # First, verify that the segment stations exist in the graph
-        if segment.from_station_id not in self.graph or segment.to_station_id not in self.graph:
-            print(f"Warning: Segment stations not found in graph: {segment.from_station_id} -> {segment.to_station_id}")
+        if (
+            segment.from_station_id not in self.graph
+            or segment.to_station_id not in self.graph
+        ):
+            print(
+                f"Warning: Segment stations not found in graph: {segment.from_station_id} -> {segment.to_station_id}"
+            )
             return 0.0
 
         for report in reports:
@@ -140,7 +155,9 @@ class RiskPredictor:
 
             # Skip if report station is not in graph
             if report.station_id not in self.graph:
-                print(f"Warning: Report station not found in graph: {report.station_id}")
+                print(
+                    f"Warning: Report station not found in graph: {report.station_id}"
+                )
                 continue
 
             # Skip old reports
@@ -156,7 +173,7 @@ class RiskPredictor:
                 # Create a subgraph containing only edges of the current line
                 line_subgraph = nx.DiGraph()
                 for u, v, data in self.graph.edges(data=True):
-                    if data['line_id'] == segment.line_id:
+                    if data["line_id"] == segment.line_id:
                         line_subgraph.add_edge(u, v)
                         # Also add reverse edge for undirected calculation
                         line_subgraph.add_edge(v, u)
@@ -167,36 +184,50 @@ class RiskPredictor:
                 line_subgraph.add_node(segment.to_station_id)
 
                 # Consider direction if provided
-                if report.direction:
+                if report.direction_id:
                     try:
                         # If direction is provided, only look for paths in that direction
-                        if report.direction == "1":  # Forward direction
-                            path = nx.shortest_path(line_subgraph, report.station_id, segment.from_station_id)
+                        if report.direction_id == "1":  # Forward direction
+                            path = nx.shortest_path(
+                                line_subgraph,
+                                report.station_id,
+                                segment.from_station_id,
+                            )
                         else:  # Backward direction
-                            path = nx.shortest_path(line_subgraph, segment.from_station_id, report.station_id)
+                            path = nx.shortest_path(
+                                line_subgraph,
+                                segment.from_station_id,
+                                report.station_id,
+                            )
                         distance = len(path) - 1
                     except nx.NetworkXNoPath:
-                        distance = float('inf')
+                        distance = float("inf")
                 else:
                     # If no direction, consider both directions
-                    forward_distance = float('inf')
-                    backward_distance = float('inf')
-                    
+                    forward_distance = float("inf")
+                    backward_distance = float("inf")
+
                     try:
-                        forward_distance = nx.shortest_path_length(line_subgraph, report.station_id, segment.from_station_id)
+                        forward_distance = nx.shortest_path_length(
+                            line_subgraph, report.station_id, segment.from_station_id
+                        )
                     except (nx.NetworkXNoPath, nx.NodeNotFound):
                         pass
-                        
+
                     try:
-                        backward_distance = nx.shortest_path_length(line_subgraph, segment.from_station_id, report.station_id)
+                        backward_distance = nx.shortest_path_length(
+                            line_subgraph, segment.from_station_id, report.station_id
+                        )
                     except (nx.NetworkXNoPath, nx.NodeNotFound):
                         pass
-                        
+
                     distance = min(forward_distance, backward_distance)
 
             except Exception as e:
-                print(f"Warning: Error calculating path for segment {segment.sid}: {str(e)}")
-                distance = float('inf')
+                print(
+                    f"Warning: Error calculating path for segment {segment.sid}: {str(e)}"
+                )
+                distance = float("inf")
 
             # Compute spatial risk
             spatial_risk = self._compute_spatial_risk(distance)
@@ -246,88 +277,100 @@ class RiskPredictor:
         return segment_colors
 
 
-def load_reports(csv_file: str) -> List[Report]:
-    """
-    Load inspection reports from CSV file.
+def main():
+    try:
+        # Get the directory of the current script
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        segments_path = os.path.join(script_dir, "segments.geojson")
+        logger.debug(f"Loading segments from: {segments_path}")
 
-    Args:
-        csv_file: Path to the CSV file containing ticket inspection reports
+        # Read JSON input from stdin
+        input_data = json.load(sys.stdin)
+        logger.debug(f"Received: {json.dumps(input_data)}")
 
-    Returns:
-        List of Report objects
-    """
-    reports = []
-    df = pd.read_csv(csv_file)
+        # Load segments from GeoJSON using absolute path
+        segments_gdf = gpd.read_file(segments_path)
+        logger.debug(f"Loaded {len(segments_gdf)} segments from GeoJSON")
 
-    for _, row in df.iterrows():
-        # Parse the timestamp from ISO format
-        timestamp = datetime.fromisoformat(row["Timestamp"].replace("Z", "+00:00"))
+        segments = [
+            Segment(
+                sid=row["sid"],
+                line_id=row["line"],
+                from_station_id=row["from_station_id"],
+                to_station_id=row["to_station_id"],
+            )
+            for _, row in segments_gdf.iterrows()
+        ]
+        logger.debug(f"Created {len(segments)} segment objects")
 
-        # Handle multiple lines if they're comma-separated
-        lines = (
-            row["Lines"].split(",") if isinstance(row["Lines"], str) else [row["Lines"]]
-        )
+        # Initialize risk predictor
+        predictor = RiskPredictor(segments)
+        logger.debug("Initialized RiskPredictor")
 
-        # Create a report for each line
-        for line_id in lines:
-            reports.append(
-                Report(
-                    station_id=row["StationId"],
-                    timestamp=timestamp,
-                    direction=(
-                        row["DirectionId"] if pd.notna(row["DirectionId"]) else None
-                    ),
-                    line_id=line_id.strip(),
-                )
+        # Convert input data to Report objects
+        reports = []
+        latest_timestamp = None
+        for inspector in input_data:
+            # Extract values from nested JSON structure
+            line = (
+                inspector.get("line", {}).get("String", "")
+                if isinstance(inspector.get("line"), dict)
+                else inspector.get("line", "")
+            )
+            direction_id = (
+                inspector.get("direction_id", {}).get("String", "")
+                if isinstance(inspector.get("direction_id"), dict)
+                else inspector.get("direction_id", "")
             )
 
-    return reports
+            # Debug the values we're extracting
+            logger.debug(
+                f"Processing inspector record - Station: {inspector.get('station_id')}, Line: {line}, Direction: {direction_id}"
+            )
 
+            timestamp = datetime.fromisoformat(
+                inspector["timestamp"].replace("Z", "+00:00")
+            )
 
-def save_segment_colors(colors: Dict[str, str], output_file: str):
-    # remove all of the colors with 00FF00
-    colors = {k: v for k, v in colors.items() if v != "#00FF00"}
+            # Track the latest timestamp
+            if latest_timestamp is None or timestamp > latest_timestamp:
+                latest_timestamp = timestamp
 
-    """Save segment colors to JSON file."""
-    with open(output_file, "w") as f:
-        json.dump(colors, f, indent=2)
+            reports.append(
+                Report(
+                    station_id=inspector["station_id"],
+                    timestamp=timestamp,
+                    direction_id=direction_id if direction_id else None,
+                    line_id=line if line else "",
+                )
+            )
+        logger.debug(f"Created {len(reports)} report objects with data: {reports}")
 
+        # Generate predictions
+        segment_colors = predictor.predict(reports)
+        logger.debug(f"Generated predictions for {len(segment_colors)} segments")
 
-def main():
-    # Load segments from GeoJSON (assuming segments.geojson exists)
-    import geopandas as gpd
+        # Filter out segments with #00FF00 color
+        filtered_colors = {k: v for k, v in segment_colors.items() if v != "#13C184"}
+        logger.debug(f"Filtered to {len(filtered_colors)} segments with risk")
 
-    segments_gdf = gpd.read_file("segments.geojson")
-    
-    print("Debug: Loading segments and reports...")
-    print(f"Number of segments loaded: {len(segments_gdf)}")
-    
-    segments = [
-        Segment(
-            sid=row["sid"],
-            line_id=row["line"],
-            from_station_id=row["from_station_id"],
-            to_station_id=row["to_station_id"],
-        )
-        for _, row in segments_gdf.iterrows()
-    ]
+        # Create response in the correct format
+        response = {
+            "last_modified": (
+                latest_timestamp.isoformat() + "Z"
+                if latest_timestamp
+                else datetime.now(timezone.utc).isoformat() + "Z"
+            ),
+            "segment_colors": filtered_colors,
+        }
 
-    # Print some debug info about the first few segments
-    print("\nFirst few segments:")
-    for segment in segments[:3]:
-        print(f"Segment {segment.sid}: {segment.from_station_id} -> {segment.to_station_id} (Line: {segment.line_id})")
+        # Output filtered results to stdout
+        json.dump(response, sys.stdout)
+        logger.debug("Successfully wrote results to stdout")
 
-    # Initialize risk predictor
-    predictor = RiskPredictor(segments)
-
-    # Load reports from CSV instead of JSON
-    reports = load_reports("ticket_data.csv")
-
-    # Generate predictions
-    segment_colors = predictor.predict(reports)
-
-    # Save results
-    save_segment_colors(segment_colors, "output/segment_colors.json")
+    except Exception as e:
+        logger.error(f"Error in risk model: {str(e)}", exc_info=True)
+        raise
 
 
 if __name__ == "__main__":

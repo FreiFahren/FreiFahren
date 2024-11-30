@@ -3,11 +3,10 @@ package server
 import (
 	"net/http"
 
-	"github.com/FreiFahren/backend/Rstats"
 	"github.com/FreiFahren/backend/api/distance"
-	"github.com/FreiFahren/backend/api/getSegmentColors"
 	"github.com/FreiFahren/backend/api/inspectors"
 	"github.com/FreiFahren/backend/api/lines"
+	"github.com/FreiFahren/backend/api/prediction"
 	"github.com/FreiFahren/backend/api/stations"
 	"github.com/FreiFahren/backend/caching"
 	"github.com/FreiFahren/backend/data"
@@ -47,9 +46,6 @@ func SetupServer() *echo.Echo {
 		logger.Log.Error().Str("Error", err.Error()).Send()
 	}
 
-	// Generate the initial risk segments
-	Rstats.RunRiskModel()
-
 	c := cron.New()
 
 	// Schedule a job to backup the database every day at midnight
@@ -58,15 +54,6 @@ func SetupServer() *echo.Echo {
 	})
 	if err != nil {
 		logger.Log.Error().Msg("Could not schedule backup job")
-		logger.Log.Error().Str("Error", err.Error()).Send()
-	}
-
-	// Update the risk model even if there are no reports for a long time
-	_, err = c.AddFunc("*/10 * * * *", func() {
-		Rstats.RunRiskModel()
-	})
-	if err != nil {
-		logger.Log.Error().Msg("Could not schedule risk model update job")
 		logger.Log.Error().Str("Error", err.Error()).Send()
 	}
 
@@ -132,7 +119,7 @@ func SetupServer() *echo.Echo {
 
 	e.GET("/transit/distance", distance.GetStationDistance)
 
-	e.GET("/risk-prediction/segment-colors", getSegmentColors.GetSegmentColors)
+	e.GET("/prediction/risk-segments", prediction.GetRiskSegments)
 
 	return e
 }
