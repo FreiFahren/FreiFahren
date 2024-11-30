@@ -143,19 +143,27 @@ class RiskPredictor:
             segment.from_station_id not in self.graph
             or segment.to_station_id not in self.graph
         ):
-            print(
+            logger.debug(
                 f"Warning: Segment stations not found in graph: {segment.from_station_id} -> {segment.to_station_id}"
             )
             return 0.0
 
-        for report in reports:
-            # Skip if report is not for the same line
-            if report.line_id != segment.line_id:
-                continue
+        # Find all segments that share the same stations (overlapping segments)
+        overlapping_segments = []
+        for s in self.segments:
+            if (
+                s.from_station_id == segment.from_station_id
+                and s.to_station_id == segment.to_station_id
+            ) or (
+                s.from_station_id == segment.to_station_id
+                and s.to_station_id == segment.from_station_id
+            ):
+                overlapping_segments.append(s)
 
+        for report in reports:
             # Skip if report station is not in graph
             if report.station_id not in self.graph:
-                print(
+                logger.debug(
                     f"Warning: Report station not found in graph: {report.station_id}"
                 )
                 continue
@@ -168,12 +176,14 @@ class RiskPredictor:
             # Compute temporal risk
             temporal_risk = self._compute_temporal_risk(age.total_seconds() / 3600)
 
-            # Find shortest path distance only within the same line
             try:
-                # Create a subgraph containing only edges of the current line
+                # Create a subgraph containing only edges of the current line and overlapping lines
+                relevant_lines = {segment.line_id} | {
+                    s.line_id for s in overlapping_segments
+                }
                 line_subgraph = nx.DiGraph()
                 for u, v, data in self.graph.edges(data=True):
-                    if data["line_id"] == segment.line_id:
+                    if data["line_id"] in relevant_lines:
                         line_subgraph.add_edge(u, v)
                         # Also add reverse edge for undirected calculation
                         line_subgraph.add_edge(v, u)
@@ -224,7 +234,7 @@ class RiskPredictor:
                     distance = min(forward_distance, backward_distance)
 
             except Exception as e:
-                print(
+                logger.debug(
                     f"Warning: Error calculating path for segment {segment.sid}: {str(e)}"
                 )
                 distance = float("inf")
@@ -232,11 +242,20 @@ class RiskPredictor:
             # Compute spatial risk
             spatial_risk = self._compute_spatial_risk(distance)
 
-            # Combine risks
-            risk = temporal_risk * spatial_risk
+            # Compute base risk
+            base_risk = temporal_risk * spatial_risk
+
+            # Add spillover risk from overlapping segments
+            if len(overlapping_segments) > 1:  # If there are overlapping segments
+                spillover_factor = 0.5  # Reduce the risk for overlapping segments
+                base_risk = min(
+                    1.0,
+                    base_risk
+                    * (1 + spillover_factor * (len(overlapping_segments) - 1)),
+                )
 
             # Update total risk (take maximum of all reports)
-            total_risk = max(total_risk, risk)
+            total_risk = max(total_risk, base_risk)
 
         return min(total_risk, 1.0)  # Cap at 1.0
 
