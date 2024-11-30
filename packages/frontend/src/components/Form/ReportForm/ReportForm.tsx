@@ -87,7 +87,6 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
 
     // Calculate possible stations based on entity, line, station, and search input
     const possibleStations = useMemo(() => {
-        // Sort station records from a station record [stationKey, station] array by station name
         const sortStationRecordsByStationName = (
             recordA: (string | StationProperty)[],
             recordB: (string | StationProperty)[]
@@ -106,9 +105,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
             stations = { [currentStation]: allStations[currentStation] }
         } else if (currentLine) {
             stations = Object.fromEntries(
-                allLines[currentLine]
-                    .map((stationKey) => [stationKey, allStations[stationKey]])
-                    .sort(sortStationRecordsByStationName)
+                allLines[currentLine].map((stationKey) => [stationKey, allStations[stationKey]])
             )
         } else if (currentEntity) {
             stations = Object.entries(sortedAllStations)
