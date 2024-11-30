@@ -145,10 +145,20 @@ func getLastModifiedTime(file os.FileInfo) (time.Time, error) {
 func parseRiskModelJSON(fileData []byte) ([]utils.RiskModelJSON, error) {
 	logger.Log.Debug().Msg("Parsing risk model JSON")
 
-	var segmentData []utils.RiskModelJSON
-	if err := json.Unmarshal(fileData, &segmentData); err != nil {
+	var segmentColorMap map[string]string
+	if err := json.Unmarshal(fileData, &segmentColorMap); err != nil {
 		logger.Log.Error().Err(err).Msg("Error unmarshalling JSON")
 		return nil, err
 	}
+
+	// Convert map to array of RiskModelJSON
+	var segmentData []utils.RiskModelJSON
+	for sid, color := range segmentColorMap {
+		segmentData = append(segmentData, utils.RiskModelJSON{
+			Sid:   sid,
+			Color: color,
+		})
+	}
+
 	return segmentData, nil
 }

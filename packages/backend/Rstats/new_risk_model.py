@@ -2,8 +2,9 @@ from typing import Dict, List, Tuple, Optional
 import json
 import math
 import networkx as nx
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import numpy as np
+import pandas as pd
 from dataclasses import dataclass
 
 
@@ -91,11 +92,12 @@ class RiskPredictor:
         Returns:
             Risk factor between 0 and 1
         """
-        if age_hours >= self.max_report_age.total_hours():
+        max_age_hours = self.max_report_age.total_seconds() / 3600
+        if age_hours >= max_age_hours:
             return 0.0
 
         # Sigmoid function for smooth decay
-        x = age_hours / self.max_report_age.total_hours()
+        x = age_hours / max_age_hours
         return 1 / (1 + math.exp((x - 0.5) / self.temporal_decay))
 
     def _compute_spatial_risk(self, distance: int) -> float:
@@ -126,7 +128,21 @@ class RiskPredictor:
         """
         total_risk = 0.0
 
+        # First, verify that the segment stations exist in the graph
+        if segment.from_station_id not in self.graph or segment.to_station_id not in self.graph:
+            print(f"Warning: Segment stations not found in graph: {segment.from_station_id} -> {segment.to_station_id}")
+            return 0.0
+
         for report in reports:
+            # Skip if report is not for the same line
+            if report.line_id != segment.line_id:
+                continue
+
+            # Skip if report station is not in graph
+            if report.station_id not in self.graph:
+                print(f"Warning: Report station not found in graph: {report.station_id}")
+                continue
+
             # Skip old reports
             age = current_time - report.timestamp
             if age > self.max_report_age:
@@ -135,13 +151,52 @@ class RiskPredictor:
             # Compute temporal risk
             temporal_risk = self._compute_temporal_risk(age.total_seconds() / 3600)
 
-            # Find shortest path distance
+            # Find shortest path distance only within the same line
             try:
-                distance = nx.shortest_path_length(
-                    self.graph, report.station_id, segment.from_station_id
-                )
-            except nx.NetworkXNoPath:
-                distance = float("inf")
+                # Create a subgraph containing only edges of the current line
+                line_subgraph = nx.DiGraph()
+                for u, v, data in self.graph.edges(data=True):
+                    if data['line_id'] == segment.line_id:
+                        line_subgraph.add_edge(u, v)
+                        # Also add reverse edge for undirected calculation
+                        line_subgraph.add_edge(v, u)
+
+                # Add nodes that might be isolated
+                line_subgraph.add_node(report.station_id)
+                line_subgraph.add_node(segment.from_station_id)
+                line_subgraph.add_node(segment.to_station_id)
+
+                # Consider direction if provided
+                if report.direction:
+                    try:
+                        # If direction is provided, only look for paths in that direction
+                        if report.direction == "1":  # Forward direction
+                            path = nx.shortest_path(line_subgraph, report.station_id, segment.from_station_id)
+                        else:  # Backward direction
+                            path = nx.shortest_path(line_subgraph, segment.from_station_id, report.station_id)
+                        distance = len(path) - 1
+                    except nx.NetworkXNoPath:
+                        distance = float('inf')
+                else:
+                    # If no direction, consider both directions
+                    forward_distance = float('inf')
+                    backward_distance = float('inf')
+                    
+                    try:
+                        forward_distance = nx.shortest_path_length(line_subgraph, report.station_id, segment.from_station_id)
+                    except (nx.NetworkXNoPath, nx.NodeNotFound):
+                        pass
+                        
+                    try:
+                        backward_distance = nx.shortest_path_length(line_subgraph, segment.from_station_id, report.station_id)
+                    except (nx.NetworkXNoPath, nx.NodeNotFound):
+                        pass
+                        
+                    distance = min(forward_distance, backward_distance)
+
+            except Exception as e:
+                print(f"Warning: Error calculating path for segment {segment.sid}: {str(e)}")
+                distance = float('inf')
 
             # Compute spatial risk
             spatial_risk = self._compute_spatial_risk(distance)
@@ -149,11 +204,8 @@ class RiskPredictor:
             # Combine risks
             risk = temporal_risk * spatial_risk
 
-            # Add line-specific risk boost if on same line
-            if report.line_id == segment.line_id:
-                risk *= 1.5
-
-            total_risk = max(total_risk, risk)  # Take maximum risk from all reports
+            # Update total risk (take maximum of all reports)
+            total_risk = max(total_risk, risk)
 
         return min(total_risk, 1.0)  # Cap at 1.0
 
@@ -182,7 +234,7 @@ class RiskPredictor:
             Dictionary mapping segment IDs to color codes
         """
         if current_time is None:
-            current_time = datetime.now()
+            current_time = datetime.now(timezone.utc)
 
         segment_colors = {}
 
@@ -233,6 +285,9 @@ def load_reports(csv_file: str) -> List[Report]:
 
 
 def save_segment_colors(colors: Dict[str, str], output_file: str):
+    # remove all of the colors with 00FF00
+    colors = {k: v for k, v in colors.items() if v != "#00FF00"}
+
     """Save segment colors to JSON file."""
     with open(output_file, "w") as f:
         json.dump(colors, f, indent=2)
@@ -243,7 +298,10 @@ def main():
     import geopandas as gpd
 
     segments_gdf = gpd.read_file("segments.geojson")
-
+    
+    print("Debug: Loading segments and reports...")
+    print(f"Number of segments loaded: {len(segments_gdf)}")
+    
     segments = [
         Segment(
             sid=row["sid"],
@@ -253,6 +311,11 @@ def main():
         )
         for _, row in segments_gdf.iterrows()
     ]
+
+    # Print some debug info about the first few segments
+    print("\nFirst few segments:")
+    for segment in segments[:3]:
+        print(f"Segment {segment.sid}: {segment.from_station_id} -> {segment.to_station_id} (Line: {segment.line_id})")
 
     # Initialize risk predictor
     predictor = RiskPredictor(segments)
@@ -264,7 +327,7 @@ def main():
     segment_colors = predictor.predict(reports)
 
     # Save results
-    save_segment_colors(segment_colors, "segment_colors.json")
+    save_segment_colors(segment_colors, "output/segment_colors.json")
 
 
 if __name__ == "__main__":
