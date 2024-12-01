@@ -40,8 +40,8 @@ class RiskPredictor:
         segments: List[Segment],
         max_report_age_hours: float = 24.0,
         risk_levels: int = 4,
-        spatial_decay: float = 0.5,
-        temporal_decay: float = 0.7,
+        spatial_decay: float = 0.25,
+        temporal_decay: float = 0.3,
     ):
         """
         Initialize the risk prediction model.
@@ -50,8 +50,8 @@ class RiskPredictor:
             segments: List of transport line segments
             max_report_age_hours: Maximum age of reports to consider
             risk_levels: Number of discrete risk levels (for color coding)
-            spatial_decay: Rate at which risk decreases with distance
-            temporal_decay: Rate at which risk decreases with time
+            spatial_decay: Rate at which risk decreases with distance (lower = spreads further)
+            temporal_decay: Rate at which risk decreases with time (lower = decays slower)
         """
         self.segments = segments
         self.max_report_age = timedelta(hours=max_report_age_hours)
@@ -106,13 +106,16 @@ class RiskPredictor:
         if age_hours >= max_age_hours:
             return 0.0
 
-        # Sigmoid function for smooth decay
+        # Modified sigmoid function
         x = age_hours / max_age_hours
-        return 1 / (1 + math.exp((x - 0.5) / self.temporal_decay))
+        base_risk = 1 / (1 + math.exp((x - 0.5) / self.temporal_decay))
+
+        # Amplify the risk
+        return min(1.0, base_risk * 1.5)
 
     def _compute_spatial_risk(self, distance: int) -> float:
         """
-        Compute risk based on distance from report using beta distribution.
+        Compute risk based on distance from report using exponential decay.
 
         Args:
             distance: Number of segments away from report
@@ -120,7 +123,19 @@ class RiskPredictor:
         Returns:
             Risk factor between 0 and 1
         """
-        return math.exp(-distance * self.spatial_decay)
+        if distance == float("inf"):
+            return 0.0
+
+        # Modified exponential decay with slower falloff
+        base_risk = math.exp(-distance * self.spatial_decay)
+
+        # Amplify risk for closer segments
+        if distance <= 2:
+            base_risk = min(1.0, base_risk * 1.5)
+        elif distance <= 4:
+            base_risk = min(1.0, base_risk * 1.3)
+
+        return base_risk
 
     def _compute_segment_risk(
         self, segment: Segment, reports: List[Report], current_time: datetime
@@ -181,7 +196,9 @@ class RiskPredictor:
             temporal_risk = self._compute_temporal_risk(age.total_seconds() / 3600)
 
             # Adjust risk based on number of possible lines
-            line_risk_factor = 1.0 / len(report.lines)
+            line_risk_factor = 1.0 / math.sqrt(
+                len(report.lines)
+            )  # Use square root to reduce the penalty for multiple lines
             temporal_risk *= line_risk_factor
 
             try:
@@ -255,7 +272,7 @@ class RiskPredictor:
 
             # Add spillover risk from overlapping segments
             if len(overlapping_segments) > 1:  # If there are overlapping segments
-                spillover_factor = 0.5  # Reduce the risk for overlapping segments
+                spillover_factor = 0.25  # Increased from 0.5 to increase risk spread
                 base_risk = min(
                     1.0,
                     base_risk
@@ -269,14 +286,18 @@ class RiskPredictor:
 
     def _risk_to_color(self, risk: float) -> str:
         """Convert risk score to color code."""
-        if risk <= 0:
+        if risk <= 0.1:  # Increased threshold for green
             return self.colors[0]
-        elif risk >= 1:
+        elif risk >= 0.8:  # Lower threshold for dark red
             return self.colors[-1]
 
-        # Map risk to discrete levels
-        level = int(risk * (self.risk_levels - 1))
-        return self.colors[level]
+        # Map risk to discrete levels with adjusted thresholds
+        if risk < 0.3:
+            return self.colors[1]  # Yellow
+        elif risk < 0.8:
+            return self.colors[2]  # Red
+        else:
+            return self.colors[3]  # Dark Red
 
     def predict(
         self, reports: List[Report], current_time: Optional[datetime] = None
