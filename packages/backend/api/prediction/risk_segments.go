@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/logger"
 	"github.com/labstack/echo/v4"
@@ -22,6 +23,13 @@ type RiskData struct {
 	SegmentColors map[string]string `json:"segment_colors"`
 }
 
+type RiskInspector struct {
+	StationId string   `json:"station_id"`
+	Lines     []string `json:"lines"`
+	Direction string   `json:"direction"`
+	Timestamp string   `json:"timestamp"`
+}
+
 func GetRiskSegments(c echo.Context) error {
 	logger.Log.Info().Msg("GET /prediction/risk-segments")
 
@@ -34,8 +42,45 @@ func GetRiskSegments(c echo.Context) error {
 	}
 	logger.Log.Info().Msgf("Found %d ticket inspectors", len(ticketInfoList))
 
-	// Convert ticket info to JSON
-	inspectorData, err := json.Marshal(ticketInfoList)
+	// Get stations list for line lookup
+	stationsList := data.GetStationsList()
+
+	// Convert TicketInspector to RiskInspector
+	riskInspectors := make([]RiskInspector, 0, len(ticketInfoList))
+	for _, inspector := range ticketInfoList {
+		var lines []string
+		if inspector.Line.Valid && inspector.Line.String != "" {
+			// If line is set, use it as a single-element array
+			lines = []string{inspector.Line.String}
+		} else {
+			// If no line is set, get all possible lines from the station
+			if station, ok := stationsList[inspector.StationId]; ok {
+				lines = station.Lines
+			} else {
+				logger.Log.Warn().Msgf("Station %s not found in stations list", inspector.StationId)
+				continue
+			}
+		}
+
+		// Only add inspector if we have valid lines
+		if len(lines) > 0 {
+			direction := ""
+			if inspector.DirectionId.Valid {
+				direction = inspector.DirectionId.String
+			}
+
+			riskInspector := RiskInspector{
+				StationId: inspector.StationId,
+				Lines:     lines,
+				Direction: direction,
+				Timestamp: inspector.Timestamp.Format(time.RFC3339),
+			}
+			riskInspectors = append(riskInspectors, riskInspector)
+		}
+	}
+
+	// Convert risk inspectors to JSON
+	inspectorData, err := json.Marshal(riskInspectors)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to marshal inspector data")
 		return c.NoContent(http.StatusInternalServerError)

@@ -23,7 +23,7 @@ class Report:
     station_id: str
     timestamp: datetime
     direction_id: Optional[str]
-    line_id: str
+    lines: List[str]
 
 
 @dataclass
@@ -173,8 +173,16 @@ class RiskPredictor:
             if age > self.max_report_age:
                 continue
 
+            # Skip if this segment's line is not in the report's lines
+            if segment.line_id not in report.lines:
+                continue
+
             # Compute temporal risk
             temporal_risk = self._compute_temporal_risk(age.total_seconds() / 3600)
+
+            # Adjust risk based on number of possible lines
+            line_risk_factor = 1.0 / len(report.lines)
+            temporal_risk *= line_risk_factor
 
             try:
                 # Create a subgraph containing only edges of the current line and overlapping lines
@@ -331,11 +339,7 @@ def main():
         latest_timestamp = None
         for inspector in input_data:
             # Extract values from nested JSON structure
-            line = (
-                inspector.get("line", {}).get("String", "")
-                if isinstance(inspector.get("line"), dict)
-                else inspector.get("line", "")
-            )
+            lines = inspector.get("lines", [])  # Expect lines to be a list
             direction_id = (
                 inspector.get("direction_id", {}).get("String", "")
                 if isinstance(inspector.get("direction_id"), dict)
@@ -344,7 +348,7 @@ def main():
 
             # Debug the values we're extracting
             logger.debug(
-                f"Processing inspector record - Station: {inspector.get('station_id')}, Line: {line}, Direction: {direction_id}"
+                f"Processing inspector record - Station: {inspector.get('station_id')}, Lines: {lines}, Direction: {direction_id}"
             )
 
             timestamp = datetime.fromisoformat(
@@ -360,7 +364,7 @@ def main():
                     station_id=inspector["station_id"],
                     timestamp=timestamp,
                     direction_id=direction_id if direction_id else None,
-                    line_id=line if line else "",
+                    lines=lines,
                 )
             )
         logger.debug(f"Created {len(reports)} report objects with data: {reports}")
