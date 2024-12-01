@@ -126,16 +126,23 @@ class RiskPredictor:
         if distance == float("inf"):
             return 0.0
 
-        # Modified exponential decay with slower falloff
+        # Base risk calculation with exponential decay
         base_risk = math.exp(-distance * self.spatial_decay)
 
-        # Amplify risk for closer segments
-        if distance <= 2:
-            base_risk = min(1.0, base_risk * 1.5)
-        elif distance <= 4:
-            base_risk = min(1.0, base_risk * 1.3)
-
-        return base_risk
+        # Higher risk for immediate segments, decreasing sharply with distance
+        if distance == 0:
+            return 1.0
+        elif distance == 1:
+            return 0.9
+        elif distance == 2:
+            return 0.7
+        elif distance == 3:
+            return 0.5
+        elif distance == 4:
+            return 0.3
+        else:
+            # For distances > 4, use exponential decay with a sharper falloff
+            return min(0.2, base_risk * 0.8)
 
     def _compute_segment_risk(
         self, segment: Segment, reports: List[Report], current_time: datetime
@@ -202,16 +209,14 @@ class RiskPredictor:
             temporal_risk *= line_risk_factor
 
             try:
-                # Create a subgraph containing only edges of the current line and overlapping lines
-                relevant_lines = {segment.line_id} | {
-                    s.line_id for s in overlapping_segments
-                }
+                # Create a subgraph containing only edges of the current line
                 line_subgraph = nx.DiGraph()
                 for u, v, data in self.graph.edges(data=True):
-                    if data["line_id"] in relevant_lines:
+                    if data["line_id"] == segment.line_id:
                         line_subgraph.add_edge(u, v)
-                        # Also add reverse edge for undirected calculation
-                        line_subgraph.add_edge(v, u)
+                        line_subgraph.add_edge(
+                            v, u
+                        )  # Add reverse edge for undirected calculation
 
                 # Add nodes that might be isolated
                 line_subgraph.add_node(report.station_id)
@@ -222,7 +227,9 @@ class RiskPredictor:
                 if report.direction_id:
                     try:
                         # If direction is provided, only look for paths in that direction
-                        if report.direction_id == "1":  # Forward direction
+                        if (
+                            report.direction_id == segment.to_station_id
+                        ):  # Forward direction
                             path = nx.shortest_path(
                                 line_subgraph,
                                 report.station_id,
@@ -270,13 +277,13 @@ class RiskPredictor:
             # Compute base risk
             base_risk = temporal_risk * spatial_risk
 
-            # Add spillover risk from overlapping segments
+            # Add spillover risk from overlapping segments, but with less impact
             if len(overlapping_segments) > 1:  # If there are overlapping segments
-                spillover_factor = 0.25  # Increased from 0.5 to increase risk spread
+                spillover_factor = 0.3  # Reduced from 0.7 to decrease spillover effect
                 base_risk = min(
                     1.0,
                     base_risk
-                    * (1 + spillover_factor * (len(overlapping_segments) - 1)),
+                    * (1 + spillover_factor),  # Simplified spillover calculation
                 )
 
             # Update total risk (take maximum of all reports)
@@ -288,13 +295,13 @@ class RiskPredictor:
         """Convert risk score to color code."""
         if risk <= 0.1:  # Increased threshold for green
             return self.colors[0]
-        elif risk >= 0.8:  # Lower threshold for dark red
+        elif risk >= 0.7:  # Adjusted threshold for dark red
             return self.colors[-1]
 
         # Map risk to discrete levels with adjusted thresholds
         if risk < 0.3:
             return self.colors[1]  # Yellow
-        elif risk < 0.8:
+        elif risk < 0.7:
             return self.colors[2]  # Red
         else:
             return self.colors[3]  # Dark Red
@@ -315,12 +322,37 @@ class RiskPredictor:
         if current_time is None:
             current_time = datetime.now(timezone.utc)
 
-        segment_colors = {}
-
+        # First, calculate raw risks for all segments
+        segment_risks = {}
         for segment in self.segments:
             risk = self._compute_segment_risk(segment, reports, current_time)
+            segment_risks[segment.sid] = risk
+
+        # Group segments by their endpoints (in both directions)
+        endpoint_groups = {}
+        for segment in self.segments:
+            # Create a key that's the same regardless of direction
+            endpoints = tuple(sorted([segment.from_station_id, segment.to_station_id]))
+            if endpoints not in endpoint_groups:
+                endpoint_groups[endpoints] = []
+            endpoint_groups[endpoints].append(segment.sid)
+
+        # Average out risks for segments in the same group
+        for endpoints, segment_ids in endpoint_groups.items():
+            if len(segment_ids) > 1:
+                # Calculate average risk for the group
+                avg_risk = sum(segment_risks[sid] for sid in segment_ids) / len(
+                    segment_ids
+                )
+                # Apply the average risk to all segments in the group
+                for sid in segment_ids:
+                    segment_risks[sid] = avg_risk
+
+        # Convert risks to colors
+        segment_colors = {}
+        for sid, risk in segment_risks.items():
             color = self._risk_to_color(risk)
-            segment_colors[segment.sid] = color
+            segment_colors[sid] = color
 
         return segment_colors
 
