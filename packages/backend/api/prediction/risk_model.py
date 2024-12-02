@@ -26,7 +26,6 @@ class Segment:
     from_station_id: str
     to_station_id: str
     rank: int = 0  # Position in the line sequence
-    network: str = ""  # S-Bahn or U-Bahn network
 
 
 class RiskPredictor:
