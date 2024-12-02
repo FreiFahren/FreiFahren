@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os/exec"
+	"sync"
 	"time"
 
 	"github.com/FreiFahren/backend/data"
@@ -29,9 +30,25 @@ type RiskInspector struct {
 	Timestamp string   `json:"timestamp"`
 }
 
-// ExecuteRiskModel runs the risk model and updates the cache.
-// It is thread-safe and ensures only one execution at a time.
-// Returns the risk data and any error that occurred.
+type riskCache struct {
+	data  *RiskData
+	mutex sync.RWMutex
+}
+
+var cache = &riskCache{}
+
+func (c *riskCache) get() (*RiskData, bool) {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	return c.data, c.data != nil
+}
+
+func (c *riskCache) set(data *RiskData) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	c.data = data
+}
+
 func ExecuteRiskModel() (*RiskData, error) {
 	endTime := time.Now().UTC()
 	startTime := endTime.Add(-time.Hour)
@@ -95,6 +112,7 @@ func ExecuteRiskModel() (*RiskData, error) {
 		return nil, err
 	}
 
+	// Start the risk model
 	if err := cmd.Start(); err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to start Python script")
 		return nil, err
@@ -115,6 +133,7 @@ func ExecuteRiskModel() (*RiskData, error) {
 		return nil, err
 	}
 
+	// Unmarshal the output
 	var riskData RiskData
 	if err := json.Unmarshal(stdout.Bytes(), &riskData); err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to unmarshal Python output")
@@ -122,12 +141,20 @@ func ExecuteRiskModel() (*RiskData, error) {
 	}
 	logger.Log.Debug().Msgf("amount of segments generated: %d", len(riskData.SegmentColors))
 
+	// Update cache with new data
+	cache.set(&riskData)
 	return &riskData, nil
 }
 
 func GetRiskSegments(c echo.Context) error {
 	logger.Log.Info().Msg("GET /risk-prediction/segment-colors")
 
+	// Get from cache
+	if cachedData, ok := cache.get(); ok {
+		return c.JSON(http.StatusOK, cachedData)
+	}
+
+	// If cache is empty (first request), execute the model
 	riskData, err := ExecuteRiskModel()
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to execute risk model")
