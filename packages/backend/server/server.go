@@ -119,7 +119,7 @@ func SetupServer() *echo.Echo {
 
 	e.GET("/transit/distance", distance.GetStationDistance)
 
-	e.GET("/prediction/risk-segments", prediction.GetRiskSegments)
+	e.GET("/risk-prediction/segment-colors", prediction.GetRiskSegments)
 
 	return e
 }

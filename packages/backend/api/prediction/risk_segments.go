@@ -31,7 +31,7 @@ type RiskInspector struct {
 }
 
 func GetRiskSegments(c echo.Context) error {
-	logger.Log.Info().Msg("GET /prediction/risk-segments")
+	logger.Log.Info().Msg("GET /risk-prediction/segment-colors")
 
 	endTime := time.Now().UTC()
 	startTime := endTime.Add(-time.Hour)
