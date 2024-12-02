@@ -19,7 +19,6 @@ type RiskSegmentResponse struct {
 }
 
 type RiskData struct {
-	LastModified  string            `json:"last_modified"`
 	SegmentColors map[string]string `json:"segment_colors"`
 }
 
@@ -30,15 +29,16 @@ type RiskInspector struct {
 	Timestamp string   `json:"timestamp"`
 }
 
-func GetRiskSegments(c echo.Context) error {
-	logger.Log.Info().Msg("GET /risk-prediction/segment-colors")
-
+// ExecuteRiskModel runs the risk model and updates the cache.
+// It is thread-safe and ensures only one execution at a time.
+// Returns the risk data and any error that occurred.
+func ExecuteRiskModel() (*RiskData, error) {
 	endTime := time.Now().UTC()
 	startTime := endTime.Add(-time.Hour)
 	ticketInfoList, err := database.GetLatestTicketInspectors(startTime, endTime)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to get ticket inspectors")
-		return c.NoContent(http.StatusInternalServerError)
+		return nil, err
 	}
 
 	// Get stations list for line lookup
@@ -49,10 +49,8 @@ func GetRiskSegments(c echo.Context) error {
 	for _, inspector := range ticketInfoList {
 		var lines []string
 		if inspector.Line.Valid && inspector.Line.String != "" {
-			// If line is set, use it as a single-element array
 			lines = []string{inspector.Line.String}
 		} else {
-			// If no line is set, get all possible lines from the station
 			if station, ok := stationsList[inspector.StationId]; ok {
 				lines = station.Lines
 			} else {
@@ -61,7 +59,6 @@ func GetRiskSegments(c echo.Context) error {
 			}
 		}
 
-		// Only add inspector if we have valid lines
 		if len(lines) > 0 {
 			direction := ""
 			if inspector.DirectionId.Valid {
@@ -82,54 +79,60 @@ func GetRiskSegments(c echo.Context) error {
 	inspectorData, err := json.Marshal(riskInspectors)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to marshal inspector data")
-		return c.NoContent(http.StatusInternalServerError)
+		return nil, err
 	}
 
 	// Create command to run Python script
 	cmd := exec.Command("python3", "packages/backend/api/prediction/risk_model.py")
 	cmd.Dir = "/Users/johantrieloff/Documents/FreiFahren"
 
-	// Create pipes for stdin and stdout
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to create stdin pipe")
-		return c.NoContent(http.StatusInternalServerError)
+		return nil, err
 	}
 
-	// Start the command
 	if err := cmd.Start(); err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to start Python script")
-		return c.NoContent(http.StatusInternalServerError)
+		return nil, err
 	}
 
-	// Write inspector data to stdin
 	if _, err := stdin.Write(inspectorData); err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to write to stdin")
-		return c.NoContent(http.StatusInternalServerError)
+		return nil, err
 	}
 	stdin.Close()
-	logger.Log.Debug().Msgf("Data written to risk model: %s", string(inspectorData))
+	logger.Log.Debug().Msgf("risk model started with data: %s", string(inspectorData))
 
-	// Wait for the command to complete
 	if err := cmd.Wait(); err != nil {
-		// Log both error and stderr content
 		logger.Log.Error().
 			Err(err).
 			Str("stderr", stderr.String()).
 			Msg("Python script failed")
-		return c.NoContent(http.StatusInternalServerError)
+		return nil, err
 	}
 
-	// Parse the output
 	var riskData RiskData
 	if err := json.Unmarshal(stdout.Bytes(), &riskData); err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to unmarshal Python output")
+		return nil, err
+	}
+	logger.Log.Debug().Msgf("amount of segments generated: %d", len(riskData.SegmentColors))
+
+	return &riskData, nil
+}
+
+func GetRiskSegments(c echo.Context) error {
+	logger.Log.Info().Msg("GET /risk-prediction/segment-colors")
+
+	riskData, err := ExecuteRiskModel()
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Failed to execute risk model")
 		return c.NoContent(http.StatusInternalServerError)
 	}
-	logger.Log.Debug().Msgf("Risk data: %+v", riskData)
 
 	return c.JSON(http.StatusOK, riskData)
 }

@@ -369,11 +369,6 @@ def main():
 
         # Create response in the correct format
         response = {
-            "last_modified": (
-                latest_timestamp.isoformat() + "Z"
-                if latest_timestamp
-                else datetime.now(timezone.utc).isoformat() + "Z"
-            ),
             "segment_colors": segment_colors,
         }
 

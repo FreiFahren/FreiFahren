@@ -66,6 +66,18 @@ func SetupServer() *echo.Echo {
 		logger.Log.Error().Str("Error", err.Error()).Send()
 	}
 
+	// Add cron job to update risk model every 5 minutes
+	_, err = c.AddFunc("*/5 * * * *", func() {
+		_, err := prediction.ExecuteRiskModel()
+		if err != nil {
+			logger.Log.Error().Err(err).Msg("Failed to execute risk model in cron job")
+		}
+	})
+	if err != nil {
+		logger.Log.Error().Msg("Could not schedule risk model update job")
+		logger.Log.Error().Str("Error", err.Error()).Send()
+	}
+
 	c.Start()
 
 	logger.Log.Info().Msg("Server is running...")
