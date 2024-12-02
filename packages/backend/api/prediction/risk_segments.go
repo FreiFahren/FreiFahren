@@ -40,7 +40,6 @@ func GetRiskSegments(c echo.Context) error {
 		logger.Log.Error().Err(err).Msg("Failed to get ticket inspectors")
 		return c.NoContent(http.StatusInternalServerError)
 	}
-	logger.Log.Info().Msgf("Found %d ticket inspectors", len(ticketInfoList))
 
 	// Get stations list for line lookup
 	stationsList := data.GetStationsList()
@@ -112,6 +111,7 @@ func GetRiskSegments(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	stdin.Close()
+	logger.Log.Debug().Msgf("Data written to risk model: %s", string(inspectorData))
 
 	// Wait for the command to complete
 	if err := cmd.Wait(); err != nil {
@@ -123,21 +123,13 @@ func GetRiskSegments(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	// Log any debug output from Python even if successful
-	if stderr.Len() > 0 {
-		for _, line := range bytes.Split(stderr.Bytes(), []byte("\n")) {
-			if len(line) > 0 {
-				logger.Log.Debug().Msg(string(line))
-			}
-		}
-	}
-
 	// Parse the output
 	var riskData RiskData
 	if err := json.Unmarshal(stdout.Bytes(), &riskData); err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to unmarshal Python output")
 		return c.NoContent(http.StatusInternalServerError)
 	}
+	logger.Log.Debug().Msgf("Risk data: %+v", riskData)
 
 	return c.JSON(http.StatusOK, riskData)
 }

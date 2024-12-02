@@ -1,19 +1,12 @@
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timezone
 import json
-import logging
 import sys
 from pathlib import Path
 from dataclasses import dataclass
 import math
 import numpy as np
 from scipy.stats import betabinom
-
-# Configure logging to write to stderr
-logging.basicConfig(
-    level=logging.DEBUG, format="PYTHON_DEBUG: %(message)s", stream=sys.stderr
-)
-logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -64,7 +57,6 @@ class RiskPredictor:
 
         # Calculate ranks for segments within each line
         self._calculate_segment_ranks()
-        logger.debug("Initialized RiskPredictor")
 
     def _calculate_segment_ranks(self):
         """Calculate the position (rank) of each segment within its line."""
@@ -302,7 +294,6 @@ def main():
     try:
         # Read JSON input from stdin
         input_data = json.load(sys.stdin)
-        logger.debug(f"Received: {json.dumps(input_data)}")
 
         # Load segments from segments.json file
         segments_path = Path("packages/backend/data/segments.json")
@@ -318,11 +309,9 @@ def main():
                     to_station_id=props["to_station_id"],
                 )
                 segments.append(segment)
-        logger.debug(f"Created {len(segments)} segment objects")
 
         # Initialize risk predictor
         predictor = RiskPredictor(segments)
-        logger.debug("Initialized RiskPredictor")
 
         reports = []
         latest_timestamp = None
@@ -330,11 +319,6 @@ def main():
         for inspector in input_data:
             lines = inspector["lines"]
             direction = inspector["direction"]
-
-            # Debug the values we're extracting
-            logger.debug(
-                f"Processing inspector record - Station: {inspector['station_id']}, Lines: {lines}, Direction: {direction}"
-            )
 
             timestamp = datetime.fromisoformat(
                 inspector["timestamp"].replace("Z", "+00:00")
@@ -352,11 +336,9 @@ def main():
                     lines=lines,
                 )
             )
-        logger.debug(f"Created {len(reports)} report objects")
 
         # Generate predictions
         segment_colors = predictor.predict(reports)
-        logger.debug(f"Generated predictions for {len(segment_colors)} segments")
 
         # Create response in the correct format
         response = {
@@ -370,10 +352,8 @@ def main():
 
         # Output filtered results to stdout
         json.dump(response, sys.stdout)
-        logger.debug("Successfully wrote results to stdout")
 
     except Exception as e:
-        logger.error(f"Error in risk model: {str(e)}", exc_info=True)
         raise
 
 
