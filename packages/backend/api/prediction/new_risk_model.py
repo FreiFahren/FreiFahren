@@ -5,6 +5,7 @@ import logging
 import sys
 import os
 from dataclasses import dataclass
+import math
 
 # Configure logging to write to stderr
 logging.basicConfig(
@@ -56,18 +57,56 @@ class RiskPredictor:
             self.overlapping_segments[key].append(segment)
         logger.debug("Initialized RiskPredictor")
 
+    def _calculate_temporal_decay(
+        self,
+        time_diff_seconds: float,
+        ttl: float = 1000,
+        strength: float = 0.2,
+        shift: float = 0.4,
+    ) -> float:
+        """
+        Calculate temporal decay factor using a logistic function.
+
+        Args:
+            time_diff_seconds: Time difference in seconds between now and the report
+            ttl: Time-to-live in seconds (1000 = ~17 minutes) from R model
+            strength: Controls the steepness of the decay curve (0.2) from R model
+            shift: Shifts the midpoint of the decay curve (0.4) from R model
+
+        Returns:
+            Decay factor between 0 and 1
+        """
+        strength_adj = strength * ttl
+        adjusted_ttl = ttl * (1 + shift)
+        return 1 / (1 + math.exp((time_diff_seconds - adjusted_ttl) / strength_adj))
+
     def predict(self, reports: List[Report]) -> Dict[str, str]:
+        # Get current time for temporal decay calculation
+        current_time = datetime.now(timezone.utc)
+
         # Initialize risk values for all segments
         segment_risks: Dict[str, float] = {
             segment.sid: 0.0 for segment in self.segments
         }
 
-        # Calculate initial risks based on reports and line matches
+        # Calculate initial risks based on reports and line matches with temporal decay
         for report in reports:
             if not report.lines:
                 continue
 
-            risk_per_line = 1.0 / len(report.lines)
+            # Calculate time difference in seconds
+            time_diff = (current_time - report.timestamp).total_seconds()
+
+            # Calculate temporal decay factor
+            decay_factor = self._calculate_temporal_decay(
+                time_diff,
+                ttl=1800,
+                strength=0.05,
+                shift=0.2,
+            )
+
+            # Calculate base risk per line with temporal decay
+            risk_per_line = (1.0 / len(report.lines)) * decay_factor
 
             # Assign risk to all segments matching the lines in the report
             for segment in self.segments:
@@ -105,11 +144,12 @@ class RiskPredictor:
 
     def _risk_to_color(self, risk: float) -> str:
         """Convert risk score to color code."""
-        if risk <= 0.1:
+        if risk <= 0.1:  # Increased threshold for green
             return self.colors[0]
-        elif risk >= 0.7:
+        elif risk >= 0.7:  # Adjusted threshold for dark red
             return self.colors[-1]
 
+        # Map risk to discrete levels with adjusted thresholds
         if risk < 0.3:
             return self.colors[1]  # Yellow
         elif risk < 0.7:
