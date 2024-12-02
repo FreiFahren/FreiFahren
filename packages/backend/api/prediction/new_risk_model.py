@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import json
 import logging
 import sys
-import os
+from pathlib import Path
 from dataclasses import dataclass
 import math
 import numpy as np
@@ -305,7 +305,8 @@ def main():
         logger.debug(f"Received: {json.dumps(input_data)}")
 
         # Load segments from segments.json file
-        with open("packages/backend/data/segments.json", "r") as f:
+        segments_path = Path("packages/backend/data/segments.json")
+        with segments_path.open("r") as f:
             segments_data = json.load(f)
             segments = []
             for feature in segments_data["features"]:
