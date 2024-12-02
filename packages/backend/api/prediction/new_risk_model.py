@@ -194,6 +194,33 @@ class RiskPredictor:
             )
 
     def predict(self, reports: List[Report]) -> Dict[str, str]:
+        """
+        Predict risk levels for transport segments based on inspector reports.
+
+        The prediction process works as follows:
+        1. For each report, calculates three types of risk:
+           - Direct risk: Highest for reports with known direction
+           - Bidirectional risk: Highest when direction is unknown
+           - Line-wide risk: Base risk applied to entire lines
+
+        2. Risk propagation:
+           - For station-based reports: Risk decays spatially based on segment distance
+           - For line-wide reports: Risk is distributed across all segments of the line
+           - Multiple reports' risks are combined additively (capped at 1.0)
+
+        3. Risk to color conversion:
+           - ≤ 0.2: Green (no risk)
+           - ≤ 0.5: Yellow (low risk)
+           - ≤ 0.9: Red (medium risk)
+           - > 0.9: Dark Red (high risk)
+
+        Args:
+            reports: List of Report objects containing inspector observations
+
+        Returns:
+            Dictionary mapping segment IDs to color codes representing risk levels.
+            Only segments with risk (non-green) are included in the output.
+        """
         # Get current time for temporal decay calculation
         current_time = datetime.now(timezone.utc)
 
