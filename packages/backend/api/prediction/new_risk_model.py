@@ -1,15 +1,10 @@
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional
+from datetime import datetime, timezone
 import json
-import math
-import networkx as nx
-from datetime import datetime, timedelta, timezone
-import numpy as np
-import pandas as pd
-from dataclasses import dataclass
-import os
 import logging
 import sys
-import geopandas as gpd
+import os
+from dataclasses import dataclass
 
 # Configure logging to write to stderr
 logging.basicConfig(
@@ -35,261 +30,20 @@ class Segment:
 
 
 class RiskPredictor:
-    def __init__(
-        self,
-        segments: List[Segment],
-        max_report_age_hours: float = 24.0,
-        risk_levels: int = 4,
-        spatial_decay: float = 0.25,
-        temporal_decay: float = 0.3,
-    ):
+    def __init__(self, segments: List[Segment]):
         """
         Initialize the risk prediction model.
 
         Args:
             segments: List of transport line segments
-            max_report_age_hours: Maximum age of reports to consider
-            risk_levels: Number of discrete risk levels (for color coding)
-            spatial_decay: Rate at which risk decreases with distance (lower = spreads further)
-            temporal_decay: Rate at which risk decreases with time (lower = decays slower)
         """
         self.segments = segments
-        self.max_report_age = timedelta(hours=max_report_age_hours)
-        self.risk_levels = risk_levels
-        self.spatial_decay = spatial_decay
-        self.temporal_decay = temporal_decay
-
-        # Build the network graph
-        self.graph = self._build_network_graph()
-
-        # Color scale from green to red
         self.colors = [
             "#13C184",  # Green (default/no risk)
             "#FACB3F",  # Yellow (low risk)
             "#F05044",  # Red (medium risk)
             "#A92725",  # Dark Red (high risk)
         ]
-
-    def _build_network_graph(self) -> nx.DiGraph:
-        """Build a directed graph representing the transport network."""
-        G = nx.DiGraph()
-
-        # Add segments as edges
-        for segment in self.segments:
-            G.add_edge(
-                segment.from_station_id,
-                segment.to_station_id,
-                sid=segment.sid,
-                line_id=segment.line_id,
-            )
-            # Add reverse direction
-            G.add_edge(
-                segment.to_station_id,
-                segment.from_station_id,
-                sid=f"{segment.sid}-rev",
-                line_id=segment.line_id,
-            )
-
-        return G
-
-    def _compute_temporal_risk(self, age_hours: float) -> float:
-        """
-        Compute risk based on report age using sigmoid function.
-
-        Args:
-            age_hours: Age of the report in hours
-
-        Returns:
-            Risk factor between 0 and 1
-        """
-        max_age_hours = self.max_report_age.total_seconds() / 3600
-        if age_hours >= max_age_hours:
-            return 0.0
-
-        # Modified sigmoid function
-        x = age_hours / max_age_hours
-        base_risk = 1 / (1 + math.exp((x - 0.5) / self.temporal_decay))
-
-        # Amplify the risk
-        return min(1.0, base_risk * 1.5)
-
-    def _compute_spatial_risk(self, distance: int) -> float:
-        """
-        Compute risk based on distance from report using exponential decay.
-
-        Args:
-            distance: Number of segments away from report
-
-        Returns:
-            Risk factor between 0 and 1
-        """
-        if distance == float("inf"):
-            return 0.0
-
-        # Base risk calculation with exponential decay
-        base_risk = math.exp(-distance * self.spatial_decay)
-
-        # Higher risk for immediate segments, decreasing sharply with distance
-        if distance == 0:
-            return 1.0
-        elif distance == 1:
-            return 0.9
-        elif distance == 2:
-            return 0.7
-        elif distance == 3:
-            return 0.5
-        elif distance == 4:
-            return 0.3
-        else:
-            # For distances > 4, use exponential decay with a sharper falloff
-            return min(0.2, base_risk * 0.8)
-
-    def _compute_segment_risk(
-        self, segment: Segment, reports: List[Report], current_time: datetime
-    ) -> float:
-        """
-        Compute total risk for a segment based on all reports.
-
-        Args:
-            segment: Transport line segment
-            reports: List of inspection reports
-            current_time: Current timestamp
-
-        Returns:
-            Risk score between 0 and 1
-        """
-        total_risk = 0.0
-
-        # First, verify that the segment stations exist in the graph
-        if (
-            segment.from_station_id not in self.graph
-            or segment.to_station_id not in self.graph
-        ):
-            logger.debug(
-                f"Warning: Segment stations not found in graph: {segment.from_station_id} -> {segment.to_station_id}"
-            )
-            return 0.0
-
-        # Find all segments that share the same stations (overlapping segments)
-        overlapping_segments = []
-        for s in self.segments:
-            if (
-                s.from_station_id == segment.from_station_id
-                and s.to_station_id == segment.to_station_id
-            ) or (
-                s.from_station_id == segment.to_station_id
-                and s.to_station_id == segment.from_station_id
-            ):
-                overlapping_segments.append(s)
-
-        for report in reports:
-            # Skip if report station is not in graph
-            if report.station_id not in self.graph:
-                logger.debug(
-                    f"Warning: Report station not found in graph: {report.station_id}"
-                )
-                continue
-
-            # Skip old reports
-            age = current_time - report.timestamp
-            if age > self.max_report_age:
-                continue
-
-            # Skip if this segment's line is not in the report's lines
-            if segment.line_id not in report.lines:
-                continue
-
-            # Compute temporal risk
-            temporal_risk = self._compute_temporal_risk(age.total_seconds() / 3600)
-
-            # Adjust risk based on number of possible lines
-            line_risk_factor = 1.0 / math.sqrt(
-                len(report.lines)
-            )  # Use square root to reduce the penalty for multiple lines
-            temporal_risk *= line_risk_factor
-
-            try:
-                # Create a subgraph containing only edges of the current line
-                line_subgraph = nx.DiGraph()
-                for u, v, data in self.graph.edges(data=True):
-                    if data["line_id"] == segment.line_id:
-                        line_subgraph.add_edge(u, v)
-                        line_subgraph.add_edge(
-                            v, u
-                        )  # Add reverse edge for undirected calculation
-
-                # Add nodes that might be isolated
-                line_subgraph.add_node(report.station_id)
-                line_subgraph.add_node(segment.from_station_id)
-                line_subgraph.add_node(segment.to_station_id)
-
-                # Consider direction if provided
-                if report.direction_id:
-                    try:
-                        # If direction is provided, only look for paths in that direction
-                        if (
-                            report.direction_id == segment.to_station_id
-                        ):  # Forward direction
-                            path = nx.shortest_path(
-                                line_subgraph,
-                                report.station_id,
-                                segment.from_station_id,
-                            )
-                        else:  # Backward direction
-                            path = nx.shortest_path(
-                                line_subgraph,
-                                segment.from_station_id,
-                                report.station_id,
-                            )
-                        distance = len(path) - 1
-                    except nx.NetworkXNoPath:
-                        distance = float("inf")
-                else:
-                    # If no direction, consider both directions
-                    forward_distance = float("inf")
-                    backward_distance = float("inf")
-
-                    try:
-                        forward_distance = nx.shortest_path_length(
-                            line_subgraph, report.station_id, segment.from_station_id
-                        )
-                    except (nx.NetworkXNoPath, nx.NodeNotFound):
-                        pass
-
-                    try:
-                        backward_distance = nx.shortest_path_length(
-                            line_subgraph, segment.from_station_id, report.station_id
-                        )
-                    except (nx.NetworkXNoPath, nx.NodeNotFound):
-                        pass
-
-                    distance = min(forward_distance, backward_distance)
-
-            except Exception as e:
-                logger.debug(
-                    f"Warning: Error calculating path for segment {segment.sid}: {str(e)}"
-                )
-                distance = float("inf")
-
-            # Compute spatial risk
-            spatial_risk = self._compute_spatial_risk(distance)
-
-            # Compute base risk
-            base_risk = temporal_risk * spatial_risk
-
-            # Add spillover risk from overlapping segments, but with less impact
-            if len(overlapping_segments) > 1:  # If there are overlapping segments
-                spillover_factor = 0.3  # Reduced from 0.7 to decrease spillover effect
-                base_risk = min(
-                    1.0,
-                    base_risk
-                    * (1 + spillover_factor),  # Simplified spillover calculation
-                )
-
-            # Update total risk (take maximum of all reports)
-            total_risk = max(total_risk, base_risk)
-
-        return min(total_risk, 1.0)  # Cap at 1.0
 
     def _risk_to_color(self, risk: float) -> str:
         """Convert risk score to color code."""
@@ -322,86 +76,69 @@ class RiskPredictor:
         if current_time is None:
             current_time = datetime.now(timezone.utc)
 
-        # First, calculate raw risks for all segments
-        segment_risks = {}
-        for segment in self.segments:
-            risk = self._compute_segment_risk(segment, reports, current_time)
-            segment_risks[segment.sid] = risk
+        # Initialize segment risks
+        segment_risks = {segment.sid: 0.0 for segment in self.segments}
 
-        # Group segments by their endpoints (in both directions)
-        endpoint_groups = {}
-        for segment in self.segments:
-            # Create a key that's the same regardless of direction
-            endpoints = tuple(sorted([segment.from_station_id, segment.to_station_id]))
-            if endpoints not in endpoint_groups:
-                endpoint_groups[endpoints] = []
-            endpoint_groups[endpoints].append(segment.sid)
+        # Process each report
+        for report in reports:
+            if not report.lines:
+                continue
 
-        # Average out risks for segments in the same group
-        for endpoints, segment_ids in endpoint_groups.items():
-            if len(segment_ids) > 1:
-                # Calculate average risk for the group
-                avg_risk = sum(segment_risks[sid] for sid in segment_ids) / len(
-                    segment_ids
-                )
-                # Apply the average risk to all segments in the group
-                for sid in segment_ids:
-                    segment_risks[sid] = avg_risk
+            risk_per_line = 1.0 / len(report.lines)
+
+            # Assign risk to all segments matching the lines in the report
+            for segment in self.segments:
+                if segment.line_id in report.lines:
+                    # Sum up risks from multiple reports
+                    segment_risks[segment.sid] = min(
+                        1.0, segment_risks[segment.sid] + risk_per_line
+                    )
 
         # Convert risks to colors
         segment_colors = {}
         for sid, risk in segment_risks.items():
             color = self._risk_to_color(risk)
-            segment_colors[sid] = color
+            if color != "#13C184":  # Only include segments with risk
+                segment_colors[sid] = color
 
         return segment_colors
 
 
 def main():
     try:
-        # Get the directory of the current script
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        segments_path = os.path.join(script_dir, "segments.geojson")
-        logger.debug(f"Loading segments from: {segments_path}")
-
         # Read JSON input from stdin
         input_data = json.load(sys.stdin)
         logger.debug(f"Received: {json.dumps(input_data)}")
 
-        # Load segments from GeoJSON using absolute path
-        segments_gdf = gpd.read_file(segments_path)
-        logger.debug(f"Loaded {len(segments_gdf)} segments from GeoJSON")
-
-        segments = [
-            Segment(
-                sid=row["sid"],
-                line_id=row["line"],
-                from_station_id=row["from_station_id"],
-                to_station_id=row["to_station_id"],
-            )
-            for _, row in segments_gdf.iterrows()
-        ]
+        # Load segments from segments.json file
+        with open("packages/backend/data/segments.json", "r") as f:
+            segments_data = json.load(f)
+            segments = []
+            for feature in segments_data["features"]:
+                props = feature["properties"]
+                segment = Segment(
+                    sid=props["sid"],
+                    line_id=props["line"],
+                    from_station_id=props["from_station_id"],
+                    to_station_id=props["to_station_id"],
+                )
+                segments.append(segment)
         logger.debug(f"Created {len(segments)} segment objects")
 
         # Initialize risk predictor
         predictor = RiskPredictor(segments)
         logger.debug("Initialized RiskPredictor")
 
-        # Convert input data to Report objects
         reports = []
         latest_timestamp = None
+
         for inspector in input_data:
-            # Extract values from nested JSON structure
-            lines = inspector.get("lines", [])  # Expect lines to be a list
-            direction_id = (
-                inspector.get("direction_id", {}).get("String", "")
-                if isinstance(inspector.get("direction_id"), dict)
-                else inspector.get("direction_id", "")
-            )
+            lines = inspector["lines"]
+            direction = inspector["direction"]
 
             # Debug the values we're extracting
             logger.debug(
-                f"Processing inspector record - Station: {inspector.get('station_id')}, Lines: {lines}, Direction: {direction_id}"
+                f"Processing inspector record - Station: {inspector['station_id']}, Lines: {lines}, Direction: {direction}"
             )
 
             timestamp = datetime.fromisoformat(
@@ -416,19 +153,15 @@ def main():
                 Report(
                     station_id=inspector["station_id"],
                     timestamp=timestamp,
-                    direction_id=direction_id if direction_id else None,
+                    direction_id=direction if direction else None,
                     lines=lines,
                 )
             )
-        logger.debug(f"Created {len(reports)} report objects with data: {reports}")
+        logger.debug(f"Created {len(reports)} report objects")
 
         # Generate predictions
         segment_colors = predictor.predict(reports)
         logger.debug(f"Generated predictions for {len(segment_colors)} segments")
-
-        # Filter out segments with #00FF00 color
-        filtered_colors = {k: v for k, v in segment_colors.items() if v != "#13C184"}
-        logger.debug(f"Filtered to {len(filtered_colors)} segments with risk")
 
         # Create response in the correct format
         response = {
@@ -437,7 +170,7 @@ def main():
                 if latest_timestamp
                 else datetime.now(timezone.utc).isoformat() + "Z"
             ),
-            "segment_colors": filtered_colors,
+            "segment_colors": segment_colors,
         }
 
         # Output filtered results to stdout
