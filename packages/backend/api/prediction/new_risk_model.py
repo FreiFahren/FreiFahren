@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timezone
 import json
 import logging
@@ -45,41 +45,24 @@ class RiskPredictor:
             "#A92725",  # Dark Red (high risk)
         ]
 
-    def _risk_to_color(self, risk: float) -> str:
-        """Convert risk score to color code."""
-        if risk <= 0.1:  # Increased threshold for green
-            return self.colors[0]
-        elif risk >= 0.7:  # Adjusted threshold for dark red
-            return self.colors[-1]
+        # Create a mapping of ordered station pairs -> list of segments
+        self.overlapping_segments: Dict[Tuple[str, str], List[Segment]] = {}
+        for segment in segments:
+            # Order station IDs alphabetically to handle bidirectional segments
+            stations = sorted([segment.from_station_id, segment.to_station_id])
+            key = (stations[0], stations[1])
+            if key not in self.overlapping_segments:
+                self.overlapping_segments[key] = []
+            self.overlapping_segments[key].append(segment)
+        logger.debug("Initialized RiskPredictor")
 
-        # Map risk to discrete levels with adjusted thresholds
-        if risk < 0.3:
-            return self.colors[1]  # Yellow
-        elif risk < 0.7:
-            return self.colors[2]  # Red
-        else:
-            return self.colors[3]  # Dark Red
+    def predict(self, reports: List[Report]) -> Dict[str, str]:
+        # Initialize risk values for all segments
+        segment_risks: Dict[str, float] = {
+            segment.sid: 0.0 for segment in self.segments
+        }
 
-    def predict(
-        self, reports: List[Report], current_time: Optional[datetime] = None
-    ) -> Dict[str, str]:
-        """
-        Generate risk predictions for all segments.
-
-        Args:
-            reports: List of inspection reports
-            current_time: Current timestamp (defaults to now)
-
-        Returns:
-            Dictionary mapping segment IDs to color codes
-        """
-        if current_time is None:
-            current_time = datetime.now(timezone.utc)
-
-        # Initialize segment risks
-        segment_risks = {segment.sid: 0.0 for segment in self.segments}
-
-        # Process each report
+        # Calculate initial risks based on reports and line matches
         for report in reports:
             if not report.lines:
                 continue
@@ -94,14 +77,45 @@ class RiskPredictor:
                         1.0, segment_risks[segment.sid] + risk_per_line
                     )
 
+        # Now propagate risks to overlapping segments
+        final_risks: Dict[str, float] = segment_risks.copy()
+
+        # For each segment that has a risk
+        for sid, risk in segment_risks.items():
+            if risk > 0:
+                # Find the segment
+                segment = next(s for s in self.segments if s.sid == sid)
+                # Get its ordered station pair
+                stations = sorted([segment.from_station_id, segment.to_station_id])
+                key = (stations[0], stations[1])
+
+                # Propagate its risk to all segments sharing these stations
+                for overlapping_segment in self.overlapping_segments[key]:
+                    current_risk = final_risks[overlapping_segment.sid]
+                    final_risks[overlapping_segment.sid] = max(current_risk, risk)
+
         # Convert risks to colors
         segment_colors = {}
-        for sid, risk in segment_risks.items():
+        for sid, risk in final_risks.items():
             color = self._risk_to_color(risk)
-            if color != "#13C184":  # Only include segments with risk
+            if color != self.colors[0]:  # Only include segments with risk
                 segment_colors[sid] = color
 
         return segment_colors
+
+    def _risk_to_color(self, risk: float) -> str:
+        """Convert risk score to color code."""
+        if risk <= 0.1:
+            return self.colors[0]
+        elif risk >= 0.7:
+            return self.colors[-1]
+
+        if risk < 0.3:
+            return self.colors[1]  # Yellow
+        elif risk < 0.7:
+            return self.colors[2]  # Red
+        else:
+            return self.colors[3]  # Dark Red
 
 
 def main():
