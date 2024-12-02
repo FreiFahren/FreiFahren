@@ -86,7 +86,7 @@ func GetRiskSegments(c echo.Context) error {
 	}
 
 	// Create command to run Python script
-	cmd := exec.Command("python3", "packages/backend/api/prediction/new_risk_model.py")
+	cmd := exec.Command("python3", "packages/backend/api/prediction/risk_model.py")
 	cmd.Dir = "/Users/johantrieloff/Documents/FreiFahren"
 
 	// Create pipes for stdin and stdout
