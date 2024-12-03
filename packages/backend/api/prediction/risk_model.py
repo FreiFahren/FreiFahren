@@ -322,7 +322,7 @@ def main():
         input_data = json.load(sys.stdin)
 
         # Load segments from segments.json file
-        segments_path = Path("packages/backend/data/segments-risk.json")
+        segments_path = Path("data/segments-risk.json")
         with segments_path.open("r") as f:
             segments_data = json.load(f)
             segments = []
