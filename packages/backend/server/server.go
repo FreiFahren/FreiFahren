@@ -3,10 +3,11 @@ package server
 import (
 	"net/http"
 
+	"github.com/FreiFahren/backend/Rstats"
 	"github.com/FreiFahren/backend/api/distance"
+	"github.com/FreiFahren/backend/api/getSegmentColors"
 	"github.com/FreiFahren/backend/api/inspectors"
 	"github.com/FreiFahren/backend/api/lines"
-	"github.com/FreiFahren/backend/api/prediction"
 	"github.com/FreiFahren/backend/api/stations"
 	"github.com/FreiFahren/backend/caching"
 	"github.com/FreiFahren/backend/data"
@@ -46,6 +47,9 @@ func SetupServer() *echo.Echo {
 		logger.Log.Error().Str("Error", err.Error()).Send()
 	}
 
+	// Generate the initial risk segments
+	Rstats.RunRiskModel()
+
 	c := cron.New()
 
 	// Schedule a job to backup the database every day at midnight
@@ -57,24 +61,21 @@ func SetupServer() *echo.Echo {
 		logger.Log.Error().Str("Error", err.Error()).Send()
 	}
 
+	// Update the risk model even if there are no reports for a long time
+	_, err = c.AddFunc("*/10 * * * *", func() {
+		Rstats.RunRiskModel()
+	})
+	if err != nil {
+		logger.Log.Error().Msg("Could not schedule risk model update job")
+		logger.Log.Error().Str("Error", err.Error()).Send()
+	}
+
 	// Round the older timestamps
 	_, err = c.AddFunc("*/5 * * * *", func() {
 		database.RoundOldTimestamp()
 	})
 	if err != nil {
 		logger.Log.Error().Msg("Could not schedule timestamp rounding job")
-		logger.Log.Error().Str("Error", err.Error()).Send()
-	}
-
-	// Add cron job to update risk model every 5 minutes
-	_, err = c.AddFunc("*/5 * * * *", func() {
-		_, err := prediction.ExecuteRiskModel()
-		if err != nil {
-			logger.Log.Error().Err(err).Msg("Failed to execute risk model in cron job")
-		}
-	})
-	if err != nil {
-		logger.Log.Error().Msg("Could not schedule risk model update job")
 		logger.Log.Error().Str("Error", err.Error()).Send()
 	}
 
@@ -131,7 +132,7 @@ func SetupServer() *echo.Echo {
 
 	e.GET("/transit/distance", distance.GetStationDistance)
 
-	e.GET("/risk-prediction/segment-colors", prediction.GetRiskSegments)
+	e.GET("/risk-prediction/segment-colors", getSegmentColors.GetSegmentColors)
 
 	return e
 }
