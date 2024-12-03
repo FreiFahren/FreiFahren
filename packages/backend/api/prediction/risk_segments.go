@@ -100,7 +100,7 @@ func ExecuteRiskModel() (*RiskData, error) {
 	}
 
 	// Create command to run Python script
-	cmd := exec.Command("python3", "packages/backend/api/prediction/risk_model.py")
+	cmd := exec.Command("./venv/bin/python", "packages/backend/api/prediction/risk_model.py")
 	cmd.Dir = "/Users/johantrieloff/Documents/FreiFahren"
 
 	var stdout, stderr bytes.Buffer
@@ -146,6 +146,19 @@ func ExecuteRiskModel() (*RiskData, error) {
 	return &riskData, nil
 }
 
+// @Summary Get risk segments
+//
+// @Description Retrieves risk predictions for transit segments.
+// @Description This endpoint returns color-coded risk levels for different segments of the transit network based on recent ticket inspector activity.
+//
+// @Tags prediction
+//
+// @Produce json
+//
+// @Success 200 {object} RiskData "Successfully retrieved risk segments data"
+// @Failure 500 "Internal Server Error: Failed to execute risk model"
+//
+// @Router /risk-prediction/segment-colors [get]
 func GetRiskSegments(c echo.Context) error {
 	logger.Log.Info().Msg("GET /risk-prediction/segment-colors")
 
