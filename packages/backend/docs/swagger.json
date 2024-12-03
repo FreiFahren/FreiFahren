@@ -258,40 +258,23 @@
         },
         "/risk-prediction/segment-colors": {
             "get": {
-                "description": "Fetches the latest risk assessments for transit segments, returned as color codes representing the risk level. You can find out more about the risk level calculation in the documentation.\nThe response includes the last modified timestamp of the risk model data to support conditional GET requests.",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Retrieves risk predictions for transit segments.\nThis endpoint returns color-coded risk levels for different segments of the transit network based on recent ticket inspector activity.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Risk Prediction"
+                    "prediction"
                 ],
-                "summary": "Get risk colors for segments",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Standard HTTP header used to make conditional requests; the response will include the risk colors only if they have changed since this date and time.",
-                        "name": "If-Modified-Since",
-                        "in": "header"
-                    }
-                ],
+                "summary": "Get risk segments",
                 "responses": {
                     "200": {
-                        "description": "Successfully retrieved the color-coded risk levels for each segment.",
+                        "description": "Successfully retrieved risk segments data",
                         "schema": {
-                            "$ref": "#/definitions/utils.RiskModelResponse"
-                        }
-                    },
-                    "304": {
-                        "description": "No changes: The data has not been modified since the last request date provided in the 'If-Modified-Since' header.",
-                        "schema": {
-                            "type": "none"
+                            "$ref": "#/definitions/prediction.RiskData"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error: Error during the processing of the request."
+                        "description": "Internal Server Error: Failed to execute risk model"
                     }
                 }
             }
@@ -509,6 +492,17 @@
         }
     },
     "definitions": {
+        "prediction.RiskData": {
+            "type": "object",
+            "properties": {
+                "segment_colors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "statistics.Statistics": {
             "type": "object",
             "properties": {
@@ -595,20 +589,6 @@
                 },
                 "timestamp": {
                     "type": "string"
-                }
-            }
-        },
-        "utils.RiskModelResponse": {
-            "type": "object",
-            "properties": {
-                "last_modified": {
-                    "type": "string"
-                },
-                "segment_colors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
                 }
             }
         },

@@ -5,9 +5,6 @@ import (
 	"time"
 )
 
-// This is the struct that we will use to store the data from the StationsList.json file
-// getId.go
-
 type Station struct {
 	Id          string      `json:"id"`
 	Name        string      `json:"name"`
@@ -30,14 +27,6 @@ type TicketInspectorResponse struct {
 	Line       string    `json:"line"` // String is used so that it can easily be handled by the frontend
 	IsHistoric bool      `json:"isHistoric"`
 	Message    string    `json:"message,omitempty"`
-}
-
-// Is used to simplify the data before saving it to a file
-type SimplifiedTicketInspector struct {
-	Timestamp   string   `json:"timestamp"`
-	StationId   string   `json:"station_id"`
-	Lines       []string `json:"line,omitempty"`
-	DirectionId string   `json:"direction_id,omitempty"`
 }
 
 // Is used within the backend primarily to fetch from the database
@@ -83,8 +72,6 @@ type ResponseData struct {
 	Message   string    `json:"message,omitempty"`
 }
 
-// getAllStationsAndLines.go
-
 type StationListEntry struct {
 	Name        string           `json:"name"`
 	Coordinates CoordinatesEntry `json:"coordinates"`
@@ -94,76 +81,6 @@ type StationListEntry struct {
 type CoordinatesEntry struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
-}
-
-type AllStationsAndLinesList struct {
-	Lines    []map[string][]string       `json:"lines"`
-	Stations map[string]StationListEntry `json:"stations"`
-}
-
-// getStationDistance.go
-
-// the stopovers between the station and the destination
-type Journeys struct {
-	Journey []Journey `json:"journeys"`
-}
-
-type Journey struct {
-	Legs []Leg `json:"legs"`
-}
-
-type Leg struct {
-	Stopovers []Stopover `json:"stopovers"`
-}
-
-type Stopover struct {
-	Stop Stop `json:"stop"`
-}
-
-type Stop struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-}
-
-// the nearby station to the given coordinates
-type NearbyStations struct {
-	Type        string   `json:"type"`
-	Id          string   `json:"id"`
-	Name        string   `json:"name"`
-	Location    Location `json:"location"`
-	Products    Products `json:"products"`
-	StationDHId string   `json:"stationDHId"`
-	Distance    int      `json:"distance"`
-}
-
-type Location struct {
-	Type      string  `json:"type"`
-	Id        string  `json:"id"`
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
-}
-
-type Products struct {
-	Suburban bool `json:"suburban"`
-	Subway   bool `json:"subway"`
-	Tram     bool `json:"tram"`
-	Bus      bool `json:"bus"`
-	Ferry    bool `json:"ferry"`
-	Express  bool `json:"express"`
-	Regional bool `json:"regional"`
-}
-
-// GeoJSON structs
-
-type RiskModelJSON struct {
-	Sid   string `json:"sid"`
-	Line  string `json:"line"`
-	Color string `json:"color"`
-}
-
-type RiskModelResponse struct {
-	LastModified  string            `json:"last_modified"`
-	SegmentColors map[string]string `json:"segment_colors"`
 }
 
 type GeoJSONCRS struct {
