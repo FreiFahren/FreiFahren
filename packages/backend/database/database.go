@@ -271,6 +271,8 @@ func GetLatestTicketInspectors(start, end time.Time) ([]utils.TicketInspector, e
             AND station_name IS NOT NULL
             AND station_id IS NOT NULL;`
 
+	logger.Log.Info().Msg("Getting latest ticket inspectors")
+
 	rows, err := pool.Query(context.Background(), sql, start, end)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to get latest ticket inspectors")

@@ -1,11 +1,4 @@
 definitions:
-  prediction.RiskData:
-    properties:
-      segment_colors:
-        additionalProperties:
-          type: string
-        type: object
-    type: object
   statistics.Statistics:
     properties:
       numberOfReports:
@@ -64,6 +57,15 @@ definitions:
         $ref: '#/definitions/utils.Station'
       timestamp:
         type: string
+    type: object
+  utils.RiskModelResponse:
+    properties:
+      last_modified:
+        type: string
+      segment_colors:
+        additionalProperties:
+          type: string
+        type: object
     type: object
   utils.SegmentFeature:
     properties:
@@ -337,21 +339,37 @@ paths:
       - lines
   /risk-prediction/segment-colors:
     get:
+      consumes:
+      - application/json
       description: |-
-        Retrieves risk predictions for transit segments.
-        This endpoint returns color-coded risk levels for different segments of the transit network based on recent ticket inspector activity.
+        Fetches the latest risk assessments for transit segments, returned as color codes representing the risk level. You can find out more about the risk level calculation in the documentation.
+        The response includes the last modified timestamp of the risk model data to support conditional GET requests.
+      parameters:
+      - description: Standard HTTP header used to make conditional requests; the response
+          will include the risk colors only if they have changed since this date and
+          time.
+        in: header
+        name: If-Modified-Since
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: Successfully retrieved risk segments data
+          description: Successfully retrieved the color-coded risk levels for each
+            segment.
           schema:
-            $ref: '#/definitions/prediction.RiskData'
+            $ref: '#/definitions/utils.RiskModelResponse'
+        "304":
+          description: 'No changes: The data has not been modified since the last
+            request date provided in the ''If-Modified-Since'' header.'
+          schema:
+            type: none
         "500":
-          description: 'Internal Server Error: Failed to execute risk model'
-      summary: Get risk segments
+          description: 'Internal Server Error: Error during the processing of the
+            request.'
+      summary: Get risk colors for segments
       tags:
-      - prediction
+      - Risk Prediction
   /stations:
     get:
       description: |-
