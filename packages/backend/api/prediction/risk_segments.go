@@ -100,8 +100,8 @@ func ExecuteRiskModel() (*RiskData, error) {
 	}
 
 	// Create command to run Python script
-	cmd := exec.Command("api/prediction/risk_model.py")
-	cmd.Dir = "/Users/johantrieloff/Documents/FreiFahren"
+	cmd := exec.Command("python3", "api/prediction/risk_model.py")
+	cmd.Dir = "."
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
