@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/FreiFahren/backend/Rstats"
+	"github.com/FreiFahren/backend/api/prediction"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	_ "github.com/FreiFahren/backend/docs"
@@ -83,19 +83,22 @@ func PostInspector(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	// Based on the new data, generate new risk segments
-	err = Rstats.RunRiskModel()
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error running risk model in postInspector")
-	}
+	// Update risk model after successful report submission
+	go func() {
+		if _, err := prediction.ExecuteRiskModel(); err != nil {
+			logger.Log.Error().Err(err).Msg("Failed to update risk model after new report")
+		}
+	}()
 
 	// Notify Telegram bot if there's no author (web app report)
-	if pointers.AuthorPtr == nil {
-		telegramEndpoint := os.Getenv("TELEGRAM_BOTS_URL") + "/report-inspector"
-		if err := notifyOtherServiceAboutReport(telegramEndpoint, dataToInsert, "Telegram bot"); err != nil {
-			logger.Log.Error().Err(err).Msg("Error notifying Telegram bot about report in postInspector")
+	go func() {
+		if pointers.AuthorPtr == nil {
+			telegramEndpoint := os.Getenv("TELEGRAM_BOTS_URL") + "/report-inspector"
+			if err := notifyOtherServiceAboutReport(telegramEndpoint, dataToInsert, "Telegram bot"); err != nil {
+				logger.Log.Error().Err(err).Msg("Error notifying Telegram bot about report in postInspector")
+			}
 		}
-	}
+	}()
 
 	return c.JSON(http.StatusOK, dataToInsert)
 }

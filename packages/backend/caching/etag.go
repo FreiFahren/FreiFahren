@@ -4,31 +4,11 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/FreiFahren/backend/logger"
 	"github.com/labstack/echo/v4"
 )
-
-type CacheableData interface {
-	GetBytes() []byte
-}
-
-type CacheConfig struct {
-	MaxAgeInSeconds   int
-	ContentTypeInMIME string
-}
-
-// Cache manages cached data with thread-safe operations
-type Cache struct {
-	data        []byte
-	etag        string
-	contentType string
-	maxAge      int
-	lastUpdated time.Time
-	lock        sync.RWMutex
-}
 
 // NewCache creates a new cache instance with the provided data and configuration.
 // It generates an initial ETag using SHA-256 hash of the data.

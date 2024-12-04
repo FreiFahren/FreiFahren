@@ -2,7 +2,23 @@ package caching
 
 import (
 	"sync"
+	"time"
 )
+
+type CacheConfig struct {
+	MaxAgeInSeconds   int
+	ContentTypeInMIME string
+}
+
+// Cache manages cached data with thread-safe operations
+type Cache struct {
+	data        []byte
+	etag        string
+	contentType string
+	maxAge      int
+	lastUpdated time.Time
+	lock        sync.RWMutex
+}
 
 // GlobalCacheManager is the singleton instance of CacheManager used across the application
 var GlobalCacheManager *CacheManager
