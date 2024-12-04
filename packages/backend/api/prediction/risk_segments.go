@@ -164,6 +164,7 @@ func GetRiskSegments(c echo.Context) error {
 
 	// Get from cache
 	if cachedData, ok := cache.get(); ok {
+		logger.Log.Debug().Msg("cache hit")
 		return c.JSON(http.StatusOK, cachedData)
 	}
 
