@@ -20,6 +20,7 @@ type RiskSegmentResponse struct {
 }
 
 type RiskData struct {
+	LastModified  string            `json:"last_modified"`
 	SegmentColors map[string]string `json:"segment_colors"`
 }
 
@@ -165,6 +166,7 @@ func GetRiskSegments(c echo.Context) error {
 	// Get from cache
 	if cachedData, ok := cache.get(); ok {
 		logger.Log.Debug().Msg("cache hit")
+		cachedData.LastModified = ""
 		return c.JSON(http.StatusOK, cachedData)
 	}
 
@@ -174,6 +176,7 @@ func GetRiskSegments(c echo.Context) error {
 		logger.Log.Error().Err(err).Msg("Failed to execute risk model")
 		return c.NoContent(http.StatusInternalServerError)
 	}
+	riskData.LastModified = "" // to avoid breaking backward compatibility with mobile app
 
 	return c.JSON(http.StatusOK, riskData)
 }
