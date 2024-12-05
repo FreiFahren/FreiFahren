@@ -46,18 +46,39 @@ const SheetBackground = ({ style, ...props }: ViewProps) => {
     )
 }
 
-const SheetBackdrop = (props: BottomSheetBackdropProps) => (
+const CloseableDarkSheetBackdrop = (props: BottomSheetBackdropProps) => (
     <BottomSheetBackdrop pressBehavior="close" style={{ backgroundColor: 'black' }} disappearsOnIndex={-1} {...props} />
 )
 
+const NonCloseableDarkSheetBackdrop = (props: BottomSheetBackdropProps) => (
+    <BottomSheetBackdrop pressBehavior="none" style={{ backgroundColor: 'black' }} disappearsOnIndex={-1} {...props} />
+)
+
+const TransparentCloseableSheetBackdrop = (props: BottomSheetBackdropProps) => (
+    <BottomSheetBackdrop pressBehavior="close" opacity={0} disappearsOnIndex={-1} {...props} />
+)
+
+type FFSheetBaseProps = Partial<BottomSheetModalProps> & {
+    backdropType?: 'closeable' | 'non-closeable' | 'transparent'
+}
+
 const FFSheetBase = forwardRef(
-    ({ children, ...props }: PropsWithChildren<Partial<BottomSheetModalProps>>, ref: Ref<BottomSheetModalMethods>) => (
+    (
+        { children, backdropType = 'closeable', ...props }: PropsWithChildren<FFSheetBaseProps>,
+        ref: Ref<BottomSheetModalMethods>
+    ) => (
         <BottomSheetModal
             ref={ref}
             index={0}
             handleComponent={SheetHandle}
             backgroundComponent={SheetBackground}
-            backdropComponent={SheetBackdrop}
+            backdropComponent={
+                {
+                    closeable: CloseableDarkSheetBackdrop,
+                    'non-closeable': NonCloseableDarkSheetBackdrop,
+                    transparent: TransparentCloseableSheetBackdrop,
+                }[backdropType]
+            }
             maxDynamicContentSize={Dimensions.get('window').height * 0.9}
             {...props}
         >
@@ -67,7 +88,7 @@ const FFSheetBase = forwardRef(
 )
 
 export const FFSheet = forwardRef(
-    ({ children, ...props }: PropsWithChildren<Partial<BottomSheetModalProps>>, ref: Ref<BottomSheetModalMethods>) => (
+    ({ children, ...props }: PropsWithChildren<FFSheetBaseProps>, ref: Ref<BottomSheetModalMethods>) => (
         <FFSheetBase ref={ref} {...props}>
             <FFSafeAreaView paddingHorizontal="sm" paddingVertical="sm" flex={1}>
                 {children}
@@ -76,7 +97,7 @@ export const FFSheet = forwardRef(
     )
 )
 export const FFScrollSheet = forwardRef(
-    ({ children, ...props }: PropsWithChildren<Partial<BottomSheetModalProps>>, ref: Ref<BottomSheetModalMethods>) => (
+    ({ children, ...props }: PropsWithChildren<FFSheetBaseProps>, ref: Ref<BottomSheetModalMethods>) => (
         <FFSheetBase ref={ref} {...props}>
             <BottomSheetScrollView>
                 <FFSafeAreaView edges={['bottom']} paddingHorizontal="sm" paddingVertical="sm">

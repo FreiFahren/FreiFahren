@@ -11,7 +11,7 @@ import { PrivacyPolicyUpdate } from './PrivacyPolicyUpdate'
 const DISCLAIMER_INTERVAL = Duration.fromObject({ days: 7 })
 
 const useShouldShowDisclaimer = () => {
-    const [shouldShowDisclaimer, setShouldShowDisclaimer] = useState(true)
+    const [shouldShowDisclaimer, setShouldShowDisclaimer] = useState<boolean | undefined>(true)
 
     const dismissedDisclaimerAt = useAppStore((state) => state.dismissedDisclaimerAt)
 
@@ -22,8 +22,10 @@ const useShouldShowDisclaimer = () => {
 
             if (Math.abs(now.diff(dismissedAtDate).as('days')) <= DISCLAIMER_INTERVAL.as('days')) {
                 setShouldShowDisclaimer(false)
+                return
             }
         }
+        setShouldShowDisclaimer(true)
     }, [dismissedDisclaimerAt])
 
     return shouldShowDisclaimer
@@ -58,13 +60,13 @@ export const Blocker = () => {
     const shouldShowPrivacyPolicy = useShouldShowPrivacyPolicy(newestPrivacyPolicyVersion)
 
     useEffect(() => {
-        if (shouldShowDisclaimer) {
+        if (shouldShowDisclaimer === true) {
             sheetRef.current?.present()
             track({ name: 'Disclaimer Viewed' })
-        } else if (shouldShowPrivacyPolicy === true) {
+        } else if (shouldShowDisclaimer === false && shouldShowPrivacyPolicy === true) {
             sheetRef.current?.present()
             track({ name: 'Privacy Policy Blocker Shown' })
-        } else if (shouldShowPrivacyPolicy === false) {
+        } else if (shouldShowDisclaimer === false && shouldShowPrivacyPolicy === false) {
             sheetRef.current?.dismiss()
             updateStore({ appLocked: false })
         }
@@ -82,7 +84,7 @@ export const Blocker = () => {
         track({ name: 'Privacy Policy Accepted' })
     }
 
-    if (shouldShowDisclaimer) {
+    if (shouldShowDisclaimer === true) {
         return <Disclaimer onDismiss={onDismissDisclaimer} ref={sheetRef} />
     }
     if (shouldShowPrivacyPolicy === true) {

@@ -23,7 +23,7 @@ export const ReportDetailsSheet = () => {
     if (report === null) return null
 
     return (
-        <FFScrollSheet ref={sheetRef} backdropComponent={undefined}>
+        <FFScrollSheet ref={sheetRef} backdropType="transparent">
             <ReportItem report={report} />
             {statistics.data !== undefined && statistics.data.numberOfReports > 1 && (
                 <FFText fontSize={15} mt="xs" color="darkText">

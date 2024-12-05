@@ -8,12 +8,10 @@ let client: AxiosInstance | null = null
 
 const createClient = async () => {
     const deviceName = await DeviceInfo.getDeviceName()
-    const appVersion = DeviceInfo.getVersion()
-    const buildNumber = DeviceInfo.getBuildNumber()
 
     const platform = Platform.OS === 'ios' ? 'iOS' : 'Android'
 
-    const userAgent = `Freifahren/${appVersion} (${platform}; ${Platform.Version}; ${deviceName}) BuildNumber/${buildNumber}`
+    const userAgent = `Freifahren/1.0 (${platform}; ${Platform.Version}; ${deviceName})`
 
     return axios.create({
         baseURL: config.PIRSCH_BASE_URL,
