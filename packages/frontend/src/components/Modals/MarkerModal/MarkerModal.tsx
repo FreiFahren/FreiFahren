@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react'
+import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { MarkerData } from 'src/utils/types'
@@ -8,9 +8,9 @@ import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 import Skeleton, { useSkeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
 import { useStationReports } from '../../../hooks/useStationReports'
 import { useStationDistance } from '../../../hooks/useStationDistance'
+import { sendAnalyticsEvent } from 'src/utils/analytics'
 
 import './MarkerModal.css'
-import { sendAnalyticsEvent } from 'src/utils/analytics'
 
 interface MarkerModalProps {
     selectedMarker: MarkerData
@@ -26,10 +26,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
     const { allStations } = useStationsAndLines()
     const { timestamp, station, line, direction } = selectedMarker
 
-    const adjustedTimestamp = useMemo(() => {
-        const tempTimestamp = new Date(timestamp)
-        return tempTimestamp
-    }, [timestamp])
+    const adjustedTimestamp = new Date(timestamp)
     const currentTime = new Date().getTime()
     const elapsedTimeInMinutes = Math.floor((currentTime - adjustedTimestamp.getTime()) / 60000)
 
@@ -87,39 +84,6 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
         [t, station, line, direction]
     )
 
-    const disclaimerWithLink = useMemo(
-        () => (
-            <>
-                <a href="#" onClick={handleShare} className="invite-link">
-                    {t('MarkerModal.invite', 'Invite')}
-                </a>{' '}
-                {t('MarkerModal.inviteText', 'friends to improve accuracy.')}
-            </>
-        ),
-        [t, handleShare]
-    )
-
-    const [disclaimerMessage, setDisclaimerMessage] = useState<string | JSX.Element>(
-        t('MarkerModal.disclaimer', 'Data may be inaccurate.')
-    )
-    const [isDisclaimerVisible, setIsDisclaimerVisible] = useState(false)
-    const TRANSITION_DURATION = 500 // Should match the transition-long duration in CSS
-
-    useEffect(() => {
-        setIsDisclaimerVisible(true)
-        const timer = setTimeout(() => {
-            setIsDisclaimerVisible(false)
-
-            // Wait for fade out to complete before changing message
-            setTimeout(() => {
-                setDisclaimerMessage(disclaimerWithLink)
-                setIsDisclaimerVisible(true)
-            }, TRANSITION_DURATION)
-        }, 2.5 * 1000)
-
-        return () => clearTimeout(timer)
-    }, [disclaimerWithLink])
-
     return (
         <div className={`marker-modal info-popup modal ${className}`}>
             {children}
@@ -146,9 +110,13 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                     {userLat && userLng && (
                         <span className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage}</span>
                     )}
-                    <span className={`disclaimer ${isDisclaimerVisible ? 'visible' : ''}`}>{disclaimerMessage}</span>
+                    <span className="disclaimer">{t('MarkerModal.inviteText')}</span>
                 </div>
                 {selectedMarker.message && <p className="description">{selectedMarker.message}</p>}
+                <button onClick={handleShare} className="share-button">
+                    <img src={process.env.PUBLIC_URL + '/icons/share-svgrepo-com.svg'} alt="Share" />
+                    <span>Share</span>
+                </button>
             </div>
         </div>
     )

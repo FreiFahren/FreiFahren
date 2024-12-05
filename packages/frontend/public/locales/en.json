@@ -66,9 +66,7 @@
         "stations": "stations",
         "fromYou": "away",
         "direction": "Direction",
-        "invite": "Invite",
-        "inviteText": "friends to improve accuracy.",
-        "disclaimer": "Data may be inaccurate."
+        "inviteText": "Data may be inaccurate."
     },
     "Share": {
         "title": "Check out this app.",

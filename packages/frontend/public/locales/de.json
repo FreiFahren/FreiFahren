@@ -64,11 +64,9 @@
         "minutes": "min",
         "oneStation": "eine Station",
         "stations": "Stationen",
-        "fromYou": "von dir entfernt",
+        "fromYou": "entfernt",
         "direction": "Richtung",
-        "invite": "Teile",
-        "inviteText": "mit Freunden.",
-        "disclaimer": "Daten vielleicht ungenau."
+        "inviteText": "Daten vielleicht ungenau."
     },
     "Share": {
         "title": "Schau dir mal diese App an.",
@@ -87,7 +85,7 @@
         "lines": "Linien",
         "stations": "Stationen",
         "reportsHeading": "Aktuelle Meldungen",
-        "risk": "aktuelles Risiko",
+        "risk": "Aktuelles Risiko",
         "topLines": "Top Linien",
         "topStations": "Top Stationen",
         "past24Hours": "letzte 24 Stunden",
