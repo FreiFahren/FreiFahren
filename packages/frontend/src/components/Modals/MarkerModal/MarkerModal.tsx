@@ -1,16 +1,16 @@
-import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react'
+import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { MarkerData } from 'src/utils/types'
 import { useElapsedTimeMessage, useStationDistanceMessage } from '../../../hooks/Messages'
-import { getStationDistance, fetchNumberOfReports } from '../../../utils/dbUtils'
-import { getNearestStation } from '../../../utils/mapUtils'
 import { getLineColor } from '../../../utils/uiUtils'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 import Skeleton, { useSkeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
+import { useStationReports } from '../../../hooks/useStationReports'
+import { useStationDistance } from '../../../hooks/useStationDistance'
+import { sendAnalyticsEvent } from 'src/utils/analytics'
 
 import './MarkerModal.css'
-import { sendAnalyticsEvent } from 'src/utils/analytics'
 
 interface MarkerModalProps {
     selectedMarker: MarkerData
@@ -26,48 +26,18 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
     const { allStations } = useStationsAndLines()
     const { timestamp, station, line, direction } = selectedMarker
 
-    const adjustedTimestamp = useMemo(() => {
-        const tempTimestamp = new Date(timestamp)
-        return tempTimestamp
-    }, [timestamp])
+    const adjustedTimestamp = new Date(timestamp)
     const currentTime = new Date().getTime()
     const elapsedTimeInMinutes = Math.floor((currentTime - adjustedTimestamp.getTime()) / 60000)
-    const [numberOfReports, setNumberOfReports] = useState(0)
 
-    const [isLoading, setIsLoading] = useState(false)
-    const [stationDistance, setStationDistance] = useState<number | null>(null)
-    const [shouldShowSkeleton, setShouldShowSkeleton] = useState(true)
-
-    const prevStationId = useRef(station.id)
+    const numberOfReports = useStationReports(station.id)
+    const {
+        distance: stationDistance,
+        isLoading,
+        shouldShowSkeleton,
+    } = useStationDistance(station.id, allStations, userLat, userLng)
 
     const showSkeleton = useSkeleton({ isLoading: isLoading && shouldShowSkeleton })
-
-    useEffect(() => {
-        const fetchDistance = async () => {
-            setIsLoading(true)
-            const userStation = getNearestStation(allStations, userLat, userLng)
-            if (userStation === null) return
-            const distance = await getStationDistance(userStation.key, station.id)
-            setStationDistance(distance)
-            setIsLoading(false)
-            // to avoid showing the skeleton when pos changes due to watchPosition
-            setShouldShowSkeleton(false)
-        }
-
-        // only show skeleton if the station changes
-        if (station.id !== prevStationId.current) {
-            setShouldShowSkeleton(true)
-            setStationDistance(null)
-            prevStationId.current = station.id
-        }
-
-        fetchDistance()
-    }, [userLat, userLng, station.id, allStations])
-
-    useEffect(() => {
-        fetchNumberOfReports(station.id).then(setNumberOfReports)
-    }, [station.id])
-
     const elapsedTimeMessage = useElapsedTimeMessage(elapsedTimeInMinutes, selectedMarker.isHistoric)
     const stationDistanceMessage = useStationDistanceMessage(stationDistance)
 
@@ -77,7 +47,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
             try {
                 let directionTextShare = direction.name
                 let lineTextShare = line
-                
+
                 if (direction.name === '') {
                     directionTextShare = '?'
                 }
@@ -114,39 +84,6 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
         [t, station, line, direction]
     )
 
-    const disclaimerWithLink = useMemo(
-        () => (
-            <>
-                <a href="#" onClick={handleShare} className="invite-link">
-                    {t('MarkerModal.invite', 'Invite')}
-                </a>{' '}
-                {t('MarkerModal.inviteText', 'friends to improve accuracy.')}
-            </>
-        ),
-        [t, handleShare]
-    )
-
-    const [disclaimerMessage, setDisclaimerMessage] = useState<string | JSX.Element>(
-        t('MarkerModal.disclaimer', 'Data may be inaccurate.')
-    )
-    const [isDisclaimerVisible, setIsDisclaimerVisible] = useState(false)
-    const TRANSITION_DURATION = 500 // Should match the transition-long duration in CSS
-
-    useEffect(() => {
-        setIsDisclaimerVisible(true)
-        const timer = setTimeout(() => {
-            setIsDisclaimerVisible(false)
-
-            // Wait for fade out to complete before changing message
-            setTimeout(() => {
-                setDisclaimerMessage(disclaimerWithLink)
-                setIsDisclaimerVisible(true)
-            }, TRANSITION_DURATION)
-        }, 2.5 * 1000)
-
-        return () => clearTimeout(timer)
-    }, [disclaimerWithLink])
-
     return (
         <div className={`marker-modal info-popup modal ${className}`}>
             {children}
@@ -162,10 +99,10 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
             <div>
                 <p>{elapsedTimeMessage}</p>
                 {numberOfReports > 0 && (
-                    <p>
-                        <strong>
+                    <p className="reports-count">
+                        <b>
                             {numberOfReports} {t('MarkerModal.reports')}
-                        </strong>{' '}
+                        </b>{' '}
                         {t('MarkerModal.thisWeek')}
                     </p>
                 )}
@@ -173,9 +110,13 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                     {userLat && userLng && (
                         <span className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage}</span>
                     )}
-                    <span className={`disclaimer ${isDisclaimerVisible ? 'visible' : ''}`}>{disclaimerMessage}</span>
+                    <span className="disclaimer">{t('MarkerModal.inviteText')}</span>
                 </div>
                 {selectedMarker.message && <p className="description">{selectedMarker.message}</p>}
+                <button onClick={handleShare} className="share-button">
+                    <img src={process.env.PUBLIC_URL + '/icons/share-svgrepo-com.svg'} alt="Share" />
+                    <span>{t('Share.button')}</span>
+                </button>
             </div>
         </div>
     )

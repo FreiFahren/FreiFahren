@@ -7,11 +7,11 @@ export const useStationDistanceMessage = (stationDistance: number | null): JSX.E
     return (
         <>
             {stationDistance <= 1 ? (
-                <strong>{t('MarkerModal.oneStation')} </strong>
+                t('MarkerModal.oneStation')
             ) : (
-                <strong>
+                <>
                     {stationDistance} {t('MarkerModal.stations')}{' '}
-                </strong>
+                </>
             )}
             {t('MarkerModal.fromYou')}
         </>
@@ -34,11 +34,7 @@ export const useElapsedTimeMessage = (elapsedTimeInMinutes: number, isHistoric: 
     const currentLanguage = i18n.language
 
     if (isHistoric || (elapsedTimeInMinutes > 45 && elapsedTimeInMinutes < 60)) {
-        return (
-            <span className="elapsed-time">
-                {t('MarkerModal.moreThan')} <strong>{t('MarkerModal.moreThan45Minutes')}</strong>
-            </span>
-        )
+        return <span className="elapsed-time">{t('MarkerModal.moreThan45Min')}</span>
     }
     if (Math.floor(elapsedTimeInMinutes / 60) === 1) {
         return (
@@ -51,26 +47,18 @@ export const useElapsedTimeMessage = (elapsedTimeInMinutes: number, isHistoric: 
         return (
             <span className="elapsed-time">
                 {currentLanguage === 'de' ? t('MarkerModal.ago') + ' ' : ''}
-                <strong>
-                    {Math.floor(elapsedTimeInMinutes / 60)} {t('MarkerModal.hours')}
-                </strong>
+                {Math.floor(elapsedTimeInMinutes / 60)} {t('MarkerModal.hours')}
                 {currentLanguage === 'en' ? ' ' + t('MarkerModal.ago') : ''}
             </span>
         )
     }
     if (elapsedTimeInMinutes <= 1) {
-        return (
-            <span className="elapsed-time">
-                <strong>{t('MarkerModal.now')}</strong>
-            </span>
-        )
+        return <span className="elapsed-time">{t('MarkerModal.now')}</span>
     }
     return (
         <span className="elapsed-time">
             {currentLanguage === 'de' ? t('MarkerModal.ago') + ' ' : ''}
-            <strong>
-                {elapsedTimeInMinutes} {t('MarkerModal.minutes')}
-            </strong>
+            {elapsedTimeInMinutes} {t('MarkerModal.minutes')}
             {currentLanguage === 'en' ? ' ' + t('MarkerModal.ago') : ''}
         </span>
     )

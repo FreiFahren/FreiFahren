@@ -22,7 +22,7 @@
     --color-gray: #636363;
     --color-box-text: #807f7f;
     --color-gray-on-dark-background: #959494;
-    --color-light-gray: #cccccc;
+    --color-light-gray: #d2d2d2;
     --color-light-gray-hover: #b3b3b3;
     --color-white: #ffffff;
 
@@ -31,7 +31,7 @@
     --font-xs: 0.875rem;
     --font-s: 1rem;
     --font-m: 1.125rem;
-    --font-l: 1.25rem;
+    --font-l: 1.125rem;
     --font-xl: 1.5rem;
 
     --borderRadius-small: 4px;

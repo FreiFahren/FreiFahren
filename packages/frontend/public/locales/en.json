@@ -54,8 +54,7 @@
     "MarkerModal": {
         "reports": "times",
         "thisWeek": "this week",
-        "moreThan": "More than",
-        "moreThan45Minutes": "45 min",
+        "moreThan45Min": "More than 45 min",
         "oneHourAgo": "One hour ago",
         "oneHour": "hour",
         "hours": "hours",
@@ -66,13 +65,12 @@
         "stations": "stations",
         "fromYou": "away",
         "direction": "Direction",
-        "invite": "Invite",
-        "inviteText": "friends to improve accuracy.",
-        "disclaimer": "Data may be inaccurate."
+        "inviteText": "Data may be inaccurate."
     },
     "Share": {
         "title": "Check out this app.",
         "text": "See where ticket inspectors are in Berlin!\n\nHere's a report:\nStation: {{station}}\nDirection: {{direction}}\nLine: {{line}}\n",
+        "button": "Share",
         "copied": "Link copied to clipboard!"
     },
     "StatsPopUp": {
