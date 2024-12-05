@@ -71,3 +71,8 @@
     text-decoration: underline;
     cursor: pointer;
 }
+
+.marker-modal.info-popup .reports-count {
+    font-size: var(--font-xs);
+    color: var(--color-primary);
+}

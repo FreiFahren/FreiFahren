@@ -99,10 +99,10 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
             <div>
                 <p>{elapsedTimeMessage}</p>
                 {numberOfReports > 0 && (
-                    <p>
-                        <strong>
+                    <p className="reports-count">
+                        <b>
                             {numberOfReports} {t('MarkerModal.reports')}
-                        </strong>{' '}
+                        </b>{' '}
                         {t('MarkerModal.thisWeek')}
                     </p>
                 )}
