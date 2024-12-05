@@ -115,7 +115,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                 {selectedMarker.message && <p className="description">{selectedMarker.message}</p>}
                 <button onClick={handleShare} className="share-button">
                     <img src={process.env.PUBLIC_URL + '/icons/share-svgrepo-com.svg'} alt="Share" />
-                    <span>Share</span>
+                    <span>{t('Share.button')}</span>
                 </button>
             </div>
         </div>
