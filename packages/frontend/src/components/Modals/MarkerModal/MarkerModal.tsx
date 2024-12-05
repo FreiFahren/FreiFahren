@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react'
+import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { MarkerData } from 'src/utils/types'
 import { useElapsedTimeMessage, useStationDistanceMessage } from '../../../hooks/Messages'
-import { getStationDistance, fetchNumberOfReports } from '../../../utils/dbUtils'
-import { getNearestStation } from '../../../utils/mapUtils'
 import { getLineColor } from '../../../utils/uiUtils'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 import Skeleton, { useSkeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
+import { useStationReports } from '../../../hooks/useStationReports'
+import { useStationDistance } from '../../../hooks/useStationDistance'
 
 import './MarkerModal.css'
 import { sendAnalyticsEvent } from 'src/utils/analytics'
@@ -32,42 +32,15 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
     }, [timestamp])
     const currentTime = new Date().getTime()
     const elapsedTimeInMinutes = Math.floor((currentTime - adjustedTimestamp.getTime()) / 60000)
-    const [numberOfReports, setNumberOfReports] = useState(0)
 
-    const [isLoading, setIsLoading] = useState(false)
-    const [stationDistance, setStationDistance] = useState<number | null>(null)
-    const [shouldShowSkeleton, setShouldShowSkeleton] = useState(true)
-
-    const prevStationId = useRef(station.id)
+    const numberOfReports = useStationReports(station.id)
+    const {
+        distance: stationDistance,
+        isLoading,
+        shouldShowSkeleton,
+    } = useStationDistance(station.id, allStations, userLat, userLng)
 
     const showSkeleton = useSkeleton({ isLoading: isLoading && shouldShowSkeleton })
-
-    useEffect(() => {
-        const fetchDistance = async () => {
-            setIsLoading(true)
-            const userStation = getNearestStation(allStations, userLat, userLng)
-            if (userStation === null) return
-            const distance = await getStationDistance(userStation.key, station.id)
-            setStationDistance(distance)
-            setIsLoading(false)
-            // to avoid showing the skeleton when pos changes due to watchPosition
-            setShouldShowSkeleton(false)
-        }
-
-        // only show skeleton if the station changes
-        if (station.id !== prevStationId.current) {
-            setShouldShowSkeleton(true)
-            setStationDistance(null)
-            prevStationId.current = station.id
-        }
-
-        fetchDistance()
-    }, [userLat, userLng, station.id, allStations])
-
-    useEffect(() => {
-        fetchNumberOfReports(station.id).then(setNumberOfReports)
-    }, [station.id])
-
     const elapsedTimeMessage = useElapsedTimeMessage(elapsedTimeInMinutes, selectedMarker.isHistoric)
     const stationDistanceMessage = useStationDistanceMessage(stationDistance)
 
@@ -77,7 +50,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
             try {
                 let directionTextShare = direction.name
                 let lineTextShare = line
-                
+
                 if (direction.name === '') {
                     directionTextShare = '?'
                 }
