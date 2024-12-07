@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useCallback, useMemo, useEffect } from 'react'
-import { MarkerData } from 'src/utils/types'
+import { Report } from 'src/utils/types'
 
 const STORAGE_KEY = 'viewedReports'
 const MAX_AGE_MS = 60 * 60 * 1000 // 60 minutes in milliseconds
@@ -11,12 +11,12 @@ interface ViewedReport {
 
 interface ViewedReportsContextType {
     readonly viewedReports: ViewedReport[]
-    readonly setLastViewed: (report: MarkerData) => void
-    readonly hasViewedReport: (report: MarkerData) => boolean
-    readonly isRecentAndUnviewed: (report: MarkerData) => boolean
+    readonly setLastViewed: (report: Report) => void
+    readonly hasViewedReport: (report: Report) => boolean
+    readonly isRecentAndUnviewed: (report: Report) => boolean
 }
 
-const createReportId = (report: MarkerData): string => `${report.station.id}-${report.timestamp}` // in order to avoid duplicates with same station
+const createReportId = (report: Report): string => `${report.station.id}-${report.timestamp}` // in order to avoid duplicates with same station
 
 const isReportExpired = (report: ViewedReport): boolean => {
     const currentTime = new Date().getTime()
@@ -24,7 +24,7 @@ const isReportExpired = (report: ViewedReport): boolean => {
     return currentTime - reportTime >= MAX_AGE_MS
 }
 
-const isReportRecent = (report: MarkerData): boolean => {
+const isReportRecent = (report: Report): boolean => {
     const currentTime = new Date().getTime()
     const reportTime = new Date(report.timestamp).getTime()
     return currentTime - reportTime <= 30 * 60 * 1000 // 30 minutes
@@ -59,7 +59,7 @@ export const ViewedReportsProvider: React.FC<{ children: React.ReactNode }> = ({
         return () => clearInterval(interval)
     }, [])
 
-    const setLastViewed = useCallback((report: MarkerData) => {
+    const setLastViewed = useCallback((report: Report) => {
         const newReport: ViewedReport = {
             id: createReportId(report),
             timestamp: new Date().toISOString(),
@@ -72,7 +72,7 @@ export const ViewedReportsProvider: React.FC<{ children: React.ReactNode }> = ({
     }, [])
 
     const hasViewedReport = useCallback(
-        (report: MarkerData): boolean => {
+        (report: Report): boolean => {
             if (!report) return false
             const reportId = createReportId(report)
             return reports.some((r) => r.id === reportId)
@@ -81,7 +81,7 @@ export const ViewedReportsProvider: React.FC<{ children: React.ReactNode }> = ({
     )
 
     const isRecentAndUnviewed = useCallback(
-        (report: MarkerData): boolean => {
+        (report: Report): boolean => {
             if (!report) return false
             return isReportRecent(report) && !hasViewedReport(report)
         },

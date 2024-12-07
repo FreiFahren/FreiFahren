@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { MarkerData } from 'src/utils/types'
+import { Report } from 'src/utils/types'
 import { useElapsedTimeMessage, useStationDistanceMessage } from '../../../hooks/Messages'
 import { getLineColor } from '../../../utils/uiUtils'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
@@ -13,7 +13,7 @@ import { sendAnalyticsEvent } from 'src/utils/analytics'
 import './MarkerModal.css'
 
 interface MarkerModalProps {
-    selectedMarker: MarkerData
+    selectedMarker: Report
     className: string
     userLat?: number
     userLng?: number
@@ -45,16 +45,8 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
         async (e: React.MouseEvent) => {
             e.preventDefault()
             try {
-                let directionTextShare = direction.name
-                let lineTextShare = line
-
-                if (direction.name === '') {
-                    directionTextShare = '?'
-                }
-
-                if (line === '') {
-                    lineTextShare = '?'
-                }
+                const directionTextShare = direction?.name || '?'
+                const lineTextShare = line || '?'
 
                 if (navigator.share) {
                     await navigator.share({
@@ -70,7 +62,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                         meta: {
                             station: station.name,
                             line: line,
-                            direction: direction.name,
+                            direction: direction?.name,
                         },
                     })
                 } else {
@@ -88,14 +80,14 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
         <div className={`marker-modal info-popup modal ${className}`}>
             {children}
             <h1>{station.name}</h1>
-            {(direction.name !== '' || line !== '') && (
-                <h2>
+            <h2>
+                {line && (
                     <span className="line-label" style={{ backgroundColor: getLineColor(line) }}>
                         {line}
-                    </span>{' '}
-                    {direction.name}
-                </h2>
-            )}
+                    </span>
+                )}
+                {direction?.name && <span>{direction?.name}</span>}
+            </h2>
             <div>
                 <p>{elapsedTimeMessage}</p>
                 {numberOfReports > 0 && (

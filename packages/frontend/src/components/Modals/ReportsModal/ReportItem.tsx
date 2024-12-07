@@ -1,13 +1,10 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { MarkerData } from 'src/utils/types'
+import { Report } from 'src/utils/types'
 import { useElapsedTimeMessage } from 'src/hooks/Messages'
 import { getLineColor } from 'src/utils/uiUtils'
-const ReportItem: React.FC<{ ticketInspector: MarkerData; currentTime: number }> = ({
-    ticketInspector,
-    currentTime,
-}) => {
+const ReportItem: React.FC<{ ticketInspector: Report; currentTime: number }> = ({ ticketInspector, currentTime }) => {
     const { t } = useTranslation()
     const inspectorTimestamp = new Date(ticketInspector.timestamp).getTime()
     const elapsedTime = Math.floor((currentTime - inspectorTimestamp) / (60 * 1000)) // Convert to minutes
@@ -26,7 +23,7 @@ const ReportItem: React.FC<{ ticketInspector: MarkerData; currentTime: number }>
             </div>
             <div>
                 <p>
-                    {ticketInspector.direction.name && (
+                    {ticketInspector.direction?.name && (
                         <>
                             {t('MarkerModal.direction')}: <span>{ticketInspector.direction.name}</span>
                         </>

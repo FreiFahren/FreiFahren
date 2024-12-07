@@ -10,8 +10,7 @@ import { highlightElement, createWarningSpan, getLineColor } from '../../../util
 import { calculateDistance } from '../../../utils/mapUtils'
 import { useLocation } from '../../../contexts/LocationContext'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
-import { simplifiedMarkerData } from '../../../utils/types'
-
+import { Report } from '../../../utils/types'
 import './ReportForm.css'
 
 const getCSSVariable = (variable: string): number => {
@@ -30,7 +29,7 @@ const redHighlight = (text: string) => {
 
 interface ReportFormProps {
     closeModal: () => void
-    notifyParentAboutSubmission: (reportedData: simplifiedMarkerData) => void
+    notifyParentAboutSubmission: (reportedData: Report) => void
     className?: string
 }
 
@@ -47,7 +46,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
     const [currentLine, setCurrentLine] = useState<string | null>(null)
     const [currentStation, setCurrentStation] = useState<string | null>(null)
     const [currentDirection, setCurrentDirection] = useState<string | null>(null)
-    const [description, setDescription] = useState<string>('')
+    const [description, setDescription] = useState<string | null>(null)
 
     const [stationSearch, setStationSearch] = useState<string>('')
     const [searchUsed, setSearchUsed] = useState<boolean>(false)
@@ -217,39 +216,53 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         const hasError = await validateReportForm()
         if (hasError) return // Abort submission if there are validation errors
 
-        await reportInspector(currentLine!, currentStation!, currentDirection!, description)
+        await reportInspector(currentLine!, currentStation!, currentDirection!, description!)
 
         const endTime = new Date()
         const durationInSeconds = Math.round((endTime.getTime() - startTime.current.getTime()) / 1000)
 
-        const finalizeSubmission = () => {
-            localStorage.setItem('lastReportTime', new Date().toISOString()) // Save the timestamp of the report to prevent spamming
+        const report: Report = {
+            line: currentLine,
+            station: {
+                id: currentStation!,
+                name: allStations[currentStation!].name,
+                coordinates: allStations[currentStation!].coordinates,
+            },
+            direction: currentDirection
+                ? {
+                      id: currentDirection,
+                      name: allStations[currentDirection!].name,
+                      coordinates: allStations[currentDirection!].coordinates,
+                  }
+                : null,
+            message: description,
+            timestamp: endTime.toISOString(),
+            isHistoric: false,
+        }
+
+        const finalizeSubmission = (timestamp: Date) => {
+            localStorage.setItem('lastReportTime', timestamp.toISOString()) // Save the timestamp of the report to prevent spamming
             closeModal()
-            notifyParentAboutSubmission({
-                line: currentLine!,
-                station: currentStation!,
-                direction: currentDirection!,
-                message: description,
-            })
+            notifyParentAboutSubmission(report)
         }
 
         try {
             await sendAnalyticsEvent('Report Submitted', {
                 duration: durationInSeconds,
                 meta: {
-                    Station: currentStation!,
-                    Line: currentLine!,
-                    Direction: currentDirection!,
+                    Station: report.station.name,
+                    ...(report.line && { Line: report.line }),
+                    Direction: report.direction?.name,
                     Entity: Boolean(currentEntity),
                     SearchUsed: searchUsed,
                     StationRecommendationUsed: stationRecommendationSelected,
                 },
             })
 
-            finalizeSubmission()
+            finalizeSubmission(endTime)
         } catch (error) {
             console.error('Failed to send analytics event:', error)
-            finalizeSubmission()
+            finalizeSubmission(endTime)
         }
     }
 
@@ -418,7 +431,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                             <textarea
                                 placeholder={t('ReportForm.descriptionPlaceholder')}
                                 onChange={(e) => setDescription(e.target.value)}
-                                value={description}
+                                value={description || ''}
                             />
                         </section>
                         <section>

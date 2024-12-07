@@ -2,17 +2,17 @@ import React, { useEffect, useState, useMemo, useRef } from 'react'
 import maplibregl from 'maplibre-gl'
 import { Marker } from 'react-map-gl/maplibre'
 
-import { MarkerData } from 'src/utils/types'
+import { Report } from 'src/utils/types'
 import { useViewedReports } from 'src/contexts/ViewedReportsContext'
 
 import './OpacityMarker.css'
 
 interface OpacityMarkerProps {
-    markerData: MarkerData
+    markerData: Report
     index: number
     isFirstOpen: boolean
     formSubmitted: boolean
-    onMarkerClick: (markerData: MarkerData) => void
+    onMarkerClick: (markerData: Report) => void
 }
 
 export const OpacityMarker: React.FC<OpacityMarkerProps> = ({

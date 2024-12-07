@@ -5,7 +5,7 @@ import MarkerModal from '../../Modals/MarkerModal/MarkerModal'
 import { CloseButton } from '../../Buttons/CloseButton/CloseButton'
 import { useModalAnimation } from '../../../hooks/UseModalAnimation'
 import { useTicketInspectors } from '../../../contexts/TicketInspectorsContext'
-import { MarkerData } from '../../../utils/types'
+import { Report } from '../../../utils/types'
 import { sendAnalyticsEvent } from 'src/utils/analytics'
 
 export interface MarkersProps {
@@ -16,7 +16,7 @@ export interface MarkersProps {
 
 const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, userPosition }) => {
     const { ticketInspectorList } = useTicketInspectors()
-    const [selectedMarker, setSelectedMarker] = useState<MarkerData | null>(null)
+    const [selectedMarker, setSelectedMarker] = useState<Report | null>(null)
 
     const {
         isOpen: isMarkerModalOpen,
@@ -25,7 +25,7 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
         closeModal: closeMarkerModal,
     } = useModalAnimation()
 
-    const handleMarkerClick = (report: MarkerData) => {
+    const handleMarkerClick = (report: Report) => {
         setSelectedMarker(report)
         const now = new Date()
         const ageInMinutes = Math.floor((now.getTime() - new Date(report.timestamp).getTime()) / (60 * 1000))

@@ -22,10 +22,9 @@ import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton'
 import { highlightElement, currentColorTheme, setColorThemeInLocalStorage } from '../../utils/uiUtils'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../utils/analytics'
+import { Report } from 'src/utils/types'
 
 import './App.css'
-import { simplifiedMarkerData } from 'src/utils/types'
-
 type AppUIState = {
     isReportFormOpen: boolean
     formSubmitted: boolean
@@ -57,8 +56,8 @@ function App() {
     }, [])
 
     const [showSummary, setShowSummary] = useState<boolean>(false)
-    const [reportedData, setReportedData] = useState<simplifiedMarkerData | null>(null)
-    const handleReportFormSubmit = (reportedData: simplifiedMarkerData) => {
+    const [reportedData, setReportedData] = useState<Report | null>(null)
+    const handleReportFormSubmit = (reportedData: Report) => {
         setAppUIState((appUIState) => ({ ...appUIState, formSubmitted: !appUIState.formSubmitted }))
         setShowSummary(true)
         setReportedData(reportedData)

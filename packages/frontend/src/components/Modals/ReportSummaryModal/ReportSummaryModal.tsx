@@ -1,17 +1,17 @@
 import React from 'react'
 import './ReportSummaryModal.css'
-import { simplifiedMarkerData } from '../../../utils/types'
+import { Report } from '../../../utils/types'
 
 interface ReportSummaryModalProps {
     openAnimationClass?: string
-    reportData: simplifiedMarkerData
+    reportData: Report
 }
 
 const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({ openAnimationClass, reportData }) => {
     return (
         <div className={`report-summary-modal container modal ${openAnimationClass}`}>
-            <p>{reportData.station}</p>
-            <p>{reportData.direction}</p>
+            <p>{reportData.station.name}</p>
+            <p>{reportData.direction?.name}</p>
             <p>{reportData.line}</p>
             <p>{reportData.message}</p>
         </div>
