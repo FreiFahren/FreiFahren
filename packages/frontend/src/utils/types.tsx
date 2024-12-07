@@ -69,3 +69,10 @@ export type MarkerData = {
     isHistoric: boolean
     message?: string
 }
+
+export type simplifiedMarkerData = {
+    line: string
+    station: string
+    direction: string
+    message: string
+}

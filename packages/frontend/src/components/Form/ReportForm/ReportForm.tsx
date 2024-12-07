@@ -10,6 +10,7 @@ import { highlightElement, createWarningSpan, getLineColor } from '../../../util
 import { calculateDistance } from '../../../utils/mapUtils'
 import { useLocation } from '../../../contexts/LocationContext'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
+import { simplifiedMarkerData } from '../../../utils/types'
 
 import './ReportForm.css'
 
@@ -29,7 +30,7 @@ const redHighlight = (text: string) => {
 
 interface ReportFormProps {
     closeModal: () => void
-    notifyParentAboutSubmission: () => void
+    notifyParentAboutSubmission: (reportedData: simplifiedMarkerData) => void
     className?: string
 }
 
@@ -224,7 +225,12 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         const finalizeSubmission = () => {
             localStorage.setItem('lastReportTime', new Date().toISOString()) // Save the timestamp of the report to prevent spamming
             closeModal()
-            notifyParentAboutSubmission()
+            notifyParentAboutSubmission({
+                line: currentLine!,
+                station: currentStation!,
+                direction: currentDirection!,
+                message: description,
+            })
         }
 
         try {
@@ -254,12 +260,12 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         const lastReportTime = localStorage.getItem('lastReportTime')
 
         if (lastReportTime && Date.now() - new Date(lastReportTime).getTime() < REPORT_COOLDOWN_MINUTES * 60 * 1000) {
-            highlightElement('report-form')
-            createWarningSpan(
-                'searchable-select-div',
-                `Du kannst nur alle ${REPORT_COOLDOWN_MINUTES} Minuten eine Meldung abgeben!`
-            )
-            hasError = true
+            //highlightElement('report-form')
+            //createWarningSpan(
+            //    'searchable-select-div',
+            //    `Du kannst nur alle ${REPORT_COOLDOWN_MINUTES} Minuten eine Meldung abgeben!`
+            //)
+            //hasError = true TODO: comment for testing
         }
 
         if (!currentStation) {

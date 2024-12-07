@@ -11,7 +11,7 @@ import StatsPopUp from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
 import Backdrop from '../../../src/components/Miscellaneous/Backdrop/Backdrop'
 import ReportsModalButton from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
 import ReportsModal from 'src/components/Modals/ReportsModal/ReportsModal'
-
+import ReportSummaryModal from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
 import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext'
 import { RiskDataProvider } from '../../contexts/RiskDataContext'
 import { StationsAndLinesProvider } from '../../contexts/StationsAndLinesContext'
@@ -24,6 +24,7 @@ import { useModalAnimation } from '../../hooks/UseModalAnimation'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../utils/analytics'
 
 import './App.css'
+import { simplifiedMarkerData } from 'src/utils/types'
 
 type AppUIState = {
     isReportFormOpen: boolean
@@ -55,8 +56,12 @@ function App() {
         setAppMounted(true)
     }, [])
 
-    const handleFormSubmit = () => {
+    const [showSummary, setShowSummary] = useState<boolean>(false)
+    const [reportedData, setReportedData] = useState<simplifiedMarkerData | null>(null)
+    const handleReportFormSubmit = (reportedData: simplifiedMarkerData) => {
         setAppUIState((appUIState) => ({ ...appUIState, formSubmitted: !appUIState.formSubmitted }))
+        setShowSummary(true)
+        setReportedData(reportedData)
     }
 
     const {
@@ -212,12 +217,18 @@ function App() {
                     </UtilModal>
                 </>
             )}
+            {showSummary && reportedData && (
+                <>
+                    <ReportSummaryModal reportData={reportedData} openAnimationClass="open center-animation" />
+                    <Backdrop onClick={() => setShowSummary(false)} />
+                </>
+            )}
             <StationsAndLinesProvider>
                 {appUIState.isReportFormOpen && (
                     <>
                         <ReportForm
                             closeModal={() => setAppUIState({ ...appUIState, isReportFormOpen: false })}
-                            notifyParentAboutSubmission={handleFormSubmit}
+                            notifyParentAboutSubmission={handleReportFormSubmit}
                             className={'open center-animation'}
                         />
                         <Backdrop onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
