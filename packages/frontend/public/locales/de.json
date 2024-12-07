@@ -230,5 +230,10 @@
                 "content": "Die Nutzung unserer Webseite ist in der Regel ohne Angabe personenbezogener Daten möglich. Für weitere Informationen sehen sie unsere Datenschutzerklärung."
             }
         }
+    },
+    "ReportSummaryModal": {
+        "title": "Danke für deine Meldung!",
+        "description": "Menschen schätzen deine Hilfe!",
+        "button": "Weiter"
     }
 }

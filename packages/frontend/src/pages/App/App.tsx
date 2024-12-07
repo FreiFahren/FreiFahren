@@ -218,7 +218,11 @@ function App() {
             )}
             {showSummary && reportedData && (
                 <>
-                    <ReportSummaryModal reportData={reportedData} openAnimationClass="open center-animation" />
+                    <ReportSummaryModal
+                        reportData={reportedData}
+                        openAnimationClass="open center-animation"
+                        closeModal={() => setShowSummary(false)}
+                    />
                     <Backdrop onClick={() => setShowSummary(false)} />
                 </>
             )}

@@ -1,5 +1,25 @@
-.report-summary-modal {
+.report-summary-modal-content {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.report-summary-modal-content span {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.report-summary-modal-content span h1 {
+    color: var(--incentive-blue);
+}
+
+.report-summary-modal-content span img {
+    width: 20px;
+    height: 20px;
+    filter: none !important;
+}
+
+.report-summary-modal-content p {
+    font-size: var(--font-s);
 }
