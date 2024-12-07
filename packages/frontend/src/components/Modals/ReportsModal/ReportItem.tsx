@@ -1,9 +1,11 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
+import Line from '../../Miscellaneous/Line/Line'
+
 import { Report } from 'src/utils/types'
 import { useElapsedTimeMessage } from 'src/hooks/Messages'
-import { getLineColor } from 'src/utils/uiUtils'
+
 const ReportItem: React.FC<{ ticketInspector: Report; currentTime: number }> = ({ ticketInspector, currentTime }) => {
     const { t } = useTranslation()
     const inspectorTimestamp = new Date(ticketInspector.timestamp).getTime()
@@ -13,11 +15,7 @@ const ReportItem: React.FC<{ ticketInspector: Report; currentTime: number }> = (
     return (
         <div key={ticketInspector.station.id + ticketInspector.timestamp} className="report-item">
             <div className="align-child-on-line">
-                {ticketInspector.line && (
-                    <h4 className="line-label" style={{ backgroundColor: getLineColor(ticketInspector.line) }}>
-                        {ticketInspector.line}
-                    </h4>
-                )}
+                {ticketInspector.line && <Line line={ticketInspector.line} key={ticketInspector.line} />}
                 <h4>{ticketInspector.station.name}</h4>
                 <p>{elapsedTimeMessage}</p>
             </div>

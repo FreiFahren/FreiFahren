@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import SelectField from '../SelectField/SelectField'
 import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
+import Line from '../../Miscellaneous/Line/Line'
 
 import { LinesList, StationList, reportInspector, StationProperty } from '../../../utils/dbUtils'
 import { sendAnalyticsEvent } from '../../../utils/analytics'
@@ -379,9 +380,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                                 value={currentLine}
                             >
                                 {Object.keys(possibleLines).map((line) => (
-                                    <span key={line} className="line" style={{ backgroundColor: getLineColor(line) }}>
-                                        <strong>{line}</strong>
-                                    </span>
+                                    <Line key={line} line={line} />
                                 ))}
                             </SelectField>
                         </section>

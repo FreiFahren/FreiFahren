@@ -19,10 +19,29 @@ interface SelectFieldProps {
  * @param {string | null} value - The currently selected value.
  */
 const SelectField: React.FC<SelectFieldProps> = ({ children, containerClassName, fieldClassName, onSelect, value }) => {
+    const getValueFromChild = (child: React.ReactElement): string => {
+        // Handle Line component
+        if (child.props.line) {
+            return child.props.line
+        }
+
+        // Handle span with nested strong
+        if (child.props.children?.props?.children) {
+            return child.props.children.props.children
+        }
+
+        // Handle simple span with text
+        if (child.props.children) {
+            return child.props.children
+        }
+
+        return ''
+    }
+
     const handleSelect = useCallback(
         (child: React.ReactNode) => {
             if (React.isValidElement(child)) {
-                const selectedValue = child.props.children.props.children
+                const selectedValue = getValueFromChild(child)
                 const newValue = value === selectedValue ? null : selectedValue // Toggle selection
                 onSelect(newValue)
             }
@@ -38,7 +57,9 @@ const SelectField: React.FC<SelectFieldProps> = ({ children, containerClassName,
                     React.isValidElement(child) && (
                         <div
                             key={index}
-                            className={`select-field ${value === child.props.children.props.children ? 'selected' : ''} ${fieldClassName}`}
+                            className={`select-field ${
+                                value === getValueFromChild(child) ? 'selected' : ''
+                            } ${fieldClassName}`}
                             onClick={() => handleSelect(child)}
                         >
                             {child}

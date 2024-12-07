@@ -38,7 +38,7 @@
 .report-item {
     display: flex;
     flex-direction: column;
-    margin-top: var(--margin-m);
+    margin-top: var(--margin-s);
     border-bottom: var(--border-weak);
 }
 
@@ -64,7 +64,7 @@
 }
 
 .report-item > div:first-child h4 {
-    margin-right: var(--margin-s);
+    margin: 0 var(--margin-s);
 }
 
 .report-item > div:first-child > p:last-child {

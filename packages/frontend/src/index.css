@@ -457,12 +457,13 @@ button .plus {
 
 /* Line colors */
 
-.line-label {
-    text-align: center;
+.line {
     width: 35px;
-    padding: var(--padding-xxs);
+    height: 25px;
     border-radius: var(--borderRadius-small);
-    color: var(--color-primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .elapsed-time {
