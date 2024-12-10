@@ -4,6 +4,7 @@ import { Report } from '../../../utils/types'
 import { useTranslation } from 'react-i18next'
 
 import ReportItem from '../ReportsModal/ReportItem'
+import ShareButton from '../../Miscellaneous/ShareButton/ShareButton'
 
 import './ReportSummaryModal.css'
 
@@ -22,6 +23,7 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({ openAnimationCl
                 <h1>{t('ReportSummaryModal.title')}</h1>
                 <div>
                     <ReportItem key={reportData.station.id + reportData.timestamp} ticketInspector={reportData} />
+                    <ShareButton report={reportData} />
                 </div>
                 <span>
                     <img src={process.env.PUBLIC_URL + '/icons/users-svgrepo-com.svg'} alt="check" />

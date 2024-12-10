@@ -34,6 +34,6 @@
     filter: none !important;
 }
 
-.report-summary-modal-content p {
+.report-summary-modal-content > p {
     font-size: var(--font-s);
 }

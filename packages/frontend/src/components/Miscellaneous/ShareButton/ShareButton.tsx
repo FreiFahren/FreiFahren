@@ -1,7 +1,10 @@
 import React, { useCallback } from 'react'
+
 import { useTranslation } from 'react-i18next'
 import { sendAnalyticsEvent } from 'src/utils/analytics'
 import { Report } from 'src/utils/types'
+
+import './ShareButton.css'
 
 interface ShareButtonProps {
     report?: Report
