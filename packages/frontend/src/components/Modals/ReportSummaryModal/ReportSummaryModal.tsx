@@ -20,13 +20,20 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({ openAnimationCl
     return (
         <div className={`report-summary-modal container modal ${openAnimationClass}`}>
             <div className="report-summary-modal-content">
+                <div>
+                    <img className="no-filter" src={process.env.PUBLIC_URL + '/icons/risk-0.svg'} alt="checkmark" />
+                </div>
                 <h1>{t('ReportSummaryModal.title')}</h1>
                 <div>
                     <ReportItem key={reportData.station.id + reportData.timestamp} ticketInspector={reportData} />
                     <ShareButton report={reportData} />
                 </div>
                 <span>
-                    <img src={process.env.PUBLIC_URL + '/icons/users-svgrepo-com.svg'} alt="check" />
+                    <img
+                        className="no-filter"
+                        src={process.env.PUBLIC_URL + '/icons/users-svgrepo-com.svg'}
+                        alt="users"
+                    />
                     <h1>35.000</h1>
                 </span>
                 <p>{t('ReportSummaryModal.description')}</p>

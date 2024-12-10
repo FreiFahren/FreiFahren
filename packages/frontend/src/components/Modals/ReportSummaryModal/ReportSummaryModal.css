@@ -5,7 +5,18 @@
     padding: var(--padding-s);
 }
 
-.report-summary-modal-content > div {
+.report-summary-modal-content > div:has(> img) {
+    width: 40px;
+    height: 40px;
+    background-color: var(--color-risk-0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    margin-bottom: var(--margin-s);
+}
+
+.report-summary-modal-content > div:has(> .report-item) {
     margin: var(--margin-m) 0;
     width: 100%;
     border: 1px solid var(--color-gray);
@@ -28,7 +39,7 @@
     color: var(--incentive-blue);
 }
 
-.report-summary-modal-content span img {
+.report-summary-modal-content img.no-filter {
     width: 20px;
     height: 20px;
     filter: none !important;
