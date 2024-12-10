@@ -6,10 +6,16 @@ import Line from '../../Miscellaneous/Line/Line'
 import { Report } from 'src/utils/types'
 import { useElapsedTimeMessage } from 'src/hooks/Messages'
 
-const ReportItem: React.FC<{ ticketInspector: Report; currentTime: number }> = ({ ticketInspector, currentTime }) => {
+interface ReportItemProps {
+    ticketInspector: Report
+    currentTime?: number
+}
+
+const ReportItem: React.FC<ReportItemProps> = ({ ticketInspector, currentTime }) => {
     const { t } = useTranslation()
+
     const inspectorTimestamp = new Date(ticketInspector.timestamp).getTime()
-    const elapsedTime = Math.floor((currentTime - inspectorTimestamp) / (60 * 1000)) // Convert to minutes
+    const elapsedTime = currentTime ? Math.floor((currentTime - inspectorTimestamp) / (60 * 1000)) : undefined
     const elapsedTimeMessage = useElapsedTimeMessage(elapsedTime, ticketInspector.isHistoric)
 
     return (
@@ -17,7 +23,7 @@ const ReportItem: React.FC<{ ticketInspector: Report; currentTime: number }> = (
             <div className="align-child-on-line">
                 {ticketInspector.line && <Line line={ticketInspector.line} key={ticketInspector.line} />}
                 <h4>{ticketInspector.station.name}</h4>
-                <p>{elapsedTimeMessage}</p>
+                {elapsedTimeMessage && <p>{elapsedTimeMessage}</p>}
             </div>
             <div>
                 <p>

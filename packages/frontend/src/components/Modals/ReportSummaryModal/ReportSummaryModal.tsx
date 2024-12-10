@@ -1,7 +1,11 @@
 import React from 'react'
-import './ReportSummaryModal.css'
+
 import { Report } from '../../../utils/types'
 import { useTranslation } from 'react-i18next'
+
+import ReportItem from '../ReportsModal/ReportItem'
+
+import './ReportSummaryModal.css'
 
 interface ReportSummaryModalProps {
     openAnimationClass?: string
@@ -16,7 +20,9 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({ openAnimationCl
         <div className={`report-summary-modal container modal ${openAnimationClass}`}>
             <div className="report-summary-modal-content">
                 <h1>{t('ReportSummaryModal.title')}</h1>
-                <div></div>
+                <div>
+                    <ReportItem key={reportData.station.id + reportData.timestamp} ticketInspector={reportData} />
+                </div>
                 <span>
                     <img src={process.env.PUBLIC_URL + '/icons/users-svgrepo-com.svg'} alt="check" />
                     <h1>35.000</h1>
