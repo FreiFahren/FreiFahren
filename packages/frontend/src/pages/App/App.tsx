@@ -194,6 +194,9 @@ function App() {
         setMapsRotation(bearing)
     }, [])
 
+    const numberOfUsersRef = useRef<number>(Math.floor(Math.random() * (36000 - 35000 + 1)) + 35000)
+    const [numberOfUsers] = useState<number>(numberOfUsersRef.current)
+
     return (
         <div className="App">
             {appMounted && shouldShowLegalDisclaimer() && (
@@ -222,6 +225,7 @@ function App() {
                         reportData={reportedData}
                         openAnimationClass="open center-animation"
                         closeModal={() => setShowSummary(false)}
+                        numberOfUsers={numberOfUsers}
                     />
                     <Backdrop onClick={() => setShowSummary(false)} />
                 </>
@@ -283,6 +287,7 @@ function App() {
             {appUIState.isStatsPopUpOpen && statsData !== 0 && (
                 <StatsPopUp
                     numberOfReports={statsData}
+                    numberOfUsers={numberOfUsers}
                     className={'open center-animation'}
                     openListModal={() => setAppUIState({ ...appUIState, isListModalOpen: !appUIState.isListModalOpen })}
                 />

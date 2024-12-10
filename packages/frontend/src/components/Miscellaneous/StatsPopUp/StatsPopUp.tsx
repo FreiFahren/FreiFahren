@@ -7,9 +7,10 @@ interface StatsPopUpProps {
     className: string
     numberOfReports: number
     openListModal: () => void
+    numberOfUsers: number
 }
 
-const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports, openListModal }) => {
+const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports, openListModal, numberOfUsers }) => {
     const { t } = useTranslation()
     const [message, setMessage] = useState(
         `<p><strong>${numberOfReports} ${t('StatsPopUp.reports')}</strong><br /> ${t('StatsPopUp.todayInBerlin')}</p>`
@@ -20,15 +21,6 @@ const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports, ope
     const timeForOneMessage = 3.5 * 1000
     const timeForPopOutAnimation = 0.5 * 1000
 
-    const updateMessageAndShowPopup = async () => {
-        setMessage(
-            `<p>${t('StatsPopUp.over')} <strong> 27.000 ${t('StatsPopUp.reporters')}</strong><br /> ${t(
-                'StatsPopUp.inBerlin'
-            )}</p>`
-        )
-        setPopOut(true)
-    }
-
     const hidePopupAfterAnimation = useCallback(() => {
         setTimeout(() => {
             setPopOut(false)
@@ -37,12 +29,21 @@ const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports, ope
     }, [timeForOneMessage, timeForPopOutAnimation])
 
     useEffect(() => {
+        const updateMessageAndShowPopup = async () => {
+            setMessage(
+                `<p>${t('StatsPopUp.over')} <strong> ${numberOfUsers} ${t('StatsPopUp.reporters')}</strong><br /> ${t(
+                    'StatsPopUp.inBerlin'
+                )}</p>`
+            )
+            setPopOut(true)
+        }
+
         const timer = setTimeout(() => {
             updateMessageAndShowPopup().then(hidePopupAfterAnimation)
         }, timeForOneMessage)
 
         return () => clearTimeout(timer)
-    }, [hidePopupAfterAnimation, timeForOneMessage])
+    }, [hidePopupAfterAnimation, timeForOneMessage, numberOfUsers, t])
 
     useEffect(() => {
         if (popOut) {

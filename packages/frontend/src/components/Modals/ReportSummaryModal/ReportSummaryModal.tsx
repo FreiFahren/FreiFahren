@@ -12,9 +12,15 @@ interface ReportSummaryModalProps {
     openAnimationClass?: string
     reportData: Report
     closeModal: () => void
+    numberOfUsers: number
 }
 
-const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({ openAnimationClass, reportData, closeModal }) => {
+const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({
+    openAnimationClass,
+    reportData,
+    closeModal,
+    numberOfUsers,
+}) => {
     const { t } = useTranslation()
 
     return (
@@ -34,7 +40,7 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({ openAnimationCl
                         src={process.env.PUBLIC_URL + '/icons/users-svgrepo-com.svg'}
                         alt="users"
                     />
-                    <h1>35.000</h1>
+                    <h1>{numberOfUsers}</h1>
                 </span>
                 <p>{t('ReportSummaryModal.description')}</p>
                 <button className="action" onClick={closeModal}>
