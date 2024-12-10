@@ -37,6 +37,7 @@
 
 .report-summary-modal-content span h1 {
     color: var(--incentive-blue);
+    transition: content 0.1s ease-out;
 }
 
 .report-summary-modal-content img.no-filter {

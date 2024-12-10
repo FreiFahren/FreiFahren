@@ -1,7 +1,8 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { Report } from '../../../utils/types'
-import { useTranslation } from 'react-i18next'
+import { useCountAnimation } from '../../../hooks/useCountAnimation'
 
 import ReportItem from '../ReportsModal/ReportItem'
 import ShareButton from '../../Miscellaneous/ShareButton/ShareButton'
@@ -22,6 +23,7 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({
     numberOfUsers,
 }) => {
     const { t } = useTranslation()
+    const animatedCount = useCountAnimation(numberOfUsers, 2 * 1000)
 
     return (
         <div className={`report-summary-modal container modal ${openAnimationClass}`}>
@@ -40,7 +42,7 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({
                         src={process.env.PUBLIC_URL + '/icons/users-svgrepo-com.svg'}
                         alt="users"
                     />
-                    <h1>{numberOfUsers}</h1>
+                    <h1>{animatedCount}</h1>
                 </span>
                 <p>{t('ReportSummaryModal.description')}</p>
                 <button className="action" onClick={closeModal}>
