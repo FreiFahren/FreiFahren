@@ -36,12 +36,6 @@
     margin-top: var(--margin-xxs);
 }
 
-.latest-report .line-label {
-    font-size: var(--font-xxs);
-    padding: var(--padding-xxs) var(--padding-xs);
-    color: var(--color-white);
-}
-
 .latest-report .station-name {
     font-size: var(--font-xs);
     white-space: nowrap;

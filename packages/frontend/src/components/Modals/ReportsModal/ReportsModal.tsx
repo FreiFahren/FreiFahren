@@ -8,11 +8,12 @@ import { Report } from 'src/utils/types'
 import { getRecentDataWithIfModifiedSince } from 'src/utils/dbUtils'
 import { getLineColor } from 'src/utils/uiUtils'
 
-import ReportItem from './ReportItem'
-import ClusteredReportItem from './ClusteredReportItem'
-
 import { useRiskData } from 'src/contexts/RiskDataContext'
 import { useStationsAndLines } from 'src/contexts/StationsAndLinesContext'
+
+import ReportItem from './ReportItem'
+import ClusteredReportItem from './ClusteredReportItem'
+import Line from '../../Miscellaneous/Line/Line'
 
 import './ReportsModal.css'
 
@@ -249,12 +250,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                                     src={`/icons/risk-${riskData.class}.svg`}
                                                     alt="Icon to show risk level"
                                                 />
-                                                <h4
-                                                    className="line-label"
-                                                    style={{ backgroundColor: getLineColor(line) }}
-                                                >
-                                                    {line}
-                                                </h4>
+                                                <Line line={line} />
                                             </div>
                                         ))}
                                 </div>
@@ -273,12 +269,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                                     src={`/icons/risk-${riskData.class}.svg`}
                                                     alt="Icon to show risk level"
                                                 />
-                                                <h4
-                                                    className="line-label"
-                                                    style={{ backgroundColor: getLineColor(line) }}
-                                                >
-                                                    {line}
-                                                </h4>
+                                                <Line line={line} />
                                             </div>
                                         ))}
                                 </div>
@@ -297,12 +288,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                                     src={`/icons/risk-${riskData.class}.svg`}
                                                     alt="Icon to show risk level"
                                                 />
-                                                <h4
-                                                    className="line-label"
-                                                    style={{ backgroundColor: getLineColor(line) }}
-                                                >
-                                                    {line}
-                                                </h4>
+                                                <Line line={line} />
                                             </div>
                                         ))}
                                 </div>
