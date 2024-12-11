@@ -1,5 +1,6 @@
-.info-popup.marker-modal h2 {
-    margin-bottom: var(--text-relation-weak);
+.marker-modal.info-popup.modal .direction-line {
+    justify-content: flex-start;
+    gap: var(--margin-s);
 }
 
 .marker-modal.info-popup.modal .description {

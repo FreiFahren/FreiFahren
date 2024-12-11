@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next'
 
 import { Report } from 'src/utils/types'
 import { useElapsedTimeMessage, useStationDistanceMessage } from '../../../hooks/Messages'
-import { getLineColor } from '../../../utils/uiUtils'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 import Skeleton, { useSkeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
 import { useStationReports } from '../../../hooks/useStationReports'
 import { useStationDistance } from '../../../hooks/useStationDistance'
 
 import ShareButton from '../../Miscellaneous/ShareButton/ShareButton'
+import Line from '../../Miscellaneous/Line/Line'
 
 import './MarkerModal.css'
 
@@ -46,14 +46,10 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
         <div className={`marker-modal info-popup modal ${className}`}>
             {children}
             <h1>{station.name}</h1>
-            <h2>
-                {line && (
-                    <span className="line-label" style={{ backgroundColor: getLineColor(line) }}>
-                        {line}
-                    </span>
-                )}
-                {direction?.name && <span>{direction?.name}</span>}
-            </h2>
+            <div className="align-child-on-line direction-line">
+                {line && <Line line={line} />}
+                {direction?.name && <h2>{direction?.name}</h2>}
+            </div>
             <div>
                 <p>{elapsedTimeMessage}</p>
                 {numberOfReports > 0 && (
