@@ -194,6 +194,8 @@ function App() {
         setMapsRotation(bearing)
     }, [])
 
+    // we dont know the exact number of users, so we make an estimate that should be close to the actual number
+    // in the future this will be automatically fetched from the analytics platform + telegram user count
     const numberOfUsersRef = useRef<number>(Math.floor(Math.random() * (36000 - 35000 + 1)) + 35000)
     const [numberOfUsers] = useState<number>(numberOfUsersRef.current)
 
