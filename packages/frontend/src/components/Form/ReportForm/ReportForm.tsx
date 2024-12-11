@@ -274,12 +274,12 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         const lastReportTime = localStorage.getItem('lastReportTime')
 
         if (lastReportTime && Date.now() - new Date(lastReportTime).getTime() < REPORT_COOLDOWN_MINUTES * 60 * 1000) {
-            //highlightElement('report-form')
-            //createWarningSpan(
-            //    'searchable-select-div',
-            //    `Du kannst nur alle ${REPORT_COOLDOWN_MINUTES} Minuten eine Meldung abgeben!`
-            //)
-            //hasError = true TODO: comment for testing
+            highlightElement('report-form')
+            createWarningSpan(
+                'searchable-select-div',
+                `Du kannst nur alle ${REPORT_COOLDOWN_MINUTES} Minuten eine Meldung abgeben!`
+            )
+            hasError = true
         }
 
         if (!currentStation) {
