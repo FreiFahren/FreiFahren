@@ -1,9 +1,11 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+
 import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
-import { getLineColor } from 'src/utils/uiUtils'
 import { sendAnalyticsEvent } from 'src/utils/analytics'
 import { useViewedReports } from 'src/contexts/ViewedReportsContext'
+
+import Line from '../../Miscellaneous/Line/Line'
 
 import './ReportsModalButton.css'
 
@@ -42,11 +44,7 @@ const ReportsModalButton: React.FC<ReportsModalButtonProps> = ({ openModal }) =>
                 </div>
                 {latestReport && (
                     <div className="latest-report">
-                        {latestReport.line && (
-                            <span className="line-label" style={{ backgroundColor: getLineColor(latestReport.line) }}>
-                                {latestReport.line}
-                            </span>
-                        )}
+                        {latestReport.line && <Line line={latestReport.line} />}
                         <p className="station-name">{latestReport.station.name}</p>
                         {isRecentAndUnviewed(latestReport) && <span className="indicator live pulse" />}
                     </div>

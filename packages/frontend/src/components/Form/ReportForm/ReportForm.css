@@ -8,15 +8,6 @@ div.report-form {
     margin-bottom: var(--margin-s);
 }
 
-.line {
-    width: 35px;
-    height: 100%;
-    border-radius: var(--borderRadius-small);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
 .report-form textarea {
     position: relative;
     font-size: var(--font-s);

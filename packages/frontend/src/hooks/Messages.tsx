@@ -21,17 +21,25 @@ export const useStationDistanceMessage = (stationDistance: number | null): JSX.E
 /**
  * Generates a JSX Element displaying a human-readable message about elapsed time.
  *
- * @param {number} elapsedTimeInMinutes - The elapsed time in minutes.
- * @returns {JSX.Element} A span element containing the formatted time message.
+ * @param {number | undefined} elapsedTimeInMinutes - The elapsed time in minutes.
+ * @param {boolean} isHistoric - Whether the report is historic.
+ * @returns {JSX.Element | null} A span element containing the formatted time message, or null if elapsedTimeInMinutes is undefined.
  *
  * The function handles three cases:
  * 1. If the elapsed time is more than 60 minutes, it displays the time in hours.
  * 2. If the elapsed time is 1 minute or less, it displays "Jetzt".
  * 3. For any other duration, it displays the time in minutes.
  */
-export const useElapsedTimeMessage = (elapsedTimeInMinutes: number, isHistoric: boolean): JSX.Element => {
+export const useElapsedTimeMessage = (
+    elapsedTimeInMinutes: number | undefined,
+    isHistoric: boolean
+): JSX.Element | null => {
     const { t, i18n } = useTranslation()
     const currentLanguage = i18n.language
+
+    if (elapsedTimeInMinutes === undefined) {
+        return null
+    }
 
     if (isHistoric || (elapsedTimeInMinutes > 45 && elapsedTimeInMinutes < 60)) {
         return <span className="elapsed-time">{t('MarkerModal.moreThan45Min')}</span>

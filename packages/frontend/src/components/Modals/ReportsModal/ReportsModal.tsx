@@ -4,15 +4,16 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
 
 import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
-import { MarkerData } from 'src/utils/types'
+import { Report } from 'src/utils/types'
 import { getRecentDataWithIfModifiedSince } from 'src/utils/dbUtils'
 import { getLineColor } from 'src/utils/uiUtils'
 
-import ReportItem from './ReportItem'
-import ClusteredReportItem from './ClusteredReportItem'
-
 import { useRiskData } from 'src/contexts/RiskDataContext'
 import { useStationsAndLines } from 'src/contexts/StationsAndLinesContext'
+
+import ReportItem from './ReportItem'
+import ClusteredReportItem from './ClusteredReportItem'
+import Line from '../../Miscellaneous/Line/Line'
 
 import './ReportsModal.css'
 
@@ -33,7 +34,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
         setCurrentTab(tab)
     }
 
-    const [ticketInspectorList, setTicketInspectorList] = useState<MarkerData[]>([])
+    const [ticketInspectorList, setTicketInspectorList] = useState<Report[]>([])
     const { ticketInspectorList: lastHourInspectorList } = useTicketInspectors()
 
     const currentTime = useMemo(() => new Date().getTime(), [])
@@ -74,10 +75,10 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
 
             // remove historic inspectors from previousDayInspectorList
             const filteredPreviousDayInspectorList = previousDayInspectorList.filter(
-                (inspector: MarkerData) => !inspector.isHistoric
+                (inspector: Report) => !inspector.isHistoric
             )
 
-            const sortByTimestamp = (a: MarkerData, b: MarkerData): number =>
+            const sortByTimestamp = (a: Report, b: Report): number =>
                 new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
 
             const sortedLists = [recentInspectors, historicInspectors, filteredPreviousDayInspectorList].map((list) =>
@@ -88,16 +89,16 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
         fetchInspectorList()
     }, [currentTime, lastHourInspectorList])
 
-    const [sortedLinesWithReports, setSortedLinesWithReports] = useState<Map<string, MarkerData[]>>(new Map())
+    const [sortedLinesWithReports, setSortedLinesWithReports] = useState<Map<string, Report[]>>(new Map())
 
     useEffect(() => {
-        const getAllLinesWithReportsSorted = (): Map<string, MarkerData[]> => {
-            const lineReports = new Map<string, MarkerData[]>()
+        const getAllLinesWithReportsSorted = (): Map<string, Report[]> => {
+            const lineReports = new Map<string, Report[]>()
 
             // Group reports by line
             for (const inspector of ticketInspectorList) {
                 const { line } = inspector
-                if (line === '') continue
+                if (!line) continue
                 lineReports.set(line, [...(lineReports.get(line) || []), inspector])
             }
 
@@ -249,12 +250,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                                     src={`/icons/risk-${riskData.class}.svg`}
                                                     alt="Icon to show risk level"
                                                 />
-                                                <h4
-                                                    className="line-label"
-                                                    style={{ backgroundColor: getLineColor(line) }}
-                                                >
-                                                    {line}
-                                                </h4>
+                                                <Line line={line} />
                                             </div>
                                         ))}
                                 </div>
@@ -273,12 +269,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                                     src={`/icons/risk-${riskData.class}.svg`}
                                                     alt="Icon to show risk level"
                                                 />
-                                                <h4
-                                                    className="line-label"
-                                                    style={{ backgroundColor: getLineColor(line) }}
-                                                >
-                                                    {line}
-                                                </h4>
+                                                <Line line={line} />
                                             </div>
                                         ))}
                                 </div>
@@ -297,12 +288,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                                     src={`/icons/risk-${riskData.class}.svg`}
                                                     alt="Icon to show risk level"
                                                 />
-                                                <h4
-                                                    className="line-label"
-                                                    style={{ backgroundColor: getLineColor(line) }}
-                                                >
-                                                    {line}
-                                                </h4>
+                                                <Line line={line} />
                                             </div>
                                         ))}
                                 </div>

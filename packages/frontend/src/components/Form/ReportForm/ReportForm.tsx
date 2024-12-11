@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import SelectField from '../SelectField/SelectField'
 import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
+import Line from '../../Miscellaneous/Line/Line'
 
 import { LinesList, StationList, reportInspector, StationProperty } from '../../../utils/dbUtils'
 import { sendAnalyticsEvent } from '../../../utils/analytics'
@@ -10,7 +11,7 @@ import { highlightElement, createWarningSpan, getLineColor } from '../../../util
 import { calculateDistance } from '../../../utils/mapUtils'
 import { useLocation } from '../../../contexts/LocationContext'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
-
+import { Report } from '../../../utils/types'
 import './ReportForm.css'
 
 const getCSSVariable = (variable: string): number => {
@@ -29,7 +30,7 @@ const redHighlight = (text: string) => {
 
 interface ReportFormProps {
     closeModal: () => void
-    notifyParentAboutSubmission: () => void
+    notifyParentAboutSubmission: (reportedData: Report) => void
     className?: string
 }
 
@@ -46,7 +47,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
     const [currentLine, setCurrentLine] = useState<string | null>(null)
     const [currentStation, setCurrentStation] = useState<string | null>(null)
     const [currentDirection, setCurrentDirection] = useState<string | null>(null)
-    const [description, setDescription] = useState<string>('')
+    const [description, setDescription] = useState<string | null>(null)
 
     const [stationSearch, setStationSearch] = useState<string>('')
     const [searchUsed, setSearchUsed] = useState<boolean>(false)
@@ -216,34 +217,53 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         const hasError = await validateReportForm()
         if (hasError) return // Abort submission if there are validation errors
 
-        await reportInspector(currentLine!, currentStation!, currentDirection!, description)
+        await reportInspector(currentLine!, currentStation!, currentDirection!, description!)
 
         const endTime = new Date()
         const durationInSeconds = Math.round((endTime.getTime() - startTime.current.getTime()) / 1000)
 
-        const finalizeSubmission = () => {
-            localStorage.setItem('lastReportTime', new Date().toISOString()) // Save the timestamp of the report to prevent spamming
+        const report: Report = {
+            line: currentLine,
+            station: {
+                id: currentStation!,
+                name: allStations[currentStation!].name,
+                coordinates: allStations[currentStation!].coordinates,
+            },
+            direction: currentDirection
+                ? {
+                      id: currentDirection,
+                      name: allStations[currentDirection!].name,
+                      coordinates: allStations[currentDirection!].coordinates,
+                  }
+                : null,
+            message: description,
+            timestamp: endTime.toISOString(),
+            isHistoric: false,
+        }
+
+        const finalizeSubmission = (timestamp: Date) => {
+            localStorage.setItem('lastReportTime', timestamp.toISOString()) // Save the timestamp of the report to prevent spamming
             closeModal()
-            notifyParentAboutSubmission()
+            notifyParentAboutSubmission(report)
         }
 
         try {
             await sendAnalyticsEvent('Report Submitted', {
                 duration: durationInSeconds,
                 meta: {
-                    Station: currentStation!,
-                    Line: currentLine!,
-                    Direction: currentDirection!,
+                    Station: report.station.name,
+                    ...(report.line && { Line: report.line }),
+                    Direction: report.direction?.name,
                     Entity: Boolean(currentEntity),
                     SearchUsed: searchUsed,
                     StationRecommendationUsed: stationRecommendationSelected,
                 },
             })
 
-            finalizeSubmission()
+            finalizeSubmission(endTime)
         } catch (error) {
             console.error('Failed to send analytics event:', error)
-            finalizeSubmission()
+            finalizeSubmission(endTime)
         }
     }
 
@@ -328,6 +348,18 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         return distances.slice(0, numberOfStations).map((entry) => ({ [entry.station]: entry.stationData }))
     }
 
+    const getLineValue = (child: React.ReactElement) => {
+        return child.props.line
+    }
+
+    const getEntityValue = (child: React.ReactElement) => {
+        return child.props.children?.props?.children
+    }
+
+    const getDirectionValue = (child: React.ReactElement) => {
+        return child.props.children?.props?.children
+    }
+
     return (
         <div className={`report-form container modal ${className}`} ref={containerRef}>
             <form onSubmit={handleSubmit}>
@@ -340,6 +372,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                                 fieldClassName="entity-type-selector"
                                 onSelect={handleEntitySelect}
                                 value={currentEntity}
+                                getValue={getEntityValue}
                             >
                                 <span className="line" style={{ backgroundColor: getLineColor('U8') }}>
                                     <strong>U</strong>
@@ -358,11 +391,10 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                                 containerClassName="align-child-on-line long-selector"
                                 onSelect={handleLineSelect}
                                 value={currentLine}
+                                getValue={getLineValue}
                             >
                                 {Object.keys(possibleLines).map((line) => (
-                                    <span key={line} className="line" style={{ backgroundColor: getLineColor(line) }}>
-                                        <strong>{line}</strong>
-                                    </span>
+                                    <Line key={line} line={line} />
                                 ))}
                             </SelectField>
                         </section>
@@ -395,6 +427,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                                     onSelect={handleDirectionSelect}
                                     value={currentDirection ? allStations[currentDirection].name : ''}
                                     containerClassName="align-child-on-line"
+                                    getValue={getDirectionValue}
                                 >
                                     <span>
                                         <strong>{allStations[allLines[currentLine][0]].name}</strong>
@@ -412,7 +445,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                             <textarea
                                 placeholder={t('ReportForm.descriptionPlaceholder')}
                                 onChange={(e) => setDescription(e.target.value)}
-                                value={description}
+                                value={description || ''}
                             />
                         </section>
                         <section>

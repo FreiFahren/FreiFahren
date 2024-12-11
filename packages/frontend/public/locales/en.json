@@ -231,5 +231,10 @@
                 "content": "The use of our website is generally possible without providing personal data. For further information, please see our privacy policy."
             }
         }
+    },
+    "ReportSummaryModal": {
+        "title": "Thank you for your report!",
+        "description": "People appreciate your help!",
+        "button": "Continue"
     }
 }

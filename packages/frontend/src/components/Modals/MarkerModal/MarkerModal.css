@@ -1,5 +1,6 @@
-.info-popup.marker-modal h2 {
-    margin-bottom: var(--text-relation-weak);
+.marker-modal.info-popup.modal .direction-line {
+    justify-content: flex-start;
+    gap: var(--margin-s);
 }
 
 .marker-modal.info-popup.modal .description {
@@ -11,23 +12,6 @@
     color: var(--color-white);
     font-size: var(--font-xs);
     border-left: 4px solid var(--color-primary);
-}
-
-.marker-modal.info-popup .share-button {
-    margin-top: var(--margin-m);
-    background-color: var(--color-light-gray);
-    display: flex;
-    align-items: center;
-    height: 30px;
-    justify-content: center;
-    gap: var(--margin-s);
-    animation: button-pulse 5s infinite;
-}
-
-.marker-modal.info-popup .share-button span {
-    font-size: var(--font-s);
-    font-weight: 500;
-    color: black;
 }
 
 @keyframes button-pulse {

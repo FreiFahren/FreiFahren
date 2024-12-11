@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 
-import { MarkerData } from 'src/utils/types'
+import { Report } from 'src/utils/types'
 
 import ReportItem from './ReportItem'
 
 import './ReportsModal.css'
 
 interface ClusteredReportItemProps {
-    inspectors: MarkerData[]
+    inspectors: Report[]
 }
 
 const ClusteredReportItem: React.FC<ClusteredReportItemProps> = ({ inspectors }) => {

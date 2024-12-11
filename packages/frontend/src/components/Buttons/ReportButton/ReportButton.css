@@ -10,6 +10,10 @@
     border: 2px solid var(--color-white);
 }
 
+.report-button p {
+    color: #fff;
+}
+
 .report-button .plus {
     position: relative;
     width: 20px;

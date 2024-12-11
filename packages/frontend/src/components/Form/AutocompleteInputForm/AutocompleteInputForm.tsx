@@ -94,6 +94,10 @@ function AutocompleteInputForm<T>({
         [onSelect, elementIsSelected, setHighlightedElementSelected]
     )
 
+    const getHighlightedElementValue = (child: React.ReactElement) => {
+        return child.props.children?.props?.children
+    }
+
     return (
         <section>
             <div className="align-child-on-line" id="searchable-select-div">
@@ -120,6 +124,7 @@ function AutocompleteInputForm<T>({
                             onSelect={(selectedValue) => handleSelect(selectedValue, true)}
                             value={value ? getDisplayValue(items[value]) : ''}
                             containerClassName="align-child-column highlight-list-container"
+                            getValue={getHighlightedElementValue}
                         >
                             {Object.entries(highlightElements).map(([key, item]) => (
                                 <div key={key}>
@@ -134,6 +139,7 @@ function AutocompleteInputForm<T>({
                     onSelect={handleSelect}
                     value={value ? getDisplayValue(items[value]) : ''}
                     containerClassName="align-child-column"
+                    getValue={getHighlightedElementValue}
                 >
                     {filteredItems.map(([key, item]) => (
                         <div key={key}>

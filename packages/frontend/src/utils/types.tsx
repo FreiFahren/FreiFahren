@@ -47,7 +47,7 @@ export interface SegmentColors {
     [key: string]: string
 }
 
-export type MarkerData = {
+export type Report = {
     timestamp: string
     station: {
         id: string
@@ -64,8 +64,8 @@ export type MarkerData = {
             latitude: number
             longitude: number
         }
-    }
-    line: string
+    } | null
+    line: string | null
     isHistoric: boolean
-    message?: string
+    message: string | null
 }

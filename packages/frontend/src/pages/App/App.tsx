@@ -11,7 +11,7 @@ import StatsPopUp from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
 import Backdrop from '../../../src/components/Miscellaneous/Backdrop/Backdrop'
 import ReportsModalButton from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
 import ReportsModal from 'src/components/Modals/ReportsModal/ReportsModal'
-
+import ReportSummaryModal from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
 import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext'
 import { RiskDataProvider } from '../../contexts/RiskDataContext'
 import { StationsAndLinesProvider } from '../../contexts/StationsAndLinesContext'
@@ -22,9 +22,9 @@ import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton'
 import { highlightElement, currentColorTheme, setColorThemeInLocalStorage } from '../../utils/uiUtils'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../utils/analytics'
+import { Report } from 'src/utils/types'
 
 import './App.css'
-
 type AppUIState = {
     isReportFormOpen: boolean
     formSubmitted: boolean
@@ -55,8 +55,12 @@ function App() {
         setAppMounted(true)
     }, [])
 
-    const handleFormSubmit = () => {
+    const [showSummary, setShowSummary] = useState<boolean>(false)
+    const [reportedData, setReportedData] = useState<Report | null>(null)
+    const handleReportFormSubmit = (reportedData: Report) => {
         setAppUIState((appUIState) => ({ ...appUIState, formSubmitted: !appUIState.formSubmitted }))
+        setShowSummary(true)
+        setReportedData(reportedData)
     }
 
     const {
@@ -190,6 +194,11 @@ function App() {
         setMapsRotation(bearing)
     }, [])
 
+    // we dont know the exact number of users, so we make an estimate that should be close to the actual number
+    // in the future this will be automatically fetched from the analytics platform + telegram user count
+    const numberOfUsersRef = useRef<number>(Math.floor(Math.random() * (36000 - 35000 + 1)) + 35000)
+    const [numberOfUsers] = useState<number>(numberOfUsersRef.current)
+
     return (
         <div className="App">
             {appMounted && shouldShowLegalDisclaimer() && (
@@ -212,12 +221,23 @@ function App() {
                     </UtilModal>
                 </>
             )}
+            {showSummary && reportedData && (
+                <>
+                    <ReportSummaryModal
+                        reportData={reportedData}
+                        openAnimationClass="open center-animation"
+                        closeModal={() => setShowSummary(false)}
+                        numberOfUsers={numberOfUsers}
+                    />
+                    <Backdrop onClick={() => setShowSummary(false)} />
+                </>
+            )}
             <StationsAndLinesProvider>
                 {appUIState.isReportFormOpen && (
                     <>
                         <ReportForm
                             closeModal={() => setAppUIState({ ...appUIState, isReportFormOpen: false })}
-                            notifyParentAboutSubmission={handleFormSubmit}
+                            notifyParentAboutSubmission={handleReportFormSubmit}
                             className={'open center-animation'}
                         />
                         <Backdrop onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
@@ -269,6 +289,7 @@ function App() {
             {appUIState.isStatsPopUpOpen && statsData !== 0 && (
                 <StatsPopUp
                     numberOfReports={statsData}
+                    numberOfUsers={numberOfUsers}
                     className={'open center-animation'}
                     openListModal={() => setAppUIState({ ...appUIState, isListModalOpen: !appUIState.isListModalOpen })}
                 />

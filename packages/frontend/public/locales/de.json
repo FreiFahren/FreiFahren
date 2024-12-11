@@ -70,7 +70,6 @@
     "Share": {
         "title": "Schau dir mal diese App an.",
         "text": "Siehe, wo Kontrolleure in Berlin sind!\n\nHier ist eine Meldung:\nStation: {{station}}\nRichtung: {{direction}}\nLinie: {{line}}\n",
-        "button": "Teilen",
         "copied": "Link kopiert!"
     },
     "StatsPopUp": {
@@ -231,5 +230,10 @@
                 "content": "Die Nutzung unserer Webseite ist in der Regel ohne Angabe personenbezogener Daten möglich. Für weitere Informationen sehen sie unsere Datenschutzerklärung."
             }
         }
+    },
+    "ReportSummaryModal": {
+        "title": "Danke für deine Meldung!",
+        "description": "Menschen schätzen deine Hilfe!",
+        "button": "Weiter"
     }
 }

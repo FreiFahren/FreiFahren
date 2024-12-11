@@ -1,32 +1,33 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { MarkerData } from 'src/utils/types'
+import Line from '../../Miscellaneous/Line/Line'
+
+import { Report } from 'src/utils/types'
 import { useElapsedTimeMessage } from 'src/hooks/Messages'
-import { getLineColor } from 'src/utils/uiUtils'
-const ReportItem: React.FC<{ ticketInspector: MarkerData; currentTime: number }> = ({
-    ticketInspector,
-    currentTime,
-}) => {
+
+interface ReportItemProps {
+    ticketInspector: Report
+    currentTime?: number
+}
+
+const ReportItem: React.FC<ReportItemProps> = ({ ticketInspector, currentTime }) => {
     const { t } = useTranslation()
+
     const inspectorTimestamp = new Date(ticketInspector.timestamp).getTime()
-    const elapsedTime = Math.floor((currentTime - inspectorTimestamp) / (60 * 1000)) // Convert to minutes
+    const elapsedTime = currentTime ? Math.floor((currentTime - inspectorTimestamp) / (60 * 1000)) : undefined
     const elapsedTimeMessage = useElapsedTimeMessage(elapsedTime, ticketInspector.isHistoric)
 
     return (
         <div key={ticketInspector.station.id + ticketInspector.timestamp} className="report-item">
             <div className="align-child-on-line">
-                {ticketInspector.line && (
-                    <h4 className="line-label" style={{ backgroundColor: getLineColor(ticketInspector.line) }}>
-                        {ticketInspector.line}
-                    </h4>
-                )}
+                {ticketInspector.line && <Line line={ticketInspector.line} key={ticketInspector.line} />}
                 <h4>{ticketInspector.station.name}</h4>
-                <p>{elapsedTimeMessage}</p>
+                {elapsedTimeMessage && <p>{elapsedTimeMessage}</p>}
             </div>
             <div>
                 <p>
-                    {ticketInspector.direction.name && (
+                    {ticketInspector.direction?.name && (
                         <>
                             {t('MarkerModal.direction')}: <span>{ticketInspector.direction.name}</span>
                         </>
