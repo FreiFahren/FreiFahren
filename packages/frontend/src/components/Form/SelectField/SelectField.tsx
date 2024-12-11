@@ -7,6 +7,7 @@ interface SelectFieldProps {
     fieldClassName?: string
     onSelect: (selectedValue: string | null) => void
     value: string | null
+    getValue: (child: React.ReactElement) => string
 }
 /**
  * SelectField component allows for the selection of a single value from a list of options.
@@ -17,36 +18,25 @@ interface SelectFieldProps {
  * @param {string} [fieldClassName] - Optional class name for each selectable field.
  * @param {function} onSelect - Callback function to handle the selection of an option.
  * @param {string | null} value - The currently selected value.
+ * @param {function} getValue - Function to extract the value from a child component.
  */
-const SelectField: React.FC<SelectFieldProps> = ({ children, containerClassName, fieldClassName, onSelect, value }) => {
-    const getValueFromChild = (child: React.ReactElement): string => {
-        // Handle Line component
-        if (child.props.line) {
-            return child.props.line
-        }
-
-        // Handle span with nested strong
-        if (child.props.children?.props?.children) {
-            return child.props.children.props.children
-        }
-
-        // Handle simple span with text
-        if (child.props.children) {
-            return child.props.children
-        }
-
-        return ''
-    }
-
+const SelectField: React.FC<SelectFieldProps> = ({
+    children,
+    containerClassName,
+    fieldClassName,
+    onSelect,
+    value,
+    getValue,
+}) => {
     const handleSelect = useCallback(
         (child: React.ReactNode) => {
             if (React.isValidElement(child)) {
-                const selectedValue = getValueFromChild(child)
+                const selectedValue = getValue(child)
                 const newValue = value === selectedValue ? null : selectedValue // Toggle selection
                 onSelect(newValue)
             }
         },
-        [onSelect, value]
+        [onSelect, value, getValue]
     )
 
     return (
@@ -57,9 +47,7 @@ const SelectField: React.FC<SelectFieldProps> = ({ children, containerClassName,
                     React.isValidElement(child) && (
                         <div
                             key={index}
-                            className={`select-field ${
-                                value === getValueFromChild(child) ? 'selected' : ''
-                            } ${fieldClassName}`}
+                            className={`select-field ${value === getValue(child) ? 'selected' : ''} ${fieldClassName}`}
                             onClick={() => handleSelect(child)}
                         >
                             {child}

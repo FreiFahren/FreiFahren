@@ -348,6 +348,18 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         return distances.slice(0, numberOfStations).map((entry) => ({ [entry.station]: entry.stationData }))
     }
 
+    const getLineValue = (child: React.ReactElement) => {
+        return child.props.line
+    }
+
+    const getEntityValue = (child: React.ReactElement) => {
+        return child.props.children?.props?.children
+    }
+
+    const getDirectionValue = (child: React.ReactElement) => {
+        return child.props.children?.props?.children
+    }
+
     return (
         <div className={`report-form container modal ${className}`} ref={containerRef}>
             <form onSubmit={handleSubmit}>
@@ -360,6 +372,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                                 fieldClassName="entity-type-selector"
                                 onSelect={handleEntitySelect}
                                 value={currentEntity}
+                                getValue={getEntityValue}
                             >
                                 <span className="line" style={{ backgroundColor: getLineColor('U8') }}>
                                     <strong>U</strong>
@@ -378,6 +391,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                                 containerClassName="align-child-on-line long-selector"
                                 onSelect={handleLineSelect}
                                 value={currentLine}
+                                getValue={getLineValue}
                             >
                                 {Object.keys(possibleLines).map((line) => (
                                     <Line key={line} line={line} />
@@ -413,6 +427,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                                     onSelect={handleDirectionSelect}
                                     value={currentDirection ? allStations[currentDirection].name : ''}
                                     containerClassName="align-child-on-line"
+                                    getValue={getDirectionValue}
                                 >
                                     <span>
                                         <strong>{allStations[allLines[currentLine][0]].name}</strong>
