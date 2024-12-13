@@ -206,6 +206,7 @@ class RiskPredictor:
            - For station-based reports: Risk decays spatially based on segment distance
            - For line-wide reports: Risk is distributed across all segments of the line
            - Multiple reports' risks are combined additively (capped at 1.0)
+           - Risk is propagated to overlapping segments
 
         3. Risk to color conversion:
            - ≤ 0.2: Green (no risk)
@@ -301,6 +302,33 @@ class RiskPredictor:
             color = self._risk_to_color(risk)
             if color != self.colors[0]:  # Only include segments with risk
                 segment_colors[sid] = color
+
+        # Create a dictionary to store segments by their start and end stations
+        segments_by_stations: Dict[Tuple[str, str], List[Segment]] = {}
+        for segment in self.segments:
+            # order station IDs alphabetically to handle bidirectional segments
+            stations = tuple(sorted((segment.from_station_id, segment.to_station_id)))
+            if stations not in segments_by_stations:
+                segments_by_stations[stations] = []
+            segments_by_stations[stations].append(segment)
+
+        # Propagate risk colors to overlapping segments
+        for sid, color in list(
+            segment_colors.items()
+        ):  # Iterate over a copy to avoid modifying the dictionary while iterating
+            # Find the segment corresponding to the current sid
+            current_segment = next((s for s in self.segments if s.sid == sid), None)
+            if current_segment:
+                # Get station pair for current segment
+                stations = tuple(
+                    sorted(
+                        (current_segment.from_station_id, current_segment.to_station_id)
+                    )
+                )
+                # overlapping segment inherits risk color
+                overlapping_segments = segments_by_stations.get(stations, [])
+                for overlapping_segment in overlapping_segments:
+                    segment_colors[overlapping_segment.sid] = color
 
         return segment_colors
 
