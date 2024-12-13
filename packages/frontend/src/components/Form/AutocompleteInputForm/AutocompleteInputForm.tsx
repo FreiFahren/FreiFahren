@@ -18,6 +18,14 @@ interface AutocompleteInputFormProps<T> {
     setHighlightedElementSelected?: (highlightedElementSelected: boolean) => void
 }
 
+interface HighlightedElementProps {
+    children: {
+        props: {
+            children: string
+        }
+    }
+}
+
 const search_icon = `${process.env.PUBLIC_URL}/icons/search.svg`
 
 /**
@@ -94,8 +102,8 @@ function AutocompleteInputForm<T>({
         [onSelect, elementIsSelected, setHighlightedElementSelected]
     )
 
-    const getHighlightedElementValue = (child: React.ReactElement) => {
-        return child.props.children?.props?.children
+    const getHighlightedElementValue = (child: React.ReactElement): string => {
+        return (child.props as HighlightedElementProps).children?.props?.children ?? ''
     }
 
     return (
@@ -142,7 +150,7 @@ function AutocompleteInputForm<T>({
                     getValue={getHighlightedElementValue}
                 >
                     {filteredItems.map(([key, item]) => (
-                        <div key={key}>
+                        <div key={key} data-value={getDisplayValue(item)}>
                             <strong>{getDisplayValue(item)}</strong>
                         </div>
                     ))}

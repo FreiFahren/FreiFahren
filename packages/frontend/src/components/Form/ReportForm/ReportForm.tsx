@@ -348,16 +348,28 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         return distances.slice(0, numberOfStations).map((entry) => ({ [entry.station]: entry.stationData }))
     }
 
+    interface LineChildProps {
+        line: string
+    }
+
     const getLineValue = (child: React.ReactElement) => {
-        return child.props.line
+        return (child.props as LineChildProps).line
+    }
+
+    interface EntityChildProps {
+        children: {
+            props: {
+                children: string
+            }
+        }
     }
 
     const getEntityValue = (child: React.ReactElement) => {
-        return child.props.children?.props?.children
+        return (child.props as EntityChildProps).children?.props?.children
     }
 
     const getDirectionValue = (child: React.ReactElement) => {
-        return child.props.children?.props?.children
+        return (child.props as EntityChildProps).children?.props?.children
     }
 
     return (
