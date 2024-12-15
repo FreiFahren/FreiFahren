@@ -15,7 +15,8 @@
       "prefer-arrow",
       "unicorn",
       "simple-import-sort",
-      "prettier"
+      "prettier",
+      "react-compiler"
     ],
     "rules": {
       "eqeqeq": ["error", "always"],
@@ -129,6 +130,7 @@
         }
       ],
       "react/jsx-uses-react": "off",
-      "react/react-in-jsx-scope": "off"
+      "react/react-in-jsx-scope": "off",
+      "react-compiler/react-compiler": "error"
     }
   }
