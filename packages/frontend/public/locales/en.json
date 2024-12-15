@@ -69,7 +69,7 @@
     },
     "Share": {
         "title": "Check out this app.",
-        "text": "See where ticket inspectors are in Berlin!\n\nHere's a report:\nStation: {{station}}\nDirection: {{direction}}\nLine: {{line}}\n",
+        "text": "See where ticket inspectors are in Berlin!\n\nHere's a report:\nStation: {{station}}\nDirection: {{direction}}\nLine: {{line}}\nTime: {{time}}",
         "button": "Share",
         "copied": "Link copied to clipboard!"
     },

@@ -27,7 +27,7 @@ const ClusteredReportItem: React.FC<ClusteredReportItemProps> = ({ inspectors })
         <>
             <div className="clustered-report-item align-child-on-line">
                 <div className="title-report-item">
-                    <ReportItem ticketInspector={inspectorsWithoutDirection[0]} currentTime={currentTime} />
+                    <ReportItem report={inspectorsWithoutDirection[0]} currentTime={currentTime} />
                 </div>
                 {inspectorsWithoutDirection.length > 1 && (
                     <button
@@ -41,7 +41,7 @@ const ClusteredReportItem: React.FC<ClusteredReportItemProps> = ({ inspectors })
                     expandedListWithoutTitle.map((inspector) => (
                         <ReportItem
                             key={inspector.station.id + inspector.timestamp}
-                            ticketInspector={inspector}
+                            report={inspector}
                             currentTime={currentTime}
                         />
                     ))}

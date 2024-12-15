@@ -5,10 +5,56 @@ import { sendAnalyticsEvent } from 'src/utils/analytics'
 import { Report } from 'src/utils/types'
 
 import './ShareButton.css'
+import i18next from 'i18next'
 
 interface ShareButtonProps {
     report?: Report
 }
+
+const formatTime = (timestamp: string, isHistoric: boolean): string => {
+    const date = new Date(timestamp);
+    const locale = i18next.language; // Get current language
+    
+    // For historic reports, show the full date and time
+    if (isHistoric) {
+        return date.toLocaleString(locale === 'de' ? 'de-DE' : 'en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+    
+    // For recent reports, show relative time
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) {
+        return locale === 'de' ? 'gerade eben' : 'just now';
+    }
+
+    if (diffInMinutes < 60) {
+        return locale === 'de' 
+            ? `vor ${diffInMinutes} ${diffInMinutes === 1 ? 'Minute' : 'Minuten'}`
+            : `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
+    }
+
+    if (diffInMinutes < 1440) { // less than 24 hours
+        const hours = Math.floor(diffInMinutes / 60);
+        return locale === 'de'
+            ? `vor ${hours} ${hours === 1 ? 'Stunde' : 'Stunden'}`
+            : `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+    }
+    
+    // If more than 24 hours, show the date and time
+    return date.toLocaleString(locale === 'de' ? 'de-DE' : 'en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
 
 const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
     const { t } = useTranslation()
@@ -37,6 +83,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
                     station: report.station.name,
                     direction: report.direction?.name || '?',
                     line: report.line || '?',
+                    time: formatTime(report.timestamp, report.isHistoric),
                 })
 
                 if (navigator.share) {

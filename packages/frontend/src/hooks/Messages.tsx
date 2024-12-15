@@ -32,11 +32,15 @@ export const useStationDistanceMessage = (stationDistance: number | null): React
  * 3. For any other duration, it displays the time in minutes.
  */
 export const useElapsedTimeMessage = (
-    elapsedTimeInMinutes: number | undefined,
+    timestamp: string,
     isHistoric: boolean
 ): ReactElement | null => {
     const { t, i18n } = useTranslation()
     const currentLanguage = i18n.language
+
+    const adjustedTimestamp = new Date(timestamp)
+    const currentTime = new Date().getTime()
+    const elapsedTimeInMinutes = Math.floor((currentTime - adjustedTimestamp.getTime()) / (60 * 1000)) 
 
     if (elapsedTimeInMinutes === undefined) {
         return null

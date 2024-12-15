@@ -69,7 +69,7 @@
     },
     "Share": {
         "title": "Schau dir mal diese App an.",
-        "text": "Siehe, wo Kontrolleure in Berlin sind!\n\nHier ist eine Meldung:\nStation: {{station}}\nRichtung: {{direction}}\nLinie: {{line}}\n",
+        "text": "Siehe, wo Kontrolleure in Berlin sind!\n\nHier ist eine Meldung:\nStation: {{station}}\nRichtung: {{direction}}\nLinie: {{line}}\nZeit: {{time}}",
         "copied": "Link kopiert!"
     },
     "StatsPopUp": {
