@@ -3,7 +3,7 @@ import './index.css'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { I18nextProvider } from 'react-i18next'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 
 import { LocationProvider } from './contexts/LocationContext'
 import i18n from './i18n'
@@ -27,18 +27,25 @@ const FUNNEL_ROUTES: FunnelConfig[] = [
 ]
 
 const FunnelRedirect: React.FC<FunnelConfig> = ({ source, path }) => {
+    const navigate = useNavigate()
+
+    // Execute immediately on render
     sendAnalyticsEvent('Clicked on Funnel link', {
         meta: {
             source,
             path,
         },
-    }).catch((error) => {
-        // handle in the future with sentry
-        // eslint-disable-next-line no-console
-        console.error('Failed to send analytics event:', error)
     })
+        .catch((error) => {
+            // handle in the future with sentry
+            // eslint-disable-next-line no-console
+            console.error('Failed to send analytics event:', error)
+        })
+        .finally(() => {
+            navigate('/', { replace: true })
+        })
 
-    return <Navigate to="/" replace />
+    return null
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
