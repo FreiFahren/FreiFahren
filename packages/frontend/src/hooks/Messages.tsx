@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
+import { ReactElement } from 'react'
 
-export const useStationDistanceMessage = (stationDistance: number | null): JSX.Element | null => {
+export const useStationDistanceMessage = (stationDistance: number | null): ReactElement | null => {
     const { t } = useTranslation()
 
     if (stationDistance === null) return null
@@ -33,7 +34,7 @@ export const useStationDistanceMessage = (stationDistance: number | null): JSX.E
 export const useElapsedTimeMessage = (
     elapsedTimeInMinutes: number | undefined,
     isHistoric: boolean
-): JSX.Element | null => {
+): ReactElement | null => {
     const { t, i18n } = useTranslation()
     const currentLanguage = i18n.language
 
