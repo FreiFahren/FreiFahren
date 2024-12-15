@@ -25,7 +25,6 @@ export function createWarningSpan(elementId: string, message: string) {
     if (!warningSpan) {
         warningSpan = document.createElement('span')
         warningSpan.id = 'warning-span'
-        console.log('Tests')
         warningSpan.className = 'red-highlight'
         warningSpan.textContent = message
         document.getElementById(elementId)?.appendChild(warningSpan)
