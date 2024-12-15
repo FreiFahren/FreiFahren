@@ -1,4 +1,3 @@
-from telegram_bots.config import DEV_CHAT_ID
 from telegram_bots import logger
 
 logger = logger.setup_logger()

@@ -27,10 +27,9 @@ BACKEND_URL=http://127.0.0.1:8080
 WATCHER_BOT_TOKEN=
 NLP_BOT_TOKEN=
 TELEGERAM_BOTS_URL=http://127.0.0.1:6000
-DEV_CHAT_ID=
 ```
 
-You can get the Watcher and NLP bot tokens from the BotFather. The DEV_CHAT_ID is the chat Id of the developer chat.
+You can get the NLP bot tokens from the BotFather. 
 
 ### Dependencies
 
