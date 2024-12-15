@@ -27,9 +27,6 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
     const { allStations } = useStationsAndLines()
     const { timestamp, station, line, direction } = selectedMarker
 
-    const adjustedTimestamp = new Date(timestamp)
-    const currentTime = new Date().getTime()
-    const elapsedTimeInMinutes = Math.floor((currentTime - adjustedTimestamp.getTime()) / 60000)
 
     const numberOfReports = useStationReports(station.id)
     const {
@@ -39,7 +36,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
     } = useStationDistance(station.id, allStations, userLat, userLng)
 
     const showSkeleton = useSkeleton({ isLoading: isLoading && shouldShowSkeleton })
-    const elapsedTimeMessage = useElapsedTimeMessage(elapsedTimeInMinutes, selectedMarker.isHistoric)
+    const elapsedTimeMessage = useElapsedTimeMessage(timestamp, selectedMarker.isHistoric)
     const stationDistanceMessage = useStationDistanceMessage(stationDistance)
 
     return (

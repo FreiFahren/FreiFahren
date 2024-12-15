@@ -7,29 +7,31 @@ import { Report } from 'src/utils/types'
 import { useElapsedTimeMessage } from 'src/hooks/Messages'
 
 interface ReportItemProps {
-    ticketInspector: Report
-    currentTime?: number
+    report: Report
+    currentTime?: number // optional to avoid showing the timestamp if it is redudant
 }
 
-const ReportItem: React.FC<ReportItemProps> = ({ ticketInspector, currentTime }) => {
+const ReportItem: React.FC<ReportItemProps> = ({ report, currentTime }) => {
     const { t } = useTranslation()
 
-    const inspectorTimestamp = new Date(ticketInspector.timestamp).getTime()
-    const elapsedTime = currentTime ? Math.floor((currentTime - inspectorTimestamp) / (60 * 1000)) : undefined
-    const elapsedTimeMessage = useElapsedTimeMessage(elapsedTime, ticketInspector.isHistoric)
+    let elapsedTimeMessage = null
+
+    if (currentTime) {
+        elapsedTimeMessage = useElapsedTimeMessage(report.timestamp, report.isHistoric)
+    } 
 
     return (
-        <div key={ticketInspector.station.id + ticketInspector.timestamp} className="report-item">
+        <div key={report.station.id + report.timestamp} className="report-item">
             <div className="align-child-on-line">
-                {ticketInspector.line && <Line line={ticketInspector.line} key={ticketInspector.line} />}
-                <h4>{ticketInspector.station.name}</h4>
+                {report.line && <Line line={report.line} key={report.line} />}
+                <h4>{report.station.name}</h4>
                 {elapsedTimeMessage && <p>{elapsedTimeMessage}</p>}
             </div>
             <div>
                 <p>
-                    {ticketInspector.direction?.name && (
+                    {report.direction?.name && (
                         <>
-                            {t('MarkerModal.direction')}: <span>{ticketInspector.direction.name}</span>
+                            {t('MarkerModal.direction')}: <span>{report.direction.name}</span>
                         </>
                     )}
                 </p>

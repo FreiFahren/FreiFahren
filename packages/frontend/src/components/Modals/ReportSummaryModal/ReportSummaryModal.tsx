@@ -33,7 +33,7 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({
                 </div>
                 <h1>{t('ReportSummaryModal.title')}</h1>
                 <div>
-                    <ReportItem key={reportData.station.id + reportData.timestamp} ticketInspector={reportData} />
+                    <ReportItem key={reportData.station.id + reportData.timestamp} report={reportData} />
                     <ShareButton report={reportData} />
                 </div>
                 <span>

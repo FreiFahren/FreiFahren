@@ -344,7 +344,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                     {ticketInspectorList.map((ticketInspector) => (
                         <ReportItem
                             key={ticketInspector.station.id + ticketInspector.timestamp}
-                            ticketInspector={ticketInspector}
+                            report={ticketInspector}
                             currentTime={currentTime}
                         />
                     ))}
