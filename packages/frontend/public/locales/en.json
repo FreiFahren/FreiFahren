@@ -236,5 +236,8 @@
         "title": "Thank you for your report!",
         "description": "People appreciate your help!",
         "button": "Continue"
+    },
+    "FeedbackButton": {
+        "text": "Feedback"
     }
 }

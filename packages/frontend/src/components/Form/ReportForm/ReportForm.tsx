@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import SelectField from '../SelectField/SelectField'
 import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
 import Line from '../../Miscellaneous/Line/Line'
+import FeedbackButton from '../../Buttons/FeedbackButton/FeedbackButton'
 
 import { LinesList, StationList, reportInspector, StationProperty } from '../../../utils/dbUtils'
 import { sendAnalyticsEvent } from '../../../utils/analytics'
@@ -377,7 +378,10 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
             <form onSubmit={handleSubmit}>
                 <div>
                     <div ref={topElementsRef}>
-                        <h1>{t('ReportForm.title')}</h1>
+                        <div className="align-child-on-line">
+                            <h1>{t('ReportForm.title')}</h1>
+                            <FeedbackButton onClick={() => {}} />
+                        </div>
                         <section>
                             <SelectField
                                 containerClassName="align-child-on-line large-selector"

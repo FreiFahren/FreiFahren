@@ -3,6 +3,12 @@
     max-height: 70vh;
 }
 
+.reports-modal .time-range {
+    margin-top: 0;
+    font-size: var(--font-xs);
+    color: var(--color-gray-on-dark-background);
+}
+
 .reports-modal > section.tabs {
     z-index: var(--zIndex-modal);
     margin-top: var(--margin-m);
