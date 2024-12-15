@@ -3,19 +3,33 @@
       "airbnb",
       "airbnb-typescript",
       "airbnb/hooks",
+      "plugin:react/recommended",
+      "plugin:react/jsx-runtime",
+      "plugin:react-hooks/recommended",
       "prettier"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
       "project": "./tsconfig.json",
-      "sourceType": "module"
+      "sourceType": "module",
+      "ecmaFeatures": {
+        "jsx": true
+      }
+    },
+    "settings": {
+      "react": {
+        "version": "detect"
+      }
     },
     "plugins": [
       "@typescript-eslint",
       "prefer-arrow",
       "unicorn",
       "simple-import-sort",
-      "prettier"
+      "prettier",
+      "react-compiler",
+      "react-hooks",
+      "react"
     ],
     "rules": {
       "eqeqeq": ["error", "always"],
@@ -129,6 +143,24 @@
         }
       ],
       "react/jsx-uses-react": "off",
-      "react/react-in-jsx-scope": "off"
+      "react/react-in-jsx-scope": "off",
+      "react-compiler/react-compiler": "error",
+      "react/jsx-no-leaked-render": [
+        "error",
+        { "validStrategies": ["ternary"] }
+      ],
+      "react/jsx-handler-names": [
+        "error",
+        {
+          "eventHandlerPrefix": "handle",
+          "eventHandlerPropPrefix": "on",
+          "checkLocalVariables": true
+        }
+      ],
+      "react/jsx-no-useless-fragment": ["error", { "allowExpressions": true }],
+      "react/jsx-boolean-value": ["error", "never"],
+      "react/no-array-index-key": "error",
+      "react/no-unstable-nested-components": ["error", { "allowAsProps": false }],
+      "react/hook-use-state": ["error", { "allowDestructuredState": true }]
     }
   }
