@@ -5,6 +5,7 @@
       "airbnb/hooks",
       "plugin:react/recommended",
       "plugin:react/jsx-runtime",
+      "plugin:react-hooks/recommended",
       "prettier"
     ],
     "parser": "@typescript-eslint/parser",
@@ -27,6 +28,7 @@
       "simple-import-sort",
       "prettier",
       "react-compiler",
+      "react-hooks",
       "react"
     ],
     "rules": {
