@@ -27,10 +27,12 @@ jobs:
               run: |
                   # Get the list of changed files compared to the base branch
                   CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT origin/${{ github.base_ref }} ${{ github.sha }} | grep '^packages/frontend/.*\.\(js\|jsx\|ts\|tsx\)$' || true)
+                  # Remove the packages/frontend/ prefix from the file paths
+                  STRIPPED_FILES=$(echo "$CHANGED_FILES" | sed 's|packages/frontend/||g')
                   echo "Changed files:"
-                  echo "$CHANGED_FILES"
-                  # Save the list of files to a variable that can be used in next steps
-                  echo "files=${CHANGED_FILES}" >> $GITHUB_OUTPUT
+                  echo "$STRIPPED_FILES"
+                  # Save the stripped list of files
+                  echo "files=${STRIPPED_FILES}" >> $GITHUB_OUTPUT
 
             - name: Run ESLint on changed files
               run: |
