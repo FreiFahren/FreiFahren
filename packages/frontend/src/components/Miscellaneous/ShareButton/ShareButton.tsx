@@ -13,11 +13,11 @@ interface ShareButtonProps {
 
 const formatTime = (timestamp: string, isHistoric: boolean): string => {
     const date = new Date(timestamp);
-    const locale = i18next.language; // Get current language
+    const { t } = useTranslation();
     
     // For historic reports, show the full date and time
     if (isHistoric) {
-        return date.toLocaleString(locale === 'de' ? 'de-DE' : 'en-US', {
+        return date.toLocaleString(i18next.language === 'de' ? 'de-DE' : 'en-US', {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
@@ -31,24 +31,23 @@ const formatTime = (timestamp: string, isHistoric: boolean): string => {
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
     
     if (diffInMinutes < 1) {
-        return locale === 'de' ? 'gerade eben' : 'just now';
+        return t('MarkerModal.now');
     }
 
     if (diffInMinutes < 60) {
-        return locale === 'de' 
-            ? `vor ${diffInMinutes} ${diffInMinutes === 1 ? 'Minute' : 'Minuten'}`
-            : `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
+        return `${diffInMinutes} ${t('MarkerModal.minutes')} ${t('MarkerModal.ago')}`;
     }
 
     if (diffInMinutes < 1440) { // less than 24 hours
         const hours = Math.floor(diffInMinutes / 60);
-        return locale === 'de'
-            ? `vor ${hours} ${hours === 1 ? 'Stunde' : 'Stunden'}`
-            : `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+        if (hours === 1) {
+            return t('MarkerModal.oneHourAgo');
+        }
+        return `${hours} ${t('MarkerModal.hours')} ${t('MarkerModal.ago')}`;
     }
     
     // If more than 24 hours, show the date and time
-    return date.toLocaleString(locale === 'de' ? 'de-DE' : 'en-US', {
+    return date.toLocaleString(i18next.language === 'de' ? 'de-DE' : 'en-US', {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
