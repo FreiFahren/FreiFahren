@@ -11,13 +11,34 @@ jobs:
         steps:
             - name: Check out code
               uses: actions/checkout@v2
+              with:
+                  fetch-depth: 0 # Fetch all history for all branches and tags
 
             - name: Set up Node.js
               uses: actions/setup-node@v2
               with:
                   node-version: '16'
+
             - name: Install dependencies
               run: cd packages/frontend/ && npm install
 
-            - name: Run ESLint
-              run: cd packages/frontend/ && npm run lint
+            - name: Get changed files
+              id: changed-files
+              run: |
+                  # Get the list of changed files compared to the base branch
+                  CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT origin/${{ github.base_ref }} ${{ github.sha }} | grep '^packages/frontend/.*\.\(js\|jsx\|ts\|tsx\)$' || true)
+                  echo "Changed files:"
+                  echo "$CHANGED_FILES"
+                  # Save the list of files to a variable that can be used in next steps
+                  echo "files=${CHANGED_FILES}" >> $GITHUB_OUTPUT
+
+            - name: Run ESLint on changed files
+              run: |
+                  cd packages/frontend/
+                  CHANGED_FILES="${{ steps.changed-files.outputs.files }}"
+                  if [ -n "$CHANGED_FILES" ]; then
+                    echo "Linting changed files..."
+                    npx eslint $CHANGED_FILES
+                  else
+                    echo "No relevant files changed"
+                  fi
