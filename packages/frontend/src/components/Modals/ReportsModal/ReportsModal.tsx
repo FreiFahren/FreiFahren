@@ -14,6 +14,7 @@ import { useStationsAndLines } from 'src/contexts/StationsAndLinesContext'
 import ReportItem from './ReportItem'
 import ClusteredReportItem from './ClusteredReportItem'
 import Line from '../../Miscellaneous/Line/Line'
+import FeedbackButton from '../../Buttons/FeedbackButton/FeedbackButton'
 
 import './ReportsModal.css'
 
@@ -218,8 +219,11 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             {currentTab === 'summary' && (
                 <section className="summary">
                     <section className="lines">
-                        <h2>{t('ReportsModal.reportsHeading')}</h2>
-                        <p>{t('ReportsModal.past24Hours')}</p>
+                        <div className="align-child-on-line">
+                            <h2>{t('ReportsModal.reportsHeading')}</h2>
+                            <FeedbackButton onClick={() => closeModal()} />
+                        </div>
+                        <p className="time-range">{t('ReportsModal.past24Hours')}</p>
                         {Array.from(sortedLinesWithReports.entries())
                             .sort(([, inspectorsA], [, inspectorsB]) => {
                                 const timestampA = new Date(inspectorsA[0].timestamp).getTime()
@@ -300,7 +304,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             {currentTab === 'lines' && (
                 <section className="list-modal">
                     <h2>{t('ReportsModal.topLines')}</h2>
-                    <p>{t('ReportsModal.past24Hours')}</p>
+                    <p className="time-range">{t('ReportsModal.past24Hours')}</p>
                     <ResponsiveContainer width="100%" height={getChartData.length * (34 + 12)}>
                         <BarChart data={getChartData} layout="vertical">
                             <XAxis type="number" hide />
@@ -340,7 +344,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             {currentTab === 'stations' && (
                 <section className="list-modal">
                     <h2>{t('ReportsModal.topStations')}</h2>
-                    <p>{t('ReportsModal.past24Hours')}</p>
+                    <p className="time-range">{t('ReportsModal.past24Hours')}</p>
                     {ticketInspectorList.map((ticketInspector) => (
                         <ReportItem
                             key={ticketInspector.station.id + ticketInspector.timestamp}
