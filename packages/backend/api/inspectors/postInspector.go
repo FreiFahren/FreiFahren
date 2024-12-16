@@ -19,6 +19,9 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Add this at the package level, after the imports
+var lastTelegramNotification time.Time
+
 // @Summary Submit ticket inspector data
 //
 // @Description Accepts a JSON payload with details about a ticket inspector's current location.
@@ -93,9 +96,16 @@ func PostInspector(c echo.Context) error {
 	// Notify Telegram bot if there's no author (web app report)
 	go func() {
 		if pointers.AuthorPtr == nil {
-			telegramEndpoint := os.Getenv("TELEGRAM_BOTS_URL") + "/report-inspector"
-			if err := notifyOtherServiceAboutReport(telegramEndpoint, dataToInsert, "Telegram bot"); err != nil {
-				logger.Log.Error().Err(err).Msg("Error notifying Telegram bot about report in postInspector")
+			// avoid spamming the telegram group
+			if time.Since(lastTelegramNotification) >= 5*time.Minute {
+				telegramEndpoint := os.Getenv("TELEGRAM_BOTS_URL") + "/report-inspector"
+				if err := notifyOtherServiceAboutReport(telegramEndpoint, dataToInsert, "Telegram bot"); err != nil {
+					logger.Log.Error().Err(err).Msg("Error notifying Telegram bot about report in postInspector")
+				} else {
+					lastTelegramNotification = time.Now()
+				}
+			} else {
+				logger.Log.Info().Msg("Skipping Telegram notification - rate limit not exceeded")
 			}
 		}
 	}()
