@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 
 import { useTranslation } from 'react-i18next'
-import { sendAnalyticsEvent } from 'src/utils/analytics'
+import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 import { Report } from 'src/utils/types'
 
 import './ShareButton.css'
@@ -12,9 +12,9 @@ interface ShareButtonProps {
 }
 
 const formatTime = (timestamp: string, isHistoric: boolean): string => {
-    const date = new Date(timestamp);
-    const { t } = useTranslation();
-    
+    const date = new Date(timestamp)
+    const { t } = useTranslation()
+
     // For historic reports, show the full date and time
     if (isHistoric) {
         return date.toLocaleString(i18next.language === 'de' ? 'de-DE' : 'en-US', {
@@ -22,38 +22,39 @@ const formatTime = (timestamp: string, isHistoric: boolean): string => {
             month: 'short',
             day: 'numeric',
             hour: '2-digit',
-            minute: '2-digit'
-        });
+            minute: '2-digit',
+        })
     }
-    
+
     // For recent reports, show relative time
-    const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
+    const now = new Date()
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
+
     if (diffInMinutes < 1) {
-        return t('MarkerModal.now');
+        return t('MarkerModal.now')
     }
 
     if (diffInMinutes < 60) {
-        return `${diffInMinutes} ${t('MarkerModal.minutes')} ${t('MarkerModal.ago')}`;
+        return `${diffInMinutes} ${t('MarkerModal.minutes')} ${t('MarkerModal.ago')}`
     }
 
-    if (diffInMinutes < 1440) { // less than 24 hours
-        const hours = Math.floor(diffInMinutes / 60);
+    if (diffInMinutes < 1440) {
+        // less than 24 hours
+        const hours = Math.floor(diffInMinutes / 60)
         if (hours === 1) {
-            return t('MarkerModal.oneHourAgo');
+            return t('MarkerModal.oneHourAgo')
         }
-        return `${hours} ${t('MarkerModal.hours')} ${t('MarkerModal.ago')}`;
+        return `${hours} ${t('MarkerModal.hours')} ${t('MarkerModal.ago')}`
     }
-    
+
     // If more than 24 hours, show the date and time
     return date.toLocaleString(i18next.language === 'de' ? 'de-DE' : 'en-US', {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
-    });
-};
+        minute: '2-digit',
+    })
+}
 
 const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
     const { t } = useTranslation()

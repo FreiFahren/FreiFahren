@@ -6,7 +6,7 @@ import { CloseButton } from '../../Buttons/CloseButton/CloseButton'
 import { useModalAnimation } from '../../../hooks/UseModalAnimation'
 import { useTicketInspectors } from '../../../contexts/TicketInspectorsContext'
 import { Report } from '../../../utils/types'
-import { sendAnalyticsEvent } from 'src/utils/analytics'
+import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
 
 export interface MarkersProps {
     formSubmitted: boolean

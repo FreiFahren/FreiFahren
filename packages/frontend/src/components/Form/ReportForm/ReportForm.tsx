@@ -6,7 +6,7 @@ import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputFor
 import Line from '../../Miscellaneous/Line/Line'
 
 import { LinesList, StationList, reportInspector, StationProperty } from '../../../utils/dbUtils'
-import { sendAnalyticsEvent } from '../../../utils/analytics'
+import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
 import { highlightElement, createWarningSpan, getLineColor } from '../../../utils/uiUtils'
 import { calculateDistance } from '../../../utils/mapUtils'
 import { useLocation } from '../../../contexts/LocationContext'

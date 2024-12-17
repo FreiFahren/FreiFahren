@@ -1,4 +1,4 @@
-import { AnalyticsOptions, SavedEvent } from './types'
+import { AnalyticsOptions, SavedEvent } from '../utils/types'
 
 /**
  * Sends an analytics event to the Pirsch SDK.
@@ -8,9 +8,10 @@ import { AnalyticsOptions, SavedEvent } from './types'
  * @param {AnalyticsOptions} [options] - Optional parameters for the event. Metadata that you want to send with the event.
  * @returns {Promise<void>} A promise that resolves if the event is sent successfully, or rejects with an error.
  */
-export function sendAnalyticsEvent(eventName: string, options?: AnalyticsOptions): Promise<void> {
-    return new Promise((resolve, reject) => {
-        if (window.pirsch) {
+export async function sendAnalyticsEvent(eventName: string, options?: AnalyticsOptions): Promise<void> {
+    try {
+        await waitForPirsch()
+        return new Promise((resolve, reject) => {
             try {
                 window.pirsch(eventName, options || {})
                 resolve()
@@ -19,12 +20,12 @@ export function sendAnalyticsEvent(eventName: string, options?: AnalyticsOptions
                 saveUnsuccessfulEvent(eventName, options || {})
                 reject(error)
             }
-        } else {
-            console.warn('Pirsch SDK not loaded')
-            saveUnsuccessfulEvent(eventName, options || {})
-            reject(new Error('Pirsch SDK not loaded'))
-        }
-    })
+        })
+    } catch (error) {
+        console.warn('Pirsch SDK not loaded')
+        saveUnsuccessfulEvent(eventName, options || {})
+        throw error
+    }
 }
 
 /**
@@ -67,4 +68,28 @@ export async function sendSavedEvents(): Promise<void> {
     }
 
     localStorage.setItem('unsentAnalyticsEvents', JSON.stringify(remainingEvents))
+}
+
+export function isPirschLoaded(): boolean {
+    return typeof window.pirsch !== 'undefined'
+}
+
+export function waitForPirsch(timeout = 2000): Promise<void> {
+    return new Promise((resolve, reject) => {
+        if (isPirschLoaded()) {
+            resolve()
+            return
+        }
+
+        const startTime = Date.now()
+        const interval = setInterval(() => {
+            if (isPirschLoaded()) {
+                clearInterval(interval)
+                resolve()
+            } else if (Date.now() - startTime > timeout) {
+                clearInterval(interval)
+                reject(new Error('Pirsch failed to load'))
+            }
+        }, 100)
+    })
 }

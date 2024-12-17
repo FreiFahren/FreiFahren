@@ -21,7 +21,7 @@ import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils'
 import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton'
 import { highlightElement, currentColorTheme, setColorThemeInLocalStorage } from '../../utils/uiUtils'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
-import { sendAnalyticsEvent, sendSavedEvents } from '../../utils/analytics'
+import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
 import { Report } from 'src/utils/types'
 
 import './App.css'

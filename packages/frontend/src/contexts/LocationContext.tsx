@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useCallback, useRef } from 'react'
 import { watchPosition } from '../utils/mapUtils'
-import { sendAnalyticsEvent } from 'src/utils/analytics'
+import { sendAnalyticsEvent } from '../hooks/useAnalytics'
 
 interface LocationContextType {
     userPosition: { lng: number; lat: number } | null
