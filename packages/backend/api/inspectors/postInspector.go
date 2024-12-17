@@ -19,7 +19,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Add this at the package level, after the imports
 var lastTelegramNotification time.Time
 
 // @Summary Submit ticket inspector data
@@ -43,11 +42,16 @@ var lastTelegramNotification time.Time
 //
 // @Router /basics/inspectors [post]
 func PostInspector(c echo.Context) error {
-	logger.Log.Info().Msg("POST /basics/Inspector")
+	logger.Log.Info().
+		Str("userAgent", c.Request().UserAgent()).
+		Msg("POST /basics/Inspector")
 
 	var req structs.InspectorRequest
 	if err := c.Bind(&req); err != nil {
-		logger.Log.Error().Err(err).Msg("Error binding request in postInspector")
+		logger.Log.Error().
+			Err(err).
+			Str("userAgent", c.Request().UserAgent()).
+			Msg("Error binding request in postInspector")
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	logger.Log.Debug().Interface("Request", req).Msg("Request data")
