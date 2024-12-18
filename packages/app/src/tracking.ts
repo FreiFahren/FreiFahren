@@ -59,7 +59,6 @@ type Event = BaseEvent &
         | { name: 'Report Tapped'; station: string }
         | { name: 'Layer Selected'; layer: 'risk' | 'lines' }
         | { name: 'Report Sheet Opened' }
-        | { name: 'Report Submitted'; duration: number }
         | { name: 'Language Switched'; language: string }
         | { name: 'Privacy Policy Viewed'; from: string }
         | { name: 'Support Page Viewed'; from: string }
@@ -68,6 +67,13 @@ type Event = BaseEvent &
         | { name: 'Disclaimer Dismissed' }
         | { name: 'Privacy Policy Blocker Shown' }
         | { name: 'Privacy Policy Accepted' }
+        | {
+              name: 'Report Submitted'
+              duration: number
+              line: string | null
+              stationId: string
+              directionId: string | null
+          }
     )
 
 export const track = ({ name, duration, ...eventData }: Event) => {

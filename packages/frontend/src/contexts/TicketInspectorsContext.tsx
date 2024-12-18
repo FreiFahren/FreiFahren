@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react'
 import { getRecentDataWithIfModifiedSince } from 'src/utils/dbUtils'
-import { MarkerData } from 'src/utils/types'
+import { Report } from 'src/utils/types'
 import { useRiskData } from './RiskDataContext'
 
 interface TicketInspectorsContextProps {
-    ticketInspectorList: MarkerData[]
+    ticketInspectorList: Report[]
     refreshInspectorsData: () => void
 }
 
@@ -18,7 +18,7 @@ export const useTicketInspectors = () => {
     return context
 }
 export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [ticketInspectorList, setTicketInspectorList] = useState<MarkerData[]>([])
+    const [ticketInspectorList, setTicketInspectorList] = useState<Report[]>([])
     const lastReceivedInspectorTime = useRef<Date | null>(null)
     const riskData = useRiskData()
 
@@ -36,7 +36,7 @@ export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> =
                 // Create a map to track the most recent entry per station Id
                 const updatedList = new Map(currentList.map((inspector) => [inspector.station.id, inspector]))
 
-                newTicketInspectorList.forEach((newInspector: MarkerData) => {
+                newTicketInspectorList.forEach((newInspector: Report) => {
                     const existingInspector = updatedList.get(newInspector.station.id)
                     if (existingInspector) {
                         // Compare timestamps and wether it is historic to decide if we need to update
@@ -55,9 +55,7 @@ export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> =
                 // Set the latest timestamp as if-modified-since header for the next request
                 lastReceivedInspectorTime.current = new Date(
                     Math.max(
-                        ...newTicketInspectorList.map((inspector: MarkerData) =>
-                            new Date(inspector.timestamp).getTime()
-                        )
+                        ...newTicketInspectorList.map((inspector: Report) => new Date(inspector.timestamp).getTime())
                     )
                 )
                 riskData.refreshRiskData()
@@ -65,9 +63,7 @@ export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> =
             })
 
             lastReceivedInspectorTime.current = new Date(
-                Math.max(
-                    ...newTicketInspectorList.map((inspector: MarkerData) => new Date(inspector.timestamp).getTime())
-                )
+                Math.max(...newTicketInspectorList.map((inspector: Report) => new Date(inspector.timestamp).getTime()))
             )
             riskData.refreshRiskData()
         }

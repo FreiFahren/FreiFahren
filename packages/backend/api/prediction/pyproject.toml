@@ -1,0 +1,9 @@
+[project]
+name = "risk-prediction"
+version = "0.1.0"
+description = "Risk prediction model for transport segments"
+requires-python = ">=3.9"
+dependencies = [
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+]

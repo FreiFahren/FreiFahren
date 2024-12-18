@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/FreiFahren/backend/Rstats"
+	"github.com/FreiFahren/backend/api/prediction"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	_ "github.com/FreiFahren/backend/docs"
@@ -18,6 +18,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 )
+
+var lastTelegramNotification time.Time
 
 // @Summary Submit ticket inspector data
 //
@@ -40,11 +42,16 @@ import (
 //
 // @Router /basics/inspectors [post]
 func PostInspector(c echo.Context) error {
-	logger.Log.Info().Msg("POST /basics/Inspector")
+	logger.Log.Info().
+		Str("userAgent", c.Request().UserAgent()).
+		Msg("POST /basics/Inspector")
 
 	var req structs.InspectorRequest
 	if err := c.Bind(&req); err != nil {
-		logger.Log.Error().Err(err).Msg("Error binding request in postInspector")
+		logger.Log.Error().
+			Err(err).
+			Str("userAgent", c.Request().UserAgent()).
+			Msg("Error binding request in postInspector")
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	logger.Log.Debug().Interface("Request", req).Msg("Request data")
@@ -83,19 +90,29 @@ func PostInspector(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	// Based on the new data, generate new risk segments
-	err = Rstats.RunRiskModel()
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error running risk model in postInspector")
-	}
+	// Update risk model after successful report submission
+	go func() {
+		if _, err := prediction.ExecuteRiskModel(); err != nil {
+			logger.Log.Error().Err(err).Msg("Failed to update risk model after new report")
+		}
+	}()
 
 	// Notify Telegram bot if there's no author (web app report)
-	if pointers.AuthorPtr == nil {
-		telegramEndpoint := os.Getenv("TELEGRAM_BOTS_URL") + "/report-inspector"
-		if err := notifyOtherServiceAboutReport(telegramEndpoint, dataToInsert, "Telegram bot"); err != nil {
-			logger.Log.Error().Err(err).Msg("Error notifying Telegram bot about report in postInspector")
+	go func() {
+		if pointers.AuthorPtr == nil {
+			// avoid spamming the telegram group
+			if time.Since(lastTelegramNotification) >= 5*time.Minute {
+				telegramEndpoint := os.Getenv("TELEGRAM_BOTS_URL") + "/report-inspector"
+				if err := notifyOtherServiceAboutReport(telegramEndpoint, dataToInsert, "Telegram bot"); err != nil {
+					logger.Log.Error().Err(err).Msg("Error notifying Telegram bot about report in postInspector")
+				} else {
+					lastTelegramNotification = time.Now()
+				}
+			} else {
+				logger.Log.Info().Msg("Skipping Telegram notification - rate limit not exceeded")
+			}
 		}
-	}
+	}()
 
 	return c.JSON(http.StatusOK, dataToInsert)
 }

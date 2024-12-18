@@ -1,5 +1,6 @@
-.info-popup.marker-modal h2 {
-    margin-bottom: var(--text-relation-weak);
+.marker-modal.info-popup.modal .direction-line {
+    justify-content: flex-start;
+    gap: var(--margin-s);
 }
 
 .marker-modal.info-popup.modal .description {
@@ -9,13 +10,28 @@
     margin-top: var(--margin-m);
     width: fit-content;
     color: var(--color-white);
+    font-size: var(--font-xs);
+    border-left: 4px solid var(--color-primary);
+}
+
+@keyframes button-pulse {
+    0%,
+    71.4% {
+        transform: scale(1);
+    }
+    14.3% {
+        transform: scale(1.05);
+    }
+    28.6% {
+        transform: scale(1);
+    }
 }
 
 .marker-modal.info-popup .footer {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-top: var(--margin-s);
-    min-height: 20.5px;
     color: var(--color-primary);
     width: 100%;
 }
@@ -27,8 +43,8 @@
 
 .marker-modal.info-popup .disclaimer {
     font-size: var(--font-xxs);
-    opacity: 0;
-    transition: opacity var(--transition-long);
+    color: var(--color-primary);
+    text-align: right;
 }
 
 .marker-modal.info-popup .disclaimer.visible {
@@ -39,4 +55,9 @@
     color: inherit;
     text-decoration: underline;
     cursor: pointer;
+}
+
+.marker-modal.info-popup .reports-count {
+    font-size: var(--font-xs);
+    color: var(--color-primary);
 }

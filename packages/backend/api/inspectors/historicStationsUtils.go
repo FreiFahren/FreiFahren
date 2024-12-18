@@ -77,13 +77,15 @@ func calculateWeekendAdjustment(currentTime time.Time, threshold int) float64 {
 // FetchAndAddHistoricData fetches and adds historic data to the list of ticket inspectors.
 //
 // parameters:
-// 	ticketInfoList: the list of ticket inspectors
-// 	remaining: the number of historic data to fetch
-// 	startTime: the time to start fetching historic data from
+//
+//	ticketInfoList: the list of ticket inspectors
+//	remaining: the number of historic data to fetch
+//	startTime: the time to start fetching historic data from
 //
 // returns:
-// 	the list of ticket inspectors with the historic data added
-// 	an error if one occurred
+//
+//	the list of ticket inspectors with the historic data added
+//	an error if one occurred
 func FetchAndAddHistoricData(ticketInfoList []utils.TicketInspector, remaining int, startTime time.Time) ([]utils.TicketInspector, error) {
 	logger.Log.Debug().Msg("Fetching and adding historic data")
 
@@ -109,11 +111,13 @@ func FetchAndAddHistoricData(ticketInfoList []utils.TicketInspector, remaining i
 // So if the start and end time are 1 hour apart, the timestamp will be a random number in first 15 minutes of the start time.
 //
 // parameters:
+//
 //	startTime: the start time
-// 	endTime: the end time
+//	endTime: the end time
 //
 // returns:
-// 	the calculated timestamp
+//
+//	the calculated timestamp
 //
 // This is being done to make sure that users will disregard the historic data and deem it as irrelevant.
 func calculateHistoricDataTimestamp(startTime time.Time, endTime time.Time) time.Time {
@@ -121,7 +125,6 @@ func calculateHistoricDataTimestamp(startTime time.Time, endTime time.Time) time
 	percentile25 := duration / 4
 	randomDuration := time.Duration(rand.Int63n(int64(percentile25)))
 	randomTimestamp := startTime.Add(randomDuration)
-	logger.Log.Debug().Msgf("Calculated timestamp: %s, for start time: %s and end time: %s", randomTimestamp, startTime, endTime)
 
 	return randomTimestamp
 }

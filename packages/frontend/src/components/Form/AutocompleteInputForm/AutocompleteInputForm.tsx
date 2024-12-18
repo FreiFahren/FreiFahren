@@ -18,6 +18,14 @@ interface AutocompleteInputFormProps<T> {
     setHighlightedElementSelected?: (highlightedElementSelected: boolean) => void
 }
 
+interface HighlightedElementProps {
+    children: {
+        props: {
+            children: string
+        }
+    }
+}
+
 const search_icon = `${process.env.PUBLIC_URL}/icons/search.svg`
 
 /**
@@ -94,6 +102,10 @@ function AutocompleteInputForm<T>({
         [onSelect, elementIsSelected, setHighlightedElementSelected]
     )
 
+    const getHighlightedElementValue = (child: React.ReactElement): string => {
+        return (child.props as HighlightedElementProps).children?.props?.children ?? ''
+    }
+
     return (
         <section>
             <div className="align-child-on-line" id="searchable-select-div">
@@ -120,6 +132,7 @@ function AutocompleteInputForm<T>({
                             onSelect={(selectedValue) => handleSelect(selectedValue, true)}
                             value={value ? getDisplayValue(items[value]) : ''}
                             containerClassName="align-child-column highlight-list-container"
+                            getValue={getHighlightedElementValue}
                         >
                             {Object.entries(highlightElements).map(([key, item]) => (
                                 <div key={key}>
@@ -134,9 +147,10 @@ function AutocompleteInputForm<T>({
                     onSelect={handleSelect}
                     value={value ? getDisplayValue(items[value]) : ''}
                     containerClassName="align-child-column"
+                    getValue={getHighlightedElementValue}
                 >
                     {filteredItems.map(([key, item]) => (
-                        <div key={key}>
+                        <div key={key} data-value={getDisplayValue(item)}>
                             <strong>{getDisplayValue(item)}</strong>
                         </div>
                     ))}

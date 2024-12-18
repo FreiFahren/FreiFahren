@@ -1,0 +1,16 @@
+.share-button {
+    margin-top: var(--margin-m);
+    background-color: var(--color-light-gray);
+    display: flex;
+    align-items: center;
+    height: 30px;
+    justify-content: center;
+    gap: var(--margin-s);
+    animation: button-pulse 5s infinite;
+}
+
+.share-button span {
+    font-size: var(--font-s);
+    font-weight: 500;
+    color: black;
+}

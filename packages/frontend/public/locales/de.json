@@ -52,10 +52,9 @@
         "setLocation": "Standort setzen"
     },
     "MarkerModal": {
-        "reports": "Mal",
+        "reports": "mal",
         "thisWeek": "diese Woche",
-        "moreThan": "Vor mehr als",
-        "moreThan45Minutes": "45 min",
+        "moreThan45Min": "Vor mehr als 45 min",
         "oneHourAgo": "Vor einer",
         "oneHour": "Stunde",
         "hours": "Stunden",
@@ -64,15 +63,13 @@
         "minutes": "min",
         "oneStation": "eine Station",
         "stations": "Stationen",
-        "fromYou": "von dir entfernt",
+        "fromYou": "entfernt",
         "direction": "Richtung",
-        "invite": "Teile",
-        "inviteText": "mit Freunden.",
-        "disclaimer": "Daten vielleicht ungenau."
+        "inviteText": "Daten vielleicht ungenau."
     },
     "Share": {
         "title": "Schau dir mal diese App an.",
-        "text": "Siehe, wo Kontrolleure in Berlin sind!\n\nHier ist eine Meldung:\nStation: {{station}}\nRichtung: {{direction}}\nLinie: {{line}}\n",
+        "text": "Siehe, wo Kontrolleure in Berlin sind!\n\nHier ist eine Meldung:\nStation: {{station}}\nRichtung: {{direction}}\nLinie: {{line}}\nZeit: {{time}}",
         "copied": "Link kopiert!"
     },
     "StatsPopUp": {
@@ -87,7 +84,7 @@
         "lines": "Linien",
         "stations": "Stationen",
         "reportsHeading": "Aktuelle Meldungen",
-        "risk": "aktuelles Risiko",
+        "risk": "Aktuelles Risiko",
         "topLines": "Top Linien",
         "topStations": "Top Stationen",
         "past24Hours": "letzte 24 Stunden",
@@ -233,5 +230,10 @@
                 "content": "Die Nutzung unserer Webseite ist in der Regel ohne Angabe personenbezogener Daten möglich. Für weitere Informationen sehen sie unsere Datenschutzerklärung."
             }
         }
+    },
+    "ReportSummaryModal": {
+        "title": "Danke für deine Meldung!",
+        "description": "Menschen schätzen deine Hilfe!",
+        "button": "Weiter"
     }
 }
