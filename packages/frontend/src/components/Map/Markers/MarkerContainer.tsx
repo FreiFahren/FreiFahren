@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
 
-import { OpacityMarker } from './Classes/OpacityMarker/OpacityMarker'
-import MarkerModal from '../../Modals/MarkerModal/MarkerModal'
-import { CloseButton } from '../../Buttons/CloseButton/CloseButton'
-import { useModalAnimation } from '../../../hooks/UseModalAnimation'
 import { useTicketInspectors } from '../../../contexts/TicketInspectorsContext'
-import { Report } from '../../../utils/types'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
+import { useModalAnimation } from '../../../hooks/UseModalAnimation'
+import { Report } from '../../../utils/types'
+import { CloseButton } from '../../Buttons/CloseButton/CloseButton'
+import MarkerModal from '../../Modals/MarkerModal/MarkerModal'
+import { OpacityMarker } from './Classes/OpacityMarker/OpacityMarker'
 
 export interface MarkersProps {
     formSubmitted: boolean
@@ -32,39 +32,38 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
         sendAnalyticsEvent('Marker clicked', {
             meta: {
                 station: report.station.name,
-                ageInMinutes: ageInMinutes,
+                ageInMinutes,
                 isHistoric: report.isHistoric,
             },
-        })
+        }).catch(
+            // eslint-disable-next-line no-console
+            console.error
+        )
         openMarkerModal()
     }
 
     return (
         <div>
-            {ticketInspectorList.map((ticketInspector, index) => {
-                return (
-                    <OpacityMarker
-                        isFirstOpen={isFirstOpen}
-                        markerData={ticketInspector}
-                        index={index}
-                        key={ticketInspector.station.id}
-                        formSubmitted={formSubmitted}
-                        onMarkerClick={handleMarkerClick}
-                    />
-                )
-            })}
-            {isMarkerModalOpen && selectedMarker && (
-                <>
-                    <MarkerModal
-                        selectedMarker={selectedMarker}
-                        className={`open ${isMarkerModalAnimatingOut ? 'slide-out' : 'slide-in'}`}
-                        userLat={userPosition?.lat}
-                        userLng={userPosition?.lng}
-                    >
-                        <CloseButton closeModal={closeMarkerModal} />
-                    </MarkerModal>
-                </>
-            )}
+            {ticketInspectorList.map((ticketInspector, index) => (
+                <OpacityMarker
+                    isFirstOpen={isFirstOpen}
+                    markerData={ticketInspector}
+                    index={index}
+                    key={ticketInspector.station.id}
+                    formSubmitted={formSubmitted}
+                    onMarkerClick={handleMarkerClick}
+                />
+            ))}
+            {isMarkerModalOpen && selectedMarker ? (
+                <MarkerModal
+                    selectedMarker={selectedMarker}
+                    className={`open ${isMarkerModalAnimatingOut ? 'slide-out' : 'slide-in'}`}
+                    userLat={userPosition?.lat}
+                    userLng={userPosition?.lng}
+                >
+                    <CloseButton closeModal={closeMarkerModal} />
+                </MarkerModal>
+            ) : null}
         </div>
     )
 }
