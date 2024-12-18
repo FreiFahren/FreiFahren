@@ -1,6 +1,6 @@
 import './index.css'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { I18nextProvider } from 'react-i18next'
 import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom'
@@ -29,21 +29,27 @@ const FUNNEL_ROUTES: FunnelConfig[] = [
 const FunnelRedirect: React.FC<FunnelConfig> = ({ source, path }) => {
     const navigate = useNavigate()
 
-    sendAnalyticsEvent('Clicked on Funnel link', {
-        meta: {
-            source,
-            path,
-        },
-    })
-        .then(() => {
-            navigate('/', { replace: true })
+    const handleRedirect = () => {
+        sendAnalyticsEvent('Clicked on Funnel link', {
+            meta: {
+                source,
+                path,
+            },
         })
-        .catch((error) => {
-            // eslint-disable-next-line no-console
-            console.error('Failed to send analytics event:', error)
-            // Still redirect even if the event fails
-            navigate('/', { replace: true })
-        })
+            .then(() => {
+                navigate('/', { replace: true })
+            })
+            .catch((error) => {
+                // eslint-disable-next-line no-console
+                console.error('Failed to send analytics event:', error)
+                // Still redirect even if the event fails
+                navigate('/', { replace: true })
+            })
+    }
+
+    useEffect(() => {
+        handleRedirect()
+    }, [navigate, source, path, handleRedirect])
 
     return null
 }
