@@ -43,8 +43,6 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
             {children}
             <h1>{station.name}</h1>
             <div className="align-child-on-line direction-line">
-
-                
                 {/*  because no line should be shown
                 eslint-disable-next-line react/jsx-no-leaked-render */}
                 {/* eslint-disable-next-line @typescript-eslint/strict-boolean-expressions, react/jsx-no-leaked-render */}
@@ -63,7 +61,9 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                     {userLat !== undefined && userLng !== undefined ? <span className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage}</span> : null}
                     <span className="disclaimer">{t('MarkerModal.inviteText')}</span>
                 </div>
-                {selectedMarker.message !== null ? <p className="description">{selectedMarker.message}</p> : null}
+                {/* description can be undefined */}
+                {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
+                {selectedMarker.message !== null && selectedMarker.message !== undefined ? <p className="description">{selectedMarker.message}</p> : null}
                 <ShareButton report={selectedMarker} />
             </div>
         </div>
