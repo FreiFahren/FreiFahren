@@ -17,7 +17,7 @@ import { ReportItem } from './ReportItem'
 
 interface ReportsModalProps {
     className?: string
-    closeModal: () => void
+    onCloseModal: () => void
 }
 
 type TabType = 'summary' | 'lines' | 'stations'
@@ -51,14 +51,15 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, getChart
         </div>
     )
 }
-
+// PLEASE REFACTOR THIS LATER OR MOVE IT OUT, THE REPORTS MODAL COMPONENT IS A FUCKING MESS
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomBarShape = ({ x, y, width, height, payload }: any) => {
     const color = getLineColor(payload.line)
 
     return <rect x={x} y={y} width={width} height={height} fill={color} rx={4} ry={4} />
 }
 
-const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) => {
+const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) => {
     const { t } = useTranslation()
     const [currentTab, setCurrentTab] = useState<TabType>('summary')
 
@@ -174,7 +175,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                 Object.entries(segmentColors).forEach(([segmentId, color]) => {
                     // eslint-disable-next-line prefer-destructuring
                     const line = segmentId.split('-')[0]
-                    const score = colorScores[color] ?? 0 // 0 is no risk, which is not returned by the API
+                    const score = colorScores[color]
 
                     if (!lineScores.has(line)) {
                         lineScores.set(line, { score, class: score })
@@ -270,7 +271,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                             <div
                                                 key={line}
                                                 className={`risk-line risk-level-${riskData.class}`}
-                                                onClick={() => closeModal()}
+                                                onClick={() => onCloseModal()}
                                             >
                                                 <img
                                                     src={`/icons/risk-${riskData.class}.svg`}
@@ -288,7 +289,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                             <div
                                                 key={line}
                                                 className={`risk-line risk-level-${riskData.class}`}
-                                                onClick={() => closeModal()}
+                                                onClick={() => onCloseModal()}
                                             >
                                                 <img
                                                     src={`/icons/risk-${riskData.class}.svg`}
@@ -306,7 +307,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                             <div
                                                 key={line}
                                                 className={`risk-line risk-level-${riskData.class}`}
-                                                onClick={() => closeModal()}
+                                                onClick={() => onCloseModal()}
                                             >
                                                 <img
                                                     src={`/icons/risk-${riskData.class}.svg`}

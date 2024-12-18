@@ -1,11 +1,10 @@
-import React, { useCallback } from 'react'
+import './ShareButton.css'
 
+import i18next, { TFunction } from 'i18next'
+import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { sendAnalyticsEvent } from 'src/utils/analytics'
 import { Report } from 'src/utils/types'
-
-import './ShareButton.css'
-import i18next, { TFunction } from 'i18next'
 
 interface ShareButtonProps {
     report?: Report
@@ -60,7 +59,6 @@ const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
 
     const handleShare = useCallback(
         async (event: React.MouseEvent) => {
-            console.log('Share button clicked')
             event.preventDefault()
             try {
                 if (!report) {
@@ -80,11 +78,16 @@ const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
 
                 const shareText = t('Share.text', {
                     station: report.station.name,
+
+                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                     direction: report.direction?.name !== null && report.direction?.name !== undefined ? report.direction.name : '?',
+                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                     line: report.line !== null && report.line !== undefined ? report.line : '?',
                     time: formatTime(report.timestamp, report.isHistoric, t),
                 })
-
+                
+                // The error seems incorrect in this case - the navigator.share check is actually necessary because it's not available in all browsers.
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
                 if (navigator.share) {
                     await navigator.share({
                         title: t('Share.title'),
@@ -100,6 +103,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
                     })
                 } else {
                     await navigator.clipboard.writeText(`${shareText} ${window.location.href}`)
+                    // eslint-disable-next-line no-alert
                     alert(t('Share.copied'))
                 }
             } catch (error) {

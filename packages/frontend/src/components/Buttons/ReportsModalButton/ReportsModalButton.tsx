@@ -1,13 +1,12 @@
+import './ReportsModalButton.css'
+
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-
 import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
-import { sendAnalyticsEvent } from 'src/utils/analytics'
 import { useViewedReports } from 'src/contexts/ViewedReportsContext'
+import { sendAnalyticsEvent } from 'src/utils/analytics'
 
 import { Line } from '../../Miscellaneous/Line/Line'
-
-import './ReportsModalButton.css'
 
 interface ReportsModalButtonProps {
     openModal: () => void

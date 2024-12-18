@@ -14,13 +14,13 @@ const ReportItem: React.FC<ReportItemProps> = ({ report, currentTime }) => {
     const { t } = useTranslation()
 
     const elapsedTimeMessage = useElapsedTimeMessage(report.timestamp, report.isHistoric)
-    const shouldShowTime = currentTime !== null && currentTime !== undefined
+    const shouldShowTime = currentTime !== undefined
     const displayMessage = shouldShowTime ? elapsedTimeMessage : null
 
     return (
         <div key={report.station.id + report.timestamp} className="report-item">
             <div className="align-child-on-line">
-                {report.line !== null && report.line !== undefined ? <Line line={report.line} key={report.line} /> : null}
+                {report.line !== null ? <Line line={report.line} key={report.line} /> : null}
                 <h4>{report.station.name}</h4>
                 {displayMessage ? <p>{displayMessage}</p> : null}
             </div>

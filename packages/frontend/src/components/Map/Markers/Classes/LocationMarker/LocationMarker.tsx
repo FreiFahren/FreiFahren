@@ -17,8 +17,6 @@ const LocationMarker: React.FC<LocationMarkerProps> = ({ userPosition }) => {
         const stopWatching = await watchPosition(setUserPosition)
 
         return () => stopWatching()
-        // fix later
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setUserPosition])
 
     useEffect(() => {

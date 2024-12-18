@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
-
-import { OpacityMarker } from './Classes/OpacityMarker/OpacityMarker'
-import { MarkerModal } from '../../Modals/MarkerModal/MarkerModal'
-import { CloseButton } from '../../Buttons/CloseButton/CloseButton'
-import { useModalAnimation } from '../../../hooks/UseModalAnimation'
-import { useTicketInspectors } from '../../../contexts/TicketInspectorsContext'
-import { Report } from '../../../utils/types'
 import { sendAnalyticsEvent } from 'src/utils/analytics'
+
+import { useTicketInspectors } from '../../../contexts/TicketInspectorsContext'
+import { useModalAnimation } from '../../../hooks/UseModalAnimation'
+import { Report } from '../../../utils/types'
+import { CloseButton } from '../../Buttons/CloseButton/CloseButton'
+import { MarkerModal } from '../../Modals/MarkerModal/MarkerModal'
+import { OpacityMarker } from './Classes/OpacityMarker/OpacityMarker'
 
 export interface MarkersProps {
     formSubmitted: boolean

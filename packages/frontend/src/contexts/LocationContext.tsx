@@ -1,6 +1,7 @@
-import React, { createContext, useState, useContext, useCallback, useRef } from 'react'
-import { watchPosition } from '../utils/mapUtils'
+import React, { createContext, useCallback, useContext, useMemo, useRef,useState } from 'react'
 import { sendAnalyticsEvent } from 'src/utils/analytics'
+
+import { watchPosition } from '../utils/mapUtils'
 
 interface LocationContextType {
     userPosition: { lng: number; lat: number } | null
@@ -12,6 +13,7 @@ const LocationContext = createContext<LocationContextType | undefined>(undefined
 
 export const useLocation = () => {
     const context = useContext(LocationContext)
+
     if (!context) {
         throw new Error('useLocation must be used within a LocationProvider')
     }
@@ -19,28 +21,36 @@ export const useLocation = () => {
 }
 
 export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [userPosition, setUserPositionState] = useState<{ lng: number; lat: number } | null>(null)
+    const [userPosition, setUserPosition] = useState<{ lng: number; lat: number } | null>(null)
     const hasLocationEventBeenSentRef = useRef(false) // avoid sending the location event on every render
 
-    const setUserPosition = useCallback((position: { lng: number; lat: number } | null) => {
-        setUserPositionState(position)
+    const setUserPositionState = useCallback((position: { lng: number; lat: number } | null) => {
+        setUserPosition(position)
         if (position && !hasLocationEventBeenSentRef.current) {
-            sendAnalyticsEvent('User Position has been set')
+            sendAnalyticsEvent('User Position has been set').catch((error) => {
+                // fix later with sentry
+                // eslint-disable-next-line no-console
+                console.error('Error sending analytics event:', error)
+            })
             hasLocationEventBeenSentRef.current = true
         }
     }, [])
 
     const initializeLocationTracking = useCallback(() => {
-        watchPosition(setUserPosition)
-    }, [setUserPosition])
+        watchPosition(setUserPositionState).catch((error) => {
+            // fix later with sentry
+            // eslint-disable-next-line no-console
+            console.error('Error watching position:', error)
+        })
+    }, [setUserPositionState])
 
     return (
         <LocationContext.Provider
-            value={{
+            value={useMemo(() => ({
                 userPosition,
                 setUserPosition,
                 initializeLocationTracking,
-            }}
+            }), [userPosition, setUserPosition, initializeLocationTracking])}
         >
             {children}
         </LocationContext.Provider>

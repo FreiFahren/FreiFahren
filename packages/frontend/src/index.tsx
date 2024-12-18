@@ -10,8 +10,8 @@ import { i18n } from './i18n'
 import { App } from './pages/App/App'
 import { Impressum } from './pages/Impressum/Impressum'
 import { PrivacyPolicy } from './pages/PrivacyPolicy/PrivacyPolicy'
-import Support from './pages/Support/Support'
-import reportWebVitals from './reportWebVitals'
+import { Support } from './pages/Support/Support'
+import { reportWebVitals } from './reportWebVitals'
 import { sendAnalyticsEvent } from './utils/analytics'
 
 type FunnelConfig = {

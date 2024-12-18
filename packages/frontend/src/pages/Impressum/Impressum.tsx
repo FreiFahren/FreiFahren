@@ -16,6 +16,8 @@ const Impressum = () => {
             <ul>
                 {(t('Impressum.sections.representatives.content', { returnObjects: true }) as string[]).map(
                     (name, index) => (
+                        // fix later
+                        // eslint-disable-next-line react/no-array-index-key
                         <li key={index}>{name}</li>
                     )
                 )}

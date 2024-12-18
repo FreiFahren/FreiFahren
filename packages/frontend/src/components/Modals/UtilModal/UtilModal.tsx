@@ -71,13 +71,17 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                 </div>
             </div>
             {isFeedbackModalOpen ? <>
+                    {/* always truthy, still */}
+                    {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
                     <FeedbackModal openAnimationClass={isFeedbackModalOpen ? 'open center-animation' : ''} />
                     <Backdrop handleClick={() => setIsFeedbackModalOpen(false)} Zindex={3} />
                 </> : null}
             {isLegalDisclaimerOpen ? <>
                     <LegalDisclaimer
-                        handleConfirm={() => setIsLegalDisclaimerOpen(false)}
+                        // always truthy, still
+                        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                         openAnimationClass={isLegalDisclaimerOpen ? 'open center-animation high-z-index' : ''}
+                        handleConfirm={() => setIsLegalDisclaimerOpen(false)}
                     />
                     <Backdrop handleClick={() => setIsLegalDisclaimerOpen(false)} Zindex={3} />
                 </> : null}

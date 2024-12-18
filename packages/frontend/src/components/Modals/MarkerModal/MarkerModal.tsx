@@ -49,7 +49,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                 eslint-disable-next-line react/jsx-no-leaked-render */}
                 {/* eslint-disable-next-line @typescript-eslint/strict-boolean-expressions, react/jsx-no-leaked-render */}
                 {line && <Line line={line} />}
-                {direction?.name !== null && direction?.name !== undefined ? <h2>{direction.name}</h2> : null}
+                {direction?.name !== undefined ? <h2>{direction.name}</h2> : null}
             </div>
             <div>
                 <p>{elapsedTimeMessage}</p>
@@ -63,7 +63,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                     {userLat !== undefined && userLng !== undefined ? <span className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage}</span> : null}
                     <span className="disclaimer">{t('MarkerModal.inviteText')}</span>
                 </div>
-                {selectedMarker.message !== null && selectedMarker.message !== undefined ? <p className="description">{selectedMarker.message}</p> : null}
+                {selectedMarker.message !== null ? <p className="description">{selectedMarker.message}</p> : null}
                 <ShareButton report={selectedMarker} />
             </div>
         </div>

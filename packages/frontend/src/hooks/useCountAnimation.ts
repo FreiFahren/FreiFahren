@@ -1,14 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export const useCountAnimation = (end: number, duration: number = 1000) => {
     const [count, setCount] = useState(0)
 
-    useState(() => {
+    useEffect(() => {
         let startTimestamp: number | null = null
         let animationFrame: number
 
         const step = (timestamp: number) => {
-            if (!startTimestamp) startTimestamp = timestamp
+            if (startTimestamp === null) startTimestamp = timestamp
             const progress = Math.min((timestamp - startTimestamp) / duration, 1)
 
             setCount(Math.floor(progress * end))
@@ -24,11 +24,11 @@ export const useCountAnimation = (end: number, duration: number = 1000) => {
 
         // Cleanup
         return () => {
-            if (animationFrame) {
+            if (animationFrame !== 0 ) {
                 window.cancelAnimationFrame(animationFrame)
             }
         }
-    })
+    }, [end, duration])
 
     return count
 }

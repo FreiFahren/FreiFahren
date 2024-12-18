@@ -29,14 +29,14 @@ const redHighlight = (text: string) => (
 
 interface ReportFormProps {
     closeModal: () => void
-    notifyParentAboutSubmission: (reportedData: Report) => void
+    onNotifyParentAboutSubmission: (reportedData: Report) => void
     className?: string
 }
 
 const ITEM_HEIGHT = 37
 const REPORT_COOLDOWN_MINUTES = 15
 
-const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSubmission, className }) => {
+const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmission, className }) => {
     const { t } = useTranslation()
 
     const { userPosition } = useLocation()
@@ -312,7 +312,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         const finalizeSubmission = (timestamp: Date) => {
             localStorage.setItem('lastReportTime', timestamp.toISOString()) // Save the timestamp of the report to prevent spamming
             closeModal()
-            notifyParentAboutSubmission(report)
+            onNotifyParentAboutSubmission(report)
         }
 
         try {

@@ -1,5 +1,5 @@
 import { isEqual } from 'lodash'
-import React, { createContext, useCallback,useContext, useState, useMemo } from 'react'
+import React, { createContext, useCallback,useContext, useMemo,useState } from 'react'
 import { RiskData } from 'src/utils/types'
 
 const defaultRefreshRiskData = async (): Promise<void> => {

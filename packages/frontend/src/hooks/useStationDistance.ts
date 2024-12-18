@@ -1,4 +1,4 @@
-import { useRef,useState, useEffect } from 'react'
+import { useEffect,useRef,useState } from 'react'
 
 import { getStationDistance , StationList } from '../utils/databaseUtils'
 import { getNearestStation } from '../utils/mapUtils'
