@@ -9,40 +9,8 @@ import { Linking } from 'react-native'
 import { config } from '../../config'
 import { track } from '../../tracking'
 import { FFButton, FFText, FFView } from '../common/base'
-import { FFCarousellSelect } from '../common/FFCarousellSelect'
 import { FFScrollSheet } from '../common/FFSheet'
-
-type Language = 'en' | 'de'
-
-const LanguageSwitcher = () => {
-    const { i18n, t } = useTranslation('settings')
-
-    const languages = {
-        de: '🇩🇪 Deutsch',
-        en: '🇬🇧 English',
-    } as const
-
-    const handleSelect = (item: Language) => {
-        track({ name: 'Language Switched', language: item })
-        // eslint-disable-next-line no-console
-        i18n.changeLanguage(item).catch(console.error)
-    }
-
-    return (
-        <FFView>
-            <FFText variant="header2" mt="xs" mb="xxs">
-                {t('language')}
-            </FFText>
-            <FFCarousellSelect
-                hideCheck
-                options={['en', 'de'] as const}
-                renderOption={(item: Language) => <FFText variant="label">{languages[item]}</FFText>}
-                selectedOption={i18n.language as Language}
-                onSelect={handleSelect}
-            />
-        </FFView>
-    )
-}
+import { LanguageSwitcher } from '../common/LanguageSwitcher'
 
 const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
     const { t } = useTranslation('settings')
@@ -61,6 +29,9 @@ const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
         <FFScrollSheet ref={ref}>
             <FFText variant="header1" color="fg">
                 {t('title')}
+            </FFText>
+            <FFText variant="header2" mt="xs" mb="xxs">
+                {t('language')}
             </FFText>
             <LanguageSwitcher />
             <FFView flexDirection="row" gap="xs" mt="s">

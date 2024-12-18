@@ -8,6 +8,7 @@ import { config } from '../../config'
 import { track } from '../../tracking'
 import { FFButton, FFText, FFView } from '../common/base'
 import { FFScrollSheet } from '../common/FFSheet'
+import { LanguageSwitcher } from '../common/LanguageSwitcher'
 
 type DisclaimerProps = {
     onDismiss: () => void
@@ -22,9 +23,10 @@ export const Disclaimer = forwardRef(({ onDismiss }: DisclaimerProps, ref: Ref<B
     }
 
     return (
-        <FFScrollSheet ref={ref} enablePanDownToClose={false} index={0}>
+        <FFScrollSheet ref={ref} enablePanDownToClose={false} index={0} backdropType="non-closeable">
             <FFView>
                 <FFText variant="header1">{t('title')}</FFText>
+                <LanguageSwitcher marginTop="s" />
                 <FFText mt="xs">{t('subtitle')}</FFText>
                 <FFText variant="header3" mt="xs">
                     {t('bullet1.title')}

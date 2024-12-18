@@ -23,7 +23,7 @@ export const PrivacyPolicyUpdate = forwardRef(({ onDismiss }: PrivacyPolicyUpdat
     }
 
     return (
-        <FFScrollSheet ref={ref} enablePanDownToClose={false} index={0}>
+        <FFScrollSheet ref={ref} enablePanDownToClose={false} index={0} backdropType="non-closeable">
             <FFView>
                 <FFText variant="header1">{t('title')}</FFText>
                 <FFText mt="xs">{t('text')}</FFText>
