@@ -5,7 +5,7 @@ import { persist } from 'zustand/middleware'
 
 import { Report } from './api'
 
-const PERSISTED_KEYS = ['layer', 'dismissedDisclaimerAt', 'privacyPolicyVersion', 'language'] as const
+const PERSISTED_KEYS = ['layer', 'dismissedDisclaimerAt', 'privacyPolicyVersion'] as const
 
 type AppState = {
     layer: 'risk' | 'lines'
@@ -13,7 +13,6 @@ type AppState = {
     dismissedDisclaimerAt: string | null
     privacyPolicyVersion: number | null
     appLocked: boolean
-    language: string | null
     update: (update: Partial<AppState>) => void
 }
 
@@ -25,7 +24,6 @@ export const useAppStore = create<AppState>()(
             dismissedDisclaimerAt: null,
             privacyPolicyVersion: null,
             appLocked: true,
-            language: null,
             update: (update) => set((state) => ({ ...state, ...update })),
         }),
         {

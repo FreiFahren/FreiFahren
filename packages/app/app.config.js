@@ -8,7 +8,6 @@ export default {
         icon: './assets/app-icon.png',
         userInterfaceStyle: 'dark',
         plugins: [
-            'expo-localization',
             [
                 'expo-dev-launcher',
                 {
