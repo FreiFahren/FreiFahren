@@ -59,7 +59,7 @@ const TransparentCloseableSheetBackdrop = (props: BottomSheetBackdropProps) => (
 )
 
 type FFSheetBaseProps = Partial<BottomSheetModalProps> & {
-    backdropType?: 'closeable' | 'non-closeable' | 'transparent'
+    backdropType?: 'closeable' | 'non-closeable' | 'transparent' | 'none'
 }
 
 const FFSheetBase = forwardRef(
@@ -77,6 +77,7 @@ const FFSheetBase = forwardRef(
                     closeable: CloseableDarkSheetBackdrop,
                     'non-closeable': NonCloseableDarkSheetBackdrop,
                     transparent: TransparentCloseableSheetBackdrop,
+                    none: undefined,
                 }[backdropType]
             }
             maxDynamicContentSize={Dimensions.get('window').height * 0.9}

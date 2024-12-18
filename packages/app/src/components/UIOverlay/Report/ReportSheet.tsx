@@ -112,9 +112,9 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
 
         const newReport = await submitReport(data)
 
-        updateAppStore({ reportToShow: newReport })
-
         close()
+
+        updateAppStore({ reportToShow: newReport })
     }
 
     return (
