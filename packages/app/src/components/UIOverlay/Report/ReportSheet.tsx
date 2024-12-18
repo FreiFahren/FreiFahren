@@ -96,13 +96,21 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
     const onSubmit = async () => {
         if (!isValid) return
 
-        track({ name: 'Report Submitted', duration: (Date.now() - openedAt.current!) / 1000 })
+        const duration = Math.floor((Date.now() - openedAt.current!) / 1000)
 
-        const newReport = await submitReport({
+        const data = {
             line: selectedLine,
             stationId: selectedStation,
             directionId: selectedDirection,
+        }
+
+        track({
+            name: 'Report Submitted',
+            duration,
+            ...data,
         })
+
+        const newReport = await submitReport(data)
 
         updateAppStore({ reportToShow: newReport })
 
