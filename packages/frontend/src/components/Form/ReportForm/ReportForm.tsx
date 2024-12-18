@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import { useLocation } from '../../../contexts/LocationContext'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
-import { sendAnalyticsEvent } from '../../../utils/analytics'
+import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
 import { LinesList, reportInspector, StationList, StationProperty } from '../../../utils/databaseUtils'
 import { calculateDistance } from '../../../utils/mapUtils'
 import { Report } from '../../../utils/types'

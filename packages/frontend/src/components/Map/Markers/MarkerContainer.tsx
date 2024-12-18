@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { sendAnalyticsEvent } from 'src/utils/analytics'
+import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 
 import { useTicketInspectors } from '../../../contexts/TicketInspectorsContext'
 import { useModalAnimation } from '../../../hooks/UseModalAnimation'

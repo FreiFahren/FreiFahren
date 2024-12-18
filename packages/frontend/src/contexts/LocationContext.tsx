@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef,useState } from 'react'
-import { sendAnalyticsEvent } from 'src/utils/analytics'
+import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 
 import { watchPosition } from '../utils/mapUtils'
 

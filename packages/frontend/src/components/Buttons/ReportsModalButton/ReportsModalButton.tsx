@@ -4,7 +4,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
 import { useViewedReports } from 'src/contexts/ViewedReportsContext'
-import { sendAnalyticsEvent } from 'src/utils/analytics'
+import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 
 import { Line } from '../../Miscellaneous/Line/Line'
 
