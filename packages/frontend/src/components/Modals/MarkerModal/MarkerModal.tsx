@@ -26,7 +26,6 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
     const { allStations } = useStationsAndLines()
     const { timestamp, station, line, direction } = selectedMarker
 
-
     const numberOfReports = useStationReports(station.id)
     const {
         distance: stationDistance,

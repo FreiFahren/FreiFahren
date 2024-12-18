@@ -8,12 +8,10 @@ let client: AxiosInstance | null = null
 
 const createClient = async () => {
     const deviceName = await DeviceInfo.getDeviceName()
-    const appVersion = DeviceInfo.getVersion()
-    const buildNumber = DeviceInfo.getBuildNumber()
 
     const platform = Platform.OS === 'ios' ? 'iOS' : 'Android'
 
-    const userAgent = `Freifahren/${appVersion} (${platform}; ${Platform.Version}; ${deviceName}) BuildNumber/${buildNumber}`
+    const userAgent = `Freifahren/1.0 (${platform}; ${Platform.Version}; ${deviceName})`
 
     return axios.create({
         baseURL: config.PIRSCH_BASE_URL,
@@ -61,7 +59,6 @@ type Event = BaseEvent &
         | { name: 'Report Tapped'; station: string }
         | { name: 'Layer Selected'; layer: 'risk' | 'lines' }
         | { name: 'Report Sheet Opened' }
-        | { name: 'Report Submitted'; duration: number }
         | { name: 'Language Switched'; language: string }
         | { name: 'Privacy Policy Viewed'; from: string }
         | { name: 'Support Page Viewed'; from: string }
@@ -70,6 +67,13 @@ type Event = BaseEvent &
         | { name: 'Disclaimer Dismissed' }
         | { name: 'Privacy Policy Blocker Shown' }
         | { name: 'Privacy Policy Accepted' }
+        | {
+              name: 'Report Submitted'
+              duration: number
+              line: string | null
+              stationId: string
+              directionId: string | null
+          }
     )
 
 export const track = ({ name, duration, ...eventData }: Event) => {

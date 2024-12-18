@@ -1,3 +1,4 @@
+import { useBottomSheetModal } from '@gorhom/bottom-sheet'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 import { forwardRef, PropsWithChildren, Ref } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -13,6 +14,7 @@ import { ReportItem } from '../../common/ReportItem'
 export const ReportListSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<BottomSheetModalMethods>) => {
     const { t } = useTranslation('reportList')
     const updateAppStore = useAppStore((state) => state.update)
+    const { dismissAll } = useBottomSheetModal()
     const { data: reports } = useReports()
 
     return (
@@ -28,7 +30,10 @@ export const ReportListSheet = forwardRef((_props: PropsWithChildren<{}>, ref: R
                 <FFView mt="xs">
                     {reports.map((report, index) => (
                         <Pressable
-                            onPress={() => updateAppStore({ reportToShow: report })}
+                            onPress={() => {
+                                dismissAll()
+                                updateAppStore({ reportToShow: report })
+                            }}
                             key={`${report.stationId}-${report.timestamp.getMilliseconds()}`}
                         >
                             <ReportItem

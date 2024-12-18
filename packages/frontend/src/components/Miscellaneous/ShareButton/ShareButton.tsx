@@ -3,7 +3,7 @@ import './ShareButton.css'
 import i18next, { TFunction } from 'i18next'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { sendAnalyticsEvent } from 'src/utils/analytics'
+import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 import { Report } from 'src/utils/types'
 
 interface ShareButtonProps {
@@ -32,9 +32,9 @@ const formatTime = (timestamp: string, isHistoric: boolean, t: TFunction): strin
         return t('MarkerModal.now');
     }
 
-    if (diffInMinutes < 60) {
-        return `${diffInMinutes} ${t('MarkerModal.minutes')} ${t('MarkerModal.ago')}`;
-    }
+                if (diffInMinutes < 60) {
+                    return `${diffInMinutes} ${t('MarkerModal.minutes')} ${t('MarkerModal.ago')}`
+                }
 
     if (diffInMinutes < 1440) { // less than 24 hours
         const hours = Math.floor(diffInMinutes / 60);

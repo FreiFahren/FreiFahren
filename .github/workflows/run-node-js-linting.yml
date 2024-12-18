@@ -12,7 +12,7 @@ jobs:
             - name: Check out code
               uses: actions/checkout@v2
               with:
-                  fetch-depth: 0 # Fetch all history for all branches and tags
+                  fetch-depth: 0
 
             - name: Set up Node.js
               uses: actions/setup-node@v2
@@ -27,12 +27,12 @@ jobs:
               run: |
                   # Get the list of changed files compared to the base branch
                   CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT origin/${{ github.base_ref }} ${{ github.sha }} | grep '^packages/frontend/.*\.\(js\|jsx\|ts\|tsx\)$' || true)
-                  # Remove the packages/frontend/ prefix from the file paths
-                  STRIPPED_FILES=$(echo "$CHANGED_FILES" | sed 's|packages/frontend/||g')
+                  # Remove the packages/frontend/ prefix and convert to comma-separated list
+                  STRIPPED_FILES=$(echo "$CHANGED_FILES" | sed 's|packages/frontend/||g' | tr '\n' ',' | sed 's/,$//')
                   echo "Changed files:"
                   echo "$STRIPPED_FILES"
                   # Save the stripped list of files
-                  echo "files=${STRIPPED_FILES}" >> $GITHUB_OUTPUT
+                  echo "files=$STRIPPED_FILES" >> $GITHUB_OUTPUT
 
             - name: Run ESLint on changed files
               run: |
@@ -40,7 +40,9 @@ jobs:
                   CHANGED_FILES="${{ steps.changed-files.outputs.files }}"
                   if [ -n "$CHANGED_FILES" ]; then
                     echo "Linting changed files..."
-                    npx eslint $CHANGED_FILES
+                    # Convert comma-separated list back to space-separated for eslint
+                    FILES_ARRAY=(${CHANGED_FILES//,/ })
+                    npx eslint "${FILES_ARRAY[@]}"
                   else
                     echo "No relevant files changed"
                   fi

@@ -170,7 +170,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                     '#FACB3F': 1, // okay
                 }
 
-                const lineScores = new Map<string, LineRiskData>()
+            const lineScores = new Map<string, LineRiskData>()
 
                 Object.entries(segmentColors).forEach(([segmentId, color]) => {
                     // eslint-disable-next-line prefer-destructuring
@@ -189,8 +189,8 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                     }
                 })
 
-                return new Map(Array.from(lineScores.entries()).sort(([, a], [, b]) => b.score - a.score))
-            }
+            return new Map(Array.from(lineScores.entries()).sort(([, a], [, b]) => b.score - a.score))
+        }
 
             const riskMap = extractMostRiskLines(segmentRiskData.segment_colors)
 

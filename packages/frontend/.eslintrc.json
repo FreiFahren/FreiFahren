@@ -55,15 +55,6 @@
           "message": "`with` is disallowed in strict mode because it makes code impossible to predict and optimize."
         }
       ],
-      "padding-line-between-statements": [
-        "error",
-        { "blankLine": "always", "prev": ["const", "let", "var"], "next": "*" },
-        {
-          "blankLine": "any",
-          "prev": ["const", "let", "var"],
-          "next": ["const", "let", "var"]
-        }
-      ],
       "prefer-destructuring": [
         "error",
         {
@@ -75,7 +66,7 @@
       "import/order": "off",
       "import/no-namespace": "error",
       "import/no-self-import": "error",
-      "import/no-default-export": "error",
+      "import/no-default-export": "off",
       "import/prefer-default-export": "off",
       "react/jsx-props-no-spreading": "off",
       "react/require-default-props": "off",
