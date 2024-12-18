@@ -139,7 +139,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             for (const inspector of ticketInspectorList) {
                 const { line } = inspector
 
-                if (line === null || line === undefined) continue
+                if (line === null ) continue
                 lineReports.set(line, [...(lineReports.get(line) ?? []), inspector])
             }
 
@@ -202,10 +202,13 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
         }
     }, [segmentRiskData, allLines])
 
-    const getChartData = useMemo(() => Array.from(sortedLinesWithReports.entries()).map(([line, reports]) => ({
+    const getChartData = useMemo(() => Array.from(sortedLinesWithReports.entries())
+        .filter(([line]) => line !== '')
+        .map(([line, reports]) => ({
             line,
             reports: reports.length,
         })), [sortedLinesWithReports])
+
 
     const [isLightTheme, setIsLightTheme] = useState<boolean>(false)
 
