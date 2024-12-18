@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react'
-import { getRecentDataWithIfModifiedSince } from 'src/utils/dbUtils'
+import React, { createContext, useCallback,useContext, useEffect, useRef, useState, useMemo } from 'react'
+import { getRecentDataWithIfModifiedSince } from 'src/utils/databaseUtils'
 import { Report } from 'src/utils/types'
+
 import { useRiskData } from './RiskDataContext'
 
 interface TicketInspectorsContextProps {
@@ -12,6 +13,7 @@ const TicketInspectorsContext = createContext<TicketInspectorsContextProps | und
 
 export const useTicketInspectors = () => {
     const context = useContext(TicketInspectorsContext)
+
     if (!context) {
         throw new Error('useTicketInspectors must be used within a TicketInspectorsProvider')
     }
@@ -25,11 +27,10 @@ export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> =
     const refreshInspectorsData = useCallback(async () => {
         const endTime = new Date().toISOString()
         const startTime = new Date(new Date(endTime).getTime() - 60 * 60 * 1000).toISOString()
-        const newTicketInspectorList =
-            (await getRecentDataWithIfModifiedSince(
-                `${process.env.REACT_APP_API_URL}/basics/inspectors?start=${startTime}&end=${endTime}`,
-                lastReceivedInspectorTime.current
-            )) || []
+        const newTicketInspectorList = (await getRecentDataWithIfModifiedSince(
+            `${process.env.REACT_APP_API_URL}/basics/inspectors?start=${startTime}&end=${endTime}`,
+            lastReceivedInspectorTime.current
+        ) as Report[] | null) ?? []
 
         if (newTicketInspectorList.length > 0) {
             setTicketInspectorList((currentList) => {
@@ -38,6 +39,7 @@ export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> =
 
                 newTicketInspectorList.forEach((newInspector: Report) => {
                     const existingInspector = updatedList.get(newInspector.station.id)
+
                     if (existingInspector) {
                         // Compare timestamps and wether it is historic to decide if we need to update
                         if (
@@ -58,25 +60,43 @@ export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> =
                         ...newTicketInspectorList.map((inspector: Report) => new Date(inspector.timestamp).getTime())
                     )
                 )
-                riskData.refreshRiskData()
+                riskData.refreshRiskData().catch((error) => {
+                    // fix this later with sentry
+                    // eslint-disable-next-line no-console
+                    console.error('Error refreshing risk data:', error)
+                })
                 return Array.from(updatedList.values())
             })
 
             lastReceivedInspectorTime.current = new Date(
                 Math.max(...newTicketInspectorList.map((inspector: Report) => new Date(inspector.timestamp).getTime()))
             )
-            riskData.refreshRiskData()
+            riskData.refreshRiskData().catch((error) => {
+                // fix this later with sentry
+                // eslint-disable-next-line no-console
+                console.error('Error refreshing risk data:', error)
+            })
         }
     }, [riskData])
 
     useEffect(() => {
-        refreshInspectorsData()
+        refreshInspectorsData().catch((error) => {
+            // fix this later with sentry
+            // eslint-disable-next-line no-console
+            console.error('Error refreshing inspectors data:', error)
+        })
         const interval = setInterval(refreshInspectorsData, 5 * 1000)
+
         return () => clearInterval(interval)
     }, [refreshInspectorsData])
 
+    const value = useMemo(
+        () => ({ ticketInspectorList, refreshInspectorsData }),
+        [ticketInspectorList, refreshInspectorsData]
+    )
+
     return (
-        <TicketInspectorsContext.Provider value={{ ticketInspectorList, refreshInspectorsData }}>
+        <TicketInspectorsContext.Provider value={value}>
             {children}
         </TicketInspectorsContext.Provider>
     )

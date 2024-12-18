@@ -1,21 +1,19 @@
-import React, { MouseEventHandler } from 'react'
-
 import './ReportButton.css'
 
+import React, { MouseEventHandler } from 'react'
+
 interface ReportButtonProps {
-    openReportModal: MouseEventHandler<HTMLButtonElement>
+    handleOpenReportModal: MouseEventHandler<HTMLButtonElement>
 }
 
-const ReportButton: React.FC<ReportButtonProps> = ({ openReportModal }) => {
-    return (
-        <button className="report-button small-button align-child-on-line" onClick={openReportModal}>
+const ReportButton: React.FC<ReportButtonProps> = ({ handleOpenReportModal }) => (
+        <button className="report-button small-button align-child-on-line" onClick={handleOpenReportModal} type="button">
             <p>Melden</p>
             <div className="plus">
-                <span></span>
-                <span></span>
+                <span />
+                <span />
             </div>
         </button>
     )
-}
 
-export default ReportButton
+export { ReportButton }

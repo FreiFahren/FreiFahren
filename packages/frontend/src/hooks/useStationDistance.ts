@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react'
-import { getStationDistance } from '../utils/dbUtils'
+import { useRef,useState, useEffect } from 'react'
+
+import { getStationDistance , StationList } from '../utils/databaseUtils'
 import { getNearestStation } from '../utils/mapUtils'
-import { StationList } from '../utils/dbUtils'
 
 interface UseStationDistanceResult {
     distance: number | null
@@ -53,40 +53,45 @@ export const useStationDistance = (
     const fetchingRef = useRef(false)
     const prevStationIdRef = useRef(stationId)
 
-    // Only show skeleton if the station changes
-    if (stationId !== prevStationIdRef.current) {
-        setShouldShowSkeleton(true)
-        setDistance(null)
-        prevStationIdRef.current = stationId
-    }
-
-    // Fetch distance if we have all required data and aren't already fetching
-    if (userLat && userLng && stationId && !fetchingRef.current) {
-        fetchingRef.current = true
-        setIsLoading(true)
-
-        const userStation = getNearestStation(allStations, userLat, userLng)
-        if (userStation) {
-            getStationDistance(userStation.key, stationId)
-                .then((newDistance) => {
-                    setDistance(newDistance)
-                    setIsLoading(false)
-                    // Avoid showing skeleton when position changes due to watchPosition
-                    setShouldShowSkeleton(false)
-                })
-                .catch((error) => {
-                    console.error('Error fetching distance:', error)
-                    setDistance(null)
-                    setIsLoading(false)
-                })
-                .finally(() => {
-                    fetchingRef.current = false
-                })
-        } else {
-            setIsLoading(false)
-            fetchingRef.current = false
+    useEffect(() => {
+        if (stationId !== prevStationIdRef.current) {
+            setShouldShowSkeleton(true)
+            setDistance(null)
+            prevStationIdRef.current = stationId
         }
-    }
+    }, [stationId])
+
+    useEffect(() => {
+        if (userLat !== undefined && userLng !== undefined && stationId && !fetchingRef.current) {
+            fetchingRef.current = true
+            setIsLoading(true)
+
+            const userStation = getNearestStation(allStations, userLat, userLng)
+
+            if (userStation) {
+                getStationDistance(userStation.key, stationId)
+                    .then((newDistance) => {
+                        setDistance(newDistance)
+                        setIsLoading(false)
+                        // Avoid showing skeleton when position changes due to watchPosition
+                        setShouldShowSkeleton(false)
+                    })
+                    .catch((error) => {
+                        // fix later with sentry
+                        // eslint-disable-next-line no-console
+                        console.error('Error fetching distance:', error)
+                        setDistance(null)
+                        setIsLoading(false)
+                    })
+                    .finally(() => {
+                        fetchingRef.current = false
+                    })
+            } else {
+                setIsLoading(false)
+                fetchingRef.current = false
+            }
+        }
+    }, [userLat, userLng, stationId, allStations])
 
     return {
         distance,

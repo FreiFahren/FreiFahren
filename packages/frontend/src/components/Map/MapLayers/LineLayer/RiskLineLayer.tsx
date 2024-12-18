@@ -1,9 +1,7 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from 'react'
-import { Source, Layer } from 'react-map-gl/maplibre'
-
-import { RiskData } from 'src/utils/types'
+import React, { useEffect,useState } from 'react'
+import { Layer,Source } from 'react-map-gl/maplibre'
 import { useRiskData } from 'src/contexts/RiskDataContext'
+import { RiskData } from 'src/utils/types'
 
 interface RiskLineLayerProps {
     preloadedRiskData: RiskData | null
@@ -20,6 +18,7 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, textColor, 
         segmentColors?: { [key: string]: string }
     ) => {
         const defaultColor = '#13C184' // lowest risk color
+
         return {
             ...data,
             features: data.features.map((feature) => ({
@@ -51,8 +50,13 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, textColor, 
     // Periodically fetch new risk data to account for changes
     useEffect(() => {
         const interval = setInterval(() => {
-            refreshRiskData()
+            refreshRiskData().catch((error) => {
+                // fix this later with sentry
+                // eslint-disable-next-line no-console
+                console.error('Error refreshing risk data', error)
+            })
         }, 30 * 1000)
+
         return () => clearInterval(interval)
     }, [refreshRiskData])
 
@@ -61,8 +65,7 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, textColor, 
     }
 
     return (
-        <>
-            <Source id="risk-line-data" type="geojson" data={geoJSON}>
+        <Source id="risk-line-data" type="geojson" data={geoJSON}>
                 <Layer
                     id="risk-line-layer"
                     type="line"
@@ -96,8 +99,7 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, textColor, 
                     }}
                 />
             </Source>
-        </>
     )
 }
 
-export default RiskLineLayer
+export { RiskLineLayer }

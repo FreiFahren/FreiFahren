@@ -1,5 +1,6 @@
-import React, { useCallback } from 'react'
 import './SelectField.css'
+
+import React, { useCallback } from 'react'
 
 interface SelectFieldProps {
     children: React.ReactNode
@@ -33,6 +34,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
             if (React.isValidElement(child)) {
                 const selectedValue = getValue(child)
                 const newValue = value === selectedValue ? null : selectedValue // Toggle selection
+
                 onSelect(newValue)
             }
         },
@@ -45,7 +47,10 @@ const SelectField: React.FC<SelectFieldProps> = ({
                 children,
                 (child, index) =>
                     React.isValidElement(child) && (
+                        // fix this later please, why button as div 
+                        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                         <div
+                            // eslint-disable-next-line react/no-array-index-key
                             key={index}
                             className={`select-field ${value === getValue(child) ? 'selected' : ''} ${fieldClassName}`}
                             onClick={() => handleSelect(child)}
@@ -58,4 +63,4 @@ const SelectField: React.FC<SelectFieldProps> = ({
     )
 }
 
-export default SelectField
+export { SelectField }

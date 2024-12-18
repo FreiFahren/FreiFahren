@@ -1,14 +1,15 @@
+import './FeedbackModal.css'
+
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import './FeedbackModal.css'
 
 interface FeedbackModalProps {
     openAnimationClass?: string
 }
 
-const github_icon = `${process.env.PUBLIC_URL}/icons/github.svg`
-const mail_icon = `${process.env.PUBLIC_URL}/icons/mail.svg`
-const telegram_icon = `${process.env.PUBLIC_URL}/icons/telegram.svg`
+const GITHUB_ICON = `${process.env.PUBLIC_URL}/icons/github.svg`
+const MAIL_ICON = `${process.env.PUBLIC_URL}/icons/mail.svg`
+const TELEGRAM_ICON = `${process.env.PUBLIC_URL}/icons/telegram.svg`
 
 const FeedbackModal: React.FC<FeedbackModalProps> = ({ openAnimationClass }) => {
     const { t } = useTranslation()
@@ -20,64 +21,64 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ openAnimationClass }) => 
                 <li>
                     <img
                         className="profile-picture"
-                        src={process.env.PUBLIC_URL + '/icons/profiles/johan.jpeg'}
+                        src={`${process.env.PUBLIC_URL  }/icons/profiles/johan.jpeg`}
                         alt="Johan Github Profile"
                     />
                     <p>Johan</p>
                     <div>
                         <a href="https://t.me/jooooooohan">
-                            <img src={telegram_icon} alt="telegram icon" />
+                            <img src={TELEGRAM_ICON} alt="telegram icon" />
                         </a>
                         <a href="mailto:johan@trieloff.net">
-                            <img src={mail_icon} alt="mail icon" />
+                            <img src={MAIL_ICON} alt="mail icon" />
                         </a>
                         <a href="https://github.com/johan-t" target="_blank" rel="noopener noreferrer">
-                            <img src={github_icon} alt="github icon" />
+                            <img src={GITHUB_ICON} alt="github icon" />
                         </a>
                     </div>
                 </li>
                 <li>
                     <img
                         className="profile-picture"
-                        src={process.env.PUBLIC_URL + '/icons/profiles/joff.jpeg'}
+                        src={`${process.env.PUBLIC_URL  }/icons/profiles/joff.jpeg`}
                         alt="Joff Github Profile"
                     />
                     <p>Joff</p>
                     <div>
                         <a href="mailto:mail@jfsalzmann.com">
-                            <img src={mail_icon} alt="mail icon" />
+                            <img src={MAIL_ICON} alt="mail icon" />
                         </a>
                         <a href="https://github.com/jfsalzmann" target="_blank" rel="noopener noreferrer">
-                            <img src={github_icon} alt="github icon" />
+                            <img src={GITHUB_ICON} alt="github icon" />
                         </a>
                     </div>
                 </li>
                 <li>
                     <img
                         className="profile-picture"
-                        src={process.env.PUBLIC_URL + '/icons/profiles/moritz.jpeg'}
+                        src={`${process.env.PUBLIC_URL  }/icons/profiles/moritz.jpeg`}
                         alt="Moritz Github Profile"
                     />
                     <p>Moritz</p>
                     <div>
                         <a href="maito:moritzamando@proton.me">
-                            <img src={mail_icon} alt="mail icon" />
+                            <img src={MAIL_ICON} alt="mail icon" />
                         </a>
                         <a href="https://github.com/mclrc" target="_blank" rel="noopener noreferrer">
-                            <img src={github_icon} alt="github icon" />
+                            <img src={GITHUB_ICON} alt="github icon" />
                         </a>
                     </div>
                 </li>
                 <li>
                     <img
                         className="profile-picture"
-                        src={process.env.PUBLIC_URL + '/icons/profiles/david.jpeg'}
+                        src={`${process.env.PUBLIC_URL  }/icons/profiles/david.jpeg`}
                         alt="David Github Profile"
                     />
                     <p>David</p>
                     <div>
                         <a href="https://github.com/brandesdavid" target="_blank" rel="noopener noreferrer">
-                            <img src={github_icon} alt="github icon" />
+                            <img src={GITHUB_ICON} alt="github icon" />
                         </a>
                     </div>
                 </li>
@@ -95,4 +96,4 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ openAnimationClass }) => 
     )
 }
 
-export default FeedbackModal
+export { FeedbackModal }

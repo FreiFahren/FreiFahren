@@ -1,5 +1,6 @@
-import { StationProperty } from './dbUtils'
+import { StationProperty } from './databaseUtils'
 
+export const deg2rad = (deg: number): number => deg * (Math.PI / 180)
 /**
  * Calculates the distance between two geographical points using the Haversine formula.
  *
@@ -9,35 +10,7 @@ import { StationProperty } from './dbUtils'
  * @param {number} lon2 - The longitude of the second point in decimal degrees.
  * @returns {number} The distance between the two points in kilometers.
  */
-export function getNearestStation(stations: { [key: string]: StationProperty }, userLat?: number, userLon?: number) {
-    if (!userLat || !userLon) return null
-    let nearestStation = null
-    let nearestDistance = Infinity
-    for (const [key, station] of Object.entries(stations)) {
-        const distance = calculateDistance(
-            userLat!,
-            userLon!,
-            station.coordinates.latitude,
-            station.coordinates.longitude
-        )
-        if (distance < nearestDistance) {
-            nearestDistance = distance
-            nearestStation = { key, ...station }
-        }
-    }
-    return nearestStation
-}
-
-/**
- * Calculates the distance between two geographical points using the Haversine formula.
- *
- * @param {number} lat1 - The latitude of the first point in decimal degrees.
- * @param {number} lon1 - The longitude of the first point in decimal degrees.
- * @param {number} lat2 - The latitude of the second point in decimal degrees.
- * @param {number} lon2 - The longitude of the second point in decimal degrees.
- * @returns {number} The distance between the two points in kilometers.
- */
-export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371 // Radius of the earth in km
     const dLat = deg2rad(lat2 - lat1)
     const dLon = deg2rad(lon2 - lon1)
@@ -46,12 +19,46 @@ export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2
         Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
     const distance = R * c // Distance in km
+
     return distance
 }
 
-function deg2rad(deg: number) {
-    return deg * (Math.PI / 180)
+/**
+ * Calculates the distance between two geographical points using the Haversine formula.
+ *
+ * @param {number} lat1 - The latitude of the first point in decimal degrees.
+ * @param {number} lon1 - The longitude of the first point in decimal degrees.
+ * @param {number} lat2 - The latitude of the second point in decimal degrees.
+ * @param {number} lon2 - The longitude of the second point in decimal degrees.
+ * @returns {number} The distance between the two points in kilometers.
+ */
+export const getNearestStation = (
+    stations: { [key: string]: StationProperty },
+    userLat?: number,
+    userLon?: number
+) => {
+    if (userLat === undefined || userLon === undefined) return null
+    let nearestStation = null
+    let nearestDistance = Infinity
+
+    for (const [key, station] of Object.entries(stations)) {
+        const distance = calculateDistance(
+            userLat!,
+            userLon!,
+            station.coordinates.latitude,
+            station.coordinates.longitude
+        )
+
+        if (distance < nearestDistance) {
+            nearestDistance = distance
+            nearestStation = { key, ...station }
+        }
+    }
+    return nearestStation
 }
+
+
+
 
 /**
  * Subscribes to user's geolocation changes and executes callback functions based on the result.
@@ -98,27 +105,28 @@ export const watchPosition = async (
             }
         },
         (error) => {
+            // fix later with sentry
+            // eslint-disable-next-line no-console
             console.error('Error obtaining position:', error.message)
             onPositionChanged(null)
         },
         options
     )
+
     return () => navigator.geolocation.clearWatch(watchId)
 }
 
-export function convertStationsToGeoJSON(stationsData: { [key: string]: StationProperty }) {
-    return {
-        type: 'FeatureCollection',
-        features: Object.keys(stationsData).map((key) => ({
-            type: 'Feature',
-            properties: {
-                name: stationsData[key].name,
-                lines: stationsData[key].lines,
-            },
-            geometry: {
-                type: 'Point',
-                coordinates: [stationsData[key].coordinates.longitude, stationsData[key].coordinates.latitude],
-            },
-        })),
-    }
-}
+export const convertStationsToGeoJSON = (stationsData: { [key: string]: StationProperty }) => ({
+    type: 'FeatureCollection',
+    features: Object.keys(stationsData).map((key) => ({
+        type: 'Feature',
+        properties: {
+            name: stationsData[key].name,
+            lines: stationsData[key].lines,
+        },
+        geometry: {
+            type: 'Point',
+            coordinates: [stationsData[key].coordinates.longitude, stationsData[key].coordinates.latitude],
+        },
+    })),
+})

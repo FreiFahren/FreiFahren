@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useRef,useState,useEffect } from 'react'
 
 type Statistics = {
     numberOfReports: number
@@ -24,20 +24,24 @@ export const useStationReports = (stationId: string): number => {
     const [numberOfReports, setNumberOfReports] = useState<number>(0)
     const fetchingRef = useRef(false) // ensure only one fetch is made
 
-    if (stationId && !fetchingRef.current) {
-        fetchingRef.current = true
-        fetch(`${process.env.REACT_APP_API_URL}/stations/${stationId}/statistics`)
-            .then((response) => response.json())
-            .then((data: Statistics) => {
-                setNumberOfReports(data.numberOfReports)
-                fetchingRef.current = false
-            })
-            .catch((error) => {
-                console.error('Error fetching reports:', error)
-                setNumberOfReports(0)
-                fetchingRef.current = false
-            })
-    }
+    useEffect(() => {
+        if (stationId && !fetchingRef.current) {
+            fetchingRef.current = true
+            fetch(`${process.env.REACT_APP_API_URL}/stations/${stationId}/statistics`)
+                .then((response) => response.json())
+                .then((data: Statistics) => {
+                    setNumberOfReports(data.numberOfReports)
+                    fetchingRef.current = false
+                })
+                .catch((error) => {
+                    // fix this later with sentry
+                    // eslint-disable-next-line no-console
+                    console.error('Error fetching reports:', error)
+                    setNumberOfReports(0)
+                    fetchingRef.current = false
+                })
+        }
+    }, [stationId])
 
     return numberOfReports
 }

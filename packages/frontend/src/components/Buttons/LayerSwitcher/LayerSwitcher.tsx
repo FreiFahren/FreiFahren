@@ -1,8 +1,9 @@
-import React, { useState, useCallback } from 'react'
+import './LayerSwitcher.css'
+
+import React, { useCallback,useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import './LayerSwitcher.css'
-import Backdrop from '../../../../src/components/Miscellaneous/Backdrop/Backdrop'
+import { Backdrop } from "../../Miscellaneous/Backdrop/Backdrop"
 
 interface LayerSwitcherProps {
     changeLayer: (layer: string) => void
@@ -24,18 +25,15 @@ const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ changeLayer, isRiskLayerO
     return (
         <>
             <button
+                type="button"
                 className="layer-switcher small-button align-child-on-line"
                 onClick={() => setAreLayerOptionsVisible(!areLayerOptionsVisible)}
                 aria-label="Button to open the layer switcher"
             >
                 <p>{t('LayerSwitcher.mode')}</p>
-                <img src={process.env.PUBLIC_URL + '/icons/layers.svg'} alt="Layers" />
+                <img src={`${process.env.PUBLIC_URL  }/icons/layers.svg`} alt="Layers" />
             </button>
-            {areLayerOptionsVisible && (
-                <>
-                    <Backdrop onClick={() => setAreLayerOptionsVisible(false)} BackgroundColor={'rgba(0, 0, 0, 0)'} />
-                </>
-            )}
+            {areLayerOptionsVisible ? <Backdrop handleClick={() => setAreLayerOptionsVisible(false)} BackgroundColor="rgba(0, 0, 0, 0)" /> : null}
             <div
                 className={`layer-options small-button align-child-on-line ${areLayerOptionsVisible ? 'visible' : ''}`}
             >
@@ -43,7 +41,7 @@ const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ changeLayer, isRiskLayerO
                     {...(areLayerOptionsVisible ? { onClick: () => closeModalAndHighlightSelectedLayer('risk') } : {})}
                 >
                     <img
-                        src={process.env.PUBLIC_URL + '/icons/risk.png'}
+                        src={`${process.env.PUBLIC_URL  }/icons/risk.png`}
                         alt="Showing how the risk layer looks like"
                         className={isRiskLayerOpen ? 'active' : ''}
                         draggable={areLayerOptionsVisible}
@@ -54,7 +52,7 @@ const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ changeLayer, isRiskLayerO
                     {...(areLayerOptionsVisible ? { onClick: () => closeModalAndHighlightSelectedLayer('line') } : {})}
                 >
                     <img
-                        src={process.env.PUBLIC_URL + '/icons/lines.png'}
+                        src={`${process.env.PUBLIC_URL  }/icons/lines.png`}
                         alt="Showing how the line layer looks like"
                         className={isRiskLayerOpen ? '' : 'active'}
                         draggable={areLayerOptionsVisible}
@@ -66,4 +64,4 @@ const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ changeLayer, isRiskLayerO
     )
 }
 
-export default LayerSwitcher
+export { LayerSwitcher }

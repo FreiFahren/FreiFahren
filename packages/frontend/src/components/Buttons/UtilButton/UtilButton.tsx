@@ -1,19 +1,19 @@
-import React from 'react'
-
 import './UtilButton.css'
 
+import React from 'react'
+
 interface UtilButtonProps {
-    onClick: () => void
+    handleClick: () => void
 }
 
-const UtilButton: React.FC<UtilButtonProps> = ({ onClick }) => {
+const UtilButton: React.FC<UtilButtonProps> = ({ handleClick }) => {
     const settingsSvg = `${process.env.PUBLIC_URL}/icons/settings.svg`
 
     return (
-        <button className="util-button small-button" onClick={onClick} aria-label="utility info">
+        <button className="util-button small-button" onClick={handleClick} aria-label="utility info" type="button">
             <img src={settingsSvg} alt="settings" />
         </button>
     )
 }
 
-export default UtilButton
+export { UtilButton }

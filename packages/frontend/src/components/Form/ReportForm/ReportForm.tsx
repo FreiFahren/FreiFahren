@@ -1,32 +1,31 @@
-import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
+import './ReportForm.css'
+
+import React, { useCallback, useEffect,useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import SelectField from '../SelectField/SelectField'
-import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
-import Line from '../../Miscellaneous/Line/Line'
-
-import { LinesList, StationList, reportInspector, StationProperty } from '../../../utils/dbUtils'
-import { sendAnalyticsEvent } from '../../../utils/analytics'
-import { highlightElement, createWarningSpan, getLineColor } from '../../../utils/uiUtils'
-import { calculateDistance } from '../../../utils/mapUtils'
 import { useLocation } from '../../../contexts/LocationContext'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
+import { sendAnalyticsEvent } from '../../../utils/analytics'
+import { LinesList, reportInspector, StationList, StationProperty } from '../../../utils/databaseUtils'
+import { calculateDistance } from '../../../utils/mapUtils'
 import { Report } from '../../../utils/types'
-import './ReportForm.css'
+import { createWarningSpan, getLineColor,highlightElement } from '../../../utils/uiUtils'
+import { Line } from '../../Miscellaneous/Line/Line'
+import { AutocompleteInputForm } from '../AutocompleteInputForm/AutocompleteInputForm'
+import { SelectField } from '../SelectField/SelectField'
 
 const getCSSVariable = (variable: string): number => {
     const value = getComputedStyle(document.documentElement).getPropertyValue(variable)
-    return parseFloat(value) || 0
+
+    return (value !== '0') ? parseFloat(value) : 0
 }
 
-const redHighlight = (text: string) => {
-    return (
+const redHighlight = (text: string) => (
         <>
             {text}
             <span className="red-highlight">*</span>
         </>
     )
-}
 
 interface ReportFormProps {
     closeModal: () => void
@@ -72,18 +71,19 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         const paddingBottom = parseFloat(styles.paddingBottom)
         const marginTop = parseFloat(styles.marginTop)
         const marginBottom = parseFloat(styles.marginBottom)
+
         return paddingTop + paddingBottom + marginTop + marginBottom
     }
 
     // Calculate possible lines based on the current entity
     const possibleLines = useMemo(() => {
-        if (!currentEntity) return allLines
+        if (currentEntity === null ) return allLines
         return Object.entries(allLines)
             .filter(([line]) => line.startsWith(currentEntity))
-            .reduce((acc, [line, stations]) => {
-                acc[line] = stations
-                return acc
-            }, {} as LinesList)
+            .reduce((accumulatedLines, [line, stations]) => ({
+                ...accumulatedLines,
+                [line]: stations
+            }), {} as LinesList)
     }, [allLines, currentEntity])
 
     // Calculate possible stations based on entity, line, station, and search input
@@ -94,6 +94,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         ) => {
             const stationA = recordA[1] as StationProperty
             const stationB = recordB[1] as StationProperty
+
             if (stationA.name > stationB.name) return 1
             if (stationA.name < stationB.name) return -1
             return 0
@@ -102,27 +103,27 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         const sortedAllStations = Object.fromEntries(Object.entries(allStations).sort(sortStationRecordsByStationName))
         let stations = sortedAllStations
 
-        if (currentStation) {
+        if (currentStation !== null) {
             stations = { [currentStation]: allStations[currentStation] }
-        } else if (currentLine) {
+        } else if (currentLine !== null) {
             stations = Object.fromEntries(
                 allLines[currentLine].map((stationKey) => [stationKey, allStations[stationKey]])
             )
-        } else if (currentEntity) {
+        } else if (currentEntity !== null) {
             stations = Object.entries(sortedAllStations)
                 .filter(([, stationData]) => stationData.lines.some((line) => line.startsWith(currentEntity)))
-                .reduce((acc, [stationName, stationData]) => {
-                    acc[stationName] = stationData
-                    return acc
-                }, {} as StationList)
+                .reduce((accumulatedStations, [stationName, stationData]) => ({
+                    ...accumulatedStations,
+                    [stationName]: stationData
+                }), {} as StationList)
         }
         if (stationSearch) {
             stations = Object.entries(stations)
                 .filter(([, stationData]) => stationData.name.toLowerCase().includes(stationSearch.toLowerCase()))
-                .reduce((acc, [stationName, stationData]) => {
-                    acc[stationName] = stationData
-                    return acc
-                }, {} as StationList)
+                .reduce((accumulatedStations, [stationName, stationData]) => ({
+                    ...accumulatedStations,
+                    [stationName]: stationData
+                }), {} as StationList)
         }
 
         return stations
@@ -139,7 +140,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                 setInitialContainerHeight(container.clientHeight)
             }
 
-            const containerHeight = initialContainerHeight || container.clientHeight
+            const containerHeight = initialContainerHeight ?? container.clientHeight
             const topHeight = top.offsetHeight
             const bottomHeight = bottom.offsetHeight
 
@@ -183,7 +184,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
     const handleLineSelect = useCallback(
         (line: string | null) => {
             setCurrentLine(line)
-            if (line && currentStation && !allLines[line].includes(currentStation)) {
+            if (typeof line === 'string' && currentStation !== null && typeof currentStation === 'string' && allLines[line].includes(currentStation) === false) {
                 setCurrentStation(null)
             }
         },
@@ -195,6 +196,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
             const foundStationEntry = Object.entries(allStations).find(
                 ([, stationData]) => stationData.name === stationName
             )
+
             setCurrentStation(foundStationEntry ? foundStationEntry[0] : null)
             setStationSearch('')
         },
@@ -206,106 +208,15 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
             const foundStationEntry = Object.entries(allStations).find(
                 ([, stationData]) => stationData.name === directionName
             )
+
             setCurrentDirection(foundStationEntry ? foundStationEntry[0] : null)
         },
         [allStations]
     )
 
-    const handleSubmit = async (event: React.FormEvent) => {
-        event.preventDefault()
-
-        const hasError = await validateReportForm()
-        if (hasError) return // Abort submission if there are validation errors
-
-        await reportInspector(currentLine!, currentStation!, currentDirection!, description!)
-
-        const endTime = new Date()
-        const durationInSeconds = Math.round((endTime.getTime() - startTime.current.getTime()) / 1000)
-
-        const report: Report = {
-            line: currentLine,
-            station: {
-                id: currentStation!,
-                name: allStations[currentStation!].name,
-                coordinates: allStations[currentStation!].coordinates,
-            },
-            direction: currentDirection
-                ? {
-                      id: currentDirection,
-                      name: allStations[currentDirection!].name,
-                      coordinates: allStations[currentDirection!].coordinates,
-                  }
-                : null,
-            message: description,
-            timestamp: endTime.toISOString(),
-            isHistoric: false,
-        }
-
-        const finalizeSubmission = (timestamp: Date) => {
-            localStorage.setItem('lastReportTime', timestamp.toISOString()) // Save the timestamp of the report to prevent spamming
-            closeModal()
-            notifyParentAboutSubmission(report)
-        }
-
-        try {
-            await sendAnalyticsEvent('Report Submitted', {
-                duration: durationInSeconds,
-                meta: {
-                    Station: report.station.name,
-                    ...(report.line && { Line: report.line }),
-                    Direction: report.direction?.name,
-                    Entity: Boolean(currentEntity),
-                    SearchUsed: searchUsed,
-                    StationRecommendationUsed: stationRecommendationSelected,
-                },
-            })
-
-            finalizeSubmission(endTime)
-        } catch (error) {
-            console.error('Failed to send analytics event:', error)
-            finalizeSubmission(endTime)
-        }
-    }
-
-    const validateReportForm = async () => {
-        let hasError = false
-
-        // Check for last report time to prevent spamming
-        const lastReportTime = localStorage.getItem('lastReportTime')
-
-        if (lastReportTime && Date.now() - new Date(lastReportTime).getTime() < REPORT_COOLDOWN_MINUTES * 60 * 1000) {
-            highlightElement('report-form')
-            createWarningSpan(
-                'searchable-select-div',
-                `Du kannst nur alle ${REPORT_COOLDOWN_MINUTES} Minuten eine Meldung abgeben!`
-            )
-            hasError = true
-        }
-
-        if (!currentStation) {
-            highlightElement('searchable-select-div')
-            createWarningSpan(
-                'searchable-select-div',
-                'Du hast keine Station ausgewählt. Bitte wähle eine Station aus!'
-            )
-            hasError = true
-        }
-
-        if (!(document.getElementById('privacy-checkbox') as HTMLInputElement).checked) {
-            highlightElement('privacy-label')
-            hasError = true
-        }
-
-        const locationError = verifyUserLocation(currentStation, allStations)
-        if (locationError) {
-            hasError = true
-        }
-
-        return hasError // Return true if there's an error, false otherwise
-    }
 
     const verifyUserLocation = (station: string | null, stationsList: StationList): boolean => {
-        if (!station) return false
+        if (station === null) return false
 
         const distance = userPosition
             ? calculateDistance(
@@ -328,19 +239,120 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
 
         return false
     }
+    
+    const validateReportForm = async () => {
+        let hasError = false
+
+        // Check for last report time to prevent spamming
+        const lastReportTime = localStorage.getItem('lastReportTime')
+
+        if ((lastReportTime !== null) && Date.now() - new Date(lastReportTime).getTime() < REPORT_COOLDOWN_MINUTES * 60 * 1000) {
+            highlightElement('report-form')
+            createWarningSpan(
+                'searchable-select-div',
+                `Du kannst nur alle ${REPORT_COOLDOWN_MINUTES} Minuten eine Meldung abgeben!`
+            )
+            hasError = true
+        }
+
+        if (currentStation === null) {
+            highlightElement('searchable-select-div')
+            createWarningSpan(
+                'searchable-select-div',
+                'Du hast keine Station ausgewählt. Bitte wähle eine Station aus!'
+            )
+            hasError = true
+        }
+
+        if (!(document.getElementById('privacy-checkbox') as HTMLInputElement).checked) {
+            highlightElement('privacy-label')
+            hasError = true
+        }
+
+        const locationError = verifyUserLocation(currentStation, allStations)
+
+        if (locationError) {
+            hasError = true
+        }
+
+        return hasError // Return true if there's an error, false otherwise
+    }
+
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault()
+
+        const hasError = await validateReportForm()
+
+        if (hasError) return // Abort submission if there are validation errors
+
+        await reportInspector(currentLine!, currentStation!, currentDirection!, description!)
+
+        const endTime = new Date()
+        const durationInSeconds = Math.round((endTime.getTime() - startTime.current.getTime()) / 1000)
+
+        const report: Report = {
+            line: currentLine,
+            station: {
+                id: currentStation!,
+                name: allStations[currentStation!].name,
+                coordinates: allStations[currentStation!].coordinates,
+            },
+            direction: currentDirection !== null
+                ? {
+                      id: currentDirection,
+                      name: allStations[currentDirection!].name,
+                      coordinates: allStations[currentDirection!].coordinates,
+                  }
+                : null,
+            message: description,
+            timestamp: endTime.toISOString(),
+            isHistoric: false,
+        }
+
+        const finalizeSubmission = (timestamp: Date) => {
+            localStorage.setItem('lastReportTime', timestamp.toISOString()) // Save the timestamp of the report to prevent spamming
+            closeModal()
+            notifyParentAboutSubmission(report)
+        }
+
+        try {
+            await sendAnalyticsEvent('Report Submitted', {
+                duration: durationInSeconds,
+                meta: {
+                    Station: report.station.name,
+                    ...(report.line !== null && { Line: report.line }),
+                    Direction: report.direction?.name,
+                    Entity: Boolean(currentEntity),
+                    SearchUsed: searchUsed,
+                    StationRecommendationUsed: stationRecommendationSelected,
+                },
+            })
+
+            finalizeSubmission(endTime)
+        } catch (error) {
+            // fix later with sentry
+            // eslint-disable-next-line no-console
+            console.error('Failed to send analytics event:', error)
+            finalizeSubmission(endTime)
+        }
+    }
+
+
+
 
     const getClosestStationsToUser = (
         numberOfStations: number,
         stationsList: StationList,
-        userPosition: { lat: number; lng: number }
+        userPositionTemp: { lat: number; lng: number }
     ) => {
         const distances = Object.entries(stationsList).map(([station, stationData]) => {
             const distance = calculateDistance(
-                userPosition.lat,
-                userPosition.lng,
+                userPositionTemp.lat,
+                userPositionTemp.lng,
                 stationData.coordinates.latitude,
                 stationData.coordinates.longitude
             )
+
             return { station, stationData, distance }
         })
 
@@ -352,9 +364,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         line: string
     }
 
-    const getLineValue = (child: React.ReactElement) => {
-        return (child.props as LineChildProps).line
-    }
+    const getLineValue = (child: React.ReactElement) => (child.props as LineChildProps).line
 
     interface EntityChildProps {
         children: {
@@ -364,13 +374,9 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
         }
     }
 
-    const getEntityValue = (child: React.ReactElement) => {
-        return (child.props as EntityChildProps).children?.props?.children
-    }
+    const getEntityValue = (child: React.ReactElement) => (child.props as EntityChildProps).children.props.children
 
-    const getDirectionValue = (child: React.ReactElement) => {
-        return (child.props as EntityChildProps).children?.props?.children
-    }
+    const getDirectionValue = (child: React.ReactElement) => (child.props as EntityChildProps).children.props.children
 
     return (
         <div className={`report-form container modal ${className}`} ref={containerRef}>
@@ -418,7 +424,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                         getDisplayValue={(station) => station.name}
                         placeholder={t('ReportForm.searchPlaceholder')}
                         label={t('ReportForm.station')}
-                        required={true}
+                        required
                         setSearchUsed={setSearchUsed}
                         listHeight={stationListHeight}
                         highlightElements={
@@ -432,12 +438,11 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                         setHighlightedElementSelected={setStationRecommendationSelected}
                     />
                     <div ref={bottomElementsRef}>
-                        {currentLine && currentLine !== 'S41' && currentLine !== 'S42' && currentStation && (
-                            <section>
+                        {(currentLine !== null) && currentLine !== 'S41' && currentLine !== 'S42' && currentStation !== null ? <section>
                                 <h3>{t('ReportForm.direction')}</h3>
                                 <SelectField
                                     onSelect={handleDirectionSelect}
-                                    value={currentDirection ? allStations[currentDirection].name : ''}
+                                    value={currentDirection !== null ? allStations[currentDirection].name : ''}
                                     containerClassName="align-child-on-line"
                                     getValue={getDirectionValue}
                                 >
@@ -450,14 +455,13 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                                         </strong>
                                     </span>
                                 </SelectField>
-                            </section>
-                        )}
+                            </section> : null}
                         <section className="description-field">
                             <h3>{t('ReportForm.description')}</h3>
                             <textarea
                                 placeholder={t('ReportForm.descriptionPlaceholder')}
-                                onChange={(e) => setDescription(e.target.value)}
-                                value={description || ''}
+                                onChange={(event) => setDescription(event.target.value)}
+                                value={description ?? ''}
                             />
                         </section>
                         <section>
@@ -478,7 +482,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
                             <div>
                                 <button
                                     type="submit"
-                                    className={isPrivacyChecked && currentStation ? '' : 'button-gray'}
+                                    className={isPrivacyChecked && currentStation !== null ? '' : 'button-gray'}
                                 >
                                     {t('ReportForm.report')}
                                 </button>
@@ -491,4 +495,4 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, notifyParentAboutSu
     )
 }
 
-export default ReportForm
+export { ReportForm }

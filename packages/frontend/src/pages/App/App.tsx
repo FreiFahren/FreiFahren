@@ -1,23 +1,23 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 
-import Map from '../../components/Map/Map'
-import LayerSwitcher from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
-import ReportButton from '../../components/Buttons/ReportButton/ReportButton'
-import ReportForm from '../../components/Form/ReportForm/ReportForm'
-import LegalDisclaimer from '../../components/Modals/LegalDisclaimer/LegalDisclaimer'
-import UtilButton from '../../components/Buttons/UtilButton/UtilButton'
-import UtilModal from '../../components/Modals/UtilModal/UtilModal'
-import StatsPopUp from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
-import Backdrop from '../../../src/components/Miscellaneous/Backdrop/Backdrop'
-import ReportsModalButton from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
-import ReportsModal from 'src/components/Modals/ReportsModal/ReportsModal'
-import ReportSummaryModal from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
+import { FreifahrenMap } from '../../components/Map/Map'
+import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
+import { ReportButton } from '../../components/Buttons/ReportButton/ReportButton'
+import { ReportForm } from '../../components/Form/ReportForm/ReportForm'
+import { LegalDisclaimer } from '../../components/Modals/LegalDisclaimer/LegalDisclaimer'
+import { UtilButton } from '../../components/Buttons/UtilButton/UtilButton'
+import { UtilModal } from '../../components/Modals/UtilModal/UtilModal'
+import { StatsPopUp } from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
+import { Backdrop } from '../../components/Miscellaneous/Backdrop/Backdrop'
+import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
+import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
+import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
 import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext'
 import { RiskDataProvider } from '../../contexts/RiskDataContext'
 import { StationsAndLinesProvider } from '../../contexts/StationsAndLinesContext'
 import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 
-import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils'
+import { getNumberOfReportsInLast24Hours } from '../../utils/databaseUtils'
 import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton'
 import { highlightElement, currentColorTheme, setColorThemeInLocalStorage } from '../../utils/uiUtils'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
@@ -47,7 +47,7 @@ const initialAppUIState: AppUIState = {
     isLegalDisclaimerOpen: false,
 }
 
-function App() {
+const App = () => {
     const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
     const [appMounted, setAppMounted] = useState(false)
 
@@ -205,9 +205,9 @@ function App() {
                 <>
                     <LegalDisclaimer
                         openAnimationClass={appUIState.isFirstOpen ? 'open center-animation' : ''}
-                        closeModal={closeLegalDisclaimer}
+                        handleConfirm={closeLegalDisclaimer}
                     />
-                    <Backdrop onClick={() => highlightElement('legal-disclaimer')} />
+                    <Backdrop handleClick={() => highlightElement('legal-disclaimer')} />
                 </>
             )}
             {isUtilOpen && (
@@ -215,9 +215,9 @@ function App() {
                     <UtilModal
                         className={`open ${isUtilAnimatingOut ? 'slide-out' : 'slide-in'}`}
                         colorTheme={appUIState.currentColorTheme}
-                        toggleColorTheme={toggleColorTheme}
+                        handleColorThemeToggle={toggleColorTheme}
                     >
-                        <CloseButton closeModal={closeUtilModal} />
+                        <CloseButton handleClose={closeUtilModal} />
                     </UtilModal>
                 </>
             )}
@@ -226,10 +226,10 @@ function App() {
                     <ReportSummaryModal
                         reportData={reportedData}
                         openAnimationClass="open center-animation"
-                        closeModal={() => setShowSummary(false)}
+                        handleCloseModal={() => setShowSummary(false)}
                         numberOfUsers={numberOfUsers}
                     />
-                    <Backdrop onClick={() => setShowSummary(false)} />
+                    <Backdrop handleClick={() => setShowSummary(false)} />
                 </>
             )}
             <StationsAndLinesProvider>
@@ -240,14 +240,14 @@ function App() {
                             notifyParentAboutSubmission={handleReportFormSubmit}
                             className={'open center-animation'}
                         />
-                        <Backdrop onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
+                        <Backdrop handleClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
                     </>
                 )}
                 <div id="portal-root"></div>
                 <RiskDataProvider>
                     <TicketInspectorsProvider>
                         <ViewedReportsProvider>
-                            <Map
+                            <FreifahrenMap
                                 isFirstOpen={appUIState.isFirstOpen}
                                 formSubmitted={appUIState.formSubmitted}
                                 currentColorTheme={appUIState.currentColorTheme}
@@ -261,9 +261,7 @@ function App() {
                                         className={`open center-animation`}
                                         closeModal={handleRiskGridItemClick}
                                     />
-                                    <Backdrop
-                                        onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })}
-                                    />
+                                    <Backdrop handleClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
                                 </>
                             )}
                             <ReportsModalButton
@@ -273,7 +271,7 @@ function App() {
                     </TicketInspectorsProvider>
                 </RiskDataProvider>
             </StationsAndLinesProvider>
-            <UtilButton onClick={toggleUtilModal} />
+            <UtilButton handleClick={toggleUtilModal} />
             {mapsRotation !== 0 && (
                 <div className="compass-container">
                     <div className="compass-needle" style={{ transform: `rotate(${mapsRotation}deg)` }}>
@@ -284,7 +282,7 @@ function App() {
                 </div>
             )}
             <ReportButton
-                openReportModal={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })}
+                handleOpenReportModal={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })}
             />
             {appUIState.isStatsPopUpOpen && statsData !== 0 && (
                 <StatsPopUp
@@ -298,4 +296,4 @@ function App() {
     )
 }
 
-export default App
+export { App }

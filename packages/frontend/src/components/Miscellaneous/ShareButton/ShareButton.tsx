@@ -5,15 +5,14 @@ import { sendAnalyticsEvent } from 'src/utils/analytics'
 import { Report } from 'src/utils/types'
 
 import './ShareButton.css'
-import i18next from 'i18next'
+import i18next, { TFunction } from 'i18next'
 
 interface ShareButtonProps {
     report?: Report
 }
 
-const formatTime = (timestamp: string, isHistoric: boolean): string => {
+const formatTime = (timestamp: string, isHistoric: boolean, t: TFunction): string => {
     const date = new Date(timestamp);
-    const { t } = useTranslation();
     
     // For historic reports, show the full date and time
     if (isHistoric) {
@@ -40,6 +39,7 @@ const formatTime = (timestamp: string, isHistoric: boolean): string => {
 
     if (diffInMinutes < 1440) { // less than 24 hours
         const hours = Math.floor(diffInMinutes / 60);
+
         if (hours === 1) {
             return t('MarkerModal.oneHourAgo');
         }
@@ -59,30 +59,30 @@ const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
     const { t } = useTranslation()
 
     const handleShare = useCallback(
-        async (e: React.MouseEvent) => {
-            e.preventDefault()
-
+        async (event: React.MouseEvent) => {
+            console.log('Share button clicked')
+            event.preventDefault()
             try {
                 if (!report) {
                     // Just share the page URL if no report
-                    if (navigator.share) {
+                    try {
                         await navigator.share({
                             title: t('Share.title'),
                             url: window.location.href,
                         })
                         await sendAnalyticsEvent('Page Shared', {})
-                    } else {
-                        await navigator.clipboard.writeText(window.location.href)
-                        alert(t('Share.copied'))
+                    } catch (error) {
+                        // eslint-disable-next-line no-console
+                        console.error('Error sharing:', error)
                     }
                     return
                 }
 
                 const shareText = t('Share.text', {
                     station: report.station.name,
-                    direction: report.direction?.name || '?',
-                    line: report.line || '?',
-                    time: formatTime(report.timestamp, report.isHistoric),
+                    direction: report.direction?.name !== null && report.direction?.name !== undefined ? report.direction.name : '?',
+                    line: report.line !== null && report.line !== undefined ? report.line : '?',
+                    time: formatTime(report.timestamp, report.isHistoric, t),
                 })
 
                 if (navigator.share) {
@@ -103,6 +103,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
                     alert(t('Share.copied'))
                 }
             } catch (error) {
+                // eslint-disable-next-line no-console
                 console.error('Error sharing:', error)
             }
         },
@@ -110,11 +111,11 @@ const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
     )
 
     return (
-        <button onClick={handleShare} className="share-button">
-            <img src={process.env.PUBLIC_URL + '/icons/share-svgrepo-com.svg'} alt="Share" />
+        <button onClick={handleShare} className="share-button" type="button">
+            <img src={`${process.env.PUBLIC_URL}/icons/share-svgrepo-com.svg`} alt="Share" />
             <span>{t('Share.button')}</span>
         </button>
     )
 }
 
-export default ShareButton
+export { ShareButton }

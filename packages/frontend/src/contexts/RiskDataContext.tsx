@@ -1,6 +1,6 @@
-import React, { createContext, useState, useContext, useCallback } from 'react'
-import { RiskData } from 'src/utils/types'
 import { isEqual } from 'lodash'
+import React, { createContext, useCallback,useContext, useState, useMemo } from 'react'
+import { RiskData } from 'src/utils/types'
 
 const defaultRefreshRiskData = async (): Promise<void> => {
     throw new Error('refreshRiskData is not implemented')
@@ -19,6 +19,7 @@ export const RiskDataProvider = ({ children }: { children: React.ReactNode }) =>
     const refreshRiskData = useCallback(async () => {
         try {
             const results = await fetch(`${process.env.REACT_APP_API_URL}/risk-prediction/segment-colors`)
+
             if (!results.ok) {
                 throw new Error('Failed to fetch risk data')
             }
@@ -29,10 +30,17 @@ export const RiskDataProvider = ({ children }: { children: React.ReactNode }) =>
                 setSegmentRiskData(newData)
             }
         } catch (error) {
+            // fix later with sentry
+            // eslint-disable-next-line no-console
             console.error('Failed to fetch risk data:', error)
             setSegmentRiskData(null)
         }
     }, [segmentRiskData])
 
-    return <RiskDataContext.Provider value={{ segmentRiskData, refreshRiskData }}>{children}</RiskDataContext.Provider>
+    const value = useMemo(
+        () => ({ segmentRiskData, refreshRiskData }),
+        [segmentRiskData, refreshRiskData]
+    )
+
+    return <RiskDataContext.Provider value={value}>{children}</RiskDataContext.Provider>
 }

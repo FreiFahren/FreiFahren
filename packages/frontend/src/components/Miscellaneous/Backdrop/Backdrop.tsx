@@ -1,15 +1,15 @@
+import './Backdrop.css'
+
 import React, { useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom'
 
-import './Backdrop.css'
-
 interface BackdropProps {
-    onClick: () => void
+    handleClick: () => void
     BackgroundColor?: string
     Zindex?: number
 }
 
-const Backdrop: React.FC<BackdropProps> = ({ onClick, BackgroundColor, Zindex }) => {
+const Backdrop: React.FC<BackdropProps> = ({ handleClick, BackgroundColor, Zindex }) => {
     const backdropRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -17,7 +17,7 @@ const Backdrop: React.FC<BackdropProps> = ({ onClick, BackgroundColor, Zindex })
 
         const handleScroll = (event: Event) => {
             if (event.target === backdrop) {
-                onClick()
+                handleClick()
             }
         }
 
@@ -32,21 +32,22 @@ const Backdrop: React.FC<BackdropProps> = ({ onClick, BackgroundColor, Zindex })
                 backdrop.removeEventListener('touchmove', handleScroll)
             }
         }
-    }, [onClick])
+    }, [handleClick])
 
     return ReactDOM.createPortal(
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
         <div
             ref={backdropRef}
             className="backdrop"
-            onClick={onClick}
+            onClick={handleClick}
             data-testid="backdrop"
             style={{
-                backgroundColor: BackgroundColor || 'rgba(0, 0, 0, 0.5)',
-                zIndex: Zindex || 1, // should be same as --zIndex-backdrop
+                backgroundColor: BackgroundColor ?? 'rgba(0, 0, 0, 0.5)',
+                zIndex: Zindex ?? 1, // should be same as --zIndex-backdrop
             }}
         />,
         document.getElementById('portal-root') as HTMLElement
     )
 }
 
-export default Backdrop
+export { Backdrop }

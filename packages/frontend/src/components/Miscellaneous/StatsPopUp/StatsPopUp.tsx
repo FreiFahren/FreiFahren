@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
-
 import './StatsPopUp.css'
+
+import React, { useCallback,useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface StatsPopUpProps {
     className: string
@@ -39,29 +39,38 @@ const StatsPopUp: React.FC<StatsPopUpProps> = ({ className, numberOfReports, ope
         }
 
         const timer = setTimeout(() => {
-            updateMessageAndShowPopup().then(hidePopupAfterAnimation)
+            updateMessageAndShowPopup().then(hidePopupAfterAnimation).catch(error => {
+                // fix later with sentry
+                // eslint-disable-next-line no-console
+                console.error('Error updating message and showing popup:', error)
+            })
         }, timeForOneMessage)
 
         return () => clearTimeout(timer)
     }, [hidePopupAfterAnimation, timeForOneMessage, numberOfUsers, t])
 
+    // eslint-disable-next-line consistent-return
     useEffect(() => {
         if (popOut) {
             const timer = setTimeout(() => setPopOut(false), timeForPopOutAnimation)
+
             return () => clearTimeout(timer)
         }
     }, [popOut, timeForPopOutAnimation])
 
     return (
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
         <div
             className={`
         stats-popup center-child ${className}
         ${popOut ? 'pop-out' : ''}
         ${!isVisible ? 'fade-out' : ''}`}
+            // eslint-disable-next-line react/jsx-handler-names
             onClick={openListModal}
+            // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{ __html: message }}
         />
     )
 }
 
-export default StatsPopUp
+export { StatsPopUp }
