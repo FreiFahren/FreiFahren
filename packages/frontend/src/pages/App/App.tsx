@@ -1,30 +1,30 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import './App.css'
 
-import Map from '../../components/Map/Map'
-import LayerSwitcher from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
-import ReportButton from '../../components/Buttons/ReportButton/ReportButton'
-import ReportForm from '../../components/Form/ReportForm/ReportForm'
-import LegalDisclaimer from '../../components/Modals/LegalDisclaimer/LegalDisclaimer'
-import UtilButton from '../../components/Buttons/UtilButton/UtilButton'
-import UtilModal from '../../components/Modals/UtilModal/UtilModal'
-import StatsPopUp from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
-import Backdrop from '../../../src/components/Miscellaneous/Backdrop/Backdrop'
+import React, { useCallback, useEffect, useRef,useState } from 'react'
 import ReportsModalButton from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
 import ReportsModal from 'src/components/Modals/ReportsModal/ReportsModal'
 import ReportSummaryModal from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
-import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext'
-import { RiskDataProvider } from '../../contexts/RiskDataContext'
-import { StationsAndLinesProvider } from '../../contexts/StationsAndLinesContext'
-import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
-
-import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils'
-import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton'
-import { highlightElement, currentColorTheme, setColorThemeInLocalStorage } from '../../utils/uiUtils'
-import { useModalAnimation } from '../../hooks/UseModalAnimation'
-import { sendAnalyticsEvent, sendSavedEvents } from '../../utils/analytics'
 import { Report } from 'src/utils/types'
 
-import './App.css'
+import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton'
+import LayerSwitcher from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
+import ReportButton from '../../components/Buttons/ReportButton/ReportButton'
+import UtilButton from '../../components/Buttons/UtilButton/UtilButton'
+import ReportForm from '../../components/Form/ReportForm/ReportForm'
+import Map from '../../components/Map/Map'
+import Backdrop from "../../components/Miscellaneous/Backdrop/Backdrop"
+import StatsPopUp from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
+import LegalDisclaimer from '../../components/Modals/LegalDisclaimer/LegalDisclaimer'
+import UtilModal from '../../components/Modals/UtilModal/UtilModal'
+import { RiskDataProvider } from '../../contexts/RiskDataContext'
+import { StationsAndLinesProvider } from '../../contexts/StationsAndLinesContext'
+import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext'
+import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
+import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
+import { useModalAnimation } from '../../hooks/UseModalAnimation'
+import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils'
+import { currentColorTheme, highlightElement, setColorThemeInLocalStorage } from '../../utils/uiUtils'
+
 type AppUIState = {
     isReportFormOpen: boolean
     formSubmitted: boolean
@@ -47,7 +47,7 @@ const initialAppUIState: AppUIState = {
     isLegalDisclaimerOpen: false,
 }
 
-function App() {
+const App = () => {
     const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
     const [appMounted, setAppMounted] = useState(false)
 
@@ -147,7 +147,7 @@ function App() {
                 meta: {
                     from: previousLayer,
                     to: clickedLayer,
-                    source: source,
+                    source,
                 },
             })
         } catch (error) {
@@ -201,28 +201,21 @@ function App() {
 
     return (
         <div className="App">
-            {appMounted && shouldShowLegalDisclaimer() && (
-                <>
+            {appMounted && shouldShowLegalDisclaimer() ? <>
                     <LegalDisclaimer
                         openAnimationClass={appUIState.isFirstOpen ? 'open center-animation' : ''}
                         closeModal={closeLegalDisclaimer}
                     />
                     <Backdrop onClick={() => highlightElement('legal-disclaimer')} />
-                </>
-            )}
-            {isUtilOpen && (
-                <>
-                    <UtilModal
+                </> : null}
+            {isUtilOpen ? <UtilModal
                         className={`open ${isUtilAnimatingOut ? 'slide-out' : 'slide-in'}`}
                         colorTheme={appUIState.currentColorTheme}
                         toggleColorTheme={toggleColorTheme}
                     >
                         <CloseButton closeModal={closeUtilModal} />
-                    </UtilModal>
-                </>
-            )}
-            {showSummary && reportedData && (
-                <>
+                    </UtilModal> : null}
+            {showSummary && reportedData ? <>
                     <ReportSummaryModal
                         reportData={reportedData}
                         openAnimationClass="open center-animation"
@@ -230,20 +223,17 @@ function App() {
                         numberOfUsers={numberOfUsers}
                     />
                     <Backdrop onClick={() => setShowSummary(false)} />
-                </>
-            )}
+                </> : null}
             <StationsAndLinesProvider>
-                {appUIState.isReportFormOpen && (
-                    <>
+                {appUIState.isReportFormOpen ? <>
                         <ReportForm
                             closeModal={() => setAppUIState({ ...appUIState, isReportFormOpen: false })}
                             notifyParentAboutSubmission={handleReportFormSubmit}
-                            className={'open center-animation'}
+                            className="open center-animation"
                         />
                         <Backdrop onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
-                    </>
-                )}
-                <div id="portal-root"></div>
+                    </> : null}
+                <div id="portal-root" />
                 <RiskDataProvider>
                     <TicketInspectorsProvider>
                         <ViewedReportsProvider>
@@ -255,17 +245,15 @@ function App() {
                                 onRotationChange={handleRotationChange}
                             />
                             <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
-                            {appUIState.isListModalOpen && (
-                                <>
+                            {appUIState.isListModalOpen ? <>
                                     <ReportsModal
-                                        className={`open center-animation`}
+                                        className="open center-animation"
                                         closeModal={handleRiskGridItemClick}
                                     />
                                     <Backdrop
                                         onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })}
                                     />
-                                </>
-                            )}
+                                </> : null}
                             <ReportsModalButton
                                 openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })}
                             />
@@ -274,26 +262,22 @@ function App() {
                 </RiskDataProvider>
             </StationsAndLinesProvider>
             <UtilButton onClick={toggleUtilModal} />
-            {mapsRotation !== 0 && (
-                <div className="compass-container">
+            {mapsRotation !== 0 ? <div className="compass-container">
                     <div className="compass-needle" style={{ transform: `rotate(${mapsRotation}deg)` }}>
-                        <div className="arrow upper"></div>
-                        <div className="compass-circle"></div>
-                        <div className="arrow lower"></div>
+                        <div className="arrow upper" />
+                        <div className="compass-circle" />
+                        <div className="arrow lower" />
                     </div>
-                </div>
-            )}
+                </div> : null}
             <ReportButton
                 openReportModal={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })}
             />
-            {appUIState.isStatsPopUpOpen && statsData !== 0 && (
-                <StatsPopUp
+            {appUIState.isStatsPopUpOpen && statsData !== 0 ? <StatsPopUp
                     numberOfReports={statsData}
                     numberOfUsers={numberOfUsers}
-                    className={'open center-animation'}
+                    className="open center-animation"
                     openListModal={() => setAppUIState({ ...appUIState, isListModalOpen: !appUIState.isListModalOpen })}
-                />
-            )}
+                /> : null}
         </div>
     )
 }

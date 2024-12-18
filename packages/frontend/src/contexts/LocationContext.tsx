@@ -1,6 +1,15 @@
-import React, { createContext, useState, useContext, useCallback, useRef } from 'react'
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react'
+
+import { sendAnalyticsEvent } from '../hooks/useAnalytics'
 import { watchPosition } from '../utils/mapUtils'
-import { sendAnalyticsEvent } from 'src/utils/analytics'
+
+// this will be replaced with sentry handling
+const handleError = (error: unknown, context: string) => {
+    if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.error(`Error in ${context}:`, error)
+    }
+}
 
 interface LocationContextType {
     userPosition: { lng: number; lat: number } | null
@@ -19,30 +28,29 @@ export const useLocation = () => {
 }
 
 export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [userPosition, setUserPositionState] = useState<{ lng: number; lat: number } | null>(null)
-    const hasLocationEventBeenSentRef = useRef(false) // avoid sending the location event on every render
+    const [userPositionState, setUserPositionState] = useState<{ lng: number; lat: number } | null>(null)
+    const hasLocationEventBeenSentRef = useRef(false)
 
     const setUserPosition = useCallback((position: { lng: number; lat: number } | null) => {
         setUserPositionState(position)
         if (position && !hasLocationEventBeenSentRef.current) {
-            sendAnalyticsEvent('User Position has been set')
+            sendAnalyticsEvent('User Position has been set').catch((error) => handleError(error, 'sendAnalyticsEvent'))
             hasLocationEventBeenSentRef.current = true
         }
     }, [])
 
     const initializeLocationTracking = useCallback(() => {
-        watchPosition(setUserPosition)
+        watchPosition(setUserPosition).catch((error) => handleError(error, 'watchPosition'))
     }, [setUserPosition])
 
-    return (
-        <LocationContext.Provider
-            value={{
-                userPosition,
-                setUserPosition,
-                initializeLocationTracking,
-            }}
-        >
-            {children}
-        </LocationContext.Provider>
+    const contextValue = useMemo(
+        () => ({
+            userPosition: userPositionState,
+            setUserPosition,
+            initializeLocationTracking,
+        }),
+        [userPositionState, setUserPosition, initializeLocationTracking]
     )
+
+    return <LocationContext.Provider value={contextValue}>{children}</LocationContext.Provider>
 }

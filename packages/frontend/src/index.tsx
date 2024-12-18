@@ -3,16 +3,16 @@ import './index.css'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { I18nextProvider } from 'react-i18next'
-import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
+import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom'
 
 import { LocationProvider } from './contexts/LocationContext'
+import { sendAnalyticsEvent } from './hooks/useAnalytics'
 import i18n from './i18n'
 import App from './pages/App/App'
 import Impressum from './pages/Impressum/Impressum'
 import PrivacyPolicy from './pages/PrivacyPolicy/PrivacyPolicy'
 import Support from './pages/Support/Support'
 import reportWebVitals from './reportWebVitals'
-import { sendAnalyticsEvent } from './utils/analytics'
 
 type FunnelConfig = {
     path: string
@@ -29,19 +29,19 @@ const FUNNEL_ROUTES: FunnelConfig[] = [
 const FunnelRedirect: React.FC<FunnelConfig> = ({ source, path }) => {
     const navigate = useNavigate()
 
-    // Execute immediately on render
     sendAnalyticsEvent('Clicked on Funnel link', {
         meta: {
             source,
             path,
         },
     })
+        .then(() => {
+            navigate('/', { replace: true })
+        })
         .catch((error) => {
-            // handle in the future with sentry
             // eslint-disable-next-line no-console
             console.error('Failed to send analytics event:', error)
-        })
-        .finally(() => {
+            // Still redirect even if the event fails
             navigate('/', { replace: true })
         })
 
