@@ -26,11 +26,11 @@ const ReportItem: React.FC<ReportItemProps> = ({ report, currentTime }) => {
             </div>
             <div>
                 <p>
-                    {report.direction?.name !== null && report.direction?.name !== undefined ? (
-                        <>
-                            {t('MarkerModal.direction')}: <span>{report.direction.name}</span>
-                        </>
-                    ) : null}
+                    {/* BECAUSE IF NULL, empty richtung is shown  */}
+                    {/* eslint-disable-next-line @typescript-eslint/strict-boolean-expressions */}
+                    {report.direction?.name ? <>
+                        {t('MarkerModal.direction')}: <span>{report.direction.name}</span>
+                    </> : null}
                 </p>
             </div>
         </div>

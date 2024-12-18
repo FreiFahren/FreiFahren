@@ -43,7 +43,12 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
             {children}
             <h1>{station.name}</h1>
             <div className="align-child-on-line direction-line">
-                {line !== null && line !== undefined ? <Line line={line} /> : null}
+
+                
+                {/*  because no line should be shown
+                eslint-disable-next-line react/jsx-no-leaked-render */}
+                {/* eslint-disable-next-line @typescript-eslint/strict-boolean-expressions, react/jsx-no-leaked-render */}
+                {line && <Line line={line} />}
                 {direction?.name !== null && direction?.name !== undefined ? <h2>{direction.name}</h2> : null}
             </div>
             <div>
