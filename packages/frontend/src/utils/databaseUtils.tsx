@@ -22,13 +22,14 @@ export type LinesList = Record<string, string[]>
  * @returns {Promise<any | null>} A promise that resolves to the fetched data if successful, or null if there is no new data or an error occurs.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getRecentDataWithIfModifiedSince(
+export const getRecentDataWithIfModifiedSince = async (
     endpointUrl: string,
     lastUpdate: Date | null
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any | null> {
+): Promise<any | null> => {
     try {
         const headers = new Headers()
+
         // Include the If-Modified-Since header only if lastUpdateTimestamp is available
         if (lastUpdate) {
             headers.append('If-Modified-Since', lastUpdate.toUTCString())
@@ -37,7 +38,7 @@ export async function getRecentDataWithIfModifiedSince(
         // Make the request with optional If-Modified-Since header
         const response = await fetch(endpointUrl, {
             method: 'GET',
-            headers: headers,
+            headers,
         })
 
         // Handle 304 Not Modified
@@ -46,38 +47,47 @@ export async function getRecentDataWithIfModifiedSince(
         }
 
         const data = await response.json()
+
         return data
     } catch (error) {
+        // fix later with sentry
+        // eslint-disable-next-line no-console
         console.error('Error:', error)
         return null // Return null in case of error
     }
 }
 
-export async function getAllStationsList(): Promise<StationList> {
+export const getAllStationsList = async (): Promise<StationList> => {
     try {
         const response = await fetch(`${process.env.REACT_APP_API_URL}/stations`)
         const data = await response.json()
+
         return data
     } catch (error) {
+        // fix later with sentry
+        // eslint-disable-next-line no-console
         console.error('Error:', error)
         return {}
     }
 }
 
-export async function getAllLinesList(): Promise<LinesList> {
+export const getAllLinesList = async (): Promise<LinesList> => {
     try {
         const response = await fetch(`${process.env.REACT_APP_API_URL}/lines`)
         const data = await response.json()
+
         return data
     } catch (error) {
+        // fix later with sentry
+        // eslint-disable-next-line no-console
         console.error('Error:', error)
         return {}
     }
 }
 
-export async function reportInspector(line: string, stationId: string, directionId: string, message: string) {
+export const reportInspector = async (line: string, stationId: string, directionId: string, message: string) => {
     const requestBody = JSON.stringify({
-        line: line,
+        line,
         stationId: stationId || '',
         directionId: directionId || '',
         message: message || '',
@@ -96,10 +106,14 @@ export async function reportInspector(line: string, stationId: string, direction
             }
             return response.json()
         })
-        .catch((error) => console.error('Error:', error))
+        .catch((error) => {
+            // fix later with sentry
+            // eslint-disable-next-line no-console
+            console.error('Error:', error)
+        })
 }
 
-export async function getStationDistance(userStationId: string, inspectorStationId: string): Promise<number | null> {
+export const getStationDistance = async (userStationId: string, inspectorStationId: string): Promise<number | null> => {
     if (userStationId === '' || inspectorStationId === '') {
         return null
     }
@@ -113,17 +127,20 @@ export async function getStationDistance(userStationId: string, inspectorStation
 
         if (response.ok) {
             return typeof data === 'number' ? data : data.distance
-        } else {
-            console.error('API call failed:', data)
-            return null
         }
+        // fix later with sentry
+        // eslint-disable-next-line no-console
+        console.error('API call failed:', data)
+        return null
     } catch (error) {
+        // fix later with sentry
+        // eslint-disable-next-line no-console
         console.error('Error fetching distance:', error)
         return null // Return null if there's an error during the fetch.
     }
 }
 
-export async function getNumberOfReportsInLast24Hours(): Promise<number> {
+export const getNumberOfReportsInLast24Hours = async (): Promise<number> => {
     try {
         // Calculate the start and end times for the last 24 hours in UTC
         const endTime = new Date().toISOString()
@@ -131,6 +148,7 @@ export async function getNumberOfReportsInLast24Hours(): Promise<number> {
 
         // Construct the URL with query parameters
         const url = new URL(`${process.env.REACT_APP_API_URL}/basics/inspectors`)
+
         url.searchParams.append('start', startTime)
         url.searchParams.append('end', endTime)
 
@@ -144,6 +162,8 @@ export async function getNumberOfReportsInLast24Hours(): Promise<number> {
 
         // Ensure that the response is an array
         if (!Array.isArray(reports)) {
+            // fix later with sentry
+            // eslint-disable-next-line no-console
             console.error('Unexpected response format:', reports)
             return 0
         }
@@ -153,6 +173,8 @@ export async function getNumberOfReportsInLast24Hours(): Promise<number> {
 
         return filteredReports.length
     } catch (error) {
+        // fix later with sentry
+        // eslint-disable-next-line no-console
         console.error('Error:', error)
         return 0
     }

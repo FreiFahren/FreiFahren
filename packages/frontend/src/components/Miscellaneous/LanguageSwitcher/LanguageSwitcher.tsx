@@ -1,5 +1,6 @@
-import { useTranslation } from 'react-i18next'
 import './LanguageSwitcher.css'
+
+import { useTranslation } from 'react-i18next'
 
 type LanguageSwitcherProps = {
     title: string
@@ -8,13 +9,20 @@ type LanguageSwitcherProps = {
 export const LanguageSwitcher = ({ title }: LanguageSwitcherProps) => {
     const { i18n } = useTranslation()
 
-    const toggleLanguage = () => {
+    const handleLanguageChange = () => {
         const newLang = i18n.language === 'en' ? 'de' : 'en'
-        i18n.changeLanguage(newLang)
+
+        i18n.changeLanguage(newLang).catch((error) => {
+            // fix this later with sentry
+            // eslint-disable-next-line no-console
+            console.error('Error changing language', error)
+        })
     }
 
     return (
-        <p onClick={toggleLanguage} className="language-switcher-link">
+        // fix this later please, why button as div 
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions, jsx-a11y/no-noninteractive-element-interactions
+        <p onClick={handleLanguageChange} className="language-switcher-link">
             {title}
         </p>
     )

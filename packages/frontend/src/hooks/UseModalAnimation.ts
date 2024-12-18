@@ -14,7 +14,7 @@ import { useState } from 'react'
  * @property {() => void} openModal - Function to open the modal.
  * @property {() => void} closeModal - Function to close the modal, triggering the closing animation.
  */
-export function useModalAnimation(timeout = 250) {
+export const useModalAnimation = (timeout = 250) => {
     const [isOpen, setIsOpen] = useState(false)
     const [isAnimatingOut, setIsAnimatingOut] = useState(false)
 

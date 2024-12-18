@@ -1,15 +1,7 @@
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react'
+import React, { createContext, useCallback, useContext, useMemo, useRef,useState } from 'react'
+import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 
-import { sendAnalyticsEvent } from '../hooks/useAnalytics'
 import { watchPosition } from '../utils/mapUtils'
-
-// this will be replaced with sentry handling
-const handleError = (error: unknown, context: string) => {
-    if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
-        console.error(`Error in ${context}:`, error)
-    }
-}
 
 interface LocationContextType {
     userPosition: { lng: number; lat: number } | null
@@ -21,6 +13,7 @@ const LocationContext = createContext<LocationContextType | undefined>(undefined
 
 export const useLocation = () => {
     const context = useContext(LocationContext)
+
     if (!context) {
         throw new Error('useLocation must be used within a LocationProvider')
     }
@@ -28,29 +21,38 @@ export const useLocation = () => {
 }
 
 export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [userPositionState, setUserPositionState] = useState<{ lng: number; lat: number } | null>(null)
-    const hasLocationEventBeenSentRef = useRef(false)
+    const [userPosition, setUserPosition] = useState<{ lng: number; lat: number } | null>(null)
+    const hasLocationEventBeenSentRef = useRef(false) // avoid sending the location event on every render
 
-    const setUserPosition = useCallback((position: { lng: number; lat: number } | null) => {
-        setUserPositionState(position)
+    const setUserPositionState = useCallback((position: { lng: number; lat: number } | null) => {
+        setUserPosition(position)
         if (position && !hasLocationEventBeenSentRef.current) {
-            sendAnalyticsEvent('User Position has been set').catch((error) => handleError(error, 'sendAnalyticsEvent'))
+            sendAnalyticsEvent('User Position has been set').catch((error) => {
+                // fix later with sentry
+                // eslint-disable-next-line no-console
+                console.error('Error sending analytics event:', error)
+            })
             hasLocationEventBeenSentRef.current = true
         }
     }, [])
 
     const initializeLocationTracking = useCallback(() => {
-        watchPosition(setUserPosition).catch((error) => handleError(error, 'watchPosition'))
-    }, [setUserPosition])
+        watchPosition(setUserPositionState).catch((error) => {
+            // fix later with sentry
+            // eslint-disable-next-line no-console
+            console.error('Error watching position:', error)
+        })
+    }, [setUserPositionState])
 
-    const contextValue = useMemo(
-        () => ({
-            userPosition: userPositionState,
-            setUserPosition,
-            initializeLocationTracking,
-        }),
-        [userPositionState, setUserPosition, initializeLocationTracking]
+    return (
+        <LocationContext.Provider
+            value={useMemo(() => ({
+                userPosition,
+                setUserPosition,
+                initializeLocationTracking,
+            }), [userPosition, setUserPosition, initializeLocationTracking])}
+        >
+            {children}
+        </LocationContext.Provider>
     )
-
-    return <LocationContext.Provider value={contextValue}>{children}</LocationContext.Provider>
 }

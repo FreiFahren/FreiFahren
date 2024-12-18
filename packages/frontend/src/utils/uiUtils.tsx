@@ -1,17 +1,15 @@
-export function highlightElement(id: string) {
+export const highlightElement = (id: string): void => {
     const element = document.getElementById(id)
 
     if (element !== null) {
-        if (element) {
-            element.classList.add('highlight')
-            setTimeout(() => {
-                element.classList.remove('highlight')
-            }, 3000)
-        }
+        element.classList.add('highlight')
+        setTimeout(() => {
+            element.classList.remove('highlight')
+        }, 3000)
     } else {
         const elementClass = document.getElementsByClassName(id)
 
-        if (elementClass) {
+        if (elementClass.length > 0) {
             elementClass[0].classList.add('highlight')
             setTimeout(() => {
                 elementClass[0].classList.remove('highlight')
@@ -20,8 +18,9 @@ export function highlightElement(id: string) {
     }
 }
 
-export function createWarningSpan(elementId: string, message: string) {
+export const createWarningSpan = (elementId: string, message: string): void => {
     let warningSpan = document.getElementById('warning-span')
+
     if (!warningSpan) {
         warningSpan = document.createElement('span')
         warningSpan.id = 'warning-span'
@@ -31,12 +30,13 @@ export function createWarningSpan(elementId: string, message: string) {
     }
 }
 
-export const currentColorTheme = () => {
+export const currentColorTheme = (): string => {
     const colorTheme = localStorage.getItem('colorTheme')
-    return colorTheme ? colorTheme : 'dark'
+
+    return colorTheme ?? 'dark'
 }
 
-export function setColorThemeInLocalStorage() {
+export const setColorThemeInLocalStorage = (): void => {
     const colorTheme = currentColorTheme()
 
     if (colorTheme === 'dark') {
@@ -51,7 +51,7 @@ export function setColorThemeInLocalStorage() {
  * @param line - The name of the line.
  * @returns The color of the line as a hex string.
  */
-export function getLineColor(line: string) {
+export const getLineColor = (line: string): string => {
     switch (line) {
         case 'S1':
             return '#da6ba2'

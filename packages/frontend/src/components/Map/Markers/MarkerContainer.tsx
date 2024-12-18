@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
+import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 
 import { useTicketInspectors } from '../../../contexts/TicketInspectorsContext'
-import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
 import { useModalAnimation } from '../../../hooks/UseModalAnimation'
 import { Report } from '../../../utils/types'
 import { CloseButton } from '../../Buttons/CloseButton/CloseButton'
-import MarkerModal from '../../Modals/MarkerModal/MarkerModal'
+import { MarkerModal } from '../../Modals/MarkerModal/MarkerModal'
 import { OpacityMarker } from './Classes/OpacityMarker/OpacityMarker'
 
 export interface MarkersProps {
@@ -29,16 +29,18 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
         setSelectedMarker(report)
         const now = new Date()
         const ageInMinutes = Math.floor((now.getTime() - new Date(report.timestamp).getTime()) / (60 * 1000))
+
         sendAnalyticsEvent('Marker clicked', {
             meta: {
                 station: report.station.name,
                 ageInMinutes,
                 isHistoric: report.isHistoric,
             },
-        }).catch(
+        }).catch((error) => {
+            // fix later with sentry
             // eslint-disable-next-line no-console
-            console.error
-        )
+            console.error('Error sending analytics event:', error)
+        })
         openMarkerModal()
     }
 
@@ -54,18 +56,18 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
                     onMarkerClick={handleMarkerClick}
                 />
             ))}
-            {isMarkerModalOpen && selectedMarker ? (
+            {isMarkerModalOpen ? selectedMarker && (
                 <MarkerModal
                     selectedMarker={selectedMarker}
                     className={`open ${isMarkerModalAnimatingOut ? 'slide-out' : 'slide-in'}`}
                     userLat={userPosition?.lat}
                     userLng={userPosition?.lng}
                 >
-                    <CloseButton closeModal={closeMarkerModal} />
-                </MarkerModal>
-            ) : null}
+                    <CloseButton handleClose={closeMarkerModal} />
+                    </MarkerModal>
+                ) : null}
         </div>
     )
 }
 
-export default MarkerContainer
+export { MarkerContainer }

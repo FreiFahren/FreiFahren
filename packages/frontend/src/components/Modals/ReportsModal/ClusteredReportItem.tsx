@@ -1,10 +1,9 @@
-import React, { useState } from 'react'
+import './ReportsModal.css'
 
+import React, { useState } from 'react'
 import { Report } from 'src/utils/types'
 
-import ReportItem from './ReportItem'
-
-import './ReportsModal.css'
+import { ReportItem } from './ReportItem'
 
 interface ClusteredReportItemProps {
     inspectors: Report[]
@@ -29,25 +28,24 @@ const ClusteredReportItem: React.FC<ClusteredReportItemProps> = ({ inspectors })
                 <div className="title-report-item">
                     <ReportItem report={inspectorsWithoutDirection[0]} currentTime={currentTime} />
                 </div>
-                {inspectorsWithoutDirection.length > 1 && (
-                    <button
+                {inspectorsWithoutDirection.length > 1 ? <button
+                        type="button"
+                        aria-label="Toggle report list"
                         className={isListExpanded ? 'expanded' : ''}
                         onClick={() => setIsListExpanded(!isListExpanded)}
-                    />
-                )}
+                    /> : null}
             </div>
             <div className={`clustered-report-item-list list-modal ${isListExpanded ? 'expanded' : ''}`}>
-                {isListExpanded &&
-                    expandedListWithoutTitle.map((inspector) => (
+                {isListExpanded ? expandedListWithoutTitle.map((inspector) => (
                         <ReportItem
                             key={inspector.station.id + inspector.timestamp}
                             report={inspector}
                             currentTime={currentTime}
                         />
-                    ))}
+                    )) : null}
             </div>
         </>
     )
 }
 
-export default ClusteredReportItem
+export { ClusteredReportItem }

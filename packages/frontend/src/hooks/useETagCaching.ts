@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef,useState } from 'react'
 
 interface ETagCacheOptions {
     endpoint: string
@@ -90,7 +90,7 @@ interface StorageKeys {
  * @param {ETagCacheOptions} options - Configuration options for the cache
  * @returns {ETagCacheResult<T>} An object containing the cached data and control functions
  */
-export function useETagCache<T>({ endpoint, storageKeyPrefix = '', onError }: ETagCacheOptions): ETagCacheResult<T> {
+export const useETagCache = <T>({ endpoint, storageKeyPrefix = '', onError }: ETagCacheOptions): ETagCacheResult<T> => {
     const [data, setData] = useState<T | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<Error | null>(null)
@@ -108,7 +108,7 @@ export function useETagCache<T>({ endpoint, storageKeyPrefix = '', onError }: ET
 
             const response = await fetch(`${process.env.REACT_APP_API_URL}${endpoint}`, {
                 headers: {
-                    'If-None-Match': cachedETag || '',
+                    'If-None-Match': cachedETag ?? '',
                     Accept: 'application/json',
                 },
             })
@@ -117,7 +117,8 @@ export function useETagCache<T>({ endpoint, storageKeyPrefix = '', onError }: ET
 
             if (response.status === 304) {
                 const cachedData = localStorage.getItem(storageKeys.dataKey)
-                if (cachedData) {
+
+                if (cachedData !== null) {
                     setData(JSON.parse(cachedData))
                     return
                 }
@@ -127,22 +128,24 @@ export function useETagCache<T>({ endpoint, storageKeyPrefix = '', onError }: ET
                 throw new Error(`Failed to fetch data: ${response.status}`)
             }
 
-            if (newETag) {
+            if (newETag !== null) {
                 localStorage.setItem(storageKeys.etagKey, newETag)
             }
 
             const newData = await response.json()
+
             localStorage.setItem(storageKeys.dataKey, JSON.stringify(newData))
             setData(newData)
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred'
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred'
             const customError = new Error(errorMessage)
 
             setError(customError)
             onError?.(customError)
 
             const cachedData = localStorage.getItem(storageKeys.dataKey)
-            if (cachedData) {
+
+            if (cachedData !== null) {
                 setData(JSON.parse(cachedData))
             }
         } finally {
@@ -154,7 +157,11 @@ export function useETagCache<T>({ endpoint, storageKeyPrefix = '', onError }: ET
 
     useEffect(() => {
         if (!hasInitialFetch.current) {
-            fetchData()
+            fetchData().catch((fetchDataError) => {
+                // fix this later with sentry
+                // eslint-disable-next-line no-console
+                console.error('Error fetching initial data:', fetchDataError)
+            })
             hasInitialFetch.current = true
         }
     }, [fetchData])
@@ -162,7 +169,11 @@ export function useETagCache<T>({ endpoint, storageKeyPrefix = '', onError }: ET
     const invalidateCache = useCallback(() => {
         localStorage.removeItem(storageKeys.etagKey)
         localStorage.removeItem(storageKeys.dataKey)
-        fetchData()
+        fetchData().catch((fetchDataError) => {
+            // fix this later with sentry
+            // eslint-disable-next-line no-console
+            console.error('Error fetching initial data:', fetchDataError)
+        })
     }, [fetchData, storageKeys])
 
     return {

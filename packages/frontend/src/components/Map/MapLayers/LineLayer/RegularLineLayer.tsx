@@ -1,5 +1,5 @@
 import React from 'react'
-import { Source, Layer } from 'react-map-gl/maplibre'
+import { Layer,Source } from 'react-map-gl/maplibre'
 
 interface RegularLineLayerProps {
     lineSegments: GeoJSON.FeatureCollection<GeoJSON.LineString> | null
@@ -11,8 +11,7 @@ const RegularLineLayer: React.FC<RegularLineLayerProps> = ({ lineSegments, textC
 
     if (!lineSegments) return null
     return (
-        <>
-            <Source id="line-data" type="geojson" data={lineSegments}>
+        <Source id="line-data" type="geojson" data={lineSegments}>
                 <Layer
                     id="line-layer"
                     type="line"
@@ -55,8 +54,7 @@ const RegularLineLayer: React.FC<RegularLineLayerProps> = ({ lineSegments, textC
                     }}
                 />
             </Source>
-        </>
     )
 }
 
-export default RegularLineLayer
+export { RegularLineLayer }

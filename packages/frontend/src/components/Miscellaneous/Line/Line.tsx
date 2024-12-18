@@ -1,10 +1,12 @@
-import React from 'react'
-
-import { getLineColor } from 'src/utils/uiUtils'
-
 import './Line.css'
 
+import React from 'react'
+import { getLineColor } from 'src/utils/uiUtils'
+
 const Line: React.FC<{ line: string }> = ({ line }) => {
+    if (line === "") {
+        return null
+    }
     return (
         <span className="line" style={{ backgroundColor: getLineColor(line) }}>
             <strong>{line}</strong>
@@ -12,4 +14,4 @@ const Line: React.FC<{ line: string }> = ({ line }) => {
     )
 }
 
-export default Line
+export { Line }

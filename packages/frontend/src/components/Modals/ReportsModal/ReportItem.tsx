@@ -1,10 +1,9 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-
-import Line from '../../Miscellaneous/Line/Line'
-
-import { Report } from 'src/utils/types'
 import { useElapsedTimeMessage } from 'src/hooks/Messages'
+import { Report } from 'src/utils/types'
+
+import { Line } from '../../Miscellaneous/Line/Line'
 
 interface ReportItemProps {
     report: Report
@@ -14,30 +13,28 @@ interface ReportItemProps {
 const ReportItem: React.FC<ReportItemProps> = ({ report, currentTime }) => {
     const { t } = useTranslation()
 
-    let elapsedTimeMessage = null
-
-    if (currentTime) {
-        elapsedTimeMessage = useElapsedTimeMessage(report.timestamp, report.isHistoric)
-    } 
+    const elapsedTimeMessage = useElapsedTimeMessage(report.timestamp, report.isHistoric)
+    const shouldShowTime = currentTime !== undefined
+    const displayMessage = shouldShowTime ? elapsedTimeMessage : null
 
     return (
         <div key={report.station.id + report.timestamp} className="report-item">
             <div className="align-child-on-line">
-                {report.line && <Line line={report.line} key={report.line} />}
+                {report.line !== null ? <Line line={report.line} key={report.line} /> : null}
                 <h4>{report.station.name}</h4>
-                {elapsedTimeMessage && <p>{elapsedTimeMessage}</p>}
+                {displayMessage ? <p>{displayMessage}</p> : null}
             </div>
             <div>
                 <p>
-                    {report.direction?.name && (
-                        <>
-                            {t('MarkerModal.direction')}: <span>{report.direction.name}</span>
-                        </>
-                    )}
+                    {/* BECAUSE IF NULL, empty richtung is shown  */}
+                    {/* eslint-disable-next-line @typescript-eslint/strict-boolean-expressions */}
+                    {report.direction?.name ? <>
+                        {t('MarkerModal.direction')}: <span>{report.direction.name}</span>
+                    </> : null}
                 </p>
             </div>
         </div>
     )
 }
 
-export default ReportItem
+export { ReportItem }
