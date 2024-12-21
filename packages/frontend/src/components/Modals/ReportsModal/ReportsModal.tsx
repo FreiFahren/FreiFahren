@@ -1,31 +1,65 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts'
-import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
-
-import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
-import { Report } from 'src/utils/types'
-import { getRecentDataWithIfModifiedSince } from 'src/utils/dbUtils'
-import { getLineColor } from 'src/utils/uiUtils'
-
-import { useRiskData } from 'src/contexts/RiskDataContext'
-import { useStationsAndLines } from 'src/contexts/StationsAndLinesContext'
-
-import ReportItem from './ReportItem'
-import ClusteredReportItem from './ClusteredReportItem'
-import Line from '../../Miscellaneous/Line/Line'
-import FeedbackButton from '../../Buttons/FeedbackButton/FeedbackButton'
-
 import './ReportsModal.css'
 
+import React, { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Bar, BarChart, ResponsiveContainer, Tooltip, TooltipProps, XAxis, YAxis } from 'recharts'
+import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
+import { useRiskData } from 'src/contexts/RiskDataContext'
+import { useStationsAndLines } from 'src/contexts/StationsAndLinesContext'
+import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
+import { getRecentDataWithIfModifiedSince } from 'src/utils/databaseUtils'
+import { Report } from 'src/utils/types'
+import { getLineColor } from 'src/utils/uiUtils'
+
+import { Line } from '../../Miscellaneous/Line/Line'
+import { ClusteredReportItem } from './ClusteredReportItem'
+import { ReportItem } from './ReportItem'
+import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 interface ReportsModalProps {
     className?: string
-    closeModal: () => void
+    onCloseModal: () => void
 }
 
 type TabType = 'summary' | 'lines' | 'stations'
 
-const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) => {
+interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
+    getChartData: { line: string; reports: number }[]
+    isLightTheme: boolean
+}
+
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, getChartData, isLightTheme }) => {
+    const { t } = useTranslation()
+
+    if (!(active ?? false) || !payload || payload.length === 0) return null
+
+    const data = payload[0].payload
+    const totalReports = getChartData.reduce((sum, item) => sum + item.reports, 0)
+    const percentage = ((data.reports / totalReports) * 100).toFixed(1)
+
+    return (
+        <div
+            className="custom-tooltip"
+            style={{
+                backgroundColor: isLightTheme === true ? '#fff' : '#000',
+                color: isLightTheme === true ? '#000' : '#fff',
+                padding: '8px',
+                borderRadius: '4px',
+            }}
+        >
+            <h4>{`${percentage}% ${t('ReportsModal.ofTotal')}`}</h4>
+            <p>{`${data.reports} ${t('ReportsModal.reports')}`}</p>
+        </div>
+    )
+}
+// PLEASE REFACTOR THIS LATER OR MOVE IT OUT, THE REPORTS MODAL COMPONENT IS A FUCKING MESS
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const CustomBarShape = ({ x, y, width, height, payload }: any) => {
+    const color = getLineColor(payload.line)
+
+    return <rect x={x} y={y} width={width} height={height} fill={color} rx={4} ry={4} />
+}
+
+const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) => {
     const { t } = useTranslation()
     const [currentTab, setCurrentTab] = useState<TabType>('summary')
 
@@ -65,10 +99,10 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             const endTimeInRFC3339 = new Date(currentTime - 1000 * 60 * 60).toISOString()
 
             const previousDayInspectorList =
-                (await getRecentDataWithIfModifiedSince(
+                ((await getRecentDataWithIfModifiedSince(
                     `${process.env.REACT_APP_API_URL}/basics/inspectors?start=${startTimeInRFC3339}&end=${endTimeInRFC3339}`,
                     null // no caching to make it less error prone
-                )) || [] // in case the server returns, 304 Not Modified
+                )) as Report[] | null) ?? [] // in case the server returns, 304 Not Modified
 
             // Separate historic inspectors from lastHourInspectorList
             const historicInspectors = lastHourInspectorList.filter((inspector) => inspector.isHistoric)
@@ -85,9 +119,15 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             const sortedLists = [recentInspectors, historicInspectors, filteredPreviousDayInspectorList].map((list) =>
                 list.sort(sortByTimestamp)
             )
+
             setTicketInspectorList(sortedLists.flat())
         }
-        fetchInspectorList()
+
+        fetchInspectorList().catch((error) => {
+            // fix later with sentry
+            // eslint-disable-next-line no-console
+            console.error('Error fetching inspector list:', error)
+        })
     }, [currentTime, lastHourInspectorList])
 
     const [sortedLinesWithReports, setSortedLinesWithReports] = useState<Map<string, Report[]>>(new Map())
@@ -99,14 +139,16 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             // Group reports by line
             for (const inspector of ticketInspectorList) {
                 const { line } = inspector
-                if (!line) continue
-                lineReports.set(line, [...(lineReports.get(line) || []), inspector])
+
+                if (line === null) continue
+                lineReports.set(line, [...(lineReports.get(line) ?? []), inspector])
             }
 
             return new Map(Array.from(lineReports.entries()).sort((a, b) => b[1].length - a[1].length))
         }
 
         const sortedLines = getAllLinesWithReportsSorted()
+
         setSortedLinesWithReports(sortedLines)
     }, [ticketInspectorList])
 
@@ -120,7 +162,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
     }
 
     useEffect(() => {
-        if (segmentRiskData && segmentRiskData.segment_colors) {
+        if (segmentRiskData) {
             const extractMostRiskLines = (segmentColors: Record<string, string>): Map<string, LineRiskData> => {
                 const colorScores: Record<string, number> = {
                     '#A92725': 3, // bad
@@ -131,13 +173,15 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                 const lineScores = new Map<string, LineRiskData>()
 
                 Object.entries(segmentColors).forEach(([segmentId, color]) => {
+                    // eslint-disable-next-line prefer-destructuring
                     const line = segmentId.split('-')[0]
-                    const score = colorScores[color] || 0 // 0 is no risk, which is not returned by the API
+                    const score = colorScores[color]
 
                     if (!lineScores.has(line)) {
                         lineScores.set(line, { score, class: score })
                     } else {
                         const currentData = lineScores.get(line)!
+
                         lineScores.set(line, {
                             score: currentData.score + score,
                             class: Math.max(currentData.class, score),
@@ -149,6 +193,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
             }
 
             const riskMap = extractMostRiskLines(segmentRiskData.segment_colors)
+
             Object.keys(allLines).forEach((line) => {
                 if (!riskMap.has(line)) {
                     riskMap.set(line, { score: 0, class: 0 })
@@ -158,56 +203,40 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
         }
     }, [segmentRiskData, allLines])
 
-    const getChartData = useMemo(() => {
-        return Array.from(sortedLinesWithReports.entries()).map(([line, reports]) => ({
-            line,
-            reports: reports.length,
-        }))
-    }, [sortedLinesWithReports])
+    const getChartData = useMemo(
+        () =>
+            Array.from(sortedLinesWithReports.entries())
+                .filter(([line]) => line !== '')
+                .map(([line, reports]) => ({
+                    line,
+                    reports: reports.length,
+                })),
+        [sortedLinesWithReports]
+    )
 
     const [isLightTheme, setIsLightTheme] = useState<boolean>(false)
 
     useEffect(() => {
         const theme = localStorage.getItem('colorTheme')
+
         setIsLightTheme(theme === 'light')
 
-        const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === 'theme') {
-                setIsLightTheme(e.newValue === 'dark')
+        const handleStorageChange = (event: StorageEvent) => {
+            if (event.key === 'theme') {
+                setIsLightTheme(event.newValue === 'dark')
             }
         }
+
         window.addEventListener('storage', handleStorageChange)
         return () => window.removeEventListener('storage', handleStorageChange)
     }, [])
-
-    const CustomTooltip: React.FC<TooltipProps<ValueType, NameType>> = ({ active, payload }) => {
-        if (!active || !payload || !payload.length) return null
-
-        const data = payload[0].payload
-        const totalReports = getChartData.reduce((sum, item) => sum + item.reports, 0)
-        const percentage = ((data.reports / totalReports) * 100).toFixed(1)
-
-        return (
-            <div
-                className="custom-tooltip"
-                style={{
-                    backgroundColor: isLightTheme ? '#fff' : '#000',
-                    color: isLightTheme ? '#000' : '#fff',
-                    padding: '8px',
-                    borderRadius: '4px',
-                }}
-            >
-                <h4>{`${percentage}% ${t('ReportsModal.ofTotal')}`}</h4>
-                <p>{`${data.reports} ${t('ReportsModal.reports')}`}</p>
-            </div>
-        )
-    }
 
     return (
         <div className={`reports-modal modal container ${className}`}>
             <section className="tabs align-child-on-line">
                 {tabs.map((tab) => (
                     <button
+                        type="button"
                         key={tab}
                         onClick={() => handleTabChange(tab)}
                         className={currentTab === tab ? 'active' : ''}
@@ -216,18 +245,19 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                     </button>
                 ))}
             </section>
-            {currentTab === 'summary' && (
+            {currentTab === 'summary' ? (
                 <section className="summary">
                     <section className="lines">
                         <div className="align-child-on-line">
                             <h2>{t('ReportsModal.reportsHeading')}</h2>
-                            <FeedbackButton onClick={() => closeModal()} />
+                            <FeedbackButton onClick={() => onCloseModal()} />
                         </div>
                         <p className="time-range">{t('ReportsModal.past24Hours')}</p>
                         {Array.from(sortedLinesWithReports.entries())
                             .sort(([, inspectorsA], [, inspectorsB]) => {
                                 const timestampA = new Date(inspectorsA[0].timestamp).getTime()
                                 const timestampB = new Date(inspectorsB[0].timestamp).getTime()
+
                                 return timestampB - timestampA // most recent first
                             })
                             .slice(0, 5)
@@ -240,15 +270,16 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                         <div className="risk-grid">
                             {Array.from(riskLines.entries()).some(
                                 ([, riskData]) => riskData.class === 2 || riskData.class === 3
-                            ) && (
+                            ) ? (
                                 <div className="risk-grid-item">
                                     {Array.from(riskLines.entries())
                                         .filter(([, riskData]) => riskData.class === 2 || riskData.class === 3)
                                         .map(([line, riskData]) => (
+                                            // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                                             <div
                                                 key={line}
                                                 className={`risk-line risk-level-${riskData.class}`}
-                                                onClick={() => closeModal()}
+                                                onClick={() => onCloseModal()}
                                             >
                                                 <img
                                                     src={`/icons/risk-${riskData.class}.svg`}
@@ -258,16 +289,17 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                             </div>
                                         ))}
                                 </div>
-                            )}
-                            {Array.from(riskLines.entries()).some(([, riskData]) => riskData.class === 1) && (
+                            ) : null}
+                            {Array.from(riskLines.entries()).some(([, riskData]) => riskData.class === 1) ? (
                                 <div className="risk-grid-item">
                                     {Array.from(riskLines.entries())
                                         .filter(([, riskData]) => riskData.class === 1)
                                         .map(([line, riskData]) => (
+                                            // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                                             <div
                                                 key={line}
                                                 className={`risk-line risk-level-${riskData.class}`}
-                                                onClick={() => closeModal()}
+                                                onClick={() => onCloseModal()}
                                             >
                                                 <img
                                                     src={`/icons/risk-${riskData.class}.svg`}
@@ -277,16 +309,17 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                             </div>
                                         ))}
                                 </div>
-                            )}
-                            {Array.from(riskLines.entries()).some(([, riskData]) => riskData.class === 0) && (
+                            ) : null}
+                            {Array.from(riskLines.entries()).some(([, riskData]) => riskData.class === 0) ? (
                                 <div className="risk-grid-item">
                                     {Array.from(riskLines.entries())
                                         .filter(([, riskData]) => riskData.class === 0)
                                         .map(([line, riskData]) => (
+                                            // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                                             <div
                                                 key={line}
                                                 className={`risk-line risk-level-${riskData.class}`}
-                                                onClick={() => closeModal()}
+                                                onClick={() => onCloseModal()}
                                             >
                                                 <img
                                                     src={`/icons/risk-${riskData.class}.svg`}
@@ -296,12 +329,12 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                             </div>
                                         ))}
                                 </div>
-                            )}
+                            ) : null}
                         </div>
                     </section>
                 </section>
-            )}
-            {currentTab === 'lines' && (
+            ) : null}
+            {currentTab === 'lines' ? (
                 <section className="list-modal">
                     <h2>{t('ReportsModal.topLines')}</h2>
                     <p className="time-range">{t('ReportsModal.past24Hours')}</p>
@@ -322,26 +355,22 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                                     dx: -5,
                                 }}
                             />
-                            <Tooltip content={<CustomTooltip />} />
+                            <Tooltip
+                                content={<CustomTooltip getChartData={getChartData} isLightTheme={isLightTheme} />}
+                            />
                             <Bar
                                 dataKey="reports"
                                 barSize={34}
                                 radius={[4, 4, 4, 4]}
                                 fill="#7e5330"
                                 name="reports"
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                shape={(props: any) => {
-                                    const { x, y, width, height } = props
-                                    const line = props.payload.line
-                                    const color = getLineColor(line)
-                                    return <rect x={x} y={y} width={width} height={height} fill={color} rx={4} ry={4} />
-                                }}
+                                shape={CustomBarShape}
                             />
                         </BarChart>
                     </ResponsiveContainer>
                 </section>
-            )}
-            {currentTab === 'stations' && (
+            ) : null}
+            {currentTab === 'stations' ? (
                 <section className="list-modal">
                     <h2>{t('ReportsModal.topStations')}</h2>
                     <p className="time-range">{t('ReportsModal.past24Hours')}</p>
@@ -353,9 +382,9 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, closeModal }) =>
                         />
                     ))}
                 </section>
-            )}
+            ) : null}
         </div>
     )
 }
 
-export default ReportsModal
+export { ReportsModal }

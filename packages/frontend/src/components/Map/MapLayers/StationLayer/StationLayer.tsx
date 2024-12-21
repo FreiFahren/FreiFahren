@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react'
-import { Source, Layer, useMap, MapRef } from 'react-map-gl/maplibre'
+import { Layer, MapRef,Source, useMap } from 'react-map-gl/maplibre'
 
 import { StationGeoJSON } from '../../../../utils/types'
 
-const ubahn_icon = `${process.env.PUBLIC_URL}/icons/ubahn.svg`
-const sbahn_icon = `${process.env.PUBLIC_URL}/icons/sbahn.svg`
+const UBAHN_ICON = `${process.env.PUBLIC_URL}/icons/ubahn.svg`
+const SBAHN_ICON = `${process.env.PUBLIC_URL}/icons/sbahn.svg`
 
 interface StationLayerProps {
     stations: StationGeoJSON
@@ -13,11 +13,12 @@ interface StationLayerProps {
 class IconFactory {
     constructor(private map: MapRef | undefined) {}
 
-    createImage(name: string, src: string) {
+    createImage(name: string, source: string) {
         const image = new Image(12, 12)
-        image.src = src
+
+        image.src = source
         image.onload = () => {
-            if (!this.map?.hasImage(name)) {
+            if (!((this.map?.hasImage(name)) ?? false)) {
                 this.map?.addImage(name, image)
             }
         }
@@ -30,13 +31,14 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations, textColor }) => {
     useEffect(() => {
         const currentMap = map.current
         const iconFactory = new IconFactory(currentMap)
-        iconFactory.createImage('ubahn-icon', ubahn_icon)
-        iconFactory.createImage('sbahn-icon', sbahn_icon)
+
+        iconFactory.createImage('ubahn-icon', UBAHN_ICON)
+        iconFactory.createImage('sbahn-icon', SBAHN_ICON)
 
         return () => {
-            if (currentMap?.hasImage('ubahn-icon') && currentMap?.hasImage('sbahn-icon')) {
-                currentMap?.removeImage('ubahn-icon')
-                currentMap?.removeImage('sbahn-icon')
+            if (currentMap && currentMap.hasImage('ubahn-icon') && currentMap.hasImage('sbahn-icon')) {
+                currentMap.removeImage('ubahn-icon')
+                currentMap.removeImage('sbahn-icon')
             }
         }
     }, [map])
@@ -196,4 +198,4 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations, textColor }) => {
     )
 }
 
-export default StationLayer
+export { StationLayer }

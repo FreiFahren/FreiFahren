@@ -1,30 +1,30 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import './App.css'
 
-import Map from '../../components/Map/Map'
-import LayerSwitcher from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
-import ReportButton from '../../components/Buttons/ReportButton/ReportButton'
-import ReportForm from '../../components/Form/ReportForm/ReportForm'
-import LegalDisclaimer from '../../components/Modals/LegalDisclaimer/LegalDisclaimer'
-import UtilButton from '../../components/Buttons/UtilButton/UtilButton'
-import UtilModal from '../../components/Modals/UtilModal/UtilModal'
-import StatsPopUp from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
-import Backdrop from '../../../src/components/Miscellaneous/Backdrop/Backdrop'
-import ReportsModalButton from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
-import ReportsModal from 'src/components/Modals/ReportsModal/ReportsModal'
-import ReportSummaryModal from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
-import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext'
-import { RiskDataProvider } from '../../contexts/RiskDataContext'
-import { StationsAndLinesProvider } from '../../contexts/StationsAndLinesContext'
-import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
-
-import { getNumberOfReportsInLast24Hours } from '../../utils/dbUtils'
-import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton'
-import { highlightElement, currentColorTheme, setColorThemeInLocalStorage } from '../../utils/uiUtils'
-import { useModalAnimation } from '../../hooks/UseModalAnimation'
-import { sendAnalyticsEvent, sendSavedEvents } from '../../utils/analytics'
+import { useCallback, useEffect, useMemo,useRef,useState } from 'react'
+import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
+import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
+import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
 import { Report } from 'src/utils/types'
 
-import './App.css'
+import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton'
+import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
+import { ReportButton } from '../../components/Buttons/ReportButton/ReportButton'
+import { UtilButton } from '../../components/Buttons/UtilButton/UtilButton'
+import { ReportForm } from '../../components/Form/ReportForm/ReportForm'
+import { FreifahrenMap } from '../../components/Map/Map'
+import { Backdrop } from '../../components/Miscellaneous/Backdrop/Backdrop'
+import { StatsPopUp } from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
+import { LegalDisclaimer } from '../../components/Modals/LegalDisclaimer/LegalDisclaimer'
+import { UtilModal } from '../../components/Modals/UtilModal/UtilModal'
+import { RiskDataProvider } from '../../contexts/RiskDataContext'
+import { StationsAndLinesProvider } from '../../contexts/StationsAndLinesContext'
+import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext'
+import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
+import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
+import { useModalAnimation } from '../../hooks/UseModalAnimation'
+import { getNumberOfReportsInLast24Hours } from '../../utils/databaseUtils'
+import { currentColorTheme, highlightElement, setColorThemeInLocalStorage } from '../../utils/uiUtils'
+
 type AppUIState = {
     isReportFormOpen: boolean
     formSubmitted: boolean
@@ -47,7 +47,7 @@ const initialAppUIState: AppUIState = {
     isLegalDisclaimerOpen: false,
 }
 
-function App() {
+const App = () => {
     const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
     const [appMounted, setAppMounted] = useState(false)
 
@@ -57,10 +57,10 @@ function App() {
 
     const [showSummary, setShowSummary] = useState<boolean>(false)
     const [reportedData, setReportedData] = useState<Report | null>(null)
-    const handleReportFormSubmit = (reportedData: Report) => {
-        setAppUIState((appUIState) => ({ ...appUIState, formSubmitted: !appUIState.formSubmitted }))
+    const handleReportFormSubmit = (reportedDataForm: Report) => {
+        setAppUIState((appUIStateCurrent) => ({ ...appUIStateCurrent, formSubmitted: !appUIStateCurrent.formSubmitted }))
         setShowSummary(true)
-        setReportedData(reportedData)
+        setReportedData(reportedDataForm)
     }
 
     const {
@@ -78,12 +78,13 @@ function App() {
         }
     }
 
-    function toggleColorTheme() {
+    const toggleColorTheme = () => {
         setColorThemeInLocalStorage()
         setAppUIState({ ...appUIState, currentColorTheme: currentColorTheme() })
 
         // add classes to the root element to change the color theme
         const root = document.documentElement
+
         if (currentColorTheme() === 'light') {
             root.classList.add('light')
             root.classList.remove('dark')
@@ -97,47 +98,68 @@ function App() {
     useEffect(() => {
         // set the color theme by manipulating the root element
         const root = document.documentElement
+
         root.classList.add(currentColorTheme())
 
         // send saved events to the backend
-        sendSavedEvents()
+        sendSavedEvents().catch((error) => {
+            // fix later with sentry
+            // eslint-disable-next-line no-console
+            console.error('Failed to send saved events:', error)
+        })
     }, [])
 
     // preloading the stats popup data
     const [statsData, setStatsData] = useState<number>(0)
+
     useEffect(() => {
         const fetchReports = async () => {
             try {
                 const numberOfReports = await getNumberOfReportsInLast24Hours()
-                if (numberOfReports) {
+
+                if (numberOfReports !== 0) {
                     setStatsData(numberOfReports)
                 }
             } catch (error) {
+                // fix later with sentry
+                // eslint-disable-next-line no-console
                 console.error('Error fetching number of reports:', error)
             }
         }
 
-        fetchReports()
+        fetchReports().catch((error) => {
+            // fix later with sentry
+            // eslint-disable-next-line no-console
+            console.error('Error fetching number of reports:', error)
+        })
     }, [appUIState])
 
     const initalTrackingRef = useRef(false)
+
     useEffect(() => {
         if (initalTrackingRef.current) return
 
-        const initialLayer = localStorage.getItem('layer') || 'line'
+        const initialLayer = localStorage.getItem('layer') ?? 'line'
+
         try {
             sendAnalyticsEvent('Initial Layer View', {
                 meta: {
                     layer: initialLayer,
                 },
+            }).catch((error) => {
+                // fix later with sentry
+                // eslint-disable-next-line no-console
+                console.error('Failed to send initial layer analytics event:', error)
             })
             initalTrackingRef.current = true
         } catch (error) {
+            // fix later with sentry
+            // eslint-disable-next-line no-console
             console.error('Failed to send initial layer analytics event:', error)
         }
     }, [initalTrackingRef])
 
-    async function changeLayer(clickedLayer: string, source: string = 'layer switcher') {
+    const changeLayer = async (clickedLayer: string, source: string = 'layer switcher') => {
         const previousLayer = appUIState.isRiskLayerOpen ? 'risk' : 'line'
 
         if (previousLayer === clickedLayer) return
@@ -147,10 +169,12 @@ function App() {
                 meta: {
                     from: previousLayer,
                     to: clickedLayer,
-                    source: source,
+                    source,
                 },
             })
         } catch (error) {
+            // fix later with sentry
+            // eslint-disable-next-line no-console
             console.error('Failed to send layer switch analytics event:', error)
         }
 
@@ -161,14 +185,19 @@ function App() {
         localStorage.setItem('layer', clickedLayer)
     }
 
-    function handleRiskGridItemClick() {
+    const handleRiskGridItemClick = () => {
         setAppUIState((prevState) => ({ ...prevState, isListModalOpen: false }))
-        changeLayer('risk', 'reports modal')
+        changeLayer('risk', 'reports modal').catch((error) => {
+            // fix later with sentry
+            // eslint-disable-next-line no-console
+            console.error('Failed to change layer to risk:', error)
+        })
     }
 
     const shouldShowLegalDisclaimer = (): boolean => {
         const legalDisclaimerAcceptedAt = localStorage.getItem('legalDisclaimerAcceptedAt')
-        if (!legalDisclaimerAcceptedAt) return true
+
+        if (legalDisclaimerAcceptedAt === null) return true
 
         const lastAcceptedDate = new Date(legalDisclaimerAcceptedAt)
         const currentDate = new Date()
@@ -177,7 +206,7 @@ function App() {
         return currentDate.getTime() - lastAcceptedDate.getTime() > oneWeek
     }
 
-    function closeLegalDisclaimer() {
+    const closeLegalDisclaimer = () => {
         localStorage.setItem('legalDisclaimerAcceptedAt', new Date().toISOString())
         setAppUIState({ ...appUIState, isFirstOpen: false, isStatsPopUpOpen: true })
     }
@@ -196,58 +225,47 @@ function App() {
 
     // we dont know the exact number of users, so we make an estimate that should be close to the actual number
     // in the future this will be automatically fetched from the analytics platform + telegram user count
-    const numberOfUsersRef = useRef<number>(Math.floor(Math.random() * (36000 - 35000 + 1)) + 35000)
-    const [numberOfUsers] = useState<number>(numberOfUsersRef.current)
+    const numberOfUsers = useMemo(() => Math.floor(Math.random() * (36000 - 35000 + 1)) + 35000, [])
 
     return (
         <div className="App">
-            {appMounted && shouldShowLegalDisclaimer() && (
-                <>
+            {appMounted && shouldShowLegalDisclaimer() ? <>
                     <LegalDisclaimer
                         openAnimationClass={appUIState.isFirstOpen ? 'open center-animation' : ''}
-                        closeModal={closeLegalDisclaimer}
+                        handleConfirm={closeLegalDisclaimer}
                     />
-                    <Backdrop onClick={() => highlightElement('legal-disclaimer')} />
-                </>
-            )}
-            {isUtilOpen && (
-                <>
-                    <UtilModal
+                    <Backdrop handleClick={() => highlightElement('legal-disclaimer')} />
+                </> : null}
+            {isUtilOpen ? <UtilModal
                         className={`open ${isUtilAnimatingOut ? 'slide-out' : 'slide-in'}`}
                         colorTheme={appUIState.currentColorTheme}
-                        toggleColorTheme={toggleColorTheme}
+                        handleColorThemeToggle={toggleColorTheme}
                     >
-                        <CloseButton closeModal={closeUtilModal} />
-                    </UtilModal>
-                </>
-            )}
-            {showSummary && reportedData && (
-                <>
+                        <CloseButton handleClose={closeUtilModal} />
+                    </UtilModal> : null}
+            {showSummary && reportedData ? <>
                     <ReportSummaryModal
                         reportData={reportedData}
                         openAnimationClass="open center-animation"
-                        closeModal={() => setShowSummary(false)}
+                        handleCloseModal={() => setShowSummary(false)}
                         numberOfUsers={numberOfUsers}
                     />
-                    <Backdrop onClick={() => setShowSummary(false)} />
-                </>
-            )}
+                    <Backdrop handleClick={() => setShowSummary(false)} />
+                </> : null}
             <StationsAndLinesProvider>
-                {appUIState.isReportFormOpen && (
-                    <>
+                {appUIState.isReportFormOpen ? <>
                         <ReportForm
                             closeModal={() => setAppUIState({ ...appUIState, isReportFormOpen: false })}
-                            notifyParentAboutSubmission={handleReportFormSubmit}
-                            className={'open center-animation'}
+                            onNotifyParentAboutSubmission={handleReportFormSubmit}
+                            className="open center-animation"
                         />
-                        <Backdrop onClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
-                    </>
-                )}
-                <div id="portal-root"></div>
+                        <Backdrop handleClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
+                    </> : null}
+                <div id="portal-root" />
                 <RiskDataProvider>
                     <TicketInspectorsProvider>
                         <ViewedReportsProvider>
-                            <Map
+                            <FreifahrenMap
                                 isFirstOpen={appUIState.isFirstOpen}
                                 formSubmitted={appUIState.formSubmitted}
                                 currentColorTheme={appUIState.currentColorTheme}
@@ -255,17 +273,13 @@ function App() {
                                 onRotationChange={handleRotationChange}
                             />
                             <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
-                            {appUIState.isListModalOpen && (
-                                <>
+                            {appUIState.isListModalOpen ? <>
                                     <ReportsModal
-                                        className={`open center-animation`}
-                                        closeModal={handleRiskGridItemClick}
+                                        className="open center-animation"
+                                        onCloseModal={handleRiskGridItemClick}
                                     />
-                                    <Backdrop
-                                        onClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })}
-                                    />
-                                </>
-                            )}
+                                    <Backdrop handleClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
+                                </> : null}
                             <ReportsModalButton
                                 openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })}
                             />
@@ -273,29 +287,25 @@ function App() {
                     </TicketInspectorsProvider>
                 </RiskDataProvider>
             </StationsAndLinesProvider>
-            <UtilButton onClick={toggleUtilModal} />
-            {mapsRotation !== 0 && (
-                <div className="compass-container">
+            <UtilButton handleClick={toggleUtilModal} />
+            {mapsRotation !== 0 ? <div className="compass-container">
                     <div className="compass-needle" style={{ transform: `rotate(${mapsRotation}deg)` }}>
-                        <div className="arrow upper"></div>
-                        <div className="compass-circle"></div>
-                        <div className="arrow lower"></div>
+                        <div className="arrow upper" />
+                        <div className="compass-circle" />
+                        <div className="arrow lower" />
                     </div>
-                </div>
-            )}
+                </div> : null}
             <ReportButton
-                openReportModal={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })}
+                handleOpenReportModal={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })}
             />
-            {appUIState.isStatsPopUpOpen && statsData !== 0 && (
-                <StatsPopUp
+            {appUIState.isStatsPopUpOpen && statsData !== 0 ? <StatsPopUp
                     numberOfReports={statsData}
                     numberOfUsers={numberOfUsers}
-                    className={'open center-animation'}
+                    className="open center-animation"
                     openListModal={() => setAppUIState({ ...appUIState, isListModalOpen: !appUIState.isListModalOpen })}
-                />
-            )}
+                /> : null}
         </div>
     )
 }
 
-export default App
+export { App }

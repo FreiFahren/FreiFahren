@@ -1,3 +1,5 @@
+// eslint-disable-next-line import/no-namespace
+import * as Localization from 'expo-localization'
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
@@ -6,10 +8,10 @@ import en from '../assets/locales/en.json'
 
 i18n.use(initReactI18next)
     .init({
-        lng: 'de',
+        lng: Localization.locale.slice(0, 2), // Automatically use device locale
+        fallbackLng: 'en',
         ns: Object.keys(de),
         defaultNS: 'common',
-        fallbackLng: 'de',
         resources: { de, en },
         supportedLngs: ['de', 'en'],
     })

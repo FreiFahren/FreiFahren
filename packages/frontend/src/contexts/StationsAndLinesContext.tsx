@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
-import { getAllLinesList, getAllStationsList, LinesList, StationList } from '../utils/dbUtils'
+import React, { createContext, useContext, useEffect,useMemo,useState } from 'react'
+
+import { getAllLinesList, getAllStationsList, LinesList, StationList } from '../utils/databaseUtils'
 
 interface StationsAndLinesContextType {
     allLines: LinesList
@@ -20,13 +21,15 @@ export const StationsAndLinesProvider: React.FC<React.PropsWithChildren> = ({ ch
                 const [lines, stations] = await Promise.all([getAllLinesList(), getAllStationsList()])
 
                 // sort them because Ubahns are more common than Sbahns, thus they have to first
-                const sortedAllLines = () => {
-                    return Object.fromEntries(
+                const sortedAllLines = () => Object.fromEntries(
                         Object.entries(lines).sort(([lineA], [lineB]) => {
+                            // fix later, the fuck u wanna destructure
+                            // eslint-disable-next-line prefer-destructuring
                             const typeA = lineA[0]
+                            // eslint-disable-next-line prefer-destructuring
                             const typeB = lineB[0]
-                            const numberA = parseInt(lineA.slice(1))
-                            const numberB = parseInt(lineB.slice(1))
+                            const numberA = parseInt(lineA.slice(1), 10)
+                            const numberB = parseInt(lineB.slice(1), 10)
 
                             if (typeA !== typeB) {
                                 return typeB.localeCompare(typeA) // U comes before S
@@ -43,20 +46,32 @@ export const StationsAndLinesProvider: React.FC<React.PropsWithChildren> = ({ ch
                             return numberA - numberB // Sort by number
                         })
                     )
-                }
+
                 setAllLines(sortedAllLines)
                 setAllStations(stations)
             } catch (error) {
+                // fix this later with sentry
+                // eslint-disable-next-line no-console
                 console.error('Failed to fetch lines and stations:', error)
             } finally {
                 setIsLoading(false)
             }
         }
-        fetchLinesAndStations()
+
+        fetchLinesAndStations().catch((error) => {
+            // fix this later with sentry
+            // eslint-disable-next-line no-console
+            console.error('Failed to fetch lines and stations:', error)
+        })
     }, [])
 
+    const value = useMemo(
+        () => ({ allLines, allStations, isLoading }),
+        [allLines, allStations, isLoading]
+    )
+
     return (
-        <StationsAndLinesContext.Provider value={{ allLines, allStations, isLoading }}>
+        <StationsAndLinesContext.Provider value={value}>
             {children}
         </StationsAndLinesContext.Provider>
     )
@@ -64,6 +79,7 @@ export const StationsAndLinesProvider: React.FC<React.PropsWithChildren> = ({ ch
 
 export const useStationsAndLines = () => {
     const context = useContext(StationsAndLinesContext)
+
     if (context === undefined) {
         throw new Error('useStationsAndLines must be used within a StationsAndLinesProvider')
     }

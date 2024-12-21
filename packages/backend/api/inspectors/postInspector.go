@@ -19,6 +19,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+var lastTelegramNotification time.Time
+
 // @Summary Submit ticket inspector data
 //
 // @Description Accepts a JSON payload with details about a ticket inspector's current location.
@@ -40,11 +42,16 @@ import (
 //
 // @Router /basics/inspectors [post]
 func PostInspector(c echo.Context) error {
-	logger.Log.Info().Msg("POST /basics/Inspector")
+	logger.Log.Info().
+		Str("userAgent", c.Request().UserAgent()).
+		Msg("POST /basics/Inspector")
 
 	var req structs.InspectorRequest
 	if err := c.Bind(&req); err != nil {
-		logger.Log.Error().Err(err).Msg("Error binding request in postInspector")
+		logger.Log.Error().
+			Err(err).
+			Str("userAgent", c.Request().UserAgent()).
+			Msg("Error binding request in postInspector")
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	logger.Log.Debug().Interface("Request", req).Msg("Request data")
@@ -93,9 +100,16 @@ func PostInspector(c echo.Context) error {
 	// Notify Telegram bot if there's no author (web app report)
 	go func() {
 		if pointers.AuthorPtr == nil {
-			telegramEndpoint := os.Getenv("TELEGRAM_BOTS_URL") + "/report-inspector"
-			if err := notifyOtherServiceAboutReport(telegramEndpoint, dataToInsert, "Telegram bot"); err != nil {
-				logger.Log.Error().Err(err).Msg("Error notifying Telegram bot about report in postInspector")
+			// avoid spamming the telegram group
+			if time.Since(lastTelegramNotification) >= 5*time.Minute {
+				telegramEndpoint := os.Getenv("TELEGRAM_BOTS_URL") + "/report-inspector"
+				if err := notifyOtherServiceAboutReport(telegramEndpoint, dataToInsert, "Telegram bot"); err != nil {
+					logger.Log.Error().Err(err).Msg("Error notifying Telegram bot about report in postInspector")
+				} else {
+					lastTelegramNotification = time.Now()
+				}
+			} else {
+				logger.Log.Info().Msg("Skipping Telegram notification - rate limit not exceeded")
 			}
 		}
 	}()

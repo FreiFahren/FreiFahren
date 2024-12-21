@@ -1,5 +1,5 @@
-import { useTranslation } from 'react-i18next'
 import { ReactElement } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export const useStationDistanceMessage = (stationDistance: number | null): ReactElement | null => {
     const { t } = useTranslation()
@@ -42,10 +42,6 @@ export const useElapsedTimeMessage = (
     const currentTime = new Date().getTime()
     const elapsedTimeInMinutes = Math.floor((currentTime - adjustedTimestamp.getTime()) / (60 * 1000)) 
 
-    if (elapsedTimeInMinutes === undefined) {
-        return null
-    }
-
     if (isHistoric || (elapsedTimeInMinutes > 45 && elapsedTimeInMinutes < 60)) {
         return <span className="elapsed-time">{t('MarkerModal.moreThan45Min')}</span>
     }
@@ -59,9 +55,9 @@ export const useElapsedTimeMessage = (
     if (elapsedTimeInMinutes > 60) {
         return (
             <span className="elapsed-time">
-                {currentLanguage === 'de' ? t('MarkerModal.ago') + ' ' : ''}
+                {currentLanguage === 'de' ? `${t('MarkerModal.ago')  } ` : ''}
                 {Math.floor(elapsedTimeInMinutes / 60)} {t('MarkerModal.hours')}
-                {currentLanguage === 'en' ? ' ' + t('MarkerModal.ago') : ''}
+                {currentLanguage === 'en' ? ` ${  t('MarkerModal.ago')}` : ''}
             </span>
         )
     }
@@ -70,9 +66,9 @@ export const useElapsedTimeMessage = (
     }
     return (
         <span className="elapsed-time">
-            {currentLanguage === 'de' ? t('MarkerModal.ago') + ' ' : ''}
+            {currentLanguage === 'de' ? `${t('MarkerModal.ago')  } ` : ''}
             {elapsedTimeInMinutes} {t('MarkerModal.minutes')}
-            {currentLanguage === 'en' ? ' ' + t('MarkerModal.ago') : ''}
+            {currentLanguage === 'en' ? ` ${  t('MarkerModal.ago')}` : ''}
         </span>
     )
 }

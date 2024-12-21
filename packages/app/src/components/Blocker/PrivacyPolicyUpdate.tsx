@@ -7,7 +7,7 @@ import { Linking } from 'react-native'
 
 import { config } from '../../config'
 import { track } from '../../tracking'
-import { FFButton, FFSafeAreaView, FFText, FFView } from '../common/base'
+import { FFButton, FFText, FFView } from '../common/base'
 import { FFScrollSheet } from '../common/FFSheet'
 
 type PrivacyPolicyUpdateProps = {
@@ -23,23 +23,21 @@ export const PrivacyPolicyUpdate = forwardRef(({ onDismiss }: PrivacyPolicyUpdat
     }
 
     return (
-        <FFScrollSheet ref={ref} enablePanDownToClose={false} index={0}>
-            <FFSafeAreaView justifyContent="space-between" flex={1} edges={['bottom']}>
-                <FFView>
-                    <FFText variant="header1">{t('title')}</FFText>
-                    <FFText mt="xs">{t('text')}</FFText>
-                    <FFText fontFamily="Funnel Sans SemiBold" mt="xs">
-                        {t('confirmText')}
+        <FFScrollSheet ref={ref} enablePanDownToClose={false} index={0} backdropType="non-closeable">
+            <FFView>
+                <FFText variant="header1">{t('title')}</FFText>
+                <FFText mt="xs">{t('text')}</FFText>
+                <FFText fontFamily="Funnel Sans SemiBold" mt="xs">
+                    {t('confirmText')}
+                </FFText>
+                <FFView flexDirection="row" alignItems="center" mt="xs">
+                    <Feather name="arrow-right" size={16} color="white" />
+                    <FFText textDecorationLine="underline" onPress={openPrivacyPolicy} ml="xxs">
+                        {t('link')}
                     </FFText>
-                    <FFView flexDirection="row" alignItems="center" mt="xs">
-                        <Feather name="arrow-right" size={16} color="white" />
-                        <FFText textDecorationLine="underline" onPress={openPrivacyPolicy} ml="xxs">
-                            {t('link')}
-                        </FFText>
-                    </FFView>
                 </FFView>
-                <FFButton onPress={onDismiss} variant="primary" label={t('confirm')} mt="m" />
-            </FFSafeAreaView>
+            </FFView>
+            <FFButton onPress={onDismiss} variant="primary" label={t('confirm')} marginTop="m" />
         </FFScrollSheet>
     )
 })

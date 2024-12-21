@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react'
-import maplibregl from 'maplibre-gl'
-import { Marker } from 'react-map-gl/maplibre'
-
-import { Report } from 'src/utils/types'
-import { useViewedReports } from 'src/contexts/ViewedReportsContext'
-
 import './OpacityMarker.css'
+
+import maplibregl from 'maplibre-gl'
+import React, { useEffect, useMemo, useRef,useState } from 'react'
+import { Marker } from 'react-map-gl/maplibre'
+import { useViewedReports } from 'src/contexts/ViewedReportsContext'
+import { Report } from 'src/utils/types'
 
 interface OpacityMarkerProps {
     markerData: Report
@@ -28,13 +27,17 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({
 
     const adjustedTimestamp = useMemo(() => {
         const tempTimestamp = new Date(timestamp)
+
         return new Date(tempTimestamp)
     }, [timestamp])
 
     const markerRef = useRef<maplibregl.Marker>(null)
 
+    // fix later, we don't need a return
+    // eslint-disable-next-line consistent-return
     useEffect(() => {
         let intervalId: NodeJS.Timeout
+
         if (!isFirstOpen) {
             if (!isHistoric) {
                 const calculateOpacity = () => {
@@ -54,6 +57,7 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({
                         clearInterval(intervalId)
                     }
                 }
+
                 // change the direct reference of the marker
                 markerRef.current?.setOpacity(opacity.toString())
 

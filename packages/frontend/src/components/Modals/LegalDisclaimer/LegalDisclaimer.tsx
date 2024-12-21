@@ -1,15 +1,15 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-
 import './LegalDisclaimer.css'
 
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
+
 interface LegalDisclaimerProps {
-    closeModal: () => void
+    handleConfirm: () => void
     openAnimationClass?: string
 }
 
-const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ closeModal, openAnimationClass }) => {
+const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ handleConfirm, openAnimationClass }) => {
     const { t } = useTranslation()
 
     return (
@@ -32,7 +32,7 @@ const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ closeModal, openAnima
                 </section>
             </div>
             <div className="footer">
-                <button onClick={closeModal}>{t('LegalDisclaimer.confirm')}</button>
+                <button type="button" onClick={handleConfirm}>{t('LegalDisclaimer.confirm')}</button>
                 <ul className="align-child-on-line">
                     <li>
                         <Link to="/impressum">{t('LegalDisclaimer.impressum')}</Link>
@@ -46,4 +46,4 @@ const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ closeModal, openAnima
     )
 }
 
-export default LegalDisclaimer
+export { LegalDisclaimer }

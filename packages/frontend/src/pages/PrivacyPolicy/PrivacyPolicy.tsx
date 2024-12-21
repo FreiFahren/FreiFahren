@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+
 import { LanguageSwitcher } from '../../components/Miscellaneous/LanguageSwitcher/LanguageSwitcher'
 
 const PrivacyPolicy = () => {
@@ -26,10 +27,15 @@ const PrivacyPolicy = () => {
 
                 setModifiedDate(formattedModifiedDate)
             } catch (error) {
+                // fix later with sentry
                 // eslint-disable-next-line no-console
                 console.error('Error getting privacy policy meta', error)
             }
-        })()
+        })().catch((error) => {
+            // fix later with sentry
+            // eslint-disable-next-line no-console
+            console.error('Error getting privacy policy meta', error)
+        })
     }, [i18n.language])
 
     return (
@@ -63,6 +69,8 @@ const PrivacyPolicy = () => {
             <ul>
                 {(t('PrivacyPolicy.sections.dataUsage.dataPoints', { returnObjects: true }) as string[]).map(
                     (item, index) => (
+                        // fix later
+                        // eslint-disable-next-line react/no-array-index-key
                         <li key={index}>{item}</li>
                     )
                 )}
@@ -103,6 +111,8 @@ const PrivacyPolicy = () => {
             <ul>
                 {(t('PrivacyPolicy.sections.analytics.dataPoints', { returnObjects: true }) as string[]).map(
                     (item, index) => (
+                        // fix later
+                        // eslint-disable-next-line react/no-array-index-key
                         <li key={index}>{item}</li>
                     )
                 )}
@@ -125,4 +135,4 @@ const PrivacyPolicy = () => {
     )
 }
 
-export default PrivacyPolicy
+export { PrivacyPolicy }
