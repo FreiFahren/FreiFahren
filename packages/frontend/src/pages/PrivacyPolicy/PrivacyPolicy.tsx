@@ -108,15 +108,6 @@ const PrivacyPolicy = () => {
 
             <h2>{t('PrivacyPolicy.sections.analytics.title')}</h2>
             <p>{t('PrivacyPolicy.sections.analytics.content')}</p>
-            <ul>
-                {(t('PrivacyPolicy.sections.analytics.dataPoints', { returnObjects: true }) as string[]).map(
-                    (item, index) => (
-                        // fix later
-                        // eslint-disable-next-line react/no-array-index-key
-                        <li key={index}>{item}</li>
-                    )
-                )}
-            </ul>
             <p>{t('PrivacyPolicy.sections.analytics.usage')}</p>
 
             <h2>{t('PrivacyPolicy.sections.errorMonitoring.title')}</h2>
