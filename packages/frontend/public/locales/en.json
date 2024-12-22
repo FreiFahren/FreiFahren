@@ -127,9 +127,10 @@
                     "Station",
                     "Direction (optional)",
                     "Report timestamp",
-                    "Description text (optional)"
+                    "Description text (optional)",
+                    "IP address of the user"
                 ],
-                "purpose": "The reported data is temporarily made available to other users of the App to provide them with information about the current situation in public transport. Additionally, the information is forwarded to the Freifahren_BE Telegram group. This data transmission serves the purpose of sharing and informing the community about incidents."
+                "purpose": "The reported data is temporarily made available to other users of the App to provide them with information about the current situation in public transport. Additionally, the information is forwarded to the Freifahren_BE Telegram group. This data transmission serves the purpose of sharing and informing the community about incidents. The IP address is used to detect spam and abuse reports to ensure that the reports come from real users and not from bots or other automated sources. The IP addresses are stored in strongly encrypted form for a maximum of 30 minutes and then deleted. They are not linked to other data and cannot be traced back to the user."
             },
             "anonymity": {
                 "title": "5. Anonymity",

@@ -126,9 +126,10 @@
                     "Station",
                     "Richtung (optional)",
                     "Uhrzeit der Meldung",
-                    "Beschreibungstext (optional)"
+                    "Beschreibungstext (optional)",
+                    "IP-Adresse des Nutzers"
                 ],
-                "purpose": "Die gemeldeten Daten werden anderen Nutzern der App temporär zur Verfügung gestellt, um ihnen die Möglichkeit zu geben, sich über die aktuelle Situation in den öffentlichen Verkehrsmitteln zu informieren. Des Weiteren werden die Informationen in die Freifahren_BE Telegram-Gruppe weitergeleitet. Diese Datenübermittlung dient dem Austausch und der Information über Vorfälle innerhalb der Community."
+                "purpose": "Die gemeldeten Daten werden anderen Nutzern der App temporär zur Verfügung gestellt, um ihnen die Möglichkeit zu geben, sich über die aktuelle Situation in den öffentlichen Verkehrsmitteln zu informieren. Des Weiteren werden die Informationen in die Freifahren_BE Telegram-Gruppe weitergeleitet. Diese Datenübermittlung dient dem Austausch und der Information über Vorfälle innerhalb der Community. Die IP-Adresse wird zur Erkennung von Spam- und Missbrauchsmeldungen verwendet um sicherzustellen, dass die Meldungen von echten Nutzern stammen und nicht von Bots oder anderen automatischen Quellen. Die IP-Adressen werden maximal 30 Minuten in stark verschlüsselter Form gespeichert und dann gelöscht. Sie sind nicht mit anderen Daten verknüpft und können nicht wieder auf den Nutzer zurückverfolgt werden."
             },
             "anonymity": {
                 "title": "5. Anonymität",
