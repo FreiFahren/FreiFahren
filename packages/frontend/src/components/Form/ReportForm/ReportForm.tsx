@@ -34,7 +34,7 @@ interface ReportFormProps {
 }
 
 const ITEM_HEIGHT = 37
-const REPORT_COOLDOWN_MINUTES = 15
+const REPORT_COOLDOWN_MINUTES = 30
 
 const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmission, className }) => {
     const { t } = useTranslation()
