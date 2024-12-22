@@ -45,6 +45,10 @@ var lastTelegramNotification time.Time
 //
 // @Router /basics/inspectors [post]
 func PostInspector(c echo.Context) error {
+	logger.Log.Info().
+		Str("userAgent", c.Request().UserAgent()).
+		Msg("POST /basics/Inspectors")
+
 	// Get IP address from request
 	ip := c.RealIP()
 
@@ -53,10 +57,6 @@ func PostInspector(c echo.Context) error {
 			"message": "Please wait at least 30 minutes between submissions",
 		})
 	}
-
-	logger.Log.Info().
-		Str("userAgent", c.Request().UserAgent()).
-		Msg("POST /basics/Inspector")
 
 	var req structs.InspectorRequest
 	if err := c.Bind(&req); err != nil {
