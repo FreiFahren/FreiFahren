@@ -10,10 +10,11 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/FreiFahren/backend/utils"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"gopkg.in/natefinch/lumberjack.v2"
+
+	"github.com/FreiFahren/backend/utils"
 )
 
 var wg sync.WaitGroup

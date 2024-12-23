@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { LanguageSwitcher } from '../../components/Miscellaneous/LanguageSwitcher/LanguageSwitcher'
-import { REPORT_COOLDOWN_MINUTES } from '../../constants'
 
 const PrivacyPolicy = () => {
     const { t, i18n } = useTranslation()
@@ -76,7 +75,7 @@ const PrivacyPolicy = () => {
                     )
                 )}
             </ul>
-            <p>{t('PrivacyPolicy.sections.dataUsage.purpose', { minutes: REPORT_COOLDOWN_MINUTES })}</p>
+            <p>{t('PrivacyPolicy.sections.dataUsage.purpose')}</p>
 
             <h2>{t('PrivacyPolicy.sections.anonymity.title')}</h2>
             <p>{t('PrivacyPolicy.sections.anonymity.content')}</p>
@@ -109,6 +108,15 @@ const PrivacyPolicy = () => {
 
             <h2>{t('PrivacyPolicy.sections.analytics.title')}</h2>
             <p>{t('PrivacyPolicy.sections.analytics.content')}</p>
+            <ul>
+                {(t('PrivacyPolicy.sections.analytics.dataPoints', { returnObjects: true }) as string[]).map(
+                    (item, index) => (
+                        // fix later
+                        // eslint-disable-next-line react/no-array-index-key
+                        <li key={index}>{item}</li>
+                    )
+                )}
+            </ul>
             <p>{t('PrivacyPolicy.sections.analytics.usage')}</p>
 
             <h2>{t('PrivacyPolicy.sections.errorMonitoring.title')}</h2>
