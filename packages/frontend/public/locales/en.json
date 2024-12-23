@@ -10,14 +10,12 @@
         "activeUsage": "I am not actively using the app during my journey.",
         "activeUsageDescription": "I understand that the active use of the app during my journey can disturb other passengers and violate the terms of use of the public transport operator.",
         "confirm": "I confirm",
-        "impressum": "Legal notice",
         "privacy": "Privacy",
         "saved": "Your confirmation will be saved to your browser's local storage."
     },
     "UtilModal": {
         "title": "Information",
         "feedback-button": "Contact & Feedback",
-        "impressum": "Legal notice",
         "privacy": "Privacy",
         "terms": "Terms of use"
     },
@@ -96,7 +94,6 @@
         "title": "Support",
         "mobile": "If you have a problem or question regarding the mobile app, please contact Moritz via",
         "web": "For inquiries regarding the website, please contact the Johan via",
-        "impressum": "Legal notice",
         "privacy": "Privacy policy"
     },
     "PrivacyPolicy": {
@@ -179,48 +176,6 @@
             "severabilityClause": {
                 "title": "14. Severability Clause",
                 "content": "If any provision of this Privacy Policy is found to be wholly or partially invalid or unenforceable, or if it subsequently becomes invalid or unenforceable, the validity of the remaining provisions shall not be affected..."
-            }
-        }
-    },
-    "Impressum": {
-        "title": "Imprint",
-        "switchLanguage": "Deutsche Version",
-        "sections": {
-            "provider": {
-                "title": "Provider:",
-                "content": "Freifahren GbR"
-            },
-            "representatives": {
-                "title": "Represented by the partners:",
-                "content": [
-                    "David Brandes",
-                    "Johan Trieloff"
-                ]
-            },
-            "contact": {
-                "title": "Contact:",
-                "address": "Address: Oberhofer Platz 7, 12009 Berlin",
-                "emailLabel": "Email:",
-                "email": "johan@trieloff.net"
-            },
-            "responsible": {
-                "title": "Responsible for content under § 55 Abs. 2 RStV:",
-                "content": [
-                    "David Brandes",
-                    "Johan Trieloff"
-                ]
-            },
-            "disclaimer": {
-                "title": "Disclaimer:",
-                "content": "The contents of our pages were created with the utmost care. However, we cannot guarantee the correctness, completeness, and up-to-dateness of the content. As a service provider, we are responsible for our own content on these pages in accordance with § 7 Abs.1 TMG under general laws. According to §§ 8 to 10 TMG, however, we are not obligated to monitor transmitted or stored external information or to investigate circumstances that indicate illegal activity."
-            },
-            "copyright": {
-                "title": "Copyright:",
-                "content": "The content and works created by the site operators on these pages are subject to German copyright law. Duplication, editing, distribution, and any kind of use beyond the limits of copyright law require the written consent of the respective author or creator. Downloads and copies of this page are only permitted for private, non-commercial use."
-            },
-            "privacy": {
-                "title": "Privacy:",
-                "content": "The use of our website is generally possible without providing personal data. For further information, please see our privacy policy."
             }
         }
     },

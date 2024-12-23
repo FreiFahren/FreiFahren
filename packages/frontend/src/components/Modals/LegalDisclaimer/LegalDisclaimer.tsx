@@ -32,11 +32,10 @@ const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ handleConfirm, openAn
                 </section>
             </div>
             <div className="footer">
-                <button type="button" onClick={handleConfirm}>{t('LegalDisclaimer.confirm')}</button>
+                <button type="button" onClick={handleConfirm}>
+                    {t('LegalDisclaimer.confirm')}
+                </button>
                 <ul className="align-child-on-line">
-                    <li>
-                        <Link to="/impressum">{t('LegalDisclaimer.impressum')}</Link>
-                    </li>
                     <li>
                         <Link to="/Datenschutz">{t('LegalDisclaimer.privacy')}</Link>
                     </li>
