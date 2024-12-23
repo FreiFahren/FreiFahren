@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { REPORT_COOLDOWN_MINUTES } from '../../constants'
 
 import { LanguageSwitcher } from '../../components/Miscellaneous/LanguageSwitcher/LanguageSwitcher'
 
@@ -75,7 +76,7 @@ const PrivacyPolicy = () => {
                     )
                 )}
             </ul>
-            <p>{t('PrivacyPolicy.sections.dataUsage.purpose')}</p>
+            <p>{t('PrivacyPolicy.sections.dataUsage.purpose', { minutes: REPORT_COOLDOWN_MINUTES })}</p>
 
             <h2>{t('PrivacyPolicy.sections.anonymity.title')}</h2>
             <p>{t('PrivacyPolicy.sections.anonymity.content')}</p>
