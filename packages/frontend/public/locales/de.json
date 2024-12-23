@@ -126,9 +126,10 @@
                     "Station",
                     "Richtung (optional)",
                     "Uhrzeit der Meldung",
-                    "Beschreibungstext (optional)"
+                    "Beschreibungstext (optional)",
+                    "IP-Adresse des Nutzers"
                 ],
-                "purpose": "Die gemeldeten Daten werden anderen Nutzern der App temporär zur Verfügung gestellt, um ihnen die Möglichkeit zu geben, sich über die aktuelle Situation in den öffentlichen Verkehrsmitteln zu informieren. Des Weiteren werden die Informationen in die Freifahren_BE Telegram-Gruppe weitergeleitet. Diese Datenübermittlung dient dem Austausch und der Information über Vorfälle innerhalb der Community."
+                "purpose": "Die gemeldeten Daten werden anderen Nutzern der App temporär zur Verfügung gestellt, um ihnen die Möglichkeit zu geben, sich über die aktuelle Situation in den öffentlichen Verkehrsmitteln zu informieren. Des Weiteren werden die Informationen in die Freifahren_BE Telegram-Gruppe weitergeleitet. Diese Datenübermittlung dient dem Austausch und der Information über Vorfälle innerhalb der Community. Die IP-Adresse wird zur Erkennung von Spam- und Missbrauchsmeldungen verwendet um sicherzustellen, dass die Meldungen von echten Nutzern stammen und nicht von Bots oder anderen automatischen Quellen. Die IP-Adressen werden maximal {{minutes}} Minuten in stark verschlüsselter Form gespeichert und dann gelöscht. Sie sind nicht mit anderen Daten verknüpft und können nicht wieder auf den Nutzer zurückverfolgt werden."
             },
             "anonymity": {
                 "title": "5. Anonymität",
@@ -160,16 +161,7 @@
             },
             "analytics": {
                 "title": "12. Einsatz von Analysetools",
-                "content": "Wir verwenden in unserer App die Analyse-Software Pirsch Analytics, um allgemeine Nutzungsinformationen wie Seitenaufrufe und Sitzungsdaten zu erfassen. Bei Pirsch Analytics handelt es sich um eine cookiefreie Webanalysesoftware, die nach dem Grundsatz \"Privacy by Design\" entwickelt wurde...",
-                "dataPoints": [
-                    "Anzahl der abgegebenen Meldungen und die benötigte Zeit für die Abgabe einer Meldung sowie weitere anonymisierte Parameter.",
-                    "Ob die Risikolinienebene betrachtet wurde.",
-                    "Ob die Liste der Meldungen betrachtet wurde.",
-                    "Welcher Marker (roter Punkt) auf der Karte angeklickt wurde.",
-                    "Ob der Standort des Nutzers geteilt wurde und durch welche Methode.",
-                    "Wie lange benötigt wurde, um das erste Fenster zu schließen.",
-                    "Wie das Meldeformular genutzt wurde."
-                ],
+                "content": "Für die Webanalyse setzen wir Pirsch Analytics ein. Bei Pirsch Analytics handelt es sich um eine cookiefreie Webanalysesoftware, die nach dem Grundsatz Privacy by Design entwickelt wurde. Zur Analyse der Besucherströme generiert Pirsch Analytics bei Erhalt des Seitenaufrufs mit Hilfe eines Hashing-Algorithmus eine 16-stellige Zahl als Besucher-ID. Als Eingabewerte dienen die IP-Adresse, der User Agent, das Datum und ein Salt. Die IP-Adresse des Besuchers wird weder vollständig noch in Teilen persistiert und durch den Hash vollständig und nicht reversierbar anonymisiert. Durch die Einbindung des Datums und der Verwendung von einem Salt pro Webseite ist gewährleistet, dass Webseitenbesucher nicht länger als 24 Stunden wiederzuerkennen sind und nicht über mehrere Webseiten hinweg getrackt werden können. Über eine lokal eingebundene Datenbank wird eine grobe Lokalisierung vorgenommen (Land/Stadt).",
                 "usage": "Diese Daten sind nicht personenbezogen; es werden keine Informationen gesammelt, die eine Identifizierung der Nutzer ermöglichen..."
             },
             "errorMonitoring": {
