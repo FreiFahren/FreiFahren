@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
-import { Backdrop } from "../../Miscellaneous/Backdrop/Backdrop"
+import { Backdrop } from '../../Miscellaneous/Backdrop/Backdrop'
 import { FeedbackModal } from '../FeedbackModal/FeedbackModal'
 import { LegalDisclaimer } from '../LegalDisclaimer/LegalDisclaimer'
 
@@ -38,7 +38,7 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                 <div>
                     <ul>
                         {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
-                        <li onClick={handleColorThemeToggle} >
+                        <li onClick={handleColorThemeToggle}>
                             {colorTheme === 'light' ? (
                                 <img src={LIGHT_ICON} alt="Light Icon" />
                             ) : (
@@ -47,9 +47,6 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                         </li>
                     </ul>
                     <ul className="align-child-on-line">
-                        <li>
-                            <Link to="/impressum">{t('UtilModal.impressum')}</Link>
-                        </li>
                         <li>
                             <Link to="/Datenschutz">{t('UtilModal.privacy')}</Link>
                         </li>
@@ -70,13 +67,16 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                     </ul>
                 </div>
             </div>
-            {isFeedbackModalOpen ? <>
+            {isFeedbackModalOpen ? (
+                <>
                     {/* always truthy, still */}
                     {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
                     <FeedbackModal openAnimationClass={isFeedbackModalOpen ? 'open center-animation' : ''} />
                     <Backdrop handleClick={() => setIsFeedbackModalOpen(false)} Zindex={3} />
-                </> : null}
-            {isLegalDisclaimerOpen ? <>
+                </>
+            ) : null}
+            {isLegalDisclaimerOpen ? (
+                <>
                     <LegalDisclaimer
                         // always truthy, still
                         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -84,7 +84,8 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                         handleConfirm={() => setIsLegalDisclaimerOpen(false)}
                     />
                     <Backdrop handleClick={() => setIsLegalDisclaimerOpen(false)} Zindex={3} />
-                </> : null}
+                </>
+            ) : null}
         </>
     )
 }
