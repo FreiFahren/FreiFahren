@@ -1,16 +1,15 @@
 import './ReportForm.css'
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect,useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { REPORT_COOLDOWN_MINUTES } from '../../../constants'
 import { useLocation } from '../../../contexts/LocationContext'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
 import { LinesList, reportInspector, StationList, StationProperty } from '../../../utils/databaseUtils'
 import { calculateDistance } from '../../../utils/mapUtils'
 import { Report } from '../../../utils/types'
-import { createWarningSpan, getLineColor, highlightElement } from '../../../utils/uiUtils'
+import { createWarningSpan, getLineColor,highlightElement } from '../../../utils/uiUtils'
 import { Line } from '../../Miscellaneous/Line/Line'
 import { AutocompleteInputForm } from '../AutocompleteInputForm/AutocompleteInputForm'
 import { SelectField } from '../SelectField/SelectField'
@@ -18,15 +17,15 @@ import { SelectField } from '../SelectField/SelectField'
 const getCSSVariable = (variable: string): number => {
     const value = getComputedStyle(document.documentElement).getPropertyValue(variable)
 
-    return value !== '0' ? parseFloat(value) : 0
+    return (value !== '0') ? parseFloat(value) : 0
 }
 
 const redHighlight = (text: string) => (
-    <>
-        {text}
-        <span className="red-highlight">*</span>
-    </>
-)
+        <>
+            {text}
+            <span className="red-highlight">*</span>
+        </>
+    )
 
 interface ReportFormProps {
     closeModal: () => void
@@ -35,6 +34,7 @@ interface ReportFormProps {
 }
 
 const ITEM_HEIGHT = 37
+const REPORT_COOLDOWN_MINUTES = 15
 
 const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmission, className }) => {
     const { t } = useTranslation()
@@ -77,16 +77,13 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
 
     // Calculate possible lines based on the current entity
     const possibleLines = useMemo(() => {
-        if (currentEntity === null) return allLines
+        if (currentEntity === null ) return allLines
         return Object.entries(allLines)
             .filter(([line]) => line.startsWith(currentEntity))
-            .reduce(
-                (accumulatedLines, [line, stations]) => ({
-                    ...accumulatedLines,
-                    [line]: stations,
-                }),
-                {} as LinesList
-            )
+            .reduce((accumulatedLines, [line, stations]) => ({
+                ...accumulatedLines,
+                [line]: stations
+            }), {} as LinesList)
     }, [allLines, currentEntity])
 
     // Calculate possible stations based on entity, line, station, and search input
@@ -115,24 +112,18 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
         } else if (currentEntity !== null) {
             stations = Object.entries(sortedAllStations)
                 .filter(([, stationData]) => stationData.lines.some((line) => line.startsWith(currentEntity)))
-                .reduce(
-                    (accumulatedStations, [stationName, stationData]) => ({
-                        ...accumulatedStations,
-                        [stationName]: stationData,
-                    }),
-                    {} as StationList
-                )
+                .reduce((accumulatedStations, [stationName, stationData]) => ({
+                    ...accumulatedStations,
+                    [stationName]: stationData
+                }), {} as StationList)
         }
         if (stationSearch) {
             stations = Object.entries(stations)
                 .filter(([, stationData]) => stationData.name.toLowerCase().includes(stationSearch.toLowerCase()))
-                .reduce(
-                    (accumulatedStations, [stationName, stationData]) => ({
-                        ...accumulatedStations,
-                        [stationName]: stationData,
-                    }),
-                    {} as StationList
-                )
+                .reduce((accumulatedStations, [stationName, stationData]) => ({
+                    ...accumulatedStations,
+                    [stationName]: stationData
+                }), {} as StationList)
         }
 
         return stations
@@ -193,12 +184,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
     const handleLineSelect = useCallback(
         (line: string | null) => {
             setCurrentLine(line)
-            if (
-                typeof line === 'string' &&
-                currentStation !== null &&
-                typeof currentStation === 'string' &&
-                allLines[line].includes(currentStation) === false
-            ) {
+            if (typeof line === 'string' && currentStation !== null && typeof currentStation === 'string' && allLines[line].includes(currentStation) === false) {
                 setCurrentStation(null)
             }
         },
@@ -228,6 +214,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
         [allStations]
     )
 
+
     const verifyUserLocation = (station: string | null, stationsList: StationList): boolean => {
         if (station === null) return false
 
@@ -252,17 +239,14 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
 
         return false
     }
-
+    
     const validateReportForm = async () => {
         let hasError = false
 
         // Check for last report time to prevent spamming
         const lastReportTime = localStorage.getItem('lastReportTime')
 
-        if (
-            lastReportTime !== null &&
-            Date.now() - new Date(lastReportTime).getTime() < REPORT_COOLDOWN_MINUTES * 60 * 1000
-        ) {
+        if ((lastReportTime !== null) && Date.now() - new Date(lastReportTime).getTime() < REPORT_COOLDOWN_MINUTES * 60 * 1000) {
             highlightElement('report-form')
             createWarningSpan(
                 'searchable-select-div',
@@ -313,14 +297,13 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
                 name: allStations[currentStation!].name,
                 coordinates: allStations[currentStation!].coordinates,
             },
-            direction:
-                currentDirection !== null
-                    ? {
-                          id: currentDirection,
-                          name: allStations[currentDirection!].name,
-                          coordinates: allStations[currentDirection!].coordinates,
-                      }
-                    : null,
+            direction: currentDirection !== null
+                ? {
+                      id: currentDirection,
+                      name: allStations[currentDirection!].name,
+                      coordinates: allStations[currentDirection!].coordinates,
+                  }
+                : null,
             message: description,
             timestamp: endTime.toISOString(),
             isHistoric: false,
@@ -353,6 +336,9 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
             finalizeSubmission(endTime)
         }
     }
+
+
+
 
     const getClosestStationsToUser = (
         numberOfStations: number,
@@ -452,11 +438,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
                         setHighlightedElementSelected={setStationRecommendationSelected}
                     />
                     <div ref={bottomElementsRef}>
-                        {currentLine !== null &&
-                        currentLine !== 'S41' &&
-                        currentLine !== 'S42' &&
-                        currentStation !== null ? (
-                            <section>
+                        {(currentLine !== null) && currentLine !== 'S41' && currentLine !== 'S42' && currentStation !== null ? <section>
                                 <h3>{t('ReportForm.direction')}</h3>
                                 <SelectField
                                     onSelect={handleDirectionSelect}
@@ -473,8 +455,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
                                         </strong>
                                     </span>
                                 </SelectField>
-                            </section>
-                        ) : null}
+                            </section> : null}
                         <section className="description-field">
                             <h3>{t('ReportForm.description')}</h3>
                             <textarea

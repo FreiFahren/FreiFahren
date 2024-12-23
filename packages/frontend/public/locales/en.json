@@ -124,10 +124,9 @@
                     "Station",
                     "Direction (optional)",
                     "Report timestamp",
-                    "Description text (optional)",
-                    "IP address of the user"
+                    "Description text (optional)"
                 ],
-                "purpose": "The reported data is temporarily made available to other users of the App to provide them with information about the current situation in public transport. Additionally, the information is forwarded to the Freifahren_BE Telegram group. This data transmission serves the purpose of sharing and informing the community about incidents. The IP address is used to detect spam and abuse reports to ensure that the reports come from real users and not from bots or other automated sources. The IP addresses are stored in strongly encrypted form for a maximum of {{minutes}} minutes and then deleted. They are not linked to other data and cannot be traced back to the user."
+                "purpose": "The reported data is temporarily made available to other users of the App to provide them with information about the current situation in public transport. Additionally, the information is forwarded to the Freifahren_BE Telegram group. This data transmission serves the purpose of sharing and informing the community about incidents."
             },
             "anonymity": {
                 "title": "5. Anonymity",
@@ -159,7 +158,16 @@
             },
             "analytics": {
                 "title": "12. Use of Analytics Tools",
-                "content": "For web analytics, we use Pirsch Analytics. Pirsch Analytics is a cookie-free web analytics software that was developed according to the Privacy by Design principle. To analyze visitor flows, Pirsch Analytics uses a hashing algorithm to generate a 16-digit number as the visitor ID when the page request is received. The input values are the IP address, the user agent, the date and a salt. The visitor's IP address is not persisted in whole or in part, and is anonymized completely and non-reversibly by the hash. The inclusion of the date and the use of one salt per website ensures that website visitors cannot be recognized for more than 24 hours and cannot be tracked across multiple websites. A rough localization (country/city) is performed via a locally integrated database.",
+                "content": "We use the analytics software Pirsch Analytics in our App to capture general usage information, such as page views and session data. Pirsch Analytics is a cookie-free web analytics software designed according to the \"Privacy by Design\" principle...",
+                "dataPoints": [
+                    "Number of submitted reports and the time taken to submit a report, as well as other anonymized parameters.",
+                    "Whether the risk line level was viewed.",
+                    "Whether the list of reports was viewed.",
+                    "Which marker (red dot) on the map was clicked.",
+                    "Whether the user's location was shared and by which method.",
+                    "How long it took to close the first window.",
+                    "How the report form was used."
+                ],
                 "usage": "These data are not personal; no information is collected that would allow user identification..."
             },
             "errorMonitoring": {

@@ -13,7 +13,6 @@ import (
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	_ "github.com/FreiFahren/backend/docs"
-	"github.com/FreiFahren/backend/limiting"
 	"github.com/FreiFahren/backend/logger"
 	structs "github.com/FreiFahren/backend/utils"
 
@@ -28,7 +27,6 @@ var lastTelegramNotification time.Time
 // @Description This endpoint validates the provided data, processes necessary computations for linking stations and lines,
 // @Description inserts the data into the database, and triggers an update to the risk model used in operational analysis.
 // @Description If the 'timestamp' field is not provided in the request, the current UTC time truncated to the nearest minute is used automatically.
-// @Description The endpoint also includes a rate limit to prevent abuse. The rate limit is based on the IP address of the request.
 //
 // @Tags basics
 //
@@ -40,23 +38,13 @@ var lastTelegramNotification time.Time
 //
 // @Success 200 {object} structs.ResponseData "Successfully processed and inserted the inspector data with computed linkages and risk model updates."
 // @Failure 400 "Bad Request: Missing or incorrect parameters provided."
-// @Failure 429 "Too Many Requests: The request has been rate limited."
 // @Failure 500 "Internal Server Error: Error during data processing or database insertion."
 //
 // @Router /basics/inspectors [post]
 func PostInspector(c echo.Context) error {
 	logger.Log.Info().
 		Str("userAgent", c.Request().UserAgent()).
-		Msg("POST /basics/Inspectors")
-
-	// Get IP address from request
-	ip := c.RealIP()
-
-	if !limiting.GlobalRateLimiter.CanSubmitReport(ip) {
-		return c.JSON(http.StatusTooManyRequests, map[string]string{
-			"message": "Please wait at least 30 minutes between submissions",
-		})
-	}
+		Msg("POST /basics/Inspector")
 
 	var req structs.InspectorRequest
 	if err := c.Bind(&req); err != nil {
@@ -125,9 +113,6 @@ func PostInspector(c echo.Context) error {
 			}
 		}
 	}()
-
-	// Record the submission after successful processing
-	limiting.GlobalRateLimiter.RecordSubmission(ip)
 
 	return c.JSON(http.StatusOK, dataToInsert)
 }

@@ -11,7 +11,6 @@ import (
 	"github.com/FreiFahren/backend/caching"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
-	"github.com/FreiFahren/backend/limiting"
 	"github.com/FreiFahren/backend/logger"
 	"github.com/FreiFahren/backend/utils"
 	"github.com/joho/godotenv"
@@ -76,14 +75,6 @@ func SetupServer() *echo.Echo {
 	})
 	if err != nil {
 		logger.Log.Error().Msg("Could not schedule risk model update job")
-		logger.Log.Error().Str("Error", err.Error()).Send()
-	}
-
-	_, err = c.AddFunc("* * * * *", func() {
-		limiting.GlobalRateLimiter.CleanupOldSubmissions()
-	})
-	if err != nil {
-		logger.Log.Error().Msg("Could not schedule rate limiter cleanup job")
 		logger.Log.Error().Str("Error", err.Error()).Send()
 	}
 
