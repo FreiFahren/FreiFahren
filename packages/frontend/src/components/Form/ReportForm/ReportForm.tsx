@@ -3,6 +3,7 @@ import './ReportForm.css'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { REPORT_COOLDOWN_MINUTES } from '../../../constants'
 import { useLocation } from '../../../contexts/LocationContext'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
@@ -13,7 +14,6 @@ import { createWarningSpan, getLineColor, highlightElement } from '../../../util
 import { Line } from '../../Miscellaneous/Line/Line'
 import { AutocompleteInputForm } from '../AutocompleteInputForm/AutocompleteInputForm'
 import { SelectField } from '../SelectField/SelectField'
-import { REPORT_COOLDOWN_MINUTES } from '../../../constants'
 
 const getCSSVariable = (variable: string): number => {
     const value = getComputedStyle(document.documentElement).getPropertyValue(variable)

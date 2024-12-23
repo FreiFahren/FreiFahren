@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { REPORT_COOLDOWN_MINUTES } from '../../constants'
 
 import { LanguageSwitcher } from '../../components/Miscellaneous/LanguageSwitcher/LanguageSwitcher'
+import { REPORT_COOLDOWN_MINUTES } from '../../constants'
 
 const PrivacyPolicy = () => {
     const { t, i18n } = useTranslation()
