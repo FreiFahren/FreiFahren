@@ -255,7 +255,7 @@ const App = ({ funnelEvent }: { funnelEvent?: FunnelConfig }) => {
     }, [funnelEvent, navigate])
 
     useEffect(() => {
-        if (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.includes('Telegram')) {
+        if (navigator.userAgent.includes('Telegram')) {
             setAppUIState({ ...appUIState, isListModalOpen: true })
         }
     }, []) // Only run once on mount
