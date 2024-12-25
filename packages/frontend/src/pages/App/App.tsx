@@ -254,6 +254,12 @@ const App = ({ funnelEvent }: { funnelEvent?: FunnelConfig }) => {
         }
     }, [funnelEvent, navigate])
 
+    useEffect(() => {
+        if (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.includes('Telegram')) {
+            alert('DETECTED')
+        }
+    }, []) // Only run once on mount
+
     return (
         <div className="App">
             {appMounted && shouldShowLegalDisclaimer() ? (
