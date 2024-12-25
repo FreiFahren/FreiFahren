@@ -47,10 +47,10 @@ const initialAppUIState: AppUIState = {
     isLegalDisclaimerOpen: false,
 }
 
-const isTelegramWebApp = (): boolean => {
+const isTelegramWebApp = (): boolean => 
     // @ts-ignore since TelegramWebviewProxy is not in the window type definitions
-    return typeof TelegramWebviewProxy !== 'undefined'
-}
+     typeof TelegramWebviewProxy !== 'undefined'
+
 
 const App = () => {
     const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
@@ -239,6 +239,10 @@ const App = () => {
         if (isTelegramWebApp()) {
             sendAnalyticsEvent('Opened from Telegram', {
                 meta: {},
+            }).catch((error) => {
+                // fix later with sentry
+                // eslint-disable-next-line no-console
+                console.error('Failed to send opened from telegram analytics event:', error)
             })
         }
     }, [])
