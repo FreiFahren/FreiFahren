@@ -79,6 +79,7 @@ func SetupServer() *echo.Echo {
 		logger.Log.Error().Str("Error", err.Error()).Send()
 	}
 
+	// remove old submissions from rate limiter every minute
 	_, err = c.AddFunc("* * * * *", func() {
 		limiting.GlobalRateLimiter.CleanupOldSubmissions()
 	})
