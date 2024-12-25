@@ -49,6 +49,11 @@ const initialAppUIState: AppUIState = {
     isLegalDisclaimerOpen: false,
 }
 
+const isTelegramWebApp = (): boolean => {
+    // @ts-ignore since TelegramWebviewProxy is not in the window type definitions
+    return typeof TelegramWebviewProxy !== 'undefined'
+}
+
 const App = ({ funnelEvent }: { funnelEvent?: FunnelConfig }) => {
     const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
     const [appMounted, setAppMounted] = useState(false)
@@ -255,8 +260,8 @@ const App = ({ funnelEvent }: { funnelEvent?: FunnelConfig }) => {
     }, [funnelEvent, navigate])
 
     useEffect(() => {
-        if (navigator.userAgent.includes('Telegram')) {
-            setAppUIState({ ...appUIState, isListModalOpen: true })
+        if (isTelegramWebApp()) {
+            setAppUIState((prev) => ({ ...prev, isListModalOpen: true }))
         }
     }, []) // Only run once on mount
 
