@@ -12,18 +12,6 @@ import { PrivacyPolicy } from './pages/PrivacyPolicy/PrivacyPolicy'
 import { Support } from './pages/Support/Support'
 import { reportWebVitals } from './reportWebVitals'
 
-export type FunnelConfig = {
-    path: string
-    source: string
-}
-
-const FUNNEL_ROUTES: FunnelConfig[] = [
-    {
-        path: '/invite',
-        source: 'FreiFahren_BE Telegram',
-    },
-]
-
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
 root.render(
@@ -41,17 +29,6 @@ root.render(
                     />
                     <Route path="/datenschutz" element={<PrivacyPolicy />} />
                     <Route path="/support" element={<Support />} />
-                    {FUNNEL_ROUTES.map((config) => (
-                        <Route
-                            key={config.path}
-                            path={config.path}
-                            element={
-                                <LocationProvider>
-                                    <App funnelEvent={config} />
-                                </LocationProvider>
-                            }
-                        />
-                    ))}
                 </Routes>
             </BrowserRouter>
         </I18nextProvider>

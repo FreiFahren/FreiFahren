@@ -1,8 +1,6 @@
 import './App.css'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { FunnelConfig } from 'src'
 import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
@@ -49,7 +47,12 @@ const initialAppUIState: AppUIState = {
     isLegalDisclaimerOpen: false,
 }
 
-const App = ({ funnelEvent }: { funnelEvent?: FunnelConfig }) => {
+const isTelegramWebApp = (): boolean => 
+    // @ts-ignore since TelegramWebviewProxy is not in the window type definitions
+     typeof TelegramWebviewProxy !== 'undefined'
+
+
+const App = () => {
     const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
     const [appMounted, setAppMounted] = useState(false)
 
@@ -232,27 +235,17 @@ const App = ({ funnelEvent }: { funnelEvent?: FunnelConfig }) => {
     // in the future this will be automatically fetched from the analytics platform + telegram user count
     const numberOfUsers = useMemo(() => Math.floor(Math.random() * (36000 - 35000 + 1)) + 35000, [])
 
-    const funnelEventSentRef = useRef(false)
-    const navigate = useNavigate()
     useEffect(() => {
-        if (funnelEvent && !funnelEventSentRef.current) {
-            funnelEventSentRef.current = true
-            sendAnalyticsEvent('Clicked on Funnel link', {
-                meta: {
-                    source: funnelEvent.source,
-                    path: funnelEvent.path,
-                },
+        if (isTelegramWebApp()) {
+            sendAnalyticsEvent('Opened from Telegram', {
+                meta: {},
+            }).catch((error) => {
+                // fix later with sentry
+                // eslint-disable-next-line no-console
+                console.error('Failed to send opened from telegram analytics event:', error)
             })
-                .catch((error) => {
-                    // fix later with sentry
-                    // eslint-disable-next-line no-console
-                    console.error('Failed to send funnel event:', error)
-                })
-                .finally(() => {
-                    navigate('/')
-                })
         }
-    }, [funnelEvent, navigate])
+    }, [])
 
     return (
         <div className="App">
