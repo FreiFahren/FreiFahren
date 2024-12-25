@@ -49,13 +49,13 @@ func PostInspector(c echo.Context) error {
 		Str("userAgent", c.Request().UserAgent()).
 		Msg("POST /basics/Inspectors")
 
-	// Get IP address from request
-	ip := c.RealIP()
-
-	if !limiting.GlobalRateLimiter.CanSubmitReport(ip) {
-		return c.JSON(http.StatusTooManyRequests, map[string]string{
-			"message": "Please wait at least 30 minutes between submissions",
-		})
+	// dont rate limit requests from the bot (password in header)
+	if c.Request().Header.Get("X-Password") != os.Getenv("REPORT_PASSWORD") {
+		if !limiting.GlobalRateLimiter.CanSubmitReport(c.RealIP()) {
+			return c.JSON(http.StatusTooManyRequests, map[string]string{
+				"message": "Please wait at least 30 minutes between submissions",
+			})
+		}
 	}
 
 	var req structs.InspectorRequest
@@ -127,7 +127,7 @@ func PostInspector(c echo.Context) error {
 	}()
 
 	// Record the submission after successful processing
-	limiting.GlobalRateLimiter.RecordSubmission(ip)
+	limiting.GlobalRateLimiter.RecordSubmission(c.RealIP())
 
 	return c.JSON(http.StatusOK, dataToInsert)
 }
