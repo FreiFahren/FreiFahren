@@ -4,8 +4,8 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
-import { Backdrop } from "../../Miscellaneous/Backdrop/Backdrop"
-import { FeedbackModal } from '../FeedbackModal/FeedbackModal'
+import { Backdrop } from '../../Miscellaneous/Backdrop/Backdrop'
+import { ContactSection } from '../ContactSection/ContactSection'
 import { LegalDisclaimer } from '../LegalDisclaimer/LegalDisclaimer'
 
 interface UtilModalProps {
@@ -22,7 +22,7 @@ const DARK_ICON = `${process.env.PUBLIC_URL}/icons/dark.svg`
 const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, handleColorThemeToggle }) => {
     const { t } = useTranslation()
 
-    const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false)
+    const [isContactModalOpen, setIsContactModalOpen] = useState(false)
     const [isLegalDisclaimerOpen, setIsLegalDisclaimerOpen] = useState(false)
 
     return (
@@ -31,14 +31,13 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                 {children}
                 <div className="align-child-on-line">
                     <h1>{t('UtilModal.title')}</h1>
-                    <button className="action" onClick={() => setIsFeedbackModalOpen(true)} type="button">
+                    <button className="action" onClick={() => setIsContactModalOpen(true)} type="button">
                         {t('UtilModal.feedback-button')}
                     </button>
                 </div>
                 <div>
                     <ul>
-                        {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
-                        <li onClick={handleColorThemeToggle} >
+                        <li onClick={handleColorThemeToggle}>
                             {colorTheme === 'light' ? (
                                 <img src={LIGHT_ICON} alt="Light Icon" />
                             ) : (
@@ -54,7 +53,6 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                             <Link to="/Datenschutz">{t('UtilModal.privacy')}</Link>
                         </li>
                         <li>
-                            {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
                             <p onClick={() => setIsLegalDisclaimerOpen(true)}>{t('UtilModal.terms')}</p>
                         </li>
                         <li>
@@ -70,21 +68,27 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                     </ul>
                 </div>
             </div>
-            {isFeedbackModalOpen ? <>
-                    {/* always truthy, still */}
-                    {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
-                    <FeedbackModal openAnimationClass={isFeedbackModalOpen ? 'open center-animation' : ''} />
-                    <Backdrop handleClick={() => setIsFeedbackModalOpen(false)} Zindex={3} />
-                </> : null}
-            {isLegalDisclaimerOpen ? <>
+            {isContactModalOpen ? (
+                <>
+                    <div
+                        className={`contact-section modal container ${
+                            isContactModalOpen ? 'open center-animation' : ''
+                        }`}
+                    >
+                        <ContactSection />
+                    </div>
+                    <Backdrop handleClick={() => setIsContactModalOpen(false)} Zindex={3} />
+                </>
+            ) : null}
+            {isLegalDisclaimerOpen ? (
+                <>
                     <LegalDisclaimer
-                        // always truthy, still
-                        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                         openAnimationClass={isLegalDisclaimerOpen ? 'open center-animation high-z-index' : ''}
                         handleConfirm={() => setIsLegalDisclaimerOpen(false)}
                     />
                     <Backdrop handleClick={() => setIsLegalDisclaimerOpen(false)} Zindex={3} />
-                </> : null}
+                </>
+            ) : null}
         </>
     )
 }

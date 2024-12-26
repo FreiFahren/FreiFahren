@@ -16,13 +16,13 @@
     },
     "UtilModal": {
         "title": "Informationen",
-        "feedback-button": "Kontakt & Feedback",
+        "feedback-button": "Kontakt",
         "impressum": "Impressum",
         "privacy": "Datenschutz",
         "terms": "Nutzungsbedingungen"
     },
-    "FeedbackModal": {
-        "title": "Sende dein Feedback an:",
+    "ContactSection": {
+        "title": "Kontaktiere uns",
         "about-us": "Über uns",
         "about-us-text": "FreiFahren ist ein nicht-kommerzielles Open-Source-Projekt, das sich zum Ziel gesetzt hat, den Zugang zum öffentlichen Nahverkehr zu erleichtern. Wir sind stets offen für neue Mithelfende auf unserem",
         "telegram-group-info": "Ein Großteil der Meldungen stammt aus der FreiFahren_BE Telegram-Gruppe. Vielen Dank an die Admins, dass wir mit unserem Telegram Bot die relevanten Informationen extrahieren dürfen."

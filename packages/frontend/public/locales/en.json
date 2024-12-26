@@ -16,13 +16,13 @@
     },
     "UtilModal": {
         "title": "Information",
-        "feedback-button": "Contact & Feedback",
+        "feedback-button": "Contact",
         "impressum": "Legal notice",
         "privacy": "Privacy",
         "terms": "Terms of use"
     },
-    "FeedbackModal": {
-        "title": "Send your feedback to:",
+    "ContactSection": {
+        "title": "Contact us",
         "about-us": "About us",
         "about-us-text": "FreiFahren is a non-commercial open-source project aimed at making public transport more accessible. We are always open to new contributors on our",
         "telegram-group-info": "Most of the reports come from the FreiFahren_BE Telegram group. Thank you to the admins for allowing us to extract the relevant information with our Telegram bot."
