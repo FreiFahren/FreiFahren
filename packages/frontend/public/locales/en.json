@@ -115,7 +115,7 @@
             },
             "responsible": {
                 "title": "2. Responsible Party",
-                "content": "The party responsible for data processing within this App is Freifahren GbR, represented by its partners, reachable via email at: johan@trieloff.net."
+                "content": "The parties responsible for data processing within this App are the developers of the FreiFahren project, reachable via email at: johan@trieloff.net. FreiFahren is a non-commercial open-source project."
             },
             "legalBasis": {
                 "title": "3. Legal Basis for Data Processing",
@@ -151,7 +151,7 @@
             },
             "storageAndAccess": {
                 "title": "6. Storage and Access",
-                "content": "The collected data is stored on our servers, hosted by Hetzner Online GmbH in Germany. The storage duration of the data is indefinite. The time taken by the user to submit a report is also stored on these servers. Access to the data is strictly limited to the partners of Freifahren GbR."
+                "content": "The collected data is stored on our servers, hosted by Hetzner Online GmbH in Germany. The storage duration of the data is indefinite. The time taken by the user to submit a report is also stored on these servers. Access to the data is strictly limited to the developers of the FreiFahren project."
             },
             "userRights": {
                 "title": "7. User Rights",
