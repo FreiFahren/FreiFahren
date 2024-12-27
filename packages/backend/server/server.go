@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/FreiFahren/backend/api/distance"
+	"github.com/FreiFahren/backend/api/feedback"
 	"github.com/FreiFahren/backend/api/inspectors"
 	"github.com/FreiFahren/backend/api/lines"
 	"github.com/FreiFahren/backend/api/prediction"
@@ -108,6 +109,7 @@ func SetupServer() *echo.Echo {
 
 	// Ensure the required table exists
 	database.CreateTicketInfoTable()
+	database.CreateFeedbackTable()
 
 	caching.InitCacheManager()
 	segments := data.GetSegments()
@@ -132,6 +134,8 @@ func SetupServer() *echo.Echo {
 	e.GET("/transit/distance", distance.GetStationDistance)
 
 	e.GET("/risk-prediction/segment-colors", prediction.GetRiskSegments)
+
+	e.POST("/feedback", feedback.PostFeedback)
 
 	return e
 }
