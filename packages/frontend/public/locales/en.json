@@ -45,6 +45,11 @@
         "privacy3": ".",
         "report": "Submit"
     },
+    "PrivacyCheckbox": {
+        "privacy1": "I agree to the",
+        "privacy2": "Privacy policy",
+        "privacy3": "."
+    },
     "AskForLocation": {
         "title": "Your location could not be determined.",
         "searchPlaceholder": "Search for a station",

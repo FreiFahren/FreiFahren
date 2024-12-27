@@ -40,10 +40,12 @@
         "direction": "Richtung",
         "description": "Beschreibung",
         "descriptionPlaceholder": "Beschreibung",
+        "report": "Melden"
+    },
+    "PrivacyCheckbox": {
         "privacy1": "Ich stimme der",
         "privacy2": "Datenschutzerklärung",
-        "privacy3": "zu.",
-        "report": "Melden"
+        "privacy3": "zu."
     },
     "AskForLocation": {
         "title": "Dein Standort konnte nicht ermittelt werden.",

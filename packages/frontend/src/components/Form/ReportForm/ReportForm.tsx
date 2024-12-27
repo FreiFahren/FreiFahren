@@ -15,19 +15,13 @@ import { AutocompleteInputForm } from '../AutocompleteInputForm/AutocompleteInpu
 import { SelectField } from '../SelectField/SelectField'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 import { FeedbackForm } from '../FeedbackForm/FeedbackForm'
+import { PrivacyCheckbox } from '../PrivacyCheckbox/PrivacyCheckbox'
 
 const getCSSVariable = (variable: string): number => {
     const value = getComputedStyle(document.documentElement).getPropertyValue(variable)
 
     return value !== '0' ? parseFloat(value) : 0
 }
-
-const redHighlight = (text: string) => (
-    <>
-        {text}
-        <span className="red-highlight">*</span>
-    </>
-)
 
 interface ReportFormProps {
     closeModal: () => void
@@ -495,18 +489,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
                         </section>
                         <section>
                             <div>
-                                <label htmlFor="privacy-checkbox" id="privacy-label">
-                                    <input
-                                        type="checkbox"
-                                        id="privacy-checkbox"
-                                        name="privacy-checkbox"
-                                        checked={isPrivacyChecked}
-                                        onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
-                                    />
-                                    {t('ReportForm.privacy1')}
-                                    <a href="/datenschutz"> {t('ReportForm.privacy2')} </a> {t('ReportForm.privacy3')}
-                                    {redHighlight('')}
-                                </label>
+                                <PrivacyCheckbox isChecked={isPrivacyChecked} onChange={setIsPrivacyChecked} />
                             </div>
                             <div>
                                 <button
