@@ -1,5 +1,6 @@
 import React, { FC } from 'react'
 import { useTranslation } from 'react-i18next'
+import './PrivacyCheckbox.css'
 
 interface PrivacyCheckboxProps {
     isChecked: boolean

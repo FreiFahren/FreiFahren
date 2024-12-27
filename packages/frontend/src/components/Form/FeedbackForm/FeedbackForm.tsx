@@ -1,9 +1,10 @@
 import './FeedbackForm.css'
-import React, { FC, ChangeEvent, useRef, useActionState } from 'react'
+import React, { FC, ChangeEvent, useRef, useActionState, useState } from 'react'
 import { ContactSection } from '../../Modals/ContactSection/ContactSection'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
 import { useTranslation } from 'react-i18next'
 import { FeedbackSummaryModal } from '../../Modals/FeedbackSummaryModal/FeedbackSummaryModal'
+import { PrivacyCheckbox } from '../PrivacyCheckbox/PrivacyCheckbox'
 
 async function submitFeedback(previousState: boolean | null, formData: FormData): Promise<boolean> {
     const feedback = formData.get('feedback') as string
@@ -41,23 +42,27 @@ interface FeedbackFormProps {
 const FeedbackForm: FC<FeedbackFormProps> = ({ openAnimationClass, onClose }) => {
     const { t } = useTranslation()
     const textareaRef = useRef<HTMLTextAreaElement>(null)
-    const buttonRef = useRef<HTMLButtonElement>(null)
     const [showSummary, formAction, isPending] = useActionState(submitFeedback, false)
-
-    const adjustHeight = (element: HTMLTextAreaElement) => {
-        element.style.height = 'auto'
-        element.style.height = `${element.scrollHeight}px`
-    }
+    const [isChecked, setIsChecked] = useState(false)
+    const hasContentRef = useRef(false)
 
     const handleInput = (e: ChangeEvent<HTMLTextAreaElement>) => {
-        adjustHeight(e.target)
+        const value = e.target.value.trim()
+        hasContentRef.current = value.length > 0
 
-        if (buttonRef.current) {
-            const hasContent = e.target.value.trim().length > 0
-            buttonRef.current.className = hasContent ? 'action' : 'button-gray'
-            buttonRef.current.disabled = isPending || !hasContent
-        }
+        // Adjust textarea height
+        e.target.style.height = 'auto'
+        e.target.style.height = `${e.target.scrollHeight}px`
+
+        // Force re-render to update button state
+        setIsChecked((prev) => prev)
     }
+
+    const handleCheckboxChange = (checked: boolean) => {
+        setIsChecked(checked)
+    }
+
+    const isSubmitEnabled = isChecked && hasContentRef.current && !isPending
 
     if (showSummary) {
         return <FeedbackSummaryModal openAnimationClass={openAnimationClass} handleCloseModal={() => onClose?.()} />
@@ -75,7 +80,12 @@ const FeedbackForm: FC<FeedbackFormProps> = ({ openAnimationClass, onClose }) =>
                     onChange={handleInput}
                     rows={1}
                 />
-                <button ref={buttonRef} type="submit" className="button-gray" disabled={true}>
+                <PrivacyCheckbox isChecked={isChecked} onChange={handleCheckboxChange} />
+                <button
+                    type="submit"
+                    className={isSubmitEnabled ? 'action' : 'button-gray'}
+                    disabled={!isSubmitEnabled}
+                >
                     {isPending ? t('FeedbackForm.submitting') : t('FeedbackForm.submit')}
                 </button>
             </form>
