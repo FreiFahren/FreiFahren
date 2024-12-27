@@ -1,0 +1,25 @@
+.feedback-summary-modal {
+    text-align: left;
+}
+
+.feedback-summary-modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: left;
+}
+
+.feedback-summary-modal-content img {
+    width: 20px;
+    height: 20px;
+}
+
+.feedback-summary-modal button img {
+    margin-right: 0.5rem;
+}
+
+.feedback-summary-modal .button-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}

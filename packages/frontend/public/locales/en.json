@@ -241,6 +241,15 @@
         "text": "Feedback"
     },
     "FeedbackForm": {
-        "title": "Give us feedback!"
+        "title": "Give us feedback!",
+        "description": "Help us improve FreiFahren!",
+        "descriptionPlaceholder": "Your feedback...",
+        "submit": "Send feedback",
+        "submitting": "Submitting..."
+    },
+    "FeedbackSummaryModal": {
+        "title": "Thank you for your feedback!",
+        "description": "Would you like to join our Telegram feedback group to help us improve FreiFahren further? Your feedback can be read directly by the developers of the app.",
+        "joinGroup": "Join Telegram Group"
     }
 }

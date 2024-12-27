@@ -240,6 +240,14 @@
         "text": "Feedback"
     },
     "FeedbackForm": {
-        "title": "Gib uns Feedback!"
+        "title": "Gib uns Feedback!",
+        "description": "Hilf uns, FreiFahren zu verbessern!",
+        "descriptionPlaceholder": "Dein Feedback...",
+        "submit": "Feedback senden"
+    },
+    "FeedbackSummaryModal": {
+        "title": "Danke für dein Feedback!",
+        "description": "Möchtest du uns in unserer Telegram-Feedback-Gruppe beitreten, um uns weiterhin zu helfen? Dein Feedback kann so direkt von den Entwicklern der App gelesen werden.",
+        "joinGroup": "Gruppe beitreten"
     }
 }

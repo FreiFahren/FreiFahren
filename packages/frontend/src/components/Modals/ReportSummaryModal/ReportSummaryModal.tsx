@@ -34,7 +34,7 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({
         <div className={`report-summary-modal container modal ${openAnimationClass}`}>
             <FeedbackButton onClick={() => setShowFeedback(true)} />
             <div className="report-summary-modal-content">
-                <div>
+                <div className="check-icon">
                     <img className="no-filter" src={`${process.env.PUBLIC_URL}/icons/risk-0.svg`} alt="checkmark" />
                 </div>
                 <h1>{t('ReportSummaryModal.title')}</h1>
