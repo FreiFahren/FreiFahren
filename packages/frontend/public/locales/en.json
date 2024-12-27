@@ -126,15 +126,24 @@
             },
             "dataUsage": {
                 "title": "4. Data Collection and Usage",
-                "content": "The App collects the following data when a report is submitted:",
+                "content": "The App collects data through two different forms:",
+                "reportFormTitle": "When creating a report:",
                 "dataPoints": [
                     "Line (optional)",
                     "Station",
                     "Direction (optional)",
                     "Report timestamp",
-                    "Description text (optional)"
+                    "Description text (optional)",
+                    "User's IP address"
                 ],
-                "purpose": "The reported data is temporarily made available to other users of the App to provide them with information about the current situation in public transport. Additionally, the information is forwarded to the Freifahren_BE Telegram group. This data transmission serves the purpose of sharing and informing the community about incidents."
+                "reportPurpose": "The reported data is temporarily made available to other users of the App to provide them with information about the current situation in public transport. Additionally, the reports are forwarded to the Freifahren_BE Telegram group. This data transmission serves the purpose of sharing and informing the community about incidents.",
+                "feedbackFormTitle": "When submitting feedback:",
+                "feedbackDataPoints": [
+                    "Feedback text",
+                    "Submission timestamp"
+                ],
+                "feedbackPurpose": "The feedback is used exclusively for improving the App and is not shared with third parties or in the Telegram group.",
+                "ipAddressInfo": "The IP address is used to detect spam and abuse reports to ensure that the submissions come from real users and not from bots or other automated sources. IP addresses are stored in heavily encrypted form for a maximum of 30 minutes and then deleted. They are not linked to other data and cannot be traced back to the user."
             },
             "anonymity": {
                 "title": "5. Anonymity",
