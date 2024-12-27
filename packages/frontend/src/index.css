@@ -264,11 +264,6 @@ span {
     margin-top: var(--margin-xs);
 }
 
-.container > div:last-of-type {
-    display: flex;
-    justify-content: center;
-}
-
 .container p {
     margin: var(--margin-s) 0;
 }

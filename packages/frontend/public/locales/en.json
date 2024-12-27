@@ -239,5 +239,8 @@
     },
     "FeedbackButton": {
         "text": "Feedback"
+    },
+    "FeedbackForm": {
+        "title": "Give us feedback!"
     }
 }

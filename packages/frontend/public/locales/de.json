@@ -238,5 +238,8 @@
     },
     "FeedbackButton": {
         "text": "Feedback"
+    },
+    "FeedbackForm": {
+        "title": "Gib uns Feedback!"
     }
 }

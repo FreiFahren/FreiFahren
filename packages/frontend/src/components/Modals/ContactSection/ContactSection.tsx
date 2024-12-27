@@ -11,8 +11,8 @@ const ContactSection: FC = () => {
     const { t } = useTranslation()
 
     return (
-        <>
-            <h1>{t('ContactSection.title')}</h1>
+        <div className="contact-section">
+            <h2>{t('ContactSection.title')}</h2>
             <ul>
                 <li>
                     <img
@@ -88,7 +88,7 @@ const ContactSection: FC = () => {
                 .
             </p>
             <p>{t('ContactSection.telegram-group-info', { groupName: t('ContactSection.group-name') })}</p>
-        </>
+        </div>
     )
 }
 

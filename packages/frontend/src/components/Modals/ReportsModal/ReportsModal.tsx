@@ -15,6 +15,8 @@ import { Line } from '../../Miscellaneous/Line/Line'
 import { ClusteredReportItem } from './ClusteredReportItem'
 import { ReportItem } from './ReportItem'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
+import { FeedbackForm } from '../../Form/FeedbackForm/FeedbackForm'
+
 interface ReportsModalProps {
     className?: string
     onCloseModal: () => void
@@ -62,6 +64,7 @@ const CustomBarShape = ({ x, y, width, height, payload }: any) => {
 const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) => {
     const { t } = useTranslation()
     const [currentTab, setCurrentTab] = useState<TabType>('summary')
+    const [showFeedback, setShowFeedback] = useState(false)
 
     const tabs: TabType[] = ['summary', 'lines', 'stations']
 
@@ -231,6 +234,14 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
         return () => window.removeEventListener('storage', handleStorageChange)
     }, [])
 
+    const handleFeedbackClick = () => {
+        setShowFeedback(true)
+    }
+
+    if (showFeedback) {
+        return <FeedbackForm openAnimationClass={className} />
+    }
+
     return (
         <div className={`reports-modal modal container ${className}`}>
             <section className="tabs align-child-on-line">
@@ -250,7 +261,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                     <section className="lines">
                         <div className="align-child-on-line">
                             <h2>{t('ReportsModal.reportsHeading')}</h2>
-                            <FeedbackButton onClick={() => onCloseModal()} />
+                            <FeedbackButton onClick={handleFeedbackClick} />
                         </div>
                         <p className="time-range">{t('ReportsModal.past24Hours')}</p>
                         {Array.from(sortedLinesWithReports.entries())

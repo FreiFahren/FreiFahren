@@ -14,6 +14,7 @@ import { Line } from '../../Miscellaneous/Line/Line'
 import { AutocompleteInputForm } from '../AutocompleteInputForm/AutocompleteInputForm'
 import { SelectField } from '../SelectField/SelectField'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
+import { FeedbackForm } from '../FeedbackForm/FeedbackForm'
 
 const getCSSVariable = (variable: string): number => {
     const value = getComputedStyle(document.documentElement).getPropertyValue(variable)
@@ -393,6 +394,11 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
 
     const getDirectionValue = (child: React.ReactElement) => (child.props as EntityChildProps).children.props.children
 
+    const [showFeedback, setShowFeedback] = useState<boolean>(false)
+    if (showFeedback) {
+        return <FeedbackForm openAnimationClass={className} />
+    }
+
     return (
         <div className={`report-form container modal ${className}`} ref={containerRef}>
             <form onSubmit={handleSubmit}>
@@ -400,7 +406,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
                     <div ref={topElementsRef}>
                         <div className="align-child-on-line">
                             <h1>{t('ReportForm.title')}</h1>
-                            <FeedbackButton onClick={() => {}} />
+                            <FeedbackButton onClick={() => setShowFeedback(true)} />
                         </div>
                         <section>
                             <SelectField
