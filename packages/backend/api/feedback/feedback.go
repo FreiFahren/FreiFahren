@@ -12,6 +12,23 @@ type FeedbackRequest struct {
 	Feedback string `json:"feedback"`
 }
 
+// @Summary Submit user feedback
+//
+// @Description Accepts a JSON payload containing user feedback and stores it in the database.
+// @Description This endpoint validates that the feedback is not empty before saving it.
+//
+// @Tags feedback
+//
+// @Accept json
+// @Produce json
+//
+// @Param feedbackData body FeedbackRequest true "User feedback data"
+//
+// @Success 200 {string} string "Feedback submitted"
+// @Failure 400 {string} string "Invalid request or empty feedback"
+// @Failure 500 {string} string "Failed to save feedback"
+//
+// @Router /feedback [post]
 func PostFeedback(c echo.Context) error {
 	logger.Log.Info().Msg("POST /feedback")
 
