@@ -2,6 +2,7 @@
     display: flex !important;
     flex-direction: column;
     align-items: flex-end;
+    width: fit-content;
 }
 
 .util-modal h1 {
@@ -86,7 +87,8 @@
     border: none;
     padding: 0;
     cursor: pointer;
-    color: inherit;
+    text-decoration: underline;
+    color: var(--color-primary);
     font: inherit;
     text-align: left;
 }
