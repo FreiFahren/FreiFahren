@@ -18,10 +18,10 @@ export const useFeedback = () => {
             })
 
             return result?.success ?? false
-        } catch (error) {
+        } catch (err) {
             // fix later with sentry
             // eslint-disable-next-line no-console
-            console.error('Error submitting feedback:', error)
+            console.error('Error submitting feedback:', err)
             return false
         }
     }
