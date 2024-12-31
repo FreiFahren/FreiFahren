@@ -73,7 +73,7 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
             </div>
             {isContactModalOpen ? (
                 <>
-                    <div className="contact-section modal container center-animation">
+                    <div className="contact-section modal container open center-animation">
                         <ContactSection />
                     </div>
                     <Backdrop handleClick={() => setIsContactModalOpen(false)} Zindex={3} />
