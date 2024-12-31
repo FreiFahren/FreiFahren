@@ -1,13 +1,10 @@
 from datetime import datetime
-import psycopg2
-from psycopg2 import sql
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-import os
 import requests
 from telegram_bots.logger import setup_logger
-from telegram_bots.config import BACKEND_URL
+from telegram_bots.config import BACKEND_URL, REPORT_PASSWORD
 
 logger = setup_logger()
+
 
 def insert_ticket_info(
     timestamp: datetime,
@@ -16,30 +13,36 @@ def insert_ticket_info(
     direction_id,
 ):
 
-    logger.info('Inserting ticket info into the database')
+    logger.info("Inserting ticket info into the database")
 
     # Prepare the JSON data payload
-    url = BACKEND_URL + '/basics/inspectors'
+    url = BACKEND_URL + "/basics/inspectors"
     data = {
-        'timestamp': timestamp.isoformat(),
-        'line': line,
-        'stationId': station_id,
-        'directionId': direction_id,
-        'author': 98111116, # ASCII code for 'Bot' to identefy messages sent by the bot
-        'message': None
+        "timestamp": timestamp.isoformat(),
+        "line": line,
+        "stationId": station_id,
+        "directionId": direction_id,
+        "author": 98111116,  # ASCII code for 'Bot' to identefy messages sent by the bot
+        "message": None,
     }
     headers = {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
+        "X-Password": REPORT_PASSWORD,  # avoid rate limiting
     }
-    
+
     response = requests.post(url, json=data, headers=headers)
 
     if response.status_code != 200:
-        logger.error('Failed to send data to the url: %s. Status code: %s Response: %s', url, response.status_code, response.text)
-        logger.debug('Failed request data: %s', data)
-        logger.debug('Failed request headers: %s', headers)
+        logger.error(
+            "Failed to send data to the url: %s. Status code: %s Response: %s",
+            url,
+            response.status_code,
+            response.text,
+        )
+        logger.debug("Failed request data: %s", data)
+        logger.debug("Failed request headers: %s", headers)
     else:
-        logger.info('Data sent to the backend successfully')
+        logger.info("Data sent to the backend successfully")
 
 
 def fetch_id(name, entity_type):
@@ -47,13 +50,13 @@ def fetch_id(name, entity_type):
         return None
 
     url = f"{BACKEND_URL}/stations/search?name={name}"
-    
+
     try:
         response = requests.get(url, timeout=10)
         response.raise_for_status()  # Raises an HTTPError for bad responses (4xx or 5xx)
-        
+
         data = response.json()
-        
+
         if data:
             station_id = next(iter(data.keys()))
             logger.info(f"Received {entity_type} id from the backend: {station_id}")
@@ -64,7 +67,9 @@ def fetch_id(name, entity_type):
 
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 404:
-            logger.info(f"{entity_type}: {name} not found: {e.response.json().get('error', 'No error message provided')}")
+            logger.info(
+                f"{entity_type}: {name} not found: {e.response.json().get('error', 'No error message provided')}"
+            )
         else:
             logger.error(f"HTTP error occurred: {e}")
         return None

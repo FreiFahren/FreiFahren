@@ -47,9 +47,6 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                     </ul>
                     <ul className="align-child-on-line">
                         <li>
-                            <Link to="/impressum">{t('UtilModal.impressum')}</Link>
-                        </li>
-                        <li>
                             <Link to="/Datenschutz">{t('UtilModal.privacy')}</Link>
                         </li>
                         <li>

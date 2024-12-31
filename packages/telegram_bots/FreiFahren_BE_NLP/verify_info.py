@@ -1,15 +1,19 @@
-from telegram_bots.FreiFahren_BE_NLP.process_message import find_station, remove_direction_and_keyword, lines
+from telegram_bots.FreiFahren_BE_NLP.process_message import (
+    find_station,
+    remove_direction_and_keyword,
+    lines,
+)
 from telegram_bots.logger import setup_logger
 
 logger = setup_logger()
 
 
 def handle_ringbahn(text):
-    logger.debug('handling ringbahn')
-    
-    ring_keywords = ['ring', 'ringbahn']
+    logger.debug("handling ringbahn")
+
+    ring_keywords = ["ring", "ringbahn"]
     # remove commas and dots from the text
-    text = text.replace(',', '').replace('.', '')
+    text = text.replace(",", "").replace(".", "")
     # split the text into individual words
     words = text.lower().split()
     # check if any word in the text matches the ring keywords
@@ -20,25 +24,25 @@ def handle_ringbahn(text):
 
 
 def verify_line(ticket_inspector, text):
-    logger.debug('verifying line')
+    logger.debug("verifying line")
 
     # If it the ring set to S41
     if handle_ringbahn(text.lower()) and ticket_inspector.line is None:
-        ticket_inspector.line = 'S41'
+        ticket_inspector.line = "S41"
     return ticket_inspector
 
 
 def set_ringbahn_directionless(ticket_inspector):
-    logger.debug('setting ringbahn directionless')
+    logger.debug("setting ringbahn directionless")
 
-    if ticket_inspector.line == 'S41' or ticket_inspector.line == 'S42':
+    if ticket_inspector.line == "S41" or ticket_inspector.line == "S42":
         ticket_inspector.direction = None
 
     return ticket_inspector
 
 
 def verify_direction(ticket_inspector, text):
-    logger.debug('verifying direction')
+    logger.debug("verifying direction")
 
     if ticket_inspector.line is None:
         return ticket_inspector
@@ -54,7 +58,7 @@ def verify_direction(ticket_inspector, text):
 
 
 def get_final_stations_of_line(line):
-    logger.debug('getting final stations of line')
+    logger.debug("getting final stations of line")
 
     final_stations_of_line = []
     final_stations_of_line.append(lines[line][0])
@@ -63,15 +67,15 @@ def get_final_stations_of_line(line):
 
 
 def get_words_after_line(text, line):
-    logger.debug('getting words after line')
+    logger.debug("getting words after line")
 
     line_index = text.rfind(line)
-    after_line = text[line_index + len(line):].strip()
+    after_line = text[line_index + len(line) :].strip()
     return after_line.split()
 
 
 def check_if_station_is_actually_direction(text, ticket_inspector):
-    logger.debug('checking if station is actually direction')
+    logger.debug("checking if station is actually direction")
 
     if ticket_inspector.direction is None or ticket_inspector.station is None:
         return ticket_inspector
@@ -88,11 +92,16 @@ def check_if_station_is_actually_direction(text, ticket_inspector):
     # Get the word directly after the line
     found_station_after_line = find_station(after_line_words[0], ticket_inspector)
 
-    if not found_station_after_line or found_station_after_line not in final_stations_of_line:
+    if (
+        not found_station_after_line
+        or found_station_after_line not in final_stations_of_line
+    ):
         return ticket_inspector
 
     # Remove the word after line from the text to find the new station
-    text_without_direction = remove_direction_and_keyword(text, line, after_line_words[0])
+    text_without_direction = remove_direction_and_keyword(
+        text, line, after_line_words[0]
+    )
     new_station = find_station(text_without_direction, ticket_inspector)
 
     if new_station is None:

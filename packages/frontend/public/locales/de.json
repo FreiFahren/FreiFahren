@@ -10,7 +10,6 @@
         "activeUsage": "Ich nutze die App nicht aktiv während der Fahrt.",
         "activeUsageDescription": "Ich verstehe, dass die aktive Nutzung der App während der Fahrt andere Fahrgäste stören und gegen die Nutzungsbedingungen des Verkehrsbetriebs verstoßen kann.",
         "confirm": "Ich bestätige",
-        "impressum": "Impressum",
         "privacy": "Datenschutz",
         "saved": "Die Bestätigung wird in Ihrem Browser gespeichert."
     },
@@ -97,7 +96,6 @@
         "title": "Support",
         "mobile": "Bei Problemen oder Anregungen bezüglich der Mobile-App, melde dich bitte bei Moritz unter",
         "web": "Falls du ein Problem mit der Website hast, kontaktiere bitte Johan unter",
-        "impressum": "Impressum",
         "privacy": "Datenschutz"
     },
     "PrivacyPolicy": {
@@ -171,16 +169,7 @@
             },
             "analytics": {
                 "title": "12. Einsatz von Analysetools",
-                "content": "Wir verwenden in unserer App die Analyse-Software Pirsch Analytics, um allgemeine Nutzungsinformationen wie Seitenaufrufe und Sitzungsdaten zu erfassen. Bei Pirsch Analytics handelt es sich um eine cookiefreie Webanalysesoftware, die nach dem Grundsatz \"Privacy by Design\" entwickelt wurde...",
-                "dataPoints": [
-                    "Anzahl der abgegebenen Meldungen und die benötigte Zeit für die Abgabe einer Meldung sowie weitere anonymisierte Parameter.",
-                    "Ob die Risikolinienebene betrachtet wurde.",
-                    "Ob die Liste der Meldungen betrachtet wurde.",
-                    "Welcher Marker (roter Punkt) auf der Karte angeklickt wurde.",
-                    "Ob der Standort des Nutzers geteilt wurde und durch welche Methode.",
-                    "Wie lange benötigt wurde, um das erste Fenster zu schließen.",
-                    "Wie das Meldeformular genutzt wurde."
-                ],
+                "content": "Für die Webanalyse setzen wir Pirsch Analytics ein. Bei Pirsch Analytics handelt es sich um eine cookiefreie Webanalysesoftware, die nach dem Grundsatz Privacy by Design entwickelt wurde. Zur Analyse der Besucherströme generiert Pirsch Analytics bei Erhalt des Seitenaufrufs mit Hilfe eines Hashing-Algorithmus eine 16-stellige Zahl als Besucher-ID. Als Eingabewerte dienen die IP-Adresse, der User Agent, das Datum und ein Salt. Die IP-Adresse des Besuchers wird weder vollständig noch in Teilen persistiert und durch den Hash vollständig und nicht reversierbar anonymisiert. Durch die Einbindung des Datums und der Verwendung von einem Salt pro Webseite ist gewährleistet, dass Webseitenbesucher nicht länger als 24 Stunden wiederzuerkennen sind und nicht über mehrere Webseiten hinweg getrackt werden können. Über eine lokal eingebundene Datenbank wird eine grobe Lokalisierung vorgenommen (Land/Stadt).",
                 "usage": "Diese Daten sind nicht personenbezogen; es werden keine Informationen gesammelt, die eine Identifizierung der Nutzer ermöglichen..."
             },
             "errorMonitoring": {
@@ -197,48 +186,6 @@
             "severabilityClause": {
                 "title": "14. Salvatorische Klausel",
                 "content": "Sollten einzelne Bestimmungen dieser Datenschutzerklärung ganz oder teilweise unwirksam oder undurchführbar sein oder nachträglich unwirksam oder undurchführbar werden, so wird dadurch die Gültigkeit der übrigen Bestimmungen nicht berührt..."
-            }
-        }
-    },
-    "Impressum": {
-        "title": "Impressum",
-        "switchLanguage": "English version",
-        "sections": {
-            "provider": {
-                "title": "Anbieter:",
-                "content": "Freifahren GbR"
-            },
-            "representatives": {
-                "title": "Vertreten durch die Gesellschafter:",
-                "content": [
-                    "David Brandes",
-                    "Johan Trieloff"
-                ]
-            },
-            "contact": {
-                "title": "Kontakt:",
-                "address": "Adresse: Oberhofer Platz 7, 12009 Berlin",
-                "emailLabel": "E-Mail:",
-                "email": "johan@trieloff.net"
-            },
-            "responsible": {
-                "title": "Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:",
-                "content": [
-                    "David Brandes",
-                    "Johan Trieloff"
-                ]
-            },
-            "disclaimer": {
-                "title": "Haftungsausschluss:",
-                "content": "Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen."
-            },
-            "copyright": {
-                "title": "Urheberrecht:",
-                "content": "Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet."
-            },
-            "privacy": {
-                "title": "Datenschutz:",
-                "content": "Die Nutzung unserer Webseite ist in der Regel ohne Angabe personenbezogener Daten möglich. Für weitere Informationen sehen sie unsere Datenschutzerklärung."
             }
         }
     },

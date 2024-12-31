@@ -3,6 +3,7 @@ import './ReportForm.css'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { REPORT_COOLDOWN_MINUTES } from '../../../constants'
 import { useLocation } from '../../../contexts/LocationContext'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
@@ -30,7 +31,6 @@ interface ReportFormProps {
 }
 
 const ITEM_HEIGHT = 37
-const REPORT_COOLDOWN_MINUTES = 15
 
 const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmission, className }) => {
     const { t } = useTranslation()

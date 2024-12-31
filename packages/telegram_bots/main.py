@@ -55,7 +55,7 @@ def report_inspector() -> tuple:
         f"Received a report from an inspector: Line: {line}, Station: {station}, Direction: {direction}, Message: {message}"
     )
 
-    telegram_message = "Über app.freifahren.org/invite gab es folgende Meldung:"
+    telegram_message = "Über app.freifahren.org gab es folgende Meldung:"
     telegram_message += "\n"
     telegram_message += f"\n<b>Station</b>: {station}"
     if line:

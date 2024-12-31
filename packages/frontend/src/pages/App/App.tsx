@@ -1,6 +1,6 @@
 import './App.css'
 
-import { useCallback, useEffect, useMemo,useRef,useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
@@ -47,6 +47,11 @@ const initialAppUIState: AppUIState = {
     isLegalDisclaimerOpen: false,
 }
 
+const isTelegramWebApp = (): boolean => 
+    // @ts-ignore since TelegramWebviewProxy is not in the window type definitions
+     typeof TelegramWebviewProxy !== 'undefined'
+
+
 const App = () => {
     const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
     const [appMounted, setAppMounted] = useState(false)
@@ -58,7 +63,10 @@ const App = () => {
     const [showSummary, setShowSummary] = useState<boolean>(false)
     const [reportedData, setReportedData] = useState<Report | null>(null)
     const handleReportFormSubmit = (reportedDataForm: Report) => {
-        setAppUIState((appUIStateCurrent) => ({ ...appUIStateCurrent, formSubmitted: !appUIStateCurrent.formSubmitted }))
+        setAppUIState((appUIStateCurrent) => ({
+            ...appUIStateCurrent,
+            formSubmitted: !appUIStateCurrent.formSubmitted,
+        }))
         setShowSummary(true)
         setReportedData(reportedDataForm)
     }
@@ -227,23 +235,40 @@ const App = () => {
     // in the future this will be automatically fetched from the analytics platform + telegram user count
     const numberOfUsers = useMemo(() => Math.floor(Math.random() * (36000 - 35000 + 1)) + 35000, [])
 
+    useEffect(() => {
+        if (isTelegramWebApp()) {
+            sendAnalyticsEvent('Opened from Telegram', {
+                meta: {},
+            }).catch((error) => {
+                // fix later with sentry
+                // eslint-disable-next-line no-console
+                console.error('Failed to send opened from telegram analytics event:', error)
+            })
+        }
+    }, [])
+
     return (
         <div className="App">
-            {appMounted && shouldShowLegalDisclaimer() ? <>
+            {appMounted && shouldShowLegalDisclaimer() ? (
+                <>
                     <LegalDisclaimer
                         openAnimationClass={appUIState.isFirstOpen ? 'open center-animation' : ''}
                         handleConfirm={closeLegalDisclaimer}
                     />
                     <Backdrop handleClick={() => highlightElement('legal-disclaimer')} />
-                </> : null}
-            {isUtilOpen ? <UtilModal
-                        className={`open ${isUtilAnimatingOut ? 'slide-out' : 'slide-in'}`}
-                        colorTheme={appUIState.currentColorTheme}
-                        handleColorThemeToggle={toggleColorTheme}
-                    >
-                        <CloseButton handleClose={closeUtilModal} />
-                    </UtilModal> : null}
-            {showSummary && reportedData ? <>
+                </>
+            ) : null}
+            {isUtilOpen ? (
+                <UtilModal
+                    className={`open ${isUtilAnimatingOut ? 'slide-out' : 'slide-in'}`}
+                    colorTheme={appUIState.currentColorTheme}
+                    handleColorThemeToggle={toggleColorTheme}
+                >
+                    <CloseButton handleClose={closeUtilModal} />
+                </UtilModal>
+            ) : null}
+            {showSummary && reportedData ? (
+                <>
                     <ReportSummaryModal
                         reportData={reportedData}
                         openAnimationClass="open center-animation"
@@ -251,16 +276,19 @@ const App = () => {
                         numberOfUsers={numberOfUsers}
                     />
                     <Backdrop handleClick={() => setShowSummary(false)} />
-                </> : null}
+                </>
+            ) : null}
             <StationsAndLinesProvider>
-                {appUIState.isReportFormOpen ? <>
+                {appUIState.isReportFormOpen ? (
+                    <>
                         <ReportForm
                             closeModal={() => setAppUIState({ ...appUIState, isReportFormOpen: false })}
                             onNotifyParentAboutSubmission={handleReportFormSubmit}
                             className="open center-animation"
                         />
                         <Backdrop handleClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
-                    </> : null}
+                    </>
+                ) : null}
                 <div id="portal-root" />
                 <RiskDataProvider>
                     <TicketInspectorsProvider>
@@ -273,13 +301,17 @@ const App = () => {
                                 onRotationChange={handleRotationChange}
                             />
                             <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
-                            {appUIState.isListModalOpen ? <>
+                            {appUIState.isListModalOpen ? (
+                                <>
                                     <ReportsModal
                                         className="open center-animation"
                                         onCloseModal={handleRiskGridItemClick}
                                     />
-                                    <Backdrop handleClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
-                                </> : null}
+                                    <Backdrop
+                                        handleClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })}
+                                    />
+                                </>
+                            ) : null}
                             <ReportsModalButton
                                 openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })}
                             />
@@ -288,22 +320,28 @@ const App = () => {
                 </RiskDataProvider>
             </StationsAndLinesProvider>
             <UtilButton handleClick={toggleUtilModal} />
-            {mapsRotation !== 0 ? <div className="compass-container">
+            {mapsRotation !== 0 ? (
+                <div className="compass-container">
                     <div className="compass-needle" style={{ transform: `rotate(${mapsRotation}deg)` }}>
                         <div className="arrow upper" />
                         <div className="compass-circle" />
                         <div className="arrow lower" />
                     </div>
-                </div> : null}
+                </div>
+            ) : null}
             <ReportButton
-                handleOpenReportModal={() => setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })}
+                handleOpenReportModal={() =>
+                    setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })
+                }
             />
-            {appUIState.isStatsPopUpOpen && statsData !== 0 ? <StatsPopUp
+            {appUIState.isStatsPopUpOpen && statsData !== 0 ? (
+                <StatsPopUp
                     numberOfReports={statsData}
                     numberOfUsers={numberOfUsers}
                     className="open center-animation"
                     openListModal={() => setAppUIState({ ...appUIState, isListModalOpen: !appUIState.isListModalOpen })}
-                /> : null}
+                />
+            ) : null}
         </div>
     )
 }
