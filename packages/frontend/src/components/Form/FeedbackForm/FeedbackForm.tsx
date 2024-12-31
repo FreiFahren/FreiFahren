@@ -4,39 +4,10 @@ import { ChangeEvent, FC, useActionState, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
+import { useFeedback } from '../../../hooks/useFeedback'
 import { ContactSection } from '../../Modals/ContactSection/ContactSection'
 import { FeedbackSummaryModal } from '../../Modals/FeedbackSummaryModal/FeedbackSummaryModal'
 import { PrivacyCheckbox } from '../PrivacyCheckbox/PrivacyCheckbox'
-
-const submitFeedback = async (previousState: boolean | null, formData: FormData): Promise<boolean> => {
-    const feedback = formData.get('feedback') as string
-
-    if (!feedback.trim()) {
-        throw new Error('Feedback cannot be empty')
-    }
-
-    try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/feedback`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ feedback }),
-        })
-
-        if (!response.ok) {
-            throw new Error('Failed to submit feedback')
-        }
-
-        await sendAnalyticsEvent('Feedback submitted', {})
-        return true
-    } catch (error) {
-        // fix later with sentry
-        // eslint-disable-next-line no-console
-        console.error('Error submitting feedback:', error)
-        throw new Error('Failed to submit feedback')
-    }
-}
 
 interface FeedbackFormProps {
     openAnimationClass?: string
@@ -46,9 +17,22 @@ interface FeedbackFormProps {
 const FeedbackForm: FC<FeedbackFormProps> = ({ openAnimationClass, onClose }) => {
     const { t } = useTranslation()
     const textareaRef = useRef<HTMLTextAreaElement>(null)
-    const [showSummary, formAction, isPending] = useActionState(submitFeedback, false)
+    const { submitFeedback } = useFeedback()
     const [isChecked, setIsChecked] = useState(false)
     const [hasContent, setHasContent] = useState(false)
+
+    const formAction = async (previousState: boolean | null, formData: FormData): Promise<boolean> => {
+        const feedback = formData.get('feedback') as string
+        const success = await submitFeedback(feedback)
+
+        if (success) {
+            await sendAnalyticsEvent('Feedback submitted', {})
+        }
+
+        return success
+    }
+
+    const [showSummary, action, isPending] = useActionState(formAction, false)
 
     const handleInput = (event: ChangeEvent<HTMLTextAreaElement>) => {
         const textarea = event.target
@@ -76,7 +60,7 @@ const FeedbackForm: FC<FeedbackFormProps> = ({ openAnimationClass, onClose }) =>
         <div className={`feedback-form modal container ${openAnimationClass}`}>
             <h1>{t('FeedbackForm.title')}</h1>
             <p className="description">{t('FeedbackForm.description')}</p>
-            <form action={formAction}>
+            <form action={action}>
                 <textarea
                     ref={textareaRef}
                     name="feedback"
