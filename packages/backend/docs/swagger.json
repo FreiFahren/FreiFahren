@@ -100,6 +100,52 @@
                 }
             }
         },
+        "/feedback": {
+            "post": {
+                "description": "Accepts a JSON payload containing user feedback and stores it in the database.\nThis endpoint validates that the feedback is not empty before saving it.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "feedback"
+                ],
+                "summary": "Submit user feedback",
+                "parameters": [
+                    {
+                        "description": "User feedback data",
+                        "name": "feedbackData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/feedback.FeedbackRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Feedback submitted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or empty feedback",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to save feedback",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/lines": {
             "get": {
                 "description": "Retrieves information about all available transit lines.\nThis endpoint returns a list of all transit lines and their associated stations.",
@@ -492,9 +538,20 @@
         }
     },
     "definitions": {
+        "feedback.FeedbackRequest": {
+            "type": "object",
+            "properties": {
+                "feedback": {
+                    "type": "string"
+                }
+            }
+        },
         "prediction.RiskData": {
             "type": "object",
             "properties": {
+                "last_modified": {
+                    "type": "string"
+                },
                 "segment_colors": {
                     "type": "object",
                     "additionalProperties": {

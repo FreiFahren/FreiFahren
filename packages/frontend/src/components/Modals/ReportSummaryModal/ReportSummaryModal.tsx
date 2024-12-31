@@ -1,7 +1,9 @@
 import './ReportSummaryModal.css'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
+import { FeedbackForm } from 'src/components/Form/FeedbackForm/FeedbackForm'
 
 import { useCountAnimation } from '../../../hooks/useCountAnimation'
 import { Report } from '../../../utils/types'
@@ -22,13 +24,19 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({
     numberOfUsers,
 }) => {
     const { t } = useTranslation()
-    const animatedCount = useCountAnimation(numberOfUsers, 2 * 1000)
+    const animatedCount = useCountAnimation(numberOfUsers, 1.5 * 1000)
+
+    const [showFeedback, setShowFeedback] = useState<boolean>(false)
+    if (showFeedback) {
+        return <FeedbackForm openAnimationClass={openAnimationClass} />
+    }
 
     return (
         <div className={`report-summary-modal container modal ${openAnimationClass}`}>
+            <FeedbackButton handleButtonClick={() => setShowFeedback(true)} />
             <div className="report-summary-modal-content">
-                <div>
-                    <img className="no-filter" src={`${process.env.PUBLIC_URL  }/icons/risk-0.svg`} alt="checkmark" />
+                <div className="check-icon">
+                    <img className="no-filter" src={`${process.env.PUBLIC_URL}/icons/risk-0.svg`} alt="checkmark" />
                 </div>
                 <h1>{t('ReportSummaryModal.title')}</h1>
                 <div>
@@ -38,7 +46,7 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({
                 <span>
                     <img
                         className="no-filter"
-                        src={`${process.env.PUBLIC_URL  }/icons/users-svgrepo-com.svg`}
+                        src={`${process.env.PUBLIC_URL}/icons/users-svgrepo-com.svg`}
                         alt="users"
                     />
                     <h1>{animatedCount}</h1>

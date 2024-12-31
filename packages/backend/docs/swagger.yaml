@@ -1,6 +1,13 @@
 definitions:
+  feedback.FeedbackRequest:
+    properties:
+      feedback:
+        type: string
+    type: object
   prediction.RiskData:
     properties:
+      last_modified:
+        type: string
       segment_colors:
         additionalProperties:
           type: string
@@ -223,6 +230,38 @@ paths:
       summary: Submit ticket inspector data
       tags:
       - basics
+  /feedback:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Accepts a JSON payload containing user feedback and stores it in the database.
+        This endpoint validates that the feedback is not empty before saving it.
+      parameters:
+      - description: User feedback data
+        in: body
+        name: feedbackData
+        required: true
+        schema:
+          $ref: '#/definitions/feedback.FeedbackRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Feedback submitted
+          schema:
+            type: string
+        "400":
+          description: Invalid request or empty feedback
+          schema:
+            type: string
+        "500":
+          description: Failed to save feedback
+          schema:
+            type: string
+      summary: Submit user feedback
+      tags:
+      - feedback
   /lines:
     get:
       description: |-

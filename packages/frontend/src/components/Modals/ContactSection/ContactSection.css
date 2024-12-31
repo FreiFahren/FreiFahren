@@ -1,34 +1,38 @@
-.feedback-modal {
+.contact-section {
     z-index: 4; /* No variable as this is an exception */
 }
 
-.feedback-modal li {
+.contact-section ul {
+    margin: 0;
+}
+
+.contact-section li {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: var(--padding-s) 0;
 }
 
-.feedback-modal li img,
-.feedback-modal li p {
+.contact-section li img,
+.contact-section li p {
     margin-right: var(--margin-s);
 }
 
-.feedback-modal li div {
+.contact-section li div {
     margin-left: auto;
     display: flex;
     align-items: center;
 }
 
-.feedback-modal li p {
+.contact-section li p {
     font-weight: 600;
 }
 
-.feedback-modal .profile-picture {
+.contact-section .profile-picture {
     border-radius: 50%;
 }
 
-.feedback-modal img {
+.contact-section img {
     width: 20px;
     height: 20px;
 }

@@ -20,7 +20,6 @@
     --incentive-blue: #0f90ff;
     --color-red: #ff0017f5;
     --color-gray: #636363;
-    --color-background-on-background: #2e2e2e;
     --color-box-text: #807f7f;
     --color-gray-on-dark-background: #959494;
     --color-light-gray: #d2d2d2;
@@ -162,6 +161,10 @@ hr {
     filter: invert(1);
 }
 
+img.no-filter {
+    filter: none !important;
+}
+
 ul {
     list-style: none;
     padding: 0;
@@ -174,7 +177,7 @@ button {
     border: none;
     border-radius: var(--borderRadius-small);
     color: var(--color-background);
-    font-size: var(--font-m);
+    font-size: var(--font-s);
     font-weight: 600;
     text-align: center;
     min-width: 100px;
@@ -215,6 +218,29 @@ button:has(a) {
 span {
     color: var(--color-primary);
     user-select: none;
+}
+
+textarea {
+    position: relative;
+    font-size: var(--font-xs);
+    font-weight: 400;
+    border: 1px solid var(--color-light-gray);
+    border-radius: var(--borderRadius-small);
+    width: calc(100% - 16px);
+    min-height: 2rem;
+    resize: none;
+    transition: ease-in-out var(--transition-default);
+    padding: var(--padding-s);
+}
+
+textarea:hover {
+    border: 1px solid var(--color-light-gray-hover);
+}
+
+textarea::placeholder {
+    font-weight: 400;
+    margin: var(--margin-m);
+    color: var(--color-box-text);
 }
 
 /* CLASS STYLES */
@@ -263,11 +289,6 @@ span {
 
 .container > ol > li > p {
     margin-top: var(--margin-xs);
-}
-
-.container > div:last-of-type {
-    display: flex;
-    justify-content: center;
 }
 
 .container p {
@@ -349,6 +370,17 @@ button .plus {
 
 .button-gray:hover {
     filter: brightness(1) !important;
+}
+
+.check-icon {
+    width: 40px;
+    height: 40px;
+    background-color: var(--color-risk-0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    margin-bottom: var(--margin-s);
 }
 
 /* ANIMATION STYLES */

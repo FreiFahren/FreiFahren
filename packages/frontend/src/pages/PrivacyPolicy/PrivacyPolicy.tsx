@@ -67,16 +67,24 @@ const PrivacyPolicy = () => {
 
             <h2>{t('PrivacyPolicy.sections.dataUsage.title')}</h2>
             <p>{t('PrivacyPolicy.sections.dataUsage.content')}</p>
+            <h3>{t('PrivacyPolicy.sections.dataUsage.reportFormTitle')}</h3>
             <ul>
-                {(t('PrivacyPolicy.sections.dataUsage.dataPoints', { returnObjects: true }) as string[]).map(
-                    (item, index) => (
-                        // fix later
-                        // eslint-disable-next-line react/no-array-index-key
-                        <li key={index}>{item}</li>
+                {(t('PrivacyPolicy.sections.dataUsage.dataPoints', { returnObjects: true }) as string[]).map((item) => (
+                    <li key={item}>{item}</li>
+                ))}
+            </ul>
+            <p>{t('PrivacyPolicy.sections.dataUsage.reportPurpose')}</p>
+            <p>{t('PrivacyPolicy.sections.dataUsage.ipAddressInfo', { minutes: REPORT_COOLDOWN_MINUTES })}</p>
+
+            <h3>{t('PrivacyPolicy.sections.dataUsage.feedbackFormTitle')}</h3>
+            <ul>
+                {(t('PrivacyPolicy.sections.dataUsage.feedbackDataPoints', { returnObjects: true }) as string[]).map(
+                    (item) => (
+                        <li key={item}>{item}</li>
                     )
                 )}
             </ul>
-            <p>{t('PrivacyPolicy.sections.dataUsage.purpose', { minutes: REPORT_COOLDOWN_MINUTES })}</p>
+            <p>{t('PrivacyPolicy.sections.dataUsage.feedbackPurpose')}</p>
 
             <h2>{t('PrivacyPolicy.sections.anonymity.title')}</h2>
             <p>{t('PrivacyPolicy.sections.anonymity.content')}</p>
