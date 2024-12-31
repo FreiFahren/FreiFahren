@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, ResponsiveContainer, Tooltip, TooltipProps, XAxis, YAxis } from 'recharts'
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
+import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 import { useRiskData } from 'src/contexts/RiskDataContext'
 import { useStationsAndLines } from 'src/contexts/StationsAndLinesContext'
 import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
@@ -11,11 +12,10 @@ import { getRecentDataWithIfModifiedSince } from 'src/utils/databaseUtils'
 import { Report } from 'src/utils/types'
 import { getLineColor } from 'src/utils/uiUtils'
 
+import { FeedbackForm } from '../../Form/FeedbackForm/FeedbackForm'
 import { Line } from '../../Miscellaneous/Line/Line'
 import { ClusteredReportItem } from './ClusteredReportItem'
 import { ReportItem } from './ReportItem'
-import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
-import { FeedbackForm } from '../../Form/FeedbackForm/FeedbackForm'
 
 interface ReportsModalProps {
     className?: string
@@ -234,10 +234,6 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
         return () => window.removeEventListener('storage', handleStorageChange)
     }, [])
 
-    const handleFeedbackClick = () => {
-        setShowFeedback(true)
-    }
-
     if (showFeedback) {
         return <FeedbackForm openAnimationClass={className} />
     }
@@ -261,7 +257,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                     <section className="lines">
                         <div className="align-child-on-line">
                             <h2>{t('ReportsModal.reportsHeading')}</h2>
-                            <FeedbackButton onClick={handleFeedbackClick} />
+                            <FeedbackButton handleButtonClick={() => setShowFeedback(true)} />
                         </div>
                         <p className="time-range">{t('ReportsModal.past24Hours')}</p>
                         {Array.from(sortedLinesWithReports.entries())

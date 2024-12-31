@@ -69,20 +69,18 @@ const PrivacyPolicy = () => {
             <p>{t('PrivacyPolicy.sections.dataUsage.content')}</p>
             <h3>{t('PrivacyPolicy.sections.dataUsage.reportFormTitle')}</h3>
             <ul>
-                {(t('PrivacyPolicy.sections.dataUsage.dataPoints', { returnObjects: true }) as string[]).map(
-                    (item, index) => (
-                        <li key={index}>{item}</li>
-                    )
-                )}
+                {(t('PrivacyPolicy.sections.dataUsage.dataPoints', { returnObjects: true }) as string[]).map((item) => (
+                    <li key={item}>{item}</li>
+                ))}
             </ul>
             <p>{t('PrivacyPolicy.sections.dataUsage.reportPurpose')}</p>
-            <p>{t('PrivacyPolicy.sections.dataUsage.ipAddressInfo')}</p>
+            <p>{t('PrivacyPolicy.sections.dataUsage.ipAddressInfo', { minutes: REPORT_COOLDOWN_MINUTES })}</p>
 
             <h3>{t('PrivacyPolicy.sections.dataUsage.feedbackFormTitle')}</h3>
             <ul>
                 {(t('PrivacyPolicy.sections.dataUsage.feedbackDataPoints', { returnObjects: true }) as string[]).map(
-                    (item, index) => (
-                        <li key={index}>{item}</li>
+                    (item) => (
+                        <li key={item}>{item}</li>
                     )
                 )}
             </ul>

@@ -2,13 +2,14 @@ import './ReportSummaryModal.css'
 
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
+import { FeedbackForm } from 'src/components/Form/FeedbackForm/FeedbackForm'
 
 import { useCountAnimation } from '../../../hooks/useCountAnimation'
 import { Report } from '../../../utils/types'
 import { ShareButton } from '../../Miscellaneous/ShareButton/ShareButton'
 import { ReportItem } from '../ReportsModal/ReportItem'
-import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
-import { FeedbackForm } from 'src/components/Form/FeedbackForm/FeedbackForm'
+
 interface ReportSummaryModalProps {
     openAnimationClass?: string
     reportData: Report
@@ -32,7 +33,7 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({
 
     return (
         <div className={`report-summary-modal container modal ${openAnimationClass}`}>
-            <FeedbackButton onClick={() => setShowFeedback(true)} />
+            <FeedbackButton handleButtonClick={() => setShowFeedback(true)} />
             <div className="report-summary-modal-content">
                 <div className="check-icon">
                     <img className="no-filter" src={`${process.env.PUBLIC_URL}/icons/risk-0.svg`} alt="checkmark" />

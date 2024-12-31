@@ -141,7 +141,7 @@
                     "Submission timestamp"
                 ],
                 "feedbackPurpose": "The feedback is used exclusively for improving the App and is not shared with third parties or in the Telegram group.",
-                "ipAddressInfo": "The IP address is used to detect spam and abuse reports to ensure that the submissions come from real users and not from bots or other automated sources. IP addresses are stored in heavily encrypted form for a maximum of 30 minutes and then deleted. They are not linked to other data and cannot be traced back to the user."
+                "ipAddressInfo": "The IP address is used to detect spam and abuse reports to ensure that the submissions come from real users and not from bots or other automated sources. IP addresses are stored in heavily encrypted form for a maximum of {{ minutes }} minutes and then deleted. They are not linked to other data and cannot be traced back to the user."
             },
             "anonymity": {
                 "title": "5. Anonymity",

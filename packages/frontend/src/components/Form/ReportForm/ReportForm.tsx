@@ -1,7 +1,8 @@
 import './ReportForm.css'
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 
 import { REPORT_COOLDOWN_MINUTES } from '../../../constants'
 import { useLocation } from '../../../contexts/LocationContext'
@@ -13,10 +14,9 @@ import { Report } from '../../../utils/types'
 import { createWarningSpan, getLineColor, highlightElement } from '../../../utils/uiUtils'
 import { Line } from '../../Miscellaneous/Line/Line'
 import { AutocompleteInputForm } from '../AutocompleteInputForm/AutocompleteInputForm'
-import { SelectField } from '../SelectField/SelectField'
-import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 import { FeedbackForm } from '../FeedbackForm/FeedbackForm'
 import { PrivacyCheckbox } from '../PrivacyCheckbox/PrivacyCheckbox'
+import { SelectField } from '../SelectField/SelectField'
 
 const getCSSVariable = (variable: string): number => {
     const value = getComputedStyle(document.documentElement).getPropertyValue(variable)
@@ -32,7 +32,7 @@ interface ReportFormProps {
 
 const ITEM_HEIGHT = 37
 
-const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmission, className }) => {
+const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmission, className }) => {
     const { t } = useTranslation()
 
     const { userPosition } = useLocation()
@@ -290,7 +290,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
         return hasError // Return true if there's an error, false otherwise
     }
 
-    const handleSubmit = async (event: React.FormEvent) => {
+    const handleSubmit = async (event: FormEvent) => {
         event.preventDefault()
 
         const hasError = await validateReportForm()
@@ -400,7 +400,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
                     <div ref={topElementsRef}>
                         <div className="align-child-on-line">
                             <h1>{t('ReportForm.title')}</h1>
-                            <FeedbackButton onClick={() => setShowFeedback(true)} />
+                            <FeedbackButton handleButtonClick={() => setShowFeedback(true)} />
                         </div>
                         <section>
                             <SelectField
@@ -489,7 +489,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
                         </section>
                         <section>
                             <div>
-                                <PrivacyCheckbox isChecked={isPrivacyChecked} onChange={setIsPrivacyChecked} />
+                                <PrivacyCheckbox isChecked={isPrivacyChecked} onChange={() => setIsPrivacyChecked} />
                             </div>
                             <div>
                                 <button

@@ -1,6 +1,8 @@
-import React, { FC } from 'react'
-import { useTranslation } from 'react-i18next'
 import './FeedbackSummaryModal.css'
+
+import { FC } from 'react'
+import { useTranslation } from 'react-i18next'
+
 interface FeedbackSummaryModalProps {
     openAnimationClass?: string
     handleCloseModal: () => void

@@ -1,6 +1,6 @@
 import './ContactSection.css'
 
-import React, { FC } from 'react'
+import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const GITHUB_ICON = `${process.env.PUBLIC_URL}/icons/github.svg`

@@ -131,7 +131,7 @@
                     "IP-Adresse des Nutzers"
                 ],
                 "reportPurpose": "Die gemeldeten Daten werden anderen Nutzern der App temporär zur Verfügung gestellt, um ihnen die Möglichkeit zu geben, sich über die aktuelle Situation in den öffentlichen Verkehrsmitteln zu informieren. Des Weiteren werden die Meldungen in die Freifahren_BE Telegram-Gruppe weitergeleitet. Diese Datenübermittlung dient dem Austausch und der Information über Vorfälle innerhalb der Community.",
-                "ipAddressInfo": "Die IP-Adresse wird verwendet, um Spam und Missbrauchsmeldungen zu erkennen, um sicherzustellen, dass die Meldungen von echten Nutzern und nicht von Bots oder anderen automatischen Quellen stammen. IP-Adressen werden in stark verschlüsselter Form für maximal 30 Minuten gespeichert und dann gelöscht. Sie sind nicht mit anderen Daten verknüpft und können nicht auf den Nutzer zurückverfolgt werden.",
+                "ipAddressInfo": "Die IP-Adresse wird verwendet, um Spam und Missbrauchsmeldungen zu erkennen, um sicherzustellen, dass die Meldungen von echten Nutzern und nicht von Bots oder anderen automatischen Quellen stammen. IP-Adressen werden in stark verschlüsselter Form für maximal {{ minutes }} Minuten gespeichert und dann gelöscht. Sie sind nicht mit anderen Daten verknüpft und können nicht auf den Nutzer zurückverfolgt werden.",
                 "feedbackFormTitle": "Bei der Übermittlung von Feedback:",
                 "feedbackDataPoints": [
                     "Feedback-Text",

@@ -37,20 +37,26 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                 </div>
                 <div>
                     <ul>
-                        <li onClick={handleColorThemeToggle}>
+                        <button className="theme-toggle" onClick={handleColorThemeToggle} type="button">
                             {colorTheme === 'light' ? (
                                 <img src={LIGHT_ICON} alt="Light Icon" />
                             ) : (
                                 <img src={DARK_ICON} alt="Dark Icon" />
                             )}
-                        </li>
+                        </button>
                     </ul>
                     <ul className="align-child-on-line">
                         <li>
                             <Link to="/Datenschutz">{t('UtilModal.privacy')}</Link>
                         </li>
                         <li>
-                            <p onClick={() => setIsLegalDisclaimerOpen(true)}>{t('UtilModal.terms')}</p>
+                            <button
+                                className="text-button"
+                                onClick={() => setIsLegalDisclaimerOpen(true)}
+                                type="button"
+                            >
+                                {t('UtilModal.terms')}
+                            </button>
                         </li>
                         <li>
                             <a
@@ -67,11 +73,7 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
             </div>
             {isContactModalOpen ? (
                 <>
-                    <div
-                        className={`contact-section modal container ${
-                            isContactModalOpen ? 'open center-animation' : ''
-                        }`}
-                    >
+                    <div className="contact-section modal container center-animation">
                         <ContactSection />
                     </div>
                     <Backdrop handleClick={() => setIsContactModalOpen(false)} Zindex={3} />
@@ -80,7 +82,7 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
             {isLegalDisclaimerOpen ? (
                 <>
                     <LegalDisclaimer
-                        openAnimationClass={isLegalDisclaimerOpen ? 'open center-animation high-z-index' : ''}
+                        openAnimationClass="open center-animation high-z-index"
                         handleConfirm={() => setIsLegalDisclaimerOpen(false)}
                     />
                     <Backdrop handleClick={() => setIsLegalDisclaimerOpen(false)} Zindex={3} />

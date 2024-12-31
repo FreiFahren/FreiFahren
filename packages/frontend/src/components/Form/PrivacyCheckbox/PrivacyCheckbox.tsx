@@ -1,6 +1,7 @@
-import React, { FC } from 'react'
-import { useTranslation } from 'react-i18next'
 import './PrivacyCheckbox.css'
+
+import { FC } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface PrivacyCheckboxProps {
     isChecked: boolean
@@ -19,7 +20,7 @@ const PrivacyCheckbox: FC<PrivacyCheckboxProps> = ({ isChecked, onChange, id = '
                 id={id}
                 name="privacy-checkbox"
                 checked={isChecked}
-                onChange={(e) => onChange(e.target.checked)}
+                onChange={(event) => onChange(event.target.checked)}
                 required
             />
             {t('PrivacyCheckbox.privacy1')}
