@@ -15,12 +15,28 @@ export const useApi = () => {
 
         try {
             const response = await fetch(`${process.env.REACT_APP_API_URL}${url}`, options)
+            const responseText = await response.text()
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`)
             }
-            const data = await response.json()
+
+            // Try to parse the response as JSON if it's not empty
+            let data: T | null = null
+            if (responseText.trim()) {
+                try {
+                    data = JSON.parse(responseText) as T
+                } catch (parseError) {
+                    // eslint-disable-next-line no-console
+                    console.error('🚨 JSON Parse Error:', parseError)
+                    throw new Error('Invalid JSON response from server')
+                }
+            }
+
             return data
         } catch (err) {
+            // eslint-disable-next-line no-console
+            console.error('🚨 API Error:', err)
             setError({ message: err instanceof Error ? err.message : 'An error occurred' })
             return null
         } finally {

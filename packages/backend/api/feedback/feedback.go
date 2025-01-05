@@ -12,6 +12,11 @@ type FeedbackRequest struct {
 	Feedback string `json:"feedback"`
 }
 
+type FeedbackResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
 // @Summary Submit user feedback
 //
 // @Description Accepts a JSON payload containing user feedback and stores it in the database.
@@ -24,9 +29,9 @@ type FeedbackRequest struct {
 //
 // @Param feedbackData body FeedbackRequest true "User feedback data"
 //
-// @Success 200 {string} string "Feedback submitted"
-// @Failure 400 {string} string "Invalid request or empty feedback"
-// @Failure 500 {string} string "Failed to save feedback"
+// @Success 200 {object} FeedbackResponse "Feedback submitted successfully"
+// @Failure 400 {object} FeedbackResponse "Invalid request or empty feedback"
+// @Failure 500 {object} FeedbackResponse "Failed to save feedback"
 //
 // @Router /feedback [post]
 func PostFeedback(c echo.Context) error {
@@ -35,18 +40,30 @@ func PostFeedback(c echo.Context) error {
 	var req FeedbackRequest
 	if err := c.Bind(&req); err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to bind feedback request")
-		return c.String(http.StatusBadRequest, "Invalid request")
+		return c.JSON(http.StatusBadRequest, FeedbackResponse{
+			Success: false,
+			Message: "Invalid request",
+		})
 	}
 
 	if req.Feedback == "" {
-		return c.String(http.StatusBadRequest, "Feedback cannot be empty")
+		return c.JSON(http.StatusBadRequest, FeedbackResponse{
+			Success: false,
+			Message: "Feedback cannot be empty",
+		})
 	}
 
 	err := database.InsertFeedback(req.Feedback)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to insert feedback")
-		return c.String(http.StatusInternalServerError, "Failed to save feedback")
+		return c.JSON(http.StatusInternalServerError, FeedbackResponse{
+			Success: false,
+			Message: "Failed to save feedback",
+		})
 	}
 
-	return c.String(http.StatusOK, "Feedback submitted")
+	return c.JSON(http.StatusOK, FeedbackResponse{
+		Success: true,
+		Message: "Feedback submitted",
+	})
 }

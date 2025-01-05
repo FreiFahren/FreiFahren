@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
 import { useFeedback } from '../../../hooks/useFeedback'
+import { useFormValidity } from '../../../hooks/useFormValidity'
 import { ContactSection } from '../../Modals/ContactSection/ContactSection'
 import { FeedbackSummaryModal } from '../../Modals/FeedbackSummaryModal/FeedbackSummaryModal'
 import { PrivacyCheckbox } from '../PrivacyCheckbox/PrivacyCheckbox'
@@ -19,14 +20,27 @@ const FeedbackForm: FC<FeedbackFormProps> = ({ openAnimationClass, onClose }) =>
     const textareaRef = useRef<HTMLTextAreaElement>(null)
     const { submitFeedback } = useFeedback()
     const [isChecked, setIsChecked] = useState(false)
-    const [hasContent, setHasContent] = useState(false)
+
+    const { isValid } = useFormValidity({
+        textareaRef,
+        isPrivacyChecked: isChecked,
+    })
 
     const formAction = async (previousState: boolean | null, formData: FormData): Promise<boolean> => {
+        if (!isValid) {
+            return false
+        }
+
         const feedback = formData.get('feedback') as string
         const success = await submitFeedback(feedback)
 
         if (success) {
-            await sendAnalyticsEvent('Feedback submitted', {})
+            try {
+                await sendAnalyticsEvent('Feedback submitted', {})
+            } catch (error) {
+                // eslint-disable-next-line no-console
+                console.error('Failed to send analytics event:', error)
+            }
         }
 
         return success
@@ -36,21 +50,10 @@ const FeedbackForm: FC<FeedbackFormProps> = ({ openAnimationClass, onClose }) =>
 
     const handleInput = (event: ChangeEvent<HTMLTextAreaElement>) => {
         const textarea = event.target
-        const value = textarea.value.trim()
-        setHasContent(value.length > 0)
-
-        // Adjust textarea height using the ref
-        if (textareaRef.current) {
-            textareaRef.current.style.height = 'auto'
-            textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
-        }
+        // Adjust textarea height
+        textarea.style.height = 'auto'
+        textarea.style.height = `${textarea.scrollHeight}px`
     }
-
-    const handleCheckboxChange = (checked: boolean) => {
-        setIsChecked(checked)
-    }
-
-    const isSubmitEnabled = isChecked && hasContent && !isPending
 
     if (showSummary) {
         return <FeedbackSummaryModal openAnimationClass={openAnimationClass} handleCloseModal={() => onClose?.()} />
@@ -68,12 +71,8 @@ const FeedbackForm: FC<FeedbackFormProps> = ({ openAnimationClass, onClose }) =>
                     onChange={handleInput}
                     rows={1}
                 />
-                <PrivacyCheckbox isChecked={isChecked} onChange={handleCheckboxChange} />
-                <button
-                    type="submit"
-                    className={isSubmitEnabled ? 'action' : 'button-gray'}
-                    disabled={!isSubmitEnabled}
-                >
+                <PrivacyCheckbox isChecked={isChecked} onChange={setIsChecked} />
+                <button type="submit" className={isValid ? 'action' : 'button-gray'} disabled={!isValid || isPending}>
                     {isPending ? t('FeedbackForm.submitting') : t('FeedbackForm.submit')}
                 </button>
             </form>

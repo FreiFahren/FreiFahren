@@ -17,11 +17,9 @@ export const useFeedback = () => {
                 body: JSON.stringify({ feedback }),
             })
 
-            return result?.success ?? false
+            const success = result?.success ?? false
+            return success
         } catch (err) {
-            // fix later with sentry
-            // eslint-disable-next-line no-console
-            console.error('Error submitting feedback:', err)
             return false
         }
     }
