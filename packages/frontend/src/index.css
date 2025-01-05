@@ -222,7 +222,7 @@ span {
 
 textarea {
     position: relative;
-    font-size: var(--font-xs);
+    font-size: 16px; /* Min font size to avoid zoom on mobile */
     font-weight: 400;
     border: 1px solid var(--color-light-gray);
     border-radius: var(--borderRadius-small);
