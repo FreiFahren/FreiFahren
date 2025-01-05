@@ -11,11 +11,17 @@ interface RequestOptions extends Omit<RequestInit, 'body'> {
     body?: unknown
 }
 
+interface ErrorWithStatus extends Error {
+    status?: number
+}
+
 const logApiError = (error: ApiError, context?: string) => {
     // eslint-disable-next-line no-console
     console.error(
-        `🚨 API Error [${error.method} ${error.url}]${context ? ` (${context})` : ''}:`,
-        error.status ? `Status ${error.status}:` : '',
+        `🚨 API Error [${error.method ?? 'UNKNOWN'} ${error.url ?? 'UNKNOWN'}]${
+            context !== undefined ? ` (${context})` : ''
+        }:`,
+        error.status !== undefined ? `Status ${error.status}:` : '',
         error.message
     )
 }
@@ -39,7 +45,7 @@ export const useApi = () => {
             const response = await fetch(fullUrl, {
                 ...options,
                 headers,
-                body: options?.body ? JSON.stringify(options.body) : undefined,
+                body: options?.body !== undefined ? JSON.stringify(options.body) : undefined,
             })
 
             const responseText = await response.text()
@@ -57,7 +63,7 @@ export const useApi = () => {
                 return { success: false, data: null }
             }
 
-            if (responseText.trim()) {
+            if (responseText.trim().length > 0) {
                 try {
                     data = JSON.parse(responseText) as T
                 } catch (parseError) {
@@ -75,9 +81,10 @@ export const useApi = () => {
             setError(null)
             return { success: true, data }
         } catch (err) {
+            const caughtError = err as ErrorWithStatus
             const apiError: ApiError = {
-                message: err instanceof Error ? err.message : 'An error occurred',
-                status: err instanceof Error && 'status' in err ? (err as any).status : undefined,
+                message: caughtError.message || 'An error occurred',
+                status: caughtError.status,
                 url,
                 method: options?.method,
             }

@@ -20,7 +20,8 @@ export const useFormValidity = (config: ValidationConfig) => {
 
     // Update the stored textarea content
     const updateTextareaContent = useCallback(() => {
-        const newContent = config.textareaRef.current?.value.trim() || ''
+        const textareaValue = config.textareaRef.current?.value
+        const newContent = textareaValue !== undefined ? textareaValue.trim() : ''
         if (newContent !== textareaContentRef.current) {
             textareaContentRef.current = newContent
             return true
@@ -42,7 +43,9 @@ export const useFormValidity = (config: ValidationConfig) => {
     // Watch for textarea content changes
     useEffect(() => {
         const textarea = config.textareaRef.current
-        if (!textarea) return
+        if (textarea === null) {
+            return undefined
+        }
 
         const handleInput = () => {
             const contentChanged = updateTextareaContent()

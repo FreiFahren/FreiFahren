@@ -69,7 +69,7 @@ const FeedbackForm: FC<FeedbackFormProps> = ({ openAnimationClass, onClose }) =>
                     onChange={handleInput}
                     rows={1}
                 />
-                <PrivacyCheckbox isChecked={isChecked} onChange={setIsChecked} />
+                <PrivacyCheckbox isChecked={isChecked} onChange={() => setIsChecked(!isChecked)} />
                 <button type="submit" className={isValid ? 'action' : 'button-gray'} disabled={!isValid || isPending}>
                     {isPending ? t('FeedbackForm.submitting') : t('FeedbackForm.submit')}
                 </button>
