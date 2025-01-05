@@ -35,12 +35,10 @@ const FeedbackForm: FC<FeedbackFormProps> = ({ openAnimationClass, onClose }) =>
         const success = await submitFeedback(feedback)
 
         if (success) {
-            try {
-                await sendAnalyticsEvent('Feedback submitted', {})
-            } catch (error) {
+            await sendAnalyticsEvent('Feedback submitted', {}).catch(() => {
                 // eslint-disable-next-line no-console
-                console.error('Failed to send analytics event:', error)
-            }
+                console.error('Failed to send analytics event')
+            })
         }
 
         return success

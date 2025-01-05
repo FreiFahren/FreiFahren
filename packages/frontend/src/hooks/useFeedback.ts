@@ -1,27 +1,19 @@
 import { useApi } from './useApi'
 
+interface FeedbackResponse {
+    success: boolean
+}
+
 export const useFeedback = () => {
-    const { fetchWithError, error, isLoading } = useApi()
+    const { post, error, isLoading } = useApi()
 
     const submitFeedback = async (feedback: string): Promise<boolean> => {
         if (!feedback.trim()) {
             return false
         }
 
-        try {
-            const result = await fetchWithError<{ success: boolean }>('/feedback', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ feedback }),
-            })
-
-            const success = result?.success ?? false
-            return success
-        } catch (err) {
-            return false
-        }
+        const { success } = await post<FeedbackResponse>('/feedback', { feedback })
+        return success
     }
 
     return { submitFeedback, error, isLoading }
