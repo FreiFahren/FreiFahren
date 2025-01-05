@@ -15,12 +15,13 @@
     },
     "UtilModal": {
         "title": "Informationen",
-        "feedback-button": "Kontakt & Feedback",
+        "feedback-button": "Kontakt",
+        "impressum": "Impressum",
         "privacy": "Datenschutz",
         "terms": "Nutzungsbedingungen"
     },
-    "FeedbackModal": {
-        "title": "Sende dein Feedback an:",
+    "ContactSection": {
+        "title": "Kontaktiere uns",
         "about-us": "Über uns",
         "about-us-text": "FreiFahren ist ein nicht-kommerzielles Open-Source-Projekt, das sich zum Ziel gesetzt hat, den Zugang zum öffentlichen Nahverkehr zu erleichtern. Wir sind stets offen für neue Mithelfende auf unserem",
         "telegram-group-info": "Ein Großteil der Meldungen stammt aus der FreiFahren_BE Telegram-Gruppe. Vielen Dank an die Admins, dass wir mit unserem Telegram Bot die relevanten Informationen extrahieren dürfen."
@@ -38,10 +39,12 @@
         "direction": "Richtung",
         "description": "Beschreibung",
         "descriptionPlaceholder": "Beschreibung",
+        "report": "Melden"
+    },
+    "PrivacyCheckbox": {
         "privacy1": "Ich stimme der",
         "privacy2": "Datenschutzerklärung",
-        "privacy3": "zu.",
-        "report": "Melden"
+        "privacy3": "zu."
     },
     "AskForLocation": {
         "title": "Dein Standort konnte nicht ermittelt werden.",
@@ -106,7 +109,7 @@
             },
             "responsible": {
                 "title": "2. Verantwortliche Stelle",
-                "content": "Verantwortlich für die Datenverarbeitung im Rahmen dieser App ist die Freifahren GbR, vertreten durch die Gesellschafter, erreichbar unter der E-Mail-Adresse: johan@trieloff.net."
+                "content": "Verantwortlich für die Datenverarbeitung im Rahmen dieser App sind die Entwickler des FreiFahren Projekts, erreichbar unter der E-Mail-Adresse: johan@trieloff.net. FreiFahren ist ein nicht-kommerzielles Open-Source-Projekt."
             },
             "legalBasis": {
                 "title": "3. Rechtsgrundlagen der Datenverarbeitung",
@@ -117,7 +120,8 @@
             },
             "dataUsage": {
                 "title": "4. Erhebung und Nutzung von Daten",
-                "content": "Die App erhebt folgende Daten, wenn eine Meldung erstellt wird:",
+                "content": "Die App erhebt Daten in zwei verschiedenen Formularen:",
+                "reportFormTitle": "Bei der Erstellung einer Meldung:",
                 "dataPoints": [
                     "Linie (optional)",
                     "Station",
@@ -126,7 +130,14 @@
                     "Beschreibungstext (optional)",
                     "IP-Adresse des Nutzers"
                 ],
-                "purpose": "Die gemeldeten Daten werden anderen Nutzern der App temporär zur Verfügung gestellt, um ihnen die Möglichkeit zu geben, sich über die aktuelle Situation in den öffentlichen Verkehrsmitteln zu informieren. Des Weiteren werden die Informationen in die Freifahren_BE Telegram-Gruppe weitergeleitet. Diese Datenübermittlung dient dem Austausch und der Information über Vorfälle innerhalb der Community. Die IP-Adresse wird zur Erkennung von Spam- und Missbrauchsmeldungen verwendet um sicherzustellen, dass die Meldungen von echten Nutzern stammen und nicht von Bots oder anderen automatischen Quellen. Die IP-Adressen werden maximal {{minutes}} Minuten in stark verschlüsselter Form gespeichert und dann gelöscht. Sie sind nicht mit anderen Daten verknüpft und können nicht wieder auf den Nutzer zurückverfolgt werden."
+                "reportPurpose": "Die gemeldeten Daten werden anderen Nutzern der App temporär zur Verfügung gestellt, um ihnen die Möglichkeit zu geben, sich über die aktuelle Situation in den öffentlichen Verkehrsmitteln zu informieren. Des Weiteren werden die Meldungen in die Freifahren_BE Telegram-Gruppe weitergeleitet. Diese Datenübermittlung dient dem Austausch und der Information über Vorfälle innerhalb der Community.",
+                "ipAddressInfo": "Die IP-Adresse wird verwendet, um Spam und Missbrauchsmeldungen zu erkennen, um sicherzustellen, dass die Meldungen von echten Nutzern und nicht von Bots oder anderen automatischen Quellen stammen. IP-Adressen werden in stark verschlüsselter Form für maximal {{ minutes }} Minuten gespeichert und dann gelöscht. Sie sind nicht mit anderen Daten verknüpft und können nicht auf den Nutzer zurückverfolgt werden.",
+                "feedbackFormTitle": "Bei der Übermittlung von Feedback:",
+                "feedbackDataPoints": [
+                    "Feedback-Text",
+                    "Zeitpunkt der Übermittlung"
+                ],
+                "feedbackPurpose": "Das Feedback wird ausschließlich zur Verbesserung der App verwendet und nicht an Dritte weitergegeben oder in der Telegram-Gruppe geteilt."
             },
             "anonymity": {
                 "title": "5. Anonymität",
@@ -134,7 +145,7 @@
             },
             "storageAndAccess": {
                 "title": "6. Speicherung und Zugriff",
-                "content": "Die erhobenen Daten werden auf unseren eigenen Servern gespeichert, die bei der Hetzner Online GmbH in Deutschland gehostet sind. Die Speicherdauer der Daten ist unbefristet. Auch die Dauer, die der Nutzer für das Melden benötigt hat, wird auf diesen Servern gespeichert. Der Zugriff auf die Daten ist streng begrenzt auf die Gesellschafter der Freifahren GbR."
+                "content": "Die erhobenen Daten werden auf unseren eigenen Servern gespeichert, die bei der Hetzner Online GmbH in Deutschland gehostet sind. Die Speicherdauer der Daten ist unbefristet. Auch die Dauer, die der Nutzer für das Melden benötigt hat, wird auf diesen Servern gespeichert. Der Zugriff auf die Daten ist streng begrenzt auf die Entwickler des FreiFahren Projekts."
             },
             "userRights": {
                 "title": "7. Rechte der Nutzer",
@@ -182,5 +193,19 @@
         "title": "Danke für deine Meldung!",
         "description": "Menschen schätzen deine Hilfe!",
         "button": "Weiter"
+    },
+    "FeedbackButton": {
+        "text": "Feedback"
+    },
+    "FeedbackForm": {
+        "title": "Gib uns Feedback!",
+        "description": "Hilf uns, FreiFahren zu verbessern!",
+        "descriptionPlaceholder": "Dein Feedback...",
+        "submit": "Feedback senden"
+    },
+    "FeedbackSummaryModal": {
+        "title": "Danke für dein Feedback!",
+        "description": "Möchtest du uns in unserer Telegram-Feedback-Gruppe beitreten, um uns weiterhin zu helfen? Dein Feedback kann so direkt von den Entwicklern der App gelesen werden.",
+        "joinGroup": "Gruppe beitreten"
     }
 }

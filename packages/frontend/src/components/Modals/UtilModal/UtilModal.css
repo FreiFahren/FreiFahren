@@ -2,6 +2,7 @@
     display: flex !important;
     flex-direction: column;
     align-items: flex-end;
+    width: fit-content;
 }
 
 .util-modal h1 {
@@ -70,4 +71,24 @@
         flex-wrap: wrap;
         gap: var(--margin-s);
     }
+}
+
+.theme-toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.text-button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
+    color: var(--color-primary);
+    font: inherit;
+    text-align: left;
 }

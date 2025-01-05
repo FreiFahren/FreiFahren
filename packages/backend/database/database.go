@@ -123,6 +123,24 @@ func CreateTicketInfoTable() {
 	logger.Log.Info().Msg("Created table ticket_info")
 }
 
+func CreateFeedbackTable() {
+	logger.Log.Debug().Msg("Creating table feedback")
+
+	sql := `
+	CREATE TABLE IF NOT EXISTS feedback (
+		id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+		timestamp TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
+		feedback TEXT NOT NULL
+	);
+	`
+
+	_, err := pool.Exec(context.Background(), sql)
+	if err != nil {
+		logger.Log.Panic().Err(err).Msg("Failed to create feedback table")
+	}
+	logger.Log.Info().Msg("Created table feedback")
+}
+
 func InsertTicketInfo(timestamp *time.Time, author *int64, message, line, stationName, stationId, directionName, directionId *string) error {
 	logger.Log.Debug().Msg("Inserting ticket info")
 
@@ -138,6 +156,22 @@ func InsertTicketInfo(timestamp *time.Time, author *int64, message, line, statio
 	_, err := pool.Exec(context.Background(), sql, values...)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to insert ticket info")
+		return err
+	}
+	return nil
+}
+
+func InsertFeedback(feedback string) error {
+	logger.Log.Debug().Msg("Inserting feedback")
+
+	sql := `
+	INSERT INTO feedback (feedback)
+	VALUES ($1);
+	`
+
+	_, err := pool.Exec(context.Background(), sql, feedback)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Failed to insert feedback")
 		return err
 	}
 	return nil

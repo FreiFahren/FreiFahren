@@ -1,0 +1,10 @@
+.feedback-form .description {
+    margin-top: var(--margin-xxs);
+    font-size: var(--font-xs);
+    color: var(--color-gray-on-dark-background);
+}
+
+.feedback-form button {
+    margin-top: var(--margin-m);
+    margin-bottom: var(--margin-m);
+}

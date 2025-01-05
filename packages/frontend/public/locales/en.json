@@ -15,12 +15,13 @@
     },
     "UtilModal": {
         "title": "Information",
-        "feedback-button": "Contact & Feedback",
+        "feedback-button": "Contact",
+        "impressum": "Legal notice",
         "privacy": "Privacy",
         "terms": "Terms of use"
     },
-    "FeedbackModal": {
-        "title": "Send your feedback to:",
+    "ContactSection": {
+        "title": "Contact us",
         "about-us": "About us",
         "about-us-text": "FreiFahren is a non-commercial open-source project aimed at making public transport more accessible. We are always open to new contributors on our",
         "telegram-group-info": "Most of the reports come from the FreiFahren_BE Telegram group. Thank you to the admins for allowing us to extract the relevant information with our Telegram bot."
@@ -42,6 +43,11 @@
         "privacy2": "Privacy policy",
         "privacy3": ".",
         "report": "Submit"
+    },
+    "PrivacyCheckbox": {
+        "privacy1": "I agree to the",
+        "privacy2": "Privacy policy",
+        "privacy3": "."
     },
     "AskForLocation": {
         "title": "Your location could not be determined.",
@@ -107,7 +113,7 @@
             },
             "responsible": {
                 "title": "2. Responsible Party",
-                "content": "The party responsible for data processing within this App is Freifahren GbR, represented by its partners, reachable via email at: johan@trieloff.net."
+                "content": "The parties responsible for data processing within this App are the developers of the FreiFahren project, reachable via email at: johan@trieloff.net. FreiFahren is a non-commercial open-source project."
             },
             "legalBasis": {
                 "title": "3. Legal Basis for Data Processing",
@@ -118,16 +124,24 @@
             },
             "dataUsage": {
                 "title": "4. Data Collection and Usage",
-                "content": "The App collects the following data when a report is submitted:",
+                "content": "The App collects data through two different forms:",
+                "reportFormTitle": "When creating a report:",
                 "dataPoints": [
                     "Line (optional)",
                     "Station",
                     "Direction (optional)",
                     "Report timestamp",
                     "Description text (optional)",
-                    "IP address of the user"
+                    "User's IP address"
                 ],
-                "purpose": "The reported data is temporarily made available to other users of the App to provide them with information about the current situation in public transport. Additionally, the information is forwarded to the Freifahren_BE Telegram group. This data transmission serves the purpose of sharing and informing the community about incidents. The IP address is used to detect spam and abuse reports to ensure that the reports come from real users and not from bots or other automated sources. The IP addresses are stored in strongly encrypted form for a maximum of {{minutes}} minutes and then deleted. They are not linked to other data and cannot be traced back to the user."
+                "reportPurpose": "The reported data is temporarily made available to other users of the App to provide them with information about the current situation in public transport. Additionally, the reports are forwarded to the Freifahren_BE Telegram group. This data transmission serves the purpose of sharing and informing the community about incidents.",
+                "feedbackFormTitle": "When submitting feedback:",
+                "feedbackDataPoints": [
+                    "Feedback text",
+                    "Submission timestamp"
+                ],
+                "feedbackPurpose": "The feedback is used exclusively for improving the App and is not shared with third parties or in the Telegram group.",
+                "ipAddressInfo": "The IP address is used to detect spam and abuse reports to ensure that the submissions come from real users and not from bots or other automated sources. IP addresses are stored in heavily encrypted form for a maximum of {{ minutes }} minutes and then deleted. They are not linked to other data and cannot be traced back to the user."
             },
             "anonymity": {
                 "title": "5. Anonymity",
@@ -135,7 +149,7 @@
             },
             "storageAndAccess": {
                 "title": "6. Storage and Access",
-                "content": "The collected data is stored on our servers, hosted by Hetzner Online GmbH in Germany. The storage duration of the data is indefinite. The time taken by the user to submit a report is also stored on these servers. Access to the data is strictly limited to the partners of Freifahren GbR."
+                "content": "The collected data is stored on our servers, hosted by Hetzner Online GmbH in Germany. The storage duration of the data is indefinite. The time taken by the user to submit a report is also stored on these servers. Access to the data is strictly limited to the developers of the FreiFahren project."
             },
             "userRights": {
                 "title": "7. User Rights",
@@ -183,5 +197,20 @@
         "title": "Thank you for your report!",
         "description": "People appreciate your help!",
         "button": "Continue"
+    },
+    "FeedbackButton": {
+        "text": "Feedback"
+    },
+    "FeedbackForm": {
+        "title": "Give us feedback!",
+        "description": "Help us improve FreiFahren!",
+        "descriptionPlaceholder": "Your feedback...",
+        "submit": "Send feedback",
+        "submitting": "Submitting..."
+    },
+    "FeedbackSummaryModal": {
+        "title": "Thank you for your feedback!",
+        "description": "Would you like to join our Telegram feedback group to help us improve FreiFahren further? Your feedback can be read directly by the developers of the app.",
+        "joinGroup": "Join Telegram Group"
     }
 }

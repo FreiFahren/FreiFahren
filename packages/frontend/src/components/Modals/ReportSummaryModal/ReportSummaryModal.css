@@ -5,17 +5,6 @@
     padding: var(--padding-s);
 }
 
-.report-summary-modal-content > div:has(> img) {
-    width: 40px;
-    height: 40px;
-    background-color: var(--color-risk-0);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-    margin-bottom: var(--margin-s);
-}
-
 .report-summary-modal-content > div:has(> .report-item) {
     margin: var(--margin-m) 0;
     width: 100%;
@@ -43,7 +32,6 @@
 .report-summary-modal-content img.no-filter {
     width: 20px;
     height: 20px;
-    filter: none !important;
 }
 
 .report-summary-modal-content > p {

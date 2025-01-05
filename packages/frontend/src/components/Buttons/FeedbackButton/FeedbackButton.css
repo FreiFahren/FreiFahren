@@ -1,0 +1,20 @@
+.feedback-button {
+    background-color: transparent;
+    width: fit-content;
+    margin-right: 0;
+    height: fit-content;
+}
+
+.feedback-button:hover {
+    background-color: var(--color-gray);
+}
+
+.feedback-button p {
+    font-size: var(--font-xs);
+    margin-left: 5px;
+}
+
+.feedback-button img {
+    width: 20px;
+    height: 20px;
+}

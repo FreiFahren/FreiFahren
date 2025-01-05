@@ -2,8 +2,9 @@ import './ReportsModal.css'
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Bar, BarChart, ResponsiveContainer, Tooltip, TooltipProps,XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, ResponsiveContainer, Tooltip, TooltipProps, XAxis, YAxis } from 'recharts'
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
+import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 import { useRiskData } from 'src/contexts/RiskDataContext'
 import { useStationsAndLines } from 'src/contexts/StationsAndLinesContext'
 import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
@@ -11,6 +12,7 @@ import { getRecentDataWithIfModifiedSince } from 'src/utils/databaseUtils'
 import { Report } from 'src/utils/types'
 import { getLineColor } from 'src/utils/uiUtils'
 
+import { FeedbackForm } from '../../Form/FeedbackForm/FeedbackForm'
 import { Line } from '../../Miscellaneous/Line/Line'
 import { ClusteredReportItem } from './ClusteredReportItem'
 import { ReportItem } from './ReportItem'
@@ -30,7 +32,7 @@ interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
 const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, getChartData, isLightTheme }) => {
     const { t } = useTranslation()
 
-    if (!(active ?? false) || !payload || (payload.length === 0)) return null
+    if (!(active ?? false) || !payload || payload.length === 0) return null
 
     const data = payload[0].payload
     const totalReports = getChartData.reduce((sum, item) => sum + item.reports, 0)
@@ -62,6 +64,7 @@ const CustomBarShape = ({ x, y, width, height, payload }: any) => {
 const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) => {
     const { t } = useTranslation()
     const [currentTab, setCurrentTab] = useState<TabType>('summary')
+    const [showFeedback, setShowFeedback] = useState(false)
 
     const tabs: TabType[] = ['summary', 'lines', 'stations']
 
@@ -99,10 +102,10 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
             const endTimeInRFC3339 = new Date(currentTime - 1000 * 60 * 60).toISOString()
 
             const previousDayInspectorList =
-                (await getRecentDataWithIfModifiedSince(
+                ((await getRecentDataWithIfModifiedSince(
                     `${process.env.REACT_APP_API_URL}/basics/inspectors?start=${startTimeInRFC3339}&end=${endTimeInRFC3339}`,
                     null // no caching to make it less error prone
-                ) as Report[] | null) ?? [] // in case the server returns, 304 Not Modified
+                )) as Report[] | null) ?? [] // in case the server returns, 304 Not Modified
 
             // Separate historic inspectors from lastHourInspectorList
             const historicInspectors = lastHourInspectorList.filter((inspector) => inspector.isHistoric)
@@ -140,7 +143,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
             for (const inspector of ticketInspectorList) {
                 const { line } = inspector
 
-                if (line === null ) continue
+                if (line === null) continue
                 lineReports.set(line, [...(lineReports.get(line) ?? []), inspector])
             }
 
@@ -170,7 +173,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                     '#FACB3F': 1, // okay
                 }
 
-            const lineScores = new Map<string, LineRiskData>()
+                const lineScores = new Map<string, LineRiskData>()
 
                 Object.entries(segmentColors).forEach(([segmentId, color]) => {
                     // eslint-disable-next-line prefer-destructuring
@@ -189,8 +192,8 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                     }
                 })
 
-            return new Map(Array.from(lineScores.entries()).sort(([, a], [, b]) => b.score - a.score))
-        }
+                return new Map(Array.from(lineScores.entries()).sort(([, a], [, b]) => b.score - a.score))
+            }
 
             const riskMap = extractMostRiskLines(segmentRiskData.segment_colors)
 
@@ -203,13 +206,16 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
         }
     }, [segmentRiskData, allLines])
 
-    const getChartData = useMemo(() => Array.from(sortedLinesWithReports.entries())
-        .filter(([line]) => line !== '')
-        .map(([line, reports]) => ({
-            line,
-            reports: reports.length,
-        })), [sortedLinesWithReports])
-
+    const getChartData = useMemo(
+        () =>
+            Array.from(sortedLinesWithReports.entries())
+                .filter(([line]) => line !== '')
+                .map(([line, reports]) => ({
+                    line,
+                    reports: reports.length,
+                })),
+        [sortedLinesWithReports]
+    )
 
     const [isLightTheme, setIsLightTheme] = useState<boolean>(false)
 
@@ -228,6 +234,10 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
         return () => window.removeEventListener('storage', handleStorageChange)
     }, [])
 
+    if (showFeedback) {
+        return <FeedbackForm openAnimationClass={className} />
+    }
+
     return (
         <div className={`reports-modal modal container ${className}`}>
             <section className="tabs align-child-on-line">
@@ -242,10 +252,14 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                     </button>
                 ))}
             </section>
-            {currentTab === 'summary' ? <section className="summary">
+            {currentTab === 'summary' ? (
+                <section className="summary">
                     <section className="lines">
-                        <h2>{t('ReportsModal.reportsHeading')}</h2>
-                        <p>{t('ReportsModal.past24Hours')}</p>
+                        <div className="align-child-on-line">
+                            <h2>{t('ReportsModal.reportsHeading')}</h2>
+                            <FeedbackButton handleButtonClick={() => setShowFeedback(true)} />
+                        </div>
+                        <p className="time-range">{t('ReportsModal.past24Hours')}</p>
                         {Array.from(sortedLinesWithReports.entries())
                             .sort(([, inspectorsA], [, inspectorsB]) => {
                                 const timestampA = new Date(inspectorsA[0].timestamp).getTime()
@@ -263,7 +277,8 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                         <div className="risk-grid">
                             {Array.from(riskLines.entries()).some(
                                 ([, riskData]) => riskData.class === 2 || riskData.class === 3
-                            ) ? <div className="risk-grid-item">
+                            ) ? (
+                                <div className="risk-grid-item">
                                     {Array.from(riskLines.entries())
                                         .filter(([, riskData]) => riskData.class === 2 || riskData.class === 3)
                                         .map(([line, riskData]) => (
@@ -280,8 +295,10 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                                                 <Line line={line} />
                                             </div>
                                         ))}
-                                </div> : null}
-                            {Array.from(riskLines.entries()).some(([, riskData]) => riskData.class === 1) ? <div className="risk-grid-item">
+                                </div>
+                            ) : null}
+                            {Array.from(riskLines.entries()).some(([, riskData]) => riskData.class === 1) ? (
+                                <div className="risk-grid-item">
                                     {Array.from(riskLines.entries())
                                         .filter(([, riskData]) => riskData.class === 1)
                                         .map(([line, riskData]) => (
@@ -298,8 +315,10 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                                                 <Line line={line} />
                                             </div>
                                         ))}
-                                </div> : null}
-                            {Array.from(riskLines.entries()).some(([, riskData]) => riskData.class === 0) ? <div className="risk-grid-item">
+                                </div>
+                            ) : null}
+                            {Array.from(riskLines.entries()).some(([, riskData]) => riskData.class === 0) ? (
+                                <div className="risk-grid-item">
                                     {Array.from(riskLines.entries())
                                         .filter(([, riskData]) => riskData.class === 0)
                                         .map(([line, riskData]) => (
@@ -316,13 +335,16 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                                                 <Line line={line} />
                                             </div>
                                         ))}
-                                </div> : null}
+                                </div>
+                            ) : null}
                         </div>
                     </section>
-                </section> : null}
-            {currentTab === 'lines' ? <section className="list-modal">
+                </section>
+            ) : null}
+            {currentTab === 'lines' ? (
+                <section className="list-modal">
                     <h2>{t('ReportsModal.topLines')}</h2>
-                    <p>{t('ReportsModal.past24Hours')}</p>
+                    <p className="time-range">{t('ReportsModal.past24Hours')}</p>
                     <ResponsiveContainer width="100%" height={getChartData.length * (34 + 12)}>
                         <BarChart data={getChartData} layout="vertical">
                             <XAxis type="number" hide />
@@ -340,7 +362,9 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                                     dx: -5,
                                 }}
                             />
-                            <Tooltip content={<CustomTooltip getChartData={getChartData} isLightTheme={isLightTheme} />} />
+                            <Tooltip
+                                content={<CustomTooltip getChartData={getChartData} isLightTheme={isLightTheme} />}
+                            />
                             <Bar
                                 dataKey="reports"
                                 barSize={34}
@@ -351,10 +375,12 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                             />
                         </BarChart>
                     </ResponsiveContainer>
-                </section> : null}
-            {currentTab === 'stations' ? <section className="list-modal">
+                </section>
+            ) : null}
+            {currentTab === 'stations' ? (
+                <section className="list-modal">
                     <h2>{t('ReportsModal.topStations')}</h2>
-                    <p>{t('ReportsModal.past24Hours')}</p>
+                    <p className="time-range">{t('ReportsModal.past24Hours')}</p>
                     {ticketInspectorList.map((ticketInspector) => (
                         <ReportItem
                             key={ticketInspector.station.id + ticketInspector.timestamp}
@@ -362,7 +388,8 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                             currentTime={currentTime}
                         />
                     ))}
-                </section> : null}
+                </section>
+            ) : null}
         </div>
     )
 }

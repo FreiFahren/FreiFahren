@@ -1,7 +1,8 @@
 import './ReportForm.css'
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 
 import { REPORT_COOLDOWN_MINUTES } from '../../../constants'
 import { useLocation } from '../../../contexts/LocationContext'
@@ -13,6 +14,8 @@ import { Report } from '../../../utils/types'
 import { createWarningSpan, getLineColor, highlightElement } from '../../../utils/uiUtils'
 import { Line } from '../../Miscellaneous/Line/Line'
 import { AutocompleteInputForm } from '../AutocompleteInputForm/AutocompleteInputForm'
+import { FeedbackForm } from '../FeedbackForm/FeedbackForm'
+import { PrivacyCheckbox } from '../PrivacyCheckbox/PrivacyCheckbox'
 import { SelectField } from '../SelectField/SelectField'
 
 const getCSSVariable = (variable: string): number => {
@@ -20,13 +23,6 @@ const getCSSVariable = (variable: string): number => {
 
     return value !== '0' ? parseFloat(value) : 0
 }
-
-const redHighlight = (text: string) => (
-    <>
-        {text}
-        <span className="red-highlight">*</span>
-    </>
-)
 
 interface ReportFormProps {
     closeModal: () => void
@@ -36,7 +32,7 @@ interface ReportFormProps {
 
 const ITEM_HEIGHT = 37
 
-const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmission, className }) => {
+const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmission, className }) => {
     const { t } = useTranslation()
 
     const { userPosition } = useLocation()
@@ -294,7 +290,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
         return hasError // Return true if there's an error, false otherwise
     }
 
-    const handleSubmit = async (event: React.FormEvent) => {
+    const handleSubmit = async (event: FormEvent) => {
         event.preventDefault()
 
         const hasError = await validateReportForm()
@@ -392,12 +388,20 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
 
     const getDirectionValue = (child: React.ReactElement) => (child.props as EntityChildProps).children.props.children
 
+    const [showFeedback, setShowFeedback] = useState<boolean>(false)
+    if (showFeedback) {
+        return <FeedbackForm openAnimationClass={className} />
+    }
+
     return (
         <div className={`report-form container modal ${className}`} ref={containerRef}>
             <form onSubmit={handleSubmit}>
                 <div>
                     <div ref={topElementsRef}>
-                        <h1>{t('ReportForm.title')}</h1>
+                        <div className="align-child-on-line">
+                            <h1>{t('ReportForm.title')}</h1>
+                            <FeedbackButton handleButtonClick={() => setShowFeedback(true)} />
+                        </div>
                         <section>
                             <SelectField
                                 containerClassName="align-child-on-line large-selector"
@@ -485,18 +489,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ closeModal, onNotifyParentAbout
                         </section>
                         <section>
                             <div>
-                                <label htmlFor="privacy-checkbox" id="privacy-label">
-                                    <input
-                                        type="checkbox"
-                                        id="privacy-checkbox"
-                                        name="privacy-checkbox"
-                                        checked={isPrivacyChecked}
-                                        onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
-                                    />
-                                    {t('ReportForm.privacy1')}
-                                    <a href="/datenschutz"> {t('ReportForm.privacy2')} </a> {t('ReportForm.privacy3')}
-                                    {redHighlight('')}
-                                </label>
+                                <PrivacyCheckbox isChecked={isPrivacyChecked} onChange={() => setIsPrivacyChecked} />
                             </div>
                             <div>
                                 <button
