@@ -17,8 +17,10 @@
         "title": "Information",
         "feedback-button": "Contact",
         "impressum": "Legal notice",
-        "privacy": "Privacy",
-        "terms": "Terms of use"
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Use",
+        "analytics-opted-in": "anonyme analytics - Click to disable",
+        "analytics-opted-out": "anonyme analytics - Click to enable"
     },
     "ContactSection": {
         "title": "Contact us",

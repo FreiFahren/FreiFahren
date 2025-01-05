@@ -1,4 +1,5 @@
 import { AnalyticsOptions, SavedEvent } from '../utils/types'
+import { isAnalyticsOptedOut } from './useAnalyticsOptOut'
 
 /**
  * Checks if the Pirsch analytics SDK is loaded and available.
@@ -54,6 +55,10 @@ const saveUnsuccessfulEvent = (eventName: string, options: AnalyticsOptions): vo
  * @returns {Promise<void>} A promise that resolves if the event is sent successfully, or rejects with an error.
  */
 export const sendAnalyticsEvent = async (eventName: string, options?: AnalyticsOptions): Promise<void> => {
+    if (isAnalyticsOptedOut()) {
+        return
+    }
+
     try {
         await waitForPirsch()
         return await new Promise((resolve, reject) => {

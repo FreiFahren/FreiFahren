@@ -18,7 +18,9 @@
         "feedback-button": "Kontakt",
         "impressum": "Impressum",
         "privacy": "Datenschutz",
-        "terms": "Nutzungsbedingungen"
+        "terms": "Nutzungsbedingungen",
+        "analytics-opted-in": "anonyme Analytics - Klicken zum Deaktivieren",
+        "analytics-opted-out": "anonyme Analytics - Klicken zum Aktivieren"
     },
     "ContactSection": {
         "title": "Kontaktiere uns",
