@@ -56,7 +56,7 @@ const saveUnsuccessfulEvent = (eventName: string, options: AnalyticsOptions): vo
  */
 export const sendAnalyticsEvent = async (eventName: string, options?: AnalyticsOptions): Promise<void> => {
     if (isAnalyticsOptedOut()) {
-        return
+        return Promise.resolve()
     }
 
     try {

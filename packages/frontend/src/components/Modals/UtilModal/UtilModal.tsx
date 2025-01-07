@@ -12,15 +12,13 @@ import { LegalDisclaimer } from '../LegalDisclaimer/LegalDisclaimer'
 interface UtilModalProps {
     className: string
     children?: React.ReactNode
-    colorTheme: string
-    handleColorThemeToggle: () => void
 }
 
 const GITHUB_ICON = `${process.env.PUBLIC_URL}/icons/github.svg`
 
-const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, handleColorThemeToggle }) => {
+const UtilModal: React.FC<UtilModalProps> = ({ className, children }) => {
     const { t } = useTranslation()
-    const [isOptedOut, setIsOptedOut] = useAnalyticsOptOut()
+    const [isOptedOut, updateOptOut] = useAnalyticsOptOut()
 
     const [isContactModalOpen, setIsContactModalOpen] = useState(false)
     const [isLegalDisclaimerOpen, setIsLegalDisclaimerOpen] = useState(false)
@@ -28,6 +26,7 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
     return (
         <>
             <div className={`util-modal info-popup modal ${className}`}>
+                {children}
                 <div className="modal-header">
                     <h1>{t('UtilModal.title')}</h1>
                     <button className="action" onClick={() => setIsContactModalOpen(true)} type="button">
@@ -55,7 +54,7 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children, colorTheme, 
                             type="checkbox"
                             className="toggle-switch__input"
                             checked={!isOptedOut}
-                            onChange={() => setIsOptedOut(!isOptedOut)}
+                            onChange={() => updateOptOut(!isOptedOut)}
                             aria-label={t('UtilModal.analytics-opted-out')}
                         />
                     </div>

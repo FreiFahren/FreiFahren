@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Layer, MapRef,Source, useMap } from 'react-map-gl/maplibre'
+import { Layer, MapRef, Source, useMap } from 'react-map-gl/maplibre'
 
 import { StationGeoJSON } from '../../../../utils/types'
 
@@ -8,7 +8,6 @@ const SBAHN_ICON = `${process.env.PUBLIC_URL}/icons/sbahn.svg`
 
 interface StationLayerProps {
     stations: StationGeoJSON
-    textColor: string
 }
 class IconFactory {
     constructor(private map: MapRef | undefined) {}
@@ -18,14 +17,14 @@ class IconFactory {
 
         image.src = source
         image.onload = () => {
-            if (!((this.map?.hasImage(name)) ?? false)) {
+            if (!(this.map?.hasImage(name) ?? false)) {
                 this.map?.addImage(name, image)
             }
         }
     }
 }
 
-const StationLayer: React.FC<StationLayerProps> = ({ stations, textColor }) => {
+const StationLayer: React.FC<StationLayerProps> = ({ stations }) => {
     const map = useMap()
 
     useEffect(() => {
@@ -147,7 +146,7 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations, textColor }) => {
                     'text-offset': [0, 1],
                 }}
                 paint={{
-                    'text-color': textColor,
+                    'text-color': '#fff',
                     'text-halo-color': 'black',
                     'text-halo-width': 0.2,
                     'text-opacity': [
