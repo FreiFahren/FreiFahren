@@ -489,7 +489,10 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
                         </section>
                         <section>
                             <div>
-                                <PrivacyCheckbox isChecked={isPrivacyChecked} onChange={() => setIsPrivacyChecked} />
+                                <PrivacyCheckbox
+                                    isChecked={isPrivacyChecked}
+                                    onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
+                                />
                             </div>
                             <div>
                                 <button
