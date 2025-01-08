@@ -90,8 +90,6 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
         [onRotationChange]
     )
 
-    const currentColorTheme = 'dark'
-
     return (
         <div id="map-container" data-testid="map-container">
             <Suspense fallback={<div>Loading...</div>}>
