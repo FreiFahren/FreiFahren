@@ -12,6 +12,7 @@ import { App } from './pages/App/App'
 import { PrivacyPolicy } from './pages/PrivacyPolicy/PrivacyPolicy'
 import { Support } from './pages/Support/Support'
 import { reportWebVitals } from './reportWebVitals'
+import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary'
 
 if (process.env.NODE_ENV === 'production') {
     Sentry.init({
@@ -31,22 +32,24 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
 root.render(
     <React.StrictMode>
-        <I18nextProvider i18n={i18n}>
-            <BrowserRouter>
-                <Routes>
-                    <Route
-                        path="/"
-                        element={
-                            <LocationProvider>
-                                <App />
-                            </LocationProvider>
-                        }
-                    />
-                    <Route path="/datenschutz" element={<PrivacyPolicy />} />
-                    <Route path="/support" element={<Support />} />
-                </Routes>
-            </BrowserRouter>
-        </I18nextProvider>
+        <ErrorBoundary>
+            <I18nextProvider i18n={i18n}>
+                <BrowserRouter>
+                    <Routes>
+                        <Route
+                            path="/"
+                            element={
+                                <LocationProvider>
+                                    <App />
+                                </LocationProvider>
+                            }
+                        />
+                        <Route path="/datenschutz" element={<PrivacyPolicy />} />
+                        <Route path="/support" element={<Support />} />
+                    </Routes>
+                </BrowserRouter>
+            </I18nextProvider>
+        </ErrorBoundary>
     </React.StrictMode>
 )
 

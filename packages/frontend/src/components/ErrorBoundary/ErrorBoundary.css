@@ -1,0 +1,19 @@
+.modal.container.center-child {
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: var(--boxShadow-default);
+    min-width: 300px;
+}
+
+.align-child-column {
+    gap: var(--margin-m);
+}
+
+.align-child-column p {
+    text-align: center;
+    color: var(--color-gray-on-dark-background);
+}
+
+.align-child-column button {
+    margin-top: var(--margin-m);
+}
