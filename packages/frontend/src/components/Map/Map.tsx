@@ -20,7 +20,6 @@ const Map = lazy(() => import('react-map-gl/maplibre'))
 interface FreifahrenMapProps {
     formSubmitted: boolean
     isFirstOpen: boolean
-    currentColorTheme: string
     isRiskLayerOpen: boolean
     onRotationChange: (bearing: number) => void
 }
@@ -32,7 +31,6 @@ const INSTAGRAM_ICON = `${process.env.PUBLIC_URL}/icons/instagram.svg`
 const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     formSubmitted,
     isFirstOpen,
-    currentColorTheme,
     isRiskLayerOpen,
     onRotationChange,
 }) => {
@@ -67,8 +65,6 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
             initializeLocationTracking()
         }
     }, [isFirstOpen, initializeLocationTracking])
-
-    const textColor = currentColorTheme === 'light' ? '#000' : '#fff'
 
     // preload colors before risklayer component mounts to instantly show the highlighted segments
     const { segmentRiskData, refreshRiskData } = useRiskData()
@@ -111,11 +107,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     minZoom={10}
                     maxBounds={maxBounds}
                     onRotate={handleRotate}
-                    mapStyle={
-                        currentColorTheme === 'light'
-                            ? `https://api.jawg.io/styles/359ec2e4-39f7-4fb5-8e3a-52037d043f96.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`
-                            : `https://api.jawg.io/styles/848dfeff-2d26-4044-8b83-3b1851256e3d.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`
-                    }
+                    mapStyle={`https://api.jawg.io/styles/848dfeff-2d26-4044-8b83-3b1851256e3d.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`}
                 >
                     {!isFirstOpen ? <LocationMarker userPosition={userPosition} /> : null}
                     <MarkerContainer
@@ -123,15 +115,11 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                         formSubmitted={formSubmitted}
                         userPosition={userPosition}
                     />
-                    <StationLayer stations={stationGeoJSON} textColor={textColor} />
+                    <StationLayer stations={stationGeoJSON} />
                     {isRiskLayerOpen ? (
-                        <RiskLineLayer
-                            preloadedRiskData={segmentRiskData}
-                            lineSegments={lineSegments}
-                            textColor={textColor}
-                        />
+                        <RiskLineLayer preloadedRiskData={segmentRiskData} lineSegments={lineSegments} />
                     ) : (
-                        <RegularLineLayer lineSegments={lineSegments} textColor={textColor} />
+                        <RegularLineLayer lineSegments={lineSegments} />
                     )}
                 </Map>
             </Suspense>

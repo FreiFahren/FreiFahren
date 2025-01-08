@@ -26,10 +26,9 @@ type TabType = 'summary' | 'lines' | 'stations'
 
 interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
     getChartData: { line: string; reports: number }[]
-    isLightTheme: boolean
 }
 
-const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, getChartData, isLightTheme }) => {
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, getChartData }) => {
     const { t } = useTranslation()
 
     if (!(active ?? false) || !payload || payload.length === 0) return null
@@ -42,8 +41,8 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, getChart
         <div
             className="custom-tooltip"
             style={{
-                backgroundColor: isLightTheme === true ? '#fff' : '#000',
-                color: isLightTheme === true ? '#000' : '#fff',
+                backgroundColor: '#000',
+                color: '#fff',
                 padding: '8px',
                 borderRadius: '4px',
             }}
@@ -217,23 +216,6 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
         [sortedLinesWithReports]
     )
 
-    const [isLightTheme, setIsLightTheme] = useState<boolean>(false)
-
-    useEffect(() => {
-        const theme = localStorage.getItem('colorTheme')
-
-        setIsLightTheme(theme === 'light')
-
-        const handleStorageChange = (event: StorageEvent) => {
-            if (event.key === 'theme') {
-                setIsLightTheme(event.newValue === 'dark')
-            }
-        }
-
-        window.addEventListener('storage', handleStorageChange)
-        return () => window.removeEventListener('storage', handleStorageChange)
-    }, [])
-
     if (showFeedback) {
         return <FeedbackForm openAnimationClass={className} />
     }
@@ -358,13 +340,11 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                                 tick={{
                                     fontSize: 16,
                                     fontWeight: 800,
-                                    fill: isLightTheme ? '#000' : '#fff',
+                                    fill: '#fff',
                                     dx: -5,
                                 }}
                             />
-                            <Tooltip
-                                content={<CustomTooltip getChartData={getChartData} isLightTheme={isLightTheme} />}
-                            />
+                            <Tooltip content={<CustomTooltip getChartData={getChartData} />} />
                             <Bar
                                 dataKey="reports"
                                 barSize={34}

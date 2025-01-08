@@ -30,22 +30,6 @@ export const createWarningSpan = (elementId: string, message: string): void => {
     }
 }
 
-export const currentColorTheme = (): string => {
-    const colorTheme = localStorage.getItem('colorTheme')
-
-    return colorTheme ?? 'dark'
-}
-
-export const setColorThemeInLocalStorage = (): void => {
-    const colorTheme = currentColorTheme()
-
-    if (colorTheme === 'dark') {
-        localStorage.setItem('colorTheme', 'light')
-    } else {
-        localStorage.setItem('colorTheme', 'dark')
-    }
-}
-
 /**
  * Returns the color of a line based on the line name.
  * @param line - The name of the line.

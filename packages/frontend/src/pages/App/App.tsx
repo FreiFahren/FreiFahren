@@ -23,14 +23,13 @@ import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
 import { getNumberOfReportsInLast24Hours } from '../../utils/databaseUtils'
-import { currentColorTheme, highlightElement, setColorThemeInLocalStorage } from '../../utils/uiUtils'
+import { highlightElement } from '../../utils/uiUtils'
 
 type AppUIState = {
     isReportFormOpen: boolean
     formSubmitted: boolean
     isFirstOpen: boolean
     isStatsPopUpOpen: boolean
-    currentColorTheme: string
     isRiskLayerOpen: boolean
     isListModalOpen: boolean
     isLegalDisclaimerOpen: boolean
@@ -41,16 +40,14 @@ const initialAppUIState: AppUIState = {
     formSubmitted: false,
     isFirstOpen: true,
     isStatsPopUpOpen: false,
-    currentColorTheme: currentColorTheme(),
     isRiskLayerOpen: localStorage.getItem('layer') === 'risk',
     isListModalOpen: false,
     isLegalDisclaimerOpen: false,
 }
 
-const isTelegramWebApp = (): boolean => 
+const isTelegramWebApp = (): boolean =>
     // @ts-ignore since TelegramWebviewProxy is not in the window type definitions
-     typeof TelegramWebviewProxy !== 'undefined'
-
+    typeof TelegramWebviewProxy !== 'undefined'
 
 const App = () => {
     const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
@@ -86,30 +83,7 @@ const App = () => {
         }
     }
 
-    const toggleColorTheme = () => {
-        setColorThemeInLocalStorage()
-        setAppUIState({ ...appUIState, currentColorTheme: currentColorTheme() })
-
-        // add classes to the root element to change the color theme
-        const root = document.documentElement
-
-        if (currentColorTheme() === 'light') {
-            root.classList.add('light')
-            root.classList.remove('dark')
-        } else {
-            root.classList.add('dark')
-            root.classList.remove('light')
-        }
-    }
-
-    // run on app mount
     useEffect(() => {
-        // set the color theme by manipulating the root element
-        const root = document.documentElement
-
-        root.classList.add(currentColorTheme())
-
-        // send saved events to the backend
         sendSavedEvents().catch((error) => {
             // fix later with sentry
             // eslint-disable-next-line no-console
@@ -259,11 +233,7 @@ const App = () => {
                 </>
             ) : null}
             {isUtilOpen ? (
-                <UtilModal
-                    className={`open ${isUtilAnimatingOut ? 'slide-out' : 'slide-in'}`}
-                    colorTheme={appUIState.currentColorTheme}
-                    handleColorThemeToggle={toggleColorTheme}
-                >
+                <UtilModal className={`open ${isUtilAnimatingOut ? 'slide-out' : 'slide-in'}`}>
                     <CloseButton handleClose={closeUtilModal} />
                 </UtilModal>
             ) : null}
@@ -296,7 +266,6 @@ const App = () => {
                             <FreifahrenMap
                                 isFirstOpen={appUIState.isFirstOpen}
                                 formSubmitted={appUIState.formSubmitted}
-                                currentColorTheme={appUIState.currentColorTheme}
                                 isRiskLayerOpen={appUIState.isRiskLayerOpen}
                                 onRotationChange={handleRotationChange}
                             />
