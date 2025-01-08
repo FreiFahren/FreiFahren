@@ -16,6 +16,8 @@
 }
 
 :root {
+    --color-primary: #dee2e6;
+    --color-background: #232323;
     --color-blue: #0075ff;
     --incentive-blue: #0f90ff;
     --color-red: #ff0017f5;
@@ -78,16 +80,6 @@
     --distance-from-edge-default: 15px;
     --button-size: 50px;
     --height-streched-button: 45px;
-}
-
-:root.light {
-    --color-primary: #191d21;
-    --color-background: #ffffff;
-}
-
-:root.dark {
-    --color-primary: #dee2e6;
-    --color-background: #232323;
 }
 
 /* ELEMENT STYLES */
@@ -156,8 +148,8 @@ hr {
     border-radius: var(--borderRadius-small);
 }
 
-.dark svg,
-.dark img[src$='.svg'] {
+svg,
+img[src$='.svg'] {
     filter: invert(1);
 }
 
@@ -194,7 +186,7 @@ button:hover {
     filter: brightness(1.1);
 }
 
-:root.dark button a {
+button a {
     color: var(--color-primary);
 }
 

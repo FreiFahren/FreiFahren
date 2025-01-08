@@ -90,6 +90,8 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
         [onRotationChange]
     )
 
+    const currentColorTheme = 'dark'
+
     return (
         <div id="map-container" data-testid="map-container">
             <Suspense fallback={<div>Loading...</div>}>
@@ -107,7 +109,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     minZoom={10}
                     maxBounds={maxBounds}
                     onRotate={handleRotate}
-                    mapStyle="https://api.jawg.io/styles/848dfeff-2d26-4044-8b83-3b1851256e3d.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}"
+                    mapStyle={`https://api.jawg.io/styles/848dfeff-2d26-4044-8b83-3b1851256e3d.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`}
                 >
                     {!isFirstOpen ? <LocationMarker userPosition={userPosition} /> : null}
                     <MarkerContainer
