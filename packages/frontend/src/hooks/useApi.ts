@@ -1,5 +1,5 @@
+import { addBreadcrumb, captureMessage, withScope } from '@sentry/react'
 import { useState } from 'react'
-import * as Sentry from '@sentry/react'
 
 interface ApiError {
     message: string
@@ -20,12 +20,12 @@ interface ErrorWithStatus extends Error {
 
 const logApiError = (error: ApiError) => {
     // Add error to Sentry with full context
-    Sentry.withScope((scope) => {
+    withScope((scope) => {
         scope.setTag('api_error', 'true')
         scope.setTag('api_method', error.method ?? 'UNKNOWN')
         scope.setTag('api_url', error.url ?? 'UNKNOWN')
 
-        if (error.status) {
+        if (error.status !== undefined) {
             scope.setTag('http_status', error.status.toString())
         }
 
@@ -33,11 +33,12 @@ const logApiError = (error: ApiError) => {
             scope.setContext('api_call_context', error.context)
         }
 
-        Sentry.captureMessage(`API Error: ${error.message}`, 'error')
+        captureMessage(`API Error: ${error.message}`, 'error')
     })
 
     // Still log to console in development
     if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
         console.error(
             `🚨 API Error [${error.method ?? 'UNKNOWN'} ${error.url ?? 'UNKNOWN'}]:`,
             error.status !== undefined ? `Status ${error.status}:` : '',
@@ -63,7 +64,7 @@ export const useApi = () => {
         }
 
         // Add breadcrumb for API call start
-        Sentry.addBreadcrumb({
+        addBreadcrumb({
             category: 'api',
             message: `API Request Started: ${options?.method ?? 'UNKNOWN'} ${url}`,
             level: 'info',
@@ -83,7 +84,7 @@ export const useApi = () => {
             })
 
             // Add breadcrumb for API response
-            Sentry.addBreadcrumb({
+            addBreadcrumb({
                 category: 'api',
                 message: `API Response Received: ${response.status}`,
                 level: response.ok ? 'info' : 'error',
@@ -159,7 +160,7 @@ export const useApi = () => {
         setIsLoading(true)
 
         // Add breadcrumb for GET request
-        Sentry.addBreadcrumb({
+        addBreadcrumb({
             category: 'api',
             message: `GET Request: ${url}`,
             level: 'info',
@@ -176,7 +177,7 @@ export const useApi = () => {
         setIsLoading(true)
 
         // Add breadcrumb for POST request
-        Sentry.addBreadcrumb({
+        addBreadcrumb({
             category: 'api',
             message: `POST Request: ${url}`,
             level: 'info',

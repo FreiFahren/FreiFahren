@@ -1,5 +1,6 @@
 import './index.css'
 
+import { browserTracingIntegration, init, replayIntegration } from '@sentry/react'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { I18nextProvider } from 'react-i18next'
@@ -7,16 +8,15 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import { LocationProvider } from './contexts/LocationContext'
 import { i18n } from './i18n'
-import * as Sentry from '@sentry/react'
 import { App } from './pages/App/App'
 import { PrivacyPolicy } from './pages/PrivacyPolicy/PrivacyPolicy'
 import { Support } from './pages/Support/Support'
 import { reportWebVitals } from './reportWebVitals'
 
 if (process.env.NODE_ENV === 'production') {
-    Sentry.init({
+    init({
         dsn: 'https://555d2661f0b147345e2117aad784560c@o4508609338867712.ingest.de.sentry.io/4508609341161552',
-        integrations: [Sentry.browserTracingIntegration(), Sentry.replayIntegration()],
+        integrations: [browserTracingIntegration(), replayIntegration()],
         // Tracing
         tracesSampleRate: 1.0, //  Capture 100% of the transactions
         // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
