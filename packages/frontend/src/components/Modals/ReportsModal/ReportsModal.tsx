@@ -216,6 +216,10 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
         [sortedLinesWithReports]
     )
 
+    const riskLevels = [3, 2, 1, 0]
+
+    const filterRiskLevelLines = (level: number, riskData: LineRiskData): boolean => riskData.class === level
+
     if (showFeedback) {
         return <FeedbackForm openAnimationClass={className} />
     }
@@ -257,13 +261,16 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                     <section className="risk">
                         <h2>{t('ReportsModal.risk')}</h2>
                         <div className="risk-grid">
-                            {Array.from(riskLines.entries()).some(
-                                ([, riskData]) => riskData.class === 2 || riskData.class === 3
-                            ) ? (
-                                <div className="risk-grid-item">
-                                    {Array.from(riskLines.entries())
-                                        .filter(([, riskData]) => riskData.class === 2 || riskData.class === 3)
-                                        .map(([line, riskData]) => (
+                            {riskLevels.map((level) => {
+                                const linesWithRiskLevel = Array.from(riskLines.entries()).filter(([, riskData]) =>
+                                    filterRiskLevelLines(level, riskData)
+                                )
+
+                                if (linesWithRiskLevel.length === 0) return null
+
+                                return (
+                                    <div key={level} className="risk-grid-item">
+                                        {linesWithRiskLevel.map(([line, riskData]) => (
                                             // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                                             <div
                                                 key={line}
@@ -277,48 +284,9 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                                                 <Line line={line} />
                                             </div>
                                         ))}
-                                </div>
-                            ) : null}
-                            {Array.from(riskLines.entries()).some(([, riskData]) => riskData.class === 1) ? (
-                                <div className="risk-grid-item">
-                                    {Array.from(riskLines.entries())
-                                        .filter(([, riskData]) => riskData.class === 1)
-                                        .map(([line, riskData]) => (
-                                            // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-                                            <div
-                                                key={line}
-                                                className={`risk-line risk-level-${riskData.class}`}
-                                                onClick={() => onCloseModal()}
-                                            >
-                                                <img
-                                                    src={`/icons/risk-${riskData.class}.svg`}
-                                                    alt="Icon to show risk level"
-                                                />
-                                                <Line line={line} />
-                                            </div>
-                                        ))}
-                                </div>
-                            ) : null}
-                            {Array.from(riskLines.entries()).some(([, riskData]) => riskData.class === 0) ? (
-                                <div className="risk-grid-item">
-                                    {Array.from(riskLines.entries())
-                                        .filter(([, riskData]) => riskData.class === 0)
-                                        .map(([line, riskData]) => (
-                                            // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-                                            <div
-                                                key={line}
-                                                className={`risk-line risk-level-${riskData.class}`}
-                                                onClick={() => onCloseModal()}
-                                            >
-                                                <img
-                                                    src={`/icons/risk-${riskData.class}.svg`}
-                                                    alt="Icon to show risk level"
-                                                />
-                                                <Line line={line} />
-                                            </div>
-                                        ))}
-                                </div>
-                            ) : null}
+                                    </div>
+                                )
+                            })}
                         </div>
                     </section>
                 </section>
@@ -347,7 +315,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                             <Tooltip content={<CustomTooltip getChartData={getChartData} />} />
                             <Bar
                                 dataKey="reports"
-                                barSize={34}
+                                barSize={24}
                                 radius={[4, 4, 4, 4]}
                                 fill="#7e5330"
                                 name="reports"
