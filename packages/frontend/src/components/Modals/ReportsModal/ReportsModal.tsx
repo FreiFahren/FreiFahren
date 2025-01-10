@@ -5,8 +5,6 @@ import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, ResponsiveContainer, Tooltip, TooltipProps, XAxis, YAxis } from 'recharts'
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
-import { useRiskData } from 'src/contexts/RiskDataContext'
-import { useStationsAndLines } from 'src/contexts/StationsAndLinesContext'
 import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
 import { getRecentDataWithIfModifiedSince } from 'src/utils/databaseUtils'
 import { Report } from 'src/utils/types'
@@ -51,7 +49,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, getChart
         </div>
     )
 }
-// PLEASE REFACTOR THIS LATER OR MOVE IT OUT, THE REPORTS MODAL COMPONENT IS A FUCKING MESS
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomBarShape = ({ x, y, width, height, payload }: any) => {
     const color = getLineColor(payload.line)
@@ -153,57 +151,6 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
         setSortedLinesWithReports(sortedLines)
     }, [ticketInspectorList])
 
-    const { segmentRiskData } = useRiskData()
-    const { allLines } = useStationsAndLines()
-    const [riskLines, setRiskLines] = useState<Map<string, LineRiskData>>(new Map())
-
-    interface LineRiskData {
-        score: number
-        class: number
-    }
-
-    useEffect(() => {
-        if (segmentRiskData) {
-            const extractMostRiskLines = (segmentColors: Record<string, string>): Map<string, LineRiskData> => {
-                const colorScores: Record<string, number> = {
-                    '#A92725': 3, // bad
-                    '#F05044': 2, // medium
-                    '#FACB3F': 1, // okay
-                }
-
-                const lineScores = new Map<string, LineRiskData>()
-
-                Object.entries(segmentColors).forEach(([segmentId, color]) => {
-                    // eslint-disable-next-line prefer-destructuring
-                    const line = segmentId.split('-')[0]
-                    const score = colorScores[color]
-
-                    if (!lineScores.has(line)) {
-                        lineScores.set(line, { score, class: score })
-                    } else {
-                        const currentData = lineScores.get(line)!
-
-                        lineScores.set(line, {
-                            score: currentData.score + score,
-                            class: Math.max(currentData.class, score),
-                        })
-                    }
-                })
-
-                return new Map(Array.from(lineScores.entries()).sort(([, a], [, b]) => b.score - a.score))
-            }
-
-            const riskMap = extractMostRiskLines(segmentRiskData.segment_colors)
-
-            Object.keys(allLines).forEach((line) => {
-                if (!riskMap.has(line)) {
-                    riskMap.set(line, { score: 0, class: 0 })
-                }
-            })
-            setRiskLines(riskMap)
-        }
-    }, [segmentRiskData, allLines])
-
     const getChartData = useMemo(
         () =>
             Array.from(sortedLinesWithReports.entries())
@@ -236,7 +183,6 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
             {currentTab === 'summary' ? (
                 <SummarySection
                     sortedLinesWithReports={sortedLinesWithReports}
-                    riskLines={riskLines}
                     onCloseModal={onCloseModal}
                     setShowFeedback={setShowFeedback}
                 />
