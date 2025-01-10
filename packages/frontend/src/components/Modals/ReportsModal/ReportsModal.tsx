@@ -2,14 +2,12 @@ import './ReportsModal.css'
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
 import { getRecentDataWithIfModifiedSince } from 'src/utils/databaseUtils'
 import { Report } from 'src/utils/types'
-import { LinesSection } from './LinesSection'
-
 import { FeedbackForm } from '../../Form/FeedbackForm/FeedbackForm'
-import { ReportItem } from './ReportItem'
+import { LinesSection } from './LinesSection'
+import { StationsSection } from './StationsSection'
 import { SummarySection } from './SummarySection'
 
 interface ReportsModalProps {
@@ -151,17 +149,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
             ) : null}
             {currentTab === 'lines' ? <LinesSection getChartData={getChartData} /> : null}
             {currentTab === 'stations' ? (
-                <section className="list-modal">
-                    <h2>{t('ReportsModal.topStations')}</h2>
-                    <p className="time-range">{t('ReportsModal.past24Hours')}</p>
-                    {ticketInspectorList.map((ticketInspector) => (
-                        <ReportItem
-                            key={ticketInspector.station.id + ticketInspector.timestamp}
-                            report={ticketInspector}
-                            currentTime={currentTime}
-                        />
-                    ))}
-                </section>
+                <StationsSection ticketInspectorList={ticketInspectorList} currentTime={currentTime} />
             ) : null}
         </div>
     )
