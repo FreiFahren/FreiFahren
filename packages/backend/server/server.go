@@ -106,6 +106,8 @@ func SetupServer() *echo.Echo {
 			echo.HeaderAccept,
 			"If-None-Match",
 			"If-Modified-Since",
+			"baggage",
+			"sentry-trace",
 		},
 		ExposeHeaders: []string{"ETag", "Last-Modified"},
 	}))

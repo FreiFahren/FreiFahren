@@ -1,95 +1,98 @@
 {
-    "name": "frontend",
-    "version": "0.1.0",
-    "private": true,
-    "type": "module",
-    "dependencies": {
-        "@testing-library/jest-dom": "^5.17.0",
-        "@testing-library/react": "^16.1.0",
-        "@types/react": "19.0.1",
-        "@types/react-dom": "19.0.2",
-        "i18next": "^23.15.2",
-        "i18next-browser-languagedetector": "^8.0.0",
-        "i18next-http-backend": "^2.6.2",
-        "lodash": "^4.17.21",
-        "maplibre-gl": "^4.2.0",
-        "react": "19.0.0",
-        "react-dom": "19.0.0",
-        "react-i18next": "^15.0.2",
-        "react-map-gl": "^7.1.7",
-        "react-router-dom": "^6.22.3",
-        "react-scripts": "5.0.1",
-        "recharts": "^2.15.0",
-        "testcafe": "^3.5.0",
-        "typescript": "^4.9.5",
-        "typescript-eslint": "^7.2.0",
-        "web-vitals": "^2.1.4"
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@sentry/cli": "^2.40.0",
+    "@sentry/react": "^8.48.0",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^16.1.0",
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.2",
+    "i18next": "^23.15.2",
+    "i18next-browser-languagedetector": "^8.0.0",
+    "i18next-http-backend": "^2.6.2",
+    "lodash": "^4.17.21",
+    "maplibre-gl": "^4.2.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-i18next": "^15.0.2",
+    "react-map-gl": "^7.1.7",
+    "react-router-dom": "^6.22.3",
+    "react-scripts": "5.0.1",
+    "recharts": "^2.15.0",
+    "testcafe": "^3.5.0",
+    "typescript": "^4.9.5",
+    "typescript-eslint": "^7.2.0",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "DISABLE_ESLINT_PLUGIN=true react-scripts start",
+    "build": "DISABLE_ESLINT_PLUGIN=true react-scripts build && sentry-cli login --auth-token $SENTRY_AUTH_TOKEN && npm run sentry:sourcemaps",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org freifahren-web --project javascript-react ./build && sentry-cli sourcemaps upload --org freifahren-web --project javascript-react ./build"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.24.3",
+    "@babel/preset-react": "^7.24.1",
+    "@babel/preset-typescript": "^7.24.1",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "babel-plugin-react-compiler": "^19.0.0-beta-37ed2a7-20241206",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "eslint-config-prettier": "^8.10.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-compiler": "^19.0.0-beta-37ed2a7-20241206",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
+    "eslint-plugin-unicorn": "^47.0.0",
+    "prettier": "^2.8.8"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "moduleNameMapper": {
+      "\\.(css|less|scss|sass)$": "identity-obj-proxy",
+      "\\.(svg)$": "<rootDir>/__mocks__/svgMock.js"
     },
-    "scripts": {
-        "start": "DISABLE_ESLINT_PLUGIN=true react-scripts start",
-        "build": "DISABLE_ESLINT_PLUGIN=true react-scripts build",
-        "test": "react-scripts test",
-        "eject": "react-scripts eject",
-        "lint": "eslint src",
-        "lint:fix": "eslint src --fix"
+    "transformIgnorePatterns": [
+      "node_modules/(?!(react-leaflet|@react-leaflet)/)"
+    ],
+    "transform": {
+      "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
     },
-    "eslintConfig": {
-        "extends": [
-            "react-app",
-            "react-app/jest"
-        ]
-    },
-    "browserslist": {
-        "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
-        ],
-        "development": [
-            "last 1 chrome version",
-            "last 1 firefox version",
-            "last 1 safari version"
-        ]
-    },
-    "devDependencies": {
-        "@babel/preset-env": "^7.24.3",
-        "@babel/preset-react": "^7.24.1",
-        "@babel/preset-typescript": "^7.24.1",
-        "@typescript-eslint/eslint-plugin": "^5.62.0",
-        "@typescript-eslint/parser": "^5.62.0",
-        "babel-plugin-react-compiler": "^19.0.0-beta-37ed2a7-20241206",
-        "eslint-config-airbnb": "^19.0.4",
-        "eslint-config-airbnb-typescript": "^17.1.0",
-        "eslint-config-prettier": "^8.10.0",
-        "eslint-plugin-import": "^2.31.0",
-        "eslint-plugin-jsx-a11y": "^6.10.2",
-        "eslint-plugin-prefer-arrow": "^1.2.3",
-        "eslint-plugin-prettier": "^4.2.1",
-        "eslint-plugin-react": "^7.37.2",
-        "eslint-plugin-react-compiler": "^19.0.0-beta-37ed2a7-20241206",
-        "eslint-plugin-react-hooks": "^4.6.2",
-        "eslint-plugin-simple-import-sort": "^10.0.0",
-        "eslint-plugin-unicorn": "^47.0.0",
-        "prettier": "^2.8.8"
-    },
-    "jest": {
-        "testEnvironment": "jsdom",
-        "moduleNameMapper": {
-            "\\.(css|less|scss|sass)$": "identity-obj-proxy",
-            "\\.(svg)$": "<rootDir>/__mocks__/svgMock.js"
-        },
-        "transformIgnorePatterns": [
-            "node_modules/(?!(react-leaflet|@react-leaflet)/)"
-        ],
-        "transform": {
-            "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
-        },
-        "testPathIgnorePatterns": [
-            "/node_modules/",
-            "/Map.test.tsx$"
-        ],
-        "setupFiles": [
-            "<rootDir>/jest.setup.tsx"
-        ]
-    }
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/Map.test.tsx$"
+    ],
+    "setupFiles": [
+      "<rootDir>/jest.setup.tsx"
+    ]
+  }
 }
