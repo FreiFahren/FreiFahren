@@ -29,7 +29,7 @@
   },
   "scripts": {
     "start": "DISABLE_ESLINT_PLUGIN=true react-scripts start",
-    "build": "DISABLE_ESLINT_PLUGIN=true react-scripts build && npm run sentry:sourcemaps",
+    "build": "DISABLE_ESLINT_PLUGIN=true react-scripts build && sentry-cli login --auth-token $SENTRY_AUTH_TOKEN && npm run sentry:sourcemaps",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint src",
