@@ -1,12 +1,14 @@
-import React, { createContext, useCallback,useContext, useEffect, useMemo,useRef, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { getRecentDataWithIfModifiedSince } from 'src/utils/databaseUtils'
 import { Report } from 'src/utils/types'
 
 import { useRiskData } from './RiskDataContext'
+import { useApi } from 'src/hooks/useApi'
 
 interface TicketInspectorsContextProps {
     ticketInspectorList: Report[]
     refreshInspectorsData: () => void
+    getLast24HourReports: () => Promise<Report[]>
 }
 
 const TicketInspectorsContext = createContext<TicketInspectorsContextProps | undefined>(undefined)
@@ -21,16 +23,20 @@ export const useTicketInspectors = () => {
 }
 export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [ticketInspectorList, setTicketInspectorList] = useState<Report[]>([])
+    const [previousDayInspectors, setPreviousDayInspectors] = useState<Report[]>([])
     const lastReceivedInspectorTime = useRef<Date | null>(null)
+    const lastFetchedPreviousDayTime = useRef<Date | null>(null)
     const riskData = useRiskData()
+    const { get, isLoading, error } = useApi()
 
     const refreshInspectorsData = useCallback(async () => {
         const endTime = new Date().toISOString()
         const startTime = new Date(new Date(endTime).getTime() - 60 * 60 * 1000).toISOString()
-        const newTicketInspectorList = (await getRecentDataWithIfModifiedSince(
-            `${process.env.REACT_APP_API_URL}/basics/inspectors?start=${startTime}&end=${endTime}`,
-            lastReceivedInspectorTime.current
-        ) as Report[] | null) ?? []
+        const newTicketInspectorList =
+            ((await getRecentDataWithIfModifiedSince(
+                `${process.env.REACT_APP_API_URL}/basics/inspectors?start=${startTime}&end=${endTime}`,
+                lastReceivedInspectorTime.current
+            )) as Report[] | null) ?? []
 
         if (newTicketInspectorList.length > 0) {
             setTicketInspectorList((currentList) => {
@@ -79,6 +85,53 @@ export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> =
         }
     }, [riskData])
 
+    const getLast24HourReports = useCallback(async (): Promise<Report[]> => {
+        const currentTime = new Date().getTime()
+
+        // Check if we need to fetch previous day data (cache for 5 minutes) will also avoid infinite loop
+        const shouldFetchPreviousDay =
+            !lastFetchedPreviousDayTime.current ||
+            currentTime - lastFetchedPreviousDayTime.current.getTime() > 5 * 60 * 1000
+
+        // If we're loading or have an error, just return the current hour's data
+        if (isLoading || error) {
+            return ticketInspectorList
+        }
+
+        if (shouldFetchPreviousDay) {
+            const startTimeInRFC3339 = new Date(currentTime - 1000 * 60 * 60 * 24).toISOString()
+            const endTimeInRFC3339 = new Date(currentTime - 1000 * 60 * 60).toISOString()
+
+            const response = await get<Report[]>(
+                `/basics/inspectors?start=${startTimeInRFC3339}&end=${endTimeInRFC3339}`
+            )
+
+            if (response.success && response.data) {
+                // Filter out historic inspectors from previous day
+                const filteredPreviousDayInspectorList = response.data.filter(
+                    (inspector: Report) => !inspector.isHistoric
+                )
+
+                setPreviousDayInspectors(filteredPreviousDayInspectorList)
+                lastFetchedPreviousDayTime.current = new Date()
+            }
+        }
+
+        // Separate historic and recent inspectors from the last hour
+        const historicInspectors = ticketInspectorList.filter((inspector) => inspector.isHistoric)
+        const recentInspectors = ticketInspectorList.filter((inspector) => !inspector.isHistoric)
+
+        const sortByTimestamp = (a: Report, b: Report): number =>
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+
+        // Combine and sort all lists
+        const sortedLists = [recentInspectors, historicInspectors, previousDayInspectors].map((list) =>
+            list.sort(sortByTimestamp)
+        )
+
+        return sortedLists.flat()
+    }, [ticketInspectorList, previousDayInspectors, get, error, isLoading])
+
     useEffect(() => {
         refreshInspectorsData().catch((error) => {
             // fix this later with sentry
@@ -91,13 +144,14 @@ export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> =
     }, [refreshInspectorsData])
 
     const value = useMemo(
-        () => ({ ticketInspectorList, refreshInspectorsData }),
-        [ticketInspectorList, refreshInspectorsData]
+        () => ({ ticketInspectorList, refreshInspectorsData, getLast24HourReports }),
+        [ticketInspectorList, refreshInspectorsData, getLast24HourReports]
     )
 
-    return (
-        <TicketInspectorsContext.Provider value={value}>
-            {children}
-        </TicketInspectorsContext.Provider>
-    )
+    return <TicketInspectorsContext.Provider value={value}>{children}</TicketInspectorsContext.Provider>
 }
+
+// Todo:
+// - rename to Reports stuff
+// - use useAPI to fetch hourly reports
+// - sensible names
