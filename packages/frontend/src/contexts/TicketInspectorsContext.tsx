@@ -1,5 +1,4 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { getRecentDataWithIfModifiedSince } from 'src/utils/databaseUtils'
 import { Report } from 'src/utils/types'
 
 import { useRiskData } from './RiskDataContext'
@@ -27,23 +26,24 @@ export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> =
     const lastReceivedInspectorTime = useRef<Date | null>(null)
     const lastFetchedPreviousDayTime = useRef<Date | null>(null)
     const riskData = useRiskData()
-    const { get, isLoading, error } = useApi()
+    const { get, getWithIfModifiedSince, isLoading, error } = useApi()
 
     const refreshInspectorsData = useCallback(async () => {
         const endTime = new Date().toISOString()
         const startTime = new Date(new Date(endTime).getTime() - 60 * 60 * 1000).toISOString()
-        const newTicketInspectorList =
-            ((await getRecentDataWithIfModifiedSince(
-                `${process.env.REACT_APP_API_URL}/basics/inspectors?start=${startTime}&end=${endTime}`,
-                lastReceivedInspectorTime.current
-            )) as Report[] | null) ?? []
 
-        if (newTicketInspectorList.length > 0) {
+        const response = await getWithIfModifiedSince<Report[]>(
+            `/basics/inspectors?start=${startTime}&end=${endTime}`,
+            lastReceivedInspectorTime.current
+        )
+
+        if (response.success && response.data && response.data.length > 0) {
+            const data = response.data
             setTicketInspectorList((currentList) => {
                 // Create a map to track the most recent entry per station Id
                 const updatedList = new Map(currentList.map((inspector) => [inspector.station.id, inspector]))
 
-                newTicketInspectorList.forEach((newInspector: Report) => {
+                data.forEach((newInspector: Report) => {
                     const existingInspector = updatedList.get(newInspector.station.id)
 
                     if (existingInspector) {
@@ -61,29 +61,22 @@ export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> =
                 })
 
                 // Set the latest timestamp as if-modified-since header for the next request
-                lastReceivedInspectorTime.current = new Date(
-                    Math.max(
-                        ...newTicketInspectorList.map((inspector: Report) => new Date(inspector.timestamp).getTime())
-                    )
+                const latestTimestamp = Math.max(
+                    ...data.map((inspector: Report) => new Date(inspector.timestamp).getTime())
                 )
+                lastReceivedInspectorTime.current = new Date(latestTimestamp)
+
+                // Trigger risk data refresh
                 riskData.refreshRiskData().catch((error) => {
                     // fix this later with sentry
                     // eslint-disable-next-line no-console
                     console.error('Error refreshing risk data:', error)
                 })
+
                 return Array.from(updatedList.values())
             })
-
-            lastReceivedInspectorTime.current = new Date(
-                Math.max(...newTicketInspectorList.map((inspector: Report) => new Date(inspector.timestamp).getTime()))
-            )
-            riskData.refreshRiskData().catch((error) => {
-                // fix this later with sentry
-                // eslint-disable-next-line no-console
-                console.error('Error refreshing risk data:', error)
-            })
         }
-    }, [riskData])
+    }, [riskData, getWithIfModifiedSince])
 
     const getLast24HourReports = useCallback(async (): Promise<Report[]> => {
         const currentTime = new Date().getTime()
@@ -153,5 +146,4 @@ export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> =
 
 // Todo:
 // - rename to Reports stuff
-// - use useAPI to fetch hourly reports
 // - sensible names
