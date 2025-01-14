@@ -4,69 +4,67 @@ import { Report } from 'src/utils/types'
 import { useRiskData } from './RiskDataContext'
 import { useApi } from 'src/hooks/useApi'
 
-interface TicketInspectorsContextProps {
-    ticketInspectorList: Report[]
-    refreshInspectorsData: () => void
+interface ReportsContextProps {
+    currentReports: Report[]
+    getReports: () => void
     getLast24HourReports: () => Promise<Report[]>
 }
 
-const TicketInspectorsContext = createContext<TicketInspectorsContextProps | undefined>(undefined)
+const ReportsContext = createContext<ReportsContextProps | undefined>(undefined)
 
-export const useTicketInspectors = () => {
-    const context = useContext(TicketInspectorsContext)
+export const useReports = () => {
+    const context = useContext(ReportsContext)
 
     if (!context) {
-        throw new Error('useTicketInspectors must be used within a TicketInspectorsProvider')
+        throw new Error('useReports must be used within a useReportsProvider')
     }
     return context
 }
-export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [ticketInspectorList, setTicketInspectorList] = useState<Report[]>([])
-    const [previousDayInspectors, setPreviousDayInspectors] = useState<Report[]>([])
-    const lastReceivedInspectorTime = useRef<Date | null>(null)
+export const ReportsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [currentReports, setCurrentReports] = useState<Report[]>([])
+    const [previousDayReports, setPreviousDayReports] = useState<Report[]>([])
+    const lastReceivedreportTime = useRef<Date | null>(null)
     const lastFetchedPreviousDayTime = useRef<Date | null>(null)
     const riskData = useRiskData()
     const { get, getWithIfModifiedSince, isLoading, error } = useApi()
 
-    const refreshInspectorsData = useCallback(async () => {
+    const getReports = useCallback(async () => {
         const endTime = new Date().toISOString()
         const startTime = new Date(new Date(endTime).getTime() - 60 * 60 * 1000).toISOString()
 
         const response = await getWithIfModifiedSince<Report[]>(
             `/basics/inspectors?start=${startTime}&end=${endTime}`,
-            lastReceivedInspectorTime.current
+            lastReceivedreportTime.current
         )
 
         if (response.success && response.data && response.data.length > 0) {
             const data = response.data
-            setTicketInspectorList((currentList) => {
+            setCurrentReports((currentList) => {
                 // Create a map to track the most recent entry per station Id
-                const updatedList = new Map(currentList.map((inspector) => [inspector.station.id, inspector]))
+                const updatedList = new Map(currentList.map((report) => [report.station.id, report]))
 
-                data.forEach((newInspector: Report) => {
-                    const existingInspector = updatedList.get(newInspector.station.id)
+                data.forEach((newreport: Report) => {
+                    const existingreport = updatedList.get(newreport.station.id)
 
-                    if (existingInspector) {
+                    if (existingreport) {
                         // Compare timestamps and wether it is historic to decide if we need to update
                         if (
-                            new Date(newInspector.timestamp) >= new Date(existingInspector.timestamp) &&
-                            newInspector.isHistoric === false
+                            new Date(newreport.timestamp) >= new Date(existingreport.timestamp) &&
+                            newreport.isHistoric === false
                         ) {
-                            updatedList.set(newInspector.station.id, newInspector)
+                            updatedList.set(newreport.station.id, newreport)
                         }
                     } else {
-                        // If no existing inspector with the same Id, add the new one
-                        updatedList.set(newInspector.station.id, newInspector)
+                        // If no existing report with the same Id, add the new one
+                        updatedList.set(newreport.station.id, newreport)
                     }
                 })
 
                 // Set the latest timestamp as if-modified-since header for the next request
-                const latestTimestamp = Math.max(
-                    ...data.map((inspector: Report) => new Date(inspector.timestamp).getTime())
-                )
-                lastReceivedInspectorTime.current = new Date(latestTimestamp)
+                const latestTimestamp = Math.max(...data.map((report: Report) => new Date(report.timestamp).getTime()))
+                lastReceivedreportTime.current = new Date(latestTimestamp)
 
-                // Trigger risk data refresh
+                // new report means new risk data
                 riskData.refreshRiskData().catch((error) => {
                     // fix this later with sentry
                     // eslint-disable-next-line no-console
@@ -88,7 +86,7 @@ export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> =
 
         // If we're loading or have an error, just return the current hour's data
         if (isLoading || error) {
-            return ticketInspectorList
+            return currentReports
         }
 
         if (shouldFetchPreviousDay) {
@@ -100,50 +98,44 @@ export const TicketInspectorsProvider: React.FC<{ children: React.ReactNode }> =
             )
 
             if (response.success && response.data) {
-                // Filter out historic inspectors from previous day
-                const filteredPreviousDayInspectorList = response.data.filter(
-                    (inspector: Report) => !inspector.isHistoric
-                )
+                // Filter out historic reports from previous day
+                const filteredPreviousDayreportList = response.data.filter((report: Report) => !report.isHistoric)
 
-                setPreviousDayInspectors(filteredPreviousDayInspectorList)
+                setPreviousDayReports(filteredPreviousDayreportList)
                 lastFetchedPreviousDayTime.current = new Date()
             }
         }
 
-        // Separate historic and recent inspectors from the last hour
-        const historicInspectors = ticketInspectorList.filter((inspector) => inspector.isHistoric)
-        const recentInspectors = ticketInspectorList.filter((inspector) => !inspector.isHistoric)
+        // Separate historic and recent reports from the last hour
+        const historicReports = currentReports.filter((report) => report.isHistoric)
+        const recentReports = currentReports.filter((report) => !report.isHistoric)
 
         const sortByTimestamp = (a: Report, b: Report): number =>
             new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
 
         // Combine and sort all lists
-        const sortedLists = [recentInspectors, historicInspectors, previousDayInspectors].map((list) =>
+        const sortedLists = [recentReports, historicReports, previousDayReports].map((list) =>
             list.sort(sortByTimestamp)
         )
 
         return sortedLists.flat()
-    }, [ticketInspectorList, previousDayInspectors, get, error, isLoading])
+    }, [currentReports, previousDayReports, get, error, isLoading])
 
     useEffect(() => {
-        refreshInspectorsData().catch((error) => {
+        getReports().catch((error) => {
             // fix this later with sentry
             // eslint-disable-next-line no-console
-            console.error('Error refreshing inspectors data:', error)
+            console.error('Error refreshing reports data:', error)
         })
-        const interval = setInterval(refreshInspectorsData, 5 * 1000)
+        const interval = setInterval(getReports, 5 * 1000)
 
         return () => clearInterval(interval)
-    }, [refreshInspectorsData])
+    }, [getReports])
 
     const value = useMemo(
-        () => ({ ticketInspectorList, refreshInspectorsData, getLast24HourReports }),
-        [ticketInspectorList, refreshInspectorsData, getLast24HourReports]
+        () => ({ currentReports, getReports, getLast24HourReports }),
+        [currentReports, getReports, getLast24HourReports]
     )
 
-    return <TicketInspectorsContext.Provider value={value}>{children}</TicketInspectorsContext.Provider>
+    return <ReportsContext.Provider value={value}>{children}</ReportsContext.Provider>
 }
-
-// Todo:
-// - rename to Reports stuff
-// - sensible names

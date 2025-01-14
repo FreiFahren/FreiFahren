@@ -18,7 +18,7 @@ import { LegalDisclaimer } from '../../components/Modals/LegalDisclaimer/LegalDi
 import { UtilModal } from '../../components/Modals/UtilModal/UtilModal'
 import { RiskDataProvider } from '../../contexts/RiskDataContext'
 import { StationsAndLinesProvider } from '../../contexts/StationsAndLinesContext'
-import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext'
+import { ReportsProvider } from '../../contexts/ReportsContext'
 import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
@@ -261,7 +261,7 @@ const App = () => {
                 ) : null}
                 <div id="portal-root" />
                 <RiskDataProvider>
-                    <TicketInspectorsProvider>
+                    <ReportsProvider>
                         <ViewedReportsProvider>
                             <FreifahrenMap
                                 isFirstOpen={appUIState.isFirstOpen}
@@ -285,7 +285,7 @@ const App = () => {
                                 openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })}
                             />
                         </ViewedReportsProvider>
-                    </TicketInspectorsProvider>
+                    </ReportsProvider>
                 </RiskDataProvider>
             </StationsAndLinesProvider>
             <UtilButton handleClick={toggleUtilModal} />

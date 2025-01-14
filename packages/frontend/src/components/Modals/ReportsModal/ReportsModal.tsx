@@ -2,7 +2,7 @@ import './ReportsModal.css'
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
+import { useReports } from 'src/contexts/ReportsContext'
 import { Report } from 'src/utils/types'
 import { FeedbackForm } from '../../Form/FeedbackForm/FeedbackForm'
 import { LinesSection } from './LinesSection'
@@ -21,7 +21,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
     const [currentTab, setCurrentTab] = useState<TabType>('summary')
     const [showFeedback, setShowFeedback] = useState(false)
     const [ticketInspectorList, setTicketInspectorList] = useState<Report[]>([])
-    const { getLast24HourReports } = useTicketInspectors()
+    const { getLast24HourReports } = useReports()
 
     const currentTime = useMemo(() => new Date().getTime(), [])
 
