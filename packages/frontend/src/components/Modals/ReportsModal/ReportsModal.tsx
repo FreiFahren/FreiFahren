@@ -20,13 +20,13 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
     const { t } = useTranslation()
     const [currentTab, setCurrentTab] = useState<TabType>('summary')
     const [showFeedback, setShowFeedback] = useState(false)
-    const [ticketInspectorList, setTicketInspectorList] = useState<Report[]>([])
+    const [reportsList, setReportsList] = useState<Report[]>([])
     const { getLast24HourReports } = useReports()
 
     const currentTime = useMemo(() => new Date().getTime(), [])
 
     useEffect(() => {
-        getLast24HourReports().then(setTicketInspectorList)
+        getLast24HourReports().then(setReportsList)
     }, [getLast24HourReports])
 
     const tabs: TabType[] = ['summary', 'lines', 'stations']
@@ -42,11 +42,11 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
             const lineReports = new Map<string, Report[]>()
 
             // Group reports by line
-            for (const inspector of ticketInspectorList) {
-                const { line } = inspector
+            for (const report of reportsList) {
+                const { line } = report
 
                 if (line === null) continue
-                lineReports.set(line, [...(lineReports.get(line) ?? []), inspector])
+                lineReports.set(line, [...(lineReports.get(line) ?? []), report])
             }
 
             return new Map(Array.from(lineReports.entries()).sort((a, b) => b[1].length - a[1].length))
@@ -55,7 +55,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
         const sortedLines = getAllLinesWithReportsSorted()
 
         setSortedLinesWithReports(sortedLines)
-    }, [ticketInspectorList])
+    }, [reportsList])
 
     const getChartData = useMemo(
         () =>
@@ -94,9 +94,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
                 />
             ) : null}
             {currentTab === 'lines' ? <LinesSection getChartData={getChartData} /> : null}
-            {currentTab === 'stations' ? (
-                <StationsSection ticketInspectorList={ticketInspectorList} currentTime={currentTime} />
-            ) : null}
+            {currentTab === 'stations' ? <StationsSection reportsList={reportsList} currentTime={currentTime} /> : null}
         </div>
     )
 }
