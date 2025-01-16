@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useReports } from 'src/contexts/ReportsContext'
 import { Report } from 'src/utils/types'
+
 import { FeedbackForm } from '../../Form/FeedbackForm/FeedbackForm'
 import { LinesSection } from './LinesSection'
 import { StationsSection } from './StationsSection'
@@ -11,12 +12,12 @@ import { SummarySection } from './SummarySection'
 
 interface ReportsModalProps {
     className?: string
-    onCloseModal: () => void
+    handleCloseModal: () => void
 }
 
 type TabType = 'summary' | 'lines' | 'stations'
 
-const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) => {
+const ReportsModal: React.FC<ReportsModalProps> = ({ className, handleCloseModal }) => {
     const { t } = useTranslation()
     const [currentTab, setCurrentTab] = useState<TabType>('summary')
     const [showFeedback, setShowFeedback] = useState(false)
@@ -89,7 +90,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, onCloseModal }) 
             {currentTab === 'summary' ? (
                 <SummarySection
                     sortedLinesWithReports={sortedLinesWithReports}
-                    onCloseModal={onCloseModal}
+                    onCloseModal={handleCloseModal}
                     setShowFeedback={setShowFeedback}
                 />
             ) : null}

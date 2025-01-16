@@ -1,6 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Report } from 'src/utils/types'
+
 import { ReportItem } from './ReportItem'
 
 interface StationsSectionProps {

@@ -1,8 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useApi } from 'src/hooks/useApi'
 import { Report } from 'src/utils/types'
 
 import { useRiskData } from './RiskDataContext'
-import { useApi } from 'src/hooks/useApi'
 
 interface ReportsContextProps {
     currentReports: Report[]
@@ -38,7 +38,7 @@ export const ReportsProvider: React.FC<{ children: React.ReactNode }> = ({ child
         )
 
         if (response.success && response.data && response.data.length > 0) {
-            const data = response.data
+            const { data } = response
             setCurrentReports((currentList) => {
                 // Create a map to track the most recent entry per station Id
                 const updatedList = new Map(currentList.map((report) => [report.station.id, report]))
@@ -65,10 +65,10 @@ export const ReportsProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 lastReceivedreportTime.current = new Date(latestTimestamp)
 
                 // new report means new risk data
-                riskData.refreshRiskData().catch((error) => {
+                riskData.refreshRiskData().catch((refreshError) => {
                     // fix this later with sentry
                     // eslint-disable-next-line no-console
-                    console.error('Error refreshing risk data:', error)
+                    console.error('Error refreshing risk data:', refreshError)
                 })
 
                 return Array.from(updatedList.values())
@@ -122,11 +122,7 @@ export const ReportsProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }, [currentReports, previousDayReports, get, error, isLoading])
 
     useEffect(() => {
-        getReports().catch((error) => {
-            // fix this later with sentry
-            // eslint-disable-next-line no-console
-            console.error('Error refreshing reports data:', error)
-        })
+        getReports()
         const interval = setInterval(getReports, 5 * 1000)
 
         return () => clearInterval(interval)

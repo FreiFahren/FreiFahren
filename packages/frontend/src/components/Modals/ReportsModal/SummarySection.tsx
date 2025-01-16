@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
-import { Line } from '../../Miscellaneous/Line/Line'
-import { ClusteredReportItem } from './ClusteredReportItem'
-import { Report } from 'src/utils/types'
 import { useRiskData } from 'src/contexts/RiskDataContext'
 import { useStationsAndLines } from 'src/contexts/StationsAndLinesContext'
+import { Report } from 'src/utils/types'
+
+import { Line } from '../../Miscellaneous/Line/Line'
+import { ClusteredReportItem } from './ClusteredReportItem'
 
 interface SummarySectionProps {
     sortedLinesWithReports: Map<string, Report[]>
@@ -39,7 +40,7 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
                 Object.entries(segmentColors).forEach(([segmentId, color]) => {
                     // eslint-disable-next-line prefer-destructuring
                     const line = segmentId.split('-')[0]
-                    const score = colorScores[color] ?? 0 // default to 0 if color not found
+                    const score = color in colorScores ? colorScores[color] : 0
 
                     if (!lineScores.has(line)) {
                         lineScores.set(line, { score, class: score })
@@ -112,6 +113,12 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
                                         key={line}
                                         className={`risk-line risk-level-${riskData.class}`}
                                         onClick={() => onCloseModal()}
+                                        onKeyDown={(event) => {
+                                            if (event.key === 'Enter' || event.key === ' ') {
+                                                event.preventDefault()
+                                                onCloseModal()
+                                            }
+                                        }}
                                         role="button"
                                         tabIndex={0}
                                     >
