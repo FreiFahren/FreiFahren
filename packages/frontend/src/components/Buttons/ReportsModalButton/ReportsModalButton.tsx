@@ -2,7 +2,7 @@ import './ReportsModalButton.css'
 
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { useTicketInspectors } from 'src/contexts/TicketInspectorsContext'
+import { useReports } from 'src/contexts/ReportsContext'
 import { useViewedReports } from 'src/contexts/ViewedReportsContext'
 import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 
@@ -14,17 +14,17 @@ interface ReportsModalButtonProps {
 
 const ReportsModalButton: React.FC<ReportsModalButtonProps> = ({ openModal }) => {
     const { t } = useTranslation()
-    const { ticketInspectorList } = useTicketInspectors()
+    const { currentReports } = useReports()
     const { setLastViewed, isRecentAndUnviewed } = useViewedReports()
 
     const latestReport =
-        ticketInspectorList.length > 0
-            ? ticketInspectorList.reduce((latest, current) => {
+        currentReports.length > 0
+            ? currentReports.reduce((latest, current) => {
                   const currentTime = new Date(current.timestamp).getTime()
                   const latestTime = new Date(latest.timestamp).getTime()
 
                   return currentTime > latestTime ? current : latest
-              }, ticketInspectorList[0])
+              }, currentReports[0])
             : null
 
     const handleClick = () => {
@@ -44,11 +44,11 @@ const ReportsModalButton: React.FC<ReportsModalButtonProps> = ({ openModal }) =>
             <div className="list-button-content">
                 <div className="list-button-header">
                     <p>{t('InspectorListButton.label')}</p>
-                    <p>{ticketInspectorList.length}</p>
+                    <p>{currentReports.length}</p>
                 </div>
                 {latestReport ? (
                     <div className="latest-report">
-                        {(latestReport.line !== null) ? <Line line={latestReport.line} /> : null}
+                        {latestReport.line !== null ? <Line line={latestReport.line} /> : null}
                         <p className="station-name">{latestReport.station.name}</p>
                         {isRecentAndUnviewed(latestReport) ? <span className="indicator live pulse" /> : null}
                     </div>

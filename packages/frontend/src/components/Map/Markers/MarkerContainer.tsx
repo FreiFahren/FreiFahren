@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 
-import { useTicketInspectors } from '../../../contexts/TicketInspectorsContext'
+import { useReports } from '../../../contexts/ReportsContext'
 import { useModalAnimation } from '../../../hooks/UseModalAnimation'
 import { Report } from '../../../utils/types'
 import { CloseButton } from '../../Buttons/CloseButton/CloseButton'
@@ -15,7 +15,7 @@ export interface MarkersProps {
 }
 
 const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, userPosition }) => {
-    const { ticketInspectorList } = useTicketInspectors()
+    const { currentReports } = useReports()
     const [selectedMarker, setSelectedMarker] = useState<Report | null>(null)
 
     const {
@@ -46,7 +46,7 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
 
     return (
         <div>
-            {ticketInspectorList.map((ticketInspector, index) => (
+            {currentReports.map((ticketInspector, index) => (
                 <OpacityMarker
                     isFirstOpen={isFirstOpen}
                     markerData={ticketInspector}
@@ -56,16 +56,18 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
                     onMarkerClick={handleMarkerClick}
                 />
             ))}
-            {isMarkerModalOpen ? selectedMarker && (
-                <MarkerModal
-                    selectedMarker={selectedMarker}
-                    className={`open ${isMarkerModalAnimatingOut ? 'slide-out' : 'slide-in'}`}
-                    userLat={userPosition?.lat}
-                    userLng={userPosition?.lng}
-                >
-                    <CloseButton handleClose={closeMarkerModal} />
-                    </MarkerModal>
-                ) : null}
+            {isMarkerModalOpen
+                ? selectedMarker && (
+                      <MarkerModal
+                          selectedMarker={selectedMarker}
+                          className={`open ${isMarkerModalAnimatingOut ? 'slide-out' : 'slide-in'}`}
+                          userLat={userPosition?.lat}
+                          userLng={userPosition?.lng}
+                      >
+                          <CloseButton handleClose={closeMarkerModal} />
+                      </MarkerModal>
+                  )
+                : null}
         </div>
     )
 }

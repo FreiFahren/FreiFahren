@@ -55,7 +55,7 @@ export const useApi = () => {
     const handleRequest = async <T>(
         url: string,
         options?: RequestOptions
-    ): Promise<{ success: boolean; data: T | null }> => {
+    ): Promise<{ success: boolean; data: T | null; status?: number }> => {
         const baseUrl = process.env.REACT_APP_API_URL
         const fullUrl = `${baseUrl}${url}`
         const headers = {
@@ -82,6 +82,11 @@ export const useApi = () => {
                 headers,
                 body: options?.body !== undefined ? JSON.stringify(options.body) : undefined,
             })
+
+            // Handle 304 Not Modified
+            if (response.status === 304) {
+                return { success: true, data: null, status: 304 }
+            }
 
             // Add breadcrumb for API response
             addBreadcrumb({
@@ -112,7 +117,7 @@ export const useApi = () => {
                 }
                 setError(apiError)
                 logApiError(apiError)
-                return { success: false, data: null }
+                return { success: false, data: null, status: response.status }
             }
 
             if (responseText.trim().length > 0) {
@@ -136,7 +141,7 @@ export const useApi = () => {
             }
 
             setError(null)
-            return { success: true, data }
+            return { success: true, data, status: response.status }
         } catch (err) {
             const caughtError = err as ErrorWithStatus
             const apiError: ApiError = {
@@ -173,6 +178,29 @@ export const useApi = () => {
         }
     }
 
+    const getWithIfModifiedSince = async <T>(url: string, lastUpdate: Date | null) => {
+        try {
+            const headers: HeadersInit = {}
+            if (lastUpdate) {
+                headers['If-Modified-Since'] = lastUpdate.toUTCString()
+            }
+
+            const response = await handleRequest<T>(url, { method: 'GET', headers })
+
+            // Only set loading state if it's not a 304 to not cause rerender
+            if (response.status !== 304) {
+                setIsLoading(true)
+            }
+
+            return response
+        } finally {
+            // Only reset loading state if we set it before
+            if (isLoading) {
+                setIsLoading(false)
+            }
+        }
+    }
+
     const post = async <T>(url: string, body: unknown, options?: Omit<RequestOptions, 'method' | 'body'>) => {
         setIsLoading(true)
 
@@ -192,6 +220,7 @@ export const useApi = () => {
 
     return {
         get,
+        getWithIfModifiedSince,
         post,
         error,
         isLoading,

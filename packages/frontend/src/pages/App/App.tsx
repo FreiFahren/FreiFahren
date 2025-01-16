@@ -16,9 +16,9 @@ import { Backdrop } from '../../components/Miscellaneous/Backdrop/Backdrop'
 import { StatsPopUp } from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
 import { LegalDisclaimer } from '../../components/Modals/LegalDisclaimer/LegalDisclaimer'
 import { UtilModal } from '../../components/Modals/UtilModal/UtilModal'
+import { ReportsProvider } from '../../contexts/ReportsContext'
 import { RiskDataProvider } from '../../contexts/RiskDataContext'
 import { StationsAndLinesProvider } from '../../contexts/StationsAndLinesContext'
-import { TicketInspectorsProvider } from '../../contexts/TicketInspectorsContext'
 import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
@@ -167,7 +167,7 @@ const App = () => {
         localStorage.setItem('layer', clickedLayer)
     }
 
-    const handleRiskGridItemClick = () => {
+    const onRiskGridItemClick = () => {
         setAppUIState((prevState) => ({ ...prevState, isListModalOpen: false }))
         changeLayer('risk', 'reports modal').catch((error) => {
             // fix later with sentry
@@ -261,7 +261,7 @@ const App = () => {
                 ) : null}
                 <div id="portal-root" />
                 <RiskDataProvider>
-                    <TicketInspectorsProvider>
+                    <ReportsProvider>
                         <ViewedReportsProvider>
                             <FreifahrenMap
                                 isFirstOpen={appUIState.isFirstOpen}
@@ -274,7 +274,7 @@ const App = () => {
                                 <>
                                     <ReportsModal
                                         className="open center-animation"
-                                        onCloseModal={handleRiskGridItemClick}
+                                        handleCloseModal={onRiskGridItemClick}
                                     />
                                     <Backdrop
                                         handleClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })}
@@ -285,7 +285,7 @@ const App = () => {
                                 openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })}
                             />
                         </ViewedReportsProvider>
-                    </TicketInspectorsProvider>
+                    </ReportsProvider>
                 </RiskDataProvider>
             </StationsAndLinesProvider>
             <UtilButton handleClick={toggleUtilModal} />

@@ -287,6 +287,11 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
             hasError = true
         }
 
+        // otherwise it is too annoying to test
+        if (process.env.NODE_ENV === 'development') {
+            return false
+        }
+
         return hasError // Return true if there's an error, false otherwise
     }
 
