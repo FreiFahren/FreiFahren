@@ -112,7 +112,6 @@ func SetupServer() *echo.Echo {
 		ExposeHeaders: []string{"ETag", "Last-Modified"},
 	}))
 
-	// Define routes
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "API")
 	})
@@ -130,24 +129,49 @@ func SetupServer() *echo.Echo {
 		ContentTypeInMIME: "application/json",
 	})
 
-	e.POST("/basics/inspectors", inspectors.PostInspector)
-	e.GET("/basics/inspectors", inspectors.GetTicketInspectorsInfo)
+	// Create API version groups
+	v0 := e.Group("/v0")
+	latest := e // Routes without version prefix will point to latest version
 
-	e.GET("/lines", lines.GetAllLines)
-	e.GET("/lines/segments", lines.GetAllSegments)
-	e.GET("/lines/:lineName", lines.GetSingleLine)
-	e.GET("/lines/:lineId/:stationId/statistics", lines.GetLineStatistics)
+	// V0 Routes
+	v0.POST("/basics/inspectors", inspectors.PostInspector)
+	v0.GET("/basics/inspectors", inspectors.GetTicketInspectorsInfo)
 
-	e.GET("/stations", stations.GetAllStations)
-	e.GET("/stations/:stationId", stations.GetSingleStation)
-	e.GET("/stations/:stationId/statistics", stations.GetStationStatistics)
-	e.GET("/stations/search", stations.SearchStation)
+	v0.GET("/lines", lines.GetAllLines)
+	v0.GET("/lines/segments", lines.GetAllSegments)
+	v0.GET("/lines/:lineName", lines.GetSingleLine)
+	v0.GET("/lines/:lineId/:stationId/statistics", lines.GetLineStatistics)
 
-	e.GET("/transit/distance", distance.GetStationDistance)
+	v0.GET("/stations", stations.GetAllStations)
+	v0.GET("/stations/:stationId", stations.GetSingleStation)
+	v0.GET("/stations/:stationId/statistics", stations.GetStationStatistics)
+	v0.GET("/stations/search", stations.SearchStation)
 
-	e.GET("/risk-prediction/segment-colors", prediction.GetRiskSegments)
+	v0.GET("/transit/distance", distance.GetStationDistance)
 
-	e.POST("/feedback", feedback.PostFeedback)
+	v0.GET("/risk-prediction/segment-colors", prediction.GetRiskSegments)
+
+	v0.POST("/feedback", feedback.PostFeedback)
+
+	// Latest Routes
+	latest.POST("/basics/inspectors", inspectors.PostInspector)
+	latest.GET("/basics/inspectors", inspectors.GetTicketInspectorsInfo)
+
+	latest.GET("/lines", lines.GetAllLines)
+	latest.GET("/lines/segments", lines.GetAllSegments)
+	latest.GET("/lines/:lineName", lines.GetSingleLine)
+	latest.GET("/lines/:lineId/:stationId/statistics", lines.GetLineStatistics)
+
+	latest.GET("/stations", stations.GetAllStations)
+	latest.GET("/stations/:stationId", stations.GetSingleStation)
+	latest.GET("/stations/:stationId/statistics", stations.GetStationStatistics)
+	latest.GET("/stations/search", stations.SearchStation)
+
+	latest.GET("/transit/distance", distance.GetStationDistance)
+
+	latest.GET("/risk-prediction/segment-colors", prediction.GetRiskSegments)
+
+	latest.POST("/feedback", feedback.PostFeedback)
 
 	return e
 }
