@@ -126,6 +126,3 @@ if __name__ == "__main__":
         error_message = f"Error in natural language processing bot: {str(e)}\n{traceback.format_exc()}"
         logger.error(error_message)
         sys.exit(1)
-
-
-
