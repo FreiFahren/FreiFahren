@@ -1,28 +1,38 @@
 from telegram_bots.config import FREIFAHREN_CHAT_ID
 from telegram_bots.bot_utils import send_message
-from telegram_bots.restart_utils import (
-    RestartableThread,
-    MAX_RESTARTS,
-    run_safely,
-    thread_exception_handler,
-)
 from telegram_bots.FreiFahren_BE_NLP.nlp import process_new_message
 from telegram_bots.logger import setup_logger
-from telegram_bots.bots import nlp_bot
+from telebot import TeleBot
+from telegram_bots.config import NLP_BOT_TOKEN, RESTART_PASSWORD
 
 from flask import Flask, request
 from datetime import datetime
 from waitress import serve
 import traceback
-import threading
-import time
 import pytz
 import sys
-
+import threading
+import os
 
 app = Flask(__name__)
 logger = setup_logger()
 
+nlp_bot = TeleBot(NLP_BOT_TOKEN)
+
+def send_message(chat_id: str, message: str, bot, parse_mode='HTML') -> None:
+    """Send a message to a user or chat id.
+
+    Args:
+        user_id (int): The Id of the user or chat id.
+        message (str): The message to send.
+        bot (telebot.TeleBot): The bot to use to send the message.
+    """
+
+    try:
+        bot.send_message(chat_id, message, parse_mode=parse_mode)
+    except Exception as e:
+        logger.error(f'Failed to send message to user {chat_id}: {e}')
+        
 
 # message handler for the nlp bot
 @nlp_bot.message_handler(content_types=["text", "photo"])
@@ -40,6 +50,7 @@ def get_info(message):
         if message.content_type == "text"
         else (message.caption or "Image without description")
     )
+    logger.info(f"Message received: {text} from chat id: {message.chat.id}")
 
     process_new_message(timestamp, text)
 
@@ -69,34 +80,39 @@ def report_inspector() -> tuple:
 
     return {"status": "success"}, 200
 
+@app.route("/restart", methods=["POST"])
+def restart():
+    if RESTART_PASSWORD == request.headers.get("X-Password"):
+        logger.info("Restarting the natural language processing bot...")
+        os.execv(sys.executable, ['python3', '-m', 'telegram_bots.main'])
+    else:
+        return {"status": "error", "message": "Invalid password"}, 401
 
 if __name__ == "__main__":
     try:
-        logger.info("Starting the combined bot...")
+        logger.info("Starting the natural language processing bot...")
 
-        # Set up global exception handler for threads
-        threading.excepthook = thread_exception_handler
+        def bot_error_handler(exception):
+            logger.error(f"NLP Bot Error: {str(exception)}")
+            logger.error(traceback.format_exc())
 
-        # Start the NLP bot polling in a separate thread
-        nlp_thread = RestartableThread(
-            target=lambda: run_safely(nlp_bot.polling, "NLP Bot"), name="NLP Bot"
-        )
-        nlp_thread.start()
+        # Register error handler for the bot
+        nlp_bot.logger = logger
+        nlp_bot.exception_handler = bot_error_handler
 
-        # Run the Flask app
+        # Start the NLP bot polling in a thread
+        bot_thread = threading.Thread(target=lambda: nlp_bot.polling(non_stop=True, timeout=60))
+        bot_thread.daemon = True  # This ensures the thread will be killed when the main program exits
+        bot_thread.start()
+
+        # Run the Flask app in the main thread
         logger.info("Starting the Flask server...")
         serve(app, host="0.0.0.0", port=6000)
 
     except Exception as e:
-        error_message = f"Error in combined bot: {str(e)}\n{traceback.format_exc()}"
+        error_message = f"Error in natural language processing bot: {str(e)}\n{traceback.format_exc()}"
         logger.error(error_message)
-        sys.exit(1)  # Exit with error code
+        sys.exit(1)
 
-    # Keep the main thread running and monitor other threads
-    while True:
-        time.sleep(10)
-        if not nlp_thread.is_alive() and nlp_thread.restart_count >= MAX_RESTARTS:
-            logger.critical(
-                f"Thread {nlp_thread.name} is dead and cannot be restarted. Exiting program."
-            )
-            sys.exit(1)
+
+

@@ -5,7 +5,6 @@ from telegram_bots.FreiFahren_BE_NLP.process_message import (
     find_station,
     format_text,
     lines,
-    load_data,
     check_for_spam,
 )
 from telegram_bots.FreiFahren_BE_NLP.db_utils import insert_ticket_info
@@ -14,6 +13,7 @@ from telegram_bots.FreiFahren_BE_NLP.db_utils import fetch_id
 
 logger = setup_logger()
 
+MINIMUM_MESSAGE_LENGTH = 3
 
 class TicketInspector:
     def __init__(self, line, station, direction):
@@ -23,6 +23,8 @@ class TicketInspector:
 
 
 def extract_ticket_inspector_info(unformatted_text):
+    if len(unformatted_text) < MINIMUM_MESSAGE_LENGTH:
+        return None
     found_line = find_line(unformatted_text, lines)
     ticket_inspector = TicketInspector(line=found_line, station=None, direction=None)
 

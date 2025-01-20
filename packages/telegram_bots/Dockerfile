@@ -4,6 +4,9 @@ FROM python:3.9
 # Set the working directory in the container to /app
 WORKDIR /app
 
+# Install curl
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 # Add the current directory contents into the container at /app
 ADD . /app
 
