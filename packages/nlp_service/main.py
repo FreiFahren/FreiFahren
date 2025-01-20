@@ -1,4 +1,4 @@
-from nlp_service.config import FREIFAHREN_CHAT_ID
+from nlp_service.config import FREIFAHREN_CHAT_ID, SENTRY_DSN
 from nlp_service.FreiFahren_BE_NLP.nlp import process_new_message
 from nlp_service.logger import setup_logger
 from telebot import TeleBot
@@ -12,6 +12,19 @@ import pytz
 import sys
 import threading
 import os
+
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn=SENTRY_DSN,
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for tracing.
+    traces_sample_rate=1.0,
+    # Set profiles_sample_rate to 1.0 to profile 100%
+    # of sampled transactions.
+    # We recommend adjusting this value in production.
+    profiles_sample_rate=1.0,
+)
 
 app = Flask(__name__)
 logger = setup_logger()
@@ -89,6 +102,7 @@ def restart():
 
 if __name__ == "__main__":
     try:
+       
         logger.info("Starting the natural language processing bot...")
 
         def bot_error_handler(exception):

@@ -21,5 +21,6 @@ setup(
         "spacy",
         "psycopg2-binary",
         "flask",
+        "sentry-sdk",
     ],
 )
