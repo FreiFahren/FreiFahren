@@ -1,7 +1,7 @@
 from datetime import datetime
 import requests
-from telegram_bots.logger import setup_logger
-from telegram_bots.config import BACKEND_URL, REPORT_PASSWORD
+from nlp_service.logger import setup_logger
+from nlp_service.config import BACKEND_URL, REPORT_PASSWORD
 
 logger = setup_logger()
 

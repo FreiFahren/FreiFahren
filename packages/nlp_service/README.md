@@ -44,7 +44,7 @@ pip3 install -e .
 Run the application by executing the following command in the packages directory:
 
 ```shell
-python3 -m telegram_bots.main
+python3 -m nlp_service.main
 ```
 
 This will start all components in a single process.

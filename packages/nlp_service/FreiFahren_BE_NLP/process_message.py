@@ -2,13 +2,13 @@ import re
 from typing import Optional, List
 import json
 from fuzzywuzzy import process
-from telegram_bots.FreiFahren_BE_NLP.NER.TransportInformationRecognizer import (
+from nlp_service.FreiFahren_BE_NLP.NER.TransportInformationRecognizer import (
     TextProcessor,
 )
-from telegram_bots.logger import setup_logger
+from nlp_service.logger import setup_logger
 import os
 import requests
-from telegram_bots.config import BACKEND_URL
+from nlp_service.config import BACKEND_URL
 
 logger = setup_logger()
 

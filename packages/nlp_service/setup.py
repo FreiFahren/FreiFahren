@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="telegram_bots",
+    name="nlp_service",
     version="0.1",
     packages=find_packages(),
     install_requires=[
@@ -21,5 +21,6 @@ setup(
         "spacy",
         "psycopg2-binary",
         "flask",
+        "sentry-sdk",
     ],
 )

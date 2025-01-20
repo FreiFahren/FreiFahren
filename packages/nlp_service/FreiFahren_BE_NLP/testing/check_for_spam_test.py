@@ -1,5 +1,5 @@
 import unittest
-from telegram_bots.FreiFahren_BE_NLP.process_message import check_for_spam
+from nlp_service.FreiFahren_BE_NLP.process_message import check_for_spam
 
 
 class TestCheckForSpam(unittest.TestCase):
