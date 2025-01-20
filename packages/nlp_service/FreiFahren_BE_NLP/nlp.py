@@ -1,5 +1,5 @@
-from telegram_bots.FreiFahren_BE_NLP.verify_info import verify_direction, verify_line
-from telegram_bots.FreiFahren_BE_NLP.process_message import (
+from nlp_service.FreiFahren_BE_NLP.verify_info import verify_direction, verify_line
+from nlp_service.FreiFahren_BE_NLP.process_message import (
     find_line,
     find_direction,
     find_station,
@@ -7,9 +7,9 @@ from telegram_bots.FreiFahren_BE_NLP.process_message import (
     lines,
     check_for_spam,
 )
-from telegram_bots.FreiFahren_BE_NLP.db_utils import insert_ticket_info
-from telegram_bots.logger import setup_logger
-from telegram_bots.FreiFahren_BE_NLP.db_utils import fetch_id
+from nlp_service.FreiFahren_BE_NLP.db_utils import insert_ticket_info
+from nlp_service.logger import setup_logger
+from nlp_service.FreiFahren_BE_NLP.db_utils import fetch_id
 
 logger = setup_logger()
 

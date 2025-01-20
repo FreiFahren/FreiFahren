@@ -114,7 +114,7 @@ func PostInspector(c echo.Context) error {
 		if pointers.AuthorPtr == nil {
 			// avoid spamming the telegram group
 			if time.Since(lastTelegramNotification) >= 5*time.Minute {
-				telegramEndpoint := os.Getenv("TELEGRAM_BOTS_URL") + "/report-inspector"
+				telegramEndpoint := os.Getenv("NLP_SERVICE_URL") + "/report-inspector"
 				if err := notifyOtherServiceAboutReport(telegramEndpoint, dataToInsert, "Telegram bot"); err != nil {
 					logger.Log.Error().Err(err).Msg("Error notifying Telegram bot about report in postInspector")
 				} else {

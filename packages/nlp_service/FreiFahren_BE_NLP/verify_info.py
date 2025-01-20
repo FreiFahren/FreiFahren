@@ -1,9 +1,9 @@
-from telegram_bots.FreiFahren_BE_NLP.process_message import (
+from nlp_service.FreiFahren_BE_NLP.process_message import (
     find_station,
     remove_direction_and_keyword,
     lines,
 )
-from telegram_bots.logger import setup_logger
+from nlp_service.logger import setup_logger
 
 logger = setup_logger()
 

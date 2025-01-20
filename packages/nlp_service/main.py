@@ -1,9 +1,8 @@
-from telegram_bots.config import FREIFAHREN_CHAT_ID
-from telegram_bots.bot_utils import send_message
-from telegram_bots.FreiFahren_BE_NLP.nlp import process_new_message
-from telegram_bots.logger import setup_logger
+from nlp_service.config import FREIFAHREN_CHAT_ID
+from nlp_service.FreiFahren_BE_NLP.nlp import process_new_message
+from nlp_service.logger import setup_logger
 from telebot import TeleBot
-from telegram_bots.config import NLP_BOT_TOKEN, RESTART_PASSWORD
+from nlp_service.config import NLP_BOT_TOKEN, RESTART_PASSWORD
 
 from flask import Flask, request
 from datetime import datetime
@@ -84,7 +83,7 @@ def report_inspector() -> tuple:
 def restart():
     if RESTART_PASSWORD == request.headers.get("X-Password"):
         logger.info("Restarting the natural language processing bot...")
-        os.execv(sys.executable, ['python3', '-m', 'telegram_bots.main'])
+        os.execv(sys.executable, ['python3', '-m', 'nlp_service.main'])
     else:
         return {"status": "error", "message": "Invalid password"}, 401
 

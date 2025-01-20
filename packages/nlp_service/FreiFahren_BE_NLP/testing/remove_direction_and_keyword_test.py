@@ -1,5 +1,5 @@
 import unittest
-from telegram_bots.FreiFahren_BE_NLP.process_message import remove_direction_and_keyword
+from nlp_service.FreiFahren_BE_NLP.process_message import remove_direction_and_keyword
 
 
 class TestRemoveDirectionAndKeyword(unittest.TestCase):
