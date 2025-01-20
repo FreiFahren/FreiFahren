@@ -39,7 +39,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
 
     const { data: lineSegments, error: segmentsError } = useETagCache<GeoJSON.FeatureCollection<GeoJSON.LineString>>({
-        endpoint: '/lines/segments',
+        endpoint: '/v0/lines/segments',
         storageKeyPrefix: 'segments',
         onError: (error) => {
             // fix this later with sentry

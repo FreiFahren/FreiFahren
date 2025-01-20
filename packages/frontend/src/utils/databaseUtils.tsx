@@ -73,7 +73,7 @@ export const getAllStationsList = async (): Promise<StationList> => {
 
 export const getAllLinesList = async (): Promise<LinesList> => {
     try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/lines`)
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/v0/lines`)
         const data = await response.json()
 
         return data
@@ -93,7 +93,7 @@ export const reportInspector = async (line: string, stationId: string, direction
         message: message || '',
     })
 
-    fetch(`${process.env.REACT_APP_API_URL}/basics/inspectors`, {
+    fetch(`${process.env.REACT_APP_API_URL}/v0/basics/inspectors`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -147,7 +147,7 @@ export const getNumberOfReportsInLast24Hours = async (): Promise<number> => {
         const startTime = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
         // Construct the URL with query parameters
-        const url = new URL(`${process.env.REACT_APP_API_URL}/basics/inspectors`)
+        const url = new URL(`${process.env.REACT_APP_API_URL}/v0/basics/inspectors`)
 
         url.searchParams.append('start', startTime)
         url.searchParams.append('end', endTime)

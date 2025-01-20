@@ -49,7 +49,7 @@ def fetch_id(name, entity_type):
     if not name:
         return None
 
-    url = f"{BACKEND_URL}/stations/search?name={name}"
+    url = f"{BACKEND_URL}/v0/stations/search?name={name}"
 
     try:
         response = requests.get(url, timeout=10)
