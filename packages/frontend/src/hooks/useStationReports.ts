@@ -1,4 +1,4 @@
-import { useEffect,useRef,useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 type Statistics = {
     numberOfReports: number
@@ -27,7 +27,7 @@ export const useStationReports = (stationId: string): number => {
     useEffect(() => {
         if (stationId && !fetchingRef.current) {
             fetchingRef.current = true
-            fetch(`${process.env.REACT_APP_API_URL}/stations/${stationId}/statistics`)
+            fetch(`${process.env.REACT_APP_API_URL}/v0/stations/${stationId}/statistics`)
                 .then((response) => response.json())
                 .then((data: Statistics) => {
                     setNumberOfReports(data.numberOfReports)

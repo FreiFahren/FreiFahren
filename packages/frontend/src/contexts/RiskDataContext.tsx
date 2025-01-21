@@ -1,5 +1,5 @@
 import { isEqual } from 'lodash'
-import React, { createContext, useCallback,useContext, useMemo,useState } from 'react'
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import { RiskData } from 'src/utils/types'
 
 const defaultRefreshRiskData = async (): Promise<void> => {
@@ -18,7 +18,7 @@ export const RiskDataProvider = ({ children }: { children: React.ReactNode }) =>
 
     const refreshRiskData = useCallback(async () => {
         try {
-            const results = await fetch(`${process.env.REACT_APP_API_URL}/risk-prediction/segment-colors`)
+            const results = await fetch(`${process.env.REACT_APP_API_URL}/v0/risk-prediction/segment-colors`)
 
             if (!results.ok) {
                 throw new Error('Failed to fetch risk data')
@@ -37,10 +37,7 @@ export const RiskDataProvider = ({ children }: { children: React.ReactNode }) =>
         }
     }, [segmentRiskData])
 
-    const value = useMemo(
-        () => ({ segmentRiskData, refreshRiskData }),
-        [segmentRiskData, refreshRiskData]
-    )
+    const value = useMemo(() => ({ segmentRiskData, refreshRiskData }), [segmentRiskData, refreshRiskData])
 
     return <RiskDataContext.Provider value={value}>{children}</RiskDataContext.Provider>
 }

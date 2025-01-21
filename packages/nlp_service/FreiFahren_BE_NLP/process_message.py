@@ -37,7 +37,7 @@ def create_lines_with_station_names(lines_with_ids, stations):
 
 
 # Fetch lines data
-response = requests.get(f"{BACKEND_URL}/lines")
+response = requests.get(f"{BACKEND_URL}/v0/lines")
 lines_with_stations_as_ids = response.json()
 
 # Fetch stations data
