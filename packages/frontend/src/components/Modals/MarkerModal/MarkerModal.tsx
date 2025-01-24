@@ -10,7 +10,6 @@ import { useStationDistance } from '../../../hooks/useStationDistance'
 import { useStationReports } from '../../../hooks/useStationReports'
 import { Line } from '../../Miscellaneous/Line/Line'
 import { Skeleton, useSkeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
-import { ShareButton } from '../../Miscellaneous/ShareButton/ShareButton'
 
 interface MarkerModalProps {
     selectedMarker: Report
@@ -24,7 +23,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
     const { t } = useTranslation()
 
     const { allStations } = useStationsAndLines()
-    const { timestamp, station, line, direction } = selectedMarker
+    const { timestamp, station, line, direction, message } = selectedMarker
 
     const numberOfReports = useStationReports(station.id)
     const {
@@ -42,28 +41,27 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
             {children}
             <h1>{station.name}</h1>
             <div className="align-child-on-line direction-line">
-                {/*  because no line should be shown
-                eslint-disable-next-line react/jsx-no-leaked-render */}
-                {/* eslint-disable-next-line @typescript-eslint/strict-boolean-expressions, react/jsx-no-leaked-render */}
-                {line && <Line line={line} />}
+                {line !== null ? <Line line={line} /> : null}
                 {direction?.name !== undefined ? <h2>{direction.name}</h2> : null}
             </div>
             <div>
                 <p>{elapsedTimeMessage}</p>
-                {numberOfReports > 0 ? <p className="reports-count">
+                {numberOfReports > 0 ? (
+                    <p className="reports-count">
                         <b>
                             {numberOfReports} {t('MarkerModal.reports')}
                         </b>{' '}
                         {t('MarkerModal.thisWeek')}
-                    </p> : null}
+                    </p>
+                ) : null}
                 <div className="footer">
-                    {userLat !== undefined && userLng !== undefined ? <span className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage}</span> : null}
+                    {userLat !== undefined && userLng !== undefined ? (
+                        <span className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage}</span>
+                    ) : null}
                     <span className="disclaimer">{t('MarkerModal.inviteText')}</span>
                 </div>
-                {/* description can be undefined */}
-                {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
-                {selectedMarker.message !== null && selectedMarker.message !== undefined ? <p className="description">{selectedMarker.message}</p> : null}
-                <ShareButton report={selectedMarker} />
+                <span className="disclaimer">{t('MarkerModal.syncText')}</span>
+                {message !== null && message !== '' ? <p className="description">{message}</p> : null}
             </div>
         </div>
     )

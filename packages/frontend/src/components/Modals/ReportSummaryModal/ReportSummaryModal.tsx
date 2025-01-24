@@ -52,6 +52,7 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({
                     <h1>{animatedCount}</h1>
                 </span>
                 <p>{t('ReportSummaryModal.description')}</p>
+                <span className="disclaimer">{t('ReportSummaryModal.syncText')}</span>
                 <button className="action" onClick={handleCloseModal} type="button">
                     {t('ReportSummaryModal.button')}
                 </button>

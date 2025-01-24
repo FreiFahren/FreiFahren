@@ -47,7 +47,8 @@
         "privacy1": "I agree to the",
         "privacy2": "Privacy policy",
         "privacy3": ".",
-        "report": "Submit"
+        "report": "Submit",
+        "syncText": "Reports synced with @FreiFahren_BE"
     },
     "PrivacyCheckbox": {
         "privacy1": "I agree to the",
@@ -74,7 +75,8 @@
         "stations": "stations",
         "fromYou": "away",
         "direction": "Direction",
-        "inviteText": "Data may be inaccurate."
+        "inviteText": "Data may be inaccurate.",
+        "syncText": "Reports synced with @FreiFahren_BE"
     },
     "Share": {
         "title": "Check out this app.",
@@ -201,7 +203,8 @@
     "ReportSummaryModal": {
         "title": "Thank you for your report!",
         "description": "People appreciate your help!",
-        "button": "Continue"
+        "button": "Continue",
+        "syncText": "Your report was synced with @FreiFahren_BE"
     },
     "FeedbackButton": {
         "text": "Feedback"
