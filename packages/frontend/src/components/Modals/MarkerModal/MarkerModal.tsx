@@ -10,7 +10,6 @@ import { useStationDistance } from '../../../hooks/useStationDistance'
 import { useStationReports } from '../../../hooks/useStationReports'
 import { Line } from '../../Miscellaneous/Line/Line'
 import { Skeleton, useSkeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
-import { ShareButton } from '../../Miscellaneous/ShareButton/ShareButton'
 
 interface MarkerModalProps {
     selectedMarker: Report
@@ -24,7 +23,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
     const { t } = useTranslation()
 
     const { allStations } = useStationsAndLines()
-    const { timestamp, station, line, direction } = selectedMarker
+    const { timestamp, station, line, direction, message } = selectedMarker
 
     const numberOfReports = useStationReports(station.id)
     const {
@@ -42,7 +41,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
             {children}
             <h1>{station.name}</h1>
             <div className="align-child-on-line direction-line">
-                {line && <Line line={line} />}
+                {line !== null ? <Line line={line} /> : null}
                 {direction?.name !== undefined ? <h2>{direction.name}</h2> : null}
             </div>
             <div>
@@ -62,9 +61,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                     <span className="disclaimer">{t('MarkerModal.inviteText')}</span>
                 </div>
                 <span className="disclaimer">{t('MarkerModal.syncText')}</span>
-                {selectedMarker.message !== null && selectedMarker.message !== undefined ? (
-                    <p className="description">{selectedMarker.message}</p>
-                ) : null}
+                {message !== null && message !== '' ? <p className="description">{message}</p> : null}
             </div>
         </div>
     )

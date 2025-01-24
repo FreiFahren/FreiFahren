@@ -1,6 +1,6 @@
 import './ReportForm.css'
 
-import React, { ChangeEvent, FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 
@@ -484,20 +484,20 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
                                 </SelectField>
                             </section>
                         ) : null}
-                        {currentStation !== null && (
+                        {currentStation !== null ? (
                             <section className="description-field">
                                 <h3>{t('ReportForm.description')}</h3>
                                 <textarea ref={descriptionRef} placeholder={t('ReportForm.descriptionPlaceholder')} />
                             </section>
-                        )}
+                        ) : null}
                         <section>
                             <div>
-                                {currentStation !== null && (
+                                {currentStation !== null ? (
                                     <PrivacyCheckbox
                                         isChecked={isPrivacyChecked}
                                         onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
                                     />
-                                )}
+                                ) : null}
                             </div>
                             <div>
                                 <button
