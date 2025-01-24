@@ -1,6 +1,6 @@
 import './ReportForm.css'
 
-import React, { FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { ChangeEvent, FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 
@@ -42,7 +42,7 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
     const [currentLine, setCurrentLine] = useState<string | null>(null)
     const [currentStation, setCurrentStation] = useState<string | null>(null)
     const [currentDirection, setCurrentDirection] = useState<string | null>(null)
-    const [description, setDescription] = useState<string | null>(null)
+    const descriptionRef = useRef<HTMLTextAreaElement>(null)
 
     const [stationSearch, setStationSearch] = useState<string>('')
     const [searchUsed, setSearchUsed] = useState<boolean>(false)
@@ -302,7 +302,7 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
 
         if (hasError) return // Abort submission if there are validation errors
 
-        await reportInspector(currentLine!, currentStation!, currentDirection!, description!)
+        await reportInspector(currentLine!, currentStation!, currentDirection!, descriptionRef.current?.value!)
 
         const endTime = new Date()
         const durationInSeconds = Math.round((endTime.getTime() - startTime.current.getTime()) / 1000)
@@ -322,7 +322,7 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
                           coordinates: allStations[currentDirection!].coordinates,
                       }
                     : null,
-            message: description,
+            message: descriptionRef.current?.value ?? '',
             timestamp: endTime.toISOString(),
             isHistoric: false,
         }
@@ -487,11 +487,7 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
                         {currentStation !== null && (
                             <section className="description-field">
                                 <h3>{t('ReportForm.description')}</h3>
-                                <textarea
-                                    placeholder={t('ReportForm.descriptionPlaceholder')}
-                                    onChange={(event) => setDescription(event.target.value)}
-                                    value={description ?? ''}
-                                />
+                                <textarea ref={descriptionRef} placeholder={t('ReportForm.descriptionPlaceholder')} />
                             </section>
                         )}
                         <section>
