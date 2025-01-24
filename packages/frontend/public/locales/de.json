@@ -45,7 +45,7 @@
         "description": "Beschreibung",
         "descriptionPlaceholder": "Beschreibung",
         "report": "Melden",
-        "syncText": "Meldungen mit @FreiFahren_BE synchronisiert"
+        "syncText": "Die Meldung wird mit @FreiFahren_BE synchronisiert"
     },
     "PrivacyCheckbox": {
         "privacy1": "Ich stimme der",
@@ -200,7 +200,8 @@
     "ReportSummaryModal": {
         "title": "Danke für deine Meldung!",
         "description": "Menschen schätzen deine Hilfe!",
-        "button": "Weiter"
+        "button": "Weiter",
+        "syncText": "Die Meldung wird mit @FreiFahren_BE synchronisiert"
     },
     "FeedbackButton": {
         "text": "Feedback"

@@ -35,5 +35,10 @@
 }
 
 .report-summary-modal-content > p {
+    margin: 0;
     font-size: var(--font-s);
+}
+
+.report-summary-modal-content .disclaimer {
+    margin-bottom: var(--margin-s);
 }

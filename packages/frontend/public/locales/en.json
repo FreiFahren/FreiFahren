@@ -203,7 +203,8 @@
     "ReportSummaryModal": {
         "title": "Thank you for your report!",
         "description": "People appreciate your help!",
-        "button": "Continue"
+        "button": "Continue",
+        "syncText": "Your report was synced with @FreiFahren_BE"
     },
     "FeedbackButton": {
         "text": "Feedback"
