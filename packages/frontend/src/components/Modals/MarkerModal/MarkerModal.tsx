@@ -42,28 +42,29 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
             {children}
             <h1>{station.name}</h1>
             <div className="align-child-on-line direction-line">
-                {/*  because no line should be shown
-                eslint-disable-next-line react/jsx-no-leaked-render */}
-                {/* eslint-disable-next-line @typescript-eslint/strict-boolean-expressions, react/jsx-no-leaked-render */}
                 {line && <Line line={line} />}
                 {direction?.name !== undefined ? <h2>{direction.name}</h2> : null}
             </div>
             <div>
                 <p>{elapsedTimeMessage}</p>
-                {numberOfReports > 0 ? <p className="reports-count">
+                {numberOfReports > 0 ? (
+                    <p className="reports-count">
                         <b>
                             {numberOfReports} {t('MarkerModal.reports')}
                         </b>{' '}
                         {t('MarkerModal.thisWeek')}
-                    </p> : null}
+                    </p>
+                ) : null}
                 <div className="footer">
-                    {userLat !== undefined && userLng !== undefined ? <span className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage}</span> : null}
+                    {userLat !== undefined && userLng !== undefined ? (
+                        <span className="distance">{showSkeleton ? <Skeleton /> : stationDistanceMessage}</span>
+                    ) : null}
                     <span className="disclaimer">{t('MarkerModal.inviteText')}</span>
                 </div>
-                {/* description can be undefined */}
-                {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
-                {selectedMarker.message !== null && selectedMarker.message !== undefined ? <p className="description">{selectedMarker.message}</p> : null}
-                <ShareButton report={selectedMarker} />
+                <span className="disclaimer">{t('MarkerModal.syncText')}</span>
+                {selectedMarker.message !== null && selectedMarker.message !== undefined ? (
+                    <p className="description">{selectedMarker.message}</p>
+                ) : null}
             </div>
         </div>
     )

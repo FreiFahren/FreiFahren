@@ -71,7 +71,8 @@
         "stations": "Stationen",
         "fromYou": "entfernt",
         "direction": "Richtung",
-        "inviteText": "Daten vielleicht ungenau."
+        "inviteText": "Daten vielleicht ungenau.",
+        "syncText": "Meldungen mit @FreiFahren_BE synchronisert"
     },
     "Share": {
         "title": "Schau dir mal diese App an.",
