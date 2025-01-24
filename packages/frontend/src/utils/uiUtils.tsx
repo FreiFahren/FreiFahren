@@ -12,7 +12,9 @@ export const highlightElement = (id: string): void => {
         if (elementClass.length > 0) {
             elementClass[0].classList.add('highlight')
             setTimeout(() => {
-                elementClass[0].classList.remove('highlight')
+                if (elementClass.length > 0) {
+                    elementClass[0].classList.remove('highlight')
+                }
             }, 3000)
         }
     }
