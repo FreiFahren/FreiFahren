@@ -42,8 +42,6 @@
 }
 
 .marker-modal.info-popup .disclaimer {
-    font-size: var(--font-xxs);
-    color: var(--color-primary);
     text-align: right;
 }
 

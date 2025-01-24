@@ -44,7 +44,8 @@
         "direction": "Richtung",
         "description": "Beschreibung",
         "descriptionPlaceholder": "Beschreibung",
-        "report": "Melden"
+        "report": "Melden",
+        "syncText": "Meldungen mit @FreiFahren_BE synchronisiert"
     },
     "PrivacyCheckbox": {
         "privacy1": "Ich stimme der",

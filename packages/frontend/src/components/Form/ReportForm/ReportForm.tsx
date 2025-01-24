@@ -484,20 +484,24 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
                                 </SelectField>
                             </section>
                         ) : null}
-                        <section className="description-field">
-                            <h3>{t('ReportForm.description')}</h3>
-                            <textarea
-                                placeholder={t('ReportForm.descriptionPlaceholder')}
-                                onChange={(event) => setDescription(event.target.value)}
-                                value={description ?? ''}
-                            />
-                        </section>
+                        {currentStation !== null && (
+                            <section className="description-field">
+                                <h3>{t('ReportForm.description')}</h3>
+                                <textarea
+                                    placeholder={t('ReportForm.descriptionPlaceholder')}
+                                    onChange={(event) => setDescription(event.target.value)}
+                                    value={description ?? ''}
+                                />
+                            </section>
+                        )}
                         <section>
                             <div>
-                                <PrivacyCheckbox
-                                    isChecked={isPrivacyChecked}
-                                    onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
-                                />
+                                {currentStation !== null && (
+                                    <PrivacyCheckbox
+                                        isChecked={isPrivacyChecked}
+                                        onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
+                                    />
+                                )}
                             </div>
                             <div>
                                 <button
@@ -506,6 +510,7 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
                                 >
                                     {t('ReportForm.report')}
                                 </button>
+                                <p className="disclaimer">{t('ReportForm.syncText')}</p>
                             </div>
                         </section>
                     </div>
