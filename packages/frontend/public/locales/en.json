@@ -1,4 +1,7 @@
 {
+    "reportButton": {
+        "label": "Report"
+    },
     "InspectorListButton": {
         "label": "Current reports: "
     },
