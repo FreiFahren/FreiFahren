@@ -12,14 +12,13 @@ import (
 	"github.com/FreiFahren/backend/logger"
 )
 
-type RiskSegmentResponse struct {
-	SegmentID string `json:"segmentId"`
-	Color     string `json:"color"`
+type SegmentRisk struct {
+	Color string  `json:"color"`
+	Risk  float64 `json:"risk"`
 }
 
 type RiskData struct {
-	LastModified  string            `json:"last_modified"`
-	SegmentColors map[string]string `json:"segment_colors"`
+	SegmentsRisk map[string]SegmentRisk `json:"segments_risk"`
 }
 
 type RiskInspector struct {
@@ -138,7 +137,7 @@ func ExecuteRiskModel() (*RiskData, error) {
 		logger.Log.Error().Err(err).Msg("Failed to unmarshal Python output")
 		return nil, err
 	}
-	logger.Log.Debug().Msgf("amount of segments generated: %d", len(riskData.SegmentColors))
+	logger.Log.Debug().Msgf("risk data: %+v", riskData)
 
 	// Update cache with new data
 	Cache.set(&riskData)
