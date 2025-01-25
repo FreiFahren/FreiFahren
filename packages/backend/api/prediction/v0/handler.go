@@ -8,6 +8,23 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type v0RiskData struct {
+	LastModified  string            `json:"last_modified"`
+	SegmentColors map[string]string `json:"segment_colors"`
+}
+
+// serializeToV0 converts the new RiskData format to the old v0RiskData format
+func serializeToV0(data *prediction.RiskData) *v0RiskData {
+	segmentColors := make(map[string]string)
+	for sid, risk := range data.SegmentsRisk {
+		segmentColors[sid] = risk.Color
+	}
+	return &v0RiskData{
+		LastModified:  "", // to avoid breaking backward compatibility with mobile app
+		SegmentColors: segmentColors,
+	}
+}
+
 // @Summary Get risk segments
 //
 // @Description Retrieves risk predictions for transit segments.
@@ -17,7 +34,7 @@ import (
 //
 // @Produce json
 //
-// @Success 200 {object} prediction.RiskData "Successfully retrieved risk segments data"
+// @Success 200 {object} v0RiskData "Successfully retrieved risk segments data"
 // @Failure 500 "Internal Server Error: Failed to execute risk model"
 //
 // @Router /v0/risk-prediction/segment-colors [get]
@@ -27,8 +44,7 @@ func GetRiskSegments(c echo.Context) error {
 	// Get from cache
 	if cachedData, ok := prediction.Cache.Get(); ok {
 		logger.Log.Debug().Msg("cache hit")
-		cachedData.LastModified = ""
-		return c.JSON(http.StatusOK, cachedData)
+		return c.JSON(http.StatusOK, serializeToV0(cachedData))
 	}
 
 	// If cache is empty (first request), execute the model
@@ -37,7 +53,6 @@ func GetRiskSegments(c echo.Context) error {
 		logger.Log.Error().Err(err).Msg("Failed to execute risk model")
 		return c.NoContent(http.StatusInternalServerError)
 	}
-	riskData.LastModified = "" // to avoid breaking backward compatibility with mobile app
 
-	return c.JSON(http.StatusOK, riskData)
+	return c.JSON(http.StatusOK, serializeToV0(riskData))
 }

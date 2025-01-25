@@ -67,7 +67,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Accepts a JSON payload with details about a ticket inspector's current location.\nThis endpoint validates the provided data, processes necessary computations for linking stations and lines,\ninserts the data into the database, and triggers an update to the risk model used in operational analysis.\nIf the 'timestamp' field is not provided in the request, the current UTC time truncated to the nearest minute is used automatically.",
+                "description": "Accepts a JSON payload with details about a ticket inspector's current location.\nThis endpoint validates the provided data, processes necessary computations for linking stations and lines,\ninserts the data into the database, and triggers an update to the risk model used in operational analysis.\nIf the 'timestamp' field is not provided in the request, the current UTC time truncated to the nearest minute is used automatically.\nThe endpoint also includes a rate limit to prevent abuse. The rate limit is based on the IP address of the request.",
                 "consumes": [
                     "application/json"
                 ],
@@ -105,6 +105,9 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request: Missing or incorrect parameters provided."
                     },
+                    "429": {
+                        "description": "Too Many Requests: The request has been rate limited."
+                    },
                     "500": {
                         "description": "Internal Server Error: Error during data processing or database insertion."
                     }
@@ -137,21 +140,21 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Feedback submitted",
+                        "description": "Feedback submitted successfully",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/feedback.FeedbackResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid request or empty feedback",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/feedback.FeedbackResponse"
                         }
                     },
                     "500": {
                         "description": "Failed to save feedback",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/feedback.FeedbackResponse"
                         }
                     }
                 }
@@ -309,29 +312,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error: Error retrieving line data."
-                    }
-                }
-            }
-        },
-        "/risk-prediction/segment-colors": {
-            "get": {
-                "description": "Retrieves risk predictions for transit segments.\nThis endpoint returns color-coded risk levels for different segments of the transit network based on recent ticket inspector activity.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "prediction"
-                ],
-                "summary": "Get risk segments",
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved risk segments data",
-                        "schema": {
-                            "$ref": "#/definitions/prediction.RiskData"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error: Failed to execute risk model"
                     }
                 }
             }
@@ -546,6 +526,29 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/v0/risk-prediction/segment-colors": {
+            "get": {
+                "description": "Retrieves risk predictions for transit segments.\nThis endpoint returns color-coded risk levels for different segments of the transit network based on recent ticket inspector activity.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prediction"
+                ],
+                "summary": "Get risk segments",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved risk segments data",
+                        "schema": {
+                            "$ref": "#/definitions/v0.v0RiskData"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error: Failed to execute risk model"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -557,17 +560,14 @@ const docTemplate = `{
                 }
             }
         },
-        "prediction.RiskData": {
+        "feedback.FeedbackResponse": {
             "type": "object",
             "properties": {
-                "last_modified": {
+                "message": {
                     "type": "string"
                 },
-                "segment_colors": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                "success": {
+                    "type": "boolean"
                 }
             }
         },
@@ -783,6 +783,20 @@ const docTemplate = `{
                 },
                 "timestamp": {
                     "type": "string"
+                }
+            }
+        },
+        "v0.v0RiskData": {
+            "type": "object",
+            "properties": {
+                "last_modified": {
+                    "type": "string"
+                },
+                "segment_colors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         }
