@@ -61,6 +61,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                     <span className="disclaimer">{t('MarkerModal.inviteText')}</span>
                 </div>
                 <span className="disclaimer">{t('MarkerModal.syncText')}</span>
+                {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
                 {message !== null && message !== '' && message !== undefined ? (
                     <p className="description">{message}</p>
                 ) : null}

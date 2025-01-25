@@ -25,9 +25,12 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, preloadedRi
                 properties: {
                     ...feature.properties,
                     line_color: segmentsRisk
-                        ? segmentsRisk[feature.properties?.sid]?.color || defaultColor
+                        ? segmentsRisk[feature.properties?.sid].color || defaultColor
                         : defaultColor,
-                    risk_value: segmentsRisk ? segmentsRisk[feature.properties?.sid]?.risk || 0 : 0,
+                    risk_value:
+                        segmentsRisk && typeof segmentsRisk[feature.properties?.sid].risk === 'number'
+                            ? segmentsRisk[feature.properties?.sid].risk
+                            : 0,
                 },
             })),
         }
