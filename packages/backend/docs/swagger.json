@@ -538,6 +538,29 @@
                     }
                 }
             }
+        },
+        "/v1/risk-prediction/segment-colors": {
+            "get": {
+                "description": "Retrieves risk predictions for transit segments.\nThis endpoint returns color-coded risk levels for different segments of the transit network based on recent ticket inspector activity.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prediction"
+                ],
+                "summary": "Get risk segments",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved risk segments data",
+                        "schema": {
+                            "$ref": "#/definitions/prediction.RiskData"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error: Failed to execute risk model"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -557,6 +580,28 @@
                 },
                 "success": {
                     "type": "boolean"
+                }
+            }
+        },
+        "prediction.RiskData": {
+            "type": "object",
+            "properties": {
+                "segments_risk": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/prediction.SegmentRisk"
+                    }
+                }
+            }
+        },
+        "prediction.SegmentRisk": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "risk": {
+                    "type": "number"
                 }
             }
         },

@@ -11,6 +11,20 @@ definitions:
       success:
         type: boolean
     type: object
+  prediction.RiskData:
+    properties:
+      segments_risk:
+        additionalProperties:
+          $ref: '#/definitions/prediction.SegmentRisk'
+        type: object
+    type: object
+  prediction.SegmentRisk:
+    properties:
+      color:
+        type: string
+      risk:
+        type: number
+    type: object
   statistics.Statistics:
     properties:
       numberOfReports:
@@ -547,6 +561,23 @@ paths:
           description: Successfully retrieved risk segments data
           schema:
             $ref: '#/definitions/v0.v0RiskData'
+        "500":
+          description: 'Internal Server Error: Failed to execute risk model'
+      summary: Get risk segments
+      tags:
+      - prediction
+  /v1/risk-prediction/segment-colors:
+    get:
+      description: |-
+        Retrieves risk predictions for transit segments.
+        This endpoint returns color-coded risk levels for different segments of the transit network based on recent ticket inspector activity.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved risk segments data
+          schema:
+            $ref: '#/definitions/prediction.RiskData'
         "500":
           description: 'Internal Server Error: Failed to execute risk model'
       summary: Get risk segments
