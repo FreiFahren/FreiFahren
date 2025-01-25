@@ -41,7 +41,10 @@ func serializeToV0(data *prediction.RiskData) *v0RiskData {
 func GetRiskSegments(c echo.Context) error {
 	logger.Log.Info().Msg("GET /v0/risk-prediction/segment-colors")
 
-	// Get from cache
+	c.Response().Header().Set("Deprecation", "true")
+	c.Response().Header().Set("Link", "</v1/risk-prediction/segment-colors>; rel=\"successor-version\"")
+	c.Response().Header().Set("Warning", "299 - \"This endpoint is deprecated. Please migrate to /v1/risk-prediction/segment-colors\"")
+
 	if cachedData, ok := prediction.Cache.Get(); ok {
 		logger.Log.Debug().Msg("cache hit")
 		return c.JSON(http.StatusOK, serializeToV0(cachedData))
