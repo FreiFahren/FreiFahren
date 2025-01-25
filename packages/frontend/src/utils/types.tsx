@@ -38,13 +38,15 @@ export interface StationGeoJSON {
     }[]
 }
 
-export interface RiskData {
-    last_modified: string
-    segment_colors: SegmentColors
+export interface SegmentRisk {
+    color: string
+    risk: number
 }
 
-export interface SegmentColors {
-    [key: string]: string
+export interface RiskData {
+    segments_risk: {
+        [key: string]: SegmentRisk
+    }
 }
 
 export type Report = {

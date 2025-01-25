@@ -28,7 +28,9 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
 
     useEffect(() => {
         if (segmentRiskData) {
-            const extractMostRiskLines = (segmentColors: Record<string, string>): Map<string, LineRiskData> => {
+            const extractMostRiskLines = (
+                segmentsRisk: Record<string, { color: string }>
+            ): Map<string, LineRiskData> => {
                 const colorScores: Record<string, number> = {
                     '#A92725': 3, // bad - red
                     '#F05044': 3, // also bad - red (otherwise we would have too many colors, therfore aggregate)
@@ -37,10 +39,10 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
 
                 const lineScores = new Map<string, LineRiskData>()
 
-                Object.entries(segmentColors).forEach(([segmentId, color]) => {
+                Object.entries(segmentsRisk).forEach(([segmentId, data]) => {
                     // eslint-disable-next-line prefer-destructuring
                     const line = segmentId.split('-')[0]
-                    const score = color in colorScores ? colorScores[color] : 0
+                    const score = data.color in colorScores ? colorScores[data.color] : 0
 
                     if (!lineScores.has(line)) {
                         lineScores.set(line, { score, class: score })
@@ -64,7 +66,7 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
                 )
             }
 
-            const riskMap = extractMostRiskLines(segmentRiskData.segment_colors)
+            const riskMap = extractMostRiskLines(segmentRiskData.segments_risk)
 
             Object.keys(allLines).forEach((line) => {
                 if (!riskMap.has(line)) {

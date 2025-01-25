@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { useRiskData } from 'src/contexts/RiskDataContext'
-import { RiskData } from 'src/utils/types'
+import { RiskData, SegmentRisk } from 'src/utils/types'
 
 interface RiskLineLayerProps {
     preloadedRiskData: RiskData | null
@@ -14,7 +14,7 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, preloadedRi
 
     const applySegmentColors = (
         data: GeoJSON.FeatureCollection<GeoJSON.LineString>,
-        segmentColors?: { [key: string]: string }
+        segmentsRisk?: { [key: string]: SegmentRisk }
     ) => {
         const defaultColor = '#13C184' // lowest risk color
 
@@ -24,7 +24,10 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, preloadedRi
                 ...feature,
                 properties: {
                     ...feature.properties,
-                    line_color: segmentColors ? segmentColors[feature.properties?.sid] || defaultColor : defaultColor,
+                    line_color: segmentsRisk
+                        ? segmentsRisk[feature.properties?.sid]?.color || defaultColor
+                        : defaultColor,
+                    risk_value: segmentsRisk ? segmentsRisk[feature.properties?.sid]?.risk || 0 : 0,
                 },
             })),
         }
@@ -32,15 +35,15 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, preloadedRi
 
     // If the segment risk data changes, update the GeoJSON
     useEffect(() => {
-        if (lineSegments && segmentRiskData?.segment_colors) {
-            setGeoJSON(applySegmentColors(lineSegments, segmentRiskData.segment_colors))
+        if (lineSegments && segmentRiskData?.segments_risk) {
+            setGeoJSON(applySegmentColors(lineSegments, segmentRiskData.segments_risk))
         }
     }, [segmentRiskData, lineSegments])
 
     // Initialize with preloaded data
     useEffect(() => {
-        if (lineSegments && preloadedRiskData?.segment_colors) {
-            setGeoJSON(applySegmentColors(lineSegments, preloadedRiskData.segment_colors))
+        if (lineSegments && preloadedRiskData?.segments_risk) {
+            setGeoJSON(applySegmentColors(lineSegments, preloadedRiskData.segments_risk))
         } else if (lineSegments) {
             setGeoJSON(applySegmentColors(lineSegments))
         }
