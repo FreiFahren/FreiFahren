@@ -33,7 +33,7 @@ export const ReportsProvider: React.FC<{ children: React.ReactNode }> = ({ child
         const startTime = new Date(new Date(endTime).getTime() - 60 * 60 * 1000).toISOString()
 
         const response = await getWithIfModifiedSince<Report[]>(
-            `/basics/inspectors?start=${startTime}&end=${endTime}`,
+            `/v0/basics/inspectors?start=${startTime}&end=${endTime}`,
             lastReceivedreportTime.current
         )
 
@@ -94,7 +94,7 @@ export const ReportsProvider: React.FC<{ children: React.ReactNode }> = ({ child
             const endTimeInRFC3339 = new Date(currentTime - 1000 * 60 * 60).toISOString()
 
             const response = await get<Report[]>(
-                `/basics/inspectors?start=${startTimeInRFC3339}&end=${endTimeInRFC3339}`
+                `/v0/basics/inspectors?start=${startTimeInRFC3339}&end=${endTimeInRFC3339}`
             )
 
             if (response.success && response.data) {

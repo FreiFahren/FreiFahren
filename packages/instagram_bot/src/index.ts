@@ -15,7 +15,7 @@ const app = new Hono()
 app.use('/images/*', serveStatic({ root: './' }))
 
 async function fetchInspectorData() {
-    const response = await fetch(`${process.env.API_URL}/basics/inspectors`)
+    const response = await fetch(`${process.env.API_URL}/v0/basics/inspectors`)
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
     }

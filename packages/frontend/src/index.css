@@ -320,6 +320,11 @@ textarea::placeholder {
     color: var(--color-white);
 }
 
+.disclaimer {
+    font-size: var(--font-xxs);
+    color: var(--color-primary);
+}
+
 .row {
     display: flex;
     gap: var(--margin-m);

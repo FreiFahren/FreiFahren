@@ -49,7 +49,7 @@ def cut_line(
 def fetch_api_data() -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     """Fetch stations and lines data from the API."""
     stations_json = requests.get("https://api.freifahren.org/stations").json()
-    lines_json = requests.get("https://api.freifahren.org/lines").json()
+    lines_json = requests.get("https://api.freifahren.org/v0/lines").json()
     lines = [line for line in lines_json]
     return stations_json, lines
 

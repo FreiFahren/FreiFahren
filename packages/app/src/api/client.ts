@@ -37,7 +37,7 @@ const client = axios.create({
 })
 
 const getReports = async (start: DateTime, end: DateTime): Promise<Report[]> => {
-    const { data } = await client.get('/basics/inspectors', {
+    const { data } = await client.get('/v0/basics/inspectors', {
         params: {
             start: start.toISO(),
             end: end.toISO(),
@@ -62,7 +62,7 @@ type PostReport = {
 }
 
 const postReport = async (report: PostReport) => {
-    const { data } = await client.post('/basics/inspectors', {
+    const { data } = await client.post('/v0/basics/inspectors', {
         ...report,
         directionId: report.directionId ?? '',
     })
@@ -83,7 +83,7 @@ const riskSchema = z
 export type RiskData = z.infer<typeof riskSchema>
 
 export const getRiskData = async (): Promise<RiskData> => {
-    const { data } = await client.get('/risk-prediction/segment-colors')
+    const { data } = await client.get('/v0/risk-prediction/segment-colors')
 
     return riskSchema.parse(data)
 }
@@ -103,7 +103,7 @@ export const stationsSchema = z.record(stationSchema)
 export type Stations = z.infer<typeof stationsSchema>
 
 export const getStations = async (): Promise<Record<string, Station>> => {
-    const { data } = await client.get('/stations')
+    const { data } = await client.get('/v0/stations')
 
     return stationsSchema.parse(data)
 }
@@ -112,7 +112,7 @@ export const linesSchema = z.record(z.array(z.string()))
 export type Lines = z.infer<typeof linesSchema>
 
 export const getLines = async (): Promise<Record<string, string[]>> => {
-    const { data } = await client.get('/lines')
+    const { data } = await client.get('/v0/lines')
 
     return linesSchema.parse(data)
 }
@@ -124,7 +124,7 @@ export const stationStatisticsSchema = z.object({
 export type StationStatistics = z.infer<typeof stationStatisticsSchema>
 
 export const getStationStatistics = async (stationId: string) => {
-    const { data } = await client.get(`/stations/${stationId}/statistics`)
+    const { data } = await client.get(`/v0/stations/${stationId}/statistics`)
 
     return stationStatisticsSchema.parse(data)
 }

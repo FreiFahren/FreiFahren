@@ -1,4 +1,7 @@
 {
+    "reportButton": {
+        "label": "Melden"
+    },
     "InspectorListButton": {
         "label": "Aktuelle Meldungen: "
     },
@@ -41,7 +44,8 @@
         "direction": "Richtung",
         "description": "Beschreibung",
         "descriptionPlaceholder": "Beschreibung",
-        "report": "Melden"
+        "report": "Melden",
+        "syncText": "Die Meldung wird mit @FreiFahren_BE synchronisiert"
     },
     "PrivacyCheckbox": {
         "privacy1": "Ich stimme der",
@@ -68,7 +72,8 @@
         "stations": "Stationen",
         "fromYou": "entfernt",
         "direction": "Richtung",
-        "inviteText": "Daten vielleicht ungenau."
+        "inviteText": "Daten vielleicht ungenau.",
+        "syncText": "Meldungen mit @FreiFahren_BE synchronisert"
     },
     "Share": {
         "title": "Schau dir mal diese App an.",
@@ -195,7 +200,8 @@
     "ReportSummaryModal": {
         "title": "Danke für deine Meldung!",
         "description": "Menschen schätzen deine Hilfe!",
-        "button": "Weiter"
+        "button": "Weiter",
+        "syncText": "Die Meldung wird mit @FreiFahren_BE synchronisiert"
     },
     "FeedbackButton": {
         "text": "Feedback"

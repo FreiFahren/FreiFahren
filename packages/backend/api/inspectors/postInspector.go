@@ -49,9 +49,10 @@ func PostInspector(c echo.Context) error {
 		Str("userAgent", c.Request().UserAgent()).
 		Msg("POST /basics/Inspectors")
 
-	// dont rate limit requests from the bot (password in header)
-	if c.Request().Header.Get("X-Password") != os.Getenv("REPORT_PASSWORD") {
+	// dont rate limit requests from the bot (password in header) or in dev mode
+	if c.Request().Header.Get("X-Password") != os.Getenv("REPORT_PASSWORD") && os.Getenv("STATUS") != "dev" {
 		if !limiting.GlobalRateLimiter.CanSubmitReport(c.RealIP()) {
+			logger.Log.Info().Msg("User has been rate limited")
 			return c.JSON(http.StatusTooManyRequests, map[string]string{
 				"message": "Please wait at least 30 minutes between submissions",
 			})
