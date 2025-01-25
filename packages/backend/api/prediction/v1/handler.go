@@ -11,7 +11,7 @@ import (
 // @Summary Get risk segments
 //
 // @Description Retrieves risk predictions for transit segments.
-// @Description This endpoint returns color-coded risk levels for different segments of the transit network based on recent ticket inspector activity.
+// @Description This endpoint returns color-coded risk levels along with the risk value for different segments of the transit network based on recent ticket inspector activity.
 //
 // @Tags prediction
 //
