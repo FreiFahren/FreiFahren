@@ -137,7 +137,7 @@ func ExecuteRiskModel() (*RiskData, error) {
 		logger.Log.Error().Err(err).Msg("Failed to unmarshal Python output")
 		return nil, err
 	}
-	logger.Log.Debug().Msgf("risk data: %+v", riskData)
+	logger.Log.Debug().Msgf("amount of segments generated: %d", len(riskData.SegmentsRisk))
 
 	// Update cache with new data
 	Cache.set(&riskData)
