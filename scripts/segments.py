@@ -137,11 +137,8 @@ def create_segments(
         segments.append(
             {
                 "geometry": segment,
-                "sid": f"{line_id}-{i+1}",
-                "line": line_id,
+                "sid": f"{line_id}:{start_station['station_id']}-{end_station['station_id']}",
                 "line_color": line_color,
-                "from_station_id": start_station["station_id"],
-                "to_station_id": end_station["station_id"],
             }
         )
 
