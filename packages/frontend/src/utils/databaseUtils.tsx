@@ -85,34 +85,6 @@ export const getAllLinesList = async (): Promise<LinesList> => {
     }
 }
 
-export const reportInspector = async (line: string, stationId: string, directionId: string, message: string) => {
-    const requestBody = JSON.stringify({
-        line,
-        stationId: stationId || '',
-        directionId: directionId || '',
-        message: message || '',
-    })
-
-    fetch(`${process.env.REACT_APP_API_URL}/v0/basics/inspectors`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: requestBody,
-    })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`)
-            }
-            return response.json()
-        })
-        .catch((error) => {
-            // fix later with sentry
-            // eslint-disable-next-line no-console
-            console.error('Error:', error)
-        })
-}
-
 export const getStationDistance = async (userStationId: string, inspectorStationId: string): Promise<number | null> => {
     if (userStationId === '' || inspectorStationId === '') {
         return null

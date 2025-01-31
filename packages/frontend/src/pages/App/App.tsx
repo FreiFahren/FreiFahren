@@ -25,9 +25,9 @@ import { useModalAnimation } from '../../hooks/UseModalAnimation'
 import { getNumberOfReportsInLast24Hours } from '../../utils/databaseUtils'
 import { highlightElement } from '../../utils/uiUtils'
 
+// Todo: remove this state once we have a proper state management solution
 type AppUIState = {
     isReportFormOpen: boolean
-    formSubmitted: boolean
     isFirstOpen: boolean
     isStatsPopUpOpen: boolean
     isRiskLayerOpen: boolean
@@ -37,7 +37,6 @@ type AppUIState = {
 
 const initialAppUIState: AppUIState = {
     isReportFormOpen: false,
-    formSubmitted: false,
     isFirstOpen: true,
     isStatsPopUpOpen: false,
     isRiskLayerOpen: localStorage.getItem('layer') === 'risk',
@@ -60,10 +59,7 @@ const App = () => {
     const [showSummary, setShowSummary] = useState<boolean>(false)
     const [reportedData, setReportedData] = useState<Report | null>(null)
     const handleReportFormSubmit = (reportedDataForm: Report) => {
-        setAppUIState((appUIStateCurrent) => ({
-            ...appUIStateCurrent,
-            formSubmitted: !appUIStateCurrent.formSubmitted,
-        }))
+        setAppUIState((prevState) => ({ ...prevState, isReportFormOpen: false }))
         setShowSummary(true)
         setReportedData(reportedDataForm)
     }
@@ -251,11 +247,7 @@ const App = () => {
             <StationsAndLinesProvider>
                 {appUIState.isReportFormOpen ? (
                     <>
-                        <ReportForm
-                            closeModal={() => setAppUIState({ ...appUIState, isReportFormOpen: false })}
-                            onNotifyParentAboutSubmission={handleReportFormSubmit}
-                            className="open center-animation"
-                        />
+                        <ReportForm onReportFormSubmit={handleReportFormSubmit} className="open center-animation" />
                         <Backdrop handleClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
                     </>
                 ) : null}
@@ -265,7 +257,6 @@ const App = () => {
                         <ViewedReportsProvider>
                             <FreifahrenMap
                                 isFirstOpen={appUIState.isFirstOpen}
-                                formSubmitted={appUIState.formSubmitted}
                                 isRiskLayerOpen={appUIState.isRiskLayerOpen}
                                 onRotationChange={handleRotationChange}
                             />

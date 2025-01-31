@@ -8,7 +8,7 @@ import { REPORT_COOLDOWN_MINUTES } from '../../../constants'
 import { useLocation } from '../../../contexts/LocationContext'
 import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
-import { LinesList, reportInspector, StationList, StationProperty } from '../../../utils/databaseUtils'
+import { LinesList, StationList, StationProperty } from '../../../utils/databaseUtils'
 import { calculateDistance } from '../../../utils/mapUtils'
 import { Report } from '../../../utils/types'
 import { createWarningSpan, getLineColor, highlightElement } from '../../../utils/uiUtils'
@@ -17,6 +17,7 @@ import { AutocompleteInputForm } from '../AutocompleteInputForm/AutocompleteInpu
 import { FeedbackForm } from '../FeedbackForm/FeedbackForm'
 import { PrivacyCheckbox } from '../PrivacyCheckbox/PrivacyCheckbox'
 import { SelectField } from '../SelectField/SelectField'
+import { useSubmitReport } from '../../../api/queries'
 
 const getCSSVariable = (variable: string): number => {
     const value = getComputedStyle(document.documentElement).getPropertyValue(variable)
@@ -25,14 +26,13 @@ const getCSSVariable = (variable: string): number => {
 }
 
 interface ReportFormProps {
-    closeModal: () => void
-    onNotifyParentAboutSubmission: (reportedData: Report) => void
+    onReportFormSubmit: (reportedData: Report) => void
     className?: string
 }
 
 const ITEM_HEIGHT = 37
 
-const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmission, className }) => {
+const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
     const { t } = useTranslation()
 
     const { userPosition } = useLocation()
@@ -59,6 +59,8 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
 
     const [stationListHeight, setStationListHeight] = useState<number | null>(null)
     const [initialContainerHeight, setInitialContainerHeight] = useState<number | null>(null)
+
+    const submitReport = useSubmitReport()
 
     // Helper function to calculate combined padding and margin
     const calculateAllowance = (element: HTMLElement): number => {
@@ -302,56 +304,61 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
 
         if (hasError) return // Abort submission if there are validation errors
 
-        await reportInspector(currentLine!, currentStation!, currentDirection!, descriptionRef.current?.value!)
-
-        const endTime = new Date()
-        const durationInSeconds = Math.round((endTime.getTime() - startTime.current.getTime()) / 1000)
-
-        const report: Report = {
-            line: currentLine,
-            station: {
-                id: currentStation!,
-                name: allStations[currentStation!].name,
-                coordinates: allStations[currentStation!].coordinates,
-            },
-            direction:
-                currentDirection !== null
-                    ? {
-                          id: currentDirection,
-                          name: allStations[currentDirection!].name,
-                          coordinates: allStations[currentDirection!].coordinates,
-                      }
-                    : null,
-            message: descriptionRef.current?.value ?? '',
-            timestamp: endTime.toISOString(),
-            isHistoric: false,
-        }
-
-        const finalizeSubmission = (timestamp: Date) => {
-            localStorage.setItem('lastReportTime', timestamp.toISOString()) // Save the timestamp of the report to prevent spamming
-            closeModal()
-            onNotifyParentAboutSubmission(report)
-        }
-
         try {
-            await sendAnalyticsEvent('Report Submitted', {
-                duration: durationInSeconds,
-                meta: {
-                    Station: report.station.name,
-                    ...(report.line !== null && { Line: report.line }),
-                    Direction: report.direction?.name,
-                    Entity: Boolean(currentEntity),
-                    SearchUsed: searchUsed,
-                    StationRecommendationUsed: stationRecommendationSelected,
-                },
-            })
+            const endTime = new Date()
+            const durationInSeconds = Math.round((endTime.getTime() - startTime.current.getTime()) / 1000)
 
-            finalizeSubmission(endTime)
+            const report: Report = {
+                line: currentLine,
+                station: {
+                    id: currentStation!,
+                    name: allStations[currentStation!].name,
+                    coordinates: allStations[currentStation!].coordinates,
+                },
+                direction:
+                    currentDirection !== null
+                        ? {
+                              id: currentDirection,
+                              name: allStations[currentDirection!].name,
+                              coordinates: allStations[currentDirection!].coordinates,
+                          }
+                        : null,
+                message: descriptionRef.current?.value ?? '',
+                timestamp: endTime.toISOString(),
+                isHistoric: false,
+            }
+
+            await submitReport.mutateAsync(report)
+
+            const finalizeSubmission = (timestamp: Date) => {
+                localStorage.setItem('lastReportTime', timestamp.toISOString())
+                onReportFormSubmit(report)
+            }
+
+            try {
+                await sendAnalyticsEvent('Report Submitted', {
+                    duration: durationInSeconds,
+                    meta: {
+                        Station: report.station.name,
+                        ...(report.line !== null && { Line: report.line }),
+                        Direction: report.direction?.name,
+                        Entity: Boolean(currentEntity),
+                        SearchUsed: searchUsed,
+                        StationRecommendationUsed: stationRecommendationSelected,
+                    },
+                })
+
+                finalizeSubmission(endTime)
+            } catch (error) {
+                // fix later with sentry
+                // eslint-disable-next-line no-console
+                console.error('Failed to send analytics event:', error)
+                finalizeSubmission(endTime)
+            }
         } catch (error) {
             // fix later with sentry
             // eslint-disable-next-line no-console
-            console.error('Failed to send analytics event:', error)
-            finalizeSubmission(endTime)
+            console.error('Failed to submit report:', error)
         }
     }
 

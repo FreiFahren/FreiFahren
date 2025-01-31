@@ -1,7 +1,7 @@
 import './OpacityMarker.css'
 
 import maplibregl from 'maplibre-gl'
-import React, { useEffect, useMemo, useRef,useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Marker } from 'react-map-gl/maplibre'
 import { useViewedReports } from 'src/contexts/ViewedReportsContext'
 import { Report } from 'src/utils/types'
@@ -10,17 +10,10 @@ interface OpacityMarkerProps {
     markerData: Report
     index: number
     isFirstOpen: boolean
-    formSubmitted: boolean
     onMarkerClick: (markerData: Report) => void
 }
 
-export const OpacityMarker: React.FC<OpacityMarkerProps> = ({
-    markerData,
-    index,
-    isFirstOpen,
-    formSubmitted,
-    onMarkerClick,
-}) => {
+export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index, isFirstOpen, onMarkerClick }) => {
     const [opacity, setOpacity] = useState(0)
     const { timestamp, station, line, isHistoric } = markerData
     const { setLastViewed, isRecentAndUnviewed } = useViewedReports()
@@ -51,6 +44,7 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({
                         newOpacity = 0.2
                     }
                     setOpacity(newOpacity)
+                    markerRef.current?.setOpacity(newOpacity.toString())
 
                     if (elapsedTime >= timeToFade) {
                         setOpacity(0)
@@ -58,18 +52,16 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({
                     }
                 }
 
-                // change the direct reference of the marker
-                markerRef.current?.setOpacity(opacity.toString())
-
                 calculateOpacity() // Initial calculation
                 intervalId = setInterval(calculateOpacity, 30 * 1000) // Avoid excessive calculations
             } else {
-                markerRef.current?.setOpacity('0.5')
-                setOpacity(0.5)
+                const historicOpacity = 0.5
+                markerRef.current?.setOpacity(historicOpacity.toString())
+                setOpacity(historicOpacity)
             }
             return () => clearInterval(intervalId)
         }
-    }, [adjustedTimestamp, isHistoric, isFirstOpen, opacity, station.name, formSubmitted])
+    }, [adjustedTimestamp, isHistoric, isFirstOpen, station.name])
 
     if (opacity <= 0) {
         return null

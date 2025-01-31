@@ -18,7 +18,6 @@ import { MarkerContainer } from './Markers/MarkerContainer'
 const Map = lazy(() => import('react-map-gl/maplibre'))
 
 interface FreifahrenMapProps {
-    formSubmitted: boolean
     isFirstOpen: boolean
     isRiskLayerOpen: boolean
     onRotationChange: (bearing: number) => void
@@ -28,12 +27,7 @@ const berlinViewPosition: { lng: number; lat: number } = { lng: 13.388, lat: 52.
 const GITHUB_ICON = `${process.env.PUBLIC_URL}/icons/github.svg`
 const INSTAGRAM_ICON = `${process.env.PUBLIC_URL}/icons/instagram.svg`
 
-const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
-    formSubmitted,
-    isFirstOpen,
-    isRiskLayerOpen,
-    onRotationChange,
-}) => {
+const FreifahrenMap: React.FC<FreifahrenMapProps> = ({ isFirstOpen, isRiskLayerOpen, onRotationChange }) => {
     const SouthWestBounds: LngLatLike = { lng: 12.8364646484805, lat: 52.23115511676795 }
     const NorthEastBounds: LngLatLike = { lng: 14.00044556529124, lat: 52.77063424239867 }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
@@ -110,11 +104,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     mapStyle={`https://api.jawg.io/styles/848dfeff-2d26-4044-8b83-3b1851256e3d.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`}
                 >
                     {!isFirstOpen ? <LocationMarker userPosition={userPosition} /> : null}
-                    <MarkerContainer
-                        isFirstOpen={isFirstOpen}
-                        formSubmitted={formSubmitted}
-                        userPosition={userPosition}
-                    />
+                    <MarkerContainer isFirstOpen={isFirstOpen} userPosition={userPosition} />
                     <StationLayer stations={stationGeoJSON} />
                     {isRiskLayerOpen ? (
                         <RiskLineLayer preloadedRiskData={segmentRiskData} lineSegments={lineSegments} />

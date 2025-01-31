@@ -9,12 +9,11 @@ import { MarkerModal } from '../../Modals/MarkerModal/MarkerModal'
 import { OpacityMarker } from './Classes/OpacityMarker/OpacityMarker'
 
 export interface MarkersProps {
-    formSubmitted: boolean
     isFirstOpen: boolean
     userPosition?: { lng: number; lat: number } | null | null
 }
 
-const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, userPosition }) => {
+const MarkerContainer: React.FC<MarkersProps> = ({ isFirstOpen, userPosition }) => {
     const { currentReports } = useReports()
     const [selectedMarker, setSelectedMarker] = useState<Report | null>(null)
 
@@ -52,7 +51,6 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
                     markerData={ticketInspector}
                     index={index}
                     key={ticketInspector.station.id}
-                    formSubmitted={formSubmitted}
                     onMarkerClick={handleMarkerClick}
                 />
             ))}
