@@ -39,7 +39,6 @@ export interface StationGeoJSON {
 }
 
 export interface RiskData {
-    last_modified: string
     segment_colors: SegmentColors
 }
 

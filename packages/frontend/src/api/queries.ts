@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { useMemo } from 'react'
-import { Report } from 'src/utils/types'
+import { Report, RiskData } from 'src/utils/types'
 import { CACHE_KEYS } from './queryClient'
 
 const fetchNewReports = async (
@@ -69,8 +69,9 @@ export const useSubmitReport = () => {
     })
 }
 
-// Todo: invalidate risk query when new data is received
 export const useCurrentReports = () => {
+    const queryClient = useQueryClient()
+
     const { data = [], ...query } = useQuery<Report[], Error>({
         queryKey: CACHE_KEYS.byTimeframe('1h'),
         queryFn: async ({ queryKey }): Promise<Report[]> => {
@@ -80,6 +81,14 @@ export const useCurrentReports = () => {
 
             const result = await fetchNewReports(startTime, endTime, lastKnownTimestamp)
             const newData = result === null ? data : result
+
+            // If we got new data, invalidate the risk cache
+            if (result !== null) {
+                // temporary fix to avoid race condition. // todo: handle this better on the backend with mutex
+                setTimeout(() => {
+                    queryClient.invalidateQueries({ queryKey: CACHE_KEYS.risk })
+                }, 2.5 * 1000)
+            }
 
             // Separate historic and non-historic reports
             const historicReports = newData.filter((report) => report.isHistoric)
@@ -152,4 +161,20 @@ export const useLast24HourReports = () => {
     }, [lastHourReports, fullDayReports, isPlaceholderData])
 
     return { data, isPlaceholderData, ...query } as const
+}
+
+export const useRiskData = () => {
+    const { data = { segment_colors: {} }, ...query } = useQuery<RiskData, Error>({
+        queryKey: CACHE_KEYS.risk,
+        queryFn: async ({ queryKey }): Promise<RiskData> => {
+            console.log('fetching risk data')
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/v0/risk-prediction/segment-colors`)
+            return response.json()
+        },
+        refetchInterval: 30 * 1000,
+        staleTime: 60 * 1000,
+        structuralSharing: true,
+    })
+
+    return { data, ...query } as const
 }

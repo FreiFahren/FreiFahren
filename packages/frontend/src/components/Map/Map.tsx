@@ -5,7 +5,6 @@ import React, { lazy, Suspense, useCallback, useEffect, useRef } from 'react'
 import { LngLatBoundsLike, LngLatLike, MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre'
 
 import { useLocation } from '../../contexts/LocationContext'
-import { useRiskData } from '../../contexts/RiskDataContext'
 import { useStationsAndLines } from '../../contexts/StationsAndLinesContext'
 import { useETagCache } from '../../hooks/useETagCaching'
 import { convertStationsToGeoJSON } from '../../utils/mapUtils'
@@ -14,6 +13,7 @@ import { RiskLineLayer } from './MapLayers/LineLayer/RiskLineLayer'
 import { StationLayer } from './MapLayers/StationLayer/StationLayer'
 import { LocationMarker } from './Markers/Classes/LocationMarker/LocationMarker'
 import { MarkerContainer } from './Markers/MarkerContainer'
+import { useRiskData } from 'src/api/queries'
 
 const Map = lazy(() => import('react-map-gl/maplibre'))
 
@@ -61,21 +61,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({ isFirstOpen, isRiskLayerO
     }, [isFirstOpen, initializeLocationTracking])
 
     // preload colors before risklayer component mounts to instantly show the highlighted segments
-    const { segmentRiskData, refreshRiskData } = useRiskData()
-
-    const hasRefreshed = useRef(false) // To prevent refreshing on every render
-
-    useEffect(() => {
-        if (isFirstOpen && !hasRefreshed.current) {
-            // Refresh or load risk data on initial open
-            refreshRiskData().catch((error) => {
-                // fix this later with sentry
-                // eslint-disable-next-line no-console
-                console.error('Error refreshing risk data', error)
-            })
-            hasRefreshed.current = true
-        }
-    }, [isFirstOpen, refreshRiskData])
+    const { data: segmentRiskData } = useRiskData()
 
     const handleRotate = useCallback(
         (event: ViewStateChangeEvent) => {
