@@ -2,15 +2,16 @@ import { createTheme } from '@shopify/restyle'
 
 const palette = {
     bg2: '#131218',
-    bg: '#1c1c1e',
+    bg: '#232528',
     danger: '#B52F2F',
     fg: '#F0F0F0',
     success: '#C9F299',
-    selected: '#5DCC50',
+    selected: '#3478f6',
     blue: '#68f9ff',
     green: '#4D8E46',
+    primary: '#3478f6',
     whiteish: '#E9E7E7',
-    border: 'black',
+    border: '#181818',
     darkGrey: '#4A4A4A',
     darkText: '#8A8A8A',
     'lines.U1': '#88ad58',
@@ -151,6 +152,7 @@ export const theme = createTheme({
     buttonVariants: {
         defaults: {
             backgroundColor: 'bg',
+            borderColor: 'border',
             paddingVertical: 'xs',
             paddingHorizontal: 's',
             borderWidth: 2,
@@ -160,7 +162,7 @@ export const theme = createTheme({
             justifyContent: 'center',
         },
         primary: {
-            backgroundColor: 'green',
+            backgroundColor: 'primary',
         },
         secondary: {
             backgroundColor: 'bg',

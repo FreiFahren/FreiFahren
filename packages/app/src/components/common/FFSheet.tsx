@@ -34,7 +34,7 @@ const SheetBackground = ({ style, ...props }: ViewProps) => {
                 style,
                 {
                     backgroundColor: theme.colors.bg,
-                    borderColor: theme.colors.bg2,
+                    borderColor: theme.colors.border,
                     borderWidth: 2,
                     flex: 1,
                     borderTopLeftRadius: 25,

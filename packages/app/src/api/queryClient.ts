@@ -1,4 +1,8 @@
-import { QueryClient } from '@tanstack/react-query'
+import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
+
+import { useAppStore } from '../app.store'
+import { track } from '../tracking'
 
 export const CACHE_KEYS = {
     reports: ['reports'],
@@ -9,6 +13,13 @@ export const CACHE_KEYS = {
     stationStatistics: (stationId: string) => ['station-statistics', stationId],
 }
 
+const onError = (error: unknown) => {
+    if (error instanceof AxiosError && error.response?.status === 410) {
+        track({ name: 'App Deprecated' })
+        useAppStore.getState().update({ deprecated: true })
+    }
+}
+
 export const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
@@ -16,4 +27,10 @@ export const queryClient = new QueryClient({
             gcTime: Infinity,
         },
     },
+    queryCache: new QueryCache({
+        onError,
+    }),
+    mutationCache: new MutationCache({
+        onError,
+    }),
 })

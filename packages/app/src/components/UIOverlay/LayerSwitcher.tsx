@@ -31,7 +31,7 @@ export const LayerSwitcher = (props: ComponentProps<typeof FFView>) => {
                     style={{ borderRadius: 7 }}
                     bg="bg"
                     borderWidth={3}
-                    borderColor="bg2"
+                    borderColor="border"
                     p="xxxs"
                 >
                     {(['risk', 'lines'] as const).map((layer, index) => (

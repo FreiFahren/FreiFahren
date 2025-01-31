@@ -55,5 +55,10 @@
         "confirmText": "Wenn du fortfährst, erklärst du dich mit den neuen Datenschutzbestimmungen einverstanden.",
         "link": "Neue Datenschutzerklärung",
         "confirm": "Bestätigen"
+    },
+    "deprecation": {
+        "title": "Deine Version ist veraltet",
+        "text": "Leider können wir nicht immer jede App-Version unterstützen. Bitte aktualisiere die App, um weiterhin alle Funktionen nutzen zu können.",
+        "openStore": "App Store öffnen",
     }
 }
