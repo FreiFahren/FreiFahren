@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMemo } from 'react'
 import { Report } from 'src/utils/types'
 import { CACHE_KEYS } from './queryClient'
 
@@ -68,6 +69,7 @@ export const useSubmitReport = () => {
     })
 }
 
+// Todo: invalidate risk query when new data is received
 export const useCurrentReports = () => {
     const { data = [], ...query } = useQuery<Report[], Error>({
         queryKey: CACHE_KEYS.byTimeframe('1h'),
@@ -87,21 +89,42 @@ export const useCurrentReports = () => {
     return { data, ...query } as const
 }
 
+// Todo: order so that first, last hour then historic then 24h - 1 first hour
+// Todo: add placeholder so that while loading last hour is returned
 export const useLast24HourReports = () => {
-    const { data = [], ...query } = useQuery<Report[], Error>({
+    const { data: lastHourReports = [] } = useCurrentReports()
+
+    const { data: fullDayReports = [], ...query } = useQuery<Report[], Error>({
         queryKey: CACHE_KEYS.byTimeframe('24h'),
         queryFn: async ({ queryKey }): Promise<Report[]> => {
             const endTime = new Date().toISOString()
             const startTime = new Date(new Date(endTime).getTime() - 24 * 60 * 60 * 1000).toISOString()
-            const lastKnownTimestamp = data[0]?.timestamp
+            const lastKnownTimestamp = fullDayReports[0]?.timestamp
 
             const result = await fetchNewReports(startTime, endTime, lastKnownTimestamp)
-            return result === null ? data : result
+            const newData = result === null ? fullDayReports : result
+
+            // Remove the most recent hour from the 24h data since it will be replaced by lastHourReports
+            const oneHourAgo = new Date(new Date().getTime() - 60 * 60 * 1000)
+            const reportsExcludingLastHour = newData.filter((report) => new Date(report.timestamp) < oneHourAgo)
+
+            return reportsExcludingLastHour
         },
         refetchInterval: 2 * 60 * 1000,
         staleTime: 5 * 60 * 1000,
         structuralSharing: true,
     })
+
+    /*
+     Combine the data: most recent hour first, then the rest of the 24h period
+     becuase of fullDayReports wont contain historic data, (see docs for more info),
+     this would cause the Last24HourReports to be misaligned with the current reports
+    */
+    const data = useMemo(() => {
+        if (lastHourReports.length === 0 && fullDayReports.length === 0) return []
+
+        return [...lastHourReports, ...fullDayReports]
+    }, [lastHourReports, fullDayReports])
 
     return { data, ...query } as const
 }

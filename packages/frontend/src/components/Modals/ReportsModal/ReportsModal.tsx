@@ -24,34 +24,49 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, handleCloseModal
     const { data: last24HourReports } = useLast24HourReports()
 
     const currentTime = useMemo(() => new Date().getTime(), [])
-
     const tabs: TabType[] = ['summary', 'lines', 'stations']
-
-    const handleTabChange = (tab: TabType) => {
-        setCurrentTab(tab)
-    }
-
     const [sortedLinesWithReports, setSortedLinesWithReports] = useState<Map<string, Report[]>>(new Map())
 
-    useEffect(() => {
-        const getAllLinesWithReportsSorted = (): Map<string, Report[]> => {
-            const lineReports = new Map<string, Report[]>()
+    const groupReportsByLine = (reports: Report[]): Map<string, Report[]> => {
+        const lineReports = new Map<string, Report[]>()
 
-            // Group reports by line
-            for (const report of last24HourReports) {
-                const { line } = report
+        for (const report of reports) {
+            const { line } = report
+            if (line === null) continue
 
-                if (line === null) continue
-                lineReports.set(line, [...(lineReports.get(line) ?? []), report])
-            }
-
-            return new Map(Array.from(lineReports.entries()).sort((a, b) => b[1].length - a[1].length))
+            const existingReports = lineReports.get(line) ?? []
+            lineReports.set(line, [...existingReports, report])
         }
 
-        const sortedLines = getAllLinesWithReportsSorted()
+        return lineReports
+    }
 
-        setSortedLinesWithReports(sortedLines)
-    }, [last24HourReports])
+    // Sort lines by number of reports (descending)
+    const sortLinesByReportCount = (lineReports: Map<string, Report[]>): Map<string, Report[]> => {
+        const sortedEntries = Array.from(lineReports.entries()).sort((a, b) => b[1].length - a[1].length)
+        return new Map(sortedEntries)
+    }
+
+    // Check if the new sorted lines are different from current state
+    const hasLinesSortingChanged = (current: Map<string, Report[]>, next: Map<string, Report[]>): boolean => {
+        const currentEntries = Array.from(current.entries())
+        const nextEntries = Array.from(next.entries())
+
+        if (currentEntries.length !== nextEntries.length) return true
+
+        return currentEntries.some(
+            (entry, index) => entry[0] !== nextEntries[index][0] || entry[1].length !== nextEntries[index][1].length
+        )
+    }
+
+    useEffect(() => {
+        const groupedReports = groupReportsByLine(last24HourReports)
+        const sortedLines = sortLinesByReportCount(groupedReports)
+
+        if (hasLinesSortingChanged(sortedLinesWithReports, sortedLines)) {
+            setSortedLinesWithReports(sortedLines)
+        }
+    }, [last24HourReports, sortedLinesWithReports])
 
     const getChartData = useMemo(
         () =>
@@ -63,6 +78,10 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, handleCloseModal
                 })),
         [sortedLinesWithReports]
     )
+
+    const handleTabChange = (tab: TabType) => {
+        setCurrentTab(tab)
+    }
 
     if (showFeedback) {
         return <FeedbackForm openAnimationClass={className} />
