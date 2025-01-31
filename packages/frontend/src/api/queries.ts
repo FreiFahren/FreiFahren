@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { Report } from 'src/utils/types'
 import { CACHE_KEYS } from './queryClient'
@@ -109,11 +109,14 @@ export const useCurrentReports = () => {
     return { data, ...query } as const
 }
 
-// Todo: add placeholder so that while loading last hour is returned
 export const useLast24HourReports = () => {
     const { data: lastHourReports = [] } = useCurrentReports()
 
-    const { data: fullDayReports = [], ...query } = useQuery<Report[], Error>({
+    const {
+        data: fullDayReports = [],
+        isPlaceholderData,
+        ...query
+    } = useQuery<Report[], Error>({
         queryKey: CACHE_KEYS.byTimeframe('24h'),
         queryFn: async ({ queryKey }): Promise<Report[]> => {
             const endTime = new Date().toISOString()
@@ -132,6 +135,7 @@ export const useLast24HourReports = () => {
         refetchInterval: 2 * 60 * 1000,
         staleTime: 5 * 60 * 1000,
         structuralSharing: true,
+        placeholderData: keepPreviousData,
     })
 
     /*
@@ -140,10 +144,12 @@ export const useLast24HourReports = () => {
      this would cause the Last24HourReports to be misaligned with the current reports
     */
     const data = useMemo(() => {
-        if (lastHourReports.length === 0 && fullDayReports.length === 0) return []
+        // If we're showing placeholder data, just show the last hour reports
+        if (isPlaceholderData) return lastHourReports
 
+        // Once we have real data, combine both sets
         return [...lastHourReports, ...fullDayReports]
-    }, [lastHourReports, fullDayReports])
+    }, [lastHourReports, fullDayReports, isPlaceholderData])
 
-    return { data, ...query } as const
+    return { data, isPlaceholderData, ...query } as const
 }
