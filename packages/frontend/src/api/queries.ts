@@ -79,7 +79,27 @@ export const useCurrentReports = () => {
             const lastKnownTimestamp = data[0]?.timestamp
 
             const result = await fetchNewReports(startTime, endTime, lastKnownTimestamp)
-            return result === null ? data : result
+            const newData = result === null ? data : result
+
+            // Separate historic and non-historic reports
+            const historicReports = newData.filter((report) => report.isHistoric)
+            const currentReports = newData.filter((report) => !report.isHistoric)
+
+            // Sort each group by timestamp (newest first)
+            const sortedCurrentReports = currentReports.sort(
+                (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+            )
+            const sortedHistoricReports = historicReports.sort(
+                (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+            )
+
+            /*
+             Combine the sorted groups: current reports first, then historic
+             Necessary because historic reports have a guessed timestamp of between 45 and 60 minutes ago
+             This means that sometimes the historic reports will be returned first, but we should always
+             show the real reports first.
+            */
+            return [...sortedCurrentReports, ...sortedHistoricReports]
         },
         refetchInterval: 15 * 1000,
         staleTime: 2.5 * 60 * 1000,
@@ -89,7 +109,6 @@ export const useCurrentReports = () => {
     return { data, ...query } as const
 }
 
-// Todo: order so that first, last hour then historic then 24h - 1 first hour
 // Todo: add placeholder so that while loading last hour is returned
 export const useLast24HourReports = () => {
     const { data: lastHourReports = [] } = useCurrentReports()
