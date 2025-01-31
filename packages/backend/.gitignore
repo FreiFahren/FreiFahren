@@ -1,5 +1,4 @@
 .DS_Store
 .env
-*ticket_data*.csv
+*.log*
 build/
-segmentEndpoints.json

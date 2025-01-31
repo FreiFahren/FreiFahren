@@ -61,7 +61,7 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index,
             }
             return () => clearInterval(intervalId)
         }
-    }, [adjustedTimestamp, isHistoric, isFirstOpen, station.name])
+    }, [adjustedTimestamp, isHistoric, isFirstOpen, station.name, opacity])
 
     if (opacity <= 0) {
         return null

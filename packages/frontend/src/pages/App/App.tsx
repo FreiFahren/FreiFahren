@@ -16,7 +16,6 @@ import { Backdrop } from '../../components/Miscellaneous/Backdrop/Backdrop'
 import { StatsPopUp } from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
 import { LegalDisclaimer } from '../../components/Modals/LegalDisclaimer/LegalDisclaimer'
 import { UtilModal } from '../../components/Modals/UtilModal/UtilModal'
-import { ReportsProvider } from '../../contexts/ReportsContext'
 import { RiskDataProvider } from '../../contexts/RiskDataContext'
 import { StationsAndLinesProvider } from '../../contexts/StationsAndLinesContext'
 import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
@@ -253,30 +252,26 @@ const App = () => {
                 ) : null}
                 <div id="portal-root" />
                 <RiskDataProvider>
-                    <ReportsProvider>
-                        <ViewedReportsProvider>
-                            <FreifahrenMap
-                                isFirstOpen={appUIState.isFirstOpen}
-                                isRiskLayerOpen={appUIState.isRiskLayerOpen}
-                                onRotationChange={handleRotationChange}
-                            />
-                            <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
-                            {appUIState.isListModalOpen ? (
-                                <>
-                                    <ReportsModal
-                                        className="open center-animation"
-                                        handleCloseModal={onRiskGridItemClick}
-                                    />
-                                    <Backdrop
-                                        handleClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })}
-                                    />
-                                </>
-                            ) : null}
-                            <ReportsModalButton
-                                openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })}
-                            />
-                        </ViewedReportsProvider>
-                    </ReportsProvider>
+                    <ViewedReportsProvider>
+                        <FreifahrenMap
+                            isFirstOpen={appUIState.isFirstOpen}
+                            isRiskLayerOpen={appUIState.isRiskLayerOpen}
+                            onRotationChange={handleRotationChange}
+                        />
+                        <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
+                        {appUIState.isListModalOpen ? (
+                            <>
+                                <ReportsModal
+                                    className="open center-animation"
+                                    handleCloseModal={onRiskGridItemClick}
+                                />
+                                <Backdrop
+                                    handleClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })}
+                                />
+                            </>
+                        ) : null}
+                        <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
+                    </ViewedReportsProvider>
                 </RiskDataProvider>
             </StationsAndLinesProvider>
             <UtilButton handleClick={toggleUtilModal} />

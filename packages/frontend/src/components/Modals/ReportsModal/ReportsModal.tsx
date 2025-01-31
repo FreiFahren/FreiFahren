@@ -2,13 +2,13 @@ import './ReportsModal.css'
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useReports } from 'src/contexts/ReportsContext'
 import { Report } from 'src/utils/types'
 
 import { FeedbackForm } from '../../Form/FeedbackForm/FeedbackForm'
 import { LinesSection } from './LinesSection'
 import { StationsSection } from './StationsSection'
 import { SummarySection } from './SummarySection'
+import { useLast24HourReports } from 'src/api/queries'
 
 interface ReportsModalProps {
     className?: string
@@ -21,14 +21,9 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, handleCloseModal
     const { t } = useTranslation()
     const [currentTab, setCurrentTab] = useState<TabType>('summary')
     const [showFeedback, setShowFeedback] = useState(false)
-    const [reportsList, setReportsList] = useState<Report[]>([])
-    const { getLast24HourReports } = useReports()
+    const { data: last24HourReports } = useLast24HourReports()
 
     const currentTime = useMemo(() => new Date().getTime(), [])
-
-    useEffect(() => {
-        getLast24HourReports().then(setReportsList)
-    }, [getLast24HourReports])
 
     const tabs: TabType[] = ['summary', 'lines', 'stations']
 
@@ -43,7 +38,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, handleCloseModal
             const lineReports = new Map<string, Report[]>()
 
             // Group reports by line
-            for (const report of reportsList) {
+            for (const report of last24HourReports) {
                 const { line } = report
 
                 if (line === null) continue
@@ -56,7 +51,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, handleCloseModal
         const sortedLines = getAllLinesWithReportsSorted()
 
         setSortedLinesWithReports(sortedLines)
-    }, [reportsList])
+    }, [last24HourReports])
 
     const getChartData = useMemo(
         () =>
@@ -95,7 +90,9 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, handleCloseModal
                 />
             ) : null}
             {currentTab === 'lines' ? <LinesSection getChartData={getChartData} /> : null}
-            {currentTab === 'stations' ? <StationsSection reportsList={reportsList} currentTime={currentTime} /> : null}
+            {currentTab === 'stations' ? (
+                <StationsSection reportsList={last24HourReports} currentTime={currentTime} />
+            ) : null}
         </div>
     )
 }

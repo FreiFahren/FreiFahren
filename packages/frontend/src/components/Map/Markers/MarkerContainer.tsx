@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
 import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 
-import { useReports } from '../../../contexts/ReportsContext'
 import { useModalAnimation } from '../../../hooks/UseModalAnimation'
 import { Report } from '../../../utils/types'
 import { CloseButton } from '../../Buttons/CloseButton/CloseButton'
 import { MarkerModal } from '../../Modals/MarkerModal/MarkerModal'
 import { OpacityMarker } from './Classes/OpacityMarker/OpacityMarker'
+import { useCurrentReports } from 'src/api/queries'
 
 export interface MarkersProps {
     isFirstOpen: boolean
@@ -14,7 +14,7 @@ export interface MarkersProps {
 }
 
 const MarkerContainer: React.FC<MarkersProps> = ({ isFirstOpen, userPosition }) => {
-    const { currentReports } = useReports()
+    const { data: currentReports } = useCurrentReports()
     const [selectedMarker, setSelectedMarker] = useState<Report | null>(null)
 
     const {
