@@ -6,14 +6,13 @@ import { LngLatBoundsLike, LngLatLike, MapRef, ViewStateChangeEvent } from 'reac
 
 import { useLocation } from '../../contexts/LocationContext'
 import { useStationsAndLines } from '../../contexts/StationsAndLinesContext'
-import { useETagCache } from '../../hooks/useETagCaching'
 import { convertStationsToGeoJSON } from '../../utils/mapUtils'
 import { RegularLineLayer } from './MapLayers/LineLayer/RegularLineLayer'
 import { RiskLineLayer } from './MapLayers/LineLayer/RiskLineLayer'
 import { StationLayer } from './MapLayers/StationLayer/StationLayer'
 import { LocationMarker } from './Markers/Classes/LocationMarker/LocationMarker'
 import { MarkerContainer } from './Markers/MarkerContainer'
-import { useRiskData } from 'src/api/queries'
+import { useRiskData, useSegmentsETagQuery } from 'src/api/queries'
 
 const Map = lazy(() => import('react-map-gl/maplibre'))
 
@@ -32,21 +31,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({ isFirstOpen, isRiskLayerO
     const NorthEastBounds: LngLatLike = { lng: 14.00044556529124, lat: 52.77063424239867 }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
 
-    const { data: lineSegments, error: segmentsError } = useETagCache<GeoJSON.FeatureCollection<GeoJSON.LineString>>({
-        endpoint: '/v0/lines/segments',
-        storageKeyPrefix: 'segments',
-        onError: (error) => {
-            // fix this later with sentry
-            // eslint-disable-next-line no-console
-            console.error('Error loading lines GeoJSON', error)
-        },
-    })
-
-    if (segmentsError) {
-        // fix this later with sentry
-        // eslint-disable-next-line no-console
-        console.error('Error loading lines GeoJSON', segmentsError)
-    }
+    const { data: lineSegments = null } = useSegmentsETagQuery()
 
     const map = useRef<MapRef>(null)
     const { allStations } = useStationsAndLines()

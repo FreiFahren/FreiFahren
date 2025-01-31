@@ -178,3 +178,48 @@ export const useRiskData = () => {
 
     return { data, ...query } as const
 }
+
+export async function fetchWithETag<T>(endpoint: string, storageKeyPrefix: string): Promise<T> {
+    const etagKey: string = `${storageKeyPrefix}ETag`
+    const dataKey: string = `${storageKeyPrefix}Data`
+    const cachedETag: string | null = localStorage.getItem(etagKey)
+
+    const headers: HeadersInit = {
+        Accept: 'application/json',
+    }
+    if (cachedETag) {
+        headers['If-None-Match'] = cachedETag
+    }
+
+    const response: Response = await fetch(`${process.env.REACT_APP_API_URL}${endpoint}`, { headers })
+    const newETag: string | null = response.headers.get('ETag')
+
+    if (response.status === 304) {
+        const cachedData: string | null = localStorage.getItem(dataKey)
+        if (cachedData !== null) {
+            return JSON.parse(cachedData) as T
+        }
+    }
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch data: ${response.status}`)
+    }
+
+    if (newETag !== null) {
+        localStorage.setItem(etagKey, newETag)
+    }
+
+    const newData: T = await response.json()
+    localStorage.setItem(dataKey, JSON.stringify(newData))
+    return newData
+}
+
+export const useSegmentsETagQuery = () => {
+    return useQuery<GeoJSON.FeatureCollection<GeoJSON.LineString>, Error>({
+        queryKey: ['segmentsETag'],
+        queryFn: () => fetchWithETag<GeoJSON.FeatureCollection<GeoJSON.LineString>>('/v0/lines/segments', 'segments'),
+        staleTime: Infinity,
+        gcTime: Infinity,
+        refetchOnWindowFocus: false,
+    })
+}
