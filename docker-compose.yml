@@ -27,6 +27,7 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
+      - content_moderation_service
     restart: unless-stopped
     networks:
       - backend-network
@@ -46,6 +47,14 @@ services:
     networks:
       - backend-network
     platform: linux/amd64  # Force x86 architecture
+
+  content_moderation_service:
+    build:
+      context: ./packages/hate_speech_filter
+      dockerfile: Dockerfile
+    container_name: content_moderation_service
+    ports:
+      - "9090:9090"
 
   # frontend:
   #   build:

@@ -45,20 +45,18 @@ The backend consists of several key components:
 Create a `.env` file with:
 
 ```plaintext
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
+DB_USER=myuser
+DB_PASSWORD=mypassword
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=freifahren
-DB_READER=reader_user
-DB_READER_PASSWORD=reader_password
+DB_NAME=mydatabase
 ```
 
 ## Running with Docker
 
 1. Build the image:
 ```bash
-docker build -f Dockerfile.prod.backend -t freifahren-backend .
+docker build -f Dockerfile.backend -t freifahren-backend .
 ```
 
 2. Run the container:
