@@ -2,13 +2,13 @@ import './ReportsModal.css'
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useLast24HourReports } from 'src/api/queries'
 import { Report } from 'src/utils/types'
 
 import { FeedbackForm } from '../../Form/FeedbackForm/FeedbackForm'
 import { LinesSection } from './LinesSection'
 import { StationsSection } from './StationsSection'
 import { SummarySection } from './SummarySection'
-import { useLast24HourReports } from 'src/api/queries'
 
 interface ReportsModalProps {
     className?: string

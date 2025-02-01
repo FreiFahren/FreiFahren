@@ -1,11 +1,11 @@
 import './index.css'
 
 import { browserTracingIntegration, init, replayIntegration } from '@sentry/react'
+import { QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { I18nextProvider } from 'react-i18next'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { QueryClientProvider } from '@tanstack/react-query'
 
 import { queryClient } from './api/queryClient'
 import { LocationProvider } from './contexts/LocationContext'

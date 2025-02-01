@@ -1,13 +1,13 @@
 import './MarkerModal.css'
 
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { useStationDistance, useStationReports, useStations } from 'src/api/queries'
 import { Report } from 'src/utils/types'
 
 import { useElapsedTimeMessage, useStationDistanceMessage } from '../../../hooks/Messages'
 import { Line } from '../../Miscellaneous/Line/Line'
 import { Skeleton, useSkeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
-import { useStations, useStationDistance, useStationReports } from 'src/api/queries'
 
 interface MarkerModalProps {
     selectedMarker: Report
@@ -44,7 +44,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
             </div>
             <div>
                 <p>{elapsedTimeMessage}</p>
-                {numberOfReports && numberOfReports > 0 ? (
+                {numberOfReports !== undefined && numberOfReports > 0 ? (
                     <p className="reports-count">
                         <b>
                             {numberOfReports} {t('MarkerModal.reports')}
@@ -59,6 +59,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                     <span className="disclaimer">{t('MarkerModal.inviteText')}</span>
                 </div>
                 <span className="disclaimer">{t('MarkerModal.syncText')}</span>
+                {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
                 {message !== null && message !== '' && message !== undefined ? (
                     <p className="description">{message}</p>
                 ) : null}

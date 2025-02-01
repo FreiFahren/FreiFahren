@@ -1,9 +1,10 @@
-import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
-import { getNearestStation } from '../utils/mapUtils'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { LinesList, Report, RiskData, StationList } from 'src/utils/types'
-import { CACHE_KEYS } from './queryClient'
+
 import { useSkeleton } from '../components/Miscellaneous/LoadingPlaceholder/Skeleton'
+import { getNearestStation } from '../utils/mapUtils'
+import { CACHE_KEYS } from './queryClient'
 
 const fetchNewReports = async (
     startTime: string,
@@ -14,7 +15,7 @@ const fetchNewReports = async (
         'Content-Type': 'application/json',
     }
 
-    if (lastKnownTimestamp) {
+    if (lastKnownTimestamp !== undefined && lastKnownTimestamp.trim() !== '') {
         const date = new Date(lastKnownTimestamp)
         headers['If-Modified-Since'] = date.toUTCString()
     }
@@ -42,10 +43,10 @@ export const useSubmitReport = () => {
         mutationFn: async (report: Report) => {
             const requestBody = {
                 timestamp: new Date(report.timestamp),
-                line: report.line || '',
+                line: report.line ?? '',
                 stationId: report.station.id,
-                directionId: report.direction?.id || '',
-                message: report.message || '',
+                directionId: report.direction?.id ?? '',
+                message: report.message ?? '',
             }
 
             const response = await fetch(`${process.env.REACT_APP_API_URL}/v0/basics/inspectors`, {
@@ -71,8 +72,8 @@ export const useSubmitReport = () => {
     })
 }
 
-export const useFeedback = () => {
-    return useMutation({
+export const useFeedback = () =>
+    useMutation({
         mutationFn: async (feedback: string): Promise<boolean> => {
             if (!feedback.trim()) {
                 return false
@@ -86,24 +87,24 @@ export const useFeedback = () => {
             return response.ok
         },
     })
-}
 
 export const useCurrentReports = () => {
     const queryClient = useQueryClient()
-
-    const { data = [], ...query } = useQuery<Report[], Error>({
+    const queryResult = useQuery<Report[], Error>({
         queryKey: CACHE_KEYS.byTimeframe('1h'),
-        queryFn: async ({ queryKey }): Promise<Report[]> => {
+        queryFn: async (): Promise<Report[]> => {
             const endTime = new Date().toISOString()
             const startTime = new Date(new Date(endTime).getTime() - 60 * 60 * 1000).toISOString()
-            const lastKnownTimestamp = data[0]?.timestamp
+
+            // Get previous data from the queryClient instead of destructuring from outer scope.
+            const prevData = queryClient.getQueryData<Report[]>(CACHE_KEYS.byTimeframe('1h')) ?? []
+            const lastKnownTimestamp = prevData[0]?.timestamp
 
             const result = await fetchNewReports(startTime, endTime, lastKnownTimestamp)
-            const newData = result === null ? data : result
+            const newData = result === null ? prevData : result
 
-            // If we got new data, invalidate the risk cache
+            // If we got new data, invalidate the risk cache (temporary fix to avoid race condition)
             if (result !== null) {
-                // temporary fix to avoid race condition. // todo: handle this better on the backend with mutex
                 setTimeout(() => {
                     queryClient.invalidateQueries({ queryKey: CACHE_KEYS.risk })
                 }, 2.5 * 1000)
@@ -134,58 +135,60 @@ export const useCurrentReports = () => {
         structuralSharing: true,
     })
 
-    return { data, ...query } as const
+    return queryResult
 }
 
 export const useLast24HourReports = () => {
     const { data: lastHourReports = [] } = useCurrentReports()
+    const queryClient = useQueryClient()
 
-    const {
-        data: fullDayReports = [],
-        isPlaceholderData,
-        ...query
-    } = useQuery<Report[], Error>({
+    const queryResult = useQuery<Report[], Error>({
         queryKey: CACHE_KEYS.byTimeframe('24h'),
-        queryFn: async ({ queryKey }): Promise<Report[]> => {
+        queryFn: async (): Promise<Report[]> => {
             const endTime = new Date().toISOString()
             const startTime = new Date(new Date(endTime).getTime() - 24 * 60 * 60 * 1000).toISOString()
-            const lastKnownTimestamp = fullDayReports[0]?.timestamp
+
+            // Retrieve previous 24h reports via queryClient instead of outer scope.
+            const prevData = queryClient.getQueryData<Report[]>(CACHE_KEYS.byTimeframe('24h')) ?? []
+            const lastKnownTimestamp = prevData[0]?.timestamp
 
             const result = await fetchNewReports(startTime, endTime, lastKnownTimestamp)
-            const newData = result === null ? fullDayReports : result
+            const newData = result === null ? prevData : result
 
-            // Remove the most recent hour from the 24h data since it will be replaced by lastHourReports
-            const oneHourAgo = new Date(new Date().getTime() - 60 * 60 * 1000)
-            const reportsExcludingLastHour = newData.filter((report) => new Date(report.timestamp) < oneHourAgo)
-
-            return reportsExcludingLastHour
+            // Remove the most recent hour, as that is replaced by current reports.
+            const oneHourAgo = Date.now() - 60 * 60 * 1000
+            return newData.filter((report) => new Date(report.timestamp).getTime() < oneHourAgo)
         },
         refetchInterval: 2 * 60 * 1000,
         staleTime: 5 * 60 * 1000,
         structuralSharing: true,
         placeholderData: keepPreviousData,
     })
-
     /*
      Combine the data: most recent hour first, then the rest of the 24h period
      becuase of fullDayReports wont contain historic data, (see docs for more info),
      this would cause the Last24HourReports to be misaligned with the current reports
     */
-    const data = useMemo(() => {
-        // If we're showing placeholder data, just show the last hour reports
-        if (isPlaceholderData) return lastHourReports
+    const fullDayReports = useMemo(() => queryResult.data ?? [], [queryResult.data])
+    const { isPlaceholderData } = queryResult
 
-        // Once we have real data, combine both sets
+    const data = useMemo(() => {
+        if (isPlaceholderData) return lastHourReports
         return [...lastHourReports, ...fullDayReports]
     }, [lastHourReports, fullDayReports, isPlaceholderData])
 
-    return { data, isPlaceholderData, ...query } as const
+    return {
+        data,
+        isPlaceholderData,
+        error: queryResult.error,
+        isLoading: queryResult.isLoading,
+    }
 }
 
 export const useRiskData = () => {
-    const { data = { segment_colors: {} }, ...query } = useQuery<RiskData, Error>({
+    const queryResult = useQuery<RiskData, Error>({
         queryKey: CACHE_KEYS.risk,
-        queryFn: async ({ queryKey }): Promise<RiskData> => {
+        queryFn: async (): Promise<RiskData> => {
             const response = await fetch(`${process.env.REACT_APP_API_URL}/v0/risk-prediction/segment-colors`)
             return response.json()
         },
@@ -194,10 +197,15 @@ export const useRiskData = () => {
         structuralSharing: true,
     })
 
-    return { data, ...query } as const
+    return {
+        data: queryResult.data ?? { segment_colors: {} },
+        error: queryResult.error,
+        isLoading: queryResult.isLoading,
+        refetch: queryResult.refetch,
+    }
 }
 
-export async function fetchWithETag<T>(endpoint: string, storageKeyPrefix: string): Promise<T> {
+export const fetchWithETag = async <T>(endpoint: string, storageKeyPrefix: string): Promise<T> => {
     const etagKey: string = `${storageKeyPrefix}ETag`
     const dataKey: string = `${storageKeyPrefix}Data`
     const cachedETag: string | null = localStorage.getItem(etagKey)
@@ -205,7 +213,7 @@ export async function fetchWithETag<T>(endpoint: string, storageKeyPrefix: strin
     const headers: HeadersInit = {
         Accept: 'application/json',
     }
-    if (cachedETag) {
+    if (cachedETag !== null && cachedETag !== '') {
         headers['If-None-Match'] = cachedETag
     }
 
@@ -232,28 +240,26 @@ export async function fetchWithETag<T>(endpoint: string, storageKeyPrefix: strin
     return newData
 }
 
-export const useSegments = () => {
-    return useQuery<GeoJSON.FeatureCollection<GeoJSON.LineString>, Error>({
+export const useSegments = () =>
+    useQuery<GeoJSON.FeatureCollection<GeoJSON.LineString>, Error>({
         queryKey: ['segmentsETag'],
         queryFn: () => fetchWithETag<GeoJSON.FeatureCollection<GeoJSON.LineString>>('/v0/lines/segments', 'segments'),
         staleTime: Infinity,
         gcTime: Infinity,
         refetchOnWindowFocus: false,
     })
-}
 
-export const useStations = () => {
-    return useQuery<StationList, Error>({
+export const useStations = () =>
+    useQuery<StationList, Error>({
         queryKey: ['stationsETag'],
         queryFn: () => fetchWithETag<StationList>('/v0/stations', 'stations'),
         staleTime: Infinity,
         gcTime: Infinity,
         refetchOnWindowFocus: false,
     })
-}
 
-export const useLines = () => {
-    return useQuery<LinesList, Error>({
+export const useLines = () =>
+    useQuery<LinesList, Error>({
         queryKey: ['linesETag'],
         queryFn: async (): Promise<LinesList> => {
             const data = await fetchWithETag<LinesList>('/v0/lines', 'lines')
@@ -296,7 +302,6 @@ export const useLines = () => {
         gcTime: Infinity,
         refetchOnWindowFocus: false,
     })
-}
 
 export interface UseStationDistanceResult {
     distance: number | null
@@ -311,13 +316,19 @@ export const useStationDistance = (
     userLng?: number
 ): UseStationDistanceResult => {
     const { data: distance, isLoading } = useQuery<number | null>({
-        queryKey: ['stationDistance', stationId, userLat, userLng],
+        queryKey: ['stationDistance', stationId, userLat, userLng, allStations],
         queryFn: async () => {
-            if (userLat === undefined || userLng === undefined || !stationId) {
+            if (
+                userLat === undefined ||
+                Number.isNaN(userLat) ||
+                userLng === undefined ||
+                Number.isNaN(userLng) ||
+                stationId.trim() === ''
+            ) {
                 return null
             }
             const userStation = getNearestStation(allStations, userLat, userLng)
-            if (userStation && userStation.key !== '' && stationId !== '') {
+            if (userStation && userStation.key !== '') {
                 const response = await fetch(
                     `${process.env.REACT_APP_API_URL}/v0/transit/distance?inspectorStationId=${encodeURIComponent(
                         stationId
@@ -329,7 +340,12 @@ export const useStationDistance = (
             }
             return null
         },
-        enabled: Boolean(userLat && userLng && stationId),
+        enabled:
+            typeof userLat === 'number' &&
+            !Number.isNaN(userLat) &&
+            typeof userLng === 'number' &&
+            !Number.isNaN(userLng) &&
+            stationId.trim() !== '',
     })
 
     /*
@@ -349,8 +365,8 @@ export const useStationDistance = (
     }
 }
 
-export const useStationReports = (stationId: string) => {
-    return useQuery<number, Error>({
+export const useStationReports = (stationId: string) =>
+    useQuery<number, Error>({
         queryKey: CACHE_KEYS.stationReports(stationId),
         queryFn: async () => {
             const response = await fetch(`${process.env.REACT_APP_API_URL}/v0/stations/${stationId}/statistics`)
@@ -361,4 +377,3 @@ export const useStationReports = (stationId: string) => {
             return data.numberOfReports as number
         },
     })
-}

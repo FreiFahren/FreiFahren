@@ -3,6 +3,7 @@ import './Map.css'
 
 import React, { lazy, Suspense, useCallback, useEffect, useRef } from 'react'
 import { LngLatBoundsLike, LngLatLike, MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre'
+import { useRiskData, useSegments, useStations } from 'src/api/queries'
 
 import { useLocation } from '../../contexts/LocationContext'
 import { convertStationsToGeoJSON } from '../../utils/mapUtils'
@@ -11,7 +12,6 @@ import { RiskLineLayer } from './MapLayers/LineLayer/RiskLineLayer'
 import { StationLayer } from './MapLayers/StationLayer/StationLayer'
 import { LocationMarker } from './Markers/Classes/LocationMarker/LocationMarker'
 import { MarkerContainer } from './Markers/MarkerContainer'
-import { useRiskData, useSegments, useStations } from 'src/api/queries'
 
 const Map = lazy(() => import('react-map-gl/maplibre'))
 

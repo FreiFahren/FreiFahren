@@ -4,19 +4,18 @@ import React, { FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState
 import { useTranslation } from 'react-i18next'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 
+import { useLines, useStations, useSubmitReport } from '../../../api/queries'
 import { REPORT_COOLDOWN_MINUTES } from '../../../constants'
 import { useLocation } from '../../../contexts/LocationContext'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
-import { LinesList, StationList, StationProperty } from '../../../utils/types'
 import { calculateDistance } from '../../../utils/mapUtils'
-import { Report } from '../../../utils/types'
+import { LinesList, Report,StationList, StationProperty  } from '../../../utils/types'
 import { createWarningSpan, getLineColor, highlightElement } from '../../../utils/uiUtils'
 import { Line } from '../../Miscellaneous/Line/Line'
 import { AutocompleteInputForm } from '../AutocompleteInputForm/AutocompleteInputForm'
 import { FeedbackForm } from '../FeedbackForm/FeedbackForm'
 import { PrivacyCheckbox } from '../PrivacyCheckbox/PrivacyCheckbox'
 import { SelectField } from '../SelectField/SelectField'
-import { useLines, useStations, useSubmitReport } from '../../../api/queries'
 
 const getCSSVariable = (variable: string): number => {
     const value = getComputedStyle(document.documentElement).getPropertyValue(variable)
@@ -491,7 +490,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                                         <strong>
                                             {
                                                 (allStations ?? {})[
-                                                    allLines?.[currentLine]?.[allLines?.[currentLine]?.length - 1] ?? ''
+                                                    allLines?.[currentLine]?.[allLines[currentLine].length - 1] ?? ''
                                                 ].name
                                             }
                                         </strong>

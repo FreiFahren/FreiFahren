@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useCurrentReports } from 'src/api/queries'
 import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 
 import { useModalAnimation } from '../../../hooks/UseModalAnimation'
@@ -6,7 +7,6 @@ import { Report } from '../../../utils/types'
 import { CloseButton } from '../../Buttons/CloseButton/CloseButton'
 import { MarkerModal } from '../../Modals/MarkerModal/MarkerModal'
 import { OpacityMarker } from './Classes/OpacityMarker/OpacityMarker'
-import { useCurrentReports } from 'src/api/queries'
 
 export interface MarkersProps {
     isFirstOpen: boolean
@@ -45,7 +45,7 @@ const MarkerContainer: React.FC<MarkersProps> = ({ isFirstOpen, userPosition }) 
 
     return (
         <div>
-            {currentReports.map((ticketInspector, index) => (
+            {currentReports?.map((ticketInspector, index) => (
                 <OpacityMarker
                     isFirstOpen={isFirstOpen}
                     markerData={ticketInspector}

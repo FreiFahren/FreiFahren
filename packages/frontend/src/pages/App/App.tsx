@@ -6,6 +6,7 @@ import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
 import { Report } from 'src/utils/types'
 
+import { useLast24HourReports } from '../../api/queries'
 import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton'
 import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
 import { ReportButton } from '../../components/Buttons/ReportButton/ReportButton'
@@ -18,7 +19,6 @@ import { LegalDisclaimer } from '../../components/Modals/LegalDisclaimer/LegalDi
 import { UtilModal } from '../../components/Modals/UtilModal/UtilModal'
 import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
-import { useLast24HourReports } from '../../api/queries'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
 import { highlightElement } from '../../utils/uiUtils'
 
@@ -106,7 +106,7 @@ const App = () => {
             // eslint-disable-next-line no-console
             console.error('Error fetching number of reports:', error)
         })
-    }, [appUIState])
+    }, [reportsInLast24Hours.length])
 
     const initalTrackingRef = useRef(false)
 

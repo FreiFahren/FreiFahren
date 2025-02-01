@@ -14,7 +14,7 @@ interface ReportsModalButtonProps {
 
 const ReportsModalButton: React.FC<ReportsModalButtonProps> = ({ openModal }) => {
     const { t } = useTranslation()
-    const { data: lastHourReports } = useCurrentReports()
+    const { data: lastHourReports = [] } = useCurrentReports()
     const { setLastViewed, isRecentAndUnviewed } = useViewedReports()
 
     const latestReport =
