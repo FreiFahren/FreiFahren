@@ -2,7 +2,7 @@ import './ReportsModal.css'
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useReports } from 'src/contexts/ReportsContext'
+import { useLast24HourReports } from 'src/api/queries'
 import { Report } from 'src/utils/types'
 
 import { FeedbackForm } from '../../Form/FeedbackForm/FeedbackForm'
@@ -21,42 +21,52 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, handleCloseModal
     const { t } = useTranslation()
     const [currentTab, setCurrentTab] = useState<TabType>('summary')
     const [showFeedback, setShowFeedback] = useState(false)
-    const [reportsList, setReportsList] = useState<Report[]>([])
-    const { getLast24HourReports } = useReports()
+    const { data: last24HourReports } = useLast24HourReports()
 
     const currentTime = useMemo(() => new Date().getTime(), [])
-
-    useEffect(() => {
-        getLast24HourReports().then(setReportsList)
-    }, [getLast24HourReports])
-
     const tabs: TabType[] = ['summary', 'lines', 'stations']
-
-    const handleTabChange = (tab: TabType) => {
-        setCurrentTab(tab)
-    }
-
     const [sortedLinesWithReports, setSortedLinesWithReports] = useState<Map<string, Report[]>>(new Map())
 
-    useEffect(() => {
-        const getAllLinesWithReportsSorted = (): Map<string, Report[]> => {
-            const lineReports = new Map<string, Report[]>()
+    const groupReportsByLine = (reports: Report[]): Map<string, Report[]> => {
+        const lineReports = new Map<string, Report[]>()
 
-            // Group reports by line
-            for (const report of reportsList) {
-                const { line } = report
+        for (const report of reports) {
+            const { line } = report
+            if (line === null) continue
 
-                if (line === null) continue
-                lineReports.set(line, [...(lineReports.get(line) ?? []), report])
-            }
-
-            return new Map(Array.from(lineReports.entries()).sort((a, b) => b[1].length - a[1].length))
+            const existingReports = lineReports.get(line) ?? []
+            lineReports.set(line, [...existingReports, report])
         }
 
-        const sortedLines = getAllLinesWithReportsSorted()
+        return lineReports
+    }
 
-        setSortedLinesWithReports(sortedLines)
-    }, [reportsList])
+    // Sort lines by number of reports (descending)
+    const sortLinesByReportCount = (lineReports: Map<string, Report[]>): Map<string, Report[]> => {
+        const sortedEntries = Array.from(lineReports.entries()).sort((a, b) => b[1].length - a[1].length)
+        return new Map(sortedEntries)
+    }
+
+    // Check if the new sorted lines are different from current state
+    const hasLinesSortingChanged = (current: Map<string, Report[]>, next: Map<string, Report[]>): boolean => {
+        const currentEntries = Array.from(current.entries())
+        const nextEntries = Array.from(next.entries())
+
+        if (currentEntries.length !== nextEntries.length) return true
+
+        return currentEntries.some(
+            (entry, index) => entry[0] !== nextEntries[index][0] || entry[1].length !== nextEntries[index][1].length
+        )
+    }
+
+    useEffect(() => {
+        const groupedReports = groupReportsByLine(last24HourReports)
+        const sortedLines = sortLinesByReportCount(groupedReports)
+
+        if (hasLinesSortingChanged(sortedLinesWithReports, sortedLines)) {
+            setSortedLinesWithReports(sortedLines)
+        }
+    }, [last24HourReports, sortedLinesWithReports])
 
     const getChartData = useMemo(
         () =>
@@ -68,6 +78,10 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, handleCloseModal
                 })),
         [sortedLinesWithReports]
     )
+
+    const handleTabChange = (tab: TabType) => {
+        setCurrentTab(tab)
+    }
 
     if (showFeedback) {
         return <FeedbackForm openAnimationClass={className} />
@@ -95,7 +109,9 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, handleCloseModal
                 />
             ) : null}
             {currentTab === 'lines' ? <LinesSection getChartData={getChartData} /> : null}
-            {currentTab === 'stations' ? <StationsSection reportsList={reportsList} currentTime={currentTime} /> : null}
+            {currentTab === 'stations' ? (
+                <StationsSection reportsList={last24HourReports} currentTime={currentTime} />
+            ) : null}
         </div>
     )
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
+import { useCurrentReports } from 'src/api/queries'
 import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 
-import { useReports } from '../../../contexts/ReportsContext'
 import { useModalAnimation } from '../../../hooks/UseModalAnimation'
 import { Report } from '../../../utils/types'
 import { CloseButton } from '../../Buttons/CloseButton/CloseButton'
@@ -9,13 +9,12 @@ import { MarkerModal } from '../../Modals/MarkerModal/MarkerModal'
 import { OpacityMarker } from './Classes/OpacityMarker/OpacityMarker'
 
 export interface MarkersProps {
-    formSubmitted: boolean
     isFirstOpen: boolean
     userPosition?: { lng: number; lat: number } | null | null
 }
 
-const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, userPosition }) => {
-    const { currentReports } = useReports()
+const MarkerContainer: React.FC<MarkersProps> = ({ isFirstOpen, userPosition }) => {
+    const { data: currentReports } = useCurrentReports()
     const [selectedMarker, setSelectedMarker] = useState<Report | null>(null)
 
     const {
@@ -46,13 +45,12 @@ const MarkerContainer: React.FC<MarkersProps> = ({ formSubmitted, isFirstOpen, u
 
     return (
         <div>
-            {currentReports.map((ticketInspector, index) => (
+            {currentReports?.map((ticketInspector, index) => (
                 <OpacityMarker
                     isFirstOpen={isFirstOpen}
                     markerData={ticketInspector}
                     index={index}
                     key={ticketInspector.station.id}
-                    formSubmitted={formSubmitted}
                     onMarkerClick={handleMarkerClick}
                 />
             ))}

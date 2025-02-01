@@ -4,13 +4,12 @@ import React, { FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState
 import { useTranslation } from 'react-i18next'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 
+import { useLines, useStations, useSubmitReport } from '../../../api/queries'
 import { REPORT_COOLDOWN_MINUTES } from '../../../constants'
 import { useLocation } from '../../../contexts/LocationContext'
-import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
-import { LinesList, reportInspector, StationList, StationProperty } from '../../../utils/databaseUtils'
 import { calculateDistance } from '../../../utils/mapUtils'
-import { Report } from '../../../utils/types'
+import { LinesList, Report,StationList, StationProperty  } from '../../../utils/types'
 import { createWarningSpan, getLineColor, highlightElement } from '../../../utils/uiUtils'
 import { Line } from '../../Miscellaneous/Line/Line'
 import { AutocompleteInputForm } from '../AutocompleteInputForm/AutocompleteInputForm'
@@ -25,18 +24,18 @@ const getCSSVariable = (variable: string): number => {
 }
 
 interface ReportFormProps {
-    closeModal: () => void
-    onNotifyParentAboutSubmission: (reportedData: Report) => void
+    onReportFormSubmit: (reportedData: Report) => void
     className?: string
 }
 
 const ITEM_HEIGHT = 37
 
-const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmission, className }) => {
+const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
     const { t } = useTranslation()
 
     const { userPosition } = useLocation()
-    const { allLines, allStations } = useStationsAndLines()
+    const { data: allStations } = useStations()
+    const { data: allLines } = useLines()
 
     const [currentEntity, setCurrentEntity] = useState<string | null>(null)
     const [currentLine, setCurrentLine] = useState<string | null>(null)
@@ -60,6 +59,8 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
     const [stationListHeight, setStationListHeight] = useState<number | null>(null)
     const [initialContainerHeight, setInitialContainerHeight] = useState<number | null>(null)
 
+    const submitReport = useSubmitReport()
+
     // Helper function to calculate combined padding and margin
     const calculateAllowance = (element: HTMLElement): number => {
         const styles = window.getComputedStyle(element)
@@ -74,7 +75,7 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
     // Calculate possible lines based on the current entity
     const possibleLines = useMemo(() => {
         if (currentEntity === null) return allLines
-        return Object.entries(allLines)
+        return Object.entries(allLines ?? {})
             .filter(([line]) => line.startsWith(currentEntity))
             .reduce(
                 (accumulatedLines, [line, stations]) => ({
@@ -99,14 +100,18 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
             return 0
         }
 
-        const sortedAllStations = Object.fromEntries(Object.entries(allStations).sort(sortStationRecordsByStationName))
+        const sortedAllStations = Object.fromEntries(
+            Object.entries(allStations ?? {}).sort(sortStationRecordsByStationName)
+        )
         let stations = sortedAllStations
 
         if (currentStation !== null) {
-            stations = { [currentStation]: allStations[currentStation] }
+            stations = { [currentStation]: allStations![currentStation] }
         } else if (currentLine !== null) {
             stations = Object.fromEntries(
-                allLines[currentLine].map((stationKey) => [stationKey, allStations[stationKey]])
+                (allLines?.[currentLine] ?? [])
+                    .map((stationKey) => [stationKey, allStations?.[stationKey]])
+                    .filter(([, stationData]) => stationData !== undefined) as [string, StationProperty][]
             )
         } else if (currentEntity !== null) {
             stations = Object.entries(sortedAllStations)
@@ -193,7 +198,7 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
                 typeof line === 'string' &&
                 currentStation !== null &&
                 typeof currentStation === 'string' &&
-                allLines[line].includes(currentStation) === false
+                (allLines?.[line] ?? []).includes(currentStation) === false
             ) {
                 setCurrentStation(null)
             }
@@ -203,7 +208,7 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
 
     const handleStationSelect = useCallback(
         (stationName: string | null) => {
-            const foundStationEntry = Object.entries(allStations).find(
+            const foundStationEntry = Object.entries(allStations ?? {}).find(
                 ([, stationData]) => stationData.name === stationName
             )
 
@@ -215,7 +220,7 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
 
     const handleDirectionSelect = useCallback(
         (directionName: string | null) => {
-            const foundStationEntry = Object.entries(allStations).find(
+            const foundStationEntry = Object.entries(allStations ?? {}).find(
                 ([, stationData]) => stationData.name === directionName
             )
 
@@ -281,7 +286,7 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
             hasError = true
         }
 
-        const locationError = verifyUserLocation(currentStation, allStations)
+        const locationError = verifyUserLocation(currentStation, allStations ?? {})
 
         if (locationError) {
             hasError = true
@@ -302,56 +307,61 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
 
         if (hasError) return // Abort submission if there are validation errors
 
-        await reportInspector(currentLine!, currentStation!, currentDirection!, descriptionRef.current?.value!)
-
-        const endTime = new Date()
-        const durationInSeconds = Math.round((endTime.getTime() - startTime.current.getTime()) / 1000)
-
-        const report: Report = {
-            line: currentLine,
-            station: {
-                id: currentStation!,
-                name: allStations[currentStation!].name,
-                coordinates: allStations[currentStation!].coordinates,
-            },
-            direction:
-                currentDirection !== null
-                    ? {
-                          id: currentDirection,
-                          name: allStations[currentDirection!].name,
-                          coordinates: allStations[currentDirection!].coordinates,
-                      }
-                    : null,
-            message: descriptionRef.current?.value ?? '',
-            timestamp: endTime.toISOString(),
-            isHistoric: false,
-        }
-
-        const finalizeSubmission = (timestamp: Date) => {
-            localStorage.setItem('lastReportTime', timestamp.toISOString()) // Save the timestamp of the report to prevent spamming
-            closeModal()
-            onNotifyParentAboutSubmission(report)
-        }
-
         try {
-            await sendAnalyticsEvent('Report Submitted', {
-                duration: durationInSeconds,
-                meta: {
-                    Station: report.station.name,
-                    ...(report.line !== null && { Line: report.line }),
-                    Direction: report.direction?.name,
-                    Entity: Boolean(currentEntity),
-                    SearchUsed: searchUsed,
-                    StationRecommendationUsed: stationRecommendationSelected,
-                },
-            })
+            const endTime = new Date()
+            const durationInSeconds = Math.round((endTime.getTime() - startTime.current.getTime()) / 1000)
 
-            finalizeSubmission(endTime)
+            const report: Report = {
+                line: currentLine,
+                station: {
+                    id: currentStation!,
+                    name: (allStations ?? {})[currentStation!].name,
+                    coordinates: (allStations ?? {})[currentStation!].coordinates,
+                },
+                direction:
+                    currentDirection !== null
+                        ? {
+                              id: currentDirection,
+                              name: (allStations ?? {})[currentDirection!].name,
+                              coordinates: (allStations ?? {})[currentDirection!].coordinates,
+                          }
+                        : null,
+                message: descriptionRef.current?.value ?? '',
+                timestamp: endTime.toISOString(),
+                isHistoric: false,
+            }
+
+            await submitReport.mutateAsync(report)
+
+            const finalizeSubmission = (timestamp: Date) => {
+                localStorage.setItem('lastReportTime', timestamp.toISOString())
+                onReportFormSubmit(report)
+            }
+
+            try {
+                await sendAnalyticsEvent('Report Submitted', {
+                    duration: durationInSeconds,
+                    meta: {
+                        Station: report.station.name,
+                        ...(report.line !== null && { Line: report.line }),
+                        Direction: report.direction?.name,
+                        Entity: Boolean(currentEntity),
+                        SearchUsed: searchUsed,
+                        StationRecommendationUsed: stationRecommendationSelected,
+                    },
+                })
+
+                finalizeSubmission(endTime)
+            } catch (error) {
+                // fix later with sentry
+                // eslint-disable-next-line no-console
+                console.error('Failed to send analytics event:', error)
+                finalizeSubmission(endTime)
+            }
         } catch (error) {
             // fix later with sentry
             // eslint-disable-next-line no-console
-            console.error('Failed to send analytics event:', error)
-            finalizeSubmission(endTime)
+            console.error('Failed to submit report:', error)
         }
     }
 
@@ -434,7 +444,7 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
                                 value={currentLine}
                                 getValue={getLineValue}
                             >
-                                {Object.keys(possibleLines).map((line) => (
+                                {Object.keys(possibleLines ?? {}).map((line) => (
                                     <Line key={line} line={line} />
                                 ))}
                             </SelectField>
@@ -469,16 +479,20 @@ const ReportForm: FC<ReportFormProps> = ({ closeModal, onNotifyParentAboutSubmis
                                 <h3>{t('ReportForm.direction')}</h3>
                                 <SelectField
                                     onSelect={handleDirectionSelect}
-                                    value={currentDirection !== null ? allStations[currentDirection].name : ''}
+                                    value={currentDirection !== null ? (allStations ?? {})[currentDirection].name : ''}
                                     containerClassName="align-child-on-line"
                                     getValue={getDirectionValue}
                                 >
                                     <span>
-                                        <strong>{allStations[allLines[currentLine][0]].name}</strong>
+                                        <strong>{(allStations ?? {})[allLines?.[currentLine]?.[0] ?? ''].name}</strong>
                                     </span>
                                     <span>
                                         <strong>
-                                            {allStations[allLines[currentLine][allLines[currentLine].length - 1]].name}
+                                            {
+                                                (allStations ?? {})[
+                                                    allLines?.[currentLine]?.[allLines[currentLine].length - 1] ?? ''
+                                                ].name
+                                            }
                                         </strong>
                                     </span>
                                 </SelectField>

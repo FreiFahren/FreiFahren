@@ -6,6 +6,7 @@ import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
 import { Report } from 'src/utils/types'
 
+import { useLast24HourReports } from '../../api/queries'
 import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton'
 import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
 import { ReportButton } from '../../components/Buttons/ReportButton/ReportButton'
@@ -16,18 +17,13 @@ import { Backdrop } from '../../components/Miscellaneous/Backdrop/Backdrop'
 import { StatsPopUp } from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
 import { LegalDisclaimer } from '../../components/Modals/LegalDisclaimer/LegalDisclaimer'
 import { UtilModal } from '../../components/Modals/UtilModal/UtilModal'
-import { ReportsProvider } from '../../contexts/ReportsContext'
-import { RiskDataProvider } from '../../contexts/RiskDataContext'
-import { StationsAndLinesProvider } from '../../contexts/StationsAndLinesContext'
 import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
-import { getNumberOfReportsInLast24Hours } from '../../utils/databaseUtils'
 import { highlightElement } from '../../utils/uiUtils'
 
 type AppUIState = {
     isReportFormOpen: boolean
-    formSubmitted: boolean
     isFirstOpen: boolean
     isStatsPopUpOpen: boolean
     isRiskLayerOpen: boolean
@@ -37,7 +33,6 @@ type AppUIState = {
 
 const initialAppUIState: AppUIState = {
     isReportFormOpen: false,
-    formSubmitted: false,
     isFirstOpen: true,
     isStatsPopUpOpen: false,
     isRiskLayerOpen: localStorage.getItem('layer') === 'risk',
@@ -53,6 +48,8 @@ const App = () => {
     const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
     const [appMounted, setAppMounted] = useState(false)
 
+    const { data: reportsInLast24Hours } = useLast24HourReports()
+
     useEffect(() => {
         setAppMounted(true)
     }, [])
@@ -60,10 +57,7 @@ const App = () => {
     const [showSummary, setShowSummary] = useState<boolean>(false)
     const [reportedData, setReportedData] = useState<Report | null>(null)
     const handleReportFormSubmit = (reportedDataForm: Report) => {
-        setAppUIState((appUIStateCurrent) => ({
-            ...appUIStateCurrent,
-            formSubmitted: !appUIStateCurrent.formSubmitted,
-        }))
+        setAppUIState((prevState) => ({ ...prevState, isReportFormOpen: false }))
         setShowSummary(true)
         setReportedData(reportedDataForm)
     }
@@ -97,10 +91,8 @@ const App = () => {
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                const numberOfReports = await getNumberOfReportsInLast24Hours()
-
-                if (numberOfReports !== 0) {
-                    setStatsData(numberOfReports)
+                if (reportsInLast24Hours.length !== 0) {
+                    setStatsData(reportsInLast24Hours.length)
                 }
             } catch (error) {
                 // fix later with sentry
@@ -114,7 +106,7 @@ const App = () => {
             // eslint-disable-next-line no-console
             console.error('Error fetching number of reports:', error)
         })
-    }, [appUIState])
+    }, [reportsInLast24Hours.length])
 
     const initalTrackingRef = useRef(false)
 
@@ -248,46 +240,28 @@ const App = () => {
                     <Backdrop handleClick={() => setShowSummary(false)} />
                 </>
             ) : null}
-            <StationsAndLinesProvider>
-                {appUIState.isReportFormOpen ? (
+            {appUIState.isReportFormOpen ? (
+                <>
+                    <ReportForm onReportFormSubmit={handleReportFormSubmit} className="open center-animation" />
+                    <Backdrop handleClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
+                </>
+            ) : null}
+            <div id="portal-root" />
+            <ViewedReportsProvider>
+                <FreifahrenMap
+                    isFirstOpen={appUIState.isFirstOpen}
+                    isRiskLayerOpen={appUIState.isRiskLayerOpen}
+                    onRotationChange={handleRotationChange}
+                />
+                <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
+                {appUIState.isListModalOpen ? (
                     <>
-                        <ReportForm
-                            closeModal={() => setAppUIState({ ...appUIState, isReportFormOpen: false })}
-                            onNotifyParentAboutSubmission={handleReportFormSubmit}
-                            className="open center-animation"
-                        />
-                        <Backdrop handleClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
+                        <ReportsModal className="open center-animation" handleCloseModal={onRiskGridItemClick} />
+                        <Backdrop handleClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })} />
                     </>
                 ) : null}
-                <div id="portal-root" />
-                <RiskDataProvider>
-                    <ReportsProvider>
-                        <ViewedReportsProvider>
-                            <FreifahrenMap
-                                isFirstOpen={appUIState.isFirstOpen}
-                                formSubmitted={appUIState.formSubmitted}
-                                isRiskLayerOpen={appUIState.isRiskLayerOpen}
-                                onRotationChange={handleRotationChange}
-                            />
-                            <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
-                            {appUIState.isListModalOpen ? (
-                                <>
-                                    <ReportsModal
-                                        className="open center-animation"
-                                        handleCloseModal={onRiskGridItemClick}
-                                    />
-                                    <Backdrop
-                                        handleClick={() => setAppUIState({ ...appUIState, isListModalOpen: false })}
-                                    />
-                                </>
-                            ) : null}
-                            <ReportsModalButton
-                                openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })}
-                            />
-                        </ViewedReportsProvider>
-                    </ReportsProvider>
-                </RiskDataProvider>
-            </StationsAndLinesProvider>
+                <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
+            </ViewedReportsProvider>
             <UtilButton handleClick={toggleUtilModal} />
             {mapsRotation !== 0 ? (
                 <div className="compass-container">

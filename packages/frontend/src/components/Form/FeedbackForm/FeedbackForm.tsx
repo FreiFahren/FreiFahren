@@ -3,8 +3,8 @@ import './FeedbackForm.css'
 import { ChangeEvent, FC, useActionState, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { useFeedback } from '../../../api/queries'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
-import { useFeedback } from '../../../hooks/useFeedback'
 import { useFormValidity } from '../../../hooks/useFormValidity'
 import { ContactSection } from '../../Modals/ContactSection/ContactSection'
 import { FeedbackSummaryModal } from '../../Modals/FeedbackSummaryModal/FeedbackSummaryModal'
@@ -18,7 +18,7 @@ interface FeedbackFormProps {
 const FeedbackForm: FC<FeedbackFormProps> = ({ openAnimationClass, onClose }) => {
     const { t } = useTranslation()
     const textareaRef = useRef<HTMLTextAreaElement>(null)
-    const { submitFeedback } = useFeedback()
+    const { mutateAsync: submitFeedback } = useFeedback()
     const [isChecked, setIsChecked] = useState(false)
 
     const { isValid } = useFormValidity({

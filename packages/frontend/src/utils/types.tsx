@@ -38,8 +38,23 @@ export interface StationGeoJSON {
     }[]
 }
 
+export interface StationProperty {
+    name: string
+    coordinates: {
+        latitude: number
+        longitude: number
+    }
+    lines: string[]
+}
+
+export type LineProperty = {
+    [key: string]: string[]
+}
+
+export type StationList = Record<string, StationProperty>
+export type LinesList = Record<string, string[]>
+
 export interface RiskData {
-    last_modified: string
     segment_colors: SegmentColors
 }
 

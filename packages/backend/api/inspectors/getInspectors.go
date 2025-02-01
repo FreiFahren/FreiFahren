@@ -51,7 +51,7 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	if !modifiedSince {
-		// Return 304 Not Modified if the data hasn't been modified since the provided time
+		logger.Log.Info().Msg("Cache hit")
 		return c.NoContent(http.StatusNotModified)
 	}
 

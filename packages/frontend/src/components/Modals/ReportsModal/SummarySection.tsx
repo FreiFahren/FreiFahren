@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useLines, useRiskData } from 'src/api/queries'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
-import { useRiskData } from 'src/contexts/RiskDataContext'
-import { useStationsAndLines } from 'src/contexts/StationsAndLinesContext'
 import { Report } from 'src/utils/types'
 
 import { Line } from '../../Miscellaneous/Line/Line'
@@ -21,59 +20,59 @@ interface LineRiskData {
 
 const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports, onCloseModal, setShowFeedback }) => {
     const { t } = useTranslation()
+
     const riskLevels = [3, 2, 1, 0]
-    const { segmentRiskData } = useRiskData()
-    const { allLines } = useStationsAndLines()
+    const { data: segmentRiskData } = useRiskData()
     const [riskLines, setRiskLines] = useState<Map<string, LineRiskData>>(new Map())
 
+    const { data: lines } = useLines()
+
     useEffect(() => {
-        if (segmentRiskData) {
-            const extractMostRiskLines = (segmentColors: Record<string, string>): Map<string, LineRiskData> => {
-                const colorScores: Record<string, number> = {
-                    '#A92725': 3, // bad - red
-                    '#F05044': 3, // also bad - red (otherwise we would have too many colors, therfore aggregate)
-                    '#FACB3F': 1, // okay - yellow
-                }
-
-                const lineScores = new Map<string, LineRiskData>()
-
-                Object.entries(segmentColors).forEach(([segmentId, color]) => {
-                    // eslint-disable-next-line prefer-destructuring
-                    const line = segmentId.split('-')[0]
-                    const score = color in colorScores ? colorScores[color] : 0
-
-                    if (!lineScores.has(line)) {
-                        lineScores.set(line, { score, class: score })
-                    } else {
-                        const currentData = lineScores.get(line)!
-                        lineScores.set(line, {
-                            score: currentData.score + score,
-                            class: Math.max(currentData.class, score),
-                        })
-                    }
-                })
-
-                // Sort first by class (highest to lowest), then by score within each class
-                return new Map(
-                    Array.from(lineScores.entries()).sort(([, a], [, b]) => {
-                        if (b.class !== a.class) {
-                            return b.class - a.class
-                        }
-                        return b.score - a.score
-                    })
-                )
+        const extractMostRiskLines = (segmentColors: Record<string, string>): Map<string, LineRiskData> => {
+            const colorScores: Record<string, number> = {
+                '#A92725': 3, // bad - red
+                '#F05044': 3, // also bad - red (otherwise we would have too many colors, therfore aggregate)
+                '#FACB3F': 1, // okay - yellow
             }
 
-            const riskMap = extractMostRiskLines(segmentRiskData.segment_colors)
+            const lineScores = new Map<string, LineRiskData>()
 
-            Object.keys(allLines).forEach((line) => {
-                if (!riskMap.has(line)) {
-                    riskMap.set(line, { score: 0, class: 0 })
+            Object.entries(segmentColors).forEach(([segmentId, color]) => {
+                // eslint-disable-next-line prefer-destructuring
+                const line = segmentId.split('-')[0]
+                const score = color in colorScores ? colorScores[color] : 0
+
+                if (!lineScores.has(line)) {
+                    lineScores.set(line, { score, class: score })
+                } else {
+                    const currentData = lineScores.get(line)!
+                    lineScores.set(line, {
+                        score: currentData.score + score,
+                        class: Math.max(currentData.class, score),
+                    })
                 }
             })
-            setRiskLines(riskMap)
+
+            // Sort first by class (highest to lowest), then by score within each class
+            return new Map(
+                Array.from(lineScores.entries()).sort(([, a], [, b]) => {
+                    if (b.class !== a.class) {
+                        return b.class - a.class
+                    }
+                    return b.score - a.score
+                })
+            )
         }
-    }, [segmentRiskData, allLines])
+
+        const riskMap = extractMostRiskLines(segmentRiskData.segment_colors)
+
+        Object.keys(lines ?? {}).forEach((line) => {
+            if (!riskMap.has(line)) {
+                riskMap.set(line, { score: 0, class: 0 })
+            }
+        })
+        setRiskLines(riskMap)
+    }, [segmentRiskData, lines])
 
     const filterRiskLevelLines = (level: number, riskData: LineRiskData): boolean => riskData.class === level
 

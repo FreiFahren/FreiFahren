@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
-import { useRiskData } from 'src/contexts/RiskDataContext'
 import { RiskData } from 'src/utils/types'
 
 interface RiskLineLayerProps {
@@ -9,7 +8,6 @@ interface RiskLineLayerProps {
 }
 
 const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, preloadedRiskData }) => {
-    const { segmentRiskData, refreshRiskData } = useRiskData()
     const [geoJSON, setGeoJSON] = useState<GeoJSON.FeatureCollection<GeoJSON.LineString> | null>(null)
 
     const applySegmentColors = (
@@ -32,10 +30,10 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, preloadedRi
 
     // If the segment risk data changes, update the GeoJSON
     useEffect(() => {
-        if (lineSegments && segmentRiskData?.segment_colors) {
-            setGeoJSON(applySegmentColors(lineSegments, segmentRiskData.segment_colors))
+        if (lineSegments && preloadedRiskData?.segment_colors) {
+            setGeoJSON(applySegmentColors(lineSegments, preloadedRiskData.segment_colors))
         }
-    }, [segmentRiskData, lineSegments])
+    }, [preloadedRiskData, lineSegments])
 
     // Initialize with preloaded data
     useEffect(() => {
@@ -45,19 +43,6 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, preloadedRi
             setGeoJSON(applySegmentColors(lineSegments))
         }
     }, [preloadedRiskData, lineSegments])
-
-    // Periodically fetch new risk data to account for changes
-    useEffect(() => {
-        const interval = setInterval(() => {
-            refreshRiskData().catch((error) => {
-                // fix this later with sentry
-                // eslint-disable-next-line no-console
-                console.error('Error refreshing risk data', error)
-            })
-        }, 30 * 1000)
-
-        return () => clearInterval(interval)
-    }, [refreshRiskData])
 
     if (!geoJSON) {
         return null
