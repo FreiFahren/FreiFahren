@@ -4,3 +4,4 @@ settings.json
 .env
 __pycache__
 packages/*.log.*
+data/*
