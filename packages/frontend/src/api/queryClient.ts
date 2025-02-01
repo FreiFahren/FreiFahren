@@ -9,6 +9,8 @@ export const CACHE_KEYS = {
     segments: ['segments'] as const,
     feedback: ['feedback'] as const,
     stationStatistics: (stationId: string) => ['station-statistics', stationId] as const,
+    stationDistance: (stationId: string, userLat: number, userLng: number) =>
+        ['station-distance', stationId, userLat, userLng] as const,
 }
 
 export const queryClient = new QueryClient({

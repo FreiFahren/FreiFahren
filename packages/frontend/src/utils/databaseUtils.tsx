@@ -43,61 +43,6 @@ export const getRecentDataWithIfModifiedSince = async (
     }
 }
 
-export const getAllStationsList = async (): Promise<StationList> => {
-    try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/stations`)
-        const data = await response.json()
-
-        return data
-    } catch (error) {
-        // fix later with sentry
-        // eslint-disable-next-line no-console
-        console.error('Error:', error)
-        return {}
-    }
-}
-
-export const getAllLinesList = async (): Promise<LinesList> => {
-    try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/v0/lines`)
-        const data = await response.json()
-
-        return data
-    } catch (error) {
-        // fix later with sentry
-        // eslint-disable-next-line no-console
-        console.error('Error:', error)
-        return {}
-    }
-}
-
-export const getStationDistance = async (userStationId: string, inspectorStationId: string): Promise<number | null> => {
-    if (userStationId === '' || inspectorStationId === '') {
-        return null
-    }
-
-    try {
-        const url = `${process.env.REACT_APP_API_URL}/transit/distance?inspectorStationId=${encodeURIComponent(
-            inspectorStationId
-        )}&userStationId=${encodeURIComponent(userStationId)}`
-        const response = await fetch(url)
-        const data = await response.json()
-
-        if (response.ok) {
-            return typeof data === 'number' ? data : data.distance
-        }
-        // fix later with sentry
-        // eslint-disable-next-line no-console
-        console.error('API call failed:', data)
-        return null
-    } catch (error) {
-        // fix later with sentry
-        // eslint-disable-next-line no-console
-        console.error('Error fetching distance:', error)
-        return null // Return null if there's an error during the fetch.
-    }
-}
-
 export const getNumberOfReportsInLast24Hours = async (): Promise<number> => {
     try {
         // Calculate the start and end times for the last 24 hours in UTC

@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
+import { getNearestStation } from '../utils/mapUtils'
 import { useMemo } from 'react'
 import { LinesList, Report, RiskData, StationList } from 'src/utils/types'
 import { CACHE_KEYS } from './queryClient'
+import { useSkeleton } from '../components/Miscellaneous/LoadingPlaceholder/Skeleton'
 
 const fetchNewReports = async (
     startTime: string,
@@ -184,7 +186,6 @@ export const useRiskData = () => {
     const { data = { segment_colors: {} }, ...query } = useQuery<RiskData, Error>({
         queryKey: CACHE_KEYS.risk,
         queryFn: async ({ queryKey }): Promise<RiskData> => {
-            console.log('fetching risk data')
             const response = await fetch(`${process.env.REACT_APP_API_URL}/v0/risk-prediction/segment-colors`)
             return response.json()
         },
@@ -259,4 +260,55 @@ export const useLines = () => {
         gcTime: Infinity,
         refetchOnWindowFocus: false,
     })
+}
+
+export interface UseStationDistanceResult {
+    distance: number | null
+    isLoading: boolean
+    shouldShowSkeleton: boolean
+}
+
+export const useStationDistance = (
+    stationId: string,
+    allStations: StationList,
+    userLat?: number,
+    userLng?: number
+): UseStationDistanceResult => {
+    const { data: distance, isLoading } = useQuery<number | null>({
+        queryKey: ['stationDistance', stationId, userLat, userLng],
+        queryFn: async () => {
+            if (userLat === undefined || userLng === undefined || !stationId) {
+                return null
+            }
+            const userStation = getNearestStation(allStations, userLat, userLng)
+            if (userStation && userStation.key !== '' && stationId !== '') {
+                const response = await fetch(
+                    `${process.env.REACT_APP_API_URL}/v0/transit/distance?inspectorStationId=${encodeURIComponent(
+                        stationId
+                    )}&userStationId=${encodeURIComponent(userStation.key)}`
+                )
+                const data = await response.json()
+                if (typeof data === 'number') return data
+                return data.distance
+            }
+            return null
+        },
+        enabled: Boolean(userLat && userLng && stationId),
+    })
+
+    /*
+     Apply skeleton showing logic using our custom useSkeleton hook.
+     This prevents flickering for fast responses by ensuring the skeleton is shown for a minimum time.
+    */
+    const shouldShowSkeleton = useSkeleton({
+        isLoading,
+        initialDelay: 100,
+        minDisplayTime: 1000,
+    })
+
+    return {
+        distance: distance ?? null,
+        isLoading,
+        shouldShowSkeleton,
+    }
 }

@@ -1,15 +1,15 @@
 import './MarkerModal.css'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Report } from 'src/utils/types'
 
 import { useElapsedTimeMessage, useStationDistanceMessage } from '../../../hooks/Messages'
-import { useStationDistance } from '../../../hooks/useStationDistance'
 import { useStationReports } from '../../../hooks/useStationReports'
 import { Line } from '../../Miscellaneous/Line/Line'
 import { Skeleton, useSkeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
 import { useStations } from 'src/api/queries'
+import { useStationDistance } from 'src/api/queries'
 
 interface MarkerModalProps {
     selectedMarker: Report
@@ -31,6 +31,12 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
         isLoading,
         shouldShowSkeleton,
     } = useStationDistance(station.id, stations ?? {}, userLat, userLng)
+
+    useEffect(() => {
+        console.log('isLoading', isLoading)
+        console.log('shouldShowSkeleton', shouldShowSkeleton)
+        console.log('distance', stationDistance)
+    }, [isLoading, shouldShowSkeleton, stationDistance])
 
     const showSkeleton = useSkeleton({ isLoading: isLoading && shouldShowSkeleton })
     const elapsedTimeMessage = useElapsedTimeMessage(timestamp, selectedMarker.isHistoric)
