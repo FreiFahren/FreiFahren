@@ -1,0 +1,36 @@
+# Build stage
+FROM node:18 as build
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json ./
+
+# Install dependencies
+RUN npm install serve && \
+    npm install && \
+    npm install --legacy-peer-deps
+
+# Copy the rest of the application
+COPY . .
+
+# Build the application
+RUN npm run build
+
+# Production stage
+FROM node:18-slim
+
+WORKDIR /app
+
+# Install serve
+RUN npm install -g serve
+
+# Copy built assets from builder stage
+COPY --from=build /app/build ./build
+
+# Expose port 3000
+EXPOSE 3000
+
+# Start the application
+CMD ["npx", "serve", "-s", "build", "-l", "3000"] 
