@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/FreiFahren/backend/api/distance"
@@ -125,6 +126,26 @@ func SetupServer() *echo.Echo {
 	caching.InitCacheManager()
 	segments := data.GetSegments()
 	caching.GlobalCacheManager.Register("segments", segments, caching.CacheConfig{
+		MaxAgeInSeconds:   31536000, // 1 year
+		ContentTypeInMIME: "application/json",
+	})
+
+	linesList := data.GetLinesList()
+	linesBytes, err := json.Marshal(linesList)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error marshaling lines data for cache")
+	}
+	caching.GlobalCacheManager.Register("lines", linesBytes, caching.CacheConfig{
+		MaxAgeInSeconds:   31536000, // 1 year
+		ContentTypeInMIME: "application/json",
+	})
+
+	stationsList := data.GetStationsList()
+	stationsBytes, err := json.Marshal(stationsList)
+	if err != nil {
+		logger.Log.Error().Err(err).Msg("Error marshaling stations data for cache")
+	}
+	caching.GlobalCacheManager.Register("stations", stationsBytes, caching.CacheConfig{
 		MaxAgeInSeconds:   31536000, // 1 year
 		ContentTypeInMIME: "application/json",
 	})
