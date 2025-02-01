@@ -69,6 +69,23 @@ export const useSubmitReport = () => {
     })
 }
 
+export const useFeedback = () => {
+    return useMutation({
+        mutationFn: async (feedback: string): Promise<boolean> => {
+            if (!feedback.trim()) {
+                return false
+            }
+
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/v0/feedback`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ feedback }),
+            })
+            return response.ok
+        },
+    })
+}
+
 export const useCurrentReports = () => {
     const queryClient = useQueryClient()
 
