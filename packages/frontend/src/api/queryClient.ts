@@ -8,7 +8,7 @@ export const CACHE_KEYS = {
     risk: ['risk'] as const,
     segments: ['segments'] as const,
     feedback: ['feedback'] as const,
-    stationStatistics: (stationId: string) => ['station-statistics', stationId] as const,
+    stationReports: (stationId: string) => ['station-reports', stationId] as const,
     stationDistance: (stationId: string, userLat: number, userLng: number) =>
         ['station-distance', stationId, userLat, userLng] as const,
 }

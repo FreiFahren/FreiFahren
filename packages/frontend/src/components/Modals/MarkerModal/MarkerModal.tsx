@@ -5,11 +5,9 @@ import { useTranslation } from 'react-i18next'
 import { Report } from 'src/utils/types'
 
 import { useElapsedTimeMessage, useStationDistanceMessage } from '../../../hooks/Messages'
-import { useStationReports } from '../../../hooks/useStationReports'
 import { Line } from '../../Miscellaneous/Line/Line'
 import { Skeleton, useSkeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
-import { useStations } from 'src/api/queries'
-import { useStationDistance } from 'src/api/queries'
+import { useStations, useStationDistance, useStationReports } from 'src/api/queries'
 
 interface MarkerModalProps {
     selectedMarker: Report
@@ -25,7 +23,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
     const { data: stations } = useStations()
     const { timestamp, station, line, direction, message } = selectedMarker
 
-    const numberOfReports = useStationReports(station.id)
+    const { data: numberOfReports } = useStationReports(station.id)
     const {
         distance: stationDistance,
         isLoading,
@@ -52,7 +50,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
             </div>
             <div>
                 <p>{elapsedTimeMessage}</p>
-                {numberOfReports > 0 ? (
+                {numberOfReports && numberOfReports > 0 ? (
                     <p className="reports-count">
                         <b>
                             {numberOfReports} {t('MarkerModal.reports')}

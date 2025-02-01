@@ -312,3 +312,17 @@ export const useStationDistance = (
         shouldShowSkeleton,
     }
 }
+
+export const useStationReports = (stationId: string) => {
+    return useQuery<number, Error>({
+        queryKey: CACHE_KEYS.stationReports(stationId),
+        queryFn: async () => {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/v0/stations/${stationId}/statistics`)
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
+            const data = await response.json()
+            return data.numberOfReports as number
+        },
+    })
+}
