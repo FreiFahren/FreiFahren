@@ -30,12 +30,6 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
         shouldShowSkeleton,
     } = useStationDistance(station.id, stations ?? {}, userLat, userLng)
 
-    useEffect(() => {
-        console.log('isLoading', isLoading)
-        console.log('shouldShowSkeleton', shouldShowSkeleton)
-        console.log('distance', stationDistance)
-    }, [isLoading, shouldShowSkeleton, stationDistance])
-
     const showSkeleton = useSkeleton({ isLoading: isLoading && shouldShowSkeleton })
     const elapsedTimeMessage = useElapsedTimeMessage(timestamp, selectedMarker.isHistoric)
     const stationDistanceMessage = useStationDistanceMessage(stationDistance)

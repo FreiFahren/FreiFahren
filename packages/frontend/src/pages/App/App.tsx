@@ -18,11 +18,10 @@ import { LegalDisclaimer } from '../../components/Modals/LegalDisclaimer/LegalDi
 import { UtilModal } from '../../components/Modals/UtilModal/UtilModal'
 import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
+import { useLast24HourReports } from '../../api/queries'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
-import { getNumberOfReportsInLast24Hours } from '../../utils/databaseUtils'
 import { highlightElement } from '../../utils/uiUtils'
 
-// Todo: remove this state once we have a proper state management solution
 type AppUIState = {
     isReportFormOpen: boolean
     isFirstOpen: boolean
@@ -48,6 +47,8 @@ const isTelegramWebApp = (): boolean =>
 const App = () => {
     const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
     const [appMounted, setAppMounted] = useState(false)
+
+    const { data: reportsInLast24Hours } = useLast24HourReports()
 
     useEffect(() => {
         setAppMounted(true)
@@ -90,10 +91,8 @@ const App = () => {
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                const numberOfReports = await getNumberOfReportsInLast24Hours()
-
-                if (numberOfReports !== 0) {
-                    setStatsData(numberOfReports)
+                if (reportsInLast24Hours.length !== 0) {
+                    setStatsData(reportsInLast24Hours.length)
                 }
             } catch (error) {
                 // fix later with sentry
