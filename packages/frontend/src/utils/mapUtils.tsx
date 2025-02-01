@@ -1,4 +1,4 @@
-import { StationProperty } from './databaseUtils'
+import { StationProperty } from './types'
 
 export const deg2rad = (deg: number): number => deg * (Math.PI / 180)
 /**
@@ -32,11 +32,7 @@ export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2
  * @param {number} lon2 - The longitude of the second point in decimal degrees.
  * @returns {number} The distance between the two points in kilometers.
  */
-export const getNearestStation = (
-    stations: { [key: string]: StationProperty },
-    userLat?: number,
-    userLon?: number
-) => {
+export const getNearestStation = (stations: { [key: string]: StationProperty }, userLat?: number, userLon?: number) => {
     if (userLat === undefined || userLon === undefined) return null
     let nearestStation = null
     let nearestDistance = Infinity
@@ -56,9 +52,6 @@ export const getNearestStation = (
     }
     return nearestStation
 }
-
-
-
 
 /**
  * Subscribes to user's geolocation changes and executes callback functions based on the result.

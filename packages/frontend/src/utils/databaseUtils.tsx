@@ -1,18 +1,4 @@
-export interface StationProperty {
-    name: string
-    coordinates: {
-        latitude: number
-        longitude: number
-    }
-    lines: string[]
-}
-
-export type LineProperty = {
-    [key: string]: string[]
-}
-
-export type StationList = Record<string, StationProperty>
-export type LinesList = Record<string, string[]>
+import { StationList, LinesList } from './types'
 
 /**
  * Fetches recent data from the given endpoint with an optional If-Modified-Since header.

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { useMemo } from 'react'
-import { Report, RiskData } from 'src/utils/types'
+import { LinesList, Report, RiskData, StationList } from 'src/utils/types'
 import { CACHE_KEYS } from './queryClient'
 
 const fetchNewReports = async (
@@ -214,10 +214,30 @@ export async function fetchWithETag<T>(endpoint: string, storageKeyPrefix: strin
     return newData
 }
 
-export const useSegmentsETagQuery = () => {
+export const useSegments = () => {
     return useQuery<GeoJSON.FeatureCollection<GeoJSON.LineString>, Error>({
         queryKey: ['segmentsETag'],
         queryFn: () => fetchWithETag<GeoJSON.FeatureCollection<GeoJSON.LineString>>('/v0/lines/segments', 'segments'),
+        staleTime: Infinity,
+        gcTime: Infinity,
+        refetchOnWindowFocus: false,
+    })
+}
+
+export const useStations = () => {
+    return useQuery<StationList, Error>({
+        queryKey: ['stationsETag'],
+        queryFn: () => fetchWithETag<StationList>('/v0/stations', 'stations'),
+        staleTime: Infinity,
+        gcTime: Infinity,
+        refetchOnWindowFocus: false,
+    })
+}
+
+export const useLines = () => {
+    return useQuery<LinesList, Error>({
+        queryKey: ['linesETag'],
+        queryFn: () => fetchWithETag<LinesList>('/v0/lines', 'lines'),
         staleTime: Infinity,
         gcTime: Infinity,
         refetchOnWindowFocus: false,

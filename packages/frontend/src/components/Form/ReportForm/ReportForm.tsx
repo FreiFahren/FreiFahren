@@ -6,9 +6,8 @@ import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton
 
 import { REPORT_COOLDOWN_MINUTES } from '../../../constants'
 import { useLocation } from '../../../contexts/LocationContext'
-import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
-import { LinesList, StationList, StationProperty } from '../../../utils/databaseUtils'
+import { LinesList, StationList, StationProperty } from '../../../utils/types'
 import { calculateDistance } from '../../../utils/mapUtils'
 import { Report } from '../../../utils/types'
 import { createWarningSpan, getLineColor, highlightElement } from '../../../utils/uiUtils'
@@ -17,7 +16,7 @@ import { AutocompleteInputForm } from '../AutocompleteInputForm/AutocompleteInpu
 import { FeedbackForm } from '../FeedbackForm/FeedbackForm'
 import { PrivacyCheckbox } from '../PrivacyCheckbox/PrivacyCheckbox'
 import { SelectField } from '../SelectField/SelectField'
-import { useSubmitReport } from '../../../api/queries'
+import { useLines, useStations, useSubmitReport } from '../../../api/queries'
 
 const getCSSVariable = (variable: string): number => {
     const value = getComputedStyle(document.documentElement).getPropertyValue(variable)
@@ -36,7 +35,8 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
     const { t } = useTranslation()
 
     const { userPosition } = useLocation()
-    const { allLines, allStations } = useStationsAndLines()
+    const { data: allStations } = useStations()
+    const { data: allLines } = useLines()
 
     const [currentEntity, setCurrentEntity] = useState<string | null>(null)
     const [currentLine, setCurrentLine] = useState<string | null>(null)
@@ -76,7 +76,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
     // Calculate possible lines based on the current entity
     const possibleLines = useMemo(() => {
         if (currentEntity === null) return allLines
-        return Object.entries(allLines)
+        return Object.entries(allLines ?? {})
             .filter(([line]) => line.startsWith(currentEntity))
             .reduce(
                 (accumulatedLines, [line, stations]) => ({
@@ -101,14 +101,18 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
             return 0
         }
 
-        const sortedAllStations = Object.fromEntries(Object.entries(allStations).sort(sortStationRecordsByStationName))
+        const sortedAllStations = Object.fromEntries(
+            Object.entries(allStations ?? {}).sort(sortStationRecordsByStationName)
+        )
         let stations = sortedAllStations
 
         if (currentStation !== null) {
-            stations = { [currentStation]: allStations[currentStation] }
+            stations = { [currentStation]: allStations![currentStation] }
         } else if (currentLine !== null) {
             stations = Object.fromEntries(
-                allLines[currentLine].map((stationKey) => [stationKey, allStations[stationKey]])
+                (allLines?.[currentLine] ?? [])
+                    .map((stationKey) => [stationKey, allStations?.[stationKey]])
+                    .filter(([, stationData]) => stationData !== undefined) as [string, StationProperty][]
             )
         } else if (currentEntity !== null) {
             stations = Object.entries(sortedAllStations)
@@ -195,7 +199,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                 typeof line === 'string' &&
                 currentStation !== null &&
                 typeof currentStation === 'string' &&
-                allLines[line].includes(currentStation) === false
+                (allLines?.[line] ?? []).includes(currentStation) === false
             ) {
                 setCurrentStation(null)
             }
@@ -205,7 +209,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
 
     const handleStationSelect = useCallback(
         (stationName: string | null) => {
-            const foundStationEntry = Object.entries(allStations).find(
+            const foundStationEntry = Object.entries(allStations ?? {}).find(
                 ([, stationData]) => stationData.name === stationName
             )
 
@@ -217,7 +221,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
 
     const handleDirectionSelect = useCallback(
         (directionName: string | null) => {
-            const foundStationEntry = Object.entries(allStations).find(
+            const foundStationEntry = Object.entries(allStations ?? {}).find(
                 ([, stationData]) => stationData.name === directionName
             )
 
@@ -283,7 +287,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
             hasError = true
         }
 
-        const locationError = verifyUserLocation(currentStation, allStations)
+        const locationError = verifyUserLocation(currentStation, allStations ?? {})
 
         if (locationError) {
             hasError = true
@@ -312,15 +316,15 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                 line: currentLine,
                 station: {
                     id: currentStation!,
-                    name: allStations[currentStation!].name,
-                    coordinates: allStations[currentStation!].coordinates,
+                    name: (allStations ?? {})[currentStation!].name,
+                    coordinates: (allStations ?? {})[currentStation!].coordinates,
                 },
                 direction:
                     currentDirection !== null
                         ? {
                               id: currentDirection,
-                              name: allStations[currentDirection!].name,
-                              coordinates: allStations[currentDirection!].coordinates,
+                              name: (allStations ?? {})[currentDirection!].name,
+                              coordinates: (allStations ?? {})[currentDirection!].coordinates,
                           }
                         : null,
                 message: descriptionRef.current?.value ?? '',
@@ -441,7 +445,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                                 value={currentLine}
                                 getValue={getLineValue}
                             >
-                                {Object.keys(possibleLines).map((line) => (
+                                {Object.keys(possibleLines ?? {}).map((line) => (
                                     <Line key={line} line={line} />
                                 ))}
                             </SelectField>
@@ -476,16 +480,20 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                                 <h3>{t('ReportForm.direction')}</h3>
                                 <SelectField
                                     onSelect={handleDirectionSelect}
-                                    value={currentDirection !== null ? allStations[currentDirection].name : ''}
+                                    value={currentDirection !== null ? (allStations ?? {})[currentDirection].name : ''}
                                     containerClassName="align-child-on-line"
                                     getValue={getDirectionValue}
                                 >
                                     <span>
-                                        <strong>{allStations[allLines[currentLine][0]].name}</strong>
+                                        <strong>{(allStations ?? {})[allLines?.[currentLine]?.[0] ?? ''].name}</strong>
                                     </span>
                                     <span>
                                         <strong>
-                                            {allStations[allLines[currentLine][allLines[currentLine].length - 1]].name}
+                                            {
+                                                (allStations ?? {})[
+                                                    allLines?.[currentLine]?.[allLines?.[currentLine]?.length - 1] ?? ''
+                                                ].name
+                                            }
                                         </strong>
                                     </span>
                                 </SelectField>

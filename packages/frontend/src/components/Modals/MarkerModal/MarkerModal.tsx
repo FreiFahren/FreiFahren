@@ -4,12 +4,12 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Report } from 'src/utils/types'
 
-import { useStationsAndLines } from '../../../contexts/StationsAndLinesContext'
 import { useElapsedTimeMessage, useStationDistanceMessage } from '../../../hooks/Messages'
 import { useStationDistance } from '../../../hooks/useStationDistance'
 import { useStationReports } from '../../../hooks/useStationReports'
 import { Line } from '../../Miscellaneous/Line/Line'
 import { Skeleton, useSkeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
+import { useStations } from 'src/api/queries'
 
 interface MarkerModalProps {
     selectedMarker: Report
@@ -22,7 +22,7 @@ interface MarkerModalProps {
 const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selectedMarker, userLat, userLng }) => {
     const { t } = useTranslation()
 
-    const { allStations } = useStationsAndLines()
+    const { data: stations } = useStations()
     const { timestamp, station, line, direction, message } = selectedMarker
 
     const numberOfReports = useStationReports(station.id)
@@ -30,7 +30,7 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
         distance: stationDistance,
         isLoading,
         shouldShowSkeleton,
-    } = useStationDistance(station.id, allStations, userLat, userLng)
+    } = useStationDistance(station.id, stations ?? {}, userLat, userLng)
 
     const showSkeleton = useSkeleton({ isLoading: isLoading && shouldShowSkeleton })
     const elapsedTimeMessage = useElapsedTimeMessage(timestamp, selectedMarker.isHistoric)

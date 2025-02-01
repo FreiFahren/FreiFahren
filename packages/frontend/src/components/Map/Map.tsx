@@ -5,14 +5,13 @@ import React, { lazy, Suspense, useCallback, useEffect, useRef } from 'react'
 import { LngLatBoundsLike, LngLatLike, MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre'
 
 import { useLocation } from '../../contexts/LocationContext'
-import { useStationsAndLines } from '../../contexts/StationsAndLinesContext'
 import { convertStationsToGeoJSON } from '../../utils/mapUtils'
 import { RegularLineLayer } from './MapLayers/LineLayer/RegularLineLayer'
 import { RiskLineLayer } from './MapLayers/LineLayer/RiskLineLayer'
 import { StationLayer } from './MapLayers/StationLayer/StationLayer'
 import { LocationMarker } from './Markers/Classes/LocationMarker/LocationMarker'
 import { MarkerContainer } from './Markers/MarkerContainer'
-import { useRiskData, useSegmentsETagQuery } from 'src/api/queries'
+import { useRiskData, useSegments, useStations } from 'src/api/queries'
 
 const Map = lazy(() => import('react-map-gl/maplibre'))
 
@@ -31,11 +30,11 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({ isFirstOpen, isRiskLayerO
     const NorthEastBounds: LngLatLike = { lng: 14.00044556529124, lat: 52.77063424239867 }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
 
-    const { data: lineSegments = null } = useSegmentsETagQuery()
+    const { data: lineSegments = null } = useSegments()
 
     const map = useRef<MapRef>(null)
-    const { allStations } = useStationsAndLines()
-    const stationGeoJSON = convertStationsToGeoJSON(allStations)
+    const { data: stations } = useStations()
+    const stationGeoJSON = convertStationsToGeoJSON(stations ?? {})
 
     const { userPosition, initializeLocationTracking } = useLocation()
 

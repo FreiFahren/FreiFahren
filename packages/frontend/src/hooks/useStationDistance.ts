@@ -1,7 +1,8 @@
-import { useEffect,useRef,useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
-import { getStationDistance , StationList } from '../utils/databaseUtils'
+import { getStationDistance } from '../utils/databaseUtils'
 import { getNearestStation } from '../utils/mapUtils'
+import { StationList } from '../utils/types'
 
 interface UseStationDistanceResult {
     distance: number | null

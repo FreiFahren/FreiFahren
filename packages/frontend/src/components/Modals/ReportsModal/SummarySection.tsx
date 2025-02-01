@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
-import { useStationsAndLines } from 'src/contexts/StationsAndLinesContext'
 import { Report } from 'src/utils/types'
 
 import { Line } from '../../Miscellaneous/Line/Line'
 import { ClusteredReportItem } from './ClusteredReportItem'
-import { useRiskData } from 'src/api/queries'
+import { useRiskData, useLines } from 'src/api/queries'
 
 interface SummarySectionProps {
     sortedLinesWithReports: Map<string, Report[]>
@@ -21,10 +20,12 @@ interface LineRiskData {
 
 const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports, onCloseModal, setShowFeedback }) => {
     const { t } = useTranslation()
+
     const riskLevels = [3, 2, 1, 0]
     const { data: segmentRiskData } = useRiskData()
-    const { allLines } = useStationsAndLines()
     const [riskLines, setRiskLines] = useState<Map<string, LineRiskData>>(new Map())
+
+    const { data: lines } = useLines()
 
     useEffect(() => {
         if (segmentRiskData) {
@@ -66,14 +67,14 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
 
             const riskMap = extractMostRiskLines(segmentRiskData.segment_colors)
 
-            Object.keys(allLines).forEach((line) => {
+            Object.keys(lines ?? {}).forEach((line) => {
                 if (!riskMap.has(line)) {
                     riskMap.set(line, { score: 0, class: 0 })
                 }
             })
             setRiskLines(riskMap)
         }
-    }, [segmentRiskData, allLines])
+    }, [segmentRiskData, lines])
 
     const filterRiskLevelLines = (level: number, riskData: LineRiskData): boolean => riskData.class === level
 
