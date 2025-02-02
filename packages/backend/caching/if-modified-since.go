@@ -1,6 +1,8 @@
 package caching
 
-import "time"
+import (
+	"time"
+)
 
 // CheckIfModifiedSince determines if data should be re-fetched based on the If-Modified-Since header.
 //
@@ -20,16 +22,17 @@ func CheckIfModifiedSince(ifModifiedSince string, lastModified time.Time) (bool,
 		return true, nil
 	}
 
-	// Use time.RFC1123 to parse HTTP date format
+	// Parse the If-Modified-Since header in RFC1123 format
 	requestedModificationTime, err := time.Parse(time.RFC1123, ifModifiedSince)
 	if err != nil {
 		return true, err
 	}
 
+	// Convert both times to UTC and truncate to seconds for comparison
+	// This ensures we're comparing at the same precision
+	lastModifiedUTC := lastModified.UTC().Truncate(time.Second)
+	requestedTimeUTC := requestedModificationTime.UTC().Truncate(time.Second)
+
 	// If the data has not been modified since the provided time, return false
-	if !lastModified.After(requestedModificationTime) {
-		return false, nil
-	} else {
-		return true, nil
-	}
+	return lastModifiedUTC.After(requestedTimeUTC), nil
 }

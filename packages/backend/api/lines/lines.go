@@ -30,6 +30,12 @@ import (
 func GetAllLines(c echo.Context) error {
 	logger.Log.Info().Msg("GET /lines")
 
+	if cache, exists := caching.GlobalCacheManager.Get("lines"); exists {
+		return cache.ETagMiddleware()(func(c echo.Context) error {
+			return nil
+		})(c)
+	}
+
 	return c.JSON(http.StatusOK, data.GetLinesList())
 }
 

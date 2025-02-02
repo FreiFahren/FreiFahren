@@ -2,7 +2,7 @@ import './ReportsModalButton.css'
 
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { useReports } from 'src/contexts/ReportsContext'
+import { useCurrentReports } from 'src/api/queries'
 import { useViewedReports } from 'src/contexts/ViewedReportsContext'
 import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 
@@ -14,17 +14,17 @@ interface ReportsModalButtonProps {
 
 const ReportsModalButton: React.FC<ReportsModalButtonProps> = ({ openModal }) => {
     const { t } = useTranslation()
-    const { currentReports } = useReports()
+    const { data: lastHourReports = [] } = useCurrentReports()
     const { setLastViewed, isRecentAndUnviewed } = useViewedReports()
 
     const latestReport =
-        currentReports.length > 0
-            ? currentReports.reduce((latest, current) => {
+        lastHourReports.length > 0
+            ? lastHourReports.reduce((latest, current) => {
                   const currentTime = new Date(current.timestamp).getTime()
                   const latestTime = new Date(latest.timestamp).getTime()
 
                   return currentTime > latestTime ? current : latest
-              }, currentReports[0])
+              }, lastHourReports[0])
             : null
 
     const handleClick = () => {
@@ -44,7 +44,7 @@ const ReportsModalButton: React.FC<ReportsModalButtonProps> = ({ openModal }) =>
             <div className="list-button-content">
                 <div className="list-button-header">
                     <p>{t('InspectorListButton.label')}</p>
-                    <p>{currentReports.length}</p>
+                    <p>{lastHourReports.length}</p>
                 </div>
                 {latestReport ? (
                     <div className="latest-report">

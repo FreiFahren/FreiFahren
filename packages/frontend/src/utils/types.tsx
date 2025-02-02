@@ -43,6 +43,21 @@ export interface SegmentRisk {
     risk: number
 }
 
+export interface StationProperty {
+    name: string
+    coordinates: {
+        latitude: number
+        longitude: number
+    }
+    lines: string[]
+}
+
+export type LineProperty = {
+    [key: string]: string[]
+}
+
+export type StationList = Record<string, StationProperty>
+export type LinesList = Record<string, string[]>
 export interface RiskData {
     segments_risk: {
         [key: string]: SegmentRisk

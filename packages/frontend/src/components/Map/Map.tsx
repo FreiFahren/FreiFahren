@@ -3,11 +3,9 @@ import './Map.css'
 
 import React, { lazy, Suspense, useCallback, useEffect, useRef } from 'react'
 import { LngLatBoundsLike, LngLatLike, MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre'
+import { useRiskData, useSegments, useStations } from 'src/api/queries'
 
 import { useLocation } from '../../contexts/LocationContext'
-import { useRiskData } from '../../contexts/RiskDataContext'
-import { useStationsAndLines } from '../../contexts/StationsAndLinesContext'
-import { useETagCache } from '../../hooks/useETagCaching'
 import { convertStationsToGeoJSON } from '../../utils/mapUtils'
 import { RegularLineLayer } from './MapLayers/LineLayer/RegularLineLayer'
 import { RiskLineLayer } from './MapLayers/LineLayer/RiskLineLayer'
@@ -18,7 +16,6 @@ import { MarkerContainer } from './Markers/MarkerContainer'
 const Map = lazy(() => import('react-map-gl/maplibre'))
 
 interface FreifahrenMapProps {
-    formSubmitted: boolean
     isFirstOpen: boolean
     isRiskLayerOpen: boolean
     onRotationChange: (bearing: number) => void
@@ -28,35 +25,16 @@ const berlinViewPosition: { lng: number; lat: number } = { lng: 13.388, lat: 52.
 const GITHUB_ICON = `${process.env.PUBLIC_URL}/icons/github.svg`
 const INSTAGRAM_ICON = `${process.env.PUBLIC_URL}/icons/instagram.svg`
 
-const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
-    formSubmitted,
-    isFirstOpen,
-    isRiskLayerOpen,
-    onRotationChange,
-}) => {
+const FreifahrenMap: React.FC<FreifahrenMapProps> = ({ isFirstOpen, isRiskLayerOpen, onRotationChange }) => {
     const SouthWestBounds: LngLatLike = { lng: 12.8364646484805, lat: 52.23115511676795 }
     const NorthEastBounds: LngLatLike = { lng: 14.00044556529124, lat: 52.77063424239867 }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
 
-    const { data: lineSegments, error: segmentsError } = useETagCache<GeoJSON.FeatureCollection<GeoJSON.LineString>>({
-        endpoint: '/v0/lines/segments',
-        storageKeyPrefix: 'segments',
-        onError: (error) => {
-            // fix this later with sentry
-            // eslint-disable-next-line no-console
-            console.error('Error loading lines GeoJSON', error)
-        },
-    })
-
-    if (segmentsError) {
-        // fix this later with sentry
-        // eslint-disable-next-line no-console
-        console.error('Error loading lines GeoJSON', segmentsError)
-    }
+    const { data: lineSegments = null } = useSegments()
 
     const map = useRef<MapRef>(null)
-    const { allStations } = useStationsAndLines()
-    const stationGeoJSON = convertStationsToGeoJSON(allStations)
+    const { data: stations } = useStations()
+    const stationGeoJSON = convertStationsToGeoJSON(stations ?? {})
 
     const { userPosition, initializeLocationTracking } = useLocation()
 
@@ -67,21 +45,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     }, [isFirstOpen, initializeLocationTracking])
 
     // preload colors before risklayer component mounts to instantly show the highlighted segments
-    const { segmentRiskData, refreshRiskData } = useRiskData()
-
-    const hasRefreshed = useRef(false) // To prevent refreshing on every render
-
-    useEffect(() => {
-        if (isFirstOpen && !hasRefreshed.current) {
-            // Refresh or load risk data on initial open
-            refreshRiskData().catch((error) => {
-                // fix this later with sentry
-                // eslint-disable-next-line no-console
-                console.error('Error refreshing risk data', error)
-            })
-            hasRefreshed.current = true
-        }
-    }, [isFirstOpen, refreshRiskData])
+    const { data: segmentRiskData } = useRiskData()
 
     const handleRotate = useCallback(
         (event: ViewStateChangeEvent) => {
@@ -110,11 +74,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     mapStyle={`https://api.jawg.io/styles/848dfeff-2d26-4044-8b83-3b1851256e3d.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`}
                 >
                     {!isFirstOpen ? <LocationMarker userPosition={userPosition} /> : null}
-                    <MarkerContainer
-                        isFirstOpen={isFirstOpen}
-                        formSubmitted={formSubmitted}
-                        userPosition={userPosition}
-                    />
+                    <MarkerContainer isFirstOpen={isFirstOpen} userPosition={userPosition} />
                     <StationLayer stations={stationGeoJSON} />
                     {isRiskLayerOpen ? (
                         <RiskLineLayer preloadedRiskData={segmentRiskData} lineSegments={lineSegments} />
