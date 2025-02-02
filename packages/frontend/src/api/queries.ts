@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
-import { LinesList, Report, RiskData, StationList } from 'src/utils/types'
+import { Report, RiskData, LinesList, StationList } from 'src/utils/types'
 
 import { useSkeleton } from '../components/Miscellaneous/LoadingPlaceholder/Skeleton'
 import { getNearestStation } from '../utils/mapUtils'
@@ -189,7 +189,7 @@ export const useRiskData = () => {
     const queryResult = useQuery<RiskData, Error>({
         queryKey: CACHE_KEYS.risk,
         queryFn: async (): Promise<RiskData> => {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/v0/risk-prediction/segment-colors`)
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/v1/risk-prediction/segment-colors`)
             return response.json()
         },
         refetchInterval: 30 * 1000,
@@ -198,7 +198,7 @@ export const useRiskData = () => {
     })
 
     return {
-        data: queryResult.data ?? { segment_colors: {} },
+        data: queryResult.data ?? { segments_risk: {} },
         error: queryResult.error,
         isLoading: queryResult.isLoading,
         refetch: queryResult.refetch,
