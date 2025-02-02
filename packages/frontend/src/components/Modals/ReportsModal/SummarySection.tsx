@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLines, useRiskData } from 'src/api/queries'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
-import { Report, RiskData, SegmentRisk } from 'src/utils/types'
+import { Report, SegmentRisk } from 'src/utils/types'
 
 import { Line } from '../../Miscellaneous/Line/Line'
 import { ClusteredReportItem } from './ClusteredReportItem'
@@ -38,7 +38,7 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
             const lineScores = new Map<string, LineRiskData>()
 
             Object.entries(segmentsRisk).forEach(([segmentId, segment]) => {
-                const line = segmentId.split('-')[0]
+                const [line] = segmentId.split('-')
                 const score = segment.color in colorScores ? colorScores[segment.color] : 0
 
                 if (!lineScores.has(line)) {
