@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLines, useRiskData } from 'src/api/queries'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
-import { Report } from 'src/utils/types'
+import { Report, SegmentRisk } from 'src/utils/types'
 
 import { Line } from '../../Miscellaneous/Line/Line'
 import { ClusteredReportItem } from './ClusteredReportItem'
@@ -28,7 +28,7 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
     const { data: lines } = useLines()
 
     useEffect(() => {
-        const extractMostRiskLines = (segmentColors: Record<string, string>): Map<string, LineRiskData> => {
+        const extractMostRiskLines = (segmentsRisk: Record<string, SegmentRisk>): Map<string, LineRiskData> => {
             const colorScores: Record<string, number> = {
                 '#A92725': 3, // bad - red
                 '#F05044': 3, // also bad - red (otherwise we would have too many colors, therfore aggregate)
@@ -37,10 +37,9 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
 
             const lineScores = new Map<string, LineRiskData>()
 
-            Object.entries(segmentColors).forEach(([segmentId, color]) => {
-                // eslint-disable-next-line prefer-destructuring
-                const line = segmentId.split('-')[0]
-                const score = color in colorScores ? colorScores[color] : 0
+            Object.entries(segmentsRisk).forEach(([segmentId, segment]) => {
+                const [line] = segmentId.split('-')
+                const score = segment.color in colorScores ? colorScores[segment.color] : 0
 
                 if (!lineScores.has(line)) {
                     lineScores.set(line, { score, class: score })
@@ -64,7 +63,7 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
             )
         }
 
-        const riskMap = extractMostRiskLines(segmentRiskData.segment_colors)
+        const riskMap = extractMostRiskLines(segmentRiskData.segments_risk)
 
         Object.keys(lines ?? {}).forEach((line) => {
             if (!riskMap.has(line)) {

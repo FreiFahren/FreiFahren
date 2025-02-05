@@ -9,6 +9,8 @@ import (
 	"github.com/FreiFahren/backend/api/inspectors"
 	"github.com/FreiFahren/backend/api/lines"
 	"github.com/FreiFahren/backend/api/prediction"
+	predictionV0 "github.com/FreiFahren/backend/api/prediction/v0"
+	predictionV1 "github.com/FreiFahren/backend/api/prediction/v1"
 	"github.com/FreiFahren/backend/api/stations"
 	"github.com/FreiFahren/backend/caching"
 	"github.com/FreiFahren/backend/data"
@@ -152,6 +154,7 @@ func SetupServer() *echo.Echo {
 
 	// Create API version groups
 	v0 := e.Group("/v0")
+	v1 := e.Group("/v1")
 	latest := e // Routes without version prefix will point to latest version
 
 	// V0 Routes
@@ -170,9 +173,12 @@ func SetupServer() *echo.Echo {
 
 	v0.GET("/transit/distance", distance.GetStationDistance)
 
-	v0.GET("/risk-prediction/segment-colors", prediction.GetRiskSegments)
+	v0.GET("/risk-prediction/segment-colors", predictionV0.GetRiskSegments)
 
 	v0.POST("/feedback", feedback.PostFeedback)
+
+	// V1 Routes
+	v1.GET("/risk-prediction/segment-colors", predictionV1.GetRiskSegments)
 
 	// Latest Routes
 	latest.POST("/basics/inspectors", inspectors.PostInspector)
@@ -190,7 +196,7 @@ func SetupServer() *echo.Echo {
 
 	latest.GET("/transit/distance", distance.GetStationDistance)
 
-	latest.GET("/risk-prediction/segment-colors", prediction.GetRiskSegments)
+	latest.GET("/risk-prediction/segment-colors", predictionV1.GetRiskSegments)
 
 	latest.POST("/feedback", feedback.PostFeedback)
 

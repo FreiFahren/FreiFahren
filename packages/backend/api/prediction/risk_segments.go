@@ -3,7 +3,6 @@ package prediction
 import (
 	"bytes"
 	"encoding/json"
-	"net/http"
 	"os/exec"
 	"sync"
 	"time"
@@ -11,17 +10,15 @@ import (
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/logger"
-	"github.com/labstack/echo/v4"
 )
 
-type RiskSegmentResponse struct {
-	SegmentID string `json:"segmentId"`
-	Color     string `json:"color"`
+type SegmentRisk struct {
+	Color string  `json:"color"`
+	Risk  float64 `json:"risk"`
 }
 
 type RiskData struct {
-	LastModified  string            `json:"last_modified"`
-	SegmentColors map[string]string `json:"segment_colors"`
+	SegmentsRisk map[string]SegmentRisk `json:"segments_risk"`
 }
 
 type RiskInspector struct {
@@ -31,20 +28,20 @@ type RiskInspector struct {
 	Timestamp string   `json:"timestamp"`
 }
 
-type riskCache struct {
+type RiskCache struct {
 	data  *RiskData
 	mutex sync.RWMutex
 }
 
-var cache = &riskCache{}
+var Cache = &RiskCache{}
 
-func (c *riskCache) get() (*RiskData, bool) {
+func (c *RiskCache) Get() (*RiskData, bool) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	return c.data, c.data != nil
 }
 
-func (c *riskCache) set(data *RiskData) {
+func (c *RiskCache) set(data *RiskData) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	c.data = data
@@ -140,43 +137,9 @@ func ExecuteRiskModel() (*RiskData, error) {
 		logger.Log.Error().Err(err).Msg("Failed to unmarshal Python output")
 		return nil, err
 	}
-	logger.Log.Debug().Msgf("amount of segments generated: %d", len(riskData.SegmentColors))
+	logger.Log.Debug().Msgf("amount of segments generated: %d", len(riskData.SegmentsRisk))
 
 	// Update cache with new data
-	cache.set(&riskData)
+	Cache.set(&riskData)
 	return &riskData, nil
-}
-
-// @Summary Get risk segments
-//
-// @Description Retrieves risk predictions for transit segments.
-// @Description This endpoint returns color-coded risk levels for different segments of the transit network based on recent ticket inspector activity.
-//
-// @Tags prediction
-//
-// @Produce json
-//
-// @Success 200 {object} RiskData "Successfully retrieved risk segments data"
-// @Failure 500 "Internal Server Error: Failed to execute risk model"
-//
-// @Router /risk-prediction/segment-colors [get]
-func GetRiskSegments(c echo.Context) error {
-	logger.Log.Info().Msg("GET /risk-prediction/segment-colors")
-
-	// Get from cache
-	if cachedData, ok := cache.get(); ok {
-		logger.Log.Debug().Msg("cache hit")
-		cachedData.LastModified = ""
-		return c.JSON(http.StatusOK, cachedData)
-	}
-
-	// If cache is empty (first request), execute the model
-	riskData, err := ExecuteRiskModel()
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Failed to execute risk model")
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	riskData.LastModified = "" // to avoid breaking backward compatibility with mobile app
-
-	return c.JSON(http.StatusOK, riskData)
 }

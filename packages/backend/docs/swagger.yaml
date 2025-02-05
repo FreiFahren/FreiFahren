@@ -4,14 +4,26 @@ definitions:
       feedback:
         type: string
     type: object
+  feedback.FeedbackResponse:
+    properties:
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
   prediction.RiskData:
     properties:
-      last_modified:
-        type: string
-      segment_colors:
+      segments_risk:
         additionalProperties:
-          type: string
+          $ref: '#/definitions/prediction.SegmentRisk'
         type: object
+    type: object
+  prediction.SegmentRisk:
+    properties:
+      color:
+        type: string
+      risk:
+        type: number
     type: object
   statistics.Statistics:
     properties:
@@ -154,6 +166,15 @@ definitions:
       timestamp:
         type: string
     type: object
+  v0.v0RiskData:
+    properties:
+      last_modified:
+        type: string
+      segment_colors:
+        additionalProperties:
+          type: string
+        type: object
+    type: object
 info:
   contact: {}
 paths:
@@ -202,6 +223,7 @@ paths:
         This endpoint validates the provided data, processes necessary computations for linking stations and lines,
         inserts the data into the database, and triggers an update to the risk model used in operational analysis.
         If the 'timestamp' field is not provided in the request, the current UTC time truncated to the nearest minute is used automatically.
+        The endpoint also includes a rate limit to prevent abuse. The rate limit is based on the IP address of the request.
       parameters:
       - description: Data about the inspector's location and activity
         in: body
@@ -224,6 +246,8 @@ paths:
             $ref: '#/definitions/utils.ResponseData'
         "400":
           description: 'Bad Request: Missing or incorrect parameters provided.'
+        "429":
+          description: 'Too Many Requests: The request has been rate limited.'
         "500":
           description: 'Internal Server Error: Error during data processing or database
             insertion.'
@@ -248,17 +272,17 @@ paths:
       - application/json
       responses:
         "200":
-          description: Feedback submitted
+          description: Feedback submitted successfully
           schema:
-            type: string
+            $ref: '#/definitions/feedback.FeedbackResponse'
         "400":
           description: Invalid request or empty feedback
           schema:
-            type: string
+            $ref: '#/definitions/feedback.FeedbackResponse'
         "500":
           description: Failed to save feedback
           schema:
-            type: string
+            $ref: '#/definitions/feedback.FeedbackResponse'
       summary: Submit user feedback
       tags:
       - feedback
@@ -374,23 +398,6 @@ paths:
       summary: Get all segments
       tags:
       - lines
-  /risk-prediction/segment-colors:
-    get:
-      description: |-
-        Retrieves risk predictions for transit segments.
-        This endpoint returns color-coded risk levels for different segments of the transit network based on recent ticket inspector activity.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved risk segments data
-          schema:
-            $ref: '#/definitions/prediction.RiskData'
-        "500":
-          description: 'Internal Server Error: Failed to execute risk model'
-      summary: Get risk segments
-      tags:
-      - prediction
   /stations:
     get:
       description: |-
@@ -542,4 +549,38 @@ paths:
       summary: Calculate shortest distance to a station
       tags:
       - transit
+  /v0/risk-prediction/segment-colors:
+    get:
+      description: |-
+        Retrieves risk predictions for transit segments.
+        This endpoint returns color-coded risk levels for different segments of the transit network based on recent ticket inspector activity.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved risk segments data
+          schema:
+            $ref: '#/definitions/v0.v0RiskData'
+        "500":
+          description: 'Internal Server Error: Failed to execute risk model'
+      summary: Get risk segments
+      tags:
+      - prediction
+  /v1/risk-prediction/segment-colors:
+    get:
+      description: |-
+        Retrieves risk predictions for transit segments.
+        This endpoint returns color-coded risk levels for different segments of the transit network based on recent ticket inspector activity.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved risk segments data
+          schema:
+            $ref: '#/definitions/prediction.RiskData'
+        "500":
+          description: 'Internal Server Error: Failed to execute risk model'
+      summary: Get risk segments
+      tags:
+      - prediction
 swagger: "2.0"

@@ -192,7 +192,7 @@ class RiskPredictor:
                 )[0]
             )
 
-    def predict(self, reports: List[Report]) -> Dict[str, str]:
+    def predict(self, reports: List[Report]) -> Dict[str, Dict[str, str]]:
         """
         Predict risk levels for transport segments based on inspector reports.
 
@@ -296,12 +296,15 @@ class RiskPredictor:
             total_risk = min(1.0, risks["direct"] + risks["bidirect"] + risks["line"])
             final_risks[sid] = total_risk
 
-        # Convert risks to colors
+        # Convert risks to colors and create response
         segment_colors = {}
         for sid, risk in final_risks.items():
             color = self._risk_to_color(risk)
             if color != self.colors[0]:  # Only include segments with risk
-                segment_colors[sid] = color
+                segment_colors[sid] = {
+                    "color": color,
+                    "risk": round(risk, 3),  # Round to 3 decimal places for readability
+                }
 
         # Create a dictionary to store segments by their start and end stations
         segments_by_stations: Dict[Tuple[str, str], List[Segment]] = {}
@@ -313,7 +316,7 @@ class RiskPredictor:
             segments_by_stations[stations].append(segment)
 
         # Propagate risk colors to overlapping segments
-        for sid, color in list(
+        for sid, data in list(
             segment_colors.items()
         ):  # Iterate over a copy to avoid modifying the dictionary while iterating
             # Find the segment corresponding to the current sid
@@ -325,10 +328,10 @@ class RiskPredictor:
                         (current_segment.from_station_id, current_segment.to_station_id)
                     )
                 )
-                # overlapping segment inherits risk color
+                # overlapping segment inherits risk color and value
                 overlapping_segments = segments_by_stations.get(stations, [])
                 for overlapping_segment in overlapping_segments:
-                    segment_colors[overlapping_segment.sid] = color
+                    segment_colors[overlapping_segment.sid] = data
 
         return segment_colors
 
@@ -396,7 +399,7 @@ def main():
 
         # Create response in the correct format
         response = {
-            "segment_colors": segment_colors,
+            "segments_risk": segment_colors,
         }
 
         # Output filtered results to stdout

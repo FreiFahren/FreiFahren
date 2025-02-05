@@ -38,6 +38,11 @@ export interface StationGeoJSON {
     }[]
 }
 
+export interface SegmentRisk {
+    color: string
+    risk: number
+}
+
 export interface StationProperty {
     name: string
     coordinates: {
@@ -53,13 +58,10 @@ export type LineProperty = {
 
 export type StationList = Record<string, StationProperty>
 export type LinesList = Record<string, string[]>
-
 export interface RiskData {
-    segment_colors: SegmentColors
-}
-
-export interface SegmentColors {
-    [key: string]: string
+    segments_risk: {
+        [key: string]: SegmentRisk
+    }
 }
 
 export type Report = {
