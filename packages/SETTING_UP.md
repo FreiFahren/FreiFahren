@@ -60,7 +60,7 @@ SENTRY_DSN=
 
 ```plaintext
 REACT_APP_JAWG_ACCESS_TOKEN=
-REACT_APP_API_URL=http://backend:8080
+REACT_APP_API_URL=http://localhost:8080
 SENTRY_AUTH_TOKEN=
 ```
 
