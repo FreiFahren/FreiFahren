@@ -71,7 +71,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({ isFirstOpen, isRiskLayerO
                     minZoom={10}
                     maxBounds={maxBounds}
                     onRotate={handleRotate}
-                    mapStyle={`https://api.jawg.io/styles/848dfeff-2d26-4044-8b83-3b1851256e3d.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`}
+                    mapStyle={`https://api.jawg.io/styles/c52af8db-49f6-40b8-9197-568b7fd9a940.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`}
                 >
                     {!isFirstOpen ? <LocationMarker userPosition={userPosition} /> : null}
                     <MarkerContainer isFirstOpen={isFirstOpen} userPosition={userPosition} />
