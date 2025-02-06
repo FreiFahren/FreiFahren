@@ -29,15 +29,8 @@ RUN npm install -g serve
 # Copy built assets from builder stage
 COPY --from=build /app/build ./build
 
-# Create a script to inject environment variables
-RUN echo '#!/bin/sh\n\
-    echo "window._env_ = {" > ./build/env-config.js\n\
-    echo "  REACT_APP_BACKEND_URL: \"$REACT_APP_BACKEND_URL\"," >> ./build/env-config.js\n\
-    echo "}" >> ./build/env-config.js\n\
-    npx serve -s build -l 3000' > ./start.sh && chmod +x ./start.sh
-
 # Expose port 3000
 EXPOSE 3000
 
-# Start the application using the script
-CMD ["./start.sh"] 
+# Start the application
+CMD ["npx", "serve", "-s", "build", "-l", "3000"] 
