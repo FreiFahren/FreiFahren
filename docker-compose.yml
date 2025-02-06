@@ -1,30 +1,78 @@
-version: '3.8'
+version: "3.8"
 
 services:
-    postgres:
-        container_name: ff-postgres
-        build:
-            context: .
-            dockerfile: .devcontainer/Dockerfile.postgres
-        environment:
-            DB_USER: myuser
-            DB_PASSWORD: mypassword
-            DB_NAME: mydatabase
-        ports:
-            - '5432:5432'
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - backend-network
 
-    backend:
-        container_name: ff-backend
-        build:
-            context: .
-            dockerfile: .devcontainer/Dockerfile.backend
-        environment:
-            DB_USER: myuser
-            DB_PASSWORD: mypassword
-            DB_NAME: mydatabase
-            DB_HOST: postgres
-            DB_PORT: 5432
-        ports:
-            - '8080:8080'
-        depends_on:
-            - postgres
+  backend:
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile.backend
+    container_name: backend
+    env_file:
+      - ./packages/backend/.env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - content_moderation_service
+    restart: unless-stopped
+    networks:
+      - backend-network
+
+  nlp_service:
+    build:
+      context: ./packages/
+      dockerfile: nlp_service/Dockerfile.nlp_service
+    container_name: nlp_service
+    env_file:
+      - ./packages/nlp_service/.env
+    ports:
+      - "6000:6000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - backend-network
+    platform: linux/amd64  # Force x86 architecture
+
+  content_moderation_service:
+    build:
+      context: ./packages/hate_speech_filter
+      dockerfile: Dockerfile.hatespeechfilter
+    container_name: content_moderation_service
+    ports:
+      - "9090:9090"
+    networks:
+      - backend-network
+
+  frontend:
+    build:
+      context: ./packages/frontend
+      dockerfile: Dockerfile.frontend
+    container_name: frontend
+    env_file:
+      - ./packages/frontend/.env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+    driver: bridge 
