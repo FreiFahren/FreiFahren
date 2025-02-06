@@ -20,8 +20,5 @@ RUN pip install --no-cache-dir -U pip && \
 # Add the current directory contents into the container at /app
 COPY nlp_service/ /app/nlp_service
 
-# Copy the .env file into the container
-COPY nlp_service/.env .env
-
 # Run the command to start the main application
 CMD ["python3", "-m", "nlp_service.main"]
