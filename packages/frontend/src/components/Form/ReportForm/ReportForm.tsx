@@ -9,7 +9,7 @@ import { REPORT_COOLDOWN_MINUTES } from '../../../constants'
 import { useLocation } from '../../../contexts/LocationContext'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
 import { calculateDistance } from '../../../utils/mapUtils'
-import { LinesList, Report,StationList, StationProperty  } from '../../../utils/types'
+import { LinesList, Report, StationList, StationProperty } from '../../../utils/types'
 import { createWarningSpan, getLineColor, highlightElement } from '../../../utils/uiUtils'
 import { Line } from '../../Miscellaneous/Line/Line'
 import { AutocompleteInputForm } from '../AutocompleteInputForm/AutocompleteInputForm'
@@ -60,6 +60,10 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
     const [initialContainerHeight, setInitialContainerHeight] = useState<number | null>(null)
 
     const submitReport = useSubmitReport()
+
+    // Constants for layout calculations
+    const DIRECTION_SELECTOR_HEIGHT = 80 // Approximate height of direction selector including margins
+    const MARGIN_S = getCSSVariable('--margin-s')
 
     // Helper function to calculate combined padding and margin
     const calculateAllowance = (element: HTMLElement): number => {
@@ -145,7 +149,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
             const top = topElementsRef.current
             const bottom = bottomElementsRef.current
 
-            // Set initial container height once to retrieve it when user deselects a station
+            // Set initial container height once
             if (initialContainerHeight === null) {
                 setInitialContainerHeight(container.clientHeight)
             }
@@ -154,42 +158,68 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
             const topHeight = top.offsetHeight
             const bottomHeight = bottom.offsetHeight
 
-            const marginS = getCSSVariable('--margin-s')
+            // Calculate base margins
+            const dynamicDivMargins = MARGIN_S * 2
 
-            // Calculate total dynamic margins
-            // two margins between top and bottom elements
-            const dynamicDivMargins = marginS * 2
+            // Calculate space needed for direction selector if visible
+            const directionSelectorSpace =
+                currentLine !== null && currentStation !== null && currentLine !== 'S41' && currentLine !== 'S42'
+                    ? DIRECTION_SELECTOR_HEIGHT
+                    : 0
 
-            // Calculate total allowance
+            // Calculate total space needed
             const containerAllowance = calculateAllowance(container) + dynamicDivMargins
             const topAllowance = calculateAllowance(top) + dynamicDivMargins
             const bottomAllowance = calculateAllowance(bottom) + dynamicDivMargins
+            const totalAllowance = containerAllowance + topAllowance + bottomAllowance + MARGIN_S
 
-            const totalAllowance = containerAllowance + topAllowance + bottomAllowance + marginS
-
+            // Calculate available height
             const stationCount = Object.keys(possibleStations).length
-            const availableHeight = containerHeight - topHeight - bottomHeight - totalAllowance
+            const availableHeight = Math.max(
+                0,
+                containerHeight - topHeight - bottomHeight - totalAllowance - directionSelectorSpace
+            )
 
-            const newStationListHeight = Math.min(stationCount * ITEM_HEIGHT, availableHeight)
-
+            const newStationListHeight = Math.max(0, Math.min(stationCount * ITEM_HEIGHT, availableHeight))
             setStationListHeight(newStationListHeight)
         }
-    }, [initialContainerHeight, possibleStations])
+    }, [initialContainerHeight, possibleStations, currentLine, currentStation])
 
+    // Handle resize and content changes
     useEffect(() => {
         calculateStationListHeight()
-        const handleResize = () => calculateStationListHeight()
 
+        const handleResize = () => calculateStationListHeight()
         window.addEventListener('resize', handleResize)
         return () => window.removeEventListener('resize', handleResize)
-    }, [calculateStationListHeight, possibleStations])
+    }, [calculateStationListHeight])
 
-    const handleEntitySelect = useCallback((entity: string | null) => {
-        setCurrentEntity(entity)
-        setCurrentLine(null)
-        setCurrentStation(null)
-        setCurrentDirection(null)
-    }, [])
+    const handleEntitySelect = useCallback(
+        (entity: string | null) => {
+            setCurrentEntity(entity)
+
+            // Only reset subsequent selections if the current line is no longer valid
+            if (currentLine !== null && entity !== null && !currentLine.startsWith(entity)) {
+                setCurrentLine(null)
+                setCurrentStation(null)
+                setCurrentDirection(null)
+            }
+            // if a station is selected check if the station is still valid for the selected entity
+            else if (currentStation !== null && entity !== null) {
+                const stationData = allStations?.[currentStation]
+
+                if (stationData) {
+                    const isValidStation = stationData.lines.some((line) => line.startsWith(entity))
+
+                    if (!isValidStation) {
+                        setCurrentStation(null)
+                        setCurrentDirection(null)
+                    }
+                }
+            }
+        },
+        [currentLine, currentStation, allStations]
+    )
 
     const handleLineSelect = useCallback(
         (line: string | null) => {
