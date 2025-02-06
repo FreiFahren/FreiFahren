@@ -12,16 +12,22 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies first
-COPY nlp_service/requirements.txt /app/nlp_service/requirements.txt
-RUN pip install --no-cache-dir -U pip && \
-    pip install --no-cache-dir wheel && \
-    pip install --no-cache-dir -r nlp_service/requirements.txt
+COPY nlp_service/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Add the current directory contents into the container at /app
-COPY nlp_service/ /app/nlp_service
+# Copy the application code
+COPY nlp_service/FreiFahren_BE_NLP/ .
 
-# Copy the .env file into the container
-COPY nlp_service/.env .env
+# Create a script to check for required environment variables
+RUN echo '#!/bin/sh\n\
+required_vars="BACKEND_URL NLP_BOT_TOKEN FREIFAHREN_CHAT_ID"\n\
+for var in $required_vars; do\n\
+    if [ -z "${!var}" ]; then\n\
+        echo "Error: Required environment variable $var is not set."\n\
+        exit 1\n\
+    fi\n\
+done\n\
+python main.py' > ./start.sh && chmod +x ./start.sh
 
-# Run the command to start the main application
-CMD ["python3", "-m", "nlp_service.main"]
+# Start the application using the script
+CMD ["./start.sh"]

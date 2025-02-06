@@ -37,8 +37,12 @@ services:
       context: ./packages/
       dockerfile: nlp_service/Dockerfile.nlp_service
     container_name: nlp_service
-    env_file:
-      - ./packages/nlp_service/.env
+    environment:
+      - BACKEND_URL=${BACKEND_URL}
+      - NLP_BOT_TOKEN=${NLP_BOT_TOKEN}
+      - FREIFAHREN_CHAT_ID=${FREIFAHREN_CHAT_ID}
+      - RESTART_PASSWORD=${RESTART_PASSWORD}
+      - SENTRY_DSN=${SENTRY_DSN}
     ports:
       - "6000:6000"
     depends_on:
@@ -46,7 +50,7 @@ services:
     restart: unless-stopped
     networks:
       - backend-network
-    platform: linux/amd64  # Force x86 architecture
+    platform: linux/amd64
 
   content_moderation_service:
     build:
@@ -63,8 +67,8 @@ services:
       context: ./packages/frontend
       dockerfile: Dockerfile.frontend
     container_name: frontend
-    env_file:
-      - ./packages/frontend/.env
+    environment:
+      - REACT_APP_BACKEND_URL=${REACT_APP_BACKEND_URL:-http://localhost:8080}
     ports:
       - "3000:3000"
     depends_on:
