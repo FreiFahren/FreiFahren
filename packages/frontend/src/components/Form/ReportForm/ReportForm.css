@@ -1,6 +1,7 @@
 div.report-form {
     padding: var(--padding-m);
     transition: ease-in-out var(--transition-default);
+    padding-bottom: var(--padding-xs);
 }
 
 .report-form > form > div > section > * {
