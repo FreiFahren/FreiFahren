@@ -9,7 +9,7 @@ import { REPORT_COOLDOWN_MINUTES } from '../../../constants'
 import { useLocation } from '../../../contexts/LocationContext'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
 import { calculateDistance } from '../../../utils/mapUtils'
-import { LinesList, Report,StationList, StationProperty  } from '../../../utils/types'
+import { LinesList, Report, StationList, StationProperty } from '../../../utils/types'
 import { createWarningSpan, getLineColor, highlightElement } from '../../../utils/uiUtils'
 import { Line } from '../../Miscellaneous/Line/Line'
 import { AutocompleteInputForm } from '../AutocompleteInputForm/AutocompleteInputForm'
@@ -184,12 +184,32 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
         return () => window.removeEventListener('resize', handleResize)
     }, [calculateStationListHeight, possibleStations])
 
-    const handleEntitySelect = useCallback((entity: string | null) => {
-        setCurrentEntity(entity)
-        setCurrentLine(null)
-        setCurrentStation(null)
-        setCurrentDirection(null)
-    }, [])
+    const handleEntitySelect = useCallback(
+        (entity: string | null) => {
+            setCurrentEntity(entity)
+
+            // Only reset subsequent selections if the current line is no longer valid
+            if (currentLine !== null && entity !== null && !currentLine.startsWith(entity)) {
+                setCurrentLine(null)
+                setCurrentStation(null)
+                setCurrentDirection(null)
+            }
+            // if a station is selected check if the station is still valid for the selected entity
+            else if (currentStation !== null && entity !== null) {
+                const stationData = allStations?.[currentStation]
+
+                if (stationData) {
+                    const isValidStation = stationData.lines.some((line) => line.startsWith(entity))
+
+                    if (!isValidStation) {
+                        setCurrentStation(null)
+                        setCurrentDirection(null)
+                    }
+                }
+            }
+        },
+        [currentLine, currentStation, allStations]
+    )
 
     const handleLineSelect = useCallback(
         (line: string | null) => {
