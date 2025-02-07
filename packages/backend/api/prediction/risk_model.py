@@ -353,17 +353,20 @@ def main():
         input_data = json.load(sys.stdin)
 
         # Load segments from segments.json file
-        segments_path = Path("data/segments-risk.json")
+        segments_path = Path("data/segments.json")
         with segments_path.open("r") as f:
             segments_data = json.load(f)
             segments = []
             for feature in segments_data["features"]:
                 props = feature["properties"]
+                # Parse sid to extract station IDs segment format: LINE.FROM_STATION:TO_STATION
+                line_and_stations = props["sid"].split(".")
+                station_ids = line_and_stations[1].split(":")
                 segment = Segment(
                     sid=props["sid"],
-                    line_id=props["line"],
-                    from_station_id=props["from_station_id"],
-                    to_station_id=props["to_station_id"],
+                    line_id=line_and_stations[0],
+                    from_station_id=station_ids[0],
+                    to_station_id=station_ids[1],
                 )
                 segments.append(segment)
 
