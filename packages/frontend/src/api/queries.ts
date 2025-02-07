@@ -170,6 +170,7 @@ export const useLast24HourReports = () => {
      this would cause the Last24HourReports to be misaligned with the current reports
     */
     const fullDayReports = useMemo(() => queryResult.data ?? [], [queryResult.data])
+    fullDayReports.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     const { isPlaceholderData } = queryResult
 
     const data = useMemo(() => {
