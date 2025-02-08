@@ -67,6 +67,8 @@ type Event = BaseEvent &
         | { name: 'Disclaimer Dismissed' }
         | { name: 'Privacy Policy Blocker Shown' }
         | { name: 'Privacy Policy Accepted' }
+        | { name: 'App Store Opened' }
+        | { name: 'App Deprecated' }
         | {
               name: 'Report Submitted'
               duration: number

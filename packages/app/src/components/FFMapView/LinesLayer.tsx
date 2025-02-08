@@ -7,7 +7,7 @@ export const LinesLayer = () => (
         <LineLayer
             id="route-layer"
             style={{
-                lineWidth: 2,
+                lineWidth: 2.5,
                 lineJoin: 'round',
                 lineCap: 'round',
                 lineColor: ['get', 'line_color'],
