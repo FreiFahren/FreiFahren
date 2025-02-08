@@ -1,3355 +1,3344 @@
 {
-  "M-AFf": {
-    "engineId": "de-DELFI_de:11000:900171002",
-    "coordinates": {
-      "lat": 52.51353,
-      "lon": 13.519078
-    }
-  },
-  "M-AKf": {
-    "engineId": "de-DELFI_de:11000:900161517",
-    "coordinates": {
-      "lat": 52.50572,
-      "lon": 13.519707
-    }
-  },
-  "M-AM": {
-    "engineId": "de-DELFI_de:11000:900003203",
-    "coordinates": {
-      "lat": 52.523666,
-      "lon": 13.356952
-    }
-  },
-  "M-AS": {
-    "engineId": "de-DELFI_de:11000:900141506",
-    "coordinates": {
-      "lat": 52.558384,
-      "lon": 13.433301
-    }
-  },
-  "M-Adw": {
-    "engineId": "de-DELFI_de:11000:900170515",
-    "coordinates": {
-      "lat": 52.53789,
-      "lon": 13.56032
-    }
-  },
-  "M-AeS": {
-    "engineId": "de-DELFI_de:11000:900150500",
-    "coordinates": {
-      "lat": 52.554974,
-      "lon": 13.51212
-    }
-  },
-  "M-Ah": {
-    "engineId": "de-DELFI_de:11000:900150020",
-    "coordinates": {
-      "lat": 52.548866,
-      "lon": 13.50476
-    }
-  },
-  "M-Ahs": {
-    "engineId": "de-DELFI_de:11000:900151501",
-    "coordinates": {
-      "lat": 52.566216,
-      "lon": 13.501888
-    }
-  },
-  "M-Aks": {
-    "engineId": "de-DELFI_de:11000:900171008",
-    "coordinates": {
-      "lat": 52.525497,
-      "lon": 13.519653
-    }
-  },
-  "M-Am": {
-    "engineId": "de-DELFI_de:11000:900170516",
-    "coordinates": {
-      "lat": 52.541965,
-      "lon": 13.563708
-    }
-  },
-  "M-Ap": {
-    "engineId": "de-DELFI_de:11000:900140011",
-    "coordinates": {
-      "lat": 52.548283,
-      "lon": 13.450855
-    }
-  },
-  "M-Are": {
-    "engineId": "de-DELFI_de:11000:900160515",
-    "coordinates": {
-      "lat": 52.53488,
-      "lon": 13.505564
-    }
-  },
-  "M-Arns": {
-    "engineId": "de-DELFI_de:11000:900110025",
-    "coordinates": {
-      "lat": 52.534096,
-      "lon": 13.437388
-    }
-  },
-  "M-Ars": {
-    "engineId": "de-DELFI_de:11000:900152509",
-    "coordinates": {
-      "lat": 52.558617,
-      "lon": 13.514811
-    }
-  },
-  "M-Asp": {
-    "engineId": "de-DELFI_de:11000:900160510::3",
-    "coordinates": {
-      "lat": 52.52815,
-      "lon": 13.469048
-    }
-  },
-  "M-Ats": {
-    "engineId": "de-DELFI_de:11000:900150509",
-    "coordinates": {
-      "lat": 52.53493,
-      "lon": 13.480171
-    }
-  },
-  "M-Aw": {
-    "engineId": "de-DELFI_de:11000:900141504",
-    "coordinates": {
-      "lat": 52.565117,
-      "lon": 13.435969
-    }
-  },
-  "M-BhIs": {
-    "engineId": "de-DELFI_de:11000:900150518",
-    "coordinates": {
-      "lat": 52.544353,
-      "lon": 13.468636
-    }
-  },
-  "M-Bhm": {
-    "engineId": "de-DELFI_de:11000:900170010",
-    "coordinates": {
-      "lat": 52.549007,
-      "lon": 13.583714
-    }
-  },
-  "M-Bhs": {
-    "engineId": "de-DELFI_de:11000:900140506::1",
-    "coordinates": {
-      "lat": 52.549644,
-      "lon": 13.447207
-    }
-  },
-  "M-Bjs": {
-    "engineId": "de-DELFI_de:11000:900110010",
-    "coordinates": {
-      "lat": 52.554447,
-      "lon": 13.403138
-    }
-  },
-  "M-Bp": {
-    "engineId": "de-DELFI_de:11000:900170011",
-    "coordinates": {
-      "lat": 52.567806,
-      "lon": 13.573698
-    }
-  },
-  "M-BpP": {
-    "engineId": "de-DELFI_de:11000:900131004",
-    "coordinates": {
-      "lat": 52.571198,
-      "lon": 13.398141
-    }
-  },
-  "M-Bpm": {
-    "engineId": "de-DELFI_de:11000:900170529",
-    "coordinates": {
-      "lat": 52.54985,
-      "lon": 13.560745
-    }
-  },
-  "M-Bps": {
-    "engineId": "de-DELFI_de:11000:900171517",
-    "coordinates": {
-      "lat": 52.5275,
-      "lon": 13.548811
-    }
-  },
-  "M-Bpz": {
-    "engineId": "de-VBB_de:11000:900120516::4",
-    "coordinates": {
-      "lat": 52.520145,
-      "lon": 13.451617
-    }
-  },
-  "M-Br": {
-    "engineId": "de-DELFI_de:11000:900192506::1",
-    "coordinates": {
-      "lat": 52.45762,
-      "lon": 13.511041
-    }
-  },
-  "M-Bs": {
-    "engineId": "de-DELFI_de:11000:900120511",
-    "coordinates": {
-      "lat": 52.52313,
-      "lon": 13.427217
-    }
-  },
-  "M-Bsa": {
-    "engineId": "de-DELFI_de:11000:900140517",
-    "coordinates": {
-      "lat": 52.556908,
-      "lon": 13.485984
-    }
-  },
-  "M-Bss": {
-    "engineId": "de-DELFI_de:11000:900171515",
-    "coordinates": {
-      "lat": 52.525497,
-      "lon": 13.530115
-    }
-  },
-  "M-Bw": {
-    "engineId": "de-DELFI_de:11000:900170524",
-    "coordinates": {
-      "lat": 52.547638,
-      "lon": 13.578357
-    }
-  },
-  "M-Crw": {
-    "engineId": "de-DELFI_de:11000:900161508",
-    "coordinates": {
-      "lat": 52.50073,
-      "lon": 13.521759
-    }
-  },
-  "M-Dgs": {
-    "engineId": "de-DELFI_de:11000:900170520",
-    "coordinates": {
-      "lat": 52.53674,
-      "lon": 13.524788
-    }
-  },
-  "M-Drs": {
-    "engineId": "de-DELFI_de:11000:900009206",
-    "coordinates": {
-      "lat": 52.55653,
-      "lon": 13.377547
-    }
-  },
-  "M-EwS": {
-    "engineId": "de-DELFI_de:11000:900110509",
-    "coordinates": {
-      "lat": 52.5478,
-      "lon": 13.42866
-    }
-  },
-  "M-Fb": {
-    "engineId": "de-DELFI_de:11000:900152007::2",
-    "coordinates": {
-      "lat": 52.5702,
-      "lon": 13.526386
-    }
-  },
-  "M-Fd": {
-    "engineId": "de-DELFI_de:11000:900150501",
-    "coordinates": {
-      "lat": 52.559826,
-      "lon": 13.495328
-    }
-  },
-  "M-Frm": {
-    "engineId": "de-DELFI_de:11000:900170519",
-    "coordinates": {
-      "lat": 52.54668,
-      "lon": 13.557462
-    }
-  },
-  "M-Frs": {
-    "engineId": "de-DELFI_de:11000:900140505::1",
-    "coordinates": {
-      "lat": 52.551975,
-      "lon": 13.440053
-    }
-  },
-  "M-Fs": {
-    "engineId": "de-DELFI_de:11000:900110510",
-    "coordinates": {
-      "lat": 52.54204,
-      "lon": 13.425914
-    }
-  },
-  "M-Ges": {
-    "engineId": "de-DELFI_de:11000:900160514",
-    "coordinates": {
-      "lat": 52.53442,
-      "lon": 13.495938
-    }
-  },
-  "M-Gew": {
-    "engineId": "de-DELFI_de:11000:900170521",
-    "coordinates": {
-      "lat": 52.539047,
-      "lon": 13.533977
-    }
-  },
-  "M-Gm": {
-    "engineId": "de-DELFI_de:11000:900007150::1",
-    "coordinates": {
-      "lat": 52.535786,
-      "lon": 13.390559
-    }
-  },
-  "M-Gos": {
-    "engineId": "de-DELFI_de:11000:900150522",
-    "coordinates": {
-      "lat": 52.54837,
-      "lon": 13.467178
-    }
-  },
-  "M-GrA": {
-    "engineId": "de-DELFI_de:11000:900131528::1",
-    "coordinates": {
-      "lat": 52.578465,
-      "lon": 13.398469
-    }
-  },
-  "M-Grus": {
-    "engineId": "de-DELFI_de:11000:900007160",
-    "coordinates": {
-      "lat": 52.55536,
-      "lon": 13.390796
-    }
-  },
-  "M-Gs": {
-    "engineId": "de-DELFI_de:11000:900140014",
-    "coordinates": {
-      "lat": 52.554577,
-      "lon": 13.482425
-    }
-  },
-  "M-Gss": {
-    "engineId": "de-DELFI_de:11000:900194010",
-    "coordinates": {
-      "lat": 52.440697,
-      "lon": 13.522953
-    }
-  },
-  "M-Hd": {
-    "engineId": "de-DELFI_de:11000:900141001",
-    "coordinates": {
-      "lat": 52.572563,
-      "lon": 13.437068
-    }
-  },
-  "M-Hgw": {
-    "engineId": "de-DELFI_de:11000:900162002",
-    "coordinates": {
-      "lat": 52.47401,
-      "lon": 13.520218
-    }
-  },
-  "M-Hk": {
-    "engineId": "de-DELFI_de:11000:900141002::1",
-    "coordinates": {
-      "lat": 52.56874,
-      "lon": 13.438934
-    }
-  },
-  "M-Hos": {
-    "engineId": "de-DELFI_de:11000:900150011",
-    "coordinates": {
-      "lat": 52.53585,
-      "lon": 13.472862
-    }
-  },
-  "M-Ht": {
-    "engineId": "de-DELFI_de:11000:900120013::1",
-    "coordinates": {
-      "lat": 52.508785,
-      "lon": 13.465995
-    }
-  },
-  "M-Hts": {
-    "engineId": "de-DELFI_de:11000:900160518::1",
-    "coordinates": {
-      "lat": 52.526524,
-      "lon": 13.490983
-    }
-  },
-  "M-Hu": {
-    "engineId": "de-DELFI_de:11000:900110521",
-    "coordinates": {
-      "lat": 52.532516,
-      "lon": 13.428789
-    }
-  },
-  "M-Hus": {
-    "engineId": "de-DELFI_de:11000:900110511",
-    "coordinates": {
-      "lat": 52.540035,
-      "lon": 13.418715
-    }
-  },
-  "M-Hwp": {
-    "engineId": "de-DELFI_de:11000:900171516",
-    "coordinates": {
-      "lat": 52.525963,
-      "lon": 13.542878
-    }
-  },
-  "M-Jps": {
-    "engineId": "de-DELFI_de:11000:900170517::1",
-    "coordinates": {
-      "lat": 52.54724,
-      "lon": 13.561078
-    }
-  },
-  "M-Js": {
-    "engineId": "de-DELFI_de:11000:900175520",
-    "coordinates": {
-      "lat": 52.531937,
-      "lon": 13.614908
-    }
-  },
-  "M-Jss": {
-    "engineId": "de-DELFI_de:11000:900120029::1",
-    "coordinates": {
-      "lat": 52.51207,
-      "lon": 13.473715
-    }
-  },
-  "M-Kek": {
-    "engineId": "de-DELFI_000306499003",
-    "coordinates": {
-      "lat": 52.525978,
-      "lon": 13.508226
-    }
-  },
-  "M-Kf": {
-    "engineId": "de-DELFI_de:11000:900120513",
-    "coordinates": {
-      "lat": 52.524147,
-      "lon": 13.440202
-    }
-  },
-  "M-Kg": {
-    "engineId": "de-DELFI_de:11000:900100038::5",
-    "coordinates": {
-      "lat": 52.51939,
-      "lon": 13.395382
-    }
-  },
-  "M-Kga": {
-    "engineId": "de-DELFI_de:11000:900171540",
-    "coordinates": {
-      "lat": 52.519012,
-      "lon": 13.519341
-    }
-  },
-  "M-Kmm": {
-    "engineId": "de-DELFI_de:11000:900002206",
-    "coordinates": {
-      "lat": 52.526684,
-      "lon": 13.354805
-    }
-  },
-  "M-Kn": {
-    "engineId": "de-DELFI_000300377007",
-    "coordinates": {
-      "lat": 52.53001,
-      "lon": 13.440682
-    }
-  },
-  "M-Kna": {
-    "engineId": "de-DELFI_de:11000:900110507",
-    "coordinates": {
-      "lat": 52.533226,
-      "lon": 13.420721
-    }
-  },
-  "M-Kps": {
-    "engineId": "de-DELFI_de:11000:900120526::1",
-    "coordinates": {
-      "lat": 52.51061,
-      "lon": 13.452634
-    }
-  },
-  "M-Kzs": {
-    "engineId": "de-DELFI_de:11000:900194016::4",
-    "coordinates": {
-      "lat": 52.432644,
-      "lon": 13.526385
-    }
-  },
-  "M-Lbs": {
-    "engineId": "de-DELFI_de:11000:900002205",
-    "coordinates": {
-      "lat": 52.526253,
-      "lon": 13.345508
-    }
-  },
-  "M-Lcs": {
-    "engineId": "de-DELFI_de:11000:900175510",
-    "coordinates": {
-      "lat": 52.549217,
-      "lon": 13.587997
-    }
-  },
-  "M-Lfs": {
-    "engineId": "de-DELFI_de:11000:900194517",
-    "coordinates": {
-      "lat": 52.446365,
-      "lon": 13.51475
-    }
-  },
-  "M-Ljs": {
-    "engineId": "de-DELFI_de:11000:900194537",
-    "coordinates": {
-      "lat": 52.43739,
-      "lon": 13.527766
-    }
-  },
-  "M-Lp": {
-    "engineId": "de-DELFI_de:11000:900160017::1",
-    "coordinates": {
-      "lat": 52.51988,
-      "lon": 13.479579
-    }
-  },
-  "M-Lsp": {
-    "engineId": "de-DELFI_de:11000:900011201",
-    "coordinates": {
-      "lat": 52.55698,
-      "lon": 13.365603
-    }
-  },
-  "M-Lues": {
-    "engineId": "de-DELFI_de:11000:900003259",
-    "coordinates": {
-      "lat": 52.52313,
-      "lon": 13.361639
-    }
-  },
-  "M-Lus": {
-    "engineId": "de-DELFI_de:11000:900003257::1",
-    "coordinates": {
-      "lat": 52.524246,
-      "lon": 13.36195
-    }
-  },
-  "M-MaS": {
-    "engineId": "de-DELFI_de:11000:900110508",
-    "coordinates": {
-      "lat": 52.535538,
-      "lon": 13.422093
-    }
-  },
-  "M-Map": {
-    "engineId": "de-DELFI_de:11000:900170020",
-    "coordinates": {
-      "lat": 52.543407,
-      "lon": 13.549696
-    }
-  },
-  "M-Mbs": {
-    "engineId": "de-DELFI_de:11000:900162007",
-    "coordinates": {
-      "lat": 52.48656,
-      "lon": 13.526908
-    }
-  },
-  "M-Mcs": {
-    "engineId": "de-DELFI_de:11000:900175511",
-    "coordinates": {
-      "lat": 52.545536,
-      "lon": 13.587068
-    }
-  },
-  "M-Mers": {
-    "engineId": "de-DELFI_de:11000:900171514",
-    "coordinates": {
-      "lat": 52.52927,
-      "lon": 13.519268
-    }
-  },
-  "M-Mes": {
-    "engineId": "de-DELFI_de:11000:900100030::1",
-    "coordinates": {
-      "lat": 52.52407,
-      "lon": 13.410607
-    }
-  },
-  "M-Mgs": {
-    "engineId": "de-DELFI_de:11000:900194501",
-    "coordinates": {
-      "lat": 52.429764,
-      "lon": 13.530237
-    }
-  },
-  "M-Mhs": {
-    "engineId": "de-DELFI_de:11000:900170530",
-    "coordinates": {
-      "lat": 52.5539,
-      "lon": 13.565668
-    }
-  },
-  "M-Mp": {
-    "engineId": "de-DELFI_de:11000:900100512::3",
-    "coordinates": {
-      "lat": 52.52387,
-      "lon": 13.396918
-    }
-  },
-  "M-Ms": {
-    "engineId": "de-DELFI_de:11000:900130506::1",
-    "coordinates": {
-      "lat": 52.56478,
-      "lon": 13.412812
-    }
-  },
-  "M-Nbs": {
-    "engineId": "de-DELFI_de:11000:900194011",
-    "coordinates": {
-      "lat": 52.448772,
-      "lon": 13.512023
-    }
-  },
-  "M-Niem": {
-    "engineId": "de-DELFI_de:11000:900170506",
-    "coordinates": {
-      "lat": 52.564724,
-      "lon": 13.571582
-    }
-  },
-  "M-Ns": {
-    "engineId": "de-DELFI_de:11000:900175519",
-    "coordinates": {
-      "lat": 52.532936,
-      "lon": 13.610194
-    }
-  },
-  "M-Ob": {
-    "engineId": "de-DELFI_de:11000:900110030::1",
-    "coordinates": {
-      "lat": 52.530426,
-      "lon": 13.461534
-    }
-  },
-  "M-Oh": {
-    "engineId": "de-DELFI_de:11000:900011252",
-    "coordinates": {
-      "lat": 52.553696,
-      "lon": 13.358291
-    }
-  },
-  "M-Ose": {
-    "engineId": "de-DELFI_de:11000:900150007::5",
-    "coordinates": {
-      "lat": 52.54684,
-      "lon": 13.497835
-    }
-  },
-  "M-Pk": {
-    "engineId": "de-DELFI_de:11000:900130013",
-    "coordinates": {
-      "lat": 52.570766,
-      "lon": 13.410134
-    }
-  },
-  "M-Pna": {
-    "engineId": "de-DELFI_de:11000:900006102::1",
-    "coordinates": {
-      "lat": 52.55889,
-      "lon": 13.385608
-    }
-  },
-  "M-Pp": {
-    "engineId": "de-DELFI_de:11000:900141507",
-    "coordinates": {
-      "lat": 52.556664,
-      "lon": 13.429913
-    }
-  },
-  "M-Pppl": {
-    "engineId": "de-DELFI_de:11000:900100504::1",
-    "coordinates": {
-      "lat": 52.532303,
-      "lon": 13.394622
-    }
-  },
-  "M-Prp": {
-    "engineId": "de-DELFI_de:11000:900151006",
-    "coordinates": {
-      "lat": 52.563217,
-      "lon": 13.505059
-    }
-  },
-  "M-Prs": {
-    "engineId": "de-DELFI_de:11000:900152006",
-    "coordinates": {
-      "lat": 52.568634,
-      "lon": 13.520673
-    }
-  },
-  "M-Pvn": {
-    "engineId": "de-DELFI_de:11000:900120019",
-    "coordinates": {
-      "lat": 52.523254,
-      "lon": 13.433056
-    }
-  },
-  "M-Rb": {
-    "engineId": "de-DELFI_de:11000:900141503::1",
-    "coordinates": {
-      "lat": 52.570133,
-      "lon": 13.437688
-    }
-  },
-  "M-Rds": {
-    "engineId": "de-DELFI_de:11000:900152508",
-    "coordinates": {
-      "lat": 52.55985,
-      "lon": 13.510518
-    }
-  },
-  "M-Rp": {
-    "engineId": "de-DELFI_000300385007",
-    "coordinates": {
-      "lat": 52.52668,
-      "lon": 13.481033
-    }
-  },
-  "M-Rs": {
-    "engineId": "de-DELFI_de:11000:900175013",
-    "coordinates": {
-      "lat": 52.529404,
-      "lon": 13.624183
-    }
-  },
-  "M-Rsb": {
-    "engineId": "de-DELFI_de:11000:900181002",
-    "coordinates": {
-      "lat": 52.468136,
-      "lon": 13.513717
-    }
-  },
-  "M-Rth": {
-    "engineId": "de-DELFI_de:11000:900160544",
-    "coordinates": {
-      "lat": 52.51591,
-      "lon": 13.479075
-    }
-  },
-  "M-Sbs": {
-    "engineId": "de-DELFI_de:11000:900150511::1",
-    "coordinates": {
-      "lat": 52.53943,
-      "lon": 13.483366
-    }
-  },
-  "M-Scs": {
-    "engineId": "de-DELFI_de:11000:900160516",
-    "coordinates": {
-      "lat": 52.535145,
-      "lon": 13.50967
-    }
-  },
-  "M-Sfo": {
-    "engineId": "de-DELFI_de:11000:900150519",
-    "coordinates": {
-      "lat": 52.53841,
-      "lon": 13.471445
-    }
-  },
-  "M-Sfs": {
-    "engineId": "de-DELFI_de:11000:900110008",
-    "coordinates": {
-      "lat": 52.55404,
-      "lon": 13.408728
-    }
-  },
-  "M-Sgs": {
-    "engineId": "de-DELFI_de:11000:900160521::1",
-    "coordinates": {
-      "lat": 52.523407,
-      "lon": 13.499658
-    }
-  },
-  "M-Sis": {
-    "engineId": "de-DELFI_de:11000:900120528::1",
-    "coordinates": {
-      "lat": 52.509914,
-      "lon": 13.456418
-    }
-  },
-  "M-Sns": {
-    "engineId": "de-DELFI_de:11000:900150510::2",
-    "coordinates": {
-      "lat": 52.538475,
-      "lon": 13.480536
-    }
-  },
-  "M-Str": {
-    "engineId": "de-DELFI_de:11000:900120515",
-    "coordinates": {
-      "lat": 52.52274,
-      "lon": 13.450145
-    }
-  },
-  "M-Sts": {
-    "engineId": "de-DELFI_de:11000:900110015",
-    "coordinates": {
-      "lat": 52.55267,
-      "lon": 13.424239
-    }
-  },
-  "M-Sws": {
-    "engineId": "de-DELFI_de:11000:900110505::3",
-    "coordinates": {
-      "lat": 52.536602,
-      "lon": 13.407587
-    }
-  },
-  "M-TSS": {
-    "engineId": "de-DELFI_de:11000:900141502",
-    "coordinates": {
-      "lat": 52.562263,
-      "lon": 13.434844
-    }
-  },
-  "M-Tc": {
-    "engineId": "de-DELFI_de:11000:900131505::1",
-    "coordinates": {
-      "lat": 52.57581,
-      "lon": 13.398893
-    }
-  },
-  "M-Tp": {
-    "engineId": "de-DELFI_de:11000:900120540::3",
-    "coordinates": {
-      "lat": 52.512047,
-      "lon": 13.469806
-    }
-  },
-  "M-Tw": {
-    "engineId": "de-DELFI_de:11000:900162008",
-    "coordinates": {
-      "lat": 52.47731,
-      "lon": 13.523756
-    }
-  },
-  "M-Tws": {
-    "engineId": "de-DELFI_de:11000:900162004",
-    "coordinates": {
-      "lat": 52.49282,
-      "lon": 13.526595
-    }
-  },
-  "M-Us": {
-    "engineId": "de-DELFI_de:11000:900100540::1",
-    "coordinates": {
-      "lat": 52.51907,
-      "lon": 13.391509
-    }
-  },
-  "M-Vik": {
-    "engineId": "de-DELFI_de:11000:900010251",
-    "coordinates": {
-      "lat": 52.543526,
-      "lon": 13.338811
-    }
-  },
-  "M-Vp": {
-    "engineId": "de-DELFI_de:11000:900181501",
-    "coordinates": {
-      "lat": 52.471058,
-      "lon": 13.517144
-    }
-  },
-  "M-Wers": {
-    "engineId": "de-DELFI_de:11000:900150512::1",
-    "coordinates": {
-      "lat": 52.542164,
-      "lon": 13.488909
-    }
-  },
-  "M-Wes": {
-    "engineId": "de-DELFI_de:11000:900140006",
-    "coordinates": {
-      "lat": 52.551888,
-      "lon": 13.465482
-    }
-  },
-  "M-Whs": {
-    "engineId": "de-DELFI_de:11000:900181502::1",
-    "coordinates": {
-      "lat": 52.461052,
-      "lon": 13.520031
-    }
-  },
-  "M-Wst": {
-    "engineId": "de-DELFI_de:11000:900110512",
-    "coordinates": {
-      "lat": 52.537613,
-      "lon": 13.428807
-    }
-  },
-  "M-Wuh": {
-    "engineId": "de-DELFI_de:11000:900170531",
-    "coordinates": {
-      "lat": 52.557713,
-      "lon": 13.568235
-    }
-  },
-  "M-Wus": {
-    "engineId": "de-DELFI_de:11000:900120529::1",
-    "coordinates": {
-      "lat": 52.508976,
-      "lon": 13.460258
-    }
-  },
-  "M-Zes": {
-    "engineId": "de-DELFI_de:11000:900160513",
-    "coordinates": {
-      "lat": 52.533947,
-      "lon": 13.487153
-    }
-  },
-  "M-Zk": {
-    "engineId": "de-DELFI_de:11000:900100042::1",
-    "coordinates": {
-      "lat": 52.53457,
-      "lon": 13.405554
-    }
-  },
-  "M-Zs": {
-    "engineId": "de-DELFI_de:11000:900151004",
-    "coordinates": {
-      "lat": 52.57028,
-      "lon": 13.49738
-    }
-  },
-  "S-AB": {
-    "engineId": "de-DELFI_000300220027",
-    "coordinates": {
-      "lat": 52.503834,
-      "lon": 13.382322
-    }
-  },
-  "S-AR": {
-    "engineId": "de-DELFI_de:11000:900085105",
-    "coordinates": {
-      "lat": 52.57797,
-      "lon": 13.349747
-    }
-  },
-  "S-Ag": {
-    "engineId": "de-DELFI_de:11000:900195510",
-    "coordinates": {
-      "lat": 52.40779,
-      "lon": 13.559602
-    }
-  },
-  "S-At": {
-    "engineId": "de-DELFI_de:11000:900068301",
-    "coordinates": {
-      "lat": 52.447296,
-      "lon": 13.361177
-    }
-  },
-  "S-BC": {
-    "engineId": "de-DELFI_de:11000:900072101",
-    "coordinates": {
-      "lat": 52.411034,
-      "lon": 13.38247
-    }
-  },
-  "S-BF": {
-    "engineId": "de-DELFI_de:12060:900350161",
-    "coordinates": {
-      "lat": 52.66837,
-      "lon": 13.564597
-    }
-  },
-  "S-BR": {
-    "engineId": "de-DELFI_de:11000:900160002",
-    "coordinates": {
-      "lat": 52.4936,
-      "lon": 13.498152
-    }
-  },
-  "S-Ba": {
-    "engineId": "de-DELFI_de:12054:900230000",
-    "coordinates": {
-      "lat": 52.39145,
-      "lon": 13.094634
-    }
-  },
-  "S-Be": {
-    "engineId": "de-DELFI_000300219018",
-    "coordinates": {
-      "lat": 52.519814,
-      "lon": 13.3474
-    }
-  },
-  "S-Bes": {
-    "engineId": "de-DELFI_de:11000:900020202",
-    "coordinates": {
-      "lat": 52.534313,
-      "lon": 13.328703
-    }
-  },
-  "S-Bfe": {
-    "engineId": "de-DELFI_de:12065:900200011",
-    "coordinates": {
-      "lat": 52.669697,
-      "lon": 13.321455
-    }
-  },
-  "S-Bie": {
-    "engineId": "de-DELFI_de:11000:900171001",
-    "coordinates": {
-      "lat": 52.513058,
-      "lon": 13.555035
-    }
-  },
-  "S-Bk": {
-    "engineId": "de-DELFI_de:12064:900320026",
-    "coordinates": {
-      "lat": 52.515793,
-      "lon": 13.649774
-    }
-  },
-  "S-Bl": {
-    "engineId": "de-DELFI_de:11000:900142001",
-    "coordinates": {
-      "lat": 52.59107,
-      "lon": 13.442972
-    }
-  },
-  "S-Bo": {
-    "engineId": "de-DELFI_de:12065:900200007",
-    "coordinates": {
-      "lat": 52.714916,
-      "lon": 13.276787
-    }
-  },
-  "S-BoG": {
-    "engineId": "de-DELFI_de:11000:900066102",
-    "coordinates": {
-      "lat": 52.44755,
-      "lon": 13.306041
-    }
-  },
-  "S-Bsw": {
-    "engineId": "de-DELFI_000300190025",
-    "coordinates": {
-      "lat": 52.467632,
-      "lon": 13.490098
-    }
-  },
-  "S-Bu": {
-    "engineId": "de-DELFI_de:11000:900135001",
-    "coordinates": {
-      "lat": 52.636295,
-      "lon": 13.492369
-    }
-  },
-  "S-Bw": {
-    "engineId": "de-DELFI_de:12065:900200008",
-    "coordinates": {
-      "lat": 52.688576,
-      "lon": 13.288846
-    }
-  },
-  "S-Eid": {
-    "engineId": "de-DELFI_de:11000:900096405",
-    "coordinates": {
-      "lat": 52.577545,
-      "lon": 13.315583
-    }
-  },
-  "S-Eiw": {
-    "engineId": "de-DELFI_de:12061:900260004",
-    "coordinates": {
-      "lat": 52.37191,
-      "lon": 13.615038
-    }
-  },
-  "S-Fd": {
-    "engineId": "de-DELFI_de:12064:900320006",
-    "coordinates": {
-      "lat": 52.5263,
-      "lon": 13.761071
-    }
-  },
-  "S-Fh": {
-    "engineId": "de-DELFI_de:11000:900182002",
-    "coordinates": {
-      "lat": 52.45719,
-      "lon": 13.625478
-    }
-  },
-  "S-Fhn": {
-    "engineId": "de-DELFI_de:11000:900092201",
-    "coordinates": {
-      "lat": 52.632957,
-      "lon": 13.289564
-    }
-  },
-  "S-Fr": {
-    "engineId": "de-DELFI_de:11000:900060101",
-    "coordinates": {
-      "lat": 52.47,
-      "lon": 13.340598
-    }
-  },
-  "S-Gbs": {
-    "engineId": "de-DELFI_de:12054:900230003",
-    "coordinates": {
-      "lat": 52.393944,
-      "lon": 13.128808
-    }
-  },
-  "S-Gr": {
-    "engineId": "de-DELFI_de:11000:900186001",
-    "coordinates": {
-      "lat": 52.412712,
-      "lon": 13.574018
-    }
-  },
-  "S-GrA": {
-    "engineId": "de-DELFI_de:11000:900196001",
-    "coordinates": {
-      "lat": 52.39954,
-      "lon": 13.543222
-    }
-  },
-  "S-Grw": {
-    "engineId": "de-DELFI_de:11000:900048101",
-    "coordinates": {
-      "lat": 52.48868,
-      "lon": 13.261944
-    }
-  },
-  "S-HN": {
-    "engineId": "de-DELFI_de:12065:900200009",
-    "coordinates": {
-      "lat": 52.669445,
-      "lon": 13.287223
-    }
-  },
-  "S-Ha": {
-    "engineId": "de-DELFI_de:11000:900040101",
-    "coordinates": {
-      "lat": 52.496696,
-      "lon": 13.290151
-    }
-  },
-  "S-Hd": {
-    "engineId": "de-DELFI_de:11000:900093201",
-    "coordinates": {
-      "lat": 52.618164,
-      "lon": 13.306804
-    }
-  },
-  "S-Hed": {
-    "engineId": "de-DELFI_de:12065:900200000",
-    "coordinates": {
-      "lat": 52.637867,
-      "lon": 13.205874
-    }
-  },
-  "S-Hee": {
-    "engineId": "de-DELFI_de:11000:900037255::1",
-    "coordinates": {
-      "lat": 52.5209,
-      "lon": 13.159273
-    }
-  },
-  "S-Hes": {
-    "engineId": "de-DELFI_de:11000:900091203",
-    "coordinates": {
-      "lat": 52.62515,
-      "lon": 13.228667
-    }
-  },
-  "S-Hgm": {
-    "engineId": "de-DELFI_de:12064:900320003",
-    "coordinates": {
-      "lat": 52.549038,
-      "lon": 13.86679
-    }
-  },
-  "S-Hi": {
-    "engineId": "de-DELFI_de:11000:900182001",
-    "coordinates": {
-      "lat": 52.457855,
-      "lon": 13.601462
-    }
-  },
-  "S-HoM": {
-    "engineId": "de-DELFI_de:12064:900320008",
-    "coordinates": {
-      "lat": 52.51783,
-      "lon": 13.673748
-    }
-  },
-  "S-HuH": {
-    "engineId": "de-DELFI_de:11000:900008101",
-    "coordinates": {
-      "lat": 52.54474,
-      "lon": 13.37873
-    }
-  },
-  "S-Hzd": {
-    "engineId": "de-DELFI_de:11000:900044101",
-    "coordinates": {
-      "lat": 52.48834,
-      "lon": 13.300714
-    }
-  },
-  "S-J": {
-    "engineId": "de-DELFI_de:11000:900193001",
-    "coordinates": {
-      "lat": 52.446693,
-      "lon": 13.524028
-    }
-  },
-  "S-K": {
-    "engineId": "de-DELFI_de:11000:900180001",
-    "coordinates": {
-      "lat": 52.45869,
-      "lon": 13.579543
-    }
-  },
-  "S-KLH": {
-    "engineId": "de-DELFI_de:11000:900077155",
-    "coordinates": {
-      "lat": 52.46917,
-      "lon": 13.467529
-    }
-  },
-  "S-KWH": {
-    "engineId": "de-VBN_000008010193",
-    "coordinates": {
-      "lat": 52.296635,
-      "lon": 13.631472
-    }
-  },
-  "S-Kad": {
-    "engineId": "de-DELFI_de:11000:900175002",
-    "coordinates": {
-      "lat": 52.512123,
-      "lon": 13.58903
-    }
-  },
-  "S-Kar": {
-    "engineId": "de-DELFI_de:11000:900143001",
-    "coordinates": {
-      "lat": 52.615753,
-      "lon": 13.470081
-    }
-  },
-  "S-Law": {
-    "engineId": "de-DELFI_de:11000:900067221",
-    "coordinates": {
-      "lat": 52.439034,
-      "lon": 13.34276
-    }
-  },
-  "S-Leh": {
-    "engineId": "de-DELFI_de:12065:900200006",
-    "coordinates": {
-      "lat": 52.741394,
-      "lon": 13.26328
-    }
-  },
-  "S-LiO": {
-    "engineId": "de-DELFI_de:11000:900064301",
-    "coordinates": {
-      "lat": 52.429295,
-      "lon": 13.327749
-    }
-  },
-  "S-LiS": {
-    "engineId": "de-DELFI_de:11000:900064201",
-    "coordinates": {
-      "lat": 52.409958,
-      "lon": 13.308662
-    }
-  },
-  "S-LiW": {
-    "engineId": "de-DELFI_de:11000:900066101",
-    "coordinates": {
-      "lat": 52.443512,
-      "lon": 13.294141
-    }
-  },
-  "S-Lir": {
-    "engineId": "de-DELFI_de:11000:900074201",
-    "coordinates": {
-      "lat": 52.38668,
-      "lon": 13.396642
-    }
-  },
-  "S-MM": {
-    "engineId": "de-DELFI_de:12065:900200013",
-    "coordinates": {
-      "lat": 52.65432,
-      "lon": 13.388063
-    }
-  },
-  "S-MP": {
-    "engineId": "de-DELFI_de:11000:900050301",
-    "coordinates": {
-      "lat": 52.437164,
-      "lon": 13.23206
-    }
-  },
-  "S-MS": {
-    "engineId": "de-DELFI_de:11000:900025423",
-    "coordinates": {
-      "lat": 52.49877,
-      "lon": 13.27045
-    }
-  },
-  "S-Mad": {
-    "engineId": "de-DELFI_de:11000:900176001",
-    "coordinates": {
-      "lat": 52.51204,
-      "lon": 13.610693
-    }
-  },
-  "S-Maf": {
-    "engineId": "de-DELFI_de:11000:900073101",
-    "coordinates": {
-      "lat": 52.423817,
-      "lon": 13.375022
-    }
-  },
-  "S-Maw": {
-    "engineId": "de-DELFI_de:12072:900245028",
-    "coordinates": {
-      "lat": 52.360165,
-      "lon": 13.408775
-    }
-  },
-  "S-MeA": {
-    "engineId": "de-DELFI_de:11000:900170003",
-    "coordinates": {
-      "lat": 52.557816,
-      "lon": 13.554392
-    }
-  },
-  "S-NH": {
-    "engineId": "de-DELFI_de:12064:900320130::1",
-    "coordinates": {
-      "lat": 52.523045,
-      "lon": 13.700712
-    }
-  },
-  "S-NiS": {
-    "engineId": "de-DELFI_de:11000:900052201",
-    "coordinates": {
-      "lat": 52.43121,
-      "lon": 13.193298
-    }
-  },
-  "S-Np": {
-    "engineId": "de-DELFI_de:11000:900160003",
-    "coordinates": {
-      "lat": 52.503445,
-      "lon": 13.484297
-    }
-  },
-  "S-OdS": {
-    "engineId": "de-DELFI_de:11000:900064256",
-    "coordinates": {
-      "lat": 52.418373,
-      "lon": 13.313865
-    }
-  },
-  "S-Okz": {
-    "engineId": "de-DELFI_de:11000:900120003",
-    "coordinates": {
-      "lat": 52.503113,
-      "lon": 13.469221
-    }
-  },
-  "S-Or": {
-    "engineId": "de-DELFI_de:12065:900200005",
-    "coordinates": {
-      "lat": 52.754486,
-      "lon": 13.248311
-    }
-  },
-  "S-Os": {
-    "engineId": "de-DELFI_de:11000:900192002",
-    "coordinates": {
-      "lat": 52.45227,
-      "lon": 13.538461
-    }
-  },
-  "S-Ost": {
-    "engineId": "ee-peatus_126935",
-    "coordinates": {
-      "lat": 52.510498,
-      "lon": 13.434699
-    }
-  },
-  "S-PB": {
-    "engineId": "de-DELFI_de:11000:900025424",
-    "coordinates": {
-      "lat": 52.509926,
-      "lon": 13.228253
-    }
-  },
-  "S-PH": {
-    "engineId": "de-VBN_000008012666",
-    "coordinates": {
-      "lat": 52.39151,
-      "lon": 13.066703
-    }
-  },
-  "S-PN": {
-    "engineId": "de-DELFI_de:12064:900320005",
-    "coordinates": {
-      "lat": 52.528988,
-      "lon": 13.790696
-    }
-  },
-  "S-Pc": {
-    "engineId": "de-DELFI_de:11000:900170005",
-    "coordinates": {
-      "lat": 52.53475,
-      "lon": 13.536008
-    }
-  },
-  "S-Prw": {
-    "engineId": "de-DELFI_de:11000:900058102",
-    "coordinates": {
-      "lat": 52.45924,
-      "lon": 13.356028
-    }
-  },
-  "S-Pw": {
-    "engineId": "de-DELFI_de:11000:900191002",
-    "coordinates": {
-      "lat": 52.47872,
-      "lon": 13.474029
-    }
-  },
-  "S-RWS": {
-    "engineId": "de-DELFI_de:11000:900170002",
-    "coordinates": {
-      "lat": 52.55075,
-      "lon": 13.548392
-    }
-  },
-  "S-Rd": {
-    "engineId": "de-DELFI_de:11000:900183001",
-    "coordinates": {
-      "lat": 52.451443,
-      "lon": 13.691582
-    }
-  },
-  "S-Rgt": {
-    "engineId": "de-DELFI_de:12060:900350162",
-    "coordinates": {
-      "lat": 52.64922,
-      "lon": 13.514525
-    }
-  },
-  "S-Rub": {
-    "engineId": "de-DELFI_de:11000:900160001",
-    "coordinates": {
-      "lat": 52.501213,
-      "lon": 13.478699
-    }
-  },
-  "S-SD": {
-    "engineId": "de-DELFI_de:11000:900091201::1",
-    "coordinates": {
-      "lat": 52.614914,
-      "lon": 13.244347
-    }
-  },
-  "S-SS": {
-    "engineId": "de-DELFI_de:11000:900050355",
-    "coordinates": {
-      "lat": 52.439808,
-      "lon": 13.213986
-    }
-  },
-  "S-Sa": {
-    "engineId": "de-DELFI_de:11000:900077110::1",
-    "coordinates": {
-      "lat": 52.472485,
-      "lon": 13.454689
-    }
-  },
-  "S-Sau": {
-    "engineId": "de-DELFI_de:11000:900074202",
-    "coordinates": {
-      "lat": 52.39856,
-      "lon": 13.389437
-    }
-  },
-  "S-Sav": {
-    "engineId": "de-DELFI_000300221009",
-    "coordinates": {
-      "lat": 52.50526,
-      "lon": 13.319896
-    }
-  },
-  "S-Sb": {
-    "engineId": "de-DELFI_de:11000:900054104",
-    "coordinates": {
-      "lat": 52.479813,
-      "lon": 13.352848
-    }
-  },
-  "S-SbS": {
-    "engineId": "de-DELFI_de:12064:900320002",
-    "coordinates": {
-      "lat": 52.577595,
-      "lon": 13.888281
-    }
-  },
-  "S-Scf": {
-    "engineId": "de-DELFI_de:12065:900200012",
-    "coordinates": {
-      "lat": 52.664593,
-      "lon": 13.340511
-    }
-  },
-  "S-Se": {
-    "engineId": "de-DELFI_de:11000:900063452",
-    "coordinates": {
-      "lat": 52.4489,
-      "lon": 13.354077
-    }
-  },
-  "S-Sh": {
-    "engineId": "de-DELFI_de:11000:900085201",
-    "coordinates": {
-      "lat": 52.5719,
-      "lon": 13.380242
-    }
-  },
-  "S-Skz": {
-    "engineId": "de-DELFI_de:11000:900058101",
-    "coordinates": {
-      "lat": 52.475502,
-      "lon": 13.365552
-    }
-  },
-  "S-Spf": {
-    "engineId": "de-DELFI_de:11000:900180003",
-    "coordinates": {
-      "lat": 52.44594,
-      "lon": 13.562701
-    }
-  },
-  "S-St": {
-    "engineId": "de-DELFI_de:12064:900320004",
-    "coordinates": {
-      "lat": 52.532364,
-      "lon": 13.834793
-    }
-  },
-  "S-StN": {
-    "engineId": "de-DELFI_de:12064:900320001",
-    "coordinates": {
-      "lat": 52.5907,
-      "lon": 13.908894
-    }
-  },
-  "S-Str": {
-    "engineId": "de-DELFI_de:11000:900030202",
-    "coordinates": {
-      "lat": 52.53197,
-      "lon": 13.209099
-    }
-  },
-  "S-SuS": {
-    "engineId": "de-DELFI_de:11000:900049202",
-    "coordinates": {
-      "lat": 52.436188,
-      "lon": 13.273501
-    }
-  },
-  "S-TP": {
-    "engineId": "de-DELFI_de:11000:900190001",
-    "coordinates": {
-      "lat": 52.49383,
-      "lon": 13.461825
-    }
-  },
-  "S-TS": {
-    "engineId": "de-DELFI_de:12069:900220114",
-    "coordinates": {
-      "lat": 52.39718,
-      "lon": 13.276028
-    }
-  },
-  "S-Tg": {
-    "engineId": "de-DELFI_de:11000:900003103",
-    "coordinates": {
-      "lat": 52.513958,
-      "lon": 13.336241
-    }
-  },
-  "S-ULi": {
-    "engineId": "de-DELFI_de:11000:900160004",
-    "coordinates": {
-      "lat": 52.510674,
-      "lon": 13.498359
-    }
-  },
-  "S-UWe": {
-    "engineId": "de-DELFI_de:11000:900009104",
-    "coordinates": {
-      "lat": 52.542732,
-      "lon": 13.36606
-    }
-  },
-  "S-W": {
-    "engineId": "de-DELFI_de:11000:900094101",
-    "coordinates": {
-      "lat": 52.606815,
-      "lon": 13.320549
-    }
-  },
-  "S-Wa": {
-    "engineId": "de-DELFI_de:11000:900053301",
-    "coordinates": {
-      "lat": 52.421726,
-      "lon": 13.178932
-    }
-  },
-  "S-Wb": {
-    "engineId": "de-DELFI_de:11000:900151001",
-    "coordinates": {
-      "lat": 52.573265,
-      "lon": 13.504238
-    }
-  },
-  "S-Wd": {
-    "engineId": "de-DELFI_de:12061:900260080",
-    "coordinates": {
-      "lat": 52.368282,
-      "lon": 13.463432
-    }
-  },
-  "S-We": {
-    "engineId": "de-DELFI_de:11000:900026207",
-    "coordinates": {
-      "lat": 52.51861,
-      "lon": 13.284237
-    }
-  },
-  "S-Wh": {
-    "engineId": "de-DELFI_de:11000:900183002",
-    "coordinates": {
-      "lat": 52.438732,
-      "lon": 13.721143
-    }
-  },
-  "S-Wkz": {
-    "engineId": "de-DELFI_de:11000:900024102",
-    "coordinates": {
-      "lat": 52.501152,
-      "lon": 13.283036
-    }
-  },
-  "S-Wld": {
-    "engineId": "de-DELFI_de:12061:900260002",
-    "coordinates": {
-      "lat": 52.319206,
-      "lon": 13.633587
-    }
-  },
-  "S-Wlh": {
-    "engineId": "de-DELFI_de:11000:900180002",
-    "coordinates": {
-      "lat": 52.46906,
-      "lon": 13.553527
-    }
-  },
-  "S-WoS": {
-    "engineId": "de-DELFI_de:11000:900130003",
-    "coordinates": {
-      "lat": 52.564976,
-      "lon": 13.39315
-    }
-  },
-  "S-Wr": {
-    "engineId": "de-DELFI_de:11000:900084101",
-    "coordinates": {
-      "lat": 52.58139,
-      "lon": 13.362938
-    }
-  },
-  "S-Ze": {
-    "engineId": "de-DELFI_de:11000:900049201",
-    "coordinates": {
-      "lat": 52.43121,
-      "lon": 13.259227
-    }
-  },
-  "S-Zep": {
-    "engineId": "de-DELFI_de:12060:900350163",
-    "coordinates": {
-      "lat": 52.65916,
-      "lon": 13.533054
-    }
-  },
-  "S-Zeu": {
-    "engineId": "de-DELFI_de:12061:900260003",
-    "coordinates": {
-      "lat": 52.34935,
-      "lon": 13.627012
-    }
-  },
-  "SM-Ad": {
-    "engineId": "de-DELFI_de:11000:900193002",
-    "coordinates": {
-      "lat": 52.4351,
-      "lon": 13.540553
-    }
-  },
-  "SM-Ah": {
-    "engineId": "de-DELFI_de:11000:900170004",
-    "coordinates": {
-      "lat": 52.57134,
-      "lon": 13.565649
-    }
-  },
-  "SM-BoS": {
-    "engineId": "de-DELFI_de:11000:900110011",
-    "coordinates": {
-      "lat": 52.554764,
-      "lon": 13.397841
-    }
-  },
-  "SM-FfO": {
-    "engineId": "de-DELFI_de:11000:900171002",
-    "coordinates": {
-      "lat": 52.51353,
-      "lon": 13.519078
-    }
-  },
-  "SM-GrS": {
-    "engineId": "de-DELFI_de:11000:900110003",
-    "coordinates": {
-      "lat": 52.540726,
-      "lon": 13.438356
-    }
-  },
-  "SM-Gs": {
-    "engineId": "de-DELFI_de:11000:900152002",
-    "coordinates": {
-      "lat": 52.555737,
-      "lon": 13.525653
-    }
-  },
-  "SM-HM": {
-    "engineId": "de-DELFI_de:11000:900100002",
-    "coordinates": {
-      "lat": 52.522606,
-      "lon": 13.402358
-    }
-  },
-  "SM-HSH": {
-    "engineId": "de-DELFI_de:11000:900151006::11",
-    "coordinates": {
-      "lat": 52.565025,
-      "lon": 13.511833
-    }
-  },
-  "SM-Kh": {
-    "engineId": "de-DELFI_000300180014",
-    "coordinates": {
-      "lat": 52.48137,
-      "lon": 13.526554
-    }
-  },
-  "SM-LaA": {
-    "engineId": "de-DELFI_de:11000:900110004",
-    "coordinates": {
-      "lat": 52.52877,
-      "lon": 13.455944
-    }
-  },
-  "SM-Maz": {
-    "engineId": "de-DELFI_de:11000:900170001",
-    "coordinates": {
-      "lat": 52.54327,
-      "lon": 13.541524
-    }
-  },
-  "SM-NB": {
-    "engineId": "de-DELFI_de:11000:900007104",
-    "coordinates": {
-      "lat": 52.531673,
-      "lon": 13.388798
-    }
-  },
-  "SM-OrS": {
-    "engineId": "de-DELFI_de:11000:900100007",
-    "coordinates": {
-      "lat": 52.52516,
-      "lon": 13.393068
-    }
-  },
-  "SM-PrA": {
-    "engineId": "de-DELFI_de:11000:900110002",
-    "coordinates": {
-      "lat": 52.544804,
-      "lon": 13.427419
-    }
-  },
-  "SM-Spl": {
-    "engineId": "de-DELFI_de:11000:900171003",
-    "coordinates": {
-      "lat": 52.526146,
-      "lon": 13.53687
-    }
-  },
-  "SM-StS": {
-    "engineId": "de-DELFI_de:11000:900110012",
-    "coordinates": {
-      "lat": 52.52387,
-      "lon": 13.464704
-    }
-  },
-  "SM-Sw": {
-    "engineId": "de-DELFI_de:11000:900192001",
-    "coordinates": {
-      "lat": 52.454613,
-      "lon": 13.510149
-    }
-  },
-  "SU-BRT": {
-    "engineId": "de-DELFI_de:11000:900100025",
-    "coordinates": {
-      "lat": 52.51651,
-      "lon": 13.381937
-    }
-  },
-  "SU-Bs": {
-    "engineId": "de-DELFI_de:11000:900044202",
-    "coordinates": {
-      "lat": 52.47767,
-      "lon": 13.328626
-    }
-  },
-  "SU-Chb": {
-    "engineId": "de-DELFI_de:11000:900024101",
-    "coordinates": {
-      "lat": 52.50473,
-      "lon": 13.303862
-    }
-  },
-  "SU-Gb": {
-    "engineId": "de-DELFI_de:11000:900007102",
-    "coordinates": {
-      "lat": 52.548637,
-      "lon": 13.388372
-    }
-  },
-  "SU-HMS": {
-    "engineId": "de-DELFI_de:11000:900079221",
-    "coordinates": {
-      "lat": 52.467182,
-      "lon": 13.431704
-    }
-  },
-  "SU-Hb": {
-    "engineId": "de-DELFI_de:11000:900045102",
-    "coordinates": {
-      "lat": 52.480125,
-      "lon": 13.31229
-    }
-  },
-  "SU-Ip": {
-    "engineId": "de-DELFI_de:11000:900054105",
-    "coordinates": {
-      "lat": 52.4781,
-      "lon": 13.342875
-    }
-  },
-  "SU-J": {
-    "engineId": "de-DELFI_de:11000:900100004",
-    "coordinates": {
-      "lat": 52.5155,
-      "lon": 13.418027
-    }
-  },
-  "SU-Jho": {
-    "engineId": "de-DELFI_de:11000:900020201",
-    "coordinates": {
-      "lat": 52.530453,
-      "lon": 13.300124
-    }
-  },
-  "SU-KB": {
-    "engineId": "de-DELFI_de:11000:900096458",
-    "coordinates": {
-      "lat": 52.57817,
-      "lon": 13.332921
-    }
-  },
-  "SU-MNI": {
-    "engineId": "de-DELFI_de:11000:900024106",
-    "coordinates": {
-      "lat": 52.506622,
-      "lon": 13.282884
-    }
-  },
-  "SU-Nk": {
-    "engineId": "de-DELFI_de:11000:900078201",
-    "coordinates": {
-      "lat": 52.46928,
-      "lon": 13.443692
-    }
-  },
-  "SU-PAH": {
-    "engineId": "de-DELFI_de:11000:900130001",
-    "coordinates": {
-      "lat": 52.577602,
-      "lon": 13.42909
-    }
-  },
-  "SU-Pd": {
-    "engineId": "de-DELFI_de:11000:900100020",
-    "coordinates": {
-      "lat": 52.509357,
-      "lon": 13.376547
-    }
-  },
-  "SU-Rzu": {
-    "engineId": "de-DELFI_de:11000:900062282::1",
-    "coordinates": {
-      "lat": 52.455566,
-      "lon": 13.320961
-    }
-  },
-  "SU-S": {
-    "engineId": "de-DELFI_de:11000:900029101",
-    "coordinates": {
-      "lat": 52.534798,
-      "lon": 13.197477
-    }
-  },
-  "SU-Sd": {
-    "engineId": "de-DELFI_de:11000:900025203",
-    "coordinates": {
-      "lat": 52.517048,
-      "lon": 13.2505
-    }
-  },
-  "SU-Tg": {
-    "engineId": "de-DELFI_de:11000:900089303",
-    "coordinates": {
-      "lat": 52.588806,
-      "lon": 13.288695
-    }
-  },
-  "SU-Ts": {
-    "engineId": "de-DELFI_de:11000:900068201",
-    "coordinates": {
-      "lat": 52.470573,
-      "lon": 13.3859
-    }
-  },
-  "SU-WF": {
-    "engineId": "de-DELFI_de:11000:900001201",
-    "coordinates": {
-      "lat": 52.536182,
-      "lon": 13.343837
-    }
-  },
-  "SU-WIU": {
-    "engineId": "de-DELFI_de:11000:900096101",
-    "coordinates": {
-      "lat": 52.596394,
-      "lon": 13.335481
-    }
-  },
-  "SU-Wh": {
-    "engineId": "de-DELFI_de:11000:900175001",
-    "coordinates": {
-      "lat": 52.512726,
-      "lon": 13.574536
-    }
-  },
-  "SU-Y": {
-    "engineId": "de-DELFI_de:11000:900057103::3",
-    "coordinates": {
-      "lat": 52.49283,
-      "lon": 13.3698
-    }
-  },
-  "SU-Zo": {
-    "engineId": "de-DELFI_de:11000:900023201",
-    "coordinates": {
-      "lat": 52.50692,
-      "lon": 13.332707
-    }
-  },
-  "SUM-A": {
-    "engineId": "de-DELFI_de:11000:900100005::1",
-    "coordinates": {
-      "lat": 52.52214,
-      "lon": 13.414628
-    }
-  },
-  "SUM-Ff": {
-    "engineId": "de-DELFI_de:11000:900120001",
-    "coordinates": {
-      "lat": 52.51358,
-      "lon": 13.475848
-    }
-  },
-  "SUM-Frs": {
-    "engineId": "de-DELFI_de:11000:900100001",
-    "coordinates": {
-      "lat": 52.52052,
-      "lon": 13.38645
-    }
-  },
-  "SUM-HBF": {
-    "engineId": "de-DELFI_de:11000:900003200",
-    "coordinates": {
-      "lat": 52.525593,
-      "lon": 13.369545
-    }
-  },
-  "SUM-PA": {
-    "engineId": "de-DELFI_000300160011",
-    "coordinates": {
-      "lat": 52.567577,
-      "lon": 13.412035
-    }
-  },
-  "SUM-Sh": {
-    "engineId": "de-DELFI_de:11000:900110001",
-    "coordinates": {
-      "lat": 52.549335,
-      "lon": 13.415138
-    }
-  },
-  "SUM-WA": {
-    "engineId": "de-DELFI_de:11000:900120004",
-    "coordinates": {
-      "lat": 52.505764,
-      "lon": 13.449159
-    }
-  },
-  "U-AS": {
-    "engineId": "de-DELFI_de:11000:900029301",
-    "coordinates": {
-      "lat": 52.53916,
-      "lon": 13.206763
-    }
-  },
-  "U-Ado": {
-    "engineId": "de-DELFI_de:11000:900023302",
-    "coordinates": {
-      "lat": 52.500088,
-      "lon": 13.307348
-    }
-  },
-  "U-Afr": {
-    "engineId": "de-DELFI_de:11000:900011102",
-    "coordinates": {
-      "lat": 52.560863,
-      "lon": 13.333502
-    }
-  },
-  "U-At": {
-    "engineId": "de-DELFI_de:11000:900068202",
-    "coordinates": {
-      "lat": 52.46593,
-      "lon": 13.385796
-    }
-  },
-  "U-Au": {
-    "engineId": "de-DELFI_de:11000:900023202",
-    "coordinates": {
-      "lat": 52.500443,
-      "lon": 13.336461
-    }
-  },
-  "U-Bi": {
-    "engineId": "de-DELFI_de:11000:900002201",
-    "coordinates": {
-      "lat": 52.53227,
-      "lon": 13.341418
-    }
-  },
-  "U-Bl": {
-    "engineId": "de-DELFI_de:11000:900080201",
-    "coordinates": {
-      "lat": 52.452744,
-      "lon": 13.448976
-    }
-  },
-  "U-Bli": {
-    "engineId": "de-DELFI_de:11000:900041102",
-    "coordinates": {
-      "lat": 52.486477,
-      "lon": 13.320545
-    }
-  },
-  "U-Bmo": {
-    "engineId": "de-DELFI_de:11000:900024201",
-    "coordinates": {
-      "lat": 52.511543,
-      "lon": 13.305335
-    }
-  },
-  "U-Bo": {
-    "engineId": "de-DELFI_de:11000:900079202",
-    "coordinates": {
-      "lat": 52.479744,
-      "lon": 13.425782
-    }
-  },
-  "U-Bpu": {
-    "engineId": "de-DELFI_de:11000:900055102",
-    "coordinates": {
-      "lat": 52.488655,
-      "lon": 13.340237
-    }
-  },
-  "U-Br": {
-    "engineId": "de-DELFI_de:11000:900080402",
-    "coordinates": {
-      "lat": 52.437077,
-      "lon": 13.447668
-    }
-  },
-  "U-Bt": {
-    "engineId": "de-DELFI_de:11000:900051202",
-    "coordinates": {
-      "lat": 52.467342,
-      "lon": 13.309276
-    }
-  },
-  "U-Bu": {
-    "engineId": "de-DELFI_de:11000:900003254",
-    "coordinates": {
-      "lat": 52.52011,
-      "lon": 13.372952
-    }
-  },
-  "U-Bue": {
-    "engineId": "de-DELFI_de:11000:900056104",
-    "coordinates": {
-      "lat": 52.497627,
-      "lon": 13.362456
-    }
-  },
-  "U-Bü": {
-    "engineId": "de-DELFI_de:11000:900171005",
-    "coordinates": {
-      "lat": 52.499516,
-      "lon": 13.547326
-    }
-  },
-  "U-C": {
-    "engineId": "de-DELFI_de:11000:900175006",
-    "coordinates": {
-      "lat": 52.533962,
-      "lon": 13.596894
-    }
-  },
-  "U-DD": {
-    "engineId": "de-DELFI_de:11000:900051303",
-    "coordinates": {
-      "lat": 52.457695,
-      "lon": 13.290011
-    }
-  },
-  "U-E": {
-    "engineId": "de-DELFI_de:11000:900171006",
-    "coordinates": {
-      "lat": 52.505135,
-      "lon": 13.560646
-    }
-  },
-  "U-Ei": {
-    "engineId": "de-DELFI_de:11000:900054103",
-    "coordinates": {
-      "lat": 52.489475,
-      "lon": 13.350284
-    }
-  },
-  "U-FN": {
-    "engineId": "de-DELFI_de:11000:900085202",
-    "coordinates": {
-      "lat": 52.563854,
-      "lon": 13.364283
-    }
-  },
-  "U-Fbs": {
-    "engineId": "de-DELFI_de:11000:900063101",
-    "coordinates": {
-      "lat": 52.463577,
-      "lon": 13.332412
-    }
-  },
-  "U-Fi": {
-    "engineId": "de-DELFI_de:11000:900161504::1",
-    "coordinates": {
-      "lat": 52.506622,
-      "lon": 13.511598
-    }
-  },
-  "U-Fpo": {
-    "engineId": "de-DELFI_de:11000:900041101",
-    "coordinates": {
-      "lat": 52.490192,
-      "lon": 13.314508
-    }
-  },
-  "U-Fw": {
-    "engineId": "de-DELFI_de:11000:900061102",
-    "coordinates": {
-      "lat": 52.47144,
-      "lon": 13.328676
-    }
-  },
-  "U-GK": {
-    "engineId": "de-DELFI_de:11000:900175005",
-    "coordinates": {
-      "lat": 52.52849,
-      "lon": 13.59055
-    }
-  },
-  "U-Go": {
-    "engineId": "de-DELFI_de:11000:900017103",
-    "coordinates": {
-      "lat": 52.499588,
-      "lon": 13.374293
-    }
-  },
-  "U-Gr": {
-    "engineId": "de-DELFI_000300101007",
-    "coordinates": {
-      "lat": 52.49956,
-      "lon": 13.426519
-    }
-  },
-  "U-Gs": {
-    "engineId": "de-DELFI_de:11000:900016101",
-    "coordinates": {
-      "lat": 52.491253,
-      "lon": 13.395382
-    }
-  },
-  "U-Gt": {
-    "engineId": "de-DELFI_de:11000:900043201",
-    "coordinates": {
-      "lat": 52.491993,
-      "lon": 13.33121
-    }
-  },
-  "U-Gz": {
-    "engineId": "de-DELFI_de:11000:900080202",
-    "coordinates": {
-      "lat": 52.463516,
-      "lon": 13.444828
-    }
-  },
-  "U-Ha": {
-    "engineId": "de-DELFI_de:11000:900003101",
-    "coordinates": {
-      "lat": 52.518112,
-      "lon": 13.342165
-    }
-  },
-  "U-HaT": {
-    "engineId": "de-DELFI_de:11000:900012103",
-    "coordinates": {
-      "lat": 52.497772,
-      "lon": 13.39176
-    }
-  },
-  "U-Hl": {
-    "engineId": "de-DELFI_de:11000:900018102",
-    "coordinates": {
-      "lat": 52.5367,
-      "lon": 13.286578
-    }
-  },
-  "U-Hpu": {
-    "engineId": "de-DELFI_de:11000:900078171::4",
-    "coordinates": {
-      "lat": 52.48678,
-      "lon": 13.424221
-    }
-  },
-  "U-Hs": {
-    "engineId": "de-DELFI_de:11000:900034102",
-    "coordinates": {
-      "lat": 52.53869,
-      "lon": 13.231946
-    }
-  },
-  "U-Hv": {
-    "engineId": "de-DELFI_de:11000:900100012",
-    "coordinates": {
-      "lat": 52.513363,
-      "lon": 13.395346
-    }
-  },
-  "U-Hz": {
-    "engineId": "de-DELFI_de:11000:900043101",
-    "coordinates": {
-      "lat": 52.49383,
-      "lon": 13.324051
-    }
-  },
-  "U-Hö": {
-    "engineId": "de-DELFI_de:11000:900175010",
-    "coordinates": {
-      "lat": 52.538105,
-      "lon": 13.634541
-    }
-  },
-  "U-JK": {
-    "engineId": "de-DELFI_de:11000:900018101",
-    "coordinates": {
-      "lat": 52.536983,
-      "lon": 13.293661
-    }
-  },
-  "U-Jt": {
-    "engineId": "de-DELFI_de:11000:900082202",
-    "coordinates": {
-      "lat": 52.429253,
-      "lon": 13.453851
-    }
-  },
-  "U-KL": {
-    "engineId": "de-DELFI_de:11000:900175004",
-    "coordinates": {
-      "lat": 52.521435,
-      "lon": 13.588763
-    }
-  },
-  "U-Kbo": {
-    "engineId": "de-DELFI_de:11000:900013102",
-    "coordinates": {
-      "lat": 52.499046,
-      "lon": 13.417748
-    }
-  },
-  "U-Kd": {
-    "engineId": "de-DELFI_de:11000:900026202",
-    "coordinates": {
-      "lat": 52.509987,
-      "lon": 13.281695
-    }
-  },
-  "U-Kfu": {
-    "engineId": "de-DELFI_de:11000:900023203",
-    "coordinates": {
-      "lat": 52.50376,
-      "lon": 13.331419
-    }
-  },
-  "U-Kn": {
-    "engineId": "de-DELFI_de:11000:900041201",
-    "coordinates": {
-      "lat": 52.49357,
-      "lon": 13.310084
-    }
-  },
-  "U-Ko": {
-    "engineId": "de-DELFI_de:11000:900100015",
-    "coordinates": {
-      "lat": 52.517227,
-      "lon": 13.412455
-    }
-  },
-  "U-Kr": {
-    "engineId": "de-DELFI_de:11000:900050201",
-    "coordinates": {
-      "lat": 52.442616,
-      "lon": 13.24036
-    }
-  },
-  "U-Ks": {
-    "engineId": "de-DELFI_de:11000:900012102",
-    "coordinates": {
-      "lat": 52.50667,
-      "lon": 13.390863
-    }
-  },
-  "U-Kt": {
-    "engineId": "de-DELFI_de:11000:900054102",
-    "coordinates": {
-      "lat": 52.490685,
-      "lon": 13.360543
-    }
-  },
-  "U-Kus": {
-    "engineId": "de-DELFI_de:11000:900005201",
-    "coordinates": {
-      "lat": 52.49978,
-      "lon": 13.362857
-    }
-  },
-  "U-L": {
-    "engineId": "de-DELFI_de:11000:900079201",
-    "coordinates": {
-      "lat": 52.472874,
-      "lon": 13.4284
-    }
-  },
-  "U-LD": {
-    "engineId": "de-DELFI_de:11000:900086160",
-    "coordinates": {
-      "lat": 52.575386,
-      "lon": 13.339036
-    }
-  },
-  "U-La": {
-    "engineId": "de-DELFI_de:11000:900082201",
-    "coordinates": {
-      "lat": 52.424644,
-      "lon": 13.463109
-    }
-  },
-  "U-Lpu": {
-    "engineId": "de-DELFI_de:11000:900009102",
-    "coordinates": {
-      "lat": 52.546494,
-      "lon": 13.359395
-    }
-  },
-  "U-MB": {
-    "engineId": "de-DELFI_de:11000:900005252",
-    "coordinates": {
-      "lat": 52.503185,
-      "lon": 13.374679
-    }
-  },
-  "U-MH": {
-    "engineId": "de-DELFI_000300087015",
-    "coordinates": {
-      "lat": 52.51129,
-      "lon": 13.38244
-    }
-  },
-  "U-Md": {
-    "engineId": "de-DELFI_de:11000:900160005",
-    "coordinates": {
-      "lat": 52.51246,
-      "lon": 13.487492
-    }
-  },
-  "U-Me": {
-    "engineId": "de-DELFI_de:11000:900017101",
-    "coordinates": {
-      "lat": 52.49357,
-      "lon": 13.38814
-    }
-  },
-  "U-Mf": {
-    "engineId": "de-DELFI_de:11000:900070301",
-    "coordinates": {
-      "lat": 52.43861,
-      "lon": 13.38792
-    }
-  },
-  "U-Mi": {
-    "engineId": "de-DELFI_de:11000:900100011",
-    "coordinates": {
-      "lat": 52.511494,
-      "lon": 13.389719
-    }
-  },
-  "U-Mk": {
-    "engineId": "de-DELFI_de:11000:900100516::1",
-    "coordinates": {
-      "lat": 52.51239,
-      "lon": 13.410473
-    }
-  },
-  "U-Mo": {
-    "engineId": "de-DELFI_de:11000:900017104",
-    "coordinates": {
-      "lat": 52.498943,
-      "lon": 13.383256
-    }
-  },
-  "U-Mp": {
-    "engineId": "de-DELFI_de:11000:900019204",
-    "coordinates": {
-      "lat": 52.525978,
-      "lon": 13.305715
-    }
-  },
-  "U-Mr": {
-    "engineId": "de-DELFI_de:11000:900013101",
-    "coordinates": {
-      "lat": 52.50374,
-      "lon": 13.410947
-    }
-  },
-  "U-Ms": {
-    "engineId": "de-DELFI_de:11000:900100537",
-    "coordinates": {
-      "lat": 52.518085,
-      "lon": 13.400394
-    }
-  },
-  "U-Nd": {
-    "engineId": "de-DELFI_de:11000:900026101",
-    "coordinates": {
-      "lat": 52.51641,
-      "lon": 13.25991
-    }
-  },
-  "U-Nm": {
-    "engineId": "de-DELFI_de:11000:900056102",
-    "coordinates": {
-      "lat": 52.499645,
-      "lon": 13.353825
-    }
-  },
-  "U-Np": {
-    "engineId": "de-DELFI_de:11000:900009201",
-    "coordinates": {
-      "lat": 52.551525,
-      "lon": 13.367365
-    }
-  },
-  "U-Obi": {
-    "engineId": "de-DELFI_de:11000:900022201",
-    "coordinates": {
-      "lat": 52.511826,
-      "lon": 13.30942
-    }
-  },
-  "U-Os": {
-    "engineId": "de-DELFI_de:11000:900051301",
-    "coordinates": {
-      "lat": 52.45042,
-      "lon": 13.26891
-    }
-  },
-  "U-Ot": {
-    "engineId": "de-DELFI_de:11000:900050282",
-    "coordinates": {
-      "lat": 52.450146,
-      "lon": 13.254016
-    }
-  },
-  "U-P": {
-    "engineId": "de-DELFI_000300049001",
-    "coordinates": {
-      "lat": 52.538544,
-      "lon": 13.24791
-    }
-  },
-  "U-PB": {
-    "engineId": "de-DELFI_000300109009",
-    "coordinates": {
-      "lat": 52.57414,
-      "lon": 13.348424
-    }
-  },
-  "U-PL": {
-    "engineId": "de-DELFI_de:11000:900017102",
-    "coordinates": {
-      "lat": 52.48487,
-      "lon": 13.385927
-    }
-  },
-  "U-Pi": {
-    "engineId": "de-DELFI_000300034008",
-    "coordinates": {
-      "lat": 52.44576,
-      "lon": 13.45019
-    }
-  },
-  "U-Po": {
-    "engineId": "de-DELFI_000300127005",
-    "coordinates": {
-      "lat": 52.464115,
-      "lon": 13.297356
-    }
-  },
-  "U-Pr": {
-    "engineId": "de-DELFI_de:11000:900013103",
-    "coordinates": {
-      "lat": 52.498325,
-      "lon": 13.406551
-    }
-  },
-  "U-Ps": {
-    "engineId": "de-DELFI_de:11000:900068101",
-    "coordinates": {
-      "lat": 52.47814,
-      "lon": 13.386725
-    }
-  },
-  "U-RE": {
-    "engineId": "de-DELFI_de:11000:900085203",
-    "coordinates": {
-      "lat": 52.570843,
-      "lon": 13.360635
-    }
-  },
-  "U-RP": {
-    "engineId": "de-DELFI_de:11000:900023101",
-    "coordinates": {
-      "lat": 52.51158,
-      "lon": 13.322581
-    }
-  },
-  "U-RR": {
-    "engineId": "de-DELFI_de:11000:900096410",
-    "coordinates": {
-      "lat": 52.58822,
-      "lon": 13.325568
-    }
-  },
-  "U-RS": {
-    "engineId": "de-DELFI_de:11000:900054101",
-    "coordinates": {
-      "lat": 52.483334,
-      "lon": 13.341989
-    }
-  },
-  "U-RSp": {
-    "engineId": "de-DELFI_de:11000:900029302",
-    "coordinates": {
-      "lat": 52.53564,
-      "lon": 13.199837
-    }
-  },
-  "U-RUE": {
-    "engineId": "de-DELFI_de:11000:900045101",
-    "coordinates": {
-      "lat": 52.47246,
-      "lon": 13.314387
-    }
-  },
-  "U-Ra": {
-    "engineId": "de-DELFI_de:11000:900100045",
-    "coordinates": {
-      "lat": 52.518463,
-      "lon": 13.407061
-    }
-  },
-  "U-Rb": {
-    "engineId": "de-DELFI_de:11000:900011101",
-    "coordinates": {
-      "lat": 52.55667,
-      "lon": 13.341013
-    }
-  },
-  "U-Rd": {
-    "engineId": "de-DELFI_de:11000:900083201",
-    "coordinates": {
-      "lat": 52.415714,
-      "lon": 13.496527
-    }
-  },
-  "U-Ri": {
-    "engineId": "de-DELFI_de:11000:900008102",
-    "coordinates": {
-      "lat": 52.539886,
-      "lon": 13.370382
-    }
-  },
-  "U-Rk": {
-    "engineId": "de-DELFI_de:11000:900078102",
-    "coordinates": {
-      "lat": 52.481148,
-      "lon": 13.434807
-    }
-  },
-  "U-Rl": {
-    "engineId": "de-DELFI_de:11000:900025202",
-    "coordinates": {
-      "lat": 52.525585,
-      "lon": 13.241902
-    }
-  },
-  "U-Rm": {
-    "engineId": "de-DELFI_de:11000:900036101",
-    "coordinates": {
-      "lat": 52.536903,
-      "lon": 13.26287
-    }
-  },
-  "U-Rw": {
-    "engineId": "de-DELFI_de:11000:900022202",
-    "coordinates": {
-      "lat": 52.517155,
-      "lon": 13.307221
-    }
-  },
-  "U-S": {
-    "engineId": "de-DELFI_de:11000:900014102",
-    "coordinates": {
-      "lat": 52.50115,
-      "lon": 13.441791
-    }
-  },
-  "U-ST": {
-    "engineId": "de-DELFI_de:11000:900016201",
-    "coordinates": {
-      "lat": 52.49334,
-      "lon": 13.421912
-    }
-  },
-  "U-Sch": {
-    "engineId": "de-DELFI_de:11000:900086102",
-    "coordinates": {
-      "lat": 52.563484,
-      "lon": 13.327328
-    }
-  },
-  "U-Si": {
-    "engineId": "de-DELFI_de:11000:900100017",
-    "coordinates": {
-      "lat": 52.520317,
-      "lon": 13.421895
-    }
-  },
-  "U-Sie": {
-    "engineId": "de-DELFI_de:11000:900035101",
-    "coordinates": {
-      "lat": 52.537025,
-      "lon": 13.273323
-    }
-  },
-  "U-Sk": {
-    "engineId": "de-DELFI_de:11000:900100501",
-    "coordinates": {
-      "lat": 52.535397,
-      "lon": 13.377033
-    }
-  },
-  "U-Slo": {
-    "engineId": "de-DELFI_de:11000:900062203",
-    "coordinates": {
-      "lat": 52.46118,
-      "lon": 13.324836
-    }
-  },
-  "U-Sno": {
-    "engineId": "de-DELFI_de:11000:900042101",
-    "coordinates": {
-      "lat": 52.496582,
-      "lon": 13.330613
-    }
-  },
-  "U-Sp": {
-    "engineId": "de-DELFI_de:11000:900100013",
-    "coordinates": {
-      "lat": 52.51141,
-      "lon": 13.402031
-    }
-  },
-  "U-Sr": {
-    "engineId": "de-DELFI_de:11000:900120006",
-    "coordinates": {
-      "lat": 52.518024,
-      "lon": 13.432208
-    }
-  },
-  "U-Su": {
-    "engineId": "de-DELFI_de:11000:900016202",
-    "coordinates": {
-      "lat": 52.48922,
-      "lon": 13.407685
-    }
-  },
-  "U-Sz": {
-    "engineId": "de-DELFI_000300080005",
-    "coordinates": {
-      "lat": 52.532253,
-      "lon": 13.412673
-    }
-  },
-  "U-T": {
-    "engineId": "de-DELFI_000300125006",
-    "coordinates": {
-      "lat": 52.450947,
-      "lon": 13.281065
-    }
-  },
-  "U-Th": {
-    "engineId": "de-DELFI_de:11000:900026201",
-    "coordinates": {
-      "lat": 52.509796,
-      "lon": 13.272977
-    }
-  },
-  "U-U": {
-    "engineId": "de-DELFI_de:11000:900023301",
-    "coordinates": {
-      "lat": 52.502743,
-      "lon": 13.326233
-    }
-  },
-  "U-Ull": {
-    "engineId": "de-DELFI_de:11000:900069271",
-    "coordinates": {
-      "lat": 52.45345,
-      "lon": 13.384771
-    }
-  },
-  "U-V": {
-    "engineId": "de-DELFI_de:11000:900055101",
-    "coordinates": {
-      "lat": 52.49617,
-      "lon": 13.343264
-    }
-  },
-  "U-Vo": {
-    "engineId": "de-DELFI_de:11000:900007103",
-    "coordinates": {
-      "lat": 52.54193,
-      "lon": 13.393157
-    }
-  },
-  "U-W": {
-    "engineId": "de-DELFI_de:11000:900100051",
-    "coordinates": {
-      "lat": 52.525375,
-      "lon": 13.405305
-    }
-  },
-  "U-WR": {
-    "engineId": "de-DELFI_de:11000:900120025",
-    "coordinates": {
-      "lat": 52.51685,
-      "lon": 13.443278
-    }
-  },
-  "U-Wd": {
-    "engineId": "de-DELFI_de:11000:900024200::1",
-    "coordinates": {
-      "lat": 52.506752,
-      "lon": 13.306893
-    }
-  },
-  "U-Wk": {
-    "engineId": "de-DELFI_de:11000:900083102",
-    "coordinates": {
-      "lat": 52.423153,
-      "lon": 13.47482
-    }
-  },
-  "U-Wl": {
-    "engineId": "de-DELFI_de:11000:900070101",
-    "coordinates": {
-      "lat": 52.445644,
-      "lon": 13.385744
-    }
-  },
-  "U-Wsg": {
-    "engineId": "de-DELFI_de:11000:900061101",
-    "coordinates": {
-      "lat": 52.464996,
-      "lon": 13.328409
-    }
-  },
-  "U-Wt": {
-    "engineId": "de-DELFI_de:11000:900056101",
-    "coordinates": {
-      "lat": 52.50211,
-      "lon": 13.342561
-    }
-  },
-  "U-Zd": {
-    "engineId": "de-DELFI_de:11000:900083101",
-    "coordinates": {
-      "lat": 52.42303,
-      "lon": 13.484371
-    }
-  },
-  "U-Zi": {
-    "engineId": "de-DELFI_de:11000:900033101",
-    "coordinates": {
-      "lat": 52.53752,
-      "lon": 13.217625
-    }
-  },
-  "UM-Am": {
-    "engineId": "de-DELFI_de:11000:900009101",
-    "coordinates": {
-      "lat": 52.542202,
-      "lon": 13.349534
-    }
-  },
-  "UM-B": {
-    "engineId": "de-DELFI_de:11000:900007110",
-    "coordinates": {
-      "lat": 52.537994,
-      "lon": 13.396231
-    }
-  },
-  "UM-EB": {
-    "engineId": "de-DELFI_de:11000:900110006",
-    "coordinates": {
-      "lat": 52.541084,
-      "lon": 13.41216
-    }
-  },
-  "UM-Ft": {
-    "engineId": "de-DELFI_de:11000:900120008",
-    "coordinates": {
-      "lat": 52.515774,
-      "lon": 13.454085
-    }
-  },
-  "UM-H": {
-    "engineId": "de-DELFI_de:11000:900175007",
-    "coordinates": {
-      "lat": 52.536327,
-      "lon": 13.605323
-    }
-  },
-  "UM-LL": {
-    "engineId": "de-DELFI_de:11000:900175015",
-    "coordinates": {
-      "lat": 52.539135,
-      "lon": 13.619707
-    }
-  },
-  "UM-Lu": {
-    "engineId": "de-DELFI_de:11000:900100016",
-    "coordinates": {
-      "lat": 52.52819,
-      "lon": 13.410405
-    }
-  },
-  "UM-NA": {
-    "engineId": "de-DELFI_de:11000:900100009",
-    "coordinates": {
-      "lat": 52.531254,
-      "lon": 13.382415
-    }
-  },
-  "UM-Ob": {
-    "engineId": "de-DELFI_de:11000:900100019",
-    "coordinates": {
-      "lat": 52.52516,
-      "lon": 13.387587
-    }
-  },
-  "UM-Olu": {
-    "engineId": "de-DELFI_de:11000:900009202",
-    "coordinates": {
-      "lat": 52.557106,
-      "lon": 13.373279
-    }
-  },
-  "UM-Ro": {
-    "engineId": "de-DELFI_de:11000:900100023",
-    "coordinates": {
-      "lat": 52.52978,
-      "lon": 13.401393
-    }
-  },
-  "UM-Tk": {
-    "engineId": "de-DELFI_de:11000:900161002",
-    "coordinates": {
-      "lat": 52.497234,
-      "lon": 13.523626
-    }
-  },
-  "UM-VIN": {
-    "engineId": "de-DELFI_de:11000:900130011",
-    "coordinates": {
-      "lat": 52.559517,
-      "lon": 13.41377
-    }
-  },
-  "M-Af": {
-    "engineId": "de-DELFI_de:11000:900110019",
-    "coordinates": {
-      "lat": 52.528015,
-      "lon": 13.425135
-    }
-  },
-  "M-Als": {
-    "engineId": "de-DELFI_de:11000:900140005",
-    "coordinates": {
-      "lat": 52.54979,
-      "lon": 13.457775
-    }
-  },
-  "M-Fls": {
-    "engineId": "de-DELFI_de:11000:900110018",
-    "coordinates": {
-      "lat": 52.540874,
-      "lon": 13.4058
-    }
-  },
-  "M-Fw": {
-    "engineId": "de-DELFI_de:11000:900150513::1",
-    "coordinates": {
-      "lat": 52.54443,
-      "lon": 13.493233
-    }
-  },
-  "M-Ip": {
-    "engineId": "de-DELFI_de:11000:900100503",
-    "coordinates": {
-      "lat": 52.528767,
-      "lon": 13.376929
-    }
-  },
-  "M-Kl": {
-    "engineId": "de-DELFI_de:11000:900110029::1",
-    "coordinates": {
-      "lat": 52.529213,
-      "lon": 13.462786
-    }
-  },
-  "M-RpP": {
-    "engineId": "de-DELFI_de:11000:900130501",
-    "coordinates": {
-      "lat": 52.56938,
-      "lon": 13.403453
-    }
-  },
-  "M-Tm": {
-    "engineId": "de-DELFI_de:11000:900110515",
-    "coordinates": {
-      "lat": 52.543373,
-      "lon": 13.441436
-    }
-  },
-  "M-Ws": {
-    "engineId": "de-DELFI_de:11000:900152003",
-    "coordinates": {
-      "lat": 52.569176,
-      "lon": 13.525544
-    }
-  },
-  "S-Ber": {
-    "engineId": "de-VBN_000008013470",
-    "coordinates": {
-      "lat": 52.675568,
-      "lon": 13.592641
-    }
-  },
-  "S-Sf": {
-    "engineId": "de-DELFI_de:12061:900260005",
-    "coordinates": {
-      "lat": 52.390907,
-      "lon": 13.513046
-    }
-  },
-  "U-He": {
-    "engineId": "de-DELFI_de:11000:900100032::1",
-    "coordinates": {
-      "lat": 52.508682,
-      "lon": 13.412985
-    }
-  },
-  "U-So": {
-    "engineId": "de-DELFI_de:11000:900022101",
-    "coordinates": {
-      "lat": 52.51097,
-      "lon": 13.297463
-    }
-  },
-  "U-UDU": {
-    "engineId": "de-DELFI_de:11000:900100513",
-    "coordinates": {
-      "lat": 52.516994,
-      "lon": 13.388876
-    }
-  },
-  "M-AhS": {
-    "name": "Alte Hellersdorfer Straße",
-    "coordinates": {
-      "latitude": 52.5447344,
-      "longitude": 13.5927651
-    }
-  },
-  "M-Ba": {
-    "engineId": "de-DELFI_de:11000:900140519",
-    "coordinates": {
-      "latitude": 52.553673,
-      "longitude": 13.4805827
-    }
-  },
-  "M-Bbs": {
-    "engineId": "de-DELFI_de:11000:900160509::1",
-    "coordinates": {
-      "latitude": 52.526714,
-      "longitude": 13.482571
-    }
-  },
-  "M-Bdm": {
-    "engineId": "de-DELFI_de:11000:900170512::1",
-    "coordinates": {
-      "latitude": 52.53851,
-      "longitude": 13.568765
-    }
-  },
-  "M-Bns": {
-    "name": "Benno-König-Straße",
-    "coordinates": {
-      "latitude": 52.4427282,
-      "longitude": 13.5197601
-    }
-  },
-  "M-Dz": {
-    "engineId": "de-DELFI_de:11000:900110017",
-    "coordinates": {
-      "latitude": 52.53918,
-      "longitude": 13.424244
-    }
-  },
-  "M-Grs": {
-    "engineId": "de-DELFI_de:11000:900120014",
-    "coordinates": {
-      "latitude": 52.512405,
-      "longitude": 13.452397
-    }
-  },
-  "M-Gt": {
-    "engineId": "de-DELFI_de:11000:900100026::1",
-    "coordinates": {
-      "latitude": 52.521046,
-      "longitude": 13.411326
-    }
-  },
-  "M-Gus": {
-    "engineId": "de-DELFI_de:11000:900140017::1",
-    "coordinates": {
-      "latitude": 52.554115,
-      "longitude": 13.43596
-    }
-  },
-  "M-Jas": {
-    "engineId": "de-DELFI_de:11000:900160508::1",
-    "coordinates": {
-      "latitude": 52.534084,
-      "longitude": 13.467872
-    }
-  },
-  "M-Ka": {
-    "engineId": "de-DELFI_de:11000:900020152::1",
-    "coordinates": {
-      "latitude": 52.519356,
-      "longitude": 13.272245
-    }
-  },
-  "M-Mis": {
-    "engineId": "de-DELFI_de:11000:900110503::1",
-    "coordinates": {
-      "latitude": 52.54565,
-      "longitude": 13.413102
-    }
-  },
-  "M-Mos": {
-    "engineId": "de-DELFI_de:11000:900100040",
-    "coordinates": {
-      "latitude": 52.525185,
-      "longitude": 13.419945
-    }
-  },
-  "M-Mw": {
-    "engineId": "de-DELFI_de:11000:900150002",
-    "coordinates": {
-      "latitude": 52.56105,
-      "longitude": 13.500679
-    }
-  },
-  "M-Mz": {
-    "engineId": "de-DELFI_de:11000:900110506",
-    "coordinates": {
-      "latitude": 52.531033,
-      "longitude": 13.419383
-    }
-  },
-  "M-Os": {
-    "engineId": "de-VBB_de:11000:900110013::9",
-    "coordinates": {
-      "latitude": 52.552673,
-      "longitude": 13.426237
-    }
-  },
-  "M-Phs": {
-    "engineId": "de-DELFI_de:11000:900110523",
-    "coordinates": {
-      "latitude": 52.529198,
-      "longitude": 13.44464
-    }
-  },
-  "M-Ps": {
-    "engineId": "de-DELFI_de:11000:900120016",
-    "coordinates": {
-      "latitude": 52.526043,
-      "longitude": 13.446777
-    }
-  },
-  "M-Qes": {
-    "engineId": "de-DELFI_de:11000:900175011",
-    "coordinates": {
-      "latitude": 52.538956,
-      "longitude": 13.604518
-    }
-  },
-  "M-Rbs": {
-    "engineId": "de-DELFI_de:11000:900151004",
-    "coordinates": {
-      "latitude": 52.57028,
-      "longitude": 13.49738
-    }
-  },
-  "M-Rh": {
-    "engineId": "de-DELFI_de:11000:900150005",
-    "coordinates": {
-      "latitude": 52.539555,
-      "longitude": 13.514199
-    }
-  },
-  "M-Sf": {
-    "engineId": "de-DELFI_de:11000:900140518",
-    "coordinates": {
-      "latitude": 52.55331,
-      "longitude": 13.475769
-    }
-  },
-  "M-Ss": {
-    "engineId": "de-DELFI_de:11000:900100515",
-    "coordinates": {
-      "latitude": 52.520023,
-      "longitude": 13.404825
-    }
-  },
-  "M-Ster": {
-    "engineId": "de-DELFI_de:11000:900194007",
-    "coordinates": {
-      "latitude": 52.446655,
-      "longitude": 13.506656
-    }
-  },
-  "M-Wls": {
-    "engineId": "de-DELFI_de:11000:900007105::1",
-    "coordinates": {
-      "latitude": 52.54007,
-      "longitude": 13.401312
-    }
-  },
-  "M-Wns": {
-    "engineId": "de-DELFI_de:11000:900194504",
-    "coordinates": {
-      "latitude": 52.43227,
-      "longitude": 13.53522
-    }
-  },
-  "M-Wse": {
-    "engineId": "de-DELFI_de:11000:900160018",
-    "coordinates": {
-      "latitude": 52.532055,
-      "longitude": 13.476714
-    }
-  },
-  "M-Zos": {
-    "engineId": "de-DELFI_de:11000:900175513",
-    "coordinates": {
-      "latitude": 52.543793,
-      "longitude": 13.599196
-    }
-  },
-  "S-BER": {
-    "engineId": "de-DELFI_de:12061:900260009",
-    "coordinates": {
-      "latitude": 52.364605,
-      "longitude": 13.509874
-    }
-  },
-  "S-Blf": {
-    "engineId": "de-DELFI_de:12072:900245027",
-    "coordinates": {
-      "latitude": 52.337627,
-      "longitude": 13.415908
-    }
-  },
-  "S-Er": {
-    "engineId": "de-DELFI_de:12067:900310004",
-    "coordinates": {
-      "latitude": 52.426956,
-      "longitude": 13.752661
-    }
-  },
-  "S-JLB": {
-    "engineId": "de-DELFI_de:11000:900057104",
-    "coordinates": {
-      "latitude": 52.486263,
-      "longitude": 13.360775
-    }
-  },
-  "U-Beo": {
-    "engineId": "de-DELFI_de:11000:900044201",
-    "coordinates": {
-      "latitude": 52.487045,
-      "longitude": 13.331355
-    }
-  },
-  "U-KM": {
-    "engineId": "de-DELFI_de:11000:900078103",
-    "coordinates": {
-      "latitude": 52.47643,
-      "longitude": 13.439805
-    }
-  },
-  "U-Ka": {
-    "engineId": "de-DELFI_de:11000:900068302",
-    "coordinates": {
-      "latitude": 52.46051,
-      "longitude": 13.384905
-    }
-  },
-  "U-Pks": {
-    "engineId": "de-DELFI_de:11000:900009203",
-    "coordinates": {
-      "latitude": 52.55228,
-      "longitude": 13.381437
-    }
-  },
-  "U-Sa": {
-    "engineId": "de-DELFI_de:11000:900120009",
-    "coordinates": {
-      "latitude": 52.514664,
-      "longitude": 13.465347
-    }
-  },
-  "UM-Se": {
-    "engineId": "de-DELFI_de:11000:900009103",
-    "coordinates": {
-      "latitude": 52.55047,
-      "longitude": 13.351969
-    }
-  },
-  "UM-Tm": {
-    "name": "de-DELFI_de:11000:900003104",
-    "coordinates": {
-      "latitude": 52.525936,
-      "longitude": 13.341417
-    }
-  }
+  "matched": {
+    "M-AFf": {
+      "engineId": "de-DELFI_de:11000:900171002",
+      "coordinates": {
+        "lat": 52.51353,
+        "lon": 13.519078
+      }
+    },
+    "M-AKf": {
+      "engineId": "de-DELFI_de:11000:900161517",
+      "coordinates": {
+        "lat": 52.50572,
+        "lon": 13.519707
+      }
+    },
+    "M-AM": {
+      "engineId": "de-DELFI_de:11000:900003203",
+      "coordinates": {
+        "lat": 52.523666,
+        "lon": 13.356952
+      }
+    },
+    "M-AS": {
+      "engineId": "de-DELFI_de:11000:900141506",
+      "coordinates": {
+        "lat": 52.558384,
+        "lon": 13.433301
+      }
+    },
+    "M-Adw": {
+      "engineId": "de-DELFI_de:11000:900170515",
+      "coordinates": {
+        "lat": 52.53789,
+        "lon": 13.56032
+      }
+    },
+    "M-AeS": {
+      "engineId": "de-DELFI_de:11000:900150500",
+      "coordinates": {
+        "lat": 52.554974,
+        "lon": 13.51212
+      }
+    },
+    "M-Ah": {
+      "engineId": "de-DELFI_de:11000:900150020",
+      "coordinates": {
+        "lat": 52.548866,
+        "lon": 13.50476
+      }
+    },
+    "M-Ahs": {
+      "engineId": "de-DELFI_de:11000:900151501",
+      "coordinates": {
+        "lat": 52.566216,
+        "lon": 13.501888
+      }
+    },
+    "M-Aks": {
+      "engineId": "de-DELFI_de:11000:900171008",
+      "coordinates": {
+        "lat": 52.525497,
+        "lon": 13.519653
+      }
+    },
+    "M-Am": {
+      "engineId": "de-DELFI_de:11000:900170516",
+      "coordinates": {
+        "lat": 52.541965,
+        "lon": 13.563708
+      }
+    },
+    "M-Ap": {
+      "engineId": "de-DELFI_de:11000:900140011",
+      "coordinates": {
+        "lat": 52.548283,
+        "lon": 13.450855
+      }
+    },
+    "M-Are": {
+      "engineId": "de-DELFI_de:11000:900160515",
+      "coordinates": {
+        "lat": 52.53488,
+        "lon": 13.505564
+      }
+    },
+    "M-Arns": {
+      "engineId": "de-DELFI_de:11000:900110025",
+      "coordinates": {
+        "lat": 52.534096,
+        "lon": 13.437388
+      }
+    },
+    "M-Ars": {
+      "engineId": "de-DELFI_de:11000:900152509",
+      "coordinates": {
+        "lat": 52.558617,
+        "lon": 13.514811
+      }
+    },
+    "M-Asp": {
+      "engineId": "de-DELFI_de:11000:900160510::3",
+      "coordinates": {
+        "lat": 52.52815,
+        "lon": 13.469048
+      }
+    },
+    "M-Ats": {
+      "engineId": "de-DELFI_de:11000:900150509",
+      "coordinates": {
+        "lat": 52.53493,
+        "lon": 13.480171
+      }
+    },
+    "M-Aw": {
+      "engineId": "de-DELFI_de:11000:900141504",
+      "coordinates": {
+        "lat": 52.565117,
+        "lon": 13.435969
+      }
+    },
+    "M-BhIs": {
+      "engineId": "de-DELFI_de:11000:900150518",
+      "coordinates": {
+        "lat": 52.544353,
+        "lon": 13.468636
+      }
+    },
+    "M-Bhm": {
+      "engineId": "de-DELFI_de:11000:900170010",
+      "coordinates": {
+        "lat": 52.549007,
+        "lon": 13.583714
+      }
+    },
+    "M-Bhs": {
+      "engineId": "de-DELFI_de:11000:900140506::1",
+      "coordinates": {
+        "lat": 52.549644,
+        "lon": 13.447207
+      }
+    },
+    "M-Bjs": {
+      "engineId": "de-DELFI_de:11000:900110010",
+      "coordinates": {
+        "lat": 52.554447,
+        "lon": 13.403138
+      }
+    },
+    "M-Bp": {
+      "engineId": "de-DELFI_de:11000:900170011",
+      "coordinates": {
+        "lat": 52.567806,
+        "lon": 13.573698
+      }
+    },
+    "M-BpP": {
+      "engineId": "de-DELFI_de:11000:900131004",
+      "coordinates": {
+        "lat": 52.571198,
+        "lon": 13.398141
+      }
+    },
+    "M-Bpm": {
+      "engineId": "de-DELFI_de:11000:900170529",
+      "coordinates": {
+        "lat": 52.54985,
+        "lon": 13.560745
+      }
+    },
+    "M-Bps": {
+      "engineId": "de-DELFI_de:11000:900171517",
+      "coordinates": {
+        "lat": 52.5275,
+        "lon": 13.548811
+      }
+    },
+    "M-Bpz": {
+      "engineId": "de-VBB_de:11000:900120516::4",
+      "coordinates": {
+        "lat": 52.520145,
+        "lon": 13.451617
+      }
+    },
+    "M-Br": {
+      "engineId": "de-DELFI_de:11000:900192506::1",
+      "coordinates": {
+        "lat": 52.45762,
+        "lon": 13.511041
+      }
+    },
+    "M-Bs": {
+      "engineId": "de-DELFI_de:11000:900120511",
+      "coordinates": {
+        "lat": 52.52313,
+        "lon": 13.427217
+      }
+    },
+    "M-Bsa": {
+      "engineId": "de-DELFI_de:11000:900140517",
+      "coordinates": {
+        "lat": 52.556908,
+        "lon": 13.485984
+      }
+    },
+    "M-Bss": {
+      "engineId": "de-DELFI_de:11000:900171515",
+      "coordinates": {
+        "lat": 52.525497,
+        "lon": 13.530115
+      }
+    },
+    "M-Bw": {
+      "engineId": "de-DELFI_de:11000:900170524",
+      "coordinates": {
+        "lat": 52.547638,
+        "lon": 13.578357
+      }
+    },
+    "M-Crw": {
+      "engineId": "de-DELFI_de:11000:900161508",
+      "coordinates": {
+        "lat": 52.50073,
+        "lon": 13.521759
+      }
+    },
+    "M-Dgs": {
+      "engineId": "de-DELFI_de:11000:900170520",
+      "coordinates": {
+        "lat": 52.53674,
+        "lon": 13.524788
+      }
+    },
+    "M-Drs": {
+      "engineId": "de-DELFI_de:11000:900009206",
+      "coordinates": {
+        "lat": 52.55653,
+        "lon": 13.377547
+      }
+    },
+    "M-EwS": {
+      "engineId": "de-DELFI_de:11000:900110509",
+      "coordinates": {
+        "lat": 52.5478,
+        "lon": 13.42866
+      }
+    },
+    "M-Fb": {
+      "engineId": "de-DELFI_de:11000:900152007::2",
+      "coordinates": {
+        "lat": 52.5702,
+        "lon": 13.526386
+      }
+    },
+    "M-Fd": {
+      "engineId": "de-DELFI_de:11000:900150501",
+      "coordinates": {
+        "lat": 52.559826,
+        "lon": 13.495328
+      }
+    },
+    "M-Frm": {
+      "engineId": "de-DELFI_de:11000:900170519",
+      "coordinates": {
+        "lat": 52.54668,
+        "lon": 13.557462
+      }
+    },
+    "M-Frs": {
+      "engineId": "de-DELFI_de:11000:900140505::1",
+      "coordinates": {
+        "lat": 52.551975,
+        "lon": 13.440053
+      }
+    },
+    "M-Fs": {
+      "engineId": "de-DELFI_de:11000:900110510",
+      "coordinates": {
+        "lat": 52.54204,
+        "lon": 13.425914
+      }
+    },
+    "M-Ges": {
+      "engineId": "de-DELFI_de:11000:900160514",
+      "coordinates": {
+        "lat": 52.53442,
+        "lon": 13.495938
+      }
+    },
+    "M-Gew": {
+      "engineId": "de-DELFI_de:11000:900170521",
+      "coordinates": {
+        "lat": 52.539047,
+        "lon": 13.533977
+      }
+    },
+    "M-Gm": {
+      "engineId": "de-DELFI_de:11000:900007150::1",
+      "coordinates": {
+        "lat": 52.535786,
+        "lon": 13.390559
+      }
+    },
+    "M-Gos": {
+      "engineId": "de-DELFI_de:11000:900150522",
+      "coordinates": {
+        "lat": 52.54837,
+        "lon": 13.467178
+      }
+    },
+    "M-GrA": {
+      "engineId": "de-DELFI_de:11000:900131528::1",
+      "coordinates": {
+        "lat": 52.578465,
+        "lon": 13.398469
+      }
+    },
+    "M-Grus": {
+      "engineId": "de-DELFI_de:11000:900007160",
+      "coordinates": {
+        "lat": 52.55536,
+        "lon": 13.390796
+      }
+    },
+    "M-Gs": {
+      "engineId": "de-DELFI_de:11000:900140014",
+      "coordinates": {
+        "lat": 52.554577,
+        "lon": 13.482425
+      }
+    },
+    "M-Gss": {
+      "engineId": "de-DELFI_de:11000:900194010",
+      "coordinates": {
+        "lat": 52.440697,
+        "lon": 13.522953
+      }
+    },
+    "M-Hd": {
+      "engineId": "de-DELFI_de:11000:900141001",
+      "coordinates": {
+        "lat": 52.572563,
+        "lon": 13.437068
+      }
+    },
+    "M-Hgw": {
+      "engineId": "de-DELFI_de:11000:900162002",
+      "coordinates": {
+        "lat": 52.47401,
+        "lon": 13.520218
+      }
+    },
+    "M-Hk": {
+      "engineId": "de-DELFI_de:11000:900141002::1",
+      "coordinates": {
+        "lat": 52.56874,
+        "lon": 13.438934
+      }
+    },
+    "M-Hos": {
+      "engineId": "de-DELFI_de:11000:900150011",
+      "coordinates": {
+        "lat": 52.53585,
+        "lon": 13.472862
+      }
+    },
+    "M-Ht": {
+      "engineId": "de-DELFI_de:11000:900120013::1",
+      "coordinates": {
+        "lat": 52.508785,
+        "lon": 13.465995
+      }
+    },
+    "M-Hts": {
+      "engineId": "de-DELFI_de:11000:900160518::1",
+      "coordinates": {
+        "lat": 52.526524,
+        "lon": 13.490983
+      }
+    },
+    "M-Hu": {
+      "engineId": "de-DELFI_de:11000:900110521",
+      "coordinates": {
+        "lat": 52.532516,
+        "lon": 13.428789
+      }
+    },
+    "M-Hus": {
+      "engineId": "de-DELFI_de:11000:900110511",
+      "coordinates": {
+        "lat": 52.540035,
+        "lon": 13.418715
+      }
+    },
+    "M-Hwp": {
+      "engineId": "de-DELFI_de:11000:900171516",
+      "coordinates": {
+        "lat": 52.525963,
+        "lon": 13.542878
+      }
+    },
+    "M-Jps": {
+      "engineId": "de-DELFI_de:11000:900170517::1",
+      "coordinates": {
+        "lat": 52.54724,
+        "lon": 13.561078
+      }
+    },
+    "M-Js": {
+      "engineId": "de-DELFI_de:11000:900175520",
+      "coordinates": {
+        "lat": 52.531937,
+        "lon": 13.614908
+      }
+    },
+    "M-Jss": {
+      "engineId": "de-DELFI_de:11000:900120029::1",
+      "coordinates": {
+        "lat": 52.51207,
+        "lon": 13.473715
+      }
+    },
+    "M-Kek": {
+      "engineId": "de-DELFI_000306499003",
+      "coordinates": {
+        "lat": 52.525978,
+        "lon": 13.508226
+      }
+    },
+    "M-Kf": {
+      "engineId": "de-DELFI_de:11000:900120513",
+      "coordinates": {
+        "lat": 52.524147,
+        "lon": 13.440202
+      }
+    },
+    "M-Kg": {
+      "engineId": "de-DELFI_de:11000:900100038::5",
+      "coordinates": {
+        "lat": 52.51939,
+        "lon": 13.395382
+      }
+    },
+    "M-Kga": {
+      "engineId": "de-DELFI_de:11000:900171540",
+      "coordinates": {
+        "lat": 52.519012,
+        "lon": 13.519341
+      }
+    },
+    "M-Kmm": {
+      "engineId": "de-DELFI_de:11000:900002206",
+      "coordinates": {
+        "lat": 52.526684,
+        "lon": 13.354805
+      }
+    },
+    "M-Kn": {
+      "engineId": "de-DELFI_000300377007",
+      "coordinates": {
+        "lat": 52.53001,
+        "lon": 13.440682
+      }
+    },
+    "M-Kna": {
+      "engineId": "de-DELFI_de:11000:900110507",
+      "coordinates": {
+        "lat": 52.533226,
+        "lon": 13.420721
+      }
+    },
+    "M-Kps": {
+      "engineId": "de-DELFI_de:11000:900120526::1",
+      "coordinates": {
+        "lat": 52.51061,
+        "lon": 13.452634
+      }
+    },
+    "M-Kzs": {
+      "engineId": "de-DELFI_de:11000:900194016::4",
+      "coordinates": {
+        "lat": 52.432644,
+        "lon": 13.526385
+      }
+    },
+    "M-Lbs": {
+      "engineId": "de-DELFI_de:11000:900002205",
+      "coordinates": {
+        "lat": 52.526253,
+        "lon": 13.345508
+      }
+    },
+    "M-Lcs": {
+      "engineId": "de-DELFI_de:11000:900175510",
+      "coordinates": {
+        "lat": 52.549217,
+        "lon": 13.587997
+      }
+    },
+    "M-Lfs": {
+      "engineId": "de-DELFI_de:11000:900194517",
+      "coordinates": {
+        "lat": 52.446365,
+        "lon": 13.51475
+      }
+    },
+    "M-Ljs": {
+      "engineId": "de-DELFI_de:11000:900194537",
+      "coordinates": {
+        "lat": 52.43739,
+        "lon": 13.527766
+      }
+    },
+    "M-Lp": {
+      "engineId": "de-DELFI_de:11000:900160017::1",
+      "coordinates": {
+        "lat": 52.51988,
+        "lon": 13.479579
+      }
+    },
+    "M-Lsp": {
+      "engineId": "de-DELFI_de:11000:900011201",
+      "coordinates": {
+        "lat": 52.55698,
+        "lon": 13.365603
+      }
+    },
+    "M-Lues": {
+      "engineId": "de-DELFI_de:11000:900003259",
+      "coordinates": {
+        "lat": 52.52313,
+        "lon": 13.361639
+      }
+    },
+    "M-Lus": {
+      "engineId": "de-DELFI_de:11000:900003257::1",
+      "coordinates": {
+        "lat": 52.524246,
+        "lon": 13.36195
+      }
+    },
+    "M-MaS": {
+      "engineId": "de-DELFI_de:11000:900110508",
+      "coordinates": {
+        "lat": 52.535538,
+        "lon": 13.422093
+      }
+    },
+    "M-Map": {
+      "engineId": "de-DELFI_de:11000:900170020",
+      "coordinates": {
+        "lat": 52.543407,
+        "lon": 13.549696
+      }
+    },
+    "M-Mbs": {
+      "engineId": "de-DELFI_de:11000:900162007",
+      "coordinates": {
+        "lat": 52.48656,
+        "lon": 13.526908
+      }
+    },
+    "M-Mcs": {
+      "engineId": "de-DELFI_de:11000:900175511",
+      "coordinates": {
+        "lat": 52.545536,
+        "lon": 13.587068
+      }
+    },
+    "M-Mers": {
+      "engineId": "de-DELFI_de:11000:900171514",
+      "coordinates": {
+        "lat": 52.52927,
+        "lon": 13.519268
+      }
+    },
+    "M-Mes": {
+      "engineId": "de-DELFI_de:11000:900100030::1",
+      "coordinates": {
+        "lat": 52.52407,
+        "lon": 13.410607
+      }
+    },
+    "M-Mgs": {
+      "engineId": "de-DELFI_de:11000:900194501",
+      "coordinates": {
+        "lat": 52.429764,
+        "lon": 13.530237
+      }
+    },
+    "M-Mhs": {
+      "engineId": "de-DELFI_de:11000:900170530",
+      "coordinates": {
+        "lat": 52.5539,
+        "lon": 13.565668
+      }
+    },
+    "M-Mp": {
+      "engineId": "de-DELFI_de:11000:900100512::3",
+      "coordinates": {
+        "lat": 52.52387,
+        "lon": 13.396918
+      }
+    },
+    "M-Ms": {
+      "engineId": "de-DELFI_de:11000:900130506::1",
+      "coordinates": {
+        "lat": 52.56478,
+        "lon": 13.412812
+      }
+    },
+    "M-Nbs": {
+      "engineId": "de-DELFI_de:11000:900194011",
+      "coordinates": {
+        "lat": 52.448772,
+        "lon": 13.512023
+      }
+    },
+    "M-Niem": {
+      "engineId": "de-DELFI_de:11000:900170506",
+      "coordinates": {
+        "lat": 52.564724,
+        "lon": 13.571582
+      }
+    },
+    "M-Ns": {
+      "engineId": "de-DELFI_de:11000:900175519",
+      "coordinates": {
+        "lat": 52.532936,
+        "lon": 13.610194
+      }
+    },
+    "M-Ob": {
+      "engineId": "de-DELFI_de:11000:900110030::1",
+      "coordinates": {
+        "lat": 52.530426,
+        "lon": 13.461534
+      }
+    },
+    "M-Oh": {
+      "engineId": "de-DELFI_de:11000:900011252",
+      "coordinates": {
+        "lat": 52.553696,
+        "lon": 13.358291
+      }
+    },
+    "M-Ose": {
+      "engineId": "de-DELFI_de:11000:900150007::5",
+      "coordinates": {
+        "lat": 52.54684,
+        "lon": 13.497835
+      }
+    },
+    "M-Pk": {
+      "engineId": "de-DELFI_de:11000:900130013",
+      "coordinates": {
+        "lat": 52.570766,
+        "lon": 13.410134
+      }
+    },
+    "M-Pna": {
+      "engineId": "de-DELFI_de:11000:900006102::1",
+      "coordinates": {
+        "lat": 52.55889,
+        "lon": 13.385608
+      }
+    },
+    "M-Pp": {
+      "engineId": "de-DELFI_de:11000:900141507",
+      "coordinates": {
+        "lat": 52.556664,
+        "lon": 13.429913
+      }
+    },
+    "M-Pppl": {
+      "engineId": "de-DELFI_de:11000:900100504::1",
+      "coordinates": {
+        "lat": 52.532303,
+        "lon": 13.394622
+      }
+    },
+    "M-Prp": {
+      "engineId": "de-DELFI_de:11000:900151006",
+      "coordinates": {
+        "lat": 52.563217,
+        "lon": 13.505059
+      }
+    },
+    "M-Prs": {
+      "engineId": "de-DELFI_de:11000:900152006",
+      "coordinates": {
+        "lat": 52.568634,
+        "lon": 13.520673
+      }
+    },
+    "M-Pvn": {
+      "engineId": "de-DELFI_de:11000:900120019",
+      "coordinates": {
+        "lat": 52.523254,
+        "lon": 13.433056
+      }
+    },
+    "M-Rb": {
+      "engineId": "de-DELFI_de:11000:900141503::1",
+      "coordinates": {
+        "lat": 52.570133,
+        "lon": 13.437688
+      }
+    },
+    "M-Rds": {
+      "engineId": "de-DELFI_de:11000:900152508",
+      "coordinates": {
+        "lat": 52.55985,
+        "lon": 13.510518
+      }
+    },
+    "M-Rp": {
+      "engineId": "de-DELFI_000300385007",
+      "coordinates": {
+        "lat": 52.52668,
+        "lon": 13.481033
+      }
+    },
+    "M-Rs": {
+      "engineId": "de-DELFI_de:11000:900175013",
+      "coordinates": {
+        "lat": 52.529404,
+        "lon": 13.624183
+      }
+    },
+    "M-Rsb": {
+      "engineId": "de-DELFI_de:11000:900181002",
+      "coordinates": {
+        "lat": 52.468136,
+        "lon": 13.513717
+      }
+    },
+    "M-Rth": {
+      "engineId": "de-DELFI_de:11000:900160544",
+      "coordinates": {
+        "lat": 52.51591,
+        "lon": 13.479075
+      }
+    },
+    "M-Sbs": {
+      "engineId": "de-DELFI_de:11000:900150511::1",
+      "coordinates": {
+        "lat": 52.53943,
+        "lon": 13.483366
+      }
+    },
+    "M-Scs": {
+      "engineId": "de-DELFI_de:11000:900160516",
+      "coordinates": {
+        "lat": 52.535145,
+        "lon": 13.50967
+      }
+    },
+    "M-Sfo": {
+      "engineId": "de-DELFI_de:11000:900150519",
+      "coordinates": {
+        "lat": 52.53841,
+        "lon": 13.471445
+      }
+    },
+    "M-Sfs": {
+      "engineId": "de-DELFI_de:11000:900110008",
+      "coordinates": {
+        "lat": 52.55404,
+        "lon": 13.408728
+      }
+    },
+    "M-Sgs": {
+      "engineId": "de-DELFI_de:11000:900160521::1",
+      "coordinates": {
+        "lat": 52.523407,
+        "lon": 13.499658
+      }
+    },
+    "M-Sis": {
+      "engineId": "de-DELFI_de:11000:900120528::1",
+      "coordinates": {
+        "lat": 52.509914,
+        "lon": 13.456418
+      }
+    },
+    "M-Sns": {
+      "engineId": "de-DELFI_de:11000:900150510::2",
+      "coordinates": {
+        "lat": 52.538475,
+        "lon": 13.480536
+      }
+    },
+    "M-Str": {
+      "engineId": "de-DELFI_de:11000:900120515",
+      "coordinates": {
+        "lat": 52.52274,
+        "lon": 13.450145
+      }
+    },
+    "M-Sts": {
+      "engineId": "de-DELFI_de:11000:900110015",
+      "coordinates": {
+        "lat": 52.55267,
+        "lon": 13.424239
+      }
+    },
+    "M-Sws": {
+      "engineId": "de-DELFI_de:11000:900110505::3",
+      "coordinates": {
+        "lat": 52.536602,
+        "lon": 13.407587
+      }
+    },
+    "M-TSS": {
+      "engineId": "de-DELFI_de:11000:900141502",
+      "coordinates": {
+        "lat": 52.562263,
+        "lon": 13.434844
+      }
+    },
+    "M-Tc": {
+      "engineId": "de-DELFI_de:11000:900131505::1",
+      "coordinates": {
+        "lat": 52.57581,
+        "lon": 13.398893
+      }
+    },
+    "M-Tp": {
+      "engineId": "de-DELFI_de:11000:900120540::3",
+      "coordinates": {
+        "lat": 52.512047,
+        "lon": 13.469806
+      }
+    },
+    "M-Tw": {
+      "engineId": "de-DELFI_de:11000:900162008",
+      "coordinates": {
+        "lat": 52.47731,
+        "lon": 13.523756
+      }
+    },
+    "M-Tws": {
+      "engineId": "de-DELFI_de:11000:900162004",
+      "coordinates": {
+        "lat": 52.49282,
+        "lon": 13.526595
+      }
+    },
+    "M-Us": {
+      "engineId": "de-DELFI_de:11000:900100540::1",
+      "coordinates": {
+        "lat": 52.51907,
+        "lon": 13.391509
+      }
+    },
+    "M-Vik": {
+      "engineId": "de-DELFI_de:11000:900010251",
+      "coordinates": {
+        "lat": 52.543526,
+        "lon": 13.338811
+      }
+    },
+    "M-Vp": {
+      "engineId": "de-DELFI_de:11000:900181501",
+      "coordinates": {
+        "lat": 52.471058,
+        "lon": 13.517144
+      }
+    },
+    "M-Wers": {
+      "engineId": "de-DELFI_de:11000:900150512::1",
+      "coordinates": {
+        "lat": 52.542164,
+        "lon": 13.488909
+      }
+    },
+    "M-Wes": {
+      "engineId": "de-DELFI_de:11000:900140006",
+      "coordinates": {
+        "lat": 52.551888,
+        "lon": 13.465482
+      }
+    },
+    "M-Whs": {
+      "engineId": "de-DELFI_de:11000:900181502::1",
+      "coordinates": {
+        "lat": 52.461052,
+        "lon": 13.520031
+      }
+    },
+    "M-Wst": {
+      "engineId": "de-DELFI_de:11000:900110512",
+      "coordinates": {
+        "lat": 52.537613,
+        "lon": 13.428807
+      }
+    },
+    "M-Wuh": {
+      "engineId": "de-DELFI_de:11000:900170531",
+      "coordinates": {
+        "lat": 52.557713,
+        "lon": 13.568235
+      }
+    },
+    "M-Wus": {
+      "engineId": "de-DELFI_de:11000:900120529::1",
+      "coordinates": {
+        "lat": 52.508976,
+        "lon": 13.460258
+      }
+    },
+    "M-Zes": {
+      "engineId": "de-DELFI_de:11000:900160513",
+      "coordinates": {
+        "lat": 52.533947,
+        "lon": 13.487153
+      }
+    },
+    "M-Zk": {
+      "engineId": "de-DELFI_de:11000:900100042::1",
+      "coordinates": {
+        "lat": 52.53457,
+        "lon": 13.405554
+      }
+    },
+    "M-Zs": {
+      "engineId": "de-DELFI_de:11000:900151004",
+      "coordinates": {
+        "lat": 52.57028,
+        "lon": 13.49738
+      }
+    },
+    "S-AB": {
+      "engineId": "de-DELFI_000300220027",
+      "coordinates": {
+        "lat": 52.503834,
+        "lon": 13.382322
+      }
+    },
+    "S-AR": {
+      "engineId": "de-DELFI_de:11000:900085105",
+      "coordinates": {
+        "lat": 52.57797,
+        "lon": 13.349747
+      }
+    },
+    "S-Ag": {
+      "engineId": "de-DELFI_de:11000:900195510",
+      "coordinates": {
+        "lat": 52.40779,
+        "lon": 13.559602
+      }
+    },
+    "S-At": {
+      "engineId": "de-DELFI_de:11000:900068301",
+      "coordinates": {
+        "lat": 52.447296,
+        "lon": 13.361177
+      }
+    },
+    "S-BC": {
+      "engineId": "de-DELFI_de:11000:900072101",
+      "coordinates": {
+        "lat": 52.411034,
+        "lon": 13.38247
+      }
+    },
+    "S-BF": {
+      "engineId": "de-DELFI_de:12060:900350161",
+      "coordinates": {
+        "lat": 52.66837,
+        "lon": 13.564597
+      }
+    },
+    "S-BR": {
+      "engineId": "de-DELFI_de:11000:900160002",
+      "coordinates": {
+        "lat": 52.4936,
+        "lon": 13.498152
+      }
+    },
+    "S-Ba": {
+      "engineId": "de-DELFI_de:12054:900230000",
+      "coordinates": {
+        "lat": 52.39145,
+        "lon": 13.094634
+      }
+    },
+    "S-Be": {
+      "engineId": "de-DELFI_000300219018",
+      "coordinates": {
+        "lat": 52.519814,
+        "lon": 13.3474
+      }
+    },
+    "S-Bes": {
+      "engineId": "de-DELFI_de:11000:900020202",
+      "coordinates": {
+        "lat": 52.534313,
+        "lon": 13.328703
+      }
+    },
+    "S-Bfe": {
+      "engineId": "de-DELFI_de:12065:900200011",
+      "coordinates": {
+        "lat": 52.669697,
+        "lon": 13.321455
+      }
+    },
+    "S-Bie": {
+      "engineId": "de-DELFI_de:11000:900171001",
+      "coordinates": {
+        "lat": 52.513058,
+        "lon": 13.555035
+      }
+    },
+    "S-Bk": {
+      "engineId": "de-DELFI_de:12064:900320026",
+      "coordinates": {
+        "lat": 52.515793,
+        "lon": 13.649774
+      }
+    },
+    "S-Bl": {
+      "engineId": "de-DELFI_de:11000:900142001",
+      "coordinates": {
+        "lat": 52.59107,
+        "lon": 13.442972
+      }
+    },
+    "S-Bo": {
+      "engineId": "de-DELFI_de:12065:900200007",
+      "coordinates": {
+        "lat": 52.714916,
+        "lon": 13.276787
+      }
+    },
+    "S-BoG": {
+      "engineId": "de-DELFI_de:11000:900066102",
+      "coordinates": {
+        "lat": 52.44755,
+        "lon": 13.306041
+      }
+    },
+    "S-Bsw": {
+      "engineId": "de-DELFI_000300190025",
+      "coordinates": {
+        "lat": 52.467632,
+        "lon": 13.490098
+      }
+    },
+    "S-Bu": {
+      "engineId": "de-DELFI_de:11000:900135001",
+      "coordinates": {
+        "lat": 52.636295,
+        "lon": 13.492369
+      }
+    },
+    "S-Bw": {
+      "engineId": "de-DELFI_de:12065:900200008",
+      "coordinates": {
+        "lat": 52.688576,
+        "lon": 13.288846
+      }
+    },
+    "S-Eid": {
+      "engineId": "de-DELFI_de:11000:900096405",
+      "coordinates": {
+        "lat": 52.577545,
+        "lon": 13.315583
+      }
+    },
+    "S-Eiw": {
+      "engineId": "de-DELFI_de:12061:900260004",
+      "coordinates": {
+        "lat": 52.37191,
+        "lon": 13.615038
+      }
+    },
+    "S-Fd": {
+      "engineId": "de-DELFI_de:12064:900320006",
+      "coordinates": {
+        "lat": 52.5263,
+        "lon": 13.761071
+      }
+    },
+    "S-Fh": {
+      "engineId": "de-DELFI_de:11000:900182002",
+      "coordinates": {
+        "lat": 52.45719,
+        "lon": 13.625478
+      }
+    },
+    "S-Fhn": {
+      "engineId": "de-DELFI_de:11000:900092201",
+      "coordinates": {
+        "lat": 52.632957,
+        "lon": 13.289564
+      }
+    },
+    "S-Fr": {
+      "engineId": "de-DELFI_de:11000:900060101",
+      "coordinates": {
+        "lat": 52.47,
+        "lon": 13.340598
+      }
+    },
+    "S-Gbs": {
+      "engineId": "de-DELFI_de:12054:900230003",
+      "coordinates": {
+        "lat": 52.393944,
+        "lon": 13.128808
+      }
+    },
+    "S-Gr": {
+      "engineId": "de-DELFI_de:11000:900186001",
+      "coordinates": {
+        "lat": 52.412712,
+        "lon": 13.574018
+      }
+    },
+    "S-GrA": {
+      "engineId": "de-DELFI_de:11000:900196001",
+      "coordinates": {
+        "lat": 52.39954,
+        "lon": 13.543222
+      }
+    },
+    "S-Grw": {
+      "engineId": "de-DELFI_de:11000:900048101",
+      "coordinates": {
+        "lat": 52.48868,
+        "lon": 13.261944
+      }
+    },
+    "S-HN": {
+      "engineId": "de-DELFI_de:12065:900200009",
+      "coordinates": {
+        "lat": 52.669445,
+        "lon": 13.287223
+      }
+    },
+    "S-Ha": {
+      "engineId": "de-DELFI_de:11000:900040101",
+      "coordinates": {
+        "lat": 52.496696,
+        "lon": 13.290151
+      }
+    },
+    "S-Hd": {
+      "engineId": "de-DELFI_de:11000:900093201",
+      "coordinates": {
+        "lat": 52.618164,
+        "lon": 13.306804
+      }
+    },
+    "S-Hed": {
+      "engineId": "de-DELFI_de:12065:900200000",
+      "coordinates": {
+        "lat": 52.637867,
+        "lon": 13.205874
+      }
+    },
+    "S-Hee": {
+      "engineId": "de-DELFI_de:11000:900037255::1",
+      "coordinates": {
+        "lat": 52.5209,
+        "lon": 13.159273
+      }
+    },
+    "S-Hes": {
+      "engineId": "de-DELFI_de:11000:900091203",
+      "coordinates": {
+        "lat": 52.62515,
+        "lon": 13.228667
+      }
+    },
+    "S-Hgm": {
+      "engineId": "de-DELFI_de:12064:900320003",
+      "coordinates": {
+        "lat": 52.549038,
+        "lon": 13.86679
+      }
+    },
+    "S-Hi": {
+      "engineId": "de-DELFI_de:11000:900182001",
+      "coordinates": {
+        "lat": 52.457855,
+        "lon": 13.601462
+      }
+    },
+    "S-HoM": {
+      "engineId": "de-DELFI_de:12064:900320008",
+      "coordinates": {
+        "lat": 52.51783,
+        "lon": 13.673748
+      }
+    },
+    "S-HuH": {
+      "engineId": "de-DELFI_de:11000:900008101",
+      "coordinates": {
+        "lat": 52.54474,
+        "lon": 13.37873
+      }
+    },
+    "S-Hzd": {
+      "engineId": "de-DELFI_de:11000:900044101",
+      "coordinates": {
+        "lat": 52.48834,
+        "lon": 13.300714
+      }
+    },
+    "S-J": {
+      "engineId": "de-DELFI_de:11000:900193001",
+      "coordinates": {
+        "lat": 52.446693,
+        "lon": 13.524028
+      }
+    },
+    "S-K": {
+      "engineId": "de-DELFI_de:11000:900180001",
+      "coordinates": {
+        "lat": 52.45869,
+        "lon": 13.579543
+      }
+    },
+    "S-KLH": {
+      "engineId": "de-DELFI_de:11000:900077155",
+      "coordinates": {
+        "lat": 52.46917,
+        "lon": 13.467529
+      }
+    },
+    "S-KWH": {
+      "engineId": "de-VBN_000008010193",
+      "coordinates": {
+        "lat": 52.296635,
+        "lon": 13.631472
+      }
+    },
+    "S-Kad": {
+      "engineId": "de-DELFI_de:11000:900175002",
+      "coordinates": {
+        "lat": 52.512123,
+        "lon": 13.58903
+      }
+    },
+    "S-Kar": {
+      "engineId": "de-DELFI_de:11000:900143001",
+      "coordinates": {
+        "lat": 52.615753,
+        "lon": 13.470081
+      }
+    },
+    "S-Law": {
+      "engineId": "de-DELFI_de:11000:900067221",
+      "coordinates": {
+        "lat": 52.439034,
+        "lon": 13.34276
+      }
+    },
+    "S-Leh": {
+      "engineId": "de-DELFI_de:12065:900200006",
+      "coordinates": {
+        "lat": 52.741394,
+        "lon": 13.26328
+      }
+    },
+    "S-LiO": {
+      "engineId": "de-DELFI_de:11000:900064301",
+      "coordinates": {
+        "lat": 52.429295,
+        "lon": 13.327749
+      }
+    },
+    "S-LiS": {
+      "engineId": "de-DELFI_de:11000:900064201",
+      "coordinates": {
+        "lat": 52.409958,
+        "lon": 13.308662
+      }
+    },
+    "S-LiW": {
+      "engineId": "de-DELFI_de:11000:900066101",
+      "coordinates": {
+        "lat": 52.443512,
+        "lon": 13.294141
+      }
+    },
+    "S-Lir": {
+      "engineId": "de-DELFI_de:11000:900074201",
+      "coordinates": {
+        "lat": 52.38668,
+        "lon": 13.396642
+      }
+    },
+    "S-MM": {
+      "engineId": "de-DELFI_de:12065:900200013",
+      "coordinates": {
+        "lat": 52.65432,
+        "lon": 13.388063
+      }
+    },
+    "S-MP": {
+      "engineId": "de-DELFI_de:11000:900050301",
+      "coordinates": {
+        "lat": 52.437164,
+        "lon": 13.23206
+      }
+    },
+    "S-MS": {
+      "engineId": "de-DELFI_de:11000:900025423",
+      "coordinates": {
+        "lat": 52.49877,
+        "lon": 13.27045
+      }
+    },
+    "S-Mad": {
+      "engineId": "de-DELFI_de:11000:900176001",
+      "coordinates": {
+        "lat": 52.51204,
+        "lon": 13.610693
+      }
+    },
+    "S-Maf": {
+      "engineId": "de-DELFI_de:11000:900073101",
+      "coordinates": {
+        "lat": 52.423817,
+        "lon": 13.375022
+      }
+    },
+    "S-Maw": {
+      "engineId": "de-DELFI_de:12072:900245028",
+      "coordinates": {
+        "lat": 52.360165,
+        "lon": 13.408775
+      }
+    },
+    "S-MeA": {
+      "engineId": "de-DELFI_de:11000:900170003",
+      "coordinates": {
+        "lat": 52.557816,
+        "lon": 13.554392
+      }
+    },
+    "S-NH": {
+      "engineId": "de-DELFI_de:12064:900320130::1",
+      "coordinates": {
+        "lat": 52.523045,
+        "lon": 13.700712
+      }
+    },
+    "S-NiS": {
+      "engineId": "de-DELFI_de:11000:900052201",
+      "coordinates": {
+        "lat": 52.43121,
+        "lon": 13.193298
+      }
+    },
+    "S-Np": {
+      "engineId": "de-DELFI_de:11000:900160003",
+      "coordinates": {
+        "lat": 52.503445,
+        "lon": 13.484297
+      }
+    },
+    "S-OdS": {
+      "engineId": "de-DELFI_de:11000:900064256",
+      "coordinates": {
+        "lat": 52.418373,
+        "lon": 13.313865
+      }
+    },
+    "S-Okz": {
+      "engineId": "de-DELFI_de:11000:900120003",
+      "coordinates": {
+        "lat": 52.503113,
+        "lon": 13.469221
+      }
+    },
+    "S-Or": {
+      "engineId": "de-DELFI_de:12065:900200005",
+      "coordinates": {
+        "lat": 52.754486,
+        "lon": 13.248311
+      }
+    },
+    "S-Os": {
+      "engineId": "de-DELFI_de:11000:900192002",
+      "coordinates": {
+        "lat": 52.45227,
+        "lon": 13.538461
+      }
+    },
+    "S-Ost": {
+      "engineId": "ee-peatus_126935",
+      "coordinates": {
+        "lat": 52.510498,
+        "lon": 13.434699
+      }
+    },
+    "S-PB": {
+      "engineId": "de-DELFI_de:11000:900025424",
+      "coordinates": {
+        "lat": 52.509926,
+        "lon": 13.228253
+      }
+    },
+    "S-PH": {
+      "engineId": "de-VBN_000008012666",
+      "coordinates": {
+        "lat": 52.39151,
+        "lon": 13.066703
+      }
+    },
+    "S-PN": {
+      "engineId": "de-DELFI_de:12064:900320005",
+      "coordinates": {
+        "lat": 52.528988,
+        "lon": 13.790696
+      }
+    },
+    "S-Pc": {
+      "engineId": "de-DELFI_de:11000:900170005",
+      "coordinates": {
+        "lat": 52.53475,
+        "lon": 13.536008
+      }
+    },
+    "S-Prw": {
+      "engineId": "de-DELFI_de:11000:900058102",
+      "coordinates": {
+        "lat": 52.45924,
+        "lon": 13.356028
+      }
+    },
+    "S-Pw": {
+      "engineId": "de-DELFI_de:11000:900191002",
+      "coordinates": {
+        "lat": 52.47872,
+        "lon": 13.474029
+      }
+    },
+    "S-RWS": {
+      "engineId": "de-DELFI_de:11000:900170002",
+      "coordinates": {
+        "lat": 52.55075,
+        "lon": 13.548392
+      }
+    },
+    "S-Rd": {
+      "engineId": "de-DELFI_de:11000:900183001",
+      "coordinates": {
+        "lat": 52.451443,
+        "lon": 13.691582
+      }
+    },
+    "S-Rgt": {
+      "engineId": "de-DELFI_de:12060:900350162",
+      "coordinates": {
+        "lat": 52.64922,
+        "lon": 13.514525
+      }
+    },
+    "S-Rub": {
+      "engineId": "de-DELFI_de:11000:900160001",
+      "coordinates": {
+        "lat": 52.501213,
+        "lon": 13.478699
+      }
+    },
+    "S-SD": {
+      "engineId": "de-DELFI_de:11000:900091201::1",
+      "coordinates": {
+        "lat": 52.614914,
+        "lon": 13.244347
+      }
+    },
+    "S-SS": {
+      "engineId": "de-DELFI_de:11000:900050355",
+      "coordinates": {
+        "lat": 52.439808,
+        "lon": 13.213986
+      }
+    },
+    "S-Sa": {
+      "engineId": "de-DELFI_de:11000:900077110::1",
+      "coordinates": {
+        "lat": 52.472485,
+        "lon": 13.454689
+      }
+    },
+    "S-Sau": {
+      "engineId": "de-DELFI_de:11000:900074202",
+      "coordinates": {
+        "lat": 52.39856,
+        "lon": 13.389437
+      }
+    },
+    "S-Sav": {
+      "engineId": "de-DELFI_000300221009",
+      "coordinates": {
+        "lat": 52.50526,
+        "lon": 13.319896
+      }
+    },
+    "S-Sb": {
+      "engineId": "de-DELFI_de:11000:900054104",
+      "coordinates": {
+        "lat": 52.479813,
+        "lon": 13.352848
+      }
+    },
+    "S-SbS": {
+      "engineId": "de-DELFI_de:12064:900320002",
+      "coordinates": {
+        "lat": 52.577595,
+        "lon": 13.888281
+      }
+    },
+    "S-Scf": {
+      "engineId": "de-DELFI_de:12065:900200012",
+      "coordinates": {
+        "lat": 52.664593,
+        "lon": 13.340511
+      }
+    },
+    "S-Se": {
+      "engineId": "de-DELFI_de:11000:900063452",
+      "coordinates": {
+        "lat": 52.4489,
+        "lon": 13.354077
+      }
+    },
+    "S-Sh": {
+      "engineId": "de-DELFI_de:11000:900085201",
+      "coordinates": {
+        "lat": 52.5719,
+        "lon": 13.380242
+      }
+    },
+    "S-Skz": {
+      "engineId": "de-DELFI_de:11000:900058101",
+      "coordinates": {
+        "lat": 52.475502,
+        "lon": 13.365552
+      }
+    },
+    "S-Spf": {
+      "engineId": "de-DELFI_de:11000:900180003",
+      "coordinates": {
+        "lat": 52.44594,
+        "lon": 13.562701
+      }
+    },
+    "S-St": {
+      "engineId": "de-DELFI_de:12064:900320004",
+      "coordinates": {
+        "lat": 52.532364,
+        "lon": 13.834793
+      }
+    },
+    "S-StN": {
+      "engineId": "de-DELFI_de:12064:900320001",
+      "coordinates": {
+        "lat": 52.5907,
+        "lon": 13.908894
+      }
+    },
+    "S-Str": {
+      "engineId": "de-DELFI_de:11000:900030202",
+      "coordinates": {
+        "lat": 52.53197,
+        "lon": 13.209099
+      }
+    },
+    "S-SuS": {
+      "engineId": "de-DELFI_de:11000:900049202",
+      "coordinates": {
+        "lat": 52.436188,
+        "lon": 13.273501
+      }
+    },
+    "S-TP": {
+      "engineId": "de-DELFI_de:11000:900190001",
+      "coordinates": {
+        "lat": 52.49383,
+        "lon": 13.461825
+      }
+    },
+    "S-TS": {
+      "engineId": "de-DELFI_de:12069:900220114",
+      "coordinates": {
+        "lat": 52.39718,
+        "lon": 13.276028
+      }
+    },
+    "S-Tg": {
+      "engineId": "de-DELFI_de:11000:900003103",
+      "coordinates": {
+        "lat": 52.513958,
+        "lon": 13.336241
+      }
+    },
+    "S-ULi": {
+      "engineId": "de-DELFI_de:11000:900160004",
+      "coordinates": {
+        "lat": 52.510674,
+        "lon": 13.498359
+      }
+    },
+    "S-UWe": {
+      "engineId": "de-DELFI_de:11000:900009104",
+      "coordinates": {
+        "lat": 52.542732,
+        "lon": 13.36606
+      }
+    },
+    "S-W": {
+      "engineId": "de-DELFI_de:11000:900094101",
+      "coordinates": {
+        "lat": 52.606815,
+        "lon": 13.320549
+      }
+    },
+    "S-Wa": {
+      "engineId": "de-DELFI_de:11000:900053301",
+      "coordinates": {
+        "lat": 52.421726,
+        "lon": 13.178932
+      }
+    },
+    "S-Wb": {
+      "engineId": "de-DELFI_de:11000:900151001",
+      "coordinates": {
+        "lat": 52.573265,
+        "lon": 13.504238
+      }
+    },
+    "S-Wd": {
+      "engineId": "de-DELFI_de:12061:900260080",
+      "coordinates": {
+        "lat": 52.368282,
+        "lon": 13.463432
+      }
+    },
+    "S-We": {
+      "engineId": "de-DELFI_de:11000:900026207",
+      "coordinates": {
+        "lat": 52.51861,
+        "lon": 13.284237
+      }
+    },
+    "S-Wh": {
+      "engineId": "de-DELFI_de:11000:900183002",
+      "coordinates": {
+        "lat": 52.438732,
+        "lon": 13.721143
+      }
+    },
+    "S-Wkz": {
+      "engineId": "de-DELFI_de:11000:900024102",
+      "coordinates": {
+        "lat": 52.501152,
+        "lon": 13.283036
+      }
+    },
+    "S-Wld": {
+      "engineId": "de-DELFI_de:12061:900260002",
+      "coordinates": {
+        "lat": 52.319206,
+        "lon": 13.633587
+      }
+    },
+    "S-Wlh": {
+      "engineId": "de-DELFI_de:11000:900180002",
+      "coordinates": {
+        "lat": 52.46906,
+        "lon": 13.553527
+      }
+    },
+    "S-WoS": {
+      "engineId": "de-DELFI_de:11000:900130003",
+      "coordinates": {
+        "lat": 52.564976,
+        "lon": 13.39315
+      }
+    },
+    "S-Wr": {
+      "engineId": "de-DELFI_de:11000:900084101",
+      "coordinates": {
+        "lat": 52.58139,
+        "lon": 13.362938
+      }
+    },
+    "S-Ze": {
+      "engineId": "de-DELFI_de:11000:900049201",
+      "coordinates": {
+        "lat": 52.43121,
+        "lon": 13.259227
+      }
+    },
+    "S-Zep": {
+      "engineId": "de-DELFI_de:12060:900350163",
+      "coordinates": {
+        "lat": 52.65916,
+        "lon": 13.533054
+      }
+    },
+    "S-Zeu": {
+      "engineId": "de-DELFI_de:12061:900260003",
+      "coordinates": {
+        "lat": 52.34935,
+        "lon": 13.627012
+      }
+    },
+    "SM-Ad": {
+      "engineId": "de-DELFI_de:11000:900193002",
+      "coordinates": {
+        "lat": 52.4351,
+        "lon": 13.540553
+      }
+    },
+    "SM-Ah": {
+      "engineId": "de-DELFI_de:11000:900170004",
+      "coordinates": {
+        "lat": 52.57134,
+        "lon": 13.565649
+      }
+    },
+    "SM-BoS": {
+      "engineId": "de-DELFI_de:11000:900110011",
+      "coordinates": {
+        "lat": 52.554764,
+        "lon": 13.397841
+      }
+    },
+    "SM-FfO": {
+      "engineId": "de-DELFI_de:11000:900171002",
+      "coordinates": {
+        "lat": 52.51353,
+        "lon": 13.519078
+      }
+    },
+    "SM-GrS": {
+      "engineId": "de-DELFI_de:11000:900110003",
+      "coordinates": {
+        "lat": 52.540726,
+        "lon": 13.438356
+      }
+    },
+    "SM-Gs": {
+      "engineId": "de-DELFI_de:11000:900152002",
+      "coordinates": {
+        "lat": 52.555737,
+        "lon": 13.525653
+      }
+    },
+    "SM-HM": {
+      "engineId": "de-DELFI_de:11000:900100002",
+      "coordinates": {
+        "lat": 52.522606,
+        "lon": 13.402358
+      }
+    },
+    "SM-HSH": {
+      "engineId": "de-DELFI_de:11000:900151006::11",
+      "coordinates": {
+        "lat": 52.565025,
+        "lon": 13.511833
+      }
+    },
+    "SM-Kh": {
+      "engineId": "de-DELFI_000300180014",
+      "coordinates": {
+        "lat": 52.48137,
+        "lon": 13.526554
+      }
+    },
+    "SM-LaA": {
+      "engineId": "de-DELFI_de:11000:900110004",
+      "coordinates": {
+        "lat": 52.52877,
+        "lon": 13.455944
+      }
+    },
+    "SM-Maz": {
+      "engineId": "de-DELFI_de:11000:900170001",
+      "coordinates": {
+        "lat": 52.54327,
+        "lon": 13.541524
+      }
+    },
+    "SM-NB": {
+      "engineId": "de-DELFI_de:11000:900007104",
+      "coordinates": {
+        "lat": 52.531673,
+        "lon": 13.388798
+      }
+    },
+    "SM-OrS": {
+      "engineId": "de-DELFI_de:11000:900100007",
+      "coordinates": {
+        "lat": 52.52516,
+        "lon": 13.393068
+      }
+    },
+    "SM-PrA": {
+      "engineId": "de-DELFI_de:11000:900110002",
+      "coordinates": {
+        "lat": 52.544804,
+        "lon": 13.427419
+      }
+    },
+    "SM-Spl": {
+      "engineId": "de-DELFI_de:11000:900171003",
+      "coordinates": {
+        "lat": 52.526146,
+        "lon": 13.53687
+      }
+    },
+    "SM-StS": {
+      "engineId": "de-DELFI_de:11000:900110012",
+      "coordinates": {
+        "lat": 52.52387,
+        "lon": 13.464704
+      }
+    },
+    "SM-Sw": {
+      "engineId": "de-DELFI_de:11000:900192001",
+      "coordinates": {
+        "lat": 52.454613,
+        "lon": 13.510149
+      }
+    },
+    "SU-BRT": {
+      "engineId": "de-DELFI_de:11000:900100025",
+      "coordinates": {
+        "lat": 52.51651,
+        "lon": 13.381937
+      }
+    },
+    "SU-Bs": {
+      "engineId": "de-DELFI_de:11000:900044202",
+      "coordinates": {
+        "lat": 52.47767,
+        "lon": 13.328626
+      }
+    },
+    "SU-Chb": {
+      "engineId": "de-DELFI_de:11000:900024101",
+      "coordinates": {
+        "lat": 52.50473,
+        "lon": 13.303862
+      }
+    },
+    "SU-Gb": {
+      "engineId": "de-DELFI_de:11000:900007102",
+      "coordinates": {
+        "lat": 52.548637,
+        "lon": 13.388372
+      }
+    },
+    "SU-HMS": {
+      "engineId": "de-DELFI_de:11000:900079221",
+      "coordinates": {
+        "lat": 52.467182,
+        "lon": 13.431704
+      }
+    },
+    "SU-Hb": {
+      "engineId": "de-DELFI_de:11000:900045102",
+      "coordinates": {
+        "lat": 52.480125,
+        "lon": 13.31229
+      }
+    },
+    "SU-Ip": {
+      "engineId": "de-DELFI_de:11000:900054105",
+      "coordinates": {
+        "lat": 52.4781,
+        "lon": 13.342875
+      }
+    },
+    "SU-J": {
+      "engineId": "de-DELFI_de:11000:900100004",
+      "coordinates": {
+        "lat": 52.5155,
+        "lon": 13.418027
+      }
+    },
+    "SU-Jho": {
+      "engineId": "de-DELFI_de:11000:900020201",
+      "coordinates": {
+        "lat": 52.530453,
+        "lon": 13.300124
+      }
+    },
+    "SU-KB": {
+      "engineId": "de-DELFI_de:11000:900096458",
+      "coordinates": {
+        "lat": 52.57817,
+        "lon": 13.332921
+      }
+    },
+    "SU-MNI": {
+      "engineId": "de-DELFI_de:11000:900024106",
+      "coordinates": {
+        "lat": 52.506622,
+        "lon": 13.282884
+      }
+    },
+    "SU-Nk": {
+      "engineId": "de-DELFI_de:11000:900078201",
+      "coordinates": {
+        "lat": 52.46928,
+        "lon": 13.443692
+      }
+    },
+    "SU-PAH": {
+      "engineId": "de-DELFI_de:11000:900130001",
+      "coordinates": {
+        "lat": 52.577602,
+        "lon": 13.42909
+      }
+    },
+    "SU-Pd": {
+      "engineId": "de-DELFI_de:11000:900100020",
+      "coordinates": {
+        "lat": 52.509357,
+        "lon": 13.376547
+      }
+    },
+    "SU-Rzu": {
+      "engineId": "de-DELFI_de:11000:900062282::1",
+      "coordinates": {
+        "lat": 52.455566,
+        "lon": 13.320961
+      }
+    },
+    "SU-S": {
+      "engineId": "de-DELFI_de:11000:900029101",
+      "coordinates": {
+        "lat": 52.534798,
+        "lon": 13.197477
+      }
+    },
+    "SU-Sd": {
+      "engineId": "de-DELFI_de:11000:900025203",
+      "coordinates": {
+        "lat": 52.517048,
+        "lon": 13.2505
+      }
+    },
+    "SU-Tg": {
+      "engineId": "de-DELFI_de:11000:900089303",
+      "coordinates": {
+        "lat": 52.588806,
+        "lon": 13.288695
+      }
+    },
+    "SU-Ts": {
+      "engineId": "de-DELFI_de:11000:900068201",
+      "coordinates": {
+        "lat": 52.470573,
+        "lon": 13.3859
+      }
+    },
+    "SU-WF": {
+      "engineId": "de-DELFI_de:11000:900001201",
+      "coordinates": {
+        "lat": 52.536182,
+        "lon": 13.343837
+      }
+    },
+    "SU-WIU": {
+      "engineId": "de-DELFI_de:11000:900096101",
+      "coordinates": {
+        "lat": 52.596394,
+        "lon": 13.335481
+      }
+    },
+    "SU-Wh": {
+      "engineId": "de-DELFI_de:11000:900175001",
+      "coordinates": {
+        "lat": 52.512726,
+        "lon": 13.574536
+      }
+    },
+    "SU-Y": {
+      "engineId": "de-DELFI_de:11000:900057103::3",
+      "coordinates": {
+        "lat": 52.49283,
+        "lon": 13.3698
+      }
+    },
+    "SU-Zo": {
+      "engineId": "de-DELFI_de:11000:900023201",
+      "coordinates": {
+        "lat": 52.50692,
+        "lon": 13.332707
+      }
+    },
+    "SUM-A": {
+      "engineId": "de-DELFI_de:11000:900100005::1",
+      "coordinates": {
+        "lat": 52.52214,
+        "lon": 13.414628
+      }
+    },
+    "SUM-Ff": {
+      "engineId": "de-DELFI_de:11000:900120001",
+      "coordinates": {
+        "lat": 52.51358,
+        "lon": 13.475848
+      }
+    },
+    "SUM-Frs": {
+      "engineId": "de-DELFI_de:11000:900100001",
+      "coordinates": {
+        "lat": 52.52052,
+        "lon": 13.38645
+      }
+    },
+    "SUM-HBF": {
+      "engineId": "de-DELFI_de:11000:900003200",
+      "coordinates": {
+        "lat": 52.525593,
+        "lon": 13.369545
+      }
+    },
+    "SUM-PA": {
+      "engineId": "de-DELFI_000300160011",
+      "coordinates": {
+        "lat": 52.567577,
+        "lon": 13.412035
+      }
+    },
+    "SUM-Sh": {
+      "engineId": "de-DELFI_de:11000:900110001",
+      "coordinates": {
+        "lat": 52.549335,
+        "lon": 13.415138
+      }
+    },
+    "SUM-WA": {
+      "engineId": "de-DELFI_de:11000:900120004",
+      "coordinates": {
+        "lat": 52.505764,
+        "lon": 13.449159
+      }
+    },
+    "U-AS": {
+      "engineId": "de-DELFI_de:11000:900029301",
+      "coordinates": {
+        "lat": 52.53916,
+        "lon": 13.206763
+      }
+    },
+    "U-Ado": {
+      "engineId": "de-DELFI_de:11000:900023302",
+      "coordinates": {
+        "lat": 52.500088,
+        "lon": 13.307348
+      }
+    },
+    "U-Afr": {
+      "engineId": "de-DELFI_de:11000:900011102",
+      "coordinates": {
+        "lat": 52.560863,
+        "lon": 13.333502
+      }
+    },
+    "U-At": {
+      "engineId": "de-DELFI_de:11000:900068202",
+      "coordinates": {
+        "lat": 52.46593,
+        "lon": 13.385796
+      }
+    },
+    "U-Au": {
+      "engineId": "de-DELFI_de:11000:900023202",
+      "coordinates": {
+        "lat": 52.500443,
+        "lon": 13.336461
+      }
+    },
+    "U-Bi": {
+      "engineId": "de-DELFI_de:11000:900002201",
+      "coordinates": {
+        "lat": 52.53227,
+        "lon": 13.341418
+      }
+    },
+    "U-Bl": {
+      "engineId": "de-DELFI_de:11000:900080201",
+      "coordinates": {
+        "lat": 52.452744,
+        "lon": 13.448976
+      }
+    },
+    "U-Bli": {
+      "engineId": "de-DELFI_de:11000:900041102",
+      "coordinates": {
+        "lat": 52.486477,
+        "lon": 13.320545
+      }
+    },
+    "U-Bmo": {
+      "engineId": "de-DELFI_de:11000:900024201",
+      "coordinates": {
+        "lat": 52.511543,
+        "lon": 13.305335
+      }
+    },
+    "U-Bo": {
+      "engineId": "de-DELFI_de:11000:900079202",
+      "coordinates": {
+        "lat": 52.479744,
+        "lon": 13.425782
+      }
+    },
+    "U-Bpu": {
+      "engineId": "de-DELFI_de:11000:900055102",
+      "coordinates": {
+        "lat": 52.488655,
+        "lon": 13.340237
+      }
+    },
+    "U-Br": {
+      "engineId": "de-DELFI_de:11000:900080402",
+      "coordinates": {
+        "lat": 52.437077,
+        "lon": 13.447668
+      }
+    },
+    "U-Bt": {
+      "engineId": "de-DELFI_de:11000:900051202",
+      "coordinates": {
+        "lat": 52.467342,
+        "lon": 13.309276
+      }
+    },
+    "U-Bu": {
+      "engineId": "de-DELFI_de:11000:900003254",
+      "coordinates": {
+        "lat": 52.52011,
+        "lon": 13.372952
+      }
+    },
+    "U-Bue": {
+      "engineId": "de-DELFI_de:11000:900056104",
+      "coordinates": {
+        "lat": 52.497627,
+        "lon": 13.362456
+      }
+    },
+    "U-Bü": {
+      "engineId": "de-DELFI_de:11000:900171005",
+      "coordinates": {
+        "lat": 52.499516,
+        "lon": 13.547326
+      }
+    },
+    "U-C": {
+      "engineId": "de-DELFI_de:11000:900175006",
+      "coordinates": {
+        "lat": 52.533962,
+        "lon": 13.596894
+      }
+    },
+    "U-DD": {
+      "engineId": "de-DELFI_de:11000:900051303",
+      "coordinates": {
+        "lat": 52.457695,
+        "lon": 13.290011
+      }
+    },
+    "U-E": {
+      "engineId": "de-DELFI_de:11000:900171006",
+      "coordinates": {
+        "lat": 52.505135,
+        "lon": 13.560646
+      }
+    },
+    "U-Ei": {
+      "engineId": "de-DELFI_de:11000:900054103",
+      "coordinates": {
+        "lat": 52.489475,
+        "lon": 13.350284
+      }
+    },
+    "U-FN": {
+      "engineId": "de-DELFI_de:11000:900085202",
+      "coordinates": {
+        "lat": 52.563854,
+        "lon": 13.364283
+      }
+    },
+    "U-Fbs": {
+      "engineId": "de-DELFI_de:11000:900063101",
+      "coordinates": {
+        "lat": 52.463577,
+        "lon": 13.332412
+      }
+    },
+    "U-Fi": {
+      "engineId": "de-DELFI_de:11000:900161504::1",
+      "coordinates": {
+        "lat": 52.506622,
+        "lon": 13.511598
+      }
+    },
+    "U-Fpo": {
+      "engineId": "de-DELFI_de:11000:900041101",
+      "coordinates": {
+        "lat": 52.490192,
+        "lon": 13.314508
+      }
+    },
+    "U-Fw": {
+      "engineId": "de-DELFI_de:11000:900061102",
+      "coordinates": {
+        "lat": 52.47144,
+        "lon": 13.328676
+      }
+    },
+    "U-GK": {
+      "engineId": "de-DELFI_de:11000:900175005",
+      "coordinates": {
+        "lat": 52.52849,
+        "lon": 13.59055
+      }
+    },
+    "U-Go": {
+      "engineId": "de-DELFI_de:11000:900017103",
+      "coordinates": {
+        "lat": 52.499588,
+        "lon": 13.374293
+      }
+    },
+    "U-Gr": {
+      "engineId": "de-DELFI_000300101007",
+      "coordinates": {
+        "lat": 52.49956,
+        "lon": 13.426519
+      }
+    },
+    "U-Gs": {
+      "engineId": "de-DELFI_de:11000:900016101",
+      "coordinates": {
+        "lat": 52.491253,
+        "lon": 13.395382
+      }
+    },
+    "U-Gt": {
+      "engineId": "de-DELFI_de:11000:900043201",
+      "coordinates": {
+        "lat": 52.491993,
+        "lon": 13.33121
+      }
+    },
+    "U-Gz": {
+      "engineId": "de-DELFI_de:11000:900080202",
+      "coordinates": {
+        "lat": 52.463516,
+        "lon": 13.444828
+      }
+    },
+    "U-Ha": {
+      "engineId": "de-DELFI_de:11000:900003101",
+      "coordinates": {
+        "lat": 52.518112,
+        "lon": 13.342165
+      }
+    },
+    "U-HaT": {
+      "engineId": "de-DELFI_de:11000:900012103",
+      "coordinates": {
+        "lat": 52.497772,
+        "lon": 13.39176
+      }
+    },
+    "U-Hl": {
+      "engineId": "de-DELFI_de:11000:900018102",
+      "coordinates": {
+        "lat": 52.5367,
+        "lon": 13.286578
+      }
+    },
+    "U-Hpu": {
+      "engineId": "de-DELFI_de:11000:900078171::4",
+      "coordinates": {
+        "lat": 52.48678,
+        "lon": 13.424221
+      }
+    },
+    "U-Hs": {
+      "engineId": "de-DELFI_de:11000:900034102",
+      "coordinates": {
+        "lat": 52.53869,
+        "lon": 13.231946
+      }
+    },
+    "U-Hv": {
+      "engineId": "de-DELFI_de:11000:900100012",
+      "coordinates": {
+        "lat": 52.513363,
+        "lon": 13.395346
+      }
+    },
+    "U-Hz": {
+      "engineId": "de-DELFI_de:11000:900043101",
+      "coordinates": {
+        "lat": 52.49383,
+        "lon": 13.324051
+      }
+    },
+    "U-Hö": {
+      "engineId": "de-DELFI_de:11000:900175010",
+      "coordinates": {
+        "lat": 52.538105,
+        "lon": 13.634541
+      }
+    },
+    "U-JK": {
+      "engineId": "de-DELFI_de:11000:900018101",
+      "coordinates": {
+        "lat": 52.536983,
+        "lon": 13.293661
+      }
+    },
+    "U-Jt": {
+      "engineId": "de-DELFI_de:11000:900082202",
+      "coordinates": {
+        "lat": 52.429253,
+        "lon": 13.453851
+      }
+    },
+    "U-KL": {
+      "engineId": "de-DELFI_de:11000:900175004",
+      "coordinates": {
+        "lat": 52.521435,
+        "lon": 13.588763
+      }
+    },
+    "U-Kbo": {
+      "engineId": "de-DELFI_de:11000:900013102",
+      "coordinates": {
+        "lat": 52.499046,
+        "lon": 13.417748
+      }
+    },
+    "U-Kd": {
+      "engineId": "de-DELFI_de:11000:900026202",
+      "coordinates": {
+        "lat": 52.509987,
+        "lon": 13.281695
+      }
+    },
+    "U-Kfu": {
+      "engineId": "de-DELFI_de:11000:900023203",
+      "coordinates": {
+        "lat": 52.50376,
+        "lon": 13.331419
+      }
+    },
+    "U-Kn": {
+      "engineId": "de-DELFI_de:11000:900041201",
+      "coordinates": {
+        "lat": 52.49357,
+        "lon": 13.310084
+      }
+    },
+    "U-Ko": {
+      "engineId": "de-DELFI_de:11000:900100015",
+      "coordinates": {
+        "lat": 52.517227,
+        "lon": 13.412455
+      }
+    },
+    "U-Kr": {
+      "engineId": "de-DELFI_de:11000:900050201",
+      "coordinates": {
+        "lat": 52.442616,
+        "lon": 13.24036
+      }
+    },
+    "U-Ks": {
+      "engineId": "de-DELFI_de:11000:900012102",
+      "coordinates": {
+        "lat": 52.50667,
+        "lon": 13.390863
+      }
+    },
+    "U-Kt": {
+      "engineId": "de-DELFI_de:11000:900054102",
+      "coordinates": {
+        "lat": 52.490685,
+        "lon": 13.360543
+      }
+    },
+    "U-Kus": {
+      "engineId": "de-DELFI_de:11000:900005201",
+      "coordinates": {
+        "lat": 52.49978,
+        "lon": 13.362857
+      }
+    },
+    "U-L": {
+      "engineId": "de-DELFI_de:11000:900079201",
+      "coordinates": {
+        "lat": 52.472874,
+        "lon": 13.4284
+      }
+    },
+    "U-LD": {
+      "engineId": "de-DELFI_de:11000:900086160",
+      "coordinates": {
+        "lat": 52.575386,
+        "lon": 13.339036
+      }
+    },
+    "U-La": {
+      "engineId": "de-DELFI_de:11000:900082201",
+      "coordinates": {
+        "lat": 52.424644,
+        "lon": 13.463109
+      }
+    },
+    "U-Lpu": {
+      "engineId": "de-DELFI_de:11000:900009102",
+      "coordinates": {
+        "lat": 52.546494,
+        "lon": 13.359395
+      }
+    },
+    "U-MB": {
+      "engineId": "de-DELFI_de:11000:900005252",
+      "coordinates": {
+        "lat": 52.503185,
+        "lon": 13.374679
+      }
+    },
+    "U-MH": {
+      "engineId": "de-DELFI_000300087015",
+      "coordinates": {
+        "lat": 52.51129,
+        "lon": 13.38244
+      }
+    },
+    "U-Md": {
+      "engineId": "de-DELFI_de:11000:900160005",
+      "coordinates": {
+        "lat": 52.51246,
+        "lon": 13.487492
+      }
+    },
+    "U-Me": {
+      "engineId": "de-DELFI_de:11000:900017101",
+      "coordinates": {
+        "lat": 52.49357,
+        "lon": 13.38814
+      }
+    },
+    "U-Mf": {
+      "engineId": "de-DELFI_de:11000:900070301",
+      "coordinates": {
+        "lat": 52.43861,
+        "lon": 13.38792
+      }
+    },
+    "U-Mi": {
+      "engineId": "de-DELFI_de:11000:900100011",
+      "coordinates": {
+        "lat": 52.511494,
+        "lon": 13.389719
+      }
+    },
+    "U-Mk": {
+      "engineId": "de-DELFI_de:11000:900100516::1",
+      "coordinates": {
+        "lat": 52.51239,
+        "lon": 13.410473
+      }
+    },
+    "U-Mo": {
+      "engineId": "de-DELFI_de:11000:900017104",
+      "coordinates": {
+        "lat": 52.498943,
+        "lon": 13.383256
+      }
+    },
+    "U-Mp": {
+      "engineId": "de-DELFI_de:11000:900019204",
+      "coordinates": {
+        "lat": 52.525978,
+        "lon": 13.305715
+      }
+    },
+    "U-Mr": {
+      "engineId": "de-DELFI_de:11000:900013101",
+      "coordinates": {
+        "lat": 52.50374,
+        "lon": 13.410947
+      }
+    },
+    "U-Ms": {
+      "engineId": "de-DELFI_de:11000:900100537",
+      "coordinates": {
+        "lat": 52.518085,
+        "lon": 13.400394
+      }
+    },
+    "U-Nd": {
+      "engineId": "de-DELFI_de:11000:900026101",
+      "coordinates": {
+        "lat": 52.51641,
+        "lon": 13.25991
+      }
+    },
+    "U-Nm": {
+      "engineId": "de-DELFI_de:11000:900056102",
+      "coordinates": {
+        "lat": 52.499645,
+        "lon": 13.353825
+      }
+    },
+    "U-Np": {
+      "engineId": "de-DELFI_de:11000:900009201",
+      "coordinates": {
+        "lat": 52.551525,
+        "lon": 13.367365
+      }
+    },
+    "U-Obi": {
+      "engineId": "de-DELFI_de:11000:900022201",
+      "coordinates": {
+        "lat": 52.511826,
+        "lon": 13.30942
+      }
+    },
+    "U-Os": {
+      "engineId": "de-DELFI_de:11000:900051301",
+      "coordinates": {
+        "lat": 52.45042,
+        "lon": 13.26891
+      }
+    },
+    "U-Ot": {
+      "engineId": "de-DELFI_de:11000:900050282",
+      "coordinates": {
+        "lat": 52.450146,
+        "lon": 13.254016
+      }
+    },
+    "U-P": {
+      "engineId": "de-DELFI_000300049001",
+      "coordinates": {
+        "lat": 52.538544,
+        "lon": 13.24791
+      }
+    },
+    "U-PB": {
+      "engineId": "de-DELFI_000300109009",
+      "coordinates": {
+        "lat": 52.57414,
+        "lon": 13.348424
+      }
+    },
+    "U-PL": {
+      "engineId": "de-DELFI_de:11000:900017102",
+      "coordinates": {
+        "lat": 52.48487,
+        "lon": 13.385927
+      }
+    },
+    "U-Pi": {
+      "engineId": "de-DELFI_000300034008",
+      "coordinates": {
+        "lat": 52.44576,
+        "lon": 13.45019
+      }
+    },
+    "U-Po": {
+      "engineId": "de-DELFI_000300127005",
+      "coordinates": {
+        "lat": 52.464115,
+        "lon": 13.297356
+      }
+    },
+    "U-Pr": {
+      "engineId": "de-DELFI_de:11000:900013103",
+      "coordinates": {
+        "lat": 52.498325,
+        "lon": 13.406551
+      }
+    },
+    "U-Ps": {
+      "engineId": "de-DELFI_de:11000:900068101",
+      "coordinates": {
+        "lat": 52.47814,
+        "lon": 13.386725
+      }
+    },
+    "U-RE": {
+      "engineId": "de-DELFI_de:11000:900085203",
+      "coordinates": {
+        "lat": 52.570843,
+        "lon": 13.360635
+      }
+    },
+    "U-RP": {
+      "engineId": "de-DELFI_de:11000:900023101",
+      "coordinates": {
+        "lat": 52.51158,
+        "lon": 13.322581
+      }
+    },
+    "U-RR": {
+      "engineId": "de-DELFI_de:11000:900096410",
+      "coordinates": {
+        "lat": 52.58822,
+        "lon": 13.325568
+      }
+    },
+    "U-RS": {
+      "engineId": "de-DELFI_de:11000:900054101",
+      "coordinates": {
+        "lat": 52.483334,
+        "lon": 13.341989
+      }
+    },
+    "U-RSp": {
+      "engineId": "de-DELFI_de:11000:900029302",
+      "coordinates": {
+        "lat": 52.53564,
+        "lon": 13.199837
+      }
+    },
+    "U-RUE": {
+      "engineId": "de-DELFI_de:11000:900045101",
+      "coordinates": {
+        "lat": 52.47246,
+        "lon": 13.314387
+      }
+    },
+    "U-Ra": {
+      "engineId": "de-DELFI_de:11000:900100045",
+      "coordinates": {
+        "lat": 52.518463,
+        "lon": 13.407061
+      }
+    },
+    "U-Rb": {
+      "engineId": "de-DELFI_de:11000:900011101",
+      "coordinates": {
+        "lat": 52.55667,
+        "lon": 13.341013
+      }
+    },
+    "U-Rd": {
+      "engineId": "de-DELFI_de:11000:900083201",
+      "coordinates": {
+        "lat": 52.415714,
+        "lon": 13.496527
+      }
+    },
+    "U-Ri": {
+      "engineId": "de-DELFI_de:11000:900008102",
+      "coordinates": {
+        "lat": 52.539886,
+        "lon": 13.370382
+      }
+    },
+    "U-Rk": {
+      "engineId": "de-DELFI_de:11000:900078102",
+      "coordinates": {
+        "lat": 52.481148,
+        "lon": 13.434807
+      }
+    },
+    "U-Rl": {
+      "engineId": "de-DELFI_de:11000:900025202",
+      "coordinates": {
+        "lat": 52.525585,
+        "lon": 13.241902
+      }
+    },
+    "U-Rm": {
+      "engineId": "de-DELFI_de:11000:900036101",
+      "coordinates": {
+        "lat": 52.536903,
+        "lon": 13.26287
+      }
+    },
+    "U-Rw": {
+      "engineId": "de-DELFI_de:11000:900022202",
+      "coordinates": {
+        "lat": 52.517155,
+        "lon": 13.307221
+      }
+    },
+    "U-S": {
+      "engineId": "de-DELFI_de:11000:900014102",
+      "coordinates": {
+        "lat": 52.50115,
+        "lon": 13.441791
+      }
+    },
+    "U-ST": {
+      "engineId": "de-DELFI_de:11000:900016201",
+      "coordinates": {
+        "lat": 52.49334,
+        "lon": 13.421912
+      }
+    },
+    "U-Sch": {
+      "engineId": "de-DELFI_de:11000:900086102",
+      "coordinates": {
+        "lat": 52.563484,
+        "lon": 13.327328
+      }
+    },
+    "U-Si": {
+      "engineId": "de-DELFI_de:11000:900100017",
+      "coordinates": {
+        "lat": 52.520317,
+        "lon": 13.421895
+      }
+    },
+    "U-Sie": {
+      "engineId": "de-DELFI_de:11000:900035101",
+      "coordinates": {
+        "lat": 52.537025,
+        "lon": 13.273323
+      }
+    },
+    "U-Sk": {
+      "engineId": "de-DELFI_de:11000:900100501",
+      "coordinates": {
+        "lat": 52.535397,
+        "lon": 13.377033
+      }
+    },
+    "U-Slo": {
+      "engineId": "de-DELFI_de:11000:900062203",
+      "coordinates": {
+        "lat": 52.46118,
+        "lon": 13.324836
+      }
+    },
+    "U-Sno": {
+      "engineId": "de-DELFI_de:11000:900042101",
+      "coordinates": {
+        "lat": 52.496582,
+        "lon": 13.330613
+      }
+    },
+    "U-Sp": {
+      "engineId": "de-DELFI_de:11000:900100013",
+      "coordinates": {
+        "lat": 52.51141,
+        "lon": 13.402031
+      }
+    },
+    "U-Sr": {
+      "engineId": "de-DELFI_de:11000:900120006",
+      "coordinates": {
+        "lat": 52.518024,
+        "lon": 13.432208
+      }
+    },
+    "U-Su": {
+      "engineId": "de-DELFI_de:11000:900016202",
+      "coordinates": {
+        "lat": 52.48922,
+        "lon": 13.407685
+      }
+    },
+    "U-Sz": {
+      "engineId": "de-DELFI_000300080005",
+      "coordinates": {
+        "lat": 52.532253,
+        "lon": 13.412673
+      }
+    },
+    "U-T": {
+      "engineId": "de-DELFI_000300125006",
+      "coordinates": {
+        "lat": 52.450947,
+        "lon": 13.281065
+      }
+    },
+    "U-Th": {
+      "engineId": "de-DELFI_de:11000:900026201",
+      "coordinates": {
+        "lat": 52.509796,
+        "lon": 13.272977
+      }
+    },
+    "U-U": {
+      "engineId": "de-DELFI_de:11000:900023301",
+      "coordinates": {
+        "lat": 52.502743,
+        "lon": 13.326233
+      }
+    },
+    "U-Ull": {
+      "engineId": "de-DELFI_de:11000:900069271",
+      "coordinates": {
+        "lat": 52.45345,
+        "lon": 13.384771
+      }
+    },
+    "U-V": {
+      "engineId": "de-DELFI_de:11000:900055101",
+      "coordinates": {
+        "lat": 52.49617,
+        "lon": 13.343264
+      }
+    },
+    "U-Vo": {
+      "engineId": "de-DELFI_de:11000:900007103",
+      "coordinates": {
+        "lat": 52.54193,
+        "lon": 13.393157
+      }
+    },
+    "U-W": {
+      "engineId": "de-DELFI_de:11000:900100051",
+      "coordinates": {
+        "lat": 52.525375,
+        "lon": 13.405305
+      }
+    },
+    "U-WR": {
+      "engineId": "de-DELFI_de:11000:900120025",
+      "coordinates": {
+        "lat": 52.51685,
+        "lon": 13.443278
+      }
+    },
+    "U-Wd": {
+      "engineId": "de-DELFI_de:11000:900024200::1",
+      "coordinates": {
+        "lat": 52.506752,
+        "lon": 13.306893
+      }
+    },
+    "U-Wk": {
+      "engineId": "de-DELFI_de:11000:900083102",
+      "coordinates": {
+        "lat": 52.423153,
+        "lon": 13.47482
+      }
+    },
+    "U-Wl": {
+      "engineId": "de-DELFI_de:11000:900070101",
+      "coordinates": {
+        "lat": 52.445644,
+        "lon": 13.385744
+      }
+    },
+    "U-Wsg": {
+      "engineId": "de-DELFI_de:11000:900061101",
+      "coordinates": {
+        "lat": 52.464996,
+        "lon": 13.328409
+      }
+    },
+    "U-Wt": {
+      "engineId": "de-DELFI_de:11000:900056101",
+      "coordinates": {
+        "lat": 52.50211,
+        "lon": 13.342561
+      }
+    },
+    "U-Zd": {
+      "engineId": "de-DELFI_de:11000:900083101",
+      "coordinates": {
+        "lat": 52.42303,
+        "lon": 13.484371
+      }
+    },
+    "U-Zi": {
+      "engineId": "de-DELFI_de:11000:900033101",
+      "coordinates": {
+        "lat": 52.53752,
+        "lon": 13.217625
+      }
+    },
+    "UM-Am": {
+      "engineId": "de-DELFI_de:11000:900009101",
+      "coordinates": {
+        "lat": 52.542202,
+        "lon": 13.349534
+      }
+    },
+    "UM-B": {
+      "engineId": "de-DELFI_de:11000:900007110",
+      "coordinates": {
+        "lat": 52.537994,
+        "lon": 13.396231
+      }
+    },
+    "UM-EB": {
+      "engineId": "de-DELFI_de:11000:900110006",
+      "coordinates": {
+        "lat": 52.541084,
+        "lon": 13.41216
+      }
+    },
+    "UM-Ft": {
+      "engineId": "de-DELFI_de:11000:900120008",
+      "coordinates": {
+        "lat": 52.515774,
+        "lon": 13.454085
+      }
+    },
+    "UM-H": {
+      "engineId": "de-DELFI_de:11000:900175007",
+      "coordinates": {
+        "lat": 52.536327,
+        "lon": 13.605323
+      }
+    },
+    "UM-LL": {
+      "engineId": "de-DELFI_de:11000:900175015",
+      "coordinates": {
+        "lat": 52.539135,
+        "lon": 13.619707
+      }
+    },
+    "UM-Lu": {
+      "engineId": "de-DELFI_de:11000:900100016",
+      "coordinates": {
+        "lat": 52.52819,
+        "lon": 13.410405
+      }
+    },
+    "UM-NA": {
+      "engineId": "de-DELFI_de:11000:900100009",
+      "coordinates": {
+        "lat": 52.531254,
+        "lon": 13.382415
+      }
+    },
+    "UM-Ob": {
+      "engineId": "de-DELFI_de:11000:900100019",
+      "coordinates": {
+        "lat": 52.52516,
+        "lon": 13.387587
+      }
+    },
+    "UM-Olu": {
+      "engineId": "de-DELFI_de:11000:900009202",
+      "coordinates": {
+        "lat": 52.557106,
+        "lon": 13.373279
+      }
+    },
+    "UM-Ro": {
+      "engineId": "de-DELFI_de:11000:900100023",
+      "coordinates": {
+        "lat": 52.52978,
+        "lon": 13.401393
+      }
+    },
+    "UM-Tk": {
+      "engineId": "de-DELFI_de:11000:900161002",
+      "coordinates": {
+        "lat": 52.497234,
+        "lon": 13.523626
+      }
+    },
+    "UM-VIN": {
+      "engineId": "de-DELFI_de:11000:900130011",
+      "coordinates": {
+        "lat": 52.559517,
+        "lon": 13.41377
+      }
+    },
+    "M-Af": {
+      "engineId": "de-DELFI_de:11000:900110019",
+      "coordinates": {
+        "lat": 52.528015,
+        "lon": 13.425135
+      }
+    },
+    "M-Als": {
+      "engineId": "de-DELFI_de:11000:900140005",
+      "coordinates": {
+        "lat": 52.54979,
+        "lon": 13.457775
+      }
+    },
+    "M-Fls": {
+      "engineId": "de-DELFI_de:11000:900110018",
+      "coordinates": {
+        "lat": 52.540874,
+        "lon": 13.4058
+      }
+    },
+    "M-Fw": {
+      "engineId": "de-DELFI_de:11000:900150513::1",
+      "coordinates": {
+        "lat": 52.54443,
+        "lon": 13.493233
+      }
+    },
+    "M-Ip": {
+      "engineId": "de-DELFI_de:11000:900100503",
+      "coordinates": {
+        "lat": 52.528767,
+        "lon": 13.376929
+      }
+    },
+    "M-Kl": {
+      "engineId": "de-DELFI_de:11000:900110029::1",
+      "coordinates": {
+        "lat": 52.529213,
+        "lon": 13.462786
+      }
+    },
+    "M-RpP": {
+      "engineId": "de-DELFI_de:11000:900130501",
+      "coordinates": {
+        "lat": 52.56938,
+        "lon": 13.403453
+      }
+    },
+    "M-Tm": {
+      "engineId": "de-DELFI_de:11000:900110515",
+      "coordinates": {
+        "lat": 52.543373,
+        "lon": 13.441436
+      }
+    },
+    "M-Ws": {
+      "engineId": "de-DELFI_de:11000:900152003",
+      "coordinates": {
+        "lat": 52.569176,
+        "lon": 13.525544
+      }
+    },
+    "S-Ber": {
+      "engineId": "de-VBN_000008013470",
+      "coordinates": {
+        "lat": 52.675568,
+        "lon": 13.592641
+      }
+    },
+    "S-Sf": {
+      "engineId": "de-DELFI_de:12061:900260005",
+      "coordinates": {
+        "lat": 52.390907,
+        "lon": 13.513046
+      }
+    },
+    "U-He": {
+      "engineId": "de-DELFI_de:11000:900100032::1",
+      "coordinates": {
+        "lat": 52.508682,
+        "lon": 13.412985
+      }
+    },
+    "U-So": {
+      "engineId": "de-DELFI_de:11000:900022101",
+      "coordinates": {
+        "lat": 52.51097,
+        "lon": 13.297463
+      }
+    },
+    "U-UDU": {
+      "engineId": "de-DELFI_de:11000:900100513",
+      "coordinates": {
+        "lat": 52.516994,
+        "lon": 13.388876
+      }
+    },
+    "M-Ba": {
+      "engineId": "de-DELFI_de:11000:900140519",
+      "coordinates": {
+        "latitude": 52.553673,
+        "longitude": 13.4805827
+      }
+    },
+    "M-Bbs": {
+      "engineId": "de-DELFI_de:11000:900160509::1",
+      "coordinates": {
+        "latitude": 52.526714,
+        "longitude": 13.482571
+      }
+    },
+    "M-Bdm": {
+      "engineId": "de-DELFI_de:11000:900170512::1",
+      "coordinates": {
+        "latitude": 52.53851,
+        "longitude": 13.568765
+      }
+    },
+    "M-Dz": {
+      "engineId": "de-DELFI_de:11000:900110017",
+      "coordinates": {
+        "latitude": 52.53918,
+        "longitude": 13.424244
+      }
+    },
+    "M-Grs": {
+      "engineId": "de-DELFI_de:11000:900120014",
+      "coordinates": {
+        "latitude": 52.512405,
+        "longitude": 13.452397
+      }
+    },
+    "M-Gt": {
+      "engineId": "de-DELFI_de:11000:900100026::1",
+      "coordinates": {
+        "latitude": 52.521046,
+        "longitude": 13.411326
+      }
+    },
+    "M-Gus": {
+      "engineId": "de-DELFI_de:11000:900140017::1",
+      "coordinates": {
+        "latitude": 52.554115,
+        "longitude": 13.43596
+      }
+    },
+    "M-Jas": {
+      "engineId": "de-DELFI_de:11000:900160508::1",
+      "coordinates": {
+        "latitude": 52.534084,
+        "longitude": 13.467872
+      }
+    },
+    "M-Ka": {
+      "engineId": "de-DELFI_de:11000:900020152::1",
+      "coordinates": {
+        "latitude": 52.519356,
+        "longitude": 13.272245
+      }
+    },
+    "M-Mis": {
+      "engineId": "de-DELFI_de:11000:900110503::1",
+      "coordinates": {
+        "latitude": 52.54565,
+        "longitude": 13.413102
+      }
+    },
+    "M-Mos": {
+      "engineId": "de-DELFI_de:11000:900100040",
+      "coordinates": {
+        "latitude": 52.525185,
+        "longitude": 13.419945
+      }
+    },
+    "M-Mw": {
+      "engineId": "de-DELFI_de:11000:900150002",
+      "coordinates": {
+        "latitude": 52.56105,
+        "longitude": 13.500679
+      }
+    },
+    "M-Mz": {
+      "engineId": "de-DELFI_de:11000:900110506",
+      "coordinates": {
+        "latitude": 52.531033,
+        "longitude": 13.419383
+      }
+    },
+    "M-Os": {
+      "engineId": "de-VBB_de:11000:900110013::9",
+      "coordinates": {
+        "latitude": 52.552673,
+        "longitude": 13.426237
+      }
+    },
+    "M-Phs": {
+      "engineId": "de-DELFI_de:11000:900110523",
+      "coordinates": {
+        "latitude": 52.529198,
+        "longitude": 13.44464
+      }
+    },
+    "M-Ps": {
+      "engineId": "de-DELFI_de:11000:900120016",
+      "coordinates": {
+        "latitude": 52.526043,
+        "longitude": 13.446777
+      }
+    },
+    "M-Qes": {
+      "engineId": "de-DELFI_de:11000:900175011",
+      "coordinates": {
+        "latitude": 52.538956,
+        "longitude": 13.604518
+      }
+    },
+    "M-Rbs": {
+      "engineId": "de-DELFI_de:11000:900151004",
+      "coordinates": {
+        "latitude": 52.57028,
+        "longitude": 13.49738
+      }
+    },
+    "M-Rh": {
+      "engineId": "de-DELFI_de:11000:900150005",
+      "coordinates": {
+        "latitude": 52.539555,
+        "longitude": 13.514199
+      }
+    },
+    "M-Sf": {
+      "engineId": "de-DELFI_de:11000:900140518",
+      "coordinates": {
+        "latitude": 52.55331,
+        "longitude": 13.475769
+      }
+    },
+    "M-Ss": {
+      "engineId": "de-DELFI_de:11000:900100515",
+      "coordinates": {
+        "latitude": 52.520023,
+        "longitude": 13.404825
+      }
+    },
+    "M-Ster": {
+      "engineId": "de-DELFI_de:11000:900194007",
+      "coordinates": {
+        "latitude": 52.446655,
+        "longitude": 13.506656
+      }
+    },
+    "M-Wls": {
+      "engineId": "de-DELFI_de:11000:900007105::1",
+      "coordinates": {
+        "latitude": 52.54007,
+        "longitude": 13.401312
+      }
+    },
+    "M-Wns": {
+      "engineId": "de-DELFI_de:11000:900194504",
+      "coordinates": {
+        "latitude": 52.43227,
+        "longitude": 13.53522
+      }
+    },
+    "M-Wse": {
+      "engineId": "de-DELFI_de:11000:900160018",
+      "coordinates": {
+        "latitude": 52.532055,
+        "longitude": 13.476714
+      }
+    },
+    "M-Zos": {
+      "engineId": "de-DELFI_de:11000:900175513",
+      "coordinates": {
+        "latitude": 52.543793,
+        "longitude": 13.599196
+      }
+    },
+    "S-BER": {
+      "engineId": "de-DELFI_de:12061:900260009",
+      "coordinates": {
+        "latitude": 52.364605,
+        "longitude": 13.509874
+      }
+    },
+    "S-Blf": {
+      "engineId": "de-DELFI_de:12072:900245027",
+      "coordinates": {
+        "latitude": 52.337627,
+        "longitude": 13.415908
+      }
+    },
+    "S-Er": {
+      "engineId": "de-DELFI_de:12067:900310004",
+      "coordinates": {
+        "latitude": 52.426956,
+        "longitude": 13.752661
+      }
+    },
+    "S-JLB": {
+      "engineId": "de-DELFI_de:11000:900057104",
+      "coordinates": {
+        "latitude": 52.486263,
+        "longitude": 13.360775
+      }
+    },
+    "U-Beo": {
+      "engineId": "de-DELFI_de:11000:900044201",
+      "coordinates": {
+        "latitude": 52.487045,
+        "longitude": 13.331355
+      }
+    },
+    "U-KM": {
+      "engineId": "de-DELFI_de:11000:900078103",
+      "coordinates": {
+        "latitude": 52.47643,
+        "longitude": 13.439805
+      }
+    },
+    "U-Ka": {
+      "engineId": "de-DELFI_de:11000:900068302",
+      "coordinates": {
+        "latitude": 52.46051,
+        "longitude": 13.384905
+      }
+    },
+    "U-Pks": {
+      "engineId": "de-DELFI_de:11000:900009203",
+      "coordinates": {
+        "latitude": 52.55228,
+        "longitude": 13.381437
+      }
+    },
+    "U-Sa": {
+      "engineId": "de-DELFI_de:11000:900120009",
+      "coordinates": {
+        "latitude": 52.514664,
+        "longitude": 13.465347
+      }
+    },
+    "UM-Se": {
+      "engineId": "de-DELFI_de:11000:900009103",
+      "coordinates": {
+        "latitude": 52.55047,
+        "longitude": 13.351969
+      }
+    },
+    "UM-Tm": {
+      "engineId": "de-DELFI_de:11000:900003104",
+      "coordinates": {
+        "latitude": 52.525936,
+        "longitude": 13.341417
+      }
+    }
+  },
+  "unmatched": {}
 }
