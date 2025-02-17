@@ -108,13 +108,45 @@ interface RouteRequest {
 
 const app = new Hono()
 
-// Store the context
 let serverContext: ServerContext = {
     stationsFreiFahren: {},
     stationsMap: {},
     currentRisk: {
         segments_risk: {},
     },
+}
+
+function calculateLegRisk(leg: Leg, riskData: RiskData): number {
+    // Skip walking legs
+    if (leg.mode === 'WALK') return 0
+
+    const line = leg.routeShortName
+    if (!line) return 0
+
+    // Get station IDs from the engines format
+    const fromId = leg.from.stopId.split(':').pop() || ''
+    const toId = leg.to.stopId.split(':').pop() || ''
+
+    // Try both directions of the segment
+    const forwardKey = `${line}.${fromId}:${toId}`
+    const reverseKey = `${line}.${toId}:${fromId}`
+
+    const segmentRisk = riskData.segments_risk[forwardKey] || riskData.segments_risk[reverseKey]
+    return segmentRisk?.risk || 0
+}
+
+function calculateItineraryRisk(itinerary: Itinerary, riskData: RiskData): number {
+    let totalRisk = 0
+    let transitLegs = 0
+
+    for (const leg of itinerary.legs) {
+        const risk = calculateLegRisk(leg, riskData)
+        totalRisk += risk
+        transitLegs++
+    }
+
+    // Return average risk across transit legs
+    return transitLegs > 0 ? totalRisk / transitLegs : 0 // Question: Average or sum?
 }
 
 app.post('/route', async (c) => {
@@ -143,7 +175,7 @@ app.post('/route', async (c) => {
         const currentTime = new Date().toISOString()
 
         // Construct the URL with query parameters
-        const url = new URL('https://api.transitous.org/api/v1/plan')
+        const url = new URL(process.env.ENGINE_URL + '/plan')
         url.searchParams.set('time', currentTime)
         url.searchParams.set('fromPlace', startStationId)
         url.searchParams.set('toPlace', endStationId)
@@ -169,10 +201,28 @@ app.post('/route', async (c) => {
         }
 
         const routeData: RouteResponse = await response.json()
-        // dump the routeData to a file
-        writeFileSync('routeData.json', JSON.stringify(routeData, null, 2))
 
-        return c.json(routeData)
+        // Calculate risk for each itinerary and add it to the response
+        const itinerariesWithRisk = routeData.itineraries.map((itinerary) => ({
+            ...itinerary,
+            calculated_risk: calculateItineraryRisk(itinerary, serverContext.currentRisk),
+        }))
+
+        // Sort itineraries by risk (lowest first)
+        // Todo: Store lowest risk seperate and keep the order from the engine
+        const sortedItineraries = itinerariesWithRisk.sort(
+            (a, b) => (a.calculated_risk || 0) - (b.calculated_risk || 0)
+        )
+
+        const enrichedResponse = {
+            ...routeData,
+            itineraries: sortedItineraries,
+        }
+
+        // dump the routeData to a file for debugging
+        writeFileSync('routeData.json', JSON.stringify(enrichedResponse, null, 2))
+
+        return c.json(enrichedResponse)
     } catch (error) {
         console.error('Error processing route request:', error)
         return c.json(
