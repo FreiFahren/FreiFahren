@@ -13,6 +13,88 @@ interface RiskData {
     }
 }
 
+interface Position {
+    name: string
+    stopId: string
+    lat: number
+    lon: number
+    level: number
+    vertexType: string
+    departure?: string
+    scheduledDeparture?: string
+    arrival?: string
+    scheduledArrival?: string
+    scheduledTrack?: string
+    track?: string
+}
+
+interface LegGeometry {
+    points: string
+    length: number
+}
+
+interface Leg {
+    mode: 'WALK' | 'SUBWAY' | 'TRAM' | 'BUS' | 'RAIL'
+    from: Position
+    to: Position
+    duration: number
+    startTime: string
+    endTime: string
+    scheduledStartTime: string
+    scheduledEndTime: string
+    realTime: boolean
+    headsign?: string
+    routeColor?: string
+    routeTextColor?: string
+    agencyName?: string
+    agencyUrl?: string
+    agencyId?: string
+    tripId?: string
+    routeShortName?: string
+    source?: string
+    intermediateStops?: Position[]
+    legGeometry: LegGeometry
+}
+
+interface DebugOutput {
+    direct: number
+    execute_time: number
+    fastest_direct: number
+    fp_update_prevented_by_lower_bound: number
+    interval_extensions: number
+    lb_time: number
+    n_dest_offsets: number
+    n_earliest_arrival_updated_by_footpath: number
+    n_earliest_arrival_updated_by_route: number
+    n_earliest_trip_calls: number
+    n_footpaths_visited: number
+    n_routes_visited: number
+    n_routing_time: number
+    n_start_offsets: number
+    n_td_dest_offsets: number
+    n_td_start_offsets: number
+    query_preparation: number
+    route_update_prevented_by_lower_bound: number
+}
+
+interface Itinerary {
+    duration: number
+    startTime: string
+    endTime: string
+    transfers: number
+    legs: Leg[]
+    calculated_risk?: number
+}
+
+interface RouteResponse {
+    requestParameters: Record<string, unknown>
+    debugOutput: DebugOutput
+    from: Position
+    to: Position
+    direct: any[]
+    itineraries: Itinerary[]
+}
+
 type ServerContext = {
     stationsFreiFahren: StationList
     stationsMap: Record<string, string>
@@ -86,7 +168,7 @@ app.post('/route', async (c) => {
             )
         }
 
-        const routeData = await response.json()
+        const routeData: RouteResponse = await response.json()
         // dump the routeData to a file
         writeFileSync('routeData.json', JSON.stringify(routeData, null, 2))
 
