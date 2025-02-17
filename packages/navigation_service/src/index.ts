@@ -13,12 +13,13 @@ export interface StationProperty {
 }
 
 const getStationsFreiFahren = async () => {
+    console.log('The backend url is', process.env.BACKEND_URL)
     const response = await fetch(`${process.env.BACKEND_URL}/v0/stations`)
     return response.json()
 }
 
 const getStationsMap = async () => {
-    const filePath = join(__dirname, 'stationsMap.json')
+    const filePath = join(__dirname, '../stationsMap.prod.json')
     const fileContent = await readFile(filePath, 'utf-8')
     return JSON.parse(fileContent)
 }
