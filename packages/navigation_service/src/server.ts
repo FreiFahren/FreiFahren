@@ -86,6 +86,13 @@ interface Itinerary {
     calculated_risk?: number
 }
 
+interface PerformanceMetrics {
+    engineResponseTimeMs: number
+    riskCalculationTimeMs: number
+    responseSizeMb: number
+    totalProcessingTimeMs: number
+}
+
 interface RouteResponse {
     requestParameters: Record<string, unknown>
     debugOutput: DebugOutput
@@ -93,6 +100,7 @@ interface RouteResponse {
     to: Position
     direct: any[]
     itineraries: Itinerary[]
+    performance?: PerformanceMetrics
 }
 
 type ServerContext = {
@@ -151,6 +159,7 @@ function calculateItineraryRisk(itinerary: Itinerary, riskData: RiskData): numbe
 
 app.post('/route', async (c) => {
     try {
+        const totalStartTime = Bun.nanoseconds()
         const body = await c.req.json<RouteRequest>()
         const { startStation, endStation } = body
 
@@ -187,8 +196,11 @@ app.post('/route', async (c) => {
         url.searchParams.set('directModes', 'WALK')
         url.searchParams.set('requireBikeTransport', 'false')
 
-        // Make the request to the engine
+        // Measure engine response time
+        const engineStartTime = Bun.nanoseconds()
         const response = await fetch(url.toString())
+        const engineEndTime = Bun.nanoseconds()
+        const engineResponseTime = (engineEndTime - engineStartTime) / 1e6 // Convert to milliseconds
 
         if (!response.ok) {
             return c.json(
@@ -201,18 +213,31 @@ app.post('/route', async (c) => {
         }
 
         const routeData: RouteResponse = await response.json()
+        const responseSize = new TextEncoder().encode(JSON.stringify(routeData)).length
+        const responseSizeMB = responseSize / (1024 * 1024) // Convert bytes to MB
 
-        // Calculate risk for each itinerary and add it to the response
+        // Measure risk calculation time
+        const riskStartTime = Bun.nanoseconds()
         const itinerariesWithRisk = routeData.itineraries.map((itinerary) => ({
             ...itinerary,
             calculated_risk: calculateItineraryRisk(itinerary, serverContext.currentRisk),
         }))
 
-        // Sort itineraries by risk (lowest first)
-        // Todo: Store lowest risk seperate and keep the order from the engine
         const sortedItineraries = itinerariesWithRisk.sort(
             (a, b) => (a.calculated_risk || 0) - (b.calculated_risk || 0)
         )
+        const riskEndTime = Bun.nanoseconds()
+        const riskCalculationTime = (riskEndTime - riskStartTime) / 1e6 // Convert to milliseconds
+
+        const totalEndTime = Bun.nanoseconds()
+        const totalProcessingTime = (totalEndTime - totalStartTime) / 1e6 // Convert to milliseconds
+
+        const performanceMetrics: PerformanceMetrics = {
+            engineResponseTimeMs: engineResponseTime,
+            riskCalculationTimeMs: riskCalculationTime,
+            responseSizeMb: Number(responseSizeMB.toFixed(3)),
+            totalProcessingTimeMs: totalProcessingTime,
+        }
 
         const enrichedResponse = {
             ...routeData,
@@ -221,6 +246,15 @@ app.post('/route', async (c) => {
 
         // dump the routeData to a file for debugging
         writeFileSync('routeData.json', JSON.stringify(enrichedResponse, null, 2))
+
+        console.log('Performance Metrics:', {
+            ...performanceMetrics,
+            timestamp: new Date().toISOString(),
+            request: {
+                from: startStation,
+                to: endStation,
+            },
+        })
 
         return c.json(enrichedResponse)
     } catch (error) {
