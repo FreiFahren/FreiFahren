@@ -24,15 +24,22 @@ const getStationsMap = async () => {
     return JSON.parse(fileContent)
 }
 
+const getCurrentRisk = async () => {
+    const response = await fetch(`${process.env.BACKEND_URL}/v1/risk-prediction/segment-colors`)
+    return response.json()
+}
+
 const init = async () => {
     console.log('Initializing server...')
 
     const stationsFreiFahren = await getStationsFreiFahren()
     const stationsMap = await getStationsMap()
+    const currentRisk = await getCurrentRisk()
 
     server.setContext({
         stationsFreiFahren,
         stationsMap,
+        currentRisk, // Todo: setup a cron job to update the current risk
     })
 }
 

@@ -2,10 +2,21 @@ import { Hono } from 'hono'
 import { StationList } from './index'
 import { writeFileSync } from 'fs'
 
-// Define the type for your context
+interface SegmentRisk {
+    color: string
+    risk: number
+}
+
+interface RiskData {
+    segments_risk: {
+        [key: string]: SegmentRisk
+    }
+}
+
 type ServerContext = {
     stationsFreiFahren: StationList
     stationsMap: Record<string, string>
+    currentRisk: RiskData
 }
 
 interface RouteRequest {
@@ -19,6 +30,9 @@ const app = new Hono()
 let serverContext: ServerContext = {
     stationsFreiFahren: {},
     stationsMap: {},
+    currentRisk: {
+        segments_risk: {},
+    },
 }
 
 app.post('/route', async (c) => {
