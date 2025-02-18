@@ -93,14 +93,23 @@ interface PerformanceMetrics {
     totalProcessingTimeMs: number
 }
 
-interface RouteResponse {
+interface EngineResponse {
     requestParameters: Record<string, unknown>
     debugOutput: DebugOutput
     from: Position
     to: Position
     direct: any[]
     itineraries: Itinerary[]
-    performance?: PerformanceMetrics
+}
+
+interface RouteResponse {
+    requestParameters: Record<string, unknown>
+    debugOutput: DebugOutput
+    from: Position
+    to: Position
+    direct: any[]
+    safestRoute: Itinerary
+    alternativeRoutes: Itinerary[]
 }
 
 type ServerContext = {
@@ -212,20 +221,25 @@ app.post('/route', async (c) => {
             )
         }
 
-        const routeData: RouteResponse = await response.json()
+        const routeData: EngineResponse = await response.json()
         const responseSize = new TextEncoder().encode(JSON.stringify(routeData)).length
         const responseSizeMB = responseSize / (1024 * 1024) // Convert bytes to MB
 
         // Measure risk calculation time
         const riskStartTime = Bun.nanoseconds()
-        const itinerariesWithRisk = routeData.itineraries.map((itinerary) => ({
+        const itinerariesWithRisk = routeData.itineraries.map((itinerary: Itinerary) => ({
             ...itinerary,
             calculated_risk: calculateItineraryRisk(itinerary, serverContext.currentRisk),
         }))
 
-        const sortedItineraries = itinerariesWithRisk.sort(
+        // Find the safest route
+        const safestRoute = [...itinerariesWithRisk].sort(
             (a, b) => (a.calculated_risk || 0) - (b.calculated_risk || 0)
-        )
+        )[0]
+
+        // Filter out the safest route and keep original order for alternatives (limited to 5)
+        const alternativeRoutes = itinerariesWithRisk.filter((route: Itinerary) => route !== safestRoute).slice(0, 4) // Take only 4 alternatives (plus safest route = 5 total)
+
         const riskEndTime = Bun.nanoseconds()
         const riskCalculationTime = (riskEndTime - riskStartTime) / 1e6 // Convert to milliseconds
 
@@ -239,14 +253,7 @@ app.post('/route', async (c) => {
             totalProcessingTimeMs: totalProcessingTime,
         }
 
-        const enrichedResponse = {
-            ...routeData,
-            itineraries: sortedItineraries,
-        }
-
-        // dump the routeData to a file for debugging
-        writeFileSync('routeData.json', JSON.stringify(enrichedResponse, null, 2))
-
+        // Log performance metrics but don't include in response
         console.log('Performance Metrics:', {
             ...performanceMetrics,
             timestamp: new Date().toISOString(),
@@ -255,6 +262,20 @@ app.post('/route', async (c) => {
                 to: endStation,
             },
         })
+
+        // Construct clean response
+        const enrichedResponse: RouteResponse = {
+            requestParameters: routeData.requestParameters,
+            debugOutput: routeData.debugOutput,
+            from: routeData.from,
+            to: routeData.to,
+            direct: routeData.direct,
+            safestRoute,
+            alternativeRoutes,
+        }
+
+        // dump the routeData to a file for debugging
+        writeFileSync('routeData.json', JSON.stringify(enrichedResponse, null, 2))
 
         return c.json(enrichedResponse)
     } catch (error) {
