@@ -1,0 +1,16 @@
+{
+  "name": "navigation_service",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "generate-stations-map": "bun run src/scripts/createStationsMap.ts",
+    "post-process-stations-map": "bun run src/scripts/createStationsMap.ts post-process"
+  },
+  "dependencies": {
+    "hono": "^4.6.20",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node-cron": "^3.0.11"
+  }
+}

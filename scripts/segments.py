@@ -137,11 +137,14 @@ def create_segments(
         segments.append(
             {
                 "geometry": segment,
-                "sid": f"{line_id}-{i+1}",
-                "line": line_id,
-                "line_color": line_color,
-                "from_station_id": start_station["station_id"],
-                "to_station_id": end_station["station_id"],
+                "sid": f"{line_id}.{start_station['station_id']}:{end_station['station_id']}",
+                "line_color": (
+                    "#018A47"
+                    if "S" in line_id
+                    else (
+                        "#BE1414" if "M" in line_id else line_color
+                    )  # avoid giving each line a different color to avoid overwhelming the map
+                ),
             }
         )
 
@@ -199,6 +202,8 @@ def main() -> None:
     out skel qt;
 
     Using the relation id is important to get the line in only one direction.
+
+    When creating the segments it is important to optimize for space efficiency as the json can easily become too large.
     """
     # Read the overpass output GeoJSON
     overpass_gdf = gpd.read_file("export.geojson")
