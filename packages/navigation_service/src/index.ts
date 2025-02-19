@@ -1,6 +1,7 @@
 import server from './server'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
+import * as cron from 'node-cron'
 
 export type StationList = Record<string, StationProperty>
 export interface StationProperty {
@@ -39,7 +40,21 @@ const init = async () => {
     server.setContext({
         stationsFreiFahren,
         stationsMap,
-        currentRisk, // Todo: setup a cron job to update the current risk
+        currentRisk,
+    })
+
+    // fetch current risk every minute
+    cron.schedule('* * * * *', async () => {
+        try {
+            const updatedRisk = await getCurrentRisk()
+            server.setContext({
+                stationsFreiFahren,
+                stationsMap,
+                currentRisk: updatedRisk,
+            })
+        } catch (error) {
+            console.error('Failed to update current risk data:', error)
+        }
     })
 }
 
