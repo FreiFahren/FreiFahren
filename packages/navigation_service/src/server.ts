@@ -86,13 +86,6 @@ interface Itinerary {
     calculated_risk?: number
 }
 
-interface PerformanceMetrics {
-    engineResponseTimeMs: number
-    riskCalculationTimeMs: number
-    responseSizeMb: number
-    totalProcessingTimeMs: number
-}
-
 interface EngineResponse {
     requestParameters: Record<string, unknown>
     debugOutput: DebugOutput
@@ -166,9 +159,8 @@ function calculateItineraryRisk(itinerary: Itinerary, riskData: RiskData): numbe
     return transitLegs > 0 ? totalRisk / transitLegs : 0 // Question: Average or sum?
 }
 
-app.post('/route', async (c) => {
+app.post('/routes', async (c) => {
     try {
-        const totalStartTime = Bun.nanoseconds()
         const body = await c.req.json<RouteRequest>()
         const { startStation, endStation } = body
 
@@ -205,11 +197,7 @@ app.post('/route', async (c) => {
         url.searchParams.set('directModes', 'WALK')
         url.searchParams.set('requireBikeTransport', 'false')
 
-        // Measure engine response time
-        const engineStartTime = Bun.nanoseconds()
         const response = await fetch(url.toString())
-        const engineEndTime = Bun.nanoseconds()
-        const engineResponseTime = (engineEndTime - engineStartTime) / 1e6 // Convert to milliseconds
 
         if (!response.ok) {
             return c.json(
@@ -222,11 +210,7 @@ app.post('/route', async (c) => {
         }
 
         const routeData: EngineResponse = await response.json()
-        const responseSize = new TextEncoder().encode(JSON.stringify(routeData)).length
-        const responseSizeMB = responseSize / (1024 * 1024) // Convert bytes to MB
 
-        // Measure risk calculation time
-        const riskStartTime = Bun.nanoseconds()
         const itinerariesWithRisk = routeData.itineraries.map((itinerary: Itinerary) => ({
             ...itinerary,
             calculated_risk: calculateItineraryRisk(itinerary, serverContext.currentRisk),
@@ -240,29 +224,6 @@ app.post('/route', async (c) => {
         // Filter out the safest route and keep original order for alternatives (limited to 5)
         const alternativeRoutes = itinerariesWithRisk.filter((route: Itinerary) => route !== safestRoute).slice(0, 4) // Take only 4 alternatives (plus safest route = 5 total)
 
-        const riskEndTime = Bun.nanoseconds()
-        const riskCalculationTime = (riskEndTime - riskStartTime) / 1e6 // Convert to milliseconds
-
-        const totalEndTime = Bun.nanoseconds()
-        const totalProcessingTime = (totalEndTime - totalStartTime) / 1e6 // Convert to milliseconds
-
-        const performanceMetrics: PerformanceMetrics = {
-            engineResponseTimeMs: engineResponseTime,
-            riskCalculationTimeMs: riskCalculationTime,
-            responseSizeMb: Number(responseSizeMB.toFixed(3)),
-            totalProcessingTimeMs: totalProcessingTime,
-        }
-
-        // Log performance metrics but don't include in response
-        console.log('Performance Metrics:', {
-            ...performanceMetrics,
-            timestamp: new Date().toISOString(),
-            request: {
-                from: startStation,
-                to: endStation,
-            },
-        })
-
         // Construct clean response
         const enrichedResponse: RouteResponse = {
             requestParameters: routeData.requestParameters,
@@ -274,7 +235,7 @@ app.post('/route', async (c) => {
             alternativeRoutes,
         }
 
-        // dump the routeData to a file for debugging
+        // dump the routeData to a file for debugging // Todo: remove when done
         writeFileSync('routeData.json', JSON.stringify(enrichedResponse, null, 2))
 
         return c.json(enrichedResponse)
