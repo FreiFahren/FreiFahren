@@ -177,6 +177,8 @@ func SetupServer() *echo.Echo {
 
 	v0.POST("/feedback", feedback.PostFeedback)
 
+	v0.GET("/routes", redirectToNavigationService)
+
 	// V1 Routes
 	v1.GET("/risk-prediction/segment-colors", predictionV1.GetRiskSegments)
 
@@ -200,5 +202,12 @@ func SetupServer() *echo.Echo {
 
 	latest.POST("/feedback", feedback.PostFeedback)
 
+	latest.GET("/routes", redirectToNavigationService)
+
 	return e
+}
+
+// this will be replaced with a reverse proxy in the future
+func redirectToNavigationService(c echo.Context) error {
+	return c.Redirect(http.StatusTemporaryRedirect, "http://localhost:7070/routes")
 }
