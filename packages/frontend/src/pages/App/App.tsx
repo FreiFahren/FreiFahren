@@ -21,6 +21,7 @@ import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
 import { highlightElement } from '../../utils/uiUtils'
+import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
 
 type AppUIState = {
     isReportFormOpen: boolean
@@ -213,6 +214,8 @@ const App = () => {
         }
     }, [])
 
+    const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false)
+
     return (
         <div className="App">
             {appMounted && shouldShowLegalDisclaimer() ? (
@@ -272,6 +275,15 @@ const App = () => {
                     </div>
                 </div>
             ) : null}
+            {isNavigationModalOpen ? (
+                <>
+                    <NavigationModal className="open center-animation" />
+                    <Backdrop handleClick={() => setIsNavigationModalOpen(false)} />
+                </>
+            ) : null}
+            <button className="navigation-button small-button" onClick={() => setIsNavigationModalOpen(true)}>
+                <img src={`${process.env.PUBLIC_URL}/icons/route-svgrepo-com.svg`} alt="Navigation" />
+            </button>
             <ReportButton
                 handleOpenReportModal={() =>
                     setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })
