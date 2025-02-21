@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { LinesList, Report, RiskData, StationList } from 'src/utils/types'
 
 import { useSkeleton } from '../components/Miscellaneous/LoadingPlaceholder/Skeleton'
-import { getNearestStation } from '../utils/mapUtils'
+import { getClosestStations } from '../hooks/getClosestStations'
 import { CACHE_KEYS } from './queryClient'
 
 const fetchNewReports = async (
@@ -328,12 +328,12 @@ export const useStationDistance = (
             ) {
                 return null
             }
-            const userStation = getNearestStation(allStations, userLat, userLng)
-            if (userStation && userStation.key !== '') {
+            const userStation = getClosestStations(1, allStations, { lat: userLat, lng: userLng })[0]
+            if (userStation) {
                 const response = await fetch(
                     `${process.env.REACT_APP_API_URL}/v0/transit/distance?inspectorStationId=${encodeURIComponent(
                         stationId
-                    )}&userStationId=${encodeURIComponent(userStation.key)}`
+                    )}&userStationId=${encodeURIComponent(Object.keys(userStation)[0])}`
                 )
                 const data = await response.json()
                 if (typeof data === 'number') return data

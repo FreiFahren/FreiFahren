@@ -216,5 +216,10 @@
         "title": "Danke für dein Feedback!",
         "description": "Möchtest du uns in unserer Telegram-Feedback-Gruppe beitreten, um uns weiterhin zu helfen? Dein Feedback kann so direkt von den Entwicklern der App gelesen werden.",
         "joinGroup": "Gruppe beitreten"
+    },
+    "NavigationModal": {
+        "title": "Routenplaner",
+        "startLocation": "Startstation auswählen",
+        "endLocation": "Zielstation auswählen"
     }
 }

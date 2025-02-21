@@ -12,11 +12,11 @@ import { calculateDistance } from '../../../utils/mapUtils'
 import { LinesList, Report, StationList, StationProperty } from '../../../utils/types'
 import { createWarningSpan, getLineColor, highlightElement } from '../../../utils/uiUtils'
 import { Line } from '../../Miscellaneous/Line/Line'
-import { AutocompleteInputForm } from '../AutocompleteInputForm/AutocompleteInputForm'
+import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
 import { FeedbackForm } from '../FeedbackForm/FeedbackForm'
 import { PrivacyCheckbox } from '../PrivacyCheckbox/PrivacyCheckbox'
 import { SelectField } from '../SelectField/SelectField'
-
+import { getClosestStations } from '../../../hooks/getClosestStations'
 const getCSSVariable = (variable: string): number => {
     const value = getComputedStyle(document.documentElement).getPropertyValue(variable)
 
@@ -395,26 +395,6 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
         }
     }
 
-    const getClosestStationsToUser = (
-        numberOfStations: number,
-        stationsList: StationList,
-        userPositionTemp: { lat: number; lng: number }
-    ) => {
-        const distances = Object.entries(stationsList).map(([station, stationData]) => {
-            const distance = calculateDistance(
-                userPositionTemp.lat,
-                userPositionTemp.lng,
-                stationData.coordinates.latitude,
-                stationData.coordinates.longitude
-            )
-
-            return { station, stationData, distance }
-        })
-
-        distances.sort((a, b) => a.distance - b.distance)
-        return distances.slice(0, numberOfStations).map((entry) => ({ [entry.station]: entry.stationData }))
-    }
-
     interface LineChildProps {
         line: string
     }
@@ -484,7 +464,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                         items={possibleStations}
                         onSelect={handleStationSelect}
                         value={currentStation}
-                        getDisplayValue={(station) => station.name}
+                        getDisplayValue={(station: StationProperty) => station.name}
                         placeholder={t('ReportForm.searchPlaceholder')}
                         label={t('ReportForm.station')}
                         required
@@ -492,7 +472,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                         listHeight={stationListHeight}
                         highlightElements={
                             userPosition
-                                ? getClosestStationsToUser(3, possibleStations, userPosition).reduce(
+                                ? getClosestStations(3, possibleStations, userPosition).reduce(
                                       (acc, station) => ({ ...acc, ...station }),
                                       {}
                                   )

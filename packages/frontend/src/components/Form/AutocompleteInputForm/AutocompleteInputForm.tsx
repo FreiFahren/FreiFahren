@@ -1,6 +1,6 @@
 import './AutocompleteInputForm.css'
 
-import React, { useCallback,useRef, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 
 import { SelectField } from '../SelectField/SelectField'
 
@@ -9,8 +9,8 @@ interface AutocompleteInputFormProps<T> {
     onSelect: (key: string | null) => void
     value: string | null
     getDisplayValue: (item: T) => string
-    placeholder: string
-    label: string
+    placeholder?: string
+    label?: string
     required?: boolean
     setSearchUsed?: (searchUsed: boolean) => void
     listHeight?: number | null
@@ -102,36 +102,40 @@ const AutocompleteInputForm = <T,>({
         [onSelect, elementIsSelected, setHighlightedElementSelected]
     )
 
-    const getHighlightedElementValue = (child: React.ReactElement): string => 
+    const getHighlightedElementValue = (child: React.ReactElement): string =>
         (child.props as HighlightedElementProps).children.props.children
 
     return (
         <section>
             <div className="align-child-on-line" id="searchable-select-div">
-                <h2>
-                    {label} {required ? <span className="red-highlight">*</span> : null}
-                </h2>
-                <input
-                    className={`search-input ${showSearchBox ? 'expanded' : ''}`}
-                    type="text"
-                    placeholder={placeholder}
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    ref={searchInputRef}
-                />
-
-                {/* who the fuck made an img to button? fix later */}
-                {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, react/jsx-handler-names, jsx-a11y/no-noninteractive-element-interactions */}
-                <img src={SEARCH_ICON} onClick={toggleSearchBox} alt="Search icon" />
+                {label ? (
+                    <h2>
+                        {label} {required ? <span className="red-highlight">*</span> : null}
+                    </h2>
+                ) : undefined}
+                {placeholder ? (
+                    <>
+                        <input
+                            className={`search-input ${showSearchBox ? 'expanded' : ''}`}
+                            type="text"
+                            placeholder={placeholder}
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
+                            ref={searchInputRef}
+                        />
+                        <img src={SEARCH_ICON} onClick={toggleSearchBox} alt="Search icon" />
+                    </>
+                ) : undefined}
             </div>
             <div
                 className="list-container"
-                style={(listHeight !== null) ? { height: `${listHeight}px`, maxHeight: '100%' } : undefined}
+                style={listHeight !== null ? { height: `${listHeight}px`, maxHeight: '100%' } : undefined}
             >
-                {highlightElements && !elementIsSelected && !showSearchBox ? <>
+                {highlightElements && !elementIsSelected && !showSearchBox ? (
+                    <>
                         <SelectField
                             onSelect={(selectedValue) => handleSelect(selectedValue, true)}
-                            value={(value !== null) ? getDisplayValue(items[value]) : ''}
+                            value={value !== null ? getDisplayValue(items[value]) : ''}
                             containerClassName="align-child-column highlight-list-container"
                             getValue={getHighlightedElementValue}
                         >
@@ -142,10 +146,11 @@ const AutocompleteInputForm = <T,>({
                             ))}
                         </SelectField>
                         <hr />
-                    </> : null}
+                    </>
+                ) : null}
                 <SelectField
                     onSelect={handleSelect}
-                    value={(value !== null) ? getDisplayValue(items[value]) : ''}
+                    value={value !== null ? getDisplayValue(items[value]) : ''}
                     containerClassName="align-child-column"
                     getValue={getHighlightedElementValue}
                 >
@@ -160,4 +165,4 @@ const AutocompleteInputForm = <T,>({
     )
 }
 
-export { AutocompleteInputForm }
+export default AutocompleteInputForm

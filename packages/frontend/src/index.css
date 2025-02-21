@@ -93,6 +93,7 @@ input[type='text'] {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
+    font-size: 16px; /* Min font size to avoid zoom on mobile */
 }
 
 code {
@@ -250,7 +251,7 @@ textarea::placeholder {
     opacity: 0;
     border: var(--border-default);
     text-align: left;
-    max-height: 75vh;
+    max-height: 70vh;
 }
 
 .container {

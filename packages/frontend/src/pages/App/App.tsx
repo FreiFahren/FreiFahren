@@ -214,7 +214,12 @@ const App = () => {
         }
     }, [])
 
+    // todo: set to false for production
     const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false)
+
+    useEffect(() => {
+        setIsNavigationModalOpen(true)
+    }, [])
 
     return (
         <div className="App">
