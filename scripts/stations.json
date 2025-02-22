@@ -1,0 +1,5191 @@
+{
+    "M-AFf": {
+        "name": "Alt-Friedrichsfelde",
+        "coordinates": {
+            "latitude": 52.510358261921205,
+            "longitude": 13.519004148280676
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-AKf": {
+        "name": "Alfred-Kowalke-Straße",
+        "coordinates": {
+            "latitude": 52.5047159,
+            "longitude": 13.5202011
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-AM": {
+        "name": "Alt-Moabit",
+        "coordinates": {
+            "latitude": 52.5236109,
+            "longitude": 13.3575777
+        },
+        "lines": [
+            "M10"
+        ]
+    },
+    "M-AS": {
+        "name": "Am Steinberg",
+        "coordinates": {
+            "latitude": 52.5566797,
+            "longitude": 13.4299757
+        },
+        "lines": [
+            "M2"
+        ]
+    },
+    "M-Adw": {
+        "name": "Adersleber Weg",
+        "coordinates": {
+            "latitude": 52.53790864020656,
+            "longitude": 13.560225298247449
+        },
+        "lines": [
+            "M8"
+        ]
+    },
+    "M-AeS": {
+        "name": "Anna-Ebermann-Straße",
+        "coordinates": {
+            "latitude": 52.5551935,
+            "longitude": 13.5124151
+        },
+        "lines": [
+            "M5",
+            "M17"
+        ]
+    },
+    "M-Af": {
+        "name": "Am Friedrichshain",
+        "coordinates": {
+            "latitude": 52.5285131,
+            "longitude": 13.424138
+        },
+        "lines": [
+            "M4"
+        ]
+    },
+    "M-Ah": {
+        "name": "Alt-Hohenschönhausen",
+        "coordinates": {
+            "latitude": 52.5488033,
+            "longitude": 13.5051916
+        },
+        "lines": [
+            "M5"
+        ]
+    },
+    "M-AhS": {
+        "name": "Alte Hellersdorfer Straße",
+        "coordinates": {
+            "latitude": 52.5447344,
+            "longitude": 13.5927651
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Ahs": {
+        "name": "Ahrenshooper Straße",
+        "coordinates": {
+            "latitude": 52.5661358,
+            "longitude": 13.5020039
+        },
+        "lines": [
+            "M5"
+        ]
+    },
+    "M-Aks": {
+        "name": "Allee der Kosmonauten",
+        "coordinates": {
+            "latitude": 52.5258353,
+            "longitude": 13.5211177
+        },
+        "lines": [
+            "M8",
+            "M17"
+        ]
+    },
+    "M-Als": {
+        "name": "Albertinenstraße",
+        "coordinates": {
+            "latitude": 52.5498181,
+            "longitude": 13.4580138
+        },
+        "lines": [
+            "M4",
+            "M13"
+        ]
+    },
+    "M-Am": {
+        "name": "Alt-Marzahn",
+        "coordinates": {
+            "latitude": 52.542096,
+            "longitude": 13.5638356
+        },
+        "lines": [
+            "M8"
+        ]
+    },
+    "M-Ap": {
+        "name": "Antonplatz",
+        "coordinates": {
+            "latitude": 52.5484803,
+            "longitude": 13.4517416
+        },
+        "lines": [
+            "M4",
+            "M13"
+        ]
+    },
+    "M-Are": {
+        "name": "Arendsweg",
+        "coordinates": {
+            "latitude": 52.5349408,
+            "longitude": 13.5066484
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Arns": {
+        "name": "Arnswalder Platz",
+        "coordinates": {
+            "latitude": 52.534121783519446,
+            "longitude": 13.437427260823652
+        },
+        "lines": [
+            "M10"
+        ]
+    },
+    "M-Ars": {
+        "name": "Arnimstraße",
+        "coordinates": {
+            "latitude": 52.5587048,
+            "longitude": 13.5145413
+        },
+        "lines": [
+            "M5",
+            "M17"
+        ]
+    },
+    "M-Asp": {
+        "name": "Anton-Saefkow-Platz",
+        "coordinates": {
+            "latitude": 52.5280674,
+            "longitude": 13.4693612
+        },
+        "lines": [
+            "M8"
+        ]
+    },
+    "M-Ats": {
+        "name": "Altenhofer Straße",
+        "coordinates": {
+            "latitude": 52.5351095,
+            "longitude": 13.4796256
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Aw": {
+        "name": "Am Wasserturm",
+        "coordinates": {
+            "latitude": 52.5653634,
+            "longitude": 13.4360911
+        },
+        "lines": [
+            "M2"
+        ]
+    },
+    "M-Ba": {
+        "name": "Buschallee",
+        "coordinates": {
+            "latitude": 52.5537608,
+            "longitude": 13.4805827
+        },
+        "lines": [
+            "M4"
+        ]
+    },
+    "M-Bbs": {
+        "name": "Bernhard-Bästlein-Straße",
+        "coordinates": {
+            "latitude": 52.5267637,
+            "longitude": 13.4821953
+        },
+        "lines": [
+            "M8"
+        ]
+    },
+    "M-Bdm": {
+        "name": "Blummberger Damm",
+        "coordinates": {
+            "latitude": 52.54591394958588,
+            "longitude": 13.570784633552911
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-BhIs": {
+        "name": "Betriebshof Indira-Ghandi-Straße",
+        "coordinates": {
+            "latitude": 52.54436180051814,
+            "longitude": 13.468635833918947
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Bhm": {
+        "name": "Betriebshof Marzahn",
+        "coordinates": {
+            "latitude": 52.5490131,
+            "longitude": 13.5826397
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Bhs": {
+        "name": "Behaimstraße",
+        "coordinates": {
+            "latitude": 52.5497421,
+            "longitude": 13.4469259
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Bjs": {
+        "name": "Björnsonstraße",
+        "coordinates": {
+            "latitude": 52.5544232,
+            "longitude": 13.4030585
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Bns": {
+        "name": "Benno-König-Straße",
+        "coordinates": {
+            "latitude": 52.4427282,
+            "longitude": 13.5197601
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Bp": {
+        "name": "Barnimplatz",
+        "coordinates": {
+            "latitude": 52.5682711,
+            "longitude": 13.5747394
+        },
+        "lines": [
+            "M8"
+        ]
+    },
+    "M-BpP": {
+        "name": "Bürgerpark Pankow",
+        "coordinates": {
+            "latitude": 52.5714873,
+            "longitude": 13.3984217
+        },
+        "lines": [
+            "M1"
+        ]
+    },
+    "M-Bpm": {
+        "name": "Bürgerpark Marzahn",
+        "coordinates": {
+            "latitude": 52.5502042,
+            "longitude": 13.5611133
+        },
+        "lines": [
+            "M8"
+        ]
+    },
+    "M-Bps": {
+        "name": "Boschpoler Straße",
+        "coordinates": {
+            "latitude": 52.5288185,
+            "longitude": 13.5490456
+        },
+        "lines": [
+            "M8"
+        ]
+    },
+    "M-Bpz": {
+        "name": "Bersarinplatz",
+        "coordinates": {
+            "latitude": 52.5196343,
+            "longitude": 13.4522943
+        },
+        "lines": [
+            "M10"
+        ]
+    },
+    "M-Br": {
+        "name": "Brückenstraße",
+        "coordinates": {
+            "latitude": 52.4586564,
+            "longitude": 13.5121185
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Bs": {
+        "name": "Büschingstraße",
+        "coordinates": {
+            "latitude": 52.5231179,
+            "longitude": 13.4274985
+        },
+        "lines": [
+            "M5",
+            "M6",
+            "M8"
+        ]
+    },
+    "M-Bsa": {
+        "name": "Stadion Buschallee",
+        "coordinates": {
+            "latitude": 52.556851343596875,
+            "longitude": 13.487369371133017
+        },
+        "lines": [
+            "M4"
+        ]
+    },
+    "M-Bss": {
+        "name": "Beilsteiner Straße",
+        "coordinates": {
+            "latitude": 52.5254798,
+            "longitude": 13.5302267
+        },
+        "lines": [
+            "M8"
+        ]
+    },
+    "M-Bw": {
+        "name": "Brodowiner Weg",
+        "coordinates": {
+            "latitude": 52.5478335124887,
+            "longitude": 13.57817046785784
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Crw": {
+        "name": "Criegernweg",
+        "coordinates": {
+            "latitude": 52.5013606,
+            "longitude": 13.5215203
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Dgs": {
+        "name": "Dingelstädter Straße",
+        "coordinates": {
+            "latitude": 52.5366428,
+            "longitude": 13.5244371
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Drs": {
+        "name": "Drontheimer Straße",
+        "coordinates": {
+            "latitude": 52.5563959,
+            "longitude": 13.377926
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Dz": {
+        "name": "Danziger Straße",
+        "coordinates": {
+            "latitude": 52.5396531,
+            "longitude": 13.4244754
+        },
+        "lines": [
+            "M2",
+            "M4",
+            "M10"
+        ]
+    },
+    "M-EwS": {
+        "name": "Erich-Weinert-Straße",
+        "coordinates": {
+            "latitude": 52.5475518,
+            "longitude": 13.4285563
+        },
+        "lines": [
+            "M2"
+        ]
+    },
+    "M-Fb": {
+        "name": "Falkenberg",
+        "coordinates": {
+            "latitude": 52.5698506,
+            "longitude": 13.5265911
+        },
+        "lines": [
+            "M4",
+            "M17"
+        ]
+    },
+    "M-Fd": {
+        "name": "Feldtmannstraße",
+        "coordinates": {
+            "latitude": 52.559939,
+            "longitude": 13.4957441
+        },
+        "lines": [
+            "M4"
+        ]
+    },
+    "M-Fls": {
+        "name": "Friedrich-Ludwig-Jahn-Sportpark",
+        "coordinates": {
+            "latitude": 52.5408998,
+            "longitude": 13.4057883
+        },
+        "lines": [
+            "M10"
+        ]
+    },
+    "M-Frm": {
+        "name": "Freizeitforum Marzahn",
+        "coordinates": {
+            "latitude": 52.5465019,
+            "longitude": 13.5573621
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Frs": {
+        "name": "Friesickestraße",
+        "coordinates": {
+            "latitude": 52.5516729,
+            "longitude": 13.440803
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Fs": {
+        "name": "Fröbelstraße",
+        "coordinates": {
+            "latitude": 52.5419298,
+            "longitude": 13.4258552
+        },
+        "lines": [
+            "M2"
+        ]
+    },
+    "M-Fw": {
+        "name": "Freienwalder Straße",
+        "coordinates": {
+            "latitude": 52.5442504,
+            "longitude": 13.4927547
+        },
+        "lines": [
+            "M5"
+        ]
+    },
+    "M-Ges": {
+        "name": "Genslerstraße",
+        "coordinates": {
+            "latitude": 52.53439,
+            "longitude": 13.4948771
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Gew": {
+        "name": "Gewerbepark Georg Knorr",
+        "coordinates": {
+            "latitude": 52.5390995,
+            "longitude": 13.5341226
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Gm": {
+        "name": "Gedenkstätte Berliner Mauer",
+        "coordinates": {
+            "latitude": 52.5359069,
+            "longitude": 13.3908576
+        },
+        "lines": [
+            "M10"
+        ]
+    },
+    "M-Gos": {
+        "name": "Gounodstraße",
+        "coordinates": {
+            "latitude": 52.5484859,
+            "longitude": 13.4671092
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-GrA": {
+        "name": "Grabbeallee",
+        "coordinates": {
+            "latitude": 52.579025,
+            "longitude": 13.3983499
+        },
+        "lines": [
+            "M1"
+        ]
+    },
+    "M-Grs": {
+        "name": "Grünberger Straße",
+        "coordinates": {
+            "latitude": 52.5122375,
+            "longitude": 13.4526058
+        },
+        "lines": [
+            "M10"
+        ]
+    },
+    "M-Grus": {
+        "name": "Grüntaler Straße",
+        "coordinates": {
+            "latitude": 52.5553265,
+            "longitude": 13.3909991
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Gs": {
+        "name": "Giersstraße",
+        "coordinates": {
+            "latitude": 52.5544234,
+            "longitude": 13.4821862
+        },
+        "lines": [
+            "M4"
+        ]
+    },
+    "M-Gss": {
+        "name": "Gerhard-Sedlmayr-Straße",
+        "coordinates": {
+            "latitude": 52.4397147,
+            "longitude": 13.5241905
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Gt": {
+        "name": "Gontardstraße",
+        "coordinates": {
+            "latitude": 52.5208822,
+            "longitude": 13.4115103
+        },
+        "lines": [
+            "M4",
+            "M5",
+            "M6"
+        ]
+    },
+    "M-Gus": {
+        "name": "Gustav-Adolf-Straße",
+        "coordinates": {
+            "latitude": 52.5534746,
+            "longitude": 13.4352568
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Hd": {
+        "name": "Heinersdorf",
+        "coordinates": {
+            "latitude": 52.5727666,
+            "longitude": 13.4374123
+        },
+        "lines": [
+            "M2"
+        ]
+    },
+    "M-Hgw": {
+        "name": "Hegemeisterweg",
+        "coordinates": {
+            "latitude": 52.4741663,
+            "longitude": 13.5204016
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Hk": {
+        "name": "Heinersdorf Kirche",
+        "coordinates": {
+            "latitude": 52.5683537,
+            "longitude": 13.4392285
+        },
+        "lines": [
+            "M2"
+        ]
+    },
+    "M-Hos": {
+        "name": "Hohenschönhausener Straße",
+        "coordinates": {
+            "latitude": 52.535882117725244,
+            "longitude": 13.472737021219185
+        },
+        "lines": [
+            "M5",
+            "M6",
+            "M13"
+        ]
+    },
+    "M-Ht": {
+        "name": "Holteistraße",
+        "coordinates": {
+            "latitude": 52.5081321,
+            "longitude": 13.4658555
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Hts": {
+        "name": "Herzbergstraße",
+        "coordinates": {
+            "latitude": 52.5265974,
+            "longitude": 13.4897656
+        },
+        "lines": [
+            "M8"
+        ]
+    },
+    "M-Hu": {
+        "name": "Hufelandstraße",
+        "coordinates": {
+            "latitude": 52.5327449,
+            "longitude": 13.4290859
+        },
+        "lines": [
+            "M4"
+        ]
+    },
+    "M-Hus": {
+        "name": "Husemannstraße",
+        "coordinates": {
+            "latitude": 52.5399725,
+            "longitude": 13.4191052
+        },
+        "lines": [
+            "M10"
+        ]
+    },
+    "M-Hwp": {
+        "name": "Helene-Weigel-Platz",
+        "coordinates": {
+            "latitude": 52.5259347,
+            "longitude": 13.5434041
+        },
+        "lines": [
+            "M8"
+        ]
+    },
+    "M-Ip": {
+        "name": "Invalidenpark",
+        "coordinates": {
+            "latitude": 52.5286147,
+            "longitude": 13.3763477
+        },
+        "lines": [
+            "M5",
+            "M8",
+            "M10"
+        ]
+    },
+    "M-Jas": {
+        "name": "Judith-Auer-Straße",
+        "coordinates": {
+            "latitude": 52.5340748,
+            "longitude": 13.4676978
+        },
+        "lines": [
+            "M5",
+            "M6"
+        ]
+    },
+    "M-Jps": {
+        "name": "Jan-Petersen-Straße",
+        "coordinates": {
+            "latitude": 52.5472111,
+            "longitude": 13.5619425
+        },
+        "lines": [
+            "M6",
+            "M8"
+        ]
+    },
+    "M-Js": {
+        "name": "Jenaer Straße",
+        "coordinates": {
+            "latitude": 52.5321781,
+            "longitude": 13.6143398
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Jss": {
+        "name": "Jessnerstraße",
+        "coordinates": {
+            "latitude": 52.5120927,
+            "longitude": 13.4733089
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Ka": {
+        "name": "Kastanienallee",
+        "coordinates": {
+            "latitude": 52.5438862,
+            "longitude": 13.5989829
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Kek": {
+        "name": "Ev. Krankenhaus KEH",
+        "coordinates": {
+            "latitude": 52.5254615,
+            "longitude": 13.5084195
+        },
+        "lines": [
+            "M8"
+        ]
+    },
+    "M-Kf": {
+        "name": "Klinikum im Friedrichshain",
+        "coordinates": {
+            "latitude": 52.5241405,
+            "longitude": 13.440187
+        },
+        "lines": [
+            "M5",
+            "M6",
+            "M8"
+        ]
+    },
+    "M-Kg": {
+        "name": "Am Kupfergraben",
+        "coordinates": {
+            "latitude": 52.5194258,
+            "longitude": 13.3953708
+        },
+        "lines": [
+            "M1"
+        ]
+    },
+    "M-Kga": {
+        "name": "Kleingartenanlage Bielefeldt",
+        "coordinates": {
+            "latitude": 52.5192733,
+            "longitude": 13.5193753
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Kl": {
+        "name": "Karl-Lade-Straße",
+        "coordinates": {
+            "latitude": 52.5291972,
+            "longitude": 13.4626653
+        },
+        "lines": [
+            "M8"
+        ]
+    },
+    "M-Kmm": {
+        "name": "Krimminalgericht Mobait",
+        "coordinates": {
+            "latitude": 52.52671424027294,
+            "longitude": 13.354606558645653
+        },
+        "lines": [
+            "M10"
+        ]
+    },
+    "M-Kn": {
+        "name": "Kniprodestraße",
+        "coordinates": {
+            "latitude": 52.532541,
+            "longitude": 13.4407002
+        },
+        "lines": [
+            "M10"
+        ]
+    },
+    "M-Kna": {
+        "name": "Knaackstraße",
+        "coordinates": {
+            "latitude": 52.5334293,
+            "longitude": 13.4208437
+        },
+        "lines": [
+            "M2"
+        ]
+    },
+    "M-Kps": {
+        "name": "Kopernikusstraße",
+        "coordinates": {
+            "latitude": 52.5105842,
+            "longitude": 13.4526258
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Kzs": {
+        "name": "Karl-Ziegler-Straße",
+        "coordinates": {
+            "latitude": 52.4324964,
+            "longitude": 13.5264686
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Lbs": {
+        "name": "Lübecker Straße",
+        "coordinates": {
+            "latitude": 52.5262792,
+            "longitude": 13.3457584
+        },
+        "lines": [
+            "M10"
+        ]
+    },
+    "M-Lcs": {
+        "name": "Landsberger Chaussee",
+        "coordinates": {
+            "latitude": 52.5490935,
+            "longitude": 13.5871358
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Lfs": {
+        "name": "Landfliegerstraße",
+        "coordinates": {
+            "latitude": 52.4459695,
+            "longitude": 13.515054
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Ljs": {
+        "name": "Landschaftspark Johannisthal",
+        "coordinates": {
+            "latitude": 52.4369716,
+            "longitude": 13.5259118
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Lp": {
+        "name": "Loeperplatz",
+        "coordinates": {
+            "latitude": 52.5197412,
+            "longitude": 13.4797196
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Lsp": {
+        "name": "Louise-Schröder-Platz",
+        "coordinates": {
+            "latitude": 52.557018516572896,
+            "longitude": 13.366355550015518
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Lues": {
+        "name": "Lüneburger Straße",
+        "coordinates": {
+            "latitude": 52.5231079,
+            "longitude": 13.3617622
+        },
+        "lines": [
+            "M5",
+            "M8"
+        ]
+    },
+    "M-Lus": {
+        "name": "Lesser-Ury-Weg",
+        "coordinates": {
+            "latitude": 52.5242203,
+            "longitude": 13.3620668
+        },
+        "lines": [
+            "M5",
+            "M8",
+            "M10"
+        ]
+    },
+    "M-MaS": {
+        "name": "Marienbuger Straße",
+        "coordinates": {
+            "latitude": 52.53605122859127,
+            "longitude": 13.42238647781385
+        },
+        "lines": [
+            "M2"
+        ]
+    },
+    "M-Map": {
+        "name": "Marzahner Promenade",
+        "coordinates": {
+            "latitude": 52.5426977,
+            "longitude": 13.5485317
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Mbs": {
+        "name": "Marksburgstraße",
+        "coordinates": {
+            "latitude": 52.4863576,
+            "longitude": 13.5268378
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Mcs": {
+        "name": "Michendorfer Straße",
+        "coordinates": {
+            "latitude": 52.5454601,
+            "longitude": 13.587435
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Mers": {
+        "name": "Meeraner Straße",
+        "coordinates": {
+            "latitude": 52.5294311,
+            "longitude": 13.5192685
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Mes": {
+        "name": "Memhardstraße",
+        "coordinates": {
+            "latitude": 52.5236711,
+            "longitude": 13.4116514
+        },
+        "lines": [
+            "M2"
+        ]
+    },
+    "M-Mgs": {
+        "name": "Magnusstraße",
+        "coordinates": {
+            "latitude": 52.429759,
+            "longitude": 13.5301687
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Mhs": {
+        "name": "Max-Herrmann-Straße",
+        "coordinates": {
+            "latitude": 52.5537187,
+            "longitude": 13.565478
+        },
+        "lines": [
+            "M8"
+        ]
+    },
+    "M-Mis": {
+        "name": "Milastraße",
+        "coordinates": {
+            "latitude": 52.5449538,
+            "longitude": 13.4125522
+        },
+        "lines": [
+            "M1"
+        ]
+    },
+    "M-Mos": {
+        "name": "Mollstraße",
+        "coordinates": {
+            "latitude": 52.5278448,
+            "longitude": 13.4165112
+        },
+        "lines": [
+            "M2",
+            "M4",
+            "M5",
+            "M6",
+            "M8"
+        ]
+    },
+    "M-Mp": {
+        "name": "Monbijouplatz",
+        "coordinates": {
+            "latitude": 52.5238986,
+            "longitude": 13.3970747
+        },
+        "lines": [
+            "M1",
+            "M5"
+        ]
+    },
+    "M-Ms": {
+        "name": "Masurenstraße",
+        "coordinates": {
+            "latitude": 52.5632037,
+            "longitude": 13.4127872
+        },
+        "lines": [
+            "M1"
+        ]
+    },
+    "M-Mw": {
+        "name": "Malchower Weg",
+        "coordinates": {
+            "latitude": 52.5613788,
+            "longitude": 13.4999139
+        },
+        "lines": [
+            "M4"
+        ]
+    },
+    "M-Mz": {
+        "name": "Metznerstraße",
+        "coordinates": {
+            "latitude": 52.53117101555993,
+            "longitude": 13.419542631112797
+        },
+        "lines": [
+            "M2"
+        ]
+    },
+    "M-Nbs": {
+        "name": "Nieberstraße",
+        "coordinates": {
+            "latitude": 52.449322,
+            "longitude": 13.5114567
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Niem": {
+        "name": "Niemegker Straße",
+        "coordinates": {
+            "latitude": 52.5650166,
+            "longitude": 13.5718576
+        },
+        "lines": [
+            "M8"
+        ]
+    },
+    "M-Ns": {
+        "name": "Nossener Straße",
+        "coordinates": {
+            "latitude": 52.533407,
+            "longitude": 13.6084404
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Ob": {
+        "name": "Oderbruchstraße",
+        "coordinates": {
+            "latitude": 52.5304884,
+            "longitude": 13.4615084
+        },
+        "lines": [
+            "M5",
+            "M6"
+        ]
+    },
+    "M-Oh": {
+        "name": "Osram-Höfe",
+        "coordinates": {
+            "latitude": 52.5538317,
+            "longitude": 13.3585272
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Os": {
+        "name": "Ostseestraße",
+        "coordinates": {
+            "latitude": 52.5507797,
+            "longitude": 13.4300239
+        },
+        "lines": [
+            "M2",
+            "M4"
+        ]
+    },
+    "M-Ose": {
+        "name": "Oberseestraße",
+        "coordinates": {
+            "latitude": 52.5469426,
+            "longitude": 13.4978874
+        },
+        "lines": [
+            "M5"
+        ]
+    },
+    "M-Phs": {
+        "name": "Paul-Heyse-Straße",
+        "coordinates": {
+            "latitude": 52.5291671,
+            "longitude": 13.4447167
+        },
+        "lines": [
+            "M10"
+        ]
+    },
+    "M-Pk": {
+        "name": "Pankow Kirche",
+        "coordinates": {
+            "latitude": 52.5703917,
+            "longitude": 13.4084656
+        },
+        "lines": [
+            "M1"
+        ]
+    },
+    "M-Pna": {
+        "name": "Prinzenallee",
+        "coordinates": {
+            "latitude": 52.5559049,
+            "longitude": 13.3837609
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Pp": {
+        "name": "Pernzlauer Promenade",
+        "coordinates": {
+            "latitude": 52.55661660102684,
+            "longitude": 13.429867480101752
+        },
+        "lines": [
+            "M2"
+        ]
+    },
+    "M-Pppl": {
+        "name": "Pappelplatz",
+        "coordinates": {
+            "latitude": 52.5322689,
+            "longitude": 13.3947562
+        },
+        "lines": [
+            "M8"
+        ]
+    },
+    "M-Prp": {
+        "name": "Prerower Platz",
+        "coordinates": {
+            "latitude": 52.5636616,
+            "longitude": 13.5063374
+        },
+        "lines": [
+            "M4",
+            "M5",
+            "M17"
+        ]
+    },
+    "M-Prs": {
+        "name": "Prendenener Straße",
+        "coordinates": {
+            "latitude": 52.56860559673777,
+            "longitude": 13.519973127922649
+        },
+        "lines": [
+            "M4",
+            "M17"
+        ]
+    },
+    "M-Ps": {
+        "name": "Petersburger Straße",
+        "coordinates": {
+            "latitude": 52.5259323,
+            "longitude": 13.4462385
+        },
+        "lines": [
+            "M5",
+            "M6",
+            "M8"
+        ]
+    },
+    "M-Pvn": {
+        "name": "Platz der Vereinten Nationen",
+        "coordinates": {
+            "latitude": 52.5232307,
+            "longitude": 13.4334573
+        },
+        "lines": [
+            "M5",
+            "M6",
+            "M8"
+        ]
+    },
+    "M-Qes": {
+        "name": "Quedlinburger Straße",
+        "coordinates": {
+            "latitude": 52.5389275,
+            "longitude": 13.6043407
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Rb": {
+        "name": "Rothenbachstraße",
+        "coordinates": {
+            "latitude": 52.570062,
+            "longitude": 13.4377179
+        },
+        "lines": [
+            "M2"
+        ]
+    },
+    "M-Rbs": {
+        "name": "Ribnitzer Straße",
+        "coordinates": {
+            "latitude": 52.5701623,
+            "longitude": 13.4973963
+        },
+        "lines": [
+            "M5"
+        ]
+    },
+    "M-Rds": {
+        "name": "Rüdickenstraße",
+        "coordinates": {
+            "latitude": 52.5599143,
+            "longitude": 13.5101671
+        },
+        "lines": [
+            "M5"
+        ]
+    },
+    "M-Rh": {
+        "name": "Rhinstraße",
+        "coordinates": {
+            "latitude": 52.5357322,
+            "longitude": 13.5181868
+        },
+        "lines": [
+            "M8",
+            "M17"
+        ]
+    },
+    "M-Rp": {
+        "name": "Roederplatz",
+        "coordinates": {
+            "latitude": 52.5266198,
+            "longitude": 13.4784194
+        },
+        "lines": [
+            "M8",
+            "M13"
+        ]
+    },
+    "M-RpP": {
+        "name": "Rathaus Pankow",
+        "coordinates": {
+            "latitude": 52.5695371,
+            "longitude": 13.4045701
+        },
+        "lines": [
+            "M1"
+        ]
+    },
+    "M-Rs": {
+        "name": "Riesaer Straße",
+        "coordinates": {
+            "latitude": 52.5307469,
+            "longitude": 13.6211499
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Rsb": {
+        "name": "Rummelsburger Straße",
+        "coordinates": {
+            "latitude": 52.4682283,
+            "longitude": 13.5138328
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Rth": {
+        "name": "Rathaus Lichtenberg",
+        "coordinates": {
+            "latitude": 52.5156658,
+            "longitude": 13.4788562
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Sbs": {
+        "name": "Simon-Bolivar-Straße",
+        "coordinates": {
+            "latitude": 52.5399029,
+            "longitude": 13.4844148
+        },
+        "lines": [
+            "M5"
+        ]
+    },
+    "M-Scs": {
+        "name": "Schalkauer Straße",
+        "coordinates": {
+            "latitude": 52.5351866,
+            "longitude": 13.5100149
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Sf": {
+        "name": "Sulzfeder Straße",
+        "coordinates": {
+            "latitude": 52.553477193995846,
+            "longitude": 13.475828948080498
+        },
+        "lines": [
+            "M4"
+        ]
+    },
+    "M-Sfo": {
+        "name": "Sportforum",
+        "coordinates": {
+            "latitude": 52.5383802,
+            "longitude": 13.4714237
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Sfs": {
+        "name": "Schönfließer Straße",
+        "coordinates": {
+            "latitude": 52.5540724,
+            "longitude": 13.4090846
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Sgs": {
+        "name": "Siegfriedstraße",
+        "coordinates": {
+            "latitude": 52.52637,
+            "longitude": 13.499036
+        },
+        "lines": [
+            "M8"
+        ]
+    },
+    "M-Sis": {
+        "name": "Simplonstraße",
+        "coordinates": {
+            "latitude": 52.5098432,
+            "longitude": 13.4564928
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Sns": {
+        "name": "Sandinostraße",
+        "coordinates": {
+            "latitude": 52.5384568,
+            "longitude": 13.4805355
+        },
+        "lines": [
+            "M5"
+        ]
+    },
+    "M-Ss": {
+        "name": "Spandauer Straße",
+        "coordinates": {
+            "latitude": 52.5204243,
+            "longitude": 13.4042441
+        },
+        "lines": [
+            "M4",
+            "M5",
+            "M6"
+        ]
+    },
+    "M-Ster": {
+        "name": "Sterndamm",
+        "coordinates": {
+            "latitude": 52.4549106,
+            "longitude": 13.5084888
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Str": {
+        "name": "Straßmannstraße",
+        "coordinates": {
+            "latitude": 52.5229542,
+            "longitude": 13.4500341
+        },
+        "lines": [
+            "M10"
+        ]
+    },
+    "M-Sts": {
+        "name": "Stahlheimer Straße",
+        "coordinates": {
+            "latitude": 52.5527208,
+            "longitude": 13.4238019
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Sws": {
+        "name": "Schwedter Straße",
+        "coordinates": {
+            "latitude": 52.5371529,
+            "longitude": 13.4082376
+        },
+        "lines": [
+            "M1"
+        ]
+    },
+    "M-TSS": {
+        "name": "Tino-Schwierzina-Straße",
+        "coordinates": {
+            "latitude": 52.5622499,
+            "longitude": 13.4348544
+        },
+        "lines": [
+            "M2"
+        ]
+    },
+    "M-Tc": {
+        "name": "Tschaikowskistraße",
+        "coordinates": {
+            "latitude": 52.5756602,
+            "longitude": 13.3988199
+        },
+        "lines": [
+            "M1"
+        ]
+    },
+    "M-Tm": {
+        "name": "Thomas-Mann-Straße",
+        "coordinates": {
+            "latitude": 52.5435991,
+            "longitude": 13.4416553
+        },
+        "lines": [
+            "M4"
+        ]
+    },
+    "M-Tp": {
+        "name": "Traveplatz",
+        "coordinates": {
+            "latitude": 52.5119866,
+            "longitude": 13.4696737
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Tw": {
+        "name": "Traberweg",
+        "coordinates": {
+            "latitude": 52.4769473,
+            "longitude": 13.5233991
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Tws": {
+        "name": "Treskowallee",
+        "coordinates": {
+            "latitude": 52.4927665,
+            "longitude": 13.5266007
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Us": {
+        "name": "Universtätsstraße",
+        "coordinates": {
+            "latitude": 52.51907,
+            "longitude": 13.39159
+        },
+        "lines": [
+            "M1"
+        ]
+    },
+    "M-Vik": {
+        "name": "Virchow-Klinikum",
+        "coordinates": {
+            "latitude": 52.543917,
+            "longitude": 13.3395713
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Vp": {
+        "name": "Volkspark Wuhlheide",
+        "coordinates": {
+            "latitude": 52.4711791,
+            "longitude": 13.5172971
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Wers": {
+        "name": "Werneuchener Straße",
+        "coordinates": {
+            "latitude": 52.5422889,
+            "longitude": 13.4890554
+        },
+        "lines": [
+            "M5"
+        ]
+    },
+    "M-Wes": {
+        "name": "Weißer See",
+        "coordinates": {
+            "latitude": 52.5521763,
+            "longitude": 13.4659619
+        },
+        "lines": [
+            "M4",
+            "M13"
+        ]
+    },
+    "M-Whs": {
+        "name": "Wilhelmshofstraße",
+        "coordinates": {
+            "latitude": 52.4623366399936,
+            "longitude": 13.514820743670112
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Wls": {
+        "name": "Wolliner Straße",
+        "coordinates": {
+            "latitude": 52.5396897,
+            "longitude": 13.4012039
+        },
+        "lines": [
+            "M10"
+        ]
+    },
+    "M-Wns": {
+        "name": "Walther-Nernst-Straße",
+        "coordinates": {
+            "latitude": 52.4319162,
+            "longitude": 13.5346118
+        },
+        "lines": [
+            "M17"
+        ]
+    },
+    "M-Ws": {
+        "name": "Welsestraße",
+        "coordinates": {
+            "latitude": 52.5692786,
+            "longitude": 13.5258916
+        },
+        "lines": [
+            "M4",
+            "M17"
+        ]
+    },
+    "M-Wse": {
+        "name": "Weißensee Weg",
+        "coordinates": {
+            "latitude": 52.532583699878074,
+            "longitude": 13.476626918960434
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Wst": {
+        "name": "Winstraße",
+        "coordinates": {
+            "latitude": 52.5380186374732,
+            "longitude": 13.427793704917912
+        },
+        "lines": [
+            "M10"
+        ]
+    },
+    "M-Wuh": {
+        "name": "Wuhletalstraße",
+        "coordinates": {
+            "latitude": 52.5577949,
+            "longitude": 13.5682656
+        },
+        "lines": [
+            "M8"
+        ]
+    },
+    "M-Wus": {
+        "name": "Wühlischstraße",
+        "coordinates": {
+            "latitude": 52.50903,
+            "longitude": 13.4597503
+        },
+        "lines": [
+            "M13"
+        ]
+    },
+    "M-Zes": {
+        "name": "Zechliner Straße",
+        "coordinates": {
+            "latitude": 52.5339119,
+            "longitude": 13.4869072
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Zk": {
+        "name": "Zionskirchplatz",
+        "coordinates": {
+            "latitude": 52.5345175,
+            "longitude": 13.4056617
+        },
+        "lines": [
+            "M1"
+        ]
+    },
+    "M-Zos": {
+        "name": "Zossener Straße",
+        "coordinates": {
+            "latitude": 52.5490935,
+            "longitude": 13.5871358
+        },
+        "lines": [
+            "M6"
+        ]
+    },
+    "M-Zs": {
+        "name": "Zingster Straße",
+        "coordinates": {
+            "latitude": 52.5701623,
+            "longitude": 13.4973963
+        },
+        "lines": [
+            "M5"
+        ]
+    },
+    "S-AB": {
+        "name": "Anhalter Bahnhof",
+        "coordinates": {
+            "latitude": 52.50357773659994,
+            "longitude": 13.381471953957373
+        },
+        "lines": [
+            "S1",
+            "S2",
+            "S25",
+            "S26"
+        ]
+    },
+    "S-AR": {
+        "name": "Alt-Reinickendorf",
+        "coordinates": {
+            "latitude": 52.57778462905961,
+            "longitude": 13.351216550010662
+        },
+        "lines": [
+            "S25"
+        ]
+    },
+    "S-Ag": {
+        "name": "Altglienicke",
+        "coordinates": {
+            "latitude": 52.40691304170994,
+            "longitude": 13.55827423002745
+        },
+        "lines": [
+            "S9",
+            "S45"
+        ]
+    },
+    "S-At": {
+        "name": "Attilastraße",
+        "coordinates": {
+            "latitude": 52.44803194423858,
+            "longitude": 13.360751024205456
+        },
+        "lines": [
+            "S2"
+        ]
+    },
+    "S-BC": {
+        "name": "Buckower Chaussee",
+        "coordinates": {
+            "latitude": 52.41053968839731,
+            "longitude": 13.38275837674891
+        },
+        "lines": [
+            "S2"
+        ]
+    },
+    "S-BER": {
+        "name": "Flughafen BER",
+        "coordinates": {
+            "latitude": 52.364271431742,
+            "longitude": 13.508200821053464
+        },
+        "lines": [
+            "S9",
+            "S45"
+        ]
+    },
+    "S-BF": {
+        "name": "Bernau-Friedenstal",
+        "coordinates": {
+            "latitude": 52.66839602833204,
+            "longitude": 13.564610758333401
+        },
+        "lines": [
+            "S2"
+        ]
+    },
+    "S-BR": {
+        "name": "Betriebsbahnhof Rummelsburg",
+        "coordinates": {
+            "latitude": 52.49388707786471,
+            "longitude": 13.497701678320738
+        },
+        "lines": [
+            "S3"
+        ]
+    },
+    "S-Ba": {
+        "name": "Babelsberg",
+        "coordinates": {
+            "latitude": 52.39140543155065,
+            "longitude": 13.092963330483428
+        },
+        "lines": [
+            "S7"
+        ]
+    },
+    "S-Be": {
+        "name": "Bellevue",
+        "coordinates": {
+            "latitude": 52.51997626355828,
+            "longitude": 13.348071841924735
+        },
+        "lines": [
+            "S3",
+            "S5",
+            "S7",
+            "S9"
+        ]
+    },
+    "S-Ber": {
+        "name": "Bernau",
+        "coordinates": {
+            "latitude": 52.675543484784015,
+            "longitude": 13.591720534060528
+        },
+        "lines": [
+            "S2"
+        ]
+    },
+    "S-Bes": {
+        "name": "Beusselstraße",
+        "coordinates": {
+            "latitude": 52.53440300848655,
+            "longitude": 13.329392009360333
+        },
+        "lines": [
+            "S41",
+            "S42"
+        ]
+    },
+    "S-Bfe": {
+        "name": "Bergfelde",
+        "coordinates": {
+            "latitude": 52.67011051964306,
+            "longitude": 13.320403844948572
+        },
+        "lines": [
+            "S8"
+        ]
+    },
+    "S-Bie": {
+        "name": "Biesdorf",
+        "coordinates": {
+            "latitude": 52.51308715395152,
+            "longitude": 13.55584729903805
+        },
+        "lines": [
+            "S5"
+        ]
+    },
+    "S-Bk": {
+        "name": "Birkenstein",
+        "coordinates": {
+            "latitude": 52.51568842318139,
+            "longitude": 13.6478221856012
+        },
+        "lines": [
+            "S5"
+        ]
+    },
+    "S-Bl": {
+        "name": "Blankenburg",
+        "coordinates": {
+            "latitude": 52.59147300801217,
+            "longitude": 13.443506645985792
+        },
+        "lines": [
+            "S2",
+            "S8",
+            "S26"
+        ]
+    },
+    "S-Blf": {
+        "name": "Blankenfelde",
+        "coordinates": {
+            "latitude": 52.33844680272185,
+            "longitude": 13.415388485417793
+        },
+        "lines": [
+            "S2"
+        ]
+    },
+    "S-Bo": {
+        "name": "Borgsdorf",
+        "coordinates": {
+            "latitude": 52.71539933634622,
+            "longitude": 13.276473222594461
+        },
+        "lines": [
+            "S1"
+        ]
+    },
+    "S-BoG": {
+        "name": "Botanischer Garten",
+        "coordinates": {
+            "latitude": 52.447960324576485,
+            "longitude": 13.307118320342482
+        },
+        "lines": [
+            "S1"
+        ]
+    },
+    "S-Bsw": {
+        "name": "Baumschulenweg",
+        "coordinates": {
+            "latitude": 52.4673986661611,
+            "longitude": 13.489898165267249
+        },
+        "lines": [
+            "S8",
+            "S9",
+            "S45",
+            "S46",
+            "S47",
+            "S85"
+        ]
+    },
+    "S-Bu": {
+        "name": "Buch",
+        "coordinates": {
+            "latitude": 52.6358341362681,
+            "longitude": 13.49163231671804
+        },
+        "lines": [
+            "S2"
+        ]
+    },
+    "S-Bw": {
+        "name": "Birkenwerder",
+        "coordinates": {
+            "latitude": 52.688643245242446,
+            "longitude": 13.288691101752022
+        },
+        "lines": [
+            "S1",
+            "S8"
+        ]
+    },
+    "S-Eid": {
+        "name": "Eichborndamm",
+        "coordinates": {
+            "latitude": 52.577630364762996,
+            "longitude": 13.316618832296683
+        },
+        "lines": [
+            "S25"
+        ]
+    },
+    "S-Eiw": {
+        "name": "Eichwalde",
+        "coordinates": {
+            "latitude": 52.37096657996247,
+            "longitude": 13.615540946379326
+        },
+        "lines": [
+            "S8",
+            "S46"
+        ]
+    },
+    "S-Er": {
+        "name": "Erkner",
+        "coordinates": {
+            "latitude": 52.429422175615514,
+            "longitude": 13.75104426486513
+        },
+        "lines": [
+            "S3"
+        ]
+    },
+    "S-Fd": {
+        "name": "Fredersdorf",
+        "coordinates": {
+            "latitude": 52.52625788016459,
+            "longitude": 13.760436854569804
+        },
+        "lines": [
+            "S5"
+        ]
+    },
+    "S-Fh": {
+        "name": "Friedrichshagen",
+        "coordinates": {
+            "latitude": 52.45736507304278,
+            "longitude": 13.623305780734825
+        },
+        "lines": [
+            "S3"
+        ]
+    },
+    "S-Fhn": {
+        "name": "Frohnau",
+        "coordinates": {
+            "latitude": 52.63240964047816,
+            "longitude": 13.290223397230335
+        },
+        "lines": [
+            "S1",
+            "S85"
+        ]
+    },
+    "S-Fr": {
+        "name": "Friedenau",
+        "coordinates": {
+            "latitude": 52.47073093088298,
+            "longitude": 13.341584474992203
+        },
+        "lines": [
+            "S1"
+        ]
+    },
+    "S-Gbs": {
+        "name": "Griebnitzsee",
+        "coordinates": {
+            "latitude": 52.394451786313994,
+            "longitude": 13.127243759465784
+        },
+        "lines": [
+            "S7"
+        ]
+    },
+    "S-Gr": {
+        "name": "Grünau",
+        "coordinates": {
+            "latitude": 52.412888499044215,
+            "longitude": 13.573647670695095
+        },
+        "lines": [
+            "S8",
+            "S46",
+            "S85"
+        ]
+    },
+    "S-GrA": {
+        "name": "Grünbergallee",
+        "coordinates": {
+            "latitude": 52.39930437800666,
+            "longitude": 13.541882027160085
+        },
+        "lines": [
+            "S9",
+            "S45"
+        ]
+    },
+    "S-Grw": {
+        "name": "Grunewald",
+        "coordinates": {
+            "latitude": 52.488252529434845,
+            "longitude": 13.261019118032067
+        },
+        "lines": [
+            "S5",
+            "S7",
+            "S9"
+        ]
+    },
+    "S-HN": {
+        "name": "Hohen Neuendorf",
+        "coordinates": {
+            "latitude": 52.668649888731295,
+            "longitude": 13.287044061825412
+        },
+        "lines": [
+            "S1",
+            "S1",
+            "S8"
+        ]
+    },
+    "S-Ha": {
+        "name": "Halensee",
+        "coordinates": {
+            "latitude": 52.49603666427379,
+            "longitude": 13.290537124322782
+        },
+        "lines": [
+            "S41",
+            "S42",
+            "S45",
+            "S46"
+        ]
+    },
+    "S-Hd": {
+        "name": "Hermsdorf",
+        "coordinates": {
+            "latitude": 52.61849915677851,
+            "longitude": 13.307363419984938
+        },
+        "lines": [
+            "S1",
+            "S85"
+        ]
+    },
+    "S-Hed": {
+        "name": "Hennigsdorf",
+        "coordinates": {
+            "latitude": 52.63740854388294,
+            "longitude": 13.20607751625343
+        },
+        "lines": [
+            "S25"
+        ]
+    },
+    "S-Hee": {
+        "name": "Heerstraße",
+        "coordinates": {
+            "latitude": 52.520654395204645,
+            "longitude": 13.160242076849329
+        },
+        "lines": [
+            "S3",
+            "S9"
+        ]
+    },
+    "S-Hes": {
+        "name": "Heiligensee",
+        "coordinates": {
+            "latitude": 52.624658036905856,
+            "longitude": 13.229202890634895
+        },
+        "lines": [
+            "S25"
+        ]
+    },
+    "S-Hgm": {
+        "name": "Hegermühle",
+        "coordinates": {
+            "latitude": 52.54838214214601,
+            "longitude": 13.866363470338172
+        },
+        "lines": [
+            "S5"
+        ]
+    },
+    "S-Hi": {
+        "name": "Hirschgarten",
+        "coordinates": {
+            "latitude": 52.457910390625926,
+            "longitude": 13.603140896836976
+        },
+        "lines": [
+            "S3"
+        ]
+    },
+    "S-HoM": {
+        "name": "Hoppegarten",
+        "coordinates": {
+            "latitude": 52.51824302182709,
+            "longitude": 13.674255826143764
+        },
+        "lines": [
+            "S5"
+        ]
+    },
+    "S-HuH": {
+        "name": "Humboldthain",
+        "coordinates": {
+            "latitude": 52.54457691957134,
+            "longitude": 13.378447726204627
+        },
+        "lines": [
+            "S1",
+            "S2",
+            "S25",
+            "S26"
+        ]
+    },
+    "S-Hzd": {
+        "name": "Hohenzollerndamm",
+        "coordinates": {
+            "latitude": 52.48862989202752,
+            "longitude": 13.300230815963658
+        },
+        "lines": [
+            "S41",
+            "S42",
+            "S45",
+            "S46"
+        ]
+    },
+    "S-J": {
+        "name": "Johannisthal",
+        "coordinates": {
+            "latitude": 52.4461741,
+            "longitude": 13.5238518
+        },
+        "lines": [
+            "S8",
+            "S9",
+            "S45",
+            "S46",
+            "S85"
+        ]
+    },
+    "S-JLB": {
+        "name": "Julius-Leber-Brücke",
+        "coordinates": {
+            "latitude": 52.4461741,
+            "longitude": 13.5238518
+        },
+        "lines": [
+            "S1"
+        ]
+    },
+    "S-K": {
+        "name": "Köpenick",
+        "coordinates": {
+            "latitude": 52.45857791566351,
+            "longitude": 13.581521161136777
+        },
+        "lines": [
+            "S3"
+        ]
+    },
+    "S-KLH": {
+        "name": "Köllnische Heide",
+        "coordinates": {
+            "latitude": 52.469645772584244,
+            "longitude": 13.4679334385645
+        },
+        "lines": [
+            "S45",
+            "S46",
+            "S47"
+        ]
+    },
+    "S-KWH": {
+        "name": "Königs Wusterhausen",
+        "coordinates": {
+            "latitude": 52.29670704088011,
+            "longitude": 13.631525985739131
+        },
+        "lines": [
+            "S46"
+        ]
+    },
+    "S-Kad": {
+        "name": "Kaulsdorf",
+        "coordinates": {
+            "latitude": 52.512139878787195,
+            "longitude": 13.590200553016189
+        },
+        "lines": [
+            "S5"
+        ]
+    },
+    "S-Kar": {
+        "name": "Karow",
+        "coordinates": {
+            "latitude": 52.61521075964532,
+            "longitude": 13.469484938289156
+        },
+        "lines": [
+            "S2"
+        ]
+    },
+    "S-Law": {
+        "name": "Lankwitz",
+        "coordinates": {
+            "latitude": 52.43877523265414,
+            "longitude": 13.342065508857331
+        },
+        "lines": [
+            "S25",
+            "S26"
+        ]
+    },
+    "S-Leh": {
+        "name": "Lehnitz",
+        "coordinates": {
+            "latitude": 52.741392450132224,
+            "longitude": 13.263189842284078
+        },
+        "lines": [
+            "S1"
+        ]
+    },
+    "S-LiO": {
+        "name": "Lichterfelde Ost",
+        "coordinates": {
+            "latitude": 52.4298411481567,
+            "longitude": 13.328058269052576
+        },
+        "lines": [
+            "S25",
+            "S26"
+        ]
+    },
+    "S-LiS": {
+        "name": "Lichterfelde Süd",
+        "coordinates": {
+            "latitude": 52.410005957714986,
+            "longitude": 13.30851909343366
+        },
+        "lines": [
+            "S25",
+            "S26"
+        ]
+    },
+    "S-LiW": {
+        "name": "Lichterfelde West",
+        "coordinates": {
+            "latitude": 52.44331324158128,
+            "longitude": 13.29358058330655
+        },
+        "lines": [
+            "S1"
+        ]
+    },
+    "S-Lir": {
+        "name": "Lichtenrade",
+        "coordinates": {
+            "latitude": 52.386835418435936,
+            "longitude": 13.396580904558846
+        },
+        "lines": [
+            "S2"
+        ]
+    },
+    "S-MM": {
+        "name": "Mühlenbeck-Mönchmühle",
+        "coordinates": {
+            "latitude": 52.65475141384894,
+            "longitude": 13.38622318489405
+        },
+        "lines": [
+            "S8"
+        ]
+    },
+    "S-MP": {
+        "name": "Mexikoplatz",
+        "coordinates": {
+            "latitude": 52.436768613179595,
+            "longitude": 13.233230595414994
+        },
+        "lines": [
+            "S1"
+        ]
+    },
+    "S-MS": {
+        "name": "Messe Süd",
+        "coordinates": {
+            "latitude": 52.49864309731328,
+            "longitude": 13.270232431817675
+        },
+        "lines": [
+            "S3",
+            "S9"
+        ]
+    },
+    "S-Mad": {
+        "name": "Mahlsdorf",
+        "coordinates": {
+            "latitude": 52.51209696071558,
+            "longitude": 13.610415945916742
+        },
+        "lines": [
+            "S5"
+        ]
+    },
+    "S-Maf": {
+        "name": "Marienfelde",
+        "coordinates": {
+            "latitude": 52.42422531188802,
+            "longitude": 13.374693260191549
+        },
+        "lines": [
+            "S2"
+        ]
+    },
+    "S-Maw": {
+        "name": "Mahlow",
+        "coordinates": {
+            "latitude": 52.360644947178145,
+            "longitude": 13.407806560648282
+        },
+        "lines": [
+            "S2"
+        ]
+    },
+    "S-MeA": {
+        "name": "Mehrower Allee",
+        "coordinates": {
+            "latitude": 52.557609954688274,
+            "longitude": 13.553551909194454
+        },
+        "lines": [
+            "S7"
+        ]
+    },
+    "S-NH": {
+        "name": "Neuenhagen",
+        "coordinates": {
+            "latitude": 52.520181619783756,
+            "longitude": 13.700122761596305
+        },
+        "lines": [
+            "S5"
+        ]
+    },
+    "S-NiS": {
+        "name": "Nikolassee",
+        "coordinates": {
+            "latitude": 52.43205972515463,
+            "longitude": 13.193159117475858
+        },
+        "lines": [
+            "S1",
+            "S7"
+        ]
+    },
+    "S-Np": {
+        "name": "Nöldnerplatz",
+        "coordinates": {
+            "latitude": 52.50383098329934,
+            "longitude": 13.48531042911344
+        },
+        "lines": [
+            "S5",
+            "S7",
+            "S75"
+        ]
+    },
+    "S-OdS": {
+        "name": "Osdorfer Straße",
+        "coordinates": {
+            "latitude": 52.41888195013442,
+            "longitude": 13.314223478292519
+        },
+        "lines": [
+            "S25",
+            "S26"
+        ]
+    },
+    "S-Okz": {
+        "name": "Ostkreuz",
+        "coordinates": {
+            "latitude": 52.50315279626426,
+            "longitude": 13.46957750161971
+        },
+        "lines": [
+            "S3",
+            "S5",
+            "S7",
+            "S8",
+            "S41",
+            "S42",
+            "S75",
+            "S85"
+        ]
+    },
+    "S-Or": {
+        "name": "Oranienburg",
+        "coordinates": {
+            "latitude": 52.753968368269284,
+            "longitude": 13.24891166803829
+        },
+        "lines": [
+            "S1"
+        ]
+    },
+    "S-Os": {
+        "name": "Oberspree",
+        "coordinates": {
+            "latitude": 52.4524363296818,
+            "longitude": 13.538058268000697
+        },
+        "lines": [
+            "S47"
+        ]
+    },
+    "S-Ost": {
+        "name": "Ostbahnhof",
+        "coordinates": {
+            "latitude": 52.51072105162612,
+            "longitude": 13.435149970948999
+        },
+        "lines": [
+            "S3",
+            "S5",
+            "S7",
+            "S9",
+            "S75"
+        ]
+    },
+    "S-PB": {
+        "name": "Pichelsberg",
+        "coordinates": {
+            "latitude": 52.51017449977732,
+            "longitude": 13.227536848089812
+        },
+        "lines": [
+            "S3",
+            "S9"
+        ]
+    },
+    "S-PH": {
+        "name": "Potsdam Hauptbahnhof",
+        "coordinates": {
+            "latitude": 52.391795350910854,
+            "longitude": 13.06723080362724
+        },
+        "lines": [
+            "S7"
+        ]
+    },
+    "S-PN": {
+        "name": "Petershagen Nord",
+        "coordinates": {
+            "latitude": 52.528851317699406,
+            "longitude": 13.789018460309848
+        },
+        "lines": [
+            "S5"
+        ]
+    },
+    "S-Pc": {
+        "name": "Poelchaustraße",
+        "coordinates": {
+            "latitude": 52.535875107846124,
+            "longitude": 13.535580034261073
+        },
+        "lines": [
+            "S7"
+        ]
+    },
+    "S-Prw": {
+        "name": "Priesterweg",
+        "coordinates": {
+            "latitude": 52.45991899878993,
+            "longitude": 13.35624293564004
+        },
+        "lines": [
+            "S2",
+            "S25",
+            "S26"
+        ]
+    },
+    "S-Pw": {
+        "name": "Plänterwald",
+        "coordinates": {
+            "latitude": 52.47858930934535,
+            "longitude": 13.473237302424081
+        },
+        "lines": [
+            "S8",
+            "S9",
+            "S85"
+        ]
+    },
+    "S-RWS": {
+        "name": "Raoul-Wallenberg-Straße",
+        "coordinates": {
+            "latitude": 52.550735348104155,
+            "longitude": 13.547560466619132
+        },
+        "lines": [
+            "S7"
+        ]
+    },
+    "S-Rd": {
+        "name": "Rahnsdorf",
+        "coordinates": {
+            "latitude": 52.45163925746135,
+            "longitude": 13.689923967314684
+        },
+        "lines": [
+            "S3"
+        ]
+    },
+    "S-Rgt": {
+        "name": "Röntgental",
+        "coordinates": {
+            "latitude": 52.648680714109815,
+            "longitude": 13.51360660593241
+        },
+        "lines": [
+            "S2"
+        ]
+    },
+    "S-Rub": {
+        "name": "Rummelsburg",
+        "coordinates": {
+            "latitude": 52.50128394781751,
+            "longitude": 13.478402280168666
+        },
+        "lines": [
+            "S3"
+        ]
+    },
+    "S-SD": {
+        "name": "Schulzendorf",
+        "coordinates": {
+            "latitude": 52.6139599,
+            "longitude": 13.2409545
+        },
+        "lines": [
+            "S25"
+        ]
+    },
+    "S-SS": {
+        "name": "Schlachtensee",
+        "coordinates": {
+            "latitude": 52.4400237,
+            "longitude": 13.210119
+        },
+        "lines": [
+            "S1"
+        ]
+    },
+    "S-Sa": {
+        "name": "Sonnenallee",
+        "coordinates": {
+            "latitude": 52.47297073778705,
+            "longitude": 13.455691446999964
+        },
+        "lines": [
+            "S41",
+            "S42"
+        ]
+    },
+    "S-Sau": {
+        "name": "Schichauweg",
+        "coordinates": {
+            "latitude": 52.39856512387104,
+            "longitude": 13.38939188857222
+        },
+        "lines": [
+            "S2"
+        ]
+    },
+    "S-Sav": {
+        "name": "Savignyplatz",
+        "coordinates": {
+            "latitude": 52.50517768280662,
+            "longitude": 13.319067413798507
+        },
+        "lines": [
+            "S3",
+            "S5",
+            "S7",
+            "S9"
+        ]
+    },
+    "S-Sb": {
+        "name": "Schöneberg",
+        "coordinates": {
+            "latitude": 52.47934532264665,
+            "longitude": 13.351945170423448
+        },
+        "lines": [
+            "S1",
+            "S41",
+            "S42",
+            "S45",
+            "S46"
+        ]
+    },
+    "S-SbS": {
+        "name": "Strausberg Stadt",
+        "coordinates": {
+            "latitude": 52.57669305295812,
+            "longitude": 13.88785499320312
+        },
+        "lines": [
+            "S5"
+        ]
+    },
+    "S-Scf": {
+        "name": "Schönfließ",
+        "coordinates": {
+            "latitude": 52.664700479825,
+            "longitude": 13.340044936033166
+        },
+        "lines": [
+            "S8"
+        ]
+    },
+    "S-Se": {
+        "name": "Südende",
+        "coordinates": {
+            "latitude": 52.44828066344158,
+            "longitude": 13.35375098015922
+        },
+        "lines": [
+            "S25",
+            "S26"
+        ]
+    },
+    "S-Sf": {
+        "name": "Schönefeld",
+        "coordinates": {
+            "latitude": 52.39093492627191,
+            "longitude": 13.513004163911802
+        },
+        "lines": [
+            "S9",
+            "S45"
+        ]
+    },
+    "S-Sh": {
+        "name": "Schönholz",
+        "coordinates": {
+            "latitude": 52.57150632376607,
+            "longitude": 13.380981428275703
+        },
+        "lines": [
+            "S1",
+            "S25",
+            "S85"
+        ]
+    },
+    "S-Skz": {
+        "name": "Südkreuz",
+        "coordinates": {
+            "latitude": 52.47599314817384,
+            "longitude": 13.365003992795835
+        },
+        "lines": [
+            "S2",
+            "S25",
+            "S26",
+            "S41",
+            "S42",
+            "S45",
+            "S46"
+        ]
+    },
+    "S-Spf": {
+        "name": "Spindlersfeld",
+        "coordinates": {
+            "latitude": 52.44691537220555,
+            "longitude": 13.561565579406874
+        },
+        "lines": [
+            "S47"
+        ]
+    },
+    "S-St": {
+        "name": "Strausberg",
+        "coordinates": {
+            "latitude": 52.53223380392106,
+            "longitude": 13.83368960314968
+        },
+        "lines": [
+            "S5"
+        ]
+    },
+    "S-StN": {
+        "name": "Strausberg Nord",
+        "coordinates": {
+            "latitude": 52.590293238904195,
+            "longitude": 13.908505507535097
+        },
+        "lines": [
+            "S5"
+        ]
+    },
+    "S-Str": {
+        "name": "Stresow",
+        "coordinates": {
+            "latitude": 52.531945986954725,
+            "longitude": 13.2093447613249
+        },
+        "lines": [
+            "S3",
+            "S9"
+        ]
+    },
+    "S-SuS": {
+        "name": "Sundgauer Straße",
+        "coordinates": {
+            "latitude": 52.436440635597336,
+            "longitude": 13.27419084043828
+        },
+        "lines": [
+            "S1"
+        ]
+    },
+    "S-TP": {
+        "name": "Treptower Park",
+        "coordinates": {
+            "latitude": 52.49384672072847,
+            "longitude": 13.461819533243897
+        },
+        "lines": [
+            "S8",
+            "S9",
+            "S41",
+            "S42",
+            "S85"
+        ]
+    },
+    "S-TS": {
+        "name": "Teltow Stadt",
+        "coordinates": {
+            "latitude": 52.396850784626025,
+            "longitude": 13.276256805199665
+        },
+        "lines": [
+            "S25",
+            "S26"
+        ]
+    },
+    "S-Tg": {
+        "name": "Tiergarten",
+        "coordinates": {
+            "latitude": 52.51439039715447,
+            "longitude": 13.336458275641945
+        },
+        "lines": [
+            "S3",
+            "S5",
+            "S7",
+            "S9"
+        ]
+    },
+    "S-ULi": {
+        "name": "Lichtenberg",
+        "coordinates": {
+            "latitude": 52.510675987022125,
+            "longitude": 13.498210990679752
+        },
+        "lines": [
+            "U5",
+            "S5",
+            "S7",
+            "S75"
+        ]
+    },
+    "S-UWe": {
+        "name": "Wedding",
+        "coordinates": {
+            "latitude": 52.54252098662721,
+            "longitude": 13.366096046568202
+        },
+        "lines": [
+            "U6",
+            "S41",
+            "S42"
+        ]
+    },
+    "S-W": {
+        "name": "Waidmannslust",
+        "coordinates": {
+            "latitude": 52.606271853798034,
+            "longitude": 13.321191771180168
+        },
+        "lines": [
+            "S1",
+            "S85"
+        ]
+    },
+    "S-Wa": {
+        "name": "Wannsee",
+        "coordinates": {
+            "latitude": 52.42142365719005,
+            "longitude": 13.179783408106715
+        },
+        "lines": [
+            "S1",
+            "S7"
+        ]
+    },
+    "S-Wb": {
+        "name": "Wartenberg",
+        "coordinates": {
+            "latitude": 52.57298288360968,
+            "longitude": 13.503832489572574
+        },
+        "lines": [
+            "S75"
+        ]
+    },
+    "S-Wd": {
+        "name": "Waßmannsdorf",
+        "coordinates": {
+            "latitude": 52.36828545289484,
+            "longitude": 13.463432804602576
+        },
+        "lines": [
+            "S9",
+            "S45"
+        ]
+    },
+    "S-We": {
+        "name": "Westend",
+        "coordinates": {
+            "latitude": 52.51800203972138,
+            "longitude": 13.284417179594556
+        },
+        "lines": [
+            "S41",
+            "S42",
+            "S46"
+        ]
+    },
+    "S-Wh": {
+        "name": "Wilhelmshagen",
+        "coordinates": {
+            "latitude": 52.43849544258998,
+            "longitude": 13.72233368992778
+        },
+        "lines": [
+            "S3"
+        ]
+    },
+    "S-Wkz": {
+        "name": "Westkreuz",
+        "coordinates": {
+            "latitude": 52.50079421678501,
+            "longitude": 13.283921188791652
+        },
+        "lines": [
+            "S3",
+            "S5",
+            "S7",
+            "S9",
+            "S41",
+            "S42",
+            "S46"
+        ]
+    },
+    "S-Wld": {
+        "name": "Wildau",
+        "coordinates": {
+            "latitude": 52.31942184277858,
+            "longitude": 13.633796481223953
+        },
+        "lines": [
+            "S8",
+            "S46"
+        ]
+    },
+    "S-Wlh": {
+        "name": "Wuhlheide",
+        "coordinates": {
+            "latitude": 52.46855503183164,
+            "longitude": 13.55432463299806
+        },
+        "lines": [
+            "S3"
+        ]
+    },
+    "S-WoS": {
+        "name": "Wollankstraße",
+        "coordinates": {
+            "latitude": 52.565188563100236,
+            "longitude": 13.39239474937986
+        },
+        "lines": [
+            "S1",
+            "S25",
+            "S85"
+        ]
+    },
+    "S-Wr": {
+        "name": "Wilhelmsruh",
+        "coordinates": {
+            "latitude": 52.5816925841539,
+            "longitude": 13.362240735817181
+        },
+        "lines": [
+            "S1",
+            "S85"
+        ]
+    },
+    "S-Ze": {
+        "name": "Zehlendorf",
+        "coordinates": {
+            "latitude": 52.43106724989431,
+            "longitude": 13.258607052244827
+        },
+        "lines": [
+            "S1"
+        ]
+    },
+    "S-Zep": {
+        "name": "Zepernick",
+        "coordinates": {
+            "latitude": 52.65968264914693,
+            "longitude": 13.533848153750881
+        },
+        "lines": [
+            "S2"
+        ]
+    },
+    "S-Zeu": {
+        "name": "Zeuthen",
+        "coordinates": {
+            "latitude": 52.34844638158367,
+            "longitude": 13.627641020513778
+        },
+        "lines": [
+            "S8",
+            "S46"
+        ]
+    },
+    "SM-Ad": {
+        "name": "Adlershof",
+        "coordinates": {
+            "latitude": 52.434737049866555,
+            "longitude": 13.54158320841833
+        },
+        "lines": [
+            "S8",
+            "S9",
+            "S45",
+            "S46",
+            "S85",
+            "M17"
+        ]
+    },
+    "SM-Ah": {
+        "name": "Ahrensfelde",
+        "coordinates": {
+            "latitude": 52.57133952885113,
+            "longitude": 13.565658651249521
+        },
+        "lines": [
+            "S7",
+            "M8"
+        ]
+    },
+    "SM-BoS": {
+        "name": "Bornholmer Straße",
+        "coordinates": {
+            "latitude": 52.55477089178501,
+            "longitude": 13.397822002836676
+        },
+        "lines": [
+            "S1",
+            "S2",
+            "S8",
+            "S25",
+            "S26",
+            "S85",
+            "M1",
+            "M13"
+        ]
+    },
+    "SM-FfO": {
+        "name": "Friedrichsfelde Ost",
+        "coordinates": {
+            "latitude": 52.51411927342633,
+            "longitude": 13.520081500988965
+        },
+        "lines": [
+            "S5",
+            "S7",
+            "S75",
+            "M17"
+        ]
+    },
+    "SM-GrS": {
+        "name": "Greifswalder Straße",
+        "coordinates": {
+            "latitude": 52.54024825279254,
+            "longitude": 13.438985778465877
+        },
+        "lines": [
+            "S8",
+            "S41",
+            "S42",
+            "S85",
+            "M4",
+            "M10"
+        ]
+    },
+    "SM-Gs": {
+        "name": "Gehrenseestraße",
+        "coordinates": {
+            "latitude": 52.55584435315586,
+            "longitude": 13.525830125443235
+        },
+        "lines": [
+            "S75",
+            "M5",
+            "M17"
+        ]
+    },
+    "SM-HM": {
+        "name": "Hackescher Markt",
+        "coordinates": {
+            "latitude": 52.522680277367414,
+            "longitude": 13.402343468615896
+        },
+        "lines": [
+            "S3",
+            "S5",
+            "S7",
+            "S9",
+            "M1",
+            "M4",
+            "M5",
+            "M6"
+        ]
+    },
+    "SM-HSH": {
+        "name": "Hohenschönhausen",
+        "coordinates": {
+            "latitude": 52.56627441894349,
+            "longitude": 13.51250029042896
+        },
+        "lines": [
+            "S75",
+            "M4",
+            "M17"
+        ]
+    },
+    "SM-Kh": {
+        "name": "Karlshorst",
+        "coordinates": {
+            "latitude": 52.48047203535731,
+            "longitude": 13.527267174664189
+        },
+        "lines": [
+            "S3",
+            "M17"
+        ]
+    },
+    "SM-LaA": {
+        "name": "Landsberger Allee",
+        "coordinates": {
+            "latitude": 52.52948316342784,
+            "longitude": 13.454759154527181
+        },
+        "lines": [
+            "S8",
+            "S41",
+            "S42",
+            "S85",
+            "M5",
+            "M6",
+            "M8",
+            "M10",
+            "M13"
+        ]
+    },
+    "SM-Maz": {
+        "name": "Marzahn",
+        "coordinates": {
+            "latitude": 52.54365475380672,
+            "longitude": 13.541356480429641
+        },
+        "lines": [
+            "S7",
+            "M6"
+        ]
+    },
+    "SM-NB": {
+        "name": "Nordbahnhof",
+        "coordinates": {
+            "latitude": 52.53227935061409,
+            "longitude": 13.387832771354482
+        },
+        "lines": [
+            "S1",
+            "S2",
+            "S25",
+            "S26",
+            "M8",
+            "M10"
+        ]
+    },
+    "SM-OrS": {
+        "name": "Oranienburger Straße",
+        "coordinates": {
+            "latitude": 52.52522273354742,
+            "longitude": 13.393012961994373
+        },
+        "lines": [
+            "S1",
+            "S2",
+            "S25",
+            "S26",
+            "M1",
+            "M5"
+        ]
+    },
+    "SM-PrA": {
+        "name": "Prenzlauer Allee",
+        "coordinates": {
+            "latitude": 52.545256519429614,
+            "longitude": 13.427610793078344
+        },
+        "lines": [
+            "S8",
+            "S41",
+            "S42",
+            "S85",
+            "M2",
+            "M8",
+            "M13"
+        ]
+    },
+    "SM-Spl": {
+        "name": "Springpfuhl",
+        "coordinates": {
+            "latitude": 52.52704029576719,
+            "longitude": 13.536562327113188
+        },
+        "lines": [
+            "S7",
+            "S75",
+            "M8"
+        ]
+    },
+    "SM-StS": {
+        "name": "Storkower Straße",
+        "coordinates": {
+            "latitude": 52.52375022925449,
+            "longitude": 13.464895936262337
+        },
+        "lines": [
+            "S8",
+            "S41",
+            "S42",
+            "S85",
+            "M13"
+        ]
+    },
+    "SM-Sw": {
+        "name": "Schöneweide",
+        "coordinates": {
+            "latitude": 52.45488773737367,
+            "longitude": 13.509709562039006
+        },
+        "lines": [
+            "S8",
+            "S9",
+            "S45",
+            "S46",
+            "S47",
+            "S85",
+            "M17"
+        ]
+    },
+    "SU-BRT": {
+        "name": "Brandenburger Tor",
+        "coordinates": {
+            "latitude": 52.51661840399382,
+            "longitude": 13.380975569557677
+        },
+        "lines": [
+            "U5",
+            "S1",
+            "S2",
+            "S25",
+            "S26"
+        ]
+    },
+    "SU-Bs": {
+        "name": "Bundesplatz",
+        "coordinates": {
+            "latitude": 52.477646743794764,
+            "longitude": 13.328885320245575
+        },
+        "lines": [
+            "U9",
+            "S41",
+            "S42",
+            "S45",
+            "S46"
+        ]
+    },
+    "SU-Chb": {
+        "name": "Charlottenburg",
+        "coordinates": {
+            "latitude": 52.50503957802886,
+            "longitude": 13.304525314626375
+        },
+        "lines": [
+            "S3",
+            "S5",
+            "S7",
+            "S9",
+            "S45"
+        ]
+    },
+    "SU-Gb": {
+        "name": "Gesundbrunnen",
+        "coordinates": {
+            "latitude": 52.548917990474564,
+            "longitude": 13.388910034420718
+        },
+        "lines": [
+            "U8",
+            "S1",
+            "S2",
+            "S25",
+            "S26",
+            "S41",
+            "S42"
+        ]
+    },
+    "SU-HMS": {
+        "name": "Hermannstraße",
+        "coordinates": {
+            "latitude": 52.46724851469642,
+            "longitude": 13.431478848765067
+        },
+        "lines": [
+            "U8",
+            "S41",
+            "S42",
+            "S45",
+            "S46",
+            "S47"
+        ]
+    },
+    "SU-Hb": {
+        "name": "Heidelberger Platz",
+        "coordinates": {
+            "latitude": 52.479826248866374,
+            "longitude": 13.31289330772151
+        },
+        "lines": [
+            "U3",
+            "S41",
+            "S42",
+            "S45",
+            "S46"
+        ]
+    },
+    "SU-Ip": {
+        "name": "Innsbrucker Platz",
+        "coordinates": {
+            "latitude": 52.47898716627316,
+            "longitude": 13.343674511575102
+        },
+        "lines": [
+            "U4",
+            "S41",
+            "S42",
+            "S45",
+            "S46"
+        ]
+    },
+    "SU-J": {
+        "name": "Jannowitzbrücke",
+        "coordinates": {
+            "latitude": 52.51534963353936,
+            "longitude": 13.418168279445752
+        },
+        "lines": [
+            "U8",
+            "S3",
+            "S5",
+            "S7",
+            "S9"
+        ]
+    },
+    "SU-Jho": {
+        "name": "Jungfernheide",
+        "coordinates": {
+            "latitude": 52.53078678114559,
+            "longitude": 13.300614806321846
+        },
+        "lines": [
+            "U7",
+            "S41",
+            "S42"
+        ]
+    },
+    "SU-KB": {
+        "name": "Karl-Bonhoeffer-Nervenklinik",
+        "coordinates": {
+            "latitude": 52.57862744286831,
+            "longitude": 13.333497007690767
+        },
+        "lines": [
+            "U8",
+            "S25"
+        ]
+    },
+    "SU-MNI": {
+        "name": "Messe Nord/ICC",
+        "coordinates": {
+            "latitude": 52.50770556383728,
+            "longitude": 13.28345572200206
+        },
+        "lines": [
+            "S41",
+            "S42",
+            "S46"
+        ]
+    },
+    "SU-Nk": {
+        "name": "Neukölln",
+        "coordinates": {
+            "latitude": 52.469182571934425,
+            "longitude": 13.441841386333778
+        },
+        "lines": [
+            "U7",
+            "S41",
+            "S42",
+            "S45",
+            "S46",
+            "S47"
+        ]
+    },
+    "SU-PAH": {
+        "name": "Pankow-Heinersdorf",
+        "coordinates": {
+            "latitude": 52.57806624577108,
+            "longitude": 13.429505256669756
+        },
+        "lines": [
+            "S2",
+            "S8",
+            "S26"
+        ]
+    },
+    "SU-Pd": {
+        "name": "Potsdamer Platz",
+        "coordinates": {
+            "latitude": 52.50914559466656,
+            "longitude": 13.37820915242142
+        },
+        "lines": [
+            "U2",
+            "S1",
+            "S2",
+            "S25",
+            "S26"
+        ]
+    },
+    "SU-Rzu": {
+        "name": "Rathaus Steglitz",
+        "coordinates": {
+            "latitude": 52.45629009418093,
+            "longitude": 13.32177885644316
+        },
+        "lines": [
+            "U9",
+            "S1"
+        ]
+    },
+    "SU-S": {
+        "name": "Spandau",
+        "coordinates": {
+            "latitude": 52.53477813646717,
+            "longitude": 13.197446750429094
+        },
+        "lines": [
+            "S3",
+            "S9"
+        ]
+    },
+    "SU-Sd": {
+        "name": "Olympia-Stadion",
+        "coordinates": {
+            "latitude": 52.51683483000147,
+            "longitude": 13.250403365391207
+        },
+        "lines": [
+            "U2",
+            "S3",
+            "S9"
+        ]
+    },
+    "SU-Tg": {
+        "name": "Tegel",
+        "coordinates": {
+            "latitude": 52.588188657366004,
+            "longitude": 13.28968407067768
+        },
+        "lines": [
+            "S25"
+        ]
+    },
+    "SU-Ts": {
+        "name": "Tempelhof",
+        "coordinates": {
+            "latitude": 52.4704170148691,
+            "longitude": 13.385131628568047
+        },
+        "lines": [
+            "U6",
+            "S41",
+            "S42",
+            "S45",
+            "S46"
+        ]
+    },
+    "SU-WF": {
+        "name": "Westhafen",
+        "coordinates": {
+            "latitude": 52.53627585017986,
+            "longitude": 13.34441920621967
+        },
+        "lines": [
+            "U9",
+            "S41",
+            "S42"
+        ]
+    },
+    "SU-WIU": {
+        "name": "Wittenau",
+        "coordinates": {
+            "latitude": 52.59564077089752,
+            "longitude": 13.33470779255751
+        },
+        "lines": [
+            "U8",
+            "S1",
+            "S85"
+        ]
+    },
+    "SU-Wh": {
+        "name": "Wuhletal",
+        "coordinates": {
+            "latitude": 52.512612595867324,
+            "longitude": 13.575192957146982
+        },
+        "lines": [
+            "U5",
+            "S5"
+        ]
+    },
+    "SU-Y": {
+        "name": "Yorckstraße",
+        "coordinates": {
+            "latitude": 52.49297432782316,
+            "longitude": 13.370695294049767
+        },
+        "lines": [
+            "U7",
+            "S1",
+            "S2",
+            "S25",
+            "S26"
+        ]
+    },
+    "SU-Zo": {
+        "name": "Zoologischer Garten",
+        "coordinates": {
+            "latitude": 52.50715105514533,
+            "longitude": 13.331886833080347
+        },
+        "lines": [
+            "U2",
+            "U9",
+            "S3",
+            "S5",
+            "S7",
+            "S9"
+        ]
+    },
+    "SUM-A": {
+        "name": "Alexanderplatz",
+        "coordinates": {
+            "latitude": 52.52158475360679,
+            "longitude": 13.413909928437732
+        },
+        "lines": [
+            "U2",
+            "U5",
+            "U8",
+            "S3",
+            "S5",
+            "S7",
+            "S9",
+            "M2",
+            "M4",
+            "M5",
+            "M6"
+        ]
+    },
+    "SUM-Ff": {
+        "name": "Frankfurter Allee",
+        "coordinates": {
+            "latitude": 52.513627176017735,
+            "longitude": 13.475445264188181
+        },
+        "lines": [
+            "U5",
+            "S8",
+            "S41",
+            "S42",
+            "S85",
+            "M13"
+        ]
+    },
+    "SUM-Frs": {
+        "name": "Friedrichstraße",
+        "coordinates": {
+            "latitude": 52.52024702463257,
+            "longitude": 13.387515680392795
+        },
+        "lines": [
+            "U6",
+            "S1",
+            "S2",
+            "S3",
+            "S5",
+            "S7",
+            "S9",
+            "S25",
+            "S26",
+            "M1"
+        ]
+    },
+    "SUM-HBF": {
+        "name": "Hauptbahnhof",
+        "coordinates": {
+            "latitude": 52.52521428361473,
+            "longitude": 13.369363030781443
+        },
+        "lines": [
+            "U5",
+            "S3",
+            "S5",
+            "S7",
+            "S9",
+            "M5",
+            "M8",
+            "M10"
+        ]
+    },
+    "SUM-PA": {
+        "name": "Pankow",
+        "coordinates": {
+            "latitude": 52.56679151700152,
+            "longitude": 13.41171577649132
+        },
+        "lines": [
+            "U2",
+            "S2",
+            "S8",
+            "S26",
+            "M1"
+        ]
+    },
+    "SUM-Sh": {
+        "name": "Schönhauser Allee",
+        "coordinates": {
+            "latitude": 52.54938459656765,
+            "longitude": 13.414693514613475
+        },
+        "lines": [
+            "U2",
+            "S8",
+            "S41",
+            "S42",
+            "S85",
+            "M1",
+            "M13"
+        ]
+    },
+    "SUM-WA": {
+        "name": "Warschauer Straße",
+        "coordinates": {
+            "latitude": 52.50576865500821,
+            "longitude": 13.449336563276148
+        },
+        "lines": [
+            "U1",
+            "U3",
+            "S3",
+            "S5",
+            "S7",
+            "S9",
+            "S75",
+            "M10",
+            "M13"
+        ]
+    },
+    "U-AS": {
+        "name": "Altstadt-Spandau",
+        "coordinates": {
+            "latitude": 52.53884188949789,
+            "longitude": 13.206249030648536
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Ado": {
+        "name": "Adenauer Platz",
+        "coordinates": {
+            "latitude": 52.50000451375408,
+            "longitude": 13.307319652383967
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Afr": {
+        "name": "Afrikanische Straße",
+        "coordinates": {
+            "latitude": 52.56023984848616,
+            "longitude": 13.334620298220727
+        },
+        "lines": [
+            "U6"
+        ]
+    },
+    "U-At": {
+        "name": "Alt-Tempelhof",
+        "coordinates": {
+            "latitude": 52.46552767929282,
+            "longitude": 13.385626688180338
+        },
+        "lines": [
+            "U6"
+        ]
+    },
+    "U-Au": {
+        "name": "Augsburger Straße",
+        "coordinates": {
+            "latitude": 52.500486676310686,
+            "longitude": 13.336469515686446
+        },
+        "lines": [
+            "U3"
+        ]
+    },
+    "U-Beo": {
+        "name": "Berliner Straße",
+        "coordinates": {
+            "latitude": 52.48733843166056,
+            "longitude": 13.331018866866685
+        },
+        "lines": [
+            "U7",
+            "U9"
+        ]
+    },
+    "U-Bi": {
+        "name": "Birkenstraße",
+        "coordinates": {
+            "latitude": 52.53237397693337,
+            "longitude": 13.341358806477587
+        },
+        "lines": [
+            "U9"
+        ]
+    },
+    "U-Bl": {
+        "name": "Blaschkoallee",
+        "coordinates": {
+            "latitude": 52.4521217829363,
+            "longitude": 13.449176052255837
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Bli": {
+        "name": "Blissestraße",
+        "coordinates": {
+            "latitude": 52.486487040682476,
+            "longitude": 13.32052211999013
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Bmo": {
+        "name": "Bismarckstraße",
+        "coordinates": {
+            "latitude": 52.51151171547343,
+            "longitude": 13.30524401162657
+        },
+        "lines": [
+            "U2",
+            "U7"
+        ]
+    },
+    "U-Bo": {
+        "name": "Boddinstraße",
+        "coordinates": {
+            "latitude": 52.48016714999761,
+            "longitude": 13.425289655450285
+        },
+        "lines": [
+            "U8"
+        ]
+    },
+    "U-Bpu": {
+        "name": "Bayrischer Platz",
+        "coordinates": {
+            "latitude": 52.48859286130434,
+            "longitude": 13.340566036723288
+        },
+        "lines": [
+            "U4",
+            "U7"
+        ]
+    },
+    "U-Br": {
+        "name": "Britz Süd",
+        "coordinates": {
+            "latitude": 52.43782913951898,
+            "longitude": 13.448169538796577
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Bt": {
+        "name": "Breitenbachplatz",
+        "coordinates": {
+            "latitude": 52.46703033372626,
+            "longitude": 13.308867296775418
+        },
+        "lines": [
+            "U3"
+        ]
+    },
+    "U-Bu": {
+        "name": "Bundestag",
+        "coordinates": {
+            "latitude": 52.52011252969376,
+            "longitude": 13.372951427042096
+        },
+        "lines": [
+            "U5"
+        ]
+    },
+    "U-Bue": {
+        "name": "Bülowstraße",
+        "coordinates": {
+            "latitude": 52.497617107326164,
+            "longitude": 13.3631854921573
+        },
+        "lines": [
+            "U2"
+        ]
+    },
+    "U-Bü": {
+        "name": "Biesdorf-Süd",
+        "coordinates": {
+            "latitude": 52.49960387665061,
+            "longitude": 13.54652416627269
+        },
+        "lines": [
+            "U5"
+        ]
+    },
+    "U-C": {
+        "name": "Cottbusser Platz",
+        "coordinates": {
+            "latitude": 52.5338368011239,
+            "longitude": 13.596393211677906
+        },
+        "lines": [
+            "U5"
+        ]
+    },
+    "U-DD": {
+        "name": "Dahlem-Dorf",
+        "coordinates": {
+            "latitude": 52.457384410031835,
+            "longitude": 13.289682141177991
+        },
+        "lines": [
+            "U3"
+        ]
+    },
+    "U-E": {
+        "name": "Elsterwerdaer Platz",
+        "coordinates": {
+            "latitude": 52.50529237860792,
+            "longitude": 13.560881199885898
+        },
+        "lines": [
+            "U5"
+        ]
+    },
+    "U-Ei": {
+        "name": "Eisenacher Straße",
+        "coordinates": {
+            "latitude": 52.48957749606902,
+            "longitude": 13.350179660198677
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-FN": {
+        "name": "Franz-Neumann-Platz",
+        "coordinates": {
+            "latitude": 52.56454659447431,
+            "longitude": 13.363917069862026
+        },
+        "lines": [
+            "U8"
+        ]
+    },
+    "U-Fbs": {
+        "name": "Feuerbachstraße",
+        "coordinates": {
+            "latitude": 52.46366858232227,
+            "longitude": 13.332704195617424
+        },
+        "lines": [
+            "S1"
+        ]
+    },
+    "U-Fi": {
+        "name": "Friedrichsfelde",
+        "coordinates": {
+            "latitude": 52.50615420677204,
+            "longitude": 13.512846071137943
+        },
+        "lines": [
+            "U5"
+        ]
+    },
+    "U-Fpo": {
+        "name": "Fehrbelliner Platz",
+        "coordinates": {
+            "latitude": 52.49056086919134,
+            "longitude": 13.315115415869883
+        },
+        "lines": [
+            "U3",
+            "U7"
+        ]
+    },
+    "U-Fw": {
+        "name": "Friedrich-Wilhelm-Platz",
+        "coordinates": {
+            "latitude": 52.47213264477739,
+            "longitude": 13.328734261912842
+        },
+        "lines": [
+            "U9"
+        ]
+    },
+    "U-GK": {
+        "name": "Kienberg (Gärten der Welt)",
+        "coordinates": {
+            "latitude": 52.528625784222356,
+            "longitude": 13.59065952539163
+        },
+        "lines": [
+            "U5"
+        ]
+    },
+    "U-Go": {
+        "name": "Gleisdreieck",
+        "coordinates": {
+            "latitude": 52.49952468649019,
+            "longitude": 13.374029341875143
+        },
+        "lines": [
+            "U1",
+            "U2",
+            "U3"
+        ]
+    },
+    "U-Gr": {
+        "name": "Görlitzer Bahnhof",
+        "coordinates": {
+            "latitude": 52.49925912573195,
+            "longitude": 13.428040141032824
+        },
+        "lines": [
+            "U1",
+            "U3"
+        ]
+    },
+    "U-Gs": {
+        "name": "Gneisenaustraße",
+        "coordinates": {
+            "latitude": 52.491287792962424,
+            "longitude": 13.39582160840456
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Gt": {
+        "name": "Güntzelstraße",
+        "coordinates": {
+            "latitude": 52.49206864099776,
+            "longitude": 13.331002845117467
+        },
+        "lines": [
+            "U9"
+        ]
+    },
+    "U-Gz": {
+        "name": "Grenzallee",
+        "coordinates": {
+            "latitude": 52.462879080615835,
+            "longitude": 13.444761707804048
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Ha": {
+        "name": "Hansaplatz",
+        "coordinates": {
+            "latitude": 52.51800512092953,
+            "longitude": 13.342038035573722
+        },
+        "lines": [
+            "U9"
+        ]
+    },
+    "U-HaT": {
+        "name": "Hallesches Tor",
+        "coordinates": {
+            "latitude": 52.49776431163335,
+            "longitude": 13.390640531660353
+        },
+        "lines": [
+            "U1",
+            "U3",
+            "U6"
+        ]
+    },
+    "U-He": {
+        "name": "Heinrich-Heine-Straße",
+        "coordinates": {
+            "latitude": 52.510443486484434,
+            "longitude": 13.416026152345921
+        },
+        "lines": [
+            "U8"
+        ]
+    },
+    "U-Hl": {
+        "name": "Halemweg",
+        "coordinates": {
+            "latitude": 52.536675159789525,
+            "longitude": 13.286119662034395
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Hpu": {
+        "name": "Hermannplatz",
+        "coordinates": {
+            "latitude": 52.48629702019309,
+            "longitude": 13.424549605923573
+        },
+        "lines": [
+            "U7",
+            "U8"
+        ]
+    },
+    "U-Hs": {
+        "name": "Haselhorst",
+        "coordinates": {
+            "latitude": 52.53870599648869,
+            "longitude": 13.233127356285706
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Hv": {
+        "name": "Hausvogteiplatz",
+        "coordinates": {
+            "latitude": 52.513346994663635,
+            "longitude": 13.395592845606899
+        },
+        "lines": [
+            "U2"
+        ]
+    },
+    "U-Hz": {
+        "name": "Hohenzollernplatz",
+        "coordinates": {
+            "latitude": 52.49409407138691,
+            "longitude": 13.324741572972073
+        },
+        "lines": [
+            "U3"
+        ]
+    },
+    "U-Hö": {
+        "name": "Hönow",
+        "coordinates": {
+            "latitude": 52.53845213803834,
+            "longitude": 13.633126695663236
+        },
+        "lines": [
+            "U5"
+        ]
+    },
+    "U-JK": {
+        "name": "Jakob Kaiser Platz",
+        "coordinates": {
+            "latitude": 52.5364310976052,
+            "longitude": 13.293392312282265
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Jt": {
+        "name": "Johannisthaler Chaussee",
+        "coordinates": {
+            "latitude": 52.42933817740163,
+            "longitude": 13.453318925778717
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-KL": {
+        "name": "Kaulsdorf-Nord",
+        "coordinates": {
+            "latitude": 52.52115789551493,
+            "longitude": 13.588918436156263
+        },
+        "lines": [
+            "U5"
+        ]
+    },
+    "U-KM": {
+        "name": "Karl-Marx-Straße",
+        "coordinates": {
+            "latitude": 52.476264793503134,
+            "longitude": 13.439340868415997
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Ka": {
+        "name": "Kaiserin-Augusta-Straße",
+        "coordinates": {
+            "latitude": 52.45997085595789,
+            "longitude": 13.384608775842764
+        },
+        "lines": [
+            "U6"
+        ]
+    },
+    "U-Kbo": {
+        "name": "Kottbusser Tor",
+        "coordinates": {
+            "latitude": 52.49899215011615,
+            "longitude": 13.418309275866363
+        },
+        "lines": [
+            "U1",
+            "U3",
+            "U8"
+        ]
+    },
+    "U-Kd": {
+        "name": "Kaiserdamm",
+        "coordinates": {
+            "latitude": 52.51008683081932,
+            "longitude": 13.28310366028748
+        },
+        "lines": [
+            "U2"
+        ]
+    },
+    "U-Kfu": {
+        "name": "Kurfürstendamm",
+        "coordinates": {
+            "latitude": 52.503835118337435,
+            "longitude": 13.33139323651622
+        },
+        "lines": [
+            "U1",
+            "U9"
+        ]
+    },
+    "U-Kn": {
+        "name": "Konstanzer Straße",
+        "coordinates": {
+            "latitude": 52.49453466670329,
+            "longitude": 13.309058026400066
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Ko": {
+        "name": "Kloster Straße",
+        "coordinates": {
+            "latitude": 52.51723678327738,
+            "longitude": 13.412422762101698
+        },
+        "lines": [
+            "U2"
+        ]
+    },
+    "U-Kr": {
+        "name": "Krumme Lanke",
+        "coordinates": {
+            "latitude": 52.44346835460266,
+            "longitude": 13.241381454626179
+        },
+        "lines": [
+            "U3"
+        ]
+    },
+    "U-Ks": {
+        "name": "Kochstraße (Checkpoint Charlie)",
+        "coordinates": {
+            "latitude": 52.50603991236267,
+            "longitude": 13.390597653584223
+        },
+        "lines": [
+            "U6"
+        ]
+    },
+    "U-Kt": {
+        "name": "Kleistpark",
+        "coordinates": {
+            "latitude": 52.490355022084486,
+            "longitude": 13.360240294020343
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Kus": {
+        "name": "Kurfürstenstraße",
+        "coordinates": {
+            "latitude": 52.49997205510576,
+            "longitude": 13.361904131145394
+        },
+        "lines": [
+            "U1",
+            "U3"
+        ]
+    },
+    "U-L": {
+        "name": "Leinestraße",
+        "coordinates": {
+            "latitude": 52.47294946260803,
+            "longitude": 13.428319680083604
+        },
+        "lines": [
+            "U8"
+        ]
+    },
+    "U-LD": {
+        "name": "Lindauer Allee",
+        "coordinates": {
+            "latitude": 52.57541756928663,
+            "longitude": 13.338426480372704
+        },
+        "lines": [
+            "U8"
+        ]
+    },
+    "U-La": {
+        "name": "Lipschitzallee",
+        "coordinates": {
+            "latitude": 52.42464125301083,
+            "longitude": 13.462694616179675
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Lpu": {
+        "name": "Leopoldplatz",
+        "coordinates": {
+            "latitude": 52.54638399263291,
+            "longitude": 13.359173363387754
+        },
+        "lines": [
+            "U6",
+            "U9"
+        ]
+    },
+    "U-MB": {
+        "name": "Mendelssohn-Bartholdy-Park",
+        "coordinates": {
+            "latitude": 52.50373069587255,
+            "longitude": 13.37486427537928
+        },
+        "lines": [
+            "U2"
+        ]
+    },
+    "U-MH": {
+        "name": "Mohrenstraße",
+        "coordinates": {
+            "latitude": 52.51178744184193,
+            "longitude": 13.385103611022117
+        },
+        "lines": [
+            "U2"
+        ]
+    },
+    "U-Md": {
+        "name": "Magdalenenstraße",
+        "coordinates": {
+            "latitude": 52.51247776982194,
+            "longitude": 13.487067103080761
+        },
+        "lines": [
+            "U5"
+        ]
+    },
+    "U-Me": {
+        "name": "Mehringdamm",
+        "coordinates": {
+            "latitude": 52.49411969285654,
+            "longitude": 13.388617584781144
+        },
+        "lines": [
+            "U6",
+            "U7"
+        ]
+    },
+    "U-Mf": {
+        "name": "Alt-Mariendorf",
+        "coordinates": {
+            "latitude": 52.439693943244094,
+            "longitude": 13.387504000560341
+        },
+        "lines": [
+            "U6"
+        ]
+    },
+    "U-Mi": {
+        "name": "Stadtmitte",
+        "coordinates": {
+            "latitude": 52.51060465728949,
+            "longitude": 13.38981249267141
+        },
+        "lines": [
+            "U2",
+            "U6"
+        ]
+    },
+    "U-Mk": {
+        "name": "Märkisches Museum",
+        "coordinates": {
+            "latitude": 52.5123423494104,
+            "longitude": 13.410156814535839
+        },
+        "lines": [
+            "U2"
+        ]
+    },
+    "U-Mo": {
+        "name": "Möckernbrücke",
+        "coordinates": {
+            "latitude": 52.49869030287971,
+            "longitude": 13.382952782576325
+        },
+        "lines": [
+            "U1",
+            "U3",
+            "U7"
+        ]
+    },
+    "U-Mp": {
+        "name": "Mierendorffplatz",
+        "coordinates": {
+            "latitude": 52.5264233799148,
+            "longitude": 13.304777771636452
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Mr": {
+        "name": "Moritzplatz",
+        "coordinates": {
+            "latitude": 52.503663417049296,
+            "longitude": 13.410745069576649
+        },
+        "lines": [
+            "U8"
+        ]
+    },
+    "U-Ms": {
+        "name": "Museumsinsel",
+        "coordinates": {
+            "latitude": 52.517264498921804,
+            "longitude": 13.398871480364647
+        },
+        "lines": [
+            "U5"
+        ]
+    },
+    "U-Nd": {
+        "name": "Neu Westend",
+        "coordinates": {
+            "latitude": 52.51620172364511,
+            "longitude": 13.259259300898378
+        },
+        "lines": [
+            "U2"
+        ]
+    },
+    "U-Nm": {
+        "name": "Nollendorfplatz",
+        "coordinates": {
+            "latitude": 52.49960137673452,
+            "longitude": 13.353698440274883
+        },
+        "lines": [
+            "U1",
+            "U2",
+            "U3",
+            "U4"
+        ]
+    },
+    "U-Np": {
+        "name": "Nauener Platz",
+        "coordinates": {
+            "latitude": 52.5514051831702,
+            "longitude": 13.367174367036398
+        },
+        "lines": [
+            "U9"
+        ]
+    },
+    "U-Obi": {
+        "name": "Deutsche Oper",
+        "coordinates": {
+            "latitude": 52.511841502651464,
+            "longitude": 13.310542678017583
+        },
+        "lines": [
+            "U2"
+        ]
+    },
+    "U-Os": {
+        "name": "Oskar-Helene-Heim",
+        "coordinates": {
+            "latitude": 52.450372915919814,
+            "longitude": 13.269081392608598
+        },
+        "lines": [
+            "U3"
+        ]
+    },
+    "U-Ot": {
+        "name": "Onkel Toms Hütte",
+        "coordinates": {
+            "latitude": 52.44990287012803,
+            "longitude": 13.253050230163211
+        },
+        "lines": [
+            "U3"
+        ]
+    },
+    "U-P": {
+        "name": "Paulsternstraße",
+        "coordinates": {
+            "latitude": 52.53790929996944,
+            "longitude": 13.247806807858922
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-PB": {
+        "name": "Paracelsus-Bad",
+        "coordinates": {
+            "latitude": 52.5742387353402,
+            "longitude": 13.348482014907574
+        },
+        "lines": [
+            "U8"
+        ]
+    },
+    "U-PL": {
+        "name": "Platz der Luftbrücke",
+        "coordinates": {
+            "latitude": 52.486085692405766,
+            "longitude": 13.385951152366573
+        },
+        "lines": [
+            "U6"
+        ]
+    },
+    "U-Pi": {
+        "name": "Parchimer Allee",
+        "coordinates": {
+            "latitude": 52.44524298776193,
+            "longitude": 13.449530833941026
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Pks": {
+        "name": "Pankstraße",
+        "coordinates": {
+            "latitude": 52.55226960744437,
+            "longitude": 13.381449722503731
+        },
+        "lines": [
+            "U8"
+        ]
+    },
+    "U-Po": {
+        "name": "Podbielskiallee",
+        "coordinates": {
+            "latitude": 52.46412347717734,
+            "longitude": 13.295754469708868
+        },
+        "lines": [
+            "U3"
+        ]
+    },
+    "U-Pr": {
+        "name": "Prinzenstraße",
+        "coordinates": {
+            "latitude": 52.498397225840904,
+            "longitude": 13.405914369467723
+        },
+        "lines": [
+            "U1",
+            "U3"
+        ]
+    },
+    "U-Ps": {
+        "name": "Paradestraße",
+        "coordinates": {
+            "latitude": 52.47853281937745,
+            "longitude": 13.385630063412236
+        },
+        "lines": [
+            "U6"
+        ]
+    },
+    "U-RE": {
+        "name": "Residenzstraße",
+        "coordinates": {
+            "latitude": 52.57117800889685,
+            "longitude": 13.360469717285753
+        },
+        "lines": [
+            "U8"
+        ]
+    },
+    "U-RP": {
+        "name": "Ernst-Reuter-Platz",
+        "coordinates": {
+            "latitude": 52.51188493793791,
+            "longitude": 13.322164399678371
+        },
+        "lines": [
+            "U2"
+        ]
+    },
+    "U-RR": {
+        "name": "Rathaus Reinickendorf",
+        "coordinates": {
+            "latitude": 52.588372668996726,
+            "longitude": 13.325926085277757
+        },
+        "lines": [
+            "U8"
+        ]
+    },
+    "U-RS": {
+        "name": "Rathaus Schöneberg",
+        "coordinates": {
+            "latitude": 52.48317252016258,
+            "longitude": 13.34197980163114
+        },
+        "lines": [
+            "U4"
+        ]
+    },
+    "U-RSp": {
+        "name": "Rathaus Spandau",
+        "coordinates": {
+            "latitude": 52.53517336378184,
+            "longitude": 13.199770337041343
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-RUE": {
+        "name": "Rüdesheimer Platz",
+        "coordinates": {
+            "latitude": 52.47325378847543,
+            "longitude": 13.31442029211621
+        },
+        "lines": [
+            "U3"
+        ]
+    },
+    "U-Ra": {
+        "name": "Rotes Rathaus",
+        "coordinates": {
+            "latitude": 52.51884573517026,
+            "longitude": 13.408076953565228
+        },
+        "lines": [
+            "U5"
+        ]
+    },
+    "U-Rb": {
+        "name": "Rehberge",
+        "coordinates": {
+            "latitude": 52.556706048597306,
+            "longitude": 13.340973153055728
+        },
+        "lines": [
+            "U6"
+        ]
+    },
+    "U-Rd": {
+        "name": "Rudow",
+        "coordinates": {
+            "latitude": 52.41618723736849,
+            "longitude": 13.495394256545211
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Ri": {
+        "name": "Reinickendorfer Straße",
+        "coordinates": {
+            "latitude": 52.54004313886426,
+            "longitude": 13.370290663173478
+        },
+        "lines": [
+            "U6"
+        ]
+    },
+    "U-Rk": {
+        "name": "Rathaus Neukölln",
+        "coordinates": {
+            "latitude": 52.48165648057321,
+            "longitude": 13.434175596374757
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Rl": {
+        "name": "Ruhleben",
+        "coordinates": {
+            "latitude": 52.52567316114269,
+            "longitude": 13.24141969643523
+        },
+        "lines": [
+            "U2"
+        ]
+    },
+    "U-Rm": {
+        "name": "Rohrdamm",
+        "coordinates": {
+            "latitude": 52.537020147343696,
+            "longitude": 13.26234955373954
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Rw": {
+        "name": "Richard-Wagner-Platz",
+        "coordinates": {
+            "latitude": 52.51739320199016,
+            "longitude": 13.306589849135975
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-S": {
+        "name": "Schlesisches Tor",
+        "coordinates": {
+            "latitude": 52.500839421685754,
+            "longitude": 13.441458862040918
+        },
+        "lines": [
+            "U1",
+            "U3"
+        ]
+    },
+    "U-ST": {
+        "name": "Schönleinstraße",
+        "coordinates": {
+            "latitude": 52.49305626902435,
+            "longitude": 13.422052068684394
+        },
+        "lines": [
+            "U8"
+        ]
+    },
+    "U-Sa": {
+        "name": "Samariter Straße",
+        "coordinates": {
+            "latitude": 52.5147333440525,
+            "longitude": 13.46443091850088
+        },
+        "lines": [
+            "U5"
+        ]
+    },
+    "U-Sch": {
+        "name": "Kurt-Schumacher-Platz",
+        "coordinates": {
+            "latitude": 52.56323316292418,
+            "longitude": 13.327117706396677
+        },
+        "lines": [
+            "U6"
+        ]
+    },
+    "U-Si": {
+        "name": "Schillingstraße",
+        "coordinates": {
+            "latitude": 52.52079169173754,
+            "longitude": 13.421109392557014
+        },
+        "lines": [
+            "U5"
+        ]
+    },
+    "U-Sie": {
+        "name": "Siemensdamm",
+        "coordinates": {
+            "latitude": 52.53678402739041,
+            "longitude": 13.272799996101497
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Sk": {
+        "name": "Schwartzkopffstraße",
+        "coordinates": {
+            "latitude": 52.53516033422582,
+            "longitude": 13.377316757053364
+        },
+        "lines": [
+            "U6"
+        ]
+    },
+    "U-Slo": {
+        "name": "Schloßstraße",
+        "coordinates": {
+            "latitude": 52.46148060471478,
+            "longitude": 13.325056802665415
+        },
+        "lines": [
+            "U9"
+        ]
+    },
+    "U-Sno": {
+        "name": "Spichernstraße",
+        "coordinates": {
+            "latitude": 52.49643468742741,
+            "longitude": 13.331012496840088
+        },
+        "lines": [
+            "U3",
+            "U9"
+        ]
+    },
+    "U-So": {
+        "name": "Sophie-Charlotte-Platz",
+        "coordinates": {
+            "latitude": 52.51091816213409,
+            "longitude": 13.296329591640841
+        },
+        "lines": [
+            "U2"
+        ]
+    },
+    "U-Sp": {
+        "name": "Spittelmarkt",
+        "coordinates": {
+            "latitude": 52.51129188431449,
+            "longitude": 13.40412770353123
+        },
+        "lines": [
+            "U2"
+        ]
+    },
+    "U-Sr": {
+        "name": "Strausberger Platz",
+        "coordinates": {
+            "latitude": 52.5181030085142,
+            "longitude": 13.4315094869213
+        },
+        "lines": [
+            "U5"
+        ]
+    },
+    "U-Su": {
+        "name": "Südstern",
+        "coordinates": {
+            "latitude": 52.48931793680438,
+            "longitude": 13.40767017964501
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Sz": {
+        "name": "Senefelderplatz",
+        "coordinates": {
+            "latitude": 52.532389502723476,
+            "longitude": 13.412687503271002
+        },
+        "lines": [
+            "U2"
+        ]
+    },
+    "U-T": {
+        "name": "Freie Universität (Thielplatz)",
+        "coordinates": {
+            "latitude": 52.45105589319979,
+            "longitude": 13.2817493817291
+        },
+        "lines": [
+            "U3"
+        ]
+    },
+    "U-Th": {
+        "name": "Theodor-Heuss-Platz",
+        "coordinates": {
+            "latitude": 52.50999462008639,
+            "longitude": 13.272222439364015
+        },
+        "lines": [
+            "U2"
+        ]
+    },
+    "U-U": {
+        "name": "Uhlandstraße",
+        "coordinates": {
+            "latitude": 52.502837443202964,
+            "longitude": 13.326670737362036
+        },
+        "lines": [
+            "U1"
+        ]
+    },
+    "U-UDU": {
+        "name": "Unter den Linden",
+        "coordinates": {
+            "latitude": 52.51698797927253,
+            "longitude": 13.388818251010832
+        },
+        "lines": [
+            "U5",
+            "U6"
+        ]
+    },
+    "U-Ull": {
+        "name": "Ullsteinstraße",
+        "coordinates": {
+            "latitude": 52.45374859575384,
+            "longitude": 13.384439960604055
+        },
+        "lines": [
+            "U6"
+        ]
+    },
+    "U-V": {
+        "name": "Viktoria-Luise-Platz",
+        "coordinates": {
+            "latitude": 52.49618363081879,
+            "longitude": 13.343181463966943
+        },
+        "lines": [
+            "U4"
+        ]
+    },
+    "U-Vo": {
+        "name": "Voltastraße",
+        "coordinates": {
+            "latitude": 52.54229213243312,
+            "longitude": 13.392854748220458
+        },
+        "lines": [
+            "U8"
+        ]
+    },
+    "U-W": {
+        "name": "Weinmeisterstraße",
+        "coordinates": {
+            "latitude": 52.525467894743656,
+            "longitude": 13.405019360141694
+        },
+        "lines": [
+            "U8"
+        ]
+    },
+    "U-WR": {
+        "name": "Weberwiese",
+        "coordinates": {
+            "latitude": 52.51676967487191,
+            "longitude": 13.44474125104108
+        },
+        "lines": [
+            "U5"
+        ]
+    },
+    "U-Wd": {
+        "name": "Wilmersdorfer Straße",
+        "coordinates": {
+            "latitude": 52.5066732911431,
+            "longitude": 13.306630201435127
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Wk": {
+        "name": "Wutzkyallee",
+        "coordinates": {
+            "latitude": 52.42333409200771,
+            "longitude": 13.474553345421072
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Wl": {
+        "name": "Westphalweg",
+        "coordinates": {
+            "latitude": 52.44623951880109,
+            "longitude": 13.385672060446183
+        },
+        "lines": [
+            "U6"
+        ]
+    },
+    "U-Wsg": {
+        "name": "Walther-Schreiber-Platz",
+        "coordinates": {
+            "latitude": 52.46534179783416,
+            "longitude": 13.328258848165575
+        },
+        "lines": [
+            "U9"
+        ]
+    },
+    "U-Wt": {
+        "name": "Wittenbergplatz",
+        "coordinates": {
+            "latitude": 52.50179869829708,
+            "longitude": 13.342996266063494
+        },
+        "lines": [
+            "U1",
+            "U2",
+            "U3"
+        ]
+    },
+    "U-Zd": {
+        "name": "Zwickauer Damm",
+        "coordinates": {
+            "latitude": 52.42338668234191,
+            "longitude": 13.483921023353275
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "U-Zi": {
+        "name": "Zitadelle",
+        "coordinates": {
+            "latitude": 52.53767530952763,
+            "longitude": 13.217500629799758
+        },
+        "lines": [
+            "U7"
+        ]
+    },
+    "UM-Am": {
+        "name": "Amrumer Straße",
+        "coordinates": {
+            "latitude": 52.54233462216217,
+            "longitude": 13.3501448571524
+        },
+        "lines": [
+            "U9",
+            "M13"
+        ]
+    },
+    "UM-B": {
+        "name": "Bernauer Straße",
+        "coordinates": {
+            "latitude": 52.537441310538384,
+            "longitude": 13.396615864950519
+        },
+        "lines": [
+            "U8",
+            "M10"
+        ]
+    },
+    "UM-EB": {
+        "name": "Eberswalder Straße",
+        "coordinates": {
+            "latitude": 52.541510349369474,
+            "longitude": 13.412187246893353
+        },
+        "lines": [
+            "U2",
+            "M1",
+            "M10"
+        ]
+    },
+    "UM-Ft": {
+        "name": "Frankfurter Tor",
+        "coordinates": {
+            "latitude": 52.515838117616056,
+            "longitude": 13.453982017388682
+        },
+        "lines": [
+            "U5",
+            "M10"
+        ]
+    },
+    "UM-H": {
+        "name": "Hellersdorf",
+        "coordinates": {
+            "latitude": 52.53668164468644,
+            "longitude": 13.606669852325496
+        },
+        "lines": [
+            "U5",
+            "M6"
+        ]
+    },
+    "UM-LL": {
+        "name": "Louis-Lewin-Straße",
+        "coordinates": {
+            "latitude": 52.538985513121645,
+            "longitude": 13.61834680851888
+        },
+        "lines": [
+            "U5",
+            "M6"
+        ]
+    },
+    "UM-Lu": {
+        "name": "Rosa-Luxemburg-Platz",
+        "coordinates": {
+            "latitude": 52.52769587558723,
+            "longitude": 13.410483427785294
+        },
+        "lines": [
+            "U2",
+            "M8"
+        ]
+    },
+    "UM-NA": {
+        "name": "Naturkundemuseum",
+        "coordinates": {
+            "latitude": 52.53127506108444,
+            "longitude": 13.382158151362859
+        },
+        "lines": [
+            "U6",
+            "M5",
+            "M8",
+            "M10"
+        ]
+    },
+    "UM-Ob": {
+        "name": "Oranienburger Tor",
+        "coordinates": {
+            "latitude": 52.52560158138314,
+            "longitude": 13.387359266990046
+        },
+        "lines": [
+            "U6",
+            "M1",
+            "M5"
+        ]
+    },
+    "UM-Olu": {
+        "name": "Osloer Straße",
+        "coordinates": {
+            "latitude": 52.55716430726028,
+            "longitude": 13.373267488971862
+        },
+        "lines": [
+            "U8",
+            "U9",
+            "M13"
+        ]
+    },
+    "UM-Ro": {
+        "name": "Rosenthaler Platz",
+        "coordinates": {
+            "latitude": 52.529918168106974,
+            "longitude": 13.401069427270272
+        },
+        "lines": [
+            "U8",
+            "M1",
+            "M8"
+        ]
+    },
+    "UM-Se": {
+        "name": "Seestraße",
+        "coordinates": {
+            "latitude": 52.549804440688575,
+            "longitude": 13.353111472349383
+        },
+        "lines": [
+            "U6",
+            "M13"
+        ]
+    },
+    "UM-Tk": {
+        "name": "Tierpark",
+        "coordinates": {
+            "latitude": 52.49778992690432,
+            "longitude": 13.522938471264155
+        },
+        "lines": [
+            "U5",
+            "M17"
+        ]
+    },
+    "UM-Tm": {
+        "name": "Turmstraße",
+        "coordinates": {
+            "latitude": 52.52615073182113,
+            "longitude": 13.341282507237821
+        },
+        "lines": [
+            "U9",
+            "M10"
+        ]
+    },
+    "UM-VIN": {
+        "name": "Vinetastraße",
+        "coordinates": {
+            "latitude": 52.55933475710921,
+            "longitude": 13.413277828299073
+        },
+        "lines": [
+            "U2",
+            "M1"
+        ]
+    }
+}
