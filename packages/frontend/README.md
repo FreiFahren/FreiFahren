@@ -29,9 +29,21 @@ This repository contains the frontend code for the FreiFahren web application. T
     ```sh
     REACT_APP_JAWG_ACCESS_TOKEN=YOUR_JAWG_ACCESS_TOKEN
     REACT_APP_API_URL=http://localhost:8080
+
+    // Map view. Default values are the Berlin view.
+    REACT_APP_MAP_CENTER_LNG=13.388
+    REACT_APP_MAP_CENTER_LAT=52.5162
+    REACT_APP_MAP_BOUNDS_SW_LNG=12.8364646484805
+    REACT_APP_MAP_BOUNDS_SW_LAT=52.23115511676795
+    REACT_APP_MAP_BOUNDS_NE_LNG=14.00044556529124
+    REACT_APP_MAP_BOUNDS_NE_LAT=52.77063424239867
     ```
 
-    You can get a free access token from [Jawg](https://www.jawg.io/)
+    You can get a free access token from [Jawg](https://www.jawg.io/).
+
+    You can get the map view bounds easier from [OpenStreetMap](https://www.openstreetmap.org/). Right click to center the map and the coordinates and zoom level will be shown in the URL. 
+    
+    Add routes by right clicking on the upper left corner and lower right corner of the map to get North East and South West bounds, shown in the URL as well.
 
 4. Run the app
     ```sh

@@ -20,14 +20,23 @@ interface FreifahrenMapProps {
     isRiskLayerOpen: boolean
     onRotationChange: (bearing: number) => void
 }
-
-const berlinViewPosition: { lng: number; lat: number } = { lng: 13.388, lat: 52.5162 }
+// Incase of using environment variables, we need to use the process.env.REACT_APP_MAP_CENTER_LNG and process.env.REACT_APP_MAP_CENTER_LAT
+const berlinViewPosition: { lng: number; lat: number } = {
+    lng: Number(process.env.REACT_APP_MAP_CENTER_LNG) || 13.388,
+    lat: Number(process.env.REACT_APP_MAP_CENTER_LAT) || 52.5162,
+}
 const GITHUB_ICON = `${process.env.PUBLIC_URL}/icons/github.svg`
 const INSTAGRAM_ICON = `${process.env.PUBLIC_URL}/icons/instagram.svg`
 
 const FreifahrenMap: React.FC<FreifahrenMapProps> = ({ isFirstOpen, isRiskLayerOpen, onRotationChange }) => {
-    const SouthWestBounds: LngLatLike = { lng: 12.8364646484805, lat: 52.23115511676795 }
-    const NorthEastBounds: LngLatLike = { lng: 14.00044556529124, lat: 52.77063424239867 }
+    const SouthWestBounds: LngLatLike = {
+        lng: Number(process.env.REACT_APP_MAP_BOUNDS_SW_LNG) || 12.8364646484805,
+        lat: Number(process.env.REACT_APP_MAP_BOUNDS_SW_LAT) || 52.23115511676795,
+    }
+    const NorthEastBounds: LngLatLike = {
+        lng: Number(process.env.REACT_APP_MAP_BOUNDS_NE_LNG) || 14.00044556529124,
+        lat: Number(process.env.REACT_APP_MAP_BOUNDS_NE_LAT) || 52.77063424239867,
+    }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
 
     const { data: lineSegments = null } = useSegments()
