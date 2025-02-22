@@ -15,7 +15,7 @@ var embeddedLinesList []byte
 //go:embed StationsList.json
 var embeddedStationsList []byte
 
-//go:embed StationsMap.prod.json
+//go:embed stationsMap.prod.json
 var embeddedStationsMap []byte
 
 //go:embed segments.json
