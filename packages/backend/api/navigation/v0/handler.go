@@ -19,10 +19,11 @@ import (
 // @Accept json
 // @Produce json
 //
-// @Param routeRequest body navigation.RouteRequest true "Start and end station IDs"
+// @Param startStation query string true "Start station ID"
+// @Param endStation query string true "End station ID"
 //
 // @Success 200 {object} navigation.EnrichedRouteResponse "Successfully retrieved route options"
-// @Failure 400 {object} map[string]string "Bad Request: Invalid request body or station IDs"
+// @Failure 400 {object} map[string]string "Bad Request: Missing or invalid station IDs"
 // @Failure 502 {object} map[string]string "Bad Gateway: Failed to fetch route from engine"
 // @Failure 500 {object} map[string]string "Internal Server Error: Failed to process route data"
 //
@@ -30,11 +31,18 @@ import (
 func GetItineraries(c echo.Context) error {
 	logger.Log.Info().Msg("GET /v0/itineraries")
 
-	var req navigation.RouteRequest
-	if err := c.Bind(&req); err != nil {
+	startStation := c.QueryParam("startStation")
+	endStation := c.QueryParam("endStation")
+
+	if startStation == "" || endStation == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
+			"error": "Missing startStation or endStation query parameter",
 		})
+	}
+
+	req := navigation.RouteRequest{
+		StartStation: startStation,
+		EndStation:   endStation,
 	}
 
 	response, err := navigation.GenerateItineraries(req)

@@ -129,13 +129,6 @@ definitions:
       vertexType:
         type: string
     type: object
-  navigation.RouteRequest:
-    properties:
-      endStation:
-        type: string
-      startStation:
-        type: string
-    type: object
   prediction.RiskData:
     properties:
       segments_risk:
@@ -700,12 +693,16 @@ paths:
         This endpoint calculates multiple route options and enriches them with risk data from the risk prediction model.
         The response includes both the safest route and alternative routes, sorted by their calculated risk.
       parameters:
-      - description: Start and end station IDs
-        in: body
-        name: routeRequest
+      - description: Start station ID
+        in: query
+        name: startStation
         required: true
-        schema:
-          $ref: '#/definitions/navigation.RouteRequest'
+        type: string
+      - description: End station ID
+        in: query
+        name: endStation
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -714,7 +711,7 @@ paths:
           schema:
             $ref: '#/definitions/navigation.EnrichedRouteResponse'
         "400":
-          description: 'Bad Request: Invalid request body or station IDs'
+          description: 'Bad Request: Missing or invalid station IDs'
           schema:
             additionalProperties:
               type: string
