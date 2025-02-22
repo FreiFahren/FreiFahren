@@ -539,9 +539,70 @@
                 }
             }
         },
+        "/v0/transit/itineraries": {
+            "get": {
+                "description": "Retrieves possible routes between two stations, including a safest route based on risk prediction.\nThis endpoint calculates multiple route options and enriches them with risk data from the risk prediction model.\nThe response includes both the safest route and alternative routes, sorted by their calculated risk.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transit"
+                ],
+                "summary": "Get route itineraries between two stations",
+                "parameters": [
+                    {
+                        "description": "Start and end station IDs",
+                        "name": "routeRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/navigation.RouteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved route options",
+                        "schema": {
+                            "$ref": "#/definitions/navigation.EnrichedRouteResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request: Invalid request body or station IDs",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error: Failed to process route data",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway: Failed to fetch route from engine",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1/risk-prediction/segment-colors": {
             "get": {
-                "description": "Retrieves risk predictions for transit segments.\nThis endpoint returns color-coded risk levels for different segments of the transit network based on recent ticket inspector activity.",
+                "description": "Retrieves risk predictions for transit segments.\nThis endpoint returns color-coded risk levels along with the risk value for different segments of the transit network based on recent ticket inspector activity.",
                 "produces": [
                     "application/json"
                 ],
@@ -580,6 +641,195 @@
                 },
                 "success": {
                     "type": "boolean"
+                }
+            }
+        },
+        "navigation.EnrichedRouteResponse": {
+            "type": "object",
+            "properties": {
+                "alternativeRoutes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/navigation.Itinerary"
+                    }
+                },
+                "debugOutput": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "direct": {
+                    "type": "array",
+                    "items": {}
+                },
+                "from": {
+                    "$ref": "#/definitions/navigation.Position"
+                },
+                "requestParameters": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "safestRoute": {
+                    "$ref": "#/definitions/navigation.Itinerary"
+                },
+                "to": {
+                    "$ref": "#/definitions/navigation.Position"
+                }
+            }
+        },
+        "navigation.Itinerary": {
+            "type": "object",
+            "properties": {
+                "calculated_risk": {
+                    "type": "number"
+                },
+                "duration": {
+                    "type": "integer"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "legs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/navigation.Leg"
+                    }
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "transfers": {
+                    "type": "integer"
+                }
+            }
+        },
+        "navigation.Leg": {
+            "type": "object",
+            "properties": {
+                "agencyId": {
+                    "type": "string"
+                },
+                "agencyName": {
+                    "type": "string"
+                },
+                "agencyUrl": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "integer"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "from": {
+                    "$ref": "#/definitions/navigation.Position"
+                },
+                "headsign": {
+                    "type": "string"
+                },
+                "intermediateStops": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/navigation.Position"
+                    }
+                },
+                "legGeometry": {
+                    "$ref": "#/definitions/navigation.LegGeometry"
+                },
+                "mode": {
+                    "type": "string"
+                },
+                "realTime": {
+                    "type": "boolean"
+                },
+                "routeColor": {
+                    "type": "string"
+                },
+                "routeShortName": {
+                    "type": "string"
+                },
+                "routeTextColor": {
+                    "type": "string"
+                },
+                "scheduledEndTime": {
+                    "type": "string"
+                },
+                "scheduledStartTime": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "to": {
+                    "$ref": "#/definitions/navigation.Position"
+                },
+                "tripId": {
+                    "type": "string"
+                }
+            }
+        },
+        "navigation.LegGeometry": {
+            "type": "object",
+            "properties": {
+                "length": {
+                    "type": "integer"
+                },
+                "points": {
+                    "type": "string"
+                }
+            }
+        },
+        "navigation.Position": {
+            "type": "object",
+            "properties": {
+                "arrival": {
+                    "type": "string"
+                },
+                "departure": {
+                    "type": "string"
+                },
+                "lat": {
+                    "type": "number"
+                },
+                "level": {
+                    "type": "number"
+                },
+                "lon": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "scheduledArrival": {
+                    "type": "string"
+                },
+                "scheduledDeparture": {
+                    "type": "string"
+                },
+                "scheduledTrack": {
+                    "type": "string"
+                },
+                "stopId": {
+                    "type": "string"
+                },
+                "track": {
+                    "type": "string"
+                },
+                "vertexType": {
+                    "type": "string"
+                }
+            }
+        },
+        "navigation.RouteRequest": {
+            "type": "object",
+            "properties": {
+                "endStation": {
+                    "type": "string"
+                },
+                "startStation": {
+                    "type": "string"
                 }
             }
         },
