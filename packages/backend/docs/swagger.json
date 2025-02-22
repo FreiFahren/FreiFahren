@@ -516,7 +516,30 @@
                 }
             }
         },
-        "/v0/itineraries": {
+        "/v0/risk-prediction/segment-colors": {
+            "get": {
+                "description": "Retrieves risk predictions for transit segments.\nThis endpoint returns color-coded risk levels for different segments of the transit network based on recent ticket inspector activity.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prediction"
+                ],
+                "summary": "Get risk segments",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved risk segments data",
+                        "schema": {
+                            "$ref": "#/definitions/v0.v0RiskData"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error: Failed to execute risk model"
+                    }
+                }
+            }
+        },
+        "/v0/transit/itineraries": {
             "get": {
                 "description": "Retrieves possible routes between two stations, including a safest route based on risk prediction.\nThis endpoint calculates multiple route options and enriches them with risk data from the risk prediction model.\nThe response includes both the safest route and alternative routes, sorted by their calculated risk.",
                 "consumes": [
@@ -526,7 +549,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "navigation"
+                    "transit"
                 ],
                 "summary": "Get route itineraries between two stations",
                 "parameters": [
@@ -573,29 +596,6 @@
                                 "type": "string"
                             }
                         }
-                    }
-                }
-            }
-        },
-        "/v0/risk-prediction/segment-colors": {
-            "get": {
-                "description": "Retrieves risk predictions for transit segments.\nThis endpoint returns color-coded risk levels for different segments of the transit network based on recent ticket inspector activity.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "prediction"
-                ],
-                "summary": "Get risk segments",
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved risk segments data",
-                        "schema": {
-                            "$ref": "#/definitions/v0.v0RiskData"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error: Failed to execute risk model"
                     }
                 }
             }

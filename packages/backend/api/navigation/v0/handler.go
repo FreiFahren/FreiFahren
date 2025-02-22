@@ -14,7 +14,7 @@ import (
 // @Description This endpoint calculates multiple route options and enriches them with risk data from the risk prediction model.
 // @Description The response includes both the safest route and alternative routes, sorted by their calculated risk.
 //
-// @Tags navigation
+// @Tags transit
 //
 // @Accept json
 // @Produce json
@@ -26,7 +26,7 @@ import (
 // @Failure 502 {object} map[string]string "Bad Gateway: Failed to fetch route from engine"
 // @Failure 500 {object} map[string]string "Internal Server Error: Failed to process route data"
 //
-// @Router /v0/itineraries [get]
+// @Router /v0/transit/itineraries [get]
 func GetItineraries(c echo.Context) error {
 	logger.Log.Info().Msg("GET /v0/itineraries")
 

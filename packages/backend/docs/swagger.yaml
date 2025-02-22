@@ -674,7 +674,24 @@ paths:
       summary: Calculate shortest distance to a station
       tags:
       - transit
-  /v0/itineraries:
+  /v0/risk-prediction/segment-colors:
+    get:
+      description: |-
+        Retrieves risk predictions for transit segments.
+        This endpoint returns color-coded risk levels for different segments of the transit network based on recent ticket inspector activity.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved risk segments data
+          schema:
+            $ref: '#/definitions/v0.v0RiskData'
+        "500":
+          description: 'Internal Server Error: Failed to execute risk model'
+      summary: Get risk segments
+      tags:
+      - prediction
+  /v0/transit/itineraries:
     get:
       consumes:
       - application/json
@@ -716,24 +733,7 @@ paths:
             type: object
       summary: Get route itineraries between two stations
       tags:
-      - navigation
-  /v0/risk-prediction/segment-colors:
-    get:
-      description: |-
-        Retrieves risk predictions for transit segments.
-        This endpoint returns color-coded risk levels for different segments of the transit network based on recent ticket inspector activity.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved risk segments data
-          schema:
-            $ref: '#/definitions/v0.v0RiskData'
-        "500":
-          description: 'Internal Server Error: Failed to execute risk model'
-      summary: Get risk segments
-      tags:
-      - prediction
+      - transit
   /v1/risk-prediction/segment-colors:
     get:
       description: |-

@@ -173,12 +173,11 @@ func SetupServer() *echo.Echo {
 	v0.GET("/stations/search", stations.SearchStation)
 
 	v0.GET("/transit/distance", distance.GetStationDistance)
+	v0.GET("/transit/itineraries", navigationV0.GetItineraries)
 
 	v0.GET("/risk-prediction/segment-colors", predictionV0.GetRiskSegments)
 
 	v0.POST("/feedback", feedback.PostFeedback)
-
-	v0.GET("/itineraries", navigationV0.GetItineraries)
 
 	// V1 Routes
 	v1.GET("/risk-prediction/segment-colors", predictionV1.GetRiskSegments)
@@ -198,12 +197,11 @@ func SetupServer() *echo.Echo {
 	latest.GET("/stations/search", stations.SearchStation)
 
 	latest.GET("/transit/distance", distance.GetStationDistance)
+	latest.GET("/transit/itineraries", navigationV0.GetItineraries)
 
 	latest.GET("/risk-prediction/segment-colors", predictionV1.GetRiskSegments)
 
 	latest.POST("/feedback", feedback.PostFeedback)
-
-	latest.GET("/itineraries", navigationV0.GetItineraries)
 
 	return e
 }
