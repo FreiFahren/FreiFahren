@@ -378,3 +378,85 @@ export const useStationReports = (stationId: string) =>
             return data.numberOfReports as number
         },
     })
+
+type Position = {
+    name: string
+    stopId: string
+    lat: number
+    lon: number
+    level: number
+    vertexType: string
+    departure?: string
+    scheduledDeparture?: string
+    arrival?: string
+    scheduledArrival?: string
+    scheduledTrack?: string
+    track?: string
+}
+
+type LegGeometry = {
+    points: string
+    length: number
+}
+
+type Leg = {
+    mode: string
+    from: Position
+    to: Position
+    duration: number
+    startTime: string
+    endTime: string
+    scheduledStartTime: string
+    scheduledEndTime: string
+    realTime: boolean
+    headsign?: string
+    routeColor?: string
+    routeTextColor?: string
+    agencyName?: string
+    agencyUrl?: string
+    agencyId?: string
+    tripId?: string
+    routeShortName?: string
+    source?: string
+    intermediateStops?: Position[]
+    legGeometry: LegGeometry
+}
+
+type Itinerary = {
+    duration: number
+    startTime: string
+    endTime: string
+    transfers: number
+    legs: Leg[]
+    calculatedRisk?: number
+}
+
+export type NavigationResponse = {
+    requestParameters: Record<string, unknown>
+    debugOutput: Record<string, unknown>
+    from: Position
+    to: Position
+    direct: unknown[]
+    safestRoute: Itinerary
+    alternativeRoutes: Itinerary[]
+}
+
+export const useNavigation = (startStationId: string, endStationId: string, options?: { enabled?: boolean }) =>
+    useQuery<NavigationResponse, Error>({
+        queryKey: CACHE_KEYS.navigation(startStationId, endStationId),
+        queryFn: async () => {
+            if (!startStationId || !endStationId) {
+                return null
+            }
+
+            const response = await fetch(
+                `${process.env.REACT_APP_API_URL}/v0/transit/itineraries?startStationId=${startStationId}&endStationId=${endStationId}`
+            )
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
+            const data = await response.json()
+            return data
+        },
+        enabled: options?.enabled,
+    })

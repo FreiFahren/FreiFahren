@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useStations } from '../../../api/queries'
+import { useStations, useNavigation } from '../../../api/queries'
 import { getClosestStations } from '../../../hooks/getClosestStations'
 import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
 import { StationProperty } from 'src/utils/types'
@@ -26,6 +26,10 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
     const [startLocation, setStartLocation] = useState<string | null>(null)
     const [endLocation, setEndLocation] = useState<string | null>(null)
 
+    const { data: navigationData, isLoading } = useNavigation(startLocation ?? '', endLocation ?? '', {
+        enabled: Boolean(startLocation && endLocation),
+    })
+
     const possibleStations = allStations
         ? Object.fromEntries(
               Object.entries(allStations).filter(([_, station]) =>
@@ -45,7 +49,6 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
             if (!endLocation) {
                 setTimeout(() => {
                     if (endInputRef.current) {
-                        // save the user a click
                         endInputRef.current.focus()
                     }
                 }, 0)
@@ -121,6 +124,12 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
                     }
                 />
             </div>
+            {isLoading && (
+                <div className="loading-container">
+                    <div className="loading-spinner"></div>
+                    <div className="loading-text">Loading...</div>
+                </div>
+            )}
         </div>
     )
 }

@@ -24,4 +24,5 @@ div.modal.container.navigation-modal {
     overflow-y: auto;
     flex: 1;
     min-height: 0;
+    margin-bottom: var(--margin-s);
 }
