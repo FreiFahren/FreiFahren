@@ -565,13 +565,18 @@ const docTemplate = `{
                 "summary": "Get route itineraries between two stations",
                 "parameters": [
                     {
-                        "description": "Start and end station IDs",
-                        "name": "routeRequest",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/navigation.RouteRequest"
-                        }
+                        "type": "string",
+                        "description": "Start station ID",
+                        "name": "startStation",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End station ID",
+                        "name": "endStation",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -582,7 +587,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request: Invalid request body or station IDs",
+                        "description": "Bad Request: Missing or invalid station IDs",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -829,17 +834,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "vertexType": {
-                    "type": "string"
-                }
-            }
-        },
-        "navigation.RouteRequest": {
-            "type": "object",
-            "properties": {
-                "endStation": {
-                    "type": "string"
-                },
-                "startStation": {
                     "type": "string"
                 }
             }
