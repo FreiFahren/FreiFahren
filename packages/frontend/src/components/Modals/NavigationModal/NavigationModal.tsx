@@ -4,7 +4,7 @@ import { getClosestStations } from '../../../hooks/getClosestStations'
 import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
 import { StationProperty } from 'src/utils/types'
 import { useLocation } from '../../../contexts/LocationContext'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 import './NavigationModal.css'
 
@@ -18,6 +18,8 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
     const { t } = useTranslation()
     const { userPosition } = useLocation()
     const { data: allStations } = useStations()
+    const startInputRef = useRef<HTMLInputElement>(null)
+    const endInputRef = useRef<HTMLInputElement>(null)
 
     const [searchValue, setSearchValue] = useState('')
     const [activeInput, setActiveInput] = useState<ActiveInput>(null)
@@ -40,6 +42,14 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
 
         if (activeInput === 'start') {
             setStartLocation(selectedStation[0])
+            if (!endLocation) {
+                setTimeout(() => {
+                    if (endInputRef.current) {
+                        // save the user a click
+                        endInputRef.current.focus()
+                    }
+                }, 0)
+            }
         } else if (activeInput === 'end') {
             setEndLocation(selectedStation[0])
         }
@@ -57,26 +67,38 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
         return activeInput === input ? searchValue : ''
     }
 
+    const handleInputFocus = (input: ActiveInput) => {
+        setActiveInput(input)
+        const inputRef = input === 'start' ? startInputRef : endInputRef
+        const hasValue = input === 'start' ? startLocation : endLocation
+
+        if (hasValue && inputRef.current) {
+            inputRef.current.select()
+        }
+    }
+
     return (
         <div className={`navigation-modal modal container ${className}`}>
             <h1>{t('NavigationModal.title')}</h1>
             <div className="location-inputs">
                 <input
+                    ref={startInputRef}
                     type="text"
                     placeholder={t('NavigationModal.startLocation')}
                     value={getInputValue('start')}
                     autoFocus
-                    onFocus={() => setActiveInput('start')}
+                    onFocus={() => handleInputFocus('start')}
                     onChange={(e) => {
                         setSearchValue(e.target.value)
                         setStartLocation(null)
                     }}
                 />
                 <input
+                    ref={endInputRef}
                     type="text"
                     placeholder={t('NavigationModal.endLocation')}
                     value={getInputValue('end')}
-                    onFocus={() => setActiveInput('end')}
+                    onFocus={() => handleInputFocus('end')}
                     onChange={(e) => {
                         setSearchValue(e.target.value)
                         setEndLocation(null)
