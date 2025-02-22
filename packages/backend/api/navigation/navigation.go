@@ -13,8 +13,24 @@ import (
 	"github.com/FreiFahren/backend/api/prediction"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/logger"
-	"github.com/labstack/echo/v4"
 )
+
+// Custom error types
+type ValidationError struct {
+	message string
+}
+
+func (e *ValidationError) Error() string {
+	return e.message
+}
+
+type EngineError struct {
+	message string
+}
+
+func (e *EngineError) Error() string {
+	return e.message
+}
 
 type Position struct {
 	Name               string  `json:"name"`
@@ -154,29 +170,17 @@ func calculateItineraryRisk(itinerary *Itinerary, riskData *prediction.RiskData)
 	return 0
 }
 
-func GetItineraries(c echo.Context) error {
-	logger.Log.Info().Msg("GET /itineraries")
-	var req RouteRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request body",
-		})
-	}
-
+func GenerateItineraries(req RouteRequest) (*EnrichedRouteResponse, error) {
 	// Get station IDs using the map
 	stationsMap := data.GetStationsMap()
 	startStationId, exists := stationsMap[req.StartStation]
 	if !exists {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid start station ID",
-		})
+		return nil, &ValidationError{message: "Invalid start station ID"}
 	}
 
 	endStationId, exists := stationsMap[req.EndStation]
 	if !exists {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid end station ID",
-		})
+		return nil, &ValidationError{message: "Invalid end station ID"}
 	}
 
 	// Construct the URL with query parameters
@@ -199,25 +203,19 @@ func GetItineraries(c echo.Context) error {
 	resp, err := http.Get(engineURL + "?" + queryParams.Encode())
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to fetch route from engine")
-		return c.JSON(http.StatusBadGateway, map[string]string{
-			"error": "Failed to fetch route from engine",
-		})
+		return nil, &EngineError{message: "Failed to fetch route from engine"}
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return c.JSON(http.StatusBadGateway, map[string]string{
-			"error": "Engine returned non-200 status code",
-		})
+		return nil, &EngineError{message: "Engine returned non-200 status code"}
 	}
 
 	// Decode engine response directly into our struct
 	var engineResp RouteResponse
 	if err := json.NewDecoder(resp.Body).Decode(&engineResp); err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to decode engine response")
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to decode engine response",
-		})
+		return nil, fmt.Errorf("failed to decode engine response: %w", err)
 	}
 
 	// Get current risk data
@@ -227,9 +225,7 @@ func GetItineraries(c echo.Context) error {
 		riskData, err = prediction.ExecuteRiskModel()
 		if err != nil {
 			logger.Log.Error().Err(err).Msg("Failed to get risk data")
-			return c.JSON(http.StatusInternalServerError, map[string]string{
-				"error": "Failed to get risk data",
-			})
+			return nil, fmt.Errorf("failed to get risk data: %w", err)
 		}
 	}
 
@@ -246,7 +242,7 @@ func GetItineraries(c echo.Context) error {
 	})
 
 	// Construct final response
-	response := EnrichedRouteResponse{
+	response := &EnrichedRouteResponse{
 		RequestParameters: engineResp.RequestParameters,
 		DebugOutput:       engineResp.DebugOutput,
 		From:              engineResp.From,
@@ -256,13 +252,5 @@ func GetItineraries(c echo.Context) error {
 		AlternativeRoutes: allItineraries[1:],
 	}
 
-	// write response to file for deugging
-	// todo: remove this before deployment
-	file2, err := os.Create("response.json")
-	if err != nil {
-		logger.Log.Error().Err(err).Msg("Failed to create file")
-	}
-	json.NewEncoder(file2).Encode(response)
-
-	return c.JSON(http.StatusOK, response)
+	return response, nil
 }
