@@ -7,13 +7,22 @@ interface ItineraryItemProps {
     itinerary: Itinerary
 }
 
+const formatLocalTime = (utcTimeString: string): string => {
+    const date = new Date(utcTimeString)
+    return date.toLocaleTimeString('de-DE', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    })
+}
+
 export const ItineraryItem: React.FC<ItineraryItemProps> = ({ itinerary }) => {
     return (
         <div className={`route-option`}>
             <div className="route-header">
                 <div className="route-time">
                     <span className="time">
-                        {itinerary.startTime.slice(11, 16)} - {itinerary.endTime.slice(11, 16)}
+                        {formatLocalTime(itinerary.startTime)} - {formatLocalTime(itinerary.endTime)}
                     </span>
                     <span className="duration">{Math.floor((itinerary.duration / 60) % 60)} min</span>
                 </div>
