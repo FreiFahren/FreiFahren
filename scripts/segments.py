@@ -46,19 +46,17 @@ def cut_line(
     return second_cut[0]
 
 
-def fetch_stations_and_lines_with_api() -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
+def fetch_stations_and_lines_with_api(url: str) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     """Fetch stations and lines data from the API."""
-    # stations_json = requests.get("https://api.freifahren.org/stations").json()
-    # lines_json = requests.get("https://api.freifahren.org/v0/lines").json()
-    stations_json = requests.get("http://localhost:8080/stations").json()
-    lines_json = requests.get("http://localhost:8080/v0/lines").json()
+    stations_json = requests.get(url + "/stations").json()
+    lines_json = requests.get(url + "/v0/lines").json()
     lines = [line for line in lines_json]
     return stations_json, lines
 
 def fetch_stations_and_lines_with_file(stations_file: str, lines_file: str) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     """Fetch stations and lines data from the API."""
-    stations_json = requests.get(stations_file).json()
-    lines_json = requests.get(lines_file).json()
+    stations_json = json.load(open(stations_file))
+    lines_json = json.load(open(lines_file))
     lines = [line for line in lines_json]
     return stations_json, lines
 
@@ -169,8 +167,13 @@ def main() -> None:
     overpass_gdf = gpd.read_file("export.geojson")
     overpass_gdf = overpass_gdf[overpass_gdf["ref"].notnull()]
 
-    # It is also possible to fetch the data from the API using fetch_stations_and_lines_with_api()
-    stations_json, lines = fetch_stations_and_lines_with_file("scripts/stations.json", "scripts/lines.json")
+    # NOTE: It is also possible to fetch the data from the API using fetch_stations_and_lines_with_api()
+
+    # stations_json, lines = fetch_stations_and_lines_with_api("http://localhost:8080")
+    
+    stations_json, lines = fetch_stations_and_lines_with_file("stations.json", "lines.json")
+
+
 
     # Process stations data
     stations_exploded = process_stations_data(stations_json)
