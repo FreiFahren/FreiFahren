@@ -4,7 +4,7 @@ import { getClosestStations } from '../../../hooks/getClosestStations'
 import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
 import { StationProperty } from '../../../utils/types'
 import { useLocation } from '../../../contexts/LocationContext'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { ItineraryItem } from './ItineraryItem'
 import { Skeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
 
@@ -54,9 +54,12 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
                         endInputRef.current.focus()
                     }
                 }, 0)
+            } else {
+                setActiveInput(null)
             }
         } else if (activeInput === 'end') {
             setEndLocation(selectedStation[0])
+            setActiveInput(null)
         }
 
         setSearchValue('')
@@ -110,7 +113,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
                     }}
                 />
             </div>
-            {navigationData ? (
+            {navigationData && !activeInput ? (
                 <div className="navigation-data-container">
                     <ItineraryItem itinerary={navigationData.safestRoute} />
                     {navigationData.alternativeRoutes.map((route, index) => (
