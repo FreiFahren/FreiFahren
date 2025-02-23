@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"sort"
 	"strings"
 	"time"
 
@@ -231,15 +230,29 @@ func GenerateItineraries(req RouteRequest) (*EnrichedRouteResponse, error) {
 
 	// Calculate risk for all itineraries
 	var allItineraries []Itinerary
+	var safestRouteIndex int
+	var lowestRisk float64
+
 	for i := range engineResp.Itineraries {
 		engineResp.Itineraries[i].CalculatedRisk = calculateItineraryRisk(&engineResp.Itineraries[i], riskData)
+
+		// Keep track of the safest route
+		if i == 0 || engineResp.Itineraries[i].CalculatedRisk < lowestRisk {
+			safestRouteIndex = i
+			lowestRisk = engineResp.Itineraries[i].CalculatedRisk
+		}
+
 		allItineraries = append(allItineraries, engineResp.Itineraries[i])
 	}
 
-	// Sort by risk to find safest route
-	sort.Slice(allItineraries, func(i, j int) bool {
-		return allItineraries[i].CalculatedRisk < allItineraries[j].CalculatedRisk
-	})
+	// Filter out the safest route from alternative routes while preserving order
+	// order is preserved as the engine already returns the itereraries by how good they are
+	alternativeRoutes := make([]Itinerary, 0, len(allItineraries)-1)
+	for i, itin := range allItineraries {
+		if i != safestRouteIndex {
+			alternativeRoutes = append(alternativeRoutes, itin)
+		}
+	}
 
 	// Construct final response
 	response := &EnrichedRouteResponse{
@@ -248,8 +261,8 @@ func GenerateItineraries(req RouteRequest) (*EnrichedRouteResponse, error) {
 		From:              engineResp.From,
 		To:                engineResp.To,
 		Direct:            engineResp.Direct,
-		SafestRoute:       &allItineraries[0],
-		AlternativeRoutes: allItineraries[1:],
+		SafestRoute:       &allItineraries[safestRouteIndex],
+		AlternativeRoutes: alternativeRoutes,
 	}
 
 	return response, nil
