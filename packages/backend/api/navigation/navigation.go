@@ -140,7 +140,6 @@ func calculateLegRisk(leg *Leg, riskData *prediction.RiskData) float64 {
 	// Try both directions of the segment
 	forwardKey := fmt.Sprintf("%s.%s:%s", *line, fromID, toID)
 	reverseKey := fmt.Sprintf("%s.%s:%s", *line, toID, fromID)
-	logger.Log.Info().Msgf("forwardKey: %s, reverseKey: %s", forwardKey, reverseKey)
 
 	if risk, exists := riskData.SegmentsRisk[forwardKey]; exists {
 		return risk.Risk
@@ -312,6 +311,12 @@ func GenerateItineraries(req RouteRequest) (*EnrichedRouteResponse, error) {
 		if i != safestRouteIndex {
 			alternativeRoutes = append(alternativeRoutes, itin)
 		}
+	}
+
+	// Limit to top 10 itineraries in total (including safest route)
+	maxTotal := 10
+	if len(alternativeRoutes) > maxTotal-1 {
+		alternativeRoutes = alternativeRoutes[:maxTotal-1]
 	}
 
 	// Construct final response
