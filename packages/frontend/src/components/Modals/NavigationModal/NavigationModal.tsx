@@ -6,6 +6,7 @@ import { StationProperty } from '../../../utils/types'
 import { useLocation } from '../../../contexts/LocationContext'
 import { useState, useRef } from 'react'
 import { ItineraryItem } from './ItineraryItem'
+import { Skeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
 
 import './NavigationModal.css'
 
@@ -117,9 +118,12 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
                     ))}
                 </div>
             ) : isLoading ? (
-                <div className="loading-container">
-                    <div className="loading-spinner"></div>
-                    <div className="loading-text">Loading...</div>
+                <div className="navigation-data-container">
+                    <div className="skeleton-container">
+                        {Array.from({ length: 10 }).map((_, index) => (
+                            <Skeleton key={index} />
+                        ))}
+                    </div>
                 </div>
             ) : (
                 <div className="autocomplete-container">

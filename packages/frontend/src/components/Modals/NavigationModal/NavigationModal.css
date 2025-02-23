@@ -69,3 +69,14 @@ div.modal.container.navigation-modal {
     display: flex;
     gap: var(--margin-xs);
 }
+
+.skeleton-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--margin-s);
+    padding: var(--padding-s);
+}
+
+.skeleton-container .loading-placeholder {
+    height: 50px;
+}
