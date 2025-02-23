@@ -140,6 +140,7 @@ func calculateLegRisk(leg *Leg, riskData *prediction.RiskData) float64 {
 	// Try both directions of the segment
 	forwardKey := fmt.Sprintf("%s.%s:%s", *line, fromID, toID)
 	reverseKey := fmt.Sprintf("%s.%s:%s", *line, toID, fromID)
+	logger.Log.Info().Msgf("forwardKey: %s, reverseKey: %s", forwardKey, reverseKey)
 
 	if risk, exists := riskData.SegmentsRisk[forwardKey]; exists {
 		return risk.Risk
@@ -167,6 +168,62 @@ func calculateItineraryRisk(itinerary *Itinerary, riskData *prediction.RiskData)
 		return totalRisk / float64(transitLegs)
 	}
 	return 0
+}
+
+func translateEngineStationId(engineId string) string {
+	// Get the stations map
+	stationsMap := data.GetStationsMap()
+
+	// Extract the middle numbers from the engine ID
+	// Example: "de-VBB_de:11000:900110521::4" -> "900110521"
+	parts := strings.Split(engineId, ":")
+	if len(parts) < 3 {
+		return engineId // Return original if format doesn't match
+	}
+	middleNumbers := parts[2]
+
+	// Iterate through the stations map to find a matching station
+	for freifahrenId, mappedEngineId := range stationsMap {
+		// Extract middle numbers from mapped engine ID
+		mappedParts := strings.Split(mappedEngineId, ":")
+		if len(mappedParts) < 3 {
+			continue
+		}
+		mappedMiddleNumbers := mappedParts[2]
+
+		// Compare middle numbers
+		if middleNumbers == mappedMiddleNumbers {
+			return freifahrenId
+		}
+	}
+
+	return engineId // Return original if no match found
+}
+
+func translateStationIds(position *Position) {
+	if position.StopID != "" {
+		position.StopID = translateEngineStationId(position.StopID)
+	}
+}
+
+func translateResponseStationIds(response *RouteResponse) {
+	// Translate From and To station IDs
+	translateStationIds(&response.From)
+	translateStationIds(&response.To)
+
+	// Translate station IDs in all itineraries
+	for i := range response.Itineraries {
+		for j := range response.Itineraries[i].Legs {
+			// Translate From and To station IDs in each leg
+			translateStationIds(&response.Itineraries[i].Legs[j].From)
+			translateStationIds(&response.Itineraries[i].Legs[j].To)
+
+			// Translate station IDs in intermediate stops
+			for k := range response.Itineraries[i].Legs[j].IntermediateStops {
+				translateStationIds(&response.Itineraries[i].Legs[j].IntermediateStops[k])
+			}
+		}
+	}
 }
 
 func GenerateItineraries(req RouteRequest) (*EnrichedRouteResponse, error) {
@@ -216,6 +273,9 @@ func GenerateItineraries(req RouteRequest) (*EnrichedRouteResponse, error) {
 		logger.Log.Error().Err(err).Msg("Failed to decode engine response")
 		return nil, fmt.Errorf("failed to decode engine response: %w", err)
 	}
+
+	// Translate all station IDs to FreiFahren format
+	translateResponseStationIds(&engineResp)
 
 	// Get current risk data
 	riskData, ok := prediction.Cache.Get()
