@@ -115,7 +115,10 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
             </div>
             {navigationData && !activeInput ? (
                 <div className="navigation-data-container">
-                    <ItineraryItem itinerary={navigationData.safestRoute} />
+                    <div className="safest-route">
+                        <ItineraryItem itinerary={navigationData.safestRoute} />
+                        <div className="safest-route-tag">{t('NavigationModal.safestRoute')}</div>
+                    </div>
                     {navigationData.alternativeRoutes.map((route, index) => (
                         <ItineraryItem key={index} itinerary={route} />
                     ))}

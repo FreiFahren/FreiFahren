@@ -220,6 +220,7 @@
     "NavigationModal": {
         "title": "Routenplaner",
         "startLocation": "Startstation auswählen",
-        "endLocation": "Zielstation auswählen"
+        "endLocation": "Zielstation auswählen",
+        "safestRoute": "Sicherste Route"
     }
 }

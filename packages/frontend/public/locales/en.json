@@ -224,6 +224,7 @@
     "NavigationModal": {
         "title": "Route Planner",
         "startLocation": "Select start station",
-        "endLocation": "Select end station"
+        "endLocation": "Select end station",
+        "safestRoute": "Safest Route"
     }
 }

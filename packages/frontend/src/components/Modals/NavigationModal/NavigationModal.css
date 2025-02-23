@@ -99,3 +99,23 @@ div.modal.container.navigation-modal {
 .skeleton-container .loading-placeholder {
     height: 50px;
 }
+
+.safest-route {
+    margin-top: var(--margin-m);
+    position: relative;
+    border: 2px solid var(--color-primary);
+    border-radius: var(--borderRadius-medium);
+    padding: var(--padding-xxs);
+    margin-bottom: var(--margin-s);
+}
+
+.safest-route-tag {
+    position: absolute;
+    top: -12px;
+    right: 16px;
+    background-color: var(--color-primary);
+    padding: var(--padding-xxs) var(--padding-xs);
+    border-radius: var(--borderRadius-small);
+    font-size: var(--font-xxs);
+    font-weight: 500;
+}
