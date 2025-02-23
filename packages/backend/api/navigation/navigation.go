@@ -118,36 +118,55 @@ func calculateLegRisk(leg *Leg, riskData *prediction.RiskData) float64 {
 		return 0
 	}
 
-	// Get station IDs from the engines format
-	fromID := ""
-	if id := leg.From.StopID; id != "" {
-		if parts := strings.Split(id, ":"); len(parts) > 0 {
-			fromID = parts[len(parts)-1]
+	// Create a slice of all stops in order (from -> intermediate -> to)
+	allStops := make([]Position, 0, len(leg.IntermediateStops)+2)
+	allStops = append(allStops, leg.From)
+	allStops = append(allStops, leg.IntermediateStops...)
+	allStops = append(allStops, leg.To)
+
+	var totalRisk float64
+	var segmentCount int
+
+	// Calculate risk for each consecutive pair of stops
+	for i := 0; i < len(allStops)-1; i++ {
+		// Get station IDs from the engines format
+		fromID := ""
+		if id := allStops[i].StopID; id != "" {
+			if parts := strings.Split(id, ":"); len(parts) > 0 {
+				fromID = parts[len(parts)-1]
+			}
+		}
+
+		toID := ""
+		if id := allStops[i+1].StopID; id != "" {
+			if parts := strings.Split(id, ":"); len(parts) > 0 {
+				toID = parts[len(parts)-1]
+			}
+		}
+
+		if fromID == "" || toID == "" {
+			continue
+		}
+
+		// Try both directions of the segment
+		forwardKey := fmt.Sprintf("%s.%s:%s", *line, fromID, toID)
+		reverseKey := fmt.Sprintf("%s.%s:%s", *line, toID, fromID)
+
+		if risk, exists := riskData.SegmentsRisk[forwardKey]; exists {
+			totalRisk += risk.Risk
+			segmentCount++
+			continue
+		}
+
+		if risk, exists := riskData.SegmentsRisk[reverseKey]; exists {
+			totalRisk += risk.Risk
+			segmentCount++
 		}
 	}
 
-	toID := ""
-	if id := leg.To.StopID; id != "" {
-		if parts := strings.Split(id, ":"); len(parts) > 0 {
-			toID = parts[len(parts)-1]
-		}
+	if segmentCount > 0 {
+		return totalRisk / float64(segmentCount)
 	}
-
-	if fromID == "" || toID == "" {
-		return 0
-	}
-
-	// Try both directions of the segment
-	forwardKey := fmt.Sprintf("%s.%s:%s", *line, fromID, toID)
-	reverseKey := fmt.Sprintf("%s.%s:%s", *line, toID, fromID)
-
-	if risk, exists := riskData.SegmentsRisk[forwardKey]; exists {
-		return risk.Risk
-	}
-	if risk, exists := riskData.SegmentsRisk[reverseKey]; exists {
-		return risk.Risk
-	}
-
 	return 0
 }
 
