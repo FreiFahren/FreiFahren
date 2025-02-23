@@ -86,3 +86,65 @@ export type Report = {
     isHistoric: boolean
     message: string | null
 }
+
+export type Position = {
+    name: string
+    stopId: string
+    lat: number
+    lon: number
+    level: number
+    vertexType: string
+    departure?: string
+    scheduledDeparture?: string
+    arrival?: string
+    scheduledArrival?: string
+    scheduledTrack?: string
+    track?: string
+}
+
+export type LegGeometry = {
+    points: string
+    length: number
+}
+
+export type Leg = {
+    mode: string
+    from: Position
+    to: Position
+    duration: number
+    startTime: string
+    endTime: string
+    scheduledStartTime: string
+    scheduledEndTime: string
+    realTime: boolean
+    headsign?: string
+    routeColor?: string
+    routeTextColor?: string
+    agencyName?: string
+    agencyUrl?: string
+    agencyId?: string
+    tripId?: string
+    routeShortName?: string
+    source?: string
+    intermediateStops?: Position[]
+    legGeometry: LegGeometry
+}
+
+export type Itinerary = {
+    duration: number
+    startTime: string
+    endTime: string
+    transfers: number
+    legs: Leg[]
+    calculatedRisk?: number
+}
+
+export type NavigationResponse = {
+    requestParameters: Record<string, unknown>
+    debugOutput: Record<string, unknown>
+    from: Position
+    to: Position
+    direct: unknown[]
+    safestRoute: Itinerary
+    alternativeRoutes: Itinerary[]
+}

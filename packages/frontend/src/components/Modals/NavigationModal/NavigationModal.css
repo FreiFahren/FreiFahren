@@ -26,3 +26,46 @@ div.modal.container.navigation-modal {
     min-height: 0;
     margin-bottom: var(--margin-s);
 }
+
+.navigation-data-container {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+.route-option {
+    padding: var(--padding-s);
+    margin-bottom: var(--margin-s);
+    border: 1px solid var(--color-border);
+    border-radius: var(--borderRadius-medium);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.route-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--margin-xs);
+}
+
+.route-time {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.route-time .time {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.route-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.route-lines {
+    display: flex;
+    gap: var(--margin-xs);
+}

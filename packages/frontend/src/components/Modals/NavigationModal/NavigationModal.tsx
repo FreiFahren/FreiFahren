@@ -2,9 +2,10 @@ import { useTranslation } from 'react-i18next'
 import { useStations, useNavigation } from '../../../api/queries'
 import { getClosestStations } from '../../../hooks/getClosestStations'
 import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
-import { StationProperty } from 'src/utils/types'
+import { StationProperty } from '../../../utils/types'
 import { useLocation } from '../../../contexts/LocationContext'
 import { useState, useRef } from 'react'
+import { ItineraryItem } from './ItineraryItem'
 
 import './NavigationModal.css'
 
@@ -108,26 +109,34 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
                     }}
                 />
             </div>
-            <div className="autocomplete-container">
-                <AutocompleteInputForm
-                    items={possibleStations}
-                    onSelect={handleStationSelect}
-                    value={activeInput === 'start' ? startLocation : endLocation}
-                    getDisplayValue={(station: StationProperty | null) => station?.name ?? ''}
-                    highlightElements={
-                        userPosition && activeInput === 'start'
-                            ? getClosestStations(3, possibleStations, userPosition).reduce(
-                                  (acc, station) => ({ ...acc, ...station }),
-                                  {}
-                              )
-                            : undefined
-                    }
-                />
-            </div>
-            {isLoading && (
+            {navigationData ? (
+                <div className="navigation-data-container">
+                    <ItineraryItem itinerary={navigationData.safestRoute} />
+                    {navigationData.alternativeRoutes.map((route, index) => (
+                        <ItineraryItem key={index} itinerary={route} />
+                    ))}
+                </div>
+            ) : isLoading ? (
                 <div className="loading-container">
                     <div className="loading-spinner"></div>
                     <div className="loading-text">Loading...</div>
+                </div>
+            ) : (
+                <div className="autocomplete-container">
+                    <AutocompleteInputForm
+                        items={possibleStations}
+                        onSelect={handleStationSelect}
+                        value={activeInput === 'start' ? startLocation : endLocation}
+                        getDisplayValue={(station: StationProperty | null) => station?.name ?? ''}
+                        highlightElements={
+                            userPosition && activeInput === 'start'
+                                ? getClosestStations(3, possibleStations, userPosition).reduce(
+                                      (acc, station) => ({ ...acc, ...station }),
+                                      {}
+                                  )
+                                : undefined
+                        }
+                    />
                 </div>
             )}
         </div>

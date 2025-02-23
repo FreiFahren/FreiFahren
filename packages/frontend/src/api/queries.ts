@@ -450,7 +450,7 @@ export const useNavigation = (startStationId: string, endStationId: string, opti
             }
 
             const response = await fetch(
-                `${process.env.REACT_APP_API_URL}/v0/transit/itineraries?startStationId=${startStationId}&endStationId=${endStationId}`
+                `${process.env.REACT_APP_API_URL}/v0/transit/itineraries?startStation=${startStationId}&endStation=${endStationId}`
             )
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`)
