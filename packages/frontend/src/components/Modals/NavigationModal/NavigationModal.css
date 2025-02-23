@@ -68,6 +68,25 @@ div.modal.container.navigation-modal {
 .route-lines {
     display: flex;
     gap: var(--margin-xs);
+    align-items: center;
+}
+
+.route-lines span {
+    display: flex;
+    align-items: center;
+}
+
+.route-lines span:not(:last-child)::after {
+    content: '›';
+    margin: 0 var(--margin-xs);
+    color: var(--color-text-secondary);
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.route-lines .walk-icon {
+    opacity: 0.7;
+    margin: 0 var(--margin-xxs);
 }
 
 .skeleton-container {

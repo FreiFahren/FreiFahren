@@ -205,12 +205,24 @@ func translateStationIds(position *Position) {
 	}
 }
 
+func removeRedundantWalkingLegs(itinerary *Itinerary) {
+	// Filter out walking legs with same from and to stop ID
+	filteredLegs := make([]Leg, 0)
+	for _, leg := range itinerary.Legs {
+		if leg.Mode == "WALK" && leg.From.StopID == leg.To.StopID {
+			continue // Skip this leg
+		}
+		filteredLegs = append(filteredLegs, leg)
+	}
+	itinerary.Legs = filteredLegs
+}
+
 func translateResponseStationIds(response *RouteResponse) {
 	// Translate From and To station IDs
 	translateStationIds(&response.From)
 	translateStationIds(&response.To)
 
-	// Translate station IDs in all itineraries
+	// Translate station IDs in all itineraries and remove redundant walking legs
 	for i := range response.Itineraries {
 		for j := range response.Itineraries[i].Legs {
 			// Translate From and To station IDs in each leg
@@ -222,6 +234,8 @@ func translateResponseStationIds(response *RouteResponse) {
 				translateStationIds(&response.Itineraries[i].Legs[j].IntermediateStops[k])
 			}
 		}
+		// Remove redundant walking legs after translation
+		removeRedundantWalkingLegs(&response.Itineraries[i])
 	}
 }
 

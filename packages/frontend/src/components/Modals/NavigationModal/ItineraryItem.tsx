@@ -1,6 +1,8 @@
 import { Line } from 'src/components/Miscellaneous/Line/Line'
 import { Itinerary, Leg } from 'src/utils/types'
 
+const WALK_ICON = `${process.env.PUBLIC_URL}/icons/walking-svgrepo-com.svg`
+
 interface ItineraryItemProps {
     itinerary: Itinerary
 }
@@ -17,10 +19,15 @@ export const ItineraryItem: React.FC<ItineraryItemProps> = ({ itinerary }) => {
                 </div>
                 <div className="route-info">
                     <div className="route-lines">
-                        {itinerary.legs.map(
-                            (leg: Leg, index: number) =>
-                                leg.routeShortName && <Line key={index} line={leg.routeShortName} />
-                        )}
+                        {itinerary.legs.map((leg: Leg, index: number) => (
+                            <span key={index}>
+                                {leg.mode === 'WALK' ? (
+                                    <img src={WALK_ICON} alt="Walking" className="walk-icon" width="15" height="15" />
+                                ) : (
+                                    leg.routeShortName && <Line line={leg.routeShortName} />
+                                )}
+                            </span>
+                        ))}
                     </div>
                 </div>
             </div>

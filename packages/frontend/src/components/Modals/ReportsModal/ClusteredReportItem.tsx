@@ -32,7 +32,7 @@ const ClusteredReportItem: React.FC<ClusteredReportItemProps> = ({ inspectors })
                     <button
                         type="button"
                         aria-label="Toggle report list"
-                        className={isListExpanded ? 'expanded' : ''}
+                        className={`expand-button ${isListExpanded ? 'expanded' : ''}`}
                         onClick={() => setIsListExpanded(!isListExpanded)}
                     />
                 ) : null}
