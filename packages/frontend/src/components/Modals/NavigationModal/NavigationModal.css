@@ -119,3 +119,7 @@ div.modal.container.navigation-modal {
     font-size: var(--font-xxs);
     font-weight: 500;
 }
+
+.focused-input {
+    border: 2px solid var(--incentive-blue);
+}

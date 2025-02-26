@@ -83,6 +83,16 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
         if (hasValue && inputRef.current) {
             inputRef.current.select()
         }
+
+        // add blue border only to focused input
+        ;[startInputRef, endInputRef].forEach((ref) => {
+            if (ref.current) {
+                ref.current.classList.remove('focused-input')
+            }
+        })
+        if (inputRef.current) {
+            inputRef.current.classList.add('focused-input')
+        }
     }
 
     return (
