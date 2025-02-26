@@ -7,7 +7,7 @@ import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/Rep
 import { Report } from 'src/utils/types'
 
 import { useLast24HourReports } from '../../api/queries'
-import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton'
+import CloseButton from '../../components/Buttons/CloseButton/CloseButton'
 import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
 import { ReportButton } from '../../components/Buttons/ReportButton/ReportButton'
 import { UtilButton } from '../../components/Buttons/UtilButton/UtilButton'

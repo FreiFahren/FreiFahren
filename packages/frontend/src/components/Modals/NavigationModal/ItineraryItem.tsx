@@ -5,6 +5,7 @@ const WALK_ICON = `${process.env.PUBLIC_URL}/icons/walking-svgrepo-com.svg`
 
 interface ItineraryItemProps {
     itinerary: Itinerary
+    onClick: () => void
 }
 
 const formatLocalTime = (utcTimeString: string): string => {
@@ -16,9 +17,9 @@ const formatLocalTime = (utcTimeString: string): string => {
     })
 }
 
-export const ItineraryItem: React.FC<ItineraryItemProps> = ({ itinerary }) => {
+export const ItineraryItem: React.FC<ItineraryItemProps> = ({ itinerary, onClick }) => {
     return (
-        <div className={`route-option`}>
+        <div className={`route-option`} onClick={onClick}>
             <div className="route-header">
                 <div className="route-time">
                     <span className="time">

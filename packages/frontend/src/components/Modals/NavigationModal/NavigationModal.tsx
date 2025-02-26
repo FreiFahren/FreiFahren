@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next'
+import CloseButton from 'src/components/Buttons/CloseButton/CloseButton'
 import { useStations, useNavigation } from '../../../api/queries'
 import { getClosestStations } from '../../../hooks/getClosestStations'
 import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
-import { StationProperty } from '../../../utils/types'
+import { Itinerary, StationProperty } from '../../../utils/types'
 import { useLocation } from '../../../contexts/LocationContext'
 import { useState, useRef } from 'react'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
@@ -10,6 +11,7 @@ import { FeedbackForm } from 'src/components/Form/FeedbackForm/FeedbackForm'
 import { ItineraryItem } from './ItineraryItem'
 import { Skeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
 import './NavigationModal.css'
+import ItineraryDetail from './ItineraryDetail'
 
 interface NavigationModalProps {
     className?: string
@@ -30,6 +32,8 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
     const [activeInput, setActiveInput] = useState<ActiveInput>(null)
     const [startLocation, setStartLocation] = useState<string | null>(null)
     const [endLocation, setEndLocation] = useState<string | null>(null)
+
+    const [selectedRoute, setSelectedRoute] = useState<Itinerary | null>(null)
 
     const { data: navigationData, isLoading } = useNavigation(startLocation ?? '', endLocation ?? '', {
         enabled: Boolean(startLocation && endLocation),
@@ -102,6 +106,14 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
         return <FeedbackForm openAnimationClass={className} onClose={() => setIsFeedbackModalOpen(false)} />
     }
 
+    if (selectedRoute) {
+        return (
+            <ItineraryDetail itinerary={selectedRoute} className={className}>
+                <CloseButton handleClose={() => setSelectedRoute(null)} />
+            </ItineraryDetail>
+        )
+    }
+
     return (
         <div className={`navigation-modal modal container ${className}`}>
             <div className="align-child-on-line">
@@ -136,11 +148,14 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
             {navigationData && !activeInput ? (
                 <div className="navigation-data-container">
                     <div className="safest-route">
-                        <ItineraryItem itinerary={navigationData.safestRoute} />
+                        <ItineraryItem
+                            itinerary={navigationData.safestRoute}
+                            onClick={() => setSelectedRoute(navigationData.safestRoute)}
+                        />
                         <div className="safest-route-tag">{t('NavigationModal.safestRoute')}</div>
                     </div>
                     {navigationData.alternativeRoutes.map((route, index) => (
-                        <ItineraryItem key={index} itinerary={route} />
+                        <ItineraryItem key={index} itinerary={route} onClick={() => setSelectedRoute(route)} />
                     ))}
                 </div>
             ) : isLoading ? (
