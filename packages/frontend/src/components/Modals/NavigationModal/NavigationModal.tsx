@@ -4,10 +4,11 @@ import { getClosestStations } from '../../../hooks/getClosestStations'
 import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
 import { StationProperty } from '../../../utils/types'
 import { useLocation } from '../../../contexts/LocationContext'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
+import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
+import { FeedbackForm } from 'src/components/Form/FeedbackForm/FeedbackForm'
 import { ItineraryItem } from './ItineraryItem'
 import { Skeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
-
 import './NavigationModal.css'
 
 interface NavigationModalProps {
@@ -22,6 +23,8 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
     const { data: allStations } = useStations()
     const startInputRef = useRef<HTMLInputElement>(null)
     const endInputRef = useRef<HTMLInputElement>(null)
+
+    const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false)
 
     const [searchValue, setSearchValue] = useState('')
     const [activeInput, setActiveInput] = useState<ActiveInput>(null)
@@ -95,9 +98,16 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
         }
     }
 
+    if (isFeedbackModalOpen) {
+        return <FeedbackForm openAnimationClass={className} onClose={() => setIsFeedbackModalOpen(false)} />
+    }
+
     return (
         <div className={`navigation-modal modal container ${className}`}>
-            <h1>{t('NavigationModal.title')}</h1>
+            <div className="align-child-on-line">
+                <h1>{t('NavigationModal.title')}</h1>
+                <FeedbackButton handleButtonClick={() => setIsFeedbackModalOpen(true)} />
+            </div>
             <div className="location-inputs">
                 <input
                     ref={startInputRef}
