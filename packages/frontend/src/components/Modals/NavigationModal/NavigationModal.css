@@ -123,3 +123,150 @@ div.modal.container.navigation-modal {
 .focused-input {
     border: 2px solid var(--incentive-blue);
 }
+
+/* ItineraryDetail specific styles */
+.navigation-detail.modal {
+    overflow-y: auto;
+    max-height: 80vh;
+}
+
+.itinerary-header {
+    margin-bottom: var(--margin-m);
+    padding-bottom: var(--margin-s);
+    border-bottom: 1px solid var(--color-gray);
+}
+
+.route-locations {
+    margin-bottom: var(--margin-s);
+}
+
+.origin,
+.destination {
+    font-size: var(--font-m);
+    margin-bottom: var(--margin-xs);
+}
+
+.time-range {
+    font-size: var(--font-l);
+    font-weight: bold;
+}
+
+.day-duration {
+    color: var(--color-gray-on-dark-background);
+    font-size: var(--font-s);
+    font-weight: 500;
+}
+
+.itinerary-timeline {
+    position: relative;
+    margin: var(--margin-m) 0;
+}
+
+.itinerary-leg {
+    position: relative;
+}
+
+.itinerary-step {
+    display: flex;
+    margin-bottom: var(--margin-m);
+    position: relative;
+}
+
+.step-time {
+    width: 50px;
+    text-align: right;
+    font-weight: 500;
+    padding-right: var(--padding-s);
+}
+
+.step-timeline {
+    position: relative;
+    width: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.timeline-marker {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    z-index: 2;
+}
+
+.timeline-walking,
+.timeline-transit {
+    position: absolute;
+    width: 4px;
+    top: 6px;
+    bottom: -30px;
+    z-index: 1;
+}
+
+.timeline-walking {
+    background-color: var(--color-gray);
+    border-left: 2px dotted var(--color-background);
+}
+
+.step-details {
+    flex: 1;
+    padding-left: var(--padding-m);
+}
+
+.step-location {
+    font-weight: 500;
+}
+
+.step-walking {
+    display: flex;
+    align-items: center;
+    color: var(--color-gray-on-dark-background);
+}
+
+.walking-icon {
+    margin-right: var(--margin-xs);
+    font-size: 1.2em;
+}
+
+.walking-details {
+    margin-left: var(--margin-s);
+    font-size: var(--font-xs);
+}
+
+.transit-info {
+    display: flex;
+    align-items: center;
+}
+
+.transit-direction {
+    margin-left: var(--margin-s);
+    font-weight: 500;
+}
+
+.stops-info {
+    margin-top: var(--margin-xs);
+    font-size: var(--font-xs);
+    color: var(--color-gray-on-dark-background);
+}
+
+.route-risk {
+    margin-top: var(--margin-m);
+    background-color: var(--color-background);
+    border-radius: var(--borderRadius-small);
+    height: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.risk-indicator {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.risk-text {
+    text-align: right;
+    font-size: var(--font-xs);
+    margin-top: var(--margin-xxs);
+    color: var(--color-gray-on-dark-background);
+}

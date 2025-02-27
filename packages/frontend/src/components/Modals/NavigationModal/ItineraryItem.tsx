@@ -1,20 +1,12 @@
 import { Line } from 'src/components/Miscellaneous/Line/Line'
 import { Itinerary, Leg } from 'src/utils/types'
+import { formatLocalTime } from 'src/utils/dateUtils'
 
 const WALK_ICON = `${process.env.PUBLIC_URL}/icons/walking-svgrepo-com.svg`
 
 interface ItineraryItemProps {
     itinerary: Itinerary
     onClick: () => void
-}
-
-const formatLocalTime = (utcTimeString: string): string => {
-    const date = new Date(utcTimeString)
-    return date.toLocaleTimeString('de-DE', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-    })
 }
 
 export const ItineraryItem: React.FC<ItineraryItemProps> = ({ itinerary, onClick }) => {

@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next'
-import CloseButton from 'src/components/Buttons/CloseButton/CloseButton'
 import { useStations, useNavigation } from '../../../api/queries'
 import { getClosestStations } from '../../../hooks/getClosestStations'
 import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
@@ -107,11 +106,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
     }
 
     if (selectedRoute) {
-        return (
-            <ItineraryDetail itinerary={selectedRoute} className={className}>
-                <CloseButton handleClose={() => setSelectedRoute(null)} />
-            </ItineraryDetail>
-        )
+        return <ItineraryDetail itinerary={selectedRoute} className={className} />
     }
 
     return (

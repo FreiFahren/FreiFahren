@@ -225,6 +225,9 @@
         "title": "Route Planner",
         "startLocation": "Select start station",
         "endLocation": "Select end station",
-        "safestRoute": "Safest Route"
+        "safestRoute": "Safest Route",
+        "from": "From",
+        "to": "To",
+        "stops": "Stops"
     }
 }
