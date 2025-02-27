@@ -4,7 +4,7 @@ import { getClosestStations } from '../../../hooks/getClosestStations'
 import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
 import { Itinerary, StationProperty } from '../../../utils/types'
 import { useLocation } from '../../../contexts/LocationContext'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 import { FeedbackForm } from 'src/components/Form/FeedbackForm/FeedbackForm'
 import { ItineraryItem } from './ItineraryItem'
@@ -24,6 +24,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
     const { data: allStations } = useStations()
     const startInputRef = useRef<HTMLInputElement>(null)
     const endInputRef = useRef<HTMLInputElement>(null)
+    const [isInitialMount, setIsInitialMount] = useState(true)
 
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false)
 
@@ -33,6 +34,10 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
     const [endLocation, setEndLocation] = useState<string | null>(null)
 
     const [selectedRoute, setSelectedRoute] = useState<Itinerary | null>(null)
+
+    useEffect(() => {
+        setIsInitialMount(false)
+    }, [])
 
     const { data: navigationData, isLoading } = useNavigation(startLocation ?? '', endLocation ?? '', {
         enabled: Boolean(startLocation && endLocation),
@@ -106,7 +111,15 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
     }
 
     if (selectedRoute) {
-        return <ItineraryDetail itinerary={selectedRoute} className={className} />
+        return (
+            <ItineraryDetail
+                itinerary={selectedRoute}
+                className={className}
+                onBack={() => {
+                    setSelectedRoute(null)
+                }}
+            />
+        )
     }
 
     return (
@@ -121,7 +134,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
                     type="text"
                     placeholder={t('NavigationModal.startLocation')}
                     value={getInputValue('start')}
-                    autoFocus
+                    autoFocus={isInitialMount}
                     onFocus={() => handleInputFocus('start')}
                     onChange={(e) => {
                         setSearchValue(e.target.value)
@@ -140,7 +153,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
                     }}
                 />
             </div>
-            {navigationData && !activeInput ? (
+            {navigationData && startLocation && endLocation ? (
                 <div className="navigation-data-container">
                     <div className="safest-route">
                         <ItineraryItem
@@ -153,7 +166,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
                         <ItineraryItem key={index} itinerary={route} onClick={() => setSelectedRoute(route)} />
                     ))}
                 </div>
-            ) : isLoading ? (
+            ) : isLoading && startLocation && endLocation ? (
                 <div className="navigation-data-container">
                     <div className="skeleton-container">
                         {Array.from({ length: 10 }).map((_, index) => (

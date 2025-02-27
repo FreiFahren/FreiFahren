@@ -127,7 +127,25 @@ div.modal.container.navigation-modal {
 /* ItineraryDetail specific styles */
 .navigation-detail.modal {
     overflow-y: auto;
-    max-height: 80vh;
+    max-height: 70vh;
+    top: auto;
+    bottom: 0;
+    transform: translateX(-50%);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
+    animation: slide-up var(--transition-default) ease-out forwards;
+}
+
+@keyframes slide-up {
+    0% {
+        transform: translateX(-50%) translateY(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
 }
 
 .itinerary-header {
@@ -138,6 +156,29 @@ div.modal.container.navigation-modal {
 
 .route-locations {
     margin-bottom: var(--margin-s);
+    position: relative;
+}
+
+.back-button {
+    position: absolute;
+    right: 0;
+    background-color: transparent;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.back-button .back-icon {
+    width: 20px;
+    height: 20px;
 }
 
 .origin,

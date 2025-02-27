@@ -68,9 +68,6 @@ export const watchPosition = async (
             }
         },
         (error) => {
-            // fix later with sentry
-            // eslint-disable-next-line no-console
-            console.error('Error obtaining position:', error.message)
             onPositionChanged(null)
         },
         options

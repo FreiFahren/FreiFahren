@@ -8,9 +8,10 @@ import { getLineColor } from 'src/hooks/getLineColor'
 interface ItineraryDetailProps {
     itinerary: Itinerary
     className?: string
+    onBack?: () => void
 }
 
-const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className }) => {
+const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className, onBack }) => {
     const { t } = useTranslation()
     const durationMinutes = Math.round(itinerary.duration / 60)
     const durationText = `(${formatDuration(durationMinutes)})`
@@ -85,6 +86,11 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className 
             <div className="itinerary-header">
                 <div className="route-header">
                     <div className="route-locations">
+                        {onBack && (
+                            <button className="back-button" onClick={onBack} aria-label={t('NavigationModal.back')}>
+                                <img src="/icons/right-arrow-svgrepo-com.svg" alt="Back" className="back-icon" />
+                            </button>
+                        )}
                         <div className="origin">
                             <p>
                                 {t('NavigationModal.from')} {itinerary.legs[0].from.name}
