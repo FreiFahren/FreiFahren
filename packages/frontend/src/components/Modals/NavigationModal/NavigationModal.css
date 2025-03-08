@@ -226,6 +226,29 @@ div.modal.container.navigation-modal {
     position: relative;
     border-left: 4px solid var(--color-gray);
     margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+    min-height: 24px;
+    gap: var(--margin-s);
+}
+
+.step-location {
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    position: relative;
+    margin-left: -24px;
+    margin-top: -4px;
+}
+
+.step-location p {
+    margin: 0;
+    line-height: 1.2;
+}
+
+.step-location.transfer-station {
+    color: var(--color-gray-on-dark-background);
+    font-size: var(--font-s);
 }
 
 .timeline-marker {
@@ -234,17 +257,24 @@ div.modal.container.navigation-modal {
     border-radius: 50%;
     background-color: var(--color-primary);
     z-index: 2;
-    position: absolute;
-    left: -8px;
-    top: 0;
+    margin-right: 6px;
+}
+
+.transit-info {
+    display: flex;
+    align-items: center;
+}
+
+.step-details > * {
+    margin-bottom: var(--margin-xs);
+}
+
+.step-details > *:last-child {
+    margin-bottom: 0;
 }
 
 .step-details.walking-step {
     border-left: 4px dotted var(--color-gray);
-}
-
-.step-location {
-    font-weight: 500;
 }
 
 .step-walking {
@@ -263,14 +293,11 @@ div.modal.container.navigation-modal {
     font-size: var(--font-xs);
 }
 
-.transit-info {
-    display: flex;
-    align-items: center;
-}
-
 .transit-direction {
     margin-left: var(--margin-s);
     font-weight: 500;
+    display: flex;
+    align-items: center;
 }
 
 .stops-info {

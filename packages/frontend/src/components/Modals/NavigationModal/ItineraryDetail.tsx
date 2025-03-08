@@ -25,8 +25,8 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className,
                             <span>{formatLocalTime(leg.startTime)}</span>
                         </div>
                         <div className="step-details">
-                            <div className="timeline-marker"></div>
                             <div className="step-location">
+                                <div className="timeline-marker"></div>
                                 <p>{leg.from.name}</p>
                             </div>
                         </div>
@@ -38,6 +38,10 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className,
                         <span>{formatLocalTime(leg.startTime)}</span>
                     </div>
                     <div className="step-details" style={{ borderLeftColor: getLineColor(leg.routeShortName || '') }}>
+                        <div className="step-location transfer-station">
+                            <div className="timeline-marker"></div>
+                            <p>{leg.from.name}</p>
+                        </div>
                         <div className="transit-info">
                             <Line line={leg.routeShortName || ''} />
                             <div className="transit-direction">
@@ -60,8 +64,8 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className,
                             <span>{formatLocalTime(leg.endTime)}</span>
                         </div>
                         <div className="step-details">
-                            <div className="timeline-marker"></div>
                             <div className="step-location">
+                                <div className="timeline-marker"></div>
                                 <p>{leg.to.name}</p>
                             </div>
                         </div>
