@@ -62,13 +62,21 @@ In hindsight, the Markers directory lays a foundation for other Markers with dif
 
 ## Testing
 
-To run tests for the react dom, use `sh npx jest`
+Make sure to have the frontend running with `npm start`.
 
-To run tests for the `react-map-gl/maplibre` module, please
-`sh npm install -g testcafe `
+To run tests for the react dom, use `npx jest`
 
-and
+To run tests for the `react-map-gl/maplibre` module, please install testcafe globally with
 
-`sh npx testcafe chrome src/tests/components/Map/Map.test.tsx`
+```sh
+npm install -g testcafe 
+```
+
+and then
+
+```sh
+npx testcafe chrome src/tests/components/Map/Map.test.tsx
+```
+
 
 Note: maplibre can't be rendered through jest, that's why we use an emulating instance of chrome.
