@@ -17,29 +17,38 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className,
     const durationText = `(${formatDuration(durationMinutes)})`
 
     const renderLeg = (leg: Leg, index: number, isLast: boolean) => {
+        const isWalking = leg.mode.toLowerCase() === 'walk'
+
         return (
             <div key={index} className="itinerary-leg">
                 <div className="itinerary-step">
                     <div className="step-time">
                         <span>{formatLocalTime(leg.startTime)}</span>
                     </div>
-                    <div className="step-details" style={{ borderLeftColor: getLineColor(leg.routeShortName || '') }}>
+                    <div
+                        className={`step-details ${isWalking ? 'walking-step' : ''}`}
+                        style={!isWalking ? { borderLeftColor: getLineColor(leg.routeShortName || '') } : undefined}
+                    >
                         <div className="step-location transfer-station">
                             <div className="timeline-marker"></div>
                             <p>{leg.from.name}</p>
                         </div>
-                        <div className="transit-info">
-                            <Line line={leg.routeShortName || ''} />
-                            <div className="transit-direction">
-                                <span>{leg.headsign || leg.to.name}</span>
-                            </div>
-                        </div>
-                        {leg.intermediateStops && leg.intermediateStops.length > 0 && (
-                            <div className="stops-info">
-                                <span className="stops-count">
-                                    {leg.intermediateStops.length} {t('NavigationModal.stops')}
-                                </span>
-                            </div>
+                        {!isWalking && (
+                            <>
+                                <div className="transit-info">
+                                    <Line line={leg.routeShortName || ''} />
+                                    <div className="transit-direction">
+                                        <span>{leg.headsign || leg.to.name}</span>
+                                    </div>
+                                </div>
+                                {leg.intermediateStops && leg.intermediateStops.length > 0 && (
+                                    <div className="stops-info">
+                                        <span className="stops-count">
+                                            {leg.intermediateStops.length} {t('NavigationModal.stops')}
+                                        </span>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>

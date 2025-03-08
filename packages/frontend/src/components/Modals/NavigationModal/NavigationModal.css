@@ -277,10 +277,16 @@ div.modal.container.navigation-modal {
     border-left: 4px dotted var(--color-gray);
 }
 
-.step-walking {
+.walking-info {
+    color: var(--color-gray-on-dark-background);
+    font-size: var(--font-s);
     display: flex;
     align-items: center;
-    color: var(--color-gray-on-dark-background);
+    padding-left: var(--padding-xs);
+}
+
+.walking-info span {
+    margin-left: var(--margin-xs);
 }
 
 .walking-icon {
