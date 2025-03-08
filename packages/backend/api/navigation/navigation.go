@@ -224,6 +224,18 @@ func translateStationIds(position *Position) {
 	}
 }
 
+func translateStationName(stationId string) string {
+	// Get the stations list which contains the station details
+	stationsList := data.GetStationsList()
+
+	// Look up the station in the list
+	if station, exists := stationsList[stationId]; exists {
+		return station.Name
+	}
+
+	return "" // Return empty string if no translation found
+}
+
 func removeRedundantWalkingLegs(itinerary *Itinerary) {
 	// Filter out walking legs with same from and to stop ID
 	filteredLegs := make([]Leg, 0)
@@ -236,10 +248,18 @@ func removeRedundantWalkingLegs(itinerary *Itinerary) {
 	itinerary.Legs = filteredLegs
 }
 
-func translateResponseStationIds(response *RouteResponse) {
+func translateResponseStations(response *RouteResponse) {
 	// Translate From and To station IDs
 	translateStationIds(&response.From)
 	translateStationIds(&response.To)
+
+	// Translate station names using the translated IDs
+	if translatedName := translateStationName(response.From.StopID); translatedName != "" {
+		response.From.Name = translatedName
+	}
+	if translatedName := translateStationName(response.To.StopID); translatedName != "" {
+		response.To.Name = translatedName
+	}
 
 	// Translate station IDs in all itineraries and remove redundant walking legs
 	for i := range response.Itineraries {
@@ -248,9 +268,25 @@ func translateResponseStationIds(response *RouteResponse) {
 			translateStationIds(&response.Itineraries[i].Legs[j].From)
 			translateStationIds(&response.Itineraries[i].Legs[j].To)
 
-			// Translate station IDs in intermediate stops
+			// Translate station names using the translated IDs
+			if translatedName := translateStationName(response.Itineraries[i].Legs[j].From.StopID); translatedName != "" {
+				response.Itineraries[i].Legs[j].From.Name = translatedName
+			}
+			if translatedName := translateStationName(response.Itineraries[i].Legs[j].To.StopID); translatedName != "" {
+				response.Itineraries[i].Legs[j].To.Name = translatedName
+			}
+
+			// also translate the headsign
+			if response.Itineraries[i].Legs[j].Headsign != nil {
+				*response.Itineraries[i].Legs[j].Headsign = translateStationName(*response.Itineraries[i].Legs[j].Headsign)
+			}
+
+			// Translate station IDs and names in intermediate stops
 			for k := range response.Itineraries[i].Legs[j].IntermediateStops {
 				translateStationIds(&response.Itineraries[i].Legs[j].IntermediateStops[k])
+				if translatedName := translateStationName(response.Itineraries[i].Legs[j].IntermediateStops[k].StopID); translatedName != "" {
+					response.Itineraries[i].Legs[j].IntermediateStops[k].Name = translatedName
+				}
 			}
 		}
 		// Remove redundant walking legs after translation
@@ -307,7 +343,7 @@ func GenerateItineraries(req RouteRequest) (*EnrichedRouteResponse, error) {
 	}
 
 	// Translate all station IDs to FreiFahren format
-	translateResponseStationIds(&engineResp)
+	translateResponseStations(&engineResp)
 
 	// Get current risk data
 	riskData, ok := prediction.Cache.Get()
