@@ -1,6 +1,6 @@
 from nlp_service.utils.logger import setup_logger
 from nlp_service.core.dataloader import lines, stations_with_synonyms
-from nlp_service.FreiFahren_BE_NLP.NER.TransportInformationRecognizer import (
+from nlp_service.core.NER.TransportInformationRecognizer import (
     TextProcessor,
 )
 

@@ -1,7 +1,7 @@
 from datetime import datetime
 import requests
 from nlp_service.utils.logger import setup_logger
-from nlp_service.config import BACKEND_URL, REPORT_PASSWORD
+from nlp_service.config.config import BACKEND_URL, REPORT_PASSWORD
 
 logger = setup_logger()
 

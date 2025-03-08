@@ -31,6 +31,8 @@ services:
     restart: unless-stopped
     networks:
       - backend-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   nlp_service:
     build:
@@ -75,4 +77,4 @@ services:
 
 networks:
   backend-network:
-    driver: bridge 
+    driver: bridge

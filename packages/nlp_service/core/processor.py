@@ -29,7 +29,7 @@ def extract_ticket_inspector_info(unformatted_text):
     Extracts ticket inspector information from the unformatted text.
     """
     
-    ticket_inspector = TicketInspector()
+    ticket_inspector = TicketInspector(station=None, direction=None, line=None)
 
     found_line = find_line(unformatted_text, lines)
     ticket_inspector.line = found_line

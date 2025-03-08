@@ -1,12 +1,12 @@
 from flask import Flask, request
-from nlp_service.config.config import FREIFAHREN_CHAT_ID, REPORT_PASSWORD, RESTART_PASSWORD
+from nlp_service.config.config import FREIFAHREN_CHAT_ID, RESTART_PASSWORD
 from nlp_service.services.telegram_adapter import send_message
-from nlp_service.utils.logger import get_logger
+from nlp_service.utils.logger import setup_logger
 from nlp_service.services.telegram_adapter import nlp_bot
 
 import os, sys
 
-logger = get_logger()
+logger = setup_logger()
 
 flask_app = Flask(__name__)
 

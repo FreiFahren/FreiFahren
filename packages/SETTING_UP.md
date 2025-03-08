@@ -26,6 +26,7 @@ NLP_SERVICE_URL=http://nlp_service:6000
 CONTENT_MODERATION_SERVICE_URL=http://content_moderation_service:9090
 REPORT_PASSWORD=backend_report_password
 ```
+> NOTE: If you are running your own Postgres server outside of docker, you can change the `DB_HOST` to `host.docker.internal` and the `DB_PORT` to the port of your Postgres server.
 
 - The credentials for the **Postgres database** can be changed in the `docker-compose.yml` file.
 

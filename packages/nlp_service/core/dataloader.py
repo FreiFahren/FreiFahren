@@ -12,10 +12,10 @@ Data models
 """
 
 class TicketInspector:
-    def __init__(self, line, station, direction):
-        self.line = line
+    def __init__(self, station=None, direction=None, line=None):
         self.station = station
         self.direction = direction
+        self.line = line
 
 """
 Functions for loading and preparing stations and lines data
