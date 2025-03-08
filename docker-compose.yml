@@ -31,8 +31,9 @@ services:
     restart: unless-stopped
     networks:
       - backend-network
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    # UNCOMMENT the lines below to use host.docker.internal
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
 
   nlp_service:
     build:
