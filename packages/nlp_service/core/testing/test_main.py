@@ -6,8 +6,8 @@ import os
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 sys.path.insert(0, root_dir)
 
-from nlp_service.FreiFahren_BE_NLP.testing.remove_direction_and_keyword_test import TestRemoveDirectionAndKeyword
-from nlp_service.FreiFahren_BE_NLP.testing.check_for_spam_test import TestCheckForSpam
+from nlp_service.core.testing.remove_direction_and_keyword_test import TestRemoveDirectionAndKeyword
+from nlp_service.core.testing.check_for_spam_test import TestCheckForSpam
 
 red = '\033[91m'
 reset = '\033[0m'

@@ -1,77 +1,122 @@
-# FreiFahren Telegram Bot System Documentation
+# FreiFahren NLP Service Documentation
 
 ## Overview
 
-This system combines a Natural Language Processing (NLP) bot and an abstraction layer into a single application. It processes messages about ticket inspectors in Berlin's public transportation system.
+This service provides Natural Language Processing (NLP) capabilities for the FreiFahren system. It processes messages about ticket inspectors in Berlin's public transportation system, extracting relevant information through various natural language processing techniques.
 
 ### Components
 
-1. **NLP Bot**: Processes incoming messages to extract information about ticket inspectors.
-2. **Flask Application**: Provides endpoints for health checks and error reporting.
+1. **NLP Processing**: Extracts information about ticket inspectors from messages using NER and other NLP techniques.
+2. **Telegram Integration**: Interfaces with Telegram to receive and process messages.
+3. **API Layer**: Provides endpoints for health checks, error reporting, and data transmission.
 
-### Architecture
+### Project Structure
 
-The system runs as a single process with multiple threads:
-
--   Main Thread: Runs the Flask application
--   NLP Bot Thread: Handles Telegram messages
+```
+nlp_service/
+├── config/             # Configuration settings and language rules
+├── core/               # Core NLP processing logic
+│   ├── NER/            # Named Entity Recognition components
+│   ├── data/           # Data files for NLP processing
+│   ├── extractors/     # Feature extraction modules
+│   └── testing/        # Test utilities
+├── services/           # External service integrations
+│   ├── api_adapter.py  # Flask API implementation
+│   └── telegram_adapter.py # Telegram bot integration
+├── utils/              # Utility functions
+│   ├── database.py     # Database connectivity
+│   └── logger.py       # Logging configuration
+├── main.py             # Application entry point
+├── Dockerfile.nlp_service # Container definition
+├── Pipfile             # Pipenv dependency management
+└── requirements.txt    # Traditional pip requirements
+```
 
 ## Setup
 
 ### Environment Variables
 
-Create a .env file in the root directory with the following content:
+Create a `.env` file in the root directory with the following content:
 
 ```shell
-BACKEND_URL=http://127.0.0.1:8080
-WATCHER_BOT_TOKEN=
-NLP_BOT_TOKEN=
-TELEGERAM_BOTS_URL=http://127.0.0.1:6000
+BACKEND_URL=http://localhost:8080
+FREIFAHREN_CHAT_ID=[TELEGRAM_CHAT_ID]
+NLP_BOT_TOKEN=[YOUR_BOT_TOKEN]
+REPORT_PASSWORD=[SECURE_PASSWORD]
+RESTART_PASSWORD=[SECURE_PASSWORD]
+DB_USER=[DATABASE_USER]
+DB_NAME=[DATABASE_NAME]
+DB_HOST=[DATABASE_HOST]
+DB_PORT=[DATABASE_PORT]
+DB_PASSWORD=[DATABASE_PASSWORD]
+SENTRY_DSN=[OPTIONAL_SENTRY_DSN]
 ```
-
-You can get the NLP bot tokens from the BotFather. 
 
 ### Dependencies
 
-install the dependencies by running:
+You can install dependencies using either pipenv or pip:
+
+#### Using Pipenv (recommended)
 
 ```shell
-pip3 install -e .
+pipenv install
+pipenv shell
+```
+
+#### Using Pip
+
+```shell
+pip3 install -r requirements.txt
 ```
 
 ### Running the Application
 
-Run the application by executing the following command in the packages directory:
+Run the application by executing:
 
 ```shell
-python3 -m nlp_service.main
+python -m nlp_service.main
 ```
+> NOTE: Make sure to be in the `packages/` directory, to execute the `nlp_service.main` module
 
 This will start all components in a single process.
 
 ## How it Works
 
 1. **Initialization**:
+   - The main script sets up the environment, connects to Sentry (if configured), and initializes components.
+   - It starts the Telegram bot in a separate thread and runs the Flask server in the main thread.
 
--   The main script sets up the Flask app and NLP bot.
--   It starts separate threads for NLP bot polling.
+2. **NLP Processing**:
+   - Messages are received through the Telegram bot.
+   - The core NLP components (in the `core/` directory) process these messages to extract ticket inspector information.
+   - Various extractors and NER models identify key entities such as locations, times, and transport details.
 
-2. **NLP Bot**:
+3. **API Layer**:
+   - The Flask application provides endpoints for:
+     - Health monitoring
+     - Manual inspector reporting
+     - Data exchange with other system components
 
--   Listens for incoming Telegram messages.
--   Processes messages to extract ticket inspector information.
--   Sends extracted data to the backend.
+4. **Data Management**:
+   - Processed information is stored in a PostgreSQL database.
+   - Communication with the backend service provides consolidated data access.
 
+## Docker Deployment
 
-3. **Flask Application**:
+The service can be containerized using the provided Dockerfile:
 
--   Offers a /report-inspector endpoint for manual reporting.
+```shell
+docker build -f Dockerfile.nlp_service -t freifahren-nlp-service .
+docker run -p 6000:6000 --env-file .env freifahren-nlp-service
+```
 
-4. **Error Handling**:
+or go into the root directory and run:
 
--   Uses a global thread exception handler to catch and report unhandled exceptions
--   implements a run_safely function to wrap thread targets for additional error catching.
+```shell
+docker compose up 
+```
+
 
 ## Logging
 
--   The system uses a custom logger that writes to both a file (app.log) and the console.
+The system uses a custom logger that writes to both stdout and a file (`app.log`).
