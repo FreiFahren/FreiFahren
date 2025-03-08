@@ -1,5 +1,7 @@
 from nlp_service.config.config import SENTRY_DSN
 from nlp_service.utils.logger import setup_logger
+
+# Import the services. The services initialize themselves in their respective files
 from nlp_service.services.api_adapter import flask_app
 from nlp_service.services.telegram_adapter import nlp_bot
 

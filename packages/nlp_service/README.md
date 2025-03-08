@@ -116,6 +116,7 @@ or go into the root directory and run:
 docker compose up 
 ```
 
+For more detailed setup instructions, see [here](../SETTING_UP.md).
 
 ## Logging
 
