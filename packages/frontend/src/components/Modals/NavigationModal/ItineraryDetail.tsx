@@ -19,20 +19,6 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className,
     const renderLeg = (leg: Leg, index: number, isLast: boolean) => {
         return (
             <div key={index} className="itinerary-leg">
-                {index === 0 && (
-                    <div className="itinerary-step">
-                        <div className="step-time">
-                            <span>{formatLocalTime(leg.startTime)}</span>
-                        </div>
-                        <div className="step-details">
-                            <div className="step-location">
-                                <div className="timeline-marker"></div>
-                                <p>{leg.from.name}</p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
                 <div className="itinerary-step">
                     <div className="step-time">
                         <span>{formatLocalTime(leg.startTime)}</span>
