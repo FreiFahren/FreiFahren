@@ -24,10 +24,8 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className,
                         <div className="step-time">
                             <span>{formatLocalTime(leg.startTime)}</span>
                         </div>
-                        <div className="step-timeline">
-                            <div className="timeline-marker"></div>
-                        </div>
                         <div className="step-details">
+                            <div className="timeline-marker"></div>
                             <div className="step-location">
                                 <p>{leg.from.name}</p>
                             </div>
@@ -39,13 +37,7 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className,
                     <div className="step-time">
                         <span>{formatLocalTime(leg.startTime)}</span>
                     </div>
-                    <div className="step-timeline">
-                        <div
-                            className="timeline-transit"
-                            style={{ backgroundColor: getLineColor(leg.routeShortName || '') }}
-                        ></div>
-                    </div>
-                    <div className="step-details">
+                    <div className="step-details" style={{ borderLeftColor: getLineColor(leg.routeShortName || '') }}>
                         <div className="transit-info">
                             <Line line={leg.routeShortName || ''} />
                             <div className="transit-direction">
@@ -67,10 +59,8 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className,
                         <div className="step-time">
                             <span>{formatLocalTime(leg.endTime)}</span>
                         </div>
-                        <div className="step-timeline">
-                            <div className="timeline-marker"></div>
-                        </div>
                         <div className="step-details">
+                            <div className="timeline-marker"></div>
                             <div className="step-location">
                                 <p>{leg.to.name}</p>
                             </div>
