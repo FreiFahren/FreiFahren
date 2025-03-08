@@ -1,16 +1,15 @@
 from datetime import datetime
 import requests
-from nlp_service.logger import setup_logger
+from nlp_service.utils.logger import setup_logger
 from nlp_service.config import BACKEND_URL, REPORT_PASSWORD
 
 logger = setup_logger()
 
-
 def insert_ticket_info(
     timestamp: datetime,
-    line,
-    station_id,
-    direction_id,
+    line: str,
+    station_id: str,
+    direction_id: str,
 ):
 
     logger.info("Inserting ticket info into the database")
