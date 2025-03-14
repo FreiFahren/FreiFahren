@@ -4,7 +4,7 @@ import { getClosestStations } from '../../../hooks/getClosestStations'
 import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
 import { Itinerary, StationProperty } from '../../../utils/types'
 import { useLocation } from '../../../contexts/LocationContext'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 import { FeedbackForm } from 'src/components/Form/FeedbackForm/FeedbackForm'
 import { ItineraryItem } from './ItineraryItem'
@@ -12,6 +12,7 @@ import { Skeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
 import './NavigationModal.css'
 import ItineraryDetail from './ItineraryDetail'
 import { sendAnalyticsEvent, useTrackComponentView } from '../../../hooks/useAnalytics'
+import Fuse from 'fuse.js'
 
 interface NavigationModalProps {
     className?: string
@@ -38,6 +39,24 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
 
     const [selectedRoute, setSelectedRoute] = useState<Itinerary | null>(null)
 
+    // remove single S and U
+    const preprocessName = (name: string): string => name.replace(/^(S|U)\s+/i, ' ')
+
+    const fuse = useMemo(() => {
+        if (!allStations) return null
+
+        const stations = Object.entries(allStations).map(([id, station]) => ({
+            id,
+            ...station,
+            processedName: preprocessName(station.name),
+        }))
+        return new Fuse(stations, {
+            keys: ['processedName'],
+            threshold: 0.4,
+            distance: 100,
+        })
+    }, [allStations])
+
     useEffect(() => {
         setIsInitialMount(false)
     }, [])
@@ -46,13 +65,14 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
         enabled: Boolean(startLocation && endLocation),
     })
 
-    const possibleStations = allStations
-        ? Object.fromEntries(
-              Object.entries(allStations).filter(([_, station]) =>
-                  station.name.toLowerCase().includes(searchValue.toLowerCase())
-              )
-          )
-        : {}
+    const possibleStations = useMemo(() => {
+        if (!allStations || !searchValue || !fuse) return allStations ?? {}
+
+        const processedSearchValue = preprocessName(searchValue)
+        console.log('processedSearchValue', processedSearchValue)
+        const searchResults = fuse.search(processedSearchValue)
+        return Object.fromEntries(searchResults.map((result) => [result.item.id, allStations[result.item.id]]))
+    }, [allStations, searchValue, fuse])
 
     const handleStationSelect = (stationName: string | null) => {
         if (!stationName || !allStations) return

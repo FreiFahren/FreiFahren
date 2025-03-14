@@ -11,6 +11,7 @@
     "@testing-library/react": "^16.1.0",
     "@types/react": "19.0.1",
     "@types/react-dom": "19.0.2",
+    "fuse.js": "^7.1.0",
     "i18next": "^23.15.2",
     "i18next-browser-languagedetector": "^8.0.0",
     "i18next-http-backend": "^2.6.2",
