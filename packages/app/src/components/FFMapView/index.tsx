@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react'
 import { StyleSheet } from 'react-native'
 
 import { Report, useReports } from '../../api'
-import { useStations } from '../../api/queries'
+import { useLines, useRiskData, useSegments, useStations } from '../../api/queries'
 import { useAppStore } from '../../app.store'
 import { config } from '../../config'
 import { track } from '../../tracking'
@@ -34,6 +34,30 @@ const styles = StyleSheet.create({
     },
 })
 
+// Workaround: Because Maplibre native does not have zIndex and layers are rendered
+// in order of their creation. Thus, we need to force the order they are mounted
+// independendly of the order the data loads in.
+const useLayersToRender = () => {
+    const { data: lines } = useLines()
+    const { data: segments } = useSegments()
+    const { data: riskData } = useRiskData()
+    const { data: stations } = useStations()
+    const { data: reports } = useReports()
+
+    const hasLines = lines !== undefined
+    const hasSegments = segments !== undefined
+    const hasRiskData = riskData !== undefined
+    const hasStations = stations !== undefined
+    const hasReports = reports !== undefined
+
+    return {
+        lines: hasLines,
+        risk: hasLines && hasSegments && hasRiskData,
+        stations: hasLines && hasSegments && hasStations,
+        reports: hasLines && hasSegments && hasRiskData && hasStations && hasReports,
+    }
+}
+
 export const FFMapView = () => {
     const cameraRef = useRef<CameraRef>(null)
     const stations = useStations().data
@@ -44,6 +68,8 @@ export const FFMapView = () => {
     }, [])
 
     const { layer, reportToShow, update: updateAppState } = useAppStore()
+
+    const layersToRender = useLayersToRender()
 
     useEffect(() => {
         if (!isNil(reportToShow) && stations !== undefined) {
@@ -85,10 +111,10 @@ export const FFMapView = () => {
                     followUserMode={UserTrackingMode.Follow}
                     ref={cameraRef}
                 />
-                <LinesLayer />
-                <RiskLayer visible={layer === 'risk'} />
-                <StationLayer />
-                <ReportsLayer reports={reports} onPressReport={onPressReport} />
+                {layersToRender.lines && <LinesLayer />}
+                {layersToRender.risk && <RiskLayer visible={layer === 'risk'} />}
+                {layersToRender.stations && <StationLayer />}
+                {layersToRender.reports && <ReportsLayer reports={reports} onPressReport={onPressReport} />}
                 <UserLocation visible animated />
             </MapView>
         </FFView>

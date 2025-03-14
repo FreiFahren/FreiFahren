@@ -3,13 +3,21 @@ import axios from 'axios'
 import { z } from 'zod'
 
 import { config } from '../config'
-import { api, Lines, Report, RiskData, Stations, StationStatistics } from './client'
+import { api, FeatureCollection, Lines, Report, RiskData, Stations, StationStatistics } from './client'
 import { CACHE_KEYS } from './queryClient'
 
 export const useLines = <T = Lines>(select?: (data: Lines) => T) =>
     useQuery({
         queryKey: CACHE_KEYS.lines,
         queryFn: api.getLines,
+        staleTime: Infinity,
+        select,
+    })
+
+export const useSegments = <T = FeatureCollection>(select?: (data: FeatureCollection) => T) =>
+    useQuery({
+        queryKey: CACHE_KEYS.segments,
+        queryFn: api.getSegments,
         staleTime: Infinity,
         select,
     })
