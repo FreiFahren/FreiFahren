@@ -103,7 +103,7 @@ div.modal.container.navigation-modal {
 .safest-route {
     margin-top: var(--margin-m);
     position: relative;
-    border: 2px solid var(--color-primary);
+    border: 2px solid var(--color-risk-0);
     border-radius: var(--borderRadius-medium);
     padding: var(--padding-xxs);
     margin-bottom: var(--margin-s);
@@ -113,7 +113,7 @@ div.modal.container.navigation-modal {
     position: absolute;
     top: -12px;
     right: 16px;
-    background-color: var(--color-primary);
+    background-color: var(--color-risk-0);
     padding: var(--padding-xxs) var(--padding-xs);
     border-radius: var(--borderRadius-small);
     font-size: var(--font-xxs);
