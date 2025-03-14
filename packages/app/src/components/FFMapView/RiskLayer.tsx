@@ -1,26 +1,33 @@
 import { LineLayer, ShapeSource } from '@maplibre/maplibre-react-native'
 import { useMemo } from 'react'
 
-import { useRiskData } from '../../api/queries'
+import { useRiskData, useSegments } from '../../api/queries'
 import { useAppStore } from '../../app.store'
-import lines from '../../data/line-segments.json'
 
-const linesWithRiskColors = (segmentColors?: { [key: string]: string }) => {
+const useLinesWithRiskColors = (segmentColors?: { [key: string]: string }) => {
+    const { data: segments } = useSegments()
+
     const defaultColor = '#13C184'
 
-    return {
-        ...lines,
-        features: lines.features.map((feature) => ({
-            ...feature,
-            properties: {
-                ...feature.properties,
-                color:
-                    segmentColors !== undefined
-                        ? (segmentColors[feature.properties.sid] ?? defaultColor)
-                        : defaultColor,
-            },
-        })),
-    }
+    return useMemo(
+        () =>
+            segments === undefined
+                ? null
+                : {
+                      ...segments,
+                      features: segments.features.map((feature) => ({
+                          ...feature,
+                          properties: {
+                              ...feature.properties,
+                              color:
+                                  segmentColors !== undefined
+                                      ? (segmentColors[feature.properties.sid] ?? defaultColor)
+                                      : defaultColor,
+                          },
+                      })),
+                  },
+        [segments, segmentColors]
+    )
 }
 
 type RiskLayerProps = {
@@ -29,8 +36,10 @@ type RiskLayerProps = {
 
 export const RiskLayer = ({ visible }: RiskLayerProps) => {
     const { data: riskData } = useRiskData()
-    const riskGeoJson = useMemo(() => linesWithRiskColors(riskData?.segmentColors), [riskData])
+    const riskGeoJson = useLinesWithRiskColors(riskData?.segmentColors)
     const shouldShow = useAppStore((state) => !state.appLocked)
+
+    if (riskGeoJson === null) return null
 
     return (
         <ShapeSource id="risk-source" shape={riskGeoJson as GeoJSON.GeoJSON}>

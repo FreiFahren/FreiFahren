@@ -5,6 +5,7 @@ import DeviceInfo from 'react-native-device-info'
 import { z } from 'zod'
 
 import { config } from '../config'
+import { createETagMiddleware } from './etagMiddleware'
 
 export const reportSchema = z
     .object({
@@ -28,13 +29,23 @@ export const reportSchema = z
 
 export type Report = z.infer<typeof reportSchema>
 
-const client = axios.create({
+export const client = axios.create({
     baseURL: config.FF_API_BASE_URL,
+    validateStatus: () => true,
     headers: {
         'ff-app-version': DeviceInfo.getVersion(),
         'ff-platform': Platform.OS,
     },
 })
+
+const etagMiddleware = createETagMiddleware({
+    endpoints: ['/v0/lines', '/v0/stations', '/v0/lines/segments'],
+})
+
+etagMiddleware.applyMiddleware(client)
+
+export const clearApiCache = etagMiddleware.clearAllCaches
+export const clearEndpointCache = etagMiddleware.clearCache
 
 const getReports = async (start: DateTime, end: DateTime): Promise<Report[]> => {
     const { data } = await client.get('/v0/basics/inspectors', {
@@ -117,6 +128,32 @@ export const getLines = async (): Promise<Record<string, string[]>> => {
     return linesSchema.parse(data)
 }
 
+export const featureCollectionSchema = z.object({
+    type: z.literal('FeatureCollection'),
+    features: z.array(
+        z.object({
+            type: z.literal('Feature'),
+            properties: z.object({
+                sid: z.string(),
+                line: z.string(),
+                line_color: z.string(),
+            }),
+            geometry: z.object({
+                type: z.literal('LineString'),
+                coordinates: z.array(z.array(z.number())),
+            }),
+        })
+    ),
+})
+
+export type FeatureCollection = z.infer<typeof featureCollectionSchema>
+
+export const getSegments = async (): Promise<FeatureCollection> => {
+    const { data } = await client.get('/v0/lines/segments')
+
+    return featureCollectionSchema.parse(data)
+}
+
 export const stationStatisticsSchema = z.object({
     numberOfReports: z.number(),
 })
@@ -137,4 +174,5 @@ export const api = {
     postReport,
     getRiskData,
     getStationStatistics,
+    getSegments,
 }
