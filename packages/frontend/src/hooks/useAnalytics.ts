@@ -1,5 +1,6 @@
 import { AnalyticsOptions, SavedEvent } from '../utils/types'
 import { isAnalyticsOptedOut } from './useAnalyticsOptOut'
+import { useEffect, useRef } from 'react'
 
 /**
  * Checks if the Pirsch analytics SDK is loaded and available.
@@ -108,6 +109,24 @@ export const sendSavedEvents = async (): Promise<void> => {
 
     await Promise.all(eventPromises)
     localStorage.setItem('unsentAnalyticsEvents', JSON.stringify(remainingEvents))
+}
+
+/**
+ * Hook to track component views. This automatically sends an analytics event
+ * when a component mounts, without requiring a useEffect in the component itself.
+ *
+ * @param {string} componentName - The name of the component to track
+ * @param {AnalyticsOptions} [options] - Optional parameters for the event
+ */
+export const useTrackComponentView = (componentName: string, options?: AnalyticsOptions): void => {
+    const isFirstRender = useRef(true)
+
+    useEffect(() => {
+        if (isFirstRender.current) {
+            sendAnalyticsEvent(`${componentName} opened`, options)
+            isFirstRender.current = false
+        }
+    }, [componentName, options])
 }
 
 export { isPirschLoaded, waitForPirsch }

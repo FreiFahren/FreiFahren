@@ -11,6 +11,7 @@ import { ItineraryItem } from './ItineraryItem'
 import { Skeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
 import './NavigationModal.css'
 import ItineraryDetail from './ItineraryDetail'
+import { sendAnalyticsEvent, useTrackComponentView } from '../../../hooks/useAnalytics'
 
 interface NavigationModalProps {
     className?: string
@@ -19,6 +20,8 @@ interface NavigationModalProps {
 type ActiveInput = 'start' | 'end' | null
 
 const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
+    useTrackComponentView('navigation modal')
+
     const { t } = useTranslation()
     const { userPosition } = useLocation()
     const { data: allStations } = useStations()
@@ -158,12 +161,30 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
                     <div className="safest-route">
                         <ItineraryItem
                             itinerary={navigationData.safestRoute}
-                            onClick={() => setSelectedRoute(navigationData.safestRoute)}
+                            onClick={() => {
+                                setSelectedRoute(navigationData.safestRoute)
+                                sendAnalyticsEvent('Route selected', {
+                                    meta: {
+                                        isSafe: true,
+                                    },
+                                })
+                            }}
                         />
                         <div className="safest-route-tag">{t('NavigationModal.safestRoute')}</div>
                     </div>
                     {navigationData.alternativeRoutes.map((route, index) => (
-                        <ItineraryItem key={index} itinerary={route} onClick={() => setSelectedRoute(route)} />
+                        <ItineraryItem
+                            key={index}
+                            itinerary={route}
+                            onClick={() => {
+                                setSelectedRoute(route)
+                                sendAnalyticsEvent('Route selected', {
+                                    meta: {
+                                        isSafe: false,
+                                    },
+                                })
+                            }}
+                        />
                     ))}
                 </div>
             ) : isLoading && startLocation && endLocation ? (
