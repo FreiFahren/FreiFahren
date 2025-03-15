@@ -108,7 +108,7 @@ export type LegGeometry = {
 }
 
 export type Leg = {
-    mode: string
+    mode: 'WALK' | 'BUS' | 'TRAM' | 'METRO' | 'SUBWAY' | 'REGIONAL_RAIL'
     from: Position
     to: Position
     duration: number
@@ -137,14 +137,4 @@ export type Itinerary = {
     transfers: number
     legs: Leg[]
     calculatedRisk?: number
-}
-
-export type NavigationResponse = {
-    requestParameters: Record<string, unknown>
-    debugOutput: Record<string, unknown>
-    from: Position
-    to: Position
-    direct: unknown[]
-    safestRoute: Itinerary
-    alternativeRoutes: Itinerary[]
 }

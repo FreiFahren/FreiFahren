@@ -11,29 +11,33 @@ definitions:
       success:
         type: boolean
     type: object
-  navigation.EnrichedRouteResponse:
+  itineraries.ItinerariesResponse:
     properties:
-      alternativeRoutes:
+      alternativeItineraries:
         items:
-          $ref: '#/definitions/navigation.Itinerary'
+          $ref: '#/definitions/itineraries.ResponseItinerary'
         type: array
       debugOutput:
         additionalProperties: true
         type: object
-      direct:
-        items: {}
-        type: array
       from:
-        $ref: '#/definitions/navigation.Position'
+        $ref: '#/definitions/itineraries.ResponsePosition'
       requestParameters:
         additionalProperties: true
         type: object
-      safestRoute:
-        $ref: '#/definitions/navigation.Itinerary'
+      safestItinerary:
+        $ref: '#/definitions/itineraries.ResponseItinerary'
       to:
-        $ref: '#/definitions/navigation.Position'
+        $ref: '#/definitions/itineraries.ResponsePosition'
     type: object
-  navigation.Itinerary:
+  itineraries.LegGeometry:
+    properties:
+      length:
+        type: integer
+      points:
+        type: string
+    type: object
+  itineraries.ResponseItinerary:
     properties:
       calculated_risk:
         type: number
@@ -43,74 +47,47 @@ definitions:
         type: string
       legs:
         items:
-          $ref: '#/definitions/navigation.Leg'
+          $ref: '#/definitions/itineraries.ResponseLeg'
         type: array
       startTime:
         type: string
       transfers:
         type: integer
     type: object
-  navigation.Leg:
+  itineraries.ResponseLeg:
     properties:
-      agencyId:
-        type: string
-      agencyName:
-        type: string
-      agencyUrl:
-        type: string
       duration:
         type: integer
       endTime:
         type: string
       from:
-        $ref: '#/definitions/navigation.Position'
-      headsign:
-        type: string
+        $ref: '#/definitions/itineraries.ResponsePosition'
       intermediateStops:
         items:
-          $ref: '#/definitions/navigation.Position'
+          $ref: '#/definitions/itineraries.ResponsePosition'
         type: array
       legGeometry:
-        $ref: '#/definitions/navigation.LegGeometry'
+        $ref: '#/definitions/itineraries.LegGeometry'
       mode:
         type: string
-      realTime:
-        type: boolean
-      routeColor:
-        type: string
       routeShortName:
-        type: string
-      routeTextColor:
         type: string
       scheduledEndTime:
         type: string
       scheduledStartTime:
         type: string
-      source:
-        type: string
       startTime:
         type: string
       to:
-        $ref: '#/definitions/navigation.Position'
-      tripId:
-        type: string
+        $ref: '#/definitions/itineraries.ResponsePosition'
     type: object
-  navigation.LegGeometry:
-    properties:
-      length:
-        type: integer
-      points:
-        type: string
-    type: object
-  navigation.Position:
+  itineraries.ResponsePosition:
     properties:
       arrival:
         type: string
       departure:
         type: string
       lat:
-        type: number
-      level:
         type: number
       lon:
         type: number
@@ -120,13 +97,7 @@ definitions:
         type: string
       scheduledDeparture:
         type: string
-      scheduledTrack:
-        type: string
       stopId:
-        type: string
-      track:
-        type: string
-      vertexType:
         type: string
     type: object
   prediction.RiskData:
@@ -689,9 +660,9 @@ paths:
       consumes:
       - application/json
       description: |-
-        Retrieves possible routes between two stations, including a safest route based on risk prediction.
-        This endpoint calculates multiple route options and enriches them with risk data from the risk prediction model.
-        The response includes both the safest route and alternative routes, sorted by their calculated risk.
+        Retrieves possible routes between two stations, including a safest itinerary based on risk prediction.
+        This endpoint calculates multiple itinerary options and enriches them with risk data from the risk prediction model.
+        The response includes both the safest itinerary and alternative itineraries, sorted by their calculated risk.
       parameters:
       - description: Start station ID
         in: query
@@ -709,7 +680,7 @@ paths:
         "200":
           description: Successfully retrieved route options
           schema:
-            $ref: '#/definitions/navigation.EnrichedRouteResponse'
+            $ref: '#/definitions/itineraries.ItinerariesResponse'
         "400":
           description: 'Bad Request: Missing or invalid station IDs'
           schema:

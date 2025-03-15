@@ -552,7 +552,7 @@ const docTemplate = `{
         },
         "/v0/transit/itineraries": {
             "get": {
-                "description": "Retrieves possible routes between two stations, including a safest route based on risk prediction.\nThis endpoint calculates multiple route options and enriches them with risk data from the risk prediction model.\nThe response includes both the safest route and alternative routes, sorted by their calculated risk.",
+                "description": "Retrieves possible routes between two stations, including a safest itinerary based on risk prediction.\nThis endpoint calculates multiple itinerary options and enriches them with risk data from the risk prediction model.\nThe response includes both the safest itinerary and alternative itineraries, sorted by their calculated risk.",
                 "consumes": [
                     "application/json"
                 ],
@@ -583,7 +583,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Successfully retrieved route options",
                         "schema": {
-                            "$ref": "#/definitions/navigation.EnrichedRouteResponse"
+                            "$ref": "#/definitions/itineraries.ItinerariesResponse"
                         }
                     },
                     "400": {
@@ -660,39 +660,46 @@ const docTemplate = `{
                 }
             }
         },
-        "navigation.EnrichedRouteResponse": {
+        "itineraries.ItinerariesResponse": {
             "type": "object",
             "properties": {
-                "alternativeRoutes": {
+                "alternativeItineraries": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/navigation.Itinerary"
+                        "$ref": "#/definitions/itineraries.ResponseItinerary"
                     }
                 },
                 "debugOutput": {
                     "type": "object",
                     "additionalProperties": true
                 },
-                "direct": {
-                    "type": "array",
-                    "items": {}
-                },
                 "from": {
-                    "$ref": "#/definitions/navigation.Position"
+                    "$ref": "#/definitions/itineraries.ResponsePosition"
                 },
                 "requestParameters": {
                     "type": "object",
                     "additionalProperties": true
                 },
-                "safestRoute": {
-                    "$ref": "#/definitions/navigation.Itinerary"
+                "safestItinerary": {
+                    "$ref": "#/definitions/itineraries.ResponseItinerary"
                 },
                 "to": {
-                    "$ref": "#/definitions/navigation.Position"
+                    "$ref": "#/definitions/itineraries.ResponsePosition"
                 }
             }
         },
-        "navigation.Itinerary": {
+        "itineraries.LegGeometry": {
+            "type": "object",
+            "properties": {
+                "length": {
+                    "type": "integer"
+                },
+                "points": {
+                    "type": "string"
+                }
+            }
+        },
+        "itineraries.ResponseItinerary": {
             "type": "object",
             "properties": {
                 "calculated_risk": {
@@ -707,7 +714,7 @@ const docTemplate = `{
                 "legs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/navigation.Leg"
+                        "$ref": "#/definitions/itineraries.ResponseLeg"
                     }
                 },
                 "startTime": {
@@ -718,18 +725,9 @@ const docTemplate = `{
                 }
             }
         },
-        "navigation.Leg": {
+        "itineraries.ResponseLeg": {
             "type": "object",
             "properties": {
-                "agencyId": {
-                    "type": "string"
-                },
-                "agencyName": {
-                    "type": "string"
-                },
-                "agencyUrl": {
-                    "type": "string"
-                },
                 "duration": {
                     "type": "integer"
                 },
@@ -737,33 +735,21 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "from": {
-                    "$ref": "#/definitions/navigation.Position"
-                },
-                "headsign": {
-                    "type": "string"
+                    "$ref": "#/definitions/itineraries.ResponsePosition"
                 },
                 "intermediateStops": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/navigation.Position"
+                        "$ref": "#/definitions/itineraries.ResponsePosition"
                     }
                 },
                 "legGeometry": {
-                    "$ref": "#/definitions/navigation.LegGeometry"
+                    "$ref": "#/definitions/itineraries.LegGeometry"
                 },
                 "mode": {
                     "type": "string"
                 },
-                "realTime": {
-                    "type": "boolean"
-                },
-                "routeColor": {
-                    "type": "string"
-                },
                 "routeShortName": {
-                    "type": "string"
-                },
-                "routeTextColor": {
                     "type": "string"
                 },
                 "scheduledEndTime": {
@@ -772,32 +758,15 @@ const docTemplate = `{
                 "scheduledStartTime": {
                     "type": "string"
                 },
-                "source": {
-                    "type": "string"
-                },
                 "startTime": {
                     "type": "string"
                 },
                 "to": {
-                    "$ref": "#/definitions/navigation.Position"
-                },
-                "tripId": {
-                    "type": "string"
+                    "$ref": "#/definitions/itineraries.ResponsePosition"
                 }
             }
         },
-        "navigation.LegGeometry": {
-            "type": "object",
-            "properties": {
-                "length": {
-                    "type": "integer"
-                },
-                "points": {
-                    "type": "string"
-                }
-            }
-        },
-        "navigation.Position": {
+        "itineraries.ResponsePosition": {
             "type": "object",
             "properties": {
                 "arrival": {
@@ -807,9 +776,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "lat": {
-                    "type": "number"
-                },
-                "level": {
                     "type": "number"
                 },
                 "lon": {
@@ -824,16 +790,7 @@ const docTemplate = `{
                 "scheduledDeparture": {
                     "type": "string"
                 },
-                "scheduledTrack": {
-                    "type": "string"
-                },
                 "stopId": {
-                    "type": "string"
-                },
-                "track": {
-                    "type": "string"
-                },
-                "vertexType": {
                     "type": "string"
                 }
             }

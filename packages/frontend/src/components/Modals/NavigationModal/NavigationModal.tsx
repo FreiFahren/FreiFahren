@@ -172,9 +172,9 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
                 <div className="navigation-data-container">
                     <div className="safest-route">
                         <ItineraryItem
-                            itinerary={navigationData.safestRoute}
+                            itinerary={navigationData.safestItinerary}
                             onClick={() => {
-                                setSelectedRoute(navigationData.safestRoute)
+                                setSelectedRoute(navigationData.safestItinerary)
                                 sendAnalyticsEvent('Route selected', {
                                     meta: {
                                         isSafe: true,
@@ -184,7 +184,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
                         />
                         <div className="safest-route-tag">{t('NavigationModal.safestRoute')}</div>
                     </div>
-                    {navigationData.alternativeRoutes.map((route, index) => (
+                    {navigationData.alternativeItineraries.map((route, index) => (
                         <ItineraryItem
                             key={index}
                             itinerary={route}

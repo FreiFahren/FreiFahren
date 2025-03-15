@@ -1,4 +1,4 @@
-package navigation
+package itineraries
 
 import (
 	"encoding/json"
@@ -13,99 +13,6 @@ import (
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/logger"
 )
-
-// Custom error types
-type ValidationError struct {
-	message string
-}
-
-func (e *ValidationError) Error() string {
-	return e.message
-}
-
-type EngineError struct {
-	message string
-}
-
-func (e *EngineError) Error() string {
-	return e.message
-}
-
-type Position struct {
-	Name               string  `json:"name"`
-	StopID             string  `json:"stopId"`
-	Lat                float64 `json:"lat"`
-	Lon                float64 `json:"lon"`
-	Level              float64 `json:"level"`
-	VertexType         string  `json:"vertexType"`
-	Departure          *string `json:"departure,omitempty"`
-	ScheduledDeparture *string `json:"scheduledDeparture,omitempty"`
-	Arrival            *string `json:"arrival,omitempty"`
-	ScheduledArrival   *string `json:"scheduledArrival,omitempty"`
-	ScheduledTrack     *string `json:"scheduledTrack,omitempty"`
-	Track              *string `json:"track,omitempty"`
-}
-
-type LegGeometry struct {
-	Points string `json:"points"`
-	Length int    `json:"length"`
-}
-
-type Leg struct {
-	Mode               string      `json:"mode"`
-	From               Position    `json:"from"`
-	To                 Position    `json:"to"`
-	Duration           int         `json:"duration"`
-	StartTime          string      `json:"startTime"`
-	EndTime            string      `json:"endTime"`
-	ScheduledStartTime string      `json:"scheduledStartTime"`
-	ScheduledEndTime   string      `json:"scheduledEndTime"`
-	RealTime           bool        `json:"realTime"`
-	Headsign           *string     `json:"headsign,omitempty"`
-	RouteColor         *string     `json:"routeColor,omitempty"`
-	RouteTextColor     *string     `json:"routeTextColor,omitempty"`
-	AgencyName         *string     `json:"agencyName,omitempty"`
-	AgencyURL          *string     `json:"agencyUrl,omitempty"`
-	AgencyID           *string     `json:"agencyId,omitempty"`
-	TripID             *string     `json:"tripId,omitempty"`
-	RouteShortName     *string     `json:"routeShortName,omitempty"`
-	Source             *string     `json:"source,omitempty"`
-	IntermediateStops  []Position  `json:"intermediateStops,omitempty"`
-	LegGeometry        LegGeometry `json:"legGeometry"`
-}
-
-type Itinerary struct {
-	Duration       int     `json:"duration"`
-	StartTime      string  `json:"startTime"`
-	EndTime        string  `json:"endTime"`
-	Transfers      int     `json:"transfers"`
-	Legs           []Leg   `json:"legs"`
-	CalculatedRisk float64 `json:"calculated_risk,omitempty"`
-}
-
-type RouteRequest struct {
-	StartStation string `json:"startStation"`
-	EndStation   string `json:"endStation"`
-}
-
-type RouteResponse struct {
-	RequestParameters map[string]interface{} `json:"requestParameters"`
-	DebugOutput       map[string]interface{} `json:"debugOutput"`
-	From              Position               `json:"from"`
-	To                Position               `json:"to"`
-	Direct            []interface{}          `json:"direct"`
-	Itineraries       []Itinerary            `json:"itineraries"`
-}
-
-type EnrichedRouteResponse struct {
-	RequestParameters map[string]interface{} `json:"requestParameters"`
-	DebugOutput       map[string]interface{} `json:"debugOutput"`
-	From              Position               `json:"from"`
-	To                Position               `json:"to"`
-	Direct            []interface{}          `json:"direct"`
-	SafestRoute       *Itinerary             `json:"safestRoute"`
-	AlternativeRoutes []Itinerary            `json:"alternativeRoutes"`
-}
 
 func calculateLegRisk(leg *Leg, riskData *prediction.RiskData) float64 {
 	// Skip walking legs
@@ -248,7 +155,7 @@ func removeRedundantWalkingLegs(itinerary *Itinerary) {
 	itinerary.Legs = filteredLegs
 }
 
-func translateResponseStations(response *RouteResponse) {
+func translateResponseStations(response *EngineResponse) {
 	// Translate From and To station IDs
 	translateStationIds(&response.From)
 	translateStationIds(&response.To)
@@ -294,7 +201,64 @@ func translateResponseStations(response *RouteResponse) {
 	}
 }
 
-func GenerateItineraries(req RouteRequest) (*EnrichedRouteResponse, error) {
+func positionToResponsePosition(pos Position) ResponsePosition {
+	return ResponsePosition{
+		BasePosition: BasePosition[any]{
+			Name:               pos.Name,
+			StopID:             pos.StopID,
+			Lat:                pos.Lat,
+			Lon:                pos.Lon,
+			Departure:          pos.Departure,
+			ScheduledDeparture: pos.ScheduledDeparture,
+			Arrival:            pos.Arrival,
+			ScheduledArrival:   pos.ScheduledArrival,
+		},
+	}
+}
+
+func translateToResponseLeg(leg *Leg) ResponseLeg {
+	// Convert intermediate stops
+	intermediateStops := make([]ResponsePosition, len(leg.IntermediateStops))
+	for i, stop := range leg.IntermediateStops {
+		intermediateStops[i] = positionToResponsePosition(stop)
+	}
+
+	return ResponseLeg{
+		BaseLeg: BaseLeg[ResponsePosition, LegGeometry]{
+			Mode:               leg.Mode,
+			From:               positionToResponsePosition(leg.From),
+			To:                 positionToResponsePosition(leg.To),
+			Duration:           leg.Duration,
+			StartTime:          leg.StartTime,
+			EndTime:            leg.EndTime,
+			ScheduledStartTime: leg.ScheduledStartTime,
+			ScheduledEndTime:   leg.ScheduledEndTime,
+			RouteShortName:     leg.RouteShortName,
+			IntermediateStops:  intermediateStops,
+			LegGeometry:        leg.LegGeometry,
+		},
+	}
+}
+
+func translateToResponseItinerary(itinerary *Itinerary) ResponseItinerary {
+	responseLeg := make([]ResponseLeg, len(itinerary.Legs))
+	for i, leg := range itinerary.Legs {
+		responseLeg[i] = translateToResponseLeg(&leg)
+	}
+
+	return ResponseItinerary{
+		BaseItinerary: BaseItinerary[ResponseLeg]{
+			Duration:       itinerary.Duration,
+			StartTime:      itinerary.StartTime,
+			EndTime:        itinerary.EndTime,
+			Transfers:      itinerary.Transfers,
+			Legs:           responseLeg,
+			CalculatedRisk: itinerary.CalculatedRisk,
+		},
+	}
+}
+
+func GenerateItineraries(req ItineraryRequest) (*ItinerariesResponse, error) {
 	// Get station IDs using the map
 	stationsMap := data.GetStationsMap()
 	startStationId, exists := stationsMap[req.StartStation]
@@ -336,7 +300,7 @@ func GenerateItineraries(req RouteRequest) (*EnrichedRouteResponse, error) {
 	}
 
 	// Decode engine response directly into our struct
-	var engineResp RouteResponse
+	var engineResp EngineResponse
 	if err := json.NewDecoder(resp.Body).Decode(&engineResp); err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to decode engine response")
 		return nil, fmt.Errorf("failed to decode engine response: %w", err)
@@ -374,29 +338,34 @@ func GenerateItineraries(req RouteRequest) (*EnrichedRouteResponse, error) {
 	}
 
 	// Filter out the safest route from alternative routes while preserving order
-	// order is preserved as the engine already returns the itereraries by how good they are
-	alternativeRoutes := make([]Itinerary, 0, len(allItineraries)-1)
+	// order is preserved as the engine already returns the itineraries by how good they are
+	alternativeItineraries := make([]Itinerary, 0, len(allItineraries)-1)
 	for i, itin := range allItineraries {
 		if i != safestRouteIndex {
-			alternativeRoutes = append(alternativeRoutes, itin)
+			alternativeItineraries = append(alternativeItineraries, itin)
 		}
 	}
 
 	// Limit to top 10 itineraries in total (including safest route)
 	maxTotal := 10
-	if len(alternativeRoutes) > maxTotal-1 {
-		alternativeRoutes = alternativeRoutes[:maxTotal-1]
+	if len(alternativeItineraries) > maxTotal-1 {
+		alternativeItineraries = alternativeItineraries[:maxTotal-1]
 	}
 
 	// Construct final response
-	response := &EnrichedRouteResponse{
-		RequestParameters: engineResp.RequestParameters,
-		DebugOutput:       engineResp.DebugOutput,
-		From:              engineResp.From,
-		To:                engineResp.To,
-		Direct:            engineResp.Direct,
-		SafestRoute:       &allItineraries[safestRouteIndex],
-		AlternativeRoutes: alternativeRoutes,
+	safestItinerary := translateToResponseItinerary(&allItineraries[safestRouteIndex])
+	response := &ItinerariesResponse{
+		RequestParameters:      engineResp.RequestParameters,
+		DebugOutput:            engineResp.DebugOutput,
+		From:                   positionToResponsePosition(engineResp.From),
+		To:                     positionToResponsePosition(engineResp.To),
+		SafestItinerary:        &safestItinerary,
+		AlternativeItineraries: make([]ResponseItinerary, len(alternativeItineraries)),
+	}
+
+	// Translate alternative itineraries
+	for i, itinerary := range alternativeItineraries {
+		response.AlternativeItineraries[i] = translateToResponseItinerary(&itinerary)
 	}
 
 	return response, nil
