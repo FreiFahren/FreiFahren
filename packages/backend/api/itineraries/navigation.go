@@ -201,7 +201,8 @@ func translateResponseStations(response *EngineResponse) {
 	}
 }
 
-func positionToResponsePosition(pos Position) ResponsePosition {
+// translateToResponsePosition converts an engine Position to a ResponsePosition
+func translateToResponsePosition(pos Position) ResponsePosition {
 	return ResponsePosition{
 		BasePosition: BasePosition[any]{
 			Name:               pos.Name,
@@ -216,18 +217,23 @@ func positionToResponsePosition(pos Position) ResponsePosition {
 	}
 }
 
+// translateToResponseLeg converts an engine Leg to a ResponseLeg
 func translateToResponseLeg(leg *Leg) ResponseLeg {
+	// Convert from and to positions
+	fromPos := translateToResponsePosition(leg.From)
+	toPos := translateToResponsePosition(leg.To)
+
 	// Convert intermediate stops
 	intermediateStops := make([]ResponsePosition, len(leg.IntermediateStops))
 	for i, stop := range leg.IntermediateStops {
-		intermediateStops[i] = positionToResponsePosition(stop)
+		intermediateStops[i] = translateToResponsePosition(stop)
 	}
 
 	return ResponseLeg{
 		BaseLeg: BaseLeg[ResponsePosition, LegGeometry]{
 			Mode:               leg.Mode,
-			From:               positionToResponsePosition(leg.From),
-			To:                 positionToResponsePosition(leg.To),
+			From:               fromPos,
+			To:                 toPos,
 			Duration:           leg.Duration,
 			StartTime:          leg.StartTime,
 			EndTime:            leg.EndTime,
@@ -240,6 +246,7 @@ func translateToResponseLeg(leg *Leg) ResponseLeg {
 	}
 }
 
+// translateToResponseItinerary converts an engine Itinerary to a ResponseItinerary
 func translateToResponseItinerary(itinerary *Itinerary) ResponseItinerary {
 	responseLeg := make([]ResponseLeg, len(itinerary.Legs))
 	for i, leg := range itinerary.Legs {
@@ -338,7 +345,7 @@ func GenerateItineraries(req ItineraryRequest) (*ItinerariesResponse, error) {
 	}
 
 	// Filter out the safest route from alternative routes while preserving order
-	// order is preserved as the engine already returns the itineraries by how good they are
+	// order is preserved as the engine already returns the itereraries by how good they are
 	alternativeItineraries := make([]Itinerary, 0, len(allItineraries)-1)
 	for i, itin := range allItineraries {
 		if i != safestRouteIndex {
@@ -357,8 +364,8 @@ func GenerateItineraries(req ItineraryRequest) (*ItinerariesResponse, error) {
 	response := &ItinerariesResponse{
 		RequestParameters:      engineResp.RequestParameters,
 		DebugOutput:            engineResp.DebugOutput,
-		From:                   positionToResponsePosition(engineResp.From),
-		To:                     positionToResponsePosition(engineResp.To),
+		From:                   translateToResponsePosition(engineResp.From),
+		To:                     translateToResponsePosition(engineResp.To),
 		SafestItinerary:        &safestItinerary,
 		AlternativeItineraries: make([]ResponseItinerary, len(alternativeItineraries)),
 	}
