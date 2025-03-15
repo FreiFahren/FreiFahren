@@ -38,7 +38,7 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className,
                                 <div className="transit-info">
                                     <Line line={leg.routeShortName || ''} />
                                     <div className="transit-direction">
-                                        <span>{leg.headsign || leg.to.name}</span>
+                                        <span>{leg.to.name}</span>
                                     </div>
                                 </div>
                                 {leg.intermediateStops && leg.intermediateStops.length > 0 && (

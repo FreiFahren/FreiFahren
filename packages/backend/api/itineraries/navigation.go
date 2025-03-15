@@ -183,11 +183,6 @@ func translateResponseStations(response *EngineResponse) {
 				response.Itineraries[i].Legs[j].To.Name = translatedName
 			}
 
-			// also translate the headsign
-			if response.Itineraries[i].Legs[j].Headsign != nil {
-				*response.Itineraries[i].Legs[j].Headsign = translateStationName(*response.Itineraries[i].Legs[j].Headsign)
-			}
-
 			// Translate station IDs and names in intermediate stops
 			for k := range response.Itineraries[i].Legs[j].IntermediateStops {
 				translateStationIds(&response.Itineraries[i].Legs[j].IntermediateStops[k])
