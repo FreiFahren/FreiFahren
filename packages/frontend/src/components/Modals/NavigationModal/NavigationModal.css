@@ -8,16 +8,30 @@ div.modal.container.navigation-modal {
 .location-inputs {
     display: flex;
     flex-direction: column;
-    gap: var(--margin-xs);
-    margin-bottom: var(--margin-s);
-    margin-top: var(--margin-s);
-    flex-shrink: 0;
+    gap: 5px;
+    margin-bottom: 20px;
+}
+
+.input-container {
+    position: relative;
+    width: 100%;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 15px;
 }
 
 .location-inputs input {
     border-radius: var(--borderRadius-small);
     border: var(--border-default);
     padding: var(--padding-s);
+    padding-left: 30px;
+    width: calc(100% - 30px - var(--padding-s));
 }
 
 .autocomplete-container {

@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
-import { LinesList, Report, RiskData, StationList, Itinerary, Position } from 'src/utils/types'
+import { Itinerary, LinesList, Position, Report, RiskData, StationList } from 'src/utils/types'
 
 import { useSkeleton } from '../components/Miscellaneous/LoadingPlaceholder/Skeleton'
 import { getClosestStations } from '../hooks/getClosestStations'
@@ -328,18 +328,15 @@ export const useStationDistance = (
             ) {
                 return null
             }
-            const userStation = getClosestStations(1, allStations, { lat: userLat, lng: userLng })[0]
-            if (userStation) {
-                const response = await fetch(
-                    `${process.env.REACT_APP_API_URL}/v0/transit/distance?inspectorStationId=${encodeURIComponent(
-                        stationId
-                    )}&userStationId=${encodeURIComponent(Object.keys(userStation)[0])}`
-                )
-                const data = await response.json()
-                if (typeof data === 'number') return data
-                return data.distance
-            }
-            return null
+            const [userStation] = getClosestStations(1, allStations, { lat: userLat, lng: userLng })
+            const response = await fetch(
+                `${process.env.REACT_APP_API_URL}/v0/transit/distance?inspectorStationId=${encodeURIComponent(
+                    stationId
+                )}&userStationId=${encodeURIComponent(Object.keys(userStation)[0])}`
+            )
+            const data = await response.json()
+            if (typeof data === 'number') return data
+            return data.distance
         },
         enabled:
             typeof userLat === 'number' &&

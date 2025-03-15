@@ -69,7 +69,7 @@ const AutocompleteInputForm = <T,>({
     const [search, setSearch] = useState('')
     const searchInputRef = useRef<HTMLInputElement>(null)
 
-    const toggleSearchBox = useCallback(() => {
+    const handleToggleSearchBox = useCallback(() => {
         setShowSearchBox((prev) => !prev)
         setTimeout(() => {
             // slight delay to make sure the input is rendered
@@ -108,12 +108,12 @@ const AutocompleteInputForm = <T,>({
     return (
         <section>
             <div className="align-child-on-line" id="searchable-select-div">
-                {label ? (
+                {label !== undefined && label !== '' ? (
                     <h2>
                         {label} {required ? <span className="red-highlight">*</span> : null}
                     </h2>
                 ) : undefined}
-                {placeholder ? (
+                {placeholder !== undefined && placeholder !== '' ? (
                     <>
                         <input
                             className={`search-input ${showSearchBox ? 'expanded' : ''}`}
@@ -123,7 +123,14 @@ const AutocompleteInputForm = <T,>({
                             onChange={(event) => setSearch(event.target.value)}
                             ref={searchInputRef}
                         />
-                        <img src={SEARCH_ICON} onClick={toggleSearchBox} alt="Search icon" />
+                        <button
+                            type="button"
+                            className="search-icon-button"
+                            onClick={handleToggleSearchBox}
+                            aria-label="Toggle search box"
+                        >
+                            <img src={SEARCH_ICON} alt="Search icon" />
+                        </button>
                     </>
                 ) : undefined}
             </div>

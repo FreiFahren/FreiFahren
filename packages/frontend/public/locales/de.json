@@ -219,8 +219,8 @@
     },
     "NavigationModal": {
         "title": "Routenplaner",
-        "startLocation": "Startstation auswählen",
-        "endLocation": "Zielstation auswählen",
+        "startLocation": "Startstation",
+        "endLocation": "Zielstation",
         "safestRoute": "Geringstes Risiko",
         "from": "Von: ",
         "to": "Nach: ",

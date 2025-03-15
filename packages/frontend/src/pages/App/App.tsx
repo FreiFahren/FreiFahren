@@ -2,6 +2,7 @@ import './App.css'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
+import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
 import { Report } from 'src/utils/types'
@@ -21,7 +22,6 @@ import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
 import { highlightElement } from '../../utils/uiUtils'
-import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
 
 type AppUIState = {
     isReportFormOpen: boolean
@@ -214,12 +214,7 @@ const App = () => {
         }
     }, [])
 
-    // todo: set to false for production
     const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false)
-
-    useEffect(() => {
-        setIsNavigationModalOpen(true)
-    }, [])
 
     return (
         <div className="App">
@@ -286,7 +281,11 @@ const App = () => {
                     <Backdrop handleClick={() => setIsNavigationModalOpen(false)} />
                 </>
             ) : null}
-            <button className="navigation-button small-button" onClick={() => setIsNavigationModalOpen(true)}>
+            <button
+                className="navigation-button small-button"
+                onClick={() => setIsNavigationModalOpen(true)}
+                type="button"
+            >
                 <img src={`${process.env.PUBLIC_URL}/icons/route-svgrepo-com.svg`} alt="Navigation" />
             </button>
             <ReportButton

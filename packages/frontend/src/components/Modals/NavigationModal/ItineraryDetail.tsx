@@ -1,9 +1,9 @@
 import React from 'react'
-import { Itinerary, Leg } from 'src/utils/types'
 import { useTranslation } from 'react-i18next'
-import { formatLocalTime, formatDuration } from 'src/utils/dateUtils'
 import { Line } from 'src/components/Miscellaneous/Line/Line'
 import { getLineColor } from 'src/hooks/getLineColor'
+import { formatDuration, formatLocalTime } from 'src/utils/dateUtils'
+import { Itinerary, Leg } from 'src/utils/types'
 
 interface ItineraryDetailProps {
     itinerary: Itinerary
@@ -16,6 +16,12 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className,
     const durationMinutes = Math.round(itinerary.duration / 60)
     const durationText = `(${formatDuration(durationMinutes)})`
 
+    const handleBack = (): void => {
+        if (onBack) {
+            onBack()
+        }
+    }
+
     const renderLeg = (leg: Leg, index: number, isLast: boolean) => {
         const isWalking = leg.mode.toLowerCase() === 'walk'
 
@@ -27,45 +33,49 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className,
                     </div>
                     <div
                         className={`step-details ${isWalking ? 'walking-step' : ''}`}
-                        style={!isWalking ? { borderLeftColor: getLineColor(leg.routeShortName || '') } : undefined}
+                        style={
+                            !isWalking && leg.routeShortName !== undefined && leg.routeShortName !== ''
+                                ? { borderLeftColor: getLineColor(leg.routeShortName) }
+                                : undefined
+                        }
                     >
                         <div className="step-location transfer-station">
-                            <div className="timeline-marker"></div>
+                            <div className="timeline-marker" />
                             <p>{leg.from.name}</p>
                         </div>
-                        {!isWalking && (
+                        {!isWalking ? (
                             <>
                                 <div className="transit-info">
-                                    <Line line={leg.routeShortName || ''} />
+                                    <Line line={leg.routeShortName ?? ''} />
                                     <div className="transit-direction">
                                         <span>{leg.to.name}</span>
                                     </div>
                                 </div>
-                                {leg.intermediateStops && leg.intermediateStops.length > 0 && (
+                                {leg.intermediateStops && leg.intermediateStops.length > 0 ? (
                                     <div className="stops-info">
                                         <span className="stops-count">
                                             {leg.intermediateStops.length} {t('NavigationModal.stops')}
                                         </span>
                                     </div>
-                                )}
+                                ) : null}
                             </>
-                        )}
+                        ) : null}
                     </div>
                 </div>
 
-                {isLast && (
+                {isLast ? (
                     <div className="itinerary-step">
                         <div className="step-time">
                             <span>{formatLocalTime(leg.endTime)}</span>
                         </div>
                         <div className="step-details">
                             <div className="step-location">
-                                <div className="timeline-marker"></div>
+                                <div className="timeline-marker" />
                                 <p>{leg.to.name}</p>
                             </div>
                         </div>
                     </div>
-                )}
+                ) : null}
             </div>
         )
     }
@@ -75,11 +85,16 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className,
             <div className="itinerary-header">
                 <div className="route-header">
                     <div className="route-locations">
-                        {onBack && (
-                            <button className="back-button" onClick={onBack} aria-label={t('NavigationModal.back')}>
+                        {onBack ? (
+                            <button
+                                type="button"
+                                className="back-button"
+                                onClick={handleBack}
+                                aria-label={t('NavigationModal.back')}
+                            >
                                 <img src="/icons/right-arrow-svgrepo-com.svg" alt="Back" className="back-icon" />
                             </button>
-                        )}
+                        ) : null}
                         <div className="origin">
                             <p>
                                 {t('NavigationModal.from')} {itinerary.legs[0].from.name}
@@ -107,7 +122,7 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className,
                 {itinerary.legs.map((leg, index) => renderLeg(leg, index, index === itinerary.legs.length - 1))}
             </div>
 
-            {itinerary.calculatedRisk !== undefined && (
+            {itinerary.calculatedRisk !== undefined ? (
                 <div className="route-risk">
                     <div
                         className="risk-indicator"
@@ -115,14 +130,14 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className,
                             width: `${Math.max(10, 100 - itinerary.calculatedRisk * 100)}%`,
                             backgroundColor: `hsl(${120 - itinerary.calculatedRisk * 120}, 70%, 60%)`,
                         }}
-                    ></div>
+                    />
                     <div className="risk-text">
                         <span>
                             {t('NavigationModal.safetyScore')}: {Math.round((1 - itinerary.calculatedRisk) * 100)}%
                         </span>
                     </div>
                 </div>
-            )}
+            ) : null}
         </div>
     )
 }

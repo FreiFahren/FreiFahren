@@ -223,8 +223,8 @@
     },
     "NavigationModal": {
         "title": "Route Planner",
-        "startLocation": "Select start station",
-        "endLocation": "Select end station",
+        "startLocation": "start station",
+        "endLocation": "end station",
         "safestRoute": "Lowest Risk",
         "from": "From: ",
         "to": "To: ",

@@ -1,6 +1,7 @@
+import { useEffect, useRef } from 'react'
+
 import { AnalyticsOptions, SavedEvent } from '../utils/types'
 import { isAnalyticsOptedOut } from './useAnalyticsOptOut'
-import { useEffect, useRef } from 'react'
 
 /**
  * Checks if the Pirsch analytics SDK is loaded and available.

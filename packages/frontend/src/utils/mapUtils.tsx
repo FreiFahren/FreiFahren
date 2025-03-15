@@ -67,7 +67,7 @@ export const watchPosition = async (
                 lastPosition = newPosition
             }
         },
-        (error) => {
+        () => {
             onPositionChanged(null)
         },
         options

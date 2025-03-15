@@ -7,17 +7,18 @@ import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton
 import { useLines, useStations, useSubmitReport } from '../../../api/queries'
 import { REPORT_COOLDOWN_MINUTES } from '../../../constants'
 import { useLocation } from '../../../contexts/LocationContext'
+import { getClosestStations } from '../../../hooks/getClosestStations'
+import { getLineColor } from '../../../hooks/getLineColor'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
 import { calculateDistance } from '../../../utils/mapUtils'
 import { LinesList, Report, StationList, StationProperty } from '../../../utils/types'
 import { createWarningSpan, highlightElement } from '../../../utils/uiUtils'
-import { getLineColor } from '../../../hooks/getLineColor'
 import { Line } from '../../Miscellaneous/Line/Line'
 import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
 import { FeedbackForm } from '../FeedbackForm/FeedbackForm'
 import { PrivacyCheckbox } from '../PrivacyCheckbox/PrivacyCheckbox'
 import { SelectField } from '../SelectField/SelectField'
-import { getClosestStations } from '../../../hooks/getClosestStations'
+
 const getCSSVariable = (variable: string): number => {
     const value = getComputedStyle(document.documentElement).getPropertyValue(variable)
 
@@ -184,7 +185,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
             const newStationListHeight = Math.max(0, Math.min(stationCount * ITEM_HEIGHT, availableHeight))
             setStationListHeight(newStationListHeight)
         }
-    }, [initialContainerHeight, possibleStations, currentLine, currentStation])
+    }, [initialContainerHeight, possibleStations, currentLine, currentStation, MARGIN_S])
 
     // Handle resize and content changes
     useEffect(() => {

@@ -1,18 +1,20 @@
+import './NavigationModal.css'
+
+import Fuse from 'fuse.js'
+import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useStations, useNavigation } from '../../../api/queries'
-import { getClosestStations } from '../../../hooks/getClosestStations'
-import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
-import { Itinerary, StationProperty } from '../../../utils/types'
-import { useLocation } from '../../../contexts/LocationContext'
-import { useState, useRef, useMemo } from 'react'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 import { FeedbackForm } from 'src/components/Form/FeedbackForm/FeedbackForm'
-import { ItineraryItem } from './ItineraryItem'
-import { Skeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
-import './NavigationModal.css'
-import ItineraryDetail from './ItineraryDetail'
+
+import { useNavigation, useStations } from '../../../api/queries'
+import { useLocation } from '../../../contexts/LocationContext'
+import { getClosestStations } from '../../../hooks/getClosestStations'
 import { sendAnalyticsEvent, useTrackComponentView } from '../../../hooks/useAnalytics'
-import Fuse from 'fuse.js'
+import { Itinerary, StationProperty } from '../../../utils/types'
+import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
+import { Skeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
+import ItineraryDetail from './ItineraryDetail'
+import { ItineraryItem } from './ItineraryItem'
 
 interface NavigationModalProps {
     className?: string
@@ -20,7 +22,8 @@ interface NavigationModalProps {
 
 type ActiveInput = 'start' | 'end' | null
 
-const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
+// eslint-disable-next-line react/prop-types
+const NavigationModal: React.FC<NavigationModalProps> = ({ className = '' }) => {
     useTrackComponentView('navigation modal')
 
     const { t } = useTranslation()
@@ -31,7 +34,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
 
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false)
     const [searchValue, setSearchValue] = useState('')
-    const [activeInput, setActiveInput] = useState<ActiveInput>(null)
+    const [activeInput, setActiveInput] = useState<ActiveInput>('start')
     const [startLocation, setStartLocation] = useState<string | null>(null)
     const [endLocation, setEndLocation] = useState<string | null>(null)
     const [selectedRoute, setSelectedRoute] = useState<Itinerary | null>(null)
@@ -40,7 +43,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
     const preprocessName = (name: string): string => name.replace(/^(S|U)\s+/i, ' ')
 
     const fuse = useMemo(() => {
-        if (!allStations) return null
+        if (allStations === undefined) return null
 
         const stations = Object.entries(allStations).map(([id, station]) => ({
             id,
@@ -54,27 +57,32 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
         })
     }, [allStations])
 
-    const { data: navigationData, isLoading } = useNavigation(startLocation ?? '', endLocation ?? '', {
-        enabled: Boolean(startLocation && endLocation),
-    })
+    const { data: navigationData, isLoading } = useNavigation(
+        startLocation !== null ? startLocation : '',
+        endLocation !== null ? endLocation : '',
+        {
+            // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+            enabled: Boolean(startLocation && endLocation),
+        }
+    )
 
     const possibleStations = useMemo(() => {
-        if (!allStations || !searchValue || !fuse) return allStations ?? {}
+        if (allStations === undefined || searchValue === '' || fuse === null) return allStations ?? {}
 
         const processedSearchValue = preprocessName(searchValue)
         const searchResults = fuse.search(processedSearchValue)
         return Object.fromEntries(searchResults.map((result) => [result.item.id, allStations[result.item.id]]))
     }, [allStations, searchValue, fuse])
 
-    const handleStationSelect = (stationName: string | null) => {
-        if (!stationName || !allStations) return
+    const handleStationSelect = (stationName: string | null): void => {
+        if (stationName === null || !allStations) return
 
-        const selectedStation = Object.entries(allStations).find(([_, station]) => station.name === stationName)
+        const selectedStation = Object.entries(allStations).find(([, station]) => station.name === stationName)
         if (!selectedStation) return
 
         if (activeInput === 'start') {
             setStartLocation(selectedStation[0])
-            if (!endLocation) {
+            if (endLocation === null) {
                 setTimeout(() => {
                     if (endInputRef.current) {
                         endInputRef.current.focus()
@@ -91,20 +99,20 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
         setSearchValue('')
     }
 
-    const getInputValue = (input: ActiveInput) => {
-        if (input === 'start' && startLocation && allStations) {
+    const getInputValue = (input: ActiveInput): string => {
+        if (input === 'start' && startLocation !== null && allStations) {
             return allStations[startLocation].name
         }
-        if (input === 'end' && endLocation && allStations) {
+        if (input === 'end' && endLocation !== null && allStations) {
             return allStations[endLocation].name
         }
         return activeInput === input ? searchValue : ''
     }
 
-    const handleInputFocus = (input: ActiveInput) => {
+    const handleInputFocus = (input: ActiveInput): void => {
         setActiveInput(input)
         const inputRef = input === 'start' ? startInputRef : endInputRef
-        const hasValue = input === 'start' ? startLocation : endLocation
+        const hasValue = input === 'start' ? startLocation !== null : endLocation !== null
 
         if (hasValue && inputRef.current) {
             inputRef.current.select()
@@ -121,11 +129,79 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
         }
     }
 
+    const renderContent = (): React.ReactNode => {
+        if (navigationData && startLocation !== null && endLocation !== null) {
+            return (
+                <div className="navigation-data-container">
+                    <div className="safest-route">
+                        <ItineraryItem
+                            itinerary={navigationData.safestItinerary}
+                            onClick={() => {
+                                setSelectedRoute(navigationData.safestItinerary)
+                                sendAnalyticsEvent('Route selected', {
+                                    meta: {
+                                        isSafe: true,
+                                    },
+                                })
+                            }}
+                        />
+                        <div className="safest-route-tag">{t('NavigationModal.safestRoute')}</div>
+                    </div>
+                    {navigationData.alternativeItineraries.map((route) => (
+                        <ItineraryItem
+                            key={`route-${route.startTime}-${route.endTime}`}
+                            itinerary={route}
+                            onClick={() => {
+                                setSelectedRoute(route)
+                                sendAnalyticsEvent('Route selected', {
+                                    meta: {
+                                        isSafe: false,
+                                    },
+                                })
+                            }}
+                        />
+                    ))}
+                </div>
+            )
+        }
+
+        if (isLoading && startLocation !== null && endLocation !== null) {
+            return (
+                <div className="navigation-data-container">
+                    <div className="skeleton-container">
+                        {Array.from({ length: 10 }).map((_, i) => (
+                            <Skeleton key={`skeleton-${new Date().getTime()}-${i * Math.random()}`} />
+                        ))}
+                    </div>
+                </div>
+            )
+        }
+
+        return (
+            <div className="autocomplete-container">
+                <AutocompleteInputForm
+                    items={possibleStations}
+                    onSelect={handleStationSelect}
+                    value={activeInput === 'start' ? startLocation : endLocation}
+                    getDisplayValue={(station: StationProperty | null) => station?.name ?? ''}
+                    highlightElements={
+                        userPosition && activeInput === 'start'
+                            ? getClosestStations(3, possibleStations, userPosition).reduce(
+                                  (acc, station) => ({ ...acc, ...station }),
+                                  {}
+                              )
+                            : undefined
+                    }
+                />
+            </div>
+        )
+    }
+
     if (isFeedbackModalOpen) {
         return <FeedbackForm openAnimationClass={className} onClose={() => setIsFeedbackModalOpen(false)} />
     }
 
-    if (selectedRoute) {
+    if (selectedRoute !== null) {
         return (
             <ItineraryDetail
                 itinerary={selectedRoute}
@@ -144,87 +220,44 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className }) => {
                 <FeedbackButton handleButtonClick={() => setIsFeedbackModalOpen(true)} />
             </div>
             <div className="location-inputs">
-                <input
-                    ref={startInputRef}
-                    type="text"
-                    placeholder={t('NavigationModal.startLocation')}
-                    value={getInputValue('start')}
-                    autoFocus={selectedRoute === null && !startLocation}
-                    onFocus={() => handleInputFocus('start')}
-                    onChange={(e) => {
-                        setSearchValue(e.target.value)
-                        setStartLocation(null)
-                    }}
-                />
-                <input
-                    ref={endInputRef}
-                    type="text"
-                    placeholder={t('NavigationModal.endLocation')}
-                    value={getInputValue('end')}
-                    onFocus={() => handleInputFocus('end')}
-                    onChange={(e) => {
-                        setSearchValue(e.target.value)
-                        setEndLocation(null)
-                    }}
-                />
-            </div>
-            {navigationData && startLocation && endLocation ? (
-                <div className="navigation-data-container">
-                    <div className="safest-route">
-                        <ItineraryItem
-                            itinerary={navigationData.safestItinerary}
-                            onClick={() => {
-                                setSelectedRoute(navigationData.safestItinerary)
-                                sendAnalyticsEvent('Route selected', {
-                                    meta: {
-                                        isSafe: true,
-                                    },
-                                })
-                            }}
-                        />
-                        <div className="safest-route-tag">{t('NavigationModal.safestRoute')}</div>
-                    </div>
-                    {navigationData.alternativeItineraries.map((route, index) => (
-                        <ItineraryItem
-                            key={index}
-                            itinerary={route}
-                            onClick={() => {
-                                setSelectedRoute(route)
-                                sendAnalyticsEvent('Route selected', {
-                                    meta: {
-                                        isSafe: false,
-                                    },
-                                })
-                            }}
-                        />
-                    ))}
-                </div>
-            ) : isLoading && startLocation && endLocation ? (
-                <div className="navigation-data-container">
-                    <div className="skeleton-container">
-                        {Array.from({ length: 10 }).map((_, index) => (
-                            <Skeleton key={index} />
-                        ))}
-                    </div>
-                </div>
-            ) : (
-                <div className="autocomplete-container">
-                    <AutocompleteInputForm
-                        items={possibleStations}
-                        onSelect={handleStationSelect}
-                        value={activeInput === 'start' ? startLocation : endLocation}
-                        getDisplayValue={(station: StationProperty | null) => station?.name ?? ''}
-                        highlightElements={
-                            userPosition && activeInput === 'start'
-                                ? getClosestStations(3, possibleStations, userPosition).reduce(
-                                      (acc, station) => ({ ...acc, ...station }),
-                                      {}
-                                  )
-                                : undefined
-                        }
+                <div className="input-container">
+                    <img
+                        src={`${process.env.PUBLIC_URL}/icons/search.svg`}
+                        alt="Search"
+                        className="search-icon no-filter"
+                    />
+                    <input
+                        ref={startInputRef}
+                        type="text"
+                        placeholder={t('NavigationModal.startLocation')}
+                        value={getInputValue('start')}
+                        onFocus={() => handleInputFocus('start')}
+                        onChange={(event) => {
+                            setSearchValue(event.target.value)
+                            setStartLocation(null)
+                        }}
                     />
                 </div>
-            )}
+                <div className="input-container">
+                    <img
+                        src={`${process.env.PUBLIC_URL}/icons/search.svg`}
+                        alt="Search"
+                        className="search-icon no-filter"
+                    />
+                    <input
+                        ref={endInputRef}
+                        type="text"
+                        placeholder={t('NavigationModal.endLocation')}
+                        value={getInputValue('end')}
+                        onFocus={() => handleInputFocus('end')}
+                        onChange={(event) => {
+                            setSearchValue(event.target.value)
+                            setEndLocation(null)
+                        }}
+                    />
+                </div>
+            </div>
+            {renderContent()}
         </div>
     )
 }
