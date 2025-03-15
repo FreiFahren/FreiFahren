@@ -221,9 +221,9 @@
         "title": "Routenplaner",
         "startLocation": "Startstation auswählen",
         "endLocation": "Zielstation auswählen",
-        "safestRoute": "Sicherste Route",
-        "from": "Von",
-        "to": "Nach",
+        "safestRoute": "Geringstes Risiko",
+        "from": "Von: ",
+        "to": "Nach: ",
         "stops": "Haltestellen"
     }
 }

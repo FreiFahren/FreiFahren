@@ -119,7 +119,7 @@ export type Leg = {
 }
 
 export type Itinerary = {
-    duration: number
+    duration: number // in seconds
     startTime: string
     endTime: string
     transfers: number

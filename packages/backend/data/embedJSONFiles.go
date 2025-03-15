@@ -75,6 +75,7 @@ func GetStationsList() map[string]utils.StationListEntry {
 	return stationsList
 }
 
+// maps the freifahren station id to the engine station id
 func GetStationsMap() map[string]string {
 	dataLock.RLock()
 	defer dataLock.RUnlock()

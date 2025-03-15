@@ -50,7 +50,7 @@ type BaseLeg[P any, G any] struct {
 	Mode               string  `json:"mode"`
 	From               P       `json:"from"`
 	To                 P       `json:"to"`
-	Duration           int     `json:"duration"`
+	Duration           int     `json:"duration"` // in seconds
 	StartTime          string  `json:"startTime"`
 	EndTime            string  `json:"endTime"`
 	ScheduledStartTime string  `json:"scheduledStartTime"`
@@ -82,7 +82,7 @@ type ResponseLeg struct {
 }
 
 type BaseItinerary[L any] struct {
-	Duration       int     `json:"duration"`
+	Duration       int     `json:"duration"` // in seconds
 	StartTime      string  `json:"startTime"`
 	EndTime        string  `json:"endTime"`
 	Transfers      int     `json:"transfers"`
