@@ -24,36 +24,6 @@ export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2
 }
 
 /**
- * Calculates the distance between two geographical points using the Haversine formula.
- *
- * @param {number} lat1 - The latitude of the first point in decimal degrees.
- * @param {number} lon1 - The longitude of the first point in decimal degrees.
- * @param {number} lat2 - The latitude of the second point in decimal degrees.
- * @param {number} lon2 - The longitude of the second point in decimal degrees.
- * @returns {number} The distance between the two points in kilometers.
- */
-export const getNearestStation = (stations: { [key: string]: StationProperty }, userLat?: number, userLon?: number) => {
-    if (userLat === undefined || userLon === undefined) return null
-    let nearestStation = null
-    let nearestDistance = Infinity
-
-    for (const [key, station] of Object.entries(stations)) {
-        const distance = calculateDistance(
-            userLat!,
-            userLon!,
-            station.coordinates.latitude,
-            station.coordinates.longitude
-        )
-
-        if (distance < nearestDistance) {
-            nearestDistance = distance
-            nearestStation = { key, ...station }
-        }
-    }
-    return nearestStation
-}
-
-/**
  * Subscribes to user's geolocation changes and executes callback functions based on the result.
  * @param {Function} onPositionChanged Callback that handles position data.
  * @param {Function} openAskForLocation Callback that handles failures in obtaining geolocation.
@@ -97,10 +67,7 @@ export const watchPosition = async (
                 lastPosition = newPosition
             }
         },
-        (error) => {
-            // fix later with sentry
-            // eslint-disable-next-line no-console
-            console.error('Error obtaining position:', error.message)
+        () => {
             onPositionChanged(null)
         },
         options

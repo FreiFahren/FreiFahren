@@ -2,12 +2,13 @@ import './App.css'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
+import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
 import { Report } from 'src/utils/types'
 
 import { useLast24HourReports } from '../../api/queries'
-import { CloseButton } from '../../components/Buttons/CloseButton/CloseButton'
+import CloseButton from '../../components/Buttons/CloseButton/CloseButton'
 import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
 import { ReportButton } from '../../components/Buttons/ReportButton/ReportButton'
 import { UtilButton } from '../../components/Buttons/UtilButton/UtilButton'
@@ -213,6 +214,8 @@ const App = () => {
         }
     }, [])
 
+    const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false)
+
     return (
         <div className="App">
             {appMounted && shouldShowLegalDisclaimer() ? (
@@ -272,6 +275,19 @@ const App = () => {
                     </div>
                 </div>
             ) : null}
+            {isNavigationModalOpen ? (
+                <>
+                    <NavigationModal className="open center-animation" />
+                    <Backdrop handleClick={() => setIsNavigationModalOpen(false)} />
+                </>
+            ) : null}
+            <button
+                className="navigation-button small-button"
+                onClick={() => setIsNavigationModalOpen(true)}
+                type="button"
+            >
+                <img src={`${process.env.PUBLIC_URL}/icons/route-svgrepo-com.svg`} alt="Navigation" />
+            </button>
             <ReportButton
                 handleOpenReportModal={() =>
                     setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })

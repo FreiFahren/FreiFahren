@@ -41,3 +41,10 @@ section img {
     max-height: calc(100vh - 475px);
     min-height: 40px;
 }
+
+.search-icon-button {
+    background-color: transparent;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+}

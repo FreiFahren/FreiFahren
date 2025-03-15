@@ -1,9 +1,9 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
-import { LinesList, Report, RiskData, StationList } from 'src/utils/types'
+import { Itinerary, LinesList, Position, Report, RiskData, StationList } from 'src/utils/types'
 
 import { useSkeleton } from '../components/Miscellaneous/LoadingPlaceholder/Skeleton'
-import { getNearestStation } from '../utils/mapUtils'
+import { getClosestStations } from '../hooks/getClosestStations'
 import { CACHE_KEYS } from './queryClient'
 
 const fetchNewReports = async (
@@ -328,18 +328,15 @@ export const useStationDistance = (
             ) {
                 return null
             }
-            const userStation = getNearestStation(allStations, userLat, userLng)
-            if (userStation && userStation.key !== '') {
-                const response = await fetch(
-                    `${process.env.REACT_APP_API_URL}/v0/transit/distance?inspectorStationId=${encodeURIComponent(
-                        stationId
-                    )}&userStationId=${encodeURIComponent(userStation.key)}`
-                )
-                const data = await response.json()
-                if (typeof data === 'number') return data
-                return data.distance
-            }
-            return null
+            const [userStation] = getClosestStations(1, allStations, { lat: userLat, lng: userLng })
+            const response = await fetch(
+                `${process.env.REACT_APP_API_URL}/v0/transit/distance?inspectorStationId=${encodeURIComponent(
+                    stationId
+                )}&userStationId=${encodeURIComponent(Object.keys(userStation)[0])}`
+            )
+            const data = await response.json()
+            if (typeof data === 'number') return data
+            return data.distance
         },
         enabled:
             typeof userLat === 'number' &&
@@ -377,4 +374,34 @@ export const useStationReports = (stationId: string) =>
             const data = await response.json()
             return data.numberOfReports as number
         },
+    })
+
+export type NavigationResponse = {
+    requestParameters: Record<string, unknown>
+    debugOutput: Record<string, unknown>
+    from: Position
+    to: Position
+    direct: unknown[]
+    safestItinerary: Itinerary
+    alternativeItineraries: Itinerary[]
+}
+
+export const useNavigation = (startStationId: string, endStationId: string, options?: { enabled?: boolean }) =>
+    useQuery<NavigationResponse, Error>({
+        queryKey: CACHE_KEYS.navigation(startStationId, endStationId),
+        queryFn: async () => {
+            if (!startStationId || !endStationId) {
+                return null
+            }
+
+            const response = await fetch(
+                `${process.env.REACT_APP_API_URL}/v0/transit/itineraries?startStation=${startStationId}&endStation=${endStationId}`
+            )
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
+            const data = await response.json()
+            return data
+        },
+        enabled: options?.enabled,
     })

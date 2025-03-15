@@ -1,10 +1,10 @@
 import './Line.css'
 
 import React from 'react'
-import { getLineColor } from 'src/utils/uiUtils'
+import { getLineColor } from 'src/hooks/getLineColor'
 
 const Line: React.FC<{ line: string }> = ({ line }) => {
-    if (line === "") {
+    if (line === '') {
         return null
     }
     return (

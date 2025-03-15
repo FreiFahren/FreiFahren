@@ -204,7 +204,7 @@
         "syncText": "Die Meldung wird mit @FreiFahren_BE synchronisiert"
     },
     "FeedbackButton": {
-        "text": "Feedback"
+        "text": "Feedback?"
     },
     "FeedbackForm": {
         "title": "Gib uns Feedback!",
@@ -216,5 +216,14 @@
         "title": "Danke für dein Feedback!",
         "description": "Möchtest du uns in unserer Telegram-Feedback-Gruppe beitreten, um uns weiterhin zu helfen? Dein Feedback kann so direkt von den Entwicklern der App gelesen werden.",
         "joinGroup": "Gruppe beitreten"
+    },
+    "NavigationModal": {
+        "title": "Routenplaner",
+        "startLocation": "Startstation",
+        "endLocation": "Zielstation",
+        "safestRoute": "Geringstes Risiko",
+        "from": "Von: ",
+        "to": "Nach: ",
+        "stops": "Haltestellen"
     }
 }

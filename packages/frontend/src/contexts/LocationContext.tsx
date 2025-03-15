@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useRef,useState } from 'react'
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react'
 import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 
 import { watchPosition } from '../utils/mapUtils'
@@ -46,11 +46,14 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     return (
         <LocationContext.Provider
-            value={useMemo(() => ({
-                userPosition,
-                setUserPosition,
-                initializeLocationTracking,
-            }), [userPosition, setUserPosition, initializeLocationTracking])}
+            value={useMemo(
+                () => ({
+                    userPosition,
+                    setUserPosition,
+                    initializeLocationTracking,
+                }),
+                [userPosition, setUserPosition, initializeLocationTracking]
+            )}
         >
             {children}
         </LocationContext.Provider>

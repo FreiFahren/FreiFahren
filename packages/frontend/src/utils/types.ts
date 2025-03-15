@@ -86,3 +86,43 @@ export type Report = {
     isHistoric: boolean
     message: string | null
 }
+
+export type Position = {
+    name: string
+    stopId: string
+    lat: number
+    lon: number
+    departure?: string
+    scheduledDeparture?: string
+    arrival?: string
+    scheduledArrival?: string
+}
+
+export type LegGeometry = {
+    points: string
+    length: number
+}
+
+export type Leg = {
+    mode: 'WALK' | 'BUS' | 'TRAM' | 'METRO' | 'SUBWAY' | 'REGIONAL_RAIL'
+    from: Position
+    to: Position
+    duration: number
+    startTime: string
+    endTime: string
+    scheduledStartTime: string
+    scheduledEndTime: string
+    realTime: boolean
+    routeShortName?: string
+    intermediateStops?: Position[]
+    legGeometry: LegGeometry
+}
+
+export type Itinerary = {
+    duration: number // in seconds
+    startTime: string
+    endTime: string
+    transfers: number
+    legs: Leg[]
+    calculatedRisk?: number
+}

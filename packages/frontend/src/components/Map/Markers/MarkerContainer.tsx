@@ -4,7 +4,7 @@ import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 
 import { useModalAnimation } from '../../../hooks/UseModalAnimation'
 import { Report } from '../../../utils/types'
-import { CloseButton } from '../../Buttons/CloseButton/CloseButton'
+import CloseButton from '../../Buttons/CloseButton/CloseButton'
 import { MarkerModal } from '../../Modals/MarkerModal/MarkerModal'
 import { OpacityMarker } from './Classes/OpacityMarker/OpacityMarker'
 

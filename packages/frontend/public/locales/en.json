@@ -207,7 +207,7 @@
         "syncText": "Your report was synced with @FreiFahren_BE"
     },
     "FeedbackButton": {
-        "text": "Feedback"
+        "text": "Feedback?"
     },
     "FeedbackForm": {
         "title": "Give us feedback!",
@@ -220,5 +220,14 @@
         "title": "Thank you for your feedback!",
         "description": "Would you like to join our Telegram feedback group to help us improve FreiFahren further? Your feedback can be read directly by the developers of the app.",
         "joinGroup": "Join Telegram Group"
+    },
+    "NavigationModal": {
+        "title": "Route Planner",
+        "startLocation": "start station",
+        "endLocation": "end station",
+        "safestRoute": "Lowest Risk",
+        "from": "From: ",
+        "to": "To: ",
+        "stops": "Stops"
     }
 }

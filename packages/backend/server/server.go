@@ -7,6 +7,7 @@ import (
 	"github.com/FreiFahren/backend/api/distance"
 	"github.com/FreiFahren/backend/api/feedback"
 	"github.com/FreiFahren/backend/api/inspectors"
+	itinerariesV0 "github.com/FreiFahren/backend/api/itineraries/v0"
 	"github.com/FreiFahren/backend/api/lines"
 	"github.com/FreiFahren/backend/api/prediction"
 	predictionV0 "github.com/FreiFahren/backend/api/prediction/v0"
@@ -172,6 +173,7 @@ func SetupServer() *echo.Echo {
 	v0.GET("/stations/search", stations.SearchStation)
 
 	v0.GET("/transit/distance", distance.GetStationDistance)
+	v0.GET("/transit/itineraries", itinerariesV0.GetItineraries)
 
 	v0.GET("/risk-prediction/segment-colors", predictionV0.GetRiskSegments)
 
@@ -195,6 +197,7 @@ func SetupServer() *echo.Echo {
 	latest.GET("/stations/search", stations.SearchStation)
 
 	latest.GET("/transit/distance", distance.GetStationDistance)
+	latest.GET("/transit/itineraries", itinerariesV0.GetItineraries)
 
 	latest.GET("/risk-prediction/segment-colors", predictionV1.GetRiskSegments)
 

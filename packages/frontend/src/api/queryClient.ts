@@ -11,6 +11,7 @@ export const CACHE_KEYS = {
     stationReports: (stationId: string) => ['station-reports', stationId] as const,
     stationDistance: (stationId: string, userLat: number, userLng: number) =>
         ['station-distance', stationId, userLat, userLng] as const,
+    navigation: (startStationId: string, endStationId: string) => ['navigation', startStationId, endStationId] as const,
 }
 
 export const queryClient = new QueryClient({

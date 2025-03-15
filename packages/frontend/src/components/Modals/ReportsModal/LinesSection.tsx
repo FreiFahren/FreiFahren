@@ -2,7 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, ResponsiveContainer, Tooltip, TooltipProps, XAxis, YAxis } from 'recharts'
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
-import { getLineColor } from 'src/utils/uiUtils'
+import { getLineColor } from 'src/hooks/getLineColor'
 
 interface LinesSectionProps {
     getChartData: { line: string; reports: number }[]

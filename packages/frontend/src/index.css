@@ -93,6 +93,7 @@ input[type='text'] {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
+    font-size: 16px; /* Min font size to avoid zoom on mobile */
 }
 
 code {
@@ -250,7 +251,7 @@ textarea::placeholder {
     opacity: 0;
     border: var(--border-default);
     text-align: left;
-    max-height: 75vh;
+    max-height: 70vh;
 }
 
 .container {
@@ -499,4 +500,36 @@ button .plus {
 
 .elapsed-time {
     font-size: var(--font-xs);
+}
+
+.expand-button {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    min-width: 20px;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    outline: none;
+}
+
+.expand-button::before {
+    content: '';
+    position: absolute;
+    margin-top: 8px;
+    width: 10px;
+    height: 10px;
+    border-left: 2px solid var(--color-primary);
+    border-top: 2px solid var(--color-primary);
+    transform: translate(-50%, -50%) rotate(45deg);
+    transition: transform var(--transition-default) ease;
+    border-radius: 1px;
+}
+
+.expand-button.expanded::before {
+    transform: translate(-50%, -75%) rotate(225deg);
 }
