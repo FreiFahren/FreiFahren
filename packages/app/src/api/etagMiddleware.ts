@@ -102,7 +102,12 @@ export const createETagMiddleware = (params: ETagCacheConfig) => {
             return response
         }
 
-        if (!isNil(response.data) && response.headers.etag !== undefined) {
+        if (
+            response.status >= 200 &&
+            response.status < 300 &&
+            !isNil(response.data) &&
+            response.headers.etag !== undefined
+        ) {
             try {
                 await AsyncStorage.setItem(etagKey, response.headers.etag)
                 await AsyncStorage.setItem(dataKey, JSON.stringify(response.data))

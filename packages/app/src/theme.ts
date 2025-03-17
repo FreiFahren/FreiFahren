@@ -6,6 +6,7 @@ const palette = {
     danger: '#B52F2F',
     fg: '#F0F0F0',
     success: '#C9F299',
+    safetyGreen: '#4D8E46',
     selected: '#3478f6',
     blue: '#68f9ff',
     green: '#4D8E46',
@@ -134,6 +135,19 @@ export const theme = createTheme({
             lineHeight: 22,
             fontFamily: 'Funnel Sans Regular',
             color: 'fg',
+        },
+    },
+    textInputVariants: {
+        defaults: {
+            color: 'fg',
+            fontSize: 16,
+            padding: 0,
+        },
+        search: {
+            backgroundColor: 'darkGrey',
+            borderRadius: 'm',
+            paddingVertical: 'xs',
+            paddingHorizontal: 's',
         },
     },
     borderRadii: {

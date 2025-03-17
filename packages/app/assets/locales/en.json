@@ -2,7 +2,24 @@
   "common": {
     "line": "Line",
     "direction": "Direction",
-    "station": "Station"
+    "station": "Station",
+    "startStation": "Start station",
+    "destinationStation": "Destination station"
+  },
+  "navigation": {
+    "title": "Navigation",
+    "enterStartStation": "Enter start station",
+    "enterDestinationStation": "Enter destination station",
+    "loadingItineraries": "Loading routes...",
+    "routeResults": "Route options",
+    "alternativeRoutes": "Alternative routes",
+    "safestRoute": "SAFEST ROUTE",
+    "walkTo": "Walk to",
+    "toDestination": "To {{destination}}",
+    "transfersCount_one": "{{count}} transfer",
+    "transfersCount_other": "{{count}} transfers",
+    "riskScore": "Risk score: {{score}}%",
+    "unknownLine": "?"
   },
   "makeReport": {
     "title": "Report incident",

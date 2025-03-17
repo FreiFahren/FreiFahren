@@ -2,7 +2,24 @@
   "common": {
     "line": "Linie",
     "direction": "Richtung",
-    "station": "Station"
+    "station": "Station",
+    "startStation": "Startstation",
+    "destinationStation": "Zielstation"
+  },
+  "navigation": {
+    "title": "Navigation",
+    "enterStartStation": "Startstation eingeben",
+    "enterDestinationStation": "Zielstation eingeben",
+    "loadingItineraries": "Routen werden geladen...",
+    "routeResults": "Routenoptionen",
+    "alternativeRoutes": "Alternative Routen",
+    "safestRoute": "SICHERSTE ROUTE",
+    "walkTo": "Zu Fuß nach",
+    "toDestination": "Nach {{destination}}",
+    "transfersCount_one": "{{count}} Umstieg",
+    "transfersCount_other": "{{count}} Umstiege",
+    "riskScore": "Risikobewertung: {{score}}%",
+    "unknownLine": "?"
   },
   "makeReport": {
     "title": "Vorfall Melden",
@@ -50,15 +67,15 @@
     "confirm": "Bestätigen"
   },
   "privacyPolicyUpdated": {
-        "title": "Neue Datenschutzerklärung",
-        "text": "Wir haben unsere Datenschutzerklärung aktualisiert. Wir speichern weiterhin keine personenbezogenen Daten, deinen Standort oder ähnliches, aber bitte lies sie dir trotzdem durch.",
-        "confirmText": "Wenn du fortfährst, erklärst du dich mit den neuen Datenschutzbestimmungen einverstanden.",
-        "link": "Neue Datenschutzerklärung",
-        "confirm": "Bestätigen"
-    },
-    "deprecation": {
-        "title": "Deine Version ist veraltet",
-        "text": "Leider können wir nicht immer jede App-Version unterstützen. Bitte aktualisiere die App, um weiterhin alle Funktionen nutzen zu können.",
-        "openStore": "App Store öffnen",
-    }
+    "title": "Neue Datenschutzerklärung",
+    "text": "Wir haben unsere Datenschutzerklärung aktualisiert. Wir speichern weiterhin keine personenbezogenen Daten, deinen Standort oder ähnliches, aber bitte lies sie dir trotzdem durch.",
+    "confirmText": "Wenn du fortfährst, erklärst du dich mit den neuen Datenschutzbestimmungen einverstanden.",
+    "link": "Neue Datenschutzerklärung",
+    "confirm": "Bestätigen"
+  },
+  "deprecation": {
+    "title": "Deine Version ist veraltet",
+    "text": "Leider können wir nicht immer jede App-Version unterstützen. Bitte aktualisiere die App, um weiterhin alle Funktionen nutzen zu können.",
+    "openStore": "App Store öffnen"
+  }
 }
