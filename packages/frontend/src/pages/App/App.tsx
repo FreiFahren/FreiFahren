@@ -216,6 +216,8 @@ const App = () => {
 
     const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false)
 
+    const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
+
     return (
         <div className="App">
             {appMounted && shouldShowLegalDisclaimer() ? (
@@ -265,6 +267,15 @@ const App = () => {
                 ) : null}
                 <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
             </ViewedReportsProvider>
+            <button className="search-button" onClick={() => setIsSearchModalOpen(true)}>
+                <input type="text" placeholder="Hier suchen" readOnly />
+                <div className="search-icon">
+                    <img src={`${process.env.PUBLIC_URL}/icons/search.svg`} alt="Search" />
+                </div>
+                <div className="navigation-icon">
+                    <img src={`${process.env.PUBLIC_URL}/icons/route-svgrepo-com.svg`} alt="Navigation" />
+                </div>
+            </button>
             <UtilButton handleClick={toggleUtilModal} />
             {mapsRotation !== 0 ? (
                 <div className="compass-container">

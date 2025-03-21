@@ -1,5 +1,5 @@
 .layer-switcher {
-    top: var(--distance-from-edge-default);
+    top: calc(var(--distance-from-edge-default) + 50px);
     right: var(--distance-from-edge-default);
     display: flex;
     align-items: center;
