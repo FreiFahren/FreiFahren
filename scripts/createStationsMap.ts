@@ -163,6 +163,11 @@ async function postProcessStationsMap(): Promise<void> {
     }
 }
 
+/**
+ * Goal of the script is to create a stations map of the freifahren stations to the engine stations.
+ * It uses the name of the station and the geocode API to find the closest match.
+ * After this is created a human should validate the results and run post-process to create a production map.
+ */
 async function main() {
     const command = process.argv[2]
 
