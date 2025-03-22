@@ -1,7 +1,6 @@
 import './NavigationModal.css'
 
-import Fuse from 'fuse.js'
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 import { FeedbackForm } from 'src/components/Form/FeedbackForm/FeedbackForm'
@@ -10,6 +9,7 @@ import { useNavigation, useStations } from '../../../api/queries'
 import { useLocation } from '../../../contexts/LocationContext'
 import { getClosestStations } from '../../../hooks/getClosestStations'
 import { sendAnalyticsEvent, useTrackComponentView } from '../../../hooks/useAnalytics'
+import { useStationSearch } from '../../../hooks/useStationSearch'
 import { Itinerary, StationProperty } from '../../../utils/types'
 import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
 import { Skeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
@@ -33,29 +33,12 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className = '' }) => 
     const endInputRef = useRef<HTMLInputElement>(null)
 
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false)
-    const [searchValue, setSearchValue] = useState('')
     const [activeInput, setActiveInput] = useState<ActiveInput>('start')
     const [startLocation, setStartLocation] = useState<string | null>(null)
     const [endLocation, setEndLocation] = useState<string | null>(null)
     const [selectedRoute, setSelectedRoute] = useState<Itinerary | null>(null)
 
-    // remove single S and U
-    const preprocessName = (name: string): string => name.replace(/^(S|U)\s+/i, ' ')
-
-    const fuse = useMemo(() => {
-        if (allStations === undefined) return null
-
-        const stations = Object.entries(allStations).map(([id, station]) => ({
-            id,
-            ...station,
-            processedName: preprocessName(station.name),
-        }))
-        return new Fuse(stations, {
-            keys: ['processedName'],
-            threshold: 0.4,
-            distance: 100,
-        })
-    }, [allStations])
+    const { searchValue, setSearchValue, filteredStations: possibleStations } = useStationSearch()
 
     const { data: navigationData, isLoading } = useNavigation(
         startLocation !== null ? startLocation : '',
@@ -65,14 +48,6 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className = '' }) => 
             enabled: Boolean(startLocation && endLocation),
         }
     )
-
-    const possibleStations = useMemo(() => {
-        if (allStations === undefined || searchValue === '' || fuse === null) return allStations ?? {}
-
-        const processedSearchValue = preprocessName(searchValue)
-        const searchResults = fuse.search(processedSearchValue)
-        return Object.fromEntries(searchResults.map((result) => [result.item.id, allStations[result.item.id]]))
-    }, [allStations, searchValue, fuse])
 
     const handleStationSelect = (stationName: string | null): void => {
         if (stationName === null || !allStations) return
