@@ -15,6 +15,7 @@ import { UtilButton } from '../../components/Buttons/UtilButton/UtilButton'
 import { ReportForm } from '../../components/Form/ReportForm/ReportForm'
 import { FreifahrenMap } from '../../components/Map/Map'
 import { Backdrop } from '../../components/Miscellaneous/Backdrop/Backdrop'
+import { SearchBar } from '../../components/Miscellaneous/SearchBar/SearchBar'
 import { StatsPopUp } from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
 import { LegalDisclaimer } from '../../components/Modals/LegalDisclaimer/LegalDisclaimer'
 import { UtilModal } from '../../components/Modals/UtilModal/UtilModal'
@@ -267,15 +268,7 @@ const App = () => {
                 ) : null}
                 <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
             </ViewedReportsProvider>
-            <button className="search-button" onClick={() => setIsSearchModalOpen(true)}>
-                <input type="text" placeholder="Hier suchen" readOnly />
-                <div className="search-icon">
-                    <img src={`${process.env.PUBLIC_URL}/icons/search.svg`} alt="Search" />
-                </div>
-                <div className="navigation-icon">
-                    <img src={`${process.env.PUBLIC_URL}/icons/route-svgrepo-com.svg`} alt="Navigation" />
-                </div>
-            </button>
+            <SearchBar onSearchOpen={() => setIsSearchModalOpen(true)} />
             <UtilButton handleClick={toggleUtilModal} />
             {mapsRotation !== 0 ? (
                 <div className="compass-container">

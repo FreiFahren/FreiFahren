@@ -13,7 +13,7 @@
 }
 
 .layer-options {
-    top: var(--distance-from-edge-default);
+    top: calc(var(--distance-from-edge-default) + 50px);
     right: 135px;
     width: fit-content;
     height: 60px;
