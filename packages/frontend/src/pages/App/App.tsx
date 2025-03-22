@@ -217,8 +217,6 @@ const App = () => {
 
     const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false)
 
-    const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
-
     return (
         <div className="App">
             {appMounted && shouldShowLegalDisclaimer() ? (
@@ -268,7 +266,7 @@ const App = () => {
                 ) : null}
                 <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
             </ViewedReportsProvider>
-            <SearchBar onSearchOpen={() => setIsSearchModalOpen(true)} />
+            <SearchBar />
             <UtilButton handleClick={toggleUtilModal} />
             {mapsRotation !== 0 ? (
                 <div className="compass-container">
