@@ -1,8 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react'
 import './SearchBar.css'
 import { useStationSearch } from '../../../hooks/useStationSearch'
+import { StationProperty } from 'src/utils/types'
 
-export const SearchBar: React.FC = () => {
+type SearchBarProps = {
+    onSelect: (station: StationProperty) => void
+}
+
+export const SearchBar: React.FC<SearchBarProps> = ({ onSelect }) => {
     const [isSearchFocused, setIsSearchFocused] = useState(false)
     const { searchValue, setSearchValue, filteredStations } = useStationSearch('', 5)
     const inputRef = useRef<HTMLInputElement>(null)
@@ -24,6 +29,12 @@ export const SearchBar: React.FC = () => {
         document.addEventListener('mousedown', handleClickOutside)
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
+
+    const handleStationSelect = (station: StationProperty) => {
+        setSearchValue('')
+        setIsSearchFocused(false)
+        onSelect(station)
+    }
 
     return (
         <div className="search-container">
@@ -50,10 +61,7 @@ export const SearchBar: React.FC = () => {
                         <div
                             key={`station-${index}`}
                             className="station-option"
-                            onClick={() => {
-                                setSearchValue(station.name)
-                                setIsSearchFocused(false)
-                            }}
+                            onClick={() => handleStationSelect(station)}
                         >
                             <div className="station-name">{station.name}</div>
                         </div>

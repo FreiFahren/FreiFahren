@@ -5,7 +5,7 @@ import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/Re
 import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
-import { Report } from 'src/utils/types'
+import { Report, StationProperty } from 'src/utils/types'
 
 import { useLast24HourReports } from '../../api/queries'
 import CloseButton from '../../components/Buttons/CloseButton/CloseButton'
@@ -17,6 +17,7 @@ import { FreifahrenMap } from '../../components/Map/Map'
 import { Backdrop } from '../../components/Miscellaneous/Backdrop/Backdrop'
 import { SearchBar } from '../../components/Miscellaneous/SearchBar/SearchBar'
 import { StatsPopUp } from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
+import { InfoModal } from '../../components/Modals/InfoModal/InfoModal'
 import { LegalDisclaimer } from '../../components/Modals/LegalDisclaimer/LegalDisclaimer'
 import { UtilModal } from '../../components/Modals/UtilModal/UtilModal'
 import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
@@ -217,6 +218,20 @@ const App = () => {
 
     const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false)
 
+    const [selectedStation, setSelectedStation] = useState<StationProperty | null>(null)
+
+    const {
+        isOpen: isInfoModalOpen,
+        isAnimatingOut: isInfoModalAnimatingOut,
+        openModal: openInfoModal,
+        closeModal: closeInfoModal,
+    } = useModalAnimation()
+
+    const handleStationSelect = (station: StationProperty) => {
+        setSelectedStation(station)
+        openInfoModal()
+    }
+
     return (
         <div className="App">
             {appMounted && shouldShowLegalDisclaimer() ? (
@@ -266,7 +281,7 @@ const App = () => {
                 ) : null}
                 <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
             </ViewedReportsProvider>
-            <SearchBar />
+            <SearchBar onSelect={handleStationSelect} />
             <UtilButton handleClick={toggleUtilModal} />
             {mapsRotation !== 0 ? (
                 <div className="compass-container">
@@ -302,6 +317,15 @@ const App = () => {
                     className="open center-animation"
                     openListModal={() => setAppUIState({ ...appUIState, isListModalOpen: !appUIState.isListModalOpen })}
                 />
+            ) : null}
+
+            {isInfoModalOpen && selectedStation ? (
+                <InfoModal
+                    station={selectedStation}
+                    className={`open ${isInfoModalAnimatingOut ? 'slide-out' : 'slide-in'}`}
+                >
+                    <CloseButton handleClose={closeInfoModal} />
+                </InfoModal>
             ) : null}
         </div>
     )
