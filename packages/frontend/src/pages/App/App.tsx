@@ -312,7 +312,12 @@ const App = () => {
             {isNavigationModalOpen ? (
                 <>
                     <NavigationModal className="open center-animation" initialEndStation={navigationEndStation} />
-                    <Backdrop handleClick={() => setIsNavigationModalOpen(false)} />
+                    <Backdrop
+                        handleClick={() => {
+                            setIsNavigationModalOpen(false)
+                            setNavigationEndStation(null)
+                        }}
+                    />
                 </>
             ) : null}
             <button

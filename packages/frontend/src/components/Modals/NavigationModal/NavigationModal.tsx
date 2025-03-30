@@ -1,6 +1,6 @@
 import './NavigationModal.css'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 import { FeedbackForm } from 'src/components/Form/FeedbackForm/FeedbackForm'
@@ -82,6 +82,17 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className = '', initi
 
         setSearchValue('')
     }
+
+    // set start location to the closest station if user has no start location
+    useEffect(() => {
+        if (userPosition && allStations && !startLocation) {
+            const closestStations = getClosestStations(1, allStations, userPosition)
+            if (closestStations.length > 0) {
+                const stationName = allStations[Object.keys(closestStations[0])[0]].name
+                handleStationSelect(stationName)
+            }
+        }
+    }, [userPosition, allStations, startLocation])
 
     const getInputValue = (input: ActiveInput): string => {
         if (input === 'start' && startLocation !== null && allStations) {
