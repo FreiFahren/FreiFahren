@@ -217,8 +217,8 @@ const App = () => {
     }, [])
 
     const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false)
-
     const [selectedStation, setSelectedStation] = useState<StationProperty | null>(null)
+    const [navigationEndStation, setNavigationEndStation] = useState<StationProperty | null>(null)
 
     const {
         isOpen: isInfoModalOpen,
@@ -230,6 +230,14 @@ const App = () => {
     const handleStationSelect = (station: StationProperty) => {
         setSelectedStation(station)
         openInfoModal()
+    }
+
+    const handleRouteButtonClick = () => {
+        if (selectedStation) {
+            setNavigationEndStation(selectedStation)
+            setIsNavigationModalOpen(true)
+            closeInfoModal()
+        }
     }
 
     return (
@@ -292,9 +300,18 @@ const App = () => {
                     </div>
                 </div>
             ) : null}
+            {isInfoModalOpen && selectedStation ? (
+                <InfoModal
+                    station={selectedStation}
+                    className={`open ${isInfoModalAnimatingOut ? 'slide-out' : 'slide-in'}`}
+                    onRouteClick={handleRouteButtonClick}
+                >
+                    <CloseButton handleClose={closeInfoModal} />
+                </InfoModal>
+            ) : null}
             {isNavigationModalOpen ? (
                 <>
-                    <NavigationModal className="open center-animation" />
+                    <NavigationModal className="open center-animation" initialEndStation={navigationEndStation} />
                     <Backdrop handleClick={() => setIsNavigationModalOpen(false)} />
                 </>
             ) : null}
@@ -317,15 +334,6 @@ const App = () => {
                     className="open center-animation"
                     openListModal={() => setAppUIState({ ...appUIState, isListModalOpen: !appUIState.isListModalOpen })}
                 />
-            ) : null}
-
-            {isInfoModalOpen && selectedStation ? (
-                <InfoModal
-                    station={selectedStation}
-                    className={`open ${isInfoModalAnimatingOut ? 'slide-out' : 'slide-in'}`}
-                >
-                    <CloseButton handleClose={closeInfoModal} />
-                </InfoModal>
             ) : null}
         </div>
     )

@@ -8,9 +8,10 @@ interface InfoModalProps {
     station: StationProperty | null
     className?: string
     children?: React.ReactNode
+    onRouteClick?: () => void
 }
 
-export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', children }) => {
+export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', children, onRouteClick }) => {
     if (!station) return null
 
     return (
@@ -26,7 +27,7 @@ export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', c
                     </div>
                 </div>
                 <div className="route-container">
-                    <button className="route-button">
+                    <button className="route-button" onClick={onRouteClick}>
                         <img src={`${process.env.PUBLIC_URL}/icons/route-svgrepo-com.svg`} alt="Route" />
                     </button>
                     <p className="route-text">Navigieren</p>

@@ -18,12 +18,13 @@ import { ItineraryItem } from './ItineraryItem'
 
 interface NavigationModalProps {
     className?: string
+    initialEndStation?: StationProperty | null
 }
 
 type ActiveInput = 'start' | 'end' | null
 
 // eslint-disable-next-line react/prop-types
-const NavigationModal: React.FC<NavigationModalProps> = ({ className = '' }) => {
+const NavigationModal: React.FC<NavigationModalProps> = ({ className = '', initialEndStation }) => {
     useTrackComponentView('navigation modal')
 
     const { t } = useTranslation()
@@ -35,7 +36,15 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className = '' }) => 
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false)
     const [activeInput, setActiveInput] = useState<ActiveInput>('start')
     const [startLocation, setStartLocation] = useState<string | null>(null)
-    const [endLocation, setEndLocation] = useState<string | null>(null)
+    const [endLocation, setEndLocation] = useState<string | null>(() => {
+        if (initialEndStation && allStations) {
+            const stationEntry = Object.entries(allStations).find(
+                ([, station]) => station.name === initialEndStation.name
+            )
+            return stationEntry ? stationEntry[0] : null
+        }
+        return null
+    })
     const [selectedRoute, setSelectedRoute] = useState<Itinerary | null>(null)
 
     const { searchValue, setSearchValue, filteredStations: possibleStations } = useStationSearch()
