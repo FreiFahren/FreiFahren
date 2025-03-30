@@ -13,6 +13,7 @@ import (
 	predictionV0 "github.com/FreiFahren/backend/api/prediction/v0"
 	predictionV1 "github.com/FreiFahren/backend/api/prediction/v1"
 	"github.com/FreiFahren/backend/api/stations"
+	statisticsV0 "github.com/FreiFahren/backend/api/stations/statistics/v0"
 	"github.com/FreiFahren/backend/caching"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
@@ -169,7 +170,7 @@ func SetupServer() *echo.Echo {
 
 	v0.GET("/stations", stations.GetAllStations)
 	v0.GET("/stations/:stationId", stations.GetSingleStation)
-	v0.GET("/stations/:stationId/statistics", stations.GetStationStatistics)
+	v0.GET("/stations/:stationId/statistics", statisticsV0.GetStationStatistics)
 	v0.GET("/stations/search", stations.SearchStation)
 
 	v0.GET("/transit/distance", distance.GetStationDistance)
@@ -193,7 +194,7 @@ func SetupServer() *echo.Echo {
 
 	latest.GET("/stations", stations.GetAllStations)
 	latest.GET("/stations/:stationId", stations.GetSingleStation)
-	latest.GET("/stations/:stationId/statistics", stations.GetStationStatistics)
+	latest.GET("/stations/:stationId/statistics", statisticsV0.GetStationStatistics)
 	latest.GET("/stations/search", stations.SearchStation)
 
 	latest.GET("/transit/distance", distance.GetStationDistance)
