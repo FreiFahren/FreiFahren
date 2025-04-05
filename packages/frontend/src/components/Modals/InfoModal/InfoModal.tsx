@@ -1,6 +1,6 @@
 import './InfoModal.css'
 
-import React from 'react'
+import React, { useRef } from 'react'
 import { StationProperty } from 'src/utils/types'
 import { useTranslation } from 'react-i18next'
 import { useReportsByStation, useStations } from 'src/api/queries'
@@ -19,7 +19,16 @@ export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', c
     // todo: refactor once station.id exists
     const { data: stations } = useStations()
     const stationId = stations ? Object.keys(stations).find((key) => stations[key].name === station.name) || '' : ''
-    const { data: reports } = useReportsByStation(stationId)
+
+    const nowRef = useRef(new Date())
+    const oneMonthAgoRef = useRef(
+        new Date(nowRef.current.getFullYear(), nowRef.current.getMonth() - 1, nowRef.current.getDate())
+    )
+    const { data: reports } = useReportsByStation(
+        stationId,
+        oneMonthAgoRef.current.toISOString(),
+        nowRef.current.toISOString()
+    )
 
     const currentTime = new Date().getTime()
 
