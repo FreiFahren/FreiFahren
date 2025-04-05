@@ -28,6 +28,7 @@ import (
 //
 // @Param start query string false "Start timestamp (RFC3339 format)"
 // @Param end query string false "End timestamp (RFC3339 format)"
+// @Param station query string false "Station ID to filter inspectors for a specific station"
 //
 // @Success 200 {object} []utils.TicketInspectorResponse
 // @Failure 400 {string} string "Bad Request"
@@ -59,10 +60,11 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 	// or if the If-Modified-Since header was not provided
 	start := c.QueryParam("start")
 	end := c.QueryParam("end")
+	stationId := c.QueryParam("station")
 
 	startTime, endTime := utils.GetTimeRange(start, end, time.Hour)
 
-	ticketInfoList, err := database.GetLatestTicketInspectors(startTime, endTime)
+	ticketInfoList, err := database.GetLatestTicketInspectors(startTime, endTime, stationId)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting ticket inspectors")
 		return c.NoContent(http.StatusInternalServerError)
@@ -72,12 +74,11 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 
 	if len(ticketInfoList) < currentHistoricDataThreshold {
 		numberOfHistoricDataToFetch := currentHistoricDataThreshold - len(ticketInfoList)
-		ticketInfoList, err = FetchAndAddHistoricData(ticketInfoList, numberOfHistoricDataToFetch, startTime)
+		ticketInfoList, err = FetchAndAddHistoricData(ticketInfoList, numberOfHistoricDataToFetch, startTime, stationId)
 		if err != nil {
 			logger.Log.Error().Err(err).Msg("Error fetching and adding historic data")
 			return c.NoContent(http.StatusInternalServerError)
 		}
-
 	}
 
 	ticketInspectorList := []utils.TicketInspectorResponse{}
