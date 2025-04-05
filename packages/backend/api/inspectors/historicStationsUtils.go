@@ -156,7 +156,20 @@ func FetchAndAddHistoricData(ticketInfoList []utils.TicketInspector, remaining i
 //
 // This is being done to make sure that users will disregard the historic data and deem it as irrelevant.
 func calculateHistoricDataTimestamp(startTime time.Time, endTime time.Time) time.Time {
+	// Ensure endTime is after startTime
+	if endTime.Before(startTime) {
+		logger.Log.Warn().Msg("End time is before start time, using start time + 1 hour as end time")
+		endTime = startTime.Add(time.Hour)
+	}
+
 	duration := endTime.Sub(startTime)
+
+	// If duration is zero or very small, use a default duration
+	if duration <= 0 {
+		logger.Log.Warn().Msg("Duration is zero or negative, using default duration of 1 hour")
+		duration = time.Hour
+	}
+
 	percentile25 := duration / 4
 	randomDuration := time.Duration(rand.Int63n(int64(percentile25)))
 	randomTimestamp := startTime.Add(randomDuration)

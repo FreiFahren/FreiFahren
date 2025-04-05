@@ -64,6 +64,12 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 
 	startTime, endTime := utils.GetTimeRange(start, end, time.Hour)
 
+	// Validate that endTime is after startTime
+	if endTime.Before(startTime) {
+		logger.Log.Warn().Msg("End time is before start time, returning 400 Bad Request")
+		return c.String(http.StatusBadRequest, "End time must be after start time")
+	}
+
 	ticketInfoList, err := database.GetLatestTicketInspectors(startTime, endTime, stationId)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error getting ticket inspectors")
