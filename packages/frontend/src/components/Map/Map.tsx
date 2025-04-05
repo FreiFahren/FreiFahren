@@ -12,6 +12,7 @@ import { RiskLineLayer } from './MapLayers/LineLayer/RiskLineLayer'
 import { StationLayer } from './MapLayers/StationLayer/StationLayer'
 import { LocationMarker } from './Markers/Classes/LocationMarker/LocationMarker'
 import { MarkerContainer } from './Markers/MarkerContainer'
+import { StationProperty } from '../../utils/types'
 
 const Map = lazy(() => import('react-map-gl/maplibre'))
 
@@ -19,13 +20,19 @@ interface FreifahrenMapProps {
     isFirstOpen: boolean
     isRiskLayerOpen: boolean
     onRotationChange: (bearing: number) => void
+    onStationClick?: (station: StationProperty) => void
 }
 
 const berlinViewPosition: { lng: number; lat: number } = { lng: 13.388, lat: 52.5162 }
 const GITHUB_ICON = `${process.env.PUBLIC_URL}/icons/github.svg`
 const INSTAGRAM_ICON = `${process.env.PUBLIC_URL}/icons/instagram.svg`
 
-const FreifahrenMap: React.FC<FreifahrenMapProps> = ({ isFirstOpen, isRiskLayerOpen, onRotationChange }) => {
+const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
+    isFirstOpen,
+    isRiskLayerOpen,
+    onRotationChange,
+    onStationClick,
+}) => {
     const SouthWestBounds: LngLatLike = { lng: 12.8364646484805, lat: 52.23115511676795 }
     const NorthEastBounds: LngLatLike = { lng: 14.00044556529124, lat: 52.77063424239867 }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
@@ -75,7 +82,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({ isFirstOpen, isRiskLayerO
                 >
                     {!isFirstOpen ? <LocationMarker userPosition={userPosition} /> : null}
                     <MarkerContainer isFirstOpen={isFirstOpen} userPosition={userPosition} />
-                    <StationLayer stations={stationGeoJSON} />
+                    <StationLayer stations={stationGeoJSON} onStationClick={onStationClick} />
                     {isRiskLayerOpen ? (
                         <RiskLineLayer preloadedRiskData={segmentRiskData} lineSegments={lineSegments} />
                     ) : (

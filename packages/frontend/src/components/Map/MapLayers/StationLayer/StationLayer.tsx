@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react'
 import { Layer, MapRef, Source, useMap } from 'react-map-gl/maplibre'
 
-import { StationGeoJSON } from '../../../../utils/types'
+import { StationGeoJSON, StationProperty } from '../../../../utils/types'
 
 const UBAHN_ICON = `${process.env.PUBLIC_URL}/icons/ubahn.svg`
 const SBAHN_ICON = `${process.env.PUBLIC_URL}/icons/sbahn.svg`
 
 interface StationLayerProps {
     stations: StationGeoJSON
+    onStationClick?: (station: StationProperty) => void
 }
 class IconFactory {
     constructor(private map: MapRef | undefined) {}
@@ -24,7 +25,7 @@ class IconFactory {
     }
 }
 
-const StationLayer: React.FC<StationLayerProps> = ({ stations }) => {
+const StationLayer: React.FC<StationLayerProps> = ({ stations, onStationClick }) => {
     const map = useMap()
 
     useEffect(() => {
@@ -42,6 +43,48 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations }) => {
         }
     }, [map])
 
+    useEffect(() => {
+        if (!onStationClick || !map.current) return
+
+        const handleClick = (e: maplibregl.MapMouseEvent) => {
+            const features = map.current?.queryRenderedFeatures(e.point, {
+                layers: ['stationLayer', 'stationNameLayer'],
+            })
+
+            if (features && features.length > 0) {
+                const feature = features[0]
+                const properties = feature.properties
+
+                if (properties) {
+                    const station: StationProperty = {
+                        name: properties.name,
+                        lines: properties.lines || [],
+                        coordinates:
+                            feature.geometry.type === 'Point'
+                                ? {
+                                      longitude: feature.geometry.coordinates[0],
+                                      latitude: feature.geometry.coordinates[1],
+                                  }
+                                : { longitude: 0, latitude: 0 },
+                    }
+
+                    onStationClick(station)
+                }
+            }
+        }
+
+        map.current.on('click', 'stationLayer', handleClick)
+        map.current.on('click', 'stationNameLayer', handleClick)
+
+        return () => {
+            if (map.current) {
+                map.current.off('click', 'stationLayer', handleClick)
+                map.current.off('click', 'stationNameLayer', handleClick)
+            }
+        }
+    }, [map, onStationClick])
+
+    // priority is based on number of reports
     const firstPriorityStations = [
         'Hauptbahnhof',
         'Gesundbrunnen',

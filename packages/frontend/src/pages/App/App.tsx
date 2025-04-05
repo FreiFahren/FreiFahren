@@ -279,6 +279,7 @@ const App = () => {
                     isFirstOpen={appUIState.isFirstOpen}
                     isRiskLayerOpen={appUIState.isRiskLayerOpen}
                     onRotationChange={handleRotationChange}
+                    onStationClick={handleStationSelect}
                 />
                 <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
                 {appUIState.isListModalOpen ? (
