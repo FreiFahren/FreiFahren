@@ -97,7 +97,7 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 	}
 
 	isOneHourRequest := endTime.Sub(startTime) <= time.Hour
-	if isOneHourRequest {
+	if isOneHourRequest && stationId == "" {
 		// we do not want to remove duplicates for the request to show the number of reports in the last 24h
 		ticketInspectorList = removeDuplicateStations(ticketInspectorList)
 	}
@@ -106,8 +106,6 @@ func GetTicketInspectorsInfo(c echo.Context) error {
 }
 
 func removeDuplicateStations(ticketInspectorList []utils.TicketInspectorResponse) []utils.TicketInspectorResponse {
-	logger.Log.Debug().Msg("Removing duplicate stations")
-
 	uniqueStations := make(map[string]utils.TicketInspectorResponse)
 	for _, ticketInspector := range ticketInspectorList {
 		stationId := ticketInspector.Station.Id
@@ -146,19 +144,14 @@ func constructTicketInspectorInfo(ticketInfo utils.TicketInspector, startTime ti
 		cleanedMessage = strings.TrimSpace(ticketInfo.Message.String)
 	}
 
-	// Get station data
 	station := getStationEntry(cleanedStationId, "Station")
-
-	// Get direction data
 	direction := getStationEntry(cleanedDirectionId, "Direction")
 
-	// Handle historic data timestamp
 	if ticketInfo.IsHistoric {
 		// As the historic data is not a real entry it has no timestamp, so we need to calculate one
 		ticketInfo.Timestamp = calculateHistoricDataTimestamp(startTime, endTime)
 	}
 
-	// Construct and return response
 	return utils.TicketInspectorResponse{
 		Timestamp: ticketInfo.Timestamp,
 		Station: utils.Station{

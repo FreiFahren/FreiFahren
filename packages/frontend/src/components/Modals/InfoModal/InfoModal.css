@@ -65,19 +65,6 @@
     color: var(--color-primary);
 }
 
-.info-modal.modal .lines-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--margin-xs);
-    margin-bottom: var(--margin-s);
-    justify-content: flex-start;
-}
-
-.info-modal.modal .lines-container .line {
-    transform: scale(0.8);
-    transform-origin: left center;
-}
-
 @keyframes slide-up {
     0% {
         transform: translateY(100%);

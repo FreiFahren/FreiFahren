@@ -229,5 +229,8 @@
         "from": "From: ",
         "to": "To: ",
         "stops": "Stops"
+    },
+    "InfoModal": {
+        "lastReports": "Last reports"
     }
 }

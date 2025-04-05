@@ -7,23 +7,35 @@ import { getClosestStations } from '../hooks/getClosestStations'
 import { CACHE_KEYS } from './queryClient'
 
 const fetchNewReports = async (
-    startTime: string,
-    endTime: string,
+    startTime?: string,
+    endTime?: string,
+    stationId?: string,
     lastKnownTimestamp?: string
 ): Promise<Report[] | null> => {
     const headers: HeadersInit = {
         'Content-Type': 'application/json',
     }
 
+    let queryParams = ''
+
     if (lastKnownTimestamp !== undefined && lastKnownTimestamp.trim() !== '') {
         const date = new Date(lastKnownTimestamp)
         headers['If-Modified-Since'] = date.toUTCString()
     }
 
-    const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/v0/basics/inspectors?start=${startTime}&end=${endTime}`,
-        { headers }
-    )
+    if (startTime !== undefined && startTime.trim() !== '') {
+        queryParams += `&start=${startTime}`
+    }
+
+    if (endTime !== undefined && endTime.trim() !== '') {
+        queryParams += `&end=${endTime}`
+    }
+
+    if (stationId !== undefined && stationId.trim() !== '') {
+        queryParams += `&station=${stationId}`
+    }
+
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/v0/basics/inspectors?${queryParams}`, { headers })
 
     if (response.status === 304) {
         return null
@@ -34,6 +46,13 @@ const fetchNewReports = async (
     }
 
     return response.json()
+}
+
+export const useReportsByStation = (stationId: string, startTime?: string, endTime?: string) => {
+    return useQuery({
+        queryKey: [...CACHE_KEYS.reports, stationId, startTime, endTime],
+        queryFn: () => fetchNewReports(startTime, endTime, stationId),
+    })
 }
 
 export const useSubmitReport = () => {
@@ -100,7 +119,7 @@ export const useCurrentReports = () => {
             const prevData = queryClient.getQueryData<Report[]>(CACHE_KEYS.byTimeframe('1h')) ?? []
             const lastKnownTimestamp = prevData[0]?.timestamp
 
-            const result = await fetchNewReports(startTime, endTime, lastKnownTimestamp)
+            const result = await fetchNewReports(startTime, endTime, undefined, lastKnownTimestamp)
             const newData = result === null ? prevData : result
 
             // If we got new data, invalidate the risk cache (temporary fix to avoid race condition)
@@ -152,7 +171,7 @@ export const useLast24HourReports = () => {
             const prevData = queryClient.getQueryData<Report[]>(CACHE_KEYS.byTimeframe('24h')) ?? []
             const lastKnownTimestamp = prevData[0]?.timestamp
 
-            const result = await fetchNewReports(startTime, endTime, lastKnownTimestamp)
+            const result = await fetchNewReports(startTime, endTime, undefined, lastKnownTimestamp)
             const newData = result === null ? prevData : result
 
             // Remove the most recent hour, as that is replaced by current reports.
