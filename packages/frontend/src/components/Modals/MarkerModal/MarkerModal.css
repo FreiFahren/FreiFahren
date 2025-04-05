@@ -56,6 +56,7 @@
 }
 
 .marker-modal.info-popup .reports-count {
+    height: 20px;
     font-size: var(--font-xs);
     color: var(--color-primary);
 }
