@@ -65,6 +65,26 @@
     color: var(--color-primary);
 }
 
+.frequency-items {
+    margin: var(--margin-s) 0;
+}
+
+.info-modal.modal .frequency-items div {
+    text-align: center;
+    background-color: var(--color-gray);
+    padding: var(--padding-xs);
+    border-radius: var(--borderRadius-small);
+}
+
+.info-modal.modal .frequency-items div p:first-child {
+    font-size: var(--font-l);
+    font-weight: 600;
+}
+
+.info-modal.modal .frequency-items div p:last-child {
+    font-size: var(--font-xxs);
+}
+
 @keyframes slide-up {
     0% {
         transform: translateY(100%);

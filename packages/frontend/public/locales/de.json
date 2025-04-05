@@ -227,6 +227,10 @@
         "stops": "Haltestellen"
     },
     "InfoModal": {
-        "lastReports": "Letzte Meldungen"
+        "lastReports": "Letzte Meldungen",
+        "frequency": "Kontrollhäufigkeit",
+        "daily": "pro Tag",
+        "weekly": "pro Woche",
+        "monthly": "pro Monat"
     }
 }

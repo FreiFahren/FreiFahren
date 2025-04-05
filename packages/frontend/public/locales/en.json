@@ -231,6 +231,10 @@
         "stops": "Stops"
     },
     "InfoModal": {
-        "lastReports": "Last reports"
+        "lastReports": "Last reports",
+        "frequency": "Inspection frequency",
+        "daily": "per day",
+        "weekly": "per week",
+        "monthly": "per month"
     }
 }
