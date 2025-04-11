@@ -228,9 +228,6 @@
     },
     "InfoModal": {
         "lastReports": "Letzte Meldungen",
-        "frequency": "Kontrollhäufigkeit",
-        "daily": "pro Tag",
-        "weekly": "pro Woche",
-        "monthly": "pro Monat"
+        "route": "Navigieren"
     }
 }

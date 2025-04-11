@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import './SearchBar.css'
 import { useStationSearch } from '../../../hooks/useStationSearch'
 import { StationProperty } from 'src/utils/types'
+import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
 
 type SearchBarProps = {
     onSelect: (station: StationProperty) => void
@@ -34,6 +35,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSelect }) => {
         setSearchValue('')
         setIsSearchFocused(false)
         onSelect(station)
+        sendAnalyticsEvent('InfoModal opened', { meta: { source: 'stationSearch', station_name: station.name } })
     }
 
     return (

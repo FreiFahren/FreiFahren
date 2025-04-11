@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { Layer, MapRef, Source, useMap } from 'react-map-gl/maplibre'
 
 import { StationGeoJSON, StationProperty } from '../../../../utils/types'
+import { sendAnalyticsEvent } from '../../../../hooks/useAnalytics'
 
 const UBAHN_ICON = `${process.env.PUBLIC_URL}/icons/ubahn.svg`
 const SBAHN_ICON = `${process.env.PUBLIC_URL}/icons/sbahn.svg`
@@ -58,7 +59,7 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations, onStationClick })
                 if (properties) {
                     const station: StationProperty = {
                         name: properties.name,
-                        lines: properties.lines || [],
+                        lines: JSON.parse(properties.lines || '[]'),
                         coordinates:
                             feature.geometry.type === 'Point'
                                 ? {
@@ -69,6 +70,7 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations, onStationClick })
                     }
 
                     onStationClick(station)
+                    sendAnalyticsEvent('InfoModal opened', { meta: { source: 'map', station_name: station.name } })
                 }
             }
         }
