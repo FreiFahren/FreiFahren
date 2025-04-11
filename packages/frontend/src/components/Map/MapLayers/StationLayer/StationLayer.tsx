@@ -76,12 +76,10 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations, onStationClick })
         }
 
         map.current.on('click', 'stationLayer', handleClick)
-        map.current.on('click', 'stationNameLayer', handleClick)
 
         return () => {
             if (map.current) {
                 map.current.off('click', 'stationLayer', handleClick)
-                map.current.off('click', 'stationNameLayer', handleClick)
             }
         }
     }, [map, onStationClick])

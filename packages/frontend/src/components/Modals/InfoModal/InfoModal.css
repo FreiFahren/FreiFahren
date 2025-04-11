@@ -1,8 +1,8 @@
 .info-modal.modal {
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: var(--margin-m);
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -98,18 +98,18 @@
 
 @keyframes slide-up {
     0% {
-        transform: translateY(100%);
+        transform: translateX(-50%) translateY(100%);
     }
     100% {
-        transform: translateY(0);
+        transform: translateX(-50%) translateY(0);
     }
 }
 
 @keyframes slide-down {
     0% {
-        transform: translateY(0);
+        transform: translateX(-50%) translateY(0);
     }
     100% {
-        transform: translateY(100%);
+        transform: translateX(-50%) translateY(100%);
     }
 }

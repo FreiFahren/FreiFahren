@@ -52,9 +52,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSelect }) => {
                     onChange={(e) => setSearchValue(e.target.value)}
                     onFocus={() => setIsSearchFocused(true)}
                 />
-                <div className="navigation-icon">
-                    <img src={`${process.env.PUBLIC_URL}/icons/route-svgrepo-com.svg`} alt="Navigation" />
-                </div>
             </div>
 
             {isSearchFocused && (

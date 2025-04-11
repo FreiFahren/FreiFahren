@@ -5,6 +5,10 @@
     transform: translateX(-50%);
     width: 85%;
     max-width: 400px;
+    z-index: 0;
+}
+
+.search-container:has(.focused) {
     z-index: 10;
 }
 
