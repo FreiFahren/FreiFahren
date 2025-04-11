@@ -36,6 +36,10 @@
     margin-left: var(--margin-m);
 }
 
+.info-modal .reports-container {
+    margin-top: var(--margin-m);
+}
+
 .info-modal.modal .route-button {
     display: flex;
     justify-content: center;
@@ -83,6 +87,13 @@
 
 .info-modal.modal .frequency-items div p:last-child {
     font-size: var(--font-xxs);
+}
+
+.info-modal.modal .lines-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--margin-xs);
 }
 
 @keyframes slide-up {

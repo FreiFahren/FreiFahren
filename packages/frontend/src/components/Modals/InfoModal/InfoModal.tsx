@@ -5,6 +5,7 @@ import { StationProperty } from 'src/utils/types'
 import { useTranslation } from 'react-i18next'
 import { useReportsByStation, useStations } from 'src/api/queries'
 import { ReportItem } from '../ReportsModal/ReportItem'
+import { Line } from 'src/components/Miscellaneous/Line/Line'
 
 interface InfoModalProps {
     station: StationProperty
@@ -38,29 +39,17 @@ export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', c
             <section className="info-content">
                 <div className="station-info">
                     <h1>{station.name}</h1>
+                    <div className="lines-container">
+                        {station.lines.map((line) => (
+                            <Line key={line} line={line} />
+                        ))}
+                    </div>
                 </div>
                 <div className="route-container">
                     <button className="route-button" onClick={onRouteClick}>
                         <img src={`${process.env.PUBLIC_URL}/icons/route-svgrepo-com.svg`} alt="Route" />
                     </button>
                     <p className="route-text">Navigieren</p>
-                </div>
-            </section>
-            <section className="frequency-container">
-                <h2>{t('InfoModal.frequency')}</h2>
-                <div className="frequency-items align-child-on-line">
-                    <div>
-                        <p>{Math.round((reports?.length ?? 0) / 30)}</p>
-                        <p>{t('InfoModal.daily')}</p>
-                    </div>
-                    <div>
-                        <p>{Math.round((reports?.length ?? 0) / 7)}</p>
-                        <p>{t('InfoModal.weekly')}</p>
-                    </div>
-                    <div>
-                        <p>{reports?.length}</p>
-                        <p>{t('InfoModal.monthly')}</p>
-                    </div>
                 </div>
             </section>
             <section className="reports-container">
