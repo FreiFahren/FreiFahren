@@ -23,18 +23,22 @@ interface FreifahrenMapProps {
     onStationClick?: (station: StationProperty) => void
 }
 
-const berlinViewPosition: { lng: number; lat: number } = { lng: 13.388, lat: 52.5162 }
+const cityViewPosition: { lng: number; lat: number } = {
+    lng: Number(process.env.REACT_APP_CITY_LNG),
+    lat: Number(process.env.REACT_APP_CITY_LAT),
+}
 const GITHUB_ICON = `${process.env.PUBLIC_URL}/icons/github.svg`
 const INSTAGRAM_ICON = `${process.env.PUBLIC_URL}/icons/instagram.svg`
 
-const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
-    isFirstOpen,
-    isRiskLayerOpen,
-    onRotationChange,
-    onStationClick,
-}) => {
-    const SouthWestBounds: LngLatLike = { lng: 12.8364646484805, lat: 52.23115511676795 }
-    const NorthEastBounds: LngLatLike = { lng: 14.00044556529124, lat: 52.77063424239867 }
+const FreifahrenMap: React.FC<FreifahrenMapProps> = ({ isFirstOpen, isRiskLayerOpen, onRotationChange }) => {
+    const SouthWestBounds: LngLatLike = {
+        lng: Number(process.env.REACT_APP_SW_BOUND_LNG),
+        lat: Number(process.env.REACT_APP_SW_BOUND_LAT),
+    }
+    const NorthEastBounds: LngLatLike = {
+        lng: Number(process.env.REACT_APP_NE_BOUND_LNG),
+        lat: Number(process.env.REACT_APP_NE_BOUND_LAT),
+    }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
 
     const { data: lineSegments = null } = useSegments()
@@ -70,8 +74,8 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     ref={map}
                     id="map"
                     initialViewState={{
-                        longitude: berlinViewPosition.lng,
-                        latitude: berlinViewPosition.lat,
+                        longitude: cityViewPosition.lng,
+                        latitude: cityViewPosition.lat,
                         zoom: 11,
                     }}
                     maxZoom={14}
