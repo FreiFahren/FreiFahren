@@ -57,6 +57,11 @@
     justify-content: center;
 }
 
+.search-icon img {
+    width: 20px;
+    height: 20px;
+}
+
 .search-options {
     position: absolute;
     top: 100%;
