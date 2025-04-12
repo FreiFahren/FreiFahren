@@ -25,19 +25,23 @@ export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', c
     )
 
     const now = useMemo(() => new Date(), [])
-    const oneMonthAgo = useMemo(() => {
+    const twentyFourHoursAgo = useMemo(() => {
         const date = new Date(now)
-        date.setMonth(date.getMonth() - 1)
+        date.setDate(date.getDate() - 1)
         return date
     }, [now])
 
-    const { data: reports } = useReportsByStation(stationId, oneMonthAgo.toISOString(), now.toISOString())
+    const { data: reports } = useReportsByStation(stationId, twentyFourHoursAgo.toISOString(), now.toISOString())
 
-    const currentTime = new Date().getTime()
+    const currentTime = useMemo(() => new Date().getTime(), [])
 
     const handleRouteClick = () => {
         onRouteClick?.()
     }
+
+    const reportsNoHistoric = useMemo(() => {
+        return reports?.filter((report) => report.isHistoric === false)
+    }, [reports])
 
     return (
         <div className={`info-modal modal ${className}`}>
@@ -60,12 +64,16 @@ export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', c
             </section>
             <section className="reports-container">
                 <h2>{t('InfoModal.lastReports')}</h2>
-                {reports
-                    ?.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-                    .slice(0, 3)
-                    .map((report) => (
-                        <ReportItem key={report.timestamp} report={report} currentTime={currentTime} />
-                    ))}
+                {reportsNoHistoric && reportsNoHistoric.length > 0 ? (
+                    reportsNoHistoric
+                        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                        .slice(0, 3)
+                        .map((report) => (
+                            <ReportItem key={report.timestamp} report={report} currentTime={currentTime} />
+                        ))
+                ) : (
+                    <p>{t('InfoModal.noRecentReports')}</p>
+                )}
             </section>
         </div>
     )

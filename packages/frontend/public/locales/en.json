@@ -232,6 +232,7 @@
     },
     "InfoModal": {
         "lastReports": "Last reports",
-        "route": "Navigate"
+        "route": "Navigate",
+        "noRecentReports": "No reports today"
     }
 }
