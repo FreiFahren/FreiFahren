@@ -1,11 +1,12 @@
 import './InfoModal.css'
 
-import React, { useRef } from 'react'
-import { StationProperty } from 'src/utils/types'
+import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useReportsByStation, useStations } from 'src/api/queries'
-import { ReportItem } from '../ReportsModal/ReportItem'
 import { Line } from 'src/components/Miscellaneous/Line/Line'
+import { StationProperty } from 'src/utils/types'
+
+import { ReportItem } from '../ReportsModal/ReportItem'
 
 interface InfoModalProps {
     station: StationProperty
@@ -17,21 +18,26 @@ interface InfoModalProps {
 export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', children, onRouteClick }) => {
     const { t } = useTranslation()
 
-    // todo: refactor once station.id exists
     const { data: stations } = useStations()
-    const stationId = stations ? Object.keys(stations).find((key) => stations[key].name === station.name) || '' : ''
+    const stationId = useMemo(
+        () => Object.keys(stations ?? {}).find((key) => stations?.[key]?.name === station.name) ?? '',
+        [stations, station.name]
+    )
 
-    const nowRef = useRef(new Date())
-    const oneMonthAgoRef = useRef(
-        new Date(nowRef.current.getFullYear(), nowRef.current.getMonth() - 1, nowRef.current.getDate())
-    )
-    const { data: reports } = useReportsByStation(
-        stationId,
-        oneMonthAgoRef.current.toISOString(),
-        nowRef.current.toISOString()
-    )
+    const now = useMemo(() => new Date(), [])
+    const oneMonthAgo = useMemo(() => {
+        const date = new Date(now)
+        date.setMonth(date.getMonth() - 1)
+        return date
+    }, [now])
+
+    const { data: reports } = useReportsByStation(stationId, oneMonthAgo.toISOString(), now.toISOString())
 
     const currentTime = new Date().getTime()
+
+    const handleRouteClick = () => {
+        onRouteClick?.()
+    }
 
     return (
         <div className={`info-modal modal ${className}`}>
@@ -46,7 +52,7 @@ export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', c
                     </div>
                 </div>
                 <div className="route-container">
-                    <button className="route-button" onClick={onRouteClick}>
+                    <button type="button" className="route-button" onClick={handleRouteClick}>
                         <img src={`${process.env.PUBLIC_URL}/icons/route-svgrepo-com.svg`} alt="Route" />
                     </button>
                     <p className="route-text">{t('InfoModal.route')}</p>

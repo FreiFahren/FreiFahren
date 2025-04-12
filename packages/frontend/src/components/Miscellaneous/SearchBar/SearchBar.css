@@ -68,7 +68,7 @@
     border-top: none;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     max-height: 300px;
-    overflow-y: auto;
+    overflow-y: none;
 }
 
 .station-option {
@@ -76,8 +76,16 @@
     align-items: center;
     padding: 12px 15px;
     cursor: pointer;
-    margin: 0 10px;
     border-bottom: 1px solid var(--color-gray-on-dark-background);
+    background-color: var(--color-background);
+    font-weight: 400;
+    min-width: 0;
+    border-radius: 0;
+}
+
+.search-options .station-option:last-child {
+    border-bottom: none;
+    border-radius: 0 0 15px 15px;
 }
 
 .station-option:hover {

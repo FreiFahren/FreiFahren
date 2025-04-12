@@ -1,14 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react'
 import './SearchBar.css'
-import { useStationSearch } from '../../../hooks/useStationSearch'
+
+import React, { useEffect, useRef, useState } from 'react'
 import { StationProperty } from 'src/utils/types'
+
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
+import { useStationSearch } from '../../../hooks/useStationSearch'
 
 type SearchBarProps = {
-    onSelect: (station: StationProperty) => void
+    handleSelect: (station: StationProperty) => void
 }
 
-export const SearchBar: React.FC<SearchBarProps> = ({ onSelect }) => {
+export const SearchBar: React.FC<SearchBarProps> = ({ handleSelect }) => {
     const [isSearchFocused, setIsSearchFocused] = useState(false)
     const { searchValue, setSearchValue, filteredStations } = useStationSearch('', 5)
     const inputRef = useRef<HTMLInputElement>(null)
@@ -34,7 +36,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSelect }) => {
     const handleStationSelect = (station: StationProperty) => {
         setSearchValue('')
         setIsSearchFocused(false)
-        onSelect(station)
+        handleSelect(station)
         sendAnalyticsEvent('InfoModal opened', { meta: { source: 'stationSearch', station_name: station.name } })
     }
 
@@ -49,24 +51,25 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSelect }) => {
                     type="text"
                     placeholder="Hier suchen"
                     value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
+                    onChange={(event) => setSearchValue(event.target.value)}
                     onFocus={() => setIsSearchFocused(true)}
                 />
             </div>
 
-            {isSearchFocused && (
+            {isSearchFocused ? (
                 <div className="search-options" ref={dropdownRef}>
-                    {Object.values(filteredStations).map((station, index) => (
-                        <div
-                            key={`station-${index}`}
+                    {Object.values(filteredStations).map((station) => (
+                        <button
+                            key={`station-${station.name}`}
                             className="station-option"
                             onClick={() => handleStationSelect(station)}
+                            type="button"
                         >
                             <div className="station-name">{station.name}</div>
-                        </div>
+                        </button>
                     ))}
                 </div>
-            )}
+            ) : null}
         </div>
     )
 }

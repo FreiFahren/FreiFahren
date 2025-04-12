@@ -227,7 +227,7 @@ const App = () => {
         closeModal: closeInfoModal,
     } = useModalAnimation()
 
-    const handleStationSelect = (station: StationProperty) => {
+    const onStationSelect = (station: StationProperty) => {
         setSelectedStation(station)
         openInfoModal()
     }
@@ -279,7 +279,7 @@ const App = () => {
                     isFirstOpen={appUIState.isFirstOpen}
                     isRiskLayerOpen={appUIState.isRiskLayerOpen}
                     onRotationChange={handleRotationChange}
-                    onStationClick={handleStationSelect}
+                    handleStationClick={onStationSelect}
                 />
                 <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
                 {appUIState.isListModalOpen ? (
@@ -290,7 +290,7 @@ const App = () => {
                 ) : null}
                 <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
             </ViewedReportsProvider>
-            <SearchBar onSelect={handleStationSelect} />
+            <SearchBar handleSelect={onStationSelect} />
             <UtilButton handleClick={toggleUtilModal} />
             {mapsRotation !== 0 ? (
                 <div className="compass-container">

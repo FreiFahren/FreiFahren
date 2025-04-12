@@ -1,6 +1,6 @@
 import './NavigationModal.css'
 
-import { useRef, useState, useEffect } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 import { FeedbackForm } from 'src/components/Form/FeedbackForm/FeedbackForm'
@@ -39,6 +39,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className = '', initi
     const [endLocation, setEndLocation] = useState<string | null>(() => {
         if (initialEndStation && allStations) {
             const stationEntry = Object.entries(allStations).find(
+                // eslint-disable-next-line react/prop-types
                 ([, station]) => station.name === initialEndStation.name
             )
             return stationEntry ? stationEntry[0] : null
@@ -54,45 +55,57 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className = '', initi
         endLocation !== null ? endLocation : '',
         {
             // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-            enabled: Boolean(startLocation && endLocation),
+            enabled: startLocation !== null && endLocation !== null,
         }
     )
 
-    const handleStationSelect = (stationName: string | null): void => {
-        if (stationName === null || !allStations) return
+    const handleStationSelect = useCallback(
+        (stationName: string | null): void => {
+            if (stationName === null || !allStations) return
 
-        const selectedStation = Object.entries(allStations).find(([, station]) => station.name === stationName)
-        if (!selectedStation) return
+            const selectedStation = Object.entries(allStations).find(([, station]) => station.name === stationName)
+            if (!selectedStation) return
 
-        if (activeInput === 'start') {
-            setStartLocation(selectedStation[0])
-            if (endLocation === null) {
-                setTimeout(() => {
-                    if (endInputRef.current) {
-                        endInputRef.current.focus()
-                    }
-                }, 0)
-            } else {
+            if (activeInput === 'start') {
+                setStartLocation(selectedStation[0])
+                if (endLocation === null) {
+                    setTimeout(() => {
+                        if (endInputRef.current) {
+                            endInputRef.current.focus()
+                        }
+                    }, 0)
+                } else {
+                    setActiveInput(null)
+                }
+            } else if (activeInput === 'end') {
+                setEndLocation(selectedStation[0])
                 setActiveInput(null)
             }
-        } else if (activeInput === 'end') {
-            setEndLocation(selectedStation[0])
-            setActiveInput(null)
-        }
 
-        setSearchValue('')
-    }
+            setSearchValue('')
+        },
+        [
+            allStations,
+            activeInput,
+            endLocation,
+            setStartLocation,
+            setActiveInput,
+            setEndLocation,
+            setSearchValue,
+            endInputRef,
+        ]
+    )
 
     // set start location to the closest station if user has no start location
     useEffect(() => {
-        if (userPosition && allStations && !startLocation) {
+        if (userPosition && allStations && startLocation === null) {
             const closestStations = getClosestStations(1, allStations, userPosition)
             if (closestStations.length > 0) {
                 const stationName = allStations[Object.keys(closestStations[0])[0]].name
                 handleStationSelect(stationName)
             }
         }
-    }, [userPosition, allStations, startLocation])
+    }, [userPosition, allStations, startLocation, handleStationSelect])
 
     const getInputValue = (input: ActiveInput): string => {
         if (input === 'start' && startLocation !== null && allStations) {

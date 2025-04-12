@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react'
 import { Layer, MapRef, Source, useMap } from 'react-map-gl/maplibre'
 
-import { StationGeoJSON, StationProperty } from '../../../../utils/types'
 import { sendAnalyticsEvent } from '../../../../hooks/useAnalytics'
+import { StationGeoJSON, StationProperty } from '../../../../utils/types'
 
 const UBAHN_ICON = `${process.env.PUBLIC_URL}/icons/ubahn.svg`
 const SBAHN_ICON = `${process.env.PUBLIC_URL}/icons/sbahn.svg`
@@ -45,42 +45,40 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations, onStationClick })
     }, [map])
 
     useEffect(() => {
-        if (!onStationClick || !map.current) return
+        const currentMap = map.current
+        if (!onStationClick || !currentMap) return () => {}
 
-        const handleClick = (e: maplibregl.MapMouseEvent) => {
-            const features = map.current?.queryRenderedFeatures(e.point, {
+        const handleClick = (event: maplibregl.MapMouseEvent) => {
+            const features = currentMap.queryRenderedFeatures(event.point, {
                 layers: ['stationLayer', 'stationNameLayer'],
             })
 
-            if (features && features.length > 0) {
-                const feature = features[0]
-                const properties = feature.properties
+            if (features.length > 0) {
+                const [feature] = features
+                const { properties } = feature
 
-                if (properties) {
-                    const station: StationProperty = {
-                        name: properties.name,
-                        lines: JSON.parse(properties.lines || '[]'),
-                        coordinates:
-                            feature.geometry.type === 'Point'
-                                ? {
-                                      longitude: feature.geometry.coordinates[0],
-                                      latitude: feature.geometry.coordinates[1],
-                                  }
-                                : { longitude: 0, latitude: 0 },
-                    }
-
-                    onStationClick(station)
-                    sendAnalyticsEvent('InfoModal opened', { meta: { source: 'map', station_name: station.name } })
+                const station: StationProperty = {
+                    name: properties.name,
+                    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+                    lines: JSON.parse(properties.lines || '[]'),
+                    coordinates:
+                        feature.geometry.type === 'Point'
+                            ? {
+                                  longitude: feature.geometry.coordinates[0],
+                                  latitude: feature.geometry.coordinates[1],
+                              }
+                            : { longitude: 0, latitude: 0 },
                 }
+
+                onStationClick(station)
+                sendAnalyticsEvent('InfoModal opened', { meta: { source: 'map', station_name: station.name } })
             }
         }
 
-        map.current.on('click', 'stationLayer', handleClick)
+        currentMap.on('click', 'stationLayer', handleClick)
 
         return () => {
-            if (map.current) {
-                map.current.off('click', 'stationLayer', handleClick)
-            }
+            currentMap.off('click', 'stationLayer', handleClick)
         }
     }, [map, onStationClick])
 

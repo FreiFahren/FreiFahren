@@ -1,7 +1,8 @@
+import Fuse from 'fuse.js'
 import { useMemo, useState } from 'react'
+
 import { useStations } from '../api/queries'
 import { StationProperty } from '../utils/types'
-import Fuse from 'fuse.js'
 
 type SearchResult = {
     filteredStations: Record<string, StationProperty>

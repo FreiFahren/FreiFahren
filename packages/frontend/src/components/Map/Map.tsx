@@ -7,12 +7,12 @@ import { useRiskData, useSegments, useStations } from 'src/api/queries'
 
 import { useLocation } from '../../contexts/LocationContext'
 import { convertStationsToGeoJSON } from '../../utils/mapUtils'
+import { StationProperty } from '../../utils/types'
 import { RegularLineLayer } from './MapLayers/LineLayer/RegularLineLayer'
 import { RiskLineLayer } from './MapLayers/LineLayer/RiskLineLayer'
 import { StationLayer } from './MapLayers/StationLayer/StationLayer'
 import { LocationMarker } from './Markers/Classes/LocationMarker/LocationMarker'
 import { MarkerContainer } from './Markers/MarkerContainer'
-import { StationProperty } from '../../utils/types'
 
 const Map = lazy(() => import('react-map-gl/maplibre'))
 
@@ -20,7 +20,7 @@ interface FreifahrenMapProps {
     isFirstOpen: boolean
     isRiskLayerOpen: boolean
     onRotationChange: (bearing: number) => void
-    onStationClick?: (station: StationProperty) => void
+    handleStationClick?: (station: StationProperty) => void
 }
 
 const cityViewPosition: { lng: number; lat: number } = {
@@ -30,7 +30,12 @@ const cityViewPosition: { lng: number; lat: number } = {
 const GITHUB_ICON = `${process.env.PUBLIC_URL}/icons/github.svg`
 const INSTAGRAM_ICON = `${process.env.PUBLIC_URL}/icons/instagram.svg`
 
-const FreifahrenMap: React.FC<FreifahrenMapProps> = ({ isFirstOpen, isRiskLayerOpen, onRotationChange }) => {
+const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
+    isFirstOpen,
+    isRiskLayerOpen,
+    onRotationChange,
+    handleStationClick,
+}) => {
     const SouthWestBounds: LngLatLike = {
         lng: Number(process.env.REACT_APP_SW_BOUND_LNG),
         lat: Number(process.env.REACT_APP_SW_BOUND_LAT),
@@ -86,7 +91,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({ isFirstOpen, isRiskLayerO
                 >
                     {!isFirstOpen ? <LocationMarker userPosition={userPosition} /> : null}
                     <MarkerContainer isFirstOpen={isFirstOpen} userPosition={userPosition} />
-                    <StationLayer stations={stationGeoJSON} onStationClick={onStationClick} />
+                    <StationLayer stations={stationGeoJSON} onStationClick={handleStationClick} />
                     {isRiskLayerOpen ? (
                         <RiskLineLayer preloadedRiskData={segmentRiskData} lineSegments={lineSegments} />
                     ) : (

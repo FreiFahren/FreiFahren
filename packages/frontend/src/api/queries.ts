@@ -48,12 +48,11 @@ const fetchNewReports = async (
     return response.json()
 }
 
-export const useReportsByStation = (stationId: string, startTime?: string, endTime?: string) => {
-    return useQuery({
+export const useReportsByStation = (stationId: string, startTime?: string, endTime?: string) =>
+    useQuery({
         queryKey: [...CACHE_KEYS.reports, stationId, startTime, endTime],
         queryFn: () => fetchNewReports(startTime, endTime, stationId),
     })
-}
 
 export const useSubmitReport = () => {
     const queryClient = useQueryClient()
