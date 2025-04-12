@@ -225,5 +225,9 @@
         "from": "Von: ",
         "to": "Nach: ",
         "stops": "Haltestellen"
+    },
+    "InfoModal": {
+        "lastReports": "Letzte Meldungen",
+        "route": "Navigieren"
     }
 }

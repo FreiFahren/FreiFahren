@@ -295,17 +295,35 @@ func GetHistoricStations(
 	return ticketInfoList, nil
 }
 
-func GetLatestTicketInspectors(start, end time.Time) ([]utils.TicketInspector, error) {
+func GetLatestTicketInspectors(start, end time.Time, stationId string) ([]utils.TicketInspector, error) {
 	logger.Log.Debug().Msg("Getting latest ticket inspectors")
 
-	sql := `SELECT timestamp, station_id, direction_id, line,
-            CASE WHEN author IS NULL THEN message ELSE NULL END as message
-            FROM ticket_info
-            WHERE timestamp >= $1 AND timestamp <= $2
-            AND station_name IS NOT NULL
-            AND station_id IS NOT NULL;`
+	var sql string
+	var rows pgx.Rows
+	var err error
 
-	rows, err := pool.Query(context.Background(), sql, start, end)
+	if stationId != "" {
+		logger.Log.Debug().Str("stationId", stationId).Msg("Filtering by station ID")
+		sql = `SELECT timestamp, station_id, direction_id, line,
+                CASE WHEN author IS NULL THEN message ELSE NULL END as message
+                FROM ticket_info
+                WHERE timestamp >= $1 AND timestamp <= $2
+                AND station_name IS NOT NULL
+                AND station_id IS NOT NULL
+                AND station_id = $3;`
+
+		rows, err = pool.Query(context.Background(), sql, start, end, stationId)
+	} else {
+		sql = `SELECT timestamp, station_id, direction_id, line,
+                CASE WHEN author IS NULL THEN message ELSE NULL END as message
+                FROM ticket_info
+                WHERE timestamp >= $1 AND timestamp <= $2
+                AND station_name IS NOT NULL
+                AND station_id IS NOT NULL;`
+
+		rows, err = pool.Query(context.Background(), sql, start, end)
+	}
+
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to get latest ticket inspectors")
 		return nil, err

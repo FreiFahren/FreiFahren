@@ -7,9 +7,9 @@ import (
 
 	"github.com/FreiFahren/backend/caching"
 	"github.com/FreiFahren/backend/data"
+	"github.com/FreiFahren/backend/database"
 	_ "github.com/FreiFahren/backend/docs"
 	"github.com/FreiFahren/backend/logger"
-	"github.com/FreiFahren/backend/statistics"
 	"github.com/FreiFahren/backend/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -97,12 +97,12 @@ func GetLineStatistics(c echo.Context) error {
 
 	startTime, endTime := utils.GetTimeRange(start, end, 7*24*time.Hour)
 
-	stats, err := statistics.GetStatistics(stationId, lineId, startTime, endTime)
+	numberOfReports, err := database.GetNumberOfReports(stationId, lineId, startTime, endTime)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Internal Server Error: Failed to get number of reports."})
 	}
 
-	return c.JSON(http.StatusOK, stats)
+	return c.JSON(http.StatusOK, map[string]int{"numberOfReports": numberOfReports})
 }
 
 // @Summary Get all segments

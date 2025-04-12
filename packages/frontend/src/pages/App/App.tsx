@@ -5,7 +5,7 @@ import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/Re
 import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
-import { Report } from 'src/utils/types'
+import { Report, StationProperty } from 'src/utils/types'
 
 import { useLast24HourReports } from '../../api/queries'
 import CloseButton from '../../components/Buttons/CloseButton/CloseButton'
@@ -15,7 +15,9 @@ import { UtilButton } from '../../components/Buttons/UtilButton/UtilButton'
 import { ReportForm } from '../../components/Form/ReportForm/ReportForm'
 import { FreifahrenMap } from '../../components/Map/Map'
 import { Backdrop } from '../../components/Miscellaneous/Backdrop/Backdrop'
+import { SearchBar } from '../../components/Miscellaneous/SearchBar/SearchBar'
 import { StatsPopUp } from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
+import { InfoModal } from '../../components/Modals/InfoModal/InfoModal'
 import { LegalDisclaimer } from '../../components/Modals/LegalDisclaimer/LegalDisclaimer'
 import { UtilModal } from '../../components/Modals/UtilModal/UtilModal'
 import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
@@ -215,6 +217,28 @@ const App = () => {
     }, [])
 
     const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false)
+    const [selectedStation, setSelectedStation] = useState<StationProperty | null>(null)
+    const [navigationEndStation, setNavigationEndStation] = useState<StationProperty | null>(null)
+
+    const {
+        isOpen: isInfoModalOpen,
+        isAnimatingOut: isInfoModalAnimatingOut,
+        openModal: openInfoModal,
+        closeModal: closeInfoModal,
+    } = useModalAnimation()
+
+    const onStationSelect = (station: StationProperty) => {
+        setSelectedStation(station)
+        openInfoModal()
+    }
+
+    const handleRouteButtonClick = () => {
+        if (selectedStation) {
+            setNavigationEndStation(selectedStation)
+            setIsNavigationModalOpen(true)
+            closeInfoModal()
+        }
+    }
 
     return (
         <div className="App">
@@ -255,6 +279,7 @@ const App = () => {
                     isFirstOpen={appUIState.isFirstOpen}
                     isRiskLayerOpen={appUIState.isRiskLayerOpen}
                     onRotationChange={handleRotationChange}
+                    handleStationClick={onStationSelect}
                 />
                 <LayerSwitcher changeLayer={changeLayer} isRiskLayerOpen={appUIState.isRiskLayerOpen} />
                 {appUIState.isListModalOpen ? (
@@ -265,6 +290,7 @@ const App = () => {
                 ) : null}
                 <ReportsModalButton openModal={() => setAppUIState({ ...appUIState, isListModalOpen: true })} />
             </ViewedReportsProvider>
+            <SearchBar handleSelect={onStationSelect} />
             <UtilButton handleClick={toggleUtilModal} />
             {mapsRotation !== 0 ? (
                 <div className="compass-container">
@@ -275,10 +301,24 @@ const App = () => {
                     </div>
                 </div>
             ) : null}
+            {isInfoModalOpen && selectedStation ? (
+                <InfoModal
+                    station={selectedStation}
+                    className={`open ${isInfoModalAnimatingOut ? 'slide-out' : 'slide-in'}`}
+                    onRouteClick={handleRouteButtonClick}
+                >
+                    <CloseButton handleClose={closeInfoModal} />
+                </InfoModal>
+            ) : null}
             {isNavigationModalOpen ? (
                 <>
-                    <NavigationModal className="open center-animation" />
-                    <Backdrop handleClick={() => setIsNavigationModalOpen(false)} />
+                    <NavigationModal className="open center-animation" initialEndStation={navigationEndStation} />
+                    <Backdrop
+                        handleClick={() => {
+                            setIsNavigationModalOpen(false)
+                            setNavigationEndStation(null)
+                        }}
+                    />
                 </>
             ) : null}
             <button

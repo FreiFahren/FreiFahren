@@ -1,0 +1,115 @@
+.info-modal.modal {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.info-modal.modal.open.slide-in {
+    animation: slide-up 0.3s ease-out;
+}
+
+.info-modal.modal.open.slide-out {
+    animation: slide-down 0.3s ease-in forwards;
+}
+
+.info-modal.modal .small-button.close-button {
+    position: absolute;
+}
+
+.info-modal.modal .info-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.info-modal.modal .station-info {
+    flex: 1;
+}
+
+.info-modal.modal .route-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: var(--margin-m);
+}
+
+.info-modal .reports-container {
+    margin-top: var(--margin-m);
+}
+
+.info-modal.modal .route-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 0px;
+    width: 40px;
+    background-color: var(--incentive-blue);
+    height: 40px;
+    border-radius: 50%;
+}
+
+.info-modal.modal .route-button img {
+    width: 25px;
+    height: 25px;
+}
+
+.info-modal.modal .route-text {
+    margin: var(--margin-xs) 0 0 0;
+    font-size: var(--font-xs);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.info-modal.modal h1 {
+    margin-top: 0;
+    margin-bottom: var(--margin-xs);
+    color: var(--color-primary);
+}
+
+.frequency-items {
+    margin: var(--margin-s) 0;
+}
+
+.info-modal.modal .frequency-items div {
+    text-align: center;
+    background-color: var(--color-gray);
+    padding: var(--padding-xs);
+    border-radius: var(--borderRadius-small);
+}
+
+.info-modal.modal .frequency-items div p:first-child {
+    font-size: var(--font-l);
+    font-weight: 600;
+}
+
+.info-modal.modal .frequency-items div p:last-child {
+    font-size: var(--font-xxs);
+}
+
+.info-modal.modal .lines-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--margin-xs);
+}
+
+@keyframes slide-up {
+    0% {
+        transform: translateX(-50%) translateY(100%);
+    }
+    100% {
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes slide-down {
+    0% {
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        transform: translateX(-50%) translateY(100%);
+    }
+}

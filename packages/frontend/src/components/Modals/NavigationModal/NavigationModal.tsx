@@ -1,7 +1,6 @@
 import './NavigationModal.css'
 
-import Fuse from 'fuse.js'
-import { useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 import { FeedbackForm } from 'src/components/Form/FeedbackForm/FeedbackForm'
@@ -10,6 +9,7 @@ import { useNavigation, useStations } from '../../../api/queries'
 import { useLocation } from '../../../contexts/LocationContext'
 import { getClosestStations } from '../../../hooks/getClosestStations'
 import { sendAnalyticsEvent, useTrackComponentView } from '../../../hooks/useAnalytics'
+import { useStationSearch } from '../../../hooks/useStationSearch'
 import { Itinerary, StationProperty } from '../../../utils/types'
 import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
 import { Skeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
@@ -18,12 +18,13 @@ import { ItineraryItem } from './ItineraryItem'
 
 interface NavigationModalProps {
     className?: string
+    initialEndStation?: StationProperty | null
 }
 
 type ActiveInput = 'start' | 'end' | null
 
 // eslint-disable-next-line react/prop-types
-const NavigationModal: React.FC<NavigationModalProps> = ({ className = '' }) => {
+const NavigationModal: React.FC<NavigationModalProps> = ({ className = '', initialEndStation }) => {
     useTrackComponentView('navigation modal')
 
     const { t } = useTranslation()
@@ -33,71 +34,78 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className = '' }) => 
     const endInputRef = useRef<HTMLInputElement>(null)
 
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false)
-    const [searchValue, setSearchValue] = useState('')
     const [activeInput, setActiveInput] = useState<ActiveInput>('start')
     const [startLocation, setStartLocation] = useState<string | null>(null)
-    const [endLocation, setEndLocation] = useState<string | null>(null)
+    const [endLocation, setEndLocation] = useState<string | null>(() => {
+        if (initialEndStation && allStations) {
+            const stationEntry = Object.entries(allStations).find(
+                // eslint-disable-next-line react/prop-types
+                ([, station]) => station.name === initialEndStation.name
+            )
+            return stationEntry ? stationEntry[0] : null
+        }
+        return null
+    })
     const [selectedRoute, setSelectedRoute] = useState<Itinerary | null>(null)
 
-    // remove single S and U
-    const preprocessName = (name: string): string => name.replace(/^(S|U)\s+/i, ' ')
-
-    const fuse = useMemo(() => {
-        if (allStations === undefined) return null
-
-        const stations = Object.entries(allStations).map(([id, station]) => ({
-            id,
-            ...station,
-            processedName: preprocessName(station.name),
-        }))
-        return new Fuse(stations, {
-            keys: ['processedName'],
-            threshold: 0.4,
-            distance: 100,
-        })
-    }, [allStations])
+    const { searchValue, setSearchValue, filteredStations: possibleStations } = useStationSearch()
 
     const { data: navigationData, isLoading } = useNavigation(
         startLocation !== null ? startLocation : '',
         endLocation !== null ? endLocation : '',
         {
             // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-            enabled: Boolean(startLocation && endLocation),
+            enabled: startLocation !== null && endLocation !== null,
         }
     )
 
-    const possibleStations = useMemo(() => {
-        if (allStations === undefined || searchValue === '' || fuse === null) return allStations ?? {}
+    const handleStationSelect = useCallback(
+        (stationName: string | null): void => {
+            if (stationName === null || !allStations) return
 
-        const processedSearchValue = preprocessName(searchValue)
-        const searchResults = fuse.search(processedSearchValue)
-        return Object.fromEntries(searchResults.map((result) => [result.item.id, allStations[result.item.id]]))
-    }, [allStations, searchValue, fuse])
+            const selectedStation = Object.entries(allStations).find(([, station]) => station.name === stationName)
+            if (!selectedStation) return
 
-    const handleStationSelect = (stationName: string | null): void => {
-        if (stationName === null || !allStations) return
-
-        const selectedStation = Object.entries(allStations).find(([, station]) => station.name === stationName)
-        if (!selectedStation) return
-
-        if (activeInput === 'start') {
-            setStartLocation(selectedStation[0])
-            if (endLocation === null) {
-                setTimeout(() => {
-                    if (endInputRef.current) {
-                        endInputRef.current.focus()
-                    }
-                }, 0)
-            } else {
+            if (activeInput === 'start') {
+                setStartLocation(selectedStation[0])
+                if (endLocation === null) {
+                    setTimeout(() => {
+                        if (endInputRef.current) {
+                            endInputRef.current.focus()
+                        }
+                    }, 0)
+                } else {
+                    setActiveInput(null)
+                }
+            } else if (activeInput === 'end') {
+                setEndLocation(selectedStation[0])
                 setActiveInput(null)
             }
-        } else if (activeInput === 'end') {
-            setEndLocation(selectedStation[0])
-            setActiveInput(null)
-        }
 
-        setSearchValue('')
-    }
+            setSearchValue('')
+        },
+        [
+            allStations,
+            activeInput,
+            endLocation,
+            setStartLocation,
+            setActiveInput,
+            setEndLocation,
+            setSearchValue,
+            endInputRef,
+        ]
+    )
+
+    // set start location to the closest station if user has no start location
+    useEffect(() => {
+        if (userPosition && allStations && startLocation === null) {
+            const closestStations = getClosestStations(1, allStations, userPosition)
+            if (closestStations.length > 0) {
+                const stationName = allStations[Object.keys(closestStations[0])[0]].name
+                handleStationSelect(stationName)
+            }
+        }
+    }, [userPosition, allStations, startLocation, handleStationSelect])
 
     const getInputValue = (input: ActiveInput): string => {
         if (input === 'start' && startLocation !== null && allStations) {

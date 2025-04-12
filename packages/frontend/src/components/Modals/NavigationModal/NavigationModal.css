@@ -138,13 +138,14 @@ div.modal.container.navigation-modal {
     border: 2px solid var(--incentive-blue);
 }
 
-/* ItineraryDetail specific styles */
 .navigation-detail.modal {
     overflow-y: auto;
     max-height: 70vh;
     top: auto;
     bottom: 0;
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
+    margin: 0 auto;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
     box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
@@ -153,11 +154,11 @@ div.modal.container.navigation-modal {
 
 @keyframes slide-up {
     0% {
-        transform: translateX(-50%) translateY(100%);
+        transform: translateY(100%);
         opacity: 0;
     }
     100% {
-        transform: translateX(-50%) translateY(0);
+        transform: translateY(0);
         opacity: 1;
     }
 }

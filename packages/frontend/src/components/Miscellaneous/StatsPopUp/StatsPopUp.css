@@ -1,6 +1,6 @@
 .stats-popup {
     position: fixed;
-    top: 50px;
+    top: calc(var(--distance-from-edge-default) + 75px);
     left: 50%;
     transform: translateX(-50%);
     padding: 2px var(--padding-s);
