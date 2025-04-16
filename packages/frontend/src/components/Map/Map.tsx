@@ -2,10 +2,11 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import './Map.css'
 
 import React, { lazy, Suspense, useCallback, useEffect, useRef } from 'react'
-import { LngLatBoundsLike, LngLatLike, MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre'
+import { LngLatBoundsLike, LngLatLike, MapLayerMouseEvent, MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre'
 import { useRiskData, useSegments, useStations } from 'src/api/queries'
 
 import { useLocation } from '../../contexts/LocationContext'
+import { sendAnalyticsEvent } from '../../hooks/useAnalytics'
 import { convertStationsToGeoJSON } from '../../utils/mapUtils'
 import { StationProperty } from '../../utils/types'
 import { RegularLineLayer } from './MapLayers/LineLayer/RegularLineLayer'
@@ -60,7 +61,6 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
         }
     }, [isFirstOpen, initializeLocationTracking])
 
-    // preload colors before risklayer component mounts to instantly show the highlighted segments
     const { data: segmentRiskData } = useRiskData()
 
     const handleRotate = useCallback(
@@ -68,6 +68,58 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
             onRotationChange(event.viewState.bearing)
         },
         [onRotationChange]
+    )
+
+    const handleMapClick = useCallback(
+        (event: MapLayerMouseEvent) => {
+            const currentMap = map.current
+            if (!currentMap) return
+
+            const targetElement = event.originalEvent.target
+            if (targetElement instanceof HTMLElement) {
+                if (
+                    targetElement.classList.contains('inspector-marker') ||
+                    (targetElement.parentElement?.classList.contains('inspector-marker') ?? false)
+                ) {
+                    return
+                }
+            }
+
+            const features = currentMap.queryRenderedFeatures(event.point, {
+                layers: ['stationLayer', 'stationNameLayer'],
+            })
+
+            if (features.length > 0 && handleStationClick) {
+                const [feature] = features
+                const { properties } = feature
+
+                if (typeof properties.name === 'string' && feature.geometry.type === 'Point') {
+                    let parsedLines: unknown
+                    try {
+                        parsedLines = JSON.parse(properties.lines ?? '[]')
+                    } catch (error) {
+                        parsedLines = []
+                    }
+                    const lines =
+                        Array.isArray(parsedLines) && parsedLines.every((item) => typeof item === 'string')
+                            ? (parsedLines as string[])
+                            : []
+
+                    const station: StationProperty = {
+                        name: properties.name,
+                        lines,
+                        coordinates: {
+                            longitude: (feature.geometry.coordinates as [number, number])[0],
+                            latitude: (feature.geometry.coordinates as [number, number])[1],
+                        },
+                    }
+
+                    handleStationClick(station)
+                    sendAnalyticsEvent('InfoModal opened', { meta: { source: 'map', station_name: station.name } })
+                }
+            }
+        },
+        [handleStationClick]
     )
 
     return (
@@ -87,11 +139,12 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     minZoom={10}
                     maxBounds={maxBounds}
                     onRotate={handleRotate}
+                    onClick={handleMapClick}
                     mapStyle={`https://api.jawg.io/styles/c52af8db-49f6-40b8-9197-568b7fd9a940.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`}
                 >
                     {!isFirstOpen ? <LocationMarker userPosition={userPosition} /> : null}
                     <MarkerContainer isFirstOpen={isFirstOpen} userPosition={userPosition} />
-                    <StationLayer stations={stationGeoJSON} onStationClick={handleStationClick} />
+                    <StationLayer stations={stationGeoJSON} />
                     {isRiskLayerOpen ? (
                         <RiskLineLayer preloadedRiskData={segmentRiskData} lineSegments={lineSegments} />
                     ) : (

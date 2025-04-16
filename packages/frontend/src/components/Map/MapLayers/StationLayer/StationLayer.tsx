@@ -1,15 +1,13 @@
 import React, { useEffect } from 'react'
 import { Layer, MapRef, Source, useMap } from 'react-map-gl/maplibre'
 
-import { sendAnalyticsEvent } from '../../../../hooks/useAnalytics'
-import { StationGeoJSON, StationProperty } from '../../../../utils/types'
+import { StationGeoJSON } from '../../../../utils/types'
 
 const UBAHN_ICON = `${process.env.PUBLIC_URL}/icons/ubahn.svg`
 const SBAHN_ICON = `${process.env.PUBLIC_URL}/icons/sbahn.svg`
 
 interface StationLayerProps {
     stations: StationGeoJSON
-    onStationClick?: (station: StationProperty) => void
 }
 class IconFactory {
     constructor(private map: MapRef | undefined) {}
@@ -26,7 +24,7 @@ class IconFactory {
     }
 }
 
-const StationLayer: React.FC<StationLayerProps> = ({ stations, onStationClick }) => {
+const StationLayer: React.FC<StationLayerProps> = ({ stations }) => {
     const map = useMap()
 
     useEffect(() => {
@@ -43,44 +41,6 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations, onStationClick })
             }
         }
     }, [map])
-
-    useEffect(() => {
-        const currentMap = map.current
-        if (!onStationClick || !currentMap) return () => {}
-
-        const handleClick = (event: maplibregl.MapMouseEvent) => {
-            const features = currentMap.queryRenderedFeatures(event.point, {
-                layers: ['stationLayer', 'stationNameLayer'],
-            })
-
-            if (features.length > 0) {
-                const [feature] = features
-                const { properties } = feature
-
-                const station: StationProperty = {
-                    name: properties.name,
-                    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-                    lines: JSON.parse(properties.lines || '[]'),
-                    coordinates:
-                        feature.geometry.type === 'Point'
-                            ? {
-                                  longitude: feature.geometry.coordinates[0],
-                                  latitude: feature.geometry.coordinates[1],
-                              }
-                            : { longitude: 0, latitude: 0 },
-                }
-
-                onStationClick(station)
-                sendAnalyticsEvent('InfoModal opened', { meta: { source: 'map', station_name: station.name } })
-            }
-        }
-
-        currentMap.on('click', 'stationLayer', handleClick)
-
-        return () => {
-            currentMap.off('click', 'stationLayer', handleClick)
-        }
-    }, [map, onStationClick])
 
     // priority is based on number of reports
     const firstPriorityStations = [
