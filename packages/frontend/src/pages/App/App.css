@@ -5,7 +5,7 @@
 .compass-container {
     border: var(--border-default);
     position: absolute;
-    top: 75px;
+    top: 150px;
     right: var(--distance-from-edge-default);
     width: 35px;
     height: 35px;
