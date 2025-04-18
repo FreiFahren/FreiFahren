@@ -55,6 +55,9 @@ out body;
 
 
 def fetch_elements() -> List[dict]:
+    """
+    Fetch the elements from the Overpass API.
+    """
     print("[INFO] Fetching from Overpass …", file=sys.stderr, flush=True)
     OVERPASS_URL = "https://overpass-api.de/api/interpreter"
     r = requests.post(OVERPASS_URL, data={"data": QUERY}, timeout=180)
@@ -64,6 +67,33 @@ def fetch_elements() -> List[dict]:
 
 
 def build_dataset(elements: List[dict]) -> Dict[str, dict]:
+    """
+    Build a dataset of stations from the elements fetched from the Overpass API.
+    This will return a dictionary with station IDs as keys and station information as values.
+    Something like this:
+    {
+        "SUM-n30731497": {
+            "coordinates": {
+                "latitude": 52.52158155454545,
+                "longitude": 13.413028718181819
+        },
+        "lines": [
+            "M2",
+            "M4",
+            "M5",
+            "M6",
+            "S3",
+            "S5",
+            "S7",
+            "S9",
+            "U2",
+            "U5",
+            "U8"
+        ],
+            "name": "Alexanderplatz"
+        },
+    }
+    """
     stations: Dict[int, dict] = {}  # node id -> station meta
     node_to_lines: Dict[int, Set[str]] = defaultdict(set)  # node id -> {line}
     station_to_members: Dict[int, Set[int]] = defaultdict(
@@ -145,6 +175,9 @@ def build_dataset(elements: List[dict]) -> Dict[str, dict]:
 
 
 def _haversine(a: Dict[str, float], b: Dict[str, float]) -> float:
+    """
+    Calculate the distance between two points on the Earth. Considers the Earth's curvature.
+    """
     lat1, lon1 = map(math.radians, (a["latitude"], a["longitude"]))
     lat2, lon2 = map(math.radians, (b["latitude"], b["longitude"]))
     dlat, dlon = lat2 - lat1, lon2 - lon1
@@ -156,6 +189,13 @@ def _haversine(a: Dict[str, float], b: Dict[str, float]) -> float:
 
 
 def merge_proximate(data: Dict[str, dict], threshold: float = 250.0) -> Dict[str, dict]:
+    """
+    OSM will sometimes have multiple stations that are in reality the same station.
+    For example the Berlin Hauptbahnhof is devided into three stations (trams, S-Bahn,
+    and Ubahn).
+    This function merges stations that are close to each other. As Inspectors could just
+    walk between the platforms, eg. from the Tram to the Ubahn, we merge them to reflect this.
+    """
     merged: Dict[str, dict] = {}
     used: Set[str] = set()
     ids = list(data.keys())
@@ -193,7 +233,12 @@ def merge_proximate(data: Dict[str, dict], threshold: float = 250.0) -> Dict[str
 
 
 def prefix_station_ids(data: Dict[str, dict]) -> Dict[str, dict]:
-    """Add ID prefix based on lines served."""
+    """
+    Add ID prefix based on lines served.
+    This will make it easier to construct subgraphs for each transport mode.
+    And also makes lookups more efficient as it would allow configuring index
+    lookups for each transport mode.
+    """
     prefixed: Dict[str, dict] = {}
     for station_id, station_info in data.items():
         lines = station_info["lines"]
@@ -221,6 +266,11 @@ def prefix_station_ids(data: Dict[str, dict]) -> Dict[str, dict]:
 
 
 def main() -> None:
+    """
+    This script fetches the stations from the Overpass API and builds a list of stations.
+    It then merges stations that are close to each other and adds a prefix to the station IDs
+    based on the lines served. This is the first step to set up FreiFahren.
+    """
     elements = fetch_elements()
     data = build_dataset(elements)
     data = merge_proximate(data)
