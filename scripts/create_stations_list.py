@@ -59,14 +59,14 @@ def build_dataset(elements: List[dict]) -> Dict[str, dict]:
                 tags.get("railway") == "station"
                 or tags.get("public_transport") == "station"
             ):
-                code = (
-                    tags.get("ref:ds100")
+                station_id = (
+                    tags.get("ref:ds100")  # code for german railways
                     or tags.get("railway:ref")
                     or tags.get("ref")
                     or f"n{el['id']}"
                 )
                 stations[el["id"]] = {
-                    "code": code,
+                    "station_id": station_id,
                     "name": tags.get("name", ""),
                     "coordinates": {"latitude": el["lat"], "longitude": el["lon"]},
                 }
@@ -110,18 +110,15 @@ def build_dataset(elements: List[dict]) -> Dict[str, dict]:
         for n in station_to_members.get(st_id, []):
             agg_lines.update(node_to_lines.get(n, []))
 
-        dataset[s["code"]] = {
+        dataset[s["station_id"]] = {
             "coordinates": s["coordinates"],
             "lines": sorted(agg_lines),
             "name": s["name"],
         }
 
     # 4) Debug statistics
-    empties = [k for k, v in dataset.items() if not v["lines"]]
     print(
-        f"Stations total: {len(dataset)} | "
-        f"with lines: {len(dataset) - len(empties)} | "
-        f"without lines: {len(empties)}",
+        f"Stations total: {len(dataset)}",
         file=sys.stderr,
     )
 
@@ -129,7 +126,13 @@ def build_dataset(elements: List[dict]) -> Dict[str, dict]:
 
 
 def postprocess_dataset(data: Dict[str, dict]) -> Dict[str, dict]:
-    return data
+    # Step 1: remove stations with empty 'lines'
+    filtered_data: Dict[str, dict] = {
+        station_id: station_info
+        for station_id, station_info in data.items()
+        if station_info.get("lines")
+    }
+    return filtered_data
 
 
 def main() -> None:
