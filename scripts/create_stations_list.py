@@ -6,60 +6,7 @@ from collections import defaultdict
 from typing import Dict, List, Set
 
 import requests
-
-LINES = [
-    "S1",
-    "S2",
-    "S25",
-    "S26",
-    "S3",
-    "S41",
-    "S42",
-    "S45",
-    "S46",
-    "S47",
-    "S5",
-    "S7",
-    "S75",
-    "S8",
-    "S85",
-    "S9",
-    "U1",
-    "U2",
-    "U3",
-    "U4",
-    "U5",
-    "U6",
-    "U7",
-    "U8",
-    "U9",
-    "U12",
-    "M1",
-    "M2",
-    "M4",
-    "M5",
-    "M6",
-    "M8",
-    "M10",
-    "M13",
-    "M17",
-    "12",
-    "16",
-    "18",
-    "21",
-    "27",
-    "37",
-    "50",
-    "60",
-    "61",
-    "62",
-    "63",
-    "67",
-    "68",
-]
-
-
-OVERPASS_URL = "https://overpass-api.de/api/interpreter"
+from config import CITY, ADMIN_LEVEL, LINES
 
 # Regex that exactly matches any of the wanted refs, e.g.: ^(S1|S2|U1)$
 line_regex = "^(" + "|".join(map(re.escape, LINES)) + ")$"
@@ -67,8 +14,8 @@ line_regex = "^(" + "|".join(map(re.escape, LINES)) + ")$"
 QUERY = rf"""
 [out:json][timeout:1200];
 
-// 2.1  Berlin administrative area
-area["name"="Berlin"]["boundary"="administrative"]["admin_level"~"^[4-6]$"]->.a;
+// 2.1  {CITY} administrative area
+area["name"="{CITY}"]["boundary"="administrative"]["admin_level"~"{ADMIN_LEVEL}"]->.a;
 
 // 2.2  Route relations for the lines we want
 relation
@@ -109,6 +56,7 @@ out body;
 
 def fetch_elements() -> List[dict]:
     print("[INFO] Fetching from Overpass …", file=sys.stderr, flush=True)
+    OVERPASS_URL = "https://overpass-api.de/api/interpreter"
     r = requests.post(OVERPASS_URL, data={"data": QUERY}, timeout=180)
     r.raise_for_status()
     print(f"[INFO] Received {len(r.content)//1024} kB", file=sys.stderr)
