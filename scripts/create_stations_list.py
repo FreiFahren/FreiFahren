@@ -7,6 +7,7 @@ from typing import Dict, List, Set
 
 import requests
 from config import CITY, ADMIN_LEVEL, LINES
+from geo import haversine
 
 # Regex that exactly matches any of the wanted refs, e.g.: ^(S1|S2|U1)$
 line_regex = "^(" + "|".join(map(re.escape, LINES)) + ")$"
@@ -172,20 +173,6 @@ def build_dataset(elements: List[dict]) -> Dict[str, dict]:
 
     print(f"[STAT] Stations kept: {len(dataset)}", file=sys.stderr)
     return dataset
-
-
-def _haversine(a: Dict[str, float], b: Dict[str, float]) -> float:
-    """
-    Calculate the distance between two points on the Earth. Considers the Earth's curvature.
-    """
-    lat1, lon1 = map(math.radians, (a["latitude"], a["longitude"]))
-    lat2, lon2 = map(math.radians, (b["latitude"], b["longitude"]))
-    dlat, dlon = lat2 - lat1, lon2 - lon1
-    h = (
-        math.sin(dlat / 2) ** 2
-        + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
-    )
-    return 6371000 * 2 * math.asin(math.sqrt(h))
 
 
 def merge_proximate(data: Dict[str, dict], threshold: float = 250.0) -> Dict[str, dict]:
