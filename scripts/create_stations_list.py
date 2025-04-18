@@ -2,6 +2,7 @@ import json
 import sys
 from collections import defaultdict
 from typing import Dict, List, Set
+import math
 
 import requests
 
@@ -125,6 +126,19 @@ def build_dataset(elements: List[dict]) -> Dict[str, dict]:
     return dataset
 
 
+def _haversine_distance(coord1: Dict[str, float], coord2: Dict[str, float]) -> float:
+    """Return the great-circle distance between two coordinates in meters."""
+    lat1, lon1 = math.radians(coord1["latitude"]), math.radians(coord1["longitude"])
+    lat2, lon2 = math.radians(coord2["latitude"]), math.radians(coord2["longitude"])
+    dlat, dlon = lat2 - lat1, lon2 - lon1
+    a = (
+        math.sin(dlat / 2) ** 2
+        + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    )
+    c = 2 * math.asin(math.sqrt(a))
+    return 6371000 * c
+
+
 def postprocess_dataset(data: Dict[str, dict]) -> Dict[str, dict]:
     # Step 1: remove stations with empty 'lines'
     filtered_data: Dict[str, dict] = {
@@ -132,7 +146,50 @@ def postprocess_dataset(data: Dict[str, dict]) -> Dict[str, dict]:
         for station_id, station_info in data.items()
         if station_info.get("lines")
     }
-    return filtered_data
+    # Step 2: merge stations within 250 meters
+    merged_data: Dict[str, dict] = {}
+    processed_ids: Set[str] = set()
+    for station_id, station_info in filtered_data.items():
+        if station_id in processed_ids:
+            continue
+        # find nearby stations
+        group_ids: List[str] = [station_id]
+        for other_id, other_info in filtered_data.items():
+            if other_id not in processed_ids and other_id != station_id:
+                distance = _haversine_distance(
+                    station_info["coordinates"],
+                    other_info["coordinates"],
+                )
+                if distance <= 250.0:
+                    group_ids.append(other_id)
+        processed_ids.update(group_ids)
+        # representative station
+        rep_id = group_ids[0]
+        # combine lines
+        combined_lines = sorted(
+            {
+                line
+                for station_id in group_ids
+                for line in filtered_data[station_id]["lines"]
+            }
+        )
+        # pick name from representative
+        name = filtered_data[rep_id]["name"]
+        # average coordinates
+        average_lat = sum(
+            filtered_data[station_id]["coordinates"]["latitude"]
+            for station_id in group_ids
+        ) / len(group_ids)
+        average_lon = sum(
+            filtered_data[station_id]["coordinates"]["longitude"]
+            for station_id in group_ids
+        ) / len(group_ids)
+        merged_data[rep_id] = {
+            "coordinates": {"latitude": average_lat, "longitude": average_lon},
+            "lines": combined_lines,
+            "name": name,
+        }
+    return merged_data
 
 
 def main() -> None:
