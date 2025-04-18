@@ -238,15 +238,45 @@ def merge_proximate(data: Dict[str, dict], threshold: float = 250.0) -> Dict[str
             "name": data[rep]["name"],
         }
     print(
-        f"[STAT] After merge (<{threshold} m): {len(merged)} stations", file=sys.stderr
+        f"[STAT] After merge (<{threshold}\u00a0m): {len(merged)} stations",
+        file=sys.stderr,
     )
     return merged
+
+
+def prefix_station_ids(data: Dict[str, dict]) -> Dict[str, dict]:
+    """Add ID prefix based on lines served."""
+    prefixed: Dict[str, dict] = {}
+    for station_id, station_info in data.items():
+        lines = station_info["lines"]
+        has_s: bool = any(l.startswith("S") for l in lines)
+        has_u: bool = any(l.startswith("U") for l in lines)
+        has_m: bool = any(l.startswith("M") or l.isdigit() for l in lines)
+        if has_s and has_u and has_m:
+            prefix = "SUM-"
+        elif has_s and has_u:
+            prefix = "SU-"
+        elif has_s and has_m:
+            prefix = "SM-"
+        elif has_u and has_m:
+            prefix = "UM-"
+        elif has_s:
+            prefix = "S-"
+        elif has_u:
+            prefix = "U-"
+        elif has_m:
+            prefix = "M-"
+        else:
+            prefix = ""
+        prefixed[f"{prefix}{station_id}"] = station_info
+    return prefixed
 
 
 def main() -> None:
     elements = fetch_elements()
     data = build_dataset(elements)
     data = merge_proximate(data)
+    data = prefix_station_ids(data)
 
     with open("StationsList.json", "w") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
