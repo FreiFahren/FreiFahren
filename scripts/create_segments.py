@@ -1,10 +1,14 @@
 import geopandas as gpd
-import pandas as pd
 from shapely.geometry import LineString, MultiLineString, Point
 from shapely.ops import linemerge
 import json
 import requests
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Union
+import os
+import sys
+from config import CITY, ADMIN_LEVEL, LINES
+
+OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 
 
 def cut(line: LineString, distance: float) -> List[LineString]:
@@ -46,190 +50,143 @@ def cut_line(
     return second_cut[0]
 
 
-def fetch_api_data() -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
-    """Fetch stations and lines data from the API."""
-    stations_json = requests.get("https://api.freifahren.org/stations").json()
-    lines_json = requests.get("https://api.freifahren.org/v0/lines").json()
-    lines = [line for line in lines_json]
-    return stations_json, lines
+def fetch_line_geometry(line_id: str) -> Union[LineString, MultiLineString]:
+    """Fetch and merge OSM ways for the given line via Overpass API."""
+    # 1) find the City-specific relation ID using the area filter
+    id_query = rf"""
+    [out:json][timeout:60];
+    area["name"="{CITY}"]["boundary"="administrative"]["admin_level"~"{ADMIN_LEVEL}"]->.area;
+    relation
+      ["type"="route"]
+      ["route"~"^(train|subway|tram|light_rail)$"]
+      ["ref"="{line_id}"](area.area);
+    out ids;
+    """
+    resp = requests.post(OVERPASS_URL, data={"data": id_query}, timeout=60)
+    resp.raise_for_status()
+    elements = resp.json().get("elements", [])
+    if not elements:
+        print(f"[WARN] No relation found for line {line_id}", file=sys.stderr)
+        return LineString()
+    rel_id = elements[0]["id"]
 
-
-def process_stations_data(stations_json: Dict[str, Any]) -> gpd.GeoDataFrame:
-    """Process stations data into a GeoDataFrame."""
-    stations_data = []
-    for station_id, station_info in stations_json.items():
-        stations_data.append(
-            {
-                "station_id": station_id,
-                "latitude": station_info["coordinates"]["latitude"],
-                "longitude": station_info["coordinates"]["longitude"],
-                "lines": station_info["lines"],
-                "name": station_info["name"],
-            }
-        )
-
-    stations_df = pd.DataFrame(stations_data)
-    stations_gdf = gpd.GeoDataFrame(
-        stations_df,
-        geometry=gpd.points_from_xy(stations_df.longitude, stations_df.latitude),
-        crs="EPSG:4326",
-    )
-
-    stations_exploded = stations_gdf.explode("lines").reset_index(drop=True)
-    stations_exploded.rename(columns={"lines": "line_id"}, inplace=True)
-    return stations_exploded
-
-
-def process_line_geometry(line_gdf: gpd.GeoDataFrame) -> LineString:
-    """Process line geometry into a single LineString."""
-    line_geoms = []
-    for geom in line_gdf.geometry:
-        if isinstance(geom, LineString):
-            line_geoms.append(geom)
-        elif isinstance(geom, MultiLineString):
-            line_geoms.extend(geom.geoms)
-
-    merged_line = linemerge(line_geoms)
-    if isinstance(merged_line, MultiLineString):
-        merged_line = max(merged_line.geoms, key=lambda ls: ls.length)
-    return merged_line
+    # 2) fetch full geometry by relation ID without area filter
+    geom_query = rf"""
+    [out:json][timeout:360];
+    relation({rel_id});
+    way(r);
+    (._;>;);
+    out geom;
+    """
+    resp = requests.post(OVERPASS_URL, data={"data": geom_query}, timeout=360)
+    resp.raise_for_status()
+    elements = resp.json().get("elements", [])
+    geoms: List[LineString] = []
+    for el in elements:
+        if el.get("type") == "way" and "geometry" in el:
+            coords = [(pt["lon"], pt["lat"]) for pt in el["geometry"]]
+            geoms.append(LineString(coords))
+    merged = linemerge(geoms)
+    # preserve all branches in case the line splits
+    return merged
 
 
 def create_segments(
     line_id: str,
-    merged_line: LineString,
+    merged_line: Union[LineString, MultiLineString],
     line_stations: gpd.GeoDataFrame,
     line_color: str,
 ) -> List[Dict[str, Any]]:
     """Create segments between consecutive stations."""
+    # handle split lines: generate segments for each branch
+    if isinstance(merged_line, MultiLineString):
+        segments_all: List[Dict[str, Any]] = []
+        for branch in merged_line.geoms:
+            segments_all.extend(
+                create_segments(line_id, branch, line_stations, line_color)
+            )
+        return segments_all
     station_points = line_stations.geometry.values
-    snapped_station_points = []
-    station_distances = []
+    snapped_station_points: List[Point] = []
+    station_distances: List[float] = []
 
     for station_point in station_points:
-        nearest_distance = merged_line.project(station_point)
-        nearest_point = merged_line.interpolate(nearest_distance)
-        snapped_station_points.append(nearest_point)
-        station_distances.append(nearest_distance)
+        dist = merged_line.project(station_point)
+        snapped_station_points.append(merged_line.interpolate(dist))
+        station_distances.append(dist)
 
     line_stations["snapped_geometry"] = snapped_station_points
     line_stations["distance_along_line"] = station_distances
-    line_stations_sorted = line_stations.sort_values("distance_along_line")
+    sorted_stations = line_stations.sort_values("distance_along_line")
 
-    segments = []
-    station_list = line_stations_sorted.to_dict("records")
-    num_stations = len(station_list)
-
-    for i in range(num_stations - 1):
-        start_station = station_list[i]
-        end_station = station_list[i + 1]
-
-        start_distance = start_station["distance_along_line"]
-        end_distance = end_station["distance_along_line"]
-
-        if start_distance > end_distance:
-            start_distance, end_distance = end_distance, start_distance
-
-        segment = cut_line(merged_line, start_distance, end_distance)
-        if segment.is_empty:
+    segments: List[Dict[str, Any]] = []
+    records = sorted_stations.to_dict("records")
+    for i in range(len(records) - 1):
+        a, b = records[i], records[i + 1]
+        start, end = a["distance_along_line"], b["distance_along_line"]
+        if start > end:
+            start, end = end, start
+        seg_line = cut_line(merged_line, start, end)
+        if seg_line.is_empty:
             continue
-
         segments.append(
             {
-                "geometry": segment,
-                "sid": f"{line_id}.{start_station['station_id']}:{end_station['station_id']}",
+                "geometry": seg_line,
+                "sid": f"{line_id}.{a['station_id']}:{b['station_id']}",
                 "line_color": (
                     "#018A47"
-                    if "S" in line_id
-                    else (
-                        "#BE1414" if "M" in line_id else line_color
-                    )  # avoid giving each line a different color to avoid overwhelming the map
+                    if line_id.startswith("S")
+                    else ("#BE1414" if line_id.startswith("M") else line_color)
                 ),
             }
         )
-
     return segments
 
 
 def main() -> None:
     """
-        Main function to process and generate segments. It will read the overpass export and create segments for all lines.
-        In order to run this script, you need to have the overpass turbo query in the export.geojson file.
-        Run this query to create the data for all lines:
-
-        [out:json][timeout:25];
-    // Define the area of Berlin
-    {{geocodeArea:Berlin}}->.searchArea;
-    (
-      relation(id:1929070); // S1
-      relation(id:2269238); // S2
-      relation(id:2343465); // S3
-      relation(id:2015959); // S5
-      relation(id:2017023); // S7
-      relation(id:2269252); // S8
-      relation(id:2389946); // S9
-      relation(id:2422951); // S25
-      relation(id:7794031); // S26
-      relation(id:14981); // S41
-      relation(id:14983); // S42
-      relation(id:2422929); // S46
-      relation(id:2413846); // S47
-      relation(id:2174798); // S75
-      relation(id:2979451); // S85
-      relation(id:2669205); // U1
-      relation(id:2669184); // U2
-      relation(id:2669208); // U3
-      relation(id:2676945); // U4
-      relation(id:2227744); // U5
-      relation(id:2679164); // U6
-      relation(id:2678986); // U7
-      relation(id:2679014); // U8
-      relation(id:2679017); // U9
-      relation(id:2076230); // M1
-      relation(id:1981932); // M2
-      relation(id:2012424); // M4
-      relation(id:5829220); // M5
-      relation(id:2076355); // M6
-      relation(id:5829222); // M8
-      relation(id:2077032); // M10
-      relation(id:2077077); // M13
-      relation(id:2077162); // M17
-
-    );
-
-    out body;
-    >;
-    out skel qt;
-
-    Using the relation id is important to get the line in only one direction.
-
-    When creating the segments it is important to optimize for space efficiency as the json can easily become too large.
+    Main function to process and generate segments using Overpass API and local JSON.
     """
-    # Read the overpass output GeoJSON
-    overpass_gdf = gpd.read_file("export.geojson")
-    overpass_gdf = overpass_gdf[overpass_gdf["ref"].notnull()]
-
-    # Fetch API data
-    stations_json, lines = fetch_api_data()
-
-    # Process stations data
-    stations_exploded = process_stations_data(stations_json)
-
-    # Get unique lines
-    lines = overpass_gdf["ref"].unique()
+    # Load station and line definitions
+    if not os.path.exists("StationsList.json"):
+        raise FileNotFoundError(
+            "StationsList.json not found. Run create_stations_list.py first."
+        )
+    if not os.path.exists("LinesList.json"):
+        raise FileNotFoundError(
+            "LinesList.json not found. Run create_lines_list.py first."
+        )
+    with open("StationsList.json") as f:
+        stations_json = json.load(f)
+    with open("LinesList.json") as f:
+        lines_json = json.load(f)
 
     # Process segments for each line
     segments_list = []
-    for line_id in lines:
-        line_gdf = overpass_gdf[overpass_gdf["ref"] == line_id]
-        merged_line = process_line_geometry(line_gdf)
+    for line_id in LINES:
+        merged_line = fetch_line_geometry(line_id)
 
-        line_stations = stations_exploded[
-            stations_exploded["line_id"] == line_id
-        ].copy()
-        line_color = (
-            line_gdf.iloc[0]["colour"] if "colour" in line_gdf.columns else "#000000"
-        )
+        # build station GeoDataFrame from precomputed JSON
+        station_ids = lines_json.get(line_id)
+        if not station_ids:
+            print(f"[WARN] No stations for line {line_id}", file=sys.stderr)
+            continue
+        rows = []
+        for sid in station_ids:
+            info = stations_json.get(sid)
+            if not info:
+                raise ValueError(f"Station {sid} not found in StationsList.json")
+            rows.append(
+                {
+                    "station_id": sid,
+                    "geometry": Point(
+                        info["coordinates"]["longitude"],
+                        info["coordinates"]["latitude"],
+                    ),
+                }
+            )
+        line_stations = gpd.GeoDataFrame(rows, geometry="geometry", crs="EPSG:4326")
+        line_color = "#000000"
 
         line_segments = create_segments(line_id, merged_line, line_stations, line_color)
         segments_list.extend(line_segments)
