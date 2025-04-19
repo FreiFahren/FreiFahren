@@ -1881,7 +1881,7 @@
             "M5",
             "M6"
         ],
-        "name": "S+U Alexanderplatz/Gontardstraße"
+        "name": "Alexanderplatz/Gontardstraße"
     },
     "UM-n30732016": {
         "coordinates": {
@@ -2710,7 +2710,7 @@
             "S75",
             "U5"
         ],
-        "name": "S+U Lichtenberg/Siegfriedstraße"
+        "name": "Lichtenberg/Siegfriedstraße"
     },
     "M-n98862012": {
         "coordinates": {
@@ -3716,7 +3716,7 @@
             "S9",
             "U6"
         ],
-        "name": "S+U Friedrichstraße"
+        "name": "Friedrichstraße"
     },
     "M-n247603398": {
         "coordinates": {
@@ -4628,7 +4628,7 @@
             "U1",
             "U3"
         ],
-        "name": "S+U Warschauer Straße"
+        "name": "Warschauer Straße"
     },
     "M-n669763367": {
         "coordinates": {
@@ -4924,7 +4924,7 @@
             "S85",
             "U2"
         ],
-        "name": "S+U Pankow"
+        "name": "Pankow"
     },
     "M-n1383533471": {
         "coordinates": {
@@ -6535,7 +6535,7 @@
             "16",
             "M13"
         ],
-        "name": "S+U Frankfurter Allee"
+        "name": "Frankfurter Allee"
     },
     "U-n3933477400": {
         "coordinates": {
@@ -6904,7 +6904,7 @@
             "12",
             "M1"
         ],
-        "name": "S+U Friedrichstraße"
+        "name": "Friedrichstraße"
     },
     "M-n11233149159": {
         "coordinates": {
