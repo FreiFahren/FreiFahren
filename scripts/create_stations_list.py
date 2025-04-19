@@ -195,7 +195,7 @@ def merge_proximate(data: Dict[str, dict], threshold: float = 250.0) -> Dict[str
             if oid in used:
                 continue
             if (
-                _haversine(data[sid]["coordinates"], data[oid]["coordinates"])
+                haversine(data[sid]["coordinates"], data[oid]["coordinates"])
                 <= threshold
             ):
                 group.append(oid)
