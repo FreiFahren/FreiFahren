@@ -66,15 +66,49 @@ def order_path(adj: Dict[str, List[str]]) -> List[str]:
 
 
 def build_line_order(stations: Dict[str, dict], line: str) -> List[str]:
-    """Return the list of station IDs in travel order for a given line."""
+    """Return the station IDs in travel order for a given line, merging any split segments."""
     # filter stations on this line
     station_ids = [sid for sid, info in stations.items() if line in info["lines"]]
+    # return early for zero or single station
     if len(station_ids) <= 1:
         return station_ids
     coords = {sid: stations[sid]["coordinates"] for sid in station_ids}
     # build MST adjacency and derive path
     adj = build_mst(station_ids, coords)
-    return order_path(adj)
+    # detect branching stations (degree > 2)
+    branch_nodes = [n for n, neigh in adj.items() if len(neigh) > 2]
+    if not branch_nodes:
+        # simple path
+        return order_path(adj)
+    # split into segments at the branching node
+    branch_node = branch_nodes[0]
+    segments: List[List[str]] = []
+    for neighbor in adj[branch_node]:
+        visited: Set[str] = set()
+        stack = [neighbor]
+        comp_nodes: Set[str] = set()
+        while stack:
+            cur = stack.pop()
+            if cur in visited or cur == branch_node:
+                continue
+            visited.add(cur)
+            comp_nodes.add(cur)
+            for nb in adj[cur]:
+                if nb != branch_node and nb not in visited:
+                    stack.append(nb)
+        comp_with_branch = comp_nodes.union({branch_node})
+        comp_adj: Dict[str, List[str]] = {
+            n: [m for m in adj[n] if m in comp_with_branch] for n in comp_with_branch
+        }
+        path = order_path(comp_adj)
+        if path[0] != branch_node:
+            path = list(reversed(path))
+        segments.append(path)
+    # merge all segments at the branching node, dropping duplicate
+    merged: List[str] = segments[0]
+    for seg in segments[1:]:
+        merged += seg[1:]
+    return merged
 
 
 def main() -> None:
