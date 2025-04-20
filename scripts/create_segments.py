@@ -91,6 +91,27 @@ def fetch_line_geometry(line_id: str) -> Union[LineString, MultiLineString]:
     return merged
 
 
+def fetch_line_api_tags(line_id: str) -> Dict[str, Any]:
+    """Fetch tags for the given line via Overpass API."""
+    id_query = rf"""
+    [out:json][timeout:60];
+    area["name"="{CITY}"]["boundary"="administrative"]["admin_level"~"{ADMIN_LEVEL}"]->.area;
+    relation
+      ["type"="route"]
+      ["route"~"^(train|subway|tram|light_rail)$"]
+      ["ref"="{line_id}"](area.area);
+    out tags;
+    """
+    resp = requests.post(OVERPASS_URL, data={"data": id_query}, timeout=60)
+    resp.raise_for_status()
+    elements = resp.json().get("elements", [])
+    if not elements:
+        print(f"[WARN] No relation found for line {line_id}", file=sys.stderr)
+        return {}
+    tags = elements[0].get("tags", {})
+    return tags
+
+
 def create_segments(
     line_id: str,
     merged_line: Union[LineString, MultiLineString],
@@ -133,11 +154,7 @@ def create_segments(
             {
                 "geometry": seg_line,
                 "sid": f"{line_id}.{a['station_id']}:{b['station_id']}",
-                "line_color": (
-                    "#018A47"
-                    if line_id.startswith("S")
-                    else ("#BE1414" if line_id.startswith("M") else line_color)
-                ),
+                "line_color": line_color,
             }
         )
     return segments
@@ -186,7 +203,19 @@ def main() -> None:
                 }
             )
         line_stations = gpd.GeoDataFrame(rows, geometry="geometry", crs="EPSG:4326")
-        line_color = "#000000"
+        api_tags = fetch_line_api_tags(line_id)
+
+        # set correct line color based on API tags or rules
+        api_color = api_tags.get("colour") or api_tags.get("color")
+        route_type = api_tags.get("route", "")
+        if line_id.startswith("S"):
+            line_color = "#007734"
+        elif route_type == "subway":
+            line_color = api_color or "#000000"
+        elif route_type in ("tram", "light_rail"):
+            line_color = "#be1414"
+        else:
+            line_color = api_color or "#000000"
 
         line_segments = create_segments(line_id, merged_line, line_stations, line_color)
         segments_list.extend(line_segments)
