@@ -1330,16 +1330,6 @@
         ],
         "name": "Pastor-Niemöller-Platz"
     },
-    "M-n30561525": {
-        "coordinates": {
-            "latitude": 52.582464925,
-            "longitude": 13.3922664
-        },
-        "lines": [
-            "M1"
-        ],
-        "name": "Am Iderfenngraben"
-    },
     "M-n30624481": {
         "coordinates": {
             "latitude": 52.559740125000005,
@@ -3035,16 +3025,6 @@
         ],
         "name": "Hegermühle"
     },
-    "M-n223676384": {
-        "coordinates": {
-            "latitude": 52.594461300000006,
-            "longitude": 13.3809464
-        },
-        "lines": [
-            "M1"
-        ],
-        "name": "Wiesenwinkel"
-    },
     "M-n223826507": {
         "coordinates": {
             "latitude": 52.555372399999996,
@@ -3657,36 +3637,6 @@
             "50"
         ],
         "name": "Stiftsweg"
-    },
-    "M-n247441704": {
-        "coordinates": {
-            "latitude": 52.5886201,
-            "longitude": 13.3882701
-        },
-        "lines": [
-            "M1"
-        ],
-        "name": "Nordendstraße"
-    },
-    "M-n247441829": {
-        "coordinates": {
-            "latitude": 52.5912814,
-            "longitude": 13.38396025
-        },
-        "lines": [
-            "M1"
-        ],
-        "name": "Angerweg"
-    },
-    "M-n247441884": {
-        "coordinates": {
-            "latitude": 52.59704876666667,
-            "longitude": 13.375801716666667
-        },
-        "lines": [
-            "M1"
-        ],
-        "name": "Hauptstraße/Friedrich-Engels-Straße"
     },
     "M-n247444383": {
         "coordinates": {
@@ -5348,16 +5298,6 @@
         ],
         "name": "Hermann-Hesse-Straße/Waldstraße"
     },
-    "M-n1822477788": {
-        "coordinates": {
-            "latitude": 52.598968975000005,
-            "longitude": 13.372166125
-        },
-        "lines": [
-            "M1"
-        ],
-        "name": "Rosenthal Nord"
-    },
     "M-n1822749207": {
         "coordinates": {
             "latitude": 52.5127885,
@@ -5991,16 +5931,6 @@
             "S1"
         ],
         "name": "Mexikoplatz"
-    },
-    "M-n2478194092": {
-        "coordinates": {
-            "latitude": 52.584997425,
-            "longitude": 13.390319075
-        },
-        "lines": [
-            "M1"
-        ],
-        "name": "Friedrich-Engels-Straße/Eichenstraße"
     },
     "U-n2501078843": {
         "coordinates": {

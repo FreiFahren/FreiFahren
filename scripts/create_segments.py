@@ -181,6 +181,7 @@ def main() -> None:
     # Process segments for each line
     segments_list = []
     for line_id in LINES:
+        print(f"[INFO] Processing line {line_id}")
         merged_line = fetch_line_geometry(line_id)
 
         # build station GeoDataFrame from precomputed JSON
@@ -223,6 +224,7 @@ def main() -> None:
     # Create and save final GeoDataFrame
     segments_gdf = gpd.GeoDataFrame(segments_list, crs="EPSG:4326")
     segments_gdf.to_file("segments.geojson", driver="GeoJSON")
+    print(f"[DONE] Saved segments to segments.geojson")
 
 
 if __name__ == "__main__":
