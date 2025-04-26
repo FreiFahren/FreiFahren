@@ -657,6 +657,11 @@
         },
         "lines": [
             "S41",
+            "S42",
+            "S2",
+            "S25",
+            "S1",
+            "S26",
             "U8"
         ],
         "name": "Gesundbrunnen"
@@ -4466,7 +4471,7 @@
             "S45",
             "S46"
         ],
-        "name": "Südkreuz (Nord-Süd)"
+        "name": "Südkreuz"
     },
     "S-BSAP": {
         "coordinates": {
