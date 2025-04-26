@@ -26,10 +26,8 @@ func CreatePoolTestTable() {
 		message TEXT,
 		author BIGINT,
 		line VARCHAR(3),
-		station_name VARCHAR(255),
-		station_id VARCHAR(10),
-		direction_name VARCHAR(255),
-		direction_id VARCHAR(10)
+		station_id VARCHAR(250),
+		direction_id VARCHAR(250)
 	);
 	`
 
@@ -44,12 +42,12 @@ func CreatePoolTestTable() {
 func InsertPoolInfo(timestamp *time.Time, message *string, author *int64, line, stationName, stationId, directionName, directionId *string) error {
 
 	sql := `
-    INSERT INTO pool_test (timestamp, message, author, line, station_name, station_id, direction_name, direction_id)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+    INSERT INTO pool_test (timestamp, message, author, line, station_id, direction_id)
+    VALUES ($1, $2, $3, $4, $5, $6);
     `
 
 	// Convert *string and *int64 directly to interface{} for pgx
-	values := []interface{}{timestamp, message, author, line, stationName, stationId, directionName, directionId}
+	values := []interface{}{timestamp, message, author, line, stationId, directionId}
 
 	_, err := testPool.Exec(context.Background(), sql, values...)
 
