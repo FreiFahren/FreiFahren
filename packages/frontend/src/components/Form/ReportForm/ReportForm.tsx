@@ -82,7 +82,13 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
     const possibleLines = useMemo(() => {
         if (currentEntity === null) return allLines
         return Object.entries(allLines ?? {})
-            .filter(([line]) => line.startsWith(currentEntity))
+            .filter(([line]) => {
+                // exception as some trams begin with a number, like Nr. 17
+                if (currentEntity === 'M') {
+                    return line.startsWith('M') || /^\d/.test(line)
+                }
+                return line.startsWith(currentEntity)
+            })
             .reduce(
                 (accumulatedLines, [line, stations]) => ({
                     ...accumulatedLines,
@@ -109,19 +115,25 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
         const sortedAllStations = Object.fromEntries(
             Object.entries(allStations ?? {}).sort(sortStationRecordsByStationName)
         )
-        let stations = sortedAllStations
+        let stations: StationList = sortedAllStations
 
         if (currentStation !== null) {
-            stations = { [currentStation]: allStations![currentStation] }
+            // If a specific station is already selected, just use that one
+            stations = allStations?.[currentStation] ? { [currentStation]: allStations[currentStation] } : {}
         } else if (currentLine !== null) {
+            // If a line is selected, filter stations belonging to that line
             stations = Object.fromEntries(
                 (allLines?.[currentLine] ?? [])
                     .map((stationKey) => [stationKey, allStations?.[stationKey]])
                     .filter(([, stationData]) => stationData !== undefined) as [string, StationProperty][]
             )
         } else if (currentEntity !== null) {
+            // If an entity is selected, filter based on the station key prefix
             stations = Object.entries(sortedAllStations)
-                .filter(([, stationData]) => stationData.lines.some((line) => line.startsWith(currentEntity)))
+                .filter(([stationKey]) => {
+                    const prefix = stationKey.split('-')[0]
+                    return prefix.includes(currentEntity)
+                })
                 .reduce(
                     (accumulatedStations, [stationName, stationData]) => ({
                         ...accumulatedStations,
@@ -130,6 +142,8 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                     {} as StationList
                 )
         }
+
+        // Further filter by search input if provided
         if (stationSearch) {
             stations = Object.entries(stations)
                 .filter(([, stationData]) => stationData.name.toLowerCase().includes(stationSearch.toLowerCase()))
