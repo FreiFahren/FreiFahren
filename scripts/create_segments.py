@@ -118,15 +118,10 @@ def create_segments(
     line_stations: gpd.GeoDataFrame,
     line_color: str,
 ) -> List[Dict[str, Any]]:
-    """Create segments between consecutive stations."""
-    # handle split lines: generate segments for each branch
-    if isinstance(merged_line, MultiLineString):
-        segments_all: List[Dict[str, Any]] = []
-        for branch in merged_line.geoms:
-            segments_all.extend(
-                create_segments(line_id, branch, line_stations, line_color)
-            )
-        return segments_all
+    """Create segments between consecutive stations, handling potential line splits."""
+
+    # 1. Snap stations to the line geometry (or its closest component)
+    # Regardless of LineString or MultiLineString, project finds the nearest point
     station_points = line_stations.geometry.values
     snapped_station_points: List[Point] = []
     station_distances: List[float] = []
@@ -138,26 +133,124 @@ def create_segments(
 
     line_stations["snapped_geometry"] = snapped_station_points
     line_stations["distance_along_line"] = station_distances
+    # Sort stations based on the overall projected distance along the potentially complex line
     sorted_stations = line_stations.sort_values("distance_along_line")
-
-    segments: List[Dict[str, Any]] = []
     records = sorted_stations.to_dict("records")
-    for i in range(len(records) - 1):
-        a, b = records[i], records[i + 1]
-        start, end = a["distance_along_line"], b["distance_along_line"]
-        if start > end:
-            start, end = end, start
-        seg_line = cut_line(merged_line, start, end)
-        if seg_line.is_empty:
-            continue
-        segments.append(
-            {
-                "geometry": seg_line,
-                "sid": f"{line_id}.{a['station_id']}:{b['station_id']}",
-                "line_color": line_color,
-            }
+
+    # 2. Handle segment creation based on geometry type
+    if isinstance(merged_line, LineString):
+        # Original logic for single LineString
+        segments: List[Dict[str, Any]] = []
+        for i in range(len(records) - 1):
+            a, b = records[i], records[i + 1]
+            # Use the pre-calculated distances along the single line
+            start, end = a["distance_along_line"], b["distance_along_line"]
+
+            # Basic check for valid distances
+            if start > end:
+                # This might indicate issues with projection or complex line shapes
+                print(
+                    f"[WARN] Station distances out of order for {line_id}: {a['station_id']} ({start}) -> {b['station_id']} ({end}). Skipping segment.",
+                    file=sys.stderr,
+                )
+                continue
+            if start == end:
+                print(
+                    f"[WARN] Zero distance between stations for {line_id}: {a['station_id']} and {b['station_id']}. Skipping segment.",
+                    file=sys.stderr,
+                )
+                continue
+
+            seg_line = cut_line(merged_line, start, end)
+            # Add length check for robustness against tiny segments
+            if seg_line.is_empty or seg_line.length < 1e-6:
+                continue
+            segments.append(
+                {
+                    "geometry": seg_line,
+                    "sid": f"{line_id}.{a['station_id']}:{b['station_id']}",
+                    "line_color": line_color,
+                }
+            )
+        return segments
+
+    elif isinstance(merged_line, MultiLineString):
+        # Logic for MultiLineString: Find the best segment from available branches
+        final_segments: List[Dict[str, Any]] = []
+
+        # Iterate through station pairs based on the overall distance sort
+        for i in range(len(records) - 1):
+            a_record, b_record = records[i], records[i + 1]
+            station_id_a = a_record["station_id"]
+            station_id_b = b_record["station_id"]
+            point_a = a_record["snapped_geometry"]  # Use snapped points
+            point_b = b_record["snapped_geometry"]
+
+            best_segment_geom = None
+            min_off_track_dist = float("inf")
+
+            for branch in merged_line.geoms:
+                # Project this specific station pair onto this specific branch
+                try:
+                    # Project the SNAPPED points onto the current branch
+                    d_a_branch = branch.project(point_a)
+                    d_b_branch = branch.project(point_b)
+                except Exception as e:
+                    # This can happen if a station is very far from a specific branch
+                    continue
+
+                start_d = min(d_a_branch, d_b_branch)
+                end_d = max(d_a_branch, d_b_branch)
+
+                # Avoid zero-distance cuts
+                if abs(start_d - end_d) < 1e-9:  # Use tolerance
+                    continue
+
+                candidate_geom = cut_line(branch, start_d, end_d)
+
+                if candidate_geom.is_empty or candidate_geom.length < 1e-6:
+                    continue
+
+                # Quality check: How far is this segment from the snapped points?
+                try:
+                    off_track = point_a.distance(candidate_geom) + point_b.distance(
+                        candidate_geom
+                    )
+                except Exception as e:
+                    print(
+                        f"[WARN] Error calculating distance between points and candidate segment for {station_id_a}-{station_id_b} on line {line_id}: {e}",
+                        file=sys.stderr,
+                    )
+                    continue  # Skip this candidate if distance calc fails
+
+                if off_track < min_off_track_dist:
+                    min_off_track_dist = off_track
+                    best_segment_geom = candidate_geom
+
+            # After checking all branches, add the best segment found (if any)
+            if best_segment_geom is not None:
+                final_segments.append(
+                    {
+                        "geometry": best_segment_geom,
+                        "sid": f"{line_id}.{station_id_a}:{station_id_b}",  # Keep original order in sid
+                        "line_color": line_color,
+                    }
+                )
+            else:
+                print(
+                    f"[WARN] Could not find suitable segment geometry between {station_id_a} and {station_id_b} for line {line_id} from any branch. Skipping segment.",
+                    file=sys.stderr,
+                )
+
+        return final_segments
+
+    else:
+        # Should not happen if fetch_line_geometry returns LineString or MultiLineString
+        print(
+            f"[WARN] Unexpected geometry type for line {line_id}: {type(merged_line)}",
+            file=sys.stderr,
         )
-    return segments
+        return []
 
 
 def main() -> None:

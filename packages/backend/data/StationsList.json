@@ -6830,17 +6830,6 @@
         ],
         "name": "Jessnerstraße"
     },
-    "M-n11178436225": {
-        "coordinates": {
-            "latitude": 52.52155,
-            "longitude": 13.3876665
-        },
-        "lines": [
-            "12",
-            "M1"
-        ],
-        "name": "Friedrichstraße"
-    },
     "M-n11233149159": {
         "coordinates": {
             "latitude": 52.46486675,
