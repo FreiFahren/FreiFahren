@@ -139,7 +139,7 @@ func CreateFeedbackTable() {
 	logger.Log.Info().Msg("Created table feedback")
 }
 
-func InsertTicketInfo(timestamp *time.Time, author *int64, message, line, stationName, stationId, directionName, directionId *string) error {
+func InsertTicketInfo(timestamp *time.Time, author *int64, message, line, stationId, directionId *string) error {
 	logger.Log.Debug().Msg("Inserting ticket info")
 
 	sql := `
@@ -148,7 +148,7 @@ func InsertTicketInfo(timestamp *time.Time, author *int64, message, line, statio
     `
 
 	// Convert *string and *int64 directly to interface{} for pgx
-	values := []interface{}{timestamp, message, author, line, stationName, stationId, directionName, directionId}
+	values := []interface{}{timestamp, message, author, line, stationId, directionId}
 
 	logger.Log.Info().Msg("Inserting ticket info into the database")
 	_, err := pool.Exec(context.Background(), sql, values...)
