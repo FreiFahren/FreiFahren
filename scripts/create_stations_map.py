@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 from typing import TypedDict, Dict, Literal, cast
 from config import CITY
+from geo import haversine
 
 import requests
 
@@ -54,18 +55,6 @@ def get_station_type_prefix(station_id: str) -> str:
     return ""
 
 
-def calculate_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """Calculates the distance between two lat/lon points in kilometers."""
-    R = 6371  # Earth's radius in kilometers
-    dLat = math.radians(lat2 - lat1)
-    dLon = math.radians(lon2 - lon1)
-    a = math.sin(dLat / 2) * math.sin(dLat / 2) + math.cos(
-        math.radians(lat1)
-    ) * math.cos(math.radians(lat2)) * math.sin(dLon / 2) * math.sin(dLon / 2)
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    return R * c
-
-
 def create_stations_map(stations: StationList) -> None:
     """
     Creates a development stations map by matching FreiFahren stations
@@ -107,13 +96,18 @@ def create_stations_map(stations: StationList) -> None:
                         and "lat" in s
                         and "lon" in s
                     ):
-                        distance = calculate_distance(
-                            station["coordinates"]["latitude"],
-                            station["coordinates"]["longitude"],
-                            s["lat"],
-                            s["lon"],
-                        )
-                        if distance <= max_distance_km:
+                        # Prepare coordinate dictionaries for haversine
+                        coord1 = {
+                            "latitude": station["coordinates"]["latitude"],
+                            "longitude": station["coordinates"]["longitude"],
+                        }
+                        coord2 = {"latitude": s["lat"], "longitude": s["lon"]}
+
+                        # Call haversine and convert meters to kilometers
+                        distance_meters = haversine(coord1, coord2)
+                        distance_km = distance_meters / 1000
+
+                        if distance_km <= max_distance_km:
                             matching_stations.append(s)
 
             if matching_stations:
