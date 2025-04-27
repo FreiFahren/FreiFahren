@@ -23,10 +23,10 @@ interface FreifahrenMapProps {
     onRotationChange: (bearing: number) => void
     handleStationClick?: (station: StationProperty) => void
 }
-
+// Incase of using environment variables, we need to use the process.env.REACT_APP_MAP_CENTER_LNG and process.env.REACT_APP_MAP_CENTER_LAT
 const cityViewPosition: { lng: number; lat: number } = {
-    lng: Number(process.env.REACT_APP_CITY_LNG),
-    lat: Number(process.env.REACT_APP_CITY_LAT),
+    lng: Number.isNaN(Number(process.env.REACT_APP_MAP_CENTER_LNG)) ? 13.388 : Number(process.env.REACT_APP_MAP_CENTER_LNG),
+    lat: Number.isNaN(Number(process.env.REACT_APP_MAP_CENTER_LAT)) ? 52.5162 : Number(process.env.REACT_APP_MAP_CENTER_LAT),
 }
 const GITHUB_ICON = `${process.env.PUBLIC_URL}/icons/github.svg`
 const INSTAGRAM_ICON = `${process.env.PUBLIC_URL}/icons/instagram.svg`
@@ -38,12 +38,12 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     handleStationClick,
 }) => {
     const SouthWestBounds: LngLatLike = {
-        lng: Number(process.env.REACT_APP_SW_BOUND_LNG),
-        lat: Number(process.env.REACT_APP_SW_BOUND_LAT),
+        lng: Number.isNaN(Number(process.env.REACT_APP_MAP_BOUNDS_SW_LNG)) ? 12.8364646484805 : Number(process.env.REACT_APP_MAP_BOUNDS_SW_LNG),
+        lat: Number.isNaN(Number(process.env.REACT_APP_MAP_BOUNDS_SW_LAT)) ? 52.23115511676795 : Number(process.env.REACT_APP_MAP_BOUNDS_SW_LAT),
     }
     const NorthEastBounds: LngLatLike = {
-        lng: Number(process.env.REACT_APP_NE_BOUND_LNG),
-        lat: Number(process.env.REACT_APP_NE_BOUND_LAT),
+        lng: Number.isNaN(Number(process.env.REACT_APP_MAP_BOUNDS_NE_LNG)) ? 14.00044556529124 : Number(process.env.REACT_APP_MAP_BOUNDS_NE_LNG),
+        lat: Number.isNaN(Number(process.env.REACT_APP_MAP_BOUNDS_NE_LAT)) ? 52.77063424239867 : Number(process.env.REACT_APP_MAP_BOUNDS_NE_LAT),
     }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
 

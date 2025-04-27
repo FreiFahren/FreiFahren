@@ -87,3 +87,10 @@ export const useStationStatistics = <T = StationStatistics>(
         select,
         enabled: stationId !== undefined,
     })
+
+export const useItineraries = (start: string | undefined, end: string | undefined) =>
+    useQuery({
+        queryKey: CACHE_KEYS.itineraries(start!, end!),
+        queryFn: () => api.getItineraries(start!, end!),
+        enabled: start !== undefined && end !== undefined,
+    })

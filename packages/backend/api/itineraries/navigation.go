@@ -20,6 +20,11 @@ func calculateLegRisk(leg *Leg, riskData *prediction.RiskData) float64 {
 		return 0
 	}
 
+	// set Regional Trains to max risk, as they always have an inspector
+	if leg.Mode == "REGIONAL_RAIL" {
+		return 100
+	}
+
 	line := leg.RouteShortName
 	if line == nil {
 		return 0

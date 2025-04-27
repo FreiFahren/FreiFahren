@@ -7,6 +7,24 @@ import { z } from 'zod'
 import { config } from '../config'
 import { createETagMiddleware } from './etagMiddleware'
 
+export const client = axios.create({
+    baseURL: config.FF_API_BASE_URL,
+    validateStatus: () => true,
+    headers: {
+        'ff-app-version': DeviceInfo.getVersion(),
+        'ff-platform': Platform.OS,
+    },
+})
+
+const etagMiddleware = createETagMiddleware({
+    endpoints: ['/v0/lines', '/v0/stations', '/v0/lines/segments'],
+})
+
+etagMiddleware.applyMiddleware(client)
+
+export const clearApiCache = etagMiddleware.clearAllCaches
+export const clearEndpointCache = etagMiddleware.clearCache
+
 export const reportSchema = z
     .object({
         timestamp: z.string().transform((value) => new Date(value)),
@@ -28,25 +46,6 @@ export const reportSchema = z
     }))
 
 export type Report = z.infer<typeof reportSchema>
-
-export const client = axios.create({
-    baseURL: config.FF_API_BASE_URL,
-    validateStatus: () => true,
-    headers: {
-        'ff-app-version': DeviceInfo.getVersion(),
-        'ff-platform': Platform.OS,
-    },
-})
-
-const etagMiddleware = createETagMiddleware({
-    endpoints: ['/v0/lines', '/v0/stations', '/v0/lines/segments'],
-})
-
-etagMiddleware.applyMiddleware(client)
-
-export const clearApiCache = etagMiddleware.clearAllCaches
-export const clearEndpointCache = etagMiddleware.clearCache
-
 const getReports = async (start: DateTime, end: DateTime): Promise<Report[]> => {
     const { data } = await client.get('/v0/basics/inspectors', {
         params: {
@@ -135,7 +134,7 @@ export const featureCollectionSchema = z.object({
             type: z.literal('Feature'),
             properties: z.object({
                 sid: z.string(),
-                line: z.string(),
+                line: z.string().optional(),
                 line_color: z.string(),
             }),
             geometry: z.object({
@@ -166,6 +165,70 @@ export const getStationStatistics = async (stationId: string) => {
     return stationStatisticsSchema.parse(data)
 }
 
+export const nodeSchema = z.object({
+    name: z.string(),
+    stopId: z.string(),
+    lat: z.number(),
+    lon: z.number(),
+    departure: z.string().optional(),
+    scheduledDeparture: z.string().optional(),
+    arrival: z.string().optional(),
+    scheduledArrival: z.string().optional(),
+})
+
+export const legSchema = z.object({
+    mode: z.enum(['WALK', 'BUS', 'TRAM', 'METRO', 'SUBWAY', 'REGIONAL_RAIL']),
+    from: nodeSchema,
+    to: nodeSchema,
+    duration: z.number(),
+    startTime: z.string(),
+    endTime: z.string(),
+    scheduledStartTime: z.string(),
+    scheduledEndTime: z.string(),
+    realTime: z.boolean().optional(),
+    routeShortName: z.string().optional(),
+    intermediateStops: z.array(nodeSchema).optional(),
+    legGeometry: z.object({
+        points: z.string(),
+        length: z.number(),
+    }),
+})
+
+export const itinerarySchema = z.object({
+    duration: z.number(),
+    startTime: z.string(),
+    endTime: z.string(),
+    transfers: z.number(),
+    legs: z.array(legSchema),
+    calculatedRisk: z.number().optional(),
+})
+
+export const navigationResponseSchema = z.object({
+    requestParameters: z.record(z.unknown()),
+    debugOutput: z.record(z.unknown()),
+    from: nodeSchema,
+    to: nodeSchema,
+    direct: z.array(z.unknown()).default([]),
+    safestItinerary: itinerarySchema,
+    alternativeItineraries: z.array(itinerarySchema),
+})
+
+export type Itinerary = z.infer<typeof itinerarySchema>
+export type NavigationResponse = z.infer<typeof navigationResponseSchema>
+export type Leg = z.infer<typeof legSchema>
+export type Node = z.infer<typeof nodeSchema>
+
+export const getItineraries = async (start: string, end: string) => {
+    const { data } = await client.get(`/v0/transit/itineraries?startStation=${start}&endStation=${end}`)
+    const result = navigationResponseSchema.safeParse(data)
+
+    if (!result.success) {
+        return undefined
+    }
+
+    return result.data
+}
+
 export const api = {
     getLines,
     getStations,
@@ -175,4 +238,5 @@ export const api = {
     getRiskData,
     getStationStatistics,
     getSegments,
+    getItineraries,
 }

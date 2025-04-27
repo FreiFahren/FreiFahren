@@ -5,3 +5,9 @@ settings.json
 __pycache__
 packages/*.log.*
 data/*
+scripts/segments.geojson
+scripts/stations.json
+scripts/lines.json
+scripts/export.geojson
+scripts/Pipfile
+scripts/Pipfile.lock

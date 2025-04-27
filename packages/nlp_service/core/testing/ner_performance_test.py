@@ -6,7 +6,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from ner_test_cases import test_cases
-from NER.TransportInformationRecognizer import TransportInformationRecognizer
+from nlp_service.core.NER.TransportInformationRecognizer import TransportInformationRecognizer
 
 
 class CustomTestResult(unittest.TextTestResult):

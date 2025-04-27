@@ -4,6 +4,8 @@ import {
     BackgroundColorShorthandProps,
     border,
     BorderProps,
+    color,
+    ColorProps,
     createBox,
     createRestyleComponent,
     createText,
@@ -19,13 +21,25 @@ import {
     spacing,
     SpacingProps,
     SpacingShorthandProps,
+    typography,
+    TypographyProps,
     VariantProps,
     visible,
     VisibleProps,
 } from '@shopify/restyle'
 import { isNil } from 'lodash'
 import { ComponentProps } from 'react'
-import { ActivityIndicator, Image, Pressable, StyleProp, TextStyle, ViewStyle } from 'react-native'
+import {
+    ActivityIndicator,
+    Image,
+    Pressable,
+    StyleProp,
+    Text,
+    TextInput,
+    TextStyle,
+    View,
+    ViewStyle,
+} from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { Theme } from '../../theme'
@@ -39,9 +53,11 @@ type BaseProps = SpacingProps<Theme> &
     PositionProps<Theme> &
     OpacityProps<Theme> &
     ShadowProps<Theme> &
-    VisibleProps<Theme>
+    VisibleProps<Theme> &
+    ColorProps<Theme> &
+    TypographyProps<Theme>
 
-export const FFView = createBox<Theme>()
+export const FFView = createBox<Theme, ComponentProps<typeof View>>(View)
 
 type PressableProps = BaseProps & ComponentProps<typeof Pressable>
 
@@ -50,7 +66,7 @@ export const FFPressable = createRestyleComponent<PressableProps, Theme>(
     Pressable
 )
 
-export const FFText = createText<Theme>()
+export const FFText = createText<Theme, ComponentProps<typeof Text>>(Text)
 
 type SafeAreaProps = BaseProps & ComponentProps<typeof SafeAreaView>
 
@@ -147,3 +163,22 @@ export const FFButton = ({
         </ButtonContainer>
     )
 }
+
+// Add FFTextInput component
+type TextInputProps = ComponentProps<typeof TextInput>
+
+// Fix the type definition to correctly reference textInputVariants
+type RestyleTextInputProps = SpacingProps<Theme> &
+    LayoutProps<Theme> &
+    BorderProps<Theme> &
+    BackgroundColorProps<Theme> &
+    ColorProps<Theme> &
+    TypographyProps<Theme> &
+    VariantProps<Theme, 'textInputVariants'> & {
+        placeholderTextColor?: string
+    }
+
+export const FFTextInput = createRestyleComponent<RestyleTextInputProps & TextInputProps, Theme>(
+    [spacing, layout, border, backgroundColor, color, typography, createVariant({ themeKey: 'textInputVariants' })],
+    TextInput
+)
