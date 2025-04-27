@@ -408,23 +408,39 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
         }
     }
 
+    // Helper function to get value from <span><strong>VALUE</strong></span> structure
+    const getSpanStrongValue = useCallback((child: React.ReactElement): string => {
+        try {
+            // Use assertion here as well for the initial access
+            const innerElement = (child.props as any)?.children
+            // Check if it's a valid element and has props and props.children
+            if (
+                React.isValidElement(innerElement) &&
+                innerElement.props &&
+                // Assert props as any to access children, assuming the checks are sufficient
+                typeof (innerElement.props as any).children !== 'undefined'
+            ) {
+                // Ensure the result is a string using the same assertion
+                return String((innerElement.props as any).children ?? '')
+            }
+            console.warn(
+                'getSpanStrongValue received invalid or incomplete innerElement:',
+                innerElement,
+                'from child:',
+                child
+            )
+            return ''
+        } catch (e) {
+            console.error('Error in getSpanStrongValue for child:', child, e)
+            return ''
+        }
+    }, [])
+
     interface LineChildProps {
         line: string
     }
 
     const getLineValue = (child: React.ReactElement) => (child.props as LineChildProps).line
-
-    interface EntityChildProps {
-        children: {
-            props: {
-                children: string
-            }
-        }
-    }
-
-    const getEntityValue = (child: React.ReactElement) => (child.props as EntityChildProps).children.props.children
-
-    const getDirectionValue = (child: React.ReactElement) => (child.props as EntityChildProps).children.props.children
 
     const [showFeedback, setShowFeedback] = useState<boolean>(false)
     if (showFeedback) {
@@ -446,7 +462,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                                 fieldClassName="entity-type-selector"
                                 onSelect={handleEntitySelect}
                                 value={currentEntity}
-                                getValue={getEntityValue}
+                                getValue={getSpanStrongValue}
                             >
                                 <span className="line" style={{ backgroundColor: getLineColor('U8') }}>
                                     <strong>U</strong>
@@ -504,7 +520,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                                     onSelect={handleDirectionSelect}
                                     value={currentDirection !== null ? (allStations ?? {})[currentDirection].name : ''}
                                     containerClassName="align-child-on-line"
-                                    getValue={getDirectionValue}
+                                    getValue={getSpanStrongValue}
                                 >
                                     {(() => {
                                         // Find stations for the current line from the allLines array
@@ -516,19 +532,18 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                                         const startStationName = (allStations ?? {})[startStationId]?.name ?? ''
                                         const endStationName = (allStations ?? {})[endStationId]?.name ?? ''
 
-                                        // Return null if names can't be found to avoid rendering empty elements
-                                        if (!startStationName || !endStationName) return null
+                                        // If names can't be found, return an empty array
+                                        if (!startStationName || !endStationName) return []
 
-                                        return (
-                                            <>
-                                                <span>
-                                                    <strong>{startStationName}</strong>
-                                                </span>
-                                                <span>
-                                                    <strong>{endStationName}</strong>
-                                                </span>
-                                            </>
-                                        )
+                                        // Return an array of individual span elements
+                                        return [
+                                            <span key={startStationId || 'start'}>
+                                                <strong>{startStationName}</strong>
+                                            </span>,
+                                            <span key={endStationId || 'end'}>
+                                                <strong>{endStationName}</strong>
+                                            </span>,
+                                        ]
                                     })()}
                                 </SelectField>
                             </section>
