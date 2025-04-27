@@ -78,18 +78,28 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
         return paddingTop + paddingBottom + marginTop + marginBottom
     }
 
-    // Calculate possible lines based on the current entity
     const possibleLines = useMemo(() => {
-        if (currentEntity === null) return allLines ?? []
-        // Filter the array directly
-        return (allLines ?? []).filter(([line]) => {
-            // exception as some trams begin with a number, like Nr. 17
-            if (currentEntity === 'M') {
-                return line.startsWith('M') || /^\d/.test(line)
-            }
-            return line.startsWith(currentEntity)
-        })
-    }, [allLines, currentEntity])
+        let filteredLines: [string, string[]][] = []
+
+        // 1. Filter by entity (U, S, M, etc.)
+        if (currentEntity === null) {
+            filteredLines = allLines ?? []
+        } else {
+            filteredLines = (allLines ?? []).filter(([line]) => {
+                if (currentEntity === 'M') {
+                    return line.startsWith('M') || /^\d/.test(line)
+                }
+                return line.startsWith(currentEntity)
+            })
+        }
+
+        // 2. If a station is selected, further filter by lines containing that station
+        if (currentStation !== null) {
+            filteredLines = filteredLines.filter(([, stations]) => stations.includes(currentStation))
+        }
+
+        return filteredLines
+    }, [allLines, currentEntity, currentStation])
 
     // Calculate possible stations based on entity, line, station, and search input
     const possibleStations = useMemo(() => {
@@ -475,7 +485,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                                 </span>
                             </SelectField>
                         </section>
-                        <section>
+                        <section className="line-selector">
                             <h2>{t('ReportForm.line')}</h2>
                             <SelectField
                                 containerClassName="align-child-on-line long-selector"
