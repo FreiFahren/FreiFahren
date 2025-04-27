@@ -65,6 +65,19 @@
     color: var(--color-gray-on-dark-background);
 }
 
+.report-message {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    margin: var(--margin-xs) 0;
+}
+
+.report-message-container {
+    padding: 0 var(--padding-xs);
+    margin-bottom: var(--margin-xs);
+}
+
 .list-modal > div span {
     color: var(--color-primary);
 }

@@ -24,6 +24,11 @@ const ReportItem: React.FC<ReportItemProps> = ({ report, currentTime }) => {
                 <h4>{report.station.name}</h4>
                 {displayMessage ? <p>{displayMessage}</p> : null}
             </div>
+            {report.message !== undefined && report.message !== null && report.message.trim() !== '' ? (
+                <div className="report-message-container">
+                    <p className="report-message">{report.message}</p>
+                </div>
+            ) : null}
             <div>
                 <p className="report-item-direction">
                     {/* BECAUSE IF NULL, empty richtung is shown  */}

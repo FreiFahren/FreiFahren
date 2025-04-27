@@ -1,7 +1,7 @@
 import './App.css'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
 import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
@@ -49,8 +49,8 @@ const isTelegramWebApp = (): boolean =>
     typeof TelegramWebviewProxy !== 'undefined'
 
 const App = () => {
-    const { stationId } = useParams<{ stationId?: string }>()
-    const navigate = useNavigate()
+    const [searchParams, setSearchParams] = useSearchParams();
+    const stationId = searchParams.get('stationId');
     const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
     const [appMounted, setAppMounted] = useState(false)
 
@@ -242,10 +242,9 @@ const App = () => {
         setStationModalWasManuallyCloses(true)
         closeInfoModal()
         
-        // If we're on a station URL, navigate back to the main page
-        const isOnStationRoute = typeof stationId === 'string' && stationId.trim() !== '';
-        if (isOnStationRoute) {
-            navigate('/')
+        // If we're on a station URL with query parameter, remove the query parameter
+        if (stationId !== null) {
+            setSearchParams({});
         }
     }
 
@@ -257,14 +256,13 @@ const App = () => {
         }
     }
 
-    // Handle direct navigation to a station via URL
+    // Handle direct navigation to a station via URL query parameter
     useEffect(() => {
         const isValidStationId = typeof stationId === 'string' && stationId.trim() !== '';
 
         if (!(isValidStationId && stations && !isInfoModalOpen && !stationModalWasManuallyCloses)) {
             return;
         }
-
         const station = stations[stationId];
         
         // station does have an overlap with undefined, when looking for stations[(RANDOM_STRING)], so we need to check for it
@@ -298,7 +296,7 @@ const App = () => {
         onStationSelect(stationProperty);
             
      
-    }, [stationId, stations, isInfoModalOpen, appUIState.isFirstOpen, closeLegalDisclaimer, onStationSelect, stationModalWasManuallyCloses]);
+    }, [stationId, stations, isInfoModalOpen, appUIState.isFirstOpen, closeLegalDisclaimer, onStationSelect, stationModalWasManuallyCloses, setSearchParams]);
 
     return (
         <div className="App">
