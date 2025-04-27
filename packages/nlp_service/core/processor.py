@@ -1,32 +1,38 @@
-from nlp_service.FreiFahren_BE_NLP.verify_info import verify_direction, verify_line
-from nlp_service.FreiFahren_BE_NLP.process_message import (
-    find_line,
-    find_direction,
-    find_station,
-    format_text,
+from nlp_service.config.language_rules import check_for_spam
+from nlp_service.core.dataloader import lines
+from nlp_service.utils.logger import setup_logger
+from nlp_service.core.dataloader import (
     lines,
-    check_for_spam,
+    TicketInspector
 )
-from nlp_service.FreiFahren_BE_NLP.db_utils import insert_ticket_info
-from nlp_service.logger import setup_logger
-from nlp_service.FreiFahren_BE_NLP.db_utils import fetch_id
+from nlp_service.core.extractors.line_extractor import (
+    find_line,
+)
+from nlp_service.core.extractors.direction_extractor import (
+    find_direction,
+    format_text,
+)
+from nlp_service.core.extractors.station_extractor import (
+    find_station,
+)
+from nlp_service.config.language_rules import (
+    verify_direction,
+    verify_line,
+)
+
+from nlp_service.utils.database import insert_ticket_info, fetch_id
 
 logger = setup_logger()
 
-MINIMUM_MESSAGE_LENGTH = 3
-
-class TicketInspector:
-    def __init__(self, line, station, direction):
-        self.line = line
-        self.station = station
-        self.direction = direction
-
-
 def extract_ticket_inspector_info(unformatted_text):
-    if len(unformatted_text) < MINIMUM_MESSAGE_LENGTH:
-        return None
+    """
+    Extracts ticket inspector information from the unformatted text.
+    """
+    
+    ticket_inspector = TicketInspector(station=None, direction=None, line=None)
+
     found_line = find_line(unformatted_text, lines)
-    ticket_inspector = TicketInspector(line=found_line, station=None, direction=None)
+    ticket_inspector.line = found_line
 
     # Get the direction
     text = format_text(unformatted_text)
@@ -47,10 +53,9 @@ def extract_ticket_inspector_info(unformatted_text):
     else:
         return None
 
-
 def process_new_message(timestamp, message_text):
     # Initial guards to avoid unnecessary processing
-    if "?" in message_text or check_for_spam(message_text):
+    if check_for_spam(message_text):
         logger.info("Message is not getting processed")
         return None
 

@@ -26,6 +26,7 @@ NLP_SERVICE_URL=http://nlp_service:6000
 CONTENT_MODERATION_SERVICE_URL=http://content_moderation_service:9090
 REPORT_PASSWORD=backend_report_password
 ```
+> NOTE: If you are running your own Postgres server outside of docker, you can change the `DB_HOST` to `host.docker.internal` and the `DB_PORT` to the port of your Postgres server. Uncomment the `extra_hosts` line in the `docker-compose.yml` file to use `host.docker.internal`.
 
 - The credentials for the **Postgres database** can be changed in the `docker-compose.yml` file.
 
@@ -58,10 +59,17 @@ SENTRY_DSN=
 
 ### Frontend
 
-```plaintext
-REACT_APP_JAWG_ACCESS_TOKEN=
+```sh
+REACT_APP_JAWG_ACCESS_TOKEN=YOUR_JAWG_ACCESS_TOKEN
 REACT_APP_API_URL=http://localhost:8080
-SENTRY_AUTH_TOKEN=
+
+// Map view. Default values are the Berlin view.
+REACT_APP_MAP_CENTER_LNG=13.388
+REACT_APP_MAP_CENTER_LAT=52.5162
+REACT_APP_MAP_BOUNDS_SW_LNG=12.8364646484805
+REACT_APP_MAP_BOUNDS_SW_LAT=52.23115511676795
+REACT_APP_MAP_BOUNDS_NE_LNG=14.00044556529124
+REACT_APP_MAP_BOUNDS_NE_LAT=52.77063424239867
 ```
 
 - The `REACT_APP_JAWG_ACCESS_TOKEN` is the access token for the JAWG API. It's used to style the map. Can be obtained from the [JAWG API](https://www.jawg.io/).
@@ -69,6 +77,19 @@ SENTRY_AUTH_TOKEN=
 - The `REACT_APP_API_URL` is the URL of the backend (connected through the `backend-network` in the `docker-compose.yml` file).
 
 - (optional) The `SENTRY_AUTH_TOKEN` is the token for the Sentry project. If you want to use Sentry, make sure to use the `build:prod` command in the `Dockerfile.frontend` file, to build the frontend with **Sentry** enabled.
+
+- You can get the map view bounds easier from [OpenStreetMap](https://www.openstreetmap.org/). E.g. Enter Berlin, Germany and right click > center the map. Right click North East bound > Click Route from here and Right click South West bounds > Click Route to here. 
+
+```
+https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=52.6701%2C13.6629%3B52.3748%2C13.1108#map=11/52.5202/13.3858
+
+You can see that the coordinates are:
+
+- 52.6701, 13.6629 (North East)
+- 52.3748, 13.1108 (South West)
+
+Zoom level is 11, and the center of the map is 52.5202, 13.3858.
+```
 
 ## 2. Commands
 

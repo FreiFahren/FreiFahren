@@ -2,8 +2,15 @@ FROM golang as backend
 
 WORKDIR /project
 
-COPY . /project
+# Copy only go.mod and go.sum files first
+COPY go.mod go.sum ./
+# Download dependencies - this step will be cached unless go.mod/go.sum change
+RUN go mod download
 
+# Now copy the rest of the source code
+COPY . .
+
+# Build/install the application
 RUN go install
 
 COPY api/prediction/requirements.txt /project/api/prediction/requirements.txt

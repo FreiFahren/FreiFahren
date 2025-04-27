@@ -25,5 +25,5 @@ FreiFahren operates by leveraging real-time, community-driven data to track the 
 
 By harnessing the power of community reporting and real-time data processing, FreiFahren provides a valuable tool for navigating the Berlin public transport network with confidence.
 
-# Hosting your own FreiFahren  
-Do you want to host your own FreiFahren? Take a look at the [Freifahren GitHub Wiki](https://github.com/FreiFahren/FreiFahren/wiki)
+# Getting Started / Hosting your own FreiFahren  
+Do you want to host your own FreiFahren? Take a look at the [detailed setup instructions](packages/SETTING_UP.md).
