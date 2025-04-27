@@ -1,1378 +1,1508 @@
 {
+    "Adenauerplatz": [
+        "Adenauer",
+        "Adenauerplz"
+    ],
+    "Adersleber Weg": [
+        "Adersleber"
+    ],
     "Adlershof": [],
-    "Ahrensfelde": [],
-    "Alt-Reinickendorf": [
-        "Reinickendorf"
-    ],
-    "Altglienicke": [
-        "Glienicke"
-    ],
-    "Anhalter Bahnhof": [
-        "Anhalter"
-    ],
-    "Attilastraße": [
-        "Attila",
-        "Attilastr.",
-        "Attilastrasse"
-    ],
-    "Babelsberg": [],
-    "Baumschulenweg": [],
-    "Bellevue": [],
-    "Bergfelde": [],
-    "Bernau": [],
-    "Bernau-Friedenstal": [
-        "Friedenstal"
-    ],
-    "Betriebsbahnhof Rummelsburg": [
-        "Betriebsbahnhof",
-        "Btrbhf Rummelsburg",
-        "Btrb Rummelsburg"
-    ],
-    "Beusselstraße": [
-        "Beussel",
-        "besseulstr.",
-        "Beusselstrasse"
-    ],
-    "Biesdorf": [],
-    "Bismarckstraße": [
-        "Bismarckstr",
-        "Bismarckstrasse"
-    ],
-    "Birkenstein": [],
-    "Birkenwerder": [],
-    "Blankenburg": [],
-    "Blankenfelde": [],
-    "Borgsdorf": [],
-    "Bornholmer Straße": [
-        "Bornholmer",
-        "Bornholmerstr.",
-        "Bornholmerstrasse",
-        "Bornholmer Straße"
-    ],
-    "Botanischer Garten": [],
-    "Buch": [],
-    "Buckower Chaussee": [],
-    "Bundesplatz": [],
-    "Charlottenburg": [
-        "Chb"
-    ],
-    "Eichborndamm": [],
-    "Eichwalde": [],
-    "Erkner": [],
-    "Feuerbachstraße": [
-        "Feuerbach",
-        "Feuerbachstr.",
-        "Feuerbachstrasse"
-    ],
-    "Flughafen BER": [
-        "BER",
-        "Flughafen",
-        "Flughafen Berlin Brandenburger"
-    ],
-    "Fredersdorf": [],
-    "Friedenau": [],
-    "Friedrichsfelde Ost": [
-        "Friedrichsfelde"
-    ],
-    "Friedrichshagen": [],
-    "Frohnau": [],
-    "Rosenthaler Platz": [
-        "Rosenthaler",
-        "Rosenthalerplz"
-    ],
-    "Seestraße": [
-        "Seestr.",
-        "Seestrasse"
-    ],
-    "Gehrenseestraße": [
-        "Gehrenseeer",
-        "Gehrenseestrasse",
-        "Gehrenseestr."
-    ],
-    "Greifswalder Straße": [
-        "Greifswalder",
-        "Greifswalderstr.",
-        "Greifswalderstrasse",
-        "Greifswalder Straße"
-    ],
-    "Griebnitzsee": [],
-    "Grünau": [],
-    "Grünbergallee": [
-        "Grünberger"
-    ],
-    "Grunewald": [],
-    "Hackescher Markt": [
-        "Hackescher",
-        "Hackeschen Markt"
-    ],
-    "Halensee": [],
-    "Heerstraße": [
-        "Heerstr",
-        "Heerstrasse"
-    ],
-    "Hegermühle": [],
-    "Heiligensee": [
-        "Heiligen"
-    ],
-    "Hennigsdorf": [],
-    "Hermannstraße": [
-        "Hermannstr",
-        "Hermannstrasse"
-    ],
-    "Hermsdorf": [],
-    "Hirschgarten": [
-        "Hirschgrt"
-    ],
-    "Hohen Neuendorf": [
-        "Neuendorf"
-    ],
-    "Hohenschönhausen": [],
-    "Hohenzollerndamm": [
-        "Hohenzollern",
-        "Hohenzollern Damm"
-    ],
-    "Hoppegarten": [],
-    "Humboldthain": [
-        "Humbolt Hain"
-    ],
-    "Jannowitz Brücke": [
-        "Jannowitz",
-        "Jannowitzbrücke"
-    ],
-    "Johannisthal": [],
-    "Julius-Leber-Brücke": [
-        "Julius Leber",
-        "Julius Leber Brücke"
-    ],
-    "Karlshorst": [],
-    "Karow": [],
-    "Kaulsdorf": [],
-    "Köllnische Heide": [],
-    "Königs Wusterhausen": [],
-    "Köpenick": [],
-    "Landsberger Allee": [
-        "Landsberger"
-    ],
-    "Lankwitz": [],
-    "Lehnitz": [],
-    "Lichtenrade": [],
-    "Lichterfelde Ost": [],
-    "Lichterfelde Süd": [],
-    "Lichterfelde West": [],
-    "Mahlow": [],
-    "Mahlsdorf": [],
-    "Marienfelde": [],
-    "Marzahn": [],
-    "Mehrower Allee": [],
-    "Messe Nord/ICC": [
-        "Messe Nord"
-    ],
-    "Messe Süd": [],
-    "Mexikoplatz": [],
-    "Mühlenbeck-Mönchmühle": [],
-    "Neuenhagen": [],
-    "Nikolassee": [],
-    "Nöldnerplatz": [
-        "Nöldner",
-        "Nöldnerplz"
-    ],
-    "Nordbahnhof": [
-        "Nordbhf"
-    ],
-    "Oranienburg": [],
-    "Oberspree": [],
-    "Oranienburger Straße": [
-        "Oranienburger",
-        "Oranienburgerstr.",
-        "Oranienburgerstraße",
-        "Oranienburgerstrasse"
-    ],
-    "Osdorfer Straße": [
-        "Osdorfer",
-        "Osdorferstr.",
-        "Osdorferstrasse",
-        "Osdorferstraße"
-    ],
-    "Ostbahnhof": [
-        "Ostbhf"
-    ],
-    "Ostkreuz": [
-        "Ostkrz"
-    ],
-    "Pankow-Heinersdorf": [
-        "Heinersdorf"
-    ],
-    "Petershagen Nord": [],
-    "Perleberger Brücke": [
-        "Perleberger"
-    ],
-    "Pichelsberg": [],
-    "Plänterwald": [],
-    "Poelchaustraße": [
-        "Poelchaustrasse",
-        "Poelchaustr."
-    ],
-    "Potsdam Hauptbahnhof": [
-        "Potsdam Hbf"
-    ],
-    "Prenzlauer Allee": [
-        "Prenzlauer"
-    ],
-    "Priesterweg": [],
-    "Rahnsdorf": [],
-    "Raoul-Wallenberg-Straße": [
-        "Wallenberger",
-        "Raoul Wallenberg Str",
-        "Raoul Wallenberg",
-        "Raoul Wallenberg Strasse"
-    ],
-    "Röntgental": [],
-    "Rummelsburg": [],
-    "Savignyplatz": [
-        "Savigny"
-    ],
-    "Schichauweg": [],
-    "Schlachtensee": [],
-    "Schöneberg": [],
-    "Schönefeld": [],
-    "Schöneweide": [],
-    "Schönfließ": [],
-    "Schönhauser Allee": [
-        "Schönhauser"
-    ],
-    "Schönholz": [],
-    "Schulzendorf": [],
-    "Sonnenallee": [],
-    "Spandau": [],
-    "Spindlersfeld": [],
-    "Springpfuhl": [],
-    "Storkower Straße": [
-        "Storkower",
-        "Storkowerstr.",
-        "Storkowerstrasse",
-        "Storkowerstraße"
-    ],
-    "Strausberg": [],
-    "Strausberg Nord": [],
-    "Strausberg Stadt": [],
-    "Stresow": [],
-    "Südkreuz": [
-        "Südkrz"
-    ],
-    "Südende": [],
-    "Sundgauer Straße": [
-        "Sundgauer",
-        "Sundgauerstr.",
-        "Sundgauerstrasse",
-        "Sundgauerstraße"
-    ],
-    "Tegel": [],
-    "Teltow Stadt": [],
-    "Tempelhof": [],
-    "Tiergarten": [],
-    "Treptower Park": [
-        "Treptower",
-        "Trepi"
-    ],
-    "Waidmannslust": [],
-    "Wannsee": [],
-    "Warschauer Straße": [
-        "Warschauer",
-        "Warschauerstr.",
-        "Warschauerstrasse",
-        "Warschauerstraße"
-    ],
-    "Wartenberg": [],
-    "Waßmannsdorf": [],
-    "Wedding": [],
-    "Westend": [],
-    "Westhafen": [],
-    "Westkreuz": [
-        "Westkrz"
-    ],
-    "Wildau": [],
-    "Wilhelmshagen": [],
-    "Wilhelmsruh": [],
-    "Wittenau": [],
-    "Wollankstraße": [
-        "Wollankstr,",
-        "Wollankstrasse"
-    ],
-    "Wuhletal": [],
-    "Wuhlheide": [],
-    "Yorckstraße": [
-        "Yorcksstrasse",
-        "Yorcksstr."
-    ],
-    "Zehlendorf": [],
-    "Zepernick": [],
-    "Zeuthen": [],
-    "Zoologischer Garten": [
-        "Zoo"
-    ],
-    "Adenauer Platz": [],
     "Afrikanische Straße": [
-        "Afrikanischestr.",
-        "afrikanische strasse",
-        "Afrikanischestraße"
+        "Afrikanische",
+        "Afrikanische Str.",
+        "Afrikanische Strasse"
+    ],
+    "Ahrensfelde": [],
+    "Ahrensfelde/Stadtgrenze": [],
+    "Ahrenshooper Straße": [
+        "Ahrenshooper",
+        "Ahrenshooper Str.",
+        "Ahrenshooper Strasse"
+    ],
+    "Albertinenstraße": [
+        "Albertinen",
+        "Albertinenstr.",
+        "Albertinenstrasse"
     ],
     "Alexanderplatz": [
-        "Alex"
+        "Alex",
+        "Alexanderplz"
     ],
-    "Altstadt-Spandau": [],
+    "Alexanderplatz/Gontardstraße": [
+        "Alexanderplatz/Gontard",
+        "Alexanderplatz/Gontardstr.",
+        "Alexanderplatz/Gontardstrasse"
+    ],
+    "Alfred-Kowalke-Straße": [
+        "Alfred-Kowalke",
+        "Alfred-Kowalke-str.",
+        "Alfred-Kowalke-strasse"
+    ],
+    "Allee der Kosmonauten/Poelchaustraße": [
+        "Allee der Kosmonauten/Poelchau",
+        "Allee der Kosmonauten/Poelchaustr.",
+        "Allee der Kosmonauten/Poelchaustrasse"
+    ],
+    "Allee der Kosmonauten/Rhinstraße": [
+        "Allee der Kosmonauten/Rhin",
+        "Allee der Kosmonauten/Rhinstr.",
+        "Allee der Kosmonauten/Rhinstrasse"
+    ],
+    "Alt-Friedrichsfelde/Rhinstraße": [
+        "Alt-Friedrichsfelde/Rhin",
+        "Alt-Friedrichsfelde/Rhinstr.",
+        "Alt-Friedrichsfelde/Rhinstrasse"
+    ],
+    "Alt-Hohenschönhausen": [],
     "Alt-Mariendorf": [],
-    "Alt-Tegel": [],
+    "Alt-Marzahn": [],
+    "Alt-Moabit/Rathenower Straße": [
+        "Alt-Moabit/Rathenower",
+        "Alt-Moabit/Rathenower Str.",
+        "Alt-Moabit/Rathenower Strasse"
+    ],
+    "Alt-Reinickendorf": [],
     "Alt-Tempelhof": [],
-    "Amrumer Straße": [
-        "Amrumer",
-        "Amrumerstr.",
-        "Amrumerstrasse",
-        "Amrumerstraße"
-    ],
-    "Bayrischer Platz": [
-        "Bayrischerplz"
-    ],
-    "Berliner Straße": [
-        "Berliner",
-        "Berlinerstr.",
-        "Berlinerstrasse",
-        "Berlinerstraße"
-    ],
-    "Bernauer Straße": [
-        "Bernauer",
-        "Bernauerstr.",
-        "Bernauerstrasse",
-        "Bernauerstraße"
-    ],
-    "Biesdorf-Süd": [],
-    "Birkenstraße": [
-        "Birkenstr.",
-        "Birkenstrasse"
-    ],
-    "Augsburger Straße": [
-        "Augsburger",
-        "Augsburgerstr.",
-        "Augsburgerstrasse",
-        "Augsburgerstraße"
-    ],
-    "Blaschkoallee": [],
-    "Blissestraße": [
-        "Blissestr.",
-        "Blissestrasse"
-    ],
-    "Boddinstraße": [
-        "Boddinstr.",
-        "Boddinstrasse"
-    ],
-    "Borsigwerke": [],
-    "Brandenburger Tor": [
-        "Brandenburger"
-    ],
-    "Breitenbachplatz": [
-        "Breitenbachplz"
-    ],
-    "Britz Süd": [],
-    "Bülowstraße": [
-        "Bülowstr.",
-        "Bülowstrasse"
-    ],
-    "Bundestag": [],
-    "Cottbusser Platz": [
-        "Cottbusserplz"
-    ],
-    "Dahlem-Dorf": [],
-    "Deutsche Oper": [],
-    "Eberswalder Straße": [
-        "Eberswalder",
-        "Eberswalderstr.",
-        "Eberswalderstrasse",
-        "Eberswalderstraße"
-    ],
-    "Eisenacher Straße": [
-        "Eisenacher",
-        "Eisenacherstr.",
-        "Eisenacherstrasse",
-        "Eisenacherstraße"
-    ],
-    "Elsterwerdaer Platz": [
-        "Elsterwerdaerplz"
-    ],
-    "Ernst-Reuter-Platz": [
-        "Ernst Reuter Plz",
-        "Ernst Reuter"
-    ],
-    "Fehrbelliner Platz": [
-        "Fehrbellinerplz, Fehrbelliner"
-    ],
-    "Frankfurter Allee": [],
-    "Frankfurter Tor": [],
-    "Franz-Neumann-Platz": [
-        "Franz Neumann Plz",
-        "Franz Neumann"
-    ],
-    "Freie Universität (Thielplatz)": [
-        "Freie Universität",
-        "Thielplatz",
-        "FU"
-    ],
-    "Friedrichsfelde": [],
-    "Friedrichstraße": [
-        "Friedrichstr",
-        "Friedrichstrasse.",
-        "Friedrichstrasse"
-    ],
-    "Hellersdorf": [],
-    "Friedrich-Wilhelm-Platz": [
-        "Friedrich Wilhelm Plz",
-        "Friedrich Wilhelm"
-    ],
-    "Gesundbrunnen": [],
-    "Gleisdreieck": [],
-    "Gneisenaustraße": [
-        "Gneisenaustr.",
-        "Gneisenaustrasse"
-    ],
-    "Görlitzer Bahnhof": [
-        "Görli"
-    ],
-    "Grenzallee": [],
-    "Güntzelstraße": [
-        "Güntzelstr.",
-        "Güntzelstrasse"
-    ],
-    "Halemweg": [],
-    "Hallesches Tor": [
-        "Hallesches",
-        "Halleschen Tor"
-    ],
-    "Hansaplatz": [
-        "Hansaplz"
-    ],
-    "Haselhorst": [],
-    "Hauptbahnhof": [
-        "Hbf"
-    ],
-    "Hausvogteiplatz": [
-        "Hausvogtei",
-        "Hausvogteiplz"
-    ],
-    "Heidelberger Platz": [
-        "Heidelberger",
-        "Heidelbergerplz"
-    ],
-    "Heinrich-Heine-Straße": [
-        "Heinrich Heine Str",
-        "Heinrich Heine",
-        "Heinrich Heine Strasse",
-        "HeinrichHeineStraße",
-        "HeinrichHeine"
-    ],
-    "Hermannplatz": [
-        "Hermannplz",
-        "Hermanplatz"
-    ],
-    "Hohenzollernplatz": [
-        "Hohenzollernplz"
-    ],
-    "Holzhauserstraße": [
-        "Holzhauserstr.",
-        "Holzhauserstrasse"
-    ],
-    "Hönow": [],
-    "Innsbrucker Platz": [
-        "Innsbrucker",
-        "Innsbruckerplz"
-    ],
-    "Jakob Kaiser Platz": [
-        "Jakob Kaiser Plz",
-        "Jakob Kaiser"
-    ],
-    "Jannowitzbrücke": [
-        "Jannowitz"
-    ],
-    "Johannisthaler Chaussee": [
-        "Johannisthaler Chausse",
-        "Johannisthaler Chausse."
-    ],
-    "Jungfernheide": [],
-    "Kaiserdamm": [],
-    "Kaiserin-Augusta-Straße": [
-        "Kaiserin Augusta Str",
-        "Kaiserin Augusta",
-        "Kaiserin Augusta Strasse"
-    ],
-    "Karl-Bonhoeffer-Nervenklinik": [
-        "Karl Bonhoeffer"
-    ],
-    "Karl-Marx-Straße": [
-        "Karl Marx Str",
-        "Karl Marx Strasse"
-    ],
-    "Kaulsdorf-Nord": [],
-    "Kienberg (Gärten der Welt)": [
-        "Kienberg",
-        "Gärten der Welt"
-    ],
-    "Louis-Lewin-Straße": [
-        "Louis Lewin",
-        "Louis Lewin Str",
-        "Louis Lewin Strasse"
-    ],
-    "Kleistpark": [],
-    "Kloster Straße": [
-        "Kloster",
-        "Klosterstr.",
-        "Klosterstrasse",
-        "Klosterstraße"
-    ],
-    "Kochstraße (Checkpoint Charlie)": [
-        "Kochstr.",
-        "Checkpoint Charlie",
-        "Kochstrasse"
-    ],
-    "Konstanzer Straße": [
-        "Konstanzer",
-        "Konstanzerstr.",
-        "Konstanzerstrasse",
-        "Konstanzerstraße"
-    ],
-    "Kottbusser Tor": [
-        "Kottbusser",
-        "Kotti"
-    ],
-    "Krumme Lanke": [],
-    "Kurfürstendamm": [
-        "Kurfürstendam"
-    ],
-    "Kurfürstenstraße": [
-        "Kurfürstenstr.",
-        "Kurfürstenstrasse"
-    ],
-    "Kurt-Schumacher-Platz": [
-        "Kurt Schumacher Plz",
-        "Kurt Schumacher",
-        "Kurt Schumacher Platz",
-        "Alt-Tegel",
-        "Alt Tegel"
-    ],
-    "Leinestraße": [
-        "Leinestr.",
-        "Leinestrasse"
-    ],
-    "Leopoldplatz": [
-        "Leopoldplz",
-        "Leo"
-    ],
-    "Lichtenberg": [],
-    "Lindauer Allee": [
-        "Lindauerallee"
-    ],
-    "Lipschitzallee": [],
-    "Magdalenenstraße": [
-        "Magdalenenstr.",
-        "Magdalenenstrasse"
-    ],
-    "Märkisches Museum": [
-        "Märkisches Mus"
-    ],
-    "Mehringdamm": [],
-    "Mendelssohn-Bartholdy-Park": [
-        "Mendelssohn Bartholdy Park",
-        "Mendelssohn Bartholdy"
-    ],
-    "Mierendorffplatz": [
-        "Mierendorffplz"
-    ],
-    "Möckernbrücke": [
-        "Möckernbrück"
-    ],
-    "Mohrenstraße": [
-        "Mohrenstr.",
-        "Mohrenstrasse"
-    ],
-    "Moritzplatz": [
-        "Moritzplz"
-    ],
-    "Museumsinsel": [],
-    "Naturkundemuseum": [
-        "Naturkunde Mus"
-    ],
-    "Nauener Platz": [
-        "Nauenerplz"
-    ],
-    "Neu Westend": [],
-    "Neukölln": [],
-    "Nollendorfplatz": [
-        "Nollendorfplz"
-    ],
-    "Olympia-Stadion": [],
-    "Onkel Toms Hütte": [
-        "Onkel Toms"
-    ],
-    "Oranienburger Tor": [
-        "Oranienburger"
-    ],
-    "Oskar-Helene-Heim": [
-        "Oskar Helene"
-    ],
-    "Osloer Straße": [
-        "Osloerstr.",
-        "Osloerstraße",
-        "Osloerstrasse",
-        "Osloer"
-    ],
-    "Otisstraße": [
-        "Otisstr.",
-        "Otisstrasse"
-    ],
-    "Pankow": [],
-    "Pankstraße": [
-        "Pankstr.",
-        "Pankstrasse"
-    ],
-    "Paracelsus-Bad": [
-        ""
-    ],
-    "Paradestraße": [
-        "Paradestr.",
-        "Paradestrasse"
-    ],
-    "Parchimer Allee": [
-        "Parchimerallee"
-    ],
-    "Paulsternstraße": [
-        "Paulsternstr.",
-        "Paulsternstrasse"
-    ],
-    "Platz der Luftbrücke": [],
-    "Podbielskiallee": [],
-    "Potsdamer Platz": [
-        "Potsdamerplz"
-    ],
-    "Prinzenstraße": [
-        "Prinzenstr.",
-        "Prinzenstrasse"
-    ],
-    "Rathaus Neukölln": [],
-    "Rathaus Reinickendorf": [],
-    "Rathaus Schöneberg": [],
-    "Rathaus Spandau": [],
-    "Rathaus Steglitz": [
-        "Rathaus Stglz",
-        "Rathaus Stz"
-    ],
-    "Rehberge": [],
-    "Reinickendorfer Straße": [
-        "Reinickendorfer",
-        "Reinickendorferstr.",
-        "Reinickendorferstrasse",
-        "Reinickendorferstraße"
-    ],
-    "Residenzstraße": [
-        "Residenzstr.",
-        "Residenzstrasse"
-    ],
-    "Richard-Wagner-Platz": [
-        "Richard Wagner Plz",
-        "Richard Wagner"
-    ],
-    "Rohrdamm": [],
-    "Rosa-Luxemburg-Platz": [
-        "Rosa Luxemburg Plz",
-        "Rosa Luxemburg"
-    ],
-    "Rotes Rathaus": [],
-    "Rüdesheimer Platz": [
-        "Rüdesheimerplz"
-    ],
-    "Rudow": [],
-    "Ruhleben": [],
-    "Samariter Straße": [
-        "Samariter",
-        "Samariterstr.",
-        "Samariterstrasse",
-        "Samariterstraße"
-    ],
-    "Scharnweberstraße": [
-        "Scharnweberstr.",
-        "Scharnweberstrasse"
-    ],
-    "Schillingstraße": [
-        "Schillingstr.",
-        "Schillingstrasse"
-    ],
-    "Schlesisches Tor": [
-        "Schlesischestr."
-    ],
-    "Schloßstraße": [
-        "Schloßstr.",
-        "Schloßstrasse"
-    ],
-    "Schönleinstraße": [
-        "Schönleinstr.",
-        "Schönleinstrasse"
-    ],
-    "Schwartzkopffstraße": [
-        "Schwartzkopffstr.",
-        "Schwartzkopffstrasse"
-    ],
-    "Senefelderplatz": [
-        "Senefelderplz"
-    ],
-    "Siemensdamm": [],
-    "Sophie-Charlotte-Platz": [
-        "Sophie Charlotte Plz",
-        "Sophie Charlotte"
-    ],
-    "Spichernstraße": [
-        "Spichernstr.",
-        "Spichernstrasse"
-    ],
-    "Spittelmarkt": [],
-    "Stadtmitte": [],
-    "Strausberger Platz": [
-        "Strausbergerplz"
-    ],
-    "Südstern": [],
-    "Theodor-Heuss-Platz": [
-        "Theodor Heuss Plz",
-        "Theodor Heuss"
-    ],
-    "Tierpark": [],
-    "Turmstraße": [
-        "Turmstr.",
-        "Turmstrasse"
-    ],
-    "Uhlandstraße": [
-        "Uhlandstr.",
-        "Uhlandstrasse"
-    ],
-    "Ullsteinstraße": [
-        "Ullsteinstr.",
-        "Ullsteinstrasse"
-    ],
-    "Unter den Linden": [],
-    "Viktoria-Luise-Platz": [
-        "Viktoria Luise Plz",
-        "Viktoria Luise"
-    ],
-    "Vinetastraße": [
-        "Vinetastr.",
-        "Vinetastrasse"
-    ],
-    "Voltastraße": [
-        "Voltastr.",
-        "Voltastrasse"
-    ],
-    "Walther-Schreiber-Platz": [
-        "Walther Schreiber Plz",
-        "Walther Schreiber"
-    ],
-    "Warschauerstraße": [
-        "Warschauer",
-        "Warschauerstr.",
-        "Warschauerstrasse"
-    ],
-    "Weberwiese": [],
-    "Weinmeisterstraße": [
-        "Weinmeisterstr.",
-        "Weinmeisterstrasse"
-    ],
-    "Westphalweg": [],
-    "Wilmersdorfer Straße": [
-        "Wilmersdorferstr.",
-        "Wilmersdorferstrasse",
-        "Wilmersdorf",
-        "Wilmersdorferstraße"
-    ],
-    "Wittenbergplatz": [
-        "Wittenbergplz"
-    ],
-    "Wutzkyallee": [],
-    "Zitadelle": [],
-    "Zwickauer Damm": [
-        "Zwickauer"
-    ],
-    "Grabbeallee": [
-        "Grabbe Allee",
-        "Grabbe A."
-    ],
-    "Tschaikowskistraße": [
-        "Tschaikowsky Str",
-        "Tschaikowsky Strasse",
-        "Tschaikowsky",
-        "Tschaikowski Str",
-        "Tschaikowski Strasse"
-    ],
-    "Bürgerpark Pankow": [],
-    "Rathaus Pankow": [],
-    "Pankow Kirche": [],
-    "Masurenstraße": [
-        "Masuren Str",
-        "Masuren Strasse"
-    ],
-    "Milastraße": [
-        "Mila Str",
-        "Mila Strasse"
-    ],
-    "Schwedter Straße": [
-        "Schwedter Str",
-        "Schwedter Strasse"
-    ],
-    "Zionskirchplatz": [
-        "Zionskirche"
-    ],
-    "Monbijouplatz": [
-        "Monbijou"
-    ],
-    "Universtätsstraße": [
-        "Universitätsstr",
-        "Universitätsstrasse",
-        "Universitäts Straße"
-    ],
+    "Alte Hellersdorfer Straße/Zossener Straße": [
+        "Alte Hellersdorfer Straße/Zossener",
+        "Alte Hellersdorfer Straße/Zossener Str.",
+        "Alte Hellersdorfer Straße/Zossener Strasse"
+    ],
+    "Altenhofer Straße": [
+        "Altenhofer",
+        "Altenhofer Str.",
+        "Altenhofer Strasse"
+    ],
+    "Altglienicke": [],
+    "Altstadt Spandau": [
+        "Altstadt"
+    ],
+    "Am Friedrichshain": [],
     "Am Kupfergraben": [
         "Kupfergraben"
-    ],
-    "Heinersdorf": [],
-    "Rothenbachstraße": [
-        "Rothenbachstr.",
-        "Rothenbachstrasse",
-        "Rothenbach"
-    ],
-    "Heinersdorf Kirche": [
-        "Heinersdorfer Kirche"
-    ],
-    "Am Wasserturm": [
-        "Wasserturm"
-    ],
-    "Tino-Schwierzina-Straße": [
-        "Tino Schwierzina",
-        "TS-Straße"
-    ],
-    "Pernzlauer Promenade": [
-        "Prenzl. Promenade"
     ],
     "Am Steinberg": [
         "Steinberg"
     ],
-    "Ostseestraße": [
-        "Ostsee Straße",
-        "Ostseestr.",
-        "Ostseestrasse"
+    "Am Wasserturm": [
+        "Wasserturm"
     ],
-    "Erich-Weinert-Straße": [
-        "Erich Weinert"
+    "Amrumer Straße": [
+        "Amrumer",
+        "Amrumer Str.",
+        "Amrumer Strasse"
     ],
-    "Fröbelstraße": [],
-    "Danziger Straße": [
-        "Danziger",
-        "Danzigerstr.",
-        "Danzigerstrasse"
+    "Anhalter Bahnhof": [
+        "Anhalter"
     ],
-    "Marienbuger Straße": [
-        "Marienbuger",
-        "Marienbugerstr.",
-        "Marienbugerstrasse"
+    "Anna-Ebermann-Straße": [
+        "Anna-Ebermann-",
+        "Anna-Ebermann-str.",
+        "Anna-Ebermann-strasse"
     ],
-    "Knaackstraße": [
-        "Knaackstr.",
-        "Knaackstrasse"
-    ],
-    "Metznerstraße": [
-        "Metznerstr.",
-        "Metznerstrasse",
-        "Metzner"
-    ],
-    "Mollstraße": [
-        "Mollstr.",
-        "Mollstrasse",
-        "Moll"
-    ],
-    "Memhardstraße": [
-        "Memhardstr.",
-        "Memhardstrasse",
-        "Memhard"
-    ],
-    "Falkenberg": [],
-    "Welsestraße": [
-        "Welsestr.",
-        "Welsestrasse",
-        "Welser"
-    ],
-    "Prerower Platz": [
-        "Prerower Plz"
-    ],
-    "Malchower Weg": [
-        "Malchower"
-    ],
-    "Feldtmannstraße": [
-        "Feldtmannstr.",
-        "Feldtmannstrasse",
-        "Feldtmann"
-    ],
-    "Stadion Buschallee": [],
-    "Giersstraße": [
-        "Giersstr.",
-        "Giersstrasse",
-        "Giers"
-    ],
-    "Sulzfeder Straße": [
-        "Sulzfeder",
-        "Sulzfederstr.",
-        "Sulzfederstrasse"
-    ],
-    "Buschallee": [],
-    "Weißer See": [],
-    "Albertinenstraße": [
-        "Albertinenstr.",
-        "Albertinenstrasse"
+    "Anton-Saefkow-Platz": [
+        "Anton-Saefkow-",
+        "Anton-Saefkow-plz"
     ],
     "Antonplatz": [
         "Antonplz"
     ],
-    "Thomas-Mann-Straße": [
-        "Thomas Mannstr.",
-        "Thomas Mannstrasse"
-    ],
-    "Hufelandstraße": [
-        "Hufelandstr.",
-        "Hufelandstrasse"
-    ],
-    "Am Friedrichshain": [],
-    "Gontardstraße": [
-        "Gontardstr.",
-        "Gontardstrasse"
-    ],
-    "Spandauer Straße": [
-        "Spandauer",
-        "Spandauerstr.",
-        "Spandauerstrasse"
-    ],
-    "Zingster Straße": [
-        "Zingster",
-        "Zingsterstr.",
-        "Zingsterstrasse"
-    ],
-    "Ribnitzer Straße": [
-        "Ribnitzer",
-        "Ribnitzerstr.",
-        "Ribnitzerstrasse"
-    ],
-    "Ahrenshooper Straße": [
-        "Ahrenshooper",
-        "Ahrenshooperstr.",
-        "Ahrenshooperstrasse"
-    ],
+    "Arendsweg": [],
     "Arnimstraße": [
         "Arnimstr.",
         "Arnimstrasse"
-    ],
-    "Anna-Ebermann-Straße": [
-        "Anna Ebermann"
-    ],
-    "Alt-Hohenschönhausen": [],
-    "Oberseestraße": [
-        "Obererse",
-        "Obererseestr.",
-        "Obererseestrasse"
-    ],
-    "Freienwalder Straße": [
-        "Freienwalder",
-        "Freienwalderstr.",
-        "Freienwalderstrasse"
-    ],
-    "Werneuchener Straße": [
-        "Werneuchener",
-        "Werneuchenerstr.",
-        "Werneuchenerstrasse"
-    ],
-    "Simon-Bolivar-Straße": [
-        "Simon Bolivar",
-        "Simon Bolivarstr.",
-        "Simon Bolivarstrasse"
-    ],
-    "Sandinostraße": [
-        "Sandinostr.",
-        "Sandinostrasse"
-    ],
-    "Hohenschönhausener Straße": [
-        "Hohenschönhausener",
-        "Hohenschönhausenerstr.",
-        "Hohenschönhausenerstrasse"
-    ],
-    "Judith-Auer-Straße": [
-        "Judith Auer"
-    ],
-    "Oderbruchstraße": [
-        "Oderbruch",
-        "Oderbruchstr.",
-        "Oderbruchstrasse"
-    ],
-    "Rüdickenstraße": [
-        "Rüdicken",
-        "Rüdickenstr.",
-        "Rüdickenstrasse"
-    ],
-    "Petersburger Straße": [
-        "Petersburger",
-        "Petersburgerstr.",
-        "Petersburgerstrasse"
-    ],
-    "Klinikum im Friedrichshain": [
-        "Klinikum Friedrichshain",
-        "Klinikum"
-    ],
-    "Platz der Vereinten Nationen": [
-        "Platz der Vereinten Nationen",
-        "Plz. der Vereinten Nationen"
-    ],
-    "Büschingstraße": [
-        "Büschingstr.",
-        "Büschingstrasse"
-    ],
-    "Invalidenpark": [],
-    "Lesser-Ury-Weg": [],
-    "Lüneburger Straße": [
-        "Lüneburger",
-        "Lüneburgerstr.",
-        "Lüneburgerstrasse"
-    ],
-    "Riesaer Straße": [
-        "Riesaer",
-        "Riesaerstr.",
-        "Riesaerstrasse"
-    ],
-    "Jenaer Straße": [
-        "Jenaer",
-        "Jenaerstr.",
-        "Jenaerstrasse"
-    ],
-    "Nossener Straße": [
-        "Nossener",
-        "Nossenerstr.",
-        "Nossenerstrasse"
-    ],
-    "Quedlinburger Straße": [
-        "Quedlinburger",
-        "Quedlinburgerstr.",
-        "Quedlinburgerstrasse"
-    ],
-    "Zossener Straße": [
-        "Zossener",
-        "Zossenerstr.",
-        "Zossenerstrasse"
-    ],
-    "Kastanienallee": [
-        "Kastanien"
-    ],
-    "Alte Hellersdorfer Straße": [
-        "Alte Hellersdorfer",
-        "Alte Hellersdorferstr.",
-        "Alte Hellersdorferstrasse"
-    ],
-    "Michendorfer Straße": [
-        "Michendorfer",
-        "Michendorferstr.",
-        "Michendorferstrasse"
-    ],
-    "Landsberger Chaussee": [
-        "Landsbergerstr.",
-        "Landsbergerstrasse"
-    ],
-    "Betriebshof Marzahn": [],
-    "Brodowiner Weg": [],
-    "Blummberger Damm": [],
-    "Jan-Petersen-Straße": [
-        "Jan Petersen",
-        "Jan Petersenstr.",
-        "Jan Petersenstrasse"
-    ],
-    "Freizeitforum Marzahn": [
-        "Freizeitforum"
-    ],
-    "Marzahner Promenade": [],
-    "Gewerbepark Georg Knorr": [
-        "Georg Knorr"
-    ],
-    "Dingelstädter Straße": [
-        "Dingelstädter",
-        "Dingelstädterstr.",
-        "Dingelstädterstrasse"
-    ],
-    "Schalkauer Straße": [
-        "Schalkauer",
-        "Schalkauerstr.",
-        "Schalkauerstrasse"
-    ],
-    "Arendsweg": [],
-    "Genslerstraße": [
-        "Genslerstr.",
-        "Genslerstrasse"
-    ],
-    "Zechliner Straße": [
-        "Zechliner",
-        "Zechlinerstr.",
-        "Zechlinerstrasse"
-    ],
-    "Altenhofer Straße": [
-        "Altenhofer",
-        "Altenhoferstr.",
-        "Altenhoferstrasse"
-    ],
-    "Barnimplatz": [
-        "Barnimplz",
-        "Barmin plz."
-    ],
-    "Niemegker Straße": [
-        "Niemegker",
-        "Niemegkerstrasse",
-        "Niemegerstr."
-    ],
-    "Wuhletalstraße": [],
-    "Max-Herrmann-Straße": [
-        "Max Herrmann"
-    ],
-    "Bürgerpark Marzahn": [],
-    "Alt-Marzahn": [],
-    "Adersleber Weg": [],
-    "Allee der Kosmonauten": [
-        "A. der Kosmonauten",
-        "Allee der Astronauten"
-    ],
-    "Boschpoler Straße": [
-        "Boschpoler",
-        "Boschpolerstr.",
-        "Boschpolerstrasse"
-    ],
-    "Helene-Weigel-Platz": [
-        "Helene Weigel"
-    ],
-    "Beilsteiner Straße": [
-        "Beilsteiner",
-        "Beilsteinerstr.",
-        "Beilsteinerstrasse"
-    ],
-    "Rhinstraße": [
-        "Rhinstr.",
-        "Rhinstraße"
-    ],
-    "Ev. Krankenhaus KEH": [],
-    "Herzbergstraße": [
-        "Herzberg",
-        "Herzbergstr.",
-        "Herzbergstrasse"
-    ],
-    "Siegfriedstraße": [
-        "Siegfried",
-        "Siegfriedstr.",
-        "Siegfriedstrasse"
-    ],
-    "Bernhard-Bästlein-Straße": [
-        "Bernhard Bästlein"
-    ],
-    "Roederplatz": [
-        "Röderplatz",
-        "Roederplz"
-    ],
-    "Anton-Saefkow-Platz": [
-        "Anton Saefkow",
-        "Anton-Saefkow Plz"
-    ],
-    "Karl-Lade-Straße": [
-        "Karl Lade"
-    ],
-    "Pappelplatz": [
-        "Pappelplz"
-    ],
-    "Lübecker Straße": [
-        "Lübecker",
-        "Lübeckerstr.",
-        "Lübeckerstrasse"
-    ],
-    "Krimminalgericht Mobait": [
-        "Krimminalgericht"
-    ],
-    "Alt-Moabit": [],
-    "Gedenkstätte Berliner Mauer": [
-        "Berliner Mauer"
-    ],
-    "Wolliner Straße": [
-        "Wolliner",
-        "Wollinerstr.",
-        "Wollinerstrasse"
-    ],
-    "Friedrich-Ludwig-Jahn-Sportpark": [
-        "Friedrich Ludwig Jahn"
-    ],
-    "Husemannstraße": [
-        "Husemann",
-        "Husemannstr.",
-        "Husemannstrasse"
-    ],
-    "Winstraße": [
-        "Winstr.",
-        "Winstraße"
     ],
     "Arnswalder Platz": [
         "Arnswalder",
         "Arnswalderplz"
     ],
-    "Kniprodestraße": [
-        "Kniprodestr.",
-        "Kniprodestraße"
+    "Attilastraße": [
+        "Attilastr.",
+        "Attilastrasse"
     ],
-    "Paul-Heyse-Straße": [
-        "Paul Heyse"
+    "Augsburger Straße": [
+        "Augsburger",
+        "Augsburger Str.",
+        "Augsburger Strasse"
     ],
-    "Straßmannstraße": [
-        "Straßmann",
-        "Straßmannstr.",
-        "Straßmannstrasse"
+    "Babelsberg": [],
+    "Barnimplatz": [
+        "Barnimer",
+        "Barnimplz"
+    ],
+    "Baumschulenweg": [],
+    "Bayerischer Platz": [
+        "Bayerischer",
+        "Bayerischerplz"
+    ],
+    "Behaimstraße": [
+        "Behaimstr.",
+        "Behaimstrasse"
+    ],
+    "Beilsteiner Straße": [
+        "Beilsteiner",
+        "Beilsteiner Str.",
+        "Beilsteiner Strasse"
+    ],
+    "Bellevue": [],
+    "Benno-König-Straße": [
+        "Benno-König",
+        "Benno-König-str.",
+        "Benno-König-strasse"
+    ],
+    "Bergfelde": [],
+    "Berliner Straße": [
+        "Berliner Str.",
+        "Berliner Strasse"
+    ],
+    "Bernau": [],
+    "Bernau-Friedenstal": [],
+    "Bernauer Straße": [
+        "Bernauer",
+        "Bernauer Str.",
+        "Bernauer Strasse"
+    ],
+    "Bernhard-Bästlein-Straße": [
+        "Bernhard-Bästlein",
+        "Bernhard-Bästlein-str.",
+        "Bernhard-Bästlein-strasse"
     ],
     "Bersarinplatz": [
+        "Bersarin",
         "Bersarinplz"
     ],
-    "Grünberger Straße": [
-        "Grünberger",
-        "Grünbergerstr.",
-        "Grünbergerstrasse"
+    "Betriebsbahnhof Rummelsburg": [
+        "Betriebsbahnhof"
     ],
-    "Virchow-Klinikum": [],
-    "Osram-Höfe": [],
-    "Louise-Schröder-Platz": [
-        "Louise Schröder",
-        "Louise Schröderplz"
+    "Betriebshof Indira-Gandhi-Straße": [
+        "Betriebshof Indira-Gandhi",
+        "Betriebshof Indira-Gandhi-str.",
+        "Betriebshof Indira-Gandhi-strasse"
     ],
-    "Drontheimer Straße": [
-        "Drontheimer",
-        "Drontheimerstr.",
-        "Drontheimerstrasse"
+    "Betriebshof Marzahn": [
+        "Betriebshof"
     ],
-    "Prinzenallee": [
-        "Prinzenallee"
+    "Beusselstraße": [
+        "Beussel",
+        "Beusselstr.",
+        "Beusselstrasse"
     ],
-    "Grüntaler Straße": [
-        "Grüntaler",
-        "Grüntalerstr.",
-        "Grüntalerstrasse"
+    "Biesdorf": [],
+    "Biesdorf-Süd": [],
+    "Birkenstein": [],
+    "Birkenstraße": [
+        "Birkenstr.",
+        "Birkenstrasse"
+    ],
+    "Birkenwerder": [],
+    "Bismarckstraße": [
+        "Bismarck",
+        "Bismarckstr.",
+        "Bismarckstrasse"
     ],
     "Björnsonstraße": [
         "Björnson",
         "Björnsonstr.",
         "Björnsonstrasse"
     ],
-    "Schönfließer Straße": [
-        "Schönfließer",
-        "Schönfließerstr.",
-        "Schönfließerstrasse"
+    "Blankenburg": [],
+    "Blankenfelde (TF)": [
+        "Blankenfelde"
     ],
-    "Stahlheimer Straße": [
-        "Stahlheimer",
-        "Stahlheimerstr.",
-        "Stahlheimerstrasse"
+    "Blaschkoallee": [
+        "Blaschko"
     ],
-    "Gustav-Adolf-Straße": [
-        "Gustav Adolf",
-        "Gustav-Adolf-Straße"
+    "Blissestraße": [
+        "Blissestr.",
+        "Blissestrasse"
     ],
-    "Friesickestraße": [
-        "Friesicker",
-        "Friesickerstr.",
-        "Friesickerstrasse"
+    "Boddinstraße": [
+        "Boddin",
+        "Boddinstr.",
+        "Boddinstrasse"
     ],
-    "Rathaus Lichtenberg": [],
-    "Jessnerstraße": [
-        "Jessner",
-        "Jessnerstr.",
-        "Jessnerstrasse"
+    "Borgsdorf": [],
+    "Bornholmer Straße": [
+        "Bornholmer",
+        "Bornholmer Str.",
+        "Bornholmer Strasse"
     ],
-    "Traveplatz": [
-        "Traveplz"
+    "Boschpoler Straße": [
+        "Boschpoler",
+        "Boschpoler Str.",
+        "Boschpoler Strasse"
     ],
-    "Holteistraße": [
-        "Holteister",
-        "Holteisterstr.",
-        "Holteisterstrasse"
+    "Botanischer Garten": [],
+    "Brandenburger Tor": [
+        "Brandenburger"
     ],
-    "Wühlischstraße": [
-        "Wühlisch",
-        "Wühlischstr.",
-        "Wühlischstrasse"
+    "Breitenbachplatz": [
+        "Breitenbach",
+        "Breitenbachplz"
     ],
-    "Simplonstraße": [
-        "Simplon",
-        "Simplonstr.",
-        "Simplonstrasse"
+    "Britz-Süd": [],
+    "Brodowiner Ring": [
+        "Brodowiner"
     ],
-    "Kopernikusstraße": [
-        "Kopernikus",
-        "Kopernikusstr.",
-        "Kopernikusstrasse"
-    ],
-    "Prendenener Straße": [
-        "Prendenener",
-        "Prendenenerstr.",
-        "Prendenenerstrasse"
-    ],
-    "Meeraner Straße": [
-        "Meeraner",
-        "Meeranerstr.",
-        "Meeranerstrasse"
-    ],
-    "Kleingartenanlage Bielefeldt": [],
-    "Alt-Friedrichsfelde": [],
-    "Alfred-Kowalke-Straße": [
-        "Alfred Kowalke",
-        "Alfred-Kowalke Strasse"
-    ],
-    "Criegernweg": [],
-    "Treskowallee": [],
-    "Marksburgstraße": [
-        "Marksburg",
-        "Marksburgstr.",
-        "Marksburgstrasse"
-    ],
-    "Traberweg": [],
-    "Hegemeisterweg": [],
-    "Volkspark Wuhlheide": [],
-    "Rummelsburger Straße": [
-        "Rummelsburger",
-        "Rummelsburgerstr.",
-        "Rummelsburgerstrasse"
-    ],
-    "Wilhelmshofstraße": [
-        "Wilhelmshof",
-        "Wilhelmshofstr.",
-        "Wilhelmshofstrasse"
+    "Brunnenstraße/Invalidenstraße": [
+        "Brunnenstraße/Invaliden",
+        "Brunnenstraße/Invalidenstr.",
+        "Brunnenstraße/Invalidenstrasse"
     ],
     "Brückenstraße": [
         "Brücken",
         "Brückenstr.",
         "Brückenstrasse"
     ],
-    "Sterndamm": [],
-    "Nieberstraße": [
-        "Nieber",
-        "Nieberstr.",
-        "Nieberstrasse"
+    "Buch": [],
+    "Buckower Chaussee": [
+        "Buckower"
     ],
+    "Bundesplatz": [
+        "Bundes",
+        "Bundesplz"
+    ],
+    "Bundestag": [],
+    "Buschallee": [
+        "Busch"
+    ],
+    "Bülowstraße": [
+        "Bülow",
+        "Bülowstr.",
+        "Bülowstrasse"
+    ],
+    "Bürgerpark Marzahn": [],
+    "Bürgerpark Pankow": [],
+    "Büschingstraße": [
+        "Büsching",
+        "Büschingstr.",
+        "Büschingstrasse"
+    ],
+    "Clara-Jaschke-Straße": [
+        "Clara-Jaschke-",
+        "Clara-Jaschke-str.",
+        "Clara-Jaschke-strasse"
+    ],
+    "Cottbusser Platz": [
+        "Cottbusser",
+        "Cottbusserplz"
+    ],
+    "Criegernweg": [],
+    "Dahlem-Dorf": [],
+    "Deutsche Oper": [],
+    "Dingelstädter Straße": [
+        "Dingelstädter",
+        "Dingelstädter Str.",
+        "Dingelstädter Strasse"
+    ],
+    "Drontheimer Straße": [
+        "Drontheimer",
+        "Drontheimer Str.",
+        "Drontheimer Strasse"
+    ],
+    "Eberswalder Straße": [
+        "Eberswalder",
+        "Eberswalder Str.",
+        "Eberswalder Strasse"
+    ],
+    "Eichborndamm": [],
+    "Eichwalde": [],
+    "Eisenacher Straße": [
+        "Eisenacher",
+        "Eisenacher Str.",
+        "Eisenacher Strasse"
+    ],
+    "Elsterwerdaer Platz": [
+        "Elsterwerdaer",
+        "Elsterwerdaerplz",
+        "Elsterwerderplatz"
+    ],
+    "Erich-Weinert-Straße": [
+        "Erich-Weinert",
+        "Erich-Weinert-str.",
+        "Erich-Weinert-strasse"
+    ],
+    "Erkner": [],
+    "Ernst-Reuter-Platz": [
+        "Ernsti",
+        "Ernst-Reuter",
+        "Ernst-Reuter-plz"
+    ],
+    "Ev. Krankenhaus KEH": [],
+    "Falkenberg": [],
+    "Fehrbelliner Platz": [
+        "Fehrbelliner",
+        "Fehrbellinerplz"
+    ],
+    "Feldtmannstraße": [
+        "Feldtmann",
+        "Feldtmannstr.",
+        "Feldtmannstrasse"
+    ],
+    "Feuerbachstraße": [
+        "Feuerbach",
+        "Feuerbachstr.",
+        "Feuerbachstrasse"
+    ],
+    "Flughafen BER": [
+        "Flughafen"
+    ],
+    "Frankfurter Allee": [],
+    "Frankfurter Tor": [],
+    "Franz-Neumann-Platz": [
+        "Franz-Neumann",
+        "Franz-Neumann-plz"
+    ],
+    "Fredersdorf": [],
+    "Freie Universität (Thielplatz)": [
+        "FU",
+        "Freie Universität",
+        "Thielplatz"
+    ],
+    "Freienwalder Straße": [
+        "Freienwalder",
+        "Freienwalder Str.",
+        "Freienwalder Strasse"
+    ],
+    "Freizeitforum Marzahn": [
+        "Freizeitforum"
+    ],
+    "Friedenau": [],
+    "Friedrich-Ludwig-Jahn-Sportpark": [],
+    "Friedrich-Wilhelm-Platz": [
+        "Friedrich-Wilhelm",
+        "Friedrich-Wilhelm-plz"
+    ],
+    "Friedrichsfelde": [],
+    "Friedrichsfelde Ost": [],
+    "Friedrichshagen": [],
+    "Friedrichstraße": [
+        "Friedrichstr.",
+        "Friedrichstrasse"
+    ],
+    "Friesickestraße": [
+        "Friesicke",
+        "Friesickestr.",
+        "Friesickestrasse"
+    ],
+    "Frohnau": [],
+    "Fröbelstraße": [
+        "Fröbel",
+        "Fröbelstr.",
+        "Fröbelstrasse"
+    ],
+    "Gedenkstätte Berliner Mauer": [
+        "Gedenkstätte"
+    ],
+    "Gehrenseestraße": [
+        "Gehrensee",
+        "Gehrenseestr.",
+        "Gehrenseestrasse"
+    ],
+    "Genslerstraße": [
+        "Gensler",
+        "Genslerstr.",
+        "Genslerstrasse"
+    ],
+    "Gerhard-Sedlmayr-Straße": [
+        "Gerhard-Sedlmayr",
+        "Gerhard-Sedlmayr-str.",
+        "Gerhard-Sedlmayr-strasse"
+    ],
+    "Gesundbrunnen": [],
+    "Gewerbepark Georg Knorr": [
+        "Georg Knorr",
+        "Gewerbepark"
+    ],
+    "Gleisdreieck": [],
+    "Gneisenaustraße": [
+        "Gneisenauer",
+        "Gneisenau",
+        "Gneisenaustr.",
+        "Gneisenaustrasse"
+    ],
+    "Gounodstraße": [
+        "Gounodstr.",
+        "Gounodstrasse"
+    ],
+    "Greifswalder Straße": [
+        "Greifswalder",
+        "Greifswalder Str.",
+        "Greifswalder Strasse"
+    ],
+    "Greifswalder Straße/Danziger Straße": [
+        "Greifswalder Straße/Danziger",
+        "Greifswalder Straße/Danziger Str.",
+        "Greifswalder Straße/Danziger Strasse"
+    ],
+    "Greifswalder Straße/Ostseestraße": [
+        "Greifswalder Straße/Ostsee",
+        "Greifswalder Straße/Ostseestr.",
+        "Greifswalder Straße/Ostseestrasse"
+    ],
+    "Grenzallee": [],
+    "Griebnitzsee": [],
+    "Grunewald": [],
+    "Grünau": [],
+    "Grünbergallee": [
+        "Grünberger"
+    ],
+    "Grünberger Straße/Warschauer Straße": [
+        "Grünberger Straße/Warschauer",
+        "Grünberger Straße/Warschauer Str.",
+        "Grünberger Straße/Warschauer Strasse"
+    ],
+    "Grüntaler Straße": [
+        "Grüntaler",
+        "Grüntaler Str.",
+        "Grüntaler Strasse"
+    ],
+    "Gustav-Adolf-Straße/Langhansstraße": [
+        "Gustav-Adolf-Straße/Langhans",
+        "Gustav-Adolf-Straße/Langhansstr.",
+        "Gustav-Adolf-Straße/Langhansstrasse"
+    ],
+    "Görlitzer Bahnhof": [
+        "Görlitzer"
+    ],
+    "Güntzelstraße": [
+        "Güntzel",
+        "Güntzelstr.",
+        "Güntzelstrasse"
+    ],
+    "Hackescher Markt": [
+        "Hackescher"
+    ],
+    "Halemweg": [],
+    "Halensee": [],
+    "Hallesches Tor": [
+        "Hallesches"
+    ],
+    "Hannoversche Straße": [
+        "Hannoversche",
+        "Hannoversche Str.",
+        "Hannoversche Strasse"
+    ],
+    "Hansaplatz": [
+        "Hansa",
+        "Hansaplz"
+    ],
+    "Hansastraße/Buschallee": [
+        "Hansastraße/Busch"
+    ],
+    "Hansastraße/Malchower Weg": [
+        "Hansastraße/Malchower"
+    ],
+    "Haselhorst": [],
+    "Hauptbahnhof": [
+        "HBF"
+    ],
+    "Hausvogteiplatz": [
+        "Hausvogtei",
+        "Hausvogteiplz"
+    ],
+    "Heerstraße": [
+        "Heer",
+        "Heerstr.",
+        "Heerstrasse"
+    ],
+    "Hegemeisterweg": [],
+    "Hegermühle": [],
+    "Heidelberger Platz": [
+        "Heidelberger",
+        "Heidelbergerplz"
+    ],
+    "Heiligensee": [],
+    "Heinersdorf": [],
+    "Heinersdorf Kirche": [
+        "Heinersdorf"
+    ],
+    "Heinrich-Böll-Straße": [
+        "Heinrich-Böll",
+        "Heinrich-Böll-str.",
+        "Heinrich-Böll-strasse"
+    ],
+    "Heinrich-Heine-Straße": [
+        "Heine",
+        "Heinrich-Heine",
+        "Heinrich-Heine-str.",
+        "Heinrich-Heine-strasse"
+    ],
+    "Helene-Weigel-Platz": [
+        "Helene-Weigel",
+        "Helene-Weigel-plz"
+    ],
+    "Hellersdorf": [],
+    "Hennigsdorf": [],
+    "Hermann-Hesse-Straße/Waldstraße": [
+        "Hermann-Hesse-Straße/Wald",
+        "Hermann-Hesse-Straße/Waldstr.",
+        "Hermann-Hesse-Straße/Waldstrasse"
+    ],
+    "Hermannplatz": [
+        "Hermannplz"
+    ],
+    "Hermannstraße": [
+        "Hermannstr.",
+        "Hermannstrasse"
+    ],
+    "Hermsdorf": [],
+    "Herzbergstraße/Industriegebiet": [],
+    "Herzbergstraße/Siegfriedstraße": [
+        "Herzbergstraße/Siegfried",
+        "Herzbergstraße/Siegfriedstr.",
+        "Herzbergstraße/Siegfriedstrasse"
+    ],
+    "Hirschgarten": [],
+    "Hohen Neuendorf": [],
+    "Hohenschönhausen": [],
+    "Hohenschönhauser Straße": [
+        "Hohenschönhauser",
+        "Hohenschönhauser Str.",
+        "Hohenschönhauser Strasse"
+    ],
+    "Hohenzollerndamm": [
+        "Hohenzollern"
+    ],
+    "Hohenzollernplatz": [
+        "Hohenzollern",
+        "Hohenzollernplz"
+    ],
+    "Holteistraße": [
+        "Holtei",
+        "Holteistr.",
+        "Holteistrasse"
+    ],
+    "Hoppegarten (Mark)": [
+        "Hoppegarten"
+    ],
+    "Hufelandstraße": [
+        "Hufeland",
+        "Hufelandstr.",
+        "Hufelandstrasse"
+    ],
+    "Humboldthain": [],
+    "Husemannstraße": [
+        "Husemann",
+        "Husemannstr.",
+        "Husemannstrasse"
+    ],
+    "Hönow": [],
+    "Innsbrucker Platz": [
+        "Innsbrucker",
+        "Innsbruckerplz"
+    ],
+    "Invalidenpark": [],
+    "Jakob-Kaiser-Platz": [
+        "Jakob-Kaiser",
+        "Jakob-Kaiser-plz"
+    ],
+    "Jan-Petersen-Straße": [
+        "Jan-Petersen",
+        "Jan-Petersen-str.",
+        "Jan-Petersen-strasse"
+    ],
+    "Jannowitzbrücke": [],
+    "Jenaer Straße": [
+        "Jenaer",
+        "Jenaer Str.",
+        "Jenaer Strasse"
+    ],
+    "Jessnerstraße": [
+        "Jessner",
+        "Jessnerstr.",
+        "Jessnerstrasse"
+    ],
+    "Johannisthal": [],
+    "Johannisthaler Chaussee": [
+        "Johannisthaler"
+    ],
+    "Judith-Auer-Straße": [
+        "Judith-Auer",
+        "Judith-Auer-str.",
+        "Judith-Auer-strasse"
+    ],
+    "Julius-Leber-Brücke": [
+        "Julius Leber"
+    ],
+    "Jungfernheide": [],
+    "Kaiserdamm": [],
+    "Kaiserin-Augusta-Straße": [
+        "Kaiserin-Augusta",
+        "Kaiserin-Augusta-str.",
+        "Kaiserin-Augusta-strasse"
+    ],
+    "Karl-Bonhoeffer-Nervenklinik": [
+        "Karl Bonhoeffer"
+    ],
+    "Karl-Marx-Straße": [
+        "Marx-Straße",
+        "Karl-Marx-str.",
+        "Karl-Marx-strasse"
+    ],
+    "Karl-Ziegler-Straße": [
+        "Karl Ziegler",
+        "Karl-Ziegler-str.",
+        "Karl-Ziegler-strasse"
+    ],
+    "Karlshorst": [],
+    "Karow": [],
+    "Kaulsdorf": [],
+    "Kaulsdorf-Nord": [],
+    "Kienberg (Gärten der Welt)": [
+        "Gärten der Welt",
+        "Kienberg"
+    ],
+    "Kleingartenanlage Bielefeldt": [
+        "Kleingartenanlage"
+    ],
+    "Kleistpark": [],
+    "Klinikum im Friedrichshain": [],
+    "Klosterstraße": [
+        "Klosterstr.",
+        "Klosterstrasse"
+    ],
+    "Knaackstraße": [
+        "Knaackstr.",
+        "Knaackstrasse"
+    ],
+    "Kniprodestraße/Danziger Straße": [
+        "Kniprodestraße/Danziger",
+        "Kniprodestraße/Danziger Str.",
+        "Kniprodestraße/Danziger Strasse"
+    ],
+    "Kochstraße/Checkpoint Charlie": [
+        "Kochstraße/Checkpoint"
+    ],
+    "Konstanzer Straße": [
+        "Konstanzer",
+        "Konstanzer Str.",
+        "Konstanzer Strasse"
+    ],
+    "Kottbusser Tor": [
+        "Kottbusser",
+        "Kotti"
+    ],
+    "Kriminalgericht Moabit": [
+        "Kriminalgericht"
+    ],
+    "Krumme Lanke": [],
+    "Kuckhoffstraße": [
+        "Kuckhoff",
+        "Kuckhoffstr.",
+        "Kuckhoffstrasse"
+    ],
+    "Kurfürstendamm": [
+        "KuDamm"
+    ],
+    "Kurfürstenstraße": [
+        "Kurfürsten",
+        "Kurfürstenstr.",
+        "Kurfürstenstrasse"
+    ],
+    "Kurt-Schumacher-Platz": [
+        "Schumacherplz",
+        "Kurt-Schumacher",
+        "Kurt-Schumacher-plz"
+    ],
+    "Köllnische Heide": [],
+    "Königs Wusterhausen": [],
+    "Köpenick": [],
     "Landfliegerstraße": [
         "Landflieger",
         "Landfliegerstr.",
         "Landfliegerstrasse"
     ],
-    "Benno-König-Straße": [
-        "Benno König"
+    "Landsberger Allee": [
+        "Landsberger",
+        "Landsi"
     ],
-    "Gerhard-Sedlmayr-Straße": [
-        "Gerhard Sedlmayr"
+    "Landsberger Allee/Blumberger Damm": [],
+    "Landsberger Allee/Petersburger Straße": [
+        "Landsberger Allee/Petersburger",
+        "Landsberger Allee/Petersburger Str.",
+        "Landsberger Allee/Petersburger Strasse"
     ],
-    "Landschaftspark Johannisthal": [],
-    "Karl-Ziegler-Straße": [
-        "Karl Ziegler"
+    "Landsberger Allee/Rhinstraße": [
+        "Landsberger Allee/Rhin",
+        "Landsberger Allee/Rhinstr.",
+        "Landsberger Allee/Rhinstrasse"
     ],
-    "Magnusstraße": [],
+    "Landsberger Allee/Weißenseer Weg": [],
+    "Landsberger Chaussee/Zossener Straße": [
+        "Landsberger Chaussee/Zossener",
+        "Landsberger Chaussee/Zossener Str.",
+        "Landsberger Chaussee/Zossener Strasse"
+    ],
+    "Landschaftspark Johannisthal": [
+        "Landschaftspark"
+    ],
+    "Lankwitz": [],
+    "Lehnitz": [],
+    "Leinestraße": [
+        "Leine",
+        "Leinestr.",
+        "Leinestrasse"
+    ],
+    "Leopoldplatz": [
+        "Leo",
+        "Leoplatz",
+        "Leopold",
+        "Leopoldplz"
+    ],
+    "Lichtenberg/Siegfriedstraße": [
+        "Lichtenberg/Siegfried",
+        "Lichtenberg/Siegfriedstr.",
+        "Lichtenberg/Siegfriedstrasse"
+    ],
+    "Lichtenrade": [],
+    "Lichterfelde Ost": [
+        "LOST"
+    ],
+    "Lichterfelde Süd": [],
+    "Lichterfelde West": [],
+    "Lindauer Allee": [
+        "Lindauer"
+    ],
+    "Lipschitzallee": [
+        "Lipschitz"
+    ],
+    "Loeperplatz": [
+        "Loeper",
+        "Loeperplz"
+    ],
+    "Louis-Lewin-Straße": [
+        "Louis-Lewin",
+        "Louis-Lewin-str.",
+        "Louis-Lewin-strasse"
+    ],
+    "Louise-Schroeder-Platz": [
+        "Louise-Schroeder",
+        "Louise-Schroeder-plz"
+    ],
+    "Lübecker Straße": [
+        "Lübecker",
+        "Lübecker Str.",
+        "Lübecker Strasse"
+    ],
+    "Lüneburger Straße": [
+        "Lüneburger",
+        "Lüneburger Str.",
+        "Lüneburger Strasse"
+    ],
+    "Magdalenenstraße": [
+        "Magdalenen",
+        "Magdalenenstr.",
+        "Magdalenenstrasse"
+    ],
+    "Magnusstraße": [
+        "Magnusstr.",
+        "Magnusstrasse"
+    ],
+    "Mahlow": [],
+    "Mahlsdorf": [],
+    "Marienburger Straße": [
+        "Marienburger",
+        "Marienburger Str.",
+        "Marienburger Strasse"
+    ],
+    "Marienfelde": [],
+    "Marksburgstraße": [
+        "Marksburger",
+        "Marksburgstr.",
+        "Marksburgstrasse"
+    ],
+    "Marzahn": [],
+    "Marzahner Promenade": [
+        "Marzahner"
+    ],
+    "Masurenstraße": [
+        "Masuren",
+        "Masurenstr.",
+        "Masurenstrasse"
+    ],
+    "Max-Herrmann-Straße": [
+        "Max-Herrmann",
+        "Max-Herrmann-str.",
+        "Max-Herrmann-strasse"
+    ],
+    "Meeraner Straße": [
+        "Meeraner",
+        "Meeraner Str.",
+        "Meeraner Strasse"
+    ],
+    "Mehringdamm": [],
+    "Mehrower Allee": [
+        "Mehrower"
+    ],
+    "Mendelssohn-Bartholdy-Park": [],
+    "Messe Nord/ZOB": [
+        "Messe"
+    ],
+    "Messe Süd (Eichkamp)": [],
+    "Mexikoplatz": [
+        "Mexiko",
+        "Mexikoplz"
+    ],
+    "Michendorfer Straße": [
+        "Michendorfer",
+        "Michendorfer Str.",
+        "Michendorfer Strasse"
+    ],
+    "Mierendorffplatz": [
+        "Mierendorff",
+        "Mierendorffplz"
+    ],
+    "Milastraße": [
+        "Mila",
+        "Milastr.",
+        "Milastrasse"
+    ],
+    "Mohrenstraße": [
+        "Mohren",
+        "Mohrenstr.",
+        "Mohrenstrasse"
+    ],
+    "Mollstraße/Otto-Braun-Straße": [
+        "Mollstraße/Otto-Braun",
+        "Mollstraße/Otto-Braun-str.",
+        "Mollstraße/Otto-Braun-strasse"
+    ],
+    "Mollstraße/Prenzlauer Allee": [
+        "Mollstraße/Prenzlauer"
+    ],
+    "Monbijouplatz": [
+        "Monbijou",
+        "Monbijouplz"
+    ],
+    "Moritzplatz": [
+        "Moritz",
+        "Moritzplz"
+    ],
+    "Museumsinsel": [],
+    "Märkisches Museum": [],
+    "Möckernbrücke": [],
+    "Möllendorffstraße/Storkower Straße": [
+        "Möllendorffstraße/Storkower",
+        "Möllendorffstraße/Storkower Str.",
+        "Möllendorffstraße/Storkower Strasse"
+    ],
+    "Mühlenbeck-Mönchmühle": [],
+    "Naturkundemuseum": [],
+    "Nauener Platz": [
+        "Nauener",
+        "Nauenerplz"
+    ],
+    "Neu-Westend": [
+        "N. Westend"
+    ],
+    "Neuenhagen": [],
+    "Neukölln": [],
+    "Nieberstraße": [
+        "Nieber",
+        "Nieberstr.",
+        "Nieberstrasse"
+    ],
+    "Niemegker Straße": [
+        "Niemegker",
+        "Niemegker Str.",
+        "Niemegker Strasse"
+    ],
+    "Nikolassee": [],
+    "Nollendorfplatz": [
+        "Nollendorf",
+        "Nollendorfplz"
+    ],
+    "Nordbahnhof": [],
+    "Nordend": [],
+    "Nossener Straße": [
+        "Nossener",
+        "Nossener Str.",
+        "Nossener Strasse"
+    ],
+    "Nöldnerplatz": [
+        "Nöldner",
+        "Nöldnerplz"
+    ],
+    "Oberseestraße": [
+        "Obersee",
+        "Oberseestr.",
+        "Oberseestrasse"
+    ],
+    "Oberspree": [],
+    "Oderbruchstraße": [
+        "Oderbruch",
+        "Oderbruchstr.",
+        "Oderbruchstrasse"
+    ],
+    "Olympia-Stadion": [],
+    "Olympiastadion": [],
+    "Onkel Toms Hütte": [
+        "O. Toms Hütte"
+    ],
+    "Oranienburg": [],
+    "Oranienburger Straße": [
+        "Oranienburger",
+        "Oranienburger Str.",
+        "Oranienburger Strasse"
+    ],
+    "Oranienburger Tor": [
+        "Oranienburger"
+    ],
+    "Osdorfer Straße": [
+        "Osdorfer",
+        "Osdorfer Str.",
+        "Osdorfer Strasse"
+    ],
+    "Oskar-Helene-Heim": [],
+    "Osloer Straße": [
+        "Osloer",
+        "Osloer Str.",
+        "Osloer Strasse"
+    ],
+    "Osloer Straße/Prinzenallee": [
+        "Osloer Straße/Prinzen"
+    ],
+    "Osram-Höfe": [],
+    "Ostbahnhof": [],
+    "Ostkreuz": [],
+    "Pankow": [],
+    "Pankow Kirche": [],
+    "Pankow-Heinersdorf": [],
+    "Pankstraße": [
+        "Pankstr.",
+        "Pankstrasse"
+    ],
+    "Pappelplatz": [
+        "Pappelplz"
+    ],
+    "Paracelsus-Bad": [],
+    "Paradestraße": [
+        "Paradestr.",
+        "Paradestrasse"
+    ],
+    "Parchimer Allee": [
+        "Parchimer"
+    ],
+    "Pastor-Niemöller-Platz": [
+        "Pastor-Niemöller",
+        "Pastor-Niemöller-plz"
+    ],
+    "Paul-Heyse-Straße": [
+        "Paul-Heyse",
+        "Paul-Heyse-str.",
+        "Paul-Heyse-strasse"
+    ],
+    "Paulsternstraße": [
+        "Paulstern",
+        "Paulsternstr.",
+        "Paulsternstrasse"
+    ],
+    "Petershagen Nord": [
+        "Petershagen"
+    ],
+    "Pichelsberg": [],
+    "Platz der Luftbrücke": [
+        "P. Luftbrücke"
+    ],
+    "Platz der Vereinten Nationen": [
+        "P. Vereinte Nationen"
+    ],
+    "Plänterwald": [],
+    "Podbielskiallee": [
+        "Podbielski"
+    ],
+    "Poelchaustraße": [
+        "Poelchau",
+        "Poelchaustr.",
+        "Poelchaustrasse"
+    ],
+    "Potsdam Hauptbahnhof": [
+        "Potsdam HBF",
+        "Potsdam"
+    ],
+    "Potsdamer Platz": [
+        "Potsdamer",
+        "Potsdamerplz"
+    ],
+    "Prendener Straße": [
+        "Prendener",
+        "Prendener Str.",
+        "Prendener Strasse"
+    ],
+    "Prenzlauer Allee": [
+        "Prenzlauer"
+    ],
+    "Prenzlauer Allee/Danziger Straße": [
+        "Prenzlauer Allee/Danziger",
+        "Prenzlauer Allee/Danziger Str.",
+        "Prenzlauer Allee/Danziger Strasse"
+    ],
+    "Prenzlauer Allee/Metzer Straße": [
+        "Prenzlauer Allee/Metzer",
+        "Prenzlauer Allee/Metzer Str.",
+        "Prenzlauer Allee/Metzer Strasse"
+    ],
+    "Prenzlauer Allee/Ostseestraße": [
+        "Prenzlauer Allee/Ostsee",
+        "Prenzlauer Allee/Ostseestr.",
+        "Prenzlauer Allee/Ostseestrasse"
+    ],
+    "Prenzlauer Promenade/Am Steinberg": [],
+    "Prerower Platz": [
+        "Prerower",
+        "Prerowerplz"
+    ],
+    "Priesterweg": [],
+    "Prinzenstraße": [
+        "Prinzen",
+        "Prinzenstr.",
+        "Prinzenstrasse"
+    ],
+    "Rahnsdorf": [],
+    "Raoul-Wallenberg-Straße": [
+        "Raoul-Wallenberg",
+        "Raoul-Wallenberg-str.",
+        "Raoul-Wallenberg-strasse"
+    ],
+    "Rathaus Lichtenberg": [],
+    "Rathaus Neukölln": [],
+    "Rathaus Pankow": [],
+    "Rathaus Reinickendorf": [],
+    "Rathaus Schöneberg": [],
+    "Rathaus Spandau": [],
+    "Rathaus Steglitz": [],
+    "Rehberge": [],
+    "Reinickendorfer Straße": [
+        "Reinickendorfer",
+        "Reinickendorfer Str.",
+        "Reinickendorfer Strasse"
+    ],
+    "Residenzstraße": [
+        "Residenz",
+        "Residenzstr.",
+        "Residenzstrasse"
+    ],
+    "Revaler Straße": [
+        "Revaler",
+        "Revaler Str.",
+        "Revaler Strasse"
+    ],
+    "Rhinstraße/Gärtnerstraße": [
+        "Rhinstraße/Gärtner",
+        "Rhinstraße/Gärtnerstr.",
+        "Rhinstraße/Gärtnerstrasse"
+    ],
+    "Rhinstraße/Plauener Straße": [
+        "Rhinstraße/Plauener",
+        "Rhinstraße/Plauener Str.",
+        "Rhinstraße/Plauener Strasse"
+    ],
+    "Richard-Wagner-Platz": [
+        "Richard-Wagner",
+        "Richard-Wagner-plz"
+    ],
+    "Riesaer Straße/Louis-Lewin-Straße": [
+        "Riesaer Straße/Louis-Lewin",
+        "Riesaer Straße/Louis-Lewin-str.",
+        "Riesaer Straße/Louis-Lewin-strasse"
+    ],
+    "Roederplatz": [
+        "Roeder",
+        "Roederplz"
+    ],
+    "Rohrdamm": [],
+    "Rosa-Luxemburg-Platz": [
+        "Rosa-Luxemburg",
+        "Rosa-Luxemburg-plz"
+    ],
+    "Rosenthaler Platz": [
+        "Rosenthaler",
+        "Rosenthalerplz"
+    ],
+    "Rotes Rathaus": [],
+    "Rothenbachstraße": [
+        "Rothenbach",
+        "Rothenbachstr.",
+        "Rothenbachstrasse"
+    ],
+    "Rudow": [],
+    "Ruhleben": [],
+    "Rummelsburg": [],
+    "Rummelsburger Straße/Edisonstraße": [
+        "Rummelsburger Straße/Edison",
+        "Rummelsburger Straße/Edisonstr.",
+        "Rummelsburger Straße/Edisonstrasse"
+    ],
+    "Röntgental": [],
+    "Rüdesheimer Platz": [
+        "Rüdesheimer",
+        "Rüdesheimerplz"
+    ],
+    "Rüdickenstraße": [
+        "Rüdicken",
+        "Rüdickenstr.",
+        "Rüdickenstrasse"
+    ],
+    "Samariterstraße": [
+        "Samariter",
+        "Samariterstr.",
+        "Samariterstrasse"
+    ],
+    "Sandinostraße": [
+        "Sandino",
+        "Sandinostr.",
+        "Sandinostrasse"
+    ],
+    "Savignyplatz": [
+        "Savigny",
+        "Savignyplz"
+    ],
+    "Schichauweg": [],
+    "Schillerstraße": [
+        "Schiller",
+        "Schillerstr.",
+        "Schillerstrasse"
+    ],
+    "Schillingstraße": [
+        "Schilling",
+        "Schillingstr.",
+        "Schillingstrasse"
+    ],
+    "Schlachtensee": [],
+    "Schlesisches Tor": [
+        "Schlesisches"
+    ],
+    "Schloßstraße": [
+        "Schloß",
+        "Schloßstr.",
+        "Schloßstrasse"
+    ],
+    "Schulzendorf (b Tegel)": [],
+    "Schwartzkopffstraße": [
+        "Schwartzkopff",
+        "Schwartzkopffstr.",
+        "Schwartzkopffstrasse"
+    ],
+    "Schwedter Straße": [
+        "Schwedter",
+        "Schwedter Str.",
+        "Schwedter Strasse"
+    ],
+    "Schöneberg": [],
+    "Schönefeld": [],
+    "Schöneweide/Sterndamm": [],
+    "Schönfließ": [],
+    "Schönfließer Straße": [
+        "Schönfließer",
+        "Schönfließer Str.",
+        "Schönfließer Strasse"
+    ],
+    "Schönhauser Allee": [
+        "Schönhauser"
+    ],
+    "Schönhauser Allee/Bornholmer Straße": [
+        "Schönhauser Allee/Bornholmer",
+        "Schönhauser Allee/Bornholmer Str.",
+        "Schönhauser Allee/Bornholmer Strasse"
+    ],
+    "Schönholz": [],
+    "Schönleinstraße": [
+        "Schönlein",
+        "Schönleinstr.",
+        "Schönleinstrasse"
+    ],
+    "Seestraße": [
+        "Seestr.",
+        "Seestrasse"
+    ],
+    "Seestraße/Amrumer Straße": [
+        "Seestraße/Amrumer",
+        "Seestraße/Amrumer Str.",
+        "Seestraße/Amrumer Strasse"
+    ],
+    "Senefelderplatz": [
+        "Senefelder",
+        "Senefelderplz"
+    ],
+    "Siemensdamm": [],
+    "Siemensstraße/Edisonstraße": [
+        "Siemensstraße/Edison",
+        "Siemensstraße/Edisonstr.",
+        "Siemensstraße/Edisonstrasse"
+    ],
+    "Simon-Bolivar-Straße": [
+        "Simon-Bolivar",
+        "Simon-Bolivar-str.",
+        "Simon-Bolivar-strasse"
+    ],
+    "Sonnenallee": [],
+    "Sophie-Charlotte-Platz": [
+        "Sophie-Charlotte",
+        "Sophie-Charlotte-plz"
+    ],
+    "Spandauer Straße/Marienkirche": [
+        "Spandauer"
+    ],
+    "Spichernstraße": [
+        "Spichern",
+        "Spichernstr.",
+        "Spichernstrasse"
+    ],
+    "Spindlersfeld": [],
+    "Spittelmarkt": [],
+    "Sportforum": [],
+    "Springpfuhl": [],
+    "Stadion Buschallee/Hansastraße": [
+        "Stadion Buschallee/Hansa",
+        "Stadion Buschallee/Hansastr.",
+        "Stadion Buschallee/Hansastrasse"
+    ],
+    "Stadtmitte": [],
+    "Stahlheimer Straße/Wisbyer Straße": [
+        "Stahlheimer Straße/Wisbyer",
+        "Stahlheimer Straße/Wisbyer Str.",
+        "Stahlheimer Straße/Wisbyer Strasse"
+    ],
+    "Stendaler Straße/Quedlinburger Straße": [
+        "Stendaler Straße/Quedlinburger",
+        "Stendaler Straße/Quedlinburger Str.",
+        "Stendaler Straße/Quedlinburger Strasse"
+    ],
+    "Stendaler Straße/Zossener Straße": [
+        "Stendaler Straße/Zossener",
+        "Stendaler Straße/Zossener Str.",
+        "Stendaler Straße/Zossener Strasse"
+    ],
+    "Storkower Straße": [
+        "Storkower",
+        "Storkower Str.",
+        "Storkower Strasse"
+    ],
+    "Strausberg": [],
+    "Strausberg Nord": [],
+    "Strausberg Stadt": [],
+    "Strausberger Platz": [
+        "Strausberger",
+        "Strausbergerplz"
+    ],
+    "Straßmannstraße": [
+        "Strassi",
+        "Straßmann",
+        "Straßmannstr.",
+        "Straßmannstrasse"
+    ],
+    "Stresow": [],
+    "Sulzfelder Straße": [
+        "Sulzfelder",
+        "Sulzfelder Str.",
+        "Sulzfelder Strasse"
+    ],
+    "Sundgauer Straße": [
+        "Sundgauer",
+        "Sundgauer Str.",
+        "Sundgauer Strasse"
+    ],
+    "Südende": [],
+    "Südkreuz": [],
+    "Südstern": [],
+    "Tegel": [],
+    "Teltow Stadt": [
+        "Teltow"
+    ],
+    "Tempelhof": [],
+    "Theodor-Heuss-Platz": [
+        "Theodor-Heuss",
+        "Theodor-Heuss-plz"
+    ],
+    "Thomas-Mann-Straße": [
+        "Thomas-Mann",
+        "Thomas-Mann-str.",
+        "Thomas-Mann-strasse"
+    ],
+    "Tiergarten": [],
+    "Tierpark": [],
+    "Tino-Schwierzina-Straße": [
+        "Tino-Schwierzina",
+        "Tino-Schwierzina-str.",
+        "Tino-Schwierzina-strasse"
+    ],
+    "Traberweg": [],
+    "Traveplatz": [
+        "Trave",
+        "Traveplz"
+    ],
+    "Treptower Park": [
+        "Treptower"
+    ],
+    "Treskowallee/HTW": [],
+    "Tschaikowskistraße": [
+        "Tschaikowski",
+        "Tschaikowskistr.",
+        "Tschaikowskistrasse",
+        "Tschaikowsky",
+        "Tschaikowsky-str.",
+        "Tschaikowsky-strasse"
+    ],
+    "Turmstraße": [
+        "Turmstr.",
+        "Turmstrasse"
+    ],
+    "Uhlandstraße": [
+        "Uhland",
+        "Uhlandstr.",
+        "Uhlandstrasse"
+    ],
+    "Ullsteinstraße": [
+        "Ullstein",
+        "Ullsteinstr.",
+        "Ullsteinstrasse"
+    ],
+    "Unter den Linden": [],
+    "Viktoria-Luise-Platz": [
+        "Viktoria-Luise",
+        "Viktoria-Luise-plz"
+    ],
+    "Vinetastraße": [
+        "Vineta",
+        "Vinetastr.",
+        "Vinetastrasse"
+    ],
+    "Virchow-Klinikum": [],
+    "Volkspark Wuhlheide": [
+        "Volkspark"
+    ],
+    "Voltastraße": [
+        "Volta",
+        "Voltastr.",
+        "Voltastrasse"
+    ],
+    "Waidmannslust": [],
+    "Waldemarstraße": [
+        "Waldemar",
+        "Waldemarstr.",
+        "Waldemarstrasse"
+    ],
     "Walther-Nernst-Straße": [
-        "Walther Nernst"
+        "Walther-Nernst",
+        "Walther-Nernst-str.",
+        "Walther-Nernst-strasse"
+    ],
+    "Walther-Schreiber-Platz": [
+        "Walther-Schreiber",
+        "Walther-Schreiber-plz"
+    ],
+    "Wannsee": [],
+    "Warschauer Straße": [
+        "Warschauer",
+        "Warschauer Str.",
+        "Warschauer Strasse"
+    ],
+    "Wartenberg": [],
+    "Waßmannsdorf": [],
+    "Weberwiese": [],
+    "Wedding": [],
+    "Weinmeisterstraße/Gipsstraße": [
+        "Weinmeisterstraße/Gips",
+        "Weinmeisterstraße/Gipsstr.",
+        "Weinmeisterstraße/Gipsstrasse"
+    ],
+    "Weißer See": [],
+    "Werneuchener Straße": [
+        "Werneuchener",
+        "Werneuchener Str.",
+        "Werneuchener Strasse"
+    ],
+    "Westend": [],
+    "Westhafen": [],
+    "Westkreuz": [],
+    "Westphalweg": [],
+    "Wildau": [],
+    "Wilhelminenhofstraße/Edisonstraße": [
+        "Wilhelminenhofstraße/Edison",
+        "Wilhelminenhofstraße/Edisonstr.",
+        "Wilhelminenhofstraße/Edisonstrasse"
+    ],
+    "Wilhelmshagen": [],
+    "Wilhelmsruh": [],
+    "Wilmersdorfer Straße": [
+        "Wilmersdorfer",
+        "Wilmersdorfer Str.",
+        "Wilmersdorfer Strasse"
+    ],
+    "Winsstraße": [
+        "Wins",
+        "Winsstr.",
+        "Winsstrasse"
+    ],
+    "Wittenau": [],
+    "Wittenbergplatz": [
+        "Wittenberg",
+        "Wittenbergplz"
+    ],
+    "Wollankstraße": [
+        "Wollank",
+        "Wollankstr.",
+        "Wollankstrasse"
+    ],
+    "Wolliner Straße": [
+        "Wolliner",
+        "Wolliner Str.",
+        "Wolliner Strasse"
+    ],
+    "Wuhletal": [],
+    "Wuhletalstraße": [
+        "Wuhletal",
+        "Wuhletalstr.",
+        "Wuhletalstrasse"
+    ],
+    "Wuhlheide": [],
+    "Wutzkyallee": [
+        "Wutzky"
+    ],
+    "Wühlischstraße/Gärtnerstraße": [
+        "Wühlischstraße/Gärtner",
+        "Wühlischstraße/Gärtnerstr.",
+        "Wühlischstraße/Gärtnerstrasse"
+    ],
+    "Yorckstraße": [
+        "Yorck",
+        "Yorckstr.",
+        "Yorckstrasse"
+    ],
+    "Yorckstraße (Großgörschenstraße)": [
+        "Yorckstraße"
+    ],
+    "Zechliner Straße": [
+        "Zechliner",
+        "Zechliner Str.",
+        "Zechliner Strasse"
+    ],
+    "Zehlendorf": [],
+    "Zepernick (b Bernau)": [],
+    "Zeuthen": [],
+    "Zingster Straße": [
+        "Zingster",
+        "Zingster Str.",
+        "Zingster Strasse"
+    ],
+    "Zingster Straße/Ribnitzer Straße": [
+        "Zingster Straße/Ribnitzer",
+        "Zingster Straße/Ribnitzer Str.",
+        "Zingster Straße/Ribnitzer Strasse"
+    ],
+    "Zionskirchplatz": [
+        "Zionskirch",
+        "Zionskirchplz"
+    ],
+    "Zitadelle": [],
+    "Zoologischer Garten": [
+        "Zoologischer"
+    ],
+    "Zossener Straße/Kastanienallee": [
+        "Zossener Straße/Kastanien"
+    ],
+    "Zwickauer Damm": [
+        "Zwickauer"
     ]
 }
