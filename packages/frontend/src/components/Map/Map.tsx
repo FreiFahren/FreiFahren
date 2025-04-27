@@ -24,7 +24,7 @@ interface FreifahrenMapProps {
     handleStationClick?: (station: StationProperty) => void
 }
 // Incase of using environment variables, we need to use the process.env.REACT_APP_MAP_CENTER_LNG and process.env.REACT_APP_MAP_CENTER_LAT
-const berlinViewPosition: { lng: number; lat: number } = {
+const cityViewPosition: { lng: number; lat: number } = {
     lng: Number(process.env.REACT_APP_MAP_CENTER_LNG) || 13.388,
     lat: Number(process.env.REACT_APP_MAP_CENTER_LAT) || 52.5162,
 }
@@ -38,12 +38,12 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     handleStationClick,
 }) => {
     const SouthWestBounds: LngLatLike = {
-        lng: Number(process.env.REACT_APP_SW_BOUND_LNG),
-        lat: Number(process.env.REACT_APP_SW_BOUND_LAT),
+        lng: Number(process.env.REACT_APP_MAP_BOUNDS_SW_LNG),
+        lat: Number(process.env.REACT_APP_MAP_BOUNDS_SW_LAT),
     }
     const NorthEastBounds: LngLatLike = {
-        lng: Number(process.env.REACT_APP_NE_BOUND_LNG),
-        lat: Number(process.env.REACT_APP_NE_BOUND_LAT),
+        lng: Number(process.env.REACT_APP_MAP_BOUNDS_NE_LNG),
+        lat: Number(process.env.REACT_APP_MAP_BOUNDS_NE_LAT),
     }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
 
