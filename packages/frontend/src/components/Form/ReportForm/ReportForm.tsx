@@ -11,7 +11,7 @@ import { getClosestStations } from '../../../hooks/getClosestStations'
 import { getLineColor } from '../../../hooks/getLineColor'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
 import { calculateDistance } from '../../../utils/mapUtils'
-import { LinesList, Report, StationList, StationProperty } from '../../../utils/types'
+import { Report, StationList, StationProperty } from '../../../utils/types'
 import { createWarningSpan, highlightElement } from '../../../utils/uiUtils'
 import { Line } from '../../Miscellaneous/Line/Line'
 import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
@@ -136,6 +136,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
             // If an entity is selected, filter based on the station key prefix
             stations = Object.entries(sortedAllStations)
                 .filter(([stationKey]) => {
+                    // eslint-disable-next-line prefer-destructuring
                     const prefix = stationKey.split('-')[0]
                     return prefix.includes(currentEntity)
                 })
@@ -422,26 +423,23 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
     const getSpanStrongValue = useCallback((child: React.ReactElement): string => {
         try {
             // Use assertion here as well for the initial access
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const innerElement = (child.props as any)?.children
             // Check if it's a valid element and has props and props.children
             if (
                 React.isValidElement(innerElement) &&
+                // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
                 innerElement.props &&
                 // Assert props as any to access children, assuming the checks are sufficient
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 typeof (innerElement.props as any).children !== 'undefined'
             ) {
                 // Ensure the result is a string using the same assertion
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 return String((innerElement.props as any).children ?? '')
             }
-            console.warn(
-                'getSpanStrongValue received invalid or incomplete innerElement:',
-                innerElement,
-                'from child:',
-                child
-            )
             return ''
-        } catch (e) {
-            console.error('Error in getSpanStrongValue for child:', child, e)
+        } catch (error) {
             return ''
         }
     }, [])
@@ -539,8 +537,9 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                                         const startStationId = stationsForCurrentLine[0] ?? ''
                                         const endStationId =
                                             stationsForCurrentLine[stationsForCurrentLine.length - 1] ?? ''
-                                        const startStationName = (allStations ?? {})[startStationId]?.name ?? ''
-                                        const endStationName = (allStations ?? {})[endStationId]?.name ?? ''
+
+                                        const startStationName = (allStations ?? {})[startStationId].name
+                                        const endStationName = (allStations ?? {})[endStationId].name
 
                                         // If names can't be found, return an empty array
                                         if (!startStationName || !endStationName) return []

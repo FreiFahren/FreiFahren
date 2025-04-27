@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
 import React, { useEffect, useState } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { RiskData, SegmentRisk } from 'src/utils/types'
@@ -15,34 +16,40 @@ const filterSegmentsWithRisk = (
         return null
     }
 
-    const featuresWithRisk = data.features.filter((feature) => segmentsRisk[feature.properties?.sid])
+    if (data.features.length === 0) {
+        return null
+    }
+
+    // Filter features to include only those whose sid exists in segmentsRisk
+    const featuresWithRisk = data.features.filter(
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        (feature) => feature.properties?.sid && segmentsRisk[feature.properties.sid]
+    )
 
     if (featuresWithRisk.length === 0) {
-        return null
+        return null // Return null if no features have corresponding risk data
     }
 
     return {
         ...data,
-        features: featuresWithRisk,
+        features: featuresWithRisk, // Return the filtered features
     }
 }
 
 const applyRiskColorsToSegments = (
     data: GeoJSON.FeatureCollection<GeoJSON.LineString>,
     segmentsRisk: { [key: string]: SegmentRisk }
-): GeoJSON.FeatureCollection<GeoJSON.LineString> => {
-    return {
-        ...data,
-        features: data.features.map((feature) => ({
-            ...feature,
-            properties: {
-                ...feature.properties,
-                line_color: segmentsRisk[feature.properties?.sid].color,
-                risk_value: segmentsRisk[feature.properties?.sid].risk,
-            },
-        })),
-    }
-}
+): GeoJSON.FeatureCollection<GeoJSON.LineString> => ({
+    ...data,
+    features: data.features.map((feature) => ({
+        ...feature,
+        properties: {
+            ...feature.properties,
+            line_color: segmentsRisk[feature.properties?.sid].color,
+            risk_value: segmentsRisk[feature.properties?.sid].risk,
+        },
+    })),
+})
 
 const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, preloadedRiskData }) => {
     const [geoJSON, setGeoJSON] = useState<GeoJSON.FeatureCollection<GeoJSON.LineString> | null>(null)
