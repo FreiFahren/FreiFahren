@@ -17,11 +17,11 @@ jobs:
             - name: Install dependencies
               run: |
                   python -m pip install --upgrade pip
-                  cd packages/nlp_service && pip install -e .
-                  cd FreiFahren_BE_NLP && pip install -r requirements.txt
+                  cd packages/nlp_service && pip install -r requirements.txt
+                  cd core && pip install -r requirements.txt
             - name: Run unittests
               env:
                   BACKEND_URL: ${{ secrets.BACKEND_URL }}
               run: |
                   cd packages/nlp_service
-                  python -m unittest discover -v -s FreiFahren_BE_NLP/testing
+                  python -m unittest discover -v -s core/testing

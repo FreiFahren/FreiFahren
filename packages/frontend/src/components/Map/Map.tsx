@@ -59,7 +59,6 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
         if (!isFirstOpen) {
             initializeLocationTracking()
         }
-        console.log(cityViewPosition)
     }, [isFirstOpen, initializeLocationTracking])
 
     const { data: segmentRiskData } = useRiskData()
