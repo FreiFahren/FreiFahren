@@ -97,7 +97,7 @@ func calculateItineraryRisk(itinerary *Itinerary, riskData *prediction.RiskData)
 
 func translateEngineStationId(engineId string) string {
 	// Get the stations map
-	stationsMap := data.GetStationsMap()
+	stationsMap := data.GetStationsMap(nil)
 
 	// Extract the middle numbers from the engine ID
 	// Example: "de-VBB_de:11000:900110521::4" -> "900110521"
@@ -133,7 +133,7 @@ func translateStationIds(position *Position) {
 
 func translateStationName(stationId string, currentName string) string {
 	// Get the stations list which contains the station details
-	stationsList := data.GetStationsList()
+	stationsList := data.GetStationsList(nil)
 
 	// Look up the station in the list
 	if station, exists := stationsList[stationId]; exists {
@@ -261,7 +261,7 @@ func translateToResponseItinerary(itinerary *Itinerary) ResponseItinerary {
 
 func GenerateItineraries(req ItineraryRequest) (*ItinerariesResponse, error) {
 	// Get station IDs using the map
-	stationsMap := data.GetStationsMap()
+	stationsMap := data.GetStationsMap(nil)
 	startStationId, exists := stationsMap[req.StartStation]
 	if !exists {
 		return nil, &ValidationError{message: "Invalid start station ID"}

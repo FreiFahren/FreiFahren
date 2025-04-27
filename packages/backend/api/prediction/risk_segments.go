@@ -57,7 +57,7 @@ func ExecuteRiskModel() (*RiskData, error) {
 	}
 
 	// Get stations list for line lookup
-	stationsList := data.GetStationsList()
+	stationsList := data.GetStationsList(nil)
 
 	// Convert TicketInspector to RiskInspector
 	riskInspectors := make([]RiskInspector, 0, len(ticketInfoList))

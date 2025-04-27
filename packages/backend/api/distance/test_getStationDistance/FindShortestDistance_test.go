@@ -21,7 +21,7 @@ func TestFindShortestDistance(t *testing.T) {
 		{"Station path should be 8 from Ernst Reuter Platz to Platz der Luftbrücke", "U-RP", "U-PL", 8},
 		{"S7 Ahrensfelde to Potsdam Hauptbahnof", "SM-Ah", "S-PH", 28},
 	}
-	data.EmbedJSONFiles()
+	data.Init()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

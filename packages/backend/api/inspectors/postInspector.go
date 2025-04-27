@@ -135,7 +135,7 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 	logger.Log.Debug().Msg("Processing ticket info for insertion")
 	logger.Log.Info().Interface("Request", req).Msg("Request data")
 
-	var stations = data.GetStationsList()
+	var stations = data.GetStationsList(nil)
 
 	response := &structs.ResponseData{}
 	pointers := &structs.InsertPointers{}

@@ -181,7 +181,7 @@ func getStationEntry(id string, entryType string) utils.StationListEntry {
 		return defaultEntry
 	}
 
-	stations := data.GetStationsList()
+	stations := data.GetStationsList(nil)
 	if foundEntry, ok := stations[id]; ok {
 		return foundEntry
 	}

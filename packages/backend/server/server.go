@@ -12,8 +12,9 @@ import (
 	"github.com/FreiFahren/backend/api/prediction"
 	predictionV0 "github.com/FreiFahren/backend/api/prediction/v0"
 	predictionV1 "github.com/FreiFahren/backend/api/prediction/v1"
-	"github.com/FreiFahren/backend/api/stations"
 	statisticsV0 "github.com/FreiFahren/backend/api/stations/statistics/v0"
+	stationsV0 "github.com/FreiFahren/backend/api/stations/v0"
+	stationsV1 "github.com/FreiFahren/backend/api/stations/v1"
 	"github.com/FreiFahren/backend/caching"
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
@@ -44,7 +45,7 @@ func SetupServer() *echo.Echo {
 		logger.Log.Panic().Str("Error", err.Error()).Send()
 	}
 
-	data.EmbedJSONFiles()
+	data.Init()
 
 	// Create a new connection pool, for concurrency
 	database.CreatePool()
@@ -128,13 +129,14 @@ func SetupServer() *echo.Echo {
 	database.CreateFeedbackTable()
 
 	caching.InitCacheManager()
-	segments := data.GetSegments()
+	// Cache latest static data on startup
+	segments := data.GetSegments(nil)
 	caching.GlobalCacheManager.Register("segments", segments, caching.CacheConfig{
 		MaxAgeInSeconds:   31536000, // 1 year
 		ContentTypeInMIME: "application/json",
 	})
 
-	linesList := data.GetLinesList()
+	linesList := data.GetLinesList(nil)
 	linesBytes, err := json.Marshal(linesList)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error marshaling lines data for cache")
@@ -144,44 +146,62 @@ func SetupServer() *echo.Echo {
 		ContentTypeInMIME: "application/json",
 	})
 
-	stationsList := data.GetStationsList()
-	stationsBytes, err := json.Marshal(stationsList)
+	// Cache data for specific versions used by handlers
+	v0 := stationsV0.Version // Assign const to var
+	stationsV0List := data.GetStationsList(&v0)
+	stationsV0Bytes, err := json.Marshal(stationsV0List)
 	if err != nil {
-		logger.Log.Error().Err(err).Msg("Error marshaling stations data for cache")
+		logger.Log.Error().Err(err).Str("version", stationsV0.Version).Msg("Error marshaling stations data for cache")
 	}
-	caching.GlobalCacheManager.Register("stations", stationsBytes, caching.CacheConfig{
+	// Use versioned cache key, matching the handler
+	caching.GlobalCacheManager.Register("stations_"+stationsV0.Version, stationsV0Bytes, caching.CacheConfig{
+		MaxAgeInSeconds:   31536000, // 1 year
+		ContentTypeInMIME: "application/json",
+	})
+
+	v1Version := stationsV1.Version // Assign const to var
+	stationsV1List := data.GetStationsList(&v1Version)
+	stationsV1Bytes, err := json.Marshal(stationsV1List)
+	if err != nil {
+		logger.Log.Error().Err(err).Str("version", stationsV1.Version).Msg("Error marshaling stations data for cache")
+	}
+	caching.GlobalCacheManager.Register("stations_"+stationsV1.Version, stationsV1Bytes, caching.CacheConfig{
 		MaxAgeInSeconds:   31536000, // 1 year
 		ContentTypeInMIME: "application/json",
 	})
 
 	// Create API version groups
-	v0 := e.Group("/v0")
-	v1 := e.Group("/v1")
+	v0Group := e.Group("/v0")
+	v1Group := e.Group("/v1")
 	latest := e // Routes without version prefix will point to latest version
 
 	// V0 Routes
-	v0.POST("/basics/inspectors", inspectors.PostInspector)
-	v0.GET("/basics/inspectors", inspectors.GetTicketInspectorsInfo)
+	v0Group.POST("/basics/inspectors", inspectors.PostInspector)
+	v0Group.GET("/basics/inspectors", inspectors.GetTicketInspectorsInfo)
 
-	v0.GET("/lines", lines.GetAllLines)
-	v0.GET("/lines/segments", lines.GetAllSegments)
-	v0.GET("/lines/:lineName", lines.GetSingleLine)
-	v0.GET("/lines/:lineId/:stationId/statistics", lines.GetLineStatistics)
+	v0Group.GET("/lines", lines.GetAllLines)
+	v0Group.GET("/lines/segments", lines.GetAllSegments)
+	v0Group.GET("/lines/:lineName", lines.GetSingleLine)
+	v0Group.GET("/lines/:lineId/:stationId/statistics", lines.GetLineStatistics)
 
-	v0.GET("/stations", stations.GetAllStations)
-	v0.GET("/stations/:stationId", stations.GetSingleStation)
-	v0.GET("/stations/:stationId/statistics", statisticsV0.GetStationStatistics)
-	v0.GET("/stations/search", stations.SearchStation)
+	v0Group.GET("/stations", stationsV0.GetAllStations)
+	v0Group.GET("/stations/:stationId", stationsV0.GetSingleStation)
+	v0Group.GET("/stations/:stationId/statistics", statisticsV0.GetStationStatistics)
+	v0Group.GET("/stations/search", stationsV0.SearchStation)
 
-	v0.GET("/transit/distance", distance.GetStationDistance)
-	v0.GET("/transit/itineraries", itinerariesV0.GetItineraries)
+	v0Group.GET("/transit/distance", distance.GetStationDistance)
+	v0Group.GET("/transit/itineraries", itinerariesV0.GetItineraries)
 
-	v0.GET("/risk-prediction/segment-colors", predictionV0.GetRiskSegments)
+	v0Group.GET("/risk-prediction/segment-colors", predictionV0.GetRiskSegments)
 
-	v0.POST("/feedback", feedback.PostFeedback)
+	v0Group.POST("/feedback", feedback.PostFeedback)
 
 	// V1 Routes
-	v1.GET("/risk-prediction/segment-colors", predictionV1.GetRiskSegments)
+	v1Group.GET("/stations", stationsV1.GetAllStations)
+	v1Group.GET("/stations/:stationId", stationsV1.GetSingleStation)
+	v1Group.GET("/stations/:stationId/statistics", statisticsV0.GetStationStatistics)
+	v1Group.GET("/stations/search", stationsV1.SearchStation)
+	v1Group.GET("/risk-prediction/segment-colors", predictionV1.GetRiskSegments)
 
 	// Latest Routes
 	latest.POST("/basics/inspectors", inspectors.PostInspector)
@@ -192,10 +212,10 @@ func SetupServer() *echo.Echo {
 	latest.GET("/lines/:lineName", lines.GetSingleLine)
 	latest.GET("/lines/:lineId/:stationId/statistics", lines.GetLineStatistics)
 
-	latest.GET("/stations", stations.GetAllStations)
-	latest.GET("/stations/:stationId", stations.GetSingleStation)
+	latest.GET("/stations", stationsV1.GetAllStations)
+	latest.GET("/stations/:stationId", stationsV1.GetSingleStation)
 	latest.GET("/stations/:stationId/statistics", statisticsV0.GetStationStatistics)
-	latest.GET("/stations/search", stations.SearchStation)
+	latest.GET("/stations/search", stationsV0.SearchStation)
 
 	latest.GET("/transit/distance", distance.GetStationDistance)
 	latest.GET("/transit/itineraries", itinerariesV0.GetItineraries)

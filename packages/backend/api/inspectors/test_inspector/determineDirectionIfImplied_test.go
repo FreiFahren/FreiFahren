@@ -70,7 +70,8 @@ func TestDetermineDirectionIfImplied(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		stations := data.GetStationsList()
+		version := "v0" // I am to lazy to change the test data to use the latest version
+		stations := data.GetStationsList(&version)
 
 		t.Run(tt.name, func(t *testing.T) {
 			err := inspectors.DetermineDirectionIfImplied(tt.dataToInsert, tt.pointers, tt.line, tt.stationId, stations)

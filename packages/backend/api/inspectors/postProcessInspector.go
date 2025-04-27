@@ -18,8 +18,8 @@ import (
 func PostProcessInspectorData(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers) error {
 	logger.Log.Debug().Msg("Filling missing columns using provided data")
 
-	var stations = data.GetStationsList()
-	var lines = data.GetLinesList()
+	var stations = data.GetStationsList(nil)
+	var lines = data.GetLinesList(nil)
 
 	// check if the message is hate speech
 	if dataToInsert.Message != "" {
@@ -144,7 +144,7 @@ func guessStation(dataToInsert *structs.ResponseData, pointers *structs.InsertPo
 		pointers.StationIdPtr = &mostCommonStation
 
 		// Get the station name from the stations list
-		stations := data.GetStationsList()
+		stations := data.GetStationsList(nil)
 		if station, found := stations[mostCommonStation]; found {
 			dataToInsert.Station.Name = station.Name
 		}
@@ -238,10 +238,10 @@ func correctDirection(dataToInsert *structs.ResponseData, pointers *structs.Inse
 
 	if stationIndexOnLine > directionIndexOnLine {
 		logger.Log.Debug().Msg("Set the first station as direction")
-		setDirection(dataToInsert, pointers, line[0], data.GetStationsList()[line[0]])
+		setDirection(dataToInsert, pointers, line[0], data.GetStationsList(nil)[line[0]])
 	} else {
 		logger.Log.Debug().Msg("Set the last station as direction")
-		setDirection(dataToInsert, pointers, line[len(line)-1], data.GetStationsList()[line[len(line)-1]])
+		setDirection(dataToInsert, pointers, line[len(line)-1], data.GetStationsList(nil)[line[len(line)-1]])
 	}
 }
 

@@ -55,7 +55,7 @@ func (distanceCache *DistanceCache) setDistanceInCache(inspectorStationId, userS
 	logger.Log.Debug().Msg("Setting distance in cache")
 	distanceCache.mutex.Lock()
 	defer distanceCache.mutex.Unlock()
-	
+
 	key := getCacheKey(inspectorStationId, userStationId)
 
 	if _, exists := distanceCache.cache[key]; !exists {
@@ -135,7 +135,7 @@ func GetStationDistance(c echo.Context) error {
 func ReadAndCreateSortedStationsListAndLinesList() (map[string]utils.StationListEntry, []string, map[string][]string) {
 	logger.Log.Debug().Msg("Reading and creating sorted stations list and lines list")
 
-	stationsList = data.GetStationsList()
+	stationsList = data.GetStationsList(nil)
 
 	// Create a slice of the station Ids
 	stationIds = make([]string, 0, len(stationsList))
@@ -147,7 +147,7 @@ func ReadAndCreateSortedStationsListAndLinesList() (map[string]utils.StationList
 	// because the order of the keys in a map is not guaranteed and golang kinda fucks up
 	sort.Strings(stationIds)
 
-	linesList = data.GetLinesList()
+	linesList = data.GetLinesList(nil)
 
 	return stationsList, stationIds, linesList
 }

@@ -36,7 +36,7 @@ func GetAllLines(c echo.Context) error {
 		})(c)
 	}
 
-	return c.JSON(http.StatusOK, data.GetLinesList())
+	return c.JSON(http.StatusOK, data.GetLinesList(nil))
 }
 
 // @Summary Get a single line
@@ -59,7 +59,7 @@ func GetSingleLine(c echo.Context) error {
 	logger.Log.Info().Msg("GET /lines/:lineName")
 
 	lineName := strings.ToUpper(c.Param("lineName"))
-	lines := data.GetLinesList()
+	lines := data.GetLinesList(nil)
 
 	if line, ok := lines[lineName]; ok {
 		return c.JSON(http.StatusOK, line)
@@ -128,6 +128,6 @@ func GetAllSegments(c echo.Context) error {
 	}
 
 	// Fallback if cache doesn't exist
-	segments := data.GetSegments()
+	segments := data.GetSegments(nil)
 	return c.JSONBlob(http.StatusOK, segments)
 }

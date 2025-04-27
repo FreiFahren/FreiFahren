@@ -64,7 +64,7 @@ func runPostProcessTest(t *testing.T, tc TestCase) {
 func TestPostProcessInspectorData(t *testing.T) {
 	// Setup test environment
 	godotenv.Overload()
-	data.EmbedJSONFiles()
+	data.Init()
 	database.CreatePool()
 	defer database.ClosePool()
 
