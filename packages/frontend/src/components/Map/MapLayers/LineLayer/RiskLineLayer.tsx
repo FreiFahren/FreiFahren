@@ -7,41 +7,60 @@ interface RiskLineLayerProps {
     lineSegments: GeoJSON.FeatureCollection<GeoJSON.LineString> | null
 }
 
+const filterSegmentsWithRisk = (
+    data: GeoJSON.FeatureCollection<GeoJSON.LineString>,
+    segmentsRisk: { [key: string]: SegmentRisk } | undefined
+): GeoJSON.FeatureCollection<GeoJSON.LineString> | null => {
+    if (!segmentsRisk) {
+        return null
+    }
+
+    const featuresWithRisk = data.features.filter((feature) => segmentsRisk[feature.properties?.sid])
+
+    if (featuresWithRisk.length === 0) {
+        return null
+    }
+
+    return {
+        ...data,
+        features: featuresWithRisk,
+    }
+}
+
+const applyRiskColorsToSegments = (
+    data: GeoJSON.FeatureCollection<GeoJSON.LineString>,
+    segmentsRisk: { [key: string]: SegmentRisk }
+): GeoJSON.FeatureCollection<GeoJSON.LineString> => {
+    return {
+        ...data,
+        features: data.features.map((feature) => ({
+            ...feature,
+            properties: {
+                ...feature.properties,
+                line_color: segmentsRisk[feature.properties?.sid].color,
+                risk_value: segmentsRisk[feature.properties?.sid].risk,
+            },
+        })),
+    }
+}
+
 const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, preloadedRiskData }) => {
     const [geoJSON, setGeoJSON] = useState<GeoJSON.FeatureCollection<GeoJSON.LineString> | null>(null)
 
-    const applySegmentColors = (
-        data: GeoJSON.FeatureCollection<GeoJSON.LineString>,
-        segmentsRisk?: { [key: string]: SegmentRisk }
-    ) => {
-        const defaultColor = '#13C184' // lowest risk color
-
-        return {
-            ...data,
-            features: data.features.map((feature) => ({
-                ...feature,
-                properties: {
-                    ...feature.properties,
-                    line_color: segmentsRisk?.[feature.properties?.sid]?.color ?? defaultColor,
-                    risk_value: segmentsRisk?.[feature.properties?.sid]?.risk ?? 0,
-                },
-            })),
-        }
-    }
-
-    // If the segment risk data changes, update the GeoJSON
+    // Update GeoJSON when risk data or segments change
     useEffect(() => {
         if (lineSegments && preloadedRiskData?.segments_risk) {
-            setGeoJSON(applySegmentColors(lineSegments, preloadedRiskData.segments_risk))
-        }
-    }, [preloadedRiskData, lineSegments])
-
-    // Initialize with preloaded data
-    useEffect(() => {
-        if (lineSegments && preloadedRiskData?.segments_risk) {
-            setGeoJSON(applySegmentColors(lineSegments, preloadedRiskData.segments_risk))
-        } else if (lineSegments) {
-            setGeoJSON(applySegmentColors(lineSegments))
+            // Step 1: Filter
+            const filteredSegments = filterSegmentsWithRisk(lineSegments, preloadedRiskData.segments_risk)
+            if (filteredSegments) {
+                // Step 2: Apply colors
+                const coloredSegments = applyRiskColorsToSegments(filteredSegments, preloadedRiskData.segments_risk)
+                setGeoJSON(coloredSegments)
+            } else {
+                setGeoJSON(null) // No segments with risk
+            }
+        } else {
+            setGeoJSON(null) // Clear GeoJSON if no risk data or line segments
         }
     }, [preloadedRiskData, lineSegments])
 
@@ -63,24 +82,6 @@ const RiskLineLayer: React.FC<RiskLineLayerProps> = ({ lineSegments, preloadedRi
                 paint={{
                     'line-color': ['get', 'line_color'],
                     'line-width': 3,
-                }}
-            />
-            <Layer
-                id="risk-label-layer"
-                type="symbol"
-                beforeId="stationLayer"
-                source="risk-line-data"
-                layout={{
-                    'text-field': ['get', 'line'],
-                    'text-size': 15,
-                    'symbol-placement': 'line',
-                    'text-anchor': 'top',
-                    'text-offset': [0, 1.5],
-                    'text-keep-upright': true,
-                }}
-                paint={{
-                    'text-color': '#fff',
-                    'text-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0, 12, 1],
                 }}
             />
         </Source>

@@ -3,10 +3,12 @@ import { Layer, Source } from 'react-map-gl/maplibre'
 
 interface RegularLineLayerProps {
     lineSegments: GeoJSON.FeatureCollection<GeoJSON.LineString> | null
+    isRiskLayerOpen: boolean
 }
 
-const RegularLineLayer: React.FC<RegularLineLayerProps> = ({ lineSegments }) => {
+const RegularLineLayer: React.FC<RegularLineLayerProps> = ({ lineSegments, isRiskLayerOpen }) => {
     const firstPriorityLines = ['U1', 'U2', 'U3', 'U4', 'U5', 'U6', 'U7', 'U8', 'U9']
+    const neutralColor = '#13C184'
 
     if (!lineSegments) return null
     return (
@@ -21,7 +23,7 @@ const RegularLineLayer: React.FC<RegularLineLayerProps> = ({ lineSegments }) => 
                     'line-cap': 'round',
                 }}
                 paint={{
-                    'line-color': ['get', 'line_color'], // Set the base color from the GeoJSON
+                    'line-color': ['case', isRiskLayerOpen, neutralColor, ['get', 'line_color']],
                     'line-width': 3,
                 }}
             />

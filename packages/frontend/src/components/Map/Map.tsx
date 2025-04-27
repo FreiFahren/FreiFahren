@@ -145,10 +145,9 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     {!isFirstOpen ? <LocationMarker userPosition={userPosition} /> : null}
                     <MarkerContainer isFirstOpen={isFirstOpen} userPosition={userPosition} />
                     <StationLayer stations={stationGeoJSON} />
-                    {isRiskLayerOpen ? (
+                    <RegularLineLayer lineSegments={lineSegments} isRiskLayerOpen={isRiskLayerOpen} />
+                    {isRiskLayerOpen && (
                         <RiskLineLayer preloadedRiskData={segmentRiskData} lineSegments={lineSegments} />
-                    ) : (
-                        <RegularLineLayer lineSegments={lineSegments} />
                     )}
                 </Map>
             </Suspense>
