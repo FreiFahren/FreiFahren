@@ -69,6 +69,7 @@ type Event = BaseEvent &
         | { name: 'Privacy Policy Accepted' }
         | { name: 'App Store Opened' }
         | { name: 'App Deprecated' }
+        | { name: 'Navigation Opened' }
         | {
               name: 'Report Submitted'
               duration: number

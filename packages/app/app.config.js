@@ -3,7 +3,7 @@ export default {
     expo: {
         name: 'freifahren',
         slug: 'Freifahren',
-        version: '0.0.8',
+        version: '0.1.0',
         orientation: 'portrait',
         icon: './assets/app-icon.png',
         userInterfaceStyle: 'dark',

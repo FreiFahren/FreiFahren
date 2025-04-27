@@ -12,6 +12,7 @@ export const CACHE_KEYS = {
     risk: ['risk'],
     privacyPolicyMeta: ['privacy-policy-meta'],
     stationStatistics: (stationId: string) => ['station-statistics', stationId],
+    itineraries: (start: string, end: string) => ['itineraries', start, end],
 }
 
 const onError = (error: unknown) => {
