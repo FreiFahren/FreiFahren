@@ -49,7 +49,7 @@ Calls for loading and preparing stations and lines data
 """
 
 # Fetch lines data
-response = requests.get(f"{BACKEND_URL}/v0/lines")
+response = requests.get(f"{BACKEND_URL}/lines")
 lines_with_stations_as_ids = response.json()
 
 # Fetch stations data

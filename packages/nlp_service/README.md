@@ -44,11 +44,6 @@ FREIFAHREN_CHAT_ID=[TELEGRAM_CHAT_ID]
 NLP_BOT_TOKEN=[YOUR_BOT_TOKEN]
 REPORT_PASSWORD=[SECURE_PASSWORD]
 RESTART_PASSWORD=[SECURE_PASSWORD]
-DB_USER=[DATABASE_USER]
-DB_NAME=[DATABASE_NAME]
-DB_HOST=[DATABASE_HOST]
-DB_PORT=[DATABASE_PORT]
-DB_PASSWORD=[DATABASE_PASSWORD]
 SENTRY_DSN=[OPTIONAL_SENTRY_DSN]
 ```
 
@@ -93,7 +88,7 @@ This will start all components in a single process.
 
 3. **API Layer**:
    - The Flask application provides endpoints for:
-     - Health monitoring
+     - Automatic restart of the bot
      - Manual inspector reporting
      - Data exchange with other system components
 

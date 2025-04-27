@@ -59,24 +59,3 @@ are the markers. To display and organize the markers, `/components/Map/Markers/M
 2. `/Markers/Classes/OpacityMarker/OpacityMarker.tsx` is called in `MarkerContainer.tsx`. They represent the unique user reports on inspectors and fade after a couple of minutes.
 
 In hindsight, the Markers directory lays a foundation for other Markers with different features/
-
-## Testing
-
-Make sure to have the frontend running with `npm start`.
-
-To run tests for the react dom, use `npx jest`
-
-To run tests for the `react-map-gl/maplibre` module, please install testcafe globally with
-
-```sh
-npm install -g testcafe 
-```
-
-and then
-
-```sh
-npx testcafe chrome src/tests/components/Map/Map.test.tsx
-```
-
-
-Note: maplibre can't be rendered through jest, that's why we use an emulating instance of chrome.

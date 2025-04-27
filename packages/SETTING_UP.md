@@ -78,9 +78,18 @@ REACT_APP_MAP_BOUNDS_NE_LAT=52.77063424239867
 
 - (optional) The `SENTRY_AUTH_TOKEN` is the token for the Sentry project. If you want to use Sentry, make sure to use the `build:prod` command in the `Dockerfile.frontend` file, to build the frontend with **Sentry** enabled.
 
-- You can get the map view bounds easier from [OpenStreetMap](https://www.openstreetmap.org/). Right click to center the map and the coordinates and zoom level will be shown in the URL. 
+- You can get the map view bounds easier from [OpenStreetMap](https://www.openstreetmap.org/). E.g. Enter Berlin, Germany and right click > center the map. Right click North East bound > Click Route from here and Right click South West bounds > Click Route to here. 
 
-- Add routes by right clicking on the upper left corner and lower right corner of the map to get North East and South West bounds, shown in the URL as well.
+```
+https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=52.6701%2C13.6629%3B52.3748%2C13.1108#map=11/52.5202/13.3858
+
+You can see that the coordinates are:
+
+- 52.6701, 13.6629 (North East)
+- 52.3748, 13.1108 (South West)
+
+Zoom level is 11, and the center of the map is 52.5202, 13.3858.
+```
 
 ## 2. Commands
 
