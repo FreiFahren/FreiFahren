@@ -203,6 +203,7 @@ func notifyOtherServiceAboutReport(endpoint string, data *structs.ResponseData, 
 		"station":   data.Station.Name,
 		"direction": data.Direction.Name,
 		"message":   data.Message,
+		"stationId": data.Station.Id,
 	}
 
 	jsonData, err := json.Marshal(payload)
