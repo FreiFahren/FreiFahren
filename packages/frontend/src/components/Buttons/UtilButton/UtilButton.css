@@ -1,5 +1,5 @@
 button.util-button {
-    top: var(--distance-from-edge-default);
+    top: calc(var(--distance-from-edge-default) + 65px);
     left: var(--distance-from-edge-default);
     display: flex;
     align-items: center;

@@ -38,7 +38,8 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
             const lineScores = new Map<string, LineRiskData>()
 
             Object.entries(segmentsRisk).forEach(([segmentId, segment]) => {
-                const [line] = segmentId.split('-')
+                // eslint-disable-next-line prefer-destructuring
+                const line = segmentId.split('.')[0]
                 const score = segment.color in colorScores ? colorScores[segment.color] : 0
 
                 if (!lineScores.has(line)) {

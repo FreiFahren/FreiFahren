@@ -7,12 +7,14 @@ import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton
 import { useLines, useStations, useSubmitReport } from '../../../api/queries'
 import { REPORT_COOLDOWN_MINUTES } from '../../../constants'
 import { useLocation } from '../../../contexts/LocationContext'
+import { getClosestStations } from '../../../hooks/getClosestStations'
+import { getLineColor } from '../../../hooks/getLineColor'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
 import { calculateDistance } from '../../../utils/mapUtils'
 import { LinesList, Report, StationList, StationProperty } from '../../../utils/types'
-import { createWarningSpan, getLineColor, highlightElement } from '../../../utils/uiUtils'
+import { createWarningSpan, highlightElement } from '../../../utils/uiUtils'
 import { Line } from '../../Miscellaneous/Line/Line'
-import { AutocompleteInputForm } from '../AutocompleteInputForm/AutocompleteInputForm'
+import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
 import { FeedbackForm } from '../FeedbackForm/FeedbackForm'
 import { PrivacyCheckbox } from '../PrivacyCheckbox/PrivacyCheckbox'
 import { SelectField } from '../SelectField/SelectField'
@@ -183,7 +185,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
             const newStationListHeight = Math.max(0, Math.min(stationCount * ITEM_HEIGHT, availableHeight))
             setStationListHeight(newStationListHeight)
         }
-    }, [initialContainerHeight, possibleStations, currentLine, currentStation])
+    }, [initialContainerHeight, possibleStations, currentLine, currentStation, MARGIN_S])
 
     // Handle resize and content changes
     useEffect(() => {
@@ -395,26 +397,6 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
         }
     }
 
-    const getClosestStationsToUser = (
-        numberOfStations: number,
-        stationsList: StationList,
-        userPositionTemp: { lat: number; lng: number }
-    ) => {
-        const distances = Object.entries(stationsList).map(([station, stationData]) => {
-            const distance = calculateDistance(
-                userPositionTemp.lat,
-                userPositionTemp.lng,
-                stationData.coordinates.latitude,
-                stationData.coordinates.longitude
-            )
-
-            return { station, stationData, distance }
-        })
-
-        distances.sort((a, b) => a.distance - b.distance)
-        return distances.slice(0, numberOfStations).map((entry) => ({ [entry.station]: entry.stationData }))
-    }
-
     interface LineChildProps {
         line: string
     }
@@ -484,7 +466,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                         items={possibleStations}
                         onSelect={handleStationSelect}
                         value={currentStation}
-                        getDisplayValue={(station) => station.name}
+                        getDisplayValue={(station: StationProperty) => station.name}
                         placeholder={t('ReportForm.searchPlaceholder')}
                         label={t('ReportForm.station')}
                         required
@@ -492,7 +474,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                         listHeight={stationListHeight}
                         highlightElements={
                             userPosition
-                                ? getClosestStationsToUser(3, possibleStations, userPosition).reduce(
+                                ? getClosestStations(3, possibleStations, userPosition).reduce(
                                       (acc, station) => ({ ...acc, ...station }),
                                       {}
                                   )

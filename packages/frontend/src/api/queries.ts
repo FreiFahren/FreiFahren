@@ -1,29 +1,41 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
-import { LinesList, Report, RiskData, StationList } from 'src/utils/types'
+import { Itinerary, LinesList, Position, Report, RiskData, StationList } from 'src/utils/types'
 
 import { useSkeleton } from '../components/Miscellaneous/LoadingPlaceholder/Skeleton'
-import { getNearestStation } from '../utils/mapUtils'
+import { getClosestStations } from '../hooks/getClosestStations'
 import { CACHE_KEYS } from './queryClient'
 
 const fetchNewReports = async (
-    startTime: string,
-    endTime: string,
+    startTime?: string,
+    endTime?: string,
+    stationId?: string,
     lastKnownTimestamp?: string
 ): Promise<Report[] | null> => {
     const headers: HeadersInit = {
         'Content-Type': 'application/json',
     }
 
+    let queryParams = ''
+
     if (lastKnownTimestamp !== undefined && lastKnownTimestamp.trim() !== '') {
         const date = new Date(lastKnownTimestamp)
         headers['If-Modified-Since'] = date.toUTCString()
     }
 
-    const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/v0/basics/inspectors?start=${startTime}&end=${endTime}`,
-        { headers }
-    )
+    if (startTime !== undefined && startTime.trim() !== '') {
+        queryParams += `&start=${startTime}`
+    }
+
+    if (endTime !== undefined && endTime.trim() !== '') {
+        queryParams += `&end=${endTime}`
+    }
+
+    if (stationId !== undefined && stationId.trim() !== '') {
+        queryParams += `&station=${stationId}`
+    }
+
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/v0/basics/inspectors?${queryParams}`, { headers })
 
     if (response.status === 304) {
         return null
@@ -35,6 +47,12 @@ const fetchNewReports = async (
 
     return response.json()
 }
+
+export const useReportsByStation = (stationId: string, startTime?: string, endTime?: string) =>
+    useQuery({
+        queryKey: [...CACHE_KEYS.reports, stationId, startTime, endTime],
+        queryFn: () => fetchNewReports(startTime, endTime, stationId),
+    })
 
 export const useSubmitReport = () => {
     const queryClient = useQueryClient()
@@ -100,7 +118,7 @@ export const useCurrentReports = () => {
             const prevData = queryClient.getQueryData<Report[]>(CACHE_KEYS.byTimeframe('1h')) ?? []
             const lastKnownTimestamp = prevData[0]?.timestamp
 
-            const result = await fetchNewReports(startTime, endTime, lastKnownTimestamp)
+            const result = await fetchNewReports(startTime, endTime, undefined, lastKnownTimestamp)
             const newData = result === null ? prevData : result
 
             // If we got new data, invalidate the risk cache (temporary fix to avoid race condition)
@@ -152,7 +170,7 @@ export const useLast24HourReports = () => {
             const prevData = queryClient.getQueryData<Report[]>(CACHE_KEYS.byTimeframe('24h')) ?? []
             const lastKnownTimestamp = prevData[0]?.timestamp
 
-            const result = await fetchNewReports(startTime, endTime, lastKnownTimestamp)
+            const result = await fetchNewReports(startTime, endTime, undefined, lastKnownTimestamp)
             const newData = result === null ? prevData : result
 
             // Remove the most recent hour, as that is replaced by current reports.
@@ -259,49 +277,39 @@ export const useStations = () =>
         refetchOnWindowFocus: false,
     })
 
+const sortLinesByPriority = (data: LinesList): LinesList => {
+    const entries = Object.entries(data)
+    const groupPriority = (key: string): number => {
+        if (key.includes('U')) return 0
+        if (key.includes('S')) return 1
+        if (key.includes('M')) return 2
+        return 3
+    }
+
+    entries.sort((a, b) => {
+        const groupA = groupPriority(a[0])
+        const groupB = groupPriority(b[0])
+        if (groupA !== groupB) {
+            return groupA - groupB
+        }
+        return b[0].localeCompare(a[0], undefined, { numeric: true })
+    })
+
+    return Object.fromEntries(entries) as LinesList
+}
+
 export const useLines = () =>
     useQuery<LinesList, Error>({
         queryKey: ['linesETag'],
         queryFn: async (): Promise<LinesList> => {
             const data = await fetchWithETag<LinesList>('/v0/lines', 'lines')
-
-            /*
-             The lines are sorted by group priority first, then by descending key (using numeric comparison).
-             This ensures that "U" lines are always first, followed by "S" lines, then "M" lines, and finally other lines.
-             Within each group, the lines are sorted in descending order (largest to smallest).
-
-             This is done because there are the most reports for U lines, followed by S lines, 
-             then M lines, and the largest number lines tend to be controlled more.
-            */
-
-            // Convert record to array entries for sorting
-            const entries = Object.entries(data)
-
-            const groupPriority = (key: string): number => {
-                if (key.includes('U')) return 0
-                if (key.includes('S')) return 1
-                if (key.includes('M')) return 2
-                return 3
-            }
-
-            entries.sort((a, b) => {
-                const groupA = groupPriority(a[0])
-                const groupB = groupPriority(b[0])
-                if (groupA !== groupB) {
-                    return groupA - groupB
-                }
-                return b[0].localeCompare(a[0], undefined, { numeric: true })
-            })
-
-            const sortedData: LinesList = {}
-            for (const [key, value] of entries) {
-                sortedData[key] = value
-            }
-            return sortedData
+            return sortLinesByPriority(data)
         },
         staleTime: Infinity,
         gcTime: Infinity,
         refetchOnWindowFocus: false,
+        select: sortLinesByPriority,
+        structuralSharing: true,
     })
 
 export interface UseStationDistanceResult {
@@ -328,18 +336,15 @@ export const useStationDistance = (
             ) {
                 return null
             }
-            const userStation = getNearestStation(allStations, userLat, userLng)
-            if (userStation && userStation.key !== '') {
-                const response = await fetch(
-                    `${process.env.REACT_APP_API_URL}/v0/transit/distance?inspectorStationId=${encodeURIComponent(
-                        stationId
-                    )}&userStationId=${encodeURIComponent(userStation.key)}`
-                )
-                const data = await response.json()
-                if (typeof data === 'number') return data
-                return data.distance
-            }
-            return null
+            const [userStation] = getClosestStations(1, allStations, { lat: userLat, lng: userLng })
+            const response = await fetch(
+                `${process.env.REACT_APP_API_URL}/v0/transit/distance?inspectorStationId=${encodeURIComponent(
+                    stationId
+                )}&userStationId=${encodeURIComponent(Object.keys(userStation)[0])}`
+            )
+            const data = await response.json()
+            if (typeof data === 'number') return data
+            return data.distance
         },
         enabled:
             typeof userLat === 'number' &&
@@ -377,4 +382,34 @@ export const useStationReports = (stationId: string) =>
             const data = await response.json()
             return data.numberOfReports as number
         },
+    })
+
+export type NavigationResponse = {
+    requestParameters: Record<string, unknown>
+    debugOutput: Record<string, unknown>
+    from: Position
+    to: Position
+    direct: unknown[]
+    safestItinerary: Itinerary
+    alternativeItineraries: Itinerary[]
+}
+
+export const useNavigation = (startStationId: string, endStationId: string, options?: { enabled?: boolean }) =>
+    useQuery<NavigationResponse, Error>({
+        queryKey: CACHE_KEYS.navigation(startStationId, endStationId),
+        queryFn: async () => {
+            if (!startStationId || !endStationId) {
+                return null
+            }
+
+            const response = await fetch(
+                `${process.env.REACT_APP_API_URL}/v0/transit/itineraries?startStation=${startStationId}&endStation=${endStationId}`
+            )
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
+            const data = await response.json()
+            return data
+        },
+        enabled: options?.enabled,
     })

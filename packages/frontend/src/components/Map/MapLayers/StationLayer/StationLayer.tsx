@@ -42,6 +42,7 @@ const StationLayer: React.FC<StationLayerProps> = ({ stations }) => {
         }
     }, [map])
 
+    // priority is based on number of reports
     const firstPriorityStations = [
         'Hauptbahnhof',
         'Gesundbrunnen',

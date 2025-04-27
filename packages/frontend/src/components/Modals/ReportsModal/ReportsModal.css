@@ -48,7 +48,11 @@
     border-bottom: var(--border-weak);
 }
 
-.list-modal > .report-item:last-child,
+.report-item-direction {
+    margin: var(--margin-s) 0;
+}
+
+.report-item:last-child,
 .summary .clustered-report-item.align-child-on-line .report-item {
     border-bottom: none;
 }
@@ -57,7 +61,7 @@
     border-bottom: var(--border-weak);
 }
 
-.list-modal > .report-item p {
+.report-item p {
     color: var(--color-gray-on-dark-background);
 }
 
@@ -79,38 +83,6 @@
 
 .clustered-report-item {
     position: relative;
-}
-
-.clustered-report-item button {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    min-width: 20px;
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    outline: none;
-}
-
-.clustered-report-item button::before {
-    content: '';
-    position: absolute;
-    margin-top: 8px;
-    width: 10px;
-    height: 10px;
-    border-left: 2px solid var(--color-primary);
-    border-top: 2px solid var(--color-primary);
-    transform: translate(-50%, -50%) rotate(45deg);
-    transition: transform var(--transition-default) ease;
-    border-radius: 1px;
-}
-
-.clustered-report-item button.expanded::before {
-    transform: translate(-50%, -75%) rotate(225deg);
 }
 
 .clustered-report-item-list {

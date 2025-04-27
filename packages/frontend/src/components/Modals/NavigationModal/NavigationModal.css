@@ -1,0 +1,349 @@
+div.modal.container.navigation-modal {
+    overflow-y: hidden;
+    display: flex !important;
+    flex-direction: column;
+    height: 70vh;
+}
+
+.location-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 20px;
+}
+
+.input-container {
+    position: relative;
+    width: 100%;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 15px;
+}
+
+.location-inputs input {
+    border-radius: var(--borderRadius-small);
+    border: var(--border-default);
+    padding: var(--padding-s);
+    padding-left: 30px;
+    width: calc(100% - 30px - var(--padding-s));
+}
+
+.autocomplete-container {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    margin-bottom: var(--margin-s);
+}
+
+.navigation-data-container {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+.route-option {
+    padding: var(--padding-s);
+    margin-bottom: var(--margin-s);
+    border: 1px solid var(--color-border);
+    border-radius: var(--borderRadius-medium);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.route-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--margin-xs);
+}
+
+.route-time {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.route-time .time {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.route-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.route-lines {
+    display: flex;
+    gap: var(--margin-xs);
+    align-items: center;
+}
+
+.route-lines span {
+    display: flex;
+    align-items: center;
+}
+
+.route-lines span:not(:last-child)::after {
+    content: '›';
+    margin: 0 var(--margin-xs);
+    color: var(--color-text-secondary);
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.route-lines .walk-icon {
+    opacity: 0.7;
+    margin: 0 var(--margin-xxs);
+}
+
+.skeleton-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--margin-s);
+    padding: var(--padding-s);
+}
+
+.skeleton-container .loading-placeholder {
+    height: 50px;
+}
+
+.safest-route {
+    margin-top: var(--margin-m);
+    position: relative;
+    border: 2px solid var(--color-risk-0);
+    border-radius: var(--borderRadius-medium);
+    padding: var(--padding-xxs);
+    margin-bottom: var(--margin-s);
+}
+
+.safest-route-tag {
+    position: absolute;
+    top: -12px;
+    right: 16px;
+    background-color: var(--color-risk-0);
+    padding: var(--padding-xxs) var(--padding-xs);
+    border-radius: var(--borderRadius-small);
+    font-size: var(--font-xxs);
+    font-weight: 500;
+}
+
+.focused-input {
+    border: 2px solid var(--incentive-blue);
+}
+
+.navigation-detail.modal {
+    overflow-y: auto;
+    max-height: 70vh;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
+    animation: slide-up var(--transition-default) ease-out forwards;
+}
+
+@keyframes slide-up {
+    0% {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.itinerary-header {
+    margin-bottom: var(--margin-m);
+    padding-bottom: var(--margin-s);
+    border-bottom: 1px solid var(--color-gray);
+}
+
+.route-locations {
+    margin-bottom: var(--margin-s);
+    position: relative;
+}
+
+.back-button {
+    position: absolute;
+    right: 0;
+    background-color: transparent;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.back-button .back-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.origin,
+.destination {
+    font-size: var(--font-m);
+    margin-bottom: var(--margin-xs);
+}
+
+.time-range {
+    font-size: var(--font-l);
+    font-weight: bold;
+}
+
+.day-duration {
+    color: var(--color-gray-on-dark-background);
+    font-size: var(--font-s);
+    font-weight: 500;
+}
+
+.itinerary-timeline {
+    position: relative;
+    margin: var(--margin-m) 0;
+}
+
+.itinerary-leg {
+    position: relative;
+}
+
+.itinerary-step {
+    display: flex;
+    position: relative;
+}
+
+.step-time {
+    width: 50px;
+    text-align: right;
+    font-weight: 500;
+    padding-right: var(--padding-s);
+}
+
+.step-details {
+    flex: 1;
+    padding-left: var(--padding-m);
+    padding-bottom: var(--padding-m);
+    position: relative;
+    border-left: 4px solid var(--color-gray);
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+    min-height: 24px;
+    gap: var(--margin-s);
+}
+
+.step-location {
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    position: relative;
+    margin-left: -24px;
+    margin-top: -4px;
+}
+
+.step-location p {
+    margin: 0;
+    line-height: 1.2;
+}
+
+.step-location.transfer-station {
+    color: var(--color-gray-on-dark-background);
+    font-size: var(--font-s);
+}
+
+.timeline-marker {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    z-index: 2;
+    margin-right: 6px;
+}
+
+.transit-info {
+    display: flex;
+    align-items: center;
+}
+
+.step-details > * {
+    margin-bottom: var(--margin-xs);
+}
+
+.step-details > *:last-child {
+    margin-bottom: 0;
+}
+
+.step-details.walking-step {
+    border-left: 4px dotted var(--color-gray);
+}
+
+.walking-info {
+    color: var(--color-gray-on-dark-background);
+    font-size: var(--font-s);
+    display: flex;
+    align-items: center;
+    padding-left: var(--padding-xs);
+}
+
+.walking-info span {
+    margin-left: var(--margin-xs);
+}
+
+.walking-icon {
+    margin-right: var(--margin-xs);
+    font-size: 1.2em;
+}
+
+.walking-details {
+    margin-left: var(--margin-s);
+    font-size: var(--font-xs);
+}
+
+.transit-direction {
+    margin-left: var(--margin-s);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+.stops-info {
+    margin-top: var(--margin-xs);
+    font-size: var(--font-xs);
+    color: var(--color-gray-on-dark-background);
+}
+
+.route-risk {
+    margin-top: var(--margin-m);
+    background-color: var(--color-background);
+    border-radius: var(--borderRadius-small);
+    height: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.risk-indicator {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.risk-text {
+    text-align: right;
+    font-size: var(--font-xs);
+    margin-top: var(--margin-xxs);
+    color: var(--color-gray-on-dark-background);
+}

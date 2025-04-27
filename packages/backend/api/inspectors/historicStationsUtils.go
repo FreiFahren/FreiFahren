@@ -81,14 +81,49 @@ func calculateWeekendAdjustment(currentTime time.Time, threshold int) float64 {
 //	ticketInfoList: the list of ticket inspectors
 //	remaining: the number of historic data to fetch
 //	startTime: the time to start fetching historic data from
+//	stationId: optional station ID to filter historic data by
 //
 // returns:
 //
 //	the list of ticket inspectors with the historic data added
 //	an error if one occurred
-func FetchAndAddHistoricData(ticketInfoList []utils.TicketInspector, remaining int, startTime time.Time) ([]utils.TicketInspector, error) {
+func FetchAndAddHistoricData(ticketInfoList []utils.TicketInspector, remaining int, startTime time.Time, stationId string) ([]utils.TicketInspector, error) {
 	logger.Log.Debug().Msg("Fetching and adding historic data")
 
+	// If we're filtering by a specific station, we should only add historic data for that station
+	if stationId != "" {
+		logger.Log.Debug().Str("stationId", stationId).Msg("Filtering historic data by station")
+
+		// Check if we already have data for this station
+		hasStationData := false
+		for _, ticketInfo := range ticketInfoList {
+			if ticketInfo.StationId == stationId {
+				hasStationData = true
+				break
+			}
+		}
+
+		// If we don't have data for this station yet, create historic data for it
+		if !hasStationData && remaining > 0 {
+			historicData := utils.TicketInspector{
+				Timestamp:  calculateHistoricDataTimestamp(startTime, startTime.Add(time.Hour)),
+				StationId:  stationId,
+				IsHistoric: true,
+			}
+
+			ticketInfoList = append(ticketInfoList, historicData)
+			remaining--
+		}
+
+		// If we still need more data, we can't add more since we're filtering by station
+		if remaining > 0 {
+			logger.Log.Debug().Int("remaining", remaining).Msg("Cannot add more historic data when filtering by station")
+		}
+
+		return ticketInfoList, nil
+	}
+
+	// Original logic for when no station filter is applied
 	currentStationIds := make(map[string]bool)
 	for _, ticketInfo := range ticketInfoList {
 		currentStationIds[ticketInfo.StationId] = true
@@ -121,7 +156,20 @@ func FetchAndAddHistoricData(ticketInfoList []utils.TicketInspector, remaining i
 //
 // This is being done to make sure that users will disregard the historic data and deem it as irrelevant.
 func calculateHistoricDataTimestamp(startTime time.Time, endTime time.Time) time.Time {
+	// Ensure endTime is after startTime
+	if endTime.Before(startTime) {
+		logger.Log.Warn().Msg("End time is before start time, using start time + 1 hour as end time")
+		endTime = startTime.Add(time.Hour)
+	}
+
 	duration := endTime.Sub(startTime)
+
+	// If duration is zero or very small, use a default duration
+	if duration <= 0 {
+		logger.Log.Warn().Msg("Duration is zero or negative, using default duration of 1 hour")
+		duration = time.Hour
+	}
+
 	percentile25 := duration / 4
 	randomDuration := time.Duration(rand.Int63n(int64(percentile25)))
 	randomTimestamp := startTime.Add(randomDuration)

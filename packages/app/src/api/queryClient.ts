@@ -8,6 +8,7 @@ export const CACHE_KEYS = {
     reports: ['reports'],
     stations: ['stations'],
     lines: ['lines'],
+    segments: ['segments'],
     risk: ['risk'],
     privacyPolicyMeta: ['privacy-policy-meta'],
     stationStatistics: (stationId: string) => ['station-statistics', stationId],

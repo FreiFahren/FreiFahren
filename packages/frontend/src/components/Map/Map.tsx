@@ -2,11 +2,13 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import './Map.css'
 
 import React, { lazy, Suspense, useCallback, useEffect, useRef } from 'react'
-import { LngLatBoundsLike, LngLatLike, MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre'
+import { LngLatBoundsLike, LngLatLike, MapLayerMouseEvent, MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre'
 import { useRiskData, useSegments, useStations } from 'src/api/queries'
 
 import { useLocation } from '../../contexts/LocationContext'
+import { sendAnalyticsEvent } from '../../hooks/useAnalytics'
 import { convertStationsToGeoJSON } from '../../utils/mapUtils'
+import { StationProperty } from '../../utils/types'
 import { RegularLineLayer } from './MapLayers/LineLayer/RegularLineLayer'
 import { RiskLineLayer } from './MapLayers/LineLayer/RiskLineLayer'
 import { StationLayer } from './MapLayers/StationLayer/StationLayer'
@@ -19,6 +21,7 @@ interface FreifahrenMapProps {
     isFirstOpen: boolean
     isRiskLayerOpen: boolean
     onRotationChange: (bearing: number) => void
+    handleStationClick?: (station: StationProperty) => void
 }
 // Incase of using environment variables, we need to use the process.env.REACT_APP_MAP_CENTER_LNG and process.env.REACT_APP_MAP_CENTER_LAT
 const berlinViewPosition: { lng: number; lat: number } = {
@@ -28,14 +31,19 @@ const berlinViewPosition: { lng: number; lat: number } = {
 const GITHUB_ICON = `${process.env.PUBLIC_URL}/icons/github.svg`
 const INSTAGRAM_ICON = `${process.env.PUBLIC_URL}/icons/instagram.svg`
 
-const FreifahrenMap: React.FC<FreifahrenMapProps> = ({ isFirstOpen, isRiskLayerOpen, onRotationChange }) => {
+const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
+    isFirstOpen,
+    isRiskLayerOpen,
+    onRotationChange,
+    handleStationClick,
+}) => {
     const SouthWestBounds: LngLatLike = {
-        lng: Number(process.env.REACT_APP_MAP_BOUNDS_SW_LNG) || 12.8364646484805,
-        lat: Number(process.env.REACT_APP_MAP_BOUNDS_SW_LAT) || 52.23115511676795,
+        lng: Number(process.env.REACT_APP_SW_BOUND_LNG),
+        lat: Number(process.env.REACT_APP_SW_BOUND_LAT),
     }
     const NorthEastBounds: LngLatLike = {
-        lng: Number(process.env.REACT_APP_MAP_BOUNDS_NE_LNG) || 14.00044556529124,
-        lat: Number(process.env.REACT_APP_MAP_BOUNDS_NE_LAT) || 52.77063424239867,
+        lng: Number(process.env.REACT_APP_NE_BOUND_LNG),
+        lat: Number(process.env.REACT_APP_NE_BOUND_LAT),
     }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
 
@@ -53,7 +61,6 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({ isFirstOpen, isRiskLayerO
         }
     }, [isFirstOpen, initializeLocationTracking])
 
-    // preload colors before risklayer component mounts to instantly show the highlighted segments
     const { data: segmentRiskData } = useRiskData()
 
     const handleRotate = useCallback(
@@ -61,6 +68,58 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({ isFirstOpen, isRiskLayerO
             onRotationChange(event.viewState.bearing)
         },
         [onRotationChange]
+    )
+
+    const handleMapClick = useCallback(
+        (event: MapLayerMouseEvent) => {
+            const currentMap = map.current
+            if (!currentMap) return
+
+            const targetElement = event.originalEvent.target
+            if (targetElement instanceof HTMLElement) {
+                if (
+                    targetElement.classList.contains('inspector-marker') ||
+                    (targetElement.parentElement?.classList.contains('inspector-marker') ?? false)
+                ) {
+                    return
+                }
+            }
+
+            const features = currentMap.queryRenderedFeatures(event.point, {
+                layers: ['stationLayer', 'stationNameLayer'],
+            })
+
+            if (features.length > 0 && handleStationClick) {
+                const [feature] = features
+                const { properties } = feature
+
+                if (typeof properties.name === 'string' && feature.geometry.type === 'Point') {
+                    let parsedLines: unknown
+                    try {
+                        parsedLines = JSON.parse(properties.lines ?? '[]')
+                    } catch (error) {
+                        parsedLines = []
+                    }
+                    const lines =
+                        Array.isArray(parsedLines) && parsedLines.every((item) => typeof item === 'string')
+                            ? (parsedLines as string[])
+                            : []
+
+                    const station: StationProperty = {
+                        name: properties.name,
+                        lines,
+                        coordinates: {
+                            longitude: (feature.geometry.coordinates as [number, number])[0],
+                            latitude: (feature.geometry.coordinates as [number, number])[1],
+                        },
+                    }
+
+                    handleStationClick(station)
+                    sendAnalyticsEvent('InfoModal opened', { meta: { source: 'map', station_name: station.name } })
+                }
+            }
+        },
+        [handleStationClick]
     )
 
     return (
@@ -72,14 +131,15 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({ isFirstOpen, isRiskLayerO
                     ref={map}
                     id="map"
                     initialViewState={{
-                        longitude: berlinViewPosition.lng,
-                        latitude: berlinViewPosition.lat,
+                        longitude: cityViewPosition.lng,
+                        latitude: cityViewPosition.lat,
                         zoom: 11,
                     }}
                     maxZoom={14}
                     minZoom={10}
                     maxBounds={maxBounds}
                     onRotate={handleRotate}
+                    onClick={handleMapClick}
                     mapStyle={`https://api.jawg.io/styles/c52af8db-49f6-40b8-9197-568b7fd9a940.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`}
                 >
                     {!isFirstOpen ? <LocationMarker userPosition={userPosition} /> : null}

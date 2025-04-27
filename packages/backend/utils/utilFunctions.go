@@ -104,17 +104,20 @@ func FindEnvFile() (string, error) {
 	return "", os.ErrNotExist
 }
 
-// GetTimeRange returns the start and end time of the time range
+// GetTimeRange calculates the start and end time of a time range based on provided parameters or defaults.
 //
 // Parameters:
-//   - start: The start time of the time range in RFC 3339 format.
-//   - end: The end time of the time range in RFC 3339 format.
+//   - start: The start time in RFC 3339 format (e.g., "2025-03-23T03:19:16Z"). If empty, defaults to now minus defaultTimeRange.
+//   - end: The end time in RFC 3339 format (e.g., "2025-03-30T03:19:16Z"). If empty, defaults to current time.
+//   - defaultTimeRange: The duration to use when start and end times are not provided (e.g., 168h for 7 days).
 //
 // Returns:
-//   - The start time of the time range in RFC 3339 format.
-//   - The end time of the time range in RFC 3339 format.
+//   - time.Time: The calculated start time in UTC.
+//   - time.Time: The calculated end time in UTC.
 //
-// This function is being used to get the start and end time of the time range.
+// This function first sets default values using the current time and the provided defaultTimeRange.
+// If both start and end parameters are provided and can be parsed as RFC 3339 timestamps,
+// it uses those values instead of the defaults. All times are handled in UTC.
 func GetTimeRange(start, end string, defaultTimeRange time.Duration) (time.Time, time.Time) {
 	now := time.Now().UTC()
 	startTime := now.Add(-1 * defaultTimeRange)

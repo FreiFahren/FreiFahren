@@ -50,7 +50,7 @@ func (c *RiskCache) set(data *RiskData) {
 func ExecuteRiskModel() (*RiskData, error) {
 	endTime := time.Now().UTC()
 	startTime := endTime.Add(-time.Hour)
-	ticketInfoList, err := database.GetLatestTicketInspectors(startTime, endTime)
+	ticketInfoList, err := database.GetLatestTicketInspectors(startTime, endTime, "")
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Failed to get ticket inspectors")
 		return nil, err

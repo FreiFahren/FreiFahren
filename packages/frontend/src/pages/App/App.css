@@ -5,7 +5,7 @@
 .compass-container {
     border: var(--border-default);
     position: absolute;
-    top: 75px;
+    top: 150px;
     right: var(--distance-from-edge-default);
     width: 35px;
     height: 35px;
@@ -83,4 +83,21 @@
     right: 1px;
     border-right: 6px solid transparent;
     border-top: 10px solid #4d4d4d;
+}
+
+.navigation-button {
+    position: absolute;
+    bottom: 100px;
+    right: var(--distance-from-edge-default);
+    width: 65px;
+    height: 65px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+}
+
+.navigation-button img {
+    width: 35px;
+    height: 35px;
 }

@@ -76,7 +76,7 @@ export const StationLayer = () => {
     if (!stationsGeoJSON) return null
 
     return (
-        <ShapeSource id="stationSource" shape={stationsGeoJSON as GeoJSON.GeoJSON}>
+        <ShapeSource id="stationSource" shape={stationsGeoJSON as GeoJSON.FeatureCollection}>
             <CircleLayer
                 id="stationLayer"
                 style={{
