@@ -80,22 +80,15 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
 
     // Calculate possible lines based on the current entity
     const possibleLines = useMemo(() => {
-        if (currentEntity === null) return allLines
-        return Object.entries(allLines ?? {})
-            .filter(([line]) => {
-                // exception as some trams begin with a number, like Nr. 17
-                if (currentEntity === 'M') {
-                    return line.startsWith('M') || /^\d/.test(line)
-                }
-                return line.startsWith(currentEntity)
-            })
-            .reduce(
-                (accumulatedLines, [line, stations]) => ({
-                    ...accumulatedLines,
-                    [line]: stations,
-                }),
-                {} as LinesList
-            )
+        if (currentEntity === null) return allLines ?? []
+        // Filter the array directly
+        return (allLines ?? []).filter(([line]) => {
+            // exception as some trams begin with a number, like Nr. 17
+            if (currentEntity === 'M') {
+                return line.startsWith('M') || /^\d/.test(line)
+            }
+            return line.startsWith(currentEntity)
+        })
     }, [allLines, currentEntity])
 
     // Calculate possible stations based on entity, line, station, and search input
@@ -122,8 +115,10 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
             stations = allStations?.[currentStation] ? { [currentStation]: allStations[currentStation] } : {}
         } else if (currentLine !== null) {
             // If a line is selected, filter stations belonging to that line
+            // Find the stations for the current line from the allLines array
+            const stationsForCurrentLine = allLines?.find(([key]) => key === currentLine)?.[1] ?? []
             stations = Object.fromEntries(
-                (allLines?.[currentLine] ?? [])
+                stationsForCurrentLine
                     .map((stationKey) => [stationKey, allStations?.[stationKey]])
                     .filter(([, stationData]) => stationData !== undefined) as [string, StationProperty][]
             )
@@ -240,11 +235,13 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
     const handleLineSelect = useCallback(
         (line: string | null) => {
             setCurrentLine(line)
+            // Find the stations for the selected line from the allLines array
+            const stationsForSelectedLine = allLines?.find(([key]) => key === line)?.[1] ?? []
             if (
                 typeof line === 'string' &&
                 currentStation !== null &&
                 typeof currentStation === 'string' &&
-                (allLines?.[line] ?? []).includes(currentStation) === false
+                !stationsForSelectedLine.includes(currentStation) // Use the found stations array
             ) {
                 setCurrentStation(null)
             }
@@ -470,7 +467,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                                 value={currentLine}
                                 getValue={getLineValue}
                             >
-                                {Object.keys(possibleLines ?? {}).map((line) => (
+                                {possibleLines.map(([line]) => (
                                     <Line key={line} line={line} />
                                 ))}
                             </SelectField>
@@ -509,18 +506,30 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                                     containerClassName="align-child-on-line"
                                     getValue={getDirectionValue}
                                 >
-                                    <span>
-                                        <strong>{(allStations ?? {})[allLines?.[currentLine]?.[0] ?? ''].name}</strong>
-                                    </span>
-                                    <span>
-                                        <strong>
-                                            {
-                                                (allStations ?? {})[
-                                                    allLines?.[currentLine]?.[allLines[currentLine].length - 1] ?? ''
-                                                ].name
-                                            }
-                                        </strong>
-                                    </span>
+                                    {(() => {
+                                        // Find stations for the current line from the allLines array
+                                        const stationsForCurrentLine =
+                                            allLines?.find(([key]) => key === currentLine)?.[1] ?? []
+                                        const startStationId = stationsForCurrentLine[0] ?? ''
+                                        const endStationId =
+                                            stationsForCurrentLine[stationsForCurrentLine.length - 1] ?? ''
+                                        const startStationName = (allStations ?? {})[startStationId]?.name ?? ''
+                                        const endStationName = (allStations ?? {})[endStationId]?.name ?? ''
+
+                                        // Return null if names can't be found to avoid rendering empty elements
+                                        if (!startStationName || !endStationName) return null
+
+                                        return (
+                                            <>
+                                                <span>
+                                                    <strong>{startStationName}</strong>
+                                                </span>
+                                                <span>
+                                                    <strong>{endStationName}</strong>
+                                                </span>
+                                            </>
+                                        )
+                                    })()}
                                 </SelectField>
                             </section>
                         ) : null}
