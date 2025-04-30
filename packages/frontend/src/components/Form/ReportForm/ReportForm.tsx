@@ -81,7 +81,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
     const possibleLines = useMemo(() => {
         let filteredLines: [string, string[]][] = []
 
-        // 1. Filter by entity (U, S, M, etc.)
+        // 1. Filter by entity (U, S, M, etc.), dependent on what entities are configured
         if (currentEntity === null) {
             filteredLines = allLines ?? []
         } else {
