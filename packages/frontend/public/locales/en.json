@@ -73,7 +73,7 @@
         "minutes": "min",
         "oneStation": "one station",
         "stations": "stations",
-        "fromYou": "away",
+        "fromYou": " away",
         "direction": "Direction",
         "inviteText": "Data may be inaccurate.",
         "syncText": "Reports synced with @FreiFahren_BE"

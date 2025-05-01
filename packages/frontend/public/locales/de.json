@@ -70,7 +70,7 @@
         "minutes": "min",
         "oneStation": "eine Station",
         "stations": "Stationen",
-        "fromYou": "entfernt",
+        "fromYou": " entfernt",
         "direction": "Richtung",
         "inviteText": "Daten vielleicht ungenau.",
         "syncText": "Meldungen mit @FreiFahren_BE synchronisert"

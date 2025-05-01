@@ -1,13 +1,15 @@
 import './App.css'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router-dom'
 import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
 import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
 import { Report, StationProperty } from 'src/utils/types'
 
-import { useLast24HourReports, useCurrentReports } from '../../api/queries'
+import { useCurrentReports,useLast24HourReports, useStations } from '../../api/queries'
 import CloseButton from '../../components/Buttons/CloseButton/CloseButton'
 import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
 import { ReportButton } from '../../components/Buttons/ReportButton/ReportButton'
@@ -24,7 +26,7 @@ import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
 import { highlightElement } from '../../utils/uiUtils'
-import { useTranslation } from 'react-i18next'
+
 type AppUIState = {
     isReportFormOpen: boolean
     isFirstOpen: boolean
@@ -48,6 +50,8 @@ const isTelegramWebApp = (): boolean =>
     typeof TelegramWebviewProxy !== 'undefined'
 
 const App = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const stationId = searchParams.get('stationId');
     const { t } = useTranslation()
 
     const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
@@ -58,6 +62,7 @@ const App = () => {
     const { data: reportsInLast24Hours } = useLast24HourReports()
     const { isFetching: isFetchingCurrentReports } = useCurrentReports()
     const wasFetchingRef = useRef(isFetchingCurrentReports)
+    const { data: stations } = useStations()
 
     useEffect(() => {
         setAppMounted(true)
@@ -225,6 +230,7 @@ const App = () => {
     const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false)
     const [selectedStation, setSelectedStation] = useState<StationProperty | null>(null)
     const [navigationEndStation, setNavigationEndStation] = useState<StationProperty | null>(null)
+    const [stationModalWasManuallyCloses, setStationModalWasManuallyCloses] = useState(false)
 
     const {
         isOpen: isInfoModalOpen,
@@ -236,6 +242,17 @@ const App = () => {
     const onStationSelect = (station: StationProperty) => {
         setSelectedStation(station)
         openInfoModal()
+        setStationModalWasManuallyCloses(false)
+    }
+
+    const onCloseInfoModal = () => {
+        setStationModalWasManuallyCloses(true)
+        closeInfoModal()
+        
+        // If we're on a station URL with query parameter, remove the query parameter
+        if (stationId !== null) {
+            setSearchParams({});
+        }
     }
 
     const handleRouteButtonClick = () => {
@@ -245,6 +262,48 @@ const App = () => {
             closeInfoModal()
         }
     }
+
+    // Handle direct navigation to a station via URL query parameter
+    useEffect(() => {
+        const isValidStationId = typeof stationId === 'string' && stationId.trim() !== '';
+
+        if (!(isValidStationId && stations && !isInfoModalOpen && !stationModalWasManuallyCloses)) {
+            return;
+        }
+        const station = stations[stationId];
+        
+        // station does have an overlap with undefined, when looking for stations[(RANDOM_STRING)], so we need to check for it
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (station === undefined) {
+            return;
+        }
+        
+        const hasValidName = typeof station.name === 'string' && station.name.trim() !== ''
+        const hasValidCoordinates =
+            typeof station.coordinates === 'object' &&
+            typeof station.coordinates.longitude === 'number' &&
+            typeof station.coordinates.latitude === 'number';
+            
+        if (!(hasValidName && hasValidCoordinates)) {
+            return;
+        }
+
+        const stationProperty: StationProperty = {
+            name: station.name,
+            lines: Array.isArray(station.lines) ? station.lines : [],
+            coordinates: {
+                        longitude: station.coordinates.longitude,
+                        latitude: station.coordinates.latitude
+                    }
+        };
+        // Make sure legal disclaimer has to be accepted first, before the station view can be opened
+        if (appUIState.isFirstOpen) {
+            return;
+        }
+        onStationSelect(stationProperty);
+            
+     
+    }, [stationId, stations, isInfoModalOpen, appUIState.isFirstOpen, closeLegalDisclaimer, onStationSelect, stationModalWasManuallyCloses, setSearchParams]);
 
     useEffect(() => {
         if (indicatorTimeoutRef.current) {
@@ -336,7 +395,7 @@ const App = () => {
                     className={`open ${isInfoModalAnimatingOut ? 'slide-out' : 'slide-in'}`}
                     onRouteClick={handleRouteButtonClick}
                 >
-                    <CloseButton handleClose={closeInfoModal} />
+                    <CloseButton handleClose={onCloseInfoModal} />
                 </InfoModal>
             ) : null}
             {isNavigationModalOpen ? (
@@ -357,16 +416,14 @@ const App = () => {
             >
                 <img src={`${process.env.PUBLIC_URL}/icons/route-svgrepo-com.svg`} alt="Navigation" />
             </button>
-            {showUpdateIndicator && (
-                <div className="update-indicator">
+            {showUpdateIndicator ? <div className="update-indicator">
                     <img
                         src={`${process.env.PUBLIC_URL}/icons/refresh-svgrepo-com.svg`}
                         alt="Refresh"
                         className="update-indicator-icon"
                     />
                     <div className="update-indicator-text">{t('updateIndicator.text')}</div>
-                </div>
-            )}
+                </div> : null}
             <ReportButton
                 handleOpenReportModal={() =>
                     setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })
