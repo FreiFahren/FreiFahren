@@ -8,7 +8,7 @@ import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
 import { Report, StationProperty } from 'src/utils/types'
 
-import { useLast24HourReports, useStations } from '../../api/queries'
+import { useLast24HourReports, useStations, useCurrentReports } from '../../api/queries'
 import CloseButton from '../../components/Buttons/CloseButton/CloseButton'
 import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
 import { ReportButton } from '../../components/Buttons/ReportButton/ReportButton'
@@ -25,7 +25,7 @@ import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
 import { highlightElement } from '../../utils/uiUtils'
-
+import { useTranslation } from 'react-i18next'
 type AppUIState = {
     isReportFormOpen: boolean
     isFirstOpen: boolean
@@ -51,10 +51,16 @@ const isTelegramWebApp = (): boolean =>
 const App = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const stationId = searchParams.get('stationId');
+    const { t } = useTranslation()
+
     const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
     const [appMounted, setAppMounted] = useState(false)
+    const [showUpdateIndicator, setShowUpdateIndicator] = useState<boolean>(false)
+    const indicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
     const { data: reportsInLast24Hours } = useLast24HourReports()
+    const { isFetching: isFetchingCurrentReports } = useCurrentReports()
+    const wasFetchingRef = useRef(isFetchingCurrentReports)
     const { data: stations } = useStations()
 
     useEffect(() => {
@@ -298,6 +304,29 @@ const App = () => {
      
     }, [stationId, stations, isInfoModalOpen, appUIState.isFirstOpen, closeLegalDisclaimer, onStationSelect, stationModalWasManuallyCloses, setSearchParams]);
 
+    useEffect(() => {
+        if (indicatorTimeoutRef.current) {
+            clearTimeout(indicatorTimeoutRef.current)
+        }
+
+        if (wasFetchingRef.current && !isFetchingCurrentReports) {
+            setShowUpdateIndicator(true)
+            // Set a timeout to hide the indicator after a short period
+            indicatorTimeoutRef.current = setTimeout(() => {
+                setShowUpdateIndicator(false)
+            }, 1.5 * 1000)
+        }
+
+        // Update the ref for the next render
+        wasFetchingRef.current = isFetchingCurrentReports
+
+        return () => {
+            if (indicatorTimeoutRef.current) {
+                clearTimeout(indicatorTimeoutRef.current)
+            }
+        }
+    }, [isFetchingCurrentReports])
+
     return (
         <div className="App">
             {appMounted && shouldShowLegalDisclaimer() ? (
@@ -386,6 +415,16 @@ const App = () => {
             >
                 <img src={`${process.env.PUBLIC_URL}/icons/route-svgrepo-com.svg`} alt="Navigation" />
             </button>
+            {showUpdateIndicator && (
+                <div className="update-indicator">
+                    <img
+                        src={`${process.env.PUBLIC_URL}/icons/refresh-svgrepo-com.svg`}
+                        alt="Refresh"
+                        className="update-indicator-icon"
+                    />
+                    <div className="update-indicator-text">{t('updateIndicator.text')}</div>
+                </div>
+            )}
             <ReportButton
                 handleOpenReportModal={() =>
                     setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })

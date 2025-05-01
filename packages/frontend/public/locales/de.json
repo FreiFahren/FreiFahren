@@ -230,5 +230,8 @@
         "lastReports": "Letzte Meldungen",
         "route": "Navigieren",
         "noRecentReports": "Heute noch keine Meldungen"
+    },
+    "updateIndicator": {
+        "text": "Daten aktualisiert"
     }
 }
