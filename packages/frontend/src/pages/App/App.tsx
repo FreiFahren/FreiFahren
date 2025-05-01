@@ -1,6 +1,7 @@
 import './App.css'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
 import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
@@ -8,7 +9,7 @@ import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
 import { Report, StationProperty } from 'src/utils/types'
 
-import { useLast24HourReports, useStations, useCurrentReports } from '../../api/queries'
+import { useCurrentReports,useLast24HourReports, useStations } from '../../api/queries'
 import CloseButton from '../../components/Buttons/CloseButton/CloseButton'
 import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
 import { ReportButton } from '../../components/Buttons/ReportButton/ReportButton'
@@ -25,7 +26,7 @@ import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
 import { highlightElement } from '../../utils/uiUtils'
-import { useTranslation } from 'react-i18next'
+
 type AppUIState = {
     isReportFormOpen: boolean
     isFirstOpen: boolean
@@ -415,16 +416,14 @@ const App = () => {
             >
                 <img src={`${process.env.PUBLIC_URL}/icons/route-svgrepo-com.svg`} alt="Navigation" />
             </button>
-            {showUpdateIndicator && (
-                <div className="update-indicator">
+            {showUpdateIndicator ? <div className="update-indicator">
                     <img
                         src={`${process.env.PUBLIC_URL}/icons/refresh-svgrepo-com.svg`}
                         alt="Refresh"
                         className="update-indicator-icon"
                     />
                     <div className="update-indicator-text">{t('updateIndicator.text')}</div>
-                </div>
-            )}
+                </div> : null}
             <ReportButton
                 handleOpenReportModal={() =>
                     setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })
