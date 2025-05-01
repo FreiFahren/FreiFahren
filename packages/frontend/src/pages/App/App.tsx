@@ -24,7 +24,7 @@ import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
 import { highlightElement } from '../../utils/uiUtils'
-
+import { useTranslation } from 'react-i18next'
 type AppUIState = {
     isReportFormOpen: boolean
     isFirstOpen: boolean
@@ -48,6 +48,8 @@ const isTelegramWebApp = (): boolean =>
     typeof TelegramWebviewProxy !== 'undefined'
 
 const App = () => {
+    const { t } = useTranslation()
+
     const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
     const [appMounted, setAppMounted] = useState(false)
     const [showUpdateIndicator, setShowUpdateIndicator] = useState<boolean>(false)
@@ -362,7 +364,7 @@ const App = () => {
                         alt="Refresh"
                         className="update-indicator-icon"
                     />
-                    <div className="update-indicator-text">Daten aktualisiert</div>
+                    <div className="update-indicator-text">{t('updateIndicator.text')}</div>
                 </div>
             )}
             <ReportButton

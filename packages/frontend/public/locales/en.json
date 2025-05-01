@@ -234,5 +234,8 @@
         "lastReports": "Last reports",
         "route": "Navigate",
         "noRecentReports": "No reports today"
+    },
+    "updateIndicator": {
+        "text": "Data refreshed"
     }
 }
