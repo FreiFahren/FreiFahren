@@ -231,8 +231,7 @@
         "stops": "Stops",
         "saveRoute": "Save Route",
         "removeRoute": "Remove Route",
-        "seeRoute": "See Route",
-        "showSavedRoute": "Show Saved Route",
+        "showSavedRoute": "Show Route",
         "back": "Back"
     },
     "InfoModal": {

@@ -228,7 +228,7 @@
         "saveRoute": "Route speichern",
         "removeRoute": "Route löschen",
         "seeRoute": "Route anzeigen",
-        "showSavedRoute": "Gespeicherte Route zeigen",
+        "showSavedRoute": "Route zeigen",
         "back": "Zurück"
     },
     "InfoModal": {
