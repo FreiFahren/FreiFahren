@@ -102,6 +102,19 @@
     height: 35px;
 }
 
+/* Show Saved Route button */
+.saved-route-button {
+    height: auto;
+    min-height: var(--height-streched-button);
+    width: 8rem;
+    bottom: var(--distance-from-edge-default);
+    left: var(--distance-from-edge-default);
+    overflow: hidden;
+    margin-bottom: 4.5rem;
+    padding: var(--padding-s);
+    font-size: var(--font-xs);
+}
+
 @keyframes fadeInOut {
     0% {
         opacity: 0;

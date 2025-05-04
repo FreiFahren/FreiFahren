@@ -228,7 +228,12 @@
         "safestRoute": "Lowest Risk",
         "from": "From: ",
         "to": "To: ",
-        "stops": "Stops"
+        "stops": "Stops",
+        "saveRoute": "Save Route",
+        "removeRoute": "Remove Route",
+        "seeRoute": "See Route",
+        "showSavedRoute": "Show Saved Route",
+        "back": "Back"
     },
     "InfoModal": {
         "lastReports": "Last reports",
