@@ -62,8 +62,8 @@ def handle_start_command(message):
     
     # Send welcome message with Mini App button
     chat_id = message.chat.id
-    welcome_text = "👋 Welcome to FreiFahren! Use the button below to report inspectors:"
-    button_text = "Report Inspectors"
+    welcome_text = "Willkommen 👋 Nutze den Button unten um Kontrolleure zu melden:\n\n Welcome 👋 Use the button below to report inspectors:"
+    button_text = "Kontrolleure melden / Report inspectors"
     
     # Use the configured server URL from config
     webapp_url = f"{MINI_APP_SERVER_URL}/mini-app"
