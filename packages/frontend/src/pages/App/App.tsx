@@ -247,8 +247,6 @@ const App = () => {
         setSelectedStation(station)
         openInfoModal()
         setStationModalWasManuallyCloses(false)
-        // Navigate to the station URL
-        navigate(`/station/${station.name}`)
     }
 
     const onCloseInfoModal = () => {
