@@ -2,7 +2,7 @@ import './App.css'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
 import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
@@ -50,8 +50,8 @@ const isTelegramWebApp = (): boolean =>
     typeof TelegramWebviewProxy !== 'undefined'
 
 const App = () => {
-    const [searchParams, setSearchParams] = useSearchParams();
-    const stationId = searchParams.get('stationId');
+    const { stationId } = useParams();
+    const navigate = useNavigate();
     const { t } = useTranslation()
 
     const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
@@ -243,15 +243,17 @@ const App = () => {
         setSelectedStation(station)
         openInfoModal()
         setStationModalWasManuallyCloses(false)
+        // Navigate to the station URL
+        navigate(`/station/${station.name}`)
     }
 
     const onCloseInfoModal = () => {
         setStationModalWasManuallyCloses(true)
         closeInfoModal()
         
-        // If we're on a station URL with query parameter, remove the query parameter
-        if (stationId !== null) {
-            setSearchParams({});
+        // If we're on a station URL, navigate back to home
+        if (stationId !== undefined) {
+            navigate('/');
         }
     }
 
@@ -263,7 +265,7 @@ const App = () => {
         }
     }
 
-    // Handle direct navigation to a station via URL query parameter
+    // Handle direct navigation to a station via URL parameter
     useEffect(() => {
         const isValidStationId = typeof stationId === 'string' && stationId.trim() !== '';
 
@@ -303,7 +305,7 @@ const App = () => {
         onStationSelect(stationProperty);
             
      
-    }, [stationId, stations, isInfoModalOpen, appUIState.isFirstOpen, closeLegalDisclaimer, onStationSelect, stationModalWasManuallyCloses, setSearchParams]);
+    }, [stationId, stations, isInfoModalOpen, appUIState.isFirstOpen, closeLegalDisclaimer, onStationSelect, stationModalWasManuallyCloses, navigate]);
 
     useEffect(() => {
         if (indicatorTimeoutRef.current) {
