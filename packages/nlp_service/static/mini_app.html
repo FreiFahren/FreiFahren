@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreiFahren Mini App</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 16px;
+            color: var(--tg-theme-text-color, #000000);
+            background-color: var(--tg-theme-bg-color, #ffffff);
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: var(--tg-theme-hint-color, #999999);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .card {
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .button {
+            background-color: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--tg-theme-hint-color, #999999);
+            border-radius: 8px;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+    </style>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>FreiFahren Reporter</h1>
+        
+        <div class="card">
+            <div class="form-group">
+                <label for="line">Line</label>
+                <input type="text" id="line" placeholder="U1, S7, etc.">
+            </div>
+            
+            <div class="form-group">
+                <label for="station">Station</label>
+                <input type="text" id="station" placeholder="Station name">
+            </div>
+            
+            <div class="form-group">
+                <label for="direction">Direction</label>
+                <input type="text" id="direction" placeholder="Direction">
+            </div>
+            
+            <div class="form-group">
+                <label for="message">Message</label>
+                <input type="text" id="message" placeholder="Additional information">
+            </div>
+            
+            <button class="button" id="submit-button">Submit Report</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Telegram Mini App
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Expand the Mini App to take up the full screen
+        
+        // Initialize the main button (appears at the bottom of the app)
+        tg.MainButton.setText('CLOSE');
+        tg.MainButton.onClick(() => {
+            tg.close();
+        });
+        
+        // Show the main button
+        tg.MainButton.show();
+
+        // Handle form submission
+        document.getElementById('submit-button').addEventListener('click', () => {
+            const line = document.getElementById('line').value;
+            const station = document.getElementById('station').value;
+            const direction = document.getElementById('direction').value;
+            const message = document.getElementById('message').value;
+            
+            if (!station) {
+                tg.showAlert("Please enter a station name");
+                return;
+            }
+            
+            // Prepare data to send back to the bot
+            const data = {
+                line: line,
+                station: station,
+                direction: direction,
+                message: message
+            };
+            
+            // Send data back to the bot
+            tg.sendData(JSON.stringify(data));
+            
+            // Show confirmation to user
+            tg.showPopup({
+                title: 'Report Submitted',
+                message: 'Thank you for your report!',
+                buttons: [{type: 'ok'}]
+            });
+        });
+        
+        // Apply the theme from Telegram
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if we're in Telegram environment
+            if (tg.initDataUnsafe?.user) {
+                console.log('User information:', tg.initDataUnsafe.user);
+            }
+        });
+    </script>
+</body>
+</html> 

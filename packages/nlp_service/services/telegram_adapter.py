@@ -3,6 +3,7 @@ from nlp_service.utils.logger import setup_logger
 from nlp_service.core.processor import process_new_message
 
 from telebot import TeleBot
+from telebot.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 
 import pytz
 from datetime import datetime
@@ -33,7 +34,25 @@ def send_message(chat_id: str, message: str, bot, parse_mode='HTML') -> None:
         bot.send_message(chat_id, message, parse_mode=parse_mode)
     except Exception as e:
         logger.error(f'Failed to send message to user {chat_id}: {e}')
-        
+
+def send_webapp_button(chat_id: str, text: str, button_text: str, webapp_url: str) -> None:
+    """Send a message with a button that opens a Mini App.
+    
+    Args:
+        chat_id (str): The ID of the user or chat.
+        text (str): The message text to accompany the button.
+        button_text (str): The text displayed on the button.
+        webapp_url (str): The URL of the Mini App.
+    """
+    try:
+        markup = InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton(
+            text=button_text,
+            web_app=WebAppInfo(url=webapp_url)
+        ))
+        nlp_bot.send_message(chat_id, text, reply_markup=markup)
+    except Exception as e:
+        logger.error(f'Failed to send webapp button to chat {chat_id}: {e}')
 
 # message handler for the nlp bot
 @nlp_bot.message_handler(content_types=["text", "photo"])
