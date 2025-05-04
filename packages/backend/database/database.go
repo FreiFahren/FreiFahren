@@ -91,7 +91,7 @@ func BackupDatabase() {
 
 	// format means: Mon Jan 2 15:04:05 MST 2006
 	backupTableName := "backup_" + time.Now().UTC().Format("20060102_150405")
-	query := fmt.Sprintf("CREATE TABLE %s AS SELECT * FROM ticket_info", backupTableName)
+	query := fmt.Sprintf("CREATE TABLE %s AS SELECT * FROM reports", backupTableName)
 
 	_, err = conn.Exec(context.Background(), query)
 	if err != nil {
@@ -99,20 +99,18 @@ func BackupDatabase() {
 	}
 }
 
-func CreateTicketInfoTable() {
-	logger.Log.Debug().Msg("Creating table ticket_info")
+func CreateReportsTable() {
+	logger.Log.Debug().Msg("Creating table reports")
 
 	sql := `
-	CREATE TABLE IF NOT EXISTS ticket_info (
+	CREATE TABLE IF NOT EXISTS reports (
 		id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 		timestamp TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'),
 		message TEXT,
 		author BIGINT,
 		line VARCHAR(3),
-		station_name VARCHAR(255),
-		station_id VARCHAR(10),
-		direction_name VARCHAR(255),
-		direction_id VARCHAR(10)
+		station_id VARCHAR(250),
+		direction_id VARCHAR(250)
 	);
 	`
 
@@ -120,7 +118,7 @@ func CreateTicketInfoTable() {
 	if err != nil {
 		logger.Log.Panic().Err(err).Msg("Failed to create table")
 	}
-	logger.Log.Info().Msg("Created table ticket_info")
+	logger.Log.Info().Msg("Created table reports")
 }
 
 func CreateFeedbackTable() {
@@ -141,16 +139,16 @@ func CreateFeedbackTable() {
 	logger.Log.Info().Msg("Created table feedback")
 }
 
-func InsertTicketInfo(timestamp *time.Time, author *int64, message, line, stationName, stationId, directionName, directionId *string) error {
+func InsertTicketInfo(timestamp *time.Time, author *int64, message, line, stationId, directionId *string) error {
 	logger.Log.Debug().Msg("Inserting ticket info")
 
 	sql := `
-    INSERT INTO ticket_info (timestamp, message, author, line, station_name, station_id, direction_name, direction_id)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+    INSERT INTO reports (timestamp, message, author, line, station_id, direction_id)
+    VALUES ($1, $2, $3, $4, $5, $6);
     `
 
 	// Convert *string and *int64 directly to interface{} for pgx
-	values := []interface{}{timestamp, message, author, line, stationName, stationId, directionName, directionId}
+	values := []interface{}{timestamp, message, author, line, stationId, directionId}
 
 	logger.Log.Info().Msg("Inserting ticket info into the database")
 	_, err := pool.Exec(context.Background(), sql, values...)
@@ -182,7 +180,7 @@ func getLastNonHistoricTimestamp() (time.Time, error) {
 
 	sqlTimestamp := `
         SELECT MAX(timestamp)
-        FROM ticket_info;
+        FROM reports;
     `
 	row := pool.QueryRow(context.Background(), sqlTimestamp)
 	var lastNonHistoricTimestamp time.Time
@@ -198,9 +196,8 @@ func executeGetHistoricStationsSQL(hour, weekday, remaining int, excludedStation
 
 	sql := `
         SELECT (station_id)
-        FROM ticket_info
+        FROM reports
         WHERE EXTRACT(HOUR FROM timestamp) = $1 AND EXTRACT(DOW FROM timestamp) = $2
-        AND station_name IS NOT NULL
         AND station_id IS NOT NULL
         AND NOT (station_id = ANY($4))
         GROUP BY station_id
@@ -306,9 +303,8 @@ func GetLatestTicketInspectors(start, end time.Time, stationId string) ([]utils.
 		logger.Log.Debug().Str("stationId", stationId).Msg("Filtering by station ID")
 		sql = `SELECT timestamp, station_id, direction_id, line,
                 CASE WHEN author IS NULL THEN message ELSE NULL END as message
-                FROM ticket_info
+                FROM reports
                 WHERE timestamp >= $1 AND timestamp <= $2
-                AND station_name IS NOT NULL
                 AND station_id IS NOT NULL
                 AND station_id = $3;`
 
@@ -316,9 +312,8 @@ func GetLatestTicketInspectors(start, end time.Time, stationId string) ([]utils.
 	} else {
 		sql = `SELECT timestamp, station_id, direction_id, line,
                 CASE WHEN author IS NULL THEN message ELSE NULL END as message
-                FROM ticket_info
+                FROM reports
                 WHERE timestamp >= $1 AND timestamp <= $2
-                AND station_name IS NOT NULL
                 AND station_id IS NOT NULL;`
 
 		rows, err = pool.Query(context.Background(), sql, start, end)
@@ -353,7 +348,7 @@ func GetLatestTicketInspectors(start, end time.Time, stationId string) ([]utils.
 func GetLatestUpdateTime() (time.Time, error) {
 	var lastUpdateTime time.Time
 
-	sql := `SELECT MAX(timestamp) FROM ticket_info;`
+	sql := `SELECT MAX(timestamp) FROM reports;`
 
 	err := pool.QueryRow(context.Background(), sql).Scan(&lastUpdateTime)
 	if err != nil {
@@ -369,7 +364,7 @@ func GetNumberOfSubmissionsInLast24Hours() (int, error) {
 
 	var count int
 
-	sql := `SELECT COUNT(*) FROM ticket_info WHERE timestamp >= NOW() AT TIME ZONE 'UTC' - INTERVAL '24 hours';`
+	sql := `SELECT COUNT(*) FROM reports WHERE timestamp >= NOW() AT TIME ZONE 'UTC' - INTERVAL '24 hours';`
 
 	err := pool.QueryRow(context.Background(), sql).Scan(&count)
 	if err != nil {
@@ -383,7 +378,7 @@ func GetNumberOfSubmissionsInLast24Hours() (int, error) {
 func RoundOldTimestamp() {
 	logger.Log.Debug().Msg("Rounding old timestamps")
 
-	sql := `UPDATE ticket_info SET timestamp = DATE_TRUNC('hour', timestamp) WHERE timestamp < NOW() AT TIME ZONE 'UTC' - INTERVAL '4 hour';`
+	sql := `UPDATE reports SET timestamp = DATE_TRUNC('hour', timestamp) WHERE timestamp < NOW() AT TIME ZONE 'UTC' - INTERVAL '4 hour';`
 
 	_, err := pool.Exec(context.Background(), sql)
 	if err != nil {
@@ -404,7 +399,7 @@ func GetMostCommonStationId(stations []string) (string, error) {
 
 	sql := `
         SELECT station_id
-        FROM ticket_info
+        FROM reports
         WHERE station_id = ANY($1)
         GROUP BY station_id
         ORDER BY COUNT(*) DESC
@@ -435,7 +430,7 @@ func GetMostCommonStationId(stations []string) (string, error) {
 func GetNumberOfReports(stationId, lineId string, startTime, endTime time.Time) (int, error) {
 	logger.Log.Debug().Msgf("Getting number of reports for station %s and line %s", stationId, lineId)
 
-	sql := `SELECT COUNT(*) FROM ticket_info WHERE timestamp >= $1 AND timestamp <= $2`
+	sql := `SELECT COUNT(*) FROM reports WHERE timestamp >= $1 AND timestamp <= $2`
 	params := []interface{}{startTime, endTime}
 	paramCount := 2
 

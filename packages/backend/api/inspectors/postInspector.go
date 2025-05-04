@@ -94,9 +94,7 @@ func PostInspector(c echo.Context) error {
 		pointers.AuthorPtr,
 		pointers.MessagePtr,
 		pointers.LinePtr,
-		pointers.StationNamePtr,
 		pointers.StationIdPtr,
-		pointers.DirectionNamePtr,
 		pointers.DirectionIdPtr,
 	); err != nil {
 		logger.Log.Error().Err(err).Msg("Error inserting ticket info in postInspector")
@@ -165,7 +163,6 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 
 		if station, found := stations[req.StationId]; found {
 			response.Station.Name = station.Name
-			pointers.StationNamePtr = &station.Name
 		}
 	}
 
@@ -176,7 +173,6 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 
 		if direction, found := stations[req.DirectionId]; found {
 			response.Direction.Name = direction.Name
-			pointers.DirectionNamePtr = &direction.Name
 		}
 	}
 

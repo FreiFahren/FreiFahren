@@ -22,10 +22,10 @@ func TestGetStationDistance(t *testing.T) {
 	}{
 		{
 			name:               "Valid coordinates",
-			inspectorStationId: "U-Ado",
-			userStationId:      "S-PH",
+			inspectorStationId: "U-n29833491",
+			userStationId:      "S-BPDH",
 			expectedStatus:     http.StatusOK,
-			expectedStops:      12,
+			expectedStops:      8,
 		},
 		{
 			name:               "Invalid Station ID",
@@ -36,8 +36,8 @@ func TestGetStationDistance(t *testing.T) {
 		},
 		{
 			name:               "Same station",
-			inspectorStationId: "U-Ado",
-			userStationId:      "U-Ado",
+			inspectorStationId: "U-n29833491",
+			userStationId:      "U-n29833491",
 			expectedStatus:     http.StatusOK,
 			expectedStops:      0,
 		},

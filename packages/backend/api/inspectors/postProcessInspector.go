@@ -64,7 +64,6 @@ func PostProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 	if dataToInsert.Direction.Id == dataToInsert.Station.Id && dataToInsert.Direction.Id != "" {
 		dataToInsert.Direction = structs.Station{}
 		pointers.DirectionIdPtr = nil
-		pointers.DirectionNamePtr = nil
 
 		if dataToInsert.Line != "" {
 			// in case the direction was the same as the station, but the line was provided, we can determine the correct direction
@@ -103,7 +102,6 @@ func PostProcessInspectorData(dataToInsert *structs.ResponseData, pointers *stru
 	if dataToInsert.Direction.Id != "" && !structs.StringInSlice(dataToInsert.Line, stations[dataToInsert.Station.Id].Lines) {
 		dataToInsert.Direction = structs.Station{}
 		pointers.DirectionIdPtr = nil
-		pointers.DirectionNamePtr = nil
 		logger.Log.Debug().Msg("Removed direction because it was not on the same line")
 	}
 
@@ -149,7 +147,6 @@ func guessStation(dataToInsert *structs.ResponseData, pointers *structs.InsertPo
 		stations := data.GetStationsList()
 		if station, found := stations[mostCommonStation]; found {
 			dataToInsert.Station.Name = station.Name
-			pointers.StationNamePtr = &station.Name
 		}
 
 		logger.Log.Info().Str("line", dataToInsert.Line).Str("guessedStation", mostCommonStation).Msg("Guessed station Id based on line")
@@ -233,8 +230,6 @@ func setDirection(dataToInsert *structs.ResponseData, pointers *structs.InsertPo
 
 	dataToInsert.Direction = structs.Station{Name: station.Name, Id: stationId, Coordinates: structs.Coordinates(station.Coordinates)}
 	pointers.DirectionIdPtr = &stationId
-	directionName := station.Name
-	pointers.DirectionNamePtr = &directionName
 }
 
 func correctDirection(dataToInsert *structs.ResponseData, pointers *structs.InsertPointers, line []string) {
