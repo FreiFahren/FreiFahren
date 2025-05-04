@@ -73,7 +73,11 @@ export const FFMapView = () => {
 
     useEffect(() => {
         if (!isNil(reportToShow) && stations !== undefined) {
-            const { latitude, longitude } = stations[reportToShow.stationId].coordinates
+            const station = stations[reportToShow.stationId]
+
+            if (station === undefined) return
+
+            const { latitude, longitude } = station.coordinates
 
             cameraRef.current?.setCamera({
                 centerCoordinate: [longitude, latitude],

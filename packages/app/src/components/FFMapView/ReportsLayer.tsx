@@ -84,7 +84,11 @@ const useReportsGeoJson = (reports: Report[]) => {
         return {
             type: 'FeatureCollection',
             features: reports.map((report) => {
-                const { coordinates } = stations[report.stationId]
+                const station = stations[report.stationId]
+
+                if (station === undefined) return null
+
+                const { coordinates } = station
 
                 return {
                     type: 'Feature',
@@ -117,12 +121,13 @@ const ReportMarker = ({ onPress, report, animatedStyle }: ReportMarkerProps) => 
 
     const shouldAnimate = Date.now() - report.timestamp.getTime() < 1000 * 60 * 30
 
+    const station = stations[report.stationId]
+
+    if (station === undefined) return null
+
     return (
         <MarkerView
-            coordinate={[
-                stations[report.stationId].coordinates.longitude,
-                stations[report.stationId].coordinates.latitude,
-            ]}
+            coordinate={[station.coordinates.longitude, station.coordinates.latitude]}
             key={report.stationId}
             allowOverlap
         >

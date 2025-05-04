@@ -29,6 +29,12 @@ export type ReportSheetMethods = {
     close: () => void
 }
 
+const getLineType = (line: string) => {
+    if (line.startsWith('S')) return 's'
+    if (line.startsWith('U')) return 'u'
+    return 'm'
+}
+
 export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<ReportSheetMethods>) => {
     const { t: tCommon } = useTranslation()
     const { t: tReport } = useTranslation('makeReport')
@@ -71,7 +77,7 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
     useEffect(() => setSelectedStation(null), [selectedLine])
 
     const lineOptions = useMemo(
-        () => Object.keys(lines ?? {}).filter((line) => line.toLowerCase().startsWith(lineType)),
+        () => Object.keys(lines ?? {}).filter((line) => getLineType(line) === lineType),
         [lineType, lines]
     )
 
@@ -166,7 +172,7 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
                             renderOption={(direction, isSelected) => (
                                 <FFView flexDirection="row">
                                     <FFText fontWeight={isSelected ? 'bold' : undefined}>
-                                        {stations[direction].name}
+                                        {stations[direction]?.name ?? '?'}
                                     </FFText>
                                 </FFView>
                             )}
@@ -192,7 +198,7 @@ export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<R
                             renderOption={(station, isSelected) => (
                                 <FFView flexDirection="row" alignSelf="flex-start">
                                     <FFText fontWeight={isSelected ? 'bold' : undefined}>
-                                        {stations[station].name}
+                                        {stations[station]?.name ?? '?'}
                                     </FFText>
                                 </FFView>
                             )}
