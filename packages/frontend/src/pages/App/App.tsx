@@ -7,7 +7,7 @@ import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/Re
 import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
-import { Report, StationProperty } from 'src/utils/types'
+import { Itinerary, Report, StationProperty } from 'src/utils/types'
 
 import { useCurrentReports,useLast24HourReports, useStations } from '../../api/queries'
 import CloseButton from '../../components/Buttons/CloseButton/CloseButton'
@@ -231,6 +231,10 @@ const App = () => {
     const [selectedStation, setSelectedStation] = useState<StationProperty | null>(null)
     const [navigationEndStation, setNavigationEndStation] = useState<StationProperty | null>(null)
     const [stationModalWasManuallyCloses, setStationModalWasManuallyCloses] = useState(false)
+    
+    // New state for saved route
+    const [savedRoute, setSavedRoute] = useState<Itinerary | null>(null)
+    const [showSavedRoute, setShowSavedRoute] = useState(false)
 
     const {
         isOpen: isInfoModalOpen,
@@ -402,7 +406,16 @@ const App = () => {
             ) : null}
             {isNavigationModalOpen ? (
                 <>
-                    <NavigationModal className="open center-animation" initialEndStation={navigationEndStation} />
+                    <NavigationModal 
+                        className="open center-animation" 
+                        initialEndStation={navigationEndStation} 
+                        onSaveRoute={(route: Itinerary) => {
+                            setSavedRoute(route)
+                            setIsNavigationModalOpen(false)
+                            setNavigationEndStation(null)
+                        }}
+                        savedRoute={savedRoute}
+                    />
                     <Backdrop
                         handleClick={() => {
                             setIsNavigationModalOpen(false)
@@ -411,6 +424,34 @@ const App = () => {
                     />
                 </>
             ) : null}
+            
+            {/* Show Saved Route button - show only when a route is saved */}
+            {savedRoute && !isNavigationModalOpen && !showSavedRoute ? (
+                <button
+                    className="small-button saved-route-button"
+                    onClick={() => setShowSavedRoute(true)}
+                    type="button"
+                >
+                    <span>{t('NavigationModal.showSavedRoute')}</span>
+                </button>
+            ) : null}
+            
+            {/* Display saved route modal */}
+            {showSavedRoute && savedRoute ? (
+                <>
+                    <NavigationModal 
+                        className="open center-animation" 
+                        initialRoute={savedRoute}
+                        onRemoveRoute={() => {
+                            setSavedRoute(null)
+                            setShowSavedRoute(false)
+                        }}
+                        savedRoute={savedRoute}
+                    />
+                    <Backdrop handleClick={() => setShowSavedRoute(false)} />
+                </>
+            ) : null}
+            
             <button
                 className="navigation-button small-button"
                 onClick={() => setIsNavigationModalOpen(true)}

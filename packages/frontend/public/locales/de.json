@@ -224,7 +224,12 @@
         "safestRoute": "Geringstes Risiko",
         "from": "Von: ",
         "to": "Nach: ",
-        "stops": "Haltestellen"
+        "stops": "Haltestellen",
+        "saveRoute": "Route speichern",
+        "removeRoute": "Route löschen",
+        "seeRoute": "Route anzeigen",
+        "showSavedRoute": "Route zeigen",
+        "back": "Zurück"
     },
     "InfoModal": {
         "lastReports": "Letzte Meldungen",

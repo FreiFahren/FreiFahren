@@ -1,5 +1,6 @@
 import './NavigationModal.css'
 
+import PropTypes from 'prop-types'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
@@ -19,12 +20,22 @@ import { ItineraryItem } from './ItineraryItem'
 interface NavigationModalProps {
     className?: string
     initialEndStation?: StationProperty | null
+    initialRoute?: Itinerary | null
+    savedRoute?: Itinerary | null
+    onSaveRoute?: (route: Itinerary) => void
+    onRemoveRoute?: () => void
 }
 
 type ActiveInput = 'start' | 'end' | null
 
-// eslint-disable-next-line react/prop-types
-const NavigationModal: React.FC<NavigationModalProps> = ({ className = '', initialEndStation }) => {
+const NavigationModal: React.FC<NavigationModalProps> = ({ 
+    className = '', 
+    initialEndStation,
+    initialRoute,
+    savedRoute,
+    onSaveRoute,
+    onRemoveRoute
+}) => {
     useTrackComponentView('navigation modal')
 
     const { t } = useTranslation()
@@ -39,14 +50,15 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className = '', initi
     const [endLocation, setEndLocation] = useState<string | null>(() => {
         if (initialEndStation && allStations) {
             const stationEntry = Object.entries(allStations).find(
-                // eslint-disable-next-line react/prop-types
                 ([, station]) => station.name === initialEndStation.name
             )
             return stationEntry ? stationEntry[0] : null
         }
         return null
     })
-    const [selectedRoute, setSelectedRoute] = useState<Itinerary | null>(null)
+    
+    // If an initial route is provided, show it immediately
+    const [selectedRoute, setSelectedRoute] = useState<Itinerary | null>(initialRoute || null)
 
     const { searchValue, setSearchValue, filteredStations: possibleStations } = useStationSearch()
 
@@ -217,6 +229,9 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className = '', initi
                 onBack={() => {
                     setSelectedRoute(null)
                 }}
+                onSaveRoute={onSaveRoute}
+                onRemoveRoute={onRemoveRoute}
+                isSaved={!!savedRoute && savedRoute.startTime === selectedRoute.startTime ? savedRoute.endTime === selectedRoute.endTime : false}
             />
         )
     }
@@ -268,6 +283,23 @@ const NavigationModal: React.FC<NavigationModalProps> = ({ className = '', initi
             {renderContent()}
         </div>
     )
+}
+
+// Add prop types validation
+NavigationModal.propTypes = {
+    className: PropTypes.string,
+    initialEndStation: PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        lines: PropTypes.array,
+        coordinates: PropTypes.shape({
+            latitude: PropTypes.number.isRequired,
+            longitude: PropTypes.number.isRequired
+        }).isRequired
+    }),
+    initialRoute: PropTypes.object,
+    savedRoute: PropTypes.object,
+    onSaveRoute: PropTypes.func,
+    onRemoveRoute: PropTypes.func
 }
 
 export default NavigationModal

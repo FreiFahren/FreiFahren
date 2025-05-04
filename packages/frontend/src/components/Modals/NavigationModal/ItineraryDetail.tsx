@@ -9,9 +9,19 @@ interface ItineraryDetailProps {
     itinerary: Itinerary
     className?: string
     onBack?: () => void
+    onSaveRoute?: (route: Itinerary) => void
+    onRemoveRoute?: () => void
+    isSaved?: boolean
 }
 
-const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className, onBack }) => {
+const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ 
+    itinerary, 
+    className, 
+    onBack,
+    onSaveRoute,
+    onRemoveRoute,
+    isSaved = false
+}) => {
     const { t } = useTranslation()
     const durationMinutes = Math.round(itinerary.duration / 60)
     const durationText = `(${formatDuration(durationMinutes)})`
@@ -138,6 +148,28 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ itinerary, className,
                     </div>
                 </div>
             ) : null}
+            
+            {/* Save/Remove Route buttons */}
+            <div className="route-actions">
+                {!isSaved && onSaveRoute ? (
+                    <button 
+                        type="button" 
+                        className="button-gray" 
+                        onClick={() => onSaveRoute(itinerary)}
+                    >
+                        <span>{t('NavigationModal.saveRoute')}</span>
+                    </button>
+                ) : null}
+                {isSaved && onRemoveRoute ? (
+                    <button 
+                        type="button" 
+                        className="button-gray" 
+                        onClick={() => onRemoveRoute()}
+                    >
+                        <span>{t('NavigationModal.removeRoute')}</span>
+                    </button>
+                ) : null}
+            </div>
         </div>
     )
 }
