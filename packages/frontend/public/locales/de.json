@@ -70,7 +70,7 @@
         "minutes": "min",
         "oneStation": "eine Station",
         "stations": "Stationen",
-        "fromYou": "entfernt",
+        "fromYou": " entfernt",
         "direction": "Richtung",
         "inviteText": "Daten vielleicht ungenau.",
         "syncText": "Meldungen mit @FreiFahren_BE synchronisert"
@@ -224,11 +224,19 @@
         "safestRoute": "Geringstes Risiko",
         "from": "Von: ",
         "to": "Nach: ",
-        "stops": "Haltestellen"
+        "stops": "Haltestellen",
+        "saveRoute": "Route speichern",
+        "removeRoute": "Route löschen",
+        "seeRoute": "Route anzeigen",
+        "showSavedRoute": "Route zeigen",
+        "back": "Zurück"
     },
     "InfoModal": {
         "lastReports": "Letzte Meldungen",
         "route": "Navigieren",
         "noRecentReports": "Heute noch keine Meldungen"
+    },
+    "updateIndicator": {
+        "text": "Daten aktualisiert"
     }
 }

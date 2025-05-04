@@ -73,7 +73,7 @@
         "minutes": "min",
         "oneStation": "one station",
         "stations": "stations",
-        "fromYou": "away",
+        "fromYou": " away",
         "direction": "Direction",
         "inviteText": "Data may be inaccurate.",
         "syncText": "Reports synced with @FreiFahren_BE"
@@ -228,11 +228,18 @@
         "safestRoute": "Lowest Risk",
         "from": "From: ",
         "to": "To: ",
-        "stops": "Stops"
+        "stops": "Stops",
+        "saveRoute": "Save Route",
+        "removeRoute": "Remove Route",
+        "showSavedRoute": "Show Route",
+        "back": "Back"
     },
     "InfoModal": {
         "lastReports": "Last reports",
         "route": "Navigate",
         "noRecentReports": "No reports today"
+    },
+    "updateIndicator": {
+        "text": "Data refreshed"
     }
 }

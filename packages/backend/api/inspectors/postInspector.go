@@ -112,7 +112,7 @@ func PostInspector(c echo.Context) error {
 	go func() {
 		if pointers.AuthorPtr == nil {
 			// avoid spamming the telegram group
-			if time.Since(lastTelegramNotification) >= 5*time.Minute {
+			if time.Since(lastTelegramNotification) >= 5*time.Minute || os.Getenv("STATUS") == "dev" {
 				telegramEndpoint := os.Getenv("NLP_SERVICE_URL") + "/report-inspector"
 				if err := notifyOtherServiceAboutReport(telegramEndpoint, dataToInsert, "Telegram bot"); err != nil {
 					logger.Log.Error().Err(err).Msg("Error notifying Telegram bot about report in postInspector")
@@ -199,6 +199,7 @@ func notifyOtherServiceAboutReport(endpoint string, data *structs.ResponseData, 
 		"station":   data.Station.Name,
 		"direction": data.Direction.Name,
 		"message":   data.Message,
+		"stationId": data.Station.Id,
 	}
 
 	jsonData, err := json.Marshal(payload)

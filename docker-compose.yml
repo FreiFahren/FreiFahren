@@ -32,8 +32,8 @@ services:
     networks:
       - backend-network
     # UNCOMMENT the lines below to use host.docker.internal
-    # extra_hosts:
-    #   - "host.docker.internal:host-gateway"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   nlp_service:
     build:

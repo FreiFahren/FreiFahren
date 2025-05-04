@@ -1,13 +1,15 @@
 import './App.css'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
 import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
-import { Report, StationProperty } from 'src/utils/types'
+import { Itinerary, Report, StationProperty } from 'src/utils/types'
 
-import { useLast24HourReports } from '../../api/queries'
+import { useCurrentReports,useLast24HourReports, useStations } from '../../api/queries'
 import CloseButton from '../../components/Buttons/CloseButton/CloseButton'
 import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
 import { ReportButton } from '../../components/Buttons/ReportButton/ReportButton'
@@ -48,10 +50,19 @@ const isTelegramWebApp = (): boolean =>
     typeof TelegramWebviewProxy !== 'undefined'
 
 const App = () => {
+    const { stationId } = useParams();
+    const navigate = useNavigate();
+    const { t } = useTranslation()
+
     const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
     const [appMounted, setAppMounted] = useState(false)
+    const [showUpdateIndicator, setShowUpdateIndicator] = useState<boolean>(false)
+    const indicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
     const { data: reportsInLast24Hours } = useLast24HourReports()
+    const { isFetching: isFetchingCurrentReports } = useCurrentReports()
+    const wasFetchingRef = useRef(isFetchingCurrentReports)
+    const { data: stations } = useStations()
 
     useEffect(() => {
         setAppMounted(true)
@@ -219,6 +230,11 @@ const App = () => {
     const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false)
     const [selectedStation, setSelectedStation] = useState<StationProperty | null>(null)
     const [navigationEndStation, setNavigationEndStation] = useState<StationProperty | null>(null)
+    const [stationModalWasManuallyCloses, setStationModalWasManuallyCloses] = useState(false)
+    
+    // New state for saved route
+    const [savedRoute, setSavedRoute] = useState<Itinerary | null>(null)
+    const [showSavedRoute, setShowSavedRoute] = useState(false)
 
     const {
         isOpen: isInfoModalOpen,
@@ -230,6 +246,19 @@ const App = () => {
     const onStationSelect = (station: StationProperty) => {
         setSelectedStation(station)
         openInfoModal()
+        setStationModalWasManuallyCloses(false)
+        // Navigate to the station URL
+        navigate(`/station/${station.name}`)
+    }
+
+    const onCloseInfoModal = () => {
+        setStationModalWasManuallyCloses(true)
+        closeInfoModal()
+        
+        // If we're on a station URL, navigate back to home
+        if (stationId !== undefined) {
+            navigate('/');
+        }
     }
 
     const handleRouteButtonClick = () => {
@@ -239,6 +268,71 @@ const App = () => {
             closeInfoModal()
         }
     }
+
+    // Handle direct navigation to a station via URL parameter
+    useEffect(() => {
+        const isValidStationId = typeof stationId === 'string' && stationId.trim() !== '';
+
+        if (!(isValidStationId && stations && !isInfoModalOpen && !stationModalWasManuallyCloses)) {
+            return;
+        }
+        const station = stations[stationId];
+        
+        // station does have an overlap with undefined, when looking for stations[(RANDOM_STRING)], so we need to check for it
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (station === undefined) {
+            return;
+        }
+        
+        const hasValidName = typeof station.name === 'string' && station.name.trim() !== ''
+        const hasValidCoordinates =
+            typeof station.coordinates === 'object' &&
+            typeof station.coordinates.longitude === 'number' &&
+            typeof station.coordinates.latitude === 'number';
+            
+        if (!(hasValidName && hasValidCoordinates)) {
+            return;
+        }
+
+        const stationProperty: StationProperty = {
+            name: station.name,
+            lines: Array.isArray(station.lines) ? station.lines : [],
+            coordinates: {
+                        longitude: station.coordinates.longitude,
+                        latitude: station.coordinates.latitude
+                    }
+        };
+        // Make sure legal disclaimer has to be accepted first, before the station view can be opened
+        if (appUIState.isFirstOpen) {
+            return;
+        }
+        onStationSelect(stationProperty);
+            
+     
+    }, [stationId, stations, isInfoModalOpen, appUIState.isFirstOpen, closeLegalDisclaimer, onStationSelect, stationModalWasManuallyCloses, navigate]);
+
+    useEffect(() => {
+        if (indicatorTimeoutRef.current) {
+            clearTimeout(indicatorTimeoutRef.current)
+        }
+
+        if (wasFetchingRef.current && !isFetchingCurrentReports) {
+            setShowUpdateIndicator(true)
+            // Set a timeout to hide the indicator after a short period
+            indicatorTimeoutRef.current = setTimeout(() => {
+                setShowUpdateIndicator(false)
+            }, 1.5 * 1000)
+        }
+
+        // Update the ref for the next render
+        wasFetchingRef.current = isFetchingCurrentReports
+
+        return () => {
+            if (indicatorTimeoutRef.current) {
+                clearTimeout(indicatorTimeoutRef.current)
+            }
+        }
+    }, [isFetchingCurrentReports])
 
     return (
         <div className="App">
@@ -307,12 +401,21 @@ const App = () => {
                     className={`open ${isInfoModalAnimatingOut ? 'slide-out' : 'slide-in'}`}
                     onRouteClick={handleRouteButtonClick}
                 >
-                    <CloseButton handleClose={closeInfoModal} />
+                    <CloseButton handleClose={onCloseInfoModal} />
                 </InfoModal>
             ) : null}
             {isNavigationModalOpen ? (
                 <>
-                    <NavigationModal className="open center-animation" initialEndStation={navigationEndStation} />
+                    <NavigationModal 
+                        className="open center-animation" 
+                        initialEndStation={navigationEndStation} 
+                        onSaveRoute={(route: Itinerary) => {
+                            setSavedRoute(route)
+                            setIsNavigationModalOpen(false)
+                            setNavigationEndStation(null)
+                        }}
+                        savedRoute={savedRoute}
+                    />
                     <Backdrop
                         handleClick={() => {
                             setIsNavigationModalOpen(false)
@@ -321,6 +424,34 @@ const App = () => {
                     />
                 </>
             ) : null}
+            
+            {/* Show Saved Route button - show only when a route is saved */}
+            {savedRoute && !isNavigationModalOpen && !showSavedRoute ? (
+                <button
+                    className="small-button saved-route-button"
+                    onClick={() => setShowSavedRoute(true)}
+                    type="button"
+                >
+                    <span>{t('NavigationModal.showSavedRoute')}</span>
+                </button>
+            ) : null}
+            
+            {/* Display saved route modal */}
+            {showSavedRoute && savedRoute ? (
+                <>
+                    <NavigationModal 
+                        className="open center-animation" 
+                        initialRoute={savedRoute}
+                        onRemoveRoute={() => {
+                            setSavedRoute(null)
+                            setShowSavedRoute(false)
+                        }}
+                        savedRoute={savedRoute}
+                    />
+                    <Backdrop handleClick={() => setShowSavedRoute(false)} />
+                </>
+            ) : null}
+            
             <button
                 className="navigation-button small-button"
                 onClick={() => setIsNavigationModalOpen(true)}
@@ -328,6 +459,14 @@ const App = () => {
             >
                 <img src={`${process.env.PUBLIC_URL}/icons/route-svgrepo-com.svg`} alt="Navigation" />
             </button>
+            {showUpdateIndicator ? <div className="update-indicator">
+                    <img
+                        src={`${process.env.PUBLIC_URL}/icons/refresh-svgrepo-com.svg`}
+                        alt="Refresh"
+                        className="update-indicator-icon"
+                    />
+                    <div className="update-indicator-text">{t('updateIndicator.text')}</div>
+                </div> : null}
             <ReportButton
                 handleOpenReportModal={() =>
                     setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })

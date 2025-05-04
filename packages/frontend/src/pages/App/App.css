@@ -101,3 +101,71 @@
     width: 35px;
     height: 35px;
 }
+
+/* Show Saved Route button */
+.saved-route-button {
+    height: auto;
+    min-height: var(--height-streched-button);
+    width: 8rem;
+    bottom: var(--distance-from-edge-default);
+    left: var(--distance-from-edge-default);
+    overflow: hidden;
+    margin-bottom: calc(var(--margin-l) + 4.2rem);
+    padding: var(--padding-s);
+    font-size: var(--font-xs);
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
+    10%,
+    90% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.update-indicator {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--color-background);
+    color: var(--color-white);
+    border: var(--border-default);
+    border-radius: var(--borderRadius-default);
+    padding: var(--padding-s) var(--padding-m);
+    z-index: 1001;
+    opacity: 0;
+    animation: fadeInOut 1.5s ease-in-out forwards;
+    display: flex;
+    align-items: center;
+    gap: var(--margin-s);
+}
+
+.update-indicator-icon {
+    width: 18px;
+    height: 18px;
+    filter: invert(50%) sepia(100%) saturate(500%) hue-rotate(100deg);
+    animation: spin 1.25s linear infinite;
+}
+
+.update-indicator-text {
+    font-size: var(--font-xxs);
+    font-weight: 500;
+}
