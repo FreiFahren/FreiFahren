@@ -45,6 +45,14 @@ root.render(
                                 </LocationProvider>
                             }
                         />
+                        <Route
+                            path="/station/:stationId"
+                            element={
+                                <LocationProvider>
+                                    <App />
+                                </LocationProvider>
+                            }
+                        />
                         <Route path="/datenschutz" element={<PrivacyPolicy />} />
                         <Route path="/support" element={<Support />} />
                     </Routes>

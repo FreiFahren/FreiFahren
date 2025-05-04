@@ -29,9 +29,9 @@ def report_inspector() -> tuple:
     if direction:
         telegram_message += f"\n<b>Richtung</b>: {direction}"
     if message:
-        telegram_message += f"\nBeschreibung hier einsehbar: <a href='app.freifahren.org/?stationId={stationId}'>app.freifahren.org</a>"
+        telegram_message += f"\nBeschreibung hier einsehbar: <a href='app.freifahren.org/station/{stationId}'>app.freifahren.org</a>"
     else:
-        telegram_message += f"\n\nMehr Informationen auf <a href='app.freifahren.org/?stationId={stationId}'>app.freifahren.org</a>"
+        telegram_message += f"\n\nMehr Informationen auf <a href='app.freifahren.org/station/{stationId}'>app.freifahren.org</a>"
 
     send_message(FREIFAHREN_CHAT_ID, telegram_message, nlp_bot)
 
