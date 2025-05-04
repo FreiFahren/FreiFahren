@@ -1,4 +1,4 @@
-from nlp_service.config.config import NLP_BOT_TOKEN
+from nlp_service.config.config import NLP_BOT_TOKEN, MINI_APP_SERVER_URL
 from nlp_service.utils.logger import setup_logger
 from nlp_service.core.processor import process_new_message
 
@@ -53,6 +53,23 @@ def send_webapp_button(chat_id: str, text: str, button_text: str, webapp_url: st
         nlp_bot.send_message(chat_id, text, reply_markup=markup)
     except Exception as e:
         logger.error(f'Failed to send webapp button to chat {chat_id}: {e}')
+
+# Handler for the /start command
+@nlp_bot.message_handler(commands=['start'])
+def handle_start_command(message):
+    """Handle the /start command by sending a welcome message with the Mini App button."""
+    logger.info(f"Start command received from chat id: {message.chat.id}")
+    
+    # Send welcome message with Mini App button
+    chat_id = message.chat.id
+    welcome_text = "👋 Welcome to FreiFahren! Use the button below to report inspectors:"
+    button_text = "Report Inspectors"
+    
+    # Use the configured server URL from config
+    webapp_url = f"{MINI_APP_SERVER_URL}/mini-app"
+    
+    # Send the Mini App button
+    send_webapp_button(chat_id, welcome_text, button_text, webapp_url)
 
 # message handler for the nlp bot
 @nlp_bot.message_handler(content_types=["text", "photo"])
