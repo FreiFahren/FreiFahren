@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/FreiFahren/backend/caching"
 	"github.com/FreiFahren/backend/data"
 	_ "github.com/FreiFahren/backend/docs"
 	"github.com/FreiFahren/backend/logger"
@@ -28,11 +27,14 @@ import (
 func GetAllStations(c echo.Context) error {
 	logger.Log.Info().Msg("GET /stations")
 
+	/* Disable caching to fix issue with invalid cache in mobile app.
+	/* Todo: enable again
 	if cache, exists := caching.GlobalCacheManager.Get("stations"); exists {
 		return cache.ETagMiddleware()(func(c echo.Context) error {
 			return nil
 		})(c)
 	}
+	*/
 
 	return c.JSON(http.StatusOK, data.GetStationsList())
 }
