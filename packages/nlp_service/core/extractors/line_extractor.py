@@ -60,5 +60,7 @@ def find_line(text: str, lines: dict) -> str | None:
                     matches_per_word.setdefault(word, []).append(line)
             elif line.lower() == word.lower():
                 matches_per_word.setdefault(word, []).append(line)
+            elif word.lower() == "u12": # temporary fix for u12, which is not in the lines dict
+                matches_per_word.setdefault(word, []).append("U2")
 
     return process_matches(matches_per_word)
