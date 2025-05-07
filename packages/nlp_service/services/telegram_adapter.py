@@ -59,7 +59,6 @@ def get_info(message):
         if message.content_type == "text"
         else (message.caption or "Image without description")
     )
-    logger.info(f"Message received: {text} from chat id: {message.chat.id}")
 
     process_new_message(timestamp, text)
 
