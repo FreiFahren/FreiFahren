@@ -40,10 +40,6 @@ def format_text_for_line_search(text):
     return " ".join(formatted_words)
 
 
-"""
-Extraction functions
-"""
-
 def find_line(text, lines):
     logger.debug("finding the line")
 
@@ -57,7 +53,7 @@ def find_line(text, lines):
 
     for word in set(words):
         for line in sorted_lines:
-            if line.lower() in word.lower():
+            if line.lower() == word.lower():
                 matches_per_word.setdefault(word, []).append(line)
 
     return process_matches(matches_per_word)
