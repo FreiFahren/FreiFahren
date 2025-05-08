@@ -71,11 +71,11 @@ func TestPostProcessInspectorData(t *testing.T) {
 	// Define test cases
 	testCases := []TestCase{
 		// Tests for AssignLineIfSingleOption
-		createTestCase("Imply line from direction", "", "U-n270165592", "", "U1", "U-n2097818462", "U-n270165592"),
+		createTestCase("Imply line from direction", "", "U-n27586255", "", "U2", "SUM-n30731497", "U-n27586255"),
 		createTestCase("Imply line from station", "U-n29190890", "", "", "U8", "U-n29190890", ""),
 		createTestCase("Imply line from station and direction", "U-n29190890", "SU-BWIN", "", "U8", "U-n29190890", "SU-BWIN"),
 		createTestCase("Don't imply line if station and direction are missing", "", "", "", "", "", ""),
-		createTestCase("Dont imply line if it is already set", "UM-n243996833", "SUM-n27412648", "U5", "U5", "UM-n243996833", "U-n52684988"),
+		createTestCase("Dont imply line if it is already set", "UM-n243996833", "SUM-n27412648", "U5", "U5", "UM-n243996833", "SUM-n27412648"),
 		createTestCase("Don't imply line if there are multiple options", "U-n2097818462", "", "", "", "U-n2097818462", ""),
 		// Tests for guessStation
 		createTestCase("Don't guess the station when the line is not set", "", "SUM-n27412648", "", "", "", ""),
