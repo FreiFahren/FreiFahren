@@ -1,4 +1,5 @@
 from nlp_service.utils.logger import setup_logger
+from typing import Union
 
 logger = setup_logger()
 
@@ -40,7 +41,7 @@ def format_text_for_line_search(text):
     return " ".join(formatted_words)
 
 
-def find_line(text: str, lines: dict) -> str | None:
+def find_line(text: str, lines: dict) -> Union[str, None]:
     logger.debug("finding the line")
 
     formatted_text = format_text_for_line_search(text)
