@@ -3,7 +3,7 @@ from nlp_service.utils.logger import setup_logger
 from nlp_service.core.processor import process_new_message
 
 from telebot import TeleBot
-from telebot.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
+from telebot.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton, LinkPreviewOptions
 
 import pytz
 from datetime import datetime
@@ -28,7 +28,7 @@ def send_message(chat_id: str,
                  parse_mode: str = "HTML") -> None:
 
     try:
-        lp_opts = types.LinkPreviewOptions(
+        lp_opts = LinkPreviewOptions(
             url=preview_url,
             prefer_large_media=True,
             show_above_text=False
