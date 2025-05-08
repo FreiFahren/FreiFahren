@@ -1,6 +1,5 @@
 import './NavigationModal.css'
 
-import PropTypes from 'prop-types'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
@@ -28,13 +27,13 @@ interface NavigationModalProps {
 
 type ActiveInput = 'start' | 'end' | null
 
-const NavigationModal: React.FC<NavigationModalProps> = ({ 
-    className = '', 
+const NavigationModal: React.FC<NavigationModalProps> = ({
+    className = '',
     initialEndStation,
     initialRoute,
     savedRoute,
     onSaveRoute,
-    onRemoveRoute
+    onRemoveRoute,
 }) => {
     useTrackComponentView('navigation modal')
 
@@ -56,7 +55,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
         }
         return null
     })
-    
+
     // If an initial route is provided, show it immediately
     const [selectedRoute, setSelectedRoute] = useState<Itinerary | null>(initialRoute || null)
 
@@ -231,7 +230,11 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
                 }}
                 onSaveRoute={onSaveRoute}
                 onRemoveRoute={onRemoveRoute}
-                isSaved={!!savedRoute && savedRoute.startTime === selectedRoute.startTime ? savedRoute.endTime === selectedRoute.endTime : false}
+                isSaved={
+                    !!savedRoute && savedRoute.startTime === selectedRoute.startTime
+                        ? savedRoute.endTime === selectedRoute.endTime
+                        : false
+                }
             />
         )
     }
@@ -283,23 +286,6 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
             {renderContent()}
         </div>
     )
-}
-
-// Add prop types validation
-NavigationModal.propTypes = {
-    className: PropTypes.string,
-    initialEndStation: PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        lines: PropTypes.array,
-        coordinates: PropTypes.shape({
-            latitude: PropTypes.number.isRequired,
-            longitude: PropTypes.number.isRequired
-        }).isRequired
-    }),
-    initialRoute: PropTypes.object,
-    savedRoute: PropTypes.object,
-    onSaveRoute: PropTypes.func,
-    onRemoveRoute: PropTypes.func
 }
 
 export default NavigationModal
