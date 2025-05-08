@@ -9,7 +9,7 @@ import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
 import { Itinerary, Report, StationProperty } from 'src/utils/types'
 
-import { useCurrentReports,useLast24HourReports, useStations } from '../../api/queries'
+import { useCurrentReports, useLast24HourReports, useStations } from '../../api/queries'
 import CloseButton from '../../components/Buttons/CloseButton/CloseButton'
 import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
 import { ReportButton } from '../../components/Buttons/ReportButton/ReportButton'
@@ -50,8 +50,8 @@ const isTelegramWebApp = (): boolean =>
     typeof TelegramWebviewProxy !== 'undefined'
 
 const App = () => {
-    const { stationId } = useParams();
-    const navigate = useNavigate();
+    const { stationId } = useParams()
+    const navigate = useNavigate()
     const { t } = useTranslation()
 
     const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
@@ -194,10 +194,10 @@ const App = () => {
         return currentDate.getTime() - lastAcceptedDate.getTime() > oneWeek
     }
 
-    const closeLegalDisclaimer = () => {
+    const closeLegalDisclaimer = useCallback(() => {
         localStorage.setItem('legalDisclaimerAcceptedAt', new Date().toISOString())
-        setAppUIState({ ...appUIState, isFirstOpen: false, isStatsPopUpOpen: true })
-    }
+        setAppUIState((prevState) => ({ ...prevState, isFirstOpen: false, isStatsPopUpOpen: true }))
+    }, [])
 
     useEffect(() => {
         if (!shouldShowLegalDisclaimer()) {
@@ -231,7 +231,7 @@ const App = () => {
     const [selectedStation, setSelectedStation] = useState<StationProperty | null>(null)
     const [navigationEndStation, setNavigationEndStation] = useState<StationProperty | null>(null)
     const [stationModalWasManuallyCloses, setStationModalWasManuallyCloses] = useState(false)
-    
+
     // New state for saved route
     const [savedRoute, setSavedRoute] = useState<Itinerary | null>(null)
     const [showSavedRoute, setShowSavedRoute] = useState(false)
@@ -243,19 +243,22 @@ const App = () => {
         closeModal: closeInfoModal,
     } = useModalAnimation()
 
-    const onStationSelect = (station: StationProperty) => {
-        setSelectedStation(station)
-        openInfoModal()
-        setStationModalWasManuallyCloses(false)
-    }
+    const onStationSelect = useCallback(
+        (station: StationProperty) => {
+            setSelectedStation(station)
+            openInfoModal()
+            setStationModalWasManuallyCloses(false)
+        },
+        [openInfoModal]
+    )
 
     const onCloseInfoModal = () => {
         setStationModalWasManuallyCloses(true)
         closeInfoModal()
-        
+
         // If we're on a station URL, navigate back to home
         if (stationId !== undefined) {
-            navigate('/');
+            navigate('/')
         }
     }
 
@@ -269,45 +272,52 @@ const App = () => {
 
     // Handle direct navigation to a station via URL parameter
     useEffect(() => {
-        const isValidStationId = typeof stationId === 'string' && stationId.trim() !== '';
+        const isValidStationId = typeof stationId === 'string' && stationId.trim() !== ''
 
         if (!(isValidStationId && stations && !isInfoModalOpen && !stationModalWasManuallyCloses)) {
-            return;
+            return
         }
-        const station = stations[stationId];
-        
+        const station = stations[stationId]
+
         // station does have an overlap with undefined, when looking for stations[(RANDOM_STRING)], so we need to check for it
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (station === undefined) {
-            return;
+            return
         }
-        
+
         const hasValidName = typeof station.name === 'string' && station.name.trim() !== ''
         const hasValidCoordinates =
             typeof station.coordinates === 'object' &&
             typeof station.coordinates.longitude === 'number' &&
-            typeof station.coordinates.latitude === 'number';
-            
+            typeof station.coordinates.latitude === 'number'
+
         if (!(hasValidName && hasValidCoordinates)) {
-            return;
+            return
         }
 
         const stationProperty: StationProperty = {
             name: station.name,
             lines: Array.isArray(station.lines) ? station.lines : [],
             coordinates: {
-                        longitude: station.coordinates.longitude,
-                        latitude: station.coordinates.latitude
-                    }
-        };
+                longitude: station.coordinates.longitude,
+                latitude: station.coordinates.latitude,
+            },
+        }
         // Make sure legal disclaimer has to be accepted first, before the station view can be opened
         if (appUIState.isFirstOpen) {
-            return;
+            return
         }
-        onStationSelect(stationProperty);
-            
-     
-    }, [stationId, stations, isInfoModalOpen, appUIState.isFirstOpen, closeLegalDisclaimer, onStationSelect, stationModalWasManuallyCloses, navigate]);
+        onStationSelect(stationProperty)
+    }, [
+        stationId,
+        stations,
+        isInfoModalOpen,
+        appUIState.isFirstOpen,
+        closeLegalDisclaimer,
+        onStationSelect,
+        stationModalWasManuallyCloses,
+        navigate,
+    ])
 
     useEffect(() => {
         if (indicatorTimeoutRef.current) {
@@ -404,9 +414,9 @@ const App = () => {
             ) : null}
             {isNavigationModalOpen ? (
                 <>
-                    <NavigationModal 
-                        className="open center-animation" 
-                        initialEndStation={navigationEndStation} 
+                    <NavigationModal
+                        className="open center-animation"
+                        initialEndStation={navigationEndStation}
                         onSaveRoute={(route: Itinerary) => {
                             setSavedRoute(route)
                             setIsNavigationModalOpen(false)
@@ -422,7 +432,7 @@ const App = () => {
                     />
                 </>
             ) : null}
-            
+
             {/* Show Saved Route button - show only when a route is saved */}
             {savedRoute && !isNavigationModalOpen && !showSavedRoute ? (
                 <button
@@ -433,12 +443,12 @@ const App = () => {
                     <span>{t('NavigationModal.showSavedRoute')}</span>
                 </button>
             ) : null}
-            
+
             {/* Display saved route modal */}
             {showSavedRoute && savedRoute ? (
                 <>
-                    <NavigationModal 
-                        className="open center-animation" 
+                    <NavigationModal
+                        className="open center-animation"
                         initialRoute={savedRoute}
                         onRemoveRoute={() => {
                             setSavedRoute(null)
@@ -449,7 +459,7 @@ const App = () => {
                     <Backdrop handleClick={() => setShowSavedRoute(false)} />
                 </>
             ) : null}
-            
+
             <button
                 className="navigation-button small-button"
                 onClick={() => setIsNavigationModalOpen(true)}
@@ -457,14 +467,16 @@ const App = () => {
             >
                 <img src={`${process.env.PUBLIC_URL}/icons/route-svgrepo-com.svg`} alt="Navigation" />
             </button>
-            {showUpdateIndicator ? <div className="update-indicator">
+            {showUpdateIndicator ? (
+                <div className="update-indicator">
                     <img
                         src={`${process.env.PUBLIC_URL}/icons/refresh-svgrepo-com.svg`}
                         alt="Refresh"
                         className="update-indicator-icon"
                     />
                     <div className="update-indicator-text">{t('updateIndicator.text')}</div>
-                </div> : null}
+                </div>
+            ) : null}
             <ReportButton
                 handleOpenReportModal={() =>
                     setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })

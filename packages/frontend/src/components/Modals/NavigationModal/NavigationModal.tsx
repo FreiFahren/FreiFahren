@@ -57,7 +57,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
     })
 
     // If an initial route is provided, show it immediately
-    const [selectedRoute, setSelectedRoute] = useState<Itinerary | null>(initialRoute || null)
+    const [selectedRoute, setSelectedRoute] = useState<Itinerary | null>(initialRoute ?? null)
 
     const { searchValue, setSearchValue, filteredStations: possibleStations } = useStationSearch()
 
@@ -228,8 +228,8 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
                 onBack={() => {
                     setSelectedRoute(null)
                 }}
-                onSaveRoute={onSaveRoute}
-                onRemoveRoute={onRemoveRoute}
+                handleSaveRoute={onSaveRoute}
+                handleRemoveRoute={onRemoveRoute}
                 isSaved={
                     !!savedRoute && savedRoute.startTime === selectedRoute.startTime
                         ? savedRoute.endTime === selectedRoute.endTime
