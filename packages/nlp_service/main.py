@@ -41,7 +41,7 @@ def create_service():
 
         # Run the Flask app in the main thread
         logger.info("Starting the Flask server...")
-        serve(flask_app, host="0.0.0.0", port=3434)
+        serve(flask_app, host="0.0.0.0", port=6000)
 
     except Exception as e:
         error_message = f"Error in natural language processing bot: {str(e)}\n{traceback.format_exc()}"
