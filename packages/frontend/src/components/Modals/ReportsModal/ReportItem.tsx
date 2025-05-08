@@ -24,6 +24,7 @@ const ReportItem: React.FC<ReportItemProps> = ({ report, currentTime }) => {
                 <h4>{report.station.name}</h4>
                 {displayMessage ? <p>{displayMessage}</p> : null}
             </div>
+            {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Don't listen to the compiler, it can be undefined */}
             {report.message !== undefined && report.message !== null && report.message.trim() !== '' ? (
                 <div className="report-message-container">
                     <p className="report-message">{report.message}</p>

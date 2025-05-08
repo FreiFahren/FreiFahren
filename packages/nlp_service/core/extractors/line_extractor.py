@@ -1,4 +1,5 @@
 from nlp_service.utils.logger import setup_logger
+from typing import Union
 
 logger = setup_logger()
 
@@ -40,11 +41,7 @@ def format_text_for_line_search(text):
     return " ".join(formatted_words)
 
 
-"""
-Extraction functions
-"""
-
-def find_line(text, lines):
+def find_line(text: str, lines: dict) -> Union[str, None]:
     logger.debug("finding the line")
 
     formatted_text = format_text_for_line_search(text)
@@ -55,9 +52,16 @@ def find_line(text, lines):
     sorted_lines = sorted(lines.keys(), key=len, reverse=True)
     matches_per_word = {}
 
-    for word in set(words):
+    for i, word in enumerate(words):
         for line in sorted_lines:
-            if line.lower() in word.lower():
+            # For numeric-only lines, require "Tram" prefix
+            # as these lines are unlikely make sure the user is not referring to a number
+            if line.isdigit():
+                if i > 0 and words[i-1].lower() == "tram" and line == word:
+                    matches_per_word.setdefault(word, []).append(line)
+            elif line.lower() == word.lower():
                 matches_per_word.setdefault(word, []).append(line)
+            elif word.lower() == "u12": # temporary fix for u12, which is not in the lines dict
+                matches_per_word.setdefault(word, []).append("U2")
 
     return process_matches(matches_per_word)

@@ -61,7 +61,6 @@
     "@babel/preset-react": "^7.24.1",
     "@babel/preset-typescript": "^7.24.1",
     "@tanstack/eslint-plugin-query": "^5.65.0",
-    "@types/prop-types": "^15.7.14",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "babel-plugin-react-compiler": "^19.0.0-beta-37ed2a7-20241206",

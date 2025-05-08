@@ -34,6 +34,7 @@
       "react"
     ],
     "rules": {
+      "react/prop-types": "off",
       "eqeqeq": ["error", "always"],
       "no-console": "error",
       "no-continue": "off",
