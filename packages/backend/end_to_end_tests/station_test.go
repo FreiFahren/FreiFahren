@@ -24,7 +24,7 @@ func TestGetStationName(t *testing.T) {
 	}{
 		{
 			name:           "Valid Station ID",
-			stationId:      "SUM-A",
+			stationId:      "SUM-n30731497",
 			expectedStatus: http.StatusOK,
 			expectedName:   "Alexanderplatz",
 		},
@@ -77,7 +77,7 @@ func TestGetAllStations(t *testing.T) {
 	assert.Greater(t, len(stations), 0)
 
 	// Check if a known station exists (e.g., Alexanderplatz)
-	alexanderplatz, exists := stations["SUM-A"]
+	alexanderplatz, exists := stations["SUM-n30731497"]
 	assert.True(t, exists)
 	assert.Equal(t, "Alexanderplatz", alexanderplatz.Name)
 }
@@ -95,19 +95,19 @@ func TestSearchStationByName(t *testing.T) {
 			name:            "Valid Station Name",
 			searchName:      "Alexanderplatz",
 			expectedStatus:  http.StatusOK,
-			expectedStation: "SUM-A",
+			expectedStation: "SUM-n30731497",
 		},
 		{
 			name:            "Valid Station Name with Whitespace",
 			searchName:      "  Alexanderplatz  ",
 			expectedStatus:  http.StatusOK,
-			expectedStation: "SUM-A",
+			expectedStation: "SUM-n30731497",
 		},
 		{
 			name:            "Valid Station Name with Different Case",
 			searchName:      "aLeXaNdErPlAtZ",
 			expectedStatus:  http.StatusOK,
-			expectedStation: "SUM-A",
+			expectedStation: "SUM-n30731497",
 		},
 		{
 			name:            "Invalid Station Name",

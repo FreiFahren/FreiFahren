@@ -5,7 +5,8 @@ import { useLines } from '../../api/queries'
 import { Theme } from '../../theme'
 import { FFText, FFView } from './base'
 
-const getLineColor = (line: string) => (line.startsWith('M') ? 'lines.tram' : `lines.${line}`) as keyof Theme['colors']
+const getLineColor = (line: string) =>
+    line.startsWith('S') || line.startsWith('U') ? (`lines.${line}` as keyof Theme['colors']) : `lines.tram`
 
 type LineTagProps = {
     line: string | null | undefined

@@ -21,17 +21,25 @@ def bot_error_handler(exception):
 nlp_bot.logger = logger
 nlp_bot.exception_handler = bot_error_handler
 
-def send_message(chat_id: str, message: str, bot, parse_mode='HTML') -> None:
-    """Send a message to a user or chat id.
-
-    Args:
-        user_id (int): The Id of the user or chat id.
-        message (str): The message to send.
-        bot (telebot.TeleBot): The bot to use to send the message.
-    """
+def send_message(chat_id: str,
+                 text: str,
+                 preview_url: str,
+                 bot,
+                 parse_mode: str = "HTML") -> None:
 
     try:
-        bot.send_message(chat_id, message, parse_mode=parse_mode)
+        lp_opts = types.LinkPreviewOptions(
+            url=preview_url,
+            prefer_large_media=True,
+            show_above_text=False
+        )
+
+        bot.send_message(
+            chat_id,
+            text,
+            parse_mode=parse_mode,
+            link_preview_options=lp_opts
+        )
     except Exception as e:
         logger.error(f'Failed to send message to user {chat_id}: {e}')
 
@@ -87,7 +95,6 @@ def get_info(message):
         if message.content_type == "text"
         else (message.caption or "Image without description")
     )
-    logger.info(f"Message received: {text} from chat id: {message.chat.id}")
 
     process_new_message(timestamp, text)
 

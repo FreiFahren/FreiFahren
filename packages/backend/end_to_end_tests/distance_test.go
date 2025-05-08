@@ -22,16 +22,16 @@ func TestGetStationDistance(t *testing.T) {
 	}{
 		{
 			name:             "Regular Case",
-			userStation:      "SUM-A",
-			inspectorStation: "S-LiO",
+			userStation:      "SUM-n30731497",
+			inspectorStation: "S-n260620359",
 			expectedStatus:   http.StatusOK,
 			expectedDistance: "11",
 			expectedError:    "",
 		},
 		{
 			name:             "Station to itself",
-			userStation:      "SUM-A",
-			inspectorStation: "SUM-A",
+			userStation:      "SUM-n30731497",
+			inspectorStation: "SUM-n30731497",
 			expectedStatus:   http.StatusOK,
 			expectedDistance: "0",
 			expectedError:    "",

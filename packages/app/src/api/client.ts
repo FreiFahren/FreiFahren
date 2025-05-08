@@ -109,10 +109,10 @@ export const stationSchema = z.object({
 
 export type Station = z.infer<typeof stationSchema>
 
-export const stationsSchema = z.record(stationSchema)
+export const stationsSchema = z.record(stationSchema.optional())
 export type Stations = z.infer<typeof stationsSchema>
 
-export const getStations = async (): Promise<Record<string, Station>> => {
+export const getStations = async (): Promise<Stations> => {
     const { data } = await client.get('/v0/stations')
 
     return stationsSchema.parse(data)

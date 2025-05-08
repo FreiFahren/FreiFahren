@@ -17,6 +17,7 @@ import { Report } from '../../api'
 import { useStations } from '../../api/queries'
 import { useAppStore } from '../../app.store'
 import { Theme } from '../../theme'
+import { filterNullish } from '../../utils'
 
 const styles = StyleSheet.create({
     pulse: {
@@ -83,23 +84,29 @@ const useReportsGeoJson = (reports: Report[]) => {
 
         return {
             type: 'FeatureCollection',
-            features: reports.map((report) => {
-                const { coordinates } = stations[report.stationId]
+            features: reports
+                .map((report) => {
+                    const station = stations[report.stationId]
 
-                return {
-                    type: 'Feature',
-                    geometry: {
-                        type: 'Point',
-                        coordinates: [coordinates.longitude, coordinates.latitude],
-                    },
-                    properties: {
-                        id: report.stationId,
-                        opacity: report.isHistoric
-                            ? 0.4
-                            : 1.4 - Math.min((now - new Date(report.timestamp).getTime()) / (1000 * 60 * 60), 1),
-                    },
-                }
-            }),
+                    if (station === undefined) return null
+
+                    const { coordinates } = station
+
+                    return {
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Point',
+                            coordinates: [coordinates.longitude, coordinates.latitude],
+                        },
+                        properties: {
+                            id: report.stationId,
+                            opacity: report.isHistoric
+                                ? 0.4
+                                : 1.4 - Math.min((now - new Date(report.timestamp).getTime()) / (1000 * 60 * 60), 1),
+                        },
+                    }
+                })
+                .filter(filterNullish),
         }
     }, [reports, stations])
 }
@@ -117,12 +124,13 @@ const ReportMarker = ({ onPress, report, animatedStyle }: ReportMarkerProps) => 
 
     const shouldAnimate = Date.now() - report.timestamp.getTime() < 1000 * 60 * 30
 
+    const station = stations[report.stationId]
+
+    if (station === undefined) return null
+
     return (
         <MarkerView
-            coordinate={[
-                stations[report.stationId].coordinates.longitude,
-                stations[report.stationId].coordinates.latitude,
-            ]}
+            coordinate={[station.coordinates.longitude, station.coordinates.latitude]}
             key={report.stationId}
             allowOverlap
         >

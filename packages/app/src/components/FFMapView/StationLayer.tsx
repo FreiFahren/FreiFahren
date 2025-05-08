@@ -3,6 +3,7 @@ import { useTheme } from '@shopify/restyle'
 
 import { useStations } from '../../api/queries'
 import { Theme } from '../../theme'
+import { filterNullish } from '../../utils'
 
 const useStationsAsGeoJSON = () => {
     const { data: stations } = useStations()
@@ -11,17 +12,25 @@ const useStationsAsGeoJSON = () => {
 
     return {
         type: 'FeatureCollection',
-        features: Object.keys(stations).map((key) => ({
-            type: 'Feature',
-            properties: {
-                name: stations[key].name,
-                lines: stations[key].lines,
-            },
-            geometry: {
-                type: 'Point',
-                coordinates: [stations[key].coordinates.longitude, stations[key].coordinates.latitude],
-            },
-        })),
+        features: Object.keys(stations)
+            .map((key) => {
+                const station = stations[key]
+
+                if (station === undefined) return null
+
+                return {
+                    type: 'Feature',
+                    properties: {
+                        name: station.name,
+                        lines: station.lines,
+                    },
+                    geometry: {
+                        type: 'Point',
+                        coordinates: [station.coordinates.longitude, station.coordinates.latitude],
+                    },
+                }
+            })
+            .filter(filterNullish),
     }
 }
 

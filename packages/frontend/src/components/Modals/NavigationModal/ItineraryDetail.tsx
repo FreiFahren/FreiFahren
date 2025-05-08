@@ -9,18 +9,18 @@ interface ItineraryDetailProps {
     itinerary: Itinerary
     className?: string
     onBack?: () => void
-    onSaveRoute?: (route: Itinerary) => void
-    onRemoveRoute?: () => void
+    handleSaveRoute?: (route: Itinerary) => void
+    handleRemoveRoute?: () => void
     isSaved?: boolean
 }
 
-const ItineraryDetail: React.FC<ItineraryDetailProps> = ({ 
-    itinerary, 
-    className, 
+const ItineraryDetail: React.FC<ItineraryDetailProps> = ({
+    itinerary,
+    className,
     onBack,
-    onSaveRoute,
-    onRemoveRoute,
-    isSaved = false
+    handleSaveRoute,
+    handleRemoveRoute,
+    isSaved = false,
 }) => {
     const { t } = useTranslation()
     const durationMinutes = Math.round(itinerary.duration / 60)
@@ -148,24 +148,16 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({
                     </div>
                 </div>
             ) : null}
-            
+
             {/* Save/Remove Route buttons */}
             <div className="route-actions">
-                {!isSaved && onSaveRoute ? (
-                    <button 
-                        type="button" 
-                        className="button-gray" 
-                        onClick={() => onSaveRoute(itinerary)}
-                    >
+                {!isSaved && handleSaveRoute ? (
+                    <button type="button" className="button-gray" onClick={() => handleSaveRoute(itinerary)}>
                         <span>{t('NavigationModal.saveRoute')}</span>
                     </button>
                 ) : null}
-                {isSaved && onRemoveRoute ? (
-                    <button 
-                        type="button" 
-                        className="button-gray" 
-                        onClick={() => onRemoveRoute()}
-                    >
+                {isSaved && handleRemoveRoute ? (
+                    <button type="button" className="button-gray" onClick={() => handleRemoveRoute()}>
                         <span>{t('NavigationModal.removeRoute')}</span>
                     </button>
                 ) : null}

@@ -11,7 +11,7 @@ import { getClosestStations } from '../../../hooks/getClosestStations'
 import { getLineColor } from '../../../hooks/getLineColor'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
 import { calculateDistance } from '../../../utils/mapUtils'
-import { LinesList, Report, StationList, StationProperty } from '../../../utils/types'
+import { Report, StationList, StationProperty } from '../../../utils/types'
 import { createWarningSpan, highlightElement } from '../../../utils/uiUtils'
 import { Line } from '../../Miscellaneous/Line/Line'
 import AutocompleteInputForm from '../AutocompleteInputForm/AutocompleteInputForm'
@@ -78,19 +78,28 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
         return paddingTop + paddingBottom + marginTop + marginBottom
     }
 
-    // Calculate possible lines based on the current entity
     const possibleLines = useMemo(() => {
-        if (currentEntity === null) return allLines
-        return Object.entries(allLines ?? {})
-            .filter(([line]) => line.startsWith(currentEntity))
-            .reduce(
-                (accumulatedLines, [line, stations]) => ({
-                    ...accumulatedLines,
-                    [line]: stations,
-                }),
-                {} as LinesList
-            )
-    }, [allLines, currentEntity])
+        let filteredLines: [string, string[]][] = []
+
+        // 1. Filter by entity (U, S, M, etc.), dependent on what entities are configured
+        if (currentEntity === null) {
+            filteredLines = allLines ?? []
+        } else {
+            filteredLines = (allLines ?? []).filter(([line]) => {
+                if (currentEntity === 'M') {
+                    return line.startsWith('M') || /^\d/.test(line)
+                }
+                return line.startsWith(currentEntity)
+            })
+        }
+
+        // 2. If a station is selected, further filter by lines containing that station
+        if (currentStation !== null) {
+            filteredLines = filteredLines.filter(([, stations]) => stations.includes(currentStation))
+        }
+
+        return filteredLines
+    }, [allLines, currentEntity, currentStation])
 
     // Calculate possible stations based on entity, line, station, and search input
     const possibleStations = useMemo(() => {
@@ -109,19 +118,28 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
         const sortedAllStations = Object.fromEntries(
             Object.entries(allStations ?? {}).sort(sortStationRecordsByStationName)
         )
-        let stations = sortedAllStations
+        let stations: StationList = sortedAllStations
 
         if (currentStation !== null) {
-            stations = { [currentStation]: allStations![currentStation] }
+            // If a specific station is already selected, just use that one
+            stations = allStations?.[currentStation] ? { [currentStation]: allStations[currentStation] } : {}
         } else if (currentLine !== null) {
+            // If a line is selected, filter stations belonging to that line
+            // Find the stations for the current line from the allLines array
+            const stationsForCurrentLine = allLines?.find(([key]) => key === currentLine)?.[1] ?? []
             stations = Object.fromEntries(
-                (allLines?.[currentLine] ?? [])
+                stationsForCurrentLine
                     .map((stationKey) => [stationKey, allStations?.[stationKey]])
                     .filter(([, stationData]) => stationData !== undefined) as [string, StationProperty][]
             )
         } else if (currentEntity !== null) {
+            // If an entity is selected, filter based on the station key prefix
             stations = Object.entries(sortedAllStations)
-                .filter(([, stationData]) => stationData.lines.some((line) => line.startsWith(currentEntity)))
+                .filter(([stationKey]) => {
+                    // eslint-disable-next-line prefer-destructuring
+                    const prefix = stationKey.split('-')[0]
+                    return prefix.includes(currentEntity)
+                })
                 .reduce(
                     (accumulatedStations, [stationName, stationData]) => ({
                         ...accumulatedStations,
@@ -130,6 +148,8 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                     {} as StationList
                 )
         }
+
+        // Further filter by search input if provided
         if (stationSearch) {
             stations = Object.entries(stations)
                 .filter(([, stationData]) => stationData.name.toLowerCase().includes(stationSearch.toLowerCase()))
@@ -226,11 +246,13 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
     const handleLineSelect = useCallback(
         (line: string | null) => {
             setCurrentLine(line)
+            // Find the stations for the selected line from the allLines array
+            const stationsForSelectedLine = allLines?.find(([key]) => key === line)?.[1] ?? []
             if (
                 typeof line === 'string' &&
                 currentStation !== null &&
                 typeof currentStation === 'string' &&
-                (allLines?.[line] ?? []).includes(currentStation) === false
+                !stationsForSelectedLine.includes(currentStation) // Use the found stations array
             ) {
                 setCurrentStation(null)
             }
@@ -397,23 +419,36 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
         }
     }
 
+    // Helper function to get value from <span><strong>VALUE</strong></span> structure
+    const getSpanStrongValue = useCallback((child: React.ReactElement): string => {
+        try {
+            // Use assertion here as well for the initial access
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const innerElement = (child.props as any)?.children
+            // Check if it's a valid element and has props and props.children
+            if (
+                React.isValidElement(innerElement) &&
+                // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+                innerElement.props &&
+                // Assert props as any to access children, assuming the checks are sufficient
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                typeof (innerElement.props as any).children !== 'undefined'
+            ) {
+                // Ensure the result is a string using the same assertion
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                return String((innerElement.props as any).children ?? '')
+            }
+            return ''
+        } catch (error) {
+            return ''
+        }
+    }, [])
+
     interface LineChildProps {
         line: string
     }
 
     const getLineValue = (child: React.ReactElement) => (child.props as LineChildProps).line
-
-    interface EntityChildProps {
-        children: {
-            props: {
-                children: string
-            }
-        }
-    }
-
-    const getEntityValue = (child: React.ReactElement) => (child.props as EntityChildProps).children.props.children
-
-    const getDirectionValue = (child: React.ReactElement) => (child.props as EntityChildProps).children.props.children
 
     const [showFeedback, setShowFeedback] = useState<boolean>(false)
     if (showFeedback) {
@@ -435,7 +470,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                                 fieldClassName="entity-type-selector"
                                 onSelect={handleEntitySelect}
                                 value={currentEntity}
-                                getValue={getEntityValue}
+                                getValue={getSpanStrongValue}
                             >
                                 <span className="line" style={{ backgroundColor: getLineColor('U8') }}>
                                     <strong>U</strong>
@@ -448,7 +483,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                                 </span>
                             </SelectField>
                         </section>
-                        <section>
+                        <section className="line-selector">
                             <h2>{t('ReportForm.line')}</h2>
                             <SelectField
                                 containerClassName="align-child-on-line long-selector"
@@ -456,7 +491,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                                 value={currentLine}
                                 getValue={getLineValue}
                             >
-                                {Object.keys(possibleLines ?? {}).map((line) => (
+                                {possibleLines.map(([line]) => (
                                     <Line key={line} line={line} />
                                 ))}
                             </SelectField>
@@ -493,20 +528,32 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                                     onSelect={handleDirectionSelect}
                                     value={currentDirection !== null ? (allStations ?? {})[currentDirection].name : ''}
                                     containerClassName="align-child-on-line"
-                                    getValue={getDirectionValue}
+                                    getValue={getSpanStrongValue}
                                 >
-                                    <span>
-                                        <strong>{(allStations ?? {})[allLines?.[currentLine]?.[0] ?? ''].name}</strong>
-                                    </span>
-                                    <span>
-                                        <strong>
-                                            {
-                                                (allStations ?? {})[
-                                                    allLines?.[currentLine]?.[allLines[currentLine].length - 1] ?? ''
-                                                ].name
-                                            }
-                                        </strong>
-                                    </span>
+                                    {(() => {
+                                        // Find stations for the current line from the allLines array
+                                        const stationsForCurrentLine =
+                                            allLines?.find(([key]) => key === currentLine)?.[1] ?? []
+                                        const startStationId = stationsForCurrentLine[0] ?? ''
+                                        const endStationId =
+                                            stationsForCurrentLine[stationsForCurrentLine.length - 1] ?? ''
+
+                                        const startStationName = (allStations ?? {})[startStationId].name
+                                        const endStationName = (allStations ?? {})[endStationId].name
+
+                                        // If names can't be found, return an empty array
+                                        if (!startStationName || !endStationName) return []
+
+                                        // Return an array of individual span elements
+                                        return [
+                                            <span key={startStationId || 'start'}>
+                                                <strong>{startStationName}</strong>
+                                            </span>,
+                                            <span key={endStationId || 'end'}>
+                                                <strong>{endStationName}</strong>
+                                            </span>,
+                                        ]
+                                    })()}
                                 </SelectField>
                             </section>
                         ) : null}

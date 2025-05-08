@@ -277,38 +277,34 @@ export const useStations = () =>
         refetchOnWindowFocus: false,
     })
 
-const sortLinesByPriority = (data: LinesList): LinesList => {
-    const entries = Object.entries(data)
-    const groupPriority = (key: string): number => {
-        if (key.includes('U')) return 0
-        if (key.includes('S')) return 1
-        if (key.includes('M')) return 2
-        return 3
-    }
-
-    entries.sort((a, b) => {
-        const groupA = groupPriority(a[0])
-        const groupB = groupPriority(b[0])
-        if (groupA !== groupB) {
-            return groupA - groupB
-        }
-        return b[0].localeCompare(a[0], undefined, { numeric: true })
-    })
-
-    return Object.fromEntries(entries) as LinesList
-}
-
 export const useLines = () =>
-    useQuery<LinesList, Error>({
+    useQuery<[string, string[]][], Error>({
         queryKey: ['linesETag'],
-        queryFn: async (): Promise<LinesList> => {
+        queryFn: async (): Promise<[string, string[]][]> => {
+            const groupPriority = (key: string): number => {
+                if (key.includes('U')) return 0
+                if (key.includes('S')) return 1
+                if (key.includes('M')) return 2
+                if (/^\d+$/.test(key)) return 4 // Lowest priority (4) for numeric keys
+                return 3 // Default priority (3) for others
+            }
+
             const data = await fetchWithETag<LinesList>('/v0/lines', 'lines')
-            return sortLinesByPriority(data)
+            const sortedEntries = Object.entries(data).sort((a, b) => {
+                const groupA = groupPriority(a[0])
+                const groupB = groupPriority(b[0])
+                if (groupA !== groupB) {
+                    return groupA - groupB
+                }
+                // Sort ascending within the same group (e.g., U1 before U9)
+                return a[0].localeCompare(b[0], undefined, { numeric: true })
+            })
+
+            return sortedEntries
         },
         staleTime: Infinity,
         gcTime: Infinity,
         refetchOnWindowFocus: false,
-        select: sortLinesByPriority,
         structuralSharing: true,
     })
 

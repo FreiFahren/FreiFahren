@@ -52,14 +52,12 @@ type InspectorRequest struct {
 
 // InsertPointers holds pointers to the fields necessary for inserting data into the database.
 type InsertPointers struct {
-	TimestampPtr     *time.Time
-	AuthorPtr        *int64
-	MessagePtr       *string
-	LinePtr          *string
-	StationNamePtr   *string
-	StationIdPtr     *string
-	DirectionNamePtr *string
-	DirectionIdPtr   *string
+	TimestampPtr   *time.Time
+	AuthorPtr      *int64
+	MessagePtr     *string
+	LinePtr        *string
+	StationIdPtr   *string
+	DirectionIdPtr *string
 }
 
 // When sending the response of what was posted

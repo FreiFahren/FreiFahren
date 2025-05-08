@@ -20,6 +20,14 @@ div.report-form {
     margin-right: var(--margin-xxs);
 }
 
+.report-form .line-selector .select-field {
+    width: fit-content;
+}
+
+.report-form .line-selector .select-field-container {
+    justify-content: flex-start;
+}
+
 @media (max-width: 375px) {
     .report-form > form > div h1 + section {
         display: none;

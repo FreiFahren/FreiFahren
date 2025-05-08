@@ -124,7 +124,7 @@ func SetupServer() *echo.Echo {
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// Ensure the required table exists
-	database.CreateTicketInfoTable()
+	database.CreateReportsTable()
 	database.CreateFeedbackTable()
 
 	caching.InitCacheManager()
