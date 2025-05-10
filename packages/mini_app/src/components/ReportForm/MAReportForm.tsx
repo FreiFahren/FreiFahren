@@ -14,7 +14,6 @@ interface Station {
 }
 
 interface ReportFormProps {
-    onReportFormSubmit: (data: any) => void;
 }
 
 // Simple SelectField component inspired by the original
@@ -373,7 +372,7 @@ const ReportForm: FC<ReportFormProps> = () => {
                         <input
                             className="station-input"
                             type="text"
-                            placeholder="Search stations..."
+                            placeholder="Station suchen..."
                             value={stationSearch}
                             onChange={(e) => setStationSearch(e.target.value)}
                         />
