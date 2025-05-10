@@ -294,7 +294,11 @@ const ReportForm: FC<ReportFormProps> = () => {
         } catch (error) {
             console.error('Error submitting report:', error);
             // Show error to user (could be enhanced)
-            alert('Failed to submit report. Please try again.');
+            if (error == "Error: HTTP error! status: 429") {
+                alert('Bitte nicht so schnell! Warte 30 Minuten und versuche es erneut.');
+            } else {
+                alert('Fehler beim Senden der Meldung. Bitte versuche es erneut.');
+            }
         }
     };
 
