@@ -52,7 +52,7 @@ def serve_mini_app():
     static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
     return send_from_directory(static_dir, "mini_app.html")
 
-@flask_app.route("/mini-app/data", methods=["POST"])
+@flask_app.route("/mini-app-report-inspector", methods=["POST"])
 def handle_mini_app_data():
     """Handle data submitted from the Mini App"""
     try:
@@ -65,6 +65,7 @@ def handle_mini_app_data():
         station = data.get("station", "")
         direction = data.get("direction", "")
         message = data.get("message", "")
+        stationId = data.get("stationId", "")
         
         logger.info(f"Received Mini App data: {data}")
         
@@ -72,14 +73,18 @@ def handle_mini_app_data():
         stationId = "mini-app-report"
         
         # Format the report message
-        telegram_message = "<b>⚠️ Inspector Report from Mini App ⚠️</b>"
+        telegram_message = "<b>Meldung aus der Mini App</b>"
         telegram_message += f"\n<b>Station</b>: {station}"
         if line:
             telegram_message += f"\n<b>Line</b>: {line}"
         if direction:
             telegram_message += f"\n<b>Richtung</b>: {direction}"
         if message:
-            telegram_message += f"\n<b>Nachricht</b>: {message}"
+            telegram_message += f"\n<b>Beschreibung</b>: hier einsehbar <a href='https://app.freifahren.org/station/{stationId}'>app.freifahren.org</a>"
+        else:
+            telegram_message += f"\n\nMehr Informationen auf <a href='https://app.freifahren.org/station/{stationId}'>app.freifahren.org</a>"
+
+
         
         # Send the message to the FreiFahren chat
         send_message(FREIFAHREN_CHAT_ID, telegram_message, nlp_bot)
