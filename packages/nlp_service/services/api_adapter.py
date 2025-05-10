@@ -87,7 +87,8 @@ def handle_mini_app_data():
 
         
         # Send the message to the FreiFahren chat
-        send_message(FREIFAHREN_CHAT_ID, telegram_message, nlp_bot)
+        station_url = f"https://app.freifahren.org/station/{stationId}" # allow telegram to automatically create a preview card
+        send_message(FREIFAHREN_CHAT_ID, telegram_message, station_url, nlp_bot)
         
         return {"status": "success"}, 200
     
