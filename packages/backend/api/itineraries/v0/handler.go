@@ -29,7 +29,7 @@ import (
 //
 // @Router /v0/transit/itineraries [get]
 func GetItineraries(c echo.Context) error {
-	logger.Log.Info().Msg("GET /v0/itineraries")
+	logger.Log.Info().Msg("GET '/v0/transit/itineraries' UserAgent: " + c.Request().UserAgent())
 
 	startStation := c.QueryParam("startStation")
 	endStation := c.QueryParam("endStation")

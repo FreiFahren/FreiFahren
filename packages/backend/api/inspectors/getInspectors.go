@@ -35,7 +35,7 @@ import (
 //
 // @Router /basics/inspectors [get]
 func GetTicketInspectorsInfo(c echo.Context) error {
-	logger.Log.Info().Msg("GET /basics/inspectors")
+	logger.Log.Info().Msg("GET '/basics/inspectors' UserAgent: " + c.Request().UserAgent())
 
 	databaseLastModified, err := database.GetLatestUpdateTime()
 	if err != nil {

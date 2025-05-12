@@ -39,7 +39,7 @@ func serializeToV0(data *prediction.RiskData) *v0RiskData {
 //
 // @Router /v0/risk-prediction/segment-colors [get]
 func GetRiskSegments(c echo.Context) error {
-	logger.Log.Info().Msg("GET /v0/risk-prediction/segment-colors")
+	logger.Log.Info().Msg("GET '/v0/risk-prediction/segment-colors' UserAgent: " + c.Request().UserAgent())
 
 	c.Response().Header().Set("Deprecation", "true")
 	c.Response().Header().Set("Link", "</v1/risk-prediction/segment-colors>; rel=\"successor-version\"")

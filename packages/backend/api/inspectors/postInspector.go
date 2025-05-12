@@ -46,8 +46,7 @@ var lastTelegramNotification time.Time
 // @Router /basics/inspectors [post]
 func PostInspector(c echo.Context) error {
 	logger.Log.Info().
-		Str("userAgent", c.Request().UserAgent()).
-		Msg("POST /basics/Inspectors")
+		Msg("POST '/basics/Inspectors' UserAgent: " + c.Request().UserAgent())
 
 	// dont rate limit requests from the bot (password in header) or in dev mode
 	if c.Request().Header.Get("X-Password") != os.Getenv("REPORT_PASSWORD") && os.Getenv("STATUS") != "dev" {

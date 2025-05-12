@@ -87,7 +87,7 @@ func (distanceCache *DistanceCache) setDistanceInCache(inspectorStationId, userS
 //
 // @Router /transit/distance [get]
 func GetStationDistance(c echo.Context) error {
-	logger.Log.Info().Msg("GET /transit/distance")
+	logger.Log.Info().Msg("GET '/transit/distance' UserAgent: " + c.Request().UserAgent())
 
 	inspectorStationId := c.QueryParam("inspectorStationId")
 	userStationId := c.QueryParam("userStationId")

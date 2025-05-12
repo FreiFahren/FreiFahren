@@ -28,7 +28,7 @@ import (
 //
 // @Router /lines [get]
 func GetAllLines(c echo.Context) error {
-	logger.Log.Info().Msg("GET /lines")
+	logger.Log.Info().Msg("GET '/lines' UserAgent: " + c.Request().UserAgent())
 
 	if cache, exists := caching.GlobalCacheManager.Get("lines"); exists {
 		return cache.ETagMiddleware()(func(c echo.Context) error {
@@ -56,7 +56,7 @@ func GetAllLines(c echo.Context) error {
 //
 // @Router /lines/{lineName} [get]
 func GetSingleLine(c echo.Context) error {
-	logger.Log.Info().Msg("GET /lines/:lineName")
+	logger.Log.Info().Msg("GET '/lines/:lineName' UserAgent: " + c.Request().UserAgent())
 
 	lineName := strings.ToUpper(c.Param("lineName"))
 	lines := data.GetLinesList()
@@ -88,7 +88,7 @@ func GetSingleLine(c echo.Context) error {
 //
 // @Router /lines/{lineId}/{stationId}/statistics [get]
 func GetLineStatistics(c echo.Context) error {
-	logger.Log.Info().Msg("GET /lines/:lineId/:stationId/statistics")
+	logger.Log.Info().Msg("GET '/lines/:lineId/:stationId/statistics' UserAgent: " + c.Request().UserAgent())
 
 	lineId := c.Param("lineId")
 	stationId := c.Param("stationId")
@@ -120,7 +120,7 @@ func GetLineStatistics(c echo.Context) error {
 //
 // @Router /lines/segments [get]
 func GetAllSegments(c echo.Context) error {
-	logger.Log.Info().Msg("GET /lines/segments")
+	logger.Log.Info().Msg("GET '/lines/segments' UserAgent: " + c.Request().UserAgent())
 	if cache, exists := caching.GlobalCacheManager.Get("segments"); exists {
 		return cache.ETagMiddleware()(func(c echo.Context) error {
 			return nil

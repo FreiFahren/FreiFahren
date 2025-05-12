@@ -30,7 +30,7 @@ import (
 //
 // @Router /stations/{stationId}/statistics [get]
 func GetStationStatistics(c echo.Context) error {
-	logger.Log.Info().Msg("GET /stations/:stationId/statistics")
+	logger.Log.Info().Msg("GET '/stations/:stationId/statistics' UserAgent: " + c.Request().UserAgent())
 
 	stationId := c.Param("stationId")
 	start := c.QueryParam("start")

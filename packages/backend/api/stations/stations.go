@@ -25,7 +25,7 @@ import (
 //
 // @Router /stations [get]
 func GetAllStations(c echo.Context) error {
-	logger.Log.Info().Msg("GET /stations")
+	logger.Log.Info().Msg("GET '/stations' UserAgent: " + c.Request().UserAgent())
 
 	/* Disable caching to fix issue with invalid cache in mobile app.
 	/* Todo: enable again
@@ -55,7 +55,7 @@ func GetAllStations(c echo.Context) error {
 //
 // @Router /stations/{stationId} [get]
 func GetSingleStation(c echo.Context) error {
-	logger.Log.Info().Msg("GET /stations/:stationId")
+	logger.Log.Info().Msg("GET '/stations/:stationId' UserAgent: " + c.Request().UserAgent())
 
 	stationId := c.Param("stationId")
 	stations := data.GetStationsList()
@@ -84,7 +84,7 @@ func GetSingleStation(c echo.Context) error {
 //
 // @Router /stations/search [get]
 func SearchStation(c echo.Context) error {
-	logger.Log.Info().Msg("GET /stations/search")
+	logger.Log.Info().Msg("GET '/stations/search' UserAgent: " + c.Request().UserAgent())
 
 	name := c.QueryParam("name")
 	if name == "" {

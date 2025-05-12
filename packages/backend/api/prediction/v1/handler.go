@@ -22,7 +22,7 @@ import (
 //
 // @Router /v1/risk-prediction/segment-colors [get]
 func GetRiskSegments(c echo.Context) error {
-	logger.Log.Info().Msg("GET /v1/risk-prediction/segment-colors")
+	logger.Log.Info().Msg("GET '/v1/risk-prediction/segment-colors' UserAgent: " + c.Request().UserAgent())
 
 	// Get from cache
 	if cachedData, ok := prediction.Cache.Get(); ok {
