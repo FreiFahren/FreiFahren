@@ -55,6 +55,7 @@ const useLayersToRender = () => {
         risk: hasLines && hasSegments && hasRiskData,
         stations: hasLines && hasSegments && hasStations,
         reports: hasLines && hasSegments && hasRiskData && hasStations && hasReports,
+        userLocation: hasLines && hasSegments && hasRiskData && hasStations && hasReports,
     }
 }
 
@@ -119,7 +120,7 @@ export const FFMapView = () => {
                 {layersToRender.risk && <RiskLayer visible={layer === 'risk'} />}
                 {layersToRender.stations && <StationLayer />}
                 {layersToRender.reports && <ReportsLayer reports={reports} onPressReport={onPressReport} />}
-                <UserLocation visible animated />
+                {layersToRender.userLocation && <UserLocation visible animated />}
             </MapView>
         </FFView>
     )
