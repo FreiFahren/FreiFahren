@@ -81,9 +81,9 @@ func PostInspector(c echo.Context) error {
 	dataToInsert, pointers, err := processRequestData(req)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error processing request data in postInspector")
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"message": "Invalid report data",
-		})
+		// return 200 to avoid issues in mobile app
+		// todo: return error as soon as new release is deployed
+		return c.NoContent(http.StatusOK)
 	}
 
 	if err := PostProcessInspectorData(dataToInsert, pointers); err != nil {
