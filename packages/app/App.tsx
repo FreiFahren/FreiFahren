@@ -20,6 +20,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { queryClient } from './src/api'
 import { FFView } from './src/components/common/base'
+import { ErrorBoundary } from './src/components/ErrorBoundary'
 import i18n from './src/i18n'
 import { Main } from './src/Main'
 import { theme } from './src/theme'
@@ -74,9 +75,11 @@ const App = () => {
                         <StatusBar style="light" backgroundColor="transparent" />
                         <GestureHandlerRootView style={StyleSheet.absoluteFill}>
                             <BottomSheetModalProvider>
-                                <FFView flex={1} bg="bg">
-                                    <Main />
-                                </FFView>
+                                <ErrorBoundary>
+                                    <FFView flex={1} bg="bg">
+                                        <Main />
+                                    </FFView>
+                                </ErrorBoundary>
                             </BottomSheetModalProvider>
                         </GestureHandlerRootView>
                     </QueryClientProvider>

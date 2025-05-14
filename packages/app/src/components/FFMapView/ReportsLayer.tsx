@@ -3,6 +3,7 @@ import { useTheme } from '@shopify/restyle'
 import { isNil } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { Pressable, StyleSheet } from 'react-native'
+import DeviceInfo from 'react-native-device-info'
 import Animated, {
     Easing,
     interpolate,
@@ -17,6 +18,7 @@ import { Report } from '../../api'
 import { useStations } from '../../api/queries'
 import { useAppStore } from '../../app.store'
 import { Theme } from '../../theme'
+import { track } from '../../tracking'
 import { filterNullish } from '../../utils'
 
 const styles = StyleSheet.create({
@@ -88,7 +90,17 @@ const useReportsGeoJson = (reports: Report[]) => {
                 .map((report) => {
                     const station = stations[report.stationId]
 
-                    if (station === undefined) return null
+                    if (station === undefined) {
+                        track({
+                            name: 'Missing Station',
+                            stationId: report.stationId,
+                            version: DeviceInfo.getVersion(),
+                            location: 'useReportsGeoJson',
+                            exampleKnownStationId: Object.keys(stations)[0],
+                        })
+
+                        return
+                    }
 
                     const { coordinates } = station
 
@@ -126,7 +138,17 @@ const ReportMarker = ({ onPress, report, animatedStyle }: ReportMarkerProps) => 
 
     const station = stations[report.stationId]
 
-    if (station === undefined) return null
+    if (station === undefined) {
+        track({
+            name: 'Missing Station',
+            stationId: report.stationId,
+            version: DeviceInfo.getVersion(),
+            location: 'ReportMarker',
+            exampleKnownStationId: Object.keys(stations)[0],
+        })
+
+        return null
+    }
 
     return (
         <MarkerView

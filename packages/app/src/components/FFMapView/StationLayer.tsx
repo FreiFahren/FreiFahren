@@ -1,8 +1,10 @@
 import { CircleLayer, ShapeSource, SymbolLayer } from '@maplibre/maplibre-react-native'
 import { useTheme } from '@shopify/restyle'
+import DeviceInfo from 'react-native-device-info'
 
 import { useStations } from '../../api/queries'
 import { Theme } from '../../theme'
+import { track } from '../../tracking'
 import { filterNullish } from '../../utils'
 
 const useStationsAsGeoJSON = () => {
@@ -16,7 +18,17 @@ const useStationsAsGeoJSON = () => {
             .map((key) => {
                 const station = stations[key]
 
-                if (station === undefined) return null
+                if (station === undefined) {
+                    track({
+                        name: 'Missing Station',
+                        stationId: key,
+                        version: DeviceInfo.getVersion(),
+                        location: 'useStationsAsGeoJSON',
+                        exampleKnownStationId: Object.keys(stations)[0],
+                    })
+
+                    return null
+                }
 
                 return {
                     type: 'Feature',

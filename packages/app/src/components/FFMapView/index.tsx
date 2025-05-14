@@ -3,6 +3,7 @@ import Geolocation from '@react-native-community/geolocation'
 import { isNil, noop } from 'lodash'
 import { useEffect, useRef } from 'react'
 import { StyleSheet } from 'react-native'
+import DeviceInfo from 'react-native-device-info'
 
 import { Report, useReports } from '../../api'
 import { useLines, useRiskData, useSegments, useStations } from '../../api/queries'
@@ -76,7 +77,17 @@ export const FFMapView = () => {
         if (!isNil(reportToShow) && stations !== undefined) {
             const station = stations[reportToShow.stationId]
 
-            if (station === undefined) return
+            if (station === undefined) {
+                track({
+                    name: 'Missing Station',
+                    stationId: reportToShow.stationId,
+                    version: DeviceInfo.getVersion(),
+                    location: 'FFMapView',
+                    exampleKnownStationId: Object.keys(stations)[0],
+                })
+
+                return
+            }
 
             const { latitude, longitude } = station.coordinates
 
