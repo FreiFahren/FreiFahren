@@ -81,6 +81,9 @@ func PostInspector(c echo.Context) error {
 	dataToInsert, pointers, err := processRequestData(req)
 	if err != nil {
 		logger.Log.Error().Err(err).Msg("Error processing request data in postInspector")
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Invalid report data",
+		})
 	}
 
 	if err := PostProcessInspectorData(dataToInsert, pointers); err != nil {
@@ -162,6 +165,9 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 
 		if station, found := stations[req.StationId]; found {
 			response.Station.Name = station.Name
+		} else {
+			logger.Log.Error().Str("stationId", req.StationId).Msg("Station not found")
+			return nil, nil, errors.New("station not found")
 		}
 	}
 
