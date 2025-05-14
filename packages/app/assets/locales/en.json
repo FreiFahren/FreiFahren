@@ -72,5 +72,13 @@
     "confirmText": "By continuing, you agree to the new privacy policy.",
     "link": "New Privacy Policy",
     "confirm": "Confirm"
+  },
+  "errorFallback": {
+    "title": "Oops! Something went wrong.",
+    "messageRestart": "We've encountered an unexpected error. Please try restarting the application.",
+    "messageUpdate": "Should the error persist, please make sure you are on the latest version of the app.",
+    "openStoreButton": "Open App Store",
+    "developmentErrorDetails": "Error Details (Development Only):",
+    "retryButton": "Retry"
   }
 }

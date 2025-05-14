@@ -77,5 +77,13 @@
     "title": "Deine Version ist veraltet",
     "text": "Leider können wir nicht immer jede App-Version unterstützen. Bitte aktualisiere die App, um weiterhin alle Funktionen nutzen zu können.",
     "openStore": "App Store öffnen"
+  },
+  "errorFallback": {
+    "title": "Hoppla! Etwas ist schiefgegangen.",
+    "messageRestart": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche, die Anwendung neu zu starten.",
+    "messageUpdate": "Sollte der Fehler erneut auftreten, stelle bitte sicher, dass du die neueste Version der App verwendest.",
+    "openStoreButton": "App Store öffnen",
+    "developmentErrorDetails": "Fehlerdetails (Nur für Entwicklung):",
+    "retryButton": "Erneut versuchen"
   }
 }

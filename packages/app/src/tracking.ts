@@ -70,6 +70,14 @@ type Event = BaseEvent &
         | { name: 'App Store Opened' }
         | { name: 'App Deprecated' }
         | { name: 'Navigation Opened' }
+        | { name: 'Error Retry Attempted' }
+        | {
+              name: 'Missing Station'
+              stationId: string
+              version: string
+              location: string
+              exampleKnownStationId: string
+          }
         | {
               name: 'Report Submitted'
               duration: number

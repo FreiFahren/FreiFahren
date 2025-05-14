@@ -1,0 +1,67 @@
+# Cursor Rules for Freifahren App
+
+This document outlines key coding conventions and guidelines for the Freifahren React Native TypeScript project. Adhering to these rules helps maintain code quality, consistency, and readability across the codebase.
+
+## Project Stack Overview
+- React Native
+- TypeScript
+- Expo
+- React Query
+- Zustand
+
+## General Coding Practices
+
+### Component Structure
+- **Basic UI Building Blocks**: Core, reusable UI components (e.g., buttons, inputs, cards) are located in `components/common/`.
+- **Prioritize Common Components**: Always try to use components from `components/common/` before creating new ones. This promotes consistency and reduces redundancy. If a suitable component doesn't exist, consider if it's generic enough to be added to `components/common/`.
+
+### Commenting
+- **DO NOT WRITE SUPERFLUOUS COMMENTS.**
+- Comments explaining *what* code does are usually unnecessary, hurt readability, and effectively function as code duplication. The code itself should be self-explanatory.
+- **Only include comments for**:
+    - Unintuitive or complex logic.
+    - Strange workarounds or hacks that have a specific reason.
+    - Additional context that isn't obvious from the surrounding code (e.g., why a particular approach was chosen over another).
+    - TODOs or FIXMEs with clear explanations or ticket references.
+
+### Naming Conventions
+- Follow standard TypeScript and React naming conventions (e.g., `PascalCase` for components and types, `camelCase` for functions and variables).
+- Be descriptive and avoid overly generic or abbreviated names (see `unicorn/prevent-abbreviations` ESLint rule).
+
+## Key ESLint Rule Highlights & Conventions
+
+The project uses a comprehensive ESLint setup (extending Airbnb, React Native, Prettier, and TypeScript-specific rules). Below are some key areas to be mindful of:
+
+1.  **Imports & Exports**:
+    *   Imports and exports are automatically sorted (`simple-import-sort`).
+    *   Avoid namespace imports (`import * as X from 'module';`). Prefer named imports.
+    *   Avoid self-imports.
+    *   **Prefer named exports over default exports** (`import/no-default-export`).
+
+2.  **Strictness & Error Prevention**:
+    *   Always use strict equality (`===` and `!==`) (`eqeqeq`).
+    *   Avoid `console.log` statements in committed code (`no-console`). Use a proper logger if needed.
+    *   Pay attention to warnings about `// TODO:`, `// FIXME:`, etc. (`no-warning-comments`).
+    *   Avoid `for..in` loops. Use `Object.keys()`, `Object.values()`, or `Object.entries()` instead.
+
+3.  **Code Style & Readability**:
+    *   **Prefer destructuring** for objects and arrays, including React props in function signatures.
+    *   **Always use arrow functions**
+    *   Ensure blank lines are present after variable declaration blocks (`padding-line-between-statements`).
+    *   Avoid useless spread operators (`unicorn/no-useless-spread`).
+    *   Be mindful of common abbreviations to avoid (`unicorn/prevent-abbreviations`).
+
+4.  **TypeScript Specifics**:
+    *   Avoid using `any` where possible. If `any` is necessary, there should be a good reason (`@typescript-eslint/no-explicit-any` is a warning).
+    *   Use nullish coalescing (`??`) over logical OR (`||`) for default values where appropriate (`@typescript-eslint/prefer-nullish-coalescing`).
+    *   Handle promises correctly; avoid floating promises (`@typescript-eslint/no-floating-promises`).
+    *   Ensure boolean expressions are strictly boolean (e.g., avoid numbers or possibly nullish values in `if` conditions without explicit comparison) (`@typescript-eslint/strict-boolean-expressions`).
+
+5.  **React & React Native**:
+    *   No unused styles (`react-native/no-unused-styles`).
+    *   Split platform-specific components (e.g., `MyComponent.ios.tsx`, `MyComponent.android.tsx`) when necessary (`react-native/split-platform-components`).
+    *   Avoid raw text outside of designated Text components (exception for `FFText`) (`react-native/no-raw-text`).
+    *   Do not use single-element style arrays (`react-native/no-single-element-style-arrays`).
+    *   `React` doesn't need to be in scope for JSX (`react/react-in-jsx-scope` is off), so don't import `React`.
+
+This is not an exhaustive list of all ESLint rules, but it highlights some of the most impactful ones for daily development. Always refer to ESLint errors/warnings in your editor. Instead of fixing linter errors yourself, consider running `npm run lint:fix` to fix auto-fixable problems.
