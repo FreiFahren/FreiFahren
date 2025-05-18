@@ -26,6 +26,8 @@ import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
 import { highlightElement } from '../../utils/uiUtils'
+import MarketingModal from 'src/components/Modals/MarketingModal/MarketingModal'
+import { useShouldShowMarketingModal } from '../../hooks/useShouldShowMarketingModal'
 
 type AppUIState = {
     isReportFormOpen: boolean
@@ -58,6 +60,8 @@ const App = () => {
     const [appMounted, setAppMounted] = useState(false)
     const [showUpdateIndicator, setShowUpdateIndicator] = useState<boolean>(false)
     const indicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+    const [shouldShowMarketingModal, dismissMarketingModal] = useShouldShowMarketingModal()
 
     const { data: reportsInLast24Hours } = useLast24HourReports()
     const { isFetching: isFetchingCurrentReports } = useCurrentReports()
@@ -374,6 +378,15 @@ const App = () => {
                     <ReportForm onReportFormSubmit={handleReportFormSubmit} className="open center-animation" />
                     <Backdrop handleClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
                 </>
+            ) : null}
+            {shouldShowMarketingModal ? (
+                <MarketingModal className="open center-animation">
+                    <CloseButton
+                        handleClose={() => {
+                            dismissMarketingModal()
+                        }}
+                    />
+                </MarketingModal>
             ) : null}
             <div id="portal-root" />
             <ViewedReportsProvider>
