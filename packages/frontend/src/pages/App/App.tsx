@@ -28,23 +28,20 @@ import { useModalAnimation } from '../../hooks/UseModalAnimation'
 import { highlightElement } from '../../utils/uiUtils'
 import MarketingModal from 'src/components/Modals/MarketingModal/MarketingModal'
 import { useShouldShowMarketingModal } from '../../hooks/useShouldShowMarketingModal'
+import { useShouldShowLegalDisclaimer } from '../../hooks/useShouldShowLegalDisclaimer'
 
 type AppUIState = {
     isReportFormOpen: boolean
-    isFirstOpen: boolean
     isStatsPopUpOpen: boolean
     isRiskLayerOpen: boolean
     isListModalOpen: boolean
-    isLegalDisclaimerOpen: boolean
 }
 
-const initialAppUIState: AppUIState = {
+const initialAppUIState: Omit<AppUIState, 'isLegalDisclaimerOpen'> = {
     isReportFormOpen: false,
-    isFirstOpen: true,
     isStatsPopUpOpen: false,
     isRiskLayerOpen: localStorage.getItem('layer') === 'risk',
     isListModalOpen: false,
-    isLegalDisclaimerOpen: false,
 }
 
 const isTelegramWebApp = (): boolean =>
@@ -56,12 +53,13 @@ const App = () => {
     const navigate = useNavigate()
     const { t } = useTranslation()
 
-    const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
+    const [appUIState, setAppUIState] = useState<Omit<AppUIState, 'isLegalDisclaimerOpen'>>(initialAppUIState)
     const [appMounted, setAppMounted] = useState(false)
     const [showUpdateIndicator, setShowUpdateIndicator] = useState<boolean>(false)
     const indicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
     const [shouldShowMarketingModal, dismissMarketingModal] = useShouldShowMarketingModal()
+    const [shouldShowLegalDisclaimerModal, acceptLegalDisclaimer] = useShouldShowLegalDisclaimer()
 
     const { data: reportsInLast24Hours } = useLast24HourReports()
     const { isFetching: isFetchingCurrentReports } = useCurrentReports()
@@ -186,28 +184,16 @@ const App = () => {
         })
     }
 
-    const shouldShowLegalDisclaimer = (): boolean => {
-        const legalDisclaimerAcceptedAt = localStorage.getItem('legalDisclaimerAcceptedAt')
-
-        if (legalDisclaimerAcceptedAt === null) return true
-
-        const lastAcceptedDate = new Date(legalDisclaimerAcceptedAt)
-        const currentDate = new Date()
-        const oneWeek = 7 * 24 * 60 * 60 * 1000 // One week in milliseconds
-
-        return currentDate.getTime() - lastAcceptedDate.getTime() > oneWeek
-    }
-
-    const closeLegalDisclaimer = useCallback(() => {
-        localStorage.setItem('legalDisclaimerAcceptedAt', new Date().toISOString())
-        setAppUIState((prevState) => ({ ...prevState, isFirstOpen: false, isStatsPopUpOpen: true }))
-    }, [])
+    const handleAcceptLegalDisclaimer = useCallback(() => {
+        acceptLegalDisclaimer()
+        setAppUIState((prevState) => ({ ...prevState, isStatsPopUpOpen: true }))
+    }, [acceptLegalDisclaimer])
 
     useEffect(() => {
-        if (!shouldShowLegalDisclaimer()) {
-            setAppUIState({ ...appUIState, isFirstOpen: false, isStatsPopUpOpen: true })
+        if (!shouldShowLegalDisclaimerModal) {
+            setAppUIState((prevState) => ({ ...prevState, isStatsPopUpOpen: true }))
         }
-    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [shouldShowLegalDisclaimerModal])
 
     const [mapsRotation, setMapsRotation] = useState(0)
 
@@ -308,7 +294,7 @@ const App = () => {
             },
         }
         // Make sure legal disclaimer has to be accepted first, before the station view can be opened
-        if (appUIState.isFirstOpen) {
+        if (shouldShowLegalDisclaimerModal) {
             return
         }
         onStationSelect(stationProperty)
@@ -316,8 +302,7 @@ const App = () => {
         stationId,
         stations,
         isInfoModalOpen,
-        appUIState.isFirstOpen,
-        closeLegalDisclaimer,
+        shouldShowLegalDisclaimerModal,
         onStationSelect,
         stationModalWasManuallyCloses,
         navigate,
@@ -348,11 +333,11 @@ const App = () => {
 
     return (
         <div className="App">
-            {appMounted && shouldShowLegalDisclaimer() ? (
+            {appMounted && shouldShowLegalDisclaimerModal ? (
                 <>
                     <LegalDisclaimer
-                        openAnimationClass={appUIState.isFirstOpen ? 'open center-animation' : ''}
-                        handleConfirm={closeLegalDisclaimer}
+                        openAnimationClass={shouldShowLegalDisclaimerModal ? 'open center-animation' : ''}
+                        handleConfirm={handleAcceptLegalDisclaimer}
                     />
                     <Backdrop handleClick={() => highlightElement('legal-disclaimer')} />
                 </>
@@ -391,7 +376,7 @@ const App = () => {
             <div id="portal-root" />
             <ViewedReportsProvider>
                 <FreifahrenMap
-                    isFirstOpen={appUIState.isFirstOpen}
+                    isFirstOpen={shouldShowLegalDisclaimerModal}
                     isRiskLayerOpen={appUIState.isRiskLayerOpen}
                     onRotationChange={handleRotationChange}
                     handleStationClick={onStationSelect}
