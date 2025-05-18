@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 
 const MARKETING_MODAL_LAST_SHOWN_KEY = 'marketingModalLastShown'
 const COOLDOWN_IN_MS = 14 * 24 * 60 * 60 * 1000
-const INITIAL_DELAY_IN_MS = 30 * 1000
+const INITIAL_DELAY_IN_MS = 5 * 1000 // todo: set to 30 seconds for prod
 
 /**
  * Updates the localStorage with the current timestamp for when the marketing modal was shown.

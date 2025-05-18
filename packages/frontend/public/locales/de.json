@@ -238,5 +238,11 @@
     },
     "updateIndicator": {
         "text": "Daten aktualisiert"
+    },
+    "MarketingModal": {
+        "title": "FreiFahren Mobile App",
+        "subtitle": "Echtzeit-Updates unterwegs",
+        "description": "Erhalte sofortige Benachrichtigungen über Kontrolleure direkt auf deinem Handy. Nie wieder überrascht werden!",
+        "button": "Zur App wechseln"
     }
 }
