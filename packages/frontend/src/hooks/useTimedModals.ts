@@ -1,33 +1,18 @@
 import { useShouldShowLegalDisclaimer } from './useShouldShowLegalDisclaimer'
 import { useShouldShowMarketingModal } from './useShouldShowMarketingModal'
 
-/**
- * Describes the visibility state of timed modals.
- */
 export interface TimedModalsVisibility {
-    /** Whether the Legal Disclaimer modal should be shown. */
     shouldShowLegalDisclaimer: boolean
-    /** Whether the Marketing Modal should be shown, considering its own rules, legal disclaimer status, and non-timed modal status. */
     shouldShowMarketingModal: boolean
-    /** Indicates if conditions (primarily legal disclaimer being handled) allow StatsPopUp to be considered for display. */
     canShowStatsPopUp: boolean
 }
 
-/**
- * Defines actions that can be performed on timed modals.
- */
 export interface TimedModalsActions {
-    /** Action to accept the legal disclaimer. */
     acceptLegalDisclaimer: () => void
-    /** Action to dismiss the marketing modal. */
     dismissMarketingModal: () => void
 }
 
-/**
- * Props for the useTimedModals hook.
- */
 export interface UseTimedModalsProps {
-    /** Indicates if any non-timed modal is currently open. */
     isNonTimedModalOpen: boolean
 }
 
@@ -56,14 +41,8 @@ export const useTimedModals = ({
         finalShouldShowMarketingModal = false
         finalCanShowStatsPopUp = false
     } else {
-        // Legal disclaimer is not active (i.e., it has been handled or was never due to be shown).
-        // Conditions are met for StatsPopUp to be considered.
         finalCanShowStatsPopUp = true
 
-        // Marketing modal can be considered if:
-        // 1. Its own timing and dismissal rules are met (`isMarketingModalDueByOwnRules`).
-        // 2. No non-timed modal is currently open (`!isNonTimedModalOpen`).
-        // (The condition that Legal Disclaimer is handled is implicit by being in this 'else' block)
         if (isMarketingModalDueByOwnRules && !isNonTimedModalOpen) {
             finalShouldShowMarketingModal = true
         }
