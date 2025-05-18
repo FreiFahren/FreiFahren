@@ -187,10 +187,6 @@ button:hover {
     filter: brightness(1.1);
 }
 
-button a {
-    color: var(--color-primary);
-}
-
 button.action {
     background-color: var(--incentive-blue);
     color: var(--color-white);
@@ -198,7 +194,7 @@ button.action {
 }
 
 button a {
-    color: var(--color-background);
+    color: var(--color-primary);
     font-size: var(--font-s);
     text-decoration: none;
 }

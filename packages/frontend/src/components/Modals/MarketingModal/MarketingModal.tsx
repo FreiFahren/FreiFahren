@@ -17,7 +17,15 @@ const MarketingModal: React.FC<MarketingModalProps> = ({ className, children }) 
                 <h1>{t('MarketingModal.title')}</h1>
                 <h2>{t('MarketingModal.subtitle')}</h2>
                 <p>{t('MarketingModal.description')}</p>
-                <button type="submit">{t('MarketingModal.button')}</button>
+                <button type="submit">
+                    <a
+                        href="https://apps.apple.com/de/app/freifahren/id6738277309"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        {t('MarketingModal.button')}
+                    </a>
+                </button>
             </div>
         </div>
     )
