@@ -105,9 +105,9 @@ export const useSubmitReport = () => {
                 stationId: report.station.id,
                 directionId: report.direction?.id ?? '',
                 message: report.message ?? '',
-                author: '77105110105', // ascii for Mini
+                author: 77105110105, // ascii for Mini
             };
-
+            
             const response = await fetch(`${import.meta.env.VITE_API_URL}/v0/basics/inspectors`, {
                 method: 'POST',
                 headers: {
