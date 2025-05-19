@@ -73,7 +73,7 @@ def handle_mini_app_data():
         stationId = "mini-app-report"
         
         # Format the report message
-        telegram_message = "<b>Meldung aus der Telegram Mini App</b>"
+        telegram_message = ""
         telegram_message += f"\n<b>Station</b>: {station}"
         if line:
             telegram_message += f"\n<b>Line</b>: {line}"
@@ -82,7 +82,9 @@ def handle_mini_app_data():
         if message:
             telegram_message += f"\n<b>Beschreibung</b>: hier einsehbar <a href='https://app.freifahren.org/station/{stationId}'>app.freifahren.org</a>"
         else:
-            telegram_message += f"\n\nMehr Informationen auf <a href='https://app.freifahren.org/station/{stationId}'>app.freifahren.org</a>"
+            telegram_message += f"\nMehr Informationen auf <a href='https://app.freifahren.org/station/{stationId}'>app.freifahren.org</a>"
+        telegram_message += f"\n\nDas ist eine Meldung aus der <b>Telegram Mini App</b>. \n"
+        telegram_message += f"Um auch in Telegram zu melden: \nTippe auf mein Profilbild und dann auf \"App öffnen\""
 
 
         
