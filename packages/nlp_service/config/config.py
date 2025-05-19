@@ -14,5 +14,8 @@ REPORT_PASSWORD = os.getenv("REPORT_PASSWORD")
 RESTART_PASSWORD = os.getenv("RESTART_PASSWORD")
 SENTRY_DSN = os.getenv("SENTRY_DSN")
 
+# Server base URL for the Mini App
+MINI_APP_SERVER_URL = os.getenv("MINI_APP_SERVER_URL")
+
 # minimum message length to be processed, for the core/processor.py
 MINIMUM_MESSAGE_LENGTH = 3
