@@ -73,7 +73,7 @@ def handle_mini_app_data():
         stationId = "mini-app-report"
         
         # Format the report message
-        telegram_message = "<b>Meldung aus der Mini App</b>"
+        telegram_message = "<b>Meldung aus der Telegram Mini App</b>"
         telegram_message += f"\n<b>Station</b>: {station}"
         if line:
             telegram_message += f"\n<b>Line</b>: {line}"
