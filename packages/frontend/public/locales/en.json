@@ -241,5 +241,11 @@
     },
     "updateIndicator": {
         "text": "Data refreshed"
+    },
+    "MarketingModal": {
+        "title": "FreiFahren Mobile App",
+        "subtitle": "Real-time updates on the go",
+        "description": "Get real-time updates about reports on your mobile device. Never be caught off guard again!",
+        "button": "Switch to the app"
     }
 }

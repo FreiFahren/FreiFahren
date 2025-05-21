@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
+import MarketingModal from 'src/components/Modals/MarketingModal/MarketingModal'
 import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
@@ -25,24 +26,21 @@ import { UtilModal } from '../../components/Modals/UtilModal/UtilModal'
 import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
+import { useTimedModals } from '../../hooks/useTimedModals'
 import { highlightElement } from '../../utils/uiUtils'
 
 type AppUIState = {
     isReportFormOpen: boolean
-    isFirstOpen: boolean
     isStatsPopUpOpen: boolean
     isRiskLayerOpen: boolean
     isListModalOpen: boolean
-    isLegalDisclaimerOpen: boolean
 }
 
-const initialAppUIState: AppUIState = {
+const initialAppUIState: Omit<AppUIState, 'isLegalDisclaimerOpen'> = {
     isReportFormOpen: false,
-    isFirstOpen: true,
     isStatsPopUpOpen: false,
     isRiskLayerOpen: localStorage.getItem('layer') === 'risk',
     isListModalOpen: false,
-    isLegalDisclaimerOpen: false,
 }
 
 const isTelegramWebApp = (): boolean =>
@@ -54,7 +52,7 @@ const App = () => {
     const navigate = useNavigate()
     const { t } = useTranslation()
 
-    const [appUIState, setAppUIState] = useState<AppUIState>(initialAppUIState)
+    const [appUIState, setAppUIState] = useState<Omit<AppUIState, 'isLegalDisclaimerOpen'>>(initialAppUIState)
     const [appMounted, setAppMounted] = useState(false)
     const [showUpdateIndicator, setShowUpdateIndicator] = useState<boolean>(false)
     const indicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -91,6 +89,58 @@ const App = () => {
         }
     }
 
+    const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false)
+    const {
+        isOpen: isInfoModalOpenFromHook,
+        isAnimatingOut: isInfoModalAnimatingOut,
+        openModal: openInfoModal,
+        closeModal: closeInfoModal,
+    } = useModalAnimation()
+
+    const isNonTimedModalOpen = useMemo(
+        () =>
+            appUIState.isReportFormOpen ||
+            isNavigationModalOpen ||
+            isInfoModalOpenFromHook ||
+            appUIState.isListModalOpen ||
+            showSummary ||
+            isUtilOpen,
+        [
+            appUIState.isReportFormOpen,
+            isNavigationModalOpen,
+            isInfoModalOpenFromHook,
+            appUIState.isListModalOpen,
+            showSummary,
+            isUtilOpen,
+        ]
+    )
+
+    const [timedModalsVisibility, timedModalsActions] = useTimedModals({ isNonTimedModalOpen })
+
+    const {
+        shouldShowLegalDisclaimer,
+        shouldShowMarketingModal: showMarketingModalFromHook,
+        canShowStatsPopUp,
+    } = timedModalsVisibility
+    const { acceptLegalDisclaimer: acceptLegalDisclaimerAction, dismissMarketingModal: dismissMarketingModalAction } =
+        timedModalsActions
+
+    // handle outside of the useTimedModals hook, because it is independent of other timed modals
+    const statsPopUpTriggeredRef = useRef(false)
+    useEffect(() => {
+        if (canShowStatsPopUp && !statsPopUpTriggeredRef.current && appMounted) {
+            setAppUIState((prevState) => ({ ...prevState, isStatsPopUpOpen: true }))
+            statsPopUpTriggeredRef.current = true
+        }
+        if (!canShowStatsPopUp) {
+            statsPopUpTriggeredRef.current = false
+        }
+    }, [canShowStatsPopUp, appMounted])
+
+    const onConfirmLegalDisclaimer = useCallback(() => {
+        acceptLegalDisclaimerAction()
+    }, [acceptLegalDisclaimerAction])
+
     useEffect(() => {
         sendSavedEvents().catch((error) => {
             // fix later with sentry
@@ -101,7 +151,6 @@ const App = () => {
 
     // preloading the stats popup data
     const [statsData, setStatsData] = useState<number>(0)
-
     useEffect(() => {
         const fetchReports = async () => {
             try {
@@ -182,29 +231,6 @@ const App = () => {
         })
     }
 
-    const shouldShowLegalDisclaimer = (): boolean => {
-        const legalDisclaimerAcceptedAt = localStorage.getItem('legalDisclaimerAcceptedAt')
-
-        if (legalDisclaimerAcceptedAt === null) return true
-
-        const lastAcceptedDate = new Date(legalDisclaimerAcceptedAt)
-        const currentDate = new Date()
-        const oneWeek = 7 * 24 * 60 * 60 * 1000 // One week in milliseconds
-
-        return currentDate.getTime() - lastAcceptedDate.getTime() > oneWeek
-    }
-
-    const closeLegalDisclaimer = useCallback(() => {
-        localStorage.setItem('legalDisclaimerAcceptedAt', new Date().toISOString())
-        setAppUIState((prevState) => ({ ...prevState, isFirstOpen: false, isStatsPopUpOpen: true }))
-    }, [])
-
-    useEffect(() => {
-        if (!shouldShowLegalDisclaimer()) {
-            setAppUIState({ ...appUIState, isFirstOpen: false, isStatsPopUpOpen: true })
-        }
-    }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
     const [mapsRotation, setMapsRotation] = useState(0)
 
     const handleRotationChange = useCallback((bearing: number) => {
@@ -227,7 +253,6 @@ const App = () => {
         }
     }, [])
 
-    const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false)
     const [selectedStation, setSelectedStation] = useState<StationProperty | null>(null)
     const [navigationEndStation, setNavigationEndStation] = useState<StationProperty | null>(null)
     const [stationModalWasManuallyCloses, setStationModalWasManuallyCloses] = useState(false)
@@ -235,13 +260,6 @@ const App = () => {
     // New state for saved route
     const [savedRoute, setSavedRoute] = useState<Itinerary | null>(null)
     const [showSavedRoute, setShowSavedRoute] = useState(false)
-
-    const {
-        isOpen: isInfoModalOpen,
-        isAnimatingOut: isInfoModalAnimatingOut,
-        openModal: openInfoModal,
-        closeModal: closeInfoModal,
-    } = useModalAnimation()
 
     const onStationSelect = useCallback(
         (station: StationProperty) => {
@@ -270,11 +288,10 @@ const App = () => {
         }
     }
 
-    // Handle direct navigation to a station via URL parameter
     useEffect(() => {
         const isValidStationId = typeof stationId === 'string' && stationId.trim() !== ''
 
-        if (!(isValidStationId && stations && !isInfoModalOpen && !stationModalWasManuallyCloses)) {
+        if (!(isValidStationId && stations && !isInfoModalOpenFromHook && !stationModalWasManuallyCloses)) {
             return
         }
         const station = stations[stationId]
@@ -304,16 +321,15 @@ const App = () => {
             },
         }
         // Make sure legal disclaimer has to be accepted first, before the station view can be opened
-        if (appUIState.isFirstOpen) {
+        if (shouldShowLegalDisclaimer) {
             return
         }
         onStationSelect(stationProperty)
     }, [
         stationId,
         stations,
-        isInfoModalOpen,
-        appUIState.isFirstOpen,
-        closeLegalDisclaimer,
+        isInfoModalOpenFromHook,
+        shouldShowLegalDisclaimer,
         onStationSelect,
         stationModalWasManuallyCloses,
         navigate,
@@ -344,11 +360,11 @@ const App = () => {
 
     return (
         <div className="App">
-            {appMounted && shouldShowLegalDisclaimer() ? (
+            {appMounted && shouldShowLegalDisclaimer ? (
                 <>
                     <LegalDisclaimer
-                        openAnimationClass={appUIState.isFirstOpen ? 'open center-animation' : ''}
-                        handleConfirm={closeLegalDisclaimer}
+                        openAnimationClass="open center-animation"
+                        handleConfirm={onConfirmLegalDisclaimer}
                     />
                     <Backdrop handleClick={() => highlightElement('legal-disclaimer')} />
                 </>
@@ -375,10 +391,19 @@ const App = () => {
                     <Backdrop handleClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
                 </>
             ) : null}
+            {showMarketingModalFromHook ? (
+                <MarketingModal className="open center-animation">
+                    <CloseButton
+                        handleClose={() => {
+                            dismissMarketingModalAction()
+                        }}
+                    />
+                </MarketingModal>
+            ) : null}
             <div id="portal-root" />
             <ViewedReportsProvider>
                 <FreifahrenMap
-                    isFirstOpen={appUIState.isFirstOpen}
+                    isFirstOpen={shouldShowLegalDisclaimer}
                     isRiskLayerOpen={appUIState.isRiskLayerOpen}
                     onRotationChange={handleRotationChange}
                     handleStationClick={onStationSelect}
@@ -403,7 +428,7 @@ const App = () => {
                     </div>
                 </div>
             ) : null}
-            {isInfoModalOpen && selectedStation ? (
+            {isInfoModalOpenFromHook && selectedStation ? (
                 <InfoModal
                     station={selectedStation}
                     className={`open ${isInfoModalAnimatingOut ? 'slide-out' : 'slide-in'}`}
@@ -433,7 +458,6 @@ const App = () => {
                 </>
             ) : null}
 
-            {/* Show Saved Route button - show only when a route is saved */}
             {savedRoute && !isNavigationModalOpen && !showSavedRoute ? (
                 <button
                     className="small-button saved-route-button"
@@ -444,7 +468,6 @@ const App = () => {
                 </button>
             ) : null}
 
-            {/* Display saved route modal */}
             {showSavedRoute && savedRoute ? (
                 <>
                     <NavigationModal
@@ -482,7 +505,7 @@ const App = () => {
                     setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })
                 }
             />
-            {appUIState.isStatsPopUpOpen && statsData !== 0 ? (
+            {canShowStatsPopUp && !showMarketingModalFromHook && appUIState.isStatsPopUpOpen && statsData !== 0 ? (
                 <StatsPopUp
                     numberOfReports={statsData}
                     numberOfUsers={numberOfUsers}

@@ -1,0 +1,12 @@
+.marketing-modal {
+    bottom: -77.5px;
+}
+
+.marketing-modal-content h2 {
+    font-weight: 400;
+    color: var(--color-gray-on-dark-background);
+}
+
+.marketing-modal-content button {
+    margin-top: var(--margin-m);
+}
