@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 const MARKETING_MODAL_LAST_SHOWN_KEY = 'marketingModalLastShown'
 const COOLDOWN_IN_MS = 14 * 24 * 60 * 60 * 1000
-const INITIAL_DELAY_IN_MS = 5 * 1000 // todo: set to 30 seconds for prod
+const INITIAL_DELAY_IN_MS = 30 * 1000
 
 /**
  * Updates the localStorage with the current timestamp for when the marketing modal was shown.
@@ -20,7 +20,6 @@ export const useShouldShowMarketingModal = (): [boolean, () => void] => {
     const [hasThirtySecondsPassed, setHasThirtySecondsPassed] = useState(false)
     const [isDismissedThisSession, setIsDismissedThisSession] = useState(false)
 
-    // todo: refactor to useTimeoutFlag maybe later?
     useEffect(() => {
         const timer = setTimeout(() => {
             setHasThirtySecondsPassed(true)
@@ -35,7 +34,7 @@ export const useShouldShowMarketingModal = (): [boolean, () => void] => {
     let wasShownMoreThanTwoWeeksAgo = true // Default to true if never shown
     if (lastShownTimestamp) {
         const lastShownDate = new Date(lastShownTimestamp).getTime()
-        if (!isNaN(lastShownDate)) {
+        if (!Number.isNaN(lastShownDate)) {
             wasShownMoreThanTwoWeeksAgo = now - lastShownDate > COOLDOWN_IN_MS
         }
     }

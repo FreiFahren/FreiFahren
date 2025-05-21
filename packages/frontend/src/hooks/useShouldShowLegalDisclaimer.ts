@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 const LEGAL_DISCLAIMER_ACCEPTED_AT_KEY = 'legalDisclaimerAcceptedAt'
 const COOLDOWN_IN_MS = 7 * 24 * 60 * 60 * 1000
@@ -15,7 +15,7 @@ export const useShouldShowLegalDisclaimer = (): [boolean, () => void] => {
             return true
         }
         const lastAcceptedDate = new Date(acceptedAt).getTime()
-        if (isNaN(lastAcceptedDate)) {
+        if (Number.isNaN(lastAcceptedDate)) {
             // Invalid date stored, treat as not accepted
             return true
         }

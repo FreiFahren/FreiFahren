@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
+import MarketingModal from 'src/components/Modals/MarketingModal/MarketingModal'
 import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
@@ -25,9 +26,8 @@ import { UtilModal } from '../../components/Modals/UtilModal/UtilModal'
 import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
 import { useModalAnimation } from '../../hooks/UseModalAnimation'
-import { highlightElement } from '../../utils/uiUtils'
-import MarketingModal from 'src/components/Modals/MarketingModal/MarketingModal'
 import { useTimedModals } from '../../hooks/useTimedModals'
+import { highlightElement } from '../../utils/uiUtils'
 
 type AppUIState = {
     isReportFormOpen: boolean
@@ -97,23 +97,23 @@ const App = () => {
         closeModal: closeInfoModal,
     } = useModalAnimation()
 
-    const isNonTimedModalOpen = useMemo(() => {
-        return (
+    const isNonTimedModalOpen = useMemo(
+        () =>
             appUIState.isReportFormOpen ||
             isNavigationModalOpen ||
             isInfoModalOpenFromHook ||
             appUIState.isListModalOpen ||
             showSummary ||
-            isUtilOpen
-        )
-    }, [
-        appUIState.isReportFormOpen,
-        isNavigationModalOpen,
-        isInfoModalOpenFromHook,
-        appUIState.isListModalOpen,
-        showSummary,
-        isUtilOpen,
-    ])
+            isUtilOpen,
+        [
+            appUIState.isReportFormOpen,
+            isNavigationModalOpen,
+            isInfoModalOpenFromHook,
+            appUIState.isListModalOpen,
+            showSummary,
+            isUtilOpen,
+        ]
+    )
 
     const [timedModalsVisibility, timedModalsActions] = useTimedModals({ isNonTimedModalOpen })
 
@@ -125,6 +125,7 @@ const App = () => {
     const { acceptLegalDisclaimer: acceptLegalDisclaimerAction, dismissMarketingModal: dismissMarketingModalAction } =
         timedModalsActions
 
+    // handle outside of the useTimedModals hook, because it is independent of other timed modals
     const statsPopUpTriggeredRef = useRef(false)
     useEffect(() => {
         if (canShowStatsPopUp && !statsPopUpTriggeredRef.current && appMounted) {
@@ -136,7 +137,7 @@ const App = () => {
         }
     }, [canShowStatsPopUp, appMounted])
 
-    const handleConfirmLegalDisclaimer = useCallback(() => {
+    const onConfirmLegalDisclaimer = useCallback(() => {
         acceptLegalDisclaimerAction()
     }, [acceptLegalDisclaimerAction])
 
@@ -362,8 +363,8 @@ const App = () => {
             {appMounted && shouldShowLegalDisclaimer ? (
                 <>
                     <LegalDisclaimer
-                        openAnimationClass={shouldShowLegalDisclaimer ? 'open center-animation' : ''}
-                        handleConfirm={handleConfirmLegalDisclaimer}
+                        openAnimationClass="open center-animation"
+                        handleConfirm={onConfirmLegalDisclaimer}
                     />
                     <Backdrop handleClick={() => highlightElement('legal-disclaimer')} />
                 </>

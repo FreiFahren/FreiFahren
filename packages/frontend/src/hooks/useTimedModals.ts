@@ -32,7 +32,7 @@ export const useTimedModals = ({
 
     const [isMarketingModalDueByOwnRules, dismissMarketingModalAction] = useShouldShowMarketingModal()
 
-    let finalShouldShowLegalDisclaimer = isLegalDisclaimerDueByOwnRules
+    const finalShouldShowLegalDisclaimer = isLegalDisclaimerDueByOwnRules
     let finalShouldShowMarketingModal = false
     let finalCanShowStatsPopUp = false
 

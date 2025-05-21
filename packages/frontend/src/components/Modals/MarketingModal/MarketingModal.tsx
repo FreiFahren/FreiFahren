@@ -1,6 +1,8 @@
-import React from 'react'
 import './MarketingModal.css'
+
+import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 
 interface MarketingModalProps {
     className?: string
@@ -17,7 +19,7 @@ const MarketingModal: React.FC<MarketingModalProps> = ({ className, children }) 
                 <h1>{t('MarketingModal.title')}</h1>
                 <h2>{t('MarketingModal.subtitle')}</h2>
                 <p>{t('MarketingModal.description')}</p>
-                <button type="submit">
+                <button type="submit" onClick={() => sendAnalyticsEvent('redirected to app store', {})}>
                     <a
                         href="https://apps.apple.com/de/app/freifahren/id6738277309"
                         target="_blank"
