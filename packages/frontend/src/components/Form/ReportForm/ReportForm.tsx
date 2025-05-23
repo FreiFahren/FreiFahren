@@ -1,6 +1,6 @@
 import './ReportForm.css'
 
-import React, { FC, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { FC, FormEvent, useCallback, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 
@@ -19,18 +19,10 @@ import { FeedbackForm } from '../FeedbackForm/FeedbackForm'
 import { PrivacyCheckbox } from '../PrivacyCheckbox/PrivacyCheckbox'
 import { SelectField } from '../SelectField/SelectField'
 
-const getCSSVariable = (variable: string): number => {
-    const value = getComputedStyle(document.documentElement).getPropertyValue(variable)
-
-    return value !== '0' ? parseFloat(value) : 0
-}
-
 interface ReportFormProps {
     onReportFormSubmit: (reportedData: Report) => void
     className?: string
 }
-
-const ITEM_HEIGHT = 37
 
 const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
     const { t } = useTranslation()
@@ -54,29 +46,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
 
     const startTime = useRef<Date>(new Date())
 
-    const containerRef = useRef<HTMLDivElement>(null)
-    const topElementsRef = useRef<HTMLDivElement>(null)
-    const bottomElementsRef = useRef<HTMLDivElement>(null)
-
-    const [stationListHeight, setStationListHeight] = useState<number | null>(null)
-    const [initialContainerHeight, setInitialContainerHeight] = useState<number | null>(null)
-
     const submitReport = useSubmitReport()
-
-    // Constants for layout calculations
-    const DIRECTION_SELECTOR_HEIGHT = 80 // Approximate height of direction selector including margins
-    const MARGIN_S = getCSSVariable('--margin-s')
-
-    // Helper function to calculate combined padding and margin
-    const calculateAllowance = (element: HTMLElement): number => {
-        const styles = window.getComputedStyle(element)
-        const paddingTop = parseFloat(styles.paddingTop)
-        const paddingBottom = parseFloat(styles.paddingBottom)
-        const marginTop = parseFloat(styles.marginTop)
-        const marginBottom = parseFloat(styles.marginBottom)
-
-        return paddingTop + paddingBottom + marginTop + marginBottom
-    }
 
     const possibleLines = useMemo(() => {
         let filteredLines: [string, string[]][] = []
@@ -164,57 +134,6 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
 
         return stations
     }, [allLines, allStations, currentEntity, currentLine, currentStation, stationSearch])
-
-    const calculateStationListHeight = useCallback(() => {
-        if (containerRef.current && topElementsRef.current && bottomElementsRef.current) {
-            const container = containerRef.current
-            const top = topElementsRef.current
-            const bottom = bottomElementsRef.current
-
-            // Set initial container height once
-            if (initialContainerHeight === null) {
-                setInitialContainerHeight(container.clientHeight)
-            }
-
-            const containerHeight = initialContainerHeight ?? container.clientHeight
-            const topHeight = top.offsetHeight
-            const bottomHeight = bottom.offsetHeight
-
-            // Calculate base margins
-            const dynamicDivMargins = MARGIN_S * 2
-
-            // Calculate space needed for direction selector if visible
-            const directionSelectorSpace =
-                currentLine !== null && currentStation !== null && currentLine !== 'S41' && currentLine !== 'S42'
-                    ? DIRECTION_SELECTOR_HEIGHT
-                    : 0
-
-            // Calculate total space needed
-            const containerAllowance = calculateAllowance(container) + dynamicDivMargins
-            const topAllowance = calculateAllowance(top) + dynamicDivMargins
-            const bottomAllowance = calculateAllowance(bottom) + dynamicDivMargins
-            const totalAllowance = containerAllowance + topAllowance + bottomAllowance + MARGIN_S
-
-            // Calculate available height
-            const stationCount = Object.keys(possibleStations).length
-            const availableHeight = Math.max(
-                0,
-                containerHeight - topHeight - bottomHeight - totalAllowance - directionSelectorSpace
-            )
-
-            const newStationListHeight = Math.max(0, Math.min(stationCount * ITEM_HEIGHT, availableHeight))
-            setStationListHeight(newStationListHeight)
-        }
-    }, [initialContainerHeight, possibleStations, currentLine, currentStation, MARGIN_S])
-
-    // Handle resize and content changes
-    useEffect(() => {
-        calculateStationListHeight()
-
-        const handleResize = () => calculateStationListHeight()
-        window.addEventListener('resize', handleResize)
-        return () => window.removeEventListener('resize', handleResize)
-    }, [calculateStationListHeight])
 
     const handleEntitySelect = useCallback(
         (entity: string | null) => {
@@ -456,47 +375,48 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
     }
 
     return (
-        <div className={`report-form container modal ${className}`} ref={containerRef}>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <div ref={topElementsRef}>
-                        <div className="align-child-on-line">
-                            <h1>{t('ReportForm.title')}</h1>
-                            <FeedbackButton handleButtonClick={() => setShowFeedback(true)} />
-                        </div>
-                        <section>
-                            <SelectField
-                                containerClassName="align-child-on-line large-selector"
-                                fieldClassName="entity-type-selector"
-                                onSelect={handleEntitySelect}
-                                value={currentEntity}
-                                getValue={getSpanStrongValue}
-                            >
-                                <span className="line" style={{ backgroundColor: getLineColor('U8') }}>
-                                    <strong>U</strong>
-                                </span>
-                                <span className="line" style={{ backgroundColor: getLineColor('S2') }}>
-                                    <strong>S</strong>
-                                </span>
-                                <span className="line" style={{ backgroundColor: getLineColor('M1') }}>
-                                    <strong>M</strong>
-                                </span>
-                            </SelectField>
-                        </section>
-                        <section className="line-selector">
-                            <h2>{t('ReportForm.line')}</h2>
-                            <SelectField
-                                containerClassName="align-child-on-line long-selector"
-                                onSelect={handleLineSelect}
-                                value={currentLine}
-                                getValue={getLineValue}
-                            >
-                                {possibleLines.map(([line]) => (
-                                    <Line key={line} line={line} />
-                                ))}
-                            </SelectField>
-                        </section>
+        <div className={`report-form container modal ${className}`}>
+            <form onSubmit={handleSubmit} className="report-form-content">
+                <div className="form-header">
+                    <div className="align-child-on-line">
+                        <h1>{t('ReportForm.title')}</h1>
+                        <FeedbackButton handleButtonClick={() => setShowFeedback(true)} />
                     </div>
+                    <section>
+                        <SelectField
+                            containerClassName="align-child-on-line large-selector"
+                            fieldClassName="entity-type-selector"
+                            onSelect={handleEntitySelect}
+                            value={currentEntity}
+                            getValue={getSpanStrongValue}
+                        >
+                            <span className="line" style={{ backgroundColor: getLineColor('U8') }}>
+                                <strong>U</strong>
+                            </span>
+                            <span className="line" style={{ backgroundColor: getLineColor('S2') }}>
+                                <strong>S</strong>
+                            </span>
+                            <span className="line" style={{ backgroundColor: getLineColor('M1') }}>
+                                <strong>M</strong>
+                            </span>
+                        </SelectField>
+                    </section>
+                    <section className="line-selector">
+                        <h2>{t('ReportForm.line')}</h2>
+                        <SelectField
+                            containerClassName="align-child-on-line long-selector"
+                            onSelect={handleLineSelect}
+                            value={currentLine}
+                            getValue={getLineValue}
+                        >
+                            {possibleLines.map(([line]) => (
+                                <Line key={line} line={line} />
+                            ))}
+                        </SelectField>
+                    </section>
+                </div>
+
+                <div className="station-selector-container">
                     <AutocompleteInputForm
                         items={possibleStations}
                         onSelect={handleStationSelect}
@@ -506,7 +426,6 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                         label={t('ReportForm.station')}
                         required
                         setSearchUsed={setSearchUsed}
-                        listHeight={stationListHeight}
                         highlightElements={
                             userPosition
                                 ? getClosestStations(3, possibleStations, userPosition).reduce(
@@ -517,72 +436,72 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
                         }
                         setHighlightedElementSelected={setStationRecommendationSelected}
                     />
-                    <div ref={bottomElementsRef}>
-                        {currentLine !== null &&
-                        currentLine !== 'S41' &&
-                        currentLine !== 'S42' &&
-                        currentStation !== null ? (
-                            <section>
-                                <h3>{t('ReportForm.direction')}</h3>
-                                <SelectField
-                                    onSelect={handleDirectionSelect}
-                                    value={currentDirection !== null ? (allStations ?? {})[currentDirection].name : ''}
-                                    containerClassName="align-child-on-line"
-                                    getValue={getSpanStrongValue}
-                                >
-                                    {(() => {
-                                        // Find stations for the current line from the allLines array
-                                        const stationsForCurrentLine =
-                                            allLines?.find(([key]) => key === currentLine)?.[1] ?? []
-                                        const startStationId = stationsForCurrentLine[0] ?? ''
-                                        const endStationId =
-                                            stationsForCurrentLine[stationsForCurrentLine.length - 1] ?? ''
+                </div>
 
-                                        const startStationName = (allStations ?? {})[startStationId].name
-                                        const endStationName = (allStations ?? {})[endStationId].name
-
-                                        // If names can't be found, return an empty array
-                                        if (!startStationName || !endStationName) return []
-
-                                        // Return an array of individual span elements
-                                        return [
-                                            <span key={startStationId || 'start'}>
-                                                <strong>{startStationName}</strong>
-                                            </span>,
-                                            <span key={endStationId || 'end'}>
-                                                <strong>{endStationName}</strong>
-                                            </span>,
-                                        ]
-                                    })()}
-                                </SelectField>
-                            </section>
-                        ) : null}
-                        {currentStation !== null ? (
-                            <section className="description-field">
-                                <h3>{t('ReportForm.description')}</h3>
-                                <textarea ref={descriptionRef} placeholder={t('ReportForm.descriptionPlaceholder')} />
-                            </section>
-                        ) : null}
+                <div className="form-footer">
+                    {currentLine !== null &&
+                    currentLine !== 'S41' &&
+                    currentLine !== 'S42' &&
+                    currentStation !== null ? (
                         <section>
-                            <div>
-                                {currentStation !== null ? (
-                                    <PrivacyCheckbox
-                                        isChecked={isPrivacyChecked}
-                                        onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
-                                    />
-                                ) : null}
-                            </div>
-                            <div>
-                                <button
-                                    type="submit"
-                                    className={isPrivacyChecked && currentStation !== null ? '' : 'button-gray'}
-                                >
-                                    {t('ReportForm.report')}
-                                </button>
-                                <p className="disclaimer">{t('ReportForm.syncText')}</p>
-                            </div>
+                            <h3>{t('ReportForm.direction')}</h3>
+                            <SelectField
+                                onSelect={handleDirectionSelect}
+                                value={currentDirection !== null ? (allStations ?? {})[currentDirection].name : ''}
+                                containerClassName="align-child-on-line"
+                                getValue={getSpanStrongValue}
+                            >
+                                {(() => {
+                                    // Find stations for the current line from the allLines array
+                                    const stationsForCurrentLine =
+                                        allLines?.find(([key]) => key === currentLine)?.[1] ?? []
+                                    const startStationId = stationsForCurrentLine[0] ?? ''
+                                    const endStationId = stationsForCurrentLine[stationsForCurrentLine.length - 1] ?? ''
+
+                                    const startStationName = (allStations ?? {})[startStationId].name
+                                    const endStationName = (allStations ?? {})[endStationId].name
+
+                                    // If names can't be found, return an empty array
+                                    if (!startStationName || !endStationName) return []
+
+                                    // Return an array of individual span elements
+                                    return [
+                                        <span key={startStationId || 'start'}>
+                                            <strong>{startStationName}</strong>
+                                        </span>,
+                                        <span key={endStationId || 'end'}>
+                                            <strong>{endStationName}</strong>
+                                        </span>,
+                                    ]
+                                })()}
+                            </SelectField>
                         </section>
-                    </div>
+                    ) : null}
+                    {currentStation !== null ? (
+                        <section className="description-field">
+                            <h3>{t('ReportForm.description')}</h3>
+                            <textarea ref={descriptionRef} placeholder={t('ReportForm.descriptionPlaceholder')} />
+                        </section>
+                    ) : null}
+                    <section>
+                        <div>
+                            {currentStation !== null ? (
+                                <PrivacyCheckbox
+                                    isChecked={isPrivacyChecked}
+                                    onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
+                                />
+                            ) : null}
+                        </div>
+                        <div>
+                            <button
+                                type="submit"
+                                className={isPrivacyChecked && currentStation !== null ? '' : 'button-gray'}
+                            >
+                                {t('ReportForm.report')}
+                            </button>
+                            <p className="disclaimer">{t('ReportForm.syncText')}</p>
+                        </div>
+                    </section>
                 </div>
             </form>
         </div>

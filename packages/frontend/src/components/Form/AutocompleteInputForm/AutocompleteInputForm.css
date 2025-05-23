@@ -1,6 +1,21 @@
+section:has(> div#searchable-select-div) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+section:has(> div#searchable-select-div) > .list-container {
+    flex: 1;
+    min-height: 40px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-right: var(--padding-xs);
+}
+
 section:has(> div#searchable-select-div) > .select-field-container {
     display: block;
-    max-height: calc(100vh - 475px);
     overflow-y: auto;
 }
 
@@ -33,13 +48,6 @@ section img {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
-}
-
-.list-container {
-    overflow-y: scroll;
-    transition: ease-in-out var(--transition-default);
-    max-height: calc(100vh - 475px);
-    min-height: 40px;
 }
 
 .search-icon-button {

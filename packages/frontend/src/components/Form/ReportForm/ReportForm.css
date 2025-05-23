@@ -2,6 +2,34 @@ div.report-form {
     padding: var(--padding-m);
     transition: ease-in-out var(--transition-default);
     padding-bottom: var(--padding-xs);
+    min-height: 400px;
+    max-height: 70vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.report-form-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.form-header {
+    flex-shrink: 0;
+}
+
+.station-selector-container {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.form-footer {
+    flex-shrink: 0;
 }
 
 .report-form > form > div > section > * {
@@ -39,5 +67,16 @@ div.report-form {
 
     .report-form .description-field textarea {
         height: 1.5rem;
+    }
+
+    .station-selector-container {
+        /* Ensure station list doesn't take too much space on very small screens */
+        max-height: 200px;
+    }
+
+    div.report-form {
+        /* Reduce padding on very small screens to maximize available space */
+        padding: var(--padding-s);
+        max-height: 80vh;
     }
 }

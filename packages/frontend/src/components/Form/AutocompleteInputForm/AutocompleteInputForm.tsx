@@ -13,7 +13,6 @@ interface AutocompleteInputFormProps<T> {
     label?: string
     required?: boolean
     setSearchUsed?: (searchUsed: boolean) => void
-    listHeight?: number | null
     highlightElements?: Record<string, T>
     setHighlightedElementSelected?: (highlightedElementSelected: boolean) => void
 }
@@ -45,7 +44,6 @@ const SEARCH_ICON = `${process.env.PUBLIC_URL}/icons/search.svg`
  * @param {string} props.label - Label for the input field
  * @param {boolean} [props.required=false] - Whether the field is required
  * @param {(searchUsed: boolean) => void} [props.setSearchUsed] - Optional callback to notify when search is used
- * @param {number | null} [props.listHeight] - Optional height for the list container when not defined it will default standard css
  * @param {Array<T>} [props.highlightElements] - Optional array of elements to highlight in the list
  * @param {(highlightedElementSelected: boolean) => void} [props.setHighlightedElementSelected] - Optional callback to notify when a highlighted element is selected
  *
@@ -60,7 +58,6 @@ const AutocompleteInputForm = <T,>({
     label,
     required = false,
     setSearchUsed,
-    listHeight,
     highlightElements,
     setHighlightedElementSelected,
 }: AutocompleteInputFormProps<T>) => {
@@ -134,10 +131,7 @@ const AutocompleteInputForm = <T,>({
                     </>
                 ) : undefined}
             </div>
-            <div
-                className="list-container"
-                style={listHeight !== null ? { height: `${listHeight}px`, maxHeight: '100%' } : undefined}
-            >
+            <div className={`list-container ${value !== null ? 'has-selection' : ''}`}>
                 {highlightElements && !elementIsSelected && !showSearchBox ? (
                     <>
                         <SelectField
