@@ -29,7 +29,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:prod": "tsc -b && vite build && sentry-cli login --auth-token $SENTRY_AUTH_TOKEN && npm run sentry:sourcemaps",
+    "build:prod": "vite build && sentry-cli login --auth-token $SENTRY_AUTH_TOKEN && npm run sentry:sourcemaps",
     "preview": "vite preview",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
