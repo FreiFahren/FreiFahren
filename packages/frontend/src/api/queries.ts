@@ -35,7 +35,7 @@ const fetchNewReports = async (
         queryParams += `&station=${stationId}`
     }
 
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/v0/basics/inspectors?${queryParams}`, { headers })
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/v0/basics/inspectors?${queryParams}`, { headers })
 
     if (response.status === 304) {
         return null
@@ -67,7 +67,7 @@ export const useSubmitReport = () => {
                 message: report.message ?? '',
             }
 
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/v0/basics/inspectors`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/v0/basics/inspectors`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ export const useFeedback = () =>
                 return false
             }
 
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/v0/feedback`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/v0/feedback`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ feedback }),
@@ -208,7 +208,7 @@ export const useRiskData = () => {
     const queryResult = useQuery<RiskData, Error>({
         queryKey: CACHE_KEYS.risk,
         queryFn: async (): Promise<RiskData> => {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/v1/risk-prediction/segment-colors`)
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/v1/risk-prediction/segment-colors`)
             return response.json()
         },
         refetchInterval: 30 * 1000,
@@ -236,7 +236,7 @@ export const fetchWithETag = async <T>(endpoint: string, storageKeyPrefix: strin
         headers['If-None-Match'] = cachedETag
     }
 
-    const response: Response = await fetch(`${process.env.REACT_APP_API_URL}${endpoint}`, { headers })
+    const response: Response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, { headers })
     const newETag: string | null = response.headers.get('ETag')
 
     if (response.status === 304) {
@@ -334,7 +334,7 @@ export const useStationDistance = (
             }
             const [userStation] = getClosestStations(1, allStations, { lat: userLat, lng: userLng })
             const response = await fetch(
-                `${process.env.REACT_APP_API_URL}/v0/transit/distance?inspectorStationId=${encodeURIComponent(
+                `${import.meta.env.VITE_API_URL}/v0/transit/distance?inspectorStationId=${encodeURIComponent(
                     stationId
                 )}&userStationId=${encodeURIComponent(Object.keys(userStation)[0])}`
             )
@@ -371,7 +371,7 @@ export const useStationReports = (stationId: string) =>
     useQuery<number, Error>({
         queryKey: CACHE_KEYS.stationReports(stationId),
         queryFn: async () => {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/v0/stations/${stationId}/statistics`)
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/v0/stations/${stationId}/statistics`)
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`)
             }
@@ -399,7 +399,9 @@ export const useNavigation = (startStationId: string, endStationId: string, opti
             }
 
             const response = await fetch(
-                `${process.env.REACT_APP_API_URL}/v0/transit/itineraries?startStation=${startStationId}&endStation=${endStationId}`
+                `${
+                    import.meta.env.VITE_API_URL
+                }/v0/transit/itineraries?startStation=${startStationId}&endStation=${endStationId}`
             )
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`)

@@ -22,27 +22,18 @@
     "react-i18next": "^15.0.2",
     "react-map-gl": "^7.1.7",
     "react-router-dom": "^6.22.3",
-    "react-scripts": "5.0.1",
     "recharts": "^2.15.0",
-    "typescript": "^4.9.5",
-    "typescript-eslint": "^7.2.0",
+    "typescript": "^5.6.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "DISABLE_ESLINT_PLUGIN=true react-scripts start",
-    "build": "DISABLE_ESLINT_PLUGIN=true react-scripts build",
-    "build:prod": "DISABLE_ESLINT_PLUGIN=true react-scripts build && sentry-cli login --auth-token $SENTRY_AUTH_TOKEN && npm run sentry:sourcemaps",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "build:prod": "tsc -b && vite build && sentry-cli login --auth-token $SENTRY_AUTH_TOKEN && npm run sentry:sourcemaps",
+    "preview": "vite preview",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org freifahren-web --project javascript-react ./build && sentry-cli sourcemaps upload --org freifahren-web --project javascript-react ./build"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org freifahren-web --project javascript-react ./dist && sentry-cli sourcemaps upload --org freifahren-web --project javascript-react ./dist"
   },
   "browserslist": {
     "production": [
@@ -57,13 +48,13 @@
     ]
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.24.3",
-    "@babel/preset-react": "^7.24.1",
-    "@babel/preset-typescript": "^7.24.1",
+    "@types/node": "^22.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
     "@tanstack/eslint-plugin-query": "^5.65.0",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "babel-plugin-react-compiler": "^19.0.0-beta-37ed2a7-20241206",
+    "eslint": "^8.57.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-typescript": "^17.1.0",
     "eslint-config-prettier": "^8.10.0",
@@ -76,26 +67,7 @@
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "eslint-plugin-unicorn": "^47.0.0",
-    "prettier": "^2.8.8"
-  },
-  "jest": {
-    "testEnvironment": "jsdom",
-    "moduleNameMapper": {
-      "\\.(css|less|scss|sass)$": "identity-obj-proxy",
-      "\\.(svg)$": "<rootDir>/__mocks__/svgMock.js"
-    },
-    "transformIgnorePatterns": [
-      "node_modules/(?!(react-leaflet|@react-leaflet)/)"
-    ],
-    "transform": {
-      "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
-    },
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "/Map.test.tsx$"
-    ],
-    "setupFiles": [
-      "<rootDir>/jest.setup.tsx"
-    ]
+    "prettier": "^2.8.8",
+    "vite": "^6.0.0"
   }
 }

@@ -3,7 +3,7 @@ import { Line } from 'src/components/Miscellaneous/Line/Line'
 import { formatLocalTime } from 'src/utils/dateUtils'
 import { Itinerary, Leg } from 'src/utils/types'
 
-const WALK_ICON = `${process.env.PUBLIC_URL}/icons/walking-svgrepo-com.svg`
+const WALK_ICON = `/icons/walking-svgrepo-com.svg`
 
 interface ItineraryItemProps {
     itinerary: Itinerary

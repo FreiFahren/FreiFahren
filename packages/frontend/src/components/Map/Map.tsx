@@ -23,13 +23,17 @@ interface FreifahrenMapProps {
     onRotationChange: (bearing: number) => void
     handleStationClick?: (station: StationProperty) => void
 }
-// Incase of using environment variables, we need to use the process.env.REACT_APP_MAP_CENTER_LNG and process.env.REACT_APP_MAP_CENTER_LAT
+// Incase of using environment variables, we need to use the import.meta.env.VITE_MAP_CENTER_LNG and import.meta.env.VITE_MAP_CENTER_LAT
 const cityViewPosition: { lng: number; lat: number } = {
-    lng: Number.isNaN(Number(process.env.REACT_APP_MAP_CENTER_LNG)) ? 13.388 : Number(process.env.REACT_APP_MAP_CENTER_LNG),
-    lat: Number.isNaN(Number(process.env.REACT_APP_MAP_CENTER_LAT)) ? 52.5162 : Number(process.env.REACT_APP_MAP_CENTER_LAT),
+    lng: Number.isNaN(Number(import.meta.env.VITE_MAP_CENTER_LNG))
+        ? 13.388
+        : Number(import.meta.env.VITE_MAP_CENTER_LNG),
+    lat: Number.isNaN(Number(import.meta.env.VITE_MAP_CENTER_LAT))
+        ? 52.5162
+        : Number(import.meta.env.VITE_MAP_CENTER_LAT),
 }
-const GITHUB_ICON = `${process.env.PUBLIC_URL}/icons/github.svg`
-const INSTAGRAM_ICON = `${process.env.PUBLIC_URL}/icons/instagram.svg`
+const GITHUB_ICON = `/icons/github.svg`
+const INSTAGRAM_ICON = `/icons/instagram.svg`
 
 const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     isFirstOpen,
@@ -38,12 +42,20 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     handleStationClick,
 }) => {
     const SouthWestBounds: LngLatLike = {
-        lng: Number.isNaN(Number(process.env.REACT_APP_MAP_BOUNDS_SW_LNG)) ? 12.8364646484805 : Number(process.env.REACT_APP_MAP_BOUNDS_SW_LNG),
-        lat: Number.isNaN(Number(process.env.REACT_APP_MAP_BOUNDS_SW_LAT)) ? 52.23115511676795 : Number(process.env.REACT_APP_MAP_BOUNDS_SW_LAT),
+        lng: Number.isNaN(Number(import.meta.env.VITE_MAP_BOUNDS_SW_LNG))
+            ? 12.8364646484805
+            : Number(import.meta.env.VITE_MAP_BOUNDS_SW_LNG),
+        lat: Number.isNaN(Number(import.meta.env.VITE_MAP_BOUNDS_SW_LAT))
+            ? 52.23115511676795
+            : Number(import.meta.env.VITE_MAP_BOUNDS_SW_LAT),
     }
     const NorthEastBounds: LngLatLike = {
-        lng: Number.isNaN(Number(process.env.REACT_APP_MAP_BOUNDS_NE_LNG)) ? 14.00044556529124 : Number(process.env.REACT_APP_MAP_BOUNDS_NE_LNG),
-        lat: Number.isNaN(Number(process.env.REACT_APP_MAP_BOUNDS_NE_LAT)) ? 52.77063424239867 : Number(process.env.REACT_APP_MAP_BOUNDS_NE_LAT),
+        lng: Number.isNaN(Number(import.meta.env.VITE_MAP_BOUNDS_NE_LNG))
+            ? 14.00044556529124
+            : Number(import.meta.env.VITE_MAP_BOUNDS_NE_LNG),
+        lat: Number.isNaN(Number(import.meta.env.VITE_MAP_BOUNDS_NE_LAT))
+            ? 52.77063424239867
+            : Number(import.meta.env.VITE_MAP_BOUNDS_NE_LAT),
     }
     const maxBounds: LngLatBoundsLike = [SouthWestBounds, NorthEastBounds]
 
@@ -140,13 +152,17 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     maxBounds={maxBounds}
                     onRotate={handleRotate}
                     onClick={handleMapClick}
-                    mapStyle={`https://api.jawg.io/styles/c52af8db-49f6-40b8-9197-568b7fd9a940.json?access-token=${process.env.REACT_APP_JAWG_ACCESS_TOKEN}`}
+                    mapStyle={`https://api.jawg.io/styles/c52af8db-49f6-40b8-9197-568b7fd9a940.json?access-token=${
+                        import.meta.env.VITE_JAWG_ACCESS_TOKEN
+                    }`}
                 >
                     {!isFirstOpen ? <LocationMarker userPosition={userPosition} /> : null}
                     <MarkerContainer isFirstOpen={isFirstOpen} userPosition={userPosition} />
                     <StationLayer stations={stationGeoJSON} />
                     <RegularLineLayer lineSegments={lineSegments} isRiskLayerOpen={isRiskLayerOpen} />
-                    {isRiskLayerOpen ? <RiskLineLayer preloadedRiskData={segmentRiskData} lineSegments={lineSegments} /> : null}
+                    {isRiskLayerOpen ? (
+                        <RiskLineLayer preloadedRiskData={segmentRiskData} lineSegments={lineSegments} />
+                    ) : null}
                 </Map>
             </Suspense>
             <div className="social-media">

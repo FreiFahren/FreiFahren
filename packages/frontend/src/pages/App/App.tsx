@@ -488,15 +488,11 @@ const App = () => {
                 onClick={() => setIsNavigationModalOpen(true)}
                 type="button"
             >
-                <img src={`${process.env.PUBLIC_URL}/icons/route-svgrepo-com.svg`} alt="Navigation" />
+                <img src={`/icons/route-svgrepo-com.svg`} alt="Navigation" />
             </button>
             {showUpdateIndicator ? (
                 <div className="update-indicator">
-                    <img
-                        src={`${process.env.PUBLIC_URL}/icons/refresh-svgrepo-com.svg`}
-                        alt="Refresh"
-                        className="update-indicator-icon"
-                    />
+                    <img src={`/icons/refresh-svgrepo-com.svg`} alt="Refresh" className="update-indicator-icon" />
                     <div className="update-indicator-text">{t('updateIndicator.text')}</div>
                 </div>
             ) : null}

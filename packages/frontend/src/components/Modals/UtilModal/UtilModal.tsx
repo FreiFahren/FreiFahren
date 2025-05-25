@@ -14,7 +14,7 @@ interface UtilModalProps {
     children?: React.ReactNode
 }
 
-const GITHUB_ICON = `${process.env.PUBLIC_URL}/icons/github.svg`
+const GITHUB_ICON = `/icons/github.svg`
 
 const UtilModal: React.FC<UtilModalProps> = ({ className, children }) => {
     const { t } = useTranslation()

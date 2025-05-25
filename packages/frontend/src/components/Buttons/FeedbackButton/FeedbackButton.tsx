@@ -16,7 +16,7 @@ const FeedbackButton: React.FC<FeedbackButtonProps> = ({ handleButtonClick, clas
             onClick={handleButtonClick}
             type="button"
         >
-            <img src={`${process.env.PUBLIC_URL}/icons/message-square-plus-svgrepo-com.svg`} alt="Feedback" />
+            <img src={`/icons/message-square-plus-svgrepo-com.svg`} alt="Feedback" />
             <p>{t('FeedbackButton.text')}</p>
         </button>
     )

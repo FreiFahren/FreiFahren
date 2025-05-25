@@ -15,7 +15,7 @@ import { PrivacyPolicy } from './pages/PrivacyPolicy/PrivacyPolicy'
 import { Support } from './pages/Support/Support'
 import { reportWebVitals } from './reportWebVitals'
 
-if (process.env.NODE_ENV === 'production') {
+if (import.meta.env.PROD) {
     init({
         dsn: 'https://555d2661f0b147345e2117aad784560c@o4508609338867712.ingest.de.sentry.io/4508609341161552',
         integrations: [browserTracingIntegration(), replayIntegration()],

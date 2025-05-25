@@ -44,7 +44,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ handleSelect }) => {
         <div className="search-container">
             <div className={`search-bar ${isSearchFocused ? 'focused' : ''}`}>
                 <div className="search-icon">
-                    <img src={`${process.env.PUBLIC_URL}/icons/search.svg`} alt="Search" />
+                    <img src={`/icons/search.svg`} alt="Search" />
                 </div>
                 <input
                     ref={inputRef}
