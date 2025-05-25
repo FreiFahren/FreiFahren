@@ -3,9 +3,9 @@ import './ContactSection.css'
 import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 
-const GITHUB_ICON = `${process.env.PUBLIC_URL}/icons/github.svg`
-const MAIL_ICON = `${process.env.PUBLIC_URL}/icons/mail.svg`
-const TELEGRAM_ICON = `${process.env.PUBLIC_URL}/icons/telegram.svg`
+const GITHUB_ICON = `/icons/github.svg`
+const MAIL_ICON = `/icons/mail.svg`
+const TELEGRAM_ICON = `/icons/telegram.svg`
 
 const ContactSection: FC = () => {
     const { t } = useTranslation()
@@ -17,7 +17,7 @@ const ContactSection: FC = () => {
                 <li>
                     <img
                         className="profile-picture"
-                        src={`${process.env.PUBLIC_URL}/icons/profiles/johan.jpeg`}
+                        src="/icons/profiles/johan.jpeg"
                         alt="Johan Trieloff Github Profile"
                     />
                     <p>Johan Trieloff</p>
@@ -34,11 +34,7 @@ const ContactSection: FC = () => {
                     </div>
                 </li>
                 <li>
-                    <img
-                        className="profile-picture"
-                        src={`${process.env.PUBLIC_URL}/icons/profiles/joff.jpeg`}
-                        alt="Joff Github Profile"
-                    />
+                    <img className="profile-picture" src="/icons/profiles/joff.jpeg" alt="Joff Github Profile" />
                     <p>Joff</p>
                     <div>
                         <a href="mailto:mail@jfsalzmann.com">
@@ -50,11 +46,7 @@ const ContactSection: FC = () => {
                     </div>
                 </li>
                 <li>
-                    <img
-                        className="profile-picture"
-                        src={`${process.env.PUBLIC_URL}/icons/profiles/moritz.jpeg`}
-                        alt="Moritz Github Profile"
-                    />
+                    <img className="profile-picture" src="/icons/profiles/moritz.jpeg" alt="Moritz Github Profile" />
                     <p>Moritz</p>
                     <div>
                         <a href="maito:moritzamando@proton.me">
@@ -66,11 +58,7 @@ const ContactSection: FC = () => {
                     </div>
                 </li>
                 <li>
-                    <img
-                        className="profile-picture"
-                        src={`${process.env.PUBLIC_URL}/icons/profiles/david.jpeg`}
-                        alt="David Github Profile"
-                    />
+                    <img className="profile-picture" src="/icons/profiles/david.jpeg" alt="David Github Profile" />
                     <p>David</p>
                     <div>
                         <a href="https://github.com/brandesdavid" target="_blank" rel="noopener noreferrer">

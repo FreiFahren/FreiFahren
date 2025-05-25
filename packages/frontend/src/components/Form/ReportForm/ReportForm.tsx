@@ -347,7 +347,7 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
         }
 
         // otherwise it is too annoying to test
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
             return false
         }
 

@@ -55,7 +55,7 @@ export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', c
                 </div>
                 <div className="route-container">
                     <button type="button" className="route-button" onClick={handleRouteClick}>
-                        <img src={`${process.env.PUBLIC_URL}/icons/route-svgrepo-com.svg`} alt="Route" />
+                        <img src="/icons/route-svgrepo-com.svg" alt="Route" />
                     </button>
                     <p className="route-text">{t('InfoModal.route')}</p>
                 </div>

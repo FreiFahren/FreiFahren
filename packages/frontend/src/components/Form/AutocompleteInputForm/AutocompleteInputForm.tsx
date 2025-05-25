@@ -26,7 +26,7 @@ interface HighlightedElementProps {
     }
 }
 
-const SEARCH_ICON = `${process.env.PUBLIC_URL}/icons/search.svg`
+const SEARCH_ICON = `/icons/search.svg`
 
 /**
  * AutocompleteInputForm Component

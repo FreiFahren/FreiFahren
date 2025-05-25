@@ -3,8 +3,8 @@ import { Layer, MapRef, Source, useMap } from 'react-map-gl/maplibre'
 
 import { StationGeoJSON } from '../../../../utils/types'
 
-const UBAHN_ICON = `${process.env.PUBLIC_URL}/icons/ubahn.svg`
-const SBAHN_ICON = `${process.env.PUBLIC_URL}/icons/sbahn.svg`
+const UBAHN_ICON = `/icons/ubahn.svg`
+const SBAHN_ICON = `/icons/sbahn.svg`
 
 interface StationLayerProps {
     stations: StationGeoJSON

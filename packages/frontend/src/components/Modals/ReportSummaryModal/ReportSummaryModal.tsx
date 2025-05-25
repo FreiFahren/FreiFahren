@@ -36,7 +36,7 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({
             <FeedbackButton handleButtonClick={() => setShowFeedback(true)} />
             <div className="report-summary-modal-content">
                 <div className="check-icon">
-                    <img className="no-filter" src={`${process.env.PUBLIC_URL}/icons/risk-0.svg`} alt="checkmark" />
+                    <img className="no-filter" src="/icons/risk-0.svg" alt="checkmark" />
                 </div>
                 <h1>{t('ReportSummaryModal.title')}</h1>
                 <div>
@@ -44,11 +44,7 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({
                     <ShareButton report={reportData} />
                 </div>
                 <span>
-                    <img
-                        className="no-filter"
-                        src={`${process.env.PUBLIC_URL}/icons/users-svgrepo-com.svg`}
-                        alt="users"
-                    />
+                    <img className="no-filter" src="/icons/users-svgrepo-com.svg" alt="users" />
                     <h1>{animatedCount}</h1>
                 </span>
                 <p>{t('ReportSummaryModal.description')}</p>

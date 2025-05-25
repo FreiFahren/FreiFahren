@@ -41,12 +41,12 @@ export const useShouldShowMarketingModal = (): [boolean, () => void] => {
 
     const isIphone = /iPhone/i.test(navigator.userAgent)
 
-    // include process.env.NODE_ENV === 'development' to make it easier to test the modal
+    // include import.meta.env.DEV to make it easier to test the modal
     const shouldShow =
         wasShownMoreThanTwoWeeksAgo &&
         hasThirtySecondsPassed &&
         !isDismissedThisSession &&
-        (process.env.NODE_ENV === 'development' || isIphone)
+        (import.meta.env.DEV || isIphone)
 
     const dismissModal = () => {
         updateMarketingModalLastShown()
