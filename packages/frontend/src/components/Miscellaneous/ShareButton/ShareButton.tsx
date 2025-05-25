@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+
 import './ShareButton.css'
 
 import i18next, { TFunction } from 'i18next'
@@ -80,18 +82,16 @@ const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
                 const shareText = t('Share.text', {
                     station: report.station.name,
 
-                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                     direction:
                         report.direction?.name !== null && report.direction?.name !== undefined
                             ? report.direction.name
                             : '?',
-                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                     line: report.line !== null && report.line !== undefined ? report.line : '?',
                     time: formatTime(report.timestamp, report.isHistoric, t),
                 })
 
                 // The error seems incorrect in this case - the navigator.share check is actually necessary because it's not available in all browsers.
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions
+                // eslint-disable-next-line, @typescript-eslint/strict-boolean-expressions
                 if (navigator.share) {
                     await navigator.share({
                         title: t('Share.title'),
@@ -120,7 +120,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
 
     return (
         <button onClick={handleShare} className="share-button" type="button">
-            <img src={`/icons/share-svgrepo-com.svg`} alt="Share" />
+            <img src="/icons/share-svgrepo-com.svg" alt="Share" />
             <span>{t('Share.button')}</span>
         </button>
     )

@@ -247,7 +247,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
             </div>
             <div className="location-inputs">
                 <div className="input-container">
-                    <img src={`/icons/search.svg`} alt="Search" className="search-icon no-filter" />
+                    <img src="/icons/search.svg" alt="Search" className="search-icon no-filter" />
                     <input
                         ref={startInputRef}
                         type="text"
@@ -261,7 +261,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
                     />
                 </div>
                 <div className="input-container">
-                    <img src={`/icons/search.svg`} alt="Search" className="search-icon no-filter" />
+                    <img src="/icons/search.svg" alt="Search" className="search-icon no-filter" />
                     <input
                         ref={endInputRef}
                         type="text"

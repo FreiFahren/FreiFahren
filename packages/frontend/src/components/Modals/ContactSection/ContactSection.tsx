@@ -17,7 +17,7 @@ const ContactSection: FC = () => {
                 <li>
                     <img
                         className="profile-picture"
-                        src={`/icons/profiles/johan.jpeg`}
+                        src="/icons/profiles/johan.jpeg"
                         alt="Johan Trieloff Github Profile"
                     />
                     <p>Johan Trieloff</p>
@@ -34,7 +34,7 @@ const ContactSection: FC = () => {
                     </div>
                 </li>
                 <li>
-                    <img className="profile-picture" src={`/icons/profiles/joff.jpeg`} alt="Joff Github Profile" />
+                    <img className="profile-picture" src="/icons/profiles/joff.jpeg" alt="Joff Github Profile" />
                     <p>Joff</p>
                     <div>
                         <a href="mailto:mail@jfsalzmann.com">
@@ -46,7 +46,7 @@ const ContactSection: FC = () => {
                     </div>
                 </li>
                 <li>
-                    <img className="profile-picture" src={`/icons/profiles/moritz.jpeg`} alt="Moritz Github Profile" />
+                    <img className="profile-picture" src="/icons/profiles/moritz.jpeg" alt="Moritz Github Profile" />
                     <p>Moritz</p>
                     <div>
                         <a href="maito:moritzamando@proton.me">
@@ -58,7 +58,7 @@ const ContactSection: FC = () => {
                     </div>
                 </li>
                 <li>
-                    <img className="profile-picture" src={`/icons/profiles/david.jpeg`} alt="David Github Profile" />
+                    <img className="profile-picture" src="/icons/profiles/david.jpeg" alt="David Github Profile" />
                     <p>David</p>
                     <div>
                         <a href="https://github.com/brandesdavid" target="_blank" rel="noopener noreferrer">
