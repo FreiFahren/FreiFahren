@@ -55,7 +55,7 @@ const App = () => {
     const [appUIState, setAppUIState] = useState<Omit<AppUIState, 'isLegalDisclaimerOpen'>>(initialAppUIState)
     const [appMounted, setAppMounted] = useState(false)
     const [showUpdateIndicator, setShowUpdateIndicator] = useState<boolean>(false)
-    const indicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+    const indicatorTimeoutRef = useRef<number | null>(null)
 
     const { data: reportsInLast24Hours } = useLast24HourReports()
     const { isFetching: isFetchingCurrentReports } = useCurrentReports()

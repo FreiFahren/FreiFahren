@@ -29,7 +29,7 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index,
     // fix later, we don't need a return
     // eslint-disable-next-line consistent-return
     useEffect(() => {
-        let intervalId: NodeJS.Timeout
+        let intervalId: number
 
         if (!isFirstOpen) {
             if (!isHistoric) {

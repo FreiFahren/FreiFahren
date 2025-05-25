@@ -1,6 +1,6 @@
 import './Skeleton.css'
 
-import React, { useEffect,useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 interface UseSkeletonProps {
     isLoading: boolean
@@ -32,15 +32,15 @@ export const useSkeleton = ({ isLoading, initialDelay = 100, minDisplayTime = 10
     const [startTime, setStartTime] = useState<number | null>(null)
 
     useEffect(() => {
-        let initialTimer: NodeJS.Timeout // is used to give the api some time to respond
-        let minDisplayTimer: NodeJS.Timeout // is used to avoid flickering if api responds very quickly after initialTimer
+        let initialTimer: number // is used to give the api some time to respond
+        let minDisplayTimer: number // is used to avoid flickering if api responds very quickly after initialTimer
 
         if (isLoading && !shouldShowSkeleton) {
             initialTimer = setTimeout(() => {
                 setShouldShowSkeleton(true)
                 setStartTime(Date.now())
             }, initialDelay)
-        } else if (shouldShowSkeleton && (startTime !== null)) {
+        } else if (shouldShowSkeleton && startTime !== null) {
             const elapsedTime = Date.now() - startTime
             const remainingTime = Math.max(0, minDisplayTime - elapsedTime)
 
@@ -80,9 +80,9 @@ export const useSkeleton = ({ isLoading, initialDelay = 100, minDisplayTime = 10
  * );
  */
 const Skeleton: React.FC = () => (
-        <div className="loading-placeholder">
-            <div className="loading-animation" />
-        </div>
-    )
+    <div className="loading-placeholder">
+        <div className="loading-animation" />
+    </div>
+)
 
 export { Skeleton }
