@@ -3,7 +3,7 @@ div.report-form {
     transition: ease-in-out var(--transition-default);
     padding-bottom: var(--padding-xs);
     min-height: 400px;
-    max-height: 70vh;
+    max-height: 70dvh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -77,6 +77,6 @@ div.report-form {
     div.report-form {
         /* Reduce padding on very small screens to maximize available space */
         padding: var(--padding-s);
-        max-height: 80vh;
+        max-height: 80dvh;
     }
 }
