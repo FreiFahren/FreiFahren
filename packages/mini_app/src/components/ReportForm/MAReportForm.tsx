@@ -1,6 +1,7 @@
 import React, { FC, FormEvent, useCallback, useRef, useState } from 'react';
 import './MAReportForm.css';
 import { useStations, useLines, useSubmitReport } from '../../api/queries';
+import { useStationSearch } from '../../hooks/useStationSearch';
 import { Report } from '../../utils/types';
 import { getLineColor } from '../../utils/getLineColor';
 import { ReportSummaryModal } from '../ReportSummaryModal/ReportSummaryModal';
@@ -73,9 +74,11 @@ const ReportForm: FC<ReportFormProps> = () => {
     const [currentLine, setCurrentLine] = useState<string | null>(null);
     const [currentStation, setCurrentStation] = useState<string | null>(null);
     const [currentDirection, setCurrentDirection] = useState<string | null>(null);
-    const [stationSearch, setStationSearch] = useState<string>('');
     const [description, setDescription] = useState<string>('');
     const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false);
+    
+    // Use fuzzy search hook for station search
+    const { searchValue: stationSearch, setSearchValue: setStationSearch, filteredStations: fuzzyFilteredStations } = useStationSearch('');
     
     // State for the summary modal
     const [showSummary, setShowSummary] = useState<boolean>(false);
@@ -145,18 +148,19 @@ const ReportForm: FC<ReportFormProps> = () => {
             );
         }
 
-        // Apply station search filter if provided
+        // Apply fuzzy search filter if provided
         if (stationSearch.trim()) {
+            // Get the intersection of filtered stations and fuzzy search results
+            const fuzzyStationIds = Object.keys(fuzzyFilteredStations);
             filteredStations = Object.fromEntries(
-                Object.entries(filteredStations).filter(
-                    ([, stationData]) => 
-                        stationData.name.toLowerCase().includes(stationSearch.toLowerCase())
+                Object.entries(filteredStations).filter(([stationId]) => 
+                    fuzzyStationIds.includes(stationId)
                 )
             );
         }
 
         return filteredStations;
-    }, [stations, currentEntity, currentLine, currentStation, stationSearch, lines]);
+    }, [stations, currentEntity, currentLine, currentStation, stationSearch, fuzzyFilteredStations, lines]);
 
     // Get directions based on the line's first and last stations
     const getDirections = useCallback((): Station[] => {
