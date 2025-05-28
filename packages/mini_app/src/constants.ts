@@ -1,0 +1,1 @@
+export const REPORT_COOLDOWN_MINUTES = 30; 
