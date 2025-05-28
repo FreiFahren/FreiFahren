@@ -39,7 +39,7 @@ type AppUIState = {
 const initialAppUIState: Omit<AppUIState, 'isLegalDisclaimerOpen'> = {
     isReportFormOpen: false,
     isStatsPopUpOpen: false,
-    isRiskLayerOpen: localStorage.getItem('layer') === 'risk',
+    isRiskLayerOpen: localStorage.getItem('layer') ? localStorage.getItem('layer') === 'risk' : true,
     isListModalOpen: false,
 }
 
