@@ -1,0 +1,132 @@
+.report-summary-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.report-summary-modal-content {
+    background: var(--background-color);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 400px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.check-icon {
+    margin: 0 auto 20px;
+    width: 60px;
+    height: 60px;
+    background: #28a745;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.check-mark {
+    color: white;
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.report-summary-modal h1 {
+    color: var(--text-color-primary);
+    margin: 0 0 20px 0;
+    font-size: 1.5em;
+}
+
+.user-count {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.users-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.user-count h1 {
+    margin: 0;
+    color: var(--accent-color);
+    font-size: 2em;
+}
+
+.report-summary-modal p {
+    color: var(--text-color-secondary);
+    line-height: 1.5;
+    margin: 16px 0;
+}
+
+.disclaimer {
+    display: block;
+    font-size: 0.8em;
+    color: var(--text-color-secondary);
+    margin: 16px 0;
+    font-style: italic;
+}
+
+.action {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 1em;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 16px;
+    transition: background-color 0.2s ease;
+}
+
+.action:hover {
+    background: var(--accent-color-hover, #0056b3);
+}
+
+.action:active {
+    transform: translateY(1px);
+}
+
+/* Animation classes */
+.open {
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+.center-animation {
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+} 

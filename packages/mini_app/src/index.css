@@ -29,6 +29,15 @@
     --color-white: #ffffff;
     --color-risk-0: #7cc7ab;
 
+    /* Additional variables for modal components */
+    --background-color: #232323;
+    --background-color-secondary: #2a2a2a;
+    --text-color-primary: #ffffff;
+    --text-color-secondary: #b0b0b0;
+    --accent-color: #0075ff;
+    --accent-color-hover: #0056b3;
+    --border-color: #404040;
+
     --font-xxxs: 0.5rem;
     --font-xxs: 0.75rem;
     --font-xs: 0.875rem;

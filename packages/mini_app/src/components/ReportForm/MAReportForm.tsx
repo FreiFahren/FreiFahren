@@ -3,6 +3,7 @@ import './MAReportForm.css';
 import { useStations, useLines, useSubmitReport } from '../../api/queries';
 import { Report } from '../../utils/types';
 import { getLineColor } from '../../utils/getLineColor';
+import { ReportSummaryModal } from '../ReportSummaryModal/ReportSummaryModal';
 
 interface Station {
     id: string;
@@ -75,6 +76,11 @@ const ReportForm: FC<ReportFormProps> = () => {
     const [stationSearch, setStationSearch] = useState<string>('');
     const [description, setDescription] = useState<string>('');
     const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false);
+    
+    // State for the summary modal
+    const [showSummary, setShowSummary] = useState<boolean>(false);
+    const [reportedData, setReportedData] = useState<Report | null>(null);
+    const [numberOfUsers] = useState<number>(Math.floor(Math.random() * 500) + 100); // Mock data for now
     
     const descriptionRef = useRef<HTMLTextAreaElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -282,14 +288,9 @@ const ReportForm: FC<ReportFormProps> = () => {
             
             await submitReport.mutateAsync(report);
             
-            // Reset form after successful submission
-            setCurrentEntity(null);
-            setCurrentLine(null);
-            setCurrentStation(null);
-            setCurrentDirection(null);
-            setStationSearch('');
-            setDescription('');
-            setIsPrivacyChecked(false);
+            // Show summary modal instead of resetting form immediately
+            setReportedData(report);
+            setShowSummary(true);
             
         } catch (error) {
             console.error('Error submitting report:', error);
@@ -302,6 +303,20 @@ const ReportForm: FC<ReportFormProps> = () => {
         }
     };
 
+    const handleCloseSummary = () => {
+        setShowSummary(false);
+        setReportedData(null);
+        
+        // Reset form after closing summary
+        setCurrentEntity(null);
+        setCurrentLine(null);
+        setCurrentStation(null);
+        setCurrentDirection(null);
+        setStationSearch('');
+        setDescription('');
+        setIsPrivacyChecked(false);
+    };
+
     if (isLoadingStations || isLoadingLines) {
         return <div>Loading form data...</div>;
     }
@@ -309,6 +324,17 @@ const ReportForm: FC<ReportFormProps> = () => {
     // Helper function to get value from a Line component
     const getLineValue = (child: React.ReactElement) => child.props.line;
     
+    // Show summary modal if report was submitted
+    if (showSummary && reportedData) {
+        return (
+            <ReportSummaryModal
+                reportData={reportedData}
+                openAnimationClass="open center-animation"
+                handleCloseModal={handleCloseSummary}
+                numberOfUsers={numberOfUsers}
+            />
+        );
+    }
 
     return (
         <div className="report-form container modal" ref={containerRef}>
