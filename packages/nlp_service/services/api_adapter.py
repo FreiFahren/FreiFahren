@@ -52,7 +52,7 @@ def serve_mini_app():
     static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
     return send_from_directory(static_dir, "mini_app.html")
 
-@flask_app.route("/mini-app-report-inspector", methods=["POST"])
+@flask_app.route("/mini-app/report", methods=["POST"])
 def handle_mini_app_data():
     """Handle data submitted from the Mini App"""
     try:
@@ -69,8 +69,6 @@ def handle_mini_app_data():
         
         logger.info(f"Received Mini App data: {data}")
         
-        # Generate a station ID (this would be replaced with your actual ID generation logic)
-        stationId = "mini-app-report"
         
         # Format the report message
         telegram_message = ""

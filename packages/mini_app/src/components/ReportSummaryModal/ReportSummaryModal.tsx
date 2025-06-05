@@ -39,7 +39,7 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({
                     />
                     <h1>{animatedCount}</h1>
                 </span>
-                <p>Andere Nutzer haben heute bereits Kontrollen gemeldet. Gemeinsam sorgen wir für mehr Transparenz im öffentlichen Nahverkehr.</p>
+                <p>Menschen schätzen deine Hilfe!</p>
                 <span className="disclaimer">Deine Meldung wird mit @FreiFahren_BE synchronisiert.</span>
                 <button className="action" onClick={handleCloseModal} type="button">
                     Weiter

@@ -125,9 +125,9 @@ func PostInspector(c echo.Context) error {
 			}
 		}
 
-		if pointers.AuthorPtr != nil && *pointers.AuthorPtr == 77105110105 {
+		if *pointers.AuthorPtr == 77105110105 {
 			if time.Since(lastMiniAppNotification) >= 5*time.Minute || os.Getenv("STATUS") == "dev" {
-				miniAppEndpoint := os.Getenv("NLP_SERVICE_URL") + "/mini-app-report-inspector"
+				miniAppEndpoint := os.Getenv("NLP_SERVICE_URL") + "/mini-app/report"
 				if err := notifyOtherServiceAboutReport(miniAppEndpoint, dataToInsert, "Mini app"); err != nil {
 					logger.Log.Error().Err(err).Msg("Error notifying Mini app about report in postInspector")
 				} else {

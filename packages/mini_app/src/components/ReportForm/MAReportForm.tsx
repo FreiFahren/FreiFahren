@@ -18,7 +18,6 @@ interface Station {
 interface ReportFormProps {
 }
 
-// Simple SelectField component inspired by the original
 const SelectField: FC<{
     children: React.ReactNode;
     containerClassName?: string;
@@ -31,7 +30,7 @@ const SelectField: FC<{
         (child: React.ReactNode) => {
             if (React.isValidElement(child)) {
                 const selectedValue = getValue(child);
-                const newValue = value === selectedValue ? null : selectedValue; // Toggle selection
+                const newValue = value === selectedValue ? null : selectedValue;
                 onSelect(newValue);
             }
         },
@@ -57,7 +56,6 @@ const SelectField: FC<{
     );
 };
 
-// Line component for display
 const Line: FC<{ line: string }> = ({ line }) => {
     return (
         <div className="line" style={{ backgroundColor: getLineColor(line) }}>
@@ -77,22 +75,20 @@ const ReportForm: FC<ReportFormProps> = () => {
     const [description, setDescription] = useState<string>('');
     const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false);
     
-    // Use fuzzy search hook for station search
     const { searchValue: stationSearch, setSearchValue: setStationSearch, filteredStations: fuzzyFilteredStations } = useStationSearch('');
     
-    // State for the summary modal
     const [showSummary, setShowSummary] = useState<boolean>(false);
     const [reportedData, setReportedData] = useState<Report | null>(null);
-    const [numberOfUsers] = useState<number>(Math.floor(Math.random() * 500) + 100); // Mock data for now
+    const [numberOfUsers] = useState<number>(Math.floor(Math.random() * 500) + 100); //mock data for now
     
     const descriptionRef = useRef<HTMLTextAreaElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const topElementsRef = useRef<HTMLDivElement>(null);
     const bottomElementsRef = useRef<HTMLDivElement>(null);
+    const stationInputRef = useRef<HTMLInputElement>(null);
 
     const submitReport = useSubmitReport();
 
-    // Calculate possible lines based on entity selection
     const possibleLines = React.useMemo(() => {
         let filteredLines: [string, string[]][] = [];
 
@@ -117,17 +113,14 @@ const ReportForm: FC<ReportFormProps> = () => {
         return filteredLines;
     }, [lines, currentEntity, currentStation, stations]);
 
-    // Calculate possible stations based on entity and line selections
     const possibleStations = React.useMemo(() => {
         if (!stations) return {};
 
         let filteredStations = { ...stations };
 
         if (currentStation !== null) {
-            // If a specific station is selected, just use that one
             filteredStations = stations[currentStation] ? { [currentStation]: stations[currentStation] } : {};
         } else if (currentLine !== null) {
-            // If a line is selected, filter stations belonging to that line
             const stationsForLine = lines?.find(([key]) => key === currentLine)?.[1] ?? [];
             filteredStations = Object.fromEntries(
                 stationsForLine
@@ -135,7 +128,6 @@ const ReportForm: FC<ReportFormProps> = () => {
                     .filter(([, stationData]) => stationData !== undefined)
             );
         } else if (currentEntity !== null) {
-            // If only entity is selected, filter stations by matching lines
             filteredStations = Object.fromEntries(
                 Object.entries(stations).filter(([, stationData]) => 
                     stationData.lines.some(line => {
@@ -148,9 +140,7 @@ const ReportForm: FC<ReportFormProps> = () => {
             );
         }
 
-        // Apply fuzzy search filter if provided
         if (stationSearch.trim()) {
-            // Get the intersection of filtered stations and fuzzy search results
             const fuzzyStationIds = Object.keys(fuzzyFilteredStations);
             filteredStations = Object.fromEntries(
                 Object.entries(filteredStations).filter(([stationId]) => 
@@ -162,19 +152,15 @@ const ReportForm: FC<ReportFormProps> = () => {
         return filteredStations;
     }, [stations, currentEntity, currentLine, currentStation, stationSearch, fuzzyFilteredStations, lines]);
 
-    // Get directions based on the line's first and last stations
     const getDirections = useCallback((): Station[] => {
         if (!currentLine || !currentStation || !stations || !lines) return [];
         
-        // Ring lines S41/S42 don't have directions
         if (currentLine === 'S41' || currentLine === 'S42') return [];
         
-        // Find the line's stations
         const lineStations = lines.find(([line]) => line === currentLine)?.[1] || [];
         
         if (lineStations.length < 2) return [];
         
-        // Get the first and last stations of the line
         const firstStationId = lineStations[0];
         const lastStationId = lineStations[lineStations.length - 1];
         
@@ -202,13 +188,11 @@ const ReportForm: FC<ReportFormProps> = () => {
     const handleEntitySelect = useCallback((entity: string | null) => {
         setCurrentEntity(entity);
         
-        // Only reset subsequent selections if the current line is no longer valid
         if (currentLine !== null && entity !== null && !currentLine.startsWith(entity)) {
             setCurrentLine(null);
             setCurrentStation(null);
             setCurrentDirection(null);
         }
-        // if a station is selected check if the station is still valid for the selected entity
         else if (currentStation !== null && entity !== null && stations) {
             const stationData = stations[currentStation];
             if (stationData) {
@@ -229,10 +213,8 @@ const ReportForm: FC<ReportFormProps> = () => {
     const handleLineSelect = useCallback((line: string | null) => {
         setCurrentLine(line);
         
-        // Find the stations for the selected line
         const stationsForSelectedLine = lines?.find(([key]) => key === line)?.[1] ?? [];
         
-        // Reset station if the current station isn't on this line
         if (
             typeof line === 'string' &&
             currentStation !== null &&
@@ -245,18 +227,28 @@ const ReportForm: FC<ReportFormProps> = () => {
 
     const handleStationSelect = useCallback((stationKey: string | null) => {
         setCurrentStation(stationKey);
-        setCurrentDirection(null);  // Reset direction when station changes
+        setCurrentDirection(null);
     }, []);
 
     const handleDirectionSelect = useCallback((direction: string | null) => {
         setCurrentDirection(direction);
     }, []);
 
+    const handleStationInputFocus = useCallback(() => {
+        setTimeout(() => {
+            if (stationInputRef.current) {
+                stationInputRef.current.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                    inline: 'nearest'
+                });
+            }
+        }, 100);
+    }, []);
+
     const isFormValid = useCallback(() => {
-        // Basic validation: we need at least a station
         if (!currentStation) return false;
         
-        // Privacy must be checked
         if (!isPrivacyChecked) return false;
         
         return true;
@@ -268,67 +260,51 @@ const ReportForm: FC<ReportFormProps> = () => {
         if (!isFormValid() || !stations || !currentStation) return;
         
         const stationData = stations[currentStation];
+        const report: Report = {
+            timestamp: new Date().toISOString(),
+            line: currentLine,
+            station: {
+                id: currentStation,
+                name: stationData.name,
+                coordinates: stationData.coordinates
+            },
+            direction: currentDirection ? {
+                id: currentDirection,
+                name: possibleDirections.find(d => d.id === currentDirection)?.name || '',
+                coordinates: {
+                    latitude: 0, 
+                    longitude: 0 
+                }
+            } : null,
+            message: descriptionRef.current?.value || null,
+            isHistoric: false
+        };
         
-        try {
-            const report: Report = {
-                timestamp: new Date().toISOString(),
-                line: currentLine,
-                station: {
-                    id: currentStation,
-                    name: stationData.name,
-                    coordinates: stationData.coordinates
-                },
-                direction: currentDirection ? {
-                    id: currentDirection,
-                    name: possibleDirections.find(d => d.id === currentDirection)?.name || '',
-                    coordinates: {
-                        latitude: 0, 
-                        longitude: 0 
-                    }
-                } : null,
-                message: descriptionRef.current?.value || null,
-                isHistoric: false
-            };
-            
-            await submitReport.mutateAsync(report);
-            
-            // Show summary modal instead of resetting form immediately
-            setReportedData(report);
-            setShowSummary(true);
-            
-        } catch (error) {
-            console.error('Error submitting report:', error);
-            // Show error to user (could be enhanced)
-            if (error == "Error: HTTP error! status: 429") {
-                alert('Bitte nicht so schnell! Warte 30 Minuten und versuche es erneut.');
-            } else {
-                alert('Fehler beim Senden der Meldung. Bitte versuche es erneut.');
+        submitReport.mutate(report, {
+            onSuccess: () => {
+                setReportedData(report);
+                setShowSummary(true);
+            },
+            onError: (error: any) => {
+                if (error?.message?.includes('429')) {
+                    alert('Bitte nicht so schnell! Warte 30 Minuten und versuche es erneut.');
+                } else {
+                    alert('Fehler beim Senden der Meldung. Bitte versuche es erneut.');
+                }
             }
-        }
+        });
     };
 
     const handleCloseSummary = () => {
         setShowSummary(false);
-        setReportedData(null);
-        
-        // Reset form after closing summary
-        setCurrentEntity(null);
-        setCurrentLine(null);
-        setCurrentStation(null);
-        setCurrentDirection(null);
-        setStationSearch('');
-        setDescription('');
-        setIsPrivacyChecked(false);
     };
 
     if (isLoadingStations || isLoadingLines) {
         return <div>Loading form data...</div>;
     }
 
-    // Helper function to get value from a Line component
     const getLineValue = (child: React.ReactElement) => child.props.line;
     
-    // Show summary modal if report was submitted
     if (showSummary && reportedData) {
         return (
             <ReportSummaryModal
@@ -400,15 +376,16 @@ const ReportForm: FC<ReportFormProps> = () => {
                         )}
                     </div>
                     
-                    {/* Station selector */}
                     <section className="station-selector">
                         <h2>Station <span className="red-highlight">*</span></h2>
                         <input
+                            ref={stationInputRef}
                             className="station-input"
                             type="text"
                             placeholder="Station suchen..."
                             value={stationSearch}
                             onChange={(e) => setStationSearch(e.target.value)}
+                            onFocus={handleStationInputFocus}
                         />
                         <div className="station-list">
                             <SelectField
@@ -426,7 +403,6 @@ const ReportForm: FC<ReportFormProps> = () => {
                     </section>
                     
                     <div ref={bottomElementsRef}>
-                        {/* Direction selector */}
                         {currentLine !== null &&
                         currentLine !== 'S41' &&
                         currentLine !== 'S42' &&
@@ -448,7 +424,6 @@ const ReportForm: FC<ReportFormProps> = () => {
                             </section>
                         ) : null}
                         
-                        {/* Description field */}
                         {currentStation && (
                             <section className="description-field">
                                 <h3>Beschreibung</h3>
@@ -461,7 +436,6 @@ const ReportForm: FC<ReportFormProps> = () => {
                             </section>
                         )}
                         
-                        {/* Privacy checkbox and submit button */}
                         <section>
                             <div>
                                 {currentStation && (
@@ -471,7 +445,7 @@ const ReportForm: FC<ReportFormProps> = () => {
                                             checked={isPrivacyChecked}
                                             onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
                                         />
-                                        Ich stimme der <a href="https://app.freifahren.org/datenschutz">Datenschutzerklärung</a> zu.
+                                        Ich stimme der <a href="https://app.freifahren.org/datenschutz">Datenschutzerklärung</a> zu. <span className="red-highlight">*</span>
                                     </label>
                                 )}
                             </div>

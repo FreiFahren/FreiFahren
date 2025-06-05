@@ -55,7 +55,7 @@ div.report-form {
 }
 
 .report-form .line-selector .select-field-container {
-    justify-content: flex-start;
+    justify-content: center;
     display: flex;
     flex-wrap: nowrap;
     overflow-x: auto;
