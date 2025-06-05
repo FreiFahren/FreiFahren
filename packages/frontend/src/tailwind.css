@@ -5,3 +5,11 @@
 h1 {
     @apply text-left text-lg font-bold;
 }
+
+h2 {
+    @apply text-left text-base font-bold;
+}
+
+p {
+    @apply text-left text-sm;
+}
