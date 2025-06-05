@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { retrieveLaunchParams, useSignal, isMiniAppDark } from '@telegram-apps/sdk-react';
 import { AppRoot } from '@telegram-apps/telegram-ui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import ReportForm from './ReportForm/MAReportForm';
+import ReportForm from './ReportForm/MiniAppReportForm';
 
 // Create a client
 const queryClient = new QueryClient();

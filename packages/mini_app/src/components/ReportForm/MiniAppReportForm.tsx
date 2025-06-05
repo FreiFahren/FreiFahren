@@ -1,5 +1,5 @@
 import React, { FC, FormEvent, useCallback, useRef, useState } from 'react';
-import './MAReportForm.css';
+import './MiniAppReportForm.css';
 import { useStations, useLines, useSubmitReport } from '../../api/queries';
 import { useStationSearch } from '../../hooks/useStationSearch';
 import { Report } from '../../utils/types';
