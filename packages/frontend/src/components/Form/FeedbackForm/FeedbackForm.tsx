@@ -11,7 +11,7 @@ import { FeedbackSummaryModal } from '../../Modals/FeedbackSummaryModal/Feedback
 import { PrivacyCheckbox } from '../PrivacyCheckbox/PrivacyCheckbox'
 
 interface FeedbackFormProps {
-    openAnimationClass?: string
+    openAnimationClass: string
     onClose?: () => void
 }
 

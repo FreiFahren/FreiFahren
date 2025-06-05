@@ -452,11 +452,11 @@ const ReportForm: FC<ReportFormProps> = ({ onReportFormSubmit, className }) => {
 
     const [showFeedback, setShowFeedback] = useState<boolean>(false)
     if (showFeedback) {
-        return <FeedbackForm openAnimationClass={className} />
+        return <FeedbackForm openAnimationClass={className ?? ''} />
     }
 
     return (
-        <div className={`report-form container modal ${className}`} ref={containerRef}>
+        <div className={`report-form modal container ${className}`} ref={containerRef}>
             <form onSubmit={handleSubmit}>
                 <div>
                     <div ref={topElementsRef}>

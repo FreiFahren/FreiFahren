@@ -1,4 +1,7 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities; 
+@tailwind utilities;
 
+h1 {
+    @apply text-left text-lg font-bold;
+}

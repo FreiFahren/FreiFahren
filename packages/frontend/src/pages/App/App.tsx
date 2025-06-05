@@ -15,7 +15,7 @@ import CloseButton from '../../components/Buttons/CloseButton/CloseButton'
 import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
 import { ReportButton } from '../../components/Buttons/ReportButton/ReportButton'
 import { UtilButton } from '../../components/Buttons/UtilButton/UtilButton'
-import { ReportForm } from '../../components/Form/ReportForm/ReportForm'
+import { ReportForm } from '../../components/Form/ReportForm/ReportForm2'
 import { FreifahrenMap } from '../../components/Map/Map'
 import { Backdrop } from '../../components/Miscellaneous/Backdrop/Backdrop'
 import { SearchBar } from '../../components/Miscellaneous/SearchBar/SearchBar'
@@ -387,7 +387,7 @@ const App = () => {
             ) : null}
             {appUIState.isReportFormOpen ? (
                 <>
-                    <ReportForm onReportFormSubmit={handleReportFormSubmit} className="open center-animation" />
+                    <ReportForm className="open center-animation" />
                     <Backdrop handleClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
                 </>
             ) : null}
