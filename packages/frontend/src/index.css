@@ -3,7 +3,7 @@
     font-style: normal;
     font-weight: 400 600 700;
     font-display: swap;
-    src: url('./Raleway/Raleway-VariableFont_wght.ttf') format('ttf');
+    src: url('Raleway/Raleway-VariableFont_wght.ttf') format('ttf');
     unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
 
@@ -11,7 +11,7 @@
     font-family: 'Raleway';
     font-style: italic;
     font-weight: 400 600 700;
-    src: url('./Raleway/Raleway-Italic-VariableFont_wght.ttf') format('ttf');
+    src: url('Raleway/Raleway-Italic-VariableFont_wght.ttf') format('ttf');
     unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
 

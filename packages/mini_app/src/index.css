@@ -1,0 +1,169 @@
+@font-face {
+    font-family: 'Raleway';
+    font-style: normal;
+    font-weight: 400 600 700;
+    font-display: swap;
+    src: url('./Raleway/Raleway-VariableFont_wght.ttf') format('ttf');
+    unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+
+@font-face {
+    font-family: 'Raleway';
+    font-style: italic;
+    font-weight: 400 600 700;
+    src: url('./Raleway/Raleway-Italic-VariableFont_wght.ttf') format('ttf');
+    unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+
+:root {
+    --color-primary: #dee2e6;
+    --color-background: #232323;
+    --color-blue: #0075ff;
+    --incentive-blue: #0f90ff;
+    --color-red: #ff0017f5;
+    --color-gray: #636363;
+    --color-box-text: #807f7f;
+    --color-gray-on-dark-background: #959494;
+    --color-light-gray: #d2d2d2;
+    --color-light-gray-hover: #b3b3b3;
+    --color-white: #ffffff;
+    --color-risk-0: #7cc7ab;
+
+    /* Additional variables for modal components */
+    --background-color: #232323;
+    --background-color-secondary: #2a2a2a;
+    --text-color-primary: #ffffff;
+    --text-color-secondary: #b0b0b0;
+    --accent-color: #0075ff;
+    --accent-color-hover: #0056b3;
+    --border-color: #404040;
+
+    --font-xxxs: 0.5rem;
+    --font-xxs: 0.75rem;
+    --font-xs: 0.875rem;
+    --font-s: 1rem;
+    --font-m: 1.125rem;
+    --font-l: 1.125rem;
+    --font-xl: 1.5rem;
+
+    --borderRadius-small: 4px;
+    --borderRadius-medium: 12px;
+    --borderRadius-default: 16px;
+
+    --boxShadow-default: 0 8px 16px rgba(0, 0, 0, 0.5);
+    --boxShadow-marker: 0 2px 4px rgba(0, 0, 0, 0.5);
+    --boxShadow-marker-pulse: #ff69b400 0 0 0 16px;
+    --boxShadow-light: 0 4px 8px rgba(0, 0, 0, 0.5);
+
+    --zIndex-map: -1;
+    --zIndex-button: 0;
+    --zIndex-backdrop: 1;
+    --zIndex-modal: 2;
+    --zIndex-closeButton: 3;
+
+    --transition-default: 0.25s;
+    --transition-long: 0.5s;
+
+    --padding-xxs: 2px;
+    --padding-xs: 4px;
+    --padding-s: 8px;
+    --padding-m: 16px;
+    --padding-l: 20px;
+    --padding-xl: 24px;
+    --padding-xxl: 32px;
+
+    --margin-xxs: 2px;
+    --margin-xs: 4px;
+    --margin-s: 8px;
+    --margin-m: 16px;
+    --margin-l: 24px;
+    --margin-xl: 32px;
+
+    --text-relation-strong: 1.6%;
+    --text-relation-weak: 3.2%;
+
+    --border-default: 2px solid #000;
+    --border-weak: 1px solid #000;
+    --border-marker: 3px solid #ffffff;
+
+    --distance-from-edge-default: 15px;
+    --button-size: 50px;
+    --height-streched-button: 45px;
+}
+
+/* ELEMENT STYLES */
+
+body{
+
+    background-color: var(--color-background);
+}
+body,
+textarea,
+input[type='text'] {
+    margin: 0;
+    font-family: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+        'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+    font-size: 16px; /* Min font size to avoid zoom on mobile */
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+
+.select-field-container {
+    gap: var(--margin-s);
+}
+
+.select-field {
+    display: flex;
+    border: var(--border-weak);
+    border-radius: var(--borderRadius-small);
+    padding: var(--padding-s);
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    transition: border var(--transition-default);
+}
+
+.selected {
+    border: 1px solid var(--incentive-blue);
+}
+
+.long-selector {
+    overflow-x: visible;
+    overflow-y: hidden;
+}
+
+.large-selector {
+    height: 40px;
+}
+
+.medium-selector {
+    height: 25px;
+}
+
+.small-selector {
+    height: 20px;
+}
+
+.entity-type-selector {
+    justify-content: center;
+    align-items: center;
+}
+.red-highlight {
+    font-size: var(--font-xl);
+    color: var(--color-red);
+}
+
+.red-highlight#warning-span {
+    font-size: var(--font-xs);
+    margin-top: var(--margin-m);
+}
+
+a {
+    color: var(--color-white);
+}
