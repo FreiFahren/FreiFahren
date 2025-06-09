@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+@root {
+    --color-primary: #dee2e6;
+}
+
 h1 {
     @apply text-left text-lg font-bold;
 }
@@ -12,4 +16,18 @@ h2 {
 
 p {
     @apply text-left text-sm;
+    color: var(--color-primary);
+}
+
+button,
+button p {
+    @apply text-center text-base font-bold;
+}
+
+.button-inactive {
+    @apply bg-zinc-500;
+}
+
+.button-active {
+    @apply bg-blue-500;
 }
