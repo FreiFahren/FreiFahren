@@ -122,7 +122,7 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
                     </SelectField>
                 </section>
                 <div className="flex flex-shrink-0 flex-col">
-                    <div className="relative mb-2">
+                    <div className="relative">
                         <span className="absolute left-14 top-0 text-red-500">*</span>
                         <h2>Station</h2>
                     </div>
