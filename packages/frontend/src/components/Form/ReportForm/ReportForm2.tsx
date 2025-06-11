@@ -1,5 +1,4 @@
 import { FormEvent, useState } from 'react'
-import React from 'react'
 
 import { CenterModal } from '../../Modal/CenterModal'
 import FeedbackButton from '../../Buttons/FeedbackButton/FeedbackButton'
@@ -8,6 +7,8 @@ import { SelectField } from '../SelectField/SelectField'
 import { Line } from '../../Miscellaneous/Line/Line'
 import { useLines, useStations } from 'src/api/queries'
 import { Report, Station } from 'src/utils/types'
+import { getClosestStations } from 'src/hooks/getClosestStations'
+import { useLocation } from 'src/contexts/LocationContext'
 
 interface ReportFormProps {
     className: string
@@ -23,6 +24,7 @@ enum Entity {
 
 export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) => {
     const [showFeedback, setShowFeedback] = useState<boolean>(false)
+    const { userPosition } = useLocation()
 
     const [currentEntity, setCurrentEntity] = useState<Entity>(Entity.ALL)
     const [currentLine, setCurrentLine] = useState<string | null>(null)
@@ -129,6 +131,32 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
                 </div>
                 <div className="mb-2 min-h-0 flex-1">
                     <div className="h-full overflow-y-auto">
+                        {userPosition && currentStation === null && (
+                            <>
+                                {getClosestStations(3, possibleStations, userPosition).map((station) => (
+                                    <SelectField
+                                        containerClassName="mb-1"
+                                        onSelect={(selectedValue) => {
+                                            const selectedStation = selectedValue
+                                                ? possibleStations.find((s) => s.id === selectedValue) || null
+                                                : null
+                                            setCurrentStation(selectedStation)
+                                        }}
+                                        value={'placeholder since the regular station will be selected'}
+                                    >
+                                        <button
+                                            key={station.id}
+                                            type="button"
+                                            data-select-value={station.id}
+                                            className="flex h-fit min-w-0 flex-1 items-center justify-start"
+                                        >
+                                            <p className="text-sm font-semibold">{station.name}</p>
+                                        </button>
+                                    </SelectField>
+                                ))}
+                                <hr className="my-2" />
+                            </>
+                        )}
                         {possibleStations.map((station) => (
                             <SelectField
                                 containerClassName="mb-1"
