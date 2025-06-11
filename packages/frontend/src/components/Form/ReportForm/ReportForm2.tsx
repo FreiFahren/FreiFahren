@@ -5,8 +5,8 @@ import FeedbackButton from '../../Buttons/FeedbackButton/FeedbackButton'
 import { FeedbackForm } from '../../Form/FeedbackForm/FeedbackForm'
 import { SelectField } from '../SelectField/SelectField'
 import { Line } from '../../Miscellaneous/Line/Line'
-import { useLines } from 'src/api/queries'
-import { Report } from 'src/utils/types'
+import { useLines, useStations } from 'src/api/queries'
+import { Report, Station } from 'src/utils/types'
 
 interface ReportFormProps {
     className: string
@@ -24,7 +24,8 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
     const [showFeedback, setShowFeedback] = useState<boolean>(false)
 
     const [currentEntity, setCurrentEntity] = useState<Entity>(Entity.ALL)
-    const [currentLine, setCurrentLine] = useState<string>('')
+    const [currentLine, setCurrentLine] = useState<string | null>(null)
+    const [currentStation, setCurrentStation] = useState<Station | null>(null)
 
     const { data: linesData } = useLines()
     const allLines = linesData?.map(([line]) => line) ?? []
@@ -35,12 +36,12 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
               ? allLines.filter((line) => line.startsWith('M') || /^\d+$/.test(line))
               : allLines.filter((line) => line.startsWith(currentEntity))
 
-    // todo: replace with actual isValid hook
-    const isButtonActive = currentEntity !== Entity.ALL && currentLine !== ''
+    const { data: stationsData } = useStations()
+    // todo: allStations should be array of Station (station.id exists)
+    const allStations = stationsData ?? {}
 
-    if (showFeedback) {
-        return <FeedbackForm openAnimationClass={className} />
-    }
+    // todo: replace with actual isValid hook
+    const isButtonActive = currentStation !== null
 
     // todo: add actual location check
     // todo: send analytics event
@@ -62,18 +63,20 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
             isHistoric: false,
             message: 'TODO',
         })
+    }
 
-        console.log('submitted')
+    if (showFeedback) {
+        return <FeedbackForm openAnimationClass={className} />
     }
 
     return (
-        <CenterModal className={className + ' pb-1'}>
-            <form onSubmit={handleSubmit}>
-                <section className="mb-2 flex flex-row justify-between">
+        <CenterModal className={className + ' h-[80dvh] pb-1'}>
+            <form onSubmit={handleSubmit} className="flex h-full flex-col">
+                <section className="mb-2 flex flex-shrink-0 flex-row justify-between">
                     <h1>Neue Meldung</h1>
                     <FeedbackButton handleButtonClick={() => setShowFeedback(!showFeedback)} />
                 </section>
-                <section className="mb-2">
+                <section className="mb-2 flex-shrink-0">
                     <SelectField
                         containerClassName="flex items-center justify-between mx-auto w-full h-10 gap-2"
                         fieldClassName="flex justify-center items-center"
@@ -91,7 +94,7 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
                         </button>
                     </SelectField>
                 </section>
-                <section className="mb-2">
+                <section className="mb-2 flex-shrink-0">
                     <h2>Linie</h2>
                     <SelectField
                         containerClassName="flex items-center justify-between mx-auto w-full overflow-x-visible overflow-y-hidden gap-2"
@@ -109,8 +112,25 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
                         ))}
                     </SelectField>
                 </section>
-
-                <section>
+                <section className="mb-2 flex flex-shrink-0 flex-col">
+                    <div className="relative mb-2">
+                        <span className="absolute left-14 top-0 text-red-500">*</span>
+                        <h2>Station</h2>
+                    </div>
+                </section>
+                <section className="mb-2 min-h-0 flex-1">
+                    <div className="h-full overflow-y-auto">
+                        {Array.from({ length: 100 }, (_, i) => (
+                            <div
+                                key={i}
+                                className="mb-2 flex h-fit min-w-0 flex-1 items-center justify-center border border-red-100 p-2"
+                            >
+                                <p>Alexanderplatz</p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+                <section className="flex-shrink-0">
                     <button className={isButtonActive ? 'button-active' : 'button-inactive'} type="submit">
                         <p>Melden</p>
                     </button>

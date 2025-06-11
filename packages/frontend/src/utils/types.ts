@@ -52,6 +52,16 @@ export interface StationProperty {
     lines: string[]
 }
 
+export interface Station {
+    id: string
+    name: string
+    coordinates: {
+        latitude: number
+        longitude: number
+    }
+    lines: string[]
+}
+
 export type LineProperty = {
     [key: string]: string[]
 }
