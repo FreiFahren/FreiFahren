@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react'
+import React from 'react'
 
 import { CenterModal } from '../../Modal/CenterModal'
 import FeedbackButton from '../../Buttons/FeedbackButton/FeedbackButton'
@@ -37,8 +38,21 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
               : allLines.filter((line) => line.startsWith(currentEntity))
 
     const { data: stationsData } = useStations()
-    // todo: allStations should be array of Station (station.id exists)
-    const allStations = stationsData ?? {}
+    const allStations: Station[] = stationsData
+        ? Object.entries(stationsData)
+              .map(([id, stationProperty]) => ({
+                  id,
+                  name: stationProperty.name,
+                  coordinates: stationProperty.coordinates,
+                  lines: stationProperty.lines,
+              }))
+              .sort((a, b) => a.name.localeCompare(b.name))
+        : []
+    let possibleStations = currentStation
+        ? [currentStation]
+        : currentLine
+          ? allStations.filter((station) => station.lines.includes(currentLine))
+          : allStations
 
     // todo: replace with actual isValid hook
     const isButtonActive = currentStation !== null
@@ -48,16 +62,11 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
     // todo: actually submit the report
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
+        if (!currentStation) return
+
         onReportFormSubmit({
             timestamp: new Date().toISOString(),
-            station: {
-                id: 'TODO',
-                name: 'TODO',
-                coordinates: {
-                    latitude: 0,
-                    longitude: 0,
-                },
-            },
+            station: currentStation,
             direction: null,
             line: currentLine,
             isHistoric: false,
@@ -112,29 +121,42 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
                         ))}
                     </SelectField>
                 </section>
-                <section className="mb-2 flex flex-shrink-0 flex-col">
+                <div className="flex flex-shrink-0 flex-col">
                     <div className="relative mb-2">
                         <span className="absolute left-14 top-0 text-red-500">*</span>
                         <h2>Station</h2>
                     </div>
-                </section>
-                <section className="mb-2 min-h-0 flex-1">
+                </div>
+                <div className="mb-2 min-h-0 flex-1">
                     <div className="h-full overflow-y-auto">
-                        {Array.from({ length: 100 }, (_, i) => (
-                            <div
-                                key={i}
-                                className="mb-2 flex h-fit min-w-0 flex-1 items-center justify-center border border-red-100 p-2"
+                        {possibleStations.map((station) => (
+                            <SelectField
+                                containerClassName="mb-1"
+                                onSelect={(selectedValue) => {
+                                    const selectedStation = selectedValue
+                                        ? possibleStations.find((s) => s.id === selectedValue) || null
+                                        : null
+                                    setCurrentStation(selectedStation)
+                                }}
+                                value={currentStation?.id || null}
                             >
-                                <p>Alexanderplatz</p>
-                            </div>
+                                <button
+                                    key={station.id}
+                                    type="button"
+                                    data-select-value={station.id}
+                                    className="flex h-fit min-w-0 flex-1 items-center justify-start"
+                                >
+                                    <p className="text-sm font-semibold">{station.name}</p>
+                                </button>
+                            </SelectField>
                         ))}
                     </div>
-                </section>
+                </div>
                 <section className="flex-shrink-0">
                     <button className={isButtonActive ? 'button-active' : 'button-inactive'} type="submit">
                         <p>Melden</p>
                     </button>
-                    <p className="text-xs">Die Meldung wird mit @FreiFahren_BE synchronisiert.</p>
+                    <p className="text-xs">Meldung wird mit @FreiFahren_BE synchronisiert.</p>
                 </section>
             </form>
         </CenterModal>
