@@ -247,5 +247,8 @@
         "subtitle": "Real-time updates on the go",
         "description": "Get real-time updates about reports on your mobile device. Never be caught off guard again!",
         "button": "Switch to the app"
+    },
+    "SearchBar": {
+        "placeholder": "Search for a station..."
     }
 }

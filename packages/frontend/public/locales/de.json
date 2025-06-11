@@ -244,5 +244,8 @@
         "subtitle": "Echtzeit-Updates unterwegs",
         "description": "Erhalte sofortige Benachrichtigungen über Kontrolleure direkt auf deinem Handy. Nie wieder überrascht werden!",
         "button": "Zur App wechseln"
+    },
+    "SearchBar": {
+        "placeholder": "Suche nach einer Station..."
     }
 }
