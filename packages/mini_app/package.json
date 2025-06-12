@@ -1,0 +1,50 @@
+{
+  "name": "reactjs-template",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "homepage": "https://telegram-mini-apps.github.io/reactjs-template",
+  "scripts": {
+    "deploy": "gh-pages -d dist",
+    "dev": "vite",
+    "dev:https": "cross-env HTTPS=true vite",
+    "build": "tsc --noEmit && vite build",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
+    "preview": "vite preview",
+    "predeploy": "npm run build"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.32.0",
+    "@telegram-apps/sdk-react": "^3.1.7",
+    "@telegram-apps/telegram-ui": "^2.1.3",
+    "@tonconnect/ui-react": "^2.1.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eruda": "^3.0.1",
+    "fuse.js": "^7.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.23.0",
+    "zustand": "^4.5.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.23.0",
+    "@tanstack/eslint-plugin-query": "^5.20.1",
+    "@types/node": "^20.11.25",
+    "@types/react": "^18.2.56",
+    "@types/react-dom": "^18.2.0",
+    "@typescript-eslint/eslint-plugin": "^8.28.0",
+    "@typescript-eslint/parser": "^8.28.0",
+    "@vitejs/plugin-react-swc": "^3.8.1",
+    "cross-env": "^7.0.3",
+    "eslint": "^9.23.0",
+    "eslint-plugin-react": "^7.37.4",
+    "gh-pages": "^6.1.1",
+    "globals": "^15.2.0",
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.28.0",
+    "vite": "^5.1.4",
+    "vite-plugin-mkcert": "^1.17.8",
+    "vite-tsconfig-paths": "^5.1.4"
+  }
+}
