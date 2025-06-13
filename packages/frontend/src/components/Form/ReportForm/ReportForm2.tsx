@@ -62,8 +62,11 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
           ? filteredStations.filter((station) => !currentLine || station.lines.includes(currentLine))
           : allStations.filter((station) => !currentLine || station.lines.includes(currentLine))
 
-    // todo: replace with actual isValid hook
-    const isButtonActive = currentStation !== null
+    const handleStationSelect = (selectedValue: string | null) => {
+        const selectedStation = selectedValue ? possibleStations.find((s) => s.id === selectedValue) || null : null
+        setCurrentStation(selectedStation)
+        setIsSearchExpanded(selectedStation === null) // expand again if user deselects the station
+    }
 
     // todo: add actual location check
     // todo: send analytics event
@@ -81,6 +84,9 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
             message: 'TODO',
         })
     }
+
+    // todo: replace with actual isValid hook
+    const isButtonActive = currentStation !== null
 
     if (showFeedback) {
         return <FeedbackForm openAnimationClass={className} />
@@ -162,12 +168,7 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
                                 {getClosestStations(3, possibleStations, userPosition).map((station) => (
                                     <SelectField
                                         containerClassName="mb-1"
-                                        onSelect={(selectedValue) => {
-                                            const selectedStation = selectedValue
-                                                ? possibleStations.find((s) => s.id === selectedValue) || null
-                                                : null
-                                            setCurrentStation(selectedStation)
-                                        }}
+                                        onSelect={handleStationSelect}
                                         value={'placeholder since the regular station will be selected'}
                                     >
                                         <button
@@ -186,14 +187,7 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
                         {possibleStations.map((station) => (
                             <SelectField
                                 containerClassName="mb-1"
-                                onSelect={(selectedValue) => {
-                                    const selectedStation = selectedValue
-                                        ? possibleStations.find((s) => s.id === selectedValue) || null
-                                        : null
-                                    setCurrentStation(selectedStation)
-                                    setIsSearchExpanded(false)
-                                    setSearchValue('')
-                                }}
+                                onSelect={handleStationSelect}
                                 value={currentStation?.id || null}
                             >
                                 <button
