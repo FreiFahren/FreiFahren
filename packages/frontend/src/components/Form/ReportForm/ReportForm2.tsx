@@ -11,6 +11,7 @@ import { getClosestStations } from 'src/hooks/getClosestStations'
 import { useLocation } from 'src/contexts/LocationContext'
 import { useStationSearch } from 'src/hooks/useStationSearch'
 import searchIcon from '../../../../public/icons/search.svg'
+import StationButton from '../../Buttons/StationButton'
 
 interface ReportFormProps {
     className: string
@@ -164,12 +165,12 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
                         ))}
                     </SelectField>
                 </section>
-                <div className="mb-2 flex flex-shrink-0 flex-row items-center justify-between">
+                <div className="flex h-[35px] flex-shrink-0 flex-row items-center justify-between">
                     <div className="relative">
                         <span className="absolute left-14 top-0 text-red-500">*</span>
                         <h2>Station</h2>
                     </div>
-                    <div className="flex h-[28px] items-center gap-2">
+                    <div className="flex items-center gap-2">
                         <img
                             src={searchIcon}
                             alt="Search"
@@ -200,14 +201,7 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
                                         onSelect={handleStationSelect}
                                         value={'placeholder since the regular station will be selected'}
                                     >
-                                        <button
-                                            key={station.id}
-                                            type="button"
-                                            data-select-value={station.id}
-                                            className="flex h-fit min-w-0 flex-1 items-center justify-start"
-                                        >
-                                            <p className="text-sm font-semibold">{station.name}</p>
-                                        </button>
+                                        <StationButton station={station} data-select-value={station.id} />
                                     </SelectField>
                                 ))}
                                 <hr className="my-2" />
@@ -219,14 +213,7 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
                                 onSelect={handleStationSelect}
                                 value={currentStation?.id || null}
                             >
-                                <button
-                                    key={station.id}
-                                    type="button"
-                                    data-select-value={station.id}
-                                    className="flex h-fit min-w-0 flex-1 items-center justify-start"
-                                >
-                                    <p className="text-sm font-semibold">{station.name}</p>
-                                </button>
+                                <StationButton station={station} data-select-value={station.id} />
                             </SelectField>
                         ))}
                     </div>
