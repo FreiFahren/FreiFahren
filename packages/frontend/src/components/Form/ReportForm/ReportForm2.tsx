@@ -9,6 +9,8 @@ import { useLines, useStations } from 'src/api/queries'
 import { Report, Station } from 'src/utils/types'
 import { getClosestStations } from 'src/hooks/getClosestStations'
 import { useLocation } from 'src/contexts/LocationContext'
+import { useStationSearch } from 'src/hooks/useStationSearch'
+import searchIcon from '../../../../public/icons/search.svg'
 
 interface ReportFormProps {
     className: string
@@ -24,6 +26,7 @@ enum Entity {
 
 export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) => {
     const [showFeedback, setShowFeedback] = useState<boolean>(false)
+    const [isSearchExpanded, setIsSearchExpanded] = useState<boolean>(true)
     const { userPosition } = useLocation()
 
     const [currentEntity, setCurrentEntity] = useState<Entity>(Entity.ALL)
@@ -50,11 +53,14 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
               }))
               .sort((a, b) => a.name.localeCompare(b.name))
         : []
+
+    const { searchValue, setSearchValue, filteredStations } = useStationSearch()
+
     let possibleStations = currentStation
         ? [currentStation]
-        : currentLine
-          ? allStations.filter((station) => station.lines.includes(currentLine))
-          : allStations
+        : searchValue.trim() !== ''
+          ? filteredStations.filter((station) => !currentLine || station.lines.includes(currentLine))
+          : allStations.filter((station) => !currentLine || station.lines.includes(currentLine))
 
     // todo: replace with actual isValid hook
     const isButtonActive = currentStation !== null
@@ -123,15 +129,35 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
                         ))}
                     </SelectField>
                 </section>
-                <div className="flex flex-shrink-0 flex-col">
+                <div className="mb-2 flex flex-shrink-0 flex-row items-center justify-between">
                     <div className="relative">
                         <span className="absolute left-14 top-0 text-red-500">*</span>
                         <h2>Station</h2>
                     </div>
+                    <div className="flex h-[28px] items-center gap-2">
+                        <img
+                            src={searchIcon}
+                            alt="Search"
+                            className="h-4 w-4 cursor-pointer brightness-0 invert"
+                            onClick={() => {
+                                setIsSearchExpanded(!isSearchExpanded)
+                                setSearchValue('')
+                            }}
+                        />
+                        <input
+                            className={`ml-4 rounded-sm border-2 border-gray-300 transition-[width] duration-300 ${
+                                isSearchExpanded ? 'w-48' : 'w-0 border-0 p-0'
+                            }`}
+                            type="text"
+                            placeholder="Suche nach einer Station..."
+                            value={searchValue}
+                            onChange={(e) => setSearchValue(e.target.value)}
+                        />
+                    </div>
                 </div>
                 <div className="mb-2 min-h-0 flex-1">
                     <div className="h-full overflow-y-auto">
-                        {userPosition && currentStation === null && (
+                        {userPosition && currentStation === null && searchValue.trim() === '' && (
                             <>
                                 {getClosestStations(3, possibleStations, userPosition).map((station) => (
                                     <SelectField
@@ -165,6 +191,8 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
                                         ? possibleStations.find((s) => s.id === selectedValue) || null
                                         : null
                                     setCurrentStation(selectedStation)
+                                    setIsSearchExpanded(false)
+                                    setSearchValue('')
                                 }}
                                 value={currentStation?.id || null}
                             >
