@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useState, useMemo } from 'react'
 
 import { CenterModal } from '../../Modal/CenterModal'
 import FeedbackButton from '../../Buttons/FeedbackButton/FeedbackButton'
@@ -28,9 +28,11 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
     const [showFeedback, setShowFeedback] = useState<boolean>(false)
     const [isSearchExpanded, setIsSearchExpanded] = useState<boolean>(true)
     const { userPosition } = useLocation()
+    const { searchValue, setSearchValue, filteredStations } = useStationSearch()
 
     const [currentEntity, setCurrentEntity] = useState<Entity>(Entity.ALL)
     const [currentLine, setCurrentLine] = useState<string | null>(null)
+    const [currentDirection, setCurrentDirection] = useState<Station | null>(null)
     const [currentStation, setCurrentStation] = useState<Station | null>(null)
 
     const { data: linesData } = useLines()
@@ -54,7 +56,34 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
               .sort((a, b) => a.name.localeCompare(b.name))
         : []
 
-    const { searchValue, setSearchValue, filteredStations } = useStationSearch()
+    const possibleDirections = useMemo(() => {
+        if (!currentLine || !allStations.length || !linesData) return []
+
+        // Find the line data for the current line
+        const lineData = linesData.find(([lineName]) => lineName === currentLine)
+        if (!lineData) return []
+
+        const [, stationIds] = lineData
+        if (stationIds.length === 0) return []
+        if (stationIds.length === 1) {
+            const station = allStations.find((s) => s.id === stationIds[0])
+            return station ? [station] : []
+        }
+
+        // Get first and last station ids from the line data (in correct order)
+        const firstStationId = stationIds[0]
+        const lastStationId = stationIds[stationIds.length - 1]
+
+        // Look up the actual Station objects
+        const firstStation = allStations.find((s) => s.id === firstStationId)
+        const lastStation = allStations.find((s) => s.id === lastStationId)
+
+        const directions = []
+        if (firstStation) directions.push(firstStation)
+        if (lastStation && lastStation.id !== firstStation?.id) directions.push(lastStation)
+
+        return directions
+    }, [currentLine, allStations, linesData])
 
     let possibleStations = currentStation
         ? [currentStation]
@@ -78,7 +107,7 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
         onReportFormSubmit({
             timestamp: new Date().toISOString(),
             station: currentStation,
-            direction: null,
+            direction: currentDirection,
             line: currentLine,
             isHistoric: false,
             message: 'TODO',
@@ -161,7 +190,7 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
                         />
                     </div>
                 </div>
-                <div className="mb-2 min-h-0 flex-1">
+                <div className={`mb-2 min-h-0 ${currentStation ? '' : 'flex-1'}`}>
                     <div className="h-full overflow-y-auto">
                         {userPosition && currentStation === null && searchValue.trim() === '' && (
                             <>
@@ -202,7 +231,33 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
                         ))}
                     </div>
                 </div>
-                <section className="flex-shrink-0">
+                {currentStation && currentLine && possibleDirections.length > 0 && (
+                    <section className="mb-2 flex-shrink-0">
+                        <h2>Richtung</h2>
+                        <SelectField
+                            containerClassName="flex items-center justify-between mx-auto w-full overflow-x-visible overflow-y-hidden gap-2"
+                            onSelect={(selectedValue) => {
+                                const selectedStation = selectedValue
+                                    ? possibleDirections.find((d) => d.id === selectedValue) || null
+                                    : null
+                                setCurrentDirection(selectedStation)
+                            }}
+                            value={currentDirection?.id || null}
+                        >
+                            {possibleDirections.map((direction) => (
+                                <button
+                                    key={direction.id}
+                                    type="button"
+                                    data-select-value={direction.id}
+                                    className="flex h-fit min-w-0 flex-1 items-center justify-start"
+                                >
+                                    <p className="text-sm font-semibold">{direction.name}</p>
+                                </button>
+                            ))}
+                        </SelectField>
+                    </section>
+                )}
+                <section className="mt-auto flex-shrink-0">
                     <button className={isButtonActive ? 'button-active' : 'button-inactive'} type="submit">
                         <p>Melden</p>
                     </button>
