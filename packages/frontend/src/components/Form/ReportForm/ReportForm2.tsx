@@ -166,7 +166,7 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
                     </SelectField>
                 </section>
                 <div className="flex h-[35px] flex-shrink-0 flex-row items-center justify-between">
-                    <div className="relative">
+                    <div className="relative self-end">
                         <span className="absolute left-14 top-0 text-red-500">*</span>
                         <h2>Station</h2>
                     </div>
