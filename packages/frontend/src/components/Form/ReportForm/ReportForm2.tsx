@@ -209,7 +209,11 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                                         onSelect={handleStationSelect}
                                         value={'placeholder since the regular station will be selected'}
                                     >
-                                        <StationButton station={station} data-select-value={station.id} />
+                                        <StationButton
+                                            station={station}
+                                            data-select-value={station.id}
+                                            key={'recommended' + station.id}
+                                        />
                                     </SelectField>
                                 ))}
                                 <hr className="my-2" />
@@ -221,7 +225,11 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                                 onSelect={handleStationSelect}
                                 value={currentStation?.id || null}
                             >
-                                <StationButton station={station} data-select-value={station.id} />
+                                <StationButton
+                                    station={station}
+                                    data-select-value={station.id}
+                                    key={'station' + station.id}
+                                />
                             </SelectField>
                         ))}
                     </div>
@@ -241,7 +249,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                         >
                             {possibleDirections.map((direction) => (
                                 <button
-                                    key={direction.id}
+                                    key={'direction' + direction.id}
                                     type="button"
                                     data-select-value={direction.id}
                                     className="flex h-fit min-w-0 flex-1 items-center justify-start"
