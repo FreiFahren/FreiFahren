@@ -10,6 +10,7 @@ import { Report, Station } from 'src/utils/types'
 import { getClosestStations } from 'src/hooks/getClosestStations'
 import { useLocation } from 'src/contexts/LocationContext'
 import { useStationSearch } from 'src/hooks/useStationSearch'
+import { validateReport, ValidationError } from 'src/utils/reportValidation'
 import searchIcon from '../../../../public/icons/search.svg'
 import StationButton from '../../Buttons/StationButton'
 import { Link } from 'react-router-dom'
@@ -34,6 +35,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null)
     const [showPrivacySection, setShowPrivacySection] = useState<boolean>(false)
     const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
+    const [validationErrors, setValidationErrors] = useState<ValidationError[]>([])
 
     const [currentEntity, setCurrentEntity] = useState<Entity>(Entity.ALL)
     const [currentLine, setCurrentLine] = useState<string | null>(null)
@@ -100,23 +102,40 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         const selectedStation = selectedValue ? possibleStations.find((s) => s.id === selectedValue) || null : null
         setCurrentStation(selectedStation)
         setIsSearchExpanded(selectedStation === null) // expand again if user deselects the station
+
+        // Clear validation errors when station changes
+        if (validationErrors.length > 0) {
+            setValidationErrors([])
+        }
     }
 
-    // todo: add actual location check
     // todo: send analytics event
     // todo: actually submit the report
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         if (!currentStation) return
 
-        onReportFormSubmit({
+        // Clear previous validation errors
+        setValidationErrors([])
+
+        const report: Report = {
             timestamp: new Date().toISOString(),
             station: currentStation,
             direction: currentDirection,
             line: currentLine,
             isHistoric: false,
             message: textareaRef.current?.value || '',
-        })
+        }
+
+        const validationResult = validateReport(report, userPosition)
+        if (!validationResult.isValid && !import.meta.env.DEV) {
+            setValidationErrors(validationResult.errors)
+            return
+        }
+
+        // If validation passes, submit the report
+        onReportFormSubmit(report)
+        localStorage.setItem('lastReportedTime', new Date().toISOString())
     }
 
     const isFormValid = currentStation !== null && (!showPrivacySection || isPrivacyChecked)
@@ -293,6 +312,15 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                     </>
                 )}
                 <section className="mt-auto flex-shrink-0">
+                    {validationErrors.length > 0 && (
+                        <ul className="mb-2 rounded border border-red-300 bg-red-50 p-2 text-left">
+                            {validationErrors.map((error, index) => (
+                                <li key={index} className="text-xs text-red-600">
+                                    {error.message}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                     <button className={isFormValid ? 'button-active' : 'button-inactive'} type="submit">
                         <p>Melden</p>
                     </button>
