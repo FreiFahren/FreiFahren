@@ -44,12 +44,13 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
 
     const { data: linesData } = useLines()
     const allLines = linesData?.map(([line]) => line) ?? []
-    const possibleLines =
-        currentEntity === Entity.ALL || currentEntity === null
-            ? allLines
-            : currentEntity === Entity.T // exception because T stands for tram but we want Metro trams and regular trams
-              ? allLines.filter((line) => line.startsWith('M') || /^\d+$/.test(line))
-              : allLines.filter((line) => line.startsWith(currentEntity))
+    const possibleLines = currentStation
+        ? allLines.filter((line) => currentStation.lines.includes(line))
+        : currentEntity === Entity.ALL || currentEntity === null
+          ? allLines
+          : currentEntity === Entity.T // exception because T stands for tram but we want Metro trams and regular trams
+            ? allLines.filter((line) => line.startsWith('M') || /^\d+$/.test(line))
+            : allLines.filter((line) => line.startsWith(currentEntity))
 
     const { data: stationsData } = useStations()
     const allStations: Station[] = stationsData
