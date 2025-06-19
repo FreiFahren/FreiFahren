@@ -14,6 +14,7 @@ import { validateReport, ValidationError } from 'src/utils/reportValidation'
 import searchIcon from '../../../../public/icons/search.svg'
 import StationButton from '../../Buttons/StationButton'
 import { Link } from 'react-router-dom'
+import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 
 interface ReportFormProps {
     onReportFormSubmit: (reportedData: Report) => void
@@ -31,6 +32,11 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     const [isSearchExpanded, setIsSearchExpanded] = useState<boolean>(true)
     const { userPosition } = useLocation()
     const { searchValue, setSearchValue, filteredStations } = useStationSearch()
+
+    const startTime = useRef<number>(Date.now())
+    const searchUsed = useRef<boolean>(false)
+    const stationRecommendationUsed = useRef<boolean>(false)
+    const hadErrors = useRef<boolean>(false)
 
     const textareaRef = useRef<HTMLTextAreaElement>(null)
     const [showPrivacySection, setShowPrivacySection] = useState<boolean>(false)
@@ -131,12 +137,26 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         const validationResult = validateReport(report, userPosition)
         if (!validationResult.isValid && !import.meta.env.DEV) {
             setValidationErrors(validationResult.errors)
+            hadErrors.current = true
             return
         }
 
         // If validation passes, submit the report
         onReportFormSubmit(report)
         localStorage.setItem('lastReportedTime', new Date().toISOString())
+        sendAnalyticsEvent('Report Submitted', {
+            meta: {
+                entity: currentEntity,
+                station: currentStation.name,
+                direction: currentDirection?.name,
+                line: currentLine,
+                message: textareaRef.current?.value || '',
+                searchUsed: searchUsed.current,
+                stationRecommendationUsed: stationRecommendationUsed.current,
+                hadErrors: hadErrors.current,
+            },
+            duration: (Date.now() - startTime.current) / 1000,
+        })
     }
 
     const isFormValid = currentStation !== null && (!showPrivacySection || isPrivacyChecked)
@@ -206,6 +226,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                             onClick={() => {
                                 setIsSearchExpanded(!isSearchExpanded)
                                 setSearchValue('')
+                                searchUsed.current = true
                             }}
                         />
                         <input
@@ -226,7 +247,10 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                                 {getClosestStations(3, possibleStations, userPosition).map((station) => (
                                     <SelectField
                                         containerClassName="mb-1"
-                                        onSelect={handleStationSelect}
+                                        onSelect={() => {
+                                            handleStationSelect(station.id)
+                                            stationRecommendationUsed.current = true
+                                        }}
                                         value={'placeholder since the regular station will be selected'}
                                     >
                                         <StationButton
