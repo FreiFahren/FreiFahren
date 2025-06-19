@@ -115,7 +115,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
             direction: currentDirection,
             line: currentLine,
             isHistoric: false,
-            message: 'TODO',
+            message: textareaRef.current?.value || '',
         })
     }
 
