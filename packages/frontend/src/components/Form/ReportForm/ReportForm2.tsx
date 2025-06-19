@@ -1,4 +1,4 @@
-import { FormEvent, useState, useMemo } from 'react'
+import { FormEvent, useState, useMemo, useRef } from 'react'
 
 import { CenterModal } from '../../Modal/CenterModal'
 import FeedbackButton from '../../Buttons/FeedbackButton/FeedbackButton'
@@ -12,6 +12,7 @@ import { useLocation } from 'src/contexts/LocationContext'
 import { useStationSearch } from 'src/hooks/useStationSearch'
 import searchIcon from '../../../../public/icons/search.svg'
 import StationButton from '../../Buttons/StationButton'
+import { Link } from 'react-router-dom'
 
 interface ReportFormProps {
     onReportFormSubmit: (reportedData: Report) => void
@@ -29,6 +30,10 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     const [isSearchExpanded, setIsSearchExpanded] = useState<boolean>(true)
     const { userPosition } = useLocation()
     const { searchValue, setSearchValue, filteredStations } = useStationSearch()
+
+    const textareaRef = useRef<HTMLTextAreaElement>(null)
+    const [showPrivacySection, setShowPrivacySection] = useState<boolean>(false)
+    const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
 
     const [currentEntity, setCurrentEntity] = useState<Entity>(Entity.ALL)
     const [currentLine, setCurrentLine] = useState<string | null>(null)
@@ -114,11 +119,15 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         })
     }
 
-    // todo: replace with actual isValid hook
-    const isButtonActive = currentStation !== null
+    const isFormValid = currentStation !== null && (!showPrivacySection || isPrivacyChecked)
 
     if (showFeedback) {
         return <FeedbackForm openAnimationClass={'open center-animation'} />
+    }
+
+    const handleTextareaChange = () => {
+        const isEmpty = !textareaRef.current?.value || textareaRef.current.value.trim() === ''
+        setShowPrivacySection(!isEmpty)
     }
 
     return (
@@ -250,12 +259,33 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                             <textarea
                                 className="w-full flex-1 resize-none rounded border border-gray-300 p-2"
                                 placeholder="Beschreibe die Situation..."
+                                ref={textareaRef}
+                                onChange={handleTextareaChange}
                             />
                         </section>
+                        {showPrivacySection && (
+                            <section className="mb-2 flex min-h-0 gap-1 text-xs">
+                                <input
+                                    type="checkbox"
+                                    checked={isPrivacyChecked}
+                                    onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
+                                />
+                                <div className="relative">
+                                    <label htmlFor="privacy">
+                                        Ich stimme der{' '}
+                                        <Link to="/datenschutz" className="underline">
+                                            Datenschutzerklärung
+                                        </Link>{' '}
+                                        zu
+                                    </label>
+                                    <span className="absolute right-[-8px] top-0 text-red-500">*</span>
+                                </div>
+                            </section>
+                        )}
                     </>
                 )}
                 <section className="mt-auto flex-shrink-0">
-                    <button className={isButtonActive ? 'button-active' : 'button-inactive'} type="submit">
+                    <button className={isFormValid ? 'button-active' : 'button-inactive'} type="submit">
                         <p>Melden</p>
                     </button>
                     <p className="text-xs">Meldung wird mit @FreiFahren_BE synchronisiert.</p>
