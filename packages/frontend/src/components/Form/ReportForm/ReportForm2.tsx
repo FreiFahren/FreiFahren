@@ -14,7 +14,6 @@ import searchIcon from '../../../../public/icons/search.svg'
 import StationButton from '../../Buttons/StationButton'
 
 interface ReportFormProps {
-    className: string
     onReportFormSubmit: (reportedData: Report) => void
 }
 
@@ -25,7 +24,7 @@ enum Entity {
     ALL = '',
 }
 
-export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) => {
+export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     const [showFeedback, setShowFeedback] = useState<boolean>(false)
     const [isSearchExpanded, setIsSearchExpanded] = useState<boolean>(true)
     const { userPosition } = useLocation()
@@ -119,11 +118,11 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
     const isButtonActive = currentStation !== null
 
     if (showFeedback) {
-        return <FeedbackForm openAnimationClass={className} />
+        return <FeedbackForm openAnimationClass={'open center-animation'} />
     }
 
     return (
-        <CenterModal className={className + ' h-[80dvh] pb-1'}>
+        <CenterModal className={'h-md:h-[60vh] h-lg:h-[50vh] h-xl:h-[45vh] h-[80vh] pb-1'} animationType="popup">
             <form onSubmit={handleSubmit} className="flex h-full flex-col">
                 <section className="mb-2 flex flex-shrink-0 flex-row justify-between">
                     <h1>Neue Meldung</h1>
@@ -191,7 +190,7 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
                         />
                     </div>
                 </div>
-                <div className={`mb-2 min-h-0 ${currentStation ? '' : 'flex-1'}`}>
+                <div className={`min-h-11 ${currentStation ? '' : 'flex-1'}`}>
                     <div className="h-full overflow-y-auto">
                         {userPosition && currentStation === null && searchValue.trim() === '' && (
                             <>
@@ -243,6 +242,17 @@ export const ReportForm = ({ className, onReportFormSubmit }: ReportFormProps) =
                             ))}
                         </SelectField>
                     </section>
+                )}
+                {currentStation && (
+                    <>
+                        <section className="mb-2 flex min-h-0 flex-1 flex-col">
+                            <h2 className="mb-2 flex-shrink-0">Beschreibung</h2>
+                            <textarea
+                                className="w-full flex-1 resize-none rounded border border-gray-300 p-2"
+                                placeholder="Beschreibe die Situation..."
+                            />
+                        </section>
+                    </>
                 )}
                 <section className="mt-auto flex-shrink-0">
                     <button className={isButtonActive ? 'button-active' : 'button-inactive'} type="submit">

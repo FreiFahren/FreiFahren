@@ -387,7 +387,7 @@ const App = () => {
             ) : null}
             {appUIState.isReportFormOpen ? (
                 <>
-                    <ReportForm className="open center-animation" onReportFormSubmit={handleReportFormSubmit} />
+                    <ReportForm onReportFormSubmit={handleReportFormSubmit} />
                     <Backdrop handleClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
                 </>
             ) : null}
