@@ -15,6 +15,7 @@ import searchIcon from '../../../../public/icons/search.svg'
 import StationButton from '../../Buttons/StationButton'
 import { Link } from 'react-router-dom'
 import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
+import { useSubmitReport } from 'src/api/queries'
 
 interface ReportFormProps {
     onReportFormSubmit: (reportedData: Report) => void
@@ -32,6 +33,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     const [isSearchExpanded, setIsSearchExpanded] = useState<boolean>(true)
     const { userPosition } = useLocation()
     const { searchValue, setSearchValue, filteredStations } = useStationSearch()
+    const { mutate: submitReport } = useSubmitReport()
 
     const startTime = useRef<number>(Date.now())
     const searchUsed = useRef<boolean>(false)
@@ -116,8 +118,6 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         }
     }
 
-    // todo: send analytics event
-    // todo: actually submit the report
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         if (!currentStation) return
@@ -140,6 +140,8 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
             hadErrors.current = true
             return
         }
+
+        submitReport(report)
 
         // If validation passes, submit the report
         onReportFormSubmit(report)
@@ -305,7 +307,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                     </section>
                 )}
                 {currentStation && (
-                    <>
+                    <div className="h-sm:block hidden">
                         <section className="mb-2 flex min-h-0 flex-1 flex-col">
                             <h2 className="mb-2 flex-shrink-0">Beschreibung</h2>
                             <textarea
@@ -334,7 +336,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                                 </div>
                             </section>
                         )}
-                    </>
+                    </div>
                 )}
                 <section className="mt-auto flex-shrink-0">
                     {validationErrors.length > 0 && (
