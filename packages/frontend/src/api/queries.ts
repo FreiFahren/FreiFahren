@@ -332,7 +332,11 @@ export const useStationDistance = (
             ) {
                 return null
             }
-            const [userStation] = getClosestStations(1, allStations, { lat: userLat, lng: userLng })
+            const stationsArray = Object.entries(allStations).map(([id, station]) => ({
+                id,
+                ...station,
+            }))
+            const [userStation] = getClosestStations(1, stationsArray, { lat: userLat, lng: userLng })
             const response = await fetch(
                 `${import.meta.env.VITE_API_URL}/v0/transit/distance?inspectorStationId=${encodeURIComponent(
                     stationId
