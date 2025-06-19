@@ -1,5 +1,6 @@
 import { calculateDistance } from './mapUtils'
 import { Report } from './types'
+import { TFunction } from 'i18next'
 
 export interface ValidationError {
     field: string
@@ -22,9 +23,14 @@ interface UserPosition {
  * Returns error if user is more than 1.5km away from the station
  * @param report
  * @param userPosition
+ * @param t translation function
  * @returns ValidationError if user is more than 1.5km away from the station, null otherwise
  */
-const validateStationDistance = (report: Report, userPosition: UserPosition | null): ValidationError | null => {
+const validateStationDistance = (
+    report: Report,
+    userPosition: UserPosition | null,
+    t: TFunction
+): ValidationError | null => {
     if (!userPosition) {
         // If no user position available, skip distance validation
         return null
@@ -43,7 +49,7 @@ const validateStationDistance = (report: Report, userPosition: UserPosition | nu
     if (distance > maxDistanceKm) {
         return {
             field: 'station',
-            message: 'Du bist zu weit von der Station entfernt.',
+            message: t('ReportForm.validation.tooFarFromStation'),
             type: 'distance',
         }
     }
@@ -54,9 +60,10 @@ const validateStationDistance = (report: Report, userPosition: UserPosition | nu
 /**
  * Validates the time between the last reported time and the current time
  * Returns error if the time is less than a certain amount of minutes
+ * @param t translation function
  * @returns ValidationError if the time is too short, null otherwise
  */
-const validateReportTime = (): ValidationError | null => {
+const validateReportTime = (t: TFunction): ValidationError | null => {
     const lastReportedTime = localStorage.getItem('lastReportedTime')
     if (!lastReportedTime) {
         return null
@@ -72,7 +79,7 @@ const validateReportTime = (): ValidationError | null => {
     if (timeDifferenceInMinutes < minTimeBetweenReports) {
         return {
             field: 'time',
-            message: `Warte noch, bevor du eine neue Meldung erstellst.`,
+            message: t('ReportForm.validation.waitBeforeNextReport'),
             type: 'time',
         }
     }
@@ -83,15 +90,15 @@ const validateReportTime = (): ValidationError | null => {
 /**
  * Main validation function that runs all validation checks
  */
-export const validateReport = (report: Report, userPosition: UserPosition | null): ValidationResult => {
+export const validateReport = (report: Report, userPosition: UserPosition | null, t: TFunction): ValidationResult => {
     const errors: ValidationError[] = []
 
-    const distanceError = validateStationDistance(report, userPosition)
+    const distanceError = validateStationDistance(report, userPosition, t)
     if (distanceError) {
         errors.push(distanceError)
     }
 
-    const timeError = validateReportTime()
+    const timeError = validateReportTime(t)
     if (timeError) {
         errors.push(timeError)
     }

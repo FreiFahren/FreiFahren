@@ -1,4 +1,5 @@
 import { FormEvent, useState, useMemo, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { CenterModal } from '../../Modal/CenterModal'
 import FeedbackButton from '../../Buttons/FeedbackButton/FeedbackButton'
@@ -29,6 +30,7 @@ enum Entity {
 }
 
 export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
+    const { t } = useTranslation()
     const [showFeedback, setShowFeedback] = useState<boolean>(false)
     const [isSearchExpanded, setIsSearchExpanded] = useState<boolean>(true)
     const { userPosition } = useLocation()
@@ -134,7 +136,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
             message: textareaRef.current?.value || '',
         }
 
-        const validationResult = validateReport(report, userPosition)
+        const validationResult = validateReport(report, userPosition, t)
         if (!validationResult.isValid && !import.meta.env.DEV) {
             setValidationErrors(validationResult.errors)
             hadErrors.current = true
@@ -176,7 +178,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         <CenterModal className={'h-md:h-[60vh] h-lg:h-[50vh] h-xl:h-[45vh] h-[80vh] pb-1'} animationType="popup">
             <form onSubmit={handleSubmit} className="flex h-full flex-col">
                 <section className="mb-2 flex flex-shrink-0 flex-row justify-between">
-                    <h1>Neue Meldung</h1>
+                    <h1>{t('ReportForm.title')}</h1>
                     <FeedbackButton handleButtonClick={() => setShowFeedback(!showFeedback)} />
                 </section>
                 <section className="mb-2 flex-shrink-0">
@@ -198,7 +200,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                     </SelectField>
                 </section>
                 <section className="mb-2 flex-shrink-0">
-                    <h2>Linie</h2>
+                    <h2>{t('ReportForm.line')}</h2>
                     <SelectField
                         containerClassName="flex items-center justify-between mx-auto w-full overflow-x-visible overflow-y-hidden gap-2"
                         onSelect={(selectedValue) => setCurrentLine(selectedValue ?? '')}
@@ -218,7 +220,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                 <div className="flex h-[35px] flex-shrink-0 flex-row items-center justify-between">
                     <div className="relative self-end">
                         <span className="absolute left-14 top-0 text-red-500">*</span>
-                        <h2>Station</h2>
+                        <h2>{t('ReportForm.station')}</h2>
                     </div>
                     <div className="flex items-center gap-2">
                         <img
@@ -236,7 +238,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                                 isSearchExpanded ? 'w-48' : 'w-0 border-0 p-0'
                             }`}
                             type="text"
-                            placeholder="Suche nach einer Station..."
+                            placeholder={t('ReportForm.searchPlaceholder')}
                             value={searchValue}
                             onChange={(e) => setSearchValue(e.target.value)}
                         />
@@ -282,7 +284,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                 </div>
                 {currentStation && currentLine && possibleDirections.length > 0 && (
                     <section className="mb-2 flex-shrink-0">
-                        <h2>Richtung</h2>
+                        <h2>{t('ReportForm.direction')}</h2>
                         <SelectField
                             containerClassName="flex items-center justify-between mx-auto w-full overflow-x-visible overflow-y-hidden gap-2"
                             onSelect={(selectedValue) => {
@@ -309,10 +311,10 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                 {currentStation && (
                     <div className="h-sm:block hidden">
                         <section className="mb-2 flex min-h-0 flex-1 flex-col">
-                            <h2 className="mb-2 flex-shrink-0">Beschreibung</h2>
+                            <h2 className="mb-2 flex-shrink-0">{t('ReportForm.description')}</h2>
                             <textarea
                                 className="w-full flex-1 resize-none rounded border border-gray-300 p-2"
-                                placeholder="Beschreibe die Situation..."
+                                placeholder={t('ReportForm.descriptionPlaceholder')}
                                 ref={textareaRef}
                                 onChange={handleTextareaChange}
                             />
@@ -326,11 +328,11 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                                 />
                                 <div className="relative">
                                     <label htmlFor="privacy">
-                                        Ich stimme der{' '}
+                                        {t('PrivacyCheckbox.privacy1')}{' '}
                                         <Link to="/datenschutz" className="underline">
-                                            Datenschutzerklärung
-                                        </Link>{' '}
-                                        zu
+                                            {t('PrivacyCheckbox.privacy2')}
+                                        </Link>
+                                        {t('PrivacyCheckbox.privacy3')}
                                     </label>
                                     <span className="absolute right-[-8px] top-0 text-red-500">*</span>
                                 </div>
@@ -349,9 +351,9 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                         </ul>
                     )}
                     <button className={isFormValid ? 'button-active' : 'button-inactive'} type="submit">
-                        <p>Melden</p>
+                        <p>{t('ReportForm.report')}</p>
                     </button>
-                    <p className="text-xs">Meldung wird mit @FreiFahren_BE synchronisiert.</p>
+                    <p className="text-xs">{t('ReportForm.syncText')}</p>
                 </section>
             </form>
         </CenterModal>

@@ -43,12 +43,16 @@
         "station": "Station",
         "direction": "Direction",
         "description": "Description",
-        "descriptionPlaceholder": "Description",
+        "descriptionPlaceholder": "Describe the situation...",
         "privacy1": "I agree to the",
         "privacy2": "Privacy policy",
         "privacy3": ".",
         "report": "Submit",
-        "syncText": "Reports synced with @FreiFahren_BE"
+        "syncText": "Reports synced with @FreiFahren_BE",
+        "validation": {
+            "tooFarFromStation": "You are too far from the station.",
+            "waitBeforeNextReport": "Please wait before creating a new report."
+        }
     },
     "PrivacyCheckbox": {
         "privacy1": "I agree to the",
