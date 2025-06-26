@@ -17,6 +17,7 @@ import StationButton from '../../Buttons/StationButton'
 import { Link } from 'react-router-dom'
 import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 import { useSubmitReport } from 'src/api/queries'
+import { TextAreaWithPrivacy, TextAreaWithPrivacyRef } from '../TextAreaWithPrivacy/TextAreaWithPrivacy'
 
 interface ReportFormProps {
     onReportFormSubmit: (reportedData: Report) => void
@@ -42,10 +43,10 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     const stationRecommendationUsed = useRef<boolean>(false)
     const hadErrors = useRef<boolean>(false)
 
-    const textareaRef = useRef<HTMLTextAreaElement>(null)
-    const [showPrivacySection, setShowPrivacySection] = useState<boolean>(false)
-    const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
+    const textareaWithPrivacyRef = useRef<TextAreaWithPrivacyRef>(null)
     const [validationErrors, setValidationErrors] = useState<ValidationError[]>([])
+    const [textareaContent, setTextareaContent] = useState<string>('')
+    const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
 
     const [currentEntity, setCurrentEntity] = useState<Entity>(Entity.ALL)
     const [currentLine, setCurrentLine] = useState<string | null>(null)
@@ -133,7 +134,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
             direction: currentDirection,
             line: currentLine,
             isHistoric: false,
-            message: textareaRef.current?.value || '',
+            message: textareaWithPrivacyRef.current?.value || '',
         }
 
         const validationResult = validateReport(report, userPosition, t)
@@ -154,7 +155,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                 station: currentStation.name,
                 direction: currentDirection?.name,
                 line: currentLine,
-                message: textareaRef.current?.value || '',
+                message: textareaWithPrivacyRef.current?.value || '',
                 searchUsed: searchUsed.current,
                 stationRecommendationUsed: stationRecommendationUsed.current,
                 hadErrors: hadErrors.current,
@@ -163,15 +164,10 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         })
     }
 
-    const isFormValid = currentStation !== null && (!showPrivacySection || isPrivacyChecked)
+    const isFormValid = currentStation !== null && (!textareaContent.trim() || isPrivacyChecked)
 
     if (showFeedback) {
         return <FeedbackForm openAnimationClass={'open center-animation'} />
-    }
-
-    const handleTextareaChange = () => {
-        const isEmpty = !textareaRef.current?.value || textareaRef.current.value.trim() === ''
-        setShowPrivacySection(!isEmpty)
     }
 
     return (
@@ -315,32 +311,14 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                     <div className="h-sm:block hidden">
                         <section className="mb-2 flex min-h-0 flex-1 flex-col">
                             <h2 className="mb-2 flex-shrink-0">{t('ReportForm.description')}</h2>
-                            <textarea
-                                className="w-full flex-1 resize-none rounded border border-gray-300 p-2"
+                            <TextAreaWithPrivacy
+                                ref={textareaWithPrivacyRef}
                                 placeholder={t('ReportForm.descriptionPlaceholder')}
-                                ref={textareaRef}
-                                onChange={handleTextareaChange}
+                                className="w-full flex-1 resize-none rounded border border-gray-300 p-2"
+                                onTextChange={setTextareaContent}
+                                onPrivacyChange={setIsPrivacyChecked}
                             />
                         </section>
-                        {showPrivacySection && (
-                            <section className="mb-2 flex min-h-0 gap-1 text-xs">
-                                <input
-                                    type="checkbox"
-                                    checked={isPrivacyChecked}
-                                    onChange={() => setIsPrivacyChecked(!isPrivacyChecked)}
-                                />
-                                <div className="relative">
-                                    <label htmlFor="privacy">
-                                        {t('PrivacyCheckbox.privacy1')}{' '}
-                                        <Link to="/datenschutz" className="underline">
-                                            {t('PrivacyCheckbox.privacy2')}
-                                        </Link>
-                                        {t('PrivacyCheckbox.privacy3')}
-                                    </label>
-                                    <span className="absolute right-[-8px] top-0 text-red-500">*</span>
-                                </div>
-                            </section>
-                        )}
                     </div>
                 )}
                 <section className="mt-auto flex-shrink-0">
