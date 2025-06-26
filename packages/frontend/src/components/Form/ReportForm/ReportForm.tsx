@@ -175,7 +175,10 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     }
 
     return (
-        <CenterModal className={'h-md:h-[60vh] h-lg:h-[50vh] h-xl:h-[45vh] h-[80vh] pb-1'} animationType="popup">
+        <CenterModal
+            className={'h-md:h-[60vh] h-lg:h-[50vh] h-xl:h-[45vh] h-[80vh] max-w-md pb-1'}
+            animationType="popup"
+        >
             <form onSubmit={handleSubmit} className="flex h-full flex-col">
                 <section className="mb-2 flex flex-shrink-0 flex-row justify-between">
                     <h1>{t('ReportForm.title')}</h1>
