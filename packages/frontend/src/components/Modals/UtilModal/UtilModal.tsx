@@ -70,10 +70,7 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children }) => {
             ) : null}
             {isLegalDisclaimerOpen ? (
                 <>
-                    <LegalDisclaimer
-                        openAnimationClass="open center-animation high-z-index"
-                        handleConfirm={() => setIsLegalDisclaimerOpen(false)}
-                    />
+                    <LegalDisclaimer handleConfirm={() => setIsLegalDisclaimerOpen(false)} />
                     <Backdrop handleClick={() => setIsLegalDisclaimerOpen(false)} Zindex={3} />
                 </>
             ) : null}
