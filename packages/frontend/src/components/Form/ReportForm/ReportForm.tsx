@@ -18,6 +18,7 @@ import { Link } from 'react-router-dom'
 import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 import { useSubmitReport } from 'src/api/queries'
 import { TextAreaWithPrivacy, TextAreaWithPrivacyRef } from '../TextAreaWithPrivacy/TextAreaWithPrivacy'
+import { SubmitButton } from '../../common/SubmitButton/SubmitButton'
 
 interface ReportFormProps {
     onReportFormSubmit: (reportedData: Report) => void
@@ -172,7 +173,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
 
     return (
         <CenterModal
-            className={'h-md:h-[60vh] h-lg:h-[50vh] h-xl:h-[45vh] h-[80vh] max-w-md pb-1'}
+            className={'h-md:h-[60vh] h-lg:h-[60vh] h-xl:h-[45vh] h-[80vh] max-w-md pb-1'}
             animationType="popup"
         >
             <form onSubmit={handleSubmit} className="flex h-full flex-col">
@@ -317,6 +318,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                                 className="w-full flex-1 resize-none rounded border border-gray-300 p-2"
                                 onTextChange={setTextareaContent}
                                 onPrivacyChange={setIsPrivacyChecked}
+                                rows={2}
                             />
                         </section>
                     </div>
@@ -331,9 +333,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                             ))}
                         </ul>
                     )}
-                    <button className={isFormValid ? 'button-active' : 'button-inactive'} type="submit">
-                        <p>{t('ReportForm.report')}</p>
-                    </button>
+                    <SubmitButton isValid={isFormValid}>{t('ReportForm.report')}</SubmitButton>
                     <p className="text-xs">{t('ReportForm.syncText')}</p>
                 </section>
             </form>

@@ -1,6 +1,6 @@
 import './FeedbackForm.css'
 
-import { FC, useActionState, useRef } from 'react'
+import { FC, useActionState, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useFeedback } from '../../../api/queries'
@@ -8,6 +8,7 @@ import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
 import { ContactSection } from '../../Modals/ContactSection/ContactSection'
 import { FeedbackSummaryModal } from '../../Modals/FeedbackSummaryModal/FeedbackSummaryModal'
 import { TextAreaWithPrivacy, TextAreaWithPrivacyRef } from '../TextAreaWithPrivacy/TextAreaWithPrivacy'
+import { SubmitButton } from '../../common/SubmitButton/SubmitButton'
 
 interface FeedbackFormProps {
     openAnimationClass: string
@@ -18,8 +19,10 @@ const FeedbackForm: FC<FeedbackFormProps> = ({ openAnimationClass, onClose }) =>
     const { t } = useTranslation()
     const textareaWithPrivacyRef = useRef<TextAreaWithPrivacyRef>(null)
     const { mutateAsync: submitFeedback } = useFeedback()
+    const [textareaContent, setTextareaContent] = useState<string>('')
+    const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
 
-    const isValid = textareaWithPrivacyRef.current?.value?.trim() && textareaWithPrivacyRef.current?.isPrivacyChecked
+    const isValid = !!textareaContent.trim() && isPrivacyChecked
 
     const formAction = async (previousState: boolean | null, formData: FormData): Promise<boolean> => {
         if (!isValid) {
@@ -56,10 +59,12 @@ const FeedbackForm: FC<FeedbackFormProps> = ({ openAnimationClass, onClose }) =>
                     rows={1}
                     autoResize={true}
                     name="feedback"
+                    onTextChange={setTextareaContent}
+                    onPrivacyChange={setIsPrivacyChecked}
                 />
-                <button type="submit" className={isValid ? 'action' : 'button-gray'} disabled={!isValid || isPending}>
+                <SubmitButton isValid={isValid} disabled={!isValid || isPending}>
                     {isPending ? t('FeedbackForm.submitting') : t('FeedbackForm.submit')}
-                </button>
+                </SubmitButton>
             </form>
             <hr />
             <ContactSection />
