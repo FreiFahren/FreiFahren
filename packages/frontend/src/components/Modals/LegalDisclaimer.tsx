@@ -36,7 +36,7 @@ const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ handleConfirm }) => {
                 </SubmitButton>
                 <ul className="flex justify-end">
                     <li className="ml-2 text-xs">
-                        <Link to="/Datenschutz" className="text-gray-500 underline">
+                        <Link to="/Datenschutz" className="text-white underline">
                             {t('LegalDisclaimer.privacy')}
                         </Link>
                     </li>
