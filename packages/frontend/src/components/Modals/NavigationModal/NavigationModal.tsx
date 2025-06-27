@@ -10,15 +10,17 @@ import { useLocation } from '../../../contexts/LocationContext'
 import { getClosestStations } from '../../../hooks/getClosestStations'
 import { sendAnalyticsEvent, useTrackComponentView } from '../../../hooks/useAnalytics'
 import { useStationSearch } from '../../../hooks/useStationSearch'
-import { Itinerary, StationProperty } from '../../../utils/types'
-import AutocompleteInputForm from '../../Form/AutocompleteInputForm/AutocompleteInputForm'
+import { Itinerary, Station } from '../../../utils/types'
+import { SelectField } from '../../Form/SelectField/SelectField'
+import StationButton from '../../Buttons/StationButton'
 import { Skeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
+import { CenterModal } from '../CenterModal'
 import ItineraryDetail from './ItineraryDetail'
 import { ItineraryItem } from './ItineraryItem'
 
 interface NavigationModalProps {
     className?: string
-    initialEndStation?: StationProperty | null
+    initialEndStation?: Station | null
     initialRoute?: Itinerary | null
     savedRoute?: Itinerary | null
     onSaveRoute?: (route: Itinerary) => void
@@ -39,7 +41,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
 
     const { t } = useTranslation()
     const { userPosition } = useLocation()
-    const { data: allStations } = useStations()
+    const { data: stationsData } = useStations()
     const startInputRef = useRef<HTMLInputElement>(null)
     const endInputRef = useRef<HTMLInputElement>(null)
 
@@ -47,8 +49,8 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
     const [activeInput, setActiveInput] = useState<ActiveInput>('start')
     const [startLocation, setStartLocation] = useState<string | null>(null)
     const [endLocation, setEndLocation] = useState<string | null>(() => {
-        if (initialEndStation && allStations) {
-            const stationEntry = Object.entries(allStations).find(
+        if (initialEndStation && stationsData) {
+            const stationEntry = Object.entries(stationsData).find(
                 ([, station]) => station.name === initialEndStation.name
             )
             return stationEntry ? stationEntry[0] : null
@@ -59,7 +61,21 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
     // If an initial route is provided, show it immediately
     const [selectedRoute, setSelectedRoute] = useState<Itinerary | null>(initialRoute ?? null)
 
-    const { searchValue, setSearchValue, filteredStations: possibleStations } = useStationSearch()
+    const { searchValue, setSearchValue, filteredStations } = useStationSearch()
+
+    // Convert stations data to Station[] format like in ReportForm
+    const allStations: Station[] = stationsData
+        ? Object.entries(stationsData)
+              .map(([id, stationProperty]) => ({
+                  id,
+                  name: stationProperty.name,
+                  coordinates: stationProperty.coordinates,
+                  lines: stationProperty.lines,
+              }))
+              .sort((a, b) => a.name.localeCompare(b.name))
+        : []
+
+    const possibleStations = searchValue.trim() !== '' ? filteredStations : allStations
 
     const { data: navigationData, isLoading } = useNavigation(
         startLocation !== null ? startLocation : '',
@@ -71,14 +87,14 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
     )
 
     const handleStationSelect = useCallback(
-        (stationName: string | null): void => {
-            if (stationName === null || !allStations) return
+        (stationId: string | null): void => {
+            if (stationId === null || !allStations.length) return
 
-            const selectedStation = Object.entries(allStations).find(([, station]) => station.name === stationName)
+            const selectedStation = allStations.find((station) => station.id === stationId)
             if (!selectedStation) return
 
             if (activeInput === 'start') {
-                setStartLocation(selectedStation[0])
+                setStartLocation(selectedStation.id)
                 if (endLocation === null) {
                     setTimeout(() => {
                         if (endInputRef.current) {
@@ -89,7 +105,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
                     setActiveInput(null)
                 }
             } else if (activeInput === 'end') {
-                setEndLocation(selectedStation[0])
+                setEndLocation(selectedStation.id)
                 setActiveInput(null)
             }
 
@@ -109,21 +125,22 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
 
     // set start location to the closest station if user has no start location
     useEffect(() => {
-        if (userPosition && allStations && startLocation === null) {
+        if (userPosition && allStations.length && startLocation === null) {
             const closestStations = getClosestStations(1, allStations, userPosition)
             if (closestStations.length > 0) {
-                const stationName = allStations[Object.keys(closestStations[0])[0]].name
-                handleStationSelect(stationName)
+                handleStationSelect(closestStations[0].id)
             }
         }
     }, [userPosition, allStations, startLocation, handleStationSelect])
 
     const getInputValue = (input: ActiveInput): string => {
-        if (input === 'start' && startLocation !== null && allStations) {
-            return allStations[startLocation].name
+        if (input === 'start' && startLocation !== null) {
+            const station = allStations.find((s) => s.id === startLocation)
+            return station ? station.name : ''
         }
-        if (input === 'end' && endLocation !== null && allStations) {
-            return allStations[endLocation].name
+        if (input === 'end' && endLocation !== null) {
+            const station = allStations.find((s) => s.id === endLocation)
+            return station ? station.name : ''
         }
         return activeInput === input ? searchValue : ''
     }
@@ -151,67 +168,84 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
     const renderContent = (): React.ReactNode => {
         if (navigationData && startLocation !== null && endLocation !== null) {
             return (
-                <div className="navigation-data-container">
-                    <div className="safest-route">
-                        <ItineraryItem
-                            itinerary={navigationData.safestItinerary}
-                            onClick={() => {
-                                setSelectedRoute(navigationData.safestItinerary)
-                                sendAnalyticsEvent('Route selected', {
-                                    meta: {
-                                        isSafe: true,
-                                    },
-                                })
-                            }}
-                        />
-                        <div className="safest-route-tag">{t('NavigationModal.safestRoute')}</div>
-                    </div>
-                    {navigationData.alternativeItineraries.map((route) => (
-                        <ItineraryItem
-                            key={`route-${route.startTime}-${route.endTime}`}
-                            itinerary={route}
-                            onClick={() => {
-                                setSelectedRoute(route)
-                                sendAnalyticsEvent('Route selected', {
-                                    meta: {
-                                        isSafe: false,
-                                    },
-                                })
-                            }}
-                        />
-                    ))}
-                </div>
-            )
-        }
-
-        if (isLoading && startLocation !== null && endLocation !== null) {
-            return (
-                <div className="navigation-data-container">
-                    <div className="skeleton-container">
-                        {Array.from({ length: 10 }).map((_, i) => (
-                            <Skeleton key={`skeleton-${new Date().getTime()}-${i * Math.random()}`} />
+                <div className="navigation-data-container flex h-full flex-col">
+                    <div className="flex-1 overflow-y-auto p-2 pl-6">
+                        <div className="safest-route">
+                            <ItineraryItem
+                                itinerary={navigationData.safestItinerary}
+                                onClick={() => {
+                                    setSelectedRoute(navigationData.safestItinerary)
+                                    sendAnalyticsEvent('Route selected', {
+                                        meta: {
+                                            isSafe: true,
+                                        },
+                                    })
+                                }}
+                            />
+                            <div className="safest-route-tag">{t('NavigationModal.safestRoute')}</div>
+                        </div>
+                        {navigationData.alternativeItineraries.map((route) => (
+                            <ItineraryItem
+                                key={`route-${route.startTime}-${route.endTime}`}
+                                itinerary={route}
+                                onClick={() => {
+                                    setSelectedRoute(route)
+                                    sendAnalyticsEvent('Route selected', {
+                                        meta: {
+                                            isSafe: false,
+                                        },
+                                    })
+                                }}
+                            />
                         ))}
                     </div>
                 </div>
             )
         }
 
+        if (isLoading && startLocation !== null && endLocation !== null) {
+            return (
+                <div className="navigation-data-container flex h-full flex-col">
+                    <div className="flex-1 overflow-y-auto p-2 pl-6">
+                        <div className="skeleton-container">
+                            {Array.from({ length: 10 }).map((_, i) => (
+                                <Skeleton key={`skeleton-${new Date().getTime()}-${i * Math.random()}`} />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+
         return (
-            <div className="autocomplete-container">
-                <AutocompleteInputForm
-                    items={possibleStations}
-                    onSelect={handleStationSelect}
-                    value={activeInput === 'start' ? startLocation : endLocation}
-                    getDisplayValue={(station: StationProperty | null) => station?.name ?? ''}
-                    highlightElements={
-                        userPosition && activeInput === 'start'
-                            ? getClosestStations(3, possibleStations, userPosition).reduce(
-                                  (acc, station) => ({ ...acc, ...station }),
-                                  {}
-                              )
-                            : undefined
-                    }
-                />
+            <div className="station-selection-container flex h-full flex-col">
+                <div className="flex-1 overflow-y-auto p-2 pl-6">
+                    {userPosition && !searchValue.trim() && activeInput === 'start' && (
+                        <>
+                            {getClosestStations(3, possibleStations, userPosition).map((station) => (
+                                <SelectField
+                                    key={`recommended-${station.id}`}
+                                    containerClassName="mb-1"
+                                    onSelect={() => handleStationSelect(station.id)}
+                                    value={'placeholder since the regular station will be selected'}
+                                >
+                                    <StationButton station={station} data-select-value={station.id} />
+                                </SelectField>
+                            ))}
+                            <hr className="my-2" />
+                        </>
+                    )}
+                    {possibleStations.map((station) => (
+                        <SelectField
+                            key={`station-${station.id}`}
+                            containerClassName="mb-1 p-0"
+                            onSelect={handleStationSelect}
+                            value={activeInput === 'start' ? startLocation : endLocation}
+                        >
+                            <StationButton station={station} data-select-value={station.id} />
+                        </SelectField>
+                    ))}
+                </div>
             </div>
         )
     }
@@ -240,43 +274,51 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
     }
 
     return (
-        <div className={`navigation-modal modal container ${className}`}>
-            <div className="align-child-on-line">
-                <h1>{t('NavigationModal.title')}</h1>
-                <FeedbackButton handleButtonClick={() => setIsFeedbackModalOpen(true)} />
-            </div>
-            <div className="location-inputs">
-                <div className="input-container">
-                    <img src="/icons/search.svg" alt="Search" className="search-icon no-filter" />
-                    <input
-                        ref={startInputRef}
-                        type="text"
-                        placeholder={t('NavigationModal.startLocation')}
-                        value={getInputValue('start')}
-                        onFocus={() => handleInputFocus('start')}
-                        onChange={(event) => {
-                            setSearchValue(event.target.value)
-                            setStartLocation(null)
-                        }}
-                    />
+        <CenterModal animationType="popup" className={`${className} flex h-full flex-col overflow-y-auto pt-0`}>
+            <div className="bg-background sticky top-0 flex-shrink-0 pt-2">
+                <div className="align-child-on-line">
+                    <h1>{t('NavigationModal.title')}</h1>
+                    <FeedbackButton handleButtonClick={() => setIsFeedbackModalOpen(true)} />
                 </div>
-                <div className="input-container">
-                    <img src="/icons/search.svg" alt="Search" className="search-icon no-filter" />
-                    <input
-                        ref={endInputRef}
-                        type="text"
-                        placeholder={t('NavigationModal.endLocation')}
-                        value={getInputValue('end')}
-                        onFocus={() => handleInputFocus('end')}
-                        onChange={(event) => {
-                            setSearchValue(event.target.value)
-                            setEndLocation(null)
-                        }}
-                    />
+                <div className="location-inputs mb-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                        <img
+                            src="/icons/location-pin-alt-1-svgrepo-com.svg"
+                            alt="Search"
+                            className="h-4 w-4 brightness-0 invert"
+                        />
+                        <input
+                            ref={startInputRef}
+                            type="text"
+                            placeholder={t('NavigationModal.startLocation')}
+                            value={getInputValue('start')}
+                            onFocus={() => handleInputFocus('start')}
+                            onChange={(event) => {
+                                setSearchValue(event.target.value)
+                                setStartLocation(null)
+                            }}
+                            className="flex-1 rounded-sm border-2 border-gray-300 p-1"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <img src="/icons/flag-svgrepo-com.svg" alt="Search" className="h-4 w-4 brightness-0 invert" />
+                        <input
+                            ref={endInputRef}
+                            type="text"
+                            placeholder={t('NavigationModal.endLocation')}
+                            value={getInputValue('end')}
+                            onFocus={() => handleInputFocus('end')}
+                            onChange={(event) => {
+                                setSearchValue(event.target.value)
+                                setEndLocation(null)
+                            }}
+                            className="flex-1 rounded-sm border-2 border-gray-300 p-1"
+                        />
+                    </div>
                 </div>
             </div>
-            {renderContent()}
-        </div>
+            <div className="min-h-0 flex-1">{renderContent()}</div>
+        </CenterModal>
     )
 }
 

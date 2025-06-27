@@ -285,10 +285,6 @@ textarea::placeholder {
     margin-top: var(--margin-xs);
 }
 
-.container p {
-    margin: var(--margin-s) 0;
-}
-
 .highlight {
     border: 2px solid var(--color-red) !important;
 }

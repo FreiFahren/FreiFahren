@@ -11,10 +11,10 @@ const StationButton = ({ station, ...props }: StationButtonProps) => {
             key={station.id}
             type="button"
             data-select-value={station.id}
-            className="flex h-fit min-w-0 flex-1 items-center justify-start"
+            className="m-0 flex h-fit min-w-0 flex-1 items-center justify-start p-0"
             {...props}
         >
-            <p className="text-sm font-semibold">{station.name}</p>
+            <p className="m-0 p-0 text-sm font-semibold">{station.name}</p>
         </button>
     )
 }
