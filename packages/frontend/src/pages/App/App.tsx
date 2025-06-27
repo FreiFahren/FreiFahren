@@ -362,10 +362,7 @@ const App = () => {
         <div className="App">
             {appMounted && shouldShowLegalDisclaimer ? (
                 <>
-                    <LegalDisclaimer
-                        openAnimationClass="open center-animation"
-                        handleConfirm={onConfirmLegalDisclaimer}
-                    />
+                    <LegalDisclaimer handleConfirm={onConfirmLegalDisclaimer} />
                     <Backdrop handleClick={() => highlightElement('legal-disclaimer')} />
                 </>
             ) : null}
