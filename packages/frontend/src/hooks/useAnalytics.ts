@@ -15,7 +15,7 @@ const isPirschLoaded = (): boolean => typeof window.pirsch !== 'undefined'
  * @returns {Promise<void>} Resolves when Pirsch is loaded, rejects on timeout.
  */
 const waitForPirsch = (timeout = 2000): Promise<void> =>
-    new Promise((resolve, reject) => {
+    new Promise((resolve) => {
         if (isPirschLoaded()) {
             resolve()
             return
@@ -28,7 +28,6 @@ const waitForPirsch = (timeout = 2000): Promise<void> =>
                 resolve()
             } else if (Date.now() - startTime > timeout) {
                 clearInterval(interval)
-                reject(new Error('Pirsch failed to load'))
             }
         }, 100)
     })
