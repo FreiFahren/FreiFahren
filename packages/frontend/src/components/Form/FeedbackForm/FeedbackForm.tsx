@@ -1,14 +1,13 @@
 import './FeedbackForm.css'
 
-import { ChangeEvent, FC, useActionState, useRef, useState } from 'react'
+import { FC, useActionState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useFeedback } from '../../../api/queries'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
-import { useFormValidity } from '../../../hooks/useFormValidity'
 import { ContactSection } from '../../Modals/ContactSection/ContactSection'
 import { FeedbackSummaryModal } from '../../Modals/FeedbackSummaryModal/FeedbackSummaryModal'
-import { PrivacyCheckbox } from '../PrivacyCheckbox/PrivacyCheckbox'
+import { TextAreaWithPrivacy, TextAreaWithPrivacyRef } from '../TextAreaWithPrivacy/TextAreaWithPrivacy'
 
 interface FeedbackFormProps {
     openAnimationClass: string
@@ -17,14 +16,10 @@ interface FeedbackFormProps {
 
 const FeedbackForm: FC<FeedbackFormProps> = ({ openAnimationClass, onClose }) => {
     const { t } = useTranslation()
-    const textareaRef = useRef<HTMLTextAreaElement>(null)
+    const textareaWithPrivacyRef = useRef<TextAreaWithPrivacyRef>(null)
     const { mutateAsync: submitFeedback } = useFeedback()
-    const [isChecked, setIsChecked] = useState(false)
 
-    const { isValid } = useFormValidity({
-        textareaRef,
-        isPrivacyChecked: isChecked,
-    })
+    const isValid = textareaWithPrivacyRef.current?.value?.trim() && textareaWithPrivacyRef.current?.isPrivacyChecked
 
     const formAction = async (previousState: boolean | null, formData: FormData): Promise<boolean> => {
         if (!isValid) {
@@ -46,13 +41,6 @@ const FeedbackForm: FC<FeedbackFormProps> = ({ openAnimationClass, onClose }) =>
 
     const [showSummary, action, isPending] = useActionState(formAction, false)
 
-    const handleInput = (event: ChangeEvent<HTMLTextAreaElement>) => {
-        const textarea = event.target
-        // Adjust textarea height
-        textarea.style.height = 'auto'
-        textarea.style.height = `${textarea.scrollHeight}px`
-    }
-
     if (showSummary) {
         return <FeedbackSummaryModal openAnimationClass={openAnimationClass} handleCloseModal={() => onClose?.()} />
     }
@@ -62,14 +50,13 @@ const FeedbackForm: FC<FeedbackFormProps> = ({ openAnimationClass, onClose }) =>
             <h1>{t('FeedbackForm.title')}</h1>
             <p className="description">{t('FeedbackForm.description')}</p>
             <form action={action}>
-                <textarea
-                    ref={textareaRef}
-                    name="feedback"
+                <TextAreaWithPrivacy
+                    ref={textareaWithPrivacyRef}
                     placeholder={t('FeedbackForm.descriptionPlaceholder')}
-                    onChange={handleInput}
                     rows={1}
+                    autoResize={true}
+                    name="feedback"
                 />
-                <PrivacyCheckbox isChecked={isChecked} onChange={() => setIsChecked(!isChecked)} />
                 <button type="submit" className={isValid ? 'action' : 'button-gray'} disabled={!isValid || isPending}>
                     {isPending ? t('FeedbackForm.submitting') : t('FeedbackForm.submit')}
                 </button>
