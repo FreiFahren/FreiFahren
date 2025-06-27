@@ -1,7 +1,7 @@
 import { FormEvent, useState, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { CenterModal } from '../../Modal/CenterModal'
+import { CenterModal } from '../../Modals/CenterModal'
 import FeedbackButton from '../../Buttons/FeedbackButton/FeedbackButton'
 import { FeedbackForm } from '../FeedbackForm/FeedbackForm'
 import { SelectField } from '../SelectField/SelectField'
