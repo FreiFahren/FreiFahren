@@ -1,8 +1,8 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { CenterModal } from '../CenterModal'
-import { SubmitButton } from '../../common/SubmitButton/SubmitButton'
+import { CenterModal } from './CenterModal'
+import { SubmitButton } from '../common/SubmitButton/SubmitButton'
 
 interface LegalDisclaimerProps {
     handleConfirm: () => void

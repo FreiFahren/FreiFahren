@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom'
 import { useAnalyticsOptOut } from '../../../hooks/useAnalyticsOptOut'
 import { Backdrop } from '../../Miscellaneous/Backdrop/Backdrop'
 import { ContactSection } from '../ContactSection/ContactSection'
-import { LegalDisclaimer } from '../LegalDisclaimer/LegalDisclaimer'
+import { LegalDisclaimer } from '../LegalDisclaimer'
 
 interface UtilModalProps {
     className: string
@@ -62,7 +62,7 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children }) => {
             </div>
             {isContactModalOpen ? (
                 <>
-                    <div className="contact-section modal container open center-animation">
+                    <div className="contact-section modal open center-animation container">
                         <ContactSection />
                     </div>
                     <Backdrop handleClick={() => setIsContactModalOpen(false)} Zindex={3} />
