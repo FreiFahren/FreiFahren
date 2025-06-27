@@ -48,6 +48,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false)
     const [activeInput, setActiveInput] = useState<ActiveInput>('start')
     const [startLocation, setStartLocation] = useState<string | null>(null)
+    const [hasUserInteractedWithStart, setHasUserInteractedWithStart] = useState(false)
     const [endLocation, setEndLocation] = useState<string | null>(() => {
         if (initialEndStation && stationsData) {
             const stationEntry = Object.entries(stationsData).find(
@@ -95,6 +96,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
 
             if (activeInput === 'start') {
                 setStartLocation(selectedStation.id)
+                setHasUserInteractedWithStart(true)
                 if (endLocation === null) {
                     setTimeout(() => {
                         if (endInputRef.current) {
@@ -123,15 +125,15 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
         ]
     )
 
-    // set start location to the closest station if user has no start location
+    // set start location to the closest station if user has no start location (only on initial load)
     useEffect(() => {
-        if (userPosition && allStations.length && startLocation === null) {
+        if (userPosition && allStations.length && startLocation === null && !hasUserInteractedWithStart) {
             const closestStations = getClosestStations(1, allStations, userPosition)
             if (closestStations.length > 0) {
                 handleStationSelect(closestStations[0].id)
             }
         }
-    }, [userPosition, allStations, startLocation, handleStationSelect])
+    }, [userPosition, allStations, startLocation, hasUserInteractedWithStart, handleStationSelect])
 
     const getInputValue = (input: ActiveInput): string => {
         if (input === 'start' && startLocation !== null) {
@@ -296,6 +298,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
                             onChange={(event) => {
                                 setSearchValue(event.target.value)
                                 setStartLocation(null)
+                                setHasUserInteractedWithStart(true)
                             }}
                             className="flex-1 rounded-sm border-2 border-gray-300 p-1"
                         />
