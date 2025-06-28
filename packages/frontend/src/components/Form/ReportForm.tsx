@@ -130,7 +130,27 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
             return filteredStations.filter((station) => !currentLine || station.lines.includes(currentLine))
         }
 
-        return allStations.filter((station) => !currentLine || station.lines.includes(currentLine))
+        const lineFilteredStations = allStations.filter(
+            (station) => !currentLine || station.lines.includes(currentLine)
+        )
+
+        // If a line is selected, order stations according to the line's station order
+        if (currentLine && linesData) {
+            const lineData = linesData.find(([lineName]) => lineName === currentLine)
+            if (lineData) {
+                const [, stationIds] = lineData
+                // for quick lookup of station order
+                const stationOrderMap = new Map(stationIds.map((id, index) => [id, index]))
+
+                return lineFilteredStations.sort((a, b) => {
+                    const orderA = stationOrderMap.get(a.id) ?? Number.MAX_SAFE_INTEGER
+                    const orderB = stationOrderMap.get(b.id) ?? Number.MAX_SAFE_INTEGER
+                    return orderA - orderB
+                })
+            }
+        }
+
+        return lineFilteredStations
     })()
 
     const handleStationSelect = (selectedValue: string | null) => {
