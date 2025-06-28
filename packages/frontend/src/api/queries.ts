@@ -340,7 +340,7 @@ export const useStationDistance = (
             const response = await fetch(
                 `${import.meta.env.VITE_API_URL}/v0/transit/distance?inspectorStationId=${encodeURIComponent(
                     stationId
-                )}&userStationId=${encodeURIComponent(Object.keys(userStation)[0])}`
+                )}&userStationId=${encodeURIComponent(userStation.id)}`
             )
             const data = await response.json()
             if (typeof data === 'number') return data
