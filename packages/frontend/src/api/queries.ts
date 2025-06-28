@@ -153,7 +153,13 @@ export const useCurrentReports = () => {
         structuralSharing: true,
     })
 
-    return { ...queryResult, isFetching: queryResult.isFetching }
+    return {
+        data: queryResult.data,
+        error: queryResult.error,
+        isLoading: queryResult.isLoading,
+        isFetching: queryResult.isFetching,
+        refetch: queryResult.refetch,
+    }
 }
 
 export const useLast24HourReports = () => {

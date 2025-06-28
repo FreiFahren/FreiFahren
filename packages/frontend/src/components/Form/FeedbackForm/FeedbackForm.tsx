@@ -5,10 +5,10 @@ import { useTranslation } from 'react-i18next'
 
 import { useFeedback } from '../../../api/queries'
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
+import { SubmitButton } from '../../common/SubmitButton/SubmitButton'
 import { ContactSection } from '../../Modals/ContactSection/ContactSection'
 import { FeedbackSummaryModal } from '../../Modals/FeedbackSummaryModal/FeedbackSummaryModal'
 import { TextAreaWithPrivacy, TextAreaWithPrivacyRef } from '../TextAreaWithPrivacy/TextAreaWithPrivacy'
-import { SubmitButton } from '../../common/SubmitButton/SubmitButton'
 
 interface FeedbackFormProps {
     openAnimationClass: string
@@ -57,10 +57,10 @@ const FeedbackForm: FC<FeedbackFormProps> = ({ openAnimationClass, onClose }) =>
                     ref={textareaWithPrivacyRef}
                     placeholder={t('FeedbackForm.descriptionPlaceholder')}
                     rows={1}
-                    autoResize={true}
+                    autoResize
                     name="feedback"
-                    onTextChange={setTextareaContent}
-                    onPrivacyChange={setIsPrivacyChecked}
+                    onTextChange={(text) => setTextareaContent(text)}
+                    onPrivacyChange={(checked) => setIsPrivacyChecked(checked)}
                 />
                 <SubmitButton isValid={isValid} disabled={!isValid || isPending}>
                     {isPending ? t('FeedbackForm.submitting') : t('FeedbackForm.submit')}

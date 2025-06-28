@@ -1,4 +1,4 @@
-import { forwardRef, useState, useImperativeHandle, useRef } from 'react'
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
@@ -42,7 +42,7 @@ export const TextAreaWithPrivacy = forwardRef<TextAreaWithPrivacyRef, TextAreaWi
                 textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
             }
 
-            onTextChange?.(textareaRef.current?.value || '')
+            onTextChange?.(textareaRef.current?.value ?? '')
         }
 
         const handlePrivacyChange = () => {
@@ -54,14 +54,14 @@ export const TextAreaWithPrivacy = forwardRef<TextAreaWithPrivacyRef, TextAreaWi
         return (
             <>
                 <textarea
-                    className={className || 'min-h-24 w-full flex-1 resize-none rounded border border-gray-300 p-2'}
+                    className={className ?? 'min-h-24 w-full flex-1 resize-none rounded border border-gray-300 p-2'}
                     placeholder={placeholder}
                     ref={textareaRef}
                     onChange={handleTextareaChange}
                     rows={rows}
                     name={name}
                 />
-                {showPrivacySection && (
+                {showPrivacySection ? (
                     <section className="mb-2 mt-1 flex min-h-0 gap-1 text-xs">
                         <input type="checkbox" checked={isPrivacyChecked} onChange={handlePrivacyChange} />
                         <div className="relative">
@@ -75,8 +75,11 @@ export const TextAreaWithPrivacy = forwardRef<TextAreaWithPrivacyRef, TextAreaWi
                             <span className="absolute right-[-8px] top-0 text-red-500">*</span>
                         </div>
                     </section>
-                )}
+                ) : null}
             </>
         )
     }
 )
+
+// for debugging purposes
+TextAreaWithPrivacy.displayName = 'TextAreaWithPrivacy'

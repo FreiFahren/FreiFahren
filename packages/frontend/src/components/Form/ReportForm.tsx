@@ -1,23 +1,22 @@
-import { FormEvent, useState, useMemo, useRef } from 'react'
+import { FormEvent, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-
-import { CenterModal } from '../Modals/CenterModal'
-import FeedbackButton from '../Buttons/FeedbackButton/FeedbackButton'
-import { FeedbackForm } from './FeedbackForm/FeedbackForm'
-import { SelectField } from './SelectField/SelectField'
-import { Line } from '../Miscellaneous/Line/Line'
-import { useLines, useStations } from 'src/api/queries'
-import { Report, Station } from 'src/utils/types'
-import { getClosestStations } from 'src/hooks/getClosestStations'
+import { useLines, useStations, useSubmitReport } from 'src/api/queries'
 import { useLocation } from 'src/contexts/LocationContext'
+import { getClosestStations } from 'src/hooks/getClosestStations'
+import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 import { useStationSearch } from 'src/hooks/useStationSearch'
 import { validateReport, ValidationError } from 'src/utils/reportValidation'
+import { Report, Station } from 'src/utils/types'
+
 import searchIcon from '../../../public/icons/search.svg'
+import FeedbackButton from '../Buttons/FeedbackButton/FeedbackButton'
 import StationButton from '../Buttons/StationButton'
-import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
-import { useSubmitReport } from 'src/api/queries'
-import { TextAreaWithPrivacy, TextAreaWithPrivacyRef } from './TextAreaWithPrivacy/TextAreaWithPrivacy'
 import { SubmitButton } from '../common/SubmitButton/SubmitButton'
+import { Line } from '../Miscellaneous/Line/Line'
+import { CenterModal } from '../Modals/CenterModal'
+import { FeedbackForm } from './FeedbackForm/FeedbackForm'
+import { SelectField } from './SelectField/SelectField'
+import { TextAreaWithPrivacy, TextAreaWithPrivacyRef } from './TextAreaWithPrivacy/TextAreaWithPrivacy'
 
 interface ReportFormProps {
     onReportFormSubmit: (reportedData: Report) => void
@@ -55,25 +54,38 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
 
     const { data: linesData } = useLines()
     const allLines = linesData?.map(([line]) => line) ?? []
-    const possibleLines = currentStation
-        ? allLines.filter((line) => currentStation.lines.includes(line))
-        : currentEntity === Entity.ALL || currentEntity === null
-          ? allLines
-          : currentEntity === Entity.T // exception because T stands for tram but we want Metro trams and regular trams
-            ? allLines.filter((line) => line.startsWith('M') || /^\d+$/.test(line))
-            : allLines.filter((line) => line.startsWith(currentEntity))
+    const possibleLines = (() => {
+        if (currentStation) {
+            return allLines.filter((line) => currentStation.lines.includes(line))
+        }
+
+        if (currentEntity === Entity.ALL) {
+            return allLines
+        }
+
+        if (currentEntity === Entity.T) {
+            // exception because T stands for tram but we want Metro trams and regular trams
+            return allLines.filter((line) => line.startsWith('M') || /^\d+$/.test(line))
+        }
+
+        return allLines.filter((line) => line.startsWith(currentEntity))
+    })()
 
     const { data: stationsData } = useStations()
-    const allStations: Station[] = stationsData
-        ? Object.entries(stationsData)
-              .map(([id, stationProperty]) => ({
-                  id,
-                  name: stationProperty.name,
-                  coordinates: stationProperty.coordinates,
-                  lines: stationProperty.lines,
-              }))
-              .sort((a, b) => a.name.localeCompare(b.name))
-        : []
+    const allStations: Station[] = useMemo(
+        () =>
+            stationsData
+                ? Object.entries(stationsData)
+                      .map(([id, stationProperty]) => ({
+                          id,
+                          name: stationProperty.name,
+                          coordinates: stationProperty.coordinates,
+                          lines: stationProperty.lines,
+                      }))
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                : [],
+        [stationsData]
+    )
 
     const possibleDirections = useMemo(() => {
         if (!currentLine || !allStations.length || !linesData) return []
@@ -85,12 +97,13 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         const [, stationIds] = lineData
         if (stationIds.length === 0) return []
         if (stationIds.length === 1) {
-            const station = allStations.find((s) => s.id === stationIds[0])
+            const [stationId] = stationIds
+            const station = allStations.find((s) => s.id === stationId)
             return station ? [station] : []
         }
 
         // Get first and last station ids from the line data (in correct order)
-        const firstStationId = stationIds[0]
+        const [firstStationId] = stationIds
         const lastStationId = stationIds[stationIds.length - 1]
 
         // Look up the actual Station objects
@@ -104,14 +117,20 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         return directions
     }, [currentLine, allStations, linesData])
 
-    let possibleStations = currentStation
-        ? [currentStation]
-        : searchValue.trim() !== ''
-          ? filteredStations.filter((station) => !currentLine || station.lines.includes(currentLine))
-          : allStations.filter((station) => !currentLine || station.lines.includes(currentLine))
+    const possibleStations = (() => {
+        if (currentStation) {
+            return [currentStation]
+        }
+
+        if (searchValue.trim() !== '') {
+            return filteredStations.filter((station) => !currentLine || station.lines.includes(currentLine))
+        }
+
+        return allStations.filter((station) => !currentLine || station.lines.includes(currentLine))
+    })()
 
     const handleStationSelect = (selectedValue: string | null) => {
-        const selectedStation = selectedValue ? possibleStations.find((s) => s.id === selectedValue) || null : null
+        const selectedStation = selectedValue ? (possibleStations.find((s) => s.id === selectedValue) ?? null) : null
         setCurrentStation(selectedStation)
         setIsSearchExpanded(selectedStation === null) // expand again if user deselects the station
 
@@ -134,7 +153,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
             direction: currentDirection,
             line: currentLine,
             isHistoric: false,
-            message: textareaWithPrivacyRef.current?.value || '',
+            message: textareaWithPrivacyRef.current?.value ?? '',
         }
 
         const validationResult = validateReport(report, userPosition, t)
@@ -155,7 +174,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                 station: currentStation.name,
                 direction: currentDirection?.name,
                 line: currentLine,
-                message: textareaWithPrivacyRef.current?.value || '',
+                message: textareaWithPrivacyRef.current?.value ?? '',
                 searchUsed: searchUsed.current,
                 stationRecommendationUsed: stationRecommendationUsed.current,
                 hadErrors: hadErrors.current,
@@ -167,14 +186,11 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     const isFormValid = currentStation !== null && (!textareaContent.trim() || isPrivacyChecked)
 
     if (showFeedback) {
-        return <FeedbackForm openAnimationClass={'open center-animation'} />
+        return <FeedbackForm openAnimationClass="open center-animation" />
     }
 
     return (
-        <CenterModal
-            className={'h-md:h-[60vh] h-lg:h-[60vh] h-xl:h-[45vh] h-[80vh] max-w-md pb-1'}
-            animationType="popup"
-        >
+        <CenterModal className="h-md:h-[60vh] h-lg:h-[60vh] h-xl:h-[45vh] h-[80vh] max-w-md pb-1" animationType="popup">
             <form onSubmit={handleSubmit} className="flex h-full flex-col">
                 <section className="mb-2 flex flex-shrink-0 flex-row justify-between">
                     <h1>{t('ReportForm.title')}</h1>
@@ -222,16 +238,18 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                         <h2>{t('ReportForm.station')}</h2>
                     </div>
                     <div className="flex items-center gap-2">
-                        <img
-                            src={searchIcon}
-                            alt="Search"
-                            className="h-4 w-4 cursor-pointer brightness-0 invert"
+                        <button
+                            type="button"
+                            className="h-4 w-4 focus:outline-none"
                             onClick={() => {
                                 setIsSearchExpanded(!isSearchExpanded)
                                 setSearchValue('')
                                 searchUsed.current = true
                             }}
-                        />
+                            aria-label="Toggle search"
+                        >
+                            <img src={searchIcon} alt="Search" className="h-4 w-4 brightness-0 invert" />
+                        </button>
                         <input
                             className={`ml-4 rounded-sm border-2 border-gray-300 transition-[width] duration-300 ${
                                 isSearchExpanded ? 'w-48' : 'w-0 border-0 p-0'
@@ -239,64 +257,66 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                             type="text"
                             placeholder={t('ReportForm.searchPlaceholder')}
                             value={searchValue}
-                            onChange={(e) => setSearchValue(e.target.value)}
+                            onChange={(event) => setSearchValue(event.target.value)}
                         />
                     </div>
                 </div>
                 <div className={`min-h-11 ${currentStation ? '' : 'flex-1'}`}>
                     <div className="h-full overflow-y-auto">
-                        {userPosition && currentStation === null && searchValue.trim() === '' && (
+                        {userPosition && currentStation === null && searchValue.trim() === '' ? (
                             <>
                                 {getClosestStations(3, possibleStations, userPosition).map((station) => (
                                     <SelectField
+                                        key={`recommended${station.id}`}
                                         containerClassName="mb-1"
                                         onSelect={() => {
                                             handleStationSelect(station.id)
                                             stationRecommendationUsed.current = true
                                         }}
-                                        value={'placeholder since the regular station will be selected'}
+                                        value="placeholder since the regular station will be selected"
                                     >
                                         <StationButton
                                             station={station}
                                             data-select-value={station.id}
-                                            key={'recommended' + station.id}
+                                            key={`recommended${station.id}`}
                                         />
                                     </SelectField>
                                 ))}
                                 <hr className="my-2" />
                             </>
-                        )}
+                        ) : null}
                         {possibleStations.map((station) => (
                             <SelectField
+                                key={`station${station.id}`}
                                 containerClassName="mb-1"
                                 onSelect={handleStationSelect}
-                                value={currentStation?.id || null}
+                                value={currentStation?.id ?? null}
                             >
                                 <StationButton
                                     station={station}
                                     data-select-value={station.id}
-                                    key={'station' + station.id}
+                                    key={`station${station.id}`}
                                 />
                             </SelectField>
                         ))}
                     </div>
                 </div>
-                {currentStation && currentLine && possibleDirections.length > 0 && (
+                {currentStation && currentLine && possibleDirections.length > 0 ? (
                     <section className="mb-2 flex-shrink-0">
                         <h2>{t('ReportForm.direction')}</h2>
                         <SelectField
                             containerClassName="flex items-center justify-between mx-auto w-full overflow-x-visible overflow-y-hidden gap-2"
                             onSelect={(selectedValue) => {
                                 const selectedStation = selectedValue
-                                    ? possibleDirections.find((d) => d.id === selectedValue) || null
+                                    ? (possibleDirections.find((d) => d.id === selectedValue) ?? null)
                                     : null
                                 setCurrentDirection(selectedStation)
                             }}
-                            value={currentDirection?.id || null}
+                            value={currentDirection?.id ?? null}
                         >
                             {possibleDirections.map((direction) => (
                                 <button
-                                    key={'direction' + direction.id}
+                                    key={`direction${direction.id}`}
                                     type="button"
                                     data-select-value={direction.id}
                                     className="flex h-fit min-w-0 flex-1 items-center justify-start"
@@ -306,8 +326,8 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                             ))}
                         </SelectField>
                     </section>
-                )}
-                {currentStation && (
+                ) : null}
+                {currentStation ? (
                     <div className="h-sm:block hidden">
                         <section className="mb-2 flex min-h-0 flex-1 flex-col">
                             <h2 className="mb-2 flex-shrink-0">{t('ReportForm.description')}</h2>
@@ -315,23 +335,23 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                                 ref={textareaWithPrivacyRef}
                                 placeholder={t('ReportForm.descriptionPlaceholder')}
                                 className="w-full flex-1 resize-none rounded border border-gray-300 p-2"
-                                onTextChange={setTextareaContent}
-                                onPrivacyChange={setIsPrivacyChecked}
+                                onTextChange={(text) => setTextareaContent(text)}
+                                onPrivacyChange={(checked) => setIsPrivacyChecked(checked)}
                                 rows={2}
                             />
                         </section>
                     </div>
-                )}
+                ) : null}
                 <section className="mt-auto flex-shrink-0">
-                    {validationErrors.length > 0 && (
+                    {validationErrors.length > 0 ? (
                         <ul className="mb-2 rounded border border-red-300 bg-red-50 p-2 text-left">
-                            {validationErrors.map((error, index) => (
-                                <li key={index} className="text-xs text-red-600">
+                            {validationErrors.map((error) => (
+                                <li key={error.message} className="text-xs text-red-600">
                                     {error.message}
                                 </li>
                             ))}
                         </ul>
-                    )}
+                    ) : null}
                     <SubmitButton isValid={isFormValid}>{t('ReportForm.report')}</SubmitButton>
                     <p className="text-xs">{t('ReportForm.syncText')}</p>
                 </section>

@@ -1,11 +1,11 @@
 import './SearchBar.css'
 
 import React, { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Station } from 'src/utils/types'
 
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
 import { useStationSearch } from '../../../hooks/useStationSearch'
-import { useTranslation } from 'react-i18next'
 
 type SearchBarProps = {
     handleSelect: (station: Station) => void

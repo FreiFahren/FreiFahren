@@ -1,7 +1,8 @@
-import { calculateDistance } from './mapUtils'
-import { Report } from './types'
 import { TFunction } from 'i18next'
 import { REPORT_COOLDOWN_MINUTES } from 'src/constants'
+
+import { calculateDistance } from './mapUtils'
+import { Report } from './types'
 
 export interface ValidationError {
     field: string

@@ -14,7 +14,7 @@ const extractTextContent = (element: React.ReactElement): string => {
         }
 
         if (React.isValidElement(node)) {
-            const props = node.props as any
+            const props = node.props as Record<string, unknown>
 
             // Check for explicit select value prop (convention-based approach)
             if (props['data-select-value']) {
@@ -56,7 +56,7 @@ const extractTextContent = (element: React.ReactElement): string => {
                         }
                     }
                 } else {
-                    return findLeafText(props.children)
+                    return findLeafText(props.children as React.ReactNode)
                 }
             }
         }
@@ -64,7 +64,7 @@ const extractTextContent = (element: React.ReactElement): string => {
         return null
     }
 
-    return findLeafText(element) || ''
+    return findLeafText(element) ?? ''
 }
 
 interface SelectFieldProps {

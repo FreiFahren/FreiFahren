@@ -5,8 +5,7 @@ interface StationButtonProps {
     'data-select-value'?: string
 }
 
-const StationButton = ({ station, ...props }: StationButtonProps) => {
-    return (
+const StationButton = ({ station, ...props }: StationButtonProps) => (
         <button
             key={station.id}
             type="button"
@@ -17,6 +16,5 @@ const StationButton = ({ station, ...props }: StationButtonProps) => {
             <p className="m-0 p-0 text-sm font-semibold">{station.name}</p>
         </button>
     )
-}
 
 export default StationButton

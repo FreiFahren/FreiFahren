@@ -1,8 +1,9 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { CenterModal } from './CenterModal'
+
 import { SubmitButton } from '../common/SubmitButton/SubmitButton'
+import { CenterModal } from './CenterModal'
 
 interface LegalDisclaimerProps {
     handleConfirm: () => void
@@ -31,7 +32,7 @@ const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ handleConfirm }) => {
                 </section>
             </div>
             <div className="mt-4 flex flex-shrink-0 flex-col items-stretch">
-                <SubmitButton isValid={true} onClick={handleConfirm} className="mb-4">
+                <SubmitButton isValid onClick={handleConfirm} className="mb-4">
                     {t('LegalDisclaimer.confirm')}
                 </SubmitButton>
                 <ul className="flex justify-end">

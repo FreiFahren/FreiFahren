@@ -1,6 +1,6 @@
 import './NavigationModal.css'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 import { FeedbackForm } from 'src/components/Form/FeedbackForm/FeedbackForm'
@@ -11,8 +11,8 @@ import { getClosestStations } from '../../../hooks/getClosestStations'
 import { sendAnalyticsEvent, useTrackComponentView } from '../../../hooks/useAnalytics'
 import { useStationSearch } from '../../../hooks/useStationSearch'
 import { Itinerary, Station } from '../../../utils/types'
-import { SelectField } from '../../Form/SelectField/SelectField'
 import StationButton from '../../Buttons/StationButton'
+import { SelectField } from '../../Form/SelectField/SelectField'
 import { Skeleton } from '../../Miscellaneous/LoadingPlaceholder/Skeleton'
 import { CenterModal } from '../CenterModal'
 import ItineraryDetail from './ItineraryDetail'
@@ -65,16 +65,20 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
     const { searchValue, setSearchValue, filteredStations } = useStationSearch()
 
     // Convert stations data to Station[] format like in ReportForm
-    const allStations: Station[] = stationsData
-        ? Object.entries(stationsData)
-              .map(([id, stationProperty]) => ({
-                  id,
-                  name: stationProperty.name,
-                  coordinates: stationProperty.coordinates,
-                  lines: stationProperty.lines,
-              }))
-              .sort((a, b) => a.name.localeCompare(b.name))
-        : []
+    const allStations: Station[] = useMemo(
+        () =>
+            stationsData
+                ? Object.entries(stationsData)
+                      .map(([id, stationProperty]) => ({
+                          id,
+                          name: stationProperty.name,
+                          coordinates: stationProperty.coordinates,
+                          lines: stationProperty.lines,
+                      }))
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                : [],
+        [stationsData]
+    )
 
     const possibleStations = searchValue.trim() !== '' ? filteredStations : allStations
 
@@ -222,21 +226,21 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
         return (
             <div className="station-selection-container flex h-full flex-col">
                 <div className="flex-1 overflow-y-auto p-2 pl-6">
-                    {userPosition && !searchValue.trim() && activeInput === 'start' && (
+                    {userPosition && !searchValue.trim() && activeInput === 'start' ? (
                         <>
                             {getClosestStations(3, possibleStations, userPosition).map((station) => (
                                 <SelectField
                                     key={`recommended-${station.id}`}
                                     containerClassName="mb-1"
                                     onSelect={() => handleStationSelect(station.id)}
-                                    value={'placeholder since the regular station will be selected'}
+                                    value="placeholder since the regular station will be selected"
                                 >
                                     <StationButton station={station} data-select-value={station.id} />
                                 </SelectField>
                             ))}
                             <hr className="my-2" />
                         </>
-                    )}
+                    ) : null}
                     {possibleStations.map((station) => (
                         <SelectField
                             key={`station-${station.id}`}

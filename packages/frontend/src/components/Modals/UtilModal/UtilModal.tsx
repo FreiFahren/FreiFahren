@@ -29,7 +29,11 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children }) => {
                 {children}
                 <div className="modal-header">
                     <h1>{t('UtilModal.title')}</h1>
-                    <button className="action" onClick={() => setIsContactModalOpen(true)} type="button">
+                    <button
+                        className="action h-10 w-full rounded-sm"
+                        onClick={() => setIsContactModalOpen(true)}
+                        type="button"
+                    >
                         {t('UtilModal.feedback-button')}
                     </button>
                 </div>

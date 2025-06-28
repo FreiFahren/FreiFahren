@@ -174,20 +174,6 @@ ul {
     padding: 0;
 }
 
-button {
-    width: 100%;
-    height: 2.5em;
-    background-color: var(--color-primary);
-    border-radius: var(--borderRadius-small);
-    color: var(--color-background);
-    font-size: var(--font-s);
-    font-weight: 600;
-    text-align: center;
-    min-width: 100px;
-    transition: var(--transition-default);
-    cursor: pointer;
-}
-
 button:hover {
     filter: brightness(1.1);
 }
