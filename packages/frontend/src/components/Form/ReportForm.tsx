@@ -33,6 +33,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     const { t } = useTranslation()
     const [showFeedback, setShowFeedback] = useState<boolean>(false)
     const [isSearchExpanded, setIsSearchExpanded] = useState<boolean>(true)
+    const [isSearchFocused, setIsSearchFocused] = useState<boolean>(false)
     const { userPosition } = useLocation()
     const { searchValue, setSearchValue, filteredStations } = useStationSearch()
     const { mutate: submitReport } = useSubmitReport()
@@ -157,6 +158,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         const selectedStation = selectedValue ? (possibleStations.find((s) => s.id === selectedValue) ?? null) : null
         setCurrentStation(selectedStation)
         setIsSearchExpanded(selectedStation === null) // expand again if user deselects the station
+        setIsSearchFocused(false) // Hide search focus when station is selected
 
         // Clear validation errors when station changes
         if (validationErrors.length > 0) {
@@ -216,11 +218,19 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     return (
         <CenterModal className="h-md:h-[60vh] h-lg:h-[60vh] h-xl:h-[45vh] h-[80vh] max-w-md pb-1" animationType="popup">
             <form onSubmit={handleSubmit} className="flex h-full flex-col">
-                <section className="mb-2 flex flex-shrink-0 flex-row justify-between">
+                <section
+                    className={`mb-2 flex flex-shrink-0 flex-row justify-between transition-all duration-300 ${
+                        isSearchFocused ? 'hidden md:block' : ''
+                    }`}
+                >
                     <h1>{t('ReportForm.title')}</h1>
                     <FeedbackButton handleButtonClick={() => setShowFeedback(!showFeedback)} />
                 </section>
-                <section className="mb-2 flex-shrink-0">
+                <section
+                    className={`mb-2 flex-shrink-0 transition-all duration-300 ${
+                        isSearchFocused ? 'hidden md:block' : ''
+                    }`}
+                >
                     <SelectField
                         containerClassName="flex items-center justify-between mx-auto w-full h-10 gap-2"
                         fieldClassName="flex justify-center items-center"
@@ -238,7 +248,11 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                         </button>
                     </SelectField>
                 </section>
-                <section className="mb-2 flex-shrink-0">
+                <section
+                    className={`mb-2 flex-shrink-0 transition-all duration-300 ${
+                        isSearchFocused ? 'hidden md:block' : ''
+                    }`}
+                >
                     <h2>{t('ReportForm.line')}</h2>
                     <SelectField
                         containerClassName="flex items-center justify-between mx-auto w-full overflow-x-visible overflow-y-hidden gap-2"
@@ -282,10 +296,20 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                             placeholder={t('ReportForm.searchPlaceholder')}
                             value={searchValue}
                             onChange={(event) => setSearchValue(event.target.value)}
+                            onFocus={() => {
+                                setIsSearchFocused(true)
+                                searchUsed.current = true
+                            }}
+                            onBlur={() => {
+                                // small delay to allow station selection to complete before hiding elements
+                                setTimeout(() => {
+                                    setIsSearchFocused(false)
+                                }, 150)
+                            }}
                         />
                     </div>
                 </div>
-                <div className={`min-h-11 ${currentStation ? '' : 'flex-1'}`}>
+                <div className={`min-h-11 ${currentStation ? '' : 'flex-1'} ${isSearchFocused ? 'flex-1' : ''}`}>
                     <div className="h-full overflow-y-auto">
                         {userPosition && currentStation === null && searchValue.trim() === '' ? (
                             <>
@@ -326,7 +350,11 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                     </div>
                 </div>
                 {currentStation && currentLine && possibleDirections.length > 0 ? (
-                    <section className="mb-2 flex-shrink-0">
+                    <section
+                        className={`mb-2 flex-shrink-0 transition-all duration-300 ${
+                            isSearchFocused ? 'hidden md:block' : ''
+                        }`}
+                    >
                         <h2>{t('ReportForm.direction')}</h2>
                         <SelectField
                             containerClassName="flex items-center justify-between mx-auto w-full overflow-x-visible overflow-y-hidden gap-2"
@@ -352,7 +380,11 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                     </section>
                 ) : null}
                 {currentStation && !isFirefox ? (
-                    <div className="h-sm:block hidden">
+                    <div
+                        className={`h-sm:block transition-all duration-300 ${
+                            isSearchFocused ? 'hidden md:block' : 'hidden'
+                        }`}
+                    >
                         <section className="mb-2 flex min-h-0 flex-1 flex-col">
                             <h2 className="mb-2 flex-shrink-0">{t('ReportForm.description')}</h2>
                             <TextAreaWithPrivacy
@@ -366,7 +398,11 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                         </section>
                     </div>
                 ) : null}
-                <section className="mt-auto flex-shrink-0">
+                <section
+                    className={`mt-auto flex-shrink-0 transition-all duration-300 ${
+                        isSearchFocused ? 'hidden md:block' : ''
+                    }`}
+                >
                     {validationErrors.length > 0 ? (
                         <ul className="mb-2 rounded border border-red-300 bg-red-50 p-2 text-left">
                             {validationErrors.map((error) => (
