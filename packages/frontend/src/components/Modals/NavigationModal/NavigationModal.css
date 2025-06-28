@@ -5,13 +5,6 @@ div.modal.container.navigation-modal {
     height: 70vh;
 }
 
-.location-inputs {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin-bottom: 20px;
-}
-
 .input-container {
     position: relative;
     width: 100%;
@@ -24,14 +17,6 @@ div.modal.container.navigation-modal {
     transform: translateY(-50%);
     width: 15px;
     height: 15px;
-}
-
-.location-inputs input {
-    border-radius: var(--borderRadius-small);
-    border: var(--border-default);
-    padding: var(--padding-s);
-    padding-left: 30px;
-    width: calc(100% - 30px - var(--padding-s));
 }
 
 .autocomplete-container {

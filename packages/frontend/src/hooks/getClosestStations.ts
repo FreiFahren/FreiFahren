@@ -1,22 +1,22 @@
 import { calculateDistance } from 'src/utils/mapUtils'
-import { StationList, StationProperty } from 'src/utils/types'
+import { Station } from 'src/utils/types'
 
 export const getClosestStations = (
     numberOfStations: number,
-    stationsList: StationList,
+    stationsList: Station[],
     location: { lat: number; lng: number }
-): { [key: string]: StationProperty }[] => {
-    const distances = Object.entries(stationsList).map(([station, stationData]) => {
+): Station[] => {
+    const distances = stationsList.map((station) => {
         const distance = calculateDistance(
             location.lat,
             location.lng,
-            stationData.coordinates.latitude,
-            stationData.coordinates.longitude
+            station.coordinates.latitude,
+            station.coordinates.longitude
         )
 
-        return { station, stationData, distance }
+        return { station, distance }
     })
 
     distances.sort((a, b) => a.distance - b.distance)
-    return distances.slice(0, numberOfStations).map((entry) => ({ [entry.station]: entry.stationData }))
+    return distances.slice(0, numberOfStations).map((entry) => entry.station)
 }

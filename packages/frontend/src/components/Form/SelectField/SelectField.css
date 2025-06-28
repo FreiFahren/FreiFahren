@@ -21,20 +21,3 @@
     overflow-x: visible;
     overflow-y: hidden;
 }
-
-.large-selector {
-    height: 40px;
-}
-
-.medium-selector {
-    height: 25px;
-}
-
-.small-selector {
-    height: 20px;
-}
-
-.entity-type-selector {
-    justify-content: center;
-    align-items: center;
-}

@@ -28,11 +28,11 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({
 
     const [showFeedback, setShowFeedback] = useState<boolean>(false)
     if (showFeedback) {
-        return <FeedbackForm openAnimationClass={openAnimationClass} />
+        return <FeedbackForm openAnimationClass={openAnimationClass ?? ''} />
     }
 
     return (
-        <div className={`report-summary-modal container modal ${openAnimationClass}`}>
+        <div className={`report-summary-modal modal container ${openAnimationClass}`}>
             <FeedbackButton handleButtonClick={() => setShowFeedback(true)} />
             <div className="report-summary-modal-content">
                 <div className="check-icon">
@@ -49,7 +49,7 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({
                 </span>
                 <p>{t('ReportSummaryModal.description')}</p>
                 <span className="disclaimer">{t('ReportSummaryModal.syncText')}</span>
-                <button className="action" onClick={handleCloseModal} type="button">
+                <button className="action h-10 w-full rounded-sm" onClick={handleCloseModal} type="button">
                     {t('ReportSummaryModal.button')}
                 </button>
             </div>

@@ -1,9 +1,7 @@
-import './LayerSwitcher.css'
-
 import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { Backdrop } from '../../Miscellaneous/Backdrop/Backdrop'
+import { Backdrop } from '../Miscellaneous/Backdrop/Backdrop'
 
 interface LayerSwitcherProps {
     changeLayer: (layer: string) => void
@@ -26,40 +24,42 @@ const LayerSwitcher: React.FC<LayerSwitcherProps> = ({ changeLayer, isRiskLayerO
         <>
             <button
                 type="button"
-                className="layer-switcher small-button align-child-on-line"
+                className="bg-background fixed right-[15px] top-[80px] z-0 flex h-[45px] w-[100px] cursor-pointer items-center justify-center rounded-2xl border-2 border-black shadow-xl"
                 onClick={() => setAreLayerOptionsVisible(!areLayerOptionsVisible)}
                 aria-label="Button to open the layer switcher"
             >
                 <p>{t('LayerSwitcher.mode')}</p>
-                <img src="/icons/layers.svg" alt="Layers" />
+                <img src="/icons/layers.svg" alt="Layers" className="ml-1" />
             </button>
             {areLayerOptionsVisible ? (
                 <Backdrop handleClick={() => setAreLayerOptionsVisible(false)} BackgroundColor="rgba(0, 0, 0, 0)" />
             ) : null}
             <div
-                className={`layer-options small-button align-child-on-line ${areLayerOptionsVisible ? 'visible' : ''}`}
+                className={`bg-background duration-250 fixed right-[135px] top-[65px] flex h-[60px] w-fit cursor-pointer flex-row rounded-2xl border-2 border-black p-1 shadow-xl transition-opacity ${areLayerOptionsVisible ? 'z-[2] opacity-100' : 'z-0 opacity-0'}`}
             >
                 <div
+                    className="flex h-[50px] w-[50px] flex-col items-center justify-center"
                     {...(areLayerOptionsVisible ? { onClick: () => closeModalAndHighlightSelectedLayer('risk') } : {})}
                 >
                     <img
                         src="/icons/risk.png"
                         alt="Showing how the risk layer looks like"
-                        className={isRiskLayerOpen ? 'active' : ''}
+                        className={`h-[35px] w-[35px] border-2 ${isRiskLayerOpen ? 'rounded-xl border-gray-300' : 'border-transparent'}`}
                         draggable={areLayerOptionsVisible}
                     />
-                    <p>{t('LayerSwitcher.risk')}</p>
+                    <p className="text-xs">{t('LayerSwitcher.risk')}</p>
                 </div>
                 <div
+                    className="flex h-[50px] w-[50px] flex-col items-center justify-center"
                     {...(areLayerOptionsVisible ? { onClick: () => closeModalAndHighlightSelectedLayer('line') } : {})}
                 >
                     <img
                         src="/icons/lines.png"
                         alt="Showing how the line layer looks like"
-                        className={isRiskLayerOpen ? '' : 'active'}
+                        className={`h-[35px] w-[35px] border-2 ${!isRiskLayerOpen ? 'rounded-xl border-gray-300' : 'border-transparent'}`}
                         draggable={areLayerOptionsVisible}
                     />
-                    <p>{t('LayerSwitcher.lines')}</p>
+                    <p className="text-xs">{t('LayerSwitcher.lines')}</p>
                 </div>
             </div>
         </>

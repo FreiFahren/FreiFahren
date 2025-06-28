@@ -84,7 +84,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, handleCloseModal
     }
 
     if (showFeedback) {
-        return <FeedbackForm openAnimationClass={className} />
+        return <FeedbackForm openAnimationClass={className ?? ''} />
     }
 
     return (
@@ -95,7 +95,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, handleCloseModal
                         type="button"
                         key={tab}
                         onClick={() => handleTabChange(tab)}
-                        className={currentTab === tab ? 'active' : ''}
+                        className={`${currentTab === tab ? 'active' : ''} min-w-20`}
                     >
                         <h3>{t(`ReportsModal.${tab}`)}</h3>
                     </button>

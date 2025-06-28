@@ -2,10 +2,10 @@ import Fuse from 'fuse.js'
 import { useMemo, useState } from 'react'
 
 import { useStations } from '../api/queries'
-import { StationProperty } from '../utils/types'
+import { Station } from '../utils/types'
 
 type SearchResult = {
-    filteredStations: Record<string, StationProperty>
+    filteredStations: Station[]
     searchValue: string
     setSearchValue: (value: string) => void
 }
@@ -20,48 +20,56 @@ export const useStationSearch = (initialSearchValue: string = '', limit?: number
     const [searchValue, setSearchValue] = useState(initialSearchValue)
     const { data: allStations } = useStations()
 
+    // Convert StationList to Station array
+    const stationsArray = useMemo(() => {
+        if (!allStations) return []
+        return Object.entries(allStations).map(([id, stationProperty]) => ({
+            id,
+            name: stationProperty.name,
+            coordinates: stationProperty.coordinates,
+            lines: stationProperty.lines,
+        }))
+    }, [allStations])
+
     // Helper function to remove single S and U from station names for better search
     const preprocessName = (name: string): string => name.replace(/^(S|U)\s+/i, ' ')
 
     // Create fuzzy search instance
     const fuse = useMemo(() => {
-        if (allStations === undefined) return null
+        if (stationsArray.length === 0) return null
 
-        const stations = Object.entries(allStations).map(([id, station]) => ({
-            id,
+        const processedStations = stationsArray.map((station) => ({
             ...station,
             processedName: preprocessName(station.name),
         }))
 
-        return new Fuse(stations, {
+        return new Fuse(processedStations, {
             keys: ['processedName', 'name'],
             threshold: 0.4,
             distance: 100,
         })
-    }, [allStations])
+    }, [stationsArray])
 
     // Filter stations based on search input
     const filteredStations = useMemo(() => {
-        if (allStations === undefined) return {}
+        if (stationsArray.length === 0) return []
         if (searchValue === '' || fuse === null) {
             // Return all stations or limited number if specified
-            const stations = Object.entries(allStations)
-
-            if (limit !== undefined && stations.length > limit) {
-                return Object.fromEntries(stations.slice(0, limit))
-            }
-
-            return allStations
+            return limit !== undefined ? stationsArray.slice(0, limit) : stationsArray
         }
 
         const processedSearchValue = preprocessName(searchValue)
         const searchResults = fuse.search(processedSearchValue)
 
-        // Limit results if specified
+        // Limit results if specified and extract the station objects
         const limitedResults = limit !== undefined ? searchResults.slice(0, limit) : searchResults
-
-        return Object.fromEntries(limitedResults.map((result) => [result.item.id, allStations[result.item.id]]))
-    }, [allStations, searchValue, fuse, limit])
+        return limitedResults.map((result) => ({
+            id: result.item.id,
+            name: result.item.name,
+            coordinates: result.item.coordinates,
+            lines: result.item.lines,
+        }))
+    }, [stationsArray, searchValue, fuse, limit])
 
     return {
         filteredStations,

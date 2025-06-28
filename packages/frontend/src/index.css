@@ -88,8 +88,19 @@ body,
 textarea,
 input[type='text'] {
     margin: 0;
-    font-family: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
-        'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    font-family:
+        'Raleway',
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        'Roboto',
+        'Oxygen',
+        'Ubuntu',
+        'Cantarell',
+        'Fira Sans',
+        'Droid Sans',
+        'Helvetica Neue',
+        sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
@@ -161,26 +172,6 @@ img.no-filter {
 ul {
     list-style: none;
     padding: 0;
-}
-
-button {
-    width: 100%;
-    height: 2.5em;
-    background-color: var(--color-primary);
-    border: none;
-    border-radius: var(--borderRadius-small);
-    color: var(--color-background);
-    font-size: var(--font-s);
-    font-weight: 600;
-    text-align: center;
-    min-width: 100px;
-    transition: var(--transition-default);
-    cursor: pointer;
-}
-
-button[type='submit'] {
-    background-color: var(--incentive-blue);
-    color: var(--color-white);
 }
 
 button:hover {
@@ -278,10 +269,6 @@ textarea::placeholder {
 
 .container > ol > li > p {
     margin-top: var(--margin-xs);
-}
-
-.container p {
-    margin: var(--margin-s) 0;
 }
 
 .highlight {
