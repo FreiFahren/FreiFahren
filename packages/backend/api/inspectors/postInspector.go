@@ -125,9 +125,7 @@ func PostInspector(c echo.Context) error {
 			} else {
 				logger.Log.Info().Msg("Skipping Telegram notification - rate limit not exceeded")
 			}
-		}
-
-		if *pointers.AuthorPtr == 77105110105 {
+		} else if *pointers.AuthorPtr == 77105110105 {
 			if time.Since(lastMiniAppNotification) >= 5*time.Minute || os.Getenv("STATUS") == "dev" {
 				miniAppEndpoint := os.Getenv("NLP_SERVICE_URL") + "/mini-app/report"
 				if err := notifyOtherServiceAboutReport(miniAppEndpoint, dataToInsert, "Mini app"); err != nil {
