@@ -1,6 +1,7 @@
 import { calculateDistance } from './mapUtils'
 import { Report } from './types'
 import { TFunction } from 'i18next'
+import { REPORT_COOLDOWN_MINUTES } from 'src/constants'
 
 export interface ValidationError {
     field: string
@@ -69,7 +70,7 @@ const validateReportTime = (t: TFunction): ValidationError | null => {
         return null
     }
 
-    const minTimeBetweenReports = 30 // in minutes
+    const minTimeBetweenReports = REPORT_COOLDOWN_MINUTES // in minutes
 
     const currentTime = new Date()
     const lastReportedTimeDate = new Date(lastReportedTime)
