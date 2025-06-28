@@ -24,7 +24,7 @@ const FeedbackForm: FC<FeedbackFormProps> = ({ openAnimationClass, onClose }) =>
 
     const isValid = !!textareaContent.trim() && isPrivacyChecked
 
-    const formAction = async (previousState: boolean | null, formData: FormData): Promise<boolean> => {
+    const formAction = async (_prevState: boolean, formData: FormData): Promise<boolean> => {
         if (!isValid) {
             return false
         }

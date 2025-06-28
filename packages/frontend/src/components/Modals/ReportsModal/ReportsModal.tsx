@@ -84,7 +84,7 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, handleCloseModal
     }
 
     if (showFeedback) {
-        return <FeedbackForm openAnimationClass={className} />
+        return <FeedbackForm openAnimationClass={className ?? ''} />
     }
 
     return (

@@ -8,7 +8,7 @@ import MarketingModal from 'src/components/Modals/MarketingModal/MarketingModal'
 import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
-import { Itinerary, Report, StationProperty } from 'src/utils/types'
+import { Itinerary, Report, Station, StationProperty } from 'src/utils/types'
 
 import { useCurrentReports, useLast24HourReports, useStations } from '../../api/queries'
 import CloseButton from '../../components/Buttons/CloseButton/CloseButton'
@@ -438,7 +438,7 @@ const App = () => {
                 <>
                     <NavigationModal
                         className="open center-animation"
-                        initialEndStation={navigationEndStation}
+                        initialEndStation={navigationEndStation as Station}
                         onSaveRoute={(route: Itinerary) => {
                             setSavedRoute(route)
                             setIsNavigationModalOpen(false)
