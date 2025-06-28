@@ -43,9 +43,13 @@
         "station": "Station",
         "direction": "Richtung",
         "description": "Beschreibung",
-        "descriptionPlaceholder": "Beschreibung",
+        "descriptionPlaceholder": "Beschreibe die Situation...",
         "report": "Melden",
-        "syncText": "Die Meldung wird mit @FreiFahren_BE synchronisiert"
+        "syncText": "Meldung wird mit @FreiFahren_BE synchronisiert",
+        "validation": {
+            "tooFarFromStation": "Du bist zu weit von der Station entfernt.",
+            "waitBeforeNextReport": "Warte noch, bevor du eine neue Meldung erstellst."
+        }
     },
     "PrivacyCheckbox": {
         "privacy1": "Ich stimme der",
@@ -244,5 +248,8 @@
         "subtitle": "Echtzeit-Updates unterwegs",
         "description": "Erhalte sofortige Benachrichtigungen über Kontrolleure direkt auf deinem Handy. Nie wieder überrascht werden!",
         "button": "Zur App wechseln"
+    },
+    "SearchBar": {
+        "placeholder": "Suche nach einer Station..."
     }
 }

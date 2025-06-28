@@ -165,20 +165,33 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     ) : null}
                 </Map>
             </Suspense>
-            <div className="social-media">
+            <div className="fixed bottom-0 left-1.5 flex items-center gap-1 rounded px-1.5 py-0.5">
                 <a href="https://github.com/FreiFahren/FreiFahren" target="_blank" rel="noopener noreferrer">
-                    <img src={GITHUB_ICON} alt="GitHub" />
+                    <img src={GITHUB_ICON} alt="GitHub" className="h-4 w-4 hover:underline" />
                 </a>
                 <a href="https://www.instagram.com/frei.fahren/" target="_blank" rel="noopener noreferrer">
-                    <img src={INSTAGRAM_ICON} alt="Instagram" />
+                    <img src={INSTAGRAM_ICON} alt="Instagram" className="h-4 w-4 hover:underline" />
                 </a>
             </div>
-            <div className="map-attribution">
-                <a href="https://www.jawg.io/" target="_blank" rel="noopener noreferrer">
+            <div
+                className="fixed bottom-0 right-1.5 rounded px-1.5 py-0.5 text-gray-500 hover:underline"
+                style={{ fontSize: 'var(--font-xxxs)' }}
+            >
+                <a
+                    href="https://www.jawg.io/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="no-underline hover:underline"
+                >
                     © JawgMaps
                 </a>{' '}
                 |
-                <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">
+                <a
+                    href="https://www.openstreetmap.org/copyright"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="no-underline hover:underline"
+                >
                     © OSM contributors
                 </a>
             </div>

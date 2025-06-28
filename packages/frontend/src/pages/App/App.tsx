@@ -12,16 +12,16 @@ import { Itinerary, Report, StationProperty } from 'src/utils/types'
 
 import { useCurrentReports, useLast24HourReports, useStations } from '../../api/queries'
 import CloseButton from '../../components/Buttons/CloseButton/CloseButton'
-import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
+import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher'
 import { ReportButton } from '../../components/Buttons/ReportButton/ReportButton'
 import { UtilButton } from '../../components/Buttons/UtilButton/UtilButton'
-import { ReportForm } from '../../components/Form/ReportForm/ReportForm'
+import { ReportForm } from '../../components/Form/ReportForm'
 import { FreifahrenMap } from '../../components/Map/Map'
 import { Backdrop } from '../../components/Miscellaneous/Backdrop/Backdrop'
 import { SearchBar } from '../../components/Miscellaneous/SearchBar/SearchBar'
 import { StatsPopUp } from '../../components/Miscellaneous/StatsPopUp/StatsPopUp'
 import { InfoModal } from '../../components/Modals/InfoModal/InfoModal'
-import { LegalDisclaimer } from '../../components/Modals/LegalDisclaimer/LegalDisclaimer'
+import { LegalDisclaimer } from '../../components/Modals/LegalDisclaimer'
 import { UtilModal } from '../../components/Modals/UtilModal/UtilModal'
 import { ViewedReportsProvider } from '../../contexts/ViewedReportsContext'
 import { sendAnalyticsEvent, sendSavedEvents } from '../../hooks/useAnalytics'
@@ -362,10 +362,7 @@ const App = () => {
         <div className="App">
             {appMounted && shouldShowLegalDisclaimer ? (
                 <>
-                    <LegalDisclaimer
-                        openAnimationClass="open center-animation"
-                        handleConfirm={onConfirmLegalDisclaimer}
-                    />
+                    <LegalDisclaimer handleConfirm={onConfirmLegalDisclaimer} />
                     <Backdrop handleClick={() => highlightElement('legal-disclaimer')} />
                 </>
             ) : null}
@@ -387,7 +384,7 @@ const App = () => {
             ) : null}
             {appUIState.isReportFormOpen ? (
                 <>
-                    <ReportForm onReportFormSubmit={handleReportFormSubmit} className="open center-animation" />
+                    <ReportForm onReportFormSubmit={handleReportFormSubmit} />
                     <Backdrop handleClick={() => setAppUIState({ ...appUIState, isReportFormOpen: false })} />
                 </>
             ) : null}

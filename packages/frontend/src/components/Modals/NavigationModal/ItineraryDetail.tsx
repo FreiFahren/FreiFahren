@@ -149,15 +149,22 @@ const ItineraryDetail: React.FC<ItineraryDetailProps> = ({
                 </div>
             ) : null}
 
-            {/* Save/Remove Route buttons */}
             <div className="route-actions">
                 {!isSaved && handleSaveRoute ? (
-                    <button type="button" className="button-gray" onClick={() => handleSaveRoute(itinerary)}>
+                    <button
+                        type="button"
+                        className="button-gray h-10 w-full rounded-sm"
+                        onClick={() => handleSaveRoute(itinerary)}
+                    >
                         <span>{t('NavigationModal.saveRoute')}</span>
                     </button>
                 ) : null}
                 {isSaved && handleRemoveRoute ? (
-                    <button type="button" className="button-gray" onClick={() => handleRemoveRoute()}>
+                    <button
+                        type="button"
+                        className="button-gray h-10 w-full rounded-sm"
+                        onClick={() => handleRemoveRoute()}
+                    >
                         <span>{t('NavigationModal.removeRoute')}</span>
                     </button>
                 ) : null}

@@ -8,7 +8,7 @@ const Line: React.FC<{ line: string }> = ({ line }) => {
         return null
     }
     return (
-        <span className="line" style={{ backgroundColor: getLineColor(line) }}>
+        <span className="line" style={{ backgroundColor: getLineColor(line) }} data-select-value={line}>
             <strong>{line}</strong>
         </span>
     )

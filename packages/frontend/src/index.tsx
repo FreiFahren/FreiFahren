@@ -1,4 +1,5 @@
 import './index.css'
+import './tailwind.css'
 
 import { browserTracingIntegration, init, replayIntegration } from '@sentry/react'
 import { QueryClientProvider } from '@tanstack/react-query'

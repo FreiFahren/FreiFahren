@@ -6,13 +6,15 @@
 export const getLineColor = (line: string): string => {
     switch (true) {
         // Trams are either M1, M2 etc or a number between 1 and 88
-        case line.includes('M') || (!Number.isNaN(Number(line)) && Number(line) <= 88 && /^\d+$/.test(line)):
+        case line.includes('M') ||
+            (!Number.isNaN(Number(line)) && Number(line) <= 88 && /^\d+$/.test(line)) ||
+            line === 'T':
             return '#be1414'
         // Regional Express
         case line.includes('RE') || line.includes('RB') || line.includes('FEX'):
             return '#e30613'
         // S-Bahn
-        case line === 'S2' || line === 'S25' || line === 'S26':
+        case line === 'S2' || line === 'S25' || line === 'S26' || line === 'S':
             return '#007734'
         case line === 'S1':
             return '#da6ba2'
@@ -55,7 +57,7 @@ export const getLineColor = (line: string): string => {
             return '#8c6dab'
         case line === 'U7':
             return '#528dba'
-        case line === 'U8':
+        case line === 'U8' || line === 'U':
             return '#224f86'
         case line === 'U9':
             return '#f3791d'

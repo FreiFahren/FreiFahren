@@ -11,36 +11,3 @@
 .maplibregl-ctrl-bottom-right {
     display: none;
 }
-
-.map-attribution {
-    position: fixed;
-    bottom: 0px;
-    right: 5px;
-    padding: 2px 5px;
-    font-size: var(--font-xxxs);
-    border-radius: 3px;
-}
-
-.map-attribution a {
-    color: var(--color-box-text);
-    text-decoration: none;
-}
-
-.social-media {
-    position: fixed;
-    bottom: 0px;
-    left: 5px;
-    padding: 2px 5px;
-    border-radius: 3px;
-}
-
-.social-media img {
-    width: 15px;
-    height: 15px;
-    margin-right: var(--padding-xs);
-}
-
-.map-attribution,
-.social-media img:hover {
-    text-decoration: underline;
-}

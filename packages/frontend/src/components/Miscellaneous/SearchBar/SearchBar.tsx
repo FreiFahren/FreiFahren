@@ -1,16 +1,19 @@
 import './SearchBar.css'
 
 import React, { useEffect, useRef, useState } from 'react'
-import { StationProperty } from 'src/utils/types'
+import { useTranslation } from 'react-i18next'
+import { Station } from 'src/utils/types'
 
 import { sendAnalyticsEvent } from '../../../hooks/useAnalytics'
 import { useStationSearch } from '../../../hooks/useStationSearch'
 
 type SearchBarProps = {
-    handleSelect: (station: StationProperty) => void
+    handleSelect: (station: Station) => void
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({ handleSelect }) => {
+    const { t } = useTranslation()
+
     const [isSearchFocused, setIsSearchFocused] = useState(false)
     const { searchValue, setSearchValue, filteredStations } = useStationSearch('', 5)
     const inputRef = useRef<HTMLInputElement>(null)
@@ -33,7 +36,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ handleSelect }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
 
-    const handleStationSelect = (station: StationProperty) => {
+    const handleStationSelect = (station: Station) => {
         setSearchValue('')
         setIsSearchFocused(false)
         handleSelect(station)
@@ -49,7 +52,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ handleSelect }) => {
                 <input
                     ref={inputRef}
                     type="text"
-                    placeholder="Hier suchen"
+                    placeholder={t('SearchBar.placeholder')}
                     value={searchValue}
                     onChange={(event) => setSearchValue(event.target.value)}
                     onFocus={() => setIsSearchFocused(true)}
@@ -58,9 +61,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({ handleSelect }) => {
 
             {isSearchFocused ? (
                 <div className="search-options" ref={dropdownRef}>
-                    {Object.values(filteredStations).map((station) => (
+                    {filteredStations.map((station) => (
                         <button
-                            key={`station-${station.name}`}
+                            key={`station-${station.id}`}
                             className="station-option"
                             onClick={() => handleStationSelect(station)}
                             type="button"

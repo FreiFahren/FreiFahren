@@ -153,7 +153,13 @@ export const useCurrentReports = () => {
         structuralSharing: true,
     })
 
-    return { ...queryResult, isFetching: queryResult.isFetching }
+    return {
+        data: queryResult.data,
+        error: queryResult.error,
+        isLoading: queryResult.isLoading,
+        isFetching: queryResult.isFetching,
+        refetch: queryResult.refetch,
+    }
 }
 
 export const useLast24HourReports = () => {
@@ -332,11 +338,15 @@ export const useStationDistance = (
             ) {
                 return null
             }
-            const [userStation] = getClosestStations(1, allStations, { lat: userLat, lng: userLng })
+            const stationsArray = Object.entries(allStations).map(([id, station]) => ({
+                id,
+                ...station,
+            }))
+            const [userStation] = getClosestStations(1, stationsArray, { lat: userLat, lng: userLng })
             const response = await fetch(
                 `${import.meta.env.VITE_API_URL}/v0/transit/distance?inspectorStationId=${encodeURIComponent(
                     stationId
-                )}&userStationId=${encodeURIComponent(Object.keys(userStation)[0])}`
+                )}&userStationId=${encodeURIComponent(userStation.id)}`
             )
             const data = await response.json()
             if (typeof data === 'number') return data

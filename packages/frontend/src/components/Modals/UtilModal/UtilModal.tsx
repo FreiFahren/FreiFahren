@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom'
 import { useAnalyticsOptOut } from '../../../hooks/useAnalyticsOptOut'
 import { Backdrop } from '../../Miscellaneous/Backdrop/Backdrop'
 import { ContactSection } from '../ContactSection/ContactSection'
-import { LegalDisclaimer } from '../LegalDisclaimer/LegalDisclaimer'
+import { LegalDisclaimer } from '../LegalDisclaimer'
 
 interface UtilModalProps {
     className: string
@@ -29,7 +29,11 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children }) => {
                 {children}
                 <div className="modal-header">
                     <h1>{t('UtilModal.title')}</h1>
-                    <button className="action" onClick={() => setIsContactModalOpen(true)} type="button">
+                    <button
+                        className="action h-10 w-full rounded-sm"
+                        onClick={() => setIsContactModalOpen(true)}
+                        type="button"
+                    >
                         {t('UtilModal.feedback-button')}
                     </button>
                 </div>
@@ -62,7 +66,7 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children }) => {
             </div>
             {isContactModalOpen ? (
                 <>
-                    <div className="contact-section modal container open center-animation">
+                    <div className="contact-section modal open center-animation container">
                         <ContactSection />
                     </div>
                     <Backdrop handleClick={() => setIsContactModalOpen(false)} Zindex={3} />
@@ -70,10 +74,7 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children }) => {
             ) : null}
             {isLegalDisclaimerOpen ? (
                 <>
-                    <LegalDisclaimer
-                        openAnimationClass="open center-animation high-z-index"
-                        handleConfirm={() => setIsLegalDisclaimerOpen(false)}
-                    />
+                    <LegalDisclaimer handleConfirm={() => setIsLegalDisclaimerOpen(false)} />
                     <Backdrop handleClick={() => setIsLegalDisclaimerOpen(false)} Zindex={3} />
                 </>
             ) : null}
