@@ -31,8 +31,8 @@ const LegalDisclaimer: React.FC<LegalDisclaimerProps> = ({ handleConfirm }) => {
                     <p className="mb-4">{t('LegalDisclaimer.saved')}</p>
                 </section>
             </div>
-            <div className="mt-4 flex flex-shrink-0 flex-col items-stretch">
-                <SubmitButton isValid onClick={handleConfirm} className="mb-4">
+            <div className="flex flex-shrink-0 flex-col items-stretch">
+                <SubmitButton isValid onClick={handleConfirm}>
                     {t('LegalDisclaimer.confirm')}
                 </SubmitButton>
                 <ul className="flex justify-end">

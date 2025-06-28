@@ -19,7 +19,11 @@ const MarketingModal: React.FC<MarketingModalProps> = ({ className, children }) 
                 <h1>{t('MarketingModal.title')}</h1>
                 <h2>{t('MarketingModal.subtitle')}</h2>
                 <p>{t('MarketingModal.description')}</p>
-                <button type="submit" onClick={() => sendAnalyticsEvent('redirected to app store', {})}>
+                <button
+                    type="submit"
+                    onClick={() => sendAnalyticsEvent('redirected to app store', {})}
+                    className="h-10 w-full rounded-md p-2"
+                >
                     <a
                         href="https://apps.apple.com/de/app/freifahren/id6738277309"
                         target="_blank"

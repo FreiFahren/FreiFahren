@@ -119,7 +119,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
     )
 
     return (
-        <button onClick={handleShare} className="share-button" type="button">
+        <button onClick={handleShare} className="share-button h-10 w-full rounded-md p-2" type="button">
             <img src="/icons/share-svgrepo-com.svg" alt="Share" />
             <span>{t('Share.button')}</span>
         </button>
