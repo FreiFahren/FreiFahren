@@ -12,7 +12,7 @@ import { Itinerary, Report, StationProperty } from 'src/utils/types'
 
 import { useCurrentReports, useLast24HourReports, useStations } from '../../api/queries'
 import CloseButton from '../../components/Buttons/CloseButton/CloseButton'
-import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher/LayerSwitcher'
+import { LayerSwitcher } from '../../components/Buttons/LayerSwitcher'
 import { ReportButton } from '../../components/Buttons/ReportButton/ReportButton'
 import { UtilButton } from '../../components/Buttons/UtilButton/UtilButton'
 import { ReportForm } from '../../components/Form/ReportForm'
