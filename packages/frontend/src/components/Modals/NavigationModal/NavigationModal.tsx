@@ -277,7 +277,7 @@ const NavigationModal: React.FC<NavigationModalProps> = ({
 
     return (
         <CenterModal animationType="popup" className={`${className} flex h-full flex-col overflow-y-auto pt-0`}>
-            <div className="bg-background sticky top-0 flex-shrink-0 pt-2">
+            <div className="bg-background sticky top-0 z-10 flex-shrink-0 pt-2">
                 <div className="align-child-on-line">
                     <h1>{t('NavigationModal.title')}</h1>
                     <FeedbackButton handleButtonClick={() => setIsFeedbackModalOpen(true)} />
