@@ -37,6 +37,10 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     const { searchValue, setSearchValue, filteredStations } = useStationSearch()
     const { mutate: submitReport } = useSubmitReport()
 
+    // Detect firefox as quick fix for textarea not working on mobile
+    const userAgent = navigator.userAgent.toLowerCase()
+    const isFirefox = userAgent.includes('firefox') || userAgent.includes('fxios') || userAgent.includes('focus')
+
     const startTime = useRef<number>(Date.now())
     const searchUsed = useRef<boolean>(false)
     const stationRecommendationUsed = useRef<boolean>(false)
@@ -327,7 +331,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                         </SelectField>
                     </section>
                 ) : null}
-                {currentStation ? (
+                {currentStation && !isFirefox ? (
                     <div className="h-sm:block hidden">
                         <section className="mb-2 flex min-h-0 flex-1 flex-col">
                             <h2 className="mb-2 flex-shrink-0">{t('ReportForm.description')}</h2>
