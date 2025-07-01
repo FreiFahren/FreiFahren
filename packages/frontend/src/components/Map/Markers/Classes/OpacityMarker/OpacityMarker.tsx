@@ -36,7 +36,7 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index,
                 const calculateOpacity = () => {
                     const currentTime = new Date().getTime()
                     const elapsedTime = currentTime - adjustedTimestamp.getTime()
-                    const timeToFade = 60 * 60 * 1000
+                    const timeToFade = 5 * 60 * 1000
                     let newOpacity = Math.max(0, 1 - elapsedTime / timeToFade)
 
                     // When the opacity is too low the marker is not visible
@@ -81,7 +81,7 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index,
             className="inspector-marker"
             latitude={station.coordinates.latitude}
             longitude={station.coordinates.longitude}
-            style={{ opacity: opacity.toString() }}
+            opacity={opacity.toString()}
             onClick={handleMarkerClick}
         >
             <span className={`marker live ${shouldPulse ? 'pulse' : ''}`} />

@@ -50,7 +50,7 @@ const MarkerContainer: React.FC<MarkersProps> = ({ isFirstOpen, userPosition }) 
                     isFirstOpen={isFirstOpen}
                     markerData={ticketInspector}
                     index={index}
-                    key={ticketInspector.station.id}
+                    key={`${ticketInspector.station.id}-${ticketInspector.timestamp}`}
                     onMarkerClick={handleMarkerClick}
                 />
             ))}
