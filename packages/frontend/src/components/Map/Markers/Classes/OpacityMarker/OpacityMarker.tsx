@@ -81,7 +81,7 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index,
             className="inspector-marker"
             latitude={station.coordinates.latitude}
             longitude={station.coordinates.longitude}
-            style={{ opacity: opacity.toString() }}
+            opacity={opacity.toString()}
             onClick={handleMarkerClick}
         >
             <span className={`marker live ${shouldPulse ? 'pulse' : ''}`} />
