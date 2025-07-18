@@ -186,13 +186,19 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         if (!validationResult.isValid && !import.meta.env.DEV) {
             setValidationErrors(validationResult.errors)
             hadErrors.current = true
+
+            sendAnalyticsEvent('Validation Failed', {
+                meta: {
+                    errors: validationResult.errors,
+                },
+            })
+
             return
         }
 
         submitReport(report)
 
         // If validation passes, submit the report
-        onReportFormSubmit(report)
         localStorage.setItem('lastReportedTime', new Date().toISOString())
         sendAnalyticsEvent('Report Submitted', {
             meta: {
@@ -207,6 +213,8 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
             },
             duration: (Date.now() - startTime.current) / 1000,
         })
+
+        onReportFormSubmit(report)
     }
 
     const isFormValid = currentStation !== null && (!textareaContent.trim() || isPrivacyChecked)
