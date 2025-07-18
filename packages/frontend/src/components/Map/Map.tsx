@@ -62,6 +62,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     const { data: lineSegments = null } = useSegments()
 
     const map = useRef<MapRef>(null)
+    const clickTimer = useRef<number | null>(null)
     const { data: stations } = useStations()
     const stationGeoJSON = convertStationsToGeoJSON(stations ?? {})
 
@@ -82,57 +83,74 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
         [onRotationChange]
     )
 
+    const onSingleClick = (event: MapLayerMouseEvent) => {
+        const currentMap = map.current
+        if (!currentMap) return
+
+        const targetElement = event.originalEvent.target
+        if (targetElement instanceof HTMLElement) {
+            if (
+                targetElement.classList.contains('inspector-marker') ||
+                (targetElement.parentElement?.classList.contains('inspector-marker') ?? false)
+            ) {
+                return
+            }
+        }
+
+        const features = currentMap.queryRenderedFeatures(event.point, {
+            layers: ['stationLayer', 'stationNameLayer'],
+        })
+
+        if (features.length > 0 && handleStationClick) {
+            const [feature] = features
+            const { properties } = feature
+
+            if (typeof properties.name === 'string' && feature.geometry.type === 'Point') {
+                let parsedLines: unknown
+                try {
+                    parsedLines = JSON.parse(properties.lines ?? '[]')
+                } catch (error) {
+                    parsedLines = []
+                }
+                const lines =
+                    Array.isArray(parsedLines) && parsedLines.every((item) => typeof item === 'string')
+                        ? (parsedLines as string[])
+                        : []
+
+                const station: StationProperty = {
+                    name: properties.name,
+                    lines,
+                    coordinates: {
+                        longitude: (feature.geometry.coordinates as [number, number])[0],
+                        latitude: (feature.geometry.coordinates as [number, number])[1],
+                    },
+                }
+
+                handleStationClick(station)
+                sendAnalyticsEvent('InfoModal opened', { meta: { source: 'map', station_name: station.name } })
+            }
+        }
+    }
+
     const handleMapClick = useCallback(
         (event: MapLayerMouseEvent) => {
-            const currentMap = map.current
-            if (!currentMap) return
-
-            const targetElement = event.originalEvent.target
-            if (targetElement instanceof HTMLElement) {
-                if (
-                    targetElement.classList.contains('inspector-marker') ||
-                    (targetElement.parentElement?.classList.contains('inspector-marker') ?? false)
-                ) {
-                    return
-                }
+            if (clickTimer.current) {
+                clearTimeout(clickTimer.current)
+                clickTimer.current = null
             }
-
-            const features = currentMap.queryRenderedFeatures(event.point, {
-                layers: ['stationLayer', 'stationNameLayer'],
-            })
-
-            if (features.length > 0 && handleStationClick) {
-                const [feature] = features
-                const { properties } = feature
-
-                if (typeof properties.name === 'string' && feature.geometry.type === 'Point') {
-                    let parsedLines: unknown
-                    try {
-                        parsedLines = JSON.parse(properties.lines ?? '[]')
-                    } catch (error) {
-                        parsedLines = []
-                    }
-                    const lines =
-                        Array.isArray(parsedLines) && parsedLines.every((item) => typeof item === 'string')
-                            ? (parsedLines as string[])
-                            : []
-
-                    const station: StationProperty = {
-                        name: properties.name,
-                        lines,
-                        coordinates: {
-                            longitude: (feature.geometry.coordinates as [number, number])[0],
-                            latitude: (feature.geometry.coordinates as [number, number])[1],
-                        },
-                    }
-
-                    handleStationClick(station)
-                    sendAnalyticsEvent('InfoModal opened', { meta: { source: 'map', station_name: station.name } })
-                }
-            }
+            clickTimer.current = window.setTimeout(() => {
+                onSingleClick(event)
+            }, 200)
         },
         [handleStationClick]
     )
+
+    const handleMapDoubleClick = useCallback(() => {
+        if (clickTimer.current) {
+            clearTimeout(clickTimer.current)
+            clickTimer.current = null
+        }
+    }, [])
 
     return (
         <div id="map-container" data-testid="map-container">
@@ -152,6 +170,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     maxBounds={maxBounds}
                     onRotate={handleRotate}
                     onClick={handleMapClick}
+                    onDblClick={handleMapDoubleClick}
                     mapStyle={`https://api.jawg.io/styles/c52af8db-49f6-40b8-9197-568b7fd9a940.json?access-token=${
                         import.meta.env.VITE_JAWG_ACCESS_TOKEN
                     }`}
