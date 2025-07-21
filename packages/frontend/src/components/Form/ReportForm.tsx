@@ -36,7 +36,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     const [isSearchFocused, setIsSearchFocused] = useState<boolean>(false)
     const { userPosition } = useLocation()
     const { searchValue, setSearchValue, filteredStations } = useStationSearch()
-    const { mutate: submitReport } = useSubmitReport()
+    const { mutateAsync: submitReport } = useSubmitReport()
 
     // Detect firefox as quick fix for textarea not working on mobile
     const userAgent = navigator.userAgent.toLowerCase()
@@ -196,7 +196,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
             return
         }
 
-        submitReport(report)
+        const submittedReport = await submitReport(report)
 
         // If validation passes, submit the report
         localStorage.setItem('lastReportedTime', new Date().toISOString())
@@ -214,7 +214,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
             duration: (Date.now() - startTime.current) / 1000,
         })
 
-        onReportFormSubmit(report)
+        onReportFormSubmit(submittedReport)
     }
 
     const isFormValid = currentStation !== null && (!textareaContent.trim() || isPrivacyChecked)
