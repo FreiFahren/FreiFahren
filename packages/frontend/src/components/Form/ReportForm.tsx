@@ -200,7 +200,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
 
         // If validation passes, submit the report
         localStorage.setItem('lastReportedTime', new Date().toISOString())
-        sendAnalyticsEvent('Report Submitted', {
+        await sendAnalyticsEvent('Report Submitted', {
             meta: {
                 entity: currentEntity,
                 station: currentStation.name,
