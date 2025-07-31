@@ -2,6 +2,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { useMemo } from 'react'
 import { Itinerary, LinesList, Position, Report, RiskData, StationList } from 'src/utils/types'
 
+import { sendAnalyticsEvent } from '../hooks/useAnalytics'
 import { useSkeleton } from '../components/Miscellaneous/LoadingPlaceholder/Skeleton'
 import { getClosestStations } from '../hooks/getClosestStations'
 import { CACHE_KEYS } from './queryClient'
@@ -54,7 +55,14 @@ export const useReportsByStation = (stationId: string, startTime?: string, endTi
         queryFn: () => fetchNewReports(startTime, endTime, stationId),
     })
 
-export const useSubmitReport = () => {
+interface SubmitReportOptions {
+    duration?: number
+    meta?: {
+        [key: string]: any
+    }
+}
+
+export const useSubmitReport = (options?: SubmitReportOptions) => {
     const queryClient = useQueryClient()
 
     return useMutation({
@@ -76,16 +84,38 @@ export const useSubmitReport = () => {
             })
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`)
+                const errorData = await response.json().catch(() => ({}))
+                const error = new Error(errorData.message ?? `HTTP error! status: ${response.status}`)
+                error.name = response.status.toString()
+                throw error
             }
 
             return response.json()
         },
-        onSuccess: () => {
+        onSuccess: (_, variables) => {
+            sendAnalyticsEvent('Report Submitted', {
+                meta: {
+                    ...options?.meta,
+                    station: variables.station.name,
+                    line: variables.line,
+                    direction: variables.direction?.name,
+                    message: variables.message,
+                },
+                duration: options?.duration,
+            })
             // Invalidate relevant queries to refetch data
             queryClient.invalidateQueries({ queryKey: CACHE_KEYS.reports })
             queryClient.invalidateQueries({ queryKey: CACHE_KEYS.byTimeframe('24h') })
             queryClient.invalidateQueries({ queryKey: CACHE_KEYS.byTimeframe('1h') })
+        },
+        onError: (error: Error) => {
+            // as a quick solution until we have a proper error monitoring set up
+            sendAnalyticsEvent('Report Submission Failed', {
+                meta: {
+                    error: error.message,
+                    status: error.name,
+                },
+            })
         },
     })
 }

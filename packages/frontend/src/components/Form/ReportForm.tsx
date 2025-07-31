@@ -36,7 +36,6 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     const [isSearchFocused, setIsSearchFocused] = useState<boolean>(false)
     const { userPosition } = useLocation()
     const { searchValue, setSearchValue, filteredStations } = useStationSearch()
-    const { mutateAsync: submitReport } = useSubmitReport()
 
     // Detect firefox as quick fix for textarea not working on mobile
     const userAgent = navigator.userAgent.toLowerCase()
@@ -166,6 +165,16 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         }
     }
 
+    const { mutateAsync: submitReport } = useSubmitReport({
+        duration: (Date.now() - startTime.current) / 1000,
+        meta: {
+            entity: currentEntity,
+            message: textareaWithPrivacyRef.current?.value ?? '',
+            searchUsed: searchUsed.current,
+            stationRecommendationUsed: stationRecommendationUsed.current,
+        },
+    })
+
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         if (!currentStation) return
@@ -183,13 +192,13 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         }
 
         const validationResult = validateReport(report, userPosition, t)
-        if (!validationResult.isValid && !import.meta.env.DEV) {
+        if (!validationResult.isValid) {
             setValidationErrors(validationResult.errors)
             hadErrors.current = true
 
             sendAnalyticsEvent('Validation Failed', {
                 meta: {
-                    errors: validationResult.errors,
+                    errors: JSON.stringify(validationResult.errors),
                 },
             })
 
@@ -200,19 +209,6 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
 
         // If validation passes, submit the report
         localStorage.setItem('lastReportedTime', new Date().toISOString())
-        await sendAnalyticsEvent('Report Submitted', {
-            meta: {
-                entity: currentEntity,
-                station: currentStation.name,
-                direction: currentDirection?.name,
-                line: currentLine,
-                message: textareaWithPrivacyRef.current?.value ?? '',
-                searchUsed: searchUsed.current,
-                stationRecommendationUsed: stationRecommendationUsed.current,
-                hadErrors: hadErrors.current,
-            },
-            duration: (Date.now() - startTime.current) / 1000,
-        })
 
         onReportFormSubmit(submittedReport)
     }
