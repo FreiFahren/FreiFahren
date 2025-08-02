@@ -99,7 +99,7 @@ export const useSubmitReport = (options?: SubmitReportOptions) => {
                     station: variables.station.name,
                     line: variables.line,
                     direction: variables.direction?.name,
-                    message: variables.message,
+                    hasMessage: !!variables.message,
                 },
                 duration: options?.duration,
             })
