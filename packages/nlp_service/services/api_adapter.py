@@ -34,7 +34,7 @@ def report_inspector() -> tuple:
         telegram_message += f"\n\nMehr Informationen auf <a href='https://app.freifahren.org/station/{stationId}'>app.freifahren.org</a>"
 
     station_url = f"https://app.freifahren.org/station/{stationId}" # allow telegram to automatically create a preview card
-    send_message(FREIFAHREN_CHAT_ID, telegram_message, station_url, nlp_bot)
+   # send_message(FREIFAHREN_CHAT_ID, telegram_message, station_url, nlp_bot)
 
     return {"status": "success"}, 200
 
