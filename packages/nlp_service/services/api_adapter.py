@@ -35,11 +35,10 @@ def report_inspector() -> tuple:
 
     station_url = f"https://app.freifahren.org/station/{stationId}" # allow telegram to automatically create a preview card
 
-    logger.info(f"Request IP: {request.remote_addr}")
 
    # send_message(FREIFAHREN_CHAT_ID, telegram_message, station_url, nlp_bot)
 
-    return {"status": "hurensohn"}, 200
+    return {"status": "success"}, 200
 
 @flask_app.route("/restart", methods=["POST"])
 def restart():
