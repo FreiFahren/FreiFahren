@@ -51,8 +51,9 @@ func PostInspector(c echo.Context) error {
 
 	// patch to fix attack
 	if c.Request().Header.Get("X-Password") != os.Getenv("REPORT_PASSWORD") {
+		logger.Log.Error().Msg("Password mismatch")
 		return c.JSON(http.StatusForbidden, map[string]string{
-			"message": "Huhrensohn!",
+			"message": "Hurensohn!",
 		})
 	}
 
