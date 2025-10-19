@@ -49,6 +49,13 @@ func PostInspector(c echo.Context) error {
 	logger.Log.Info().
 		Msg("POST '/basics/Inspectors' UserAgent: " + c.Request().UserAgent())
 
+	// patch to fix attack
+	if c.Request().Header.Get("X-Password") != os.Getenv("REPORT_PASSWORD") {
+		return c.JSON(http.StatusForbidden, map[string]string{
+			"message": "Huhrensohn!",
+		})
+	}
+
 	// dont rate limit requests from the bot (password in header) or in dev mode
 	if c.Request().Header.Get("X-Password") != os.Getenv("REPORT_PASSWORD") && os.Getenv("STATUS") != "dev" {
 		if !limiting.GlobalRateLimiter.TryRecordSubmission(c.RealIP()) {

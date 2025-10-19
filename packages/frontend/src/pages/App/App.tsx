@@ -454,7 +454,6 @@ const App = () => {
                     />
                 </>
             ) : null}
-
             {savedRoute && !isNavigationModalOpen && !showSavedRoute ? (
                 <button
                     className="small-button saved-route-button"
@@ -464,7 +463,6 @@ const App = () => {
                     <span>{t('NavigationModal.showSavedRoute')}</span>
                 </button>
             ) : null}
-
             {showSavedRoute && savedRoute ? (
                 <>
                     <NavigationModal
@@ -479,7 +477,6 @@ const App = () => {
                     <Backdrop handleClick={() => setShowSavedRoute(false)} />
                 </>
             ) : null}
-
             <button
                 className="navigation-button small-button"
                 onClick={() => setIsNavigationModalOpen(true)}
@@ -493,11 +490,13 @@ const App = () => {
                     <div className="update-indicator-text">{t('updateIndicator.text')}</div>
                 </div>
             ) : null}
+            {/*
             <ReportButton
                 handleOpenReportModal={() =>
                     setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })
                 }
             />
+            */}
             {canShowStatsPopUp && !showMarketingModalFromHook && appUIState.isStatsPopUpOpen && statsData !== 0 ? (
                 <StatsPopUp
                     numberOfReports={statsData}
