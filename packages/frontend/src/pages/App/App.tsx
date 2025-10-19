@@ -490,13 +490,11 @@ const App = () => {
                     <div className="update-indicator-text">{t('updateIndicator.text')}</div>
                 </div>
             ) : null}
-            {/*
             <ReportButton
                 handleOpenReportModal={() =>
                     setAppUIState({ ...appUIState, isReportFormOpen: !appUIState.isReportFormOpen })
                 }
             />
-            */}
             {canShowStatsPopUp && !showMarketingModalFromHook && appUIState.isStatsPopUpOpen && statsData !== 0 ? (
                 <StatsPopUp
                     numberOfReports={statsData}
