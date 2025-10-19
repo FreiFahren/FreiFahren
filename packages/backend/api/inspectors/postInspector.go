@@ -23,6 +23,66 @@ import (
 var lastTelegramNotification time.Time
 var lastMiniAppNotification time.Time
 
+func verifyRequest(c echo.Context) error {
+	securityServiceURL := os.Getenv("SECURITY_MICROSERVICE_URL")
+	if securityServiceURL == "" {
+		return errors.New("security service configuration error")
+	}
+
+	// Collect headers from the incoming request
+	headers := make(map[string]string)
+	for key, values := range c.Request().Header {
+		if len(values) > 0 {
+			headers[key] = values[0]
+		}
+	}
+
+	// Create payload with headers
+	payload := map[string]interface{}{
+		"headers": headers,
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return errors.New("failed to verify request")
+	}
+
+	// Create HTTP client with timeout
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	// Create POST request to security microservice
+	req, err := http.NewRequest("POST", securityServiceURL+"/check", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return errors.New("failed to verify request")
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	// Make the request
+	resp, err := client.Do(req)
+	if err != nil {
+		return errors.New("failed to verify request")
+	}
+	defer resp.Body.Close()
+
+	// Parse response
+	var result struct {
+		Valid bool `json:"valid"`
+	}
+	
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return errors.New("failed to verify request")
+	}
+
+	// Check if request is valid
+	if !result.Valid {
+		return errors.New("spam report detected")
+	}
+
+	return nil
+}
+
 // @Summary Submit ticket inspector data
 //
 // @Description Accepts a JSON payload with details about a ticket inspector's current location.
@@ -54,6 +114,23 @@ func PostInspector(c echo.Context) error {
 		logger.Log.Error().Msg("Password mismatch")
 		return c.JSON(http.StatusForbidden, map[string]string{
 			"message": "Hurensohn!",
+		})
+	}
+
+	if err := verifyRequest(c); err != nil {
+		if err.Error() == "spam report detected" {
+			logger.Log.Warn().
+				Msg("Spam report blocked by security service")
+			return c.JSON(http.StatusForbidden, map[string]string{
+				"message": "Spam reports are not allowed, if you have an issue with us contact us and we can hash it out.",
+			})
+		}
+		logger.Log.Error().
+			Err(err).
+			Str("userAgent", c.Request().UserAgent()).
+			Msg("Error verifying request with security service")
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": "Failed to verify request",
 		})
 	}
 
