@@ -20,7 +20,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var lastTelegramNotification time.Time
 var lastMiniAppNotification time.Time
 
 func verifyRequest(c echo.Context) error {
@@ -199,21 +198,16 @@ func PostInspector(c echo.Context) error {
 	// Notify Telegram bot if there's no author (web app report)
 	go func() {
 		if pointers.AuthorPtr == nil {
-			// avoid spamming the telegram group
-			if time.Since(lastTelegramNotification) >= 5*time.Minute || os.Getenv("STATUS") == "dev" {
-				telegramEndpoint := os.Getenv("NLP_SERVICE_URL") + "/report-inspector"
-				if err := notifyOtherServiceAboutReport(telegramEndpoint, dataToInsert, "Telegram bot"); err != nil {
-					logger.Log.Error().Err(err).Msg("Error notifying Telegram bot about report in postInspector")
-				} else {
-					lastTelegramNotification = time.Now()
-				}
-			} else {
-				logger.Log.Info().Msg("Skipping Telegram notification - rate limit not exceeded")
+			telegramEndpoint := os.Getenv("NLP_SERVICE_URL") + "/report-inspector"
+			reportPassword := os.Getenv("REPORT_PASSWORD")
+			if err := notifyOtherServiceAboutReport(telegramEndpoint, dataToInsert, "Telegram bot", reportPassword); err != nil {
+				logger.Log.Error().Err(err).Msg("Error notifying Telegram bot about report in postInspector")
 			}
 		} else if *pointers.AuthorPtr == 77105110105 {
 			if time.Since(lastMiniAppNotification) >= 5*time.Minute || os.Getenv("STATUS") == "dev" {
 				miniAppEndpoint := os.Getenv("NLP_SERVICE_URL") + "/mini-app/report"
-				if err := notifyOtherServiceAboutReport(miniAppEndpoint, dataToInsert, "Mini app"); err != nil {
+				reportPassword := os.Getenv("REPORT_PASSWORD")
+				if err := notifyOtherServiceAboutReport(miniAppEndpoint, dataToInsert, "Mini app", reportPassword); err != nil {
 					logger.Log.Error().Err(err).Msg("Error notifying Mini app about report in postInspector")
 				} else {
 					lastMiniAppNotification = time.Now()
@@ -290,7 +284,7 @@ func processRequestData(req structs.InspectorRequest) (*structs.ResponseData, *s
 	return response, pointers, nil
 }
 
-func notifyOtherServiceAboutReport(endpoint string, data *structs.ResponseData, serviceName string) error {
+func notifyOtherServiceAboutReport(endpoint string, data *structs.ResponseData, serviceName string, password string) error {
 	logger.Log.Debug().Str("service", serviceName).Msg("Sending data")
 
 	payload := map[string]string{
@@ -307,7 +301,19 @@ func notifyOtherServiceAboutReport(endpoint string, data *structs.ResponseData, 
 		return err
 	}
 
-	resp, err := http.Post(endpoint, "application/json", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonData))
+	if err != nil {
+		logger.Log.Error().Err(err).Str("service", serviceName).Msg("Error creating request")
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	if password != "" {
+		req.Header.Set("X-Password", password)
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		logger.Log.Error().Err(err).Str("service", serviceName).Msg("Error posting data")
 		return err
