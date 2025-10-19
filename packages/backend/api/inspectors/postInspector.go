@@ -70,7 +70,7 @@ func verifyRequest(c echo.Context) error {
 	var result struct {
 		Valid bool `json:"valid"`
 	}
-	
+
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return errors.New("failed to verify request")
 	}
@@ -109,33 +109,26 @@ func PostInspector(c echo.Context) error {
 	logger.Log.Info().
 		Msg("POST '/basics/Inspectors' UserAgent: " + c.Request().UserAgent())
 
-	// patch to fix attack
-	if c.Request().Header.Get("X-Password") != os.Getenv("REPORT_PASSWORD") {
-		logger.Log.Error().Msg("Password mismatch")
-		return c.JSON(http.StatusForbidden, map[string]string{
-			"message": "Hurensohn!",
-		})
-	}
-
-	if err := verifyRequest(c); err != nil {
-		if err.Error() == "spam report detected" {
-			logger.Log.Warn().
-				Msg("Spam report blocked by security service")
-			return c.JSON(http.StatusForbidden, map[string]string{
-				"message": "Spam reports are not allowed, if you have an issue with us contact us and we can hash it out.",
-			})
-		}
-		logger.Log.Error().
-			Err(err).
-			Str("userAgent", c.Request().UserAgent()).
-			Msg("Error verifying request with security service")
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": "Failed to verify request",
-		})
-	}
-
 	// dont rate limit requests from the bot (password in header) or in dev mode
 	if c.Request().Header.Get("X-Password") != os.Getenv("REPORT_PASSWORD") && os.Getenv("STATUS") != "dev" {
+		// Check if the request is valid
+		if err := verifyRequest(c); err != nil {
+			if err.Error() == "spam report detected" {
+				logger.Log.Warn().
+					Msg("Spam report blocked by security service")
+				return c.JSON(http.StatusForbidden, map[string]string{
+					"message": "Spam reports are not allowed, if you have an issue with us contact us and we can hash it out.",
+				})
+			}
+			logger.Log.Error().
+				Err(err).
+				Msg("Error verifying request with security service")
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"message": "Failed to verify request",
+			})
+		}
+
+		// Rate limit the request
 		if !limiting.GlobalRateLimiter.TryRecordSubmission(c.RealIP()) {
 			logger.Log.Info().Msg("User has been rate limited")
 			return c.JSON(http.StatusTooManyRequests, map[string]string{
