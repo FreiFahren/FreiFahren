@@ -41,24 +41,25 @@ func (r *RateLimiter) hashIP(ip string) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-func (r *RateLimiter) CanSubmitReport(ip string) bool {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+
+// TryRecordSubmission atomically checks if a submission is allowed and records it.
+// Returns true if the submission was recorded (allowed), false if rate limited.
+func (r *RateLimiter) TryRecordSubmission(ip string) bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 
 	hashedIP := r.hashIP(ip)
 	lastSubmission, exists := r.submissions[hashedIP]
 
-	if !exists {
-		return true
+	// Check if submission is allowed
+	if exists && time.Since(lastSubmission) <= 30*time.Minute {
+		logger.Log.Info().Msg("Blocked IP from submitting report")
+		return false
 	}
 
-	if time.Since(lastSubmission) > 30*time.Minute {
-		return true
-	}
-
-	logger.Log.Info().
-		Msg("Blocked IP from submitting report")
-	return false
+	// Record the submission
+	r.submissions[hashedIP] = time.Now()
+	return true
 }
 
 func (r *RateLimiter) RecordSubmission(ip string) {
