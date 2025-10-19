@@ -146,4 +146,4 @@ def send_mini_app():
 
     except Exception as e:
         logger.error(f"Error sending Mini App: {str(e)}")
-        return {"status": "error", "message": str(e)}, 500
+        return {"status": "error", "message": "Failed to send Mini App"}, 500
