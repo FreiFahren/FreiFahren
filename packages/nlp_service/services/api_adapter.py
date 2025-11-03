@@ -7,7 +7,7 @@ from nlp_service.config.config import (
 from nlp_service.services.telegram_adapter import (
     send_message,
     send_webapp_button,
-    send_message_with_rate_limit,
+    send_message,
 )
 from nlp_service.utils.logger import setup_logger
 from nlp_service.services.telegram_adapter import nlp_bot
@@ -24,7 +24,6 @@ def report_inspector() -> tuple:
     """Handle inspector report submissions from the backend.
 
     Requires authentication via X-Password header.
-    Includes rate limiting to prevent spam (5 minutes between notifications).
     """
     # Check authentication
     provided_password = request.headers.get("X-Password")
@@ -55,7 +54,7 @@ def report_inspector() -> tuple:
 
     station_url = f"https://app.freifahren.org/station/{stationId}"  # allow telegram to automatically create a preview card
 
-    message_sent = send_message_with_rate_limit(
+    message_sent = send_message(
         FREIFAHREN_CHAT_ID, telegram_message, station_url, nlp_bot
     )
 
@@ -63,8 +62,8 @@ def report_inspector() -> tuple:
         logger.info("Inspector report sent to Telegram")
         return {"status": "success", "message": "Report sent"}, 200
     else:
-        logger.info("Inspector report rate limited")
-        return {"status": "success", "message": "Rate limited"}, 200
+        logger.info("Failed to send message to Telegram")
+        return {"status": "error", "message": "Failed to send message to Telegram"}, 500
 
 
 @flask_app.route("/mini-app", methods=["GET"])
