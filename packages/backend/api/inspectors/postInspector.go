@@ -13,7 +13,6 @@ import (
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	_ "github.com/FreiFahren/backend/docs"
-	"github.com/FreiFahren/backend/limiting"
 	"github.com/FreiFahren/backend/logger"
 	structs "github.com/FreiFahren/backend/utils"
 
@@ -124,14 +123,6 @@ func PostInspector(c echo.Context) error {
 				Msg("Error verifying request with security service")
 			return c.JSON(http.StatusInternalServerError, map[string]string{
 				"message": "Failed to verify request",
-			})
-		}
-
-		// Rate limit the request
-		if !limiting.GlobalRateLimiter.TryRecordSubmission(c.RealIP()) {
-			logger.Log.Info().Msg("User has been rate limited")
-			return c.JSON(http.StatusTooManyRequests, map[string]string{
-				"message": "Please wait at least 30 minutes between submissions",
 			})
 		}
 	}
