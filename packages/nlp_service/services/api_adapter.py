@@ -7,7 +7,7 @@ from nlp_service.config.config import (
 from nlp_service.services.telegram_adapter import (
     send_message,
     send_webapp_button,
-    send_message_with_rate_limit,
+    send_message,
 )
 from nlp_service.utils.logger import setup_logger
 from nlp_service.services.telegram_adapter import nlp_bot
@@ -55,7 +55,7 @@ def report_inspector() -> tuple:
 
     station_url = f"https://app.freifahren.org/station/{stationId}"  # allow telegram to automatically create a preview card
 
-    message_sent = send_message_with_rate_limit(
+    message_sent = send_message(
         FREIFAHREN_CHAT_ID, telegram_message, station_url, nlp_bot
     )
 
