@@ -11,6 +11,8 @@ registerServices(app, {
   reportsService: new ReportsService(db),
 });
 
+const test = 'Does lint trigger?'
+
 registerRoutes(app, [getReports]);
 
 export default app
