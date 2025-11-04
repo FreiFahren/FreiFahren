@@ -3,7 +3,7 @@ import { createInsertSchema } from 'drizzle-zod';
 import { stations } from './stations';
 import { lines } from './lines';
 
-export const sourceEnum = pgEnum('source', ['mini_app', 'web_app', 'app', 'telegram']);
+export const sourceEnum = pgEnum('source', ['mini_app', 'web_app', 'mobile_app', 'telegram']);
 
 export const reports = pgTable('reports', {
   report_id: serial('report_id').primaryKey(),
