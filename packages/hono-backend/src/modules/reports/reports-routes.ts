@@ -3,7 +3,7 @@ import { Env } from "../../app-env"
 
 export const getReports = defineRoute<Env>()({
   method: 'get' as const,
-  path: '/basics/reports',
+  path: 'v0/reports',
   handler: async (c) => {
     const reportsService = c.get('reportsService');
 
