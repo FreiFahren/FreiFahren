@@ -1,7 +1,8 @@
 import { pgTable, serial, integer, timestamp, pgEnum } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
-import { stations } from './stations';
+
 import { lines } from './lines';
+import { stations } from './stations';
 
 export const sourceEnum = pgEnum('source', ['mini_app', 'web_app', 'mobile_app', 'telegram']);
 
