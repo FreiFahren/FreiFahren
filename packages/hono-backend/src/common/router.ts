@@ -1,8 +1,8 @@
-import { z} from 'zod';
+import { z } from 'zod';
 
 import { Handler, Hono, Env } from 'hono';
 
-import {zValidator} from '@hono/zod-validator'
+import { zValidator } from '@hono/zod-validator'
 
 type HttpMethod = 'get' | 'post' | 'put';
 type RouteSchemas = {
@@ -26,12 +26,10 @@ export const defineRoute = <E extends Env>() =>
   ) => {
     const mws: Handler[] = [];
 
-    // user-provided non-validation middlewares first
     if (def.middlewares?.length) {
       mws.push(...def.middlewares);
     }
 
-    // then validators derived from optional schemas
     if (def.schemas?.param) mws.push(zValidator('param', def.schemas.param));
     if (def.schemas?.query) mws.push(zValidator('query', def.schemas.query));
     if (def.schemas?.json) mws.push(zValidator('json', def.schemas.json));
@@ -44,6 +42,6 @@ export const defineRoute = <E extends Env>() =>
     } as const;
   }
 
-export const register = <E extends Env>(app: Hono<E>, r: ReturnType<ReturnType<typeof defineRoute<E>>>) => {
-  app[r.method](r.path, ...r.middlewares, r.handler);
+export const registerRoutes = <E extends Env>(app: Hono<E>, routes: ReturnType<ReturnType<typeof defineRoute<E>>>[]) => {
+  routes.forEach((r) => app[r.method](r.path, ...r.middlewares, r.handler));
 };

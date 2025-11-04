@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
-import { postgres } from 'postgres';
+import postgres from 'postgres';
 
 import * as reports from './schema/reports';
 import * as lines from './schema/lines';
@@ -7,7 +7,6 @@ import * as stations from './schema/stations';
 
 const connectionString = process.env.DATABASE_URL!;
 
-// Disable prefetch as it's not supported for prepared statements
 export const client = postgres(connectionString, { prepare: false });
 export const db = drizzle(client, {
   schema: { ...reports, ...lines, ...stations },

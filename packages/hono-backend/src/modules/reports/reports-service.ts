@@ -1,6 +1,6 @@
-import { DbConnection, reports } from "../../db";
+import { DbConnection, reports } from "../../db/";
 
-class ReportsService {
+export class ReportsService {
   constructor(private db: DbConnection) {}
 
   async getReports() {

@@ -1,5 +1,5 @@
 import { defineRoute } from "../../common/router";
-import { Env} from "../../app-type"
+import { Env } from "../../app-env"
 
 export const getReports = defineRoute<Env>()({
   method: 'get' as const,
