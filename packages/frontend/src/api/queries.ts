@@ -2,9 +2,9 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { useMemo } from 'react'
 import { Itinerary, LinesList, Position, Report, RiskData, StationList } from 'src/utils/types'
 
-import { sendAnalyticsEvent } from '../hooks/useAnalytics'
 import { useSkeleton } from '../components/Miscellaneous/LoadingPlaceholder/Skeleton'
 import { getClosestStations } from '../hooks/getClosestStations'
+import { sendAnalyticsEvent } from '../hooks/useAnalytics'
 import { CACHE_KEYS } from './queryClient'
 
 const fetchNewReports = async (
@@ -58,6 +58,7 @@ export const useReportsByStation = (stationId: string, startTime?: string, endTi
 interface SubmitReportOptions {
     duration?: number
     meta?: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         [key: string]: any
     }
 }
