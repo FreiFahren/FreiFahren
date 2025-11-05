@@ -60,6 +60,21 @@ export default [
         'no-var': 'warn',
         'prefer-const': 'warn',
         'max-depth': ['error', 4],
+        "@typescript-eslint/prefer-nullish-coalescing": "error",
+        "@typescript-eslint/no-floating-promises": "error",
+        "@typescript-eslint/no-unnecessary-condition": "warn",
+        "@typescript-eslint/strict-boolean-expressions": [
+          "error",
+          {
+            "allowNumber": false
+          }
+        ],
+        "prefer-arrow/prefer-arrow-functions": [
+      "error",
+      {
+        "disallowPrototype": true
+      }
+    ],
         complexity: ['error'],
 
 
