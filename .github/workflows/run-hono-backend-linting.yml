@@ -1,0 +1,27 @@
+name: Hono Backend CI
+
+on:
+    pull_request:
+        branches: [main]
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v4
+
+            - name: Set up Bun
+              uses: oven-sh/setup-bun@v1
+              with:
+                  bun-version: latest
+
+            - name: Install dependencies
+              run: cd packages/hono-backend && bun install
+
+            - name: Run ESLint
+              run: cd packages/hono-backend && bun run lint
+

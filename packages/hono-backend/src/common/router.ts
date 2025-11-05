@@ -1,8 +1,8 @@
+import { zValidator } from '@hono/zod-validator'
+import { Handler, Hono, Env } from 'hono';
 import { z } from 'zod';
 
-import { Handler, Hono, Env } from 'hono';
 
-import { zValidator } from '@hono/zod-validator'
 
 type HttpMethod = 'get' | 'post' | 'put';
 type RouteSchemas = {
@@ -16,7 +16,7 @@ type DefineRouteInput<E extends Env, M extends HttpMethod, S extends RouteSchema
   path: string;
   schemas?: S;
   // Optional non-validation middlewares (e.g., auth, logging)
-  middlewares?: Handler<E>[]; // runs before validators
+  middlewares?: Handler<E>[]; // Runs before validators
   handler: Handler<E>;
 };
 
@@ -26,8 +26,8 @@ export const defineRoute = <E extends Env>() =>
   ) => {
     const mws: Handler[] = [];
 
-    if (def.middlewares?.length) {
-      mws.push(...def.middlewares);
+    if ((def.middlewares?.length ?? 0) > 0) {
+      mws.push(...(def.middlewares ?? []));
     }
 
     if (def.schemas?.param) mws.push(zValidator('param', def.schemas.param));

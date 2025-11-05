@@ -142,7 +142,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                 onSingleClick(event)
             }, 200)
         },
-        [handleStationClick]
+        [handleStationClick] // eslint-disable-line react-hooks/exhaustive-deps
     )
 
     const handleMapDoubleClick = useCallback(() => {
