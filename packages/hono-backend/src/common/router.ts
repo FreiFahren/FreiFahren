@@ -26,8 +26,8 @@ export const defineRoute = <E extends Env>() =>
   ) => {
     const mws: Handler[] = [];
 
-    if (def.middlewares?.length) {
-      mws.push(...def.middlewares);
+    if ((def.middlewares?.length ?? 0) > 0) {
+      mws.push(...(def.middlewares ?? []));
     }
 
     if (def.schemas?.param) mws.push(zValidator('param', def.schemas.param));
