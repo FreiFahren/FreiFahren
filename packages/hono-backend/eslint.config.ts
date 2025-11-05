@@ -1,5 +1,6 @@
 import eslint from '@eslint/js';
 import importPlugin from 'eslint-plugin-import';
+import preferArrowPlugin from 'eslint-plugin-prefer-arrow';
 import tseslint from 'typescript-eslint';
 
 export default [
@@ -14,6 +15,7 @@ export default [
     },
     plugins: {
         'import': importPlugin,
+        "prefer-arrow": preferArrowPlugin,
     },
     settings: {
       'import/resolver': {
