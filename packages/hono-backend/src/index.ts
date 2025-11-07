@@ -1,17 +1,27 @@
 import { Hono } from 'hono'
 
-import { registerServices, type Env } from './app-env';
+import { registerServices, Services, type Env } from './app-env';
 import { registerRoutes } from './common/router';
-import { db } from './db';
-import { getReports, ReportsService } from './modules/reports/';
+import { db, DbConnection } from './db';
+import { LinesService } from './modules/lines/lines-service';
+import { getReports, postReport, ReportsService } from './modules/reports/';
+import { StationsService } from './modules/stations';
 
 const app = new Hono<Env>()
 
-registerServices(app, {
-  reportsService: new ReportsService(db),
-});
+const createServices = (db: DbConnection) => {
+  const linesService = new LinesService(db);
+  const stationsService = new StationsService(db);
+  const reportsService = new ReportsService(db, stationsService, linesService);
 
+  return { stationsService, linesService, reportsService } satisfies Services;
+}
 
-registerRoutes(app, [getReports]);
+registerServices(app, createServices(db));
+
+registerRoutes(app, [
+  getReports,
+  postReport
+]);
 
 export default app

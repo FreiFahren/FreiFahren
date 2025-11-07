@@ -2,8 +2,6 @@ import { zValidator } from '@hono/zod-validator'
 import { Handler, Hono, Env } from 'hono';
 import { z } from 'zod';
 
-
-
 type HttpMethod = 'get' | 'post' | 'put';
 type RouteSchemas = {
   json?: z.ZodTypeAny;
@@ -11,13 +9,19 @@ type RouteSchemas = {
   query?: z.ZodTypeAny;
 };
 
+type HonoInputFromRouteSchemas<S extends RouteSchemas> = {
+  out: {
+    [k in keyof S]: S[k] extends undefined ? undefined : z.infer<S[k]>
+  }
+}
+
 type DefineRouteInput<E extends Env, M extends HttpMethod, S extends RouteSchemas> = {
   method: M;
   path: string;
   schemas?: S;
   // Optional non-validation middlewares (e.g., auth, logging)
   middlewares?: Handler<E>[]; // Runs before validators
-  handler: Handler<E>;
+  handler: Handler<E, string, HonoInputFromRouteSchemas<S>>;
 };
 
 export const defineRoute = <E extends Env>() =>

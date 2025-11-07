@@ -2,7 +2,7 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
-import { lines, stationLines } from '../schema/lines';
+import { lines, lineStations } from '../schema/lines';
 import { stations } from '../schema/stations';
 
 import linesListJson from './LinesList.json';
@@ -77,7 +77,7 @@ const seed = async () => {
     });
   }
 
-  await db.insert(stationLines).values(stationLineRecords).onConflictDoNothing();
+  await db.insert(lineStations).values(stationLineRecords).onConflictDoNothing();
   console.log(`Inserted ${stationLineRecords.length} station-line relationships`);
 
   console.log('Seed completed successfully!');
