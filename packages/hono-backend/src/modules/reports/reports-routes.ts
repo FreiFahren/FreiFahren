@@ -7,6 +7,6 @@ export const getReports = defineRoute<Env>()({
   handler: async (c) => {
     const reportsService = c.get('reportsService');
 
-    return reportsService.getReports()
+    return c.json(await reportsService.getReports());
   }
 })

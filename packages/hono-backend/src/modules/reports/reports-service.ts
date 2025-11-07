@@ -7,9 +7,9 @@ export class ReportsService {
     const result = await this.db
       .select({
         timestamp: reports.timestamp,
-        stationId: reports.station_id,
-        directionId: reports.direction_id,
-        lineId: reports.line_id,
+        stationId: reports.stationId,
+        directionId: reports.directionId,
+        lineId: reports.stationId,
       })
       .from(reports);
 

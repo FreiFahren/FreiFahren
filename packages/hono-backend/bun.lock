@@ -6,7 +6,6 @@
       "dependencies": {
         "drizzle-orm": "^0.44.7",
         "drizzle-zod": "^0.8.3",
-        "eslint-plugin-prefer-arrow": "^1.2.3",
         "hono": "^4.10.4",
         "postgres": "^3.4.7",
         "typescript": "^5.9.3",
@@ -21,6 +20,7 @@
         "eslint": "^9.39.1",
         "eslint-import-resolver-typescript": "^4.4.4",
         "eslint-plugin-import": "^2.32.0",
+        "eslint-plugin-prefer-arrow": "^1.2.3",
         "typescript-eslint": "^8.46.3",
       },
     },
