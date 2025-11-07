@@ -1,0 +1,54 @@
+# Docker compose file path
+compose_file := "./compose-hono.test.yaml"
+service := "bun"
+
+default:
+    @just --list
+
+db-generate:
+    docker-compose -f {{compose_file}} exec {{service}} bun run db:generate
+
+db-migrate:
+    docker-compose -f {{compose_file}} exec {{service}} bun run db:migrate
+
+db-studio:
+    docker-compose -f {{compose_file}} exec {{service}} bun run db:studio
+
+db-drop:
+    docker-compose -f {{compose_file}} exec {{service}} bun run db:drop
+
+db-seed:
+    docker-compose -f {{compose_file}} exec {{service}} bun run db:seed
+
+db-push:
+    docker-compose -f {{compose_file}} exec {{service}} bun run db:push
+
+logs:
+    docker-compose -f {{compose_file}} logs -f {{service}}
+
+shell:
+    docker-compose -f {{compose_file}} exec {{service}} sh
+
+restart:
+    docker-compose -f {{compose_file}} restart {{service}}
+
+rebuild:
+    docker-compose -f {{compose_file}} up {{service}} --build -d
+
+up:
+    docker-compose -f {{compose_file}} up -d
+
+down:
+    docker-compose -f {{compose_file}} down
+
+dev:
+    docker-compose -f {{compose_file}} up -d && docker-compose -f {{compose_file}} logs -f {{service}}
+
+dev-local:
+    bun run dev
+
+lint:
+    bun run lint
+
+lint-fix:
+    bun run lint:fix

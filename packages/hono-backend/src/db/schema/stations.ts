@@ -1,6 +1,8 @@
-import { pgTable, serial } from 'drizzle-orm/pg-core';
+import { doublePrecision, pgTable, varchar } from 'drizzle-orm/pg-core';
 
 export const stations = pgTable('stations', {
-  station_id: serial('station_id').primaryKey(),
-  // Additional fields will be defined here
+  id: varchar({ length: 16 }).primaryKey(),
+  name: varchar({ length: 255 }).notNull(),
+  lat: doublePrecision().notNull(),
+  lng: doublePrecision().notNull(),
 });
