@@ -1,17 +1,19 @@
-import { zValidator } from '@hono/zod-validator'
-import { Handler, Hono, Env } from 'hono';
-import { z } from 'zod';
+import { zValidator } from "@hono/zod-validator";
+import { Handler, Hono, Env } from "hono";
+import { z } from "zod";
 
-
-
-type HttpMethod = 'get' | 'post' | 'put';
+type HttpMethod = "get" | "post" | "put";
 type RouteSchemas = {
   json?: z.ZodTypeAny;
   param?: z.ZodTypeAny;
   query?: z.ZodTypeAny;
 };
 
-type DefineRouteInput<E extends Env, M extends HttpMethod, S extends RouteSchemas> = {
+type DefineRouteInput<
+  E extends Env,
+  M extends HttpMethod,
+  S extends RouteSchemas,
+> = {
   method: M;
   path: string;
   schemas?: S;
@@ -20,9 +22,10 @@ type DefineRouteInput<E extends Env, M extends HttpMethod, S extends RouteSchema
   handler: Handler<E>;
 };
 
-export const defineRoute = <E extends Env>() =>
+export const defineRoute =
+  <E extends Env>() =>
   <M extends HttpMethod, S extends RouteSchemas>(
-    def: DefineRouteInput<E, M, S>
+    def: DefineRouteInput<E, M, S>,
   ) => {
     const mws: Handler[] = [];
 
@@ -30,9 +33,9 @@ export const defineRoute = <E extends Env>() =>
       mws.push(...(def.middlewares ?? []));
     }
 
-    if (def.schemas?.param) mws.push(zValidator('param', def.schemas.param));
-    if (def.schemas?.query) mws.push(zValidator('query', def.schemas.query));
-    if (def.schemas?.json) mws.push(zValidator('json', def.schemas.json));
+    if (def.schemas?.param) mws.push(zValidator("param", def.schemas.param));
+    if (def.schemas?.query) mws.push(zValidator("query", def.schemas.query));
+    if (def.schemas?.json) mws.push(zValidator("json", def.schemas.json));
 
     return {
       method: def.method,
@@ -40,8 +43,11 @@ export const defineRoute = <E extends Env>() =>
       middlewares: mws as readonly Handler<E>[],
       handler: def.handler,
     } as const;
-  }
+  };
 
-export const registerRoutes = <E extends Env>(app: Hono<E>, routes: ReturnType<ReturnType<typeof defineRoute<E>>>[]) => {
+export const registerRoutes = <E extends Env>(
+  app: Hono<E>,
+  routes: ReturnType<ReturnType<typeof defineRoute<E>>>[],
+) => {
   routes.forEach((r) => app[r.method](r.path, ...r.middlewares, r.handler));
 };

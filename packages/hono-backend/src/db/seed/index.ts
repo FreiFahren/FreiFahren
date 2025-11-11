@@ -1,21 +1,21 @@
 /* eslint-disable no-console  */
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 
-import { lines, stationLines } from '../schema/lines';
-import { stations } from '../schema/stations';
+import { lines, stationLines } from "../schema/lines";
+import { stations } from "../schema/stations";
 
-import linesListJson from './LinesList.json';
-import stationsListJson from './StationsList.json';
+import linesListJson from "./LinesList.json";
+import stationsListJson from "./StationsList.json";
 
 const connectionString = process.env.DATABASE_URL!;
 
 if (!connectionString) {
-  throw new Error('DATABASE_URL environment variable is not set');
+  throw new Error("DATABASE_URL environment variable is not set");
 }
 
 const client = postgres(connectionString, { prepare: false });
-const db = drizzle(client, { casing: 'snake_case' });
+const db = drizzle(client, { casing: "snake_case" });
 
 interface StationData {
   coordinates: {
@@ -35,12 +35,12 @@ interface LinesMap {
 }
 
 const seed = async () => {
-  console.log('Starting seed...');
+  console.log("Starting seed...");
 
   const stationsData = stationsListJson as StationsMap;
   const linesData = linesListJson as LinesMap;
 
-  console.log('Inserting stations...');
+  console.log("Inserting stations...");
   const stationRecords = Object.entries(stationsData).map(([id, data]) => ({
     id,
     name: data.name,
@@ -51,7 +51,7 @@ const seed = async () => {
   await db.insert(stations).values(stationRecords).onConflictDoNothing();
   console.log(`Inserted ${stationRecords.length} stations`);
 
-  console.log('Inserting lines...');
+  console.log("Inserting lines...");
   const lineRecords = Object.keys(linesData).map((id) => ({
     id,
     name: id,
@@ -60,7 +60,7 @@ const seed = async () => {
   await db.insert(lines).values(lineRecords).onConflictDoNothing();
   console.log(`Inserted ${lineRecords.length} lines`);
 
-  console.log('Inserting station-line relationships...');
+  console.log("Inserting station-line relationships...");
   const stationLineRecords: Array<{
     stationId: string;
     lineId: string;
@@ -77,14 +77,19 @@ const seed = async () => {
     });
   }
 
-  await db.insert(stationLines).values(stationLineRecords).onConflictDoNothing();
-  console.log(`Inserted ${stationLineRecords.length} station-line relationships`);
+  await db
+    .insert(stationLines)
+    .values(stationLineRecords)
+    .onConflictDoNothing();
+  console.log(
+    `Inserted ${stationLineRecords.length} station-line relationships`,
+  );
 
-  console.log('Seed completed successfully!');
+  console.log("Seed completed successfully!");
   await client.end();
-}
+};
 
 seed().catch((error) => {
-  console.error('Seed failed:', error);
+  console.error("Seed failed:", error);
   process.exit(1);
 });

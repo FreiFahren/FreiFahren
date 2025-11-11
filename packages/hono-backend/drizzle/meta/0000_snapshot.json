@@ -58,12 +58,8 @@
           "name": "station_lines_station_id_stations_id_fk",
           "tableFrom": "station_lines",
           "tableTo": "stations",
-          "columnsFrom": [
-            "station_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["station_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -71,12 +67,8 @@
           "name": "station_lines_line_id_lines_id_fk",
           "tableFrom": "station_lines",
           "tableTo": "lines",
-          "columnsFrom": [
-            "line_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["line_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -136,12 +128,8 @@
           "name": "reports_station_id_stations_id_fk",
           "tableFrom": "reports",
           "tableTo": "stations",
-          "columnsFrom": [
-            "station_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["station_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -149,12 +137,8 @@
           "name": "reports_line_id_lines_id_fk",
           "tableFrom": "reports",
           "tableTo": "lines",
-          "columnsFrom": [
-            "line_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["line_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -162,12 +146,8 @@
           "name": "reports_direction_id_lines_id_fk",
           "tableFrom": "reports",
           "tableTo": "lines",
-          "columnsFrom": [
-            "direction_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["direction_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -220,12 +200,7 @@
     "public.source": {
       "name": "source",
       "schema": "public",
-      "values": [
-        "mini_app",
-        "web_app",
-        "mobile_app",
-        "telegram"
-      ]
+      "values": ["mini_app", "web_app", "mobile_app", "telegram"]
     }
   },
   "schemas": {},

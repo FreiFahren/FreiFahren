@@ -1,3 +1,3 @@
 export default {
-    ...import('../../.prettierrc.js'),
-}
+  ...import("../../.prettierrc.js"),
+};
