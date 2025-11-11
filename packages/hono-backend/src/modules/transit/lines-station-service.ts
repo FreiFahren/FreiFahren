@@ -2,11 +2,6 @@ import { eq } from 'drizzle-orm'
 
 import { DbConnection, stations, stationLines } from '../../db'
 
-// Todo:
-// -  Add a cache to the service so that it requests the database once
-// - Perform operations on the database in a single transaction
-// - Add proper types
-
 type StationId = string
 type LineId = string
 
