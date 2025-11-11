@@ -1,3 +1,5 @@
+import { eq } from 'drizzle-orm'
+
 import { DbConnection, stations, stationLines } from '../../db'
 
 // Todo:
@@ -5,33 +7,44 @@ import { DbConnection, stations, stationLines } from '../../db'
 // - Perform operations on the database in a single transaction
 // - Add proper types
 
+type StationId = string
+type LineId = string
+
+type Stations = Record<StationId, Station>
+type Station = {
+    name: string
+    coordinates: { latitude: number; longitude: number }
+    lines: LineId[]
+}
+
 export class LinesStationService {
     constructor(private db: DbConnection) {}
 
-    async getStations() {
-        const allStations = await this.db.select().from(stations)
-        const allStationLines = await this.db.select().from(stationLines)
+    // Perform entire query in a single transaction to get maximum performance by serializing at DB level
+    async getStations(): Promise<Stations> {
+        const joinedRows = await this.db.transaction(async (tx) => {
+            return tx
+                .select({
+                    id: stations.id,
+                    name: stations.name,
+                    lat: stations.lat,
+                    lng: stations.lng,
+                    lineId: stationLines.lineId,
+                })
+                .from(stations)
+                .leftJoin(stationLines, eq(stationLines.stationId, stations.id))
+        })
 
-        const lineIdsByStationId = new Map<string, string[]>()
-        for (const stationLine of allStationLines) {
-            const existing = lineIdsByStationId.get(stationLine.stationId) ?? []
-            existing.push(stationLine.lineId)
-            lineIdsByStationId.set(stationLine.stationId, existing)
-        }
+        const result: Stations = {}
 
-        const result: Record<
-            string,
-            { name: string; coordinates: { latitude: number; longitude: number }; lines: string[] }
-        > = {}
-
-        for (const station of allStations) {
-            result[station.id] = {
-                name: station.name,
-                coordinates: {
-                    latitude: station.lat,
-                    longitude: station.lng,
-                },
-                lines: lineIdsByStationId.get(station.id) ?? [],
+        for (const row of joinedRows) {
+            result[row.id] ??= {
+                name: row.name,
+                coordinates: { latitude: row.lat, longitude: row.lng },
+                lines: [],
+            }
+            if (row.lineId !== null) {
+                result[row.id]!.lines.push(row.lineId)
             }
         }
 
