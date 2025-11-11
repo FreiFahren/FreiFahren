@@ -18,6 +18,7 @@
     "drizzle-zod": "^0.8.3",
     "hono": "^4.10.4",
     "postgres": "^3.4.7",
+    "prettier": "^3.6.2",
     "typescript": "^5.9.3",
     "zod": "^4.1.12"
   },
