@@ -25,3 +25,5 @@ jobs:
             - name: Run ESLint
               run: cd packages/hono-backend && bun run lint
 
+            - name: Run Prettier check
+              run: cd packages/hono-backend && bun run format:check
