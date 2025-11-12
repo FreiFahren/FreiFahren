@@ -1,21 +1,20 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/postgres-js'
+import postgres from 'postgres'
 
-import * as lines from './schema/lines';
-import * as reports from './schema/reports';
-import * as stations from './schema/stations';
+import * as lines from './schema/lines'
+import * as reports from './schema/reports'
+import * as stations from './schema/stations'
 
-const connectionString = process.env.DATABASE_URL!;
+const connectionString = process.env.DATABASE_URL!
 
-export const client = postgres(connectionString, { prepare: false });
+export const client = postgres(connectionString, { prepare: false })
 export const db = drizzle(client, {
-  schema: { ...reports, ...lines, ...stations },
-  casing: 'snake_case',
-});
+    schema: { ...reports, ...lines, ...stations },
+    casing: 'snake_case',
+})
 
-export type DbConnection = typeof db;
+export type DbConnection = typeof db
 
-export  *  from './schema/reports';
-export  * from './schema/lines';
-export  * from './schema/stations';
-
+export * from './schema/reports'
+export * from './schema/lines'
+export * from './schema/stations'
