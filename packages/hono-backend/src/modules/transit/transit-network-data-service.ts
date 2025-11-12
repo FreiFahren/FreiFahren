@@ -1,16 +1,20 @@
-import { eq } from 'drizzle-orm'
+import { eq, InferSelectModel } from 'drizzle-orm'
 
-import { DbConnection, stations, stationLines } from '../../db'
+import { DbConnection, stations, stationLines, lines } from '../../db'
 
-type StationId = string
-type LineId = string
+type StationRow = InferSelectModel<typeof stations>
+type LineRow = InferSelectModel<typeof lines>
 
-type Stations = Record<StationId, Station>
+type StationId = StationRow['id']
+type LineId = LineRow['id']
+
 type Station = {
-    name: string
-    coordinates: { latitude: number; longitude: number }
+    name: StationRow['name']
+    coordinates: { latitude: StationRow['lat']; longitude: StationRow['lng'] }
     lines: LineId[]
 }
+
+type Stations = Record<StationId, Station>
 
 export class TransitNetworkDataService {
     constructor(private db: DbConnection) {}
