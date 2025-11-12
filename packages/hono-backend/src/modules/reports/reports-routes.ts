@@ -13,19 +13,19 @@ export const getReports = defineRoute<Env>()({
     schemas: {
         query: z
             .object({
-                from: z.iso
-                    .datetime()
-                    .transform((iso) => DateTime.fromISO(iso))
-                    .optional(),
-                to: z.iso
-                    .datetime()
-                    .transform((iso) => DateTime.fromISO(iso))
-                    .optional(),
+                from: z.iso.datetime().transform((str) => DateTime.fromISO(str)),
+                to: z.iso.datetime().transform((str) => DateTime.fromISO(str)),
             })
+            .or(
+                z.object({
+                    from: z.undefined(),
+                    to: z.undefined(),
+                })
+            )
             .refine(({ to, from }) => {
-                if (isNil(from) !== isNil(to)) return false
-
                 if (isNil(to) || isNil(from)) return true
+
+                if (!from.isValid || !to.isValid) return false
 
                 const range = to.diff(from)
 
@@ -38,7 +38,7 @@ export const getReports = defineRoute<Env>()({
         const query = c.req.valid('query')
 
         const range = {
-            from: query.from ?? DateTime.now().minus({ minutes: 59 }),
+            from: query.from ?? DateTime.now().minus({ minutes: 60 }),
             to: query.to ?? DateTime.now(),
         }
 
