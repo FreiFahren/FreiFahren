@@ -1,4 +1,5 @@
 import { Context } from 'hono'
+import { isNil } from 'lodash'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
 
@@ -10,16 +11,26 @@ export const getReports = defineRoute<Env>()({
     method: 'get',
     path: 'v0/reports',
     schemas: {
-        query: z.object({
-            from: z.iso
-                .datetime()
-                .transform((iso) => DateTime.fromISO(iso))
-                .optional(),
-            to: z.iso
-                .datetime()
-                .transform((iso) => DateTime.fromISO(iso))
-                .optional(),
-        }),
+        query: z
+            .object({
+                from: z.iso
+                    .datetime()
+                    .transform((iso) => DateTime.fromISO(iso))
+                    .optional(),
+                to: z.iso
+                    .datetime()
+                    .transform((iso) => DateTime.fromISO(iso))
+                    .optional(),
+            })
+            .refine(({ to, from }) => {
+                if (isNil(from) !== isNil(to)) return false
+
+                if (isNil(to) || isNil(from)) return true
+
+                const range = to.diff(from)
+
+                return range.toMillis() > 0 && range.as('days') <= 7
+            }),
     },
     handler: async (c) => {
         const reportsService = c.get('reportsService')
@@ -31,16 +42,12 @@ export const getReports = defineRoute<Env>()({
             to: query.to ?? DateTime.now(),
         }
 
-        if (range.to.diff(range.from).as('hours') > 1) {
-            return c.json({ message: 'Bad request - range larger than 1h' }, 400)
-        }
-
         return c.json(await reportsService.getReports(range))
     },
 })
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getReportSource = (_: Context): InsertReport['source'] => 'web_app'
+const getReportSource = (_: Context): InsertReport['source'] => 'telegram'
 
 export const postReport = defineRoute<Env>()({
     method: 'post',
