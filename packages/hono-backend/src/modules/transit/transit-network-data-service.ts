@@ -12,7 +12,7 @@ type Station = {
     lines: LineId[]
 }
 
-export class LinesStationService {
+export class TransitNetworkDataService {
     constructor(private db: DbConnection) {}
 
     // Perform entire query in a single transaction to get maximum performance by serializing at DB level
