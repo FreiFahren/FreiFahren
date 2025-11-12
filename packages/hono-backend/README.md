@@ -45,3 +45,9 @@ And then apply it to the DB:
 ```sh
 just db-migrate
 ```
+
+## DB Access / Drizzle Studio
+
+Drizzle provides it's own UI to interact with the DB. Simply run `just db-studio` and open the link you get in your browser.
+
+If you want to access the DB with something like Postico, use the following connection string: `postgres://postgres:postgres@localhost:5432/freifahren`
