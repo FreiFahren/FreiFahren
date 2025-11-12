@@ -31,18 +31,16 @@ export class TransitNetworkDataService {
             .from(stations)
             .leftJoin(stationLines, eq(stationLines.stationId, stations.id))
 
-        const result: Stations = {}
-
-        for (const row of joinedRows) {
-            result[row.id] ??= {
+        const result = joinedRows.reduce<Stations>((acc, row) => {
+            const existing = acc[row.id] ?? {
                 name: row.name,
                 coordinates: { latitude: row.lat, longitude: row.lng },
                 lines: [],
             }
-            if (row.lineId !== null) {
-                result[row.id]!.lines.push(row.lineId)
-            }
-        }
+            const lines = row.lineId !== null ? [...existing.lines, row.lineId] : existing.lines
+            acc[row.id] = { ...existing, lines }
+            return acc
+        }, {})
 
         return result
     }
