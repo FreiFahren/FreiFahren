@@ -19,20 +19,17 @@ type Stations = Record<StationId, Station>
 export class TransitNetworkDataService {
     constructor(private db: DbConnection) {}
 
-    // Perform entire query in a single transaction to get maximum performance by serializing at DB level
     async getStations(): Promise<Stations> {
-        const joinedRows = await this.db.transaction(async (tx) => {
-            return tx
-                .select({
-                    id: stations.id,
-                    name: stations.name,
-                    lat: stations.lat,
-                    lng: stations.lng,
-                    lineId: stationLines.lineId,
-                })
-                .from(stations)
-                .leftJoin(stationLines, eq(stationLines.stationId, stations.id))
-        })
+        const joinedRows = await this.db
+            .select({
+                id: stations.id,
+                name: stations.name,
+                lat: stations.lat,
+                lng: stations.lng,
+                lineId: stationLines.lineId,
+            })
+            .from(stations)
+            .leftJoin(stationLines, eq(stationLines.stationId, stations.id))
 
         const result: Stations = {}
 
