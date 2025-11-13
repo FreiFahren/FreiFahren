@@ -18,6 +18,8 @@ import (
 	"github.com/FreiFahren/backend/data"
 	"github.com/FreiFahren/backend/database"
 	"github.com/FreiFahren/backend/logger"
+	"github.com/FreiFahren/backend/utils"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	cron "github.com/robfig/cron/v3"
@@ -27,13 +29,30 @@ import (
 func SetupServer() *echo.Echo {
 	logger.Init()
 
+	// Find the .env file
+	envPath, err := utils.FindEnvFile()
+	if err != nil {
+		logger.Log.Panic().Msg("Could not locate .env file")
+		logger.Log.Panic().Str("Error", err.Error()).Send()
+	}
+
+	// Load .env file
+	err = godotenv.Overload(envPath)
+	if err != nil {
+		logger.Log.Panic().Msg("Error loading .env file")
+		logger.Log.Panic().Str("Error", err.Error()).Send()
+	}
+
 	data.EmbedJSONFiles()
 
 	// Create a new connection pool, for concurrency
 	database.CreatePool()
+	if err != nil {
+		logger.Log.Error().Msg("Could not create connection pool")
+		logger.Log.Error().Str("Error", err.Error()).Send()
+	}
 
 	c := cron.New()
-	var err error
 
 	// Schedule a job to backup the database every day at midnight
 	_, err = c.AddFunc("0 0 * * *", func() {
