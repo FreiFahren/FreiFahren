@@ -2,14 +2,12 @@ import { and, gte, lte } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 
 import { DbConnection, InsertReport, reports } from '../../db/'
-import { LinesService } from '../lines/lines-service'
-import { StationsService } from '../stations/stations-service'
+import { TransitNetworkDataService } from '../transit/transit-network-data-service'
 
 export class ReportsService {
     constructor(
         private db: DbConnection,
-        private stationsService: StationsService,
-        private linesService: LinesService
+        private transitNetworkDataService: TransitNetworkDataService
     ) {}
 
     async getReports({ from, to }: { from: DateTime; to: DateTime }) {

@@ -1,13 +1,11 @@
 import { Hono } from 'hono'
 
-import { LinesService } from './modules/lines/lines-service'
 import { ReportsService } from './modules/reports'
-import { StationsService } from './modules/stations'
+import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
 
 export type Services = {
     reportsService: ReportsService
-    stationsService: StationsService
-    linesService: LinesService
+    transitNetworkDataService: TransitNetworkDataService
 }
 
 export type Env = {
