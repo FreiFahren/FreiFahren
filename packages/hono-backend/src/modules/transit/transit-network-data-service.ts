@@ -1,6 +1,6 @@
 import { eq, InferSelectModel } from 'drizzle-orm'
 
-import { DbConnection, stations, stationLines, lines } from '../../db'
+import { DbConnection, stations, lineStations, lines } from '../../db'
 
 type StationRow = InferSelectModel<typeof stations>
 type LineRow = InferSelectModel<typeof lines>
@@ -26,21 +26,23 @@ export class TransitNetworkDataService {
                 name: stations.name,
                 lat: stations.lat,
                 lng: stations.lng,
-                lineId: stationLines.lineId,
+                lineId: lineStations.lineId,
             })
             .from(stations)
-            .leftJoin(stationLines, eq(stationLines.stationId, stations.id))
+            .leftJoin(lineStations, eq(lineStations.stationId, stations.id))
 
-        const result = joinedRows.reduce<Stations>((acc, row) => {
-            const existing = acc[row.id] ?? {
-                name: row.name,
-                coordinates: { latitude: row.lat, longitude: row.lng },
-                lines: [],
-            }
-            const lines = row.lineId !== null ? [...existing.lines, row.lineId] : existing.lines
-            acc[row.id] = { ...existing, lines }
-            return acc
-        }, {})
+        const result = joinedRows.reduce<Stations>((stationsById, row) => {
+            const base = Object.prototype.hasOwnProperty.call(stationsById, row.id)
+                ? stationsById[row.id]
+                : {
+                      name: row.name,
+                      coordinates: { latitude: row.lat, longitude: row.lng },
+                      lines: [],
+                  }
+            const lines = row.lineId !== null ? [...base.lines, row.lineId] : base.lines
+            stationsById[row.id] = { ...base, lines }
+            return stationsById
+        }, {} as Stations)
 
         return result
     }

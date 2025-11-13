@@ -1,6 +1,6 @@
-# Docker compose file path
 compose_file := "./compose-hono.test.yaml"
 service := "bun"
+db_url := "postgres://postgres:postgres@localhost:5432/freifahren"
 
 default:
     @just --list
@@ -12,7 +12,7 @@ db-migrate:
     docker-compose -f {{compose_file}} exec {{service}} bun run db:migrate
 
 db-studio:
-    docker-compose -f {{compose_file}} exec {{service}} bun run db:studio
+    DATABASE_URL={{db_url}} bun run db:studio
 
 db-drop:
     docker-compose -f {{compose_file}} exec {{service}} bun run db:drop

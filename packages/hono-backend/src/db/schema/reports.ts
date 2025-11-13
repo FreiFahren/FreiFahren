@@ -1,5 +1,6 @@
 import { pgTable, varchar, serial, timestamp, pgEnum } from 'drizzle-orm/pg-core'
 import { createInsertSchema } from 'drizzle-zod'
+import { z } from 'zod'
 
 import { lines } from './lines'
 import { stations } from './stations'
@@ -20,4 +21,8 @@ export const reports = pgTable('reports', {
 export const insertReportSchema = createInsertSchema(reports).pick({
     stationId: true,
     lineId: true,
+    directionId: true,
+    source: true,
 })
+
+export type InsertReport = z.infer<typeof insertReportSchema>

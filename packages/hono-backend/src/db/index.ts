@@ -1,15 +1,15 @@
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 
-import * as lines from './schema/lines'
-import * as reports from './schema/reports'
-import * as stations from './schema/stations'
+import { lines, lineStations } from './schema/lines'
+import { reports } from './schema/reports'
+import { stations } from './schema/stations'
 
 const connectionString = process.env.DATABASE_URL!
 
 export const client = postgres(connectionString, { prepare: false })
 export const db = drizzle(client, {
-    schema: { ...reports, ...lines, ...stations },
+    schema: { reports, stations, lines, lineStations },
     casing: 'snake_case',
 })
 
