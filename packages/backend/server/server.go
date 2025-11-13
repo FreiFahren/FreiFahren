@@ -40,6 +40,7 @@ func SetupServer() *echo.Echo {
 	err = godotenv.Overload(envPath)
 	if err != nil {
 		logger.Log.Panic().Msg("Error loading .env file")
+		logger.Log.Panic().Str("Environment", envPath).Send()
 		logger.Log.Panic().Str("Error", err.Error()).Send()
 	}
 
