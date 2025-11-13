@@ -1,13 +1,10 @@
 package logger
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 
-	"github.com/FreiFahren/backend/utils"
-	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
@@ -15,17 +12,6 @@ import (
 var Log zerolog.Logger
 
 func Init() {
-
-	envPath, err := utils.FindEnvFile()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	err = godotenv.Load(envPath)
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	logFile := &lumberjack.Logger{
 		Filename:   "app.log",
 		MaxSize:    10, // megabytes
