@@ -1,7 +1,7 @@
 CREATE TYPE "public"."source" AS ENUM('mini_app', 'web_app', 'mobile_app', 'telegram');--> statement-breakpoint
 CREATE TABLE "lines" (
 	"id" varchar(16) PRIMARY KEY NOT NULL,
-	"name" varchar(255) NOT NULL
+	"name" varchar(255) NOT NULL,
 	"is_circular" boolean NOT NULL DEFAULT false
 );
 --> statement-breakpoint
