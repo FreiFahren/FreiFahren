@@ -2,9 +2,10 @@ CREATE TYPE "public"."source" AS ENUM('mini_app', 'web_app', 'mobile_app', 'tele
 CREATE TABLE "lines" (
 	"id" varchar(16) PRIMARY KEY NOT NULL,
 	"name" varchar(255) NOT NULL
+	"is_circular" boolean NOT NULL DEFAULT false
 );
 --> statement-breakpoint
-CREATE TABLE "station_lines" (
+CREATE TABLE "line_stations" (
 	"station_id" varchar(16) NOT NULL,
 	"line_id" varchar(16) NOT NULL,
 	"order" integer NOT NULL
@@ -26,8 +27,8 @@ CREATE TABLE "stations" (
 	"lng" double precision NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "station_lines" ADD CONSTRAINT "station_lines_station_id_stations_id_fk" FOREIGN KEY ("station_id") REFERENCES "public"."stations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "station_lines" ADD CONSTRAINT "station_lines_line_id_lines_id_fk" FOREIGN KEY ("line_id") REFERENCES "public"."lines"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "line_stations" ADD CONSTRAINT "line_stations_station_id_stations_id_fk" FOREIGN KEY ("station_id") REFERENCES "public"."stations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "line_stations" ADD CONSTRAINT "line_stations_line_id_lines_id_fk" FOREIGN KEY ("line_id") REFERENCES "public"."lines"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reports" ADD CONSTRAINT "reports_station_id_stations_id_fk" FOREIGN KEY ("station_id") REFERENCES "public"."stations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reports" ADD CONSTRAINT "reports_line_id_lines_id_fk" FOREIGN KEY ("line_id") REFERENCES "public"."lines"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reports" ADD CONSTRAINT "reports_direction_id_lines_id_fk" FOREIGN KEY ("direction_id") REFERENCES "public"."lines"("id") ON DELETE no action ON UPDATE no action;
