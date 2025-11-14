@@ -48,7 +48,7 @@ jobs:
             - name: Start Postgres (docker-compose)
               run: |
                   cd packages/hono-backend
-                  docker-compose -f compose-hono.test.yaml up -d postgres
+                  docker compose -f compose-hono.test.yaml up -d postgres
 
             - name: Wait for Postgres
               run: |
@@ -82,4 +82,4 @@ jobs:
               if: always()
               run: |
                   cd packages/hono-backend
-                  docker-compose -f compose-hono.test.yaml down
+                  docker compose -f compose-hono.test.yaml down
