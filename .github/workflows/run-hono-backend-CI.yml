@@ -33,22 +33,14 @@ jobs:
         needs: lint
         permissions:
             contents: read
-        env:
-            DATABASE_URL: ${{ secrets.HONO_TEST_DB_URL }}
         steps:
             - name: Check out code
               uses: actions/checkout@v4
 
-            - name: Set up Bun
-              uses: oven-sh/setup-bun@v1
-
-            - name: Install dependencies
-              run: cd packages/hono-backend && bun install
-
-            - name: Start Postgres (docker-compose)
+            - name: Start services
               run: |
                   cd packages/hono-backend
-                  docker compose -f compose-hono.test.yaml up -d postgres
+                  docker compose -f compose-hono.test.yaml up -d
 
             - name: Wait for Postgres
               run: |
@@ -63,20 +55,20 @@ jobs:
                   echo "Postgres did not become ready in time"
                   exit 1
 
-            - name: Run migrations on test DB
+            - name: Run migrations
               run: |
                   cd packages/hono-backend
-                  bun run db:migrate
+                  docker compose -f compose-hono.test.yaml exec bun bun run db:migrate
 
-            - name: Seed base data on test DB
+            - name: Seed base data
               run: |
                   cd packages/hono-backend
-                  bun run db:seed
+                  docker compose -f compose-hono.test.yaml exec bun bun run db:seed
 
-            - name: Run tests against test DB
+            - name: Run tests
               run: |
                   cd packages/hono-backend
-                  bun test
+                  docker compose -f compose-hono.test.yaml exec bun bun test
 
             - name: Stop containers
               if: always()
