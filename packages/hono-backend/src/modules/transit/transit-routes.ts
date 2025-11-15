@@ -9,3 +9,12 @@ export const getStations = defineRoute<Env>()({
         return c.json(await transitNetworkDataService.getStations())
     },
 })
+
+export const getLines = defineRoute<Env>()({
+    method: 'get' as const,
+    path: 'v0/transit/lines',
+    handler: async (c) => {
+        const transitNetworkDataService = c.get('transitNetworkDataService')
+        return c.json(await transitNetworkDataService.getLines())
+    },
+})
