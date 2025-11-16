@@ -27,3 +27,51 @@ jobs:
 
             - name: Run Prettier check
               run: cd packages/hono-backend && bun run format:check
+
+    test:
+        runs-on: ubuntu-latest
+        needs: lint
+        permissions:
+            contents: read
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v4
+
+            - name: Start services
+              run: |
+                  cd packages/hono-backend
+                  docker compose -f compose-hono.test.yaml up -d
+
+            - name: Wait for Postgres
+              run: |
+                  for i in {1..30}; do
+                    if docker exec hono-postgres pg_isready -U postgres > /dev/null 2>&1; then
+                      echo "Postgres is ready"
+                      exit 0
+                    fi
+                    echo "Waiting for Postgres..."
+                    sleep 3
+                  done
+                  echo "Postgres did not become ready in time"
+                  exit 1
+
+            - name: Run migrations
+              run: |
+                  cd packages/hono-backend
+                  docker compose -f compose-hono.test.yaml exec bun bun run db:migrate
+
+            - name: Seed base data
+              run: |
+                  cd packages/hono-backend
+                  docker compose -f compose-hono.test.yaml exec bun bun run db:seed
+
+            - name: Run tests
+              run: |
+                  cd packages/hono-backend
+                  docker compose -f compose-hono.test.yaml exec bun bun test
+
+            - name: Stop containers
+              if: always()
+              run: |
+                  cd packages/hono-backend
+                  docker compose -f compose-hono.test.yaml down
