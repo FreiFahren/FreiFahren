@@ -47,7 +47,7 @@ export class ReportsService {
     async createReport(reportData: InsertReport): Promise<HttpErrorBody | null> {
         await this.db.insert(reports).values(reportData)
 
-        if (reportData.source !== 'telegram') {
+        if (reportData.source !== 'telegram' && env.NODE_ENV === 'production') {
             try {
                 await this.notifyTelegram(reportData)
             } catch (error) {
