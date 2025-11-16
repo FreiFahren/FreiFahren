@@ -20,7 +20,7 @@ const createReport = async (timestamp: Date) => {
     })
 }
 
-describe('GET /v0/reports', () => {
+describe('Timeframe filtering', () => {
     beforeAll(async () => {
         await seedBaseData(db)
 
