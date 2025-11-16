@@ -1,6 +1,7 @@
-import { eq, InferSelectModel } from 'drizzle-orm'
+import { asc, eq, InferSelectModel } from 'drizzle-orm'
 
 import { DbConnection, stations, lineStations, lines } from '../../db'
+import { buildGraph, findPathWithAStar, type Graph } from './pathfinding'
 
 type StationRow = InferSelectModel<typeof stations>
 type LineRow = InferSelectModel<typeof lines>
@@ -16,8 +17,31 @@ type Station = {
 
 type Stations = Record<StationId, Station>
 
+type PathCacheKey = `${StationId}:${StationId}`
+
 export class TransitNetworkDataService {
+    private graphCache: Graph | null = null
+    private pathCache = new Map<PathCacheKey, number>()
+    private readonly MAX_CACHE_SIZE = 1000
+
     constructor(private db: DbConnection) {}
+
+    private async buildGraph(): Promise<Graph> {
+        if (this.graphCache) {
+            return this.graphCache
+        }
+
+        const allStations = await this.db.select().from(stations)
+        const allLineStations = await this.db
+            .select()
+            .from(lineStations)
+            .orderBy(asc(lineStations.lineId), asc(lineStations.order))
+        const allLines = await this.db.select().from(lines)
+
+        this.graphCache = buildGraph(allStations, allLines, allLineStations)
+
+        return this.graphCache
+    }
 
     async getStations(): Promise<Stations> {
         const joinedRows = await this.db
@@ -52,13 +76,31 @@ export class TransitNetworkDataService {
             return 0
         }
 
-        const fromStation = await this.db.select().from(stations).where(eq(stations.id, from)).limit(1)
-        const toStation = await this.db.select().from(stations).where(eq(stations.id, to)).limit(1)
-
-        if (fromStation.length === 0 || toStation.length === 0) {
-            throw new Error('Station not found')
+        const cacheKey: PathCacheKey = `${from}:${to}`
+        const cached = this.pathCache.get(cacheKey)
+        if (cached !== undefined) {
+            return cached
         }
 
-        return 0
+        const graph = await this.buildGraph()
+
+        if (!graph.stations.has(from)) {
+            throw new Error(`Station not found: ${from}`)
+        }
+        if (!graph.stations.has(to)) {
+            throw new Error(`Station not found: ${to}`)
+        }
+
+        const distance = findPathWithAStar(graph, from, to)
+
+        if (this.pathCache.size >= this.MAX_CACHE_SIZE) {
+            const firstKey = this.pathCache.keys().next().value
+            if (firstKey !== undefined) {
+                this.pathCache.delete(firstKey)
+            }
+        }
+        this.pathCache.set(cacheKey, distance)
+
+        return distance
     }
 }
