@@ -5,7 +5,7 @@ import { DbConnection, stations, lineStations, lines } from '../../db'
 type StationRow = InferSelectModel<typeof stations>
 type LineRow = InferSelectModel<typeof lines>
 
-type StationId = StationRow['id']
+export type StationId = StationRow['id']
 type LineId = LineRow['id']
 
 type Station = {
@@ -14,7 +14,7 @@ type Station = {
     lines: LineId[]
 }
 
-type Stations = Record<StationId, Station>
+export type Stations = Record<StationId, Station>
 
 export class TransitNetworkDataService {
     constructor(private db: DbConnection) {}

@@ -23,6 +23,8 @@ services:
         container_name: hono-bun
         environment:
             DATABASE_URL: postgres://postgres:postgres@postgres:5432/freifahren
+            NLP_SERVICE_URL: http://localhost:6000
+            REPORT_PASSWORD: password
         ports:
             - '80:3000'
         volumes:
