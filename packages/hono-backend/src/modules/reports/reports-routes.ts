@@ -7,6 +7,8 @@ import { Env } from '../../app-env'
 import { defineRoute } from '../../common/router'
 import { InsertReport, insertReportSchema } from '../../db'
 
+import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from './constants'
+
 export const getReports = defineRoute<Env>()({
     method: 'get',
     path: 'v0/reports',
@@ -29,17 +31,18 @@ export const getReports = defineRoute<Env>()({
 
                 const range = to.diff(from)
 
-                return range.toMillis() > 0 && range.as('days') <= 7
+                return range.toMillis() > 0 && range.as('days') <= MAX_REPORTS_TIMEFRAME
             }),
     },
     handler: async (c) => {
         const reportsService = c.get('reportsService')
 
         const query = c.req.valid('query')
+        const defaultRange = getDefaultReportsRange()
 
         const range = {
-            from: query.from ?? DateTime.now().minus({ minutes: 60 }),
-            to: query.to ?? DateTime.now(),
+            from: query.from ?? defaultRange.from,
+            to: query.to ?? defaultRange.to,
         }
 
         return c.json(await reportsService.getReports(range))

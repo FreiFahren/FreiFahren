@@ -1,6 +1,7 @@
 compose_file := "./compose-hono.test.yaml"
 service := "bun"
 db_url := "postgres://postgres:postgres@localhost:5432/freifahren"
+test_db_url := "postgres://postgres:postgres@localhost:5432/freifahren_test"
 
 default:
     @just --list
@@ -22,6 +23,9 @@ db-seed:
 
 db-push:
     docker-compose -f {{compose_file}} exec {{service}} bun run db:push
+
+test:
+    DATABASE_URL={{test_db_url}} bun test
 
 logs:
     docker-compose -f {{compose_file}} logs -f {{service}}

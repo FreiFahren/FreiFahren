@@ -29,8 +29,8 @@
             "checkConstraints": {},
             "isRLSEnabled": false
         },
-        "public.station_lines": {
-            "name": "station_lines",
+        "public.line_stations": {
+            "name": "line_stations",
             "schema": "",
             "columns": {
                 "station_id": {
@@ -54,18 +54,18 @@
             },
             "indexes": {},
             "foreignKeys": {
-                "station_lines_station_id_stations_id_fk": {
-                    "name": "station_lines_station_id_stations_id_fk",
-                    "tableFrom": "station_lines",
+                "line_stations_station_id_stations_id_fk": {
+                    "name": "line_stations_station_id_stations_id_fk",
+                    "tableFrom": "line_stations",
                     "tableTo": "stations",
                     "columnsFrom": ["station_id"],
                     "columnsTo": ["id"],
                     "onDelete": "cascade",
                     "onUpdate": "no action"
                 },
-                "station_lines_line_id_lines_id_fk": {
-                    "name": "station_lines_line_id_lines_id_fk",
-                    "tableFrom": "station_lines",
+                "line_stations_line_id_lines_id_fk": {
+                    "name": "line_stations_line_id_lines_id_fk",
+                    "tableFrom": "line_stations",
                     "tableTo": "lines",
                     "columnsFrom": ["line_id"],
                     "columnsTo": ["id"],
