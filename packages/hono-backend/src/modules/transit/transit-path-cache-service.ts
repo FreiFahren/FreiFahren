@@ -2,7 +2,7 @@ import { existsSync, mkdirSync } from 'fs'
 import { readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 
-import { findPathWithAStar, type Graph } from './pathfinding'
+import { findPathWithAStar, StationId, type Graph } from './pathfinding'
 
 export type PathCacheKey = `${string}:${string}`
 
@@ -23,7 +23,7 @@ const CACHE_FILE = join(CACHE_DIR, 'transit-paths-cache.json')
 
 export class TransitPathCacheService {
     private pathCache = new Map<PathCacheKey, number>()
-    private isPrecomputing = false
+    private precomputePromise: Promise<void> | null = null
 
     constructor() {
         if (!existsSync(CACHE_DIR)) {
@@ -47,7 +47,19 @@ export class TransitPathCacheService {
         return this.pathCache.size
     }
 
-    async loadFromDisk(graph: Graph): Promise<boolean> {
+    getOrCompute(graph: Graph, from: StationId, to: StationId): number {
+        const key: PathCacheKey = `${from}:${to}`
+        const cached = this.pathCache.get(key)
+        if (cached !== undefined) {
+            return cached
+        }
+
+        const distance = findPathWithAStar(graph, from, to)
+        this.pathCache.set(key, distance)
+        return distance
+    }
+
+    async loadFromDisk(expectedStationCount: number): Promise<boolean> {
         try {
             if (!existsSync(CACHE_FILE)) {
                 console.log('cache file not found, will pre-compute paths')
@@ -59,7 +71,7 @@ export class TransitPathCacheService {
 
             if (
                 cacheData.metadata.version !== CACHE_VERSION ||
-                cacheData.metadata.stationCount !== graph.stations.size
+                cacheData.metadata.stationCount !== expectedStationCount
             ) {
                 console.log(
                     `cache invalid (version: ${cacheData.metadata.version}, station count: ${cacheData.metadata.stationCount}), will recompute`
@@ -82,9 +94,8 @@ export class TransitPathCacheService {
         }
     }
 
-    async saveToDisk(graph: Graph): Promise<void> {
+    async saveToDisk(stationCount: number): Promise<void> {
         try {
-            const stationCount = graph.stations.size
             const cacheData: CacheFile = {
                 metadata: {
                     version: CACHE_VERSION,
@@ -102,11 +113,19 @@ export class TransitPathCacheService {
     }
 
     async precomputeAllPaths(graph: Graph): Promise<void> {
-        if (this.isPrecomputing) {
-            return
+        if (this.precomputePromise) {
+            return this.precomputePromise
         }
 
-        this.isPrecomputing = true
+        this.precomputePromise = this._doPrecompute(graph)
+        try {
+            await this.precomputePromise
+        } finally {
+            this.precomputePromise = null
+        }
+    }
+
+    private async _doPrecompute(graph: Graph): Promise<void> {
         const stationIds = Array.from(graph.stations.keys())
         const totalPairs = stationIds.length * (stationIds.length - 1)
         let computed = 0
@@ -146,6 +165,7 @@ export class TransitPathCacheService {
                     }
                 } catch (error) {
                     if (error instanceof Error && error.message.includes('No path found')) {
+                        computed++
                         continue
                     }
                     throw error
@@ -158,9 +178,7 @@ export class TransitPathCacheService {
             `pre-computation complete: ${computed} paths computed in ${elapsed}s (${this.pathCache.size} total entries)`
         )
 
-        await this.saveToDisk(graph)
-
-        this.isPrecomputing = false
+        await this.saveToDisk(graph.stations.size)
     }
 }
 
