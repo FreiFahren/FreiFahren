@@ -1,4 +1,3 @@
-import { env } from 'bun'
 import { and, gte, lte } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
@@ -16,19 +15,10 @@ type TelegramNotificationPayload = {
 }
 
 export class ReportsService {
-    private readonly telegramNotificationEndpoint: string
-    private readonly telegramNotificationPassword: string
-
     constructor(
         private db: DbConnection,
         private transitNetworkDataService: TransitNetworkDataService
-    ) {
-        const nlpServiceUrl = z.string().min(1).parse(env.NLP_SERVICE_URL)
-        const reportPassword = z.string().min(1).parse(env.REPORT_PASSWORD)
-
-        this.telegramNotificationEndpoint = `${nlpServiceUrl.replace(/\/$/, '')}/report-inspector`
-        this.telegramNotificationPassword = reportPassword
-    }
+    ) {}
 
     async getReports({ from, to }: { from: DateTime; to: DateTime }) {
         const result = await this.db
@@ -47,7 +37,7 @@ export class ReportsService {
     async createReport(reportData: InsertReport): Promise<HttpErrorBody | null> {
         await this.db.insert(reports).values(reportData)
 
-        if (reportData.source !== 'telegram' && env.NODE_ENV === 'production') {
+        if (reportData.source !== 'telegram' && process.env.NODE_ENV === 'production') {
             try {
                 await this.notifyTelegram(reportData)
             } catch (error) {
@@ -69,13 +59,17 @@ export class ReportsService {
     }
 
     private async notifyTelegram(reportData: InsertReport) {
+        const nlpServiceUrl = z.string().min(1).parse(process.env.NLP_SERVICE_URL)
+        const reportPassword = z.string().min(1).parse(process.env.REPORT_PASSWORD)
+
+        const endpoint = `${nlpServiceUrl.replace(/\/$/, '')}/report-inspector`
         const payload = await this.buildTelegramNotificationPayload(reportData)
 
-        const response = await fetch(this.telegramNotificationEndpoint, {
+        const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Password': this.telegramNotificationPassword,
+                'X-Password': reportPassword,
             },
             body: JSON.stringify(payload),
         })
