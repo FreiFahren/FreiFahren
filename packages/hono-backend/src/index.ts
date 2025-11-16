@@ -12,7 +12,7 @@ import { getReports, getReportsByStation, postReport, ReportsService } from './m
 import { getRisk } from './modules/risk/risk-routes'
 import { RiskService } from './modules/risk/risk-service'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
-import { getLines, getSegments, getStations } from './modules/transit/transit-routes'
+import { getDistance, getLines, getSegments, getStations } from './modules/transit/transit-routes'
 
 const createServices = (db: DbConnection) => {
     const transitNetworkDataService = new TransitNetworkDataService(db)
@@ -64,7 +64,7 @@ export const createApp = (dbConnection: DbConnection = db) => {
         v0: [getReports, postReport, getReportsByStation],
     })
     registerVersionedRoutes(app, 'transit', 'v0', {
-        v0: [getStations, getLines, getSegments],
+        v0: [getStations, getLines, getSegments, getDistance],
     })
     registerVersionedRoutes(app, 'feedback', 'v0', {
         v0: [postFeedback],
