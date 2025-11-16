@@ -46,4 +46,19 @@ export class TransitNetworkDataService {
 
         return result
     }
+
+    async getDistance(from: StationId, to: StationId): Promise<number> {
+        if (from === to) {
+            return 0
+        }
+
+        const fromStation = await this.db.select().from(stations).where(eq(stations.id, from)).limit(1)
+        const toStation = await this.db.select().from(stations).where(eq(stations.id, to)).limit(1)
+
+        if (fromStation.length === 0 || toStation.length === 0) {
+            throw new Error('Station not found')
+        }
+
+        return 0
+    }
 }
