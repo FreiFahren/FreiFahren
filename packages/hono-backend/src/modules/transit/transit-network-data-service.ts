@@ -2,6 +2,7 @@ import { asc, eq, InferSelectModel } from 'drizzle-orm'
 
 import { DbConnection, stations, lineStations, lines } from '../../db'
 import { buildGraph, findPathWithAStar, type Graph } from './pathfinding'
+import { TransitPathCacheService, type PathCacheKey } from './transit-path-cache-service'
 
 type StationRow = InferSelectModel<typeof stations>
 type LineRow = InferSelectModel<typeof lines>
@@ -17,12 +18,9 @@ type Station = {
 
 type Stations = Record<StationId, Station>
 
-type PathCacheKey = `${StationId}:${StationId}`
-
 export class TransitNetworkDataService {
     private graphCache: Graph | null = null
-    private pathCache = new Map<PathCacheKey, number>()
-    private readonly MAX_CACHE_SIZE = 1000
+    private pathCacheService = new TransitPathCacheService()
 
     constructor(private db: DbConnection) {}
 
@@ -39,6 +37,15 @@ export class TransitNetworkDataService {
         const allLines = await this.db.select().from(lines)
 
         this.graphCache = buildGraph(allStations, allLines, allLineStations)
+
+        if (this.pathCacheService.size() === 0) {
+            const loaded = await this.pathCacheService.loadFromDisk(this.graphCache)
+            if (!loaded) {
+                this.pathCacheService.precomputeAllPaths(this.graphCache).catch((error) => {
+                    console.error('error during path pre-computation:', error)
+                })
+            }
+        }
 
         return this.graphCache
     }
@@ -76,12 +83,6 @@ export class TransitNetworkDataService {
             return 0
         }
 
-        const cacheKey: PathCacheKey = `${from}:${to}`
-        const cached = this.pathCache.get(cacheKey)
-        if (cached !== undefined) {
-            return cached
-        }
-
         const graph = await this.buildGraph()
 
         if (!graph.stations.has(from)) {
@@ -91,15 +92,14 @@ export class TransitNetworkDataService {
             throw new Error(`Station not found: ${to}`)
         }
 
-        const distance = findPathWithAStar(graph, from, to)
-
-        if (this.pathCache.size >= this.MAX_CACHE_SIZE) {
-            const firstKey = this.pathCache.keys().next().value
-            if (firstKey !== undefined) {
-                this.pathCache.delete(firstKey)
-            }
+        const cacheKey: PathCacheKey = `${from}:${to}`
+        const cached = this.pathCacheService.get(cacheKey)
+        if (cached !== undefined) {
+            return cached
         }
-        this.pathCache.set(cacheKey, distance)
+
+        const distance = findPathWithAStar(graph, from, to)
+        this.pathCacheService.set(cacheKey, distance)
 
         return distance
     }
