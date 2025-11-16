@@ -1,8 +1,7 @@
 import { asc, eq } from 'drizzle-orm'
 
 import { DbConnection, stations, lineStations, lines, segments } from '../../db'
-import { buildGraph, findPathWithAStar, type Graph } from './pathfinding'
-import { TransitPathCacheService, type PathCacheKey } from './transit-path-cache-service'
+import { TransitGraphService } from './transit-graph-service'
 
 import type { Lines, SegmentsFeatureCollection, Stations } from './types'
 
@@ -10,35 +9,10 @@ export class TransitNetworkDataService {
     private stationsCache: Promise<Stations> | null = null
     private linesCache: Promise<Lines> | null = null
     private segmentsCache: Promise<SegmentsFeatureCollection> | null = null
-    private graphCache: Graph | null = null
-    private pathCacheService = new TransitPathCacheService()
+    private graphService: TransitGraphService
 
-    constructor(private db: DbConnection) {}
-
-    private async buildGraph(): Promise<Graph> {
-        if (this.graphCache) {
-            return this.graphCache
-        }
-
-        const allStations = await this.db.select().from(stations)
-        const allLineStations = await this.db
-            .select()
-            .from(lineStations)
-            .orderBy(asc(lineStations.lineId), asc(lineStations.order))
-        const allLines = await this.db.select().from(lines)
-
-        this.graphCache = buildGraph(allStations, allLines, allLineStations)
-
-        if (this.pathCacheService.size() === 0) {
-            const loaded = await this.pathCacheService.loadFromDisk(this.graphCache)
-            if (!loaded) {
-                this.pathCacheService.precomputeAllPaths(this.graphCache).catch((error) => {
-                    console.error('error during path pre-computation:', error)
-                })
-            }
-        }
-
-        return this.graphCache
+    constructor(private db: DbConnection) {
+        this.graphService = new TransitGraphService(db)
     }
 
     async getStations(): Promise<Stations> {
@@ -162,28 +136,6 @@ export class TransitNetworkDataService {
     }
 
     async getDistance(from: StationId, to: StationId): Promise<number> {
-        if (from === to) {
-            return 0
-        }
-
-        const graph = await this.buildGraph()
-
-        if (!graph.stations.has(from)) {
-            throw new Error(`Station not found: ${from}`)
-        }
-        if (!graph.stations.has(to)) {
-            throw new Error(`Station not found: ${to}`)
-        }
-
-        const cacheKey: PathCacheKey = `${from}:${to}`
-        const cached = this.pathCacheService.get(cacheKey)
-        if (cached !== undefined) {
-            return cached
-        }
-
-        const distance = findPathWithAStar(graph, from, to)
-        this.pathCacheService.set(cacheKey, distance)
-
-        return distance
+        return this.graphService.getDistance(from, to)
     }
 }
