@@ -39,7 +39,6 @@ export default [
             ],
             'import/no-unresolved': 'warn',
             'import/no-unused-modules': 'warn',
-            'no-console': 'warn',
             'no-duplicate-imports': 'warn',
             'no-use-before-define': 'warn',
             'no-useless-assignment': 'warn',
