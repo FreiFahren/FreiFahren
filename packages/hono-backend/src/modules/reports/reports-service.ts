@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { z } from 'zod'
 
 import { DbConnection, InsertReport, reports } from '../../db/'
-import type { ServerErrorBody } from '../../http-error'
+import type { ServerErrorBody } from '../../../types/http-error'
 import type { Stations, TransitNetworkDataService, StationId } from '../transit/transit-network-data-service'
 
 type TelegramNotificationPayload = {

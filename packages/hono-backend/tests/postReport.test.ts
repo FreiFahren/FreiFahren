@@ -3,7 +3,7 @@ import { Hono } from 'hono'
 
 import { db, stations } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
-import type { ServerErrorBody } from '../src/http-error'
+import type { ServerErrorBody } from '../types/http-error'
 
 let app: (typeof import('../src/index'))['default']
 let fakeNlpServer: ReturnType<typeof Bun.serve> | null = null
