@@ -2,9 +2,10 @@ import { and, gte, lte } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
 
-import { DbConnection, InsertReport, reports } from '../../db/'
 import type { ServerErrorBody } from '../../../types/http-error'
-import type { Stations, TransitNetworkDataService, StationId } from '../transit/transit-network-data-service'
+import { DbConnection, InsertReport, reports } from '../../db/'
+import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
+import type { Stations, StationId } from '../transit/types'
 
 type TelegramNotificationPayload = {
     line: string | null
