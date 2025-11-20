@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { z } from 'zod'
 
 import { DbConnection, InsertReport, reports } from '../../db/'
-import type { HttpErrorBody } from '../../http-error'
+import type { ServerErrorBody } from '../../http-error'
 import type { Stations, TransitNetworkDataService, StationId } from '../transit/transit-network-data-service'
 
 type TelegramNotificationPayload = {
@@ -34,7 +34,7 @@ export class ReportsService {
         return result
     }
 
-    async createReport(reportData: InsertReport): Promise<HttpErrorBody | null> {
+    async createReport(reportData: InsertReport): Promise<ServerErrorBody | null> {
         await this.db.insert(reports).values(reportData)
 
         if (reportData.source !== 'telegram' && process.env.NODE_ENV === 'production') {
@@ -43,7 +43,7 @@ export class ReportsService {
             } catch (error) {
                 const reason = error instanceof Error ? error.message : 'Unknown error'
                 const description = `Failed to notify Telegram bot about inspector report: ${reason}`
-                const body: HttpErrorBody = {
+                const body: ServerErrorBody = {
                     message: 'Notifying the telegram bot went wrong',
                     details: {
                         internal_code: 'TELEGRAM_NOTIFICATION_FAILED',

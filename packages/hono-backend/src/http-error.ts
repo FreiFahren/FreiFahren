@@ -1,11 +1,11 @@
 export type InternalCode = 'TELEGRAM_NOTIFICATION_FAILED'
 
-export interface HttpErrorDetails {
+export interface ServerErrorDetails {
     internal_code: InternalCode
     description?: string
 }
 
-export interface HttpErrorBody {
+export interface ServerErrorBody {
     message: string
-    details: HttpErrorDetails
+    details: ServerErrorDetails
 }

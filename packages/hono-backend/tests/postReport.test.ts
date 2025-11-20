@@ -3,7 +3,7 @@ import { Hono } from 'hono'
 
 import { db, stations } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
-import type { HttpErrorBody } from '../src/http-error'
+import type { ServerErrorBody } from '../src/http-error'
 
 let app: (typeof import('../src/index'))['default']
 let fakeNlpServer: ReturnType<typeof Bun.serve> | null = null
@@ -106,7 +106,7 @@ describe('Telegram notification', () => {
 
         expect(response.status).toBe(500)
 
-        const body = (await response.json()) as HttpErrorBody
+        const body = (await response.json()) as ServerErrorBody
 
         expect(body.details.internal_code).toBe('TELEGRAM_NOTIFICATION_FAILED')
         expect(typeof body.details.description).toBe('string')
