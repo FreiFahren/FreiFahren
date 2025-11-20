@@ -1,9 +1,10 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
 import { Hono } from 'hono'
 
-import { db, stations } from '../src/db'
+import { db, reports, stations } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
 import type { ServerErrorBody } from '../types/http-error'
+import { desc } from 'drizzle-orm'
 
 let app: (typeof import('../src/index'))['default']
 let fakeNlpServer: ReturnType<typeof Bun.serve> | null = null
@@ -129,5 +130,38 @@ describe('Telegram notification', () => {
 
         expect(response.status).toBe(500)
         expect(capturedRequests.length).toBe(0)
+    })
+})
+
+describe('Report API contract', () => {
+    beforeAll(async () => {
+        await seedBaseData(db)
+        const mod = await import('../src/index')
+        app = mod.default
+    })
+
+    it('defaults to telegram source when source is missing in request', async () => {
+        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
+
+        const response = await app.request('/v0/reports', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                stationId: station.id,
+                // source is omitted
+            }),
+        })
+
+        expect(response.status).toBe(200)
+
+        const [report] = await db
+            .select({ source: reports.source })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+
+        expect(report.source).toBe('telegram')
     })
 })
