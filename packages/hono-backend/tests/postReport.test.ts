@@ -114,4 +114,20 @@ describe('Telegram notification', () => {
         // ensure we still attempted to call the NLP service
         expect(capturedRequests.length).toBe(1)
     })
+
+    it('does not send a Telegram notification if database insertion fails', async () => {
+        const response = await app.request('/v0/reports', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                stationId: 'invalid_id', // Triggers FK violation
+                source: 'web_app',
+            }),
+        })
+
+        expect(response.status).toBe(500)
+        expect(capturedRequests.length).toBe(0)
+    })
 })
