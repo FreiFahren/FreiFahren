@@ -61,15 +61,10 @@ export const postReport = defineRoute<Env>()({
 
         const reportData = c.req.valid('json')
 
-        const error = await reportsService.createReport({
+        await reportsService.createReport({
             ...reportData,
             source: reportData.source ?? 'telegram',
         })
-
-        if (error !== null) {
-            console.error(`Failed to create report: ${error.details.description}`)
-            return c.json(error, 500)
-        }
 
         return c.json(
             await reportsService.getReports({

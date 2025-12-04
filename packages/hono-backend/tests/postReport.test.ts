@@ -3,7 +3,7 @@ import { Hono } from 'hono'
 
 import { db, reports, stations } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
-import type { ServerErrorBody } from '../types/http-error'
+import type { AppErrorDetails } from '../src/common/errors'
 import { desc } from 'drizzle-orm'
 
 let app: (typeof import('../src/index'))['default']
@@ -107,7 +107,7 @@ describe('Telegram notification', () => {
 
         expect(response.status).toBe(500)
 
-        const body = (await response.json()) as ServerErrorBody
+        const body = (await response.json()) as { message: string; details: AppErrorDetails }
 
         expect(body.details.internal_code).toBe('TELEGRAM_NOTIFICATION_FAILED')
         expect(typeof body.details.description).toBe('string')
