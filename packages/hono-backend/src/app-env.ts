@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { PinoLogger } from 'hono-pino'
 
 import { ReportsService } from './modules/reports'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
@@ -9,7 +10,9 @@ export type Services = {
 }
 
 export type Env = {
-    Variables: Services
+    Variables: Services & {
+        logger: PinoLogger
+    }
 }
 
 export const registerServices = (app: Hono<Env>, services: Services) => {

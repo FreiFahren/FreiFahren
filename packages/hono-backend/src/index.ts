@@ -1,4 +1,6 @@
 import { Hono } from 'hono'
+import { requestId } from 'hono/request-id'
+import { pinoLogger } from 'hono-pino'
 
 import { registerServices, Services, type Env } from './app-env'
 import { handleError } from './common/error-handler'
@@ -9,6 +11,15 @@ import { TransitNetworkDataService } from './modules/transit/transit-network-dat
 import { getLines, getStations } from './modules/transit/transit-routes'
 
 const app = new Hono<Env>()
+
+app.use(requestId())
+app.use(
+    pinoLogger({
+        pino: {
+            level: process.env.LOG_LEVEL ?? 'info',
+        },
+    })
+)
 
 app.onError(handleError)
 
