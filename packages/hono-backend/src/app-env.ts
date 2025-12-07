@@ -1,9 +1,11 @@
 import { Hono } from 'hono'
 
+import { FeedbackService } from './modules/feedback'
 import { ReportsService } from './modules/reports'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
 
 export type Services = {
+    feedbackService: FeedbackService
     reportsService: ReportsService
     transitNetworkDataService: TransitNetworkDataService
 }
