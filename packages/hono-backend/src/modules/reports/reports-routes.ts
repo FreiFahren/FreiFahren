@@ -61,10 +61,14 @@ export const postReport = defineRoute<Env>()({
 
         const reportData = c.req.valid('json')
 
-        await reportsService.createReport({
+        const { telegramNotificationSuccess } = await reportsService.createReport({
             ...reportData,
             source: reportData.source ?? 'telegram',
         })
+
+        if (!telegramNotificationSuccess) {
+            c.header('X-Telegram-Notification-Status', 'failed')
+        }
 
         return c.json(
             await reportsService.getReports({

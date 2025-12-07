@@ -3,7 +3,6 @@ import { Hono } from 'hono'
 
 import { db, reports, stations } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
-import type { AppErrorDetails } from '../src/common/errors'
 import { desc } from 'drizzle-orm'
 
 let app: (typeof import('../src/index'))['default']
@@ -89,7 +88,7 @@ describe('Telegram notification', () => {
         expect(typeof body.station).toBe('string')
     })
 
-    it('returns a structured error and 500 when Telegram notification fails', async () => {
+    it('returns 200 and a failure header when Telegram notification fails', async () => {
         const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
 
         shouldFail = true
@@ -105,12 +104,8 @@ describe('Telegram notification', () => {
             }),
         })
 
-        expect(response.status).toBe(500)
-
-        const body = (await response.json()) as { message: string; details: AppErrorDetails }
-
-        expect(body.details.internal_code).toBe('TELEGRAM_NOTIFICATION_FAILED')
-        expect(typeof body.details.description).toBe('string')
+        expect(response.status).toBe(200)
+        expect(response.headers.get('X-Telegram-Notification-Status')).toBe('failed')
 
         // ensure we still attempted to call the NLP service
         expect(capturedRequests.length).toBe(1)

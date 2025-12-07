@@ -2,7 +2,6 @@ import { and, gte, lte } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
 
-import { AppError } from '../../common/errors'
 import { DbConnection, InsertReport, reports } from '../../db/'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
 import type { Stations, StationId } from '../transit/types'
@@ -35,21 +34,22 @@ export class ReportsService {
         return result
     }
 
-    async createReport(reportData: InsertReport): Promise<void> {
+    async createReport(reportData: InsertReport): Promise<{ telegramNotificationSuccess: boolean }> {
         await this.db.insert(reports).values(reportData)
+
+        let telegramNotificationSuccess = true
 
         if (reportData.source !== 'telegram' && process.env.NODE_ENV === 'production') {
             try {
                 await this.notifyTelegram(reportData)
             } catch (error) {
                 const reason = error instanceof Error ? error.message : 'Unknown error'
-                throw new AppError({
-                    message: 'Notifying the telegram bot went wrong',
-                    internalCode: 'TELEGRAM_NOTIFICATION_FAILED',
-                    description: `Failed to notify Telegram bot about inspector report: ${reason}`,
-                })
+                console.error(`Failed to notify Telegram bot about inspector report: ${reason}`)
+                telegramNotificationSuccess = false
             }
         }
+
+        return { telegramNotificationSuccess }
     }
 
     private async notifyTelegram(reportData: InsertReport) {
