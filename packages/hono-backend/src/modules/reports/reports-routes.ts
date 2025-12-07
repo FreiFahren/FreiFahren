@@ -35,6 +35,13 @@ export const getReports = defineRoute<Env>()({
     },
     handler: async (c) => {
         const reportsService = c.get('reportsService')
+        const logger = c.get('logger')
+        logger.info('Getting reports')
+        logger.error('This is a serious error')
+        logger.warn('This is a warning')
+        logger.debug('This is a debug message')
+        logger.trace('This is a trace message')
+        logger.fatal('This is a fatal message')
 
         const query = c.req.valid('query')
         const defaultRange = getDefaultReportsRange()
@@ -67,6 +74,7 @@ export const postReport = defineRoute<Env>()({
         })
 
         if (!telegramNotificationSuccess) {
+            c.get('logger').error('Failed to notify Telegram bot about inspector report')
             c.header('X-Telegram-Notification-Status', 'failed')
         }
 

@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { requestId } from 'hono/request-id'
 import { pinoLogger } from 'hono-pino'
+import pino from 'pino'
 
 import { registerServices, Services, type Env } from './app-env'
 import { handleError } from './common/error-handler'
@@ -15,9 +16,30 @@ const app = new Hono<Env>()
 app.use(requestId())
 app.use(
     pinoLogger({
-        pino: {
+        pino: pino({
             level: process.env.LOG_LEVEL ?? 'info',
-        },
+            transport: {
+                targets: [
+                    {
+                        target: 'pino-pretty',
+                        options: {
+                            colorize: true,
+                            ignore: 'pid,hostname,req,res,responseTime,reqId',
+                            translateTime: 'SYS:standard',
+                            destination: 1,
+                        },
+                    },
+                    {
+                        target: 'pino-roll',
+                        options: {
+                            file: './app.log',
+                            frequency: 'daily',
+                            mkdir: true,
+                        },
+                    },
+                ],
+            },
+        }),
     })
 )
 

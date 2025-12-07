@@ -42,9 +42,7 @@ export class ReportsService {
         if (reportData.source !== 'telegram' && process.env.NODE_ENV === 'production') {
             try {
                 await this.notifyTelegram(reportData)
-            } catch (error) {
-                const reason = error instanceof Error ? error.message : 'Unknown error'
-                console.error(`Failed to notify Telegram bot about inspector report: ${reason}`)
+            } catch {
                 telegramNotificationSuccess = false
             }
         }
