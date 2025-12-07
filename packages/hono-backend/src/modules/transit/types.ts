@@ -18,4 +18,4 @@ type Station = {
 type Stations = Record<StationId, Station>
 type Lines = Record<LineId, StationId[]>
 
-export type { Lines, Stations }
+export type { Lines, Stations, StationId, LineId }

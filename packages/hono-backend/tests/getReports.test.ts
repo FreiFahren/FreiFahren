@@ -1,11 +1,11 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
 import { DateTime } from 'luxon'
 
-import { db, lines, reports, stations } from '../../db'
-import { seedBaseData } from '../../db/seed/seed'
-import app from '../../index'
+import { db, lines, reports, stations } from '../src/db'
+import { seedBaseData } from '../src/db/seed/seed'
+import app from '../src/index'
 
-import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from './constants'
+import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from '../src/modules/reports/constants'
 
 let testStationId: string
 let testLineId: string
@@ -20,7 +20,7 @@ const createReport = async (timestamp: Date) => {
     })
 }
 
-describe('GET /v0/reports', () => {
+describe('Timeframe filtering', () => {
     beforeAll(async () => {
         await seedBaseData(db)
 
