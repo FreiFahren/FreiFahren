@@ -15,6 +15,16 @@ type CapturedRequest = {
 
 const capturedRequests: CapturedRequest[] = []
 
+const sendReportRequest = async (payload: object) => {
+    return app.request('/v0/reports', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    })
+}
+
 describe('Telegram notification', () => {
     let shouldFail: boolean
 
@@ -61,15 +71,9 @@ describe('Telegram notification', () => {
     it('sends a Telegram notification when source is not telegram and returns 200', async () => {
         const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
 
-        const response = await app.request('/v0/reports', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                stationId: station.id,
-                source: 'web_app',
-            }),
+        const response = await sendReportRequest({
+            stationId: station.id,
+            source: 'web_app',
         })
 
         expect(response.status).toBe(200)
@@ -93,15 +97,9 @@ describe('Telegram notification', () => {
 
         shouldFail = true
 
-        const response = await app.request('/v0/reports', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                stationId: station.id,
-                source: 'web_app',
-            }),
+        const response = await sendReportRequest({
+            stationId: station.id,
+            source: 'web_app',
         })
 
         expect(response.status).toBe(200)
@@ -112,15 +110,9 @@ describe('Telegram notification', () => {
     })
 
     it('does not send a Telegram notification if database insertion fails', async () => {
-        const response = await app.request('/v0/reports', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                stationId: 'invalid_id', // Triggers FK violation
-                source: 'web_app',
-            }),
+        const response = await sendReportRequest({
+            stationId: 'invalid_id', // Triggers FK violation
+            source: 'web_app',
         })
 
         expect(response.status).toBe(500)
@@ -138,15 +130,9 @@ describe('Report API contract', () => {
     it('defaults to telegram source when source is missing in request', async () => {
         const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
 
-        const response = await app.request('/v0/reports', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                stationId: station.id,
-                // source is omitted
-            }),
+        const response = await sendReportRequest({
+            stationId: station.id,
+            // source is omitted
         })
 
         expect(response.status).toBe(200)
@@ -182,17 +168,11 @@ describe('Report API contract', () => {
             .orderBy(desc(lineStations.order))
             .limit(1)
 
-        const response = await app.request('/v0/reports', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                stationId: entry.stationId,
-                lineId: entry.lineId,
-                directionId: finalStation.id,
-                source: 'web_app',
-            }),
+        const response = await sendReportRequest({
+            stationId: entry.stationId,
+            lineId: entry.lineId,
+            directionId: finalStation.id,
+            source: 'web_app',
         })
 
         expect(response.status).toBe(200)
