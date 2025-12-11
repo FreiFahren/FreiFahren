@@ -17,7 +17,7 @@ export const handleError = (err: Error, c: Context) => {
         )
     }
 
-    console.error('Unhandled error:', err)
+    c.get('logger').error(err, 'Unhandled error')
     return c.json(
         {
             message: 'Internal Server Error',

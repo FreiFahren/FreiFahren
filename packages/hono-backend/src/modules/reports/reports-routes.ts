@@ -67,6 +67,7 @@ export const postReport = defineRoute<Env>()({
         })
 
         if (!telegramNotificationSuccess) {
+            c.get('logger').error('Failed to notify Telegram bot about inspector report')
             c.header('X-Telegram-Notification-Status', 'failed')
         }
 
