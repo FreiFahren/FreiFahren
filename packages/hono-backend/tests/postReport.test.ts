@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
 import { Hono } from 'hono'
 
+import { Stations } from '../src/modules/transit/types'
+import { TransitNetworkDataService } from '../src/modules/transit/transit-network-data-service'
 import { db, lineStations, reports, stations } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
 import { desc, eq } from 'drizzle-orm'
@@ -186,5 +188,95 @@ describe('Report API contract', () => {
             .limit(1)
 
         expect(report.directionId).toBe(finalStation.id)
+    })
+})
+
+describe('Report Post Processing', () => {
+    let stationsMap: Stations
+
+    let stationWithOneLineId: string
+    let stationWithMultipleLinesId: string
+    let directionWithOneLineId: string
+
+    beforeAll(async () => {
+        await seedBaseData(db)
+        const transitService = new TransitNetworkDataService(db)
+        stationsMap = await transitService.getStations()
+
+        const stationEntries = Object.entries(stationsMap)
+
+        const stationWithOneLineEntry = stationEntries.find(([, s]) => s.lines.length === 1)
+        if (!stationWithOneLineEntry) throw new Error('No station with 1 line found')
+        stationWithOneLineId = stationWithOneLineEntry[0]
+
+        const stationWithMultipleLinesEntry = stationEntries.find(([, s]) => s.lines.length > 1)
+        if (!stationWithMultipleLinesEntry) throw new Error('No station with >1 lines found')
+        stationWithMultipleLinesId = stationWithMultipleLinesEntry[0]
+
+        // Find a different station for direction that has 1 line
+        const directionWithOneLineEntry = stationEntries.find(
+            ([id, s]) => s.lines.length === 1 && id !== stationWithOneLineId
+        )
+        // If we can't find a different one, reuse the first one (it's fine for testing direction logic usually)
+        directionWithOneLineId = directionWithOneLineEntry ? directionWithOneLineEntry[0] : stationWithOneLineId
+    })
+
+    it('if no line is present it will use the stations line', async () => {
+        const response = await sendReportRequest({
+            stationId: stationWithOneLineId,
+            lineId: null,
+            directionId: null,
+            source: 'web_app',
+        })
+
+        expect(response.status).toBe(200)
+
+        const [report] = await db
+            .select({ lineId: reports.lineId })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+
+        const expectedLineId = stationsMap[stationWithOneLineId].lines[0]
+        expect(report.lineId).toBe(expectedLineId)
+    })
+
+    it('if no line present and station the station has more than one line it will use the line of the direction', async () => {
+        const response = await sendReportRequest({
+            stationId: stationWithMultipleLinesId,
+            lineId: null,
+            directionId: directionWithOneLineId,
+            source: 'web_app',
+        })
+
+        expect(response.status).toBe(200)
+
+        const [report] = await db
+            .select({ lineId: reports.lineId })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+
+        const expectedLineId = stationsMap[directionWithOneLineId].lines[0]
+        expect(report.lineId).toBe(expectedLineId)
+    })
+
+    it('If no line and station has more than one line it will continue with line as null', async () => {
+        const response = await sendReportRequest({
+            stationId: stationWithMultipleLinesId,
+            lineId: null,
+            directionId: null,
+            source: 'web_app',
+        })
+
+        expect(response.status).toBe(200)
+
+        const [report] = await db
+            .select({ lineId: reports.lineId })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+
+        expect(report.lineId).toBeNull()
     })
 })
