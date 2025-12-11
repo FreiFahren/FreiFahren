@@ -54,6 +54,8 @@ export const postReport = defineRoute<Env>()({
     schemas: {
         json: insertReportSchema.extend({
             source: insertReportSchema.shape.source.optional(),
+            // Since the Bot sometimes does not detect a station, we allow undefined
+            stationId: insertReportSchema.shape.stationId.optional(),
         }),
     },
     handler: async (c) => {
@@ -61,9 +63,13 @@ export const postReport = defineRoute<Env>()({
 
         const reportData = c.req.valid('json')
 
-        const { telegramNotificationSuccess } = await reportsService.createReport({
+        const postProcessedReportData = await reportsService.postProcessReport({
             ...reportData,
             source: reportData.source ?? 'telegram',
+        })
+
+        const { telegramNotificationSuccess } = await reportsService.createReport({
+            ...postProcessedReportData,
         })
 
         if (!telegramNotificationSuccess) {
