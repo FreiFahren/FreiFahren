@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
 import { Hono } from 'hono'
 
-import { db, reports, stations } from '../src/db'
+import { db, lineStations, reports, stations } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
-import { desc } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 
 let app: (typeof import('../src/index'))['default']
 let fakeNlpServer: ReturnType<typeof Bun.serve> | null = null
@@ -158,5 +158,53 @@ describe('Report API contract', () => {
             .limit(1)
 
         expect(report.source).toBe('telegram')
+    })
+
+    it('can submit a report with a direction', async () => {
+        // Find a valid line and station connection
+        const [entry] = await db
+            .select({
+                stationId: lineStations.stationId,
+                lineId: lineStations.lineId,
+            })
+            .from(lineStations)
+            .limit(1)
+
+        // Find the final station (direction) for this line
+        const [finalStation] = await db
+            .select({
+                id: stations.id,
+                name: stations.name,
+            })
+            .from(lineStations)
+            .innerJoin(stations, eq(lineStations.stationId, stations.id))
+            .where(eq(lineStations.lineId, entry.lineId))
+            .orderBy(desc(lineStations.order))
+            .limit(1)
+
+        const response = await app.request('/v0/reports', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                stationId: entry.stationId,
+                lineId: entry.lineId,
+                directionId: finalStation.id,
+                source: 'web_app',
+            }),
+        })
+
+        expect(response.status).toBe(200)
+
+        const [report] = await db
+            .select({
+                directionId: reports.directionId,
+            })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+
+        expect(report.directionId).toBe(finalStation.id)
     })
 })
