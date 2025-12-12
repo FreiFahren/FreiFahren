@@ -10,6 +10,7 @@ import type { StationId } from '../transit/types'
 import {
     assignLineIfSingleOption,
     clearStationReferenceIfNotOnLine,
+    determineLineBasedOnStationAndDirection,
     guessStation,
     pipe,
     RawReport,
@@ -105,6 +106,7 @@ export class ReportsService {
             clearStationReferenceIfNotOnLine(stations, 'stationId'),
             clearStationReferenceIfNotOnLine(stations, 'directionId'),
             assignLineIfSingleOption(stations),
+            determineLineBasedOnStationAndDirection(stations),
             guessStation
         )
 

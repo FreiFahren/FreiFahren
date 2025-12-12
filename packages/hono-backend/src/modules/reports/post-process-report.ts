@@ -25,6 +25,26 @@ const guessStation = (reportData: RawReport): RawReport => {
     return reportData
 }
 
+const determineLineBasedOnStationAndDirection =
+    (stations: Stations) =>
+    (reportData: RawReport): RawReport => {
+        if (reportData.lineId !== null && reportData.lineId !== undefined) return reportData
+
+        const station = lookupStation(stations, reportData.stationId)
+        const direction = lookupStation(stations, reportData.directionId)
+
+        if (station === undefined || direction === undefined) return reportData
+
+        const directionLines = new Set(direction.lines)
+        const sharedLines = station.lines.filter((lineId) => directionLines.has(lineId))
+
+        if (sharedLines.length === 1) {
+            return { ...reportData, lineId: sharedLines[0] }
+        }
+
+        return reportData
+    }
+
 const isStationOnLine = (
     stations: Stations,
     lineId: LineId | null | undefined,
@@ -74,4 +94,12 @@ const assignLineIfSingleOption =
         return reportData
     }
 
-export { assignLineIfSingleOption, clearStationReferenceIfNotOnLine, guessStation, isStationOnLine, pipe, RawReport }
+export {
+    assignLineIfSingleOption,
+    clearStationReferenceIfNotOnLine,
+    determineLineBasedOnStationAndDirection,
+    guessStation,
+    isStationOnLine,
+    pipe,
+    RawReport,
+}

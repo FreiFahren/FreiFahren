@@ -199,6 +199,9 @@ describe('Report Post Processing', () => {
     let directionWithOneLineId: string
     let lineIdForStationWithOneLine: string
     let stationNotOnLineId: string
+    let stationWithMultipleLinesAndDirectionSharingSingleLine: string
+    let directionWithMultipleLinesSharingSingleLine: string
+    let sharedLineId: string
 
     beforeAll(async () => {
         await seedBaseData(db)
@@ -226,6 +229,27 @@ describe('Report Post Processing', () => {
         const stationNotOnLineEntry = stationEntries.find(([, s]) => !s.lines.includes(lineIdForStationWithOneLine))
         if (!stationNotOnLineEntry) throw new Error('No station found that is not on the selected line')
         stationNotOnLineId = stationNotOnLineEntry[0]
+
+        const multiLineStations = stationEntries.filter(([, s]) => s.lines.length > 1)
+        const sharedSingleLineMatch = multiLineStations
+            .flatMap(([stationId, station]) =>
+                multiLineStations
+                    .filter(([directionId]) => directionId !== stationId)
+                    .map(([directionId, direction]) => {
+                        const directionLines = new Set(direction.lines)
+                        const sharedLines = station.lines.filter((lineId) => directionLines.has(lineId))
+                        return { stationId, directionId, sharedLines }
+                    })
+            )
+            .find(({ sharedLines }) => sharedLines.length === 1)
+
+        if (!sharedSingleLineMatch) {
+            throw new Error('No stations found where station and direction share exactly one line')
+        }
+
+        stationWithMultipleLinesAndDirectionSharingSingleLine = sharedSingleLineMatch.stationId
+        directionWithMultipleLinesSharingSingleLine = sharedSingleLineMatch.directionId
+        sharedLineId = sharedSingleLineMatch.sharedLines[0]!
     })
 
     it('if no line is present it will use the stations line', async () => {
@@ -344,5 +368,24 @@ describe('Report Post Processing', () => {
             .limit(1)
 
         expect(report.lineId).toBeNull()
+    })
+
+    it('chooses the shared line when station and direction share a single line', async () => {
+        const response = await sendReportRequest({
+            stationId: stationWithMultipleLinesAndDirectionSharingSingleLine,
+            lineId: null,
+            directionId: directionWithMultipleLinesSharingSingleLine,
+            source: 'web_app',
+        })
+
+        expect(response.status).toBe(200)
+
+        const [report] = await db
+            .select({ lineId: reports.lineId })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+
+        expect(report.lineId).toBe(sharedLineId)
     })
 })
