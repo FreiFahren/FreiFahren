@@ -14,7 +14,7 @@ const createReport = async (timestamp: Date) => {
     await db.insert(reports).values({
         stationId: testStationId,
         lineId: testLineId,
-        directionId: testLineId,
+        directionId: testStationId,
         timestamp,
         source: 'telegram',
     })

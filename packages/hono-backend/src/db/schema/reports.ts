@@ -13,7 +13,7 @@ export const reports = pgTable('reports', {
         .notNull()
         .references(() => stations.id),
     lineId: varchar({ length: 16 }).references(() => lines.id),
-    directionId: varchar({ length: 16 }).references(() => lines.id),
+    directionId: varchar({ length: 16 }).references(() => stations.id),
     timestamp: timestamp().notNull().defaultNow(),
     source: sourceEnum().notNull(),
 })

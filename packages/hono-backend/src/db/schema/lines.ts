@@ -8,6 +8,7 @@ export const lines = pgTable('lines', {
     isCircular: boolean().notNull().default(false),
 })
 
+// Todo: avoid deprecated syntax: #FRE-562
 export const lineStations = pgTable(
     'line_stations',
     {
