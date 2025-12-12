@@ -10,6 +10,7 @@ import type { StationId } from '../transit/types'
 import {
     assignLineIfSingleOption,
     clearStationReferenceIfNotOnLine,
+    correctDirectionIfImplied,
     determineLineBasedOnStationAndDirection,
     guessStation,
     pipe,
@@ -100,6 +101,7 @@ export class ReportsService {
 
     async postProcessReport(reportData: RawReport): Promise<InsertReport> {
         const stations = await this.transitNetworkDataService.getStations()
+        const lines = await this.transitNetworkDataService.getLines()
 
         const processed = pipe(
             reportData,
@@ -107,6 +109,7 @@ export class ReportsService {
             clearStationReferenceIfNotOnLine(stations, 'directionId'),
             assignLineIfSingleOption(stations),
             determineLineBasedOnStationAndDirection(stations),
+            correctDirectionIfImplied(lines),
             guessStation
         )
 

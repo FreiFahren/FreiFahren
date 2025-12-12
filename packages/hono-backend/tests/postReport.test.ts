@@ -193,6 +193,7 @@ describe('Report API contract', () => {
 
 describe('Report Post Processing', () => {
     let stationsMap: Stations
+    let linesMap: Record<string, string[]>
 
     let stationWithOneLineId: string
     let stationWithMultipleLinesId: string
@@ -202,11 +203,16 @@ describe('Report Post Processing', () => {
     let stationWithMultipleLinesAndDirectionSharingSingleLine: string
     let directionWithMultipleLinesSharingSingleLine: string
     let sharedLineId: string
+    let lineWithMiddleStationId: string
+    let middleStationId: string
+    let stationAfterMiddleId: string
+    let firstStationOnLineId: string
 
     beforeAll(async () => {
         await seedBaseData(db)
         const transitService = new TransitNetworkDataService(db)
         stationsMap = await transitService.getStations()
+        linesMap = await transitService.getLines()
 
         const stationEntries = Object.entries(stationsMap)
 
@@ -250,6 +256,15 @@ describe('Report Post Processing', () => {
         stationWithMultipleLinesAndDirectionSharingSingleLine = sharedSingleLineMatch.stationId
         directionWithMultipleLinesSharingSingleLine = sharedSingleLineMatch.directionId
         sharedLineId = sharedSingleLineMatch.sharedLines[0]!
+
+        const lineEntries = Object.entries(linesMap)
+        const lineWithMiddleStation = lineEntries.find(([, stationIds]) => stationIds.length >= 3)
+        if (!lineWithMiddleStation) throw new Error('No line found with at least 3 stations')
+
+        lineWithMiddleStationId = lineWithMiddleStation[0]
+        firstStationOnLineId = lineWithMiddleStation[1][0]!
+        middleStationId = lineWithMiddleStation[1][1]!
+        stationAfterMiddleId = lineWithMiddleStation[1][2]!
     })
 
     it('if no line is present it will use the stations line', async () => {
@@ -387,5 +402,24 @@ describe('Report Post Processing', () => {
             .limit(1)
 
         expect(report.lineId).toBe(sharedLineId)
+    })
+
+    it('corrects direction to the terminal station when the direction is implied', async () => {
+        const response = await sendReportRequest({
+            stationId: stationAfterMiddleId,
+            lineId: lineWithMiddleStationId,
+            directionId: middleStationId, // not a terminal station
+            source: 'web_app',
+        })
+
+        expect(response.status).toBe(200)
+
+        const [report] = await db
+            .select({ directionId: reports.directionId })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+
+        expect(report.directionId).toBe(firstStationOnLineId)
     })
 })

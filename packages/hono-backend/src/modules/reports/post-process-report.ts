@@ -1,6 +1,6 @@
 import { lookupStation } from '../../common/utils'
 import { InsertReport } from '../../db'
-import { LineId, StationId, Stations } from '../transit/types'
+import { LineId, Lines, StationId, Stations } from '../transit/types'
 
 type RawReport = Omit<InsertReport, 'stationId'> & {
     stationId?: StationId | undefined
@@ -24,6 +24,36 @@ const guessStation = (reportData: RawReport): RawReport => {
 
     return reportData
 }
+
+const correctDirectionIfImplied =
+    (lines: Lines) =>
+    (reportData: RawReport): RawReport => {
+        if (reportData.lineId === null || reportData.lineId === undefined) return reportData
+        if (reportData.stationId === undefined) return reportData
+        if (reportData.directionId === null || reportData.directionId === undefined) return reportData
+
+        const stationsOnLine = lines[reportData.lineId]
+        if (stationsOnLine.length < 2) return reportData
+
+        const firstStationOnLine = stationsOnLine[0]
+        const lastStationOnLine = stationsOnLine[stationsOnLine.length - 1]
+
+        if (reportData.directionId === firstStationOnLine || reportData.directionId === lastStationOnLine) {
+            return reportData
+        }
+
+        const stationIndex = stationsOnLine.indexOf(reportData.stationId)
+        const directionIndex = stationsOnLine.indexOf(reportData.directionId)
+
+        if (stationIndex === -1 || directionIndex === -1) return reportData
+        if (stationIndex === directionIndex) return reportData
+
+        const impliedTerminalDirectionId = stationIndex < directionIndex ? lastStationOnLine : firstStationOnLine
+
+        if (impliedTerminalDirectionId === reportData.directionId) return reportData
+
+        return { ...reportData, directionId: impliedTerminalDirectionId }
+    }
 
 const determineLineBasedOnStationAndDirection =
     (stations: Stations) =>
@@ -98,6 +128,7 @@ export {
     assignLineIfSingleOption,
     clearStationReferenceIfNotOnLine,
     determineLineBasedOnStationAndDirection,
+    correctDirectionIfImplied,
     guessStation,
     isStationOnLine,
     pipe,
