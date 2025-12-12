@@ -16,6 +16,15 @@ type StationReferenceField = 'stationId' | 'directionId'
  */
 const pipe = <T>(value: T, ...fns: ((arg: T) => T)[]) => fns.reduce((acc, fn) => fn(acc), value)
 
+// TODO: Use a stochastic approach to guess the station
+const guessStation = (reportData: RawReport): RawReport => {
+    if (reportData.stationId === undefined) {
+        return { ...reportData, stationId: 'SUM-n30731497' }
+    }
+
+    return reportData
+}
+
 const isStationOnLine = (
     stations: Stations,
     lineId: LineId | null | undefined,
@@ -65,4 +74,4 @@ const assignLineIfSingleOption =
         return reportData
     }
 
-export { assignLineIfSingleOption, clearStationReferenceIfNotOnLine, isStationOnLine, pipe, RawReport }
+export { assignLineIfSingleOption, clearStationReferenceIfNotOnLine, guessStation, isStationOnLine, pipe, RawReport }

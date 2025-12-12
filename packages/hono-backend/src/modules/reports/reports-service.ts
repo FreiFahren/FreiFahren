@@ -7,7 +7,13 @@ import { DbConnection, InsertReport, reports } from '../../db/'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
 import type { StationId } from '../transit/types'
 
-import { assignLineIfSingleOption, clearStationReferenceIfNotOnLine, pipe, RawReport } from './post-process-report'
+import {
+    assignLineIfSingleOption,
+    clearStationReferenceIfNotOnLine,
+    guessStation,
+    pipe,
+    RawReport,
+} from './post-process-report'
 
 type TelegramNotificationPayload = {
     line: string | null
@@ -98,7 +104,8 @@ export class ReportsService {
             reportData,
             clearStationReferenceIfNotOnLine(stations, 'stationId'),
             clearStationReferenceIfNotOnLine(stations, 'directionId'),
-            assignLineIfSingleOption(stations)
+            assignLineIfSingleOption(stations),
+            guessStation
         )
 
         return processed as InsertReport // TODO: remove this cast

@@ -197,6 +197,8 @@ describe('Report Post Processing', () => {
     let stationWithOneLineId: string
     let stationWithMultipleLinesId: string
     let directionWithOneLineId: string
+    let lineIdForStationWithOneLine: string
+    let stationNotOnLineId: string
 
     beforeAll(async () => {
         await seedBaseData(db)
@@ -208,6 +210,7 @@ describe('Report Post Processing', () => {
         const stationWithOneLineEntry = stationEntries.find(([, s]) => s.lines.length === 1)
         if (!stationWithOneLineEntry) throw new Error('No station with 1 line found')
         stationWithOneLineId = stationWithOneLineEntry[0]
+        lineIdForStationWithOneLine = stationWithOneLineEntry[1].lines[0]!
 
         const stationWithMultipleLinesEntry = stationEntries.find(([, s]) => s.lines.length > 1)
         if (!stationWithMultipleLinesEntry) throw new Error('No station with >1 lines found')
@@ -219,6 +222,10 @@ describe('Report Post Processing', () => {
         )
         // If we can't find a different one, reuse the first one (it's fine for testing direction logic usually)
         directionWithOneLineId = directionWithOneLineEntry ? directionWithOneLineEntry[0] : stationWithOneLineId
+
+        const stationNotOnLineEntry = stationEntries.find(([, s]) => !s.lines.includes(lineIdForStationWithOneLine))
+        if (!stationNotOnLineEntry) throw new Error('No station found that is not on the selected line')
+        stationNotOnLineId = stationNotOnLineEntry[0]
     })
 
     it('if no line is present it will use the stations line', async () => {
@@ -241,6 +248,25 @@ describe('Report Post Processing', () => {
         expect(report.lineId).toBe(expectedLineId)
     })
 
+    it('does not remove the direction when line is missing', async () => {
+        const response = await sendReportRequest({
+            stationId: stationWithOneLineId,
+            lineId: null,
+            directionId: stationNotOnLineId,
+            source: 'web_app',
+        })
+
+        expect(response.status).toBe(200)
+
+        const [report] = await db
+            .select({ directionId: reports.directionId })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+
+        expect(report.directionId).toBe(stationNotOnLineId)
+    })
+
     it('if no line present and station the station has more than one line it will use the line of the direction', async () => {
         const response = await sendReportRequest({
             stationId: stationWithMultipleLinesId,
@@ -259,6 +285,46 @@ describe('Report Post Processing', () => {
 
         const expectedLineId = stationsMap[directionWithOneLineId].lines[0]
         expect(report.lineId).toBe(expectedLineId)
+    })
+
+    it('removes direction when direction is not on the provided line', async () => {
+        const response = await sendReportRequest({
+            stationId: stationWithOneLineId,
+            lineId: lineIdForStationWithOneLine,
+            directionId: stationNotOnLineId,
+            source: 'web_app',
+        })
+
+        expect(response.status).toBe(200)
+
+        const [report] = await db
+            .select({ directionId: reports.directionId, lineId: reports.lineId })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+
+        expect(report.lineId).toBe(lineIdForStationWithOneLine)
+        expect(report.directionId).toBeNull()
+    })
+
+    it('clears station when station is not on the provided line', async () => {
+        const response = await sendReportRequest({
+            stationId: stationNotOnLineId,
+            lineId: lineIdForStationWithOneLine,
+            directionId: null,
+            source: 'web_app',
+        })
+
+        expect(response.status).toBe(200)
+
+        const [report] = await db
+            .select({ stationId: reports.stationId })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+
+        expect(typeof report.stationId).toBe('string')
+        expect(report.stationId.length).toBeGreaterThan(0)
     })
 
     it('If no line and station has more than one line it will continue with line as null', async () => {
