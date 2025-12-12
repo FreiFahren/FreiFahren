@@ -2,11 +2,12 @@ import { and, gte, lte } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
 
+import { lookupStation } from '../../common/utils'
 import { DbConnection, InsertReport, reports } from '../../db/'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
-import type { Stations, StationId } from '../transit/types'
+import type { StationId } from '../transit/types'
 
-import { assignLineIfSingleOption, pipe, RawReport } from './post-process-report'
+import { assignLineIfSingleOption, clearStationReferenceIfNotOnLine, pipe, RawReport } from './post-process-report'
 
 type TelegramNotificationPayload = {
     line: string | null
@@ -78,8 +79,8 @@ export class ReportsService {
     private async buildTelegramNotificationPayload(reportData: InsertReport): Promise<TelegramNotificationPayload> {
         const stations = await this.transitNetworkDataService.getStations()
 
-        const station = this.lookupStation(stations, reportData.stationId)
-        const direction = this.lookupStation(stations, reportData.directionId)
+        const station = lookupStation(stations, reportData.stationId)
+        const direction = lookupStation(stations, reportData.directionId)
 
         return {
             line: reportData.lineId ?? null,
@@ -90,22 +91,15 @@ export class ReportsService {
         }
     }
 
-    private lookupStation(stations: Stations, stationId?: StationId | null) {
-        if (stationId === undefined || stationId === null) {
-            return undefined
-        }
-
-        if (!Object.prototype.hasOwnProperty.call(stations, stationId)) {
-            return undefined
-        }
-
-        return stations[stationId]
-    }
-
     async postProcessReport(reportData: RawReport): Promise<InsertReport> {
         const stations = await this.transitNetworkDataService.getStations()
 
-        const processed = pipe(reportData, assignLineIfSingleOption(stations))
+        const processed = pipe(
+            reportData,
+            clearStationReferenceIfNotOnLine(stations, 'stationId'),
+            clearStationReferenceIfNotOnLine(stations, 'directionId'),
+            assignLineIfSingleOption(stations)
+        )
 
         return processed as InsertReport // TODO: remove this cast
     }
