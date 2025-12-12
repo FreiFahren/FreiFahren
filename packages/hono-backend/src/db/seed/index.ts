@@ -1,12 +1,13 @@
-/* eslint-disable no-console  */
+/* eslint-disable no-console */
 import { db } from '../index'
 
-import { seedBaseData } from './seed'
+import { seedBaseData, seedReports } from './seed'
 
 const seed = async () => {
     console.log('Starting seed...')
 
     await seedBaseData(db)
+    await seedReports(db)
 
     console.log('Seed completed successfully!')
 }
