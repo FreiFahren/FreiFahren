@@ -97,6 +97,14 @@ const clearDirectionIfStationAndDirectionAreTheSame = (reportData: RawReport): R
     return reportData
 }
 
+const ifDirectionPresentWithoutLineClearDirection = (reportData: RawReport): RawReport => {
+    if (reportData.directionId !== null && reportData.directionId !== undefined && reportData.lineId === null) {
+        return { ...reportData, directionId: undefined }
+    }
+
+    return reportData
+}
+
 const clearStationReferenceIfNotOnLine =
     (stations: Stations, stationReferenceField: StationReferenceField) =>
     (reportData: RawReport): RawReport => {
@@ -137,6 +145,7 @@ export {
     clearStationReferenceIfNotOnLine,
     determineLineBasedOnStationAndDirection,
     correctDirectionIfImplied,
+    ifDirectionPresentWithoutLineClearDirection,
     guessStation,
     clearDirectionIfStationAndDirectionAreTheSame,
     isStationOnLine,

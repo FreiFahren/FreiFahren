@@ -441,4 +441,22 @@ describe('Report Post Processing', () => {
 
         expect(report.directionId).toBeNull()
     })
+
+    it('clears direction when direction is present without a line', async () => {
+        const response = await sendReportRequest({
+            stationId: stationWithOneLineId,
+            lineId: null,
+            directionId: stationWithOneLineId,
+            source: 'web_app',
+        })
+        expect(response.status).toBe(200)
+
+        const [report] = await db
+            .select({ directionId: reports.directionId })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+
+        expect(report.directionId).toBeNull()
+    })
 })

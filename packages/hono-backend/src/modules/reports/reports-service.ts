@@ -16,6 +16,7 @@ import {
     pipe,
     RawReport,
     clearDirectionIfStationAndDirectionAreTheSame,
+    ifDirectionPresentWithoutLineClearDirection,
 } from './post-process-report'
 
 type TelegramNotificationPayload = {
@@ -112,6 +113,7 @@ export class ReportsService {
             determineLineBasedOnStationAndDirection(stations),
             correctDirectionIfImplied(lines),
             clearDirectionIfStationAndDirectionAreTheSame,
+            ifDirectionPresentWithoutLineClearDirection,
             guessStation
         )
 
