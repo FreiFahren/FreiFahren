@@ -89,6 +89,14 @@ const isStationOnLine = (
     return station.lines.includes(lineId)
 }
 
+const clearDirectionIfStationAndDirectionAreTheSame = (reportData: RawReport): RawReport => {
+    if (reportData.stationId === reportData.directionId) {
+        return { ...reportData, directionId: undefined }
+    }
+
+    return reportData
+}
+
 const clearStationReferenceIfNotOnLine =
     (stations: Stations, stationReferenceField: StationReferenceField) =>
     (reportData: RawReport): RawReport => {
@@ -130,6 +138,7 @@ export {
     determineLineBasedOnStationAndDirection,
     correctDirectionIfImplied,
     guessStation,
+    clearDirectionIfStationAndDirectionAreTheSame,
     isStationOnLine,
     pipe,
     RawReport,

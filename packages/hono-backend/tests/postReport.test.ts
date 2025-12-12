@@ -422,4 +422,23 @@ describe('Report Post Processing', () => {
 
         expect(report.directionId).toBe(firstStationOnLineId)
     })
+
+    it('clears direction when station and direction are the same', async () => {
+        const response = await sendReportRequest({
+            stationId: stationWithOneLineId,
+            lineId: lineIdForStationWithOneLine,
+            directionId: stationWithOneLineId,
+            source: 'web_app',
+        })
+
+        expect(response.status).toBe(200)
+
+        const [report] = await db
+            .select({ directionId: reports.directionId })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+
+        expect(report.directionId).toBeNull()
+    })
 })
