@@ -52,11 +52,7 @@ export const postReport = defineRoute<Env>()({
     method: 'post',
     path: 'v0/reports',
     schemas: {
-        json: insertReportSchema.extend({
-            source: insertReportSchema.shape.source.optional(),
-            // Since the Bot sometimes does not detect a station, we allow undefined
-            stationId: insertReportSchema.shape.stationId.optional(),
-        }),
+        json: insertReportSchema,
     },
     handler: async (c) => {
         const reportsService = c.get('reportsService')

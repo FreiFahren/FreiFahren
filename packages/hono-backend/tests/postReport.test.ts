@@ -129,6 +129,18 @@ describe('Report API contract', () => {
         app = mod.default
     })
 
+    it('rejects reports without station, line, and direction', async () => {
+        const response = await sendReportRequest({
+            source: 'web_app',
+            // stationId, lineId and directionId are omitted on purpose
+        })
+
+        expect(response.status).toBe(400)
+
+        const responseBody = await response.text()
+        expect(responseBody).toContain('At least one of stationId, lineId, or directionId must be provided')
+    })
+
     it('returns only the created report', async () => {
         const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
 

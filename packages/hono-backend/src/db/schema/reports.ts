@@ -18,11 +18,31 @@ export const reports = pgTable('reports', {
     source: sourceEnum().notNull(),
 })
 
-export const insertReportSchema = createInsertSchema(reports).pick({
+const insertReportDbSchema = createInsertSchema(reports).pick({
     stationId: true,
     lineId: true,
     directionId: true,
     source: true,
 })
 
-export type InsertReport = z.infer<typeof insertReportSchema>
+// API input schema:
+// - Allows missing stationId (bot sometimes cannot detect it)
+// - Allows missing source (we default to telegram)
+// - Requires at least one of stationId, lineId, or directionId
+export const insertReportSchema = insertReportDbSchema
+    .extend({
+        source: insertReportDbSchema.shape.source.optional(),
+        stationId: insertReportDbSchema.shape.stationId.optional(),
+    })
+    .superRefine((data, ctx) => {
+        if (data.stationId === undefined && data.lineId === undefined && data.directionId === undefined) {
+            ctx.addIssue({
+                code: 'custom',
+                message: 'At least one of stationId, lineId, or directionId must be provided',
+                path: [],
+            })
+        }
+    })
+
+// Database insert type (internal use): stationId + source are required
+export type InsertReport = z.infer<typeof insertReportDbSchema>

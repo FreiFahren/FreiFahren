@@ -122,8 +122,6 @@ export class ReportsService {
         const stations = await this.transitNetworkDataService.getStations()
         const lines = await this.transitNetworkDataService.getLines()
 
-        // Todo: if no line, station or direction fail early
-
         const now = DateTime.utc()
 
         const processed = await pipeAsync(
