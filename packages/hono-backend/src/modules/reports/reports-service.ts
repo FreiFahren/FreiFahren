@@ -47,9 +47,25 @@ export class ReportsService {
         return result
     }
 
-    // Todo: also return the report as it is inserted into the database
-    async createReport(reportData: InsertReport): Promise<{ telegramNotificationSuccess: boolean }> {
-        await this.db.insert(reports).values(reportData)
+    async createReport(reportData: InsertReport): Promise<{
+        telegramNotificationSuccess: boolean
+        report: {
+            reportId: number
+            stationId: string
+            lineId: string | null
+            directionId: string | null
+            timestamp: Date
+        }
+    }> {
+        const [insertedReport] = await this.db.insert(reports).values(reportData).returning({
+            reportId: reports.reportId,
+            stationId: reports.stationId,
+            lineId: reports.lineId,
+            directionId: reports.directionId,
+            timestamp: reports.timestamp,
+        })
+        // Drizzle returns the inserted row for Postgres. If this ever becomes undefined, we want to surface it fast.
+        const report = insertedReport!
 
         let telegramNotificationSuccess = true
 
@@ -61,7 +77,7 @@ export class ReportsService {
             }
         }
 
-        return { telegramNotificationSuccess }
+        return { telegramNotificationSuccess, report }
     }
 
     private async notifyTelegram(reportData: InsertReport) {

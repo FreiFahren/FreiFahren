@@ -68,7 +68,7 @@ export const postReport = defineRoute<Env>()({
             source: reportData.source ?? 'telegram',
         })
 
-        const { telegramNotificationSuccess } = await reportsService.createReport({
+        const { telegramNotificationSuccess, report } = await reportsService.createReport({
             ...postProcessedReportData,
         })
 
@@ -77,11 +77,6 @@ export const postReport = defineRoute<Env>()({
             c.header('X-Telegram-Notification-Status', 'failed')
         }
 
-        return c.json(
-            await reportsService.getReports({
-                from: DateTime.now().minus({ hours: 1 }),
-                to: DateTime.now(),
-            })
-        )
+        return c.json(report)
     },
 })

@@ -129,6 +129,37 @@ describe('Report API contract', () => {
         app = mod.default
     })
 
+    it('returns only the created report', async () => {
+        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
+
+        const response = await sendReportRequest({
+            stationId: station.id,
+            source: 'web_app',
+        })
+
+        expect(response.status).toBe(200)
+
+        const body = (await response.json()) as unknown
+
+        expect(Array.isArray(body)).toBe(false)
+        expect(typeof body).toBe('object')
+        expect(body).not.toBeNull()
+
+        const createdReport = body as {
+            reportId: number
+            stationId: string
+            lineId: string | null
+            directionId: string | null
+            timestamp: string | Date
+            source?: unknown
+        }
+
+        expect(typeof createdReport.reportId).toBe('number')
+        expect(createdReport.stationId).toBe(station.id)
+        expect(createdReport).not.toHaveProperty('source')
+        expect(createdReport.timestamp).toBeTruthy()
+    })
+
     it('defaults to telegram source when source is missing in request', async () => {
         const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
 
