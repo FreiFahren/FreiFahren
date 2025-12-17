@@ -1,8 +1,10 @@
 import 'maplibre-gl/dist/maplibre-gl.css'
 import './Map.css'
+import freifahrentheme from './freifahrentheme.json'
 
 import React, { lazy, Suspense, useCallback, useEffect, useRef } from 'react'
 import { LngLatBoundsLike, LngLatLike, MapLayerMouseEvent, MapRef, ViewStateChangeEvent } from 'react-map-gl/maplibre'
+import type { StyleSpecification } from 'maplibre-gl'
 import { useRiskData, useSegments, useStations } from 'src/api/queries'
 
 import { useLocation } from '../../contexts/LocationContext'
@@ -171,9 +173,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     onRotate={handleRotate}
                     onClick={handleMapClick}
                     onDblClick={handleMapDoubleClick}
-                    mapStyle={`https://api.jawg.io/styles/c52af8db-49f6-40b8-9197-568b7fd9a940.json?access-token=${
-                        import.meta.env.VITE_JAWG_ACCESS_TOKEN
-                    }`}
+                    mapStyle={freifahrentheme as StyleSpecification}
                 >
                     {!isFirstOpen ? <LocationMarker userPosition={userPosition} /> : null}
                     <MarkerContainer isFirstOpen={isFirstOpen} userPosition={userPosition} />
@@ -194,24 +194,31 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
             </div>
             <div
                 className="fixed bottom-0 right-1.5 rounded px-1.5 py-0.5 text-gray-500 hover:underline"
-                style={{ fontSize: 'var(--font-xxxs)' }}
+                style={{ fontSize: 'var(--font-xxs)' }}
             >
                 <a
-                    href="https://www.jawg.io/"
+                    href="https://openfreemap.org/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="no-underline hover:underline"
                 >
-                    © JawgMaps
+                    OpenFreeMap
                 </a>{' '}
-                |
+                <a
+                    href="https://www.openmaptiles.org/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="no-underline hover:underline"
+                >
+                    © OpenMapTiles
+                </a>{' '}
                 <a
                     href="https://www.openstreetmap.org/copyright"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="no-underline hover:underline"
                 >
-                    © OSM contributors
+                    Data from OpenStreetMap
                 </a>
             </div>
         </div>
