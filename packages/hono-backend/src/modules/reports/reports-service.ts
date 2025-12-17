@@ -146,6 +146,6 @@ export class ReportsService {
             })
         }
 
-        return processed as InsertReport // TODO: remove this cast
+        return { ...processed, stationId: processed.stationId }
     }
 }
