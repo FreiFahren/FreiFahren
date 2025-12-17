@@ -13,7 +13,7 @@ import {
     correctDirectionIfImplied,
     determineLineBasedOnStationAndDirection,
     guessStation,
-    pipe,
+    pipeAsync,
     RawReport,
     clearDirectionIfStationAndDirectionAreTheSame,
     ifDirectionPresentWithoutLineClearDirection,
@@ -47,6 +47,7 @@ export class ReportsService {
         return result
     }
 
+    // Todo: also return the report as it is inserted into the database
     async createReport(reportData: InsertReport): Promise<{ telegramNotificationSuccess: boolean }> {
         await this.db.insert(reports).values(reportData)
 
@@ -105,7 +106,11 @@ export class ReportsService {
         const stations = await this.transitNetworkDataService.getStations()
         const lines = await this.transitNetworkDataService.getLines()
 
-        const processed = pipe(
+        // Todo: if no line, station or direction fail early
+
+        const now = DateTime.utc()
+
+        const processed = await pipeAsync(
             reportData,
             clearStationReferenceIfNotOnLine(stations, 'stationId'),
             clearStationReferenceIfNotOnLine(stations, 'directionId'),
@@ -114,7 +119,7 @@ export class ReportsService {
             correctDirectionIfImplied(lines),
             clearDirectionIfStationAndDirectionAreTheSame,
             ifDirectionPresentWithoutLineClearDirection,
-            guessStation
+            (currentReport) => guessStation(this.db)(currentReport.lineId, now.hour, now.weekday)(currentReport)
         )
 
         return processed as InsertReport // TODO: remove this cast
