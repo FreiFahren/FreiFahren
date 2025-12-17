@@ -10,7 +10,7 @@ import { useSubmitReport } from '../../../api'
 import { useLines, useStations } from '../../../api/queries'
 import { useAppStore } from '../../../app.store'
 import { Theme } from '../../../theme'
-import { track } from '../../../tracking'
+import { useTracking } from '../../../tracking/provider'
 import { FFButton, FFText, FFView } from '../../common/base'
 import { FFCarousellSelect } from '../../common/FFCarousellSelect'
 import { FFLineTag } from '../../common/FFLineTag'
@@ -36,6 +36,7 @@ const getLineType = (line: string) => {
 }
 
 export const ReportSheet = forwardRef((_props: PropsWithChildren<{}>, ref: Ref<ReportSheetMethods>) => {
+    const { track } = useTracking()
     const { t: tCommon } = useTranslation()
     const { t: tReport } = useTranslation('makeReport')
     const { mutateAsync: submitReport, isPending } = useSubmitReport()

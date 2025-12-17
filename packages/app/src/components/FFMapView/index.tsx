@@ -9,7 +9,7 @@ import { Report, useReports } from '../../api'
 import { useLines, useRiskData, useSegments, useStations } from '../../api/queries'
 import { useAppStore } from '../../app.store'
 import { config } from '../../config'
-import { track } from '../../tracking'
+import { useTracking } from '../../tracking/provider'
 import { FFView } from '../common/base'
 import { LinesLayer } from './LinesLayer'
 import { ReportsLayer } from './ReportsLayer'
@@ -64,6 +64,7 @@ export const FFMapView = () => {
     const cameraRef = useRef<CameraRef>(null)
     const stations = useStations().data
     const { data: reports = [] } = useReports()
+    const { track } = useTracking()
 
     useEffect(() => {
         Geolocation.requestAuthorization(noop, noop)

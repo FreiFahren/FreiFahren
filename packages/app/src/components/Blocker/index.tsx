@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { usePrivacyPolicyMeta } from '../../api/queries'
 import { useAppStore } from '../../app.store'
-import { track } from '../../tracking'
+import { useTracking } from '../../tracking/provider'
 import { Disclaimer } from './Disclaimer'
 import { PrivacyPolicyUpdate } from './PrivacyPolicyUpdate'
 
@@ -51,6 +51,7 @@ const useShouldShowPrivacyPolicy = (newestPrivacyPolicyVersion: number | undefin
 
 export const Blocker = () => {
     const sheetRef = useRef<BottomSheetModal>(null)
+    const { track } = useTracking()
 
     const updateStore = useAppStore(({ update }) => update)
 
@@ -70,7 +71,7 @@ export const Blocker = () => {
             sheetRef.current?.dismiss()
             updateStore({ appLocked: false })
         }
-    }, [shouldShowDisclaimer, shouldShowPrivacyPolicy, updateStore])
+    }, [shouldShowDisclaimer, shouldShowPrivacyPolicy, updateStore, track])
 
     const onDismissDisclaimer = () => {
         sheetRef.current?.dismiss()

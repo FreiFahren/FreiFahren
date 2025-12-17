@@ -2,12 +2,13 @@ import { FontAwesome5 } from '@expo/vector-icons'
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types'
 import { ComponentProps, useRef } from 'react'
 
-import { track } from '../../../tracking'
+import { useTracking } from '../../../tracking/provider'
 import { FFButton } from '../../common/base'
 import { NavigationSheet } from './NavigationSheet'
 
 export const NavigationButton = (props: ComponentProps<typeof FFButton>) => {
     const sheetRef = useRef<BottomSheetModalMethods>(null)
+    const { track } = useTracking()
 
     const handleOpen = () => {
         track({ name: 'Navigation Opened' })

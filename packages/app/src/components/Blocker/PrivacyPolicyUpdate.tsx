@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
 
 import { config } from '../../config'
-import { track } from '../../tracking'
+import { useTracking } from '../../tracking/provider'
 import { FFButton, FFText, FFView } from '../common/base'
 import { FFScrollSheet } from '../common/FFSheet'
 
@@ -16,6 +16,7 @@ type PrivacyPolicyUpdateProps = {
 
 export const PrivacyPolicyUpdate = forwardRef(({ onDismiss }: PrivacyPolicyUpdateProps, ref: Ref<BottomSheetModal>) => {
     const { t } = useTranslation('privacyPolicyUpdated')
+    const { track } = useTracking()
 
     const openPrivacyPolicy = () => {
         track({ name: 'Privacy Policy Viewed', from: 'update-sheet' })

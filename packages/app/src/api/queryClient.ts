@@ -2,7 +2,6 @@ import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 
 import { useAppStore } from '../app.store'
-import { track } from '../tracking'
 
 export const CACHE_KEYS = {
     reports: ['reports'],
@@ -17,7 +16,6 @@ export const CACHE_KEYS = {
 
 const onError = (error: unknown) => {
     if (error instanceof AxiosError && error.response?.status === 410) {
-        track({ name: 'App Deprecated' })
         useAppStore.getState().update({ deprecated: true })
     } else {
         throw error

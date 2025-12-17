@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import linesIcon from '../../../assets/lines.png'
 import riskIcon from '../../../assets/risk.png'
 import { useAppStore } from '../../app.store'
-import { track } from '../../tracking'
+import { useTracking } from '../../tracking/provider'
 import { FFButton, FFImage, FFPressable, FFText, FFView } from '../common/base'
 
 const LAYER_BUTTON_SIZE = 55
@@ -13,6 +13,7 @@ const LAYER_BUTTON_SIZE = 55
 export const LayerSwitcher = (props: ComponentProps<typeof FFView>) => {
     const { t } = useTranslation('map')
     const [isOpen, setIsOpen] = useState(false)
+    const { track } = useTracking()
 
     const { layer: currentLayer, update } = useAppStore()
 

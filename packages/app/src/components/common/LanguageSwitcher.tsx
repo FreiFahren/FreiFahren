@@ -1,7 +1,7 @@
 import { ComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { track } from '../../tracking'
+import { useTracking } from '../../tracking/provider'
 import { FFText, FFView } from './base'
 import { FFCarousellSelect } from './FFCarousellSelect'
 
@@ -9,6 +9,7 @@ type Language = 'en' | 'de'
 
 export const LanguageSwitcher = (props: ComponentProps<typeof FFView>) => {
     const { i18n } = useTranslation('settings')
+    const { track } = useTracking()
 
     const languages = {
         de: '🇩🇪 Deutsch',

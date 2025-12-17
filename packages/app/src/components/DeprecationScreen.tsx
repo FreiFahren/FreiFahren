@@ -3,10 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { Linking, Platform } from 'react-native'
 
 import { config } from '../config'
-import { track } from '../tracking'
+import { useTracking } from '../tracking/provider'
+import { useTrackHit } from '../tracking/useTrackHit'
 import { FFButton, FFSafeAreaView, FFText, FFView } from './common/base'
 
 export const DeprecationScreen = () => {
+    useTrackHit({ name: 'App Deprecated' })
+    const { track } = useTracking()
     const { t } = useTranslation('deprecation')
 
     const platform = Platform.OS

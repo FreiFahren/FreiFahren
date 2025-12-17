@@ -3,7 +3,7 @@ import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/typ
 import { ComponentProps, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { track } from '../../../tracking'
+import { useTracking } from '../../../tracking/provider'
 import { FFButton, FFText } from '../../common/base'
 import { ReportListSheet } from './ReportListSheet'
 
@@ -11,6 +11,7 @@ type ReportListButtonProps = Partial<ComponentProps<typeof FFButton>>
 
 export const ReportListButton = (props: ReportListButtonProps) => {
     const { t } = useTranslation('reportList')
+    const { track } = useTracking()
     const sheetRef = useRef<BottomSheetModalMethods>(null)
 
     const handleOpen = () => {

@@ -4,11 +4,12 @@ import { Linking, Platform } from 'react-native'
 import RNRestart from 'react-native-restart'
 
 import { config } from '../../config'
-import { track } from '../../tracking'
+import { useTracking } from '../../tracking/provider'
 import { FFButton, FFSafeAreaView, FFText, FFView } from './base'
 
 export const ErrorFallbackScreen = ({ error }: { error?: Error | null }) => {
     const { t } = useTranslation('errorFallback')
+    const { track } = useTracking()
 
     const onOpenStore = () => {
         track({ name: 'App Store Opened' })

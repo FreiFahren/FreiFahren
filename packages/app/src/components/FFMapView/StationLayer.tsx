@@ -4,11 +4,12 @@ import DeviceInfo from 'react-native-device-info'
 
 import { useStations } from '../../api/queries'
 import { Theme } from '../../theme'
-import { track } from '../../tracking'
+import { useTracking } from '../../tracking/provider'
 import { filterNullish } from '../../utils'
 
 const useStationsAsGeoJSON = () => {
     const { data: stations } = useStations()
+    const { track } = useTracking()
 
     if (!stations) return null
 

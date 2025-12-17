@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
 
 import { config } from '../../config'
-import { track } from '../../tracking'
+import { useTracking } from '../../tracking/provider'
 import { FFButton, FFText, FFView } from '../common/base'
 import { FFScrollSheet } from '../common/FFSheet'
 import { LanguageSwitcher } from '../common/LanguageSwitcher'
@@ -16,6 +16,7 @@ type DisclaimerProps = {
 
 export const Disclaimer = forwardRef(({ onDismiss }: DisclaimerProps, ref: Ref<BottomSheetModal>) => {
     const { t } = useTranslation('disclaimer')
+    const { track } = useTracking()
 
     const openPrivacyPolicy = () => {
         track({ name: 'Privacy Policy Viewed', from: 'disclaimer' })

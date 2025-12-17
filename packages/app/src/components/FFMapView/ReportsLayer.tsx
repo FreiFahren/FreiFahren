@@ -18,7 +18,7 @@ import { Report } from '../../api'
 import { useStations } from '../../api/queries'
 import { useAppStore } from '../../app.store'
 import { Theme } from '../../theme'
-import { track } from '../../tracking'
+import { useTracking } from '../../tracking/provider'
 import { filterNullish } from '../../utils'
 
 const styles = StyleSheet.create({
@@ -78,6 +78,7 @@ const usePulseAnimation = () => {
 
 const useReportsGeoJson = (reports: Report[]) => {
     const { data: stations } = useStations()
+    const { track } = useTracking()
 
     return useMemo(() => {
         if (isNil(stations)) return null
@@ -120,7 +121,7 @@ const useReportsGeoJson = (reports: Report[]) => {
                 })
                 .filter(filterNullish),
         }
-    }, [reports, stations])
+    }, [reports, stations, track])
 }
 
 type ReportMarkerProps = {
@@ -131,6 +132,7 @@ type ReportMarkerProps = {
 
 const ReportMarker = ({ onPress, report, animatedStyle }: ReportMarkerProps) => {
     const { data: stations } = useStations()
+    const { track } = useTracking()
 
     if (isNil(stations)) return null
 

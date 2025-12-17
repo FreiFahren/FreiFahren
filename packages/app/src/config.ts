@@ -15,6 +15,8 @@ export const config = (() => {
                 PRIVACY_POLICY_META_URL: z.string(),
                 APP_STORE_URL: z.string(),
                 PLAY_STORE_URL: z.string(),
+                UMAMI_WEBSITE_ID: z.string(),
+                UMAMI_HOST_URL: z.string(),
             })
             .parse({
                 FF_API_BASE_URL: process.env.EXPO_PUBLIC_FF_API_BASE_URL,
@@ -28,6 +30,8 @@ export const config = (() => {
                 PRIVACY_POLICY_META_URL: process.env.EXPO_PUBLIC_PRIVACY_POLICY_META_URL,
                 APP_STORE_URL: process.env.EXPO_PUBLIC_APP_STORE_URL,
                 PLAY_STORE_URL: process.env.EXPO_PUBLIC_PLAY_STORE_URL,
+                UMAMI_WEBSITE_ID: process.env.EXPO_PUBLIC_UMAMI_WEBSITE_ID,
+                UMAMI_HOST_URL: process.env.EXPO_PUBLIC_UMAMI_HOST_URL,
             })
     } catch (error) {
         // eslint-disable-next-line no-console

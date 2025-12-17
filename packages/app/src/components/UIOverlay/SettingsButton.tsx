@@ -7,13 +7,14 @@ import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
 
 import { config } from '../../config'
-import { track } from '../../tracking'
+import { useTracking } from '../../tracking/provider'
 import { FFButton, FFText, FFView } from '../common/base'
 import { FFScrollSheet } from '../common/FFSheet'
 import { LanguageSwitcher } from '../common/LanguageSwitcher'
 
 const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
     const { t } = useTranslation('settings')
+    const { track } = useTracking()
 
     const openPrivacyPolicy = () => {
         track({ name: 'Privacy Policy Viewed', from: 'settings' })
@@ -52,6 +53,7 @@ const SettingsSheet = forwardRef((_, ref: Ref<BottomSheetModalMethods>) => {
 
 export const SettingsButton = (props: ComponentProps<typeof FFButton>) => {
     const sheetRef = useRef<BottomSheetModalMethods>(null)
+    const { track } = useTracking()
 
     const handleOpen = () => {
         track({ name: 'Settings Opened' })

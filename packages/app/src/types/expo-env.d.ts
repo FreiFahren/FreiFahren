@@ -3,6 +3,8 @@ declare global {
         interface ProcessEnv {
             EXPO_PUBLIC_FF_API_BASE_URL: string | undefined
             EXPO_PUBLIC_MAP_STYLE_URL: string | undefined
+            EXPO_PUBLIC_UMAMI_WEBSITE_ID: string | undefined
+            EXPO_PUBLIC_UMAMI_HOST_URL: string | undefined
         }
     }
 }
