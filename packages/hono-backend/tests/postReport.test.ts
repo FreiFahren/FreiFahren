@@ -371,6 +371,15 @@ describe('Report Post Processing', () => {
         stationAfterMiddleId = lineWithMiddleStation[1][2]!
     })
 
+    it('rejects direction only payload when no line can be inferred', async () => {
+        const response = await sendReportRequest({
+            source: 'web_app',
+            directionId: stationWithMultipleLinesId,
+        })
+
+        expect(response.status).toBe(422)
+    })
+
     it('if no line is present it will use the stations line', async () => {
         const response = await sendReportRequest({
             stationId: stationWithOneLineId,

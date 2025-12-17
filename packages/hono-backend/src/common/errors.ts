@@ -1,6 +1,6 @@
 import { ContentfulStatusCode } from 'hono/utils/http-status'
 
-export type InternalCode = 'TELEGRAM_NOTIFICATION_FAILED' | 'UNKNOWN_ERROR'
+export type InternalCode = 'TELEGRAM_NOTIFICATION_FAILED' | 'UNKNOWN_ERROR' | 'VALIDATION_FAILED'
 
 export interface AppErrorDetails {
     internal_code: InternalCode

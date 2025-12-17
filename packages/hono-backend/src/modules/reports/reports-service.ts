@@ -2,6 +2,7 @@ import { and, gte, lte } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
 
+import { AppError } from '../../common/errors'
 import { lookupStation } from '../../common/utils'
 import { DbConnection, InsertReport, reports } from '../../db/'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
@@ -135,6 +136,15 @@ export class ReportsService {
             ifDirectionPresentWithoutLineClearDirection,
             (currentReport) => guessStation(this.db)(currentReport.lineId, now.hour, now.weekday)(currentReport)
         )
+
+        if (processed.stationId === undefined) {
+            throw new AppError({
+                message: 'Could not infer station from the provided information',
+                statusCode: 422,
+                internalCode: 'VALIDATION_FAILED',
+                description: `Input data: ${JSON.stringify(reportData)} Current report: ${JSON.stringify(processed)}`,
+            })
+        }
 
         return processed as InsertReport // TODO: remove this cast
     }

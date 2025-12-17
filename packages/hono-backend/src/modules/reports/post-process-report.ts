@@ -91,7 +91,9 @@ const guessStation =
     (db: DbConnection) =>
     (lineId: LineId | null | undefined, hour: number, dayOfWeek: number) =>
     async (reportData: RawReport): Promise<RawReport> => {
-        if (reportData.stationId !== undefined) return reportData
+        // We do not want to guess the station without a line
+        // Otherwise the guess would be too broad and we would end up with a lot of false positives
+        if (reportData.stationId !== undefined || lineId === null || lineId === undefined) return reportData
 
         const normalizedDayOfWeek = normalizeDayOfWeek(dayOfWeek)
         if (normalizedDayOfWeek === 0) {
@@ -115,10 +117,7 @@ const guessStation =
 
         const baseQuery = db.select({ stationId: reports.stationId, timestamp: reports.timestamp }).from(reports)
 
-        const rows =
-            lineId === null || lineId === undefined
-                ? await baseQuery
-                : await baseQuery.where(eq(reports.lineId, lineId))
+        const rows = await baseQuery.where(eq(reports.lineId, lineId))
 
         // If there are no reports for the line yet, fall back to all reports
         const candidateRows =
@@ -143,12 +142,7 @@ const guessStation =
             }
         }
 
-        throw new AppError({
-            message: 'Could not infer station from historical reports',
-            statusCode: 422,
-            internalCode: 'UNKNOWN_ERROR',
-            description: `lineId=${String(lineId ?? 'null')}, hour=${hour}, dayOfWeek=${normalizedDayOfWeek}`,
-        })
+        return reportData
     }
 
 const correctDirectionIfImplied =
@@ -224,7 +218,11 @@ const clearDirectionIfStationAndDirectionAreTheSame = (reportData: RawReport): R
 }
 
 const ifDirectionPresentWithoutLineClearDirection = (reportData: RawReport): RawReport => {
-    if (reportData.directionId !== null && reportData.directionId !== undefined && reportData.lineId === null) {
+    if (
+        reportData.directionId !== null &&
+        reportData.directionId !== undefined &&
+        (reportData.lineId === null || reportData.lineId === undefined)
+    ) {
         return { ...reportData, directionId: undefined }
     }
 
