@@ -233,6 +233,50 @@ describe('Report API contract', () => {
         expect(stationIsOnLine.length).toBe(1)
     })
 
+    it('breaks ties in station guessing by choosing the lexicographically smallest stationId', async () => {
+        // Ensure deterministic history
+        await db.delete(reports)
+
+        const [entry] = await db
+            .select({
+                stationId: lineStations.stationId,
+                lineId: lineStations.lineId,
+            })
+            .from(lineStations)
+            .limit(1)
+
+        const stationsOnLine = await db
+            .select({ stationId: lineStations.stationId })
+            .from(lineStations)
+            .where(eq(lineStations.lineId, entry.lineId))
+            .limit(2)
+
+        if (stationsOnLine.length < 2) return
+
+        const station1 = stationsOnLine[0]!.stationId
+        const station2 = stationsOnLine[1]!.stationId
+
+        const [sorted1] = [station1, station2].sort()
+
+        // Insert equal number of reports for both stations to create a tie
+        await db.insert(reports).values([
+            { stationId: station1, lineId: entry.lineId, directionId: null, source: 'web_app' },
+            { stationId: station2, lineId: entry.lineId, directionId: null, source: 'web_app' },
+        ])
+
+        const response = await sendReportRequest({
+            lineId: entry.lineId,
+            directionId: null,
+            source: 'web_app',
+            // stationId is omitted
+        })
+
+        expect(response.status).toBe(200)
+
+        const body = (await response.json()) as { stationId: string }
+        expect(body.stationId).toBe(sorted1)
+    })
+
     it('defaults to telegram source when source is missing in request', async () => {
         const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
 
@@ -307,6 +351,8 @@ describe('Report Post Processing', () => {
     let stationWithMultipleLinesAndDirectionSharingSingleLine: string
     let directionWithMultipleLinesSharingSingleLine: string
     let sharedLineId: string
+    let stationWithMultipleLinesAndDirectionSharingNoLines: string
+    let directionWithMultipleLinesSharingNoLines: string
     let lineWithMiddleStationId: string
     let middleStationId: string
     let stationAfterMiddleId: string
@@ -360,6 +406,25 @@ describe('Report Post Processing', () => {
         stationWithMultipleLinesAndDirectionSharingSingleLine = sharedSingleLineMatch.stationId
         directionWithMultipleLinesSharingSingleLine = sharedSingleLineMatch.directionId
         sharedLineId = sharedSingleLineMatch.sharedLines[0]!
+
+        const sharedNoLinesMatch = multiLineStations
+            .flatMap(([stationId, station]) =>
+                multiLineStations
+                    .filter(([directionId]) => directionId !== stationId)
+                    .map(([directionId, direction]) => {
+                        const directionLines = new Set(direction.lines)
+                        const sharedLines = station.lines.filter((lineId) => directionLines.has(lineId))
+                        return { stationId, directionId, sharedLines }
+                    })
+            )
+            .find(({ sharedLines }) => sharedLines.length === 0)
+
+        if (!sharedNoLinesMatch) {
+            throw new Error('No stations found where station and direction share zero lines')
+        }
+
+        stationWithMultipleLinesAndDirectionSharingNoLines = sharedNoLinesMatch.stationId
+        directionWithMultipleLinesSharingNoLines = sharedNoLinesMatch.directionId
 
         const lineEntries = Object.entries(linesMap)
         const lineWithMiddleStation = lineEntries.find(([, stationIds]) => stationIds.length >= 3)
@@ -535,6 +600,26 @@ describe('Report Post Processing', () => {
         expect(report.lineId).toBe(sharedLineId)
     })
 
+    it('clears direction when station and direction share no lines and no line is provided', async () => {
+        const response = await sendReportRequest({
+            stationId: stationWithMultipleLinesAndDirectionSharingNoLines,
+            lineId: null,
+            directionId: directionWithMultipleLinesSharingNoLines,
+            source: 'web_app',
+        })
+
+        expect(response.status).toBe(200)
+
+        const [report] = await db
+            .select({ lineId: reports.lineId, directionId: reports.directionId })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+
+        expect(report.lineId).toBeNull()
+        expect(report.directionId).toBeNull()
+    })
+
     it('corrects direction to the terminal station when the direction is implied', async () => {
         const response = await sendReportRequest({
             stationId: stationAfterMiddleId,
@@ -552,6 +637,50 @@ describe('Report Post Processing', () => {
             .limit(1)
 
         expect(report.directionId).toBe(firstStationOnLineId)
+    })
+
+    it('corrects direction to the last terminal station when the station is before the direction', async () => {
+        const stationsOnLine = linesMap[lineWithMiddleStationId]
+        const lastStationOnLineId = stationsOnLine[stationsOnLine.length - 1]
+
+        const response = await sendReportRequest({
+            stationId: firstStationOnLineId,
+            lineId: lineWithMiddleStationId,
+            directionId: middleStationId,
+            source: 'web_app',
+        })
+
+        expect(response.status).toBe(200)
+
+        const [report] = await db
+            .select({ directionId: reports.directionId })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+
+        expect(report.directionId).toBe(lastStationOnLineId)
+    })
+
+    it('does not change direction if it is already a terminal station', async () => {
+        const stationsOnLine = linesMap[lineWithMiddleStationId]
+        const lastStationOnLineId = stationsOnLine[stationsOnLine.length - 1]
+
+        const response = await sendReportRequest({
+            stationId: middleStationId,
+            lineId: lineWithMiddleStationId,
+            directionId: lastStationOnLineId,
+            source: 'web_app',
+        })
+
+        expect(response.status).toBe(200)
+
+        const [report] = await db
+            .select({ directionId: reports.directionId })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+
+        expect(report.directionId).toBe(lastStationOnLineId)
     })
 
     it('clears direction when station and direction are the same', async () => {
