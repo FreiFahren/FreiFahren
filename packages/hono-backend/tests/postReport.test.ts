@@ -5,7 +5,7 @@ import { Stations } from '../src/modules/transit/types'
 import { TransitNetworkDataService } from '../src/modules/transit/transit-network-data-service'
 import { db, lineStations, reports, stations } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
-import { desc, eq } from 'drizzle-orm'
+import { and, desc, eq } from 'drizzle-orm'
 
 let app: (typeof import('../src/index'))['default']
 let fakeNlpServer: ReturnType<typeof Bun.serve> | null = null
@@ -158,6 +158,67 @@ describe('Report API contract', () => {
         expect(createdReport.stationId).toBe(station.id)
         expect(createdReport).not.toHaveProperty('source')
         expect(createdReport.timestamp).toBeTruthy()
+    })
+
+    it('guesses the station when a line is provided without a station', async () => {
+        // Ensure deterministic history for this test
+        await db.delete(reports)
+
+        const [entry] = await db
+            .select({
+                stationId: lineStations.stationId,
+                lineId: lineStations.lineId,
+            })
+            .from(lineStations)
+            .limit(1)
+
+        const stationsOnLine = await db
+            .select({ stationId: lineStations.stationId })
+            .from(lineStations)
+            .where(eq(lineStations.lineId, entry.lineId))
+            .limit(3)
+
+        const mostCommonStationId = stationsOnLine[0]!.stationId
+        const lessCommonStationId = stationsOnLine[1]?.stationId ?? stationsOnLine[0]!.stationId
+
+        await db.insert(reports).values([
+            // Make one station clearly the most common for this line at the current time window
+            { stationId: mostCommonStationId, lineId: entry.lineId, directionId: null, source: 'web_app' },
+            { stationId: mostCommonStationId, lineId: entry.lineId, directionId: null, source: 'web_app' },
+            { stationId: mostCommonStationId, lineId: entry.lineId, directionId: null, source: 'web_app' },
+            { stationId: mostCommonStationId, lineId: entry.lineId, directionId: null, source: 'web_app' },
+            { stationId: mostCommonStationId, lineId: entry.lineId, directionId: null, source: 'web_app' },
+            { stationId: lessCommonStationId, lineId: entry.lineId, directionId: null, source: 'web_app' },
+        ])
+
+        const response = await sendReportRequest({
+            lineId: entry.lineId,
+            directionId: null,
+            source: 'web_app',
+            // stationId is omitted on purpose
+        })
+
+        expect(response.status).toBe(200)
+
+        const body = (await response.json()) as {
+            reportId: number
+            stationId: string
+            lineId: string | null
+            directionId: string | null
+            timestamp: string | Date
+        }
+
+        expect(typeof body.reportId).toBe('number')
+        expect(body.lineId).toBe(entry.lineId)
+        expect(body.stationId).toBe(mostCommonStationId)
+
+        const stationIsOnLine = await db
+            .select({ stationId: lineStations.stationId })
+            .from(lineStations)
+            .where(and(eq(lineStations.lineId, entry.lineId), eq(lineStations.stationId, body.stationId)))
+            .limit(1)
+
+        expect(stationIsOnLine.length).toBe(1)
     })
 
     it('defaults to telegram source when source is missing in request', async () => {
