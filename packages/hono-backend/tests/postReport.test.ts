@@ -380,6 +380,24 @@ describe('Report Post Processing', () => {
         expect(response.status).toBe(422)
     })
 
+    it('Accept a direction only payload when a line can be inferred', async () => {
+        const response = await sendReportRequest({
+            source: 'web_app',
+            directionId: directionWithOneLineId,
+        })
+
+        expect(response.status).toBe(200)
+
+        const [report] = await db
+            .select({ lineId: reports.lineId, stationId: reports.stationId, directionId: reports.directionId })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+
+        expect(report.lineId).toBe(lineIdForStationWithOneLine)
+        expect(report.directionId).toBe(directionWithOneLineId)
+    })
+
     it('if no line is present it will use the stations line', async () => {
         const response = await sendReportRequest({
             stationId: stationWithOneLineId,
