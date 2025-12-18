@@ -21,7 +21,7 @@ const MarketingModal: React.FC<MarketingModalProps> = ({ className, children }) 
                 <p>{t('MarketingModal.description')}</p>
                 <button
                     type="submit"
-                    onClick={() => sendAnalyticsEvent('redirected to app store', {})}
+                    onClick={() => sendAnalyticsEvent('redirected to app store')}
                     className="h-10 w-full rounded-md p-2"
                 >
                     <a
