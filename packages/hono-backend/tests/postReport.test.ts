@@ -337,6 +337,39 @@ describe('Report API contract', () => {
 
         expect(report.directionId).toBe(finalStation.id)
     })
+
+    it('rejects reports with an invalid lineId instead of crashing', async () => {
+        const response = await sendReportRequest({
+            lineId: 'NON_EXISTENT_LINE',
+            source: 'web_app',
+        })
+
+        expect(response.status).toBe(400)
+    })
+
+    it('rejects reports with an invalid stationId instead of crashing', async () => {
+        const response = await sendReportRequest({
+            stationId: 'NON_EXISTENT_STATION',
+            source: 'web_app',
+        })
+
+        expect(response.status).toBe(400)
+    })
+
+    it('rejects reports with an invalid directionId instead of crashing', async () => {
+        const response = await sendReportRequest({
+            directionId: 'NON_EXISTENT_DIRECTION',
+            source: 'web_app',
+        })
+        expect(response.status).toBe(400)
+    })
+
+    it('rejects reports with an invalid source instead of crashing', async () => {
+        const response = await sendReportRequest({
+            source: 'NON_EXISTENT_SOURCE',
+        })
+        expect(response.status).toBe(400)
+    })
 })
 
 describe('Report Post Processing', () => {
@@ -362,7 +395,9 @@ describe('Report Post Processing', () => {
         await seedBaseData(db)
         const transitService = new TransitNetworkDataService(db)
         stationsMap = await transitService.getStations()
-        linesMap = await transitService.getLines()
+        linesMap = Object.fromEntries(
+            Object.entries(await transitService.getLines()).map(([key, value]) => [key, value ?? []])
+        )
 
         const stationEntries = Object.entries(stationsMap)
 

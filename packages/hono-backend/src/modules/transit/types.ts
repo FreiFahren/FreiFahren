@@ -16,6 +16,6 @@ type Station = {
 }
 
 type Stations = Record<StationId, Station>
-type Lines = Record<LineId, StationId[]>
+type Lines = Record<LineId, StationId[] | undefined>
 
 export type { Lines, Stations, StationId, LineId }

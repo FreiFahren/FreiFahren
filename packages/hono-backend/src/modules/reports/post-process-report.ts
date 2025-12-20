@@ -143,7 +143,7 @@ const correctDirectionIfImplied =
         if (reportData.directionId === null || reportData.directionId === undefined) return reportData
 
         const stationsOnLine = lines[reportData.lineId]
-        if (stationsOnLine.length < 2) return reportData
+        if (stationsOnLine === undefined || stationsOnLine.length < 2) return reportData
 
         const firstStationOnLine = stationsOnLine[0]
         const lastStationOnLine = stationsOnLine[stationsOnLine.length - 1]
