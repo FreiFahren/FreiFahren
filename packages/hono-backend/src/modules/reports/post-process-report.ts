@@ -1,9 +1,8 @@
-import { eq } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 
 import { AppError } from '../../common/errors'
 import { lookupStation } from '../../common/utils'
-import { DbConnection, InsertReport, reports } from '../../db'
+import { InsertReport } from '../../db'
 import { LineId, Lines, StationId, Stations } from '../transit/types'
 
 type RawReport = Omit<InsertReport, 'stationId'> & {
@@ -88,12 +87,13 @@ const getMostCommonStationId = (
 }
 
 const guessStation =
-    (db: DbConnection) =>
-    (lineId: LineId | null | undefined, hour: number, dayOfWeek: number) =>
-    async (reportData: RawReport): Promise<RawReport> => {
+    (candidateRows: Array<{ stationId: StationId; timestamp: Date }>) =>
+    (hour: number, dayOfWeek: number) =>
+    (reportData: RawReport): RawReport => {
         // We do not want to guess the station without a line
         // Otherwise the guess would be too broad and we would end up with a lot of false positives
-        if (reportData.stationId !== undefined || lineId === null || lineId === undefined) return reportData
+        if (reportData.stationId !== undefined || reportData.lineId === null || reportData.lineId === undefined)
+            return reportData
 
         const normalizedDayOfWeek = normalizeDayOfWeek(dayOfWeek)
         if (normalizedDayOfWeek === 0) {
@@ -114,16 +114,6 @@ const guessStation =
                 description: `Provided hour=${String(hour)}`,
             })
         }
-
-        const baseQuery = db.select({ stationId: reports.stationId, timestamp: reports.timestamp }).from(reports)
-
-        const rows = await baseQuery.where(eq(reports.lineId, lineId))
-
-        // If there are no reports for the line yet, fall back to all reports
-        const candidateRows =
-            rows.length > 0
-                ? rows
-                : await db.select({ stationId: reports.stationId, timestamp: reports.timestamp }).from(reports)
 
         // Expand search window until we find at least one matching station.
         // Day window: 0..3 covers the full week (max distance is 3).

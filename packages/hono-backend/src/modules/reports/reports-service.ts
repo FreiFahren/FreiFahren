@@ -1,4 +1,4 @@
-import { and, gte, lte } from 'drizzle-orm'
+import { and, desc, eq, gte, lte } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
 
@@ -134,7 +134,24 @@ export class ReportsService {
             correctDirectionIfImplied(lines),
             clearDirectionIfStationAndDirectionAreTheSame,
             ifDirectionPresentWithoutLineClearDirection,
-            (currentReport) => guessStation(this.db)(currentReport.lineId, now.hour, now.weekday)(currentReport)
+            async (currentReport) => {
+                if (
+                    currentReport.stationId !== undefined ||
+                    currentReport.lineId === null ||
+                    currentReport.lineId === undefined
+                ) {
+                    return currentReport
+                }
+
+                const candidateRows = await this.db
+                    .select({ stationId: reports.stationId, timestamp: reports.timestamp })
+                    .from(reports)
+                    .where(eq(reports.lineId, currentReport.lineId))
+                    .orderBy(desc(reports.timestamp))
+                    .limit(1000)
+
+                return guessStation(candidateRows)(now.hour, now.weekday)(currentReport)
+            }
         )
 
         if (processed.stationId === undefined) {
