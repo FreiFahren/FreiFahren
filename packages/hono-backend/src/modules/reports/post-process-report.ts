@@ -25,14 +25,6 @@ const pipeAsync = async <T>(value: T, ...fns: Array<(arg: T) => T | Promise<T>>)
     return result
 }
 
-const normalizeDayOfWeek = (dayOfWeek: number): number => {
-    // Accept both JS-style (0-6, Sunday=0) and Luxon-style (1-7, Monday=1)
-    if (!Number.isFinite(dayOfWeek)) return 0
-    if (dayOfWeek >= 1 && dayOfWeek <= 7) return dayOfWeek
-    if (dayOfWeek >= 0 && dayOfWeek <= 6) return dayOfWeek === 0 ? 7 : dayOfWeek
-    return 0
-}
-
 const circularDistance = (a: number, b: number, modulus: number): number => {
     const forward = (a - b + modulus) % modulus
     const backward = (b - a + modulus) % modulus
@@ -48,8 +40,7 @@ const getMostCommonStationId = (
         dayWindow,
     }: { hour: number; dayOfWeek: number; hourWindow: number; dayWindow: number }
 ): StationId | undefined => {
-    const normalizedDayOfWeek = normalizeDayOfWeek(dayOfWeek)
-    if (normalizedDayOfWeek === 0) return undefined
+    if (!Number.isFinite(dayOfWeek) || dayOfWeek < 1 || dayOfWeek > 7) return undefined
     if (!Number.isInteger(hour) || hour < 0 || hour > 23) return undefined
 
     const counts = new Map<StationId, number>()
@@ -60,7 +51,7 @@ const getMostCommonStationId = (
         const rowDayOfWeek = dateTime.weekday // 1-7
 
         const hourDifference = circularDistance(rowHour, hour, 24)
-        const dayDifference = circularDistance(rowDayOfWeek, normalizedDayOfWeek, 7)
+        const dayDifference = circularDistance(rowDayOfWeek, dayOfWeek, 7)
 
         if (hourDifference > hourWindow) continue
         if (dayDifference > dayWindow) continue
@@ -95,8 +86,7 @@ const guessStation =
         if (reportData.stationId !== undefined || reportData.lineId === null || reportData.lineId === undefined)
             return reportData
 
-        const normalizedDayOfWeek = normalizeDayOfWeek(dayOfWeek)
-        if (normalizedDayOfWeek === 0) {
+        if (!Number.isFinite(dayOfWeek) || dayOfWeek < 1 || dayOfWeek > 7) {
             throw new AppError({
                 message: 'Cannot infer station because day of week is invalid',
                 statusCode: 500,
@@ -122,7 +112,7 @@ const guessStation =
             for (let hourWindow = 0; hourWindow <= 12; hourWindow++) {
                 const stationId = getMostCommonStationId(candidateRows, {
                     hour,
-                    dayOfWeek: normalizedDayOfWeek,
+                    dayOfWeek,
                     hourWindow,
                     dayWindow,
                 })
