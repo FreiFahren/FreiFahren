@@ -1,10 +1,24 @@
-import { and, gte, lte } from 'drizzle-orm'
+import { and, desc, eq, gte, lte } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
 
+import { AppError } from '../../common/errors'
+import { lookupStation } from '../../common/utils'
 import { DbConnection, InsertReport, reports } from '../../db/'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
-import type { Stations, StationId } from '../transit/types'
+import type { StationId } from '../transit/types'
+
+import {
+    assignLineIfSingleOption,
+    clearStationReferenceIfNotOnLine,
+    correctDirectionIfImplied,
+    determineLineBasedOnStationAndDirection,
+    guessStation,
+    pipeAsync,
+    RawReport,
+    clearDirectionIfStationAndDirectionAreTheSame,
+    ifDirectionPresentWithoutLineClearDirection,
+} from './post-process-report'
 
 type TelegramNotificationPayload = {
     line: string | null
@@ -34,8 +48,25 @@ export class ReportsService {
         return result
     }
 
-    async createReport(reportData: InsertReport): Promise<{ telegramNotificationSuccess: boolean }> {
-        await this.db.insert(reports).values(reportData)
+    async createReport(reportData: InsertReport): Promise<{
+        telegramNotificationSuccess: boolean
+        report: {
+            reportId: number
+            stationId: string
+            lineId: string | null
+            directionId: string | null
+            timestamp: Date
+        }
+    }> {
+        const [insertedReport] = await this.db.insert(reports).values(reportData).returning({
+            reportId: reports.reportId,
+            stationId: reports.stationId,
+            lineId: reports.lineId,
+            directionId: reports.directionId,
+            timestamp: reports.timestamp,
+        })
+        // Drizzle returns the inserted row for Postgres. If this ever becomes undefined, we want to surface it fast.
+        const report = insertedReport!
 
         let telegramNotificationSuccess = true
 
@@ -47,7 +78,7 @@ export class ReportsService {
             }
         }
 
-        return { telegramNotificationSuccess }
+        return { telegramNotificationSuccess, report }
     }
 
     private async notifyTelegram(reportData: InsertReport) {
@@ -76,8 +107,8 @@ export class ReportsService {
     private async buildTelegramNotificationPayload(reportData: InsertReport): Promise<TelegramNotificationPayload> {
         const stations = await this.transitNetworkDataService.getStations()
 
-        const station = this.lookupStation(stations, reportData.stationId)
-        const direction = this.lookupStation(stations, reportData.directionId)
+        const station = lookupStation(stations, reportData.stationId)
+        const direction = lookupStation(stations, reportData.directionId)
 
         return {
             line: reportData.lineId ?? null,
@@ -88,15 +119,52 @@ export class ReportsService {
         }
     }
 
-    private lookupStation(stations: Stations, stationId?: StationId | null) {
-        if (stationId === undefined || stationId === null) {
-            return undefined
+    async postProcessReport(reportData: RawReport): Promise<InsertReport> {
+        const stations = await this.transitNetworkDataService.getStations()
+        const lines = await this.transitNetworkDataService.getLines()
+
+        const now = DateTime.utc()
+
+        const processed = await pipeAsync(
+            reportData,
+            clearStationReferenceIfNotOnLine(stations, 'stationId'),
+            clearStationReferenceIfNotOnLine(stations, 'directionId'),
+            assignLineIfSingleOption(stations),
+            determineLineBasedOnStationAndDirection(stations),
+            correctDirectionIfImplied(lines),
+            clearDirectionIfStationAndDirectionAreTheSame,
+            ifDirectionPresentWithoutLineClearDirection,
+            async (currentReport) => {
+                if (
+                    currentReport.stationId !== undefined ||
+                    currentReport.lineId === null ||
+                    currentReport.lineId === undefined
+                ) {
+                    return currentReport
+                }
+
+                const candidateRows = await this.db
+                    .select({ stationId: reports.stationId, timestamp: reports.timestamp })
+                    .from(reports)
+                    .where(eq(reports.lineId, currentReport.lineId))
+                    .orderBy(desc(reports.timestamp))
+                    .limit(1000)
+
+                return guessStation(candidateRows)(now.hour, now.weekday)(currentReport)
+            },
+            clearStationReferenceIfNotOnLine(stations, 'stationId'),
+            clearStationReferenceIfNotOnLine(stations, 'directionId')
+        )
+
+        if (processed.stationId === undefined) {
+            throw new AppError({
+                message: 'Could not infer station from the provided information',
+                statusCode: 422,
+                internalCode: 'VALIDATION_FAILED',
+                description: `Input data: ${JSON.stringify(reportData)} Current report: ${JSON.stringify(processed)}`,
+            })
         }
 
-        if (!Object.prototype.hasOwnProperty.call(stations, stationId)) {
-            return undefined
-        }
-
-        return stations[stationId]
+        return { ...processed, stationId: processed.stationId }
     }
 }

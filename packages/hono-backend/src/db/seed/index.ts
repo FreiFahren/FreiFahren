@@ -1,4 +1,4 @@
-/* eslint-disable no-console  */
+/* eslint-disable no-console */
 import { db } from '../index'
 
 import { seedBaseData } from './seed'

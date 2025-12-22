@@ -52,18 +52,20 @@ export const postReport = defineRoute<Env>()({
     method: 'post',
     path: 'v0/reports',
     schemas: {
-        json: insertReportSchema.extend({
-            source: insertReportSchema.shape.source.optional(),
-        }),
+        json: insertReportSchema,
     },
     handler: async (c) => {
         const reportsService = c.get('reportsService')
 
         const reportData = c.req.valid('json')
 
-        const { telegramNotificationSuccess } = await reportsService.createReport({
+        const postProcessedReportData = await reportsService.postProcessReport({
             ...reportData,
             source: reportData.source ?? 'telegram',
+        })
+
+        const { telegramNotificationSuccess, report } = await reportsService.createReport({
+            ...postProcessedReportData,
         })
 
         if (!telegramNotificationSuccess) {
@@ -71,11 +73,6 @@ export const postReport = defineRoute<Env>()({
             c.header('X-Telegram-Notification-Status', 'failed')
         }
 
-        return c.json(
-            await reportsService.getReports({
-                from: DateTime.now().minus({ hours: 1 }),
-                to: DateTime.now(),
-            })
-        )
+        return c.json(report)
     },
 })
