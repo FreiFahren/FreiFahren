@@ -2,6 +2,7 @@ import { and, gte, lte } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
 
+import { AppError } from '../../common/errors'
 import { DbConnection, InsertReport, reports } from '../../db/'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
 import type { Stations, StationId } from '../transit/types'
@@ -32,6 +33,52 @@ export class ReportsService {
             .where(and(gte(reports.timestamp, from.toJSDate()), lte(reports.timestamp, to.toJSDate())))
 
         return result
+    }
+
+    /*
+    This function verifies that the request is a legitimate report
+    by checking the security service.
+    */
+    async verifyRequest(headers: Record<string, string>): Promise<void> {
+        const reportPassword = process.env.REPORT_PASSWORD
+        const isDev = process.env.NODE_ENV === 'development'
+
+        // Exceptions for dev mode and the Telegram Bot (Identified by the X-Password header)
+        if (
+            (reportPassword !== undefined && reportPassword !== '' && headers['x-password'] === reportPassword) ||
+            isDev
+        ) {
+            return
+        }
+
+        const securityServiceUrl = process.env.SECURITY_MICROSERVICE_URL
+        console.log('securityServiceUrl', securityServiceUrl)
+        if (securityServiceUrl === undefined || securityServiceUrl === '') {
+            throw new Error('security service configuration error')
+        }
+
+        const response = await fetch(`${securityServiceUrl.replace(/\/$/, '')}/check`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ headers }),
+        })
+
+        if (!response.ok) {
+            throw new Error(`failed to verify request with status ${response.status}: ${await response.text()}`)
+        }
+
+        const result = (await response.json()) as { valid: boolean }
+
+        if (!result.valid) {
+            throw new AppError({
+                message:
+                    'Spam reports are not allowed, if you have an issue with us contact us and we can hash it out.',
+                statusCode: 403,
+                internalCode: 'SPAM_REPORT_DETECTED',
+            })
+        }
     }
 
     async createReport(reportData: InsertReport): Promise<{ telegramNotificationSuccess: boolean }> {
