@@ -47,7 +47,7 @@ export class TransitNetworkDataService {
 
         const result = joinedRows.reduce<Lines>((linesById, row) => {
             const base = Object.prototype.hasOwnProperty.call(linesById, row.lineId) ? linesById[row.lineId] : []
-            const stations = row.stationId !== null ? [...(base ?? []), row.stationId] : base
+            const stations = row.stationId !== null ? [...base, row.stationId] : base
             linesById[row.lineId] = stations
             return linesById
         }, {} as Lines)
