@@ -151,7 +151,9 @@ export class ReportsService {
                     .limit(1000)
 
                 return guessStation(candidateRows)(now.hour, now.weekday)(currentReport)
-            }
+            },
+            clearStationReferenceIfNotOnLine(stations, 'stationId'),
+            clearStationReferenceIfNotOnLine(stations, 'directionId')
         )
 
         if (processed.stationId === undefined) {

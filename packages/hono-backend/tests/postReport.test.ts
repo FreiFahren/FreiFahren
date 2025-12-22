@@ -381,6 +381,7 @@ describe('Report Post Processing', () => {
     let directionWithOneLineId: string
     let lineIdForStationWithOneLine: string
     let stationNotOnLineId: string
+    let stationOnSameLineAsStationWithOneLineId: string
     let stationWithMultipleLinesAndDirectionSharingSingleLine: string
     let directionWithMultipleLinesSharingSingleLine: string
     let sharedLineId: string
@@ -420,6 +421,12 @@ describe('Report Post Processing', () => {
         const stationNotOnLineEntry = stationEntries.find(([, s]) => !s.lines.includes(lineIdForStationWithOneLine))
         if (!stationNotOnLineEntry) throw new Error('No station found that is not on the selected line')
         stationNotOnLineId = stationNotOnLineEntry[0]
+
+        const stationOnSameLineEntry = stationEntries.find(
+            ([id, s]) => s.lines.includes(lineIdForStationWithOneLine) && id !== stationWithOneLineId
+        )
+        if (!stationOnSameLineEntry) throw new Error('No second station on the same line found')
+        stationOnSameLineAsStationWithOneLineId = stationOnSameLineEntry[0]
 
         const multiLineStations = stationEntries.filter(([, s]) => s.lines.length > 1)
         const sharedSingleLineMatch = multiLineStations
@@ -522,7 +529,7 @@ describe('Report Post Processing', () => {
         const response = await sendReportRequest({
             stationId: stationWithOneLineId,
             lineId: null,
-            directionId: stationNotOnLineId,
+            directionId: stationOnSameLineAsStationWithOneLineId,
             source: 'web_app',
         })
 
@@ -534,7 +541,7 @@ describe('Report Post Processing', () => {
             .orderBy(desc(reports.timestamp))
             .limit(1)
 
-        expect(report.directionId).toBe(stationNotOnLineId)
+        expect(report.directionId).toBe(stationOnSameLineAsStationWithOneLineId)
     })
 
     it('if no line present and station the station has more than one line it will use the line of the direction', async () => {
@@ -752,6 +759,26 @@ describe('Report Post Processing', () => {
             .orderBy(desc(reports.timestamp))
             .limit(1)
 
+        expect(report.directionId).toBeNull()
+    })
+
+    it('clears direction when station is on one line and direction is on another and no lineId is provided', async () => {
+        const response = await sendReportRequest({
+            stationId: stationWithOneLineId,
+            lineId: null,
+            directionId: stationNotOnLineId,
+            source: 'web_app',
+        })
+
+        expect(response.status).toBe(200)
+
+        const [report] = await db
+            .select({ lineId: reports.lineId, directionId: reports.directionId })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+
+        expect(report.lineId).toBe(lineIdForStationWithOneLine)
         expect(report.directionId).toBeNull()
     })
 })
