@@ -145,7 +145,9 @@ const correctDirectionIfImplied =
         const stationIndex = stationsOnLine.indexOf(reportData.stationId)
         const directionIndex = stationsOnLine.indexOf(reportData.directionId)
 
+        // If the station or direction is not on the line, return the report data unchanged
         if (stationIndex === -1 || directionIndex === -1) return reportData
+        // If the station and direction are the same, return the report data unchanged
         if (stationIndex === directionIndex) return reportData
 
         const impliedTerminalDirectionId = stationIndex < directionIndex ? lastStationOnLine : firstStationOnLine
