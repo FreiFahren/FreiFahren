@@ -20,6 +20,54 @@ import {
     ifDirectionPresentWithoutLineClearDirection,
 } from './post-process-report'
 
+const MIN_PREDICTED_REPORTS_THRESHOLD = 1
+const MAX_PREDICTED_REPORTS_THRESHOLD = 7
+
+type LuxonWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7
+
+const isWeekend = (weekday: LuxonWeekday): boolean => weekday === 6 || weekday === 7
+
+const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value))
+
+const calculateBasePredictedReportsThreshold = (currentTime: DateTime): number => {
+    const minutesPastMidnight = currentTime.hour * 60 + currentTime.minute
+
+    const isSaturday = currentTime.weekday === 6
+
+    if (minutesPastMidnight >= 18 * 60 && isSaturday && minutesPastMidnight < 24 * 60) {
+        // On Saturdays, decrease linearly from 18:00 to 24:00
+        return 7 - (minutesPastMidnight - 18 * 60) * (9.0 / (6 * 60))
+    }
+
+    if (minutesPastMidnight >= 18 * 60 && minutesPastMidnight < 21 * 60) {
+        // On other days, decrease linearly from 18:00 to 21:00
+        return 7 - (minutesPastMidnight - 18 * 60) * (9.0 / (3 * 60))
+    }
+
+    if (minutesPastMidnight >= 21 * 60 || minutesPastMidnight < 7 * 60) {
+        // Stay at 1 between 21:00 to 7:00
+        return 1
+    }
+
+    if (minutesPastMidnight >= 7 * 60 && minutesPastMidnight < 9 * 60) {
+        // Increase linearly from 7:00 to 9:00
+        return 1 + (minutesPastMidnight - 7 * 60) * (9.0 / (2 * 60))
+    }
+
+    return 7
+}
+
+/**
+ * Applies the legacy weekend reduction. The reduction is computed from the *truncated* base value,
+ * which is important for matching the previous behavior.
+ */
+const calculateWeekendAdjustment = (currentTime: DateTime, baseThreshold: number): number => {
+    if (!isWeekend(currentTime.weekday as LuxonWeekday)) return 0
+
+    const truncatedBase = Math.trunc(baseThreshold)
+    return truncatedBase * 0.5
+}
+
 type TelegramNotificationPayload = {
     line: string | null
     station: string
@@ -34,7 +82,7 @@ export class ReportsService {
         private transitNetworkDataService: TransitNetworkDataService
     ) {}
 
-    async getReports({ from, to }: { from: DateTime; to: DateTime }) {
+    async getReports({ from, to, currentTime }: { from: DateTime; to: DateTime; currentTime: DateTime }) {
         const result = await this.db
             .select({
                 timestamp: reports.timestamp,
@@ -45,7 +93,22 @@ export class ReportsService {
             .from(reports)
             .where(and(gte(reports.timestamp, from.toJSDate()), lte(reports.timestamp, to.toJSDate())))
 
+        const predictedReportsThreshold = this.calculatePredictedReportsThreshold(currentTime)
+        console.log('predictedReportsThreshold', predictedReportsThreshold)
+
         return result
+    }
+
+    /*
+    Returns the integer threshold that controls how many predicted/historic reports we should show.
+    */
+    // TODO: Write integration tests for this
+    private calculatePredictedReportsThreshold(currentTime: DateTime): number {
+        const base = calculateBasePredictedReportsThreshold(currentTime)
+        const adjustment = calculateWeekendAdjustment(currentTime, base)
+        const threshold = base - adjustment
+
+        return Math.trunc(clamp(threshold, MIN_PREDICTED_REPORTS_THRESHOLD, MAX_PREDICTED_REPORTS_THRESHOLD))
     }
 
     async createReport(reportData: InsertReport): Promise<{
