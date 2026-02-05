@@ -76,13 +76,24 @@ type TelegramNotificationPayload = {
     stationId: StationId
 }
 
+type ReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'stationId' | 'directionId' | 'lineId'>
+
 export class ReportsService {
     constructor(
         private db: DbConnection,
         private transitNetworkDataService: TransitNetworkDataService
     ) {}
 
-    async getReports({ from, to, currentTime }: { from: DateTime; to: DateTime; currentTime: DateTime }) {
+    // Todo: Test that getReports returns only unique stationIds
+    async getReports({
+        from,
+        to,
+        currentTime,
+    }: {
+        from: DateTime
+        to: DateTime
+        currentTime: DateTime
+    }): Promise<ReportSummary[]> {
         const result = await this.db
             .select({
                 timestamp: reports.timestamp,
@@ -93,8 +104,14 @@ export class ReportsService {
             .from(reports)
             .where(and(gte(reports.timestamp, from.toJSDate()), lte(reports.timestamp, to.toJSDate())))
 
+        // Predict reports if we don't have enough, so that users always see at least some data
         const predictedReportsThreshold = this.calculatePredictedReportsThreshold(currentTime)
-        console.log('predictedReportsThreshold', predictedReportsThreshold)
+        if (result.length < predictedReportsThreshold) {
+            const numberOfReportsToFetch = predictedReportsThreshold - result.length
+            const excludedStationIds = new Set(result.map((r) => r.stationId as StationId))
+            const historicReports = await this.predictReports(numberOfReportsToFetch, from, to, excludedStationIds)
+            result.push(...historicReports)
+        }
 
         return result
     }
@@ -109,6 +126,74 @@ export class ReportsService {
         const threshold = base - adjustment
 
         return Math.trunc(clamp(threshold, MIN_PREDICTED_REPORTS_THRESHOLD, MAX_PREDICTED_REPORTS_THRESHOLD))
+    }
+
+    private async predictReports(
+        numberOfReportsToFetch: number,
+        from: DateTime,
+        to: DateTime,
+        excludedStationIds: ReadonlySet<StationId>
+    ): Promise<ReportSummary[]> {
+        if (numberOfReportsToFetch <= 0) return []
+
+        const stations = await this.transitNetworkDataService.getStations()
+        const allowedStationIds = (Object.keys(stations) as StationId[]).filter((id) => !excludedStationIds.has(id))
+        if (allowedStationIds.length === 0) return []
+
+        // We only want predicted timestamps near "now", so we constrain them to the final quarter of the requested range:
+        // We limit to the last quarter, so that we indicate to the user that this data is not very accurate.
+        const fromMillis = from.toMillis()
+        const toMillis = to.toMillis()
+        const rangeMillis = Math.max(0, toMillis - fromMillis)
+        const toRandomDate = (millis: number): Date => new Date(Math.floor(millis))
+
+        const randomTimestampInWindow = (windowStartMillis: number): Date => {
+            const clampedStartMillis = Math.max(fromMillis, Math.min(windowStartMillis, toMillis))
+            const millis = clampedStartMillis + Math.random() * (toMillis - clampedStartMillis)
+            return toRandomDate(millis)
+        }
+
+        const lastQuarterStartMillis = toMillis - Math.floor(rangeMillis / 4)
+        const lastHalfStartMillis = toMillis - Math.floor(rangeMillis / 2)
+
+        const candidateRows = await this.db
+            .select({ stationId: reports.stationId, timestamp: reports.timestamp })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1000)
+
+        const usedStationIds = new Set<StationId>()
+        const maxUniqueCount = Math.min(numberOfReportsToFetch, allowedStationIds.length)
+
+        const results: ReportSummary[] = []
+
+        // We only use `guessStation`. If we get an excluded/duplicate/undefined guess, we broaden the timestamp window
+        // (last quarter -> last half -> full range) and retry.
+        const windowsStartMillis = [lastQuarterStartMillis, lastHalfStartMillis, fromMillis]
+
+        const triesPerWindow = 25
+
+        for (const windowStartMillis of windowsStartMillis) {
+            for (let attempts = 0; attempts < triesPerWindow && results.length < maxUniqueCount; attempts++) {
+                const timestamp = randomTimestampInWindow(windowStartMillis)
+                const guessTime = DateTime.fromJSDate(timestamp, { zone: 'utc' })
+
+                const guessInput: { stationId?: StationId } = {}
+                const guessed = guessStation(candidateRows)(guessTime.hour, guessTime.weekday)(guessInput)
+
+                const stationId = guessed.stationId
+                if (stationId === undefined) continue
+                if (excludedStationIds.has(stationId)) continue
+                if (usedStationIds.has(stationId)) continue
+
+                usedStationIds.add(stationId)
+                results.push({ timestamp, stationId, directionId: null, lineId: null })
+            }
+        }
+
+        // Prediction is inherently best-effort: if we cannot infer enough unique stations from history,
+        // We return the subset we managed to infer instead of failing the whole request.
+        return results
     }
 
     async createReport(reportData: InsertReport): Promise<{
@@ -198,6 +283,8 @@ export class ReportsService {
             clearDirectionIfStationAndDirectionAreTheSame,
             ifDirectionPresentWithoutLineClearDirection,
             async (currentReport) => {
+                // Avoid guessing the station if we don't have a line
+                // Otherwise the guess would be too broad and we would end up with a lot of false positives
                 if (
                     currentReport.stationId !== undefined ||
                     currentReport.lineId === null ||
