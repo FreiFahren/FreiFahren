@@ -11,14 +11,18 @@ import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from '../src/modules/re
 let testStationId: string
 let testLineId: string
 
-// Note: this function is primarily used for timeframe filtering tests
+// Note: this function is primarily used for timeframe filtering tests and prediction accuracy tests
 // It is better to use the `createReportViaAPI` function for testing business logic and API behavior.
 // Since this function bypasses the API validation and post-processing pipeline, it is not a good fit for testing the API.
-const createReportWithTimestamp = async (timestamp: Date) => {
+const createReportWithTimestamp = async (
+    timestamp: Date,
+    stationId: string = testStationId,
+    lineId: string = testLineId
+) => {
     await db.insert(reports).values({
-        stationId: testStationId,
-        lineId: testLineId,
-        directionId: testStationId,
+        stationId,
+        lineId,
+        directionId: stationId,
         timestamp,
         source: 'telegram',
     })
@@ -147,11 +151,12 @@ describe('Predicted reports', () => {
         const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
         testLineId = line.id
 
-        // Get stations that are actually on this line
+        // Get stations that are actually on this line (need at least 3 for accuracy tests)
         const stationsOnLine = await db
             .select({ stationId: lineStations.stationId })
             .from(lineStations)
             .where(eq(lineStations.lineId, testLineId))
+            .limit(10)
 
         allStationIds = stationsOnLine.map((s) => s.stationId)
     })
@@ -281,5 +286,143 @@ describe('Predicted reports', () => {
 
             expect(allSame).toBe(true)
         })
+    })
+
+    it('predicts the most frequently reported station for a given time pattern', async () => {
+        // Create a clear pattern: Station A reported 5 times on Mondays at 3pm
+        // Station B reported 2 times on Mondays at 3pm
+        const stationA = allStationIds[0]
+        const stationB = allStationIds[1]
+
+        // Get a Monday at 3pm (15:00) in the past for historical data
+        const historicalMonday = DateTime.now()
+            .toUTC()
+            .minus({ weeks: 1 })
+            .set({ weekday: 1, hour: 15, minute: 0, second: 0, millisecond: 0 })
+
+        // Create 5 reports for station A
+        for (let i = 0; i < 5; i++) {
+            await createReportWithTimestamp(historicalMonday.minus({ minutes: i }).toJSDate(), stationA, testLineId)
+        }
+
+        // Create 2 reports for station B
+        for (let i = 0; i < 2; i++) {
+            await createReportWithTimestamp(historicalMonday.minus({ minutes: i + 10 }).toJSDate(), stationB, testLineId)
+        }
+
+        // Now query for current Monday at 3pm (should trigger predictions based on historical data)
+        const currentMonday = DateTime.now().toUTC().set({ weekday: 1, hour: 15, minute: 0, second: 0, millisecond: 0 })
+
+        const from = currentMonday.minus({ minutes: 30 })
+        const to = currentMonday.plus({ minutes: 30 })
+
+        const response = await app.request(
+            `/v0/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        )
+
+        expect(response.status).toBe(200)
+
+        const body = (await response.json()) as Array<{
+            stationId: string
+            isPredicted: boolean
+        }>
+
+        const predictedReports = body.filter((r) => r.isPredicted)
+
+        // Station A should appear in predictions because it was the most common
+        const predictedStationIds = new Set(predictedReports.map((r) => r.stationId))
+        expect(predictedStationIds.has(stationA)).toBe(true)
+
+        // Station B might or might not appear depending on the threshold,
+        // but Station A should definitely appear since it's the most common
+    })
+
+    it('uses expanding time windows when no exact match is found', async () => {
+        const stationA = allStationIds[0]
+
+        // Create reports on Tuesday at 10am (2 days and 5 hours away from target)
+        const historicalTuesday = DateTime.now()
+            .toUTC()
+            .minus({ weeks: 1 })
+            .set({ weekday: 2, hour: 10, minute: 0, second: 0, millisecond: 0 })
+
+        for (let i = 0; i < 3; i++) {
+            await createReportWithTimestamp(historicalTuesday.minus({ minutes: i }).toJSDate(), stationA, testLineId)
+        }
+
+        // Query for Thursday at 3pm (requires expanding window to find Tuesday 10am reports)
+        const currentThursday = DateTime.now()
+            .toUTC()
+            .set({ weekday: 4, hour: 15, minute: 0, second: 0, millisecond: 0 })
+
+        const from = currentThursday.minus({ minutes: 30 })
+        const to = currentThursday.plus({ minutes: 30 })
+
+        const response = await app.request(
+            `/v0/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        )
+
+        expect(response.status).toBe(200)
+
+        const body = (await response.json()) as Array<{
+            stationId: string
+            isPredicted: boolean
+        }>
+
+        // Should have some predicted reports (using expanded window to find historical data)
+        const predictedReports = body.filter((r) => r.isPredicted)
+        expect(predictedReports.length).toBeGreaterThan(0)
+    })
+
+    it('handles tie-breaking by choosing lexicographically smaller station ID', async () => {
+        const stationA = allStationIds[0]
+        const stationB = allStationIds[1]
+
+        // Ensure stationA is lexicographically smaller than stationB
+        const [smallerStation, largerStation] = stationA < stationB ? [stationA, stationB] : [stationB, stationA]
+
+        // Create equal number of reports for both stations
+        const historicalTime = DateTime.now()
+            .toUTC()
+            .minus({ weeks: 1 })
+            .set({ weekday: 3, hour: 12, minute: 0, second: 0, millisecond: 0 })
+
+        // 3 reports for each station at the same time
+        for (let i = 0; i < 3; i++) {
+            await createReportWithTimestamp(historicalTime.minus({ minutes: i }).toJSDate(), smallerStation, testLineId)
+        }
+
+        for (let i = 3; i < 6; i++) {
+            await createReportWithTimestamp(historicalTime.minus({ minutes: i }).toJSDate(), largerStation, testLineId)
+        }
+
+        // Query for the same day/time pattern
+        const currentTime = DateTime.now().toUTC().set({ weekday: 3, hour: 12, minute: 0, second: 0, millisecond: 0 })
+
+        const from = currentTime.minus({ minutes: 30 })
+        const to = currentTime.plus({ minutes: 30 })
+
+        const response = await app.request(
+            `/v0/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        )
+
+        expect(response.status).toBe(200)
+
+        const body = (await response.json()) as Array<{
+            stationId: string
+            isPredicted: boolean
+        }>
+
+        const predictedReports = body.filter((r) => r.isPredicted)
+
+        // In case of a tie, the lexicographically smaller station should be chosen
+        const predictedStationIds = new Set(predictedReports.map((r) => r.stationId))
+        if (predictedStationIds.has(smallerStation) || predictedStationIds.has(largerStation)) {
+            // If either appears, the smaller one should appear first or be preferred
+            const firstMatchingPrediction = predictedReports.find(
+                (r) => r.stationId === smallerStation || r.stationId === largerStation
+            )
+            expect(firstMatchingPrediction?.stationId).toBe(smallerStation)
+        }
     })
 })
