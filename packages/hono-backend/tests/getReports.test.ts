@@ -307,7 +307,11 @@ describe('Predicted reports', () => {
 
         // Create 2 reports for station B
         for (let i = 0; i < 2; i++) {
-            await createReportWithTimestamp(historicalMonday.minus({ minutes: i + 10 }).toJSDate(), stationB, testLineId)
+            await createReportWithTimestamp(
+                historicalMonday.minus({ minutes: i + 10 }).toJSDate(),
+                stationB,
+                testLineId
+            )
         }
 
         // Now query for current Monday at 3pm (should trigger predictions based on historical data)
@@ -437,7 +441,11 @@ describe('Predicted reports threshold', () => {
             for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
                 for (const hour of [7, 9, 12, 15, 18, 21]) {
                     for (let stationIdx = 0; stationIdx < Math.min(testStations.length, 7); stationIdx++) {
-                        const historicalTime = DateTime.utc(2024, 1, 1, hour, 0).minus({ weeks: weeksAgo, days: dayOffset, minutes: stationIdx * 2 })
+                        const historicalTime = DateTime.utc(2024, 1, 1, hour, 0).minus({
+                            weeks: weeksAgo,
+                            days: dayOffset,
+                            minutes: stationIdx * 2,
+                        })
                         await createReportWithTimestamp(historicalTime.toJSDate(), testStations[stationIdx], testLineId)
                     }
                 }
