@@ -76,7 +76,9 @@ type TelegramNotificationPayload = {
     stationId: StationId
 }
 
-type ReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'stationId' | 'directionId' | 'lineId'>
+type ReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'stationId' | 'directionId' | 'lineId'> & {
+    isPredicted: boolean
+}
 
 export class ReportsService {
     constructor(
@@ -84,7 +86,7 @@ export class ReportsService {
         private transitNetworkDataService: TransitNetworkDataService
     ) {}
 
-    // Todo: Test that getReports returns only unique stationIds
+    // Todo: Test that getReports returns not only unique stationIds
     async getReports({
         from,
         to,
@@ -94,7 +96,7 @@ export class ReportsService {
         to: DateTime
         currentTime: DateTime
     }): Promise<ReportSummary[]> {
-        const result = await this.db
+        const dbResults = await this.db
             .select({
                 timestamp: reports.timestamp,
                 stationId: reports.stationId,
@@ -103,6 +105,8 @@ export class ReportsService {
             })
             .from(reports)
             .where(and(gte(reports.timestamp, from.toJSDate()), lte(reports.timestamp, to.toJSDate())))
+
+        const result: ReportSummary[] = dbResults.map((r) => ({ ...r, isPredicted: false }))
 
         // Predict reports if we don't have enough, so that users always see at least some data
         const predictedReportsThreshold = this.calculatePredictedReportsThreshold(currentTime)
@@ -187,7 +191,7 @@ export class ReportsService {
                 if (usedStationIds.has(stationId)) continue
 
                 usedStationIds.add(stationId)
-                results.push({ timestamp, stationId, directionId: null, lineId: null })
+                results.push({ timestamp, stationId, directionId: null, lineId: null, isPredicted: true })
             }
         }
 
