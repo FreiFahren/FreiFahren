@@ -144,21 +144,23 @@ export class ReportsService {
         const allowedStationIds = (Object.keys(stations) as StationId[]).filter((id) => !excludedStationIds.has(id))
         if (allowedStationIds.length === 0) return []
 
-        // We only want predicted timestamps near "now", so we constrain them to the final quarter of the requested range:
-        // We limit to the last quarter, so that we indicate to the user that this data is not very accurate.
+        // We only want predicted timestamps to appear old, so we constrain them to the first quarter of the requested range.
+        // We limit to the first quarter to make it obvious to users that this data is historic/less reliable.
         const fromMillis = from.toMillis()
         const toMillis = to.toMillis()
         const rangeMillis = Math.max(0, toMillis - fromMillis)
         const toRandomDate = (millis: number): Date => new Date(Math.floor(millis))
 
-        const randomTimestampInWindow = (windowStartMillis: number): Date => {
+        const randomTimestampInWindow = (windowStartMillis: number, windowEndMillis: number): Date => {
             const clampedStartMillis = Math.max(fromMillis, Math.min(windowStartMillis, toMillis))
-            const millis = clampedStartMillis + Math.random() * (toMillis - clampedStartMillis)
+            const clampedEndMillis = Math.max(fromMillis, Math.min(windowEndMillis, toMillis))
+            const windowRange = clampedEndMillis - clampedStartMillis
+            const millis = clampedStartMillis + Math.random() * windowRange
             return toRandomDate(millis)
         }
 
-        const lastQuarterStartMillis = toMillis - Math.floor(rangeMillis / 4)
-        const lastHalfStartMillis = toMillis - Math.floor(rangeMillis / 2)
+        const firstQuarterEndMillis = fromMillis + Math.floor(rangeMillis / 4)
+        const firstHalfEndMillis = fromMillis + Math.floor(rangeMillis / 2)
 
         const candidateRows = await this.db
             .select({ stationId: reports.stationId, timestamp: reports.timestamp })
@@ -172,14 +174,18 @@ export class ReportsService {
         const results: ReportSummary[] = []
 
         // We only use `guessStation`. If we get an excluded/duplicate/undefined guess, we broaden the timestamp window
-        // (last quarter -> last half -> full range) and retry.
-        const windowsStartMillis = [lastQuarterStartMillis, lastHalfStartMillis, fromMillis]
+        // (first quarter -> first half -> full range) and retry.
+        const windows = [
+            { start: fromMillis, end: firstQuarterEndMillis },
+            { start: fromMillis, end: firstHalfEndMillis },
+            { start: fromMillis, end: toMillis },
+        ]
 
         const triesPerWindow = 25
 
-        for (const windowStartMillis of windowsStartMillis) {
+        for (const window of windows) {
             for (let attempts = 0; attempts < triesPerWindow && results.length < maxUniqueCount; attempts++) {
-                const timestamp = randomTimestampInWindow(windowStartMillis)
+                const timestamp = randomTimestampInWindow(window.start, window.end)
                 const guessTime = DateTime.fromJSDate(timestamp, { zone: 'utc' })
 
                 const guessInput: { stationId?: StationId } = {}

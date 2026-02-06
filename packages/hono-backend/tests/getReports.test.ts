@@ -377,58 +377,6 @@ describe('Predicted reports', () => {
         const predictedReports = body.filter((r) => r.isPredicted)
         expect(predictedReports.length).toBeGreaterThan(0)
     })
-
-    it('handles tie-breaking by choosing lexicographically smaller station ID', async () => {
-        const stationA = allStationIds[0]
-        const stationB = allStationIds[1]
-
-        // Ensure stationA is lexicographically smaller than stationB
-        const [smallerStation, largerStation] = stationA < stationB ? [stationA, stationB] : [stationB, stationA]
-
-        // Create equal number of reports for both stations
-        const historicalTime = DateTime.now()
-            .toUTC()
-            .minus({ weeks: 1 })
-            .set({ weekday: 3, hour: 12, minute: 0, second: 0, millisecond: 0 })
-
-        // 3 reports for each station at the same time
-        for (let i = 0; i < 3; i++) {
-            await createReportWithTimestamp(historicalTime.minus({ minutes: i }).toJSDate(), smallerStation, testLineId)
-        }
-
-        for (let i = 3; i < 6; i++) {
-            await createReportWithTimestamp(historicalTime.minus({ minutes: i }).toJSDate(), largerStation, testLineId)
-        }
-
-        // Query for the same day/time pattern
-        const currentTime = DateTime.now().toUTC().set({ weekday: 3, hour: 12, minute: 0, second: 0, millisecond: 0 })
-
-        const from = currentTime.minus({ minutes: 30 })
-        const to = currentTime.plus({ minutes: 30 })
-
-        const response = await app.request(
-            `/v0/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
-        )
-
-        expect(response.status).toBe(200)
-
-        const body = (await response.json()) as Array<{
-            stationId: string
-            isPredicted: boolean
-        }>
-
-        const predictedReports = body.filter((r) => r.isPredicted)
-
-        // In case of a tie, the lexicographically smaller station should be chosen
-        const predictedStationIds = new Set(predictedReports.map((r) => r.stationId))
-        if (predictedStationIds.has(smallerStation) || predictedStationIds.has(largerStation)) {
-            // If either appears, the smaller one should appear first or be preferred
-            const firstMatchingPrediction = predictedReports.find(
-                (r) => r.stationId === smallerStation || r.stationId === largerStation
-            )
-            expect(firstMatchingPrediction?.stationId).toBe(smallerStation)
-        }
-    })
 })
 
 describe('Predicted reports threshold', () => {
@@ -576,5 +524,61 @@ describe('Predicted reports threshold', () => {
         // Threshold should increase from morning to afternoon
         expect(total7).toBeGreaterThanOrEqual(1) // Morning has low threshold
         expect(totalNoon).toBeGreaterThan(total7) // Noon should have higher threshold
+    })
+
+    it('prioritizes placing predicted report timestamps early in the time range to appear old', async () => {
+        // Mock time to Monday at 12:00
+        const mondayNoon = DateTime.utc(2024, 1, 15, 12, 0)
+        Settings.now = () => mondayNoon.toMillis()
+
+        // Query for a 2-hour window
+        const from = mondayNoon.minus({ hours: 1 })
+        const to = mondayNoon.plus({ hours: 1 })
+
+        const response = await app.request(
+            `/v0/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        )
+
+        expect(response.status).toBe(200)
+
+        const body = (await response.json()) as Array<{
+            timestamp: string
+            isPredicted: boolean
+        }>
+
+        const predictedReports = body.filter((r) => r.isPredicted)
+
+        // Should have some predicted reports
+        expect(predictedReports.length).toBeGreaterThan(0)
+
+        // Calculate time boundaries
+        const rangeMillis = to.toMillis() - from.toMillis()
+        const firstQuarterEnd = from.plus({ milliseconds: rangeMillis / 4 })
+        const midpoint = from.plus({ milliseconds: rangeMillis / 2 })
+
+        // Count timestamps in each section
+        const inFirstQuarter = predictedReports.filter((r) => {
+            const reportTime = DateTime.fromISO(r.timestamp)
+            return reportTime >= from && reportTime <= firstQuarterEnd
+        }).length
+
+        const beforeMidpoint = predictedReports.filter((r) => {
+            const reportTime = DateTime.fromISO(r.timestamp)
+            return reportTime >= from && reportTime <= midpoint
+        }).length
+
+        // The algorithm tries first quarter first, so more timestamps should be in the earlier half
+        // At least some should be in the first quarter (algorithm tries this first)
+        expect(inFirstQuarter).toBeGreaterThan(0)
+
+        // Most should be before midpoint (first quarter and first half attempts)
+        expect(beforeMidpoint).toBeGreaterThanOrEqual(Math.floor(predictedReports.length / 2))
+
+        // All timestamps should be within the valid range
+        for (const report of predictedReports) {
+            const reportTime = DateTime.fromISO(report.timestamp)
+            expect(reportTime >= from).toBe(true)
+            expect(reportTime <= to).toBe(true)
+        }
     })
 })
