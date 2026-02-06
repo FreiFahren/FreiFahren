@@ -57,10 +57,6 @@ const calculateBasePredictedReportsThreshold = (currentTime: DateTime): number =
     return 7
 }
 
-/**
- * Applies the legacy weekend reduction. The reduction is computed from the *truncated* base value,
- * which is important for matching the previous behavior.
- */
 const calculateWeekendAdjustment = (currentTime: DateTime, baseThreshold: number): number => {
     if (!isWeekend(currentTime.weekday as LuxonWeekday)) return 0
 
@@ -86,7 +82,6 @@ export class ReportsService {
         private transitNetworkDataService: TransitNetworkDataService
     ) {}
 
-    // Todo: Test that getReports returns not only unique stationIds
     async getReports({
         from,
         to,
@@ -120,10 +115,7 @@ export class ReportsService {
         return result
     }
 
-    /*
-    Returns the integer threshold that controls how many predicted/historic reports we should show.
-    */
-    // TODO: Write integration tests for this
+    // Returns the integer threshold that controls how many predicted/historic reports we should show.
     private calculatePredictedReportsThreshold(currentTime: DateTime): number {
         const base = calculateBasePredictedReportsThreshold(currentTime)
         const adjustment = calculateWeekendAdjustment(currentTime, base)
