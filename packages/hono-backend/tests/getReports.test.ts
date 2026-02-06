@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
 import { eq } from 'drizzle-orm'
-import { DateTime } from 'luxon'
+import { DateTime, Settings } from 'luxon'
 
 import { db, lineStations, lines, reports, stations } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
@@ -424,5 +424,149 @@ describe('Predicted reports', () => {
             )
             expect(firstMatchingPrediction?.stationId).toBe(smallerStation)
         }
+    })
+})
+
+describe('Predicted reports threshold', () => {
+    let testStations: string[]
+
+    // Helper to create historical data for predictions
+    const seedHistoricalData = async () => {
+        // Create historical data across multiple days, times, and stations
+        for (let weeksAgo = 1; weeksAgo <= 2; weeksAgo++) {
+            for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+                for (const hour of [7, 9, 12, 15, 18, 21]) {
+                    for (let stationIdx = 0; stationIdx < Math.min(testStations.length, 7); stationIdx++) {
+                        const historicalTime = DateTime.utc(2024, 1, 1, hour, 0).minus({ weeks: weeksAgo, days: dayOffset, minutes: stationIdx * 2 })
+                        await createReportWithTimestamp(historicalTime.toJSDate(), testStations[stationIdx], testLineId)
+                    }
+                }
+            }
+        }
+    }
+
+    beforeAll(async () => {
+        await seedBaseData(db)
+
+        const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
+        testLineId = line.id
+
+        const stationsOnLine = await db
+            .select({ stationId: lineStations.stationId })
+            .from(lineStations)
+            .where(eq(lineStations.lineId, testLineId))
+            .limit(10)
+
+        testStations = stationsOnLine.map((s) => s.stationId)
+    })
+
+    beforeEach(async () => {
+        await db.delete(reports)
+        // Seed historical data before each test
+        await seedHistoricalData()
+    })
+
+    afterEach(async () => {
+        await db.delete(reports)
+        // Reset time mocking after each test
+        Settings.now = () => Date.now()
+    })
+
+    it('returns more predicted reports during peak hours than night hours', async () => {
+        // Test peak hours - Monday at 15:00 (threshold should be 7)
+        const mondayAfternoon = DateTime.utc(2024, 1, 15, 15, 0)
+        Settings.now = () => mondayAfternoon.toMillis()
+
+        const fromPeak = mondayAfternoon.minus({ hours: 1 })
+        const toPeak = mondayAfternoon.plus({ hours: 1 })
+
+        const responsePeak = await app.request(
+            `/v0/reports?from=${encodeURIComponent(fromPeak.toISO()!)}&to=${encodeURIComponent(toPeak.toISO()!)}`
+        )
+
+        expect(responsePeak.status).toBe(200)
+        const peakBody = (await responsePeak.json()) as Array<{ isPredicted: boolean }>
+        const peakTotal = peakBody.length
+
+        // Test night hours - Tuesday at 2:00 AM (threshold should be 1)
+        const tuesdayNight = DateTime.utc(2024, 1, 16, 2, 0)
+        Settings.now = () => tuesdayNight.toMillis()
+
+        const fromNight = tuesdayNight.minus({ hours: 1 })
+        const toNight = tuesdayNight.plus({ hours: 1 })
+
+        const responseNight = await app.request(
+            `/v0/reports?from=${encodeURIComponent(fromNight.toISO()!)}&to=${encodeURIComponent(toNight.toISO()!)}`
+        )
+
+        expect(responseNight.status).toBe(200)
+        const nightBody = (await responseNight.json()) as Array<{ isPredicted: boolean }>
+        const nightTotal = nightBody.length
+
+        // Peak hours should have more reports than night hours
+        expect(peakTotal).toBeGreaterThan(nightTotal)
+        expect(nightTotal).toBeGreaterThanOrEqual(1) // At least meets minimum threshold
+        expect(peakTotal).toBeGreaterThanOrEqual(2) // Should have more than night
+    })
+
+    it('respects threshold limits across different times of day', async () => {
+        // Test multiple times to verify threshold is respected
+        const times = [
+            { time: DateTime.utc(2024, 1, 15, 2, 0), minExpected: 1, maxExpected: 2 }, // 2am night
+            { time: DateTime.utc(2024, 1, 15, 12, 0), minExpected: 2, maxExpected: 7 }, // noon peak
+        ]
+
+        for (const { time, minExpected, maxExpected } of times) {
+            Settings.now = () => time.toMillis()
+
+            const from = time.minus({ hours: 1 })
+            const to = time.plus({ hours: 1 })
+
+            const response = await app.request(
+                `/v0/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+            )
+
+            expect(response.status).toBe(200)
+            const body = (await response.json()) as Array<{ isPredicted: boolean }>
+            const total = body.length
+
+            // Verify threshold is respected
+            expect(total).toBeGreaterThanOrEqual(minExpected)
+            expect(total).toBeLessThanOrEqual(maxExpected)
+        }
+    })
+
+    it('increases threshold from early morning to peak hours', async () => {
+        // Test at 7:00 AM (start of increase period)
+        const morning7 = DateTime.utc(2024, 1, 15, 7, 0) // Monday
+        Settings.now = () => morning7.toMillis()
+
+        const from7 = morning7.minus({ hours: 1 })
+        const to7 = morning7.plus({ hours: 1 })
+
+        const response7 = await app.request(
+            `/v0/reports?from=${encodeURIComponent(from7.toISO()!)}&to=${encodeURIComponent(to7.toISO()!)}`
+        )
+
+        const body7 = (await response7.json()) as Array<{ isPredicted: boolean }>
+        const total7 = body7.length
+
+        // Test at 12:00 PM (peak hours)
+        const noon = DateTime.utc(2024, 1, 15, 12, 0) // Monday
+        Settings.now = () => noon.toMillis()
+
+        const fromNoon = noon.minus({ hours: 1 })
+        const toNoon = noon.plus({ hours: 1 })
+
+        const responseNoon = await app.request(
+            `/v0/reports?from=${encodeURIComponent(fromNoon.toISO()!)}&to=${encodeURIComponent(toNoon.toISO()!)}`
+        )
+
+        const bodyNoon = (await responseNoon.json()) as Array<{ isPredicted: boolean }>
+        const totalNoon = bodyNoon.length
+
+        // Threshold should increase from morning to afternoon
+        expect(total7).toBeGreaterThanOrEqual(1) // Morning has low threshold
+        expect(totalNoon).toBeGreaterThan(total7) // Noon should have higher threshold
     })
 })
