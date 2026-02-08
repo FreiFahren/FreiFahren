@@ -5,6 +5,14 @@ import { AppError } from './errors'
 
 export const handleError = (err: Error, c: Context) => {
     if (err instanceof AppError) {
+        c.get('logger').error(
+            {
+                internal_code: err.internalCode,
+                statusCode: err.statusCode,
+                description: err.description,
+            },
+            err.message
+        )
         return c.json(
             {
                 message: err.message,
