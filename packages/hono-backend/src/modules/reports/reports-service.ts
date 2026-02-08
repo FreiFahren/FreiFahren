@@ -36,12 +36,12 @@ const calculateBasePredictedReportsThreshold = (currentTime: DateTime): number =
 
     if (minutesPastMidnight >= 18 * 60 && isSaturday && minutesPastMidnight < 24 * 60) {
         // On Saturdays, decrease linearly from 18:00 to 24:00
-        return 7 - (minutesPastMidnight - 18 * 60) * (9.0 / (6 * 60))
+        return 7 - (minutesPastMidnight - 18 * 60) * (6.0 / (6 * 60))
     }
 
     if (minutesPastMidnight >= 18 * 60 && minutesPastMidnight < 21 * 60) {
         // On other days, decrease linearly from 18:00 to 21:00
-        return 7 - (minutesPastMidnight - 18 * 60) * (9.0 / (3 * 60))
+        return 7 - (minutesPastMidnight - 18 * 60) * (6.0 / (3 * 60))
     }
 
     if (minutesPastMidnight >= 21 * 60 || minutesPastMidnight < 7 * 60) {
@@ -51,7 +51,7 @@ const calculateBasePredictedReportsThreshold = (currentTime: DateTime): number =
 
     if (minutesPastMidnight >= 7 * 60 && minutesPastMidnight < 9 * 60) {
         // Increase linearly from 7:00 to 9:00
-        return 1 + (minutesPastMidnight - 7 * 60) * (9.0 / (2 * 60))
+        return 1 + (minutesPastMidnight - 7 * 60) * (6.0 / (2 * 60))
     }
 
     return 7

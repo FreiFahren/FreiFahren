@@ -526,6 +526,44 @@ describe('Predicted reports threshold', () => {
         expect(totalNoon).toBeGreaterThan(total7) // Noon should have higher threshold
     })
 
+    it('maintains a linear threshold ramp until the end of each window without premature clamping', async () => {
+        // At 20:30 on a weekday (near the end of the 18:00–21:00 ramp), the threshold
+        // should still be above the minimum of 1. With incorrect slope (e.g. 9/180 instead
+        // of 6/180), the base would already be negative here and clamped to 1.
+        const weekdayLateEvening = DateTime.utc(2024, 1, 15, 20, 30) // Monday 20:30
+        Settings.now = () => weekdayLateEvening.toMillis()
+
+        const fromLate = weekdayLateEvening.minus({ hours: 1 })
+        const toLate = weekdayLateEvening.plus({ hours: 1 })
+
+        const responseLate = await app.request(
+            `/v0/reports?from=${encodeURIComponent(fromLate.toISO()!)}&to=${encodeURIComponent(toLate.toISO()!)}`
+        )
+
+        expect(responseLate.status).toBe(200)
+        const lateBody = (await responseLate.json()) as Array<{ isPredicted: boolean }>
+        const latePredicted = lateBody.filter((r) => r.isPredicted).length
+
+        // At 23:00 (flat minimum period, threshold = 1)
+        const weekdayNight = DateTime.utc(2024, 1, 15, 23, 0) // Monday 23:00
+        Settings.now = () => weekdayNight.toMillis()
+
+        const fromNight = weekdayNight.minus({ hours: 1 })
+        const toNight = weekdayNight.plus({ hours: 1 })
+
+        const responseNight = await app.request(
+            `/v0/reports?from=${encodeURIComponent(fromNight.toISO()!)}&to=${encodeURIComponent(toNight.toISO()!)}`
+        )
+
+        expect(responseNight.status).toBe(200)
+        const nightBody = (await responseNight.json()) as Array<{ isPredicted: boolean }>
+        const nightPredicted = nightBody.filter((r) => r.isPredicted).length
+
+        // 20:30 is still in the linear ramp so its threshold should be above 1,
+        // meaning more predicted reports than during the flat minimum at 23:00
+        expect(latePredicted).toBeGreaterThan(nightPredicted)
+    })
+
     it('prioritizes placing predicted report timestamps early in the time range to appear old', async () => {
         // Mock time to Monday at 12:00
         const mondayNoon = DateTime.utc(2024, 1, 15, 12, 0)
