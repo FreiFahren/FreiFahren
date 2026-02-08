@@ -7,12 +7,13 @@ import { seedBaseData } from '../src/db/seed/seed'
 import app from '../src/index'
 
 import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from '../src/modules/reports/constants'
+import { sendReportRequest } from './test-utils'
 
 let testStationId: string
 let testLineId: string
 
 // Note: this function is primarily used for timeframe filtering tests and prediction accuracy tests
-// It is better to use the `createReportViaAPI` function for testing business logic and API behavior.
+// It is better to use the `sendReportRequest` function for testing business logic and API behavior.
 // Since this function bypasses the API validation and post-processing pipeline, it is not a good fit for testing the API.
 const createReportWithTimestamp = async (
     timestamp: Date,
@@ -25,21 +26,6 @@ const createReportWithTimestamp = async (
         directionId: stationId,
         timestamp,
         source: 'telegram',
-    })
-}
-
-const createReportViaAPI = async (stationId: string, lineId: string) => {
-    await app.request('/v0/reports', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            stationId,
-            lineId,
-            directionId: stationId,
-            source: 'telegram',
-        }),
     })
 }
 
@@ -176,7 +162,7 @@ describe('Predicted reports', () => {
         const realStationIds = [allStationIds[0], allStationIds[1]]
 
         for (const stationId of realStationIds) {
-            await createReportViaAPI(stationId, testLineId)
+            await sendReportRequest({ stationId, lineId: testLineId, directionId: stationId, source: 'telegram' })
         }
 
         // Set 'to' after creating reports to ensure they're captured
@@ -216,7 +202,7 @@ describe('Predicted reports', () => {
         const stationId = allStationIds[0]
 
         for (let i = 0; i < 3; i++) {
-            await createReportViaAPI(stationId, testLineId)
+            await sendReportRequest({ stationId, lineId: testLineId, directionId: stationId, source: 'telegram' })
         }
 
         // Set 'to' after creating reports to ensure they're captured
@@ -250,7 +236,12 @@ describe('Predicted reports', () => {
         // Create a real report for one station
         const realStationId = allStationIds[0]
 
-        await createReportViaAPI(realStationId, testLineId)
+        await sendReportRequest({
+            stationId: realStationId,
+            lineId: testLineId,
+            directionId: realStationId,
+            source: 'telegram',
+        })
 
         // Set 'to' after creating reports to ensure they're captured
         const to = DateTime.now().toUTC().plus({ seconds: 5 })

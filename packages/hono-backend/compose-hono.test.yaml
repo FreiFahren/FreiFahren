@@ -26,6 +26,7 @@ services:
             DATABASE_URL: postgres://postgres:postgres@postgres:5432/freifahren
             NLP_SERVICE_URL: http://localhost:6000
             REPORT_PASSWORD: password
+            SECURITY_MICROSERVICE_URL: http://localhost:4000
         ports:
             - '80:3000'
         volumes:

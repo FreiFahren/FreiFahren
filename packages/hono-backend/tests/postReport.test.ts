@@ -6,9 +6,11 @@ import { TransitNetworkDataService } from '../src/modules/transit/transit-networ
 import { db, lineStations, reports, stations } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
 import { and, desc, eq } from 'drizzle-orm'
+import { sendReportRequest } from './test-utils'
 
 let app: (typeof import('../src/index'))['default']
 let fakeNlpServer: ReturnType<typeof Bun.serve> | null = null
+let fakeSecurityServer: ReturnType<typeof Bun.serve> | null = null
 
 type CapturedRequest = {
     body: unknown
@@ -16,16 +18,7 @@ type CapturedRequest = {
 }
 
 const capturedRequests: CapturedRequest[] = []
-
-const sendReportRequest = async (payload: object) => {
-    return app.request('/v0/reports', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-    })
-}
+let securityValidResponse = true
 
 describe('Telegram notification', () => {
     let shouldFail: boolean
@@ -53,7 +46,18 @@ describe('Telegram notification', () => {
             fetch: fakeNlp.fetch,
         })
 
+        const fakeSecurity = new Hono()
+        fakeSecurity.post('/check', async (c) => {
+            return c.json({ valid: securityValidResponse })
+        })
+
+        fakeSecurityServer = Bun.serve({
+            port: 0,
+            fetch: fakeSecurity.fetch,
+        })
+
         process.env.NLP_SERVICE_URL = `http://127.0.0.1:${fakeNlpServer.port}`
+        process.env.SECURITY_MICROSERVICE_URL = `http://127.0.0.1:${fakeSecurityServer.port}`
         process.env.REPORT_PASSWORD = 'test-password'
         process.env.NODE_ENV = 'production'
 
@@ -63,11 +67,13 @@ describe('Telegram notification', () => {
 
     afterAll(() => {
         fakeNlpServer?.stop()
+        fakeSecurityServer?.stop()
     })
 
     beforeEach(() => {
         capturedRequests.length = 0
         shouldFail = false
+        securityValidResponse = true
     })
 
     it('sends a Telegram notification when source is not telegram and returns 200', async () => {
@@ -122,11 +128,35 @@ describe('Telegram notification', () => {
     })
 })
 
+describe('Security Verification', () => {
+    it('bypasses security check when the correct X-Password is provided', async () => {
+        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
+        securityValidResponse = false // Even if security would have blocked it
+
+        const response = await app.request('/v0/reports', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Password': 'test-password',
+            },
+            body: JSON.stringify({
+                stationId: station.id,
+            }),
+        })
+
+        // Should succeed because password bypasses security service call
+        expect(response.status).toBe(200)
+    })
+})
+
 describe('Report API contract', () => {
     beforeAll(async () => {
         await seedBaseData(db)
         const mod = await import('../src/index')
         app = mod.default
+
+        process.env.NODE_ENV = 'production'
+        process.env.REPORT_PASSWORD = 'test-password' // To pass the security check
     })
 
     it('rejects reports without station, line, and direction', async () => {

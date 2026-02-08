@@ -82,6 +82,48 @@ export class ReportsService {
         private transitNetworkDataService: TransitNetworkDataService
     ) {}
 
+    async verifyRequest(headers: Record<string, string>): Promise<void> {
+        const reportPassword = process.env.REPORT_PASSWORD
+        const isDev = process.env.NODE_ENV === 'development'
+
+        // Exceptions for dev mode and the Telegram Bot (Identified by the X-Password header)
+        if (
+            (reportPassword !== undefined && reportPassword !== '' && headers['x-password'] === reportPassword) ||
+            isDev
+        ) {
+            return
+        }
+
+        const securityServiceUrl = process.env.SECURITY_MICROSERVICE_URL
+        console.log('securityServiceUrl', securityServiceUrl)
+        if (securityServiceUrl === undefined || securityServiceUrl === '') {
+            throw new Error('security service configuration error')
+        }
+
+        const response = await fetch(`${securityServiceUrl.replace(/\/$/, '')}/check`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ headers }),
+        })
+
+        if (!response.ok) {
+            throw new Error(`failed to verify request with status ${response.status}: ${await response.text()}`)
+        }
+
+        const result = (await response.json()) as { valid: boolean }
+
+        if (!result.valid) {
+            throw new AppError({
+                message:
+                    'Spam reports are not allowed, if you have an issue with us contact us and we can hash it out.',
+                statusCode: 403,
+                internalCode: 'SPAM_REPORT_DETECTED',
+            })
+        }
+    }
+
     async getReports({
         from,
         to,
