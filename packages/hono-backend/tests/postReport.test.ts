@@ -20,7 +20,6 @@ type CapturedRequest = {
 const capturedRequests: CapturedRequest[] = []
 let securityValidResponse = true
 
-
 describe('Telegram notification', () => {
     let shouldFail: boolean
 

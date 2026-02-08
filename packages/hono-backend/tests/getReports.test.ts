@@ -236,7 +236,12 @@ describe('Predicted reports', () => {
         // Create a real report for one station
         const realStationId = allStationIds[0]
 
-        await sendReportRequest({ stationId: realStationId, lineId: testLineId, directionId: realStationId, source: 'telegram' })
+        await sendReportRequest({
+            stationId: realStationId,
+            lineId: testLineId,
+            directionId: realStationId,
+            source: 'telegram',
+        })
 
         // Set 'to' after creating reports to ensure they're captured
         const to = DateTime.now().toUTC().plus({ seconds: 5 })
