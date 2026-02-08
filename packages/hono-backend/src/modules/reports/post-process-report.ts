@@ -80,11 +80,8 @@ const getMostCommonStationId = (
 const guessStation =
     (candidateRows: Array<{ stationId: StationId; timestamp: Date }>) =>
     (hour: number, dayOfWeek: number) =>
-    (reportData: RawReport): RawReport => {
-        // We do not want to guess the station without a line
-        // Otherwise the guess would be too broad and we would end up with a lot of false positives
-        if (reportData.stationId !== undefined || reportData.lineId === null || reportData.lineId === undefined)
-            return reportData
+    <T extends { stationId?: StationId }>(reportData: T): T => {
+        if (reportData.stationId !== undefined) return reportData
 
         if (!Number.isFinite(dayOfWeek) || dayOfWeek < 1 || dayOfWeek > 7) {
             throw new AppError({

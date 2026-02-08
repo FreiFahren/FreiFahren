@@ -44,7 +44,7 @@ export const getReports = defineRoute<Env>()({
             to: query.to ?? defaultRange.to,
         }
 
-        return c.json(await reportsService.getReports(range))
+        return c.json(await reportsService.getReports({ ...range, currentTime: DateTime.now() })) // Intentionally pass in local time
     },
 })
 
