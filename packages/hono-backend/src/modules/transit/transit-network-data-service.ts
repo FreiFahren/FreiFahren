@@ -5,53 +5,82 @@ import { DbConnection, stations, lineStations, lines } from '../../db'
 import type { Lines, Stations } from './types'
 
 export class TransitNetworkDataService {
+    private stationsCache: Promise<Stations> | null = null
+    private linesCache: Promise<Lines> | null = null
+
     constructor(private db: DbConnection) {}
 
     async getStations(): Promise<Stations> {
-        const joinedRows = await this.db
-            .select({
-                id: stations.id,
-                name: stations.name,
-                lat: stations.lat,
-                lng: stations.lng,
-                lineId: lineStations.lineId,
-            })
-            .from(stations)
-            .leftJoin(lineStations, eq(lineStations.stationId, stations.id))
+        if (this.stationsCache) {
+            return this.stationsCache
+        }
 
-        const result = joinedRows.reduce<Stations>((stationsById, row) => {
-            const base = Object.prototype.hasOwnProperty.call(stationsById, row.id)
-                ? stationsById[row.id]
-                : {
-                      name: row.name,
-                      coordinates: { latitude: row.lat, longitude: row.lng },
-                      lines: [],
-                  }
-            const lines = row.lineId !== null ? [...base.lines, row.lineId] : base.lines
-            stationsById[row.id] = { ...base, lines }
-            return stationsById
-        }, {} as Stations)
+        const stationsPromise = (async () => {
+            try {
+                const joinedRows = await this.db
+                    .select({
+                        id: stations.id,
+                        name: stations.name,
+                        lat: stations.lat,
+                        lng: stations.lng,
+                        lineId: lineStations.lineId,
+                    })
+                    .from(stations)
+                    .leftJoin(lineStations, eq(lineStations.stationId, stations.id))
 
-        return result
+                return joinedRows.reduce<Stations>((stationsById, row) => {
+                    const base = Object.prototype.hasOwnProperty.call(stationsById, row.id)
+                        ? stationsById[row.id]
+                        : {
+                              name: row.name,
+                              coordinates: { latitude: row.lat, longitude: row.lng },
+                              lines: [],
+                          }
+                    const lines = row.lineId !== null ? [...base.lines, row.lineId] : base.lines
+                    stationsById[row.id] = { ...base, lines }
+                    return stationsById
+                }, {} as Stations)
+            } catch (error) {
+                this.stationsCache = null
+                throw error
+            }
+        })()
+
+        this.stationsCache = stationsPromise
+        return stationsPromise
     }
 
     async getLines(): Promise<Lines> {
-        const joinedRows = await this.db
-            .select({
-                lineId: lines.id,
-                stationId: lineStations.stationId,
-            })
-            .from(lines)
-            .leftJoin(lineStations, eq(lineStations.lineId, lines.id))
-            .orderBy(asc(lines.id), asc(lineStations.order))
+        if (this.linesCache) {
+            return this.linesCache
+        }
 
-        const result = joinedRows.reduce<Lines>((linesById, row) => {
-            const base = Object.prototype.hasOwnProperty.call(linesById, row.lineId) ? linesById[row.lineId] : []
-            const stations = row.stationId !== null ? [...base, row.stationId] : base
-            linesById[row.lineId] = stations
-            return linesById
-        }, {} as Lines)
+        const linesPromise = (async () => {
+            try {
+                const joinedRows = await this.db
+                    .select({
+                        lineId: lines.id,
+                        stationId: lineStations.stationId,
+                    })
+                    .from(lines)
+                    .leftJoin(lineStations, eq(lineStations.lineId, lines.id))
+                    .orderBy(asc(lines.id), asc(lineStations.order))
 
-        return result
+                return joinedRows.reduce<Lines>((linesById, row) => {
+                    const base = Object.prototype.hasOwnProperty.call(linesById, row.lineId)
+                        ? linesById[row.lineId]
+                        : []
+                    const stations = row.stationId !== null ? [...base, row.stationId] : base
+                    linesById[row.lineId] = stations
+                    return linesById
+                }, {} as Lines)
+            } catch (error) {
+                this.linesCache = null
+                throw error
+            }
+        })()
+
+        this.linesCache = linesPromise
+        return linesPromise
     }
 }
