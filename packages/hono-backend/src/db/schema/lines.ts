@@ -20,7 +20,5 @@ export const lineStations = pgTable(
             .references(() => stations.id, { onDelete: 'cascade' }),
         order: integer().notNull(),
     },
-    (table) => ({
-        pk: primaryKey({ columns: [table.lineId, table.stationId] }),
-    })
+    (table) => [primaryKey({ columns: [table.lineId, table.stationId] })]
 )
