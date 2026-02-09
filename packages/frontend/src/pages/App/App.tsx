@@ -243,9 +243,7 @@ const App = () => {
 
     useEffect(() => {
         if (isTelegramWebApp()) {
-            sendAnalyticsEvent('Opened from Telegram', {
-                meta: {},
-            }).catch((error) => {
+            sendAnalyticsEvent('Opened from Telegram').catch((error) => {
                 // fix later with sentry
                 // eslint-disable-next-line no-console
                 console.error('Failed to send opened from telegram analytics event:', error)

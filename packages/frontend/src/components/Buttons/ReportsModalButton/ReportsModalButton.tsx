@@ -32,7 +32,7 @@ const ReportsModalButton: React.FC<ReportsModalButtonProps> = ({ openModal }) =>
         if (latestReport) {
             setLastViewed(latestReport)
         }
-        sendAnalyticsEvent('ReportsModal opened', {}).catch((error) => {
+        sendAnalyticsEvent('ReportsModal opened').catch((error) => {
             // fix this later with sentry
             // eslint-disable-next-line no-console
             console.error('Error sending analytics event', error)

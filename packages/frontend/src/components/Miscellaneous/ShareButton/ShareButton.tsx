@@ -71,7 +71,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
                             title: t('Share.title'),
                             url: window.location.href,
                         })
-                        await sendAnalyticsEvent('Page Shared', {})
+                        await sendAnalyticsEvent('Page Shared')
                     } catch (error) {
                         // eslint-disable-next-line no-console
                         console.error('Error sharing:', error)
