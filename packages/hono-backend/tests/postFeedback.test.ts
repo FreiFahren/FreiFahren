@@ -25,54 +25,31 @@ describe('Feedback endpoint', () => {
         await db.delete(feedback)
     })
 
-    it('creates feedback and returns 201', async () => {
+    it('returns 201 with no body', async () => {
         const response = await sendFeedbackRequest({ feedback: 'Great app!' })
 
         expect(response.status).toBe(201)
 
-        const body = (await response.json()) as {
-            id: number
-            feedback: string
-            userAgent: string | null
-            timestamp: string
-        }
-
-        expect(body.feedback).toBe('Great app!')
-        expect(typeof body.id).toBe('number')
-        expect(body.timestamp).toBeTruthy()
+        const body = await response.text()
+        expect(body).toBe('')
     })
 
-    it('stores the user agent from the request', async () => {
-        const response = await sendFeedbackRequest({ feedback: 'Test feedback' }, { 'User-Agent': 'TestAgent/1.0' })
-
-        expect(response.status).toBe(201)
-
-        const body = (await response.json()) as { id: number; userAgent: string | null }
-
-        expect(body.userAgent).toBe('TestAgent/1.0')
-    })
-
-    it('stores null user agent when header is missing', async () => {
-        const response = await app.request('/v0/feedback', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ feedback: 'No UA' }),
-        })
-
-        expect(response.status).toBe(201)
-
-        const body = (await response.json()) as { userAgent: string | null }
-
-        expect(body.userAgent).toBeNull()
-    })
-
-    it('persists feedback in the database', async () => {
-        await sendFeedbackRequest({ feedback: 'Persisted feedback' })
+    it('persists feedback and user agent in the database', async () => {
+        await sendFeedbackRequest({ feedback: 'Persisted feedback' }, { 'User-Agent': 'TestAgent/1.0' })
 
         const rows = await db.select().from(feedback)
 
         expect(rows.length).toBe(1)
         expect(rows[0].feedback).toBe('Persisted feedback')
+        expect(rows[0].userAgent).toBe('TestAgent/1.0')
+    })
+
+    it('stores null user agent when header is missing', async () => {
+        await sendFeedbackRequest({ feedback: 'No UA' })
+
+        const [row] = await db.select().from(feedback)
+
+        expect(row.userAgent).toBeNull()
     })
 
     it('rejects request with missing feedback field', async () => {

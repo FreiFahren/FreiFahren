@@ -12,8 +12,8 @@ export const postFeedback = defineRoute<Env>()({
         const { feedback: feedbackText } = c.req.valid('json')
         const userAgent = c.req.header('user-agent') ?? null
 
-        const [inserted] = await db.insert(feedback).values({ feedback: feedbackText, userAgent }).returning()
+        await db.insert(feedback).values({ feedback: feedbackText, userAgent })
 
-        return c.json(inserted, 201)
+        return c.body(null, 201)
     },
 })
