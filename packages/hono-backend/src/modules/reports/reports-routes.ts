@@ -11,7 +11,7 @@ import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from './constants'
 
 export const getReports = defineRoute<Env>()({
     method: 'get',
-    path: 'v0/reports',
+    path: '/',
     schemas: {
         query: z
             .object({
@@ -51,7 +51,7 @@ export const getReports = defineRoute<Env>()({
 
 export const postReport = defineRoute<Env>()({
     method: 'post',
-    path: 'v0/reports',
+    path: '/',
     schemas: {
         json: insertReportSchema,
     },

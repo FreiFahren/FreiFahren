@@ -1,5 +1,5 @@
 import { zValidator } from '@hono/zod-validator'
-import { Handler, Hono, Env } from 'hono'
+import { Context, Handler, Hono, Env } from 'hono'
 import { z } from 'zod'
 
 type HttpMethod = 'get' | 'post' | 'put'
@@ -45,9 +45,32 @@ export const defineRoute =
         } as const
     }
 
-export const registerRoutes = <E extends Env>(
-    app: Hono<E>,
-    routes: ReturnType<ReturnType<typeof defineRoute<E>>>[]
-) => {
+const registerRoutes = <E extends Env>(app: Hono<E>, routes: ReturnType<ReturnType<typeof defineRoute<E>>>[]) => {
     routes.forEach((r) => app[r.method](r.path, ...r.middlewares, r.handler))
+}
+
+export const registerVersionedRoutes = <E extends Env>(
+    app: Hono<E>,
+    basePath: string,
+    latestVersion: string,
+    versions: Record<string, ReturnType<ReturnType<typeof defineRoute<E>>>[]>
+) => {
+    // Create a standalone mini-app per version and mount it at /{version}/{basePath}.
+    // Routes inside only define paths relative to their module (e.g. "/" or "/stations"),
+    // And app.route() prefixes them so they resolve to the full URL (e.g. /v0/transit/stations).
+    for (const [version, routes] of Object.entries(versions)) {
+        const subApp = new Hono<E>()
+        registerRoutes(subApp, routes)
+        app.route(`/${version}/${basePath}`, subApp)
+    }
+
+    // Redirect unversioned requests to the latest version.
+    // 307 preserves the original HTTP method and body
+    const redirect = (c: Context) => {
+        const url = new URL(c.req.url)
+        url.pathname = `/${latestVersion}${url.pathname}`
+        return c.redirect(url.toString(), 307)
+    }
+    app.all(`/${basePath}/*`, redirect)
+    app.all(`/${basePath}`, redirect)
 }
