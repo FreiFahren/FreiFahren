@@ -35,4 +35,11 @@ describe('Versioning', () => {
         expect(location.searchParams.get('from')).toBe('2024-01-01T00:00:00Z')
         expect(location.searchParams.get('to')).toBe('2024-01-02T00:00:00Z')
     })
+
+    it('does not set deprecation headers on the latest version', async () => {
+        const response = await app.request('/v0/reports')
+        expect(response.status).toBe(200)
+        expect(response.headers.get('Deprecation')).toBeNull()
+        expect(response.headers.get('X-Latest-Api-Version')).toBeNull()
+    })
 })

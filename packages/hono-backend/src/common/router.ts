@@ -60,6 +60,15 @@ export const registerVersionedRoutes = <E extends Env>(
     // And app.route() prefixes them so they resolve to the full URL (e.g. /v0/transit/stations).
     for (const [version, routes] of Object.entries(versions)) {
         const subApp = new Hono<E>()
+
+        if (version !== latestVersion) {
+            subApp.use('*', async (c, next) => {
+                await next()
+                c.header('Deprecation', 'true')
+                c.header('X-Latest-Api-Version', latestVersion)
+            })
+        }
+
         registerRoutes(subApp, routes)
         app.route(`/${version}/${basePath}`, subApp)
     }
