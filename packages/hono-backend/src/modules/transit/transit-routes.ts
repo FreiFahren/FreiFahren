@@ -3,7 +3,7 @@ import { defineRoute } from '../../common/router'
 
 export const getStations = defineRoute<Env>()({
     method: 'get' as const,
-    path: 'v0/transit/stations',
+    path: '/stations',
     handler: async (c) => {
         const transitNetworkDataService = c.get('transitNetworkDataService')
         return c.json(await transitNetworkDataService.getStations())
@@ -12,7 +12,7 @@ export const getStations = defineRoute<Env>()({
 
 export const getLines = defineRoute<Env>()({
     method: 'get' as const,
-    path: 'v0/transit/lines',
+    path: '/lines',
     handler: async (c) => {
         const transitNetworkDataService = c.get('transitNetworkDataService')
         return c.json(await transitNetworkDataService.getLines())
