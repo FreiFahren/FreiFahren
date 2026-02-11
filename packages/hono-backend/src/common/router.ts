@@ -70,6 +70,7 @@ export const registerVersionedRoutes = <E extends Env>(
         }
 
         registerRoutes(subApp, routes)
+        // We define version in the route so that it is easy to identify and debug potential version mismatches
         app.route(`/${version}/${basePath}`, subApp)
     }
 
