@@ -73,6 +73,21 @@ export const registerVersionedRoutes = <E extends Env>(
         app.route(`/${version}/${basePath}`, subApp)
     }
 
+    // Return 404 with available versions for unknown version prefixes (e.g. /v99/reports)
+    const availableVersions = Object.keys(versions)
+    const unknownVersion = (c: Context) => {
+        const requestedVersion = c.req.param('version')
+        return c.json(
+            {
+                error: `Version ${requestedVersion} not found for ${basePath}`,
+                availableVersions,
+            },
+            404
+        )
+    }
+    app.all(`/:version{v\\d+}/${basePath}/*`, unknownVersion)
+    app.all(`/:version{v\\d+}/${basePath}`, unknownVersion)
+
     // Redirect unversioned requests to the latest version.
     // 307 preserves the original HTTP method and body
     const redirect = (c: Context) => {

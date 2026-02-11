@@ -42,4 +42,13 @@ describe('Versioning', () => {
         expect(response.headers.get('Deprecation')).toBeNull()
         expect(response.headers.get('X-Latest-Api-Version')).toBeNull()
     })
+
+    it('returns 404 with available versions for unknown version', async () => {
+        const response = await app.request('/v99/reports')
+        expect(response.status).toBe(404)
+
+        const body = (await response.json()) as { error: string; availableVersions: string[] }
+        expect(body.error).toBe('Version v99 not found for reports')
+        expect(body.availableVersions).toContain('v0')
+    })
 })
