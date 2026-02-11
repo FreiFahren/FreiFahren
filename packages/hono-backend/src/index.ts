@@ -7,6 +7,7 @@ import { registerServices, Services, type Env } from './app-env'
 import { handleError } from './common/error-handler'
 import { registerRoutes } from './common/router'
 import { db, DbConnection } from './db'
+import { postFeedback } from './modules/feedback/feedback-routes'
 import { getReports, postReport, ReportsService } from './modules/reports/'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
 import { getLines, getStations } from './modules/transit/transit-routes'
@@ -55,6 +56,6 @@ const createServices = (db: DbConnection) => {
 
 registerServices(app, createServices(db))
 
-registerRoutes(app, [getReports, postReport, getStations, getLines])
+registerRoutes(app, [getReports, postReport, getStations, getLines, postFeedback])
 
 export default app
