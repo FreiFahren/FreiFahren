@@ -1,294 +1,266 @@
 {
-  "id": "15295229-7ecd-4e98-891c-8f630e47de7c",
-  "prevId": "16f44466-7915-4d16-881c-b5f8b3661843",
-  "version": "7",
-  "dialect": "postgresql",
-  "tables": {
-    "public.feedback": {
-      "name": "feedback",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
+    "id": "15295229-7ecd-4e98-891c-8f630e47de7c",
+    "prevId": "16f44466-7915-4d16-881c-b5f8b3661843",
+    "version": "7",
+    "dialect": "postgresql",
+    "tables": {
+        "public.feedback": {
+            "name": "feedback",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "feedback": {
+                    "name": "feedback",
+                    "type": "text",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "user_agent": {
+                    "name": "user_agent",
+                    "type": "varchar(512)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "timestamp": {
+                    "name": "timestamp",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
         },
-        "feedback": {
-          "name": "feedback",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
+        "public.line_stations": {
+            "name": "line_stations",
+            "schema": "",
+            "columns": {
+                "line_id": {
+                    "name": "line_id",
+                    "type": "varchar(16)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "station_id": {
+                    "name": "station_id",
+                    "type": "varchar(16)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "order": {
+                    "name": "order",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "line_stations_line_id_lines_id_fk": {
+                    "name": "line_stations_line_id_lines_id_fk",
+                    "tableFrom": "line_stations",
+                    "tableTo": "lines",
+                    "columnsFrom": ["line_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "line_stations_station_id_stations_id_fk": {
+                    "name": "line_stations_station_id_stations_id_fk",
+                    "tableFrom": "line_stations",
+                    "tableTo": "stations",
+                    "columnsFrom": ["station_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {
+                "line_stations_line_id_station_id_pk": {
+                    "name": "line_stations_line_id_station_id_pk",
+                    "columns": ["line_id", "station_id"]
+                }
+            },
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
         },
-        "user_agent": {
-          "name": "user_agent",
-          "type": "varchar(512)",
-          "primaryKey": false,
-          "notNull": false
+        "public.lines": {
+            "name": "lines",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "varchar(16)",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(255)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "is_circular": {
+                    "name": "is_circular",
+                    "type": "boolean",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": false
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
         },
-        "timestamp": {
-          "name": "timestamp",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+        "public.reports": {
+            "name": "reports",
+            "schema": "",
+            "columns": {
+                "report_id": {
+                    "name": "report_id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "station_id": {
+                    "name": "station_id",
+                    "type": "varchar(16)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "line_id": {
+                    "name": "line_id",
+                    "type": "varchar(16)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "direction_id": {
+                    "name": "direction_id",
+                    "type": "varchar(16)",
+                    "primaryKey": false,
+                    "notNull": false
+                },
+                "timestamp": {
+                    "name": "timestamp",
+                    "type": "timestamp",
+                    "primaryKey": false,
+                    "notNull": true,
+                    "default": "now()"
+                },
+                "source": {
+                    "name": "source",
+                    "type": "source",
+                    "typeSchema": "public",
+                    "primaryKey": false,
+                    "notNull": true
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {
+                "reports_station_id_stations_id_fk": {
+                    "name": "reports_station_id_stations_id_fk",
+                    "tableFrom": "reports",
+                    "tableTo": "stations",
+                    "columnsFrom": ["station_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "reports_line_id_lines_id_fk": {
+                    "name": "reports_line_id_lines_id_fk",
+                    "tableFrom": "reports",
+                    "tableTo": "lines",
+                    "columnsFrom": ["line_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                },
+                "reports_direction_id_stations_id_fk": {
+                    "name": "reports_direction_id_stations_id_fk",
+                    "tableFrom": "reports",
+                    "tableTo": "stations",
+                    "columnsFrom": ["direction_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.stations": {
+            "name": "stations",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "varchar(16)",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "name": {
+                    "name": "name",
+                    "type": "varchar(255)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "lat": {
+                    "name": "lat",
+                    "type": "double precision",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "lng": {
+                    "name": "lng",
+                    "type": "double precision",
+                    "primaryKey": false,
+                    "notNull": true
+                }
+            },
+            "indexes": {},
+            "foreignKeys": {},
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
         }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
     },
-    "public.line_stations": {
-      "name": "line_stations",
-      "schema": "",
-      "columns": {
-        "line_id": {
-          "name": "line_id",
-          "type": "varchar(16)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "station_id": {
-          "name": "station_id",
-          "type": "varchar(16)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "order": {
-          "name": "order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
+    "enums": {
+        "public.source": {
+            "name": "source",
+            "schema": "public",
+            "values": ["mini_app", "web_app", "mobile_app", "telegram"]
         }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "line_stations_line_id_lines_id_fk": {
-          "name": "line_stations_line_id_lines_id_fk",
-          "tableFrom": "line_stations",
-          "tableTo": "lines",
-          "columnsFrom": [
-            "line_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "line_stations_station_id_stations_id_fk": {
-          "name": "line_stations_station_id_stations_id_fk",
-          "tableFrom": "line_stations",
-          "tableTo": "stations",
-          "columnsFrom": [
-            "station_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "line_stations_line_id_station_id_pk": {
-          "name": "line_stations_line_id_station_id_pk",
-          "columns": [
-            "line_id",
-            "station_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
     },
-    "public.lines": {
-      "name": "lines",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(16)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "is_circular": {
-          "name": "is_circular",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.reports": {
-      "name": "reports",
-      "schema": "",
-      "columns": {
-        "report_id": {
-          "name": "report_id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "station_id": {
-          "name": "station_id",
-          "type": "varchar(16)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "line_id": {
-          "name": "line_id",
-          "type": "varchar(16)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "direction_id": {
-          "name": "direction_id",
-          "type": "varchar(16)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "timestamp": {
-          "name": "timestamp",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "source": {
-          "name": "source",
-          "type": "source",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "reports_station_id_stations_id_fk": {
-          "name": "reports_station_id_stations_id_fk",
-          "tableFrom": "reports",
-          "tableTo": "stations",
-          "columnsFrom": [
-            "station_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "reports_line_id_lines_id_fk": {
-          "name": "reports_line_id_lines_id_fk",
-          "tableFrom": "reports",
-          "tableTo": "lines",
-          "columnsFrom": [
-            "line_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "reports_direction_id_stations_id_fk": {
-          "name": "reports_direction_id_stations_id_fk",
-          "tableFrom": "reports",
-          "tableTo": "stations",
-          "columnsFrom": [
-            "direction_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.stations": {
-      "name": "stations",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(16)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "lat": {
-          "name": "lat",
-          "type": "double precision",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "lng": {
-          "name": "lng",
-          "type": "double precision",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    }
-  },
-  "enums": {
-    "public.source": {
-      "name": "source",
-      "schema": "public",
-      "values": [
-        "mini_app",
-        "web_app",
-        "mobile_app",
-        "telegram"
-      ]
-    }
-  },
-  "schemas": {},
-  "sequences": {},
-  "roles": {},
-  "policies": {},
-  "views": {},
-  "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "sequences": {},
+    "roles": {},
+    "policies": {},
+    "views": {},
+    "_meta": {
+        "columns": {},
+        "schemas": {},
+        "tables": {}
+    }
 }
