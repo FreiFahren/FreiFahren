@@ -51,4 +51,12 @@ describe('Versioning', () => {
         expect(body.error).toBe('Version v99 not found for reports')
         expect(body.availableVersions).toContain('v0')
     })
+
+    it('does not return version error for valid version with unmatched method', async () => {
+        const response = await app.request('/v0/reports', { method: 'PUT' })
+        expect(response.status).toBe(404)
+
+        const body = await response.text()
+        expect(body).not.toContain('availableVersions')
+    })
 })

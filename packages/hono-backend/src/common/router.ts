@@ -74,10 +74,15 @@ export const registerVersionedRoutes = <E extends Env>(
         app.route(`/${version}/${basePath}`, subApp)
     }
 
-    // Return 404 with available versions for unknown version prefixes (e.g. /v99/reports)
+    // Return 404 with available versions for unknown version prefixes (e.g. /v99/reports).
+    // Only triggers when the version itself doesn't exist — valid versions with wrong
+    // Method/path fall through to Hono's default 404 handling.
     const availableVersions = Object.keys(versions)
-    const unknownVersion = (c: Context) => {
+    const unknownVersion: Handler = async (c, next) => {
         const requestedVersion = c.req.param('version')
+        if (availableVersions.includes(requestedVersion)) {
+            return next()
+        }
         return c.json(
             {
                 error: `Version ${requestedVersion} not found for ${basePath}`,
