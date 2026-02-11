@@ -31,6 +31,7 @@ services:
             - '80:3000'
         volumes:
             - ./src:/app/src:ro
+            - ./bunfig.toml:/app/bunfig.toml:ro
             - ./tests:/app/tests:ro
             - ./drizzle.config.ts:/app/drizzle.config.ts:ro
             - ./drizzle:/app/drizzle
