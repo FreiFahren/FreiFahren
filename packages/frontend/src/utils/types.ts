@@ -4,7 +4,20 @@ export {} // to make this file a module
 
 declare global {
     interface Window {
-        pirsch: (eventName: string, options: { duration?: number; meta?: Record<string, any> }) => void
+        umami?: {
+            track: {
+                (): void
+                (payload: object): void
+                (eventName: string): void 
+                (eventName: string, data: object): void
+                (propsFn: (props: object) => object): void
+            }
+            identify: {
+                (uniqueId: string): void 
+                (uniqueId: string, data: object): void
+                (data: object): void
+            }
+        }
     }
 }
 
@@ -13,7 +26,6 @@ export interface AnalyticsMeta {
 }
 
 export interface AnalyticsOptions {
-    duration?: number
     meta?: AnalyticsMeta
 }
 

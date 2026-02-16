@@ -4,30 +4,31 @@ import { AnalyticsOptions, SavedEvent } from '../utils/types'
 import { isAnalyticsOptedOut } from './useAnalyticsOptOut'
 
 /**
- * Checks if the Pirsch analytics SDK is loaded and available.
- * @returns {boolean} True if Pirsch is loaded, false otherwise.
+ * Checks if the Umami analytics SDK is loaded and available.
+ * @returns {boolean} True if Umami is loaded, false otherwise.
  */
-const isPirschLoaded = (): boolean => typeof window.pirsch !== 'undefined'
+const isUmamiLoaded = (): boolean => typeof window.umami !== 'undefined'
 
 /**
- * Waits for Pirsch SDK to load with a timeout.
+ * Waits for Umami to load with a timeout.
  * @param {number} timeout - Maximum time to wait in milliseconds.
- * @returns {Promise<void>} Resolves when Pirsch is loaded, rejects on timeout.
+ * @returns {Promise<void>} Resolves when Umami is loaded, rejects on timeout.
  */
-const waitForPirsch = (timeout = 2000): Promise<void> =>
-    new Promise((resolve) => {
-        if (isPirschLoaded()) {
+const waitForUmami = (timeout = 2000): Promise<void> =>
+    new Promise((resolve, reject) => {
+        if (isUmamiLoaded()) {
             resolve()
             return
         }
 
         const startTime = Date.now()
         const interval = setInterval(() => {
-            if (isPirschLoaded()) {
+            if (isUmamiLoaded()) {
                 clearInterval(interval)
                 resolve()
             } else if (Date.now() - startTime > timeout) {
                 clearInterval(interval)
+                reject(new Error('Umami SDK not loaded'))
             }
         }, 100)
     })
@@ -47,35 +48,31 @@ const saveUnsuccessfulEvent = (eventName: string, options: AnalyticsOptions): vo
     localStorage.setItem('unsentAnalyticsEvents', JSON.stringify(savedEvents))
 }
 
-/**
- * Sends an analytics event to the Pirsch SDK.
- * If the SDK is not loaded or an error occurs, the event is saved locally for later retry.
- *
- * @param {string} eventName - The name of the event to send.
- * @param {AnalyticsOptions} [options] - Optional parameters for the event. Metadata that you want to send with the event.
- * @returns {Promise<void>} A promise that resolves if the event is sent successfully, or rejects with an error.
- */
 export const sendAnalyticsEvent = async (eventName: string, options?: AnalyticsOptions): Promise<void> => {
     if (isAnalyticsOptedOut()) {
         return Promise.resolve()
     }
 
     try {
-        await waitForPirsch()
+        await waitForUmami()
         return await new Promise((resolve, reject) => {
             try {
-                window.pirsch(eventName, options ?? {})
+                if (window.umami) {
+                    if (options?.meta && Object.keys(options.meta).length > 0){
+                        window.umami.track(eventName, options.meta)
+                    } else {
+                        window.umami.track(eventName)
+                    }
+                }
                 resolve()
             } catch (error) {
-                // eslint-disable-next-line no-console
                 console.error(`Failed to send event: ${eventName}`, error)
                 saveUnsuccessfulEvent(eventName, options ?? {})
                 reject(error)
             }
         })
     } catch (error) {
-        // eslint-disable-next-line no-console
-        console.warn('Pirsch SDK not loaded')
+        console.warn('Umami SDK not loaded')
         saveUnsuccessfulEvent(eventName, options ?? {})
         throw error
     }
@@ -129,4 +126,4 @@ export const useTrackComponentView = (componentName: string, options?: Analytics
     }, [componentName, options])
 }
 
-export { isPirschLoaded, waitForPirsch }
+export { isUmamiLoaded, waitForUmami }
