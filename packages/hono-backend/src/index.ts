@@ -5,7 +5,7 @@ import pino from 'pino'
 
 import { registerServices, Services, type Env } from './app-env'
 import { handleError } from './common/error-handler'
-import { registerRoutes } from './common/router'
+import { registerVersionedRoutes } from './common/router'
 import { db, DbConnection } from './db'
 import { getReports, postReport, ReportsService } from './modules/reports/'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
@@ -55,6 +55,12 @@ const createServices = (db: DbConnection) => {
 
 registerServices(app, createServices(db))
 
-registerRoutes(app, [getReports, postReport, getStations, getLines])
+registerVersionedRoutes(app, 'reports', 'v0', {
+    v0: [getReports, postReport],
+})
+
+registerVersionedRoutes(app, 'transit', 'v0', {
+    v0: [getStations, getLines],
+})
 
 export default app
