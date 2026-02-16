@@ -4,7 +4,7 @@ import { DateTime, Settings } from 'luxon'
 
 import { db, lineStations, lines, reports, stations } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
-import app from '../src/index'
+import { app } from '../src/index'
 
 import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from '../src/modules/reports/constants'
 import { sendReportRequest } from './test-utils'
