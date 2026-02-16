@@ -127,10 +127,12 @@ export class ReportsService {
     async getReports({
         from,
         to,
+        stationId,
         currentTime,
     }: {
         from: DateTime
         to: DateTime
+        stationId?: StationId
         currentTime: DateTime
     }): Promise<ReportSummary[]> {
         const dbResults = await this.db
@@ -141,7 +143,13 @@ export class ReportsService {
                 lineId: reports.lineId,
             })
             .from(reports)
-            .where(and(gte(reports.timestamp, from.toJSDate()), lte(reports.timestamp, to.toJSDate())))
+            .where(
+                and(
+                    gte(reports.timestamp, from.toJSDate()),
+                    lte(reports.timestamp, to.toJSDate()),
+                    stationId !== undefined ? eq(reports.stationId, stationId) : undefined
+                )
+            )
 
         const result: ReportSummary[] = dbResults.map((r) => ({ ...r, isPredicted: false }))
 

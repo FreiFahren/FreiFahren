@@ -611,3 +611,49 @@ describe('Predicted reports threshold', () => {
         }
     })
 })
+
+describe('Reports by station route', () => {
+    let stationOneId: string
+    let stationTwoId: string
+    let lineId: string
+
+    beforeAll(async () => {
+        await seedBaseData(db)
+
+        const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
+        lineId = line.id
+
+        const stationRows = await db.select({ id: stations.id }).from(stations).limit(2)
+        stationOneId = stationRows[0].id
+        stationTwoId = stationRows[1].id
+    })
+
+    beforeEach(async () => {
+        await db.delete(reports)
+    })
+
+    afterEach(async () => {
+        await db.delete(reports)
+    })
+
+    it('returns only reports for the requested station in the given timeframe', async () => {
+        const now = DateTime.now().toUTC()
+        const from = now.minus({ minutes: 45 })
+        const to = now.plus({ minutes: 1 })
+
+        await createReportWithTimestamp(now.minus({ minutes: 30 }).toJSDate(), stationOneId, lineId)
+        await createReportWithTimestamp(now.minus({ minutes: 20 }).toJSDate(), stationOneId, lineId)
+        await createReportWithTimestamp(now.minus({ minutes: 10 }).toJSDate(), stationTwoId, lineId)
+
+        const response = await app.request(
+            `/v0/reports/${stationOneId}?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        )
+
+        expect(response.status).toBe(200)
+
+        const body = (await response.json()) as Array<{ stationId: string }>
+
+        expect(body.length).toBe(2)
+        expect(body.every((report) => report.stationId === stationOneId)).toBe(true)
+    })
+})
