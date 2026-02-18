@@ -634,6 +634,7 @@ describe('Reports by station route', () => {
 
     afterEach(async () => {
         await db.delete(reports)
+        Settings.now = () => Date.now()
     })
 
     it('returns only reports for the requested station in the given timeframe', async () => {
@@ -655,5 +656,42 @@ describe('Reports by station route', () => {
 
         expect(body.length).toBe(2)
         expect(body.every((report) => report.stationId === stationOneId)).toBe(true)
+    })
+
+    it('fills up with predicted reports when there are not enough real reports for the requested station', async () => {
+        // Mock time to peak hours so the threshold is high (7 reports)
+        const mondayNoon = DateTime.utc(2024, 1, 15, 12, 0)
+        Settings.now = () => mondayNoon.toMillis()
+
+        // Seed historical data for stationOneId at matching time patterns (Monday noon, past weeks)
+        // so the prediction algorithm guesses stationOneId for the query timeframe
+        for (let weeksAgo = 1; weeksAgo <= 2; weeksAgo++) {
+            const historicalTime = mondayNoon.minus({ weeks: weeksAgo })
+            await createReportWithTimestamp(historicalTime.toJSDate(), stationOneId, lineId)
+            await createReportWithTimestamp(historicalTime.minus({ minutes: 5 }).toJSDate(), stationOneId, lineId)
+            await createReportWithTimestamp(historicalTime.minus({ minutes: 10 }).toJSDate(), stationOneId, lineId)
+        }
+
+        // No real reports for stationOneId exist in the query timeframe
+        const from = mondayNoon.minus({ hours: 1 })
+        const to = mondayNoon.plus({ hours: 1 })
+
+        const response = await app.request(
+            `/v0/reports/${stationOneId}?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        )
+
+        expect(response.status).toBe(200)
+
+        const body = (await response.json()) as Array<{
+            stationId: string
+            isPredicted: boolean
+        }>
+
+        // The response should contain predicted reports to fill up toward the threshold
+        const predictedReports = body.filter((r) => r.isPredicted)
+        expect(predictedReports.length).toBeGreaterThan(0)
+
+        // All predicted reports must be for the requested station
+        expect(predictedReports.every((r) => r.stationId === stationOneId)).toBe(true)
     })
 })

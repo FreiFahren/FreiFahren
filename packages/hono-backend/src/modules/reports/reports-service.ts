@@ -157,12 +157,28 @@ export class ReportsService {
         const predictedReportsThreshold = this.calculatePredictedReportsThreshold(currentTime)
         if (result.length < predictedReportsThreshold) {
             const numberOfReportsToFetch = predictedReportsThreshold - result.length
-            const excludedStationIds = new Set(result.map((r) => r.stationId as StationId))
-            const historicReports = await this.predictReports(numberOfReportsToFetch, from, to, excludedStationIds)
+            const reportedStationIds = new Set(result.map((r) => r.stationId as StationId))
+            const allowedStationIds = await this.resolveAllowedStationIds(stationId, reportedStationIds)
+            const historicReports = await this.predictReports(numberOfReportsToFetch, from, to, allowedStationIds)
             result.push(...historicReports)
         }
 
         return result
+    }
+
+    // Determines which stations the prediction algorithm may emit reports for.
+    // When the query is scoped to a specific station, predictions are restricted to that station.
+    // When the query is unscoped, any station that hasn't already reported is a candidate.
+    private async resolveAllowedStationIds(
+        stationId: StationId | undefined,
+        reportedStationIds: ReadonlySet<StationId>
+    ): Promise<ReadonlySet<StationId>> {
+        if (stationId !== undefined) {
+            return reportedStationIds.has(stationId) ? new Set() : new Set([stationId])
+        }
+
+        const allStations = await this.transitNetworkDataService.getStations()
+        return new Set((Object.keys(allStations) as StationId[]).filter((id) => !reportedStationIds.has(id)))
     }
 
     // Returns the integer threshold that controls how many predicted/historic reports we should show.
@@ -178,13 +194,10 @@ export class ReportsService {
         numberOfReportsToFetch: number,
         from: DateTime,
         to: DateTime,
-        excludedStationIds: ReadonlySet<StationId>
+        allowedStationIds: ReadonlySet<StationId>
     ): Promise<ReportSummary[]> {
         if (numberOfReportsToFetch <= 0) return []
-
-        const stations = await this.transitNetworkDataService.getStations()
-        const allowedStationIds = (Object.keys(stations) as StationId[]).filter((id) => !excludedStationIds.has(id))
-        if (allowedStationIds.length === 0) return []
+        if (allowedStationIds.size === 0) return []
 
         // We only want predicted timestamps to appear old, so we constrain them to the first quarter of the requested range.
         // We limit to the first quarter to make it obvious to users that this data is historic/less reliable.
@@ -211,11 +224,11 @@ export class ReportsService {
             .limit(1000)
 
         const usedStationIds = new Set<StationId>()
-        const maxUniqueCount = Math.min(numberOfReportsToFetch, allowedStationIds.length)
+        const maxUniqueCount = Math.min(numberOfReportsToFetch, allowedStationIds.size)
 
         const results: ReportSummary[] = []
 
-        // We only use `guessStation`. If we get an excluded/duplicate/undefined guess, we broaden the timestamp window
+        // We only use `guessStation`. If we get a disallowed/duplicate/undefined guess, we broaden the timestamp window
         // (first quarter -> first half -> full range) and retry.
         const windows = [
             { start: fromMillis, end: firstQuarterEndMillis },
@@ -235,7 +248,7 @@ export class ReportsService {
 
                 const stationId = guessed.stationId
                 if (stationId === undefined) continue
-                if (excludedStationIds.has(stationId)) continue
+                if (!allowedStationIds.has(stationId)) continue
                 if (usedStationIds.has(stationId)) continue
 
                 usedStationIds.add(stationId)
