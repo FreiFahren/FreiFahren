@@ -72,12 +72,13 @@ export const postReport = defineRoute<Env>()({
     path: 'v0/reports',
     docs: {
         summary: 'Create a report',
-        description: 'Creates a report after anti-spam verification and post-processing.',
+        description:
+            'Creates a report after anti-spam verification and post-processing. At least one of stationId, lineId, or directionId must be provided.',
         tags: ['reports'],
         requestSchema: z.object({
-            stationId: z.string().max(16).nullable(),
-            lineId: z.string().max(16).nullable(),
-            directionId: z.string().max(16).nullable(),
+            stationId: z.string().max(16).optional(),
+            lineId: z.string().max(16).nullable().optional(),
+            directionId: z.string().max(16).nullable().optional(),
             source: z.enum(['mini_app', 'web_app', 'mobile_app', 'telegram']).optional(),
         }),
         responseSchema: z.object({
