@@ -9,6 +9,15 @@ type RouteSchemas = {
     query?: z.ZodTypeAny
 }
 
+export type RouteDocs = {
+    summary: string
+    description?: string
+    tags?: string[]
+    querySchema?: z.ZodObject<z.ZodRawShape>
+    requestSchema?: z.ZodTypeAny
+    responseSchema?: z.ZodTypeAny
+}
+
 type HonoInputFromRouteSchemas<S extends RouteSchemas> = {
     out: {
         [k in keyof S]: S[k] extends undefined ? undefined : z.infer<S[k]>
@@ -19,6 +28,7 @@ type DefineRouteInput<E extends Env, M extends HttpMethod, S extends RouteSchema
     method: M
     path: string
     schemas?: S
+    docs: RouteDocs
     // Optional non-validation middlewares (e.g., auth, logging)
     middlewares?: Handler<E>[] // Runs before validators
     handler: Handler<E, string, HonoInputFromRouteSchemas<S>>
@@ -40,6 +50,8 @@ export const defineRoute =
         return {
             method: def.method,
             path: def.path,
+            docs: def.docs,
+            schemas: def.schemas,
             middlewares: mws as readonly Handler<E>[],
             handler: def.handler,
         } as const

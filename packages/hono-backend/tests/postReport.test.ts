@@ -8,7 +8,6 @@ import { seedBaseData } from '../src/db/seed/seed'
 import { and, desc, eq } from 'drizzle-orm'
 import { sendReportRequest } from './test-utils'
 
-let app: (typeof import('../src/index'))['default']
 let fakeNlpServer: ReturnType<typeof Bun.serve> | null = null
 let fakeSecurityServer: ReturnType<typeof Bun.serve> | null = null
 
@@ -60,9 +59,6 @@ describe('Telegram notification', () => {
         process.env.SECURITY_MICROSERVICE_URL = `http://127.0.0.1:${fakeSecurityServer.port}`
         process.env.REPORT_PASSWORD = 'test-password'
         process.env.NODE_ENV = 'production'
-
-        const mod = await import('../src/index')
-        app = mod.default
     })
 
     afterAll(() => {
@@ -133,15 +129,8 @@ describe('Security Verification', () => {
         const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
         securityValidResponse = false // Even if security would have blocked it
 
-        const response = await app.request('/v0/reports', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Password': 'test-password',
-            },
-            body: JSON.stringify({
-                stationId: station.id,
-            }),
+        const response = await sendReportRequest({
+            stationId: station.id,
         })
 
         // Should succeed because password bypasses security service call
@@ -152,8 +141,6 @@ describe('Security Verification', () => {
 describe('Report API contract', () => {
     beforeAll(async () => {
         await seedBaseData(db)
-        const mod = await import('../src/index')
-        app = mod.default
 
         process.env.NODE_ENV = 'production'
         process.env.REPORT_PASSWORD = 'test-password' // To pass the security check
