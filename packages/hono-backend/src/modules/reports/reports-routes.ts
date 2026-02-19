@@ -51,9 +51,15 @@ export const getReports = defineRoute<Env>()({
                 // But this can be ignored since the traffic is not as high
                 const serverTimestampTruncated = latestTimestamp.startOf('second')
 
-                // Only return 304 when the client's timestamp exactly matches the server's latest.
-                // If the client has a future timestamp (e.g. clock skew), fall through to return fresh data.
-                if (serverTimestampTruncated.valueOf() === clientTimestamp.valueOf()) {
+                // Only return 304 when the client's timestamp exactly matches the server's latest
+                // And the cached response is younger than 5 minutes. The TTL forces a re-fetch as
+                // Reports age out of the rolling window even when no new insert has occurred.
+                const cacheAgeSeconds = DateTime.now().diff(clientTimestamp).as('seconds')
+                const CACHE_TTL_SECONDS = 5 * 60
+                if (
+                    serverTimestampTruncated.valueOf() === clientTimestamp.valueOf() &&
+                    cacheAgeSeconds <= CACHE_TTL_SECONDS
+                ) {
                     return new Response(null, {
                         status: 304,
                         headers: { 'Last-Modified': lastModified },

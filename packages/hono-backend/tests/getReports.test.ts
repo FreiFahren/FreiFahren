@@ -645,6 +645,7 @@ describe('Last-Modified / If-Modified-Since caching', () => {
 
     afterEach(async () => {
         await db.delete(reports)
+        Settings.now = () => Date.now()
     })
 
     it('includes Last-Modified in the response when reports exist', async () => {
@@ -689,6 +690,22 @@ describe('Last-Modified / If-Modified-Since caching', () => {
 
         expect(response.status).toBe(200)
         expect(DateTime.fromHTTP(response.headers.get('Last-Modified')!) > DateTime.fromHTTP(past)).toBe(true)
+    })
+
+    it('returns 200 when If-Modified-Since is older than 5 minutes even without a new report', async () => {
+        await sendReportRequest(reportPayload())
+
+        const first = await get()
+        const lastModified = first.headers.get('Last-Modified')!
+
+        // Simulate 6 minutes passing with no new inserts.
+        // Pre-compute the millis before assigning — Settings.now must not call DateTime.now() itself
+        // or it will recurse infinitely since Luxon routes DateTime.now() through Settings.now.
+        const sixMinutesLater = DateTime.fromHTTP(lastModified)!.plus({ minutes: 6 }).toMillis()
+        Settings.now = () => sixMinutesLater
+
+        const response = await get({ 'If-Modified-Since': lastModified })
+        expect(response.status).toBe(200)
     })
 
     it('reflects a new report in Last-Modified and invalidates the client cache', async () => {
