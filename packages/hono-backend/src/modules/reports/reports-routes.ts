@@ -37,6 +37,31 @@ export const getReports = defineRoute<Env>()({
     handler: async (c) => {
         const reportsService = c.get('reportsService')
 
+        const latestTimestamp = await reportsService.getLatestReportTimestamp()
+
+        if (latestTimestamp !== undefined) {
+            // ToHTTP() returns null only for invalid DateTime objects; latestTimestamp is always valid here
+            const lastModified = latestTimestamp.toHTTP()!
+            const ifModifiedSince = c.req.header('If-Modified-Since')
+
+            if (ifModifiedSince !== undefined) {
+                const clientTimestamp = DateTime.fromHTTP(ifModifiedSince)
+                // Truncate server timestamp to second to match HTTP-date precision before comparing
+                const serverTimestampTruncated = latestTimestamp.startOf('second')
+
+                // Only return 304 when the client's timestamp exactly matches the server's latest.
+                // If the client has a future timestamp (e.g. clock skew), fall through to return fresh data.
+                if (serverTimestampTruncated.valueOf() === clientTimestamp.valueOf()) {
+                    return new Response(null, {
+                        status: 304,
+                        headers: { 'Last-Modified': lastModified },
+                    })
+                }
+            }
+
+            c.header('Last-Modified', lastModified)
+        }
+
         const query = c.req.valid('query')
         const defaultRange = getDefaultReportsRange()
 
