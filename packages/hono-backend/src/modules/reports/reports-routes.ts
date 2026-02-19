@@ -47,6 +47,8 @@ export const getReports = defineRoute<Env>()({
             if (ifModifiedSince !== undefined) {
                 const clientTimestamp = DateTime.fromHTTP(ifModifiedSince)
                 // Truncate server timestamp to second to match HTTP-date precision before comparing
+                // Note: This means for two reports that are created within the same second, the client will not see the updated report.
+                // But this can be ignored since the traffic is not as high
                 const serverTimestampTruncated = latestTimestamp.startOf('second')
 
                 // Only return 304 when the client's timestamp exactly matches the server's latest.
