@@ -33,3 +33,17 @@ ALTER TABLE "line_stations" ADD CONSTRAINT "line_stations_station_id_stations_id
 ALTER TABLE "reports" ADD CONSTRAINT "reports_station_id_stations_id_fk" FOREIGN KEY ("station_id") REFERENCES "public"."stations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reports" ADD CONSTRAINT "reports_line_id_lines_id_fk" FOREIGN KEY ("line_id") REFERENCES "public"."lines"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reports" ADD CONSTRAINT "reports_direction_id_stations_id_fk" FOREIGN KEY ("direction_id") REFERENCES "public"."stations"("id") ON DELETE no action ON UPDATE no action;
+
+CREATE TABLE "segments" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"line_id" varchar(16) NOT NULL,
+	"from_station_id" varchar(16) NOT NULL,
+	"to_station_id" varchar(16) NOT NULL,
+	"color" varchar(7) NOT NULL,
+	"coordinates" jsonb NOT NULL
+);
+--> statement-breakpoint
+ALTER TABLE "segments" ADD CONSTRAINT "segments_line_id_lines_id_fk" FOREIGN KEY ("line_id") REFERENCES "public"."lines"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "segments" ADD CONSTRAINT "segments_from_station_id_stations_id_fk" FOREIGN KEY ("from_station_id") REFERENCES "public"."stations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "segments" ADD CONSTRAINT "segments_to_station_id_stations_id_fk" FOREIGN KEY ("to_station_id") REFERENCES "public"."stations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE UNIQUE INDEX "segments_line_from_to_idx" ON "segments" USING btree ("line_id","from_station_id","to_station_id");

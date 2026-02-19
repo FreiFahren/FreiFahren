@@ -1,12 +1,13 @@
 import { asc, eq } from 'drizzle-orm'
 
-import { DbConnection, stations, lineStations, lines } from '../../db'
+import { DbConnection, stations, lineStations, lines, segments } from '../../db'
 
-import type { Lines, Stations } from './types'
+import type { Lines, SegmentsFeatureCollection, Stations } from './types'
 
 export class TransitNetworkDataService {
     private stationsCache: Promise<Stations> | null = null
     private linesCache: Promise<Lines> | null = null
+    private segmentsCache: Promise<SegmentsFeatureCollection> | null = null
 
     constructor(private db: DbConnection) {}
 
@@ -82,5 +83,48 @@ export class TransitNetworkDataService {
 
         this.linesCache = linesPromise
         return linesPromise
+    }
+
+    async getSegments(): Promise<SegmentsFeatureCollection> {
+        if (this.segmentsCache) {
+            return this.segmentsCache
+        }
+
+        const segmentsPromise = (async () => {
+            try {
+                const rows = await this.db
+                    .select({
+                        line: segments.lineId,
+                        from: segments.fromStationId,
+                        to: segments.toStationId,
+                        color: segments.color,
+                        coordinates: segments.coordinates,
+                    })
+                    .from(segments)
+
+                return {
+                    type: 'FeatureCollection' as const,
+                    features: rows.map((row) => ({
+                        type: 'Feature' as const,
+                        properties: {
+                            line: row.line,
+                            from: row.from,
+                            to: row.to,
+                            color: row.color,
+                        },
+                        geometry: {
+                            type: 'LineString' as const,
+                            coordinates: row.coordinates,
+                        },
+                    })),
+                }
+            } catch (error) {
+                this.segmentsCache = null
+                throw error
+            }
+        })()
+
+        this.segmentsCache = segmentsPromise
+        return segmentsPromise
     }
 }

@@ -1,6 +1,6 @@
 {
-    "id": "16f44466-7915-4d16-881c-b5f8b3661843",
-    "prevId": "00000000-0000-0000-0000-000000000000",
+    "id": "c74cdf83-4a0d-4ed9-85c9-74fc979c3567",
+    "prevId": "565c8c91-131e-4a5d-8082-770a5a594eda",
     "version": "7",
     "dialect": "postgresql",
     "tables": {
@@ -161,6 +161,111 @@
                     "columnsFrom": ["direction_id"],
                     "columnsTo": ["id"],
                     "onDelete": "no action",
+                    "onUpdate": "no action"
+                }
+            },
+            "compositePrimaryKeys": {},
+            "uniqueConstraints": {},
+            "policies": {},
+            "checkConstraints": {},
+            "isRLSEnabled": false
+        },
+        "public.segments": {
+            "name": "segments",
+            "schema": "",
+            "columns": {
+                "id": {
+                    "name": "id",
+                    "type": "serial",
+                    "primaryKey": true,
+                    "notNull": true
+                },
+                "line_id": {
+                    "name": "line_id",
+                    "type": "varchar(16)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "from_station_id": {
+                    "name": "from_station_id",
+                    "type": "varchar(16)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "to_station_id": {
+                    "name": "to_station_id",
+                    "type": "varchar(16)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "color": {
+                    "name": "color",
+                    "type": "varchar(7)",
+                    "primaryKey": false,
+                    "notNull": true
+                },
+                "coordinates": {
+                    "name": "coordinates",
+                    "type": "jsonb",
+                    "primaryKey": false,
+                    "notNull": true
+                }
+            },
+            "indexes": {
+                "segments_line_from_to_idx": {
+                    "name": "segments_line_from_to_idx",
+                    "columns": [
+                        {
+                            "expression": "line_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        },
+                        {
+                            "expression": "from_station_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        },
+                        {
+                            "expression": "to_station_id",
+                            "isExpression": false,
+                            "asc": true,
+                            "nulls": "last"
+                        }
+                    ],
+                    "isUnique": true,
+                    "concurrently": false,
+                    "method": "btree",
+                    "with": {}
+                }
+            },
+            "foreignKeys": {
+                "segments_line_id_lines_id_fk": {
+                    "name": "segments_line_id_lines_id_fk",
+                    "tableFrom": "segments",
+                    "tableTo": "lines",
+                    "columnsFrom": ["line_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "segments_from_station_id_stations_id_fk": {
+                    "name": "segments_from_station_id_stations_id_fk",
+                    "tableFrom": "segments",
+                    "tableTo": "stations",
+                    "columnsFrom": ["from_station_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
+                    "onUpdate": "no action"
+                },
+                "segments_to_station_id_stations_id_fk": {
+                    "name": "segments_to_station_id_stations_id_fk",
+                    "tableFrom": "segments",
+                    "tableTo": "stations",
+                    "columnsFrom": ["to_station_id"],
+                    "columnsTo": ["id"],
+                    "onDelete": "cascade",
                     "onUpdate": "no action"
                 }
             },

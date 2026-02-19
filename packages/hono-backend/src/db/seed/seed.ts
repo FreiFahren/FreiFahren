@@ -1,9 +1,16 @@
 import type { DbConnection } from '../index'
 import { lines, lineStations } from '../schema/lines'
+import { segments } from '../schema/segments'
 import { stations } from '../schema/stations'
 
 import linesListJson from './LinesList.json'
+import segmentsJson from './segments.json'
 import stationsListJson from './StationsList.json'
+
+interface SegmentFeature {
+    properties: { sid: string; line_color: string }
+    geometry: { coordinates: [number, number][] }
+}
 
 interface StationData {
     coordinates: {
@@ -59,4 +66,18 @@ export const seedBaseData = async (db: DbConnection) => {
     }
 
     await db.insert(lineStations).values(stationLineRecords).onConflictDoNothing()
+
+    const segmentRecords = (segmentsJson.features as SegmentFeature[]).map((feature) => {
+        const [lineId, stationPart] = feature.properties.sid.split('.')
+        const [fromStationId, toStationId] = stationPart.split(':')
+        return {
+            lineId,
+            fromStationId,
+            toStationId,
+            color: feature.properties.line_color,
+            coordinates: feature.geometry.coordinates as [number, number][],
+        }
+    })
+
+    await db.insert(segments).values(segmentRecords).onConflictDoNothing()
 }

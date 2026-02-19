@@ -9,7 +9,7 @@ import { registerRoutes } from './common/router'
 import { db, DbConnection } from './db'
 import { getReports, postReport, ReportsService } from './modules/reports/'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
-import { getLines, getStations } from './modules/transit/transit-routes'
+import { getLines, getSegments, getStations } from './modules/transit/transit-routes'
 
 const app = new Hono<Env>()
 
@@ -55,6 +55,6 @@ const createServices = (db: DbConnection) => {
 
 registerServices(app, createServices(db))
 
-registerRoutes(app, [getReports, postReport, getStations, getLines])
+registerRoutes(app, [getReports, postReport, getStations, getLines, getSegments])
 
 export default app
