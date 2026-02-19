@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lte } from 'drizzle-orm'
+import { and, desc, eq, gte, lte, max } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
 
@@ -77,10 +77,24 @@ type ReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'stationId'
 }
 
 export class ReportsService {
+    private latestReportTimestamp: DateTime | undefined = undefined
+
     constructor(
         private db: DbConnection,
         private transitNetworkDataService: TransitNetworkDataService
     ) {}
+
+    async getLatestReportTimestamp(): Promise<DateTime | undefined> {
+        if (this.latestReportTimestamp !== undefined) {
+            return this.latestReportTimestamp
+        }
+        // Called when `GET /reports` is called before `POST /reports` after a restart
+        const [result] = await this.db.select({ latest: max(reports.timestamp) }).from(reports)
+        if (result.latest) {
+            this.latestReportTimestamp = DateTime.fromJSDate(result.latest)
+        }
+        return this.latestReportTimestamp
+    }
 
     async verifyRequest(headers: Record<string, string>): Promise<void> {
         const reportPassword = process.env.REPORT_PASSWORD
@@ -259,6 +273,11 @@ export class ReportsService {
         })
         // Drizzle returns the inserted row for Postgres. If this ever becomes undefined, we want to surface it fast.
         const report = insertedReport!
+
+        const insertedTimestamp = DateTime.fromJSDate(report.timestamp)
+        if (this.latestReportTimestamp === undefined || insertedTimestamp > this.latestReportTimestamp) {
+            this.latestReportTimestamp = insertedTimestamp
+        }
 
         let telegramNotificationSuccess = true
 
