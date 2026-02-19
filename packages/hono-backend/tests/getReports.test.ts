@@ -611,3 +611,103 @@ describe('Predicted reports threshold', () => {
         }
     })
 })
+
+describe('Last-Modified / If-Modified-Since caching', () => {
+    let cachingStationId: string
+    let cachingLineId: string
+
+    const reportPayload = () => ({
+        stationId: cachingStationId,
+        lineId: cachingLineId,
+        directionId: cachingStationId,
+        source: 'telegram',
+    })
+
+    const get = (headers?: Record<string, string>) =>
+        headers ? app.request('/v0/reports', { headers }) : app.request('/v0/reports')
+
+    beforeAll(async () => {
+        await seedBaseData(db)
+        const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
+        cachingLineId = line.id
+        // Pick a station that's actually on the selected line so postProcessReport doesn't clear it
+        const [stationOnLine] = await db
+            .select({ stationId: lineStations.stationId })
+            .from(lineStations)
+            .where(eq(lineStations.lineId, cachingLineId))
+            .limit(1)
+        cachingStationId = stationOnLine.stationId
+    })
+
+    beforeEach(async () => {
+        await db.delete(reports)
+    })
+
+    afterEach(async () => {
+        await db.delete(reports)
+    })
+
+    it('includes Last-Modified in the response when reports exist', async () => {
+        await sendReportRequest(reportPayload())
+
+        const response = await get()
+
+        expect(response.status).toBe(200)
+        expect(response.headers.get('Last-Modified')).not.toBeNull()
+    })
+
+    it('returns 304 with an empty body when If-Modified-Since matches Last-Modified', async () => {
+        await sendReportRequest(reportPayload())
+
+        const first = await get()
+        const lastModified = first.headers.get('Last-Modified')!
+
+        const second = await get({ 'If-Modified-Since': lastModified })
+
+        expect(second.status).toBe(304)
+        expect(second.headers.get('Last-Modified')).toBe(lastModified)
+        expect(await second.text()).toBe('')
+    })
+
+    it('returns 200 with data when If-Modified-Since is after the latest report', async () => {
+        await sendReportRequest(reportPayload())
+
+        const future = DateTime.now().plus({ hours: 1 }).toHTTP()!
+
+        const response = await get({ 'If-Modified-Since': future })
+
+        expect(response.status).toBe(200)
+        expect(response.headers.get('Last-Modified')).not.toBeNull()
+    })
+
+    it('returns 200 with Last-Modified when If-Modified-Since predates the latest report', async () => {
+        await sendReportRequest(reportPayload())
+
+        const past = DateTime.now().minus({ hours: 1 }).toHTTP()!
+
+        const response = await get({ 'If-Modified-Since': past })
+
+        expect(response.status).toBe(200)
+        expect(DateTime.fromHTTP(response.headers.get('Last-Modified')!) > DateTime.fromHTTP(past)).toBe(true)
+    })
+
+    it('reflects a new report in Last-Modified and invalidates the client cache', async () => {
+        await sendReportRequest(reportPayload())
+
+        const first = await get()
+        const t1 = first.headers.get('Last-Modified')!
+
+        // HTTP-date has 1-second precision — wait long enough for the next second to tick over
+        // so that the second report gets a strictly later timestamp in HTTP-date format
+        await new Promise((r) => setTimeout(r, 1100))
+
+        await sendReportRequest(reportPayload())
+
+        // The previously valid If-Modified-Since is now stale → 200
+        const response = await get({ 'If-Modified-Since': t1 })
+        expect(response.status).toBe(200)
+
+        const t2 = response.headers.get('Last-Modified')!
+        expect(DateTime.fromHTTP(t2) > DateTime.fromHTTP(t1)).toBe(true)
+    })
+})
