@@ -364,7 +364,7 @@ def main():
         for feature in input_data["segments"]:
             props = feature["properties"]
             segment = Segment(
-                sid=f"{props['line']}.{props['from']}:{props['to']}",
+                sid=str(props["id"]),
                 line_id=props["line"],
                 from_station_id=props["from"],
                 to_station_id=props["to"],
