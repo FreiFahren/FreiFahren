@@ -2,10 +2,12 @@ import { Hono } from 'hono'
 import { PinoLogger } from 'hono-pino'
 
 import { ReportsService } from './modules/reports'
+import { RiskService } from './modules/risk'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
 
 export type Services = {
     reportsService: ReportsService
+    riskService: RiskService
     transitNetworkDataService: TransitNetworkDataService
 }
 
