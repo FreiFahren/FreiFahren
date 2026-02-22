@@ -12,23 +12,6 @@ import { sendReportRequest } from './test-utils'
 let testStationId: string
 let testLineId: string
 
-// Note: this function is primarily used for timeframe filtering tests and prediction accuracy tests
-// It is better to use the `sendReportRequest` function for testing business logic and API behavior.
-// Since this function bypasses the API validation and post-processing pipeline, it is not a good fit for testing the API.
-const createReportWithTimestamp = async (
-    timestamp: Date,
-    stationId: string = testStationId,
-    lineId: string = testLineId
-) => {
-    await db.insert(reports).values({
-        stationId,
-        lineId,
-        directionId: stationId,
-        timestamp,
-        source: 'telegram',
-    })
-}
-
 describe('Timeframe filtering', () => {
     beforeAll(async () => {
         await seedBaseData(db)
@@ -46,6 +29,7 @@ describe('Timeframe filtering', () => {
 
     afterEach(async () => {
         await db.delete(reports)
+        Settings.now = () => Date.now()
     })
 
     it('returns data in the specified timeframe when from and to query params are present', async () => {
@@ -54,9 +38,13 @@ describe('Timeframe filtering', () => {
         const insideTwo = now.minus({ minutes: 10 })
         const outside = now.minus({ hours: 2 })
 
-        await createReportWithTimestamp(outside.toJSDate())
-        await createReportWithTimestamp(insideOne.toJSDate())
-        await createReportWithTimestamp(insideTwo.toJSDate())
+        Settings.now = () => outside.toMillis()
+        await sendReportRequest({ stationId: testStationId, source: 'telegram' })
+        Settings.now = () => insideOne.toMillis()
+        await sendReportRequest({ stationId: testStationId, source: 'telegram' })
+        Settings.now = () => insideTwo.toMillis()
+        await sendReportRequest({ stationId: testStationId, source: 'telegram' })
+        Settings.now = () => Date.now()
 
         const from = now.minus({ minutes: 45 }).toISO()
         const to = now.minus({ minutes: 5 }).toISO()
@@ -86,8 +74,11 @@ describe('Timeframe filtering', () => {
         const older = from.minus({ minutes: 10 })
         const inside = from.plus({ minutes: 10 })
 
-        await createReportWithTimestamp(older.toJSDate())
-        await createReportWithTimestamp(inside.toJSDate())
+        Settings.now = () => older.toMillis()
+        await sendReportRequest({ stationId: testStationId, source: 'telegram' })
+        Settings.now = () => inside.toMillis()
+        await sendReportRequest({ stationId: testStationId, source: 'telegram' })
+        Settings.now = () => now.toMillis()
 
         const response = await app.request('/v0/reports')
 
@@ -153,6 +144,7 @@ describe('Predicted reports', () => {
 
     afterEach(async () => {
         await db.delete(reports)
+        Settings.now = () => Date.now()
     })
 
     it('ensures predicted reports have unique station IDs and do not overlap with real reports', async () => {
@@ -293,17 +285,17 @@ describe('Predicted reports', () => {
 
         // Create 5 reports for station A
         for (let i = 0; i < 5; i++) {
-            await createReportWithTimestamp(historicalMonday.minus({ minutes: i }).toJSDate(), stationA, testLineId)
+            Settings.now = () => historicalMonday.minus({ minutes: i }).toMillis()
+            await sendReportRequest({ stationId: stationA, lineId: testLineId, source: 'telegram' })
         }
 
         // Create 2 reports for station B
         for (let i = 0; i < 2; i++) {
-            await createReportWithTimestamp(
-                historicalMonday.minus({ minutes: i + 10 }).toJSDate(),
-                stationB,
-                testLineId
-            )
+            Settings.now = () => historicalMonday.minus({ minutes: i + 10 }).toMillis()
+            await sendReportRequest({ stationId: stationB, lineId: testLineId, source: 'telegram' })
         }
+
+        Settings.now = () => Date.now()
 
         // Now query for current Monday at 3pm (should trigger predictions based on historical data)
         const currentMonday = DateTime.now().toUTC().set({ weekday: 1, hour: 15, minute: 0, second: 0, millisecond: 0 })
@@ -342,8 +334,11 @@ describe('Predicted reports', () => {
             .set({ weekday: 2, hour: 10, minute: 0, second: 0, millisecond: 0 })
 
         for (let i = 0; i < 3; i++) {
-            await createReportWithTimestamp(historicalTuesday.minus({ minutes: i }).toJSDate(), stationA, testLineId)
+            Settings.now = () => historicalTuesday.minus({ minutes: i }).toMillis()
+            await sendReportRequest({ stationId: stationA, lineId: testLineId, source: 'telegram' })
         }
+
+        Settings.now = () => Date.now()
 
         // Query for Thursday at 3pm (requires expanding window to find Tuesday 10am reports)
         const currentThursday = DateTime.now()
@@ -385,11 +380,17 @@ describe('Predicted reports threshold', () => {
                             days: dayOffset,
                             minutes: stationIdx * 2,
                         })
-                        await createReportWithTimestamp(historicalTime.toJSDate(), testStations[stationIdx], testLineId)
+                        Settings.now = () => historicalTime.toMillis()
+                        await sendReportRequest({
+                            stationId: testStations[stationIdx],
+                            lineId: testLineId,
+                            source: 'telegram',
+                        })
                     }
                 }
             }
         }
+        Settings.now = () => Date.now()
     }
 
     beforeAll(async () => {

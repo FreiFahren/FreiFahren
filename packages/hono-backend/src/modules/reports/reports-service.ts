@@ -250,13 +250,16 @@ export class ReportsService {
             timestamp: Date
         }
     }> {
-        const [insertedReport] = await this.db.insert(reports).values(reportData).returning({
-            reportId: reports.reportId,
-            stationId: reports.stationId,
-            lineId: reports.lineId,
-            directionId: reports.directionId,
-            timestamp: reports.timestamp,
-        })
+        const [insertedReport] = await this.db
+            .insert(reports)
+            .values({ ...reportData, timestamp: DateTime.utc().toJSDate() })
+            .returning({
+                reportId: reports.reportId,
+                stationId: reports.stationId,
+                lineId: reports.lineId,
+                directionId: reports.directionId,
+                timestamp: reports.timestamp,
+            })
         // Drizzle returns the inserted row for Postgres. If this ever becomes undefined, we want to surface it fast.
         const report = insertedReport!
 
