@@ -70,10 +70,12 @@ export const seedBaseData = async (db: DbConnection) => {
     const segmentRecords = (segmentsJson.features as SegmentFeature[]).map((feature) => {
         const [lineId, stationPart] = feature.properties.sid.split('.')
         const [fromStationId, toStationId] = stationPart.split(':')
+        const position = (linesData[lineId] ?? []).indexOf(fromStationId)
         return {
             lineId,
             fromStationId,
             toStationId,
+            position,
             color: feature.properties.line_color,
             coordinates: feature.geometry.coordinates as [number, number][],
         }

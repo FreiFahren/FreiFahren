@@ -102,6 +102,7 @@ export class TransitNetworkDataService {
                         coordinates: segments.coordinates,
                     })
                     .from(segments)
+                    .orderBy(asc(segments.lineId), asc(segments.position))
 
                 return {
                     type: 'FeatureCollection' as const,
