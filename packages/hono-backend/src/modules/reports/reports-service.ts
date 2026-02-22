@@ -250,7 +250,7 @@ export class ReportsService {
             timestamp: Date
         }
     }> {
-        const [insertedReport] = await this.db.insert(reports).values(reportData).returning({
+        const [insertedReport] = await this.db.insert(reports).values({ ...reportData, timestamp: DateTime.utc().toJSDate() }).returning({
             reportId: reports.reportId,
             stationId: reports.stationId,
             lineId: reports.lineId,
