@@ -182,6 +182,10 @@ describe('GET /v0/risk timeframe filtering', () => {
         const oldResponse = await app.request('/v0/risk')
         const oldBody = (await oldResponse.json()) as RiskResponse
 
+        // The 55-minute-old report must still produce output (bidirect decay ≈ 0.3 at that age),
+        // otherwise we have nothing meaningful to compare against
+        expect(Object.keys(oldBody.segments_risk).length).toBeGreaterThan(0)
+
         await db.delete(reports)
 
         // Insert a fresh report
@@ -190,17 +194,11 @@ describe('GET /v0/risk timeframe filtering', () => {
         const freshResponse = await app.request('/v0/risk')
         const freshBody = (await freshResponse.json()) as RiskResponse
 
-        // Find a segment that appears in both responses
+        // Both reports target the same station/line, so there must be a segment in common
         const sharedSid = Object.keys(freshBody.segments_risk).find((sid) => sid in oldBody.segments_risk)
+        expect(sharedSid).toBeDefined()
 
-        if (sharedSid !== undefined) {
-            expect(freshBody.segments_risk[sharedSid]!.risk).toBeGreaterThan(oldBody.segments_risk[sharedSid]!.risk)
-        }
-
-        // At minimum, the fresh report should produce at least as many risky segments
-        expect(Object.keys(freshBody.segments_risk).length).toBeGreaterThanOrEqual(
-            Object.keys(oldBody.segments_risk).length
-        )
+        expect(freshBody.segments_risk[sharedSid!]!.risk).toBeGreaterThan(oldBody.segments_risk[sharedSid!]!.risk)
     })
 })
 
@@ -309,13 +307,32 @@ describe('GET /v0/risk segment targeting', () => {
         const response = await app.request('/v0/risk')
         const body = (await response.json()) as RiskResponse
 
-        // Resolve DB IDs for segments exclusively on line B (not on line A)
-        const segmentsOnLineB = await db.select({ id: segments.id }).from(segments).where(eq(segments.lineId, lineB))
+        // Collect the normalized station pairs (sorted from:to) for all line A segments.
+        // Segments on line B that share a pair with line A legitimately inherit risk via
+        // the overlap-propagation logic, so we exclude those from the assertion.
+        const segmentsOnLineA = await db
+            .select({ fromStationId: segments.fromStationId, toStationId: segments.toStationId })
+            .from(segments)
+            .where(eq(segments.lineId, lineA))
 
-        const segmentIdsOnLineB = new Set(segmentsOnLineB.map((s) => String(s.id)))
+        const lineAPairs = new Set(segmentsOnLineA.map((s) => [s.fromStationId, s.toStationId].sort().join(':')))
+
+        // Only consider segments on line B that do NOT share a station pair with line A
+        const segmentsOnLineB = await db
+            .select({ id: segments.id, fromStationId: segments.fromStationId, toStationId: segments.toStationId })
+            .from(segments)
+            .where(eq(segments.lineId, lineB))
+
+        const exclusiveLineBIds = new Set(
+            segmentsOnLineB
+                .filter((s) => !lineAPairs.has([s.fromStationId, s.toStationId].sort().join(':')))
+                .map((s) => String(s.id))
+        )
+
+        if (exclusiveLineBIds.size === 0) return // all line B segments overlap with line A — nothing to assert
 
         for (const sid of Object.keys(body.segments_risk)) {
-            expect(segmentIdsOnLineB.has(sid)).toBe(false)
+            expect(exclusiveLineBIds.has(sid)).toBe(false)
         }
     })
 })
