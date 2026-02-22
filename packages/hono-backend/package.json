@@ -13,7 +13,7 @@
         "db:studio": "drizzle-kit studio",
         "db:drop": "drizzle-kit drop",
         "db:seed": "bun run src/db/seed/index.ts",
-        "db:reset": "psql $DATABASE_URL -c 'DROP SCHEMA public CASCADE; DROP SCHEMA drizzle CASCADE; CREATE SCHEMA public;' && drizzle-kit migrate && bun run src/db/seed/index.ts"
+        "db:dangerously-reset-do-not-run-in-production": "psql $DATABASE_URL -c 'DROP SCHEMA public CASCADE; DROP SCHEMA drizzle CASCADE; CREATE SCHEMA public;' && drizzle-kit migrate && bun run src/db/seed/index.ts"
     },
     "dependencies": {
         "@types/lodash": "^4.17.20",

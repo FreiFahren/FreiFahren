@@ -39,6 +39,7 @@ CREATE TABLE "segments" (
 	"line_id" varchar(16) NOT NULL,
 	"from_station_id" varchar(16) NOT NULL,
 	"to_station_id" varchar(16) NOT NULL,
+	"position" integer NOT NULL,
 	"color" varchar(7) NOT NULL,
 	"coordinates" jsonb NOT NULL
 );

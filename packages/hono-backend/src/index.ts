@@ -8,6 +8,7 @@ import { handleError } from './common/error-handler'
 import { registerRoutes } from './common/router'
 import { db, DbConnection } from './db'
 import { getReports, postReport, ReportsService } from './modules/reports/'
+import { getRisk, RiskService } from './modules/risk'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
 import { getLines, getSegments, getStations } from './modules/transit/transit-routes'
 
@@ -50,11 +51,13 @@ const createServices = (db: DbConnection) => {
 
     const reportsService = new ReportsService(db, transitNetworkDataService)
 
-    return { transitNetworkDataService, reportsService } satisfies Services
+    const riskService = new RiskService(reportsService, transitNetworkDataService)
+
+    return { transitNetworkDataService, reportsService, riskService } satisfies Services
 }
 
 registerServices(app, createServices(db))
 
-registerRoutes(app, [getReports, postReport, getStations, getLines, getSegments])
+registerRoutes(app, [getReports, postReport, getStations, getLines, getSegments, getRisk])
 
 export default app

@@ -95,7 +95,6 @@ export class ReportsService {
         }
 
         const securityServiceUrl = process.env.SECURITY_MICROSERVICE_URL
-        console.log('securityServiceUrl', securityServiceUrl)
         if (securityServiceUrl === undefined || securityServiceUrl === '') {
             throw new Error('security service configuration error')
         }
@@ -124,15 +123,8 @@ export class ReportsService {
         }
     }
 
-    async getReports({
-        from,
-        to,
-        currentTime,
-    }: {
-        from: DateTime
-        to: DateTime
-        currentTime: DateTime
-    }): Promise<ReportSummary[]> {
+    // Real as in not predicted and reported by a user
+    async getRealReports({ from, to }: { from: DateTime; to: DateTime }): Promise<ReportSummary[]> {
         const dbResults = await this.db
             .select({
                 timestamp: reports.timestamp,
@@ -143,7 +135,19 @@ export class ReportsService {
             .from(reports)
             .where(and(gte(reports.timestamp, from.toJSDate()), lte(reports.timestamp, to.toJSDate())))
 
-        const result: ReportSummary[] = dbResults.map((r) => ({ ...r, isPredicted: false }))
+        return dbResults.map((r) => ({ ...r, isPredicted: false }))
+    }
+
+    async getReports({
+        from,
+        to,
+        currentTime,
+    }: {
+        from: DateTime
+        to: DateTime
+        currentTime: DateTime
+    }): Promise<ReportSummary[]> {
+        const result = await this.getRealReports({ from, to })
 
         // Predict reports if we don't have enough, so that users always see at least some data
         const predictedReportsThreshold = this.calculatePredictedReportsThreshold(currentTime)

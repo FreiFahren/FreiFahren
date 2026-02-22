@@ -198,6 +198,12 @@
                     "primaryKey": false,
                     "notNull": true
                 },
+                "position": {
+                    "name": "position",
+                    "type": "integer",
+                    "primaryKey": false,
+                    "notNull": true
+                },
                 "color": {
                     "name": "color",
                     "type": "varchar(7)",

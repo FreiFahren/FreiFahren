@@ -18,6 +18,7 @@ type Station = {
 }
 
 type SegmentProperties = {
+    id: SegmentRow['id']
     line: SegmentRow['lineId']
     from: SegmentRow['fromStationId']
     to: SegmentRow['toStationId']

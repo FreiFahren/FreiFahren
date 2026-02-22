@@ -94,6 +94,7 @@ export class TransitNetworkDataService {
             try {
                 const rows = await this.db
                     .select({
+                        id: segments.id,
                         line: segments.lineId,
                         from: segments.fromStationId,
                         to: segments.toStationId,
@@ -101,12 +102,14 @@ export class TransitNetworkDataService {
                         coordinates: segments.coordinates,
                     })
                     .from(segments)
+                    .orderBy(asc(segments.lineId), asc(segments.position))
 
                 return {
                     type: 'FeatureCollection' as const,
                     features: rows.map((row) => ({
                         type: 'Feature' as const,
                         properties: {
+                            id: row.id,
                             line: row.line,
                             from: row.from,
                             to: row.to,
