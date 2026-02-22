@@ -23,7 +23,6 @@ class Report:
     timestamp: datetime
     direction_id: Optional[str]
     lines: List[str]
-    is_multi: bool = False
     is_ring: bool = False
 
 
@@ -106,6 +105,8 @@ class RiskPredictor:
             return 0.0
 
         base_risk = 0.8  # High base risk for directed reports
+        if len(report.lines) > 1:
+            base_risk /= len(report.lines)
         return base_risk * self._calculate_temporal_decay(
             time_diff, ttl=1000, strength=0.2, shift=0.4
         )
@@ -117,9 +118,8 @@ class RiskPredictor:
         else:
             base_risk = 0.2  # Lower risk when direction is known
 
-        # Apply multi-line penalty
-        if report.is_multi:
-            base_risk *= 0.2
+        if len(report.lines) > 1:
+            base_risk /= len(report.lines)
 
         return base_risk * self._calculate_temporal_decay(
             time_diff, ttl=2000, strength=0.3, shift=0.4
@@ -128,6 +128,8 @@ class RiskPredictor:
     def _calculate_line_risk(self, report: Report, time_diff: float) -> float:
         """Calculate line-wide risk based on report type and temporal decay."""
         base_risk = 0.1 if report.station_id is None else 0.05
+        if len(report.lines) > 1:
+            base_risk /= len(report.lines)
         return base_risk * self._calculate_temporal_decay(
             time_diff, ttl=4000, strength=0.3, shift=0.2
         )
