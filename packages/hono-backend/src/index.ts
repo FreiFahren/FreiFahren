@@ -8,7 +8,8 @@ import { handleError } from './common/error-handler'
 import { registerDocsRoutes } from './common/openapi'
 import { registerRoutes } from './common/router'
 import { db, DbConnection } from './db'
-import { getReports, postReport, ReportsService } from './modules/reports/'
+import { postFeedback } from './modules/feedback/feedback-routes'
+import { getReports, getReportsByStation, postReport, ReportsService } from './modules/reports/'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
 import { getLines, getStations } from './modules/transit/transit-routes'
 
@@ -56,7 +57,7 @@ const createServices = (db: DbConnection) => {
 
 registerServices(app, createServices(db))
 
-const routes = [getReports, postReport, getStations, getLines] as const
+const routes = [getReports, getReportsByStation, postReport, getStations, getLines, postFeedback] as const
 
 registerRoutes(app, [...routes])
 registerDocsRoutes(app, [...routes])
