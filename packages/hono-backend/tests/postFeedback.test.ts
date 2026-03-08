@@ -1,8 +1,7 @@
-import { beforeAll, beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'bun:test'
 
 import { db, feedback } from '../src/db'
-
-let app: (typeof import('../src/index'))['default']
+import { app } from '../src/index'
 
 const sendFeedbackRequest = (payload: object, headers?: Record<string, string>) => {
     return app.request('/v0/feedback', {
@@ -16,11 +15,6 @@ const sendFeedbackRequest = (payload: object, headers?: Record<string, string>) 
 }
 
 describe('Feedback endpoint', () => {
-    beforeAll(async () => {
-        const mod = await import('../src/index')
-        app = mod.default
-    })
-
     beforeEach(async () => {
         await db.delete(feedback)
     })
