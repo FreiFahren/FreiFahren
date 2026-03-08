@@ -11,17 +11,18 @@ import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from './constants'
 
 const reportsQuerySchema = z
     .object({
-        from: z.iso.datetime().transform((str) => DateTime.fromISO(str)),
-        to: z.iso.datetime().transform((str) => DateTime.fromISO(str)),
+        from: z.iso
+            .datetime()
+            .transform((str) => DateTime.fromISO(str))
+            .optional(),
+        to: z.iso
+            .datetime()
+            .transform((str) => DateTime.fromISO(str))
+            .optional(),
     })
-    .or(
-        z.object({
-            from: z.undefined(),
-            to: z.undefined(),
-        })
-    )
     .refine(({ to, from }) => {
-        if (isNil(to) || isNil(from)) return true
+        if (isNil(to) && isNil(from)) return true
+        if (isNil(to) || isNil(from)) return false
 
         if (!from.isValid || !to.isValid) return false
 
@@ -29,21 +30,16 @@ const reportsQuerySchema = z
 
         return range.toMillis() > 0 && range.as('days') <= MAX_REPORTS_TIMEFRAME
     })
+    .transform((query) => {
+        if (!isNil(query.from) && !isNil(query.to)) {
+            return {
+                from: query.from,
+                to: query.to,
+            }
+        }
 
-const getReportRange = (
-    query: {
-        from?: DateTime
-        to?: DateTime
-    },
-    now = DateTime.now()
-) => {
-    const defaultRange = getDefaultReportsRange(now)
-
-    return {
-        from: query.from ?? defaultRange.from,
-        to: query.to ?? defaultRange.to,
-    }
-}
+        return getDefaultReportsRange(DateTime.now())
+    })
 
 export const getReports = defineRoute<Env>()({
     method: 'get',
@@ -55,9 +51,10 @@ export const getReports = defineRoute<Env>()({
         const reportsService = c.get('reportsService')
 
         const query = c.req.valid('query')
-        const range = getReportRange(query)
 
-        return c.json(await reportsService.getReports({ ...range, currentTime: DateTime.now() })) // Intentionally pass in local time
+        return c.json(
+            await reportsService.getReports({ from: query.from!, to: query.to!, currentTime: DateTime.now() })
+        ) // Intentionally pass in local time
     },
 })
 
@@ -75,9 +72,15 @@ export const getReportsByStation = defineRoute<Env>()({
 
         const query = c.req.valid('query')
         const { stationId } = c.req.valid('param')
-        const range = getReportRange(query)
 
-        return c.json(await reportsService.getReports({ ...range, stationId, currentTime: DateTime.now() })) // Intentionally pass in local time
+        return c.json(
+            await reportsService.getReports({
+                from: query.from!,
+                to: query.to!,
+                stationId,
+                currentTime: DateTime.now(),
+            })
+        ) // Intentionally pass in local time
     },
 })
 
