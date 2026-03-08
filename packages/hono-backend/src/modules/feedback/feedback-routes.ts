@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 import { Env } from '../../app-env'
 import { defineRoute } from '../../common/router'
 import { db, feedback, insertFeedbackSchema } from '../../db'
@@ -5,6 +7,14 @@ import { db, feedback, insertFeedbackSchema } from '../../db'
 export const postFeedback = defineRoute<Env>()({
     method: 'post',
     path: 'v0/feedback',
+    docs: {
+        summary: 'Submit feedback',
+        description: 'Stores a user feedback message for the team to review.',
+        tags: ['feedback'],
+        requestSchema: z.object({
+            feedback: z.string(),
+        }),
+    },
     schemas: {
         json: insertFeedbackSchema,
     },

@@ -79,6 +79,24 @@ export const getReports = defineRoute<Env>()({
 export const getReportsByStation = defineRoute<Env>()({
     method: 'get',
     path: 'v0/reports/:stationId',
+    docs: {
+        summary: 'List reports by station',
+        description: 'Returns reports for a specific station between an optional from/to ISO datetime range.',
+        tags: ['reports'],
+        querySchema: z.object({
+            from: z.iso.datetime().optional(),
+            to: z.iso.datetime().optional(),
+        }),
+        responseSchema: z.array(
+            z.object({
+                timestamp: z.iso.datetime(),
+                stationId: z.string(),
+                directionId: z.string().nullable(),
+                lineId: z.string().nullable(),
+                isPredicted: z.boolean(),
+            })
+        ),
+    },
     schemas: {
         param: z.object({
             stationId: z.string().min(1),
