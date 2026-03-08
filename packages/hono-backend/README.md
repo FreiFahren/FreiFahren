@@ -51,3 +51,11 @@ just db-migrate
 Drizzle provides it's own UI to interact with the DB. Simply run `just db-studio` and open the link you get in your browser.
 
 If you want to access the DB with something like Postico, use the following connection string: `postgres://postgres:postgres@localhost:5432/freifahren`
+
+## API Documentation
+
+The rewrite backend now exposes OpenAPI docs and an interactive Scalar UI.
+
+- Interactive docs: `http://localhost:3000/docs`
+
+The docs are generated from route-level metadata in the rewrite endpoint definitions.

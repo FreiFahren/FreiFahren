@@ -1,4 +1,4 @@
-import app from '../src/index'
+import { app } from '../src/index'
 
 export const sendReportRequest = async (payload: object) => {
     return app.request('/v0/reports', {
