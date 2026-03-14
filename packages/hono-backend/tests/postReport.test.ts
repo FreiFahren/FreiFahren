@@ -6,7 +6,7 @@ import { TransitNetworkDataService } from '../src/modules/transit/transit-networ
 import { db, lineStations, reports, stations } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
 import { and, desc, eq } from 'drizzle-orm'
-import { appRequest, sendReportRequest } from './test-utils'
+import { sendReportRequest } from './test-utils'
 
 let fakeNlpServer: ReturnType<typeof Bun.serve> | null = null
 let fakeSecurityServer: ReturnType<typeof Bun.serve> | null = null
@@ -129,15 +129,8 @@ describe('Security Verification', () => {
         const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
         securityValidResponse = false // Even if security would have blocked it
 
-        const response = await appRequest('/reports', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Password': 'test-password',
-            },
-            body: JSON.stringify({
-                stationId: station.id,
-            }),
+        const response = await sendReportRequest({
+            stationId: station.id,
         })
 
         // Should succeed because password bypasses security service call

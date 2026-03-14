@@ -1,6 +1,12 @@
-import app from '../src/index'
+import { app } from '../src/index'
 
-export const appRequest = async (path: string, init?: RequestInit) => {
+/**
+ * Sends a request to the app and follows redirects.
+ * @param path - The path to request.
+ * @param init - The request init.
+ * @returns The response.
+ */
+export const appRequestWithRedirect = async (path: string, init?: RequestInit) => {
     const response = await app.request(path, init)
     if (response.status === 307) {
         const location = response.headers.get('Location')
@@ -12,8 +18,13 @@ export const appRequest = async (path: string, init?: RequestInit) => {
     return response
 }
 
+/**
+ * Sends a report request to the app.
+ * @param payload - The report payload.
+ * @returns The response.
+ */
 export const sendReportRequest = async (payload: object) => {
-    return appRequest('/reports', {
+    return appRequestWithRedirect('/reports', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

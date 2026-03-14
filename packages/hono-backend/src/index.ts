@@ -7,9 +7,10 @@ import { registerServices, Services, type Env } from './app-env'
 import { handleError } from './common/error-handler'
 import { registerVersionedRoutes } from './common/router'
 import { db, DbConnection } from './db'
-import { getReports, postReport, ReportsService } from './modules/reports/'
+import { postFeedback } from './modules/feedback/feedback-routes'
+import { getReports, getReportsByStation, postReport, ReportsService } from './modules/reports/'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
-import { getLines, getStations } from './modules/transit/transit-routes'
+import { getLines, getSegments, getStations } from './modules/transit/transit-routes'
 
 const app = new Hono<Env>()
 
@@ -56,11 +57,21 @@ const createServices = (db: DbConnection) => {
 registerServices(app, createServices(db))
 
 registerVersionedRoutes(app, 'reports', 'v0', {
-    v0: [getReports, postReport],
+    v0: [getReports, postReport, getReportsByStation],
 })
 
 registerVersionedRoutes(app, 'transit', 'v0', {
-    v0: [getStations, getLines],
+    v0: [getStations, getLines, getSegments],
 })
 
-export default app
+registerVersionedRoutes(app, 'feedback', 'v0', {
+    v0: [postFeedback],
+})
+
+export { app }
+
+export default {
+    fetch: app.fetch,
+    port: 3000,
+    hostname: '0.0.0.0',
+}

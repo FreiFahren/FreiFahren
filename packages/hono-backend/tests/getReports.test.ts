@@ -6,7 +6,7 @@ import { db, lineStations, lines, reports, stations } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
 
 import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from '../src/modules/reports/constants'
-import { appRequest, sendReportRequest } from './test-utils'
+import { appRequestWithRedirect, sendReportRequest } from './test-utils'
 
 let testStationId: string
 let testLineId: string
@@ -60,7 +60,9 @@ describe('Timeframe filtering', () => {
         const from = now.minus({ minutes: 45 }).toISO()
         const to = now.minus({ minutes: 5 }).toISO()
 
-        const response = await appRequest(`/reports?from=${encodeURIComponent(from!)}&to=${encodeURIComponent(to!)}`)
+        const response = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(from!)}&to=${encodeURIComponent(to!)}`
+        )
 
         expect(response.status).toBe(200)
 
@@ -86,7 +88,7 @@ describe('Timeframe filtering', () => {
         await createReportWithTimestamp(older.toJSDate())
         await createReportWithTimestamp(inside.toJSDate())
 
-        const response = await appRequest('/reports')
+        const response = await appRequestWithRedirect('/reports')
 
         expect(response.status).toBe(200)
 
@@ -105,7 +107,7 @@ describe('Timeframe filtering', () => {
         const from = now
         const to = now.minus({ hours: 1 })
 
-        const response = await appRequest(
+        const response = await appRequestWithRedirect(
             `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
@@ -117,7 +119,9 @@ describe('Timeframe filtering', () => {
         const from = now.minus({ days: MAX_REPORTS_TIMEFRAME + 1 }).toISO()
         const to = now.toISO()
 
-        const response = await appRequest(`/reports?from=${encodeURIComponent(from!)}&to=${encodeURIComponent(to!)}`)
+        const response = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(from!)}&to=${encodeURIComponent(to!)}`
+        )
 
         expect(response.status).toBe(400)
     })
@@ -163,7 +167,7 @@ describe('Predicted reports', () => {
         // Set 'to' after creating reports to ensure they're captured
         const to = DateTime.now().toUTC().plus({ seconds: 5 })
 
-        const response = await appRequest(
+        const response = await appRequestWithRedirect(
             `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
@@ -203,7 +207,7 @@ describe('Predicted reports', () => {
         // Set 'to' after creating reports to ensure they're captured
         const to = DateTime.now().toUTC().plus({ seconds: 5 })
 
-        const response = await appRequest(
+        const response = await appRequestWithRedirect(
             `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
@@ -241,7 +245,7 @@ describe('Predicted reports', () => {
         // Set 'to' after creating reports to ensure they're captured
         const to = DateTime.now().toUTC().plus({ seconds: 5 })
 
-        const response = await appRequest(
+        const response = await appRequestWithRedirect(
             `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
@@ -306,7 +310,7 @@ describe('Predicted reports', () => {
         const from = currentMonday.minus({ minutes: 30 })
         const to = currentMonday.plus({ minutes: 30 })
 
-        const response = await appRequest(
+        const response = await appRequestWithRedirect(
             `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
@@ -348,7 +352,7 @@ describe('Predicted reports', () => {
         const from = currentThursday.minus({ minutes: 30 })
         const to = currentThursday.plus({ minutes: 30 })
 
-        const response = await appRequest(
+        const response = await appRequestWithRedirect(
             `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
@@ -422,7 +426,7 @@ describe('Predicted reports threshold', () => {
         const fromPeak = mondayAfternoon.minus({ hours: 1 })
         const toPeak = mondayAfternoon.plus({ hours: 1 })
 
-        const responsePeak = await appRequest(
+        const responsePeak = await appRequestWithRedirect(
             `/reports?from=${encodeURIComponent(fromPeak.toISO()!)}&to=${encodeURIComponent(toPeak.toISO()!)}`
         )
 
@@ -437,7 +441,7 @@ describe('Predicted reports threshold', () => {
         const fromNight = tuesdayNight.minus({ hours: 1 })
         const toNight = tuesdayNight.plus({ hours: 1 })
 
-        const responseNight = await appRequest(
+        const responseNight = await appRequestWithRedirect(
             `/reports?from=${encodeURIComponent(fromNight.toISO()!)}&to=${encodeURIComponent(toNight.toISO()!)}`
         )
 
@@ -464,7 +468,7 @@ describe('Predicted reports threshold', () => {
             const from = time.minus({ hours: 1 })
             const to = time.plus({ hours: 1 })
 
-            const response = await appRequest(
+            const response = await appRequestWithRedirect(
                 `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
             )
 
@@ -486,7 +490,7 @@ describe('Predicted reports threshold', () => {
         const from7 = morning7.minus({ hours: 1 })
         const to7 = morning7.plus({ hours: 1 })
 
-        const response7 = await appRequest(
+        const response7 = await appRequestWithRedirect(
             `/reports?from=${encodeURIComponent(from7.toISO()!)}&to=${encodeURIComponent(to7.toISO()!)}`
         )
 
@@ -500,7 +504,7 @@ describe('Predicted reports threshold', () => {
         const fromNoon = noon.minus({ hours: 1 })
         const toNoon = noon.plus({ hours: 1 })
 
-        const responseNoon = await appRequest(
+        const responseNoon = await appRequestWithRedirect(
             `/reports?from=${encodeURIComponent(fromNoon.toISO()!)}&to=${encodeURIComponent(toNoon.toISO()!)}`
         )
 
@@ -522,7 +526,7 @@ describe('Predicted reports threshold', () => {
         const fromLate = weekdayLateEvening.minus({ hours: 1 })
         const toLate = weekdayLateEvening.plus({ hours: 1 })
 
-        const responseLate = await appRequest(
+        const responseLate = await appRequestWithRedirect(
             `/reports?from=${encodeURIComponent(fromLate.toISO()!)}&to=${encodeURIComponent(toLate.toISO()!)}`
         )
 
@@ -537,7 +541,7 @@ describe('Predicted reports threshold', () => {
         const fromNight = weekdayNight.minus({ hours: 1 })
         const toNight = weekdayNight.plus({ hours: 1 })
 
-        const responseNight = await appRequest(
+        const responseNight = await appRequestWithRedirect(
             `/reports?from=${encodeURIComponent(fromNight.toISO()!)}&to=${encodeURIComponent(toNight.toISO()!)}`
         )
 
@@ -559,7 +563,7 @@ describe('Predicted reports threshold', () => {
         const from = mondayNoon.minus({ hours: 1 })
         const to = mondayNoon.plus({ hours: 1 })
 
-        const response = await appRequest(
+        const response = await appRequestWithRedirect(
             `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
@@ -604,5 +608,89 @@ describe('Predicted reports threshold', () => {
             expect(reportTime >= from).toBe(true)
             expect(reportTime <= to).toBe(true)
         }
+    })
+})
+
+describe('Reports by station route', () => {
+    let stationOneId: string
+    let stationTwoId: string
+    let lineId: string
+
+    beforeAll(async () => {
+        await seedBaseData(db)
+
+        const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
+        lineId = line.id
+
+        const stationRows = await db.select({ id: stations.id }).from(stations).limit(2)
+        stationOneId = stationRows[0].id
+        stationTwoId = stationRows[1].id
+    })
+
+    beforeEach(async () => {
+        await db.delete(reports)
+    })
+
+    afterEach(async () => {
+        await db.delete(reports)
+        Settings.now = () => Date.now()
+    })
+
+    it('returns only reports for the requested station in the given timeframe', async () => {
+        const now = DateTime.now().toUTC()
+        const from = now.minus({ minutes: 45 })
+        const to = now.plus({ minutes: 1 })
+
+        await createReportWithTimestamp(now.minus({ minutes: 30 }).toJSDate(), stationOneId, lineId)
+        await createReportWithTimestamp(now.minus({ minutes: 20 }).toJSDate(), stationOneId, lineId)
+        await createReportWithTimestamp(now.minus({ minutes: 10 }).toJSDate(), stationTwoId, lineId)
+
+        const response = await appRequestWithRedirect(
+            `/v0/reports/${stationOneId}?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        )
+
+        expect(response.status).toBe(200)
+
+        const body = (await response.json()) as Array<{ stationId: string }>
+
+        expect(body.length).toBe(2)
+        expect(body.every((report) => report.stationId === stationOneId)).toBe(true)
+    })
+
+    it('fills up with predicted reports when there are not enough real reports for the requested station', async () => {
+        // Mock time to peak hours so the threshold is high (7 reports)
+        const mondayNoon = DateTime.utc(2024, 1, 15, 12, 0)
+        Settings.now = () => mondayNoon.toMillis()
+
+        // Seed historical data for stationOneId at matching time patterns (Monday noon, past weeks)
+        // so the prediction algorithm guesses stationOneId for the query timeframe
+        for (let weeksAgo = 1; weeksAgo <= 2; weeksAgo++) {
+            const historicalTime = mondayNoon.minus({ weeks: weeksAgo })
+            await createReportWithTimestamp(historicalTime.toJSDate(), stationOneId, lineId)
+            await createReportWithTimestamp(historicalTime.minus({ minutes: 5 }).toJSDate(), stationOneId, lineId)
+            await createReportWithTimestamp(historicalTime.minus({ minutes: 10 }).toJSDate(), stationOneId, lineId)
+        }
+
+        // No real reports for stationOneId exist in the query timeframe
+        const from = mondayNoon.minus({ hours: 1 })
+        const to = mondayNoon.plus({ hours: 1 })
+
+        const response = await appRequestWithRedirect(
+            `/v0/reports/${stationOneId}?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        )
+
+        expect(response.status).toBe(200)
+
+        const body = (await response.json()) as Array<{
+            stationId: string
+            isPredicted: boolean
+        }>
+
+        // The response should contain predicted reports to fill up toward the threshold
+        const predictedReports = body.filter((r) => r.isPredicted)
+        expect(predictedReports.length).toBeGreaterThan(0)
+
+        // All predicted reports must be for the requested station
+        expect(predictedReports.every((r) => r.stationId === stationOneId)).toBe(true)
     })
 })

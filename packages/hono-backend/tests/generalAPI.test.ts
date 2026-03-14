@@ -2,7 +2,8 @@ import { beforeAll, describe, expect, it } from 'bun:test'
 
 import { seedBaseData } from '../src/db/seed/seed'
 import { db } from '../src/db'
-import app from '../src/index'
+import { app } from '../src/index'
+import { appRequestWithRedirect } from './test-utils'
 
 beforeAll(async () => {
     await seedBaseData(db)
@@ -37,14 +38,14 @@ describe('Versioning', () => {
     })
 
     it('does not set deprecation headers on the latest version', async () => {
-        const response = await app.request('/v0/reports')
+        const response = await appRequestWithRedirect('/v0/reports')
         expect(response.status).toBe(200)
         expect(response.headers.get('Deprecation')).toBeNull()
         expect(response.headers.get('X-Latest-Api-Version')).toBeNull()
     })
 
     it('returns 404 with available versions for unknown version', async () => {
-        const response = await app.request('/v99/reports')
+        const response = await appRequestWithRedirect('/v99/reports')
         expect(response.status).toBe(404)
 
         const body = (await response.json()) as { error: string; availableVersions: string[] }
@@ -53,7 +54,7 @@ describe('Versioning', () => {
     })
 
     it('does not return version error for valid version with unmatched method', async () => {
-        const response = await app.request('/v0/reports', { method: 'PUT' })
+        const response = await appRequestWithRedirect('/v0/reports', { method: 'PUT' })
         expect(response.status).toBe(404)
 
         const body = await response.text()
