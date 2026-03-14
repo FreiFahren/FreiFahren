@@ -43,7 +43,7 @@ const reportsQuerySchema = z
 
 export const getReports = defineRoute<Env>()({
     method: 'get',
-    path: 'v0/reports',
+    path: '/',
     docs: {
         summary: 'List reports',
         description: 'Returns reports between an optional from/to ISO datetime range.',
@@ -78,7 +78,7 @@ export const getReports = defineRoute<Env>()({
 
 export const getReportsByStation = defineRoute<Env>()({
     method: 'get',
-    path: 'v0/reports/:stationId',
+    path: '/:stationId',
     docs: {
         summary: 'List reports by station',
         description: 'Returns reports for a specific station between an optional from/to ISO datetime range.',
@@ -122,7 +122,7 @@ export const getReportsByStation = defineRoute<Env>()({
 
 export const postReport = defineRoute<Env>()({
     method: 'post',
-    path: 'v0/reports',
+    path: '/',
     docs: {
         summary: 'Create a report',
         description:

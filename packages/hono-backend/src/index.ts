@@ -5,8 +5,7 @@ import pino from 'pino'
 
 import { registerServices, Services, type Env } from './app-env'
 import { handleError } from './common/error-handler'
-import { registerDocsRoutes } from './common/openapi'
-import { registerRoutes } from './common/router'
+import { registerVersionedRoutes } from './common/router'
 import { db, DbConnection } from './db'
 import { postFeedback } from './modules/feedback/feedback-routes'
 import { getReports, getReportsByStation, postReport, ReportsService } from './modules/reports/'
@@ -57,10 +56,17 @@ const createServices = (db: DbConnection) => {
 
 registerServices(app, createServices(db))
 
-const routes = [getReports, getReportsByStation, postReport, getStations, getLines, getSegments, postFeedback] as const
+registerVersionedRoutes(app, 'reports', 'v0', {
+    v0: [getReports, postReport, getReportsByStation],
+})
 
-registerRoutes(app, [...routes])
-registerDocsRoutes(app, [...routes])
+registerVersionedRoutes(app, 'transit', 'v0', {
+    v0: [getStations, getLines, getSegments],
+})
+
+registerVersionedRoutes(app, 'feedback', 'v0', {
+    v0: [postFeedback],
+})
 
 export { app }
 

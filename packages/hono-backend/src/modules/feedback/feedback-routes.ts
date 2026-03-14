@@ -6,7 +6,7 @@ import { db, feedback, insertFeedbackSchema } from '../../db'
 
 export const postFeedback = defineRoute<Env>()({
     method: 'post',
-    path: 'v0/feedback',
+    path: '/',
     docs: {
         summary: 'Submit feedback',
         description: 'Stores a user feedback message for the team to review.',

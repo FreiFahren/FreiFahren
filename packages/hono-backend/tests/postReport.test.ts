@@ -141,7 +141,6 @@ describe('Security Verification', () => {
 describe('Report API contract', () => {
     beforeAll(async () => {
         await seedBaseData(db)
-
         process.env.NODE_ENV = 'production'
         process.env.REPORT_PASSWORD = 'test-password' // To pass the security check
     })

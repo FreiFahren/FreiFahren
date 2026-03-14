@@ -4,10 +4,9 @@ import { DateTime, Settings } from 'luxon'
 
 import { db, lineStations, lines, reports, stations } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
-import { app } from '../src/index'
 
 import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from '../src/modules/reports/constants'
-import { sendReportRequest } from './test-utils'
+import { appRequestWithRedirect, sendReportRequest } from './test-utils'
 
 let testStationId: string
 let testLineId: string
@@ -61,8 +60,8 @@ describe('Timeframe filtering', () => {
         const from = now.minus({ minutes: 45 }).toISO()
         const to = now.minus({ minutes: 5 }).toISO()
 
-        const response = await app.request(
-            `/v0/reports?from=${encodeURIComponent(from!)}&to=${encodeURIComponent(to!)}`
+        const response = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(from!)}&to=${encodeURIComponent(to!)}`
         )
 
         expect(response.status).toBe(200)
@@ -89,7 +88,7 @@ describe('Timeframe filtering', () => {
         await createReportWithTimestamp(older.toJSDate())
         await createReportWithTimestamp(inside.toJSDate())
 
-        const response = await app.request('/v0/reports')
+        const response = await appRequestWithRedirect('/reports')
 
         expect(response.status).toBe(200)
 
@@ -108,8 +107,8 @@ describe('Timeframe filtering', () => {
         const from = now
         const to = now.minus({ hours: 1 })
 
-        const response = await app.request(
-            `/v0/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        const response = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
         expect(response.status).toBe(400)
@@ -120,8 +119,8 @@ describe('Timeframe filtering', () => {
         const from = now.minus({ days: MAX_REPORTS_TIMEFRAME + 1 }).toISO()
         const to = now.toISO()
 
-        const response = await app.request(
-            `/v0/reports?from=${encodeURIComponent(from!)}&to=${encodeURIComponent(to!)}`
+        const response = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(from!)}&to=${encodeURIComponent(to!)}`
         )
 
         expect(response.status).toBe(400)
@@ -168,8 +167,8 @@ describe('Predicted reports', () => {
         // Set 'to' after creating reports to ensure they're captured
         const to = DateTime.now().toUTC().plus({ seconds: 5 })
 
-        const response = await app.request(
-            `/v0/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        const response = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
         expect(response.status).toBe(200)
@@ -208,8 +207,8 @@ describe('Predicted reports', () => {
         // Set 'to' after creating reports to ensure they're captured
         const to = DateTime.now().toUTC().plus({ seconds: 5 })
 
-        const response = await app.request(
-            `/v0/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        const response = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
         expect(response.status).toBe(200)
@@ -246,8 +245,8 @@ describe('Predicted reports', () => {
         // Set 'to' after creating reports to ensure they're captured
         const to = DateTime.now().toUTC().plus({ seconds: 5 })
 
-        const response = await app.request(
-            `/v0/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        const response = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
         expect(response.status).toBe(200)
@@ -311,8 +310,8 @@ describe('Predicted reports', () => {
         const from = currentMonday.minus({ minutes: 30 })
         const to = currentMonday.plus({ minutes: 30 })
 
-        const response = await app.request(
-            `/v0/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        const response = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
         expect(response.status).toBe(200)
@@ -353,8 +352,8 @@ describe('Predicted reports', () => {
         const from = currentThursday.minus({ minutes: 30 })
         const to = currentThursday.plus({ minutes: 30 })
 
-        const response = await app.request(
-            `/v0/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        const response = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
         expect(response.status).toBe(200)
@@ -427,8 +426,8 @@ describe('Predicted reports threshold', () => {
         const fromPeak = mondayAfternoon.minus({ hours: 1 })
         const toPeak = mondayAfternoon.plus({ hours: 1 })
 
-        const responsePeak = await app.request(
-            `/v0/reports?from=${encodeURIComponent(fromPeak.toISO()!)}&to=${encodeURIComponent(toPeak.toISO()!)}`
+        const responsePeak = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(fromPeak.toISO()!)}&to=${encodeURIComponent(toPeak.toISO()!)}`
         )
 
         expect(responsePeak.status).toBe(200)
@@ -442,8 +441,8 @@ describe('Predicted reports threshold', () => {
         const fromNight = tuesdayNight.minus({ hours: 1 })
         const toNight = tuesdayNight.plus({ hours: 1 })
 
-        const responseNight = await app.request(
-            `/v0/reports?from=${encodeURIComponent(fromNight.toISO()!)}&to=${encodeURIComponent(toNight.toISO()!)}`
+        const responseNight = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(fromNight.toISO()!)}&to=${encodeURIComponent(toNight.toISO()!)}`
         )
 
         expect(responseNight.status).toBe(200)
@@ -469,8 +468,8 @@ describe('Predicted reports threshold', () => {
             const from = time.minus({ hours: 1 })
             const to = time.plus({ hours: 1 })
 
-            const response = await app.request(
-                `/v0/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+            const response = await appRequestWithRedirect(
+                `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
             )
 
             expect(response.status).toBe(200)
@@ -491,8 +490,8 @@ describe('Predicted reports threshold', () => {
         const from7 = morning7.minus({ hours: 1 })
         const to7 = morning7.plus({ hours: 1 })
 
-        const response7 = await app.request(
-            `/v0/reports?from=${encodeURIComponent(from7.toISO()!)}&to=${encodeURIComponent(to7.toISO()!)}`
+        const response7 = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(from7.toISO()!)}&to=${encodeURIComponent(to7.toISO()!)}`
         )
 
         const body7 = (await response7.json()) as Array<{ isPredicted: boolean }>
@@ -505,8 +504,8 @@ describe('Predicted reports threshold', () => {
         const fromNoon = noon.minus({ hours: 1 })
         const toNoon = noon.plus({ hours: 1 })
 
-        const responseNoon = await app.request(
-            `/v0/reports?from=${encodeURIComponent(fromNoon.toISO()!)}&to=${encodeURIComponent(toNoon.toISO()!)}`
+        const responseNoon = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(fromNoon.toISO()!)}&to=${encodeURIComponent(toNoon.toISO()!)}`
         )
 
         const bodyNoon = (await responseNoon.json()) as Array<{ isPredicted: boolean }>
@@ -527,8 +526,8 @@ describe('Predicted reports threshold', () => {
         const fromLate = weekdayLateEvening.minus({ hours: 1 })
         const toLate = weekdayLateEvening.plus({ hours: 1 })
 
-        const responseLate = await app.request(
-            `/v0/reports?from=${encodeURIComponent(fromLate.toISO()!)}&to=${encodeURIComponent(toLate.toISO()!)}`
+        const responseLate = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(fromLate.toISO()!)}&to=${encodeURIComponent(toLate.toISO()!)}`
         )
 
         expect(responseLate.status).toBe(200)
@@ -542,8 +541,8 @@ describe('Predicted reports threshold', () => {
         const fromNight = weekdayNight.minus({ hours: 1 })
         const toNight = weekdayNight.plus({ hours: 1 })
 
-        const responseNight = await app.request(
-            `/v0/reports?from=${encodeURIComponent(fromNight.toISO()!)}&to=${encodeURIComponent(toNight.toISO()!)}`
+        const responseNight = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(fromNight.toISO()!)}&to=${encodeURIComponent(toNight.toISO()!)}`
         )
 
         expect(responseNight.status).toBe(200)
@@ -564,8 +563,8 @@ describe('Predicted reports threshold', () => {
         const from = mondayNoon.minus({ hours: 1 })
         const to = mondayNoon.plus({ hours: 1 })
 
-        const response = await app.request(
-            `/v0/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        const response = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
         expect(response.status).toBe(200)
@@ -646,7 +645,7 @@ describe('Reports by station route', () => {
         await createReportWithTimestamp(now.minus({ minutes: 20 }).toJSDate(), stationOneId, lineId)
         await createReportWithTimestamp(now.minus({ minutes: 10 }).toJSDate(), stationTwoId, lineId)
 
-        const response = await app.request(
+        const response = await appRequestWithRedirect(
             `/v0/reports/${stationOneId}?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
@@ -676,7 +675,7 @@ describe('Reports by station route', () => {
         const from = mondayNoon.minus({ hours: 1 })
         const to = mondayNoon.plus({ hours: 1 })
 
-        const response = await app.request(
+        const response = await appRequestWithRedirect(
             `/v0/reports/${stationOneId}?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
