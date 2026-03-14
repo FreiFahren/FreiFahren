@@ -12,6 +12,13 @@ db-generate:
 db-migrate:
     docker compose -f {{compose_file}} exec {{service}} bun run db:migrate
 
+db-migrate-test:
+    docker compose -f {{compose_file}} exec -e DATABASE_URL=postgres://postgres:postgres@postgres:5432/freifahren_test {{service}} bun run db:migrate
+
+db-migrate-all:
+    just db-migrate
+    just db-migrate-test
+
 db-studio:
     DATABASE_URL={{db_url}} bun run db:studio
 
