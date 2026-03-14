@@ -1,3 +1,5 @@
+import type { Handler } from 'hono'
+import { etag } from 'hono/etag'
 import { z } from 'zod'
 
 import { Env } from '../../app-env'
@@ -6,6 +8,7 @@ import { defineRoute } from '../../common/router'
 export const getStations = defineRoute<Env>()({
     method: 'get' as const,
     path: 'v0/transit/stations',
+    middlewares: [etag() as Handler<Env>],
     docs: {
         summary: 'List stations',
         description: 'Returns all transit stations in the network.',
@@ -31,6 +34,7 @@ export const getStations = defineRoute<Env>()({
 export const getLines = defineRoute<Env>()({
     method: 'get' as const,
     path: 'v0/transit/lines',
+    middlewares: [etag() as Handler<Env>],
     docs: {
         summary: 'List lines',
         description: 'Returns all transit lines in the network.',
@@ -46,6 +50,7 @@ export const getLines = defineRoute<Env>()({
 export const getSegments = defineRoute<Env>()({
     method: 'get' as const,
     path: 'v0/transit/segments',
+    middlewares: [etag() as Handler<Env>],
     docs: {
         summary: 'List segments',
         description: 'Returns all transit line segments as GeoJSON features.',
