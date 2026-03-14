@@ -42,3 +42,35 @@ export const getLines = defineRoute<Env>()({
         return c.json(await transitNetworkDataService.getLines())
     },
 })
+
+export const getSegments = defineRoute<Env>()({
+    method: 'get' as const,
+    path: 'v0/transit/segments',
+    docs: {
+        summary: 'List segments',
+        description: 'Returns all transit line segments as GeoJSON features.',
+        tags: ['transit'],
+        responseSchema: z.object({
+            type: z.literal('FeatureCollection'),
+            features: z.array(
+                z.object({
+                    type: z.literal('Feature'),
+                    properties: z.object({
+                        line: z.string(),
+                        from: z.string(),
+                        to: z.string(),
+                        color: z.string(),
+                    }),
+                    geometry: z.object({
+                        type: z.literal('LineString'),
+                        coordinates: z.array(z.tuple([z.number(), z.number()])),
+                    }),
+                })
+            ),
+        }),
+    },
+    handler: async (c) => {
+        const transitNetworkDataService = c.get('transitNetworkDataService')
+        return c.json(await transitNetworkDataService.getSegments())
+    },
+})

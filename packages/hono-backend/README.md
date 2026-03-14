@@ -1,5 +1,15 @@
 # New Freifahren backend using Hono + Drizzle
 
+## .env
+
+The .env file contains the following variables:
+
+- `DATABASE_URL`: The URL of the database to use.
+- `DATABASE_URL_TEST`: The URL of the test database to use.
+- `NLP_SERVICE_URL`: The URL of the NLP service to use.
+- `REPORT_PASSWORD`: The password to use for the report API.
+- `SECURITY_MICROSERVICE_URL`: The URL of the security microservice to use.
+
 ## Start containers
 
 You can start the DB and bun container like so:
