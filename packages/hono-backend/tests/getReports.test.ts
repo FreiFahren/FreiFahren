@@ -2,7 +2,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, setSystemTime }
 import { eq } from 'drizzle-orm'
 import { DateTime, Settings } from 'luxon'
 
-import { db, lineStations, lines, reports, stations } from '../src/db'
+import { db, lineStations, lines, reports } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
 import app, { createApp } from '../src/index'
 import {
@@ -16,21 +16,9 @@ import { sendReportRequest } from './test-utils'
 let testStationId: string
 let testLineId: string
 
-// Note: this function is primarily used for timeframe filtering tests and prediction accuracy tests
-// It is better to use the `sendReportRequest` function for testing business logic and API behavior.
-// Since this function bypasses the API validation and post-processing pipeline, it is not a good fit for testing the API.
-const createReportWithTimestamp = async (
-    timestamp: Date,
-    stationId: string = testStationId,
-    lineId: string = testLineId
-) => {
-    await db.insert(reports).values({
-        stationId,
-        lineId,
-        directionId: stationId,
-        timestamp,
-        source: 'telegram',
-    })
+const sendReportAt = async (timestamp: Date, stationId: string = testStationId, lineId: string = testLineId) => {
+    setSystemTime(timestamp)
+    expect((await sendReportRequest({ stationId, lineId, source: 'telegram' })).status).toBe(200)
 }
 
 const toIsoSeconds = (value: DateTime) => value.toUTC().toISO({ suppressMilliseconds: true })!
@@ -64,11 +52,15 @@ describe('Timeframe filtering', () => {
     beforeAll(async () => {
         await seedBaseData(db)
 
-        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
         const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
-
-        testStationId = station.id
         testLineId = line.id
+
+        const [stationOnLine] = await db
+            .select({ stationId: lineStations.stationId })
+            .from(lineStations)
+            .where(eq(lineStations.lineId, testLineId))
+            .limit(1)
+        testStationId = stationOnLine.stationId
     })
 
     beforeEach(async () => {
@@ -77,18 +69,17 @@ describe('Timeframe filtering', () => {
 
     afterEach(async () => {
         await db.delete(reports)
+        setSystemTime()
     })
 
     it('returns data in the specified timeframe when from and to query params are present', async () => {
         const now = DateTime.now().toUTC()
-        const insideOne = now.minus({ minutes: 30 })
-        const insideTwo = now.minus({ minutes: 10 })
-        const outside = now.minus({ hours: 2 })
 
-        await createReportWithTimestamp(outside.toJSDate())
-        await createReportWithTimestamp(insideOne.toJSDate())
-        await createReportWithTimestamp(insideTwo.toJSDate())
+        await sendReportAt(now.minus({ hours: 2 }).toJSDate())
+        await sendReportAt(now.minus({ minutes: 30 }).toJSDate())
+        await sendReportAt(now.minus({ minutes: 10 }).toJSDate())
 
+        setSystemTime(now.toJSDate())
         const from = now.minus({ minutes: 45 }).toISO()
         const to = now.minus({ minutes: 5 }).toISO()
 
@@ -114,12 +105,10 @@ describe('Timeframe filtering', () => {
         const now = DateTime.now().toUTC()
         const { from, to } = getDefaultReportsRange(now)
 
-        const older = from.minus({ minutes: 10 })
-        const inside = from.plus({ minutes: 10 })
+        await sendReportAt(from.minus({ minutes: 10 }).toJSDate())
+        await sendReportAt(from.plus({ minutes: 10 }).toJSDate())
 
-        await createReportWithTimestamp(older.toJSDate())
-        await createReportWithTimestamp(inside.toJSDate())
-
+        setSystemTime(now.toJSDate())
         const response = await app.request('/v0/reports')
 
         expect(response.status).toBe(200)
@@ -184,6 +173,7 @@ describe('Predicted reports', () => {
 
     afterEach(async () => {
         await db.delete(reports)
+        setSystemTime()
     })
 
     it('ensures predicted reports have unique station IDs and do not overlap with real reports', async () => {
@@ -313,31 +303,28 @@ describe('Predicted reports', () => {
     it('predicts the most frequently reported station for a given time pattern', async () => {
         // Create a clear pattern: Station A reported 5 times on Mondays at 3pm
         // Station B reported 2 times on Mondays at 3pm
+        const now = DateTime.now().toUTC()
         const stationA = allStationIds[0]
         const stationB = allStationIds[1]
 
         // Get a Monday at 3pm (15:00) in the past for historical data
-        const historicalMonday = DateTime.now()
-            .toUTC()
+        const historicalMonday = now
             .minus({ weeks: 1 })
             .set({ weekday: 1, hour: 15, minute: 0, second: 0, millisecond: 0 })
 
         // Create 5 reports for station A
         for (let i = 0; i < 5; i++) {
-            await createReportWithTimestamp(historicalMonday.minus({ minutes: i }).toJSDate(), stationA, testLineId)
+            await sendReportAt(historicalMonday.minus({ minutes: i }).toJSDate(), stationA, testLineId)
         }
 
         // Create 2 reports for station B
         for (let i = 0; i < 2; i++) {
-            await createReportWithTimestamp(
-                historicalMonday.minus({ minutes: i + 10 }).toJSDate(),
-                stationB,
-                testLineId
-            )
+            await sendReportAt(historicalMonday.minus({ minutes: i + 10 }).toJSDate(), stationB, testLineId)
         }
 
         // Now query for current Monday at 3pm (should trigger predictions based on historical data)
-        const currentMonday = DateTime.now().toUTC().set({ weekday: 1, hour: 15, minute: 0, second: 0, millisecond: 0 })
+        setSystemTime(now.toJSDate())
+        const currentMonday = now.set({ weekday: 1, hour: 15, minute: 0, second: 0, millisecond: 0 })
 
         const from = currentMonday.minus({ minutes: 30 })
         const to = currentMonday.plus({ minutes: 30 })
@@ -364,22 +351,21 @@ describe('Predicted reports', () => {
     })
 
     it('uses expanding time windows when no exact match is found', async () => {
+        const now = DateTime.now().toUTC()
         const stationA = allStationIds[0]
 
         // Create reports on Tuesday at 10am (2 days and 5 hours away from target)
-        const historicalTuesday = DateTime.now()
-            .toUTC()
+        const historicalTuesday = now
             .minus({ weeks: 1 })
             .set({ weekday: 2, hour: 10, minute: 0, second: 0, millisecond: 0 })
 
         for (let i = 0; i < 3; i++) {
-            await createReportWithTimestamp(historicalTuesday.minus({ minutes: i }).toJSDate(), stationA, testLineId)
+            await sendReportAt(historicalTuesday.minus({ minutes: i }).toJSDate(), stationA, testLineId)
         }
 
         // Query for Thursday at 3pm (requires expanding window to find Tuesday 10am reports)
-        const currentThursday = DateTime.now()
-            .toUTC()
-            .set({ weekday: 4, hour: 15, minute: 0, second: 0, millisecond: 0 })
+        setSystemTime(now.toJSDate())
+        const currentThursday = now.set({ weekday: 4, hour: 15, minute: 0, second: 0, millisecond: 0 })
 
         const from = currentThursday.minus({ minutes: 30 })
         const to = currentThursday.plus({ minutes: 30 })
@@ -416,11 +402,12 @@ describe('Predicted reports threshold', () => {
                             days: dayOffset,
                             minutes: stationIdx * 2,
                         })
-                        await createReportWithTimestamp(historicalTime.toJSDate(), testStations[stationIdx], testLineId)
+                        await sendReportAt(historicalTime.toJSDate(), testStations[stationIdx], testLineId)
                     }
                 }
             }
         }
+        setSystemTime()
     }
 
     beforeAll(async () => {
@@ -448,6 +435,7 @@ describe('Predicted reports threshold', () => {
         await db.delete(reports)
         // Reset time mocking after each test
         Settings.now = () => Date.now()
+        setSystemTime()
     })
 
     it('returns more predicted reports during peak hours than night hours', async () => {
