@@ -48,7 +48,6 @@ const getValidReportPayload = async () => {
     }
 }
 
-
 describe('Timeframe filtering', () => {
     beforeAll(async () => {
         await seedBaseData(db)
