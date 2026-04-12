@@ -681,7 +681,7 @@ describe('Reports by station route', () => {
         setSystemTime(now.toJSDate())
 
         const response = await appRequestWithRedirect(
-            `/v0/reports/${stationOneId}?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+            `/reports/${stationOneId}?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
         expect(response.status).toBe(200)
@@ -712,7 +712,7 @@ describe('Reports by station route', () => {
         const to = mondayNoon.plus({ hours: 1 })
 
         const response = await appRequestWithRedirect(
-            `/v0/reports/${stationOneId}?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+            `/reports/${stationOneId}?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
         expect(response.status).toBe(200)
@@ -750,7 +750,7 @@ describe('GET reports cache routing', () => {
 
         expect((await sendReportRequest(payload, writerApp)).status).toBe(200)
 
-        const first = await routeApp.request('/v0/reports')
+        const first = await appRequestWithRedirect('/reports', undefined, routeApp)
         expect(first.status).toBe(200)
         expect(first.headers.get('Cache-Control')).toBe('no-store')
         expect((await getRealReports(first)).length).toBe(1)
@@ -759,8 +759,10 @@ describe('GET reports cache routing', () => {
         const to = now.minus({ minutes: 4 })
         const from = to.minus(DEFAULT_REPORTS_TIMEFRAME)
 
-        const second = await routeApp.request(
-            `/v0/reports?from=${encodeURIComponent(toIsoSeconds(from))}&to=${encodeURIComponent(toIsoSeconds(to))}`
+        const second = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(toIsoSeconds(from))}&to=${encodeURIComponent(toIsoSeconds(to))}`,
+            undefined,
+            routeApp
         )
 
         expect(second.status).toBe(200)
@@ -776,14 +778,14 @@ describe('GET reports cache routing', () => {
 
         expect((await sendReportRequest(payload, writerApp)).status).toBe(200)
 
-        const first = await routeApp.request('/v0/reports')
+        const first = await appRequestWithRedirect('/reports', undefined, routeApp)
         expect(first.status).toBe(200)
         expect((await getRealReports(first)).length).toBe(1)
 
         expect((await sendReportRequest(payload, writerApp)).status).toBe(200)
         setSystemTime(now.plus({ milliseconds: REPORTS_CACHE_TTL_MS + 1 }).toJSDate())
 
-        const second = await routeApp.request('/v0/reports')
+        const second = await appRequestWithRedirect('/reports', undefined, routeApp)
         expect(second.status).toBe(200)
         expect((await getRealReports(second)).length).toBe(2)
     })
@@ -797,7 +799,7 @@ describe('GET reports cache routing', () => {
 
         expect((await sendReportRequest(payload, writerApp)).status).toBe(200)
 
-        const first = await routeApp.request('/v0/reports')
+        const first = await appRequestWithRedirect('/reports', undefined, routeApp)
         expect(first.status).toBe(200)
         expect((await getRealReports(first)).length).toBe(1)
 
@@ -805,8 +807,10 @@ describe('GET reports cache routing', () => {
         const to = now
         const from = now.minus({ minutes: 30 })
 
-        const response = await routeApp.request(
-            `/v0/reports?from=${encodeURIComponent(toIsoSeconds(from))}&to=${encodeURIComponent(toIsoSeconds(to))}`
+        const response = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(toIsoSeconds(from))}&to=${encodeURIComponent(toIsoSeconds(to))}`,
+            undefined,
+            routeApp
         )
 
         expect(response.status).toBe(200)
@@ -822,14 +826,14 @@ describe('GET reports cache routing', () => {
 
         expect((await sendReportRequest(payload, routeApp)).status).toBe(200)
 
-        const first = await routeApp.request('/v0/reports')
+        const first = await appRequestWithRedirect('/reports', undefined, routeApp)
         expect(first.status).toBe(200)
         expect((await getRealReports(first)).length).toBe(1)
 
         const postResponse = await sendReportRequest(payload, routeApp)
         expect(postResponse.status).toBe(200)
 
-        const second = await routeApp.request('/v0/reports')
+        const second = await appRequestWithRedirect('/reports', undefined, routeApp)
         expect(second.status).toBe(200)
         expect((await getRealReports(second)).length).toBe(2)
     })
