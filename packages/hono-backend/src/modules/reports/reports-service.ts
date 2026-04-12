@@ -8,6 +8,7 @@ import { DbConnection, InsertReport, reports } from '../../db/'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
 import type { StationId } from '../transit/types'
 
+import { getDefaultReportsRange, REPORTS_CACHE_TTL_MS } from './constants'
 import {
     assignLineIfSingleOption,
     clearStationReferenceIfNotOnLine,
@@ -76,11 +77,43 @@ type ReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'stationId'
     isPredicted: boolean
 }
 
+type DefaultReportsCacheEntry = {
+    expiresAtMillis: number
+    promise: Promise<ReportSummary[]>
+}
+
 export class ReportsService {
+    private defaultReportsCache: DefaultReportsCacheEntry | null = null
+
     constructor(
         private db: DbConnection,
         private transitNetworkDataService: TransitNetworkDataService
     ) {}
+
+    async getDefaultReports(currentTime: DateTime): Promise<ReportSummary[]> {
+        const cachedEntry = this.defaultReportsCache
+        if (cachedEntry !== null && cachedEntry.expiresAtMillis > currentTime.toMillis()) {
+            return cachedEntry.promise
+        }
+
+        const range = getDefaultReportsRange(currentTime)
+        const promise = this.getReportsUncached({ ...range, currentTime })
+        const cacheEntry = {
+            expiresAtMillis: currentTime.toMillis() + REPORTS_CACHE_TTL_MS,
+            promise,
+        }
+        this.defaultReportsCache = cacheEntry
+
+        try {
+            return await promise
+        } catch (error) {
+            if (this.defaultReportsCache === cacheEntry) {
+                this.defaultReportsCache = null
+            }
+
+            throw error
+        }
+    }
 
     async verifyRequest(headers: Record<string, string>): Promise<void> {
         const reportPassword = process.env.REPORT_PASSWORD
@@ -125,6 +158,20 @@ export class ReportsService {
     }
 
     async getReports({
+        from,
+        to,
+        stationId,
+        currentTime,
+    }: {
+        from: DateTime
+        to: DateTime
+        stationId?: StationId
+        currentTime: DateTime
+    }): Promise<ReportSummary[]> {
+        return this.getReportsUncached({ from, to, stationId, currentTime })
+    }
+
+    private async getReportsUncached({
         from,
         to,
         stationId,
@@ -273,7 +320,7 @@ export class ReportsService {
     }> {
         const [insertedReport] = await this.db
             .insert(reports)
-            .values({ ...reportData, timestamp: DateTime.utc().toJSDate() })
+            .values({ ...reportData, timestamp: new Date() })
             .returning({
                 reportId: reports.reportId,
                 stationId: reports.stationId,
@@ -283,6 +330,7 @@ export class ReportsService {
             })
         // Drizzle returns the inserted row for Postgres. If this ever becomes undefined, we want to surface it fast.
         const report = insertedReport!
+        this.defaultReportsCache = null
 
         let telegramNotificationSuccess = true
 

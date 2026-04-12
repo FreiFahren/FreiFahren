@@ -1,25 +1,66 @@
-import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, setSystemTime } from 'bun:test'
 import { eq } from 'drizzle-orm'
 import { DateTime, Settings } from 'luxon'
 
-import { db, lineStations, lines, reports, stations } from '../src/db'
+import { db, lineStations, lines, reports } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
-
-import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from '../src/modules/reports/constants'
+import { createApp } from '../src/index'
+import {
+    DEFAULT_REPORTS_TIMEFRAME,
+    getDefaultReportsRange,
+    MAX_REPORTS_TIMEFRAME,
+    REPORTS_CACHE_TTL_MS,
+} from '../src/modules/reports/constants'
 import { appRequestWithRedirect, sendReportRequest } from './test-utils'
 
 let testStationId: string
 let testLineId: string
 
+const sendReportAt = async (timestamp: Date, stationId: string = testStationId, lineId: string = testLineId) => {
+    setSystemTime(timestamp)
+    expect((await sendReportRequest({ stationId, lineId, source: 'telegram' })).status).toBe(200)
+}
+
+const toIsoSeconds = (value: DateTime) => value.toUTC().toISO({ suppressMilliseconds: true })!
+
+const getRealReports = async (response: Response) => {
+    const body = (await response.json()) as Array<{
+        timestamp: string
+        stationId: string
+        isPredicted: boolean
+    }>
+
+    return body.filter((report) => !report.isPredicted)
+}
+
+const getValidReportPayload = async () => {
+    const [stationOnLine] = await db
+        .select({ stationId: lineStations.stationId })
+        .from(lineStations)
+        .where(eq(lineStations.lineId, testLineId))
+        .limit(1)
+
+    return {
+        stationId: stationOnLine.stationId,
+        lineId: testLineId,
+        directionId: stationOnLine.stationId,
+        source: 'telegram' as const,
+    }
+}
+
 describe('Timeframe filtering', () => {
     beforeAll(async () => {
         await seedBaseData(db)
 
-        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
         const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
-
-        testStationId = station.id
         testLineId = line.id
+
+        const [stationOnLine] = await db
+            .select({ stationId: lineStations.stationId })
+            .from(lineStations)
+            .where(eq(lineStations.lineId, testLineId))
+            .limit(1)
+        testStationId = stationOnLine.stationId
     })
 
     beforeEach(async () => {
@@ -29,22 +70,17 @@ describe('Timeframe filtering', () => {
     afterEach(async () => {
         await db.delete(reports)
         Settings.now = () => Date.now()
+        setSystemTime()
     })
 
     it('returns data in the specified timeframe when from and to query params are present', async () => {
         const now = DateTime.now().toUTC()
-        const insideOne = now.minus({ minutes: 30 })
-        const insideTwo = now.minus({ minutes: 10 })
-        const outside = now.minus({ hours: 2 })
 
-        Settings.now = () => outside.toMillis()
-        await sendReportRequest({ stationId: testStationId, source: 'telegram' })
-        Settings.now = () => insideOne.toMillis()
-        await sendReportRequest({ stationId: testStationId, source: 'telegram' })
-        Settings.now = () => insideTwo.toMillis()
-        await sendReportRequest({ stationId: testStationId, source: 'telegram' })
-        Settings.now = () => Date.now()
+        await sendReportAt(now.minus({ hours: 2 }).toJSDate())
+        await sendReportAt(now.minus({ minutes: 30 }).toJSDate())
+        await sendReportAt(now.minus({ minutes: 10 }).toJSDate())
 
+        setSystemTime(now.toJSDate())
         const from = now.minus({ minutes: 45 }).toISO()
         const to = now.minus({ minutes: 5 }).toISO()
 
@@ -70,15 +106,10 @@ describe('Timeframe filtering', () => {
         const now = DateTime.now().toUTC()
         const { from, to } = getDefaultReportsRange(now)
 
-        const older = from.minus({ minutes: 10 })
-        const inside = from.plus({ minutes: 10 })
+        await sendReportAt(from.minus({ minutes: 10 }).toJSDate())
+        await sendReportAt(from.plus({ minutes: 10 }).toJSDate())
 
-        Settings.now = () => older.toMillis()
-        await sendReportRequest({ stationId: testStationId, source: 'telegram' })
-        Settings.now = () => inside.toMillis()
-        await sendReportRequest({ stationId: testStationId, source: 'telegram' })
-        Settings.now = () => now.toMillis()
-
+        setSystemTime(now.toJSDate())
         const response = await appRequestWithRedirect('/reports')
 
         expect(response.status).toBe(200)
@@ -144,6 +175,7 @@ describe('Predicted reports', () => {
     afterEach(async () => {
         await db.delete(reports)
         Settings.now = () => Date.now()
+        setSystemTime()
     })
 
     it('ensures predicted reports have unique station IDs and do not overlap with real reports', async () => {
@@ -273,31 +305,30 @@ describe('Predicted reports', () => {
     it('predicts the most frequently reported station for a given time pattern', async () => {
         // Create a clear pattern: Station A reported 5 times on Mondays at 3pm
         // Station B reported 2 times on Mondays at 3pm
+        const now = DateTime.now().toUTC()
         const stationA = allStationIds[0]
         const stationB = allStationIds[1]
 
         // Get a Monday at 3pm (15:00) in the past for historical data
-        const historicalMonday = DateTime.now()
-            .toUTC()
+        const historicalMonday = now
             .minus({ weeks: 1 })
             .set({ weekday: 1, hour: 15, minute: 0, second: 0, millisecond: 0 })
 
         // Create 5 reports for station A
         for (let i = 0; i < 5; i++) {
-            Settings.now = () => historicalMonday.minus({ minutes: i }).toMillis()
-            await sendReportRequest({ stationId: stationA, lineId: testLineId, source: 'telegram' })
+            await sendReportAt(historicalMonday.minus({ minutes: i }).toJSDate(), stationA, testLineId)
         }
 
         // Create 2 reports for station B
         for (let i = 0; i < 2; i++) {
-            Settings.now = () => historicalMonday.minus({ minutes: i + 10 }).toMillis()
-            await sendReportRequest({ stationId: stationB, lineId: testLineId, source: 'telegram' })
+            await sendReportAt(historicalMonday.minus({ minutes: i + 10 }).toJSDate(), stationB, testLineId)
         }
 
         Settings.now = () => Date.now()
 
         // Now query for current Monday at 3pm (should trigger predictions based on historical data)
-        const currentMonday = DateTime.now().toUTC().set({ weekday: 1, hour: 15, minute: 0, second: 0, millisecond: 0 })
+        setSystemTime(now.toJSDate())
+        const currentMonday = now.set({ weekday: 1, hour: 15, minute: 0, second: 0, millisecond: 0 })
 
         const from = currentMonday.minus({ minutes: 30 })
         const to = currentMonday.plus({ minutes: 30 })
@@ -324,25 +355,23 @@ describe('Predicted reports', () => {
     })
 
     it('uses expanding time windows when no exact match is found', async () => {
+        const now = DateTime.now().toUTC()
         const stationA = allStationIds[0]
 
         // Create reports on Tuesday at 10am (2 days and 5 hours away from target)
-        const historicalTuesday = DateTime.now()
-            .toUTC()
+        const historicalTuesday = now
             .minus({ weeks: 1 })
             .set({ weekday: 2, hour: 10, minute: 0, second: 0, millisecond: 0 })
 
         for (let i = 0; i < 3; i++) {
-            Settings.now = () => historicalTuesday.minus({ minutes: i }).toMillis()
-            await sendReportRequest({ stationId: stationA, lineId: testLineId, source: 'telegram' })
+            await sendReportAt(historicalTuesday.minus({ minutes: i }).toJSDate(), stationA, testLineId)
         }
 
         Settings.now = () => Date.now()
 
         // Query for Thursday at 3pm (requires expanding window to find Tuesday 10am reports)
-        const currentThursday = DateTime.now()
-            .toUTC()
-            .set({ weekday: 4, hour: 15, minute: 0, second: 0, millisecond: 0 })
+        setSystemTime(now.toJSDate())
+        const currentThursday = now.set({ weekday: 4, hour: 15, minute: 0, second: 0, millisecond: 0 })
 
         const from = currentThursday.minus({ minutes: 30 })
         const to = currentThursday.plus({ minutes: 30 })
@@ -379,17 +408,13 @@ describe('Predicted reports threshold', () => {
                             days: dayOffset,
                             minutes: stationIdx * 2,
                         })
-                        Settings.now = () => historicalTime.toMillis()
-                        await sendReportRequest({
-                            stationId: testStations[stationIdx],
-                            lineId: testLineId,
-                            source: 'telegram',
-                        })
+                        await sendReportAt(historicalTime.toJSDate(), testStations[stationIdx], testLineId)
                     }
                 }
             }
         }
         Settings.now = () => Date.now()
+        setSystemTime()
     }
 
     beforeAll(async () => {
@@ -417,6 +442,7 @@ describe('Predicted reports threshold', () => {
         await db.delete(reports)
         // Reset time mocking after each test
         Settings.now = () => Date.now()
+        setSystemTime()
     })
 
     it('returns more predicted reports during peak hours than night hours', async () => {
@@ -623,9 +649,13 @@ describe('Reports by station route', () => {
         const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
         lineId = line.id
 
-        const stationRows = await db.select({ id: stations.id }).from(stations).limit(2)
-        stationOneId = stationRows[0].id
-        stationTwoId = stationRows[1].id
+        const stationRows = await db
+            .select({ stationId: lineStations.stationId })
+            .from(lineStations)
+            .where(eq(lineStations.lineId, lineId))
+            .limit(2)
+        stationOneId = stationRows[0].stationId
+        stationTwoId = stationRows[1].stationId
     })
 
     beforeEach(async () => {
@@ -635,6 +665,7 @@ describe('Reports by station route', () => {
     afterEach(async () => {
         await db.delete(reports)
         Settings.now = () => Date.now()
+        setSystemTime()
     })
 
     it('returns only reports for the requested station in the given timeframe', async () => {
@@ -642,12 +673,14 @@ describe('Reports by station route', () => {
         const from = now.minus({ minutes: 45 })
         const to = now.plus({ minutes: 1 })
 
-        await createReportWithTimestamp(now.minus({ minutes: 30 }).toJSDate(), stationOneId, lineId)
-        await createReportWithTimestamp(now.minus({ minutes: 20 }).toJSDate(), stationOneId, lineId)
-        await createReportWithTimestamp(now.minus({ minutes: 10 }).toJSDate(), stationTwoId, lineId)
+        await sendReportAt(now.minus({ minutes: 30 }).toJSDate(), stationOneId, lineId)
+        await sendReportAt(now.minus({ minutes: 20 }).toJSDate(), stationOneId, lineId)
+        await sendReportAt(now.minus({ minutes: 10 }).toJSDate(), stationTwoId, lineId)
+
+        setSystemTime(now.toJSDate())
 
         const response = await appRequestWithRedirect(
-            `/v0/reports/${stationOneId}?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+            `/reports/${stationOneId}?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
         expect(response.status).toBe(200)
@@ -661,23 +694,24 @@ describe('Reports by station route', () => {
     it('fills up with predicted reports when there are not enough real reports for the requested station', async () => {
         // Mock time to peak hours so the threshold is high (7 reports)
         const mondayNoon = DateTime.utc(2024, 1, 15, 12, 0)
-        Settings.now = () => mondayNoon.toMillis()
 
         // Seed historical data for stationOneId at matching time patterns (Monday noon, past weeks)
         // so the prediction algorithm guesses stationOneId for the query timeframe
         for (let weeksAgo = 1; weeksAgo <= 2; weeksAgo++) {
             const historicalTime = mondayNoon.minus({ weeks: weeksAgo })
-            await createReportWithTimestamp(historicalTime.toJSDate(), stationOneId, lineId)
-            await createReportWithTimestamp(historicalTime.minus({ minutes: 5 }).toJSDate(), stationOneId, lineId)
-            await createReportWithTimestamp(historicalTime.minus({ minutes: 10 }).toJSDate(), stationOneId, lineId)
+            await sendReportAt(historicalTime.toJSDate(), stationOneId, lineId)
+            await sendReportAt(historicalTime.minus({ minutes: 5 }).toJSDate(), stationOneId, lineId)
+            await sendReportAt(historicalTime.minus({ minutes: 10 }).toJSDate(), stationOneId, lineId)
         }
+
+        setSystemTime(mondayNoon.toJSDate())
 
         // No real reports for stationOneId exist in the query timeframe
         const from = mondayNoon.minus({ hours: 1 })
         const to = mondayNoon.plus({ hours: 1 })
 
         const response = await appRequestWithRedirect(
-            `/v0/reports/${stationOneId}?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+            `/reports/${stationOneId}?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
         expect(response.status).toBe(200)
@@ -693,5 +727,116 @@ describe('Reports by station route', () => {
 
         // All predicted reports must be for the requested station
         expect(predictedReports.every((r) => r.stationId === stationOneId)).toBe(true)
+    })
+})
+
+describe('GET reports cache routing', () => {
+    beforeEach(async () => {
+        await db.delete(reports)
+    })
+
+    afterEach(() => {
+        Settings.now = () => Date.now()
+        setSystemTime()
+    })
+
+    it('bypasses the default cache for explicit rolling 1h requests within the ttl', async () => {
+        const now = DateTime.utc(2024, 1, 15, 12, 0, 0)
+        setSystemTime(now.toJSDate())
+        const payload = await getValidReportPayload()
+        const routeApp = createApp()
+
+        await sendReportAt(now.minus({ minutes: 30 }).toJSDate(), payload.stationId, payload.lineId)
+
+        setSystemTime(now.toJSDate())
+
+        const first = await appRequestWithRedirect('/reports', undefined, routeApp)
+        expect(first.status).toBe(200)
+        expect(first.headers.get('Cache-Control')).toBe('no-store')
+        expect((await getRealReports(first)).length).toBe(1)
+
+        await sendReportAt(now.minus({ minutes: 10 }).toJSDate(), payload.stationId, payload.lineId)
+
+        setSystemTime(now.toJSDate())
+        const to = now
+        const from = now.minus(DEFAULT_REPORTS_TIMEFRAME)
+
+        const second = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(toIsoSeconds(from))}&to=${encodeURIComponent(toIsoSeconds(to))}`,
+            undefined,
+            routeApp
+        )
+
+        expect(second.status).toBe(200)
+        expect((await getRealReports(second)).length).toBe(2)
+    })
+
+    it('refreshes the default cache after the ttl expires', async () => {
+        const now = DateTime.now().toUTC()
+        setSystemTime(now.toJSDate())
+        const payload = await getValidReportPayload()
+        const routeApp = createApp()
+        const writerApp = createApp()
+
+        expect((await sendReportRequest(payload, writerApp)).status).toBe(200)
+
+        const first = await appRequestWithRedirect('/reports', undefined, routeApp)
+        expect(first.status).toBe(200)
+        expect((await getRealReports(first)).length).toBe(1)
+
+        expect((await sendReportRequest(payload, writerApp)).status).toBe(200)
+        setSystemTime(now.plus({ milliseconds: REPORTS_CACHE_TTL_MS + 1 }).toJSDate())
+
+        const second = await appRequestWithRedirect('/reports', undefined, routeApp)
+        expect(second.status).toBe(200)
+        expect((await getRealReports(second)).length).toBe(2)
+    })
+
+    it('bypasses the default cache for non-default ranges', async () => {
+        const now = DateTime.now().toUTC()
+        setSystemTime(now.toJSDate())
+        const payload = await getValidReportPayload()
+        const routeApp = createApp()
+        const writerApp = createApp()
+
+        expect((await sendReportRequest(payload, writerApp)).status).toBe(200)
+
+        const first = await appRequestWithRedirect('/reports', undefined, routeApp)
+        expect(first.status).toBe(200)
+        expect((await getRealReports(first)).length).toBe(1)
+
+        expect((await sendReportRequest(payload, writerApp)).status).toBe(200)
+        const to = now
+        const from = now.minus({ minutes: 30 })
+
+        const response = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(toIsoSeconds(from))}&to=${encodeURIComponent(toIsoSeconds(to))}`,
+            undefined,
+            routeApp
+        )
+
+        expect(response.status).toBe(200)
+        expect((await getRealReports(response)).length).toBe(2)
+    })
+
+    it('invalidates the default cache after posting a report through the api', async () => {
+        const now = DateTime.now().toUTC()
+        setSystemTime(now.toJSDate())
+        const payload = await getValidReportPayload()
+
+        const routeApp = createApp()
+
+        expect((await sendReportRequest(payload, routeApp)).status).toBe(200)
+
+        const first = await appRequestWithRedirect('/reports', undefined, routeApp)
+        expect(first.status).toBe(200)
+        expect((await getRealReports(first)).length).toBe(1)
+
+        const postResponse = await sendReportRequest(payload, routeApp)
+        expect(postResponse.status).toBe(200)
+
+        const second = await appRequestWithRedirect('/reports', undefined, routeApp)
+        expect(second.status).toBe(200)
+        expect((await getRealReports(second)).length).toBe(2)
     })
 })

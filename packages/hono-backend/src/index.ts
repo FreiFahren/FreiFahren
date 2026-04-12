@@ -12,40 +12,6 @@ import { getReports, getReportsByStation, postReport, ReportsService } from './m
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
 import { getLines, getSegments, getStations } from './modules/transit/transit-routes'
 
-const app = new Hono<Env>()
-
-app.use(requestId())
-app.use(
-    pinoLogger({
-        pino: pino({
-            level: process.env.LOG_LEVEL ?? 'info',
-            transport: {
-                targets: [
-                    {
-                        target: 'pino-pretty',
-                        options: {
-                            colorize: true,
-                            ignore: 'pid,hostname,req,res,responseTime,reqId',
-                            translateTime: 'SYS:standard',
-                            destination: 1,
-                        },
-                    },
-                    {
-                        target: 'pino-roll',
-                        options: {
-                            file: './app.log',
-                            frequency: 'daily',
-                            mkdir: true,
-                        },
-                    },
-                ],
-            },
-        }),
-    })
-)
-
-app.onError(handleError)
-
 const createServices = (db: DbConnection) => {
     const transitNetworkDataService = new TransitNetworkDataService(db)
 
@@ -54,19 +20,56 @@ const createServices = (db: DbConnection) => {
     return { transitNetworkDataService, reportsService } satisfies Services
 }
 
-registerServices(app, createServices(db))
+export const createApp = (dbConnection: DbConnection = db) => {
+    const app = new Hono<Env>()
 
-registerVersionedRoutes(app, 'reports', 'v0', {
-    v0: [getReports, postReport, getReportsByStation],
-})
+    app.use(requestId())
+    app.use(
+        pinoLogger({
+            pino: pino({
+                level: process.env.LOG_LEVEL ?? 'info',
+                transport: {
+                    targets: [
+                        {
+                            target: 'pino-pretty',
+                            options: {
+                                colorize: true,
+                                ignore: 'pid,hostname,req,res,responseTime,reqId',
+                                translateTime: 'SYS:standard',
+                                destination: 1,
+                            },
+                        },
+                        {
+                            target: 'pino-roll',
+                            options: {
+                                file: './app.log',
+                                frequency: 'daily',
+                                mkdir: true,
+                            },
+                        },
+                    ],
+                },
+            }),
+        })
+    )
 
-registerVersionedRoutes(app, 'transit', 'v0', {
-    v0: [getStations, getLines, getSegments],
-})
+    app.onError(handleError)
 
-registerVersionedRoutes(app, 'feedback', 'v0', {
-    v0: [postFeedback],
-})
+    registerServices(app, createServices(dbConnection))
+    registerVersionedRoutes(app, 'reports', 'v0', {
+        v0: [getReports, postReport, getReportsByStation],
+    })
+    registerVersionedRoutes(app, 'transit', 'v0', {
+        v0: [getStations, getLines, getSegments],
+    })
+    registerVersionedRoutes(app, 'feedback', 'v0', {
+        v0: [postFeedback],
+    })
+
+    return app
+}
+
+const app = createApp()
 
 export { app }
 
