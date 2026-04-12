@@ -5,11 +5,12 @@ import pino from 'pino'
 
 import { registerServices, Services, type Env } from './app-env'
 import { handleError } from './common/error-handler'
-import { registerRoutes } from './common/router'
+import { registerVersionedRoutes } from './common/router'
 import { db, DbConnection } from './db'
-import { getReports, postReport, ReportsService } from './modules/reports/'
+import { postFeedback } from './modules/feedback/feedback-routes'
+import { getReports, getReportsByStation, postReport, ReportsService } from './modules/reports/'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
-import { getLines, getStations } from './modules/transit/transit-routes'
+import { getLines, getSegments, getStations } from './modules/transit/transit-routes'
 
 const createServices = (db: DbConnection) => {
     const transitNetworkDataService = new TransitNetworkDataService(db)
@@ -55,11 +56,25 @@ export const createApp = (dbConnection: DbConnection = db) => {
     app.onError(handleError)
 
     registerServices(app, createServices(dbConnection))
-    registerRoutes(app, [getReports, postReport, getStations, getLines])
+    registerVersionedRoutes(app, 'reports', 'v0', {
+        v0: [getReports, postReport, getReportsByStation],
+    })
+    registerVersionedRoutes(app, 'transit', 'v0', {
+        v0: [getStations, getLines, getSegments],
+    })
+    registerVersionedRoutes(app, 'feedback', 'v0', {
+        v0: [postFeedback],
+    })
 
     return app
 }
 
 const app = createApp()
 
-export default app
+export { app }
+
+export default {
+    fetch: app.fetch,
+    port: 3000,
+    hostname: '0.0.0.0',
+}

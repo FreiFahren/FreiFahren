@@ -7,32 +7,63 @@ import { AppError } from '../../common/errors'
 import { defineRoute } from '../../common/router'
 import { insertReportSchema } from '../../db'
 
-import { isDefaultReportsWindow, MAX_REPORTS_TIMEFRAME } from './constants'
+import { getDefaultReportsRange, isDefaultReportsWindow, MAX_REPORTS_TIMEFRAME } from './constants'
+
+const reportsQuerySchema = z
+    .object({
+        from: z.iso
+            .datetime()
+            .transform((str) => DateTime.fromISO(str))
+            .optional(),
+        to: z.iso
+            .datetime()
+            .transform((str) => DateTime.fromISO(str))
+            .optional(),
+    })
+    .refine(({ to, from }) => {
+        if (isNil(to) && isNil(from)) return true
+        if (isNil(to) || isNil(from)) return false
+
+        if (!from.isValid || !to.isValid) return false
+
+        const range = to.diff(from)
+
+        return range.toMillis() > 0 && range.as('days') <= MAX_REPORTS_TIMEFRAME
+    })
+    .transform((query) => {
+        if (!isNil(query.from) && !isNil(query.to)) {
+            return {
+                from: query.from,
+                to: query.to,
+            }
+        }
+
+        return getDefaultReportsRange(DateTime.now())
+    })
 
 export const getReports = defineRoute<Env>()({
     method: 'get',
-    path: 'v0/reports',
-    schemas: {
-        query: z
-            .object({
-                from: z.iso.datetime().transform((str) => DateTime.fromISO(str)),
-                to: z.iso.datetime().transform((str) => DateTime.fromISO(str)),
+    path: '/',
+    docs: {
+        summary: 'List reports',
+        description: 'Returns reports between an optional from/to ISO datetime range.',
+        tags: ['reports'],
+        querySchema: z.object({
+            from: z.iso.datetime().optional(),
+            to: z.iso.datetime().optional(),
+        }),
+        responseSchema: z.array(
+            z.object({
+                timestamp: z.iso.datetime(),
+                stationId: z.string(),
+                directionId: z.string().nullable(),
+                lineId: z.string().nullable(),
+                isPredicted: z.boolean(),
             })
-            .or(
-                z.object({
-                    from: z.undefined(),
-                    to: z.undefined(),
-                })
-            )
-            .refine(({ to, from }) => {
-                if (isNil(to) || isNil(from)) return true
-
-                if (!from.isValid || !to.isValid) return false
-
-                const range = to.diff(from)
-
-                return range.toMillis() > 0 && range.as('days') <= MAX_REPORTS_TIMEFRAME
-            }),
+        ),
+    },
+    schemas: {
+        query: reportsQuerySchema,
     },
     handler: async (c) => {
         const reportsService = c.get('reportsService')
@@ -43,7 +74,7 @@ export const getReports = defineRoute<Env>()({
         // So that it is easier to reason about the cache behavior
         c.header('Cache-Control', 'no-store')
 
-        if (isNil(query.from) || isNil(query.to) || isDefaultReportsWindow({ from: query.from, to: query.to, now })) {
+        if (isDefaultReportsWindow({ from: query.from, to: query.to, now })) {
             return c.json(await reportsService.getDefaultReports(now))
         }
 
@@ -51,9 +82,72 @@ export const getReports = defineRoute<Env>()({
     },
 })
 
+export const getReportsByStation = defineRoute<Env>()({
+    method: 'get',
+    path: '/:stationId',
+    docs: {
+        summary: 'List reports by station',
+        description: 'Returns reports for a specific station between an optional from/to ISO datetime range.',
+        tags: ['reports'],
+        querySchema: z.object({
+            from: z.iso.datetime().optional(),
+            to: z.iso.datetime().optional(),
+        }),
+        responseSchema: z.array(
+            z.object({
+                timestamp: z.iso.datetime(),
+                stationId: z.string(),
+                directionId: z.string().nullable(),
+                lineId: z.string().nullable(),
+                isPredicted: z.boolean(),
+            })
+        ),
+    },
+    schemas: {
+        param: z.object({
+            stationId: z.string().min(1),
+        }),
+        query: reportsQuerySchema,
+    },
+    handler: async (c) => {
+        const reportsService = c.get('reportsService')
+
+        const query = c.req.valid('query')
+        const { stationId } = c.req.valid('param')
+
+        return c.json(
+            await reportsService.getReports({
+                from: query.from,
+                to: query.to,
+                stationId,
+                currentTime: DateTime.now(),
+            })
+        ) // Intentionally pass in local time
+    },
+})
+
 export const postReport = defineRoute<Env>()({
     method: 'post',
-    path: 'v0/reports',
+    path: '/',
+    docs: {
+        summary: 'Create a report',
+        description:
+            'Creates a report after anti-spam verification and post-processing. At least one of stationId, lineId, or directionId must be provided.',
+        tags: ['reports'],
+        requestSchema: z.object({
+            stationId: z.string().max(16).optional(),
+            lineId: z.string().max(16).nullable().optional(),
+            directionId: z.string().max(16).nullable().optional(),
+            source: z.enum(['mini_app', 'web_app', 'mobile_app', 'telegram']).optional(),
+        }),
+        responseSchema: z.object({
+            reportId: z.number().int(),
+            stationId: z.string(),
+            lineId: z.string().nullable(),
+            directionId: z.string().nullable(),
+            timestamp: z.iso.datetime(),
+        }),
+    },
     schemas: {
         json: insertReportSchema,
     },
