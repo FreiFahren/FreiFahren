@@ -5,46 +5,14 @@ import pino from 'pino'
 
 import { registerServices, Services, type Env } from './app-env'
 import { handleError } from './common/error-handler'
-import { registerRoutes } from './common/router'
+import { registerVersionedRoutes } from './common/router'
 import { db, DbConnection } from './db'
-import { getReports, postReport, ReportsService } from './modules/reports/'
-import { getRisk, RiskService } from './modules/risk'
+import { postFeedback } from './modules/feedback/feedback-routes'
+import { getReports, getReportsByStation, postReport, ReportsService } from './modules/reports/'
+import { getRisk } from './modules/risk/risk-routes'
+import { RiskService } from './modules/risk/risk-service'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
 import { getLines, getSegments, getStations } from './modules/transit/transit-routes'
-
-const app = new Hono<Env>()
-
-app.use(requestId())
-app.use(
-    pinoLogger({
-        pino: pino({
-            level: process.env.LOG_LEVEL ?? 'info',
-            transport: {
-                targets: [
-                    {
-                        target: 'pino-pretty',
-                        options: {
-                            colorize: true,
-                            ignore: 'pid,hostname,req,res,responseTime,reqId',
-                            translateTime: 'SYS:standard',
-                            destination: 1,
-                        },
-                    },
-                    {
-                        target: 'pino-roll',
-                        options: {
-                            file: './app.log',
-                            frequency: 'daily',
-                            mkdir: true,
-                        },
-                    },
-                ],
-            },
-        }),
-    })
-)
-
-app.onError(handleError)
 
 const createServices = (db: DbConnection) => {
     const transitNetworkDataService = new TransitNetworkDataService(db)
@@ -56,8 +24,64 @@ const createServices = (db: DbConnection) => {
     return { transitNetworkDataService, reportsService, riskService } satisfies Services
 }
 
-registerServices(app, createServices(db))
+export const createApp = (dbConnection: DbConnection = db) => {
+    const app = new Hono<Env>()
 
-registerRoutes(app, [getReports, postReport, getStations, getLines, getSegments, getRisk])
+    app.use(requestId())
+    app.use(
+        pinoLogger({
+            pino: pino({
+                level: process.env.LOG_LEVEL ?? 'info',
+                transport: {
+                    targets: [
+                        {
+                            target: 'pino-pretty',
+                            options: {
+                                colorize: true,
+                                ignore: 'pid,hostname,req,res,responseTime,reqId',
+                                translateTime: 'SYS:standard',
+                                destination: 1,
+                            },
+                        },
+                        {
+                            target: 'pino-roll',
+                            options: {
+                                file: './app.log',
+                                frequency: 'daily',
+                                mkdir: true,
+                            },
+                        },
+                    ],
+                },
+            }),
+        })
+    )
 
-export default app
+    app.onError(handleError)
+
+    registerServices(app, createServices(dbConnection))
+    registerVersionedRoutes(app, 'reports', 'v0', {
+        v0: [getReports, postReport, getReportsByStation],
+    })
+    registerVersionedRoutes(app, 'transit', 'v0', {
+        v0: [getStations, getLines, getSegments],
+    })
+    registerVersionedRoutes(app, 'feedback', 'v0', {
+        v0: [postFeedback],
+    })
+    registerVersionedRoutes(app, 'risk', 'v0', {
+        v0: [getRisk],
+    })
+
+    return app
+}
+
+const app = createApp()
+
+export { app }
+
+export default {
+    fetch: app.fetch,
+    port: 3000,
+    hostname: '0.0.0.0',
+}
