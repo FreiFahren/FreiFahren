@@ -46,7 +46,8 @@ export const getReports = defineRoute<Env>()({
     path: '/',
     docs: {
         summary: 'List reports',
-        description: 'Returns reports between an optional from/to ISO datetime range.',
+        description:
+            'Returns reports between an optional from/to ISO datetime range. Caching is disabled for routes that specify the from and to parameters.',
         tags: ['reports'],
         querySchema: z.object({
             from: z.iso.datetime().optional(),
@@ -69,12 +70,13 @@ export const getReports = defineRoute<Env>()({
         const reportsService = c.get('reportsService')
         const query = c.req.valid('query')
         const now = DateTime.now()
+        const hasExplicitRange = c.req.query('from') !== undefined || c.req.query('to') !== undefined
 
         // Tell client to not cache the response
         // So that it is easier to reason about the cache behavior
         c.header('Cache-Control', 'no-store')
 
-        if (isDefaultReportsWindow({ from: query.from, to: query.to, now })) {
+        if (!hasExplicitRange && isDefaultReportsWindow({ from: query.from, to: query.to, now })) {
             return c.json(await reportsService.getDefaultReports(now))
         }
 

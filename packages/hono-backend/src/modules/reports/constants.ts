@@ -1,7 +1,7 @@
 import { DateTime, Duration, DurationLike } from 'luxon'
 
 export const DEFAULT_REPORTS_TIMEFRAME: DurationLike = { minutes: 60 }
-export const REPORTS_CACHE_TTL_MS = 5 * 60 * 1000
+export const REPORTS_CACHE_TTL_MS = 1 * 60 * 1000
 
 // Compile trick to show that MAX_REPORTS_TIMEFRAME is Days and not a number
 type Days = number & { readonly __brand: 'Days' }

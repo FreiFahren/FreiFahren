@@ -740,23 +740,26 @@ describe('GET reports cache routing', () => {
         setSystemTime()
     })
 
-    it('reuses the default cache for plain and explicit rolling 1h requests within the ttl', async () => {
-        const now = DateTime.now().toUTC()
+    it('bypasses the default cache for explicit rolling 1h requests within the ttl', async () => {
+        const now = DateTime.utc(2024, 1, 15, 12, 0, 0)
         setSystemTime(now.toJSDate())
         const payload = await getValidReportPayload()
         const routeApp = createApp()
-        const writerApp = createApp()
 
-        expect((await sendReportRequest(payload, writerApp)).status).toBe(200)
+        await sendReportAt(now.minus({ minutes: 30 }).toJSDate(), payload.stationId, payload.lineId)
+
+        setSystemTime(now.toJSDate())
 
         const first = await appRequestWithRedirect('/reports', undefined, routeApp)
         expect(first.status).toBe(200)
         expect(first.headers.get('Cache-Control')).toBe('no-store')
         expect((await getRealReports(first)).length).toBe(1)
 
-        expect((await sendReportRequest(payload, writerApp)).status).toBe(200)
-        const to = now.minus({ minutes: 4 })
-        const from = to.minus(DEFAULT_REPORTS_TIMEFRAME)
+        await sendReportAt(now.minus({ minutes: 10 }).toJSDate(), payload.stationId, payload.lineId)
+
+        setSystemTime(now.toJSDate())
+        const to = now
+        const from = now.minus(DEFAULT_REPORTS_TIMEFRAME)
 
         const second = await appRequestWithRedirect(
             `/reports?from=${encodeURIComponent(toIsoSeconds(from))}&to=${encodeURIComponent(toIsoSeconds(to))}`,
@@ -765,7 +768,7 @@ describe('GET reports cache routing', () => {
         )
 
         expect(second.status).toBe(200)
-        expect((await getRealReports(second)).length).toBe(1)
+        expect((await getRealReports(second)).length).toBe(2)
     })
 
     it('refreshes the default cache after the ttl expires', async () => {
