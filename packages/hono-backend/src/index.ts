@@ -11,40 +11,6 @@ import { getReports, postReport, ReportsService } from './modules/reports/'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
 import { getLines, getStations } from './modules/transit/transit-routes'
 
-const app = new Hono<Env>()
-
-app.use(requestId())
-app.use(
-    pinoLogger({
-        pino: pino({
-            level: process.env.LOG_LEVEL ?? 'info',
-            transport: {
-                targets: [
-                    {
-                        target: 'pino-pretty',
-                        options: {
-                            colorize: true,
-                            ignore: 'pid,hostname,req,res,responseTime,reqId',
-                            translateTime: 'SYS:standard',
-                            destination: 1,
-                        },
-                    },
-                    {
-                        target: 'pino-roll',
-                        options: {
-                            file: './app.log',
-                            frequency: 'daily',
-                            mkdir: true,
-                        },
-                    },
-                ],
-            },
-        }),
-    })
-)
-
-app.onError(handleError)
-
 const createServices = (db: DbConnection) => {
     const transitNetworkDataService = new TransitNetworkDataService(db)
 
@@ -53,8 +19,47 @@ const createServices = (db: DbConnection) => {
     return { transitNetworkDataService, reportsService } satisfies Services
 }
 
-registerServices(app, createServices(db))
+export const createApp = (dbConnection: DbConnection = db) => {
+    const app = new Hono<Env>()
 
-registerRoutes(app, [getReports, postReport, getStations, getLines])
+    app.use(requestId())
+    app.use(
+        pinoLogger({
+            pino: pino({
+                level: process.env.LOG_LEVEL ?? 'info',
+                transport: {
+                    targets: [
+                        {
+                            target: 'pino-pretty',
+                            options: {
+                                colorize: true,
+                                ignore: 'pid,hostname,req,res,responseTime,reqId',
+                                translateTime: 'SYS:standard',
+                                destination: 1,
+                            },
+                        },
+                        {
+                            target: 'pino-roll',
+                            options: {
+                                file: './app.log',
+                                frequency: 'daily',
+                                mkdir: true,
+                            },
+                        },
+                    ],
+                },
+            }),
+        })
+    )
+
+    app.onError(handleError)
+
+    registerServices(app, createServices(dbConnection))
+    registerRoutes(app, [getReports, postReport, getStations, getLines])
+
+    return app
+}
+
+const app = createApp()
 
 export default app

@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lte, max } from 'drizzle-orm'
+import { and, desc, eq, gte, lte } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
 
@@ -8,6 +8,7 @@ import { DbConnection, InsertReport, reports } from '../../db/'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
 import type { StationId } from '../transit/types'
 
+import { getDefaultReportsRange, REPORTS_CACHE_TTL_MS } from './constants'
 import {
     assignLineIfSingleOption,
     clearStationReferenceIfNotOnLine,
@@ -76,24 +77,42 @@ type ReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'stationId'
     isPredicted: boolean
 }
 
+type DefaultReportsCacheEntry = {
+    expiresAtMillis: number
+    promise: Promise<ReportSummary[]>
+}
+
 export class ReportsService {
-    private latestReportTimestamp: DateTime | undefined = undefined
+    private defaultReportsCache: DefaultReportsCacheEntry | null = null
 
     constructor(
         private db: DbConnection,
         private transitNetworkDataService: TransitNetworkDataService
     ) {}
 
-    async getLatestReportTimestamp(): Promise<DateTime | undefined> {
-        if (this.latestReportTimestamp !== undefined) {
-            return this.latestReportTimestamp
+    async getDefaultReports(currentTime: DateTime): Promise<ReportSummary[]> {
+        const cachedEntry = this.defaultReportsCache
+        if (cachedEntry !== null && cachedEntry.expiresAtMillis > currentTime.toMillis()) {
+            return cachedEntry.promise
         }
-        // Called when `GET /reports` is called before `POST /reports` after a restart
-        const [result] = await this.db.select({ latest: max(reports.timestamp) }).from(reports)
-        if (result.latest) {
-            this.latestReportTimestamp = DateTime.fromJSDate(result.latest)
+
+        const range = getDefaultReportsRange(currentTime)
+        const promise = this.getReportsUncached({ ...range, currentTime })
+        const cacheEntry = {
+            expiresAtMillis: currentTime.toMillis() + REPORTS_CACHE_TTL_MS,
+            promise,
         }
-        return this.latestReportTimestamp
+        this.defaultReportsCache = cacheEntry
+
+        try {
+            return await promise
+        } catch (error) {
+            if (this.defaultReportsCache === cacheEntry) {
+                this.defaultReportsCache = null
+            }
+
+            throw error
+        }
     }
 
     async verifyRequest(headers: Record<string, string>): Promise<void> {
@@ -139,6 +158,18 @@ export class ReportsService {
     }
 
     async getReports({
+        from,
+        to,
+        currentTime,
+    }: {
+        from: DateTime
+        to: DateTime
+        currentTime: DateTime
+    }): Promise<ReportSummary[]> {
+        return this.getReportsUncached({ from, to, currentTime })
+    }
+
+    private async getReportsUncached({
         from,
         to,
         currentTime,
@@ -264,7 +295,7 @@ export class ReportsService {
             timestamp: Date
         }
     }> {
-        const [insertedReport] = await this.db.insert(reports).values(reportData).returning({
+        const [insertedReport] = await this.db.insert(reports).values({ ...reportData, timestamp: new Date() }).returning({
             reportId: reports.reportId,
             stationId: reports.stationId,
             lineId: reports.lineId,
@@ -273,11 +304,7 @@ export class ReportsService {
         })
         // Drizzle returns the inserted row for Postgres. If this ever becomes undefined, we want to surface it fast.
         const report = insertedReport!
-
-        const insertedTimestamp = DateTime.fromJSDate(report.timestamp)
-        if (this.latestReportTimestamp === undefined || insertedTimestamp > this.latestReportTimestamp) {
-            this.latestReportTimestamp = insertedTimestamp
-        }
+        this.defaultReportsCache = null
 
         let telegramNotificationSuccess = true
 

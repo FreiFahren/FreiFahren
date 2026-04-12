@@ -1,12 +1,16 @@
-import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, setSystemTime } from 'bun:test'
 import { eq } from 'drizzle-orm'
 import { DateTime, Settings } from 'luxon'
 
 import { db, lineStations, lines, reports, stations } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
-import app from '../src/index'
-
-import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from '../src/modules/reports/constants'
+import app, { createApp } from '../src/index'
+import {
+    DEFAULT_REPORTS_TIMEFRAME,
+    getDefaultReportsRange,
+    MAX_REPORTS_TIMEFRAME,
+    REPORTS_CACHE_TTL_MS,
+} from '../src/modules/reports/constants'
 import { sendReportRequest } from './test-utils'
 
 let testStationId: string
@@ -27,6 +31,33 @@ const createReportWithTimestamp = async (
         timestamp,
         source: 'telegram',
     })
+}
+
+const toIsoSeconds = (value: DateTime) => value.toUTC().toISO({ suppressMilliseconds: true })!
+
+const getRealReports = async (response: Response) => {
+    const body = (await response.json()) as Array<{
+        timestamp: string
+        stationId: string
+        isPredicted: boolean
+    }>
+
+    return body.filter((report) => !report.isPredicted)
+}
+
+const getValidReportPayload = async () => {
+    const [stationOnLine] = await db
+        .select({ stationId: lineStations.stationId })
+        .from(lineStations)
+        .where(eq(lineStations.lineId, testLineId))
+        .limit(1)
+
+    return {
+        stationId: stationOnLine.stationId,
+        lineId: testLineId,
+        directionId: stationOnLine.stationId,
+        source: 'telegram' as const,
+    }
 }
 
 describe('Timeframe filtering', () => {
@@ -612,119 +643,106 @@ describe('Predicted reports threshold', () => {
     })
 })
 
-describe('Last-Modified / If-Modified-Since caching', () => {
-    let cachingStationId: string
-    let cachingLineId: string
-
-    const reportPayload = () => ({
-        stationId: cachingStationId,
-        lineId: cachingLineId,
-        directionId: cachingStationId,
-        source: 'telegram',
-    })
-
-    const get = (headers?: Record<string, string>) =>
-        headers ? app.request('/v0/reports', { headers }) : app.request('/v0/reports')
-
-    beforeAll(async () => {
-        await seedBaseData(db)
-        const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
-        cachingLineId = line.id
-        // Pick a station that's actually on the selected line so postProcessReport doesn't clear it
-        const [stationOnLine] = await db
-            .select({ stationId: lineStations.stationId })
-            .from(lineStations)
-            .where(eq(lineStations.lineId, cachingLineId))
-            .limit(1)
-        cachingStationId = stationOnLine.stationId
-    })
-
+describe('GET reports cache routing', () => {
     beforeEach(async () => {
         await db.delete(reports)
     })
 
-    afterEach(async () => {
-        await db.delete(reports)
+    afterEach(() => {
         Settings.now = () => Date.now()
+        setSystemTime()
     })
 
-    it('includes Last-Modified in the response when reports exist', async () => {
-        await sendReportRequest(reportPayload())
+    it('reuses the default cache for plain and explicit rolling 1h requests within the ttl', async () => {
+        const now = DateTime.now().toUTC()
+        setSystemTime(now.toJSDate())
+        const payload = await getValidReportPayload()
+        const routeApp = createApp()
+        const writerApp = createApp()
 
-        const response = await get()
+        expect((await sendReportRequest(payload, writerApp)).status).toBe(200)
+
+        const first = await routeApp.request('/v0/reports')
+        expect(first.status).toBe(200)
+        expect(first.headers.get('Cache-Control')).toBe('no-store')
+        expect((await getRealReports(first)).length).toBe(1)
+
+        expect((await sendReportRequest(payload, writerApp)).status).toBe(200)
+        const to = now.minus({ minutes: 4 })
+        const from = to.minus(DEFAULT_REPORTS_TIMEFRAME)
+
+        const second = await routeApp.request(
+            `/v0/reports?from=${encodeURIComponent(toIsoSeconds(from))}&to=${encodeURIComponent(toIsoSeconds(to))}`
+        )
+
+        expect(second.status).toBe(200)
+        expect((await getRealReports(second)).length).toBe(1)
+    })
+
+    it('refreshes the default cache after the ttl expires', async () => {
+        const now = DateTime.now().toUTC()
+        setSystemTime(now.toJSDate())
+        const payload = await getValidReportPayload()
+        const routeApp = createApp()
+        const writerApp = createApp()
+
+        expect((await sendReportRequest(payload, writerApp)).status).toBe(200)
+
+        const first = await routeApp.request('/v0/reports')
+        expect(first.status).toBe(200)
+        expect((await getRealReports(first)).length).toBe(1)
+
+        expect((await sendReportRequest(payload, writerApp)).status).toBe(200)
+        setSystemTime(now.plus({ milliseconds: REPORTS_CACHE_TTL_MS + 1 }).toJSDate())
+
+        const second = await routeApp.request('/v0/reports')
+        expect(second.status).toBe(200)
+        expect((await getRealReports(second)).length).toBe(2)
+    })
+
+    it('bypasses the default cache for non-default ranges', async () => {
+        const now = DateTime.now().toUTC()
+        setSystemTime(now.toJSDate())
+        const payload = await getValidReportPayload()
+        const routeApp = createApp()
+        const writerApp = createApp()
+
+        expect((await sendReportRequest(payload, writerApp)).status).toBe(200)
+
+        const first = await routeApp.request('/v0/reports')
+        expect(first.status).toBe(200)
+        expect((await getRealReports(first)).length).toBe(1)
+
+        expect((await sendReportRequest(payload, writerApp)).status).toBe(200)
+        const to = now
+        const from = now.minus({ minutes: 30 })
+
+        const response = await routeApp.request(
+            `/v0/reports?from=${encodeURIComponent(toIsoSeconds(from))}&to=${encodeURIComponent(toIsoSeconds(to))}`
+        )
 
         expect(response.status).toBe(200)
-        expect(response.headers.get('Last-Modified')).not.toBeNull()
+        expect((await getRealReports(response)).length).toBe(2)
     })
 
-    it('returns 304 with an empty body when If-Modified-Since matches Last-Modified', async () => {
-        await sendReportRequest(reportPayload())
+    it('invalidates the default cache after posting a report through the api', async () => {
+        const now = DateTime.now().toUTC()
+        setSystemTime(now.toJSDate())
+        const payload = await getValidReportPayload()
 
-        const first = await get()
-        const lastModified = first.headers.get('Last-Modified')!
+        const routeApp = createApp()
 
-        const second = await get({ 'If-Modified-Since': lastModified })
+        expect((await sendReportRequest(payload, routeApp)).status).toBe(200)
 
-        expect(second.status).toBe(304)
-        expect(second.headers.get('Last-Modified')).toBe(lastModified)
-        expect(await second.text()).toBe('')
-    })
+        const first = await routeApp.request('/v0/reports')
+        expect(first.status).toBe(200)
+        expect((await getRealReports(first)).length).toBe(1)
 
-    it('returns 200 with data when If-Modified-Since is after the latest report', async () => {
-        await sendReportRequest(reportPayload())
+        const postResponse = await sendReportRequest(payload, routeApp)
+        expect(postResponse.status).toBe(200)
 
-        const future = DateTime.now().plus({ hours: 1 }).toHTTP()!
-
-        const response = await get({ 'If-Modified-Since': future })
-
-        expect(response.status).toBe(200)
-        expect(response.headers.get('Last-Modified')).not.toBeNull()
-    })
-
-    it('returns 200 with Last-Modified when If-Modified-Since predates the latest report', async () => {
-        await sendReportRequest(reportPayload())
-
-        const past = DateTime.now().minus({ hours: 1 }).toHTTP()!
-
-        const response = await get({ 'If-Modified-Since': past })
-
-        expect(response.status).toBe(200)
-        expect(DateTime.fromHTTP(response.headers.get('Last-Modified')!) > DateTime.fromHTTP(past)).toBe(true)
-    })
-
-    it('returns 200 when If-Modified-Since is older than 5 minutes even without a new report', async () => {
-        await sendReportRequest(reportPayload())
-
-        const first = await get()
-        const lastModified = first.headers.get('Last-Modified')!
-
-        // Simulate 6 minutes passing with no new inserts.
-        // Pre-compute the millis before assigning — Settings.now must not call DateTime.now() itself
-        // or it will recurse infinitely since Luxon routes DateTime.now() through Settings.now.
-        const sixMinutesLater = DateTime.fromHTTP(lastModified)!.plus({ minutes: 6 }).toMillis()
-        Settings.now = () => sixMinutesLater
-
-        const response = await get({ 'If-Modified-Since': lastModified })
-        expect(response.status).toBe(200)
-    })
-
-    it('reflects a new report in Last-Modified and invalidates the client cache', async () => {
-        await sendReportRequest(reportPayload())
-
-        const first = await get()
-        const t1 = first.headers.get('Last-Modified')!
-
-        // HTTP-date has 1-second precision — wait long enough for the next second to tick over
-        // so that the second report gets a strictly later timestamp in HTTP-date format
-        await new Promise((r) => setTimeout(r, 1100))
-
-        await sendReportRequest(reportPayload())
-
-        // The previously valid If-Modified-Since is now stale → 200
-        const response = await get({ 'If-Modified-Since': t1 })
-        expect(response.status).toBe(200)
-
-        const t2 = response.headers.get('Last-Modified')!
-        expect(DateTime.fromHTTP(t2) > DateTime.fromHTTP(t1)).toBe(true)
+        const second = await routeApp.request('/v0/reports')
+        expect(second.status).toBe(200)
+        expect((await getRealReports(second)).length).toBe(2)
     })
 })

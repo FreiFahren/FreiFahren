@@ -1,7 +1,7 @@
 import app from '../src/index'
 
-export const sendReportRequest = async (payload: object) => {
-    return app.request('/v0/reports', {
+export const sendReportRequest = async (payload: object, routeApp = app) => {
+    return routeApp.request('/v0/reports', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
