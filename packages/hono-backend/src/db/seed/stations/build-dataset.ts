@@ -47,10 +47,11 @@ const collectNodes = (elements: OsmElement[], nodes: Map<number, RawStation>) =>
         const ds100 = tags['ref:ds100']
         const railwayRef = tags['railway:ref']
         const ref = tags.ref
-        const code = (ds100 !== undefined && ds100 !== '' ? ds100 : undefined)
-            ?? (railwayRef !== undefined && railwayRef !== '' ? railwayRef : undefined)
-            ?? (ref !== undefined && ref !== '' ? ref : undefined)
-            ?? `n${node.id}`
+        const code =
+            (ds100 !== undefined && ds100 !== '' ? ds100 : undefined) ??
+            (railwayRef !== undefined && railwayRef !== '' ? railwayRef : undefined) ??
+            (ref !== undefined && ref !== '' ? ref : undefined) ??
+            `n${node.id}`
         nodes.set(node.id, {
             code,
             name: tags.name ?? '',
