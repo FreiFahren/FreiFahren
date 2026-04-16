@@ -1,4 +1,4 @@
-import { jsonb, pgTable, serial, uniqueIndex, varchar } from 'drizzle-orm/pg-core'
+import { integer, jsonb, pgTable, serial, uniqueIndex, varchar } from 'drizzle-orm/pg-core'
 
 import { lines } from './lines'
 import { stations } from './stations'
@@ -16,6 +16,7 @@ export const segments = pgTable(
         toStationId: varchar({ length: 16 })
             .notNull()
             .references(() => stations.id, { onDelete: 'cascade' }),
+        position: integer().notNull(),
         color: varchar({ length: 7 }).notNull(),
         coordinates: jsonb().notNull().$type<[number, number][]>(),
     },

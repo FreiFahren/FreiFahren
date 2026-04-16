@@ -18,7 +18,8 @@ export const handleError = (err: Error, c: Context) => {
                 message: err.message,
                 details: {
                     internal_code: err.internalCode,
-                    description: err.description,
+                    // We do not want to leak sensitive information to the client in production
+                    description: process.env.NODE_ENV === 'development' ? err.description : undefined,
                 },
             },
             err.statusCode
@@ -31,7 +32,8 @@ export const handleError = (err: Error, c: Context) => {
             message: 'Internal Server Error',
             details: {
                 internal_code: 'UNKNOWN_ERROR',
-                description: process.env.NODE_ENV === 'production' ? undefined : err.message,
+                // We do not want to leak sensitive information to the client in production
+                description: process.env.NODE_ENV === 'development' ? err.message : undefined,
             },
         },
         500 as ContentfulStatusCode

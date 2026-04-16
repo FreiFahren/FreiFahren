@@ -5,7 +5,7 @@ export type InternalCode =
     | 'UNKNOWN_ERROR'
     | 'SPAM_REPORT_DETECTED'
     | 'VALIDATION_FAILED'
-
+    | 'RISK_MODEL_FAILED'
 export interface AppErrorDetails {
     internal_code: InternalCode
     description?: string

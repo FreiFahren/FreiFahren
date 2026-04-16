@@ -9,6 +9,8 @@ import { registerVersionedRoutes } from './common/router'
 import { db, DbConnection } from './db'
 import { postFeedback } from './modules/feedback/feedback-routes'
 import { getReports, getReportsByStation, postReport, ReportsService } from './modules/reports/'
+import { getRisk } from './modules/risk/risk-routes'
+import { RiskService } from './modules/risk/risk-service'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
 import { getLines, getSegments, getStations } from './modules/transit/transit-routes'
 
@@ -17,7 +19,9 @@ const createServices = (db: DbConnection) => {
 
     const reportsService = new ReportsService(db, transitNetworkDataService)
 
-    return { transitNetworkDataService, reportsService } satisfies Services
+    const riskService = new RiskService(reportsService, transitNetworkDataService)
+
+    return { transitNetworkDataService, reportsService, riskService } satisfies Services
 }
 
 export const createApp = (dbConnection: DbConnection = db) => {
@@ -64,6 +68,9 @@ export const createApp = (dbConnection: DbConnection = db) => {
     })
     registerVersionedRoutes(app, 'feedback', 'v0', {
         v0: [postFeedback],
+    })
+    registerVersionedRoutes(app, 'risk', 'v0', {
+        v0: [getRisk],
     })
 
     return app
