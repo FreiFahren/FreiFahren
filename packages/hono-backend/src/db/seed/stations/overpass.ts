@@ -41,8 +41,8 @@ relation
   (area.a)
   ->.routes;
 
-// All member nodes (platforms, stop_positions, etc.)
-(.routes; >>;)->.routeNodes;
+// Only the direct member nodes of routes (stops, platforms — NOT track geometry)
+node(r.routes)->.routeNodes;
 
 // stop_area relations that contain any of those nodes
 rel
@@ -51,7 +51,7 @@ rel
   ->.stopAreas;
 
 // All nodes inside those stop_areas (incl. station nodes)
-(.stopAreas; >>;)->.stopNodes;
+node(r.stopAreas)->.stopNodes;
 
 // Also pull any station node referenced directly
 node.routeNodes["railway"="station"]->.directStations;
