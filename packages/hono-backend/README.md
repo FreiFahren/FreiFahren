@@ -1,5 +1,15 @@
 # New Freifahren backend using Hono + Drizzle
 
+## .env
+
+The .env file contains the following variables:
+
+- `DATABASE_URL`: The URL of the database to use.
+- `DATABASE_URL_TEST`: The URL of the test database to use.
+- `NLP_SERVICE_URL`: The URL of the NLP service to use.
+- `REPORT_PASSWORD`: The password to use for the report API.
+- `SECURITY_MICROSERVICE_URL`: The URL of the security microservice to use.
+
 ## Start containers
 
 You can start the DB and bun container like so:
@@ -51,3 +61,11 @@ just db-migrate
 Drizzle provides it's own UI to interact with the DB. Simply run `just db-studio` and open the link you get in your browser.
 
 If you want to access the DB with something like Postico, use the following connection string: `postgres://postgres:postgres@localhost:5432/freifahren`
+
+## API Documentation
+
+The rewrite backend now exposes OpenAPI docs and an interactive Scalar UI.
+
+- Interactive docs: `http://localhost:3000/docs`
+
+The docs are generated from route-level metadata in the rewrite endpoint definitions.

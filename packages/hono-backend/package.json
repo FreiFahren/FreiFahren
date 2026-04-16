@@ -16,6 +16,7 @@
         "db:dangerously-reset-do-not-run-in-production": "psql $DATABASE_URL -c 'DROP SCHEMA public CASCADE; DROP SCHEMA drizzle CASCADE; CREATE SCHEMA public;' && drizzle-kit migrate && bun run src/db/seed/index.ts"
     },
     "dependencies": {
+        "@scalar/hono-api-reference": "^0.9.41",
         "@types/lodash": "^4.17.20",
         "@types/luxon": "^3.7.1",
         "drizzle-orm": "^0.44.7",

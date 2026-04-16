@@ -1,4 +1,3 @@
- 
 import { db } from '../index'
 
 import { seedBaseData } from './seed'
