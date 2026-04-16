@@ -6,6 +6,9 @@ import { app } from '../src/index'
  * @param init - The request init.
  * @param targetApp - The app to send the request to. Defaults to the singleton app.
  * @returns The response.
+ * We use this instead of app.request because we want to test the latest version of the API.
+ * Otherwise we would have to specify the route version in every test.
+ * With this function we can just call the route path and it will be redirected to the latest version.
  */
 export const appRequestWithRedirect = async (path: string, init?: RequestInit, targetApp = app) => {
     const response = await targetApp.request(path, init)
