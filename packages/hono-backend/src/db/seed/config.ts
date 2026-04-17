@@ -62,8 +62,8 @@ export const SEED_CONFIG = {
     // The Overpass API configuration.
     overpass: {
         url: 'https://overpass-api.de/api/interpreter',
-        timeoutSeconds: 1200,
-        fetchTimeoutMs: 180_000,
+        timeoutSeconds: 180,
+        fetchTimeoutMs: 200_000,
     },
 
     mergeThresholdMeters: 250, // The threshold in meters for merging proximate stations.

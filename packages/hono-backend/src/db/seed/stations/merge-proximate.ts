@@ -48,40 +48,88 @@ const pickRepresentative = (group: string[], dataset: StationDataset): string =>
         return best
     })
 
+// Extract the core station name by stripping common transit prefixes and suffixes.
+// Works across cities: "S+U Alexanderplatz/Gontardstraße" → "alexanderplatz"
+// "Gare de Lyon - Diderot" → "gare de lyon"
+const coreName = (name: string): string =>
+    name
+        .toLowerCase()
+        .split(/[/\-–—]/)  // Split on slash or dash variants
+        .map((p) => p.trim())[0] // Take the first part (main name)
+
+// Check if two stations share the same core name.
+const namesMatch = (a: string, b: string): boolean => {
+    const ca = coreName(a)
+    const cb = coreName(b)
+    return ca === cb || ca.includes(cb) || cb.includes(ca)
+}
+
 // We merge proximate stations, so that they can be considered as the same station by the risk model.
 // This is important since inspectors can walk between the platforms of the merged stations.
 // To users they are basically the same station, so we merge them to avoid duplicate stations in the database.
+// Union-Find for transitive grouping: if A is near B and B is near C, all three merge.
+const makeUnionFind = (items: string[]) => {
+    const parent = new Map<string, string>()
+    for (const item of items) parent.set(item, item)
+
+    const find = (x: string): string => {
+        let root = x
+        while (parent.get(root) !== root) root = parent.get(root)!
+        // Path compression
+        let curr = x
+        while (curr !== root) {
+            const next = parent.get(curr)!
+            parent.set(curr, root)
+            curr = next
+        }
+        return root
+    }
+
+    const union = (a: string, b: string) => {
+        parent.set(find(a), find(b))
+    }
+
+    const groups = (): Map<string, string[]> => {
+        const result = new Map<string, string[]>()
+        for (const item of items) {
+            const root = find(item)
+            const group = result.get(root) ?? []
+            group.push(item)
+            result.set(root, group)
+        }
+        return result
+    }
+
+    return { find, union, groups }
+}
+
 export const mergeProximate = (dataset: StationDataset): StationDataset => {
     const threshold = SEED_CONFIG.mergeThresholdMeters
     const merged: StationDataset = new Map()
-    const used = new Set<string>()
     const codes = Array.from(dataset.keys())
+    const uf = makeUnionFind(codes)
 
+    // Build transitive groups: merge only if close AND same station name
     for (let i = 0; i < codes.length; i++) {
-        const sid = codes[i]
-        if (used.has(sid)) continue
-
-        const group = [sid]
-        const sEntry = dataset.get(sid)!
-
+        const sEntry = dataset.get(codes[i])!
         for (let j = i + 1; j < codes.length; j++) {
-            const oid = codes[j]
-            if (used.has(oid)) continue
-
-            const oEntry = dataset.get(oid)!
-            if (haversine(sEntry.coordinates, oEntry.coordinates) <= threshold) {
-                group.push(oid)
+            const oEntry = dataset.get(codes[j])!
+            if (
+                haversine(sEntry.coordinates, oEntry.coordinates) <= threshold &&
+                namesMatch(sEntry.name, oEntry.name)
+            ) {
+                uf.union(codes[i], codes[j])
             }
         }
+    }
 
-        for (const g of group) used.add(g)
+    for (const [, group] of uf.groups()) {
 
         const rep = pickRepresentative(group, dataset)
         const repEntry = dataset.get(rep)!
 
-        // Average coordinates across group
-        const avgLat = group.reduce((sum, g) => sum + dataset.get(g)!.coordinates.latitude, 0) / group.length
-        const avgLng = group.reduce((sum, g) => sum + dataset.get(g)!.coordinates.longitude, 0) / group.length
+        // Use representative station's coordinates (averaging shifts the point off the real station)
+        const { latitude: avgLat, longitude: avgLng } = repEntry.coordinates
 
         // Union lines and route types
         const allLines = new Set<string>()

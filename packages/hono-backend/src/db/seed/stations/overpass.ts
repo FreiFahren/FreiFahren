@@ -23,17 +23,27 @@ export interface OsmRelation {
 
 export type OsmElement = OsmNode | OsmRelation | { type: 'way'; [k: string]: unknown }
 
-export const buildStationsOverpassQuery = (): string => {
-    const { city, adminLevel, lines, overpass } = SEED_CONFIG
+const OVERPASS_ENDPOINTS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter']
+
+const BATCH_SIZE = 10
+
+const chunkLines = (lines: readonly string[]): string[][] => {
+    const chunks: string[][] = []
+    for (let i = 0; i < lines.length; i += BATCH_SIZE) {
+        chunks.push(lines.slice(i, i + BATCH_SIZE) as string[])
+    }
+    return chunks
+}
+
+const buildBatchQuery = (lines: string[]): string => {
+    const { city, adminLevel, overpass } = SEED_CONFIG
     const lineRegex = '^(' + lines.map((l) => l.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')$'
 
     return `
 [out:json][timeout:${overpass.timeoutSeconds}];
 
-// City administrative area
 area["name"="${city}"]["boundary"="administrative"]["admin_level"~"${adminLevel}"]->.a;
 
-// Route relations for the lines we want
 relation
   ["type"="route"]
   ["route"~"^(train|subway|tram|light_rail)$"]
@@ -41,53 +51,88 @@ relation
   (area.a)
   ->.routes;
 
-// Only the direct member nodes of routes (stops, platforms — NOT track geometry)
 node(r.routes)->.routeNodes;
 
-// stop_area relations that contain any of those nodes
 rel
   ["public_transport"="stop_area"]
   (bn.routeNodes)
   ->.stopAreas;
 
-// All nodes inside those stop_areas (incl. station nodes)
 node(r.stopAreas)->.stopNodes;
 
-// Also pull any station node referenced directly
-node.routeNodes["railway"="station"]->.directStations;
-node.routeNodes["public_transport"="station"]->.directStationsPT;
-
-// Union everything and output
 (
   .routes;
   .stopAreas;
   .routeNodes;
   .stopNodes;
-  .directStations;
-  .directStationsPT;
 );
 out body;
 `
 }
 
-export const fetchStationElements = async (): Promise<OsmElement[]> => {
-    const query = buildStationsOverpassQuery()
-    const { url, fetchTimeoutMs } = SEED_CONFIG.overpass
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-    console.log('[seed:stations] Fetching from Overpass API...')
+const MAX_RETRIES = 5
+const RETRY_DELAY_MS = 30_000
 
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ data: query }),
-        signal: AbortSignal.timeout(fetchTimeoutMs),
-    })
+const fetchWithRetry = async (query: string, fetchTimeoutMs: number): Promise<OsmElement[]> => {
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        for (const endpoint of OVERPASS_ENDPOINTS) {
+            console.log(`[seed:stations]   Trying ${endpoint} (attempt ${attempt}/${MAX_RETRIES})...`)
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ data: query }),
+                    signal: AbortSignal.timeout(fetchTimeoutMs),
+                })
 
-    if (!response.ok) {
-        throw new Error(`Overpass API returned ${response.status}: ${await response.text()}`)
+                if (response.status === 429 || response.status === 504) {
+                    console.warn(`[seed:stations]   ${endpoint} returned ${response.status}`)
+                    continue
+                }
+
+                if (!response.ok) {
+                    console.warn(`[seed:stations]   ${endpoint} returned ${response.status}, trying next...`)
+                    continue
+                }
+
+                const json = (await response.json()) as { elements: OsmElement[] }
+                return json.elements
+            } catch (err) {
+                console.warn(`[seed:stations]   ${endpoint} failed: ${err instanceof Error ? err.message : err}`)
+            }
+        }
+
+        if (attempt < MAX_RETRIES) {
+            const delay = RETRY_DELAY_MS * attempt
+            console.log(`[seed:stations]   All endpoints failed, retrying in ${delay / 1000}s...`)
+            await sleep(delay)
+        }
     }
 
-    const json = (await response.json()) as { elements: OsmElement[] }
-    console.log(`[seed:stations] Received ${json.elements.length} elements`)
-    return json.elements
+    throw new Error('All Overpass API endpoints failed after retries')
+}
+
+export const fetchStationElements = async (): Promise<OsmElement[]> => {
+    const { fetchTimeoutMs } = SEED_CONFIG.overpass
+    const batches = chunkLines(SEED_CONFIG.lines)
+    const allElements: OsmElement[] = []
+
+    for (let i = 0; i < batches.length; i++) {
+        if (i > 0) {
+            console.log('[seed:stations] Waiting 30s for rate limit cooldown...')
+            await sleep(30_000)
+        }
+
+        const batch = batches[i]
+        console.log(`[seed:stations] Batch ${i + 1}/${batches.length}: ${batch.join(', ')}`)
+        const query = buildBatchQuery(batch)
+        const elements = await fetchWithRetry(query, fetchTimeoutMs)
+        console.log(`[seed:stations]   Got ${elements.length} elements`)
+        allElements.push(...elements)
+    }
+
+    console.log(`[seed:stations] Total: ${allElements.length} elements`)
+    return allElements
 }
