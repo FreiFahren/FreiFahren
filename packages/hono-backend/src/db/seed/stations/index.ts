@@ -5,7 +5,7 @@ import { stations } from '../../schema/stations'
 
 import { buildDataset } from './build-dataset'
 import { mergeProximate } from './merge-proximate'
-import { fetchStationElements, type OsmElement, type OsmNode, type OsmRelation } from './overpass'
+import type { OsmElement, OsmNode, OsmRelation } from './overpass'
 
 const mergeRelationMembers = (existing: OsmRelation, rel: OsmRelation) => {
     const seen = new Set(existing.members.map((m) => `${m.type}:${m.ref}:${m.role}`))
@@ -42,8 +42,7 @@ const deduplicateElements = (elements: OsmElement[]): OsmElement[] => {
     return [...nodes.values(), ...relations.values(), ...other]
 }
 
-export const seedStations = async (db: DbConnection): Promise<void> => {
-    const rawElements = await fetchStationElements()
+export const seedStationsFromElements = async (db: DbConnection, rawElements: OsmElement[]): Promise<void> => {
     const elements = deduplicateElements(rawElements)
     console.log(`[seed:stations] ${rawElements.length} raw → ${elements.length} deduplicated elements`)
     const dataset = buildDataset(elements)
