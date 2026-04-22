@@ -103,10 +103,6 @@ const PrivacyPolicy = () => {
             <h2>{t('PrivacyPolicy.sections.telegramMessages.title')}</h2>
             <p>{t('PrivacyPolicy.sections.telegramMessages.content')}</p>
 
-            <h2>{t('PrivacyPolicy.sections.analytics.title')}</h2>
-            <p>{t('PrivacyPolicy.sections.analytics.content')}</p>
-            <p>{t('PrivacyPolicy.sections.analytics.usage')}</p>
-
             <h2>{t('PrivacyPolicy.sections.errorMonitoring.title')}</h2>
             <p>{t('PrivacyPolicy.sections.errorMonitoring.description')}</p>
             <ul>

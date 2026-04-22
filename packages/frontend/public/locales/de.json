@@ -206,13 +206,8 @@
                 "title": "11. Verarbeitung von Telegram-Nachrichten",
                 "content": "Durch den Freifahren Telegram Bot werden Nachrichten aus der Freifahren_BE-Gruppe mit Zustimmung der Administratoren ausgewertet. Die Nachrichten werden nicht gespeichert und nur für die Echtzeit-Auswertung verwendet. Es werden lediglich die nicht deterministisch extrahierten Informationen (Richtung, Linie und Station) aus den Nachrichten gespeichert. Die Uhrzeit wird abgerundet, um die Anonymität zu gewährleisten."
             },
-            "analytics": {
-                "title": "12. Einsatz von Analysetools",
-                "content": "Für die Webanalyse setzen wir Pirsch Analytics ein. Bei Pirsch Analytics handelt es sich um eine cookiefreie Webanalysesoftware, die nach dem Grundsatz Privacy by Design entwickelt wurde. Zur Analyse der Besucherströme generiert Pirsch Analytics bei Erhalt des Seitenaufrufs mit Hilfe eines Hashing-Algorithmus eine 16-stellige Zahl als Besucher-ID. Als Eingabewerte dienen die IP-Adresse, der User Agent, das Datum und ein Salt. Die IP-Adresse des Besuchers wird weder vollständig noch in Teilen persistiert und durch den Hash vollständig und nicht reversierbar anonymisiert. Durch die Einbindung des Datums und der Verwendung von einem Salt pro Webseite ist gewährleistet, dass Webseitenbesucher nicht länger als 24 Stunden wiederzuerkennen sind und nicht über mehrere Webseiten hinweg getrackt werden können. Über eine lokal eingebundene Datenbank wird eine grobe Lokalisierung vorgenommen (Land/Stadt).",
-                "usage": "Diese Daten sind nicht personenbezogen; es werden keine Informationen gesammelt, die eine Identifizierung der Nutzer ermöglichen..."
-            },
             "errorMonitoring": {
-                "title": "13. Fehlererkennung und Diagnose",
+                "title": "12. Fehlererkennung und Diagnose",
                 "description": "Wir verwenden Sentry zur Fehlererkennung und Absturzberichterstattung, um unseren Service zu warten und zu verbessern. Wenn die App einen Fehler feststellt, sammeln wir anonymisierte Diagnoseinformationen, einschließlich:",
                 "dataPoints": {
                     "os": "Betriebssystemversion",
@@ -223,11 +218,11 @@
                 "storage": "Diese technischen Daten werden auf der Infrastruktur von Sentry in der Europäischen Union für maximal 30 Tage gespeichert. Wir konfigurieren Sentry ausdrücklich so, dass keine IP-Adressen erfasst werden. Alle Datenerfassung erfolgt anonymisiert und dient ausschließlich der Identifizierung und Behebung technischer Probleme."
             },
             "dataProcessing": {
-                "title": "14. Auftragsverarbeitung",
-                "content": "Soweit externe Dienstleister im Rahmen der Datenverarbeitung eingesetzt werden, handelt es sich um Auftragsverarbeiter im Sinne des Art. 28 DSGVO. Mit Sentry (Functional Software, Inc.) besteht ein Auftragsverarbeitungsvertrag (Data Processing Addendum). Mit Hetzner Online GmbH und Pirsch Analytics werden entsprechende Verträge zur Auftragsverarbeitung abgeschlossen bzw. sind in Vorbereitung."
+                "title": "13. Auftragsverarbeitung",
+                "content": "Soweit externe Dienstleister im Rahmen der Datenverarbeitung eingesetzt werden, handelt es sich um Auftragsverarbeiter im Sinne des Art. 28 DSGVO. Mit Sentry (Functional Software, Inc.) besteht ein Auftragsverarbeitungsvertrag (Data Processing Addendum). Mit Hetzner Online GmbH werden entsprechende Verträge zur Auftragsverarbeitung abgeschlossen bzw. sind in Vorbereitung."
             },
             "severabilityClause": {
-                "title": "15. Salvatorische Klausel",
+                "title": "14. Salvatorische Klausel",
                 "content": "Sollten einzelne Bestimmungen dieser Datenschutzerklärung ganz oder teilweise unwirksam oder undurchführbar sein oder nachträglich unwirksam oder undurchführbar werden, so wird dadurch die Gültigkeit der übrigen Bestimmungen nicht berührt."
             }
         }
