@@ -1,8 +1,14 @@
 // This file contains the configuration for the seeding process.
 // Adapt this file to your needs. Based on your cities requirements.
-export const ROUTE_TYPE_PRIORITY = ['train', 'subway', 'tram', 'light_rail'] as const // Based on the OSM tags used in the seeding process.
+export const ROUTE_TYPE_PRIORITY = ['subway', 'tram', 'light_rail'] as const // Based on the OSM tags used in the seeding process.
 
 export type RouteType = (typeof ROUTE_TYPE_PRIORITY)[number]
+
+export const DEFAULT_ROUTE_COLORS: Record<RouteType, string> = {
+    subway: '#000000', // Fallback since we use the line color for subway lines.
+    tram: '#be1414',
+    light_rail: '#007734',
+}
 
 export const SEED_CONFIG = {
     city: 'Berlin', // The city you want to seed.
@@ -65,4 +71,5 @@ export const SEED_CONFIG = {
     },
 
     mergeThresholdMeters: 250, // The threshold in meters for merging proximate stations.
+    defaultRouteColors: DEFAULT_ROUTE_COLORS,
 } as const

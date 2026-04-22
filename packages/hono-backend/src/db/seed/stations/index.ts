@@ -4,7 +4,7 @@ import type { DbConnection } from '../../index'
 import { stations } from '../../schema/stations'
 
 import { buildDataset } from './build-dataset'
-import { mergeProximate } from './merge-proximate'
+import { mergeProximate, type Coordinates } from './merge-proximate'
 import type { OsmElement, OsmNode, OsmRelation } from './overpass'
 
 const mergeRelationMembers = (existing: OsmRelation, rel: OsmRelation) => {
@@ -45,6 +45,7 @@ const deduplicateElements = (elements: OsmElement[]): OsmElement[] => {
 export interface StationSeedResult {
     /** Raw OSM node id → `stations.id` that node ended up under (post-merge). */
     nodeIdToStationId: Map<number, string>
+    stationCoordinates: Map<string, Coordinates>
 }
 
 export const seedStationsFromElements = async (
@@ -78,5 +79,10 @@ export const seedStationsFromElements = async (
         nodeIdToStationId.set(nodeId, codeRemap.get(code) ?? code)
     }
 
-    return { nodeIdToStationId }
+    const stationCoordinates = new Map<string, Coordinates>()
+    for (const [stationId, entry] of merged) {
+        stationCoordinates.set(stationId, entry.coordinates)
+    }
+
+    return { nodeIdToStationId, stationCoordinates }
 }

@@ -11,4 +11,4 @@ export const osmSnapshot = pgTable('osm_snapshot', {
     fetchedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 })
 
-export type OsmSnapshotKind = 'stations'
+export type OsmSnapshotKind = 'stations' | 'route_geometries'

@@ -11,7 +11,7 @@ import { db } from '../index'
 import { osmSnapshot, type OsmSnapshotKind } from '../schema/osm-snapshot'
 
 import { SEED_CONFIG } from './config'
-import { fetchStationElements, type OsmElement, type OsmRelation } from './stations/overpass'
+import { fetchRouteGeometryElements, fetchStationElements, type OsmElement, type OsmRelation } from './stations/overpass'
 
 const upsertSnapshot = async (kind: OsmSnapshotKind, raw: unknown) => {
     await db
@@ -50,8 +50,17 @@ const refresh = async () => {
     assertAllRefsPresent(stationElements)
     console.log(`[seed:refresh] All ${SEED_CONFIG.lines.length} configured refs present in response.`)
 
+    console.log('[seed:refresh] Fetching route geometry from Overpass...')
+    const routeGeometryElements = await fetchRouteGeometryElements()
+
+    assertAllRefsPresent(routeGeometryElements)
+    console.log(`[seed:refresh] Geometry snapshot includes all ${SEED_CONFIG.lines.length} configured refs.`)
+
     await upsertSnapshot('stations', stationElements)
     console.log(`[seed:refresh] Stored 'stations' snapshot (${stationElements.length} elements)`)
+
+    await upsertSnapshot('route_geometries', routeGeometryElements)
+    console.log(`[seed:refresh] Stored 'route_geometries' snapshot (${routeGeometryElements.length} elements)`)
 }
 
 refresh()

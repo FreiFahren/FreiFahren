@@ -4,13 +4,13 @@ import type { DbConnection } from '../../index'
 import { lines, lineStations } from '../../schema/lines'
 import type { OsmRelation } from '../stations/overpass'
 
-import { buildLineVariants } from './build-variants'
+import { buildLineVariants, type LineVariant } from './build-variants'
 
 export const seedLinesFromRelations = async (
     db: DbConnection,
     relations: OsmRelation[],
     nodeIdToStationId: Map<number, string>
-): Promise<void> => {
+): Promise<LineVariant[]> => {
     const variants = buildLineVariants(relations, nodeIdToStationId)
 
     if (variants.length === 0) {
@@ -40,4 +40,6 @@ export const seedLinesFromRelations = async (
     console.log(
         `[seed:lines] Inserted ${lineRecords.length} line variants, ${lineStationRecords.length} line_stations rows`
     )
+
+    return variants
 }

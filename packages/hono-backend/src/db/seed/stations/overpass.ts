@@ -14,6 +14,19 @@ export interface OsmRelationMember {
     role: string
 }
 
+export interface OsmWayGeometryPoint {
+    lat: number
+    lon: number
+}
+
+export interface OsmWay {
+    type: 'way'
+    id: number
+    nodes?: number[]
+    geometry?: OsmWayGeometryPoint[]
+    tags?: Record<string, string>
+}
+
 export interface OsmRelation {
     type: 'relation'
     id: number
@@ -21,7 +34,7 @@ export interface OsmRelation {
     members: OsmRelationMember[]
 }
 
-export type OsmElement = OsmNode | OsmRelation | { type: 'way'; [k: string]: unknown }
+export type OsmElement = OsmNode | OsmRelation | OsmWay
 
 const OVERPASS_ENDPOINTS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter']
 
@@ -67,6 +80,32 @@ node(r.stopAreas)->.stopNodes;
   .stopNodes;
 );
 out body;
+`
+}
+
+const buildGeometryBatchQuery = (lines: string[]): string => {
+    const { city, adminLevel, overpass } = SEED_CONFIG
+    const lineRegex = '^(' + lines.map((l) => l.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')$'
+
+    return `
+[out:json][timeout:${overpass.timeoutSeconds}];
+
+area["name"="${city}"]["boundary"="administrative"]["admin_level"~"${adminLevel}"]->.a;
+
+relation
+  ["type"="route"]
+  ["route"~"^(train|subway|tram|light_rail)$"]
+  ["ref"~"${lineRegex}"]
+  (area.a)
+  ->.routes;
+
+way(r.routes)->.routeWays;
+
+(
+  .routes;
+  .routeWays;
+);
+out geom;
 `
 }
 
@@ -134,5 +173,28 @@ export const fetchStationElements = async (): Promise<OsmElement[]> => {
     }
 
     console.log(`[seed:stations] Total: ${allElements.length} elements`)
+    return allElements
+}
+
+export const fetchRouteGeometryElements = async (): Promise<OsmElement[]> => {
+    const { fetchTimeoutMs } = SEED_CONFIG.overpass
+    const batches = chunkLines(SEED_CONFIG.lines)
+    const allElements: OsmElement[] = []
+
+    for (let i = 0; i < batches.length; i++) {
+        if (i > 0) {
+            console.log('[seed:segments] Waiting 30s for rate limit cooldown...')
+            await sleep(30_000)
+        }
+
+        const batch = batches[i]
+        console.log(`[seed:segments] Batch ${i + 1}/${batches.length}: ${batch.join(', ')}`)
+        const query = buildGeometryBatchQuery(batch)
+        const elements = await fetchWithRetry(query, fetchTimeoutMs)
+        console.log(`[seed:segments]   Got ${elements.length} elements`)
+        allElements.push(...elements)
+    }
+
+    console.log(`[seed:segments] Total: ${allElements.length} elements`)
     return allElements
 }

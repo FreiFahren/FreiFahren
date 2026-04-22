@@ -13,6 +13,7 @@ import { db } from '../index'
 import { osmSnapshot, type OsmSnapshotKind } from '../schema/osm-snapshot'
 
 import { seedLinesFromRelations } from './lines'
+import { seedSegmentsFromGeometry } from './segments/index'
 import { seedStationsFromElements } from './stations'
 import type { OsmElement, OsmRelation } from './stations/overpass'
 
@@ -39,12 +40,19 @@ const seed = async () => {
     const stationElements = await loadSnapshot<OsmElement[]>('stations')
     console.log(`[seed]   ${stationElements.length} elements`)
 
+    console.log('[seed] Loading route geometries snapshot from osm_snapshot...')
+    const routeGeometryElements = await loadSnapshot<OsmElement[]>('route_geometries')
+    console.log(`[seed]   ${routeGeometryElements.length} elements`)
+
     console.log('[seed] Seeding stations...')
-    const { nodeIdToStationId } = await seedStationsFromElements(db, stationElements)
+    const { nodeIdToStationId, stationCoordinates } = await seedStationsFromElements(db, stationElements)
 
     console.log('[seed] Seeding lines...')
     const routeRelations = extractRouteRelations(stationElements)
-    await seedLinesFromRelations(db, routeRelations, nodeIdToStationId)
+    const variants = await seedLinesFromRelations(db, routeRelations, nodeIdToStationId)
+
+    console.log('[seed] Seeding segments...')
+    await seedSegmentsFromGeometry(db, variants, stationCoordinates, routeGeometryElements)
 
     console.log('[seed] Done.')
 }
