@@ -15,6 +15,7 @@ interface UtilModalProps {
 }
 
 const GITHUB_ICON = `/icons/github.svg`
+const INSTAGRAM_ICON = `/icons/instagram.svg`
 
 const UtilModal: React.FC<UtilModalProps> = ({ className, children }) => {
     const { t } = useTranslation()
@@ -30,7 +31,7 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children }) => {
                 <div className="modal-header">
                     <h1>{t('UtilModal.title')}</h1>
                     <button
-                        className="action h-10 w-full rounded-sm"
+                        className="action h-10 w-full"
                         onClick={() => setIsContactModalOpen(true)}
                         type="button"
                     >
@@ -39,11 +40,25 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children }) => {
                 </div>
                 <div className="modal-content">
                     <div className="social-media-row">
-                        <button className="social-media-button" type="button">
+                        <a
+                            className="social-media-button"
+                            href="https://github.com/FreiFahren/FreiFahren"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
                             <img src={GITHUB_ICON} alt="GitHub Icon" />
-                        </button>
+                        </a>
+                        <a
+                            className="social-media-button"
+                            href="https://www.instagram.com/frei.fahren"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <img src={INSTAGRAM_ICON} alt="Instagram Icon" />
+                        </a>
                     </div>
                     <div className="links-row">
+                        <Link to="/impressum">{t('UtilModal.impressum')}</Link>
                         <Link to="/Datenschutz">{t('UtilModal.privacy')}</Link>
                         <button className="text-button" onClick={() => setIsLegalDisclaimerOpen(true)} type="button">
                             {t('UtilModal.terms')}

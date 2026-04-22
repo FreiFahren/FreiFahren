@@ -22,8 +22,8 @@
         "impressum": "Impressum",
         "privacy": "Datenschutz",
         "terms": "Nutzungsbedingungen",
-        "analytics-opted-in": "anonyme Analytics - Klicken zum Deaktivieren",
-        "analytics-opted-out": "anonyme Analytics - Klicken zum Aktivieren"
+        "analytics-opted-in": "Anonyme analytics - Klicken zum Deaktivieren",
+        "analytics-opted-out": "Anonyme analytics - Klicken zum Aktivieren"
     },
     "ContactSection": {
         "title": "Kontaktiere uns",
@@ -108,7 +108,34 @@
         "title": "Support",
         "mobile": "Bei Problemen oder Anregungen bezüglich der Mobile-App, melde dich bitte bei Moritz unter",
         "web": "Falls du ein Problem mit der Website hast, kontaktiere bitte Johan unter",
-        "privacy": "Datenschutz"
+        "privacy": "Datenschutz",
+        "impressum": "Impressum"
+    },
+    "Impressum": {
+        "title": "Impressum",
+        "switchLanguage": "English version",
+        "sections": {
+            "provider": {
+                "title": "Anbieterkennzeichnung",
+                "name": "FreiFahren e.V. - Johan Trieloff (Vorstandsvorsitzender)",
+                "careOf": "c/o Online-Impressum #7591",
+                "street": "Europaring 90",
+                "city": "53757 Sankt Augustin"
+            },
+            "contact": {
+                "title": "Kontakt",
+                "emailLabel": "E-Mail:",
+                "form": "Weiterer elektronischer Kontaktweg: Kontaktformular in der App."
+            },
+            "representedBy": {
+                "title": "Vertretungsberechtigt",
+                "content": "Vertretungsberechtigter Vorstand: Johan Trieloff."
+            }
+        },
+        "links": {
+            "privacy": "Datenschutz",
+            "support": "Support"
+        }
     },
     "PrivacyPolicy": {
         "title": "Datenschutzerklärung für die App \"Freifahren\"",
@@ -121,7 +148,7 @@
             },
             "responsible": {
                 "title": "2. Verantwortliche Stelle",
-                "content": "Verantwortlich für die Datenverarbeitung im Rahmen dieser App sind die Entwickler des FreiFahren Projekts, erreichbar unter der E-Mail-Adresse: johan@trieloff.net. FreiFahren ist ein nicht-kommerzielles Open-Source-Projekt."
+                "content": "Verantwortlich fuer die Datenverarbeitung im Rahmen dieser App ist FreiFahren e.V. - Johan Trieloff (Vorstandsvorsitzender), c/o Online-Impressum #7591, Europaring 90, 53757 Sankt Augustin, erreichbar unter contact@freifahren.org. Als weiterer elektronischer Kontaktweg steht das Kontaktformular in der App zur Verfuegung. Vertretungsberechtigter Vorstand: Johan Trieloff (johan@freifahren.org), Moritz Clerc (moritz@freifahren.org), David Brandes (david@freifahren.org)."
             },
             "legalBasis": {
                 "title": "3. Rechtsgrundlagen der Datenverarbeitung",
@@ -153,15 +180,15 @@
             },
             "anonymity": {
                 "title": "5. Anonymität",
-                "content": "Es werden keine personenbezogenen Daten der Nutzer gespeichert. Die Meldungen sind anonym, und es können keine Rückschlüsse auf einzelne Personen gezogen werden."
+                "content": "Es werden keine dauerhaft personenbezogenen Daten der Nutzer gespeichert. Die Meldungen sind anonym, und es können keine Rückschlüsse auf einzelne Personen gezogen werden. Die IP-Adresse gilt als personenbezogenes Datum, wird jedoch nicht persistent gespeichert und ist nicht rekonstruierbar."
             },
             "storageAndAccess": {
                 "title": "6. Speicherung und Zugriff",
-                "content": "Die erhobenen Daten werden auf unseren eigenen Servern gespeichert, die bei der Hetzner Online GmbH in Deutschland gehostet sind. Die Speicherdauer der Daten ist unbefristet. Auch die Dauer, die der Nutzer für das Melden benötigt hat, wird auf diesen Servern gespeichert. Der Zugriff auf die Daten ist streng begrenzt auf die Entwickler des FreiFahren Projekts."
+                "content": "Die erhobenen Daten werden auf eigenen Servern des FreiFahren e.V. gespeichert, die bei der Hetzner Online GmbH in Deutschland gehostet sind. Der Zugriff ist strikt auf autorisierte Vereinsmitglieder beschränkt. Meldungen und Feedback werden ohne automatische Löschfrist gespeichert. Zeitstempel, die älter als 4 Stunden sind, werden gerundet gespeichert, um die Anonymität der Meldungen zu wahren. Darüber hinaus werden Daten in regelmäßigen Backups (derzeit täglich) gesichert. Die längerfristige Speicherung erfolgt auf Grundlage berechtigter Interessen des FreiFahren e.V. gemäß Art. 6 Abs. 1 lit. f DSGVO und dient folgenden Zwecken: Betriebssicherheit und Missbrauchsprävention: Historische Meldedaten ermöglichen die Erkennung von Manipulationsmustern und Spam-Wellen sowie die kontinuierliche Verbesserung von Gegenmaßnahmen. Qualitätsverbesserung: Die Datenbasis wird zur Kalibrierung und Validierung der Prognose- und Risikologik genutzt. Hierfür sind längerfristige Zeitreihen erforderlich, um Saisonalitäten, Eventspitzen und Ferienzeiten abzubilden. Aggregierte Auswertungen: Langfristige, aggregierte Nutzungsmuster unterstützen die technische und inhaltliche Weiterentwicklung der App. Zur Minimierung des Datenschutzrisikos werden keine Klarnamen oder Nutzerkonten gespeichert, Zeitstempel werden nach 4 Stunden gerundet, und der Datenzugriff unterliegt einem strikten Rollen- und Zugriffsmanagement sowie technischen und organisatorischen Schutzmaßnahmen."
             },
             "userRights": {
                 "title": "7. Rechte der Nutzer",
-                "content": "Nutzer haben das Recht, Auskunft über die sie betreffenden personenbezogenen Daten zu erhalten, sowie die Berichtigung oder Löschung dieser Daten zu verlangen. Anfragen hierzu können über das Kontaktformular der App oder direkt per E-Mail an johan@trieloff.net gestellt werden."
+                "content": "Nutzer haben das Recht, Auskunft über die sie betreffenden personenbezogenen Daten zu erhalten, sowie die Berichtigung oder Löschung dieser Daten zu verlangen. Anfragen hierzu können über das Kontaktformular der App oder direkt per E-Mail an contact@freifahren.org gestellt werden."
             },
             "consent": {
                 "title": "8. Zustimmung zur Datenschutzerklärung",
@@ -169,7 +196,7 @@
             },
             "dataProtectionOfficer": {
                 "title": "9. Datenschutzbeauftragter",
-                "content": "Für Fragen zum Datenschutz steht Ihnen unser Datenschutzbeauftragter Johan Trieloff (johan@trieloff.net) zur Verfügung."
+                "content": "Für Fragen zum Datenschutz erreichen Sie uns unter contact@freifahren.org."
             },
             "policyChanges": {
                 "title": "10. Änderungen an der Datenschutzerklärung",
@@ -195,9 +222,13 @@
                 },
                 "storage": "Diese technischen Daten werden auf der Infrastruktur von Sentry in der Europäischen Union für maximal 30 Tage gespeichert. Wir konfigurieren Sentry ausdrücklich so, dass keine IP-Adressen erfasst werden. Alle Datenerfassung erfolgt anonymisiert und dient ausschließlich der Identifizierung und Behebung technischer Probleme."
             },
+            "dataProcessing": {
+                "title": "14. Auftragsverarbeitung",
+                "content": "Soweit externe Dienstleister im Rahmen der Datenverarbeitung eingesetzt werden, handelt es sich um Auftragsverarbeiter im Sinne des Art. 28 DSGVO. Mit Sentry (Functional Software, Inc.) besteht ein Auftragsverarbeitungsvertrag (Data Processing Addendum). Mit Hetzner Online GmbH und Pirsch Analytics werden entsprechende Verträge zur Auftragsverarbeitung abgeschlossen bzw. sind in Vorbereitung."
+            },
             "severabilityClause": {
-                "title": "14. Salvatorische Klausel",
-                "content": "Sollten einzelne Bestimmungen dieser Datenschutzerklärung ganz oder teilweise unwirksam oder undurchführbar sein oder nachträglich unwirksam oder undurchführbar werden, so wird dadurch die Gültigkeit der übrigen Bestimmungen nicht berührt..."
+                "title": "15. Salvatorische Klausel",
+                "content": "Sollten einzelne Bestimmungen dieser Datenschutzerklärung ganz oder teilweise unwirksam oder undurchführbar sein oder nachträglich unwirksam oder undurchführbar werden, so wird dadurch die Gültigkeit der übrigen Bestimmungen nicht berührt."
             }
         }
     },

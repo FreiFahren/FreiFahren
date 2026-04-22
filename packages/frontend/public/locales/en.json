@@ -22,8 +22,8 @@
         "impressum": "Legal notice",
         "privacy": "Privacy Policy",
         "terms": "Terms of Use",
-        "analytics-opted-in": "anonyme analytics - Click to disable",
-        "analytics-opted-out": "anonyme analytics - Click to enable"
+        "analytics-opted-in": "Anonymous analytics - Click to disable",
+        "analytics-opted-out": "Anonymous analytics - Click to enable"
     },
     "ContactSection": {
         "title": "Contact us",
@@ -111,7 +111,34 @@
         "title": "Support",
         "mobile": "If you have a problem or question regarding the mobile app, please contact Moritz via",
         "web": "For inquiries regarding the website, please contact the Johan via",
-        "privacy": "Privacy policy"
+        "privacy": "Privacy policy",
+        "impressum": "Legal notice"
+    },
+    "Impressum": {
+        "title": "Legal Notice",
+        "switchLanguage": "Deutsche Version",
+        "sections": {
+            "provider": {
+                "title": "Provider Information",
+                "name": "FreiFahren e.V. - Johan Trieloff (Chairman)",
+                "careOf": "c/o Online-Impressum #7591",
+                "street": "Europaring 90",
+                "city": "53757 Sankt Augustin"
+            },
+            "contact": {
+                "title": "Contact",
+                "emailLabel": "Email:",
+                "form": "Additional electronic contact channel: in-app contact form."
+            },
+            "representedBy": {
+                "title": "Represented by",
+                "content": "Authorized representative: Johan Trieloff."
+            }
+        },
+        "links": {
+            "privacy": "Privacy Policy",
+            "support": "Support"
+        }
     },
     "PrivacyPolicy": {
         "title": "Privacy Policy for the App \"Freifahren\"",
@@ -124,7 +151,7 @@
             },
             "responsible": {
                 "title": "2. Responsible Party",
-                "content": "The parties responsible for data processing within this App are the developers of the FreiFahren project, reachable via email at: johan@trieloff.net. FreiFahren is a non-commercial open-source project."
+                "content": "The controller responsible for data processing within this App is FreiFahren e.V. - Johan Trieloff (Chairman), c/o Online-Impressum #7591, Europaring 90, 53757 Sankt Augustin, reachable via contact@freifahren.org. A second electronic contact channel is available via the in-app contact form. Authorized board members: Johan Trieloff (johan@freifahren.org), Moritz Clerc (moritz@freifahren.org), David Brandes (david@freifahren.org)."
             },
             "legalBasis": {
                 "title": "3. Legal Basis for Data Processing",
@@ -156,15 +183,15 @@
             },
             "anonymity": {
                 "title": "5. Anonymity",
-                "content": "No personal data of users is stored. The reports are anonymous, and no conclusions can be drawn about individual persons."
+                "content": "No permanently personal data of users is stored. Reports are anonymous, and no conclusions can be drawn about individual persons. The IP address is considered personal data, but it is not stored persistently and is not reconstructable."
             },
             "storageAndAccess": {
                 "title": "6. Storage and Access",
-                "content": "The collected data is stored on our servers, hosted by Hetzner Online GmbH in Germany. The storage duration of the data is indefinite. The time taken by the user to submit a report is also stored on these servers. Access to the data is strictly limited to the developers of the FreiFahren project."
+                "content": "Collected data is stored on FreiFahren e.V.'s own servers, hosted by Hetzner Online GmbH in Germany. Access is strictly limited to authorized association members. Reports and feedback are stored without an automatic deletion period. Timestamps older than 4 hours are stored in rounded form to preserve the anonymity of reports. In addition, data is secured in regular backups (currently daily). Long-term storage is based on the legitimate interests of FreiFahren e.V. in accordance with Art. 6 para. 1 lit. f GDPR and serves the following purposes: Operational security and abuse prevention: Historical report data enables the detection of manipulation patterns and spam waves as well as the continuous improvement of countermeasures. Quality improvement: The data basis is used to calibrate and validate forecasting and risk logic. Longer-term time series are required for this to capture seasonality, event peaks, and holiday periods. Aggregated evaluations: Long-term aggregated usage patterns support the technical and content-related further development of the app. To minimize data protection risk, no real names or user accounts are stored, timestamps are rounded after 4 hours, and data access is subject to strict role and access management as well as technical and organizational safeguards."
             },
             "userRights": {
                 "title": "7. User Rights",
-                "content": "Users have the right to request information about their personal data, as well as to request the correction or deletion of such data. Requests can be submitted via the App's contact form or directly by email to johan@trieloff.net"
+                "content": "Users have the right to request information about their personal data, as well as to request the correction or deletion of such data. Requests can be submitted via the App's contact form or directly by email to contact@freifahren.org."
             },
             "consent": {
                 "title": "8. Consent to the Privacy Policy",
@@ -172,7 +199,7 @@
             },
             "dataProtectionOfficer": {
                 "title": "9. Data Protection Officer",
-                "content": "For questions regarding data protection, please contact our Data Protection Officer, Johan Trieloff (johan@trieloff.net)."
+                "content": "For questions regarding data protection, please contact us via contact@freifahren.org."
             },
             "policyChanges": {
                 "title": "10. Changes to the Privacy Policy",
@@ -198,9 +225,13 @@
                 },
                 "storage": "This technical data is stored on Sentry's infrastructure located in the European Union for a maximum period of 30 days. We explicitly configure Sentry to not collect IP addresses. All data collection is anonymized and used solely for the purpose of identifying and fixing technical issues."
             },
+            "dataProcessing": {
+                "title": "14. Data Processing by Service Providers",
+                "content": "Where external service providers are used in the context of data processing, they act as processors within the meaning of Art. 28 GDPR. A data processing agreement (Data Processing Addendum) is in place with Sentry (Functional Software, Inc.). Corresponding data processing agreements with Hetzner Online GmbH and Pirsch Analytics are being concluded or are in preparation."
+            },
             "severabilityClause": {
-                "title": "14. Severability Clause",
-                "content": "If any provision of this Privacy Policy is found to be wholly or partially invalid or unenforceable, or if it subsequently becomes invalid or unenforceable, the validity of the remaining provisions shall not be affected..."
+                "title": "15. Severability Clause",
+                "content": "If any provision of this Privacy Policy is found to be wholly or partially invalid or unenforceable, or if it subsequently becomes invalid or unenforceable, the validity of the remaining provisions shall not be affected."
             }
         }
     },

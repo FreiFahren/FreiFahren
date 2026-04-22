@@ -51,11 +51,7 @@ const PrivacyPolicy = () => {
             <p>{t('PrivacyPolicy.sections.preamble.content')}</p>
 
             <h2>{t('PrivacyPolicy.sections.responsible.title')}</h2>
-            <p>
-                {t('PrivacyPolicy.sections.responsible.content', {
-                    email: <a href="mailto:johan@trieloff.net">johan@trieloff.net</a>,
-                })}
-            </p>
+            <p>{t('PrivacyPolicy.sections.responsible.content')}</p>
 
             <h2>{t('PrivacyPolicy.sections.legalBasis.title')}</h2>
             <p>{t('PrivacyPolicy.sections.legalBasis.content')}</p>
@@ -93,21 +89,13 @@ const PrivacyPolicy = () => {
             <p>{t('PrivacyPolicy.sections.storageAndAccess.content')}</p>
 
             <h2>{t('PrivacyPolicy.sections.userRights.title')}</h2>
-            <p>
-                {t('PrivacyPolicy.sections.userRights.content', {
-                    email: <a href="mailto:johan@trieloff.net">johan@trieloff.net</a>,
-                })}
-            </p>
+            <p>{t('PrivacyPolicy.sections.userRights.content')}</p>
 
             <h2>{t('PrivacyPolicy.sections.consent.title')}</h2>
             <p>{t('PrivacyPolicy.sections.consent.content')}</p>
 
             <h2>{t('PrivacyPolicy.sections.dataProtectionOfficer.title')}</h2>
-            <p>
-                {t('PrivacyPolicy.sections.dataProtectionOfficer.content', {
-                    email: <a href="mailto:johan@trieloff.net">johan@trieloff.net</a>,
-                })}
-            </p>
+            <p>{t('PrivacyPolicy.sections.dataProtectionOfficer.content')}</p>
 
             <h2>{t('PrivacyPolicy.sections.policyChanges.title')}</h2>
             <p>{t('PrivacyPolicy.sections.policyChanges.content')}</p>
@@ -128,6 +116,9 @@ const PrivacyPolicy = () => {
                 <li>{t('PrivacyPolicy.sections.errorMonitoring.dataPoints.state')}</li>
             </ul>
             <p>{t('PrivacyPolicy.sections.errorMonitoring.storage')}</p>
+
+            <h2>{t('PrivacyPolicy.sections.dataProcessing.title')}</h2>
+            <p>{t('PrivacyPolicy.sections.dataProcessing.content')}</p>
 
             <h2>{t('PrivacyPolicy.sections.severabilityClause.title')}</h2>
             <p>{t('PrivacyPolicy.sections.severabilityClause.content')}</p>

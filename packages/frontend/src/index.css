@@ -286,10 +286,11 @@ textarea::placeholder {
 }
 
 .legal-text {
-    overflow-y: scroll;
-    max-height: calc(100vh - 25px);
+    overflow-y: auto;
+    height: 100vh;
     background-color: var(--color-background);
     padding: 25px;
+    box-sizing: border-box;
 }
 
 .legal-text h2 {

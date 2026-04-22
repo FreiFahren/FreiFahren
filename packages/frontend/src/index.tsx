@@ -12,6 +12,7 @@ import { queryClient } from './api/queryClient'
 import { LocationProvider } from './contexts/LocationContext'
 import { i18n } from './i18n'
 import { App } from './pages/App/App'
+import { Impressum } from './pages/Impressum/Impressum'
 import { PrivacyPolicy } from './pages/PrivacyPolicy/PrivacyPolicy'
 import { Support } from './pages/Support/Support'
 import { reportWebVitals } from './reportWebVitals'
@@ -54,6 +55,7 @@ root.render(
                                 </LocationProvider>
                             }
                         />
+                        <Route path="/impressum" element={<Impressum />} />
                         <Route path="/datenschutz" element={<PrivacyPolicy />} />
                         <Route path="/support" element={<Support />} />
                     </Routes>
