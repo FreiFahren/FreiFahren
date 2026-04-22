@@ -12,8 +12,9 @@ import { eq } from 'drizzle-orm'
 import { db } from '../index'
 import { osmSnapshot, type OsmSnapshotKind } from '../schema/osm-snapshot'
 
+import { seedLinesFromRelations } from './lines'
 import { seedStationsFromElements } from './stations'
-import type { OsmElement } from './stations/overpass'
+import type { OsmElement, OsmRelation } from './stations/overpass'
 
 const loadSnapshot = async <T>(kind: OsmSnapshotKind): Promise<T> => {
     const rows = await db.select().from(osmSnapshot).where(eq(osmSnapshot.queryKind, kind)).limit(1)
@@ -23,13 +24,27 @@ const loadSnapshot = async <T>(kind: OsmSnapshotKind): Promise<T> => {
     return rows[0].raw as T
 }
 
+const extractRouteRelations = (elements: OsmElement[]): OsmRelation[] => {
+    const out: OsmRelation[] = []
+    for (const el of elements) {
+        if (el.type !== 'relation') continue
+        const rel = el as OsmRelation
+        if (rel.tags?.type === 'route') out.push(rel)
+    }
+    return out
+}
+
 const seed = async () => {
     console.log('[seed] Loading stations snapshot from osm_snapshot...')
     const stationElements = await loadSnapshot<OsmElement[]>('stations')
     console.log(`[seed]   ${stationElements.length} elements`)
 
     console.log('[seed] Seeding stations...')
-    await seedStationsFromElements(db, stationElements)
+    const { nodeIdToStationId } = await seedStationsFromElements(db, stationElements)
+
+    console.log('[seed] Seeding lines...')
+    const routeRelations = extractRouteRelations(stationElements)
+    await seedLinesFromRelations(db, routeRelations, nodeIdToStationId)
 
     console.log('[seed] Done.')
 }

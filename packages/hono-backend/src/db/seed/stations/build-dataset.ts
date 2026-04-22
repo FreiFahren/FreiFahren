@@ -13,6 +13,12 @@ export interface StationEntry {
 
 export type StationDataset = Map<string, StationEntry>
 
+export interface BuildResult {
+    dataset: StationDataset
+    /** OSM node id → pre-merge station code it belongs to (station node itself, or a stop_area member of one). */
+    nodeIdToCode: Map<number, string>
+}
+
 interface RawStation {
     code: string
     name: string
@@ -47,10 +53,14 @@ const collectNodes = (elements: OsmElement[], nodes: Map<number, RawStation>) =>
         const ds100 = tags['ref:ds100']
         const railwayRef = tags['railway:ref']
         const ref = tags.ref
+        /* Platform-number guard: on OSM platform / stop_position nodes, a bare numeric
+         * `ref` is the platform number (e.g. "2"), not a station code. Accepting it
+         * collapses unrelated stations across the city under one id. */
+        const refLooksLikeStationCode = ref !== undefined && ref !== '' && /[^0-9]/u.test(ref)
         const code =
             (ds100 !== undefined && ds100 !== '' ? ds100 : undefined) ??
             (railwayRef !== undefined && railwayRef !== '' ? railwayRef : undefined) ??
-            (ref !== undefined && ref !== '' ? ref : undefined) ??
+            (refLooksLikeStationCode ? ref : undefined) ??
             `n${node.id}`
         nodes.set(node.id, {
             code,
@@ -154,7 +164,7 @@ const aggregateLinesForStation = (
     return { lines, routeTypes }
 }
 
-export const buildDataset = (elements: OsmElement[]): StationDataset => {
+export const buildDataset = (elements: OsmElement[]): BuildResult => {
     const nodes = new Map<number, RawStation>()
     const nodeToLines = new Map<number, Set<string>>()
     const nodeToRouteTypes = new Map<number, Set<RouteType>>()
@@ -163,8 +173,8 @@ export const buildDataset = (elements: OsmElement[]): StationDataset => {
     collectNodes(elements, nodes)
     collectRelations(elements, nodes, nodeToLines, nodeToRouteTypes, stationToMembers)
 
-    // Aggregate lines + route types per station
     const dataset: StationDataset = new Map()
+    const nodeIdToCode = new Map<number, string>()
 
     for (const [nodeId, station] of Array.from(nodes)) {
         const { lines, routeTypes } = aggregateLinesForStation(nodeId, nodeToLines, nodeToRouteTypes, stationToMembers)
@@ -183,8 +193,16 @@ export const buildDataset = (elements: OsmElement[]): StationDataset => {
             routeTypes,
             highestRouteType: getHighestRouteType(routeTypes),
         })
+        nodeIdToCode.set(nodeId, station.code)
+
+        const members = stationToMembers.get(nodeId)
+        if (members) {
+            for (const memberId of Array.from(members)) {
+                if (!nodeIdToCode.has(memberId)) nodeIdToCode.set(memberId, station.code)
+            }
+        }
     }
 
     console.log(`[seed:stations] Stations after build: ${dataset.size}`)
-    return dataset
+    return { dataset, nodeIdToCode }
 }

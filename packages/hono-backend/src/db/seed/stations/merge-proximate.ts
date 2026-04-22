@@ -103,9 +103,16 @@ const makeUnionFind = (items: string[]) => {
     return { find, union, groups }
 }
 
-export const mergeProximate = (dataset: StationDataset): StationDataset => {
+export interface MergeResult {
+    merged: StationDataset
+    /** Pre-merge code → representative code it was merged into. */
+    codeRemap: Map<string, string>
+}
+
+export const mergeProximate = (dataset: StationDataset): MergeResult => {
     const threshold = SEED_CONFIG.mergeThresholdMeters
     const merged: StationDataset = new Map()
+    const codeRemap = new Map<string, string>()
     const codes = Array.from(dataset.keys())
     const uf = makeUnionFind(codes)
 
@@ -138,6 +145,7 @@ export const mergeProximate = (dataset: StationDataset): StationDataset => {
             const entry = dataset.get(g)!
             for (const l of entry.lines) allLines.add(l)
             for (const rt of Array.from(entry.routeTypes)) allRouteTypes.add(rt)
+            codeRemap.set(g, rep)
         }
 
         // Recompute highest after union
@@ -159,5 +167,5 @@ export const mergeProximate = (dataset: StationDataset): StationDataset => {
     }
 
     console.log(`[seed:stations] After merge (<${threshold}m): ${merged.size} stations`)
-    return merged
+    return { merged, codeRemap }
 }

@@ -42,11 +42,19 @@ const deduplicateElements = (elements: OsmElement[]): OsmElement[] => {
     return [...nodes.values(), ...relations.values(), ...other]
 }
 
-export const seedStationsFromElements = async (db: DbConnection, rawElements: OsmElement[]): Promise<void> => {
+export interface StationSeedResult {
+    /** Raw OSM node id → `stations.id` that node ended up under (post-merge). */
+    nodeIdToStationId: Map<number, string>
+}
+
+export const seedStationsFromElements = async (
+    db: DbConnection,
+    rawElements: OsmElement[]
+): Promise<StationSeedResult> => {
     const elements = deduplicateElements(rawElements)
     console.log(`[seed:stations] ${rawElements.length} raw → ${elements.length} deduplicated elements`)
-    const dataset = buildDataset(elements)
-    const merged = mergeProximate(dataset)
+    const { dataset, nodeIdToCode } = buildDataset(elements)
+    const { merged, codeRemap } = mergeProximate(dataset)
 
     if (merged.size === 0) {
         throw new Error('Station seed produced zero stations — aborting')
@@ -64,4 +72,11 @@ export const seedStationsFromElements = async (db: DbConnection, rawElements: Os
         await tx.insert(stations).values(records)
     })
     console.log(`[seed:stations] Inserted ${records.length} stations`)
+
+    const nodeIdToStationId = new Map<number, string>()
+    for (const [nodeId, code] of nodeIdToCode) {
+        nodeIdToStationId.set(nodeId, codeRemap.get(code) ?? code)
+    }
+
+    return { nodeIdToStationId }
 }

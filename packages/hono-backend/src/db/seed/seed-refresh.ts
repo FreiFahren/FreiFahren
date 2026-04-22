@@ -10,7 +10,8 @@
 import { db } from '../index'
 import { osmSnapshot, type OsmSnapshotKind } from '../schema/osm-snapshot'
 
-import { fetchStationElements } from './stations/overpass'
+import { SEED_CONFIG } from './config'
+import { fetchStationElements, type OsmElement, type OsmRelation } from './stations/overpass'
 
 const upsertSnapshot = async (kind: OsmSnapshotKind, raw: unknown) => {
     await db
@@ -22,9 +23,32 @@ const upsertSnapshot = async (kind: OsmSnapshotKind, raw: unknown) => {
         })
 }
 
+const assertAllRefsPresent = (elements: OsmElement[]) => {
+    const seen = new Set<string>()
+    for (const el of elements) {
+        if (el.type !== 'relation') continue
+        const rel = el as OsmRelation
+        const tags: Record<string, string | undefined> = rel.tags ?? {}
+        if (tags.type !== 'route') continue
+        const ref = tags.ref
+        if (ref !== undefined && ref !== '') seen.add(ref)
+    }
+    const missing = SEED_CONFIG.lines.filter((ref) => !seen.has(ref))
+    if (missing.length > 0) {
+        throw new Error(
+            `[seed:refresh] Overpass response is missing route relations for refs: ${missing.join(', ')}. ` +
+                `Existing snapshot left untouched. Re-run \`bun db:seed:refresh\` (Overpass occasionally ` +
+                `returns a truncated-but-200 body under load; a few retries usually clears it).`
+        )
+    }
+}
+
 const refresh = async () => {
     console.log('[seed:refresh] Fetching station elements from Overpass...')
     const stationElements = await fetchStationElements()
+
+    assertAllRefsPresent(stationElements)
+    console.log(`[seed:refresh] All ${SEED_CONFIG.lines.length} configured refs present in response.`)
 
     await upsertSnapshot('stations', stationElements)
     console.log(`[seed:refresh] Stored 'stations' snapshot (${stationElements.length} elements)`)
