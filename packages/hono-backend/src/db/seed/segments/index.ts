@@ -36,6 +36,46 @@ const distance = (a: Point, b: Point): number => Math.hypot(a[0] - b[0], a[1] - 
 
 const samePoint = (a: Point, b: Point): boolean => distance(a, b) <= CONNECTION_EPSILON
 
+const perpendicularDistance = (point: Point, start: Point, end: Point): number => {
+    const dx = end[0] - start[0]
+    const dy = end[1] - start[1]
+    if (dx === 0 && dy === 0) return distance(point, start)
+    return Math.abs(dy * point[0] - dx * point[1] + end[0] * start[1] - end[1] * start[0]) / Math.hypot(dx, dy)
+}
+
+const simplifySection = (coords: Point[], tolerance: number): Point[] => {
+    if (coords.length <= 2) return coords
+
+    let maxDistance = -1
+    let splitIndex = -1
+    const start = coords[0]
+    const end = coords[coords.length - 1]
+
+    for (let i = 1; i < coords.length - 1; i++) {
+        const candidateDistance = perpendicularDistance(coords[i], start, end)
+        if (candidateDistance > maxDistance) {
+            maxDistance = candidateDistance
+            splitIndex = i
+        }
+    }
+
+    if (maxDistance <= tolerance || splitIndex === -1) {
+        return [start, end]
+    }
+
+    const left = simplifySection(coords.slice(0, splitIndex + 1), tolerance)
+    const right = simplifySection(coords.slice(splitIndex), tolerance)
+    return [...left.slice(0, -1), ...right]
+}
+
+const simplifyPolyline = (coords: Point[]): Point[] => {
+    const tolerance = SEED_CONFIG.geometrySimplificationTolerance
+    if (coords.length <= 2) return coords
+
+    const simplified = simplifySection(coords, tolerance)
+    return simplified.length >= 2 ? simplified : [coords[0], coords[coords.length - 1]]
+}
+
 const appendBranch = (branch: Point[], next: Point[]): Point[] => {
     if (branch.length === 0) return [...next]
     if (next.length === 0) return [...branch]
@@ -423,15 +463,24 @@ export const seedSegmentsFromGeometry = async (
 ): Promise<void> => {
     const geometries = buildRouteGeometries(geometryElements)
     const records = buildSegmentRecords(variants, stationCoordinates, geometries)
+    const originalVertexCount = records.reduce((total, record) => total + record.coordinates.length, 0)
+    const simplifiedRecords = records.map((record) => ({
+        ...record,
+        coordinates: simplifyPolyline(record.coordinates),
+    }))
+    const simplifiedVertexCount = simplifiedRecords.reduce((total, record) => total + record.coordinates.length, 0)
 
-    if (records.length === 0) {
+    if (simplifiedRecords.length === 0) {
         throw new Error('Segment seed produced zero segments — aborting')
     }
 
     await db.transaction(async (tx) => {
         await tx.execute(sql`TRUNCATE segments RESTART IDENTITY`)
-        await tx.insert(segments).values(records)
+        await tx.insert(segments).values(simplifiedRecords)
     })
 
-    console.log(`[seed:segments] Inserted ${records.length} segments`)
+    console.log(
+        `[seed:segments] Inserted ${simplifiedRecords.length} segments ` +
+            `(${originalVertexCount} → ${simplifiedVertexCount} coordinates after simplification)`
+    )
 }

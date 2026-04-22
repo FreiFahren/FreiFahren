@@ -71,5 +71,6 @@ export const SEED_CONFIG = {
     },
 
     mergeThresholdMeters: 250, // The threshold in meters for merging proximate stations.
+    geometrySimplificationTolerance: 0.00003, // Approx. 3m in latitude; keeps endpoints while reducing vertex count.
     defaultRouteColors: DEFAULT_ROUTE_COLORS,
 } as const
