@@ -1,5 +1,6 @@
 import { asc } from 'drizzle-orm'
 
+import { AppError } from '../../common/errors'
 import { DbConnection, stations, lineStations, lines } from '../../db'
 import { buildGraph, StationId, type Graph } from './pathfinding'
 import { TransitPathCacheService } from './transit-path-cache-service'
@@ -56,13 +57,35 @@ export class TransitGraphService {
         const graph = await this.getGraph()
 
         if (!graph.stations.has(from)) {
-            throw new Error(`Station not found: ${from}`)
+            throw new AppError({
+                message: 'Station not found',
+                statusCode: 404,
+                internalCode: 'STATION_NOT_FOUND',
+                description: `from=${from}`,
+            })
         }
         if (!graph.stations.has(to)) {
-            throw new Error(`Station not found: ${to}`)
+            throw new AppError({
+                message: 'Station not found',
+                statusCode: 404,
+                internalCode: 'STATION_NOT_FOUND',
+                description: `to=${to}`,
+            })
         }
 
-        return this.pathCacheService.getOrCompute(graph, from, to)
+        try {
+            return this.pathCacheService.getOrCompute(graph, from, to)
+        } catch (error) {
+            if (error instanceof Error && error.message.includes('No path found')) {
+                throw new AppError({
+                    message: 'No path found between stations',
+                    statusCode: 422,
+                    internalCode: 'NO_PATH_FOUND',
+                    description: `${from}->${to}`,
+                })
+            }
+            throw error
+        }
     }
 }
 

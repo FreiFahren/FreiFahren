@@ -6,6 +6,8 @@ export type InternalCode =
     | 'SPAM_REPORT_DETECTED'
     | 'VALIDATION_FAILED'
     | 'RISK_MODEL_FAILED'
+    | 'STATION_NOT_FOUND'
+    | 'NO_PATH_FOUND'
 export interface AppErrorDetails {
     internal_code: InternalCode
     description?: string
