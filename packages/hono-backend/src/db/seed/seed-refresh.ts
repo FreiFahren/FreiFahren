@@ -11,7 +11,12 @@ import { db } from '../index'
 import { osmSnapshot, type OsmSnapshotKind } from '../schema/osm-snapshot'
 
 import { SEED_CONFIG } from './config'
-import { fetchRouteGeometryElements, fetchStationElements, type OsmElement, type OsmRelation } from './stations/overpass'
+import {
+    fetchRouteGeometryElements,
+    fetchStationElements,
+    type OsmElement,
+    type OsmRelation,
+} from './stations/overpass'
 
 const upsertSnapshot = async (kind: OsmSnapshotKind, raw: unknown) => {
     await db

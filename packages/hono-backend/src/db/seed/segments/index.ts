@@ -201,7 +201,11 @@ const mergeRelationMembers = (existing: OsmRelation, rel: OsmRelation) => {
     }
 }
 
-const collectConnectedWayIds = (seedId: number, adjacency: Map<string, Set<number>>, waysById: Map<number, WayShape>): Set<number> => {
+const collectConnectedWayIds = (
+    seedId: number,
+    adjacency: Map<string, Set<number>>,
+    waysById: Map<number, WayShape>
+): Set<number> => {
     const seen = new Set<number>()
     const stack = [seedId]
 
