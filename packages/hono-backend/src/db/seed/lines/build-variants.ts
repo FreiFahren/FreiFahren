@@ -98,10 +98,7 @@ const normalizeSequence = (ref: string, stationIds: string[]): { stationIds: str
     return { stationIds: deduped, isCircular }
 }
 
-export const buildLineVariants = (
-    relations: OsmRelation[],
-    nodeIdToStationId: Map<number, string>
-): LineVariant[] => {
+export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: Map<number, string>): LineVariant[] => {
     const raw: RawVariant[] = []
     let skippedNoRef = 0
     let skippedTooShort = 0

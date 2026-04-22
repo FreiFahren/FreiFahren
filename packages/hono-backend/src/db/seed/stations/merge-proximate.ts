@@ -54,7 +54,7 @@ const pickRepresentative = (group: string[], dataset: StationDataset): string =>
 const coreName = (name: string): string =>
     name
         .toLowerCase()
-        .split(/[/\-–—]/)  // Split on slash or dash variants
+        .split(/[/\-–—]/) // Split on slash or dash variants
         .map((p) => p.trim())[0] // Take the first part (main name)
 
 // Check if two stations share the same core name.
@@ -131,7 +131,6 @@ export const mergeProximate = (dataset: StationDataset): MergeResult => {
     }
 
     for (const [, group] of uf.groups()) {
-
         const rep = pickRepresentative(group, dataset)
         const repEntry = dataset.get(rep)!
 
