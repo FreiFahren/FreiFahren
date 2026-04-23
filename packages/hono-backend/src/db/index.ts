@@ -3,7 +3,6 @@ import postgres from 'postgres'
 
 import { feedback } from './schema/feedback'
 import { lines, lineStations } from './schema/lines'
-import { osmSnapshot } from './schema/osm-snapshot'
 import { reports } from './schema/reports'
 import { segments } from './schema/segments'
 import { stations } from './schema/stations'
@@ -12,7 +11,7 @@ const connectionString = process.env.DATABASE_URL!
 
 export const client = postgres(connectionString, { prepare: false })
 export const db = drizzle(client, {
-    schema: { reports, stations, lines, lineStations, feedback, segments, osmSnapshot },
+    schema: { reports, stations, lines, lineStations, feedback, segments },
     casing: 'snake_case',
 })
 
@@ -23,4 +22,3 @@ export * from './schema/reports'
 export * from './schema/lines'
 export * from './schema/stations'
 export * from './schema/segments'
-export * from './schema/osm-snapshot'

@@ -15,13 +15,6 @@
             "when": 1770824145557,
             "tag": "0001_tearful_slayback",
             "breakpoints": true
-        },
-        {
-            "idx": 2,
-            "version": "7",
-            "when": 1776598625792,
-            "tag": "0002_fixed_newton_destine",
-            "breakpoints": true
         }
     ]
 }

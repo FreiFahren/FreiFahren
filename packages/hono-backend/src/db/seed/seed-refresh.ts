@@ -1,14 +1,12 @@
 /**
  * Live-fetch entry point. Hits Overpass and stores the raw response in the
- * `osm_snapshot` table. Does not touch seed tables (e.g. stations) — the apply
- * path (`bun db:seed`) reads from `osm_snapshot` and runs the transforms.
+ * bundled snapshot JSON files. Does not touch seed tables (e.g. stations) —
+ * the apply path (`bun db:seed`) reads the bundled snapshots and runs the
+ * transforms.
  *
  * Run this manually when the OSM snapshot should be refreshed. Safe to retry —
- * the existing snapshot is left untouched until a new fetch succeeds.
+ * the existing snapshots are left untouched until all new fetches succeed.
  */
-
-import { db } from '../index'
-import { osmSnapshot, type OsmSnapshotKind } from '../schema/osm-snapshot'
 
 import { SEED_CONFIG } from './config'
 import {
@@ -18,14 +16,11 @@ import {
     type OsmRelation,
 } from './stations/overpass'
 
-const upsertSnapshot = async (kind: OsmSnapshotKind, raw: unknown) => {
-    await db
-        .insert(osmSnapshot)
-        .values({ queryKind: kind, raw })
-        .onConflictDoUpdate({
-            target: osmSnapshot.queryKind,
-            set: { raw, fetchedAt: new Date() },
-        })
+type OsmSnapshotKind = 'stations' | 'route_geometries'
+
+const writeSnapshot = async (kind: OsmSnapshotKind, raw: unknown) => {
+    const fileUrl = new URL(`./snapshots/${kind}.json`, import.meta.url)
+    await Bun.write(fileUrl, `${JSON.stringify(raw, null, 2)}\n`)
 }
 
 const assertAllRefsPresent = (elements: OsmElement[]) => {
@@ -61,11 +56,11 @@ const refresh = async () => {
     assertAllRefsPresent(routeGeometryElements)
     console.log(`[seed:refresh] Geometry snapshot includes all ${SEED_CONFIG.lines.length} configured refs.`)
 
-    await upsertSnapshot('stations', stationElements)
-    console.log(`[seed:refresh] Stored 'stations' snapshot (${stationElements.length} elements)`)
+    await writeSnapshot('stations', stationElements)
+    console.log(`[seed:refresh] Wrote 'stations' snapshot (${stationElements.length} elements)`)
 
-    await upsertSnapshot('route_geometries', routeGeometryElements)
-    console.log(`[seed:refresh] Stored 'route_geometries' snapshot (${routeGeometryElements.length} elements)`)
+    await writeSnapshot('route_geometries', routeGeometryElements)
+    console.log(`[seed:refresh] Wrote 'route_geometries' snapshot (${routeGeometryElements.length} elements)`)
 }
 
 refresh()

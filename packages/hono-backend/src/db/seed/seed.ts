@@ -1,20 +1,20 @@
-import { eq } from 'drizzle-orm'
-
 import { logger } from '../../common/logger'
 import type { DbConnection } from '../index'
-import { osmSnapshot, type OsmSnapshotKind } from '../schema/osm-snapshot'
 
 import { seedLinesFromRelations } from './lines'
 import { seedSegmentsFromGeometry } from './segments/index'
 import { seedStationsFromElements } from './stations'
 import type { OsmElement, OsmRelation } from './stations/overpass'
 
-const loadSnapshot = async <T>(db: DbConnection, kind: OsmSnapshotKind): Promise<T> => {
-    const rows = await db.select().from(osmSnapshot).where(eq(osmSnapshot.queryKind, kind)).limit(1)
-    if (rows.length === 0) {
-        throw new Error(`[seed] osm_snapshot has no '${kind}' row. Run \`bun db:seed:refresh\` to populate it.`)
+type OsmSnapshotKind = 'stations' | 'route_geometries'
+
+const loadSnapshot = async <T>(kind: OsmSnapshotKind): Promise<T> => {
+    const file = Bun.file(new URL(`./snapshots/${kind}.json`, import.meta.url))
+    if (!(await file.exists())) {
+        throw new Error(`[seed] Bundled '${kind}' snapshot is missing. Run \`bun db:seed:refresh\` to populate it.`)
     }
-    return rows[0].raw as T
+
+    return (await file.json()) as T
 }
 
 const extractRouteRelations = (elements: OsmElement[]): OsmRelation[] => {
@@ -28,12 +28,12 @@ const extractRouteRelations = (elements: OsmElement[]): OsmRelation[] => {
 }
 
 export const seedBaseData = async (db: DbConnection) => {
-    logger.info('[seed] Loading stations snapshot from osm_snapshot...')
-    const stationElements = await loadSnapshot<OsmElement[]>(db, 'stations')
+    logger.info('[seed] Loading bundled stations snapshot...')
+    const stationElements = await loadSnapshot<OsmElement[]>('stations')
     logger.info(`[seed]   ${stationElements.length} elements`)
 
-    logger.info('[seed] Loading route geometries snapshot from osm_snapshot...')
-    const routeGeometryElements = await loadSnapshot<OsmElement[]>(db, 'route_geometries')
+    logger.info('[seed] Loading bundled route geometries snapshot...')
+    const routeGeometryElements = await loadSnapshot<OsmElement[]>('route_geometries')
     logger.info(`[seed]   ${routeGeometryElements.length} elements`)
 
     logger.info('[seed] Seeding stations...')
