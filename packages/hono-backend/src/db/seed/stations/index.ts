@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 
+import { logger } from '../../../common/logger'
 import type { DbConnection } from '../../index'
 import { stations } from '../../schema/stations'
 
@@ -53,7 +54,7 @@ export const seedStationsFromElements = async (
     rawElements: OsmElement[]
 ): Promise<StationSeedResult> => {
     const elements = deduplicateElements(rawElements)
-    console.log(`[seed:stations] ${rawElements.length} raw → ${elements.length} deduplicated elements`)
+    logger.info(`[seed:stations] ${rawElements.length} raw → ${elements.length} deduplicated elements`)
     const { dataset, nodeIdToCode } = buildDataset(elements)
     const { merged, codeRemap } = mergeProximate(dataset)
 
@@ -72,7 +73,7 @@ export const seedStationsFromElements = async (
         await tx.execute(sql`TRUNCATE stations CASCADE`)
         await tx.insert(stations).values(records)
     })
-    console.log(`[seed:stations] Inserted ${records.length} stations`)
+    logger.info(`[seed:stations] Inserted ${records.length} stations`)
 
     const nodeIdToStationId = new Map<number, string>()
     for (const [nodeId, code] of nodeIdToCode) {

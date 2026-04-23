@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 
+import { logger } from '../../../common/logger'
 import type { DbConnection } from '../../index'
 import { segments } from '../../schema/segments'
 import { SEED_CONFIG, type RouteType } from '../config'
@@ -394,7 +395,7 @@ const buildSegmentRecords = (
     for (const variant of variants) {
         const routeGeometry = geometries.get(variant.osmRelationId)
         if (!routeGeometry || routeGeometry.branches.length === 0) {
-            console.warn(`[seed:segments] ${variant.id}: missing geometry for relation ${variant.osmRelationId}`)
+            logger.warn(`[seed:segments] ${variant.id}: missing geometry for relation ${variant.osmRelationId}`)
             continue
         }
 
@@ -407,7 +408,7 @@ const buildSegmentRecords = (
             const toCoordinates = stationCoordinates.get(toStationId)
 
             if (!fromCoordinates || !toCoordinates) {
-                console.warn(
+                logger.warn(
                     `[seed:segments] ${variant.id}: missing coordinates for ${!fromCoordinates ? fromStationId : toStationId}`
                 )
                 continue
@@ -439,7 +440,7 @@ const buildSegmentRecords = (
             }
 
             if (!bestCoordinates) {
-                console.warn(
+                logger.warn(
                     `[seed:segments] ${variant.id}: could not build segment ${fromStationId} -> ${toStationId}`
                 )
                 continue
@@ -483,7 +484,7 @@ export const seedSegmentsFromGeometry = async (
         await tx.insert(segments).values(simplifiedRecords)
     })
 
-    console.log(
+    logger.info(
         `[seed:segments] Inserted ${simplifiedRecords.length} segments ` +
             `(${originalVertexCount} → ${simplifiedVertexCount} coordinates after simplification)`
     )

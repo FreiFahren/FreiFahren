@@ -1,3 +1,4 @@
+import { logger } from '../../../common/logger'
 import { SEED_CONFIG, ROUTE_TYPE_PRIORITY } from '../config'
 
 import type { StationDataset } from './build-dataset'
@@ -165,6 +166,6 @@ export const mergeProximate = (dataset: StationDataset): MergeResult => {
         })
     }
 
-    console.log(`[seed:stations] After merge (<${threshold}m): ${merged.size} stations`)
+    logger.info(`[seed:stations] After merge (<${threshold}m): ${merged.size} stations`)
     return { merged, codeRemap }
 }

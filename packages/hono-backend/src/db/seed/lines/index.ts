@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 
+import { logger } from '../../../common/logger'
 import type { DbConnection } from '../../index'
 import { lines, lineStations } from '../../schema/lines'
 import type { OsmRelation } from '../stations/overpass'
@@ -37,7 +38,7 @@ export const seedLinesFromRelations = async (
         await tx.insert(lineStations).values(lineStationRecords)
     })
 
-    console.log(
+    logger.info(
         `[seed:lines] Inserted ${lineRecords.length} line variants, ${lineStationRecords.length} line_stations rows`
     )
 

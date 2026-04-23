@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm'
 
+import { logger } from '../../common/logger'
 import type { DbConnection } from '../index'
 import { osmSnapshot, type OsmSnapshotKind } from '../schema/osm-snapshot'
 
@@ -27,23 +28,23 @@ const extractRouteRelations = (elements: OsmElement[]): OsmRelation[] => {
 }
 
 export const seedBaseData = async (db: DbConnection) => {
-    console.log('[seed] Loading stations snapshot from osm_snapshot...')
+    logger.info('[seed] Loading stations snapshot from osm_snapshot...')
     const stationElements = await loadSnapshot<OsmElement[]>(db, 'stations')
-    console.log(`[seed]   ${stationElements.length} elements`)
+    logger.info(`[seed]   ${stationElements.length} elements`)
 
-    console.log('[seed] Loading route geometries snapshot from osm_snapshot...')
+    logger.info('[seed] Loading route geometries snapshot from osm_snapshot...')
     const routeGeometryElements = await loadSnapshot<OsmElement[]>(db, 'route_geometries')
-    console.log(`[seed]   ${routeGeometryElements.length} elements`)
+    logger.info(`[seed]   ${routeGeometryElements.length} elements`)
 
-    console.log('[seed] Seeding stations...')
+    logger.info('[seed] Seeding stations...')
     const { nodeIdToStationId, stationCoordinates } = await seedStationsFromElements(db, stationElements)
 
-    console.log('[seed] Seeding lines...')
+    logger.info('[seed] Seeding lines...')
     const routeRelations = extractRouteRelations(stationElements)
     const variants = await seedLinesFromRelations(db, routeRelations, nodeIdToStationId)
 
-    console.log('[seed] Seeding segments...')
+    logger.info('[seed] Seeding segments...')
     await seedSegmentsFromGeometry(db, variants, stationCoordinates, routeGeometryElements)
 
-    console.log('[seed] Done.')
+    logger.info('[seed] Done.')
 }

@@ -1,3 +1,4 @@
+import { logger } from '../../../common/logger'
 import { SEED_CONFIG, ROUTE_TYPE_PRIORITY, type RouteType } from '../config'
 
 import type { Coordinates } from './merge-proximate'
@@ -203,6 +204,6 @@ export const buildDataset = (elements: OsmElement[]): BuildResult => {
         }
     }
 
-    console.log(`[seed:stations] Stations after build: ${dataset.size}`)
+    logger.info(`[seed:stations] Stations after build: ${dataset.size}`)
     return { dataset, nodeIdToCode }
 }

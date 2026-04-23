@@ -1,3 +1,4 @@
+import { logger } from '../../../common/logger'
 import { SEED_CONFIG } from '../config'
 import type { OsmRelation } from '../stations/overpass'
 
@@ -91,7 +92,7 @@ const normalizeSequence = (ref: string, stationIds: string[]): { stationIds: str
         deduped.push(id)
     }
     if (droppedDuplicates > 0) {
-        console.warn(
+        logger.warn(
             `[seed:lines] ${ref}: dropped ${droppedDuplicates} repeated station(s) to satisfy (line_id, station_id) PK`
         )
     }
@@ -125,7 +126,7 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
         raw.push({ ref, osmRelationId: rel.id, stationIds, isCircular })
     }
 
-    console.log(
+    logger.info(
         `[seed:lines] Parsed ${raw.length} route variants (${skippedNoRef} no-ref, ${skippedTooShort} too-short)`
     )
 
@@ -140,7 +141,7 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
     if (missingRefs.length > 0) {
         /* Refresh-time assertion already guards against this; a warning here is
          * just defense-in-depth for hand-edited snapshots. */
-        console.warn(
+        logger.warn(
             `[seed:lines] Snapshot has no route relations for configured refs: ${missingRefs.join(', ')}. ` +
                 `Run \`bun db:seed:refresh\` to fetch a fresh snapshot.`
         )
@@ -174,7 +175,7 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
                 isCircular: v.isCircular,
             })
             const ringLabel = v.isCircular ? ' [circular]' : ''
-            console.log(`[seed:lines] ${ref} → 1 variant (${v.stationIds.length} stations${ringLabel})`)
+            logger.info(`[seed:lines] ${ref} → 1 variant (${v.stationIds.length} stations${ringLabel})`)
         } else {
             const suffixes = filtered.map((_, i) => suffixFor(i))
             filtered.forEach((v, i) => {
@@ -190,7 +191,7 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
                 .map((v, i) => `${assignVariantId(ref, suffixes[i])}=${v.stationIds.length}${v.isCircular ? '*' : ''}`)
                 .join(', ')
             const hasCircular = filtered.some((v) => v.isCircular)
-            console.log(
+            logger.info(
                 `[seed:lines] ${ref} → ${filtered.length} variants (${summary}${hasCircular ? ', *=circular' : ''})`
             )
         }
