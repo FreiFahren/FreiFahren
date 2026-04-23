@@ -440,9 +440,7 @@ const buildSegmentRecords = (
             }
 
             if (!bestCoordinates) {
-                logger.warn(
-                    `[seed:segments] ${variant.id}: could not build segment ${fromStationId} -> ${toStationId}`
-                )
+                logger.warn(`[seed:segments] ${variant.id}: could not build segment ${fromStationId} -> ${toStationId}`)
                 continue
             }
 
