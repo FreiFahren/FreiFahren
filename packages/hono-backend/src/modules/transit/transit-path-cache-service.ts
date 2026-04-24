@@ -2,6 +2,8 @@ import { existsSync, mkdirSync } from 'fs'
 import { readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 
+import { NoPathFoundError } from '../../common/errors'
+
 import { findPathWithAStar, StationId, type Graph } from './pathfinding'
 
 export type PathCacheKey = `${string}:${string}`
@@ -84,9 +86,7 @@ export class TransitPathCacheService {
             }
 
             const computedAt = new Date(cacheData.metadata.computedAt).toLocaleString()
-            console.log(
-                `loaded ${this.pathCache.size} pre-computed paths from cache (computed at: ${computedAt})`
-            )
+            console.log(`loaded ${this.pathCache.size} pre-computed paths from cache (computed at: ${computedAt})`)
             return true
         } catch (error) {
             console.error('error loading cache from disk:', error)
@@ -164,7 +164,7 @@ export class TransitPathCacheService {
                         )
                     }
                 } catch (error) {
-                    if (error instanceof Error && error.message.includes('No path found')) {
+                    if (error instanceof NoPathFoundError) {
                         computed++
                         continue
                     }
@@ -181,4 +181,3 @@ export class TransitPathCacheService {
         await this.saveToDisk(graph.stations.size)
     }
 }
-

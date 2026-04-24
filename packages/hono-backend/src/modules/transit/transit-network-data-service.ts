@@ -1,19 +1,21 @@
 import { asc, eq } from 'drizzle-orm'
 
+import { AppError, NoPathFoundError } from '../../common/errors'
 import { DbConnection, stations, lineStations, lines, segments } from '../../db'
-import { TransitGraphService } from './transit-graph-service'
 
+import { buildGraph, type Graph, type StationId } from './pathfinding'
+import { TransitPathCacheService } from './transit-path-cache-service'
 import type { Lines, SegmentsFeatureCollection, Stations } from './types'
 
 export class TransitNetworkDataService {
     private stationsCache: Promise<Stations> | null = null
     private linesCache: Promise<Lines> | null = null
     private segmentsCache: Promise<SegmentsFeatureCollection> | null = null
-    private graphService: TransitGraphService
+    private graphCache: Graph | null = null
+    private graphPromise: Promise<Graph> | null = null
+    private pathCacheService = new TransitPathCacheService()
 
-    constructor(private db: DbConnection) {
-        this.graphService = new TransitGraphService(db)
-    }
+    constructor(private db: DbConnection) {}
 
     async getStations(): Promise<Stations> {
         if (this.stationsCache) {
@@ -136,6 +138,82 @@ export class TransitNetworkDataService {
     }
 
     async getDistance(from: StationId, to: StationId): Promise<number> {
-        return this.graphService.getDistance(from, to)
+        const graph = await this.getGraph()
+
+        this.assertStationExists(graph, from, 'from')
+        this.assertStationExists(graph, to, 'to')
+
+        if (from === to) {
+            return 0
+        }
+
+        try {
+            return this.pathCacheService.getOrCompute(graph, from, to)
+        } catch (error) {
+            if (error instanceof NoPathFoundError) {
+                throw new AppError({
+                    message: 'No path found between stations',
+                    statusCode: 422,
+                    internalCode: 'NO_PATH_FOUND',
+                    description: `${from}->${to}`,
+                })
+            }
+            throw error
+        }
+    }
+
+    private assertStationExists(graph: Graph, stationId: StationId, field: 'from' | 'to'): void {
+        if (!graph.stations.has(stationId)) {
+            throw new AppError({
+                message: 'Station not found',
+                statusCode: 404,
+                internalCode: 'STATION_NOT_FOUND',
+                description: `${field}=${stationId}`,
+            })
+        }
+    }
+
+    private async getGraph(): Promise<Graph> {
+        if (this.graphCache) {
+            return this.graphCache
+        }
+
+        if (this.graphPromise) {
+            return this.graphPromise
+        }
+
+        // Share the same in-flight graph load across concurrent requests.
+        // If loading fails, clear the promise so the next request can retry.
+        this.graphPromise = this.loadGraph()
+        try {
+            const graph = await this.graphPromise
+            this.graphCache = graph
+            return graph
+        } catch (error) {
+            this.graphPromise = null
+            throw error
+        }
+    }
+
+    private async loadGraph(): Promise<Graph> {
+        const allStations = await this.db.select().from(stations)
+        const allLineStations = await this.db
+            .select()
+            .from(lineStations)
+            .orderBy(asc(lineStations.lineId), asc(lineStations.order))
+        const allLines = await this.db.select().from(lines)
+
+        const graph = buildGraph(allStations, allLines, allLineStations)
+
+        if (this.pathCacheService.size() === 0) {
+            const loaded = await this.pathCacheService.loadFromDisk(graph.stations.size)
+            if (!loaded) {
+                this.pathCacheService.precomputeAllPaths(graph).catch((error) => {
+                    console.error('error during path pre-computation:', error)
+                })
+            }
+        }
+
+        return graph
     }
 }

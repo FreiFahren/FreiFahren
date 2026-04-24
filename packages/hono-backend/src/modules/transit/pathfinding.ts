@@ -1,3 +1,5 @@
+import { NoPathFoundError, StationNotFoundError } from '../../common/errors'
+
 export type StationId = string
 export type LineId = string
 
@@ -76,17 +78,11 @@ class MinHeap {
         const rightChildIndex = this.getRightChildIndex(index)
         let smallest = index
 
-        if (
-            leftChildIndex < this.heap.length &&
-            this.heap[leftChildIndex].fCost < this.heap[smallest].fCost
-        ) {
+        if (leftChildIndex < this.heap.length && this.heap[leftChildIndex].fCost < this.heap[smallest].fCost) {
             smallest = leftChildIndex
         }
 
-        if (
-            rightChildIndex < this.heap.length &&
-            this.heap[rightChildIndex].fCost < this.heap[smallest].fCost
-        ) {
+        if (rightChildIndex < this.heap.length && this.heap[rightChildIndex].fCost < this.heap[smallest].fCost) {
             smallest = rightChildIndex
         }
 
@@ -116,11 +112,7 @@ class MinHeap {
     }
 }
 
-export function buildGraph(
-    stations: StationWithCoords[],
-    lines: LineRow[],
-    lineStations: LineStationRow[]
-): Graph {
+export const buildGraph = (stations: StationWithCoords[], lines: LineRow[], lineStations: LineStationRow[]): Graph => {
     const stationMap = new Map<StationId, StationWithCoords>()
     for (const station of stations) {
         stationMap.set(station.id, station)
@@ -194,18 +186,21 @@ export function buildGraph(
     }
 }
 
-function calculateHeuristic(from: StationWithCoords, to: StationWithCoords): number {
+const calculateHeuristic = (from: StationWithCoords, to: StationWithCoords): number => {
     const latDiff = from.lat - to.lat
     const lngDiff = from.lng - to.lng
     return Math.sqrt(latDiff * latDiff + lngDiff * lngDiff)
 }
 
-export function findPathWithAStar(graph: Graph, from: StationId, to: StationId): number {
+export const findPathWithAStar = (graph: Graph, from: StationId, to: StationId): number => {
     const fromStation = graph.stations.get(from)
     const toStation = graph.stations.get(to)
 
-    if (!fromStation || !toStation) {
-        throw new Error('Station not found')
+    if (!fromStation) {
+        throw new StationNotFoundError(from)
+    }
+    if (!toStation) {
+        throw new StationNotFoundError(to)
     }
 
     const openSet = new MinHeap()
@@ -260,9 +255,8 @@ export function findPathWithAStar(graph: Graph, from: StationId, to: StationId):
     }
 
     if (!goalState) {
-        throw new Error(`No path found between stations: ${from} → ${to}`)
+        throw new NoPathFoundError(from, to)
     }
 
     return goalState.gCost
 }
-
