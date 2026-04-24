@@ -79,3 +79,32 @@ export const getSegments = defineRoute<Env>()({
         return c.json(await transitNetworkDataService.getSegments())
     },
 })
+
+export const getDistance = defineRoute<Env>()({
+    method: 'get' as const,
+    path: '/distance',
+    docs: {
+        summary: 'Get distance between stations',
+        description: 'Returns the shortest distance between two station ids.',
+        tags: ['transit'],
+        querySchema: z.object({
+            from: z.string().min(1),
+            to: z.string().min(1),
+        }),
+    },
+    schemas: {
+        query: z.object({
+            from: z.string().min(1),
+            to: z.string().min(1),
+        }),
+        response: z.object({
+            distance: z.number(),
+        }),
+    },
+    handler: async (c) => {
+        const transitNetworkDataService = c.get('transitNetworkDataService')
+        const query = c.req.valid('query')
+        const distance = await transitNetworkDataService.getDistance(query.from, query.to)
+        return c.json({ distance })
+    },
+})
