@@ -23,10 +23,8 @@ export type Graph = {
 
 type AStarState = {
     stationId: StationId
-    currentLineId: LineId | null
     gCost: number
     fCost: number
-    parent: AStarState | null
 }
 
 type LineRow = {
@@ -39,8 +37,6 @@ type LineStationRow = {
     stationId: StationId
     order: number
 }
-
-export const LINE_SWITCH_PENALTY = 2
 
 class MinHeap {
     private heap: AStarState[] = []
@@ -206,10 +202,8 @@ export const findPathWithAStar = (graph: Graph, from: StationId, to: StationId):
     const openSet = new MinHeap()
     openSet.insert({
         stationId: from,
-        currentLineId: null,
         gCost: 0,
         fCost: calculateHeuristic(fromStation, toStation),
-        parent: null,
     })
 
     const visited = new Map<string, number>()
@@ -218,11 +212,10 @@ export const findPathWithAStar = (graph: Graph, from: StationId, to: StationId):
     while (!openSet.isEmpty()) {
         const current = openSet.extractMin()!
 
-        const stateKey = `${current.stationId}:${current.currentLineId ?? 'null'}`
-        if (visited.has(stateKey) && visited.get(stateKey)! <= current.gCost) {
+        if (visited.has(current.stationId) && visited.get(current.stationId)! <= current.gCost) {
             continue
         }
-        visited.set(stateKey, current.gCost)
+        visited.set(current.stationId, current.gCost)
 
         if (current.stationId === to) {
             goalState = current
@@ -231,12 +224,9 @@ export const findPathWithAStar = (graph: Graph, from: StationId, to: StationId):
 
         const neighbors = graph.neighbors.get(current.stationId) ?? []
         for (const neighbor of neighbors) {
-            const isLineSwitch = current.currentLineId !== null && current.currentLineId !== neighbor.lineId
-            const edgeCost = 1 + (isLineSwitch ? LINE_SWITCH_PENALTY : 0)
-            const newGCost = current.gCost + edgeCost
+            const newGCost = current.gCost + 1
 
-            const neighborStateKey = `${neighbor.stationId}:${neighbor.lineId}`
-            if (visited.has(neighborStateKey) && visited.get(neighborStateKey)! <= newGCost) {
+            if (visited.has(neighbor.stationId) && visited.get(neighbor.stationId)! <= newGCost) {
                 continue
             }
 
@@ -246,10 +236,8 @@ export const findPathWithAStar = (graph: Graph, from: StationId, to: StationId):
 
             openSet.insert({
                 stationId: neighbor.stationId,
-                currentLineId: neighbor.lineId,
                 gCost: newGCost,
                 fCost,
-                parent: current,
             })
         }
     }

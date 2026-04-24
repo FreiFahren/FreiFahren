@@ -1,7 +1,7 @@
 import { afterEach, beforeAll, describe, expect, it } from 'bun:test'
-import { asc, eq } from 'drizzle-orm'
+import { asc, eq, inArray } from 'drizzle-orm'
 
-import { db, lineStations, stations } from '../src/db'
+import { db, lines, lineStations, stations } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
 import { app, createApp } from '../src/index'
 import { appRequestWithRedirect } from './test-utils'
@@ -18,6 +18,8 @@ type ErrorResponse = {
 }
 
 const ISOLATED_STATION_ID = 'TEST_ISOLATED'
+const TRANSFER_STATION_IDS = ['TEST_A', 'TEST_B', 'TEST_C'] as const
+const TRANSFER_LINE_IDS = ['TEST_L1', 'TEST_L2'] as const
 
 let fromStationId: string
 let toStationId: string
@@ -57,6 +59,8 @@ describe('GET /v0/transit/distance', () => {
     })
 
     afterEach(async () => {
+        await db.delete(lines).where(inArray(lines.id, [...TRANSFER_LINE_IDS]))
+        await db.delete(stations).where(inArray(stations.id, [...TRANSFER_STATION_IDS]))
         await db.delete(stations).where(eq(stations.id, ISOLATED_STATION_ID))
     })
 
@@ -83,6 +87,32 @@ describe('GET /v0/transit/distance', () => {
 
     it('returns 2 for stations two hops apart on the same line', async () => {
         const response = await getDistance(fromStationId, twoHopsAwayStationId)
+
+        expect(response.status).toBe(200)
+
+        const body = (await response.json()) as DistanceResponse
+        expect(body.distance).toBe(2)
+    })
+
+    it('counts station hops without adding a line switch penalty', async () => {
+        await db.insert(stations).values([
+            { id: 'TEST_A', name: 'Test A', lat: 52.5, lng: 13.4 },
+            { id: 'TEST_B', name: 'Test B', lat: 52.51, lng: 13.41 },
+            { id: 'TEST_C', name: 'Test C', lat: 52.52, lng: 13.42 },
+        ])
+        await db.insert(lines).values([
+            { id: 'TEST_L1', name: 'Test Line 1', isCircular: false },
+            { id: 'TEST_L2', name: 'Test Line 2', isCircular: false },
+        ])
+        await db.insert(lineStations).values([
+            { lineId: 'TEST_L1', stationId: 'TEST_A', order: 0 },
+            { lineId: 'TEST_L1', stationId: 'TEST_B', order: 1 },
+            { lineId: 'TEST_L2', stationId: 'TEST_B', order: 0 },
+            { lineId: 'TEST_L2', stationId: 'TEST_C', order: 1 },
+        ])
+
+        const transferApp = createApp(db)
+        const response = await getDistance('TEST_A', 'TEST_C', transferApp)
 
         expect(response.status).toBe(200)
 
