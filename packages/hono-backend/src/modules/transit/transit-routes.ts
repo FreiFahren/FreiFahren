@@ -97,6 +97,9 @@ export const getDistance = defineRoute<Env>()({
             from: z.string().min(1),
             to: z.string().min(1),
         }),
+        response: z.object({
+            distance: z.number(),
+        }),
     },
     handler: async (c) => {
         const transitNetworkDataService = c.get('transitNetworkDataService')
