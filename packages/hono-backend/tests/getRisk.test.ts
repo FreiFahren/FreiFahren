@@ -489,6 +489,7 @@ describe('GET /v0/risk overlapping segments', () => {
 
     let overlapIds: string[] = []
     let primaryLineId: string | null = null
+    let overlapStationId: string | null = null
 
     beforeAll(async () => {
         await seedBaseData(db)
@@ -503,10 +504,10 @@ describe('GET /v0/risk overlapping segments', () => {
             .from(segments)
 
         // Group by normalized (sorted) station pair to find overlapping segments
-        const pairMap = new Map<string, { ids: number[]; lineIds: string[] }>()
+        const pairMap = new Map<string, { ids: number[]; lineIds: string[]; fromStationId: string }>()
         for (const seg of allSegments) {
             const key = [seg.fromStationId, seg.toStationId].sort().join(':')
-            const entry = pairMap.get(key) ?? { ids: [], lineIds: [] }
+            const entry = pairMap.get(key) ?? { ids: [], lineIds: [], fromStationId: seg.fromStationId }
             entry.ids.push(seg.id)
             entry.lineIds.push(seg.lineId)
             pairMap.set(key, entry)
@@ -516,6 +517,7 @@ describe('GET /v0/risk overlapping segments', () => {
         if (overlap) {
             overlapIds = overlap.ids.map(String)
             primaryLineId = overlap.lineIds[0]!
+            overlapStationId = overlap.fromStationId
         }
     })
 
@@ -528,21 +530,11 @@ describe('GET /v0/risk overlapping segments', () => {
     })
 
     it('all segments sharing the same station pair get colored when one of them is risky', async () => {
-        if (!primaryLineId || overlapIds.length === 0) return // skip if seed data has no overlapping pairs
+        if (!primaryLineId || !overlapStationId || overlapIds.length === 0) return // skip if seed data has no overlapping pairs
 
         const overlapSegmentIds = overlapIds
 
-        // Find a station that is directly one of the endpoints of the overlapping segment pair.
-        // Reporting there puts the segment at distance 0, guaranteeing it appears in the output.
-        const [stationEntry] = await db
-            .select({ stationId: lineStations.stationId })
-            .from(lineStations)
-            .where(eq(lineStations.lineId, primaryLineId))
-            .limit(1)
-
-        if (!stationEntry) return
-
-        await sendReportRequest({ stationId: stationEntry.stationId, lineId: primaryLineId, source: 'telegram' })
+        await sendReportRequest({ stationId: overlapStationId, lineId: primaryLineId, source: 'telegram' })
 
         const response = await appRequestWithRedirect('/risk')
         const body = (await response.json()) as RiskResponse

@@ -1,85 +1,50 @@
+import { logger } from '../../common/logger'
 import type { DbConnection } from '../index'
-import { lines, lineStations } from '../schema/lines'
-import { segments } from '../schema/segments'
-import { stations } from '../schema/stations'
 
-import linesListJson from './LinesList.json'
-import segmentsJson from './segments.json'
-import stationsListJson from './StationsList.json'
+import { seedLinesFromRelations } from './lines'
+import { seedSegmentsFromGeometry } from './segments/index'
+import { seedStationsFromElements } from './stations'
+import type { OsmElement, OsmRelation } from './stations/overpass'
 
-interface SegmentFeature {
-    properties: { sid: string; line_color: string }
-    geometry: { coordinates: [number, number][] }
-}
+type OsmSnapshotKind = 'stations' | 'route_geometries'
 
-interface StationData {
-    coordinates: {
-        latitude: number
-        longitude: number
+const loadSnapshot = async <T>(kind: OsmSnapshotKind): Promise<T> => {
+    const file = Bun.file(new URL(`./snapshots/${kind}.json`, import.meta.url))
+    if (!(await file.exists())) {
+        throw new Error(`[seed] Bundled '${kind}' snapshot is missing. Run \`bun db:seed:refresh\` to populate it.`)
     }
-    lines: string[]
-    name: string
+
+    return (await file.json()) as T
 }
 
-interface StationsMap {
-    [key: string]: StationData
-}
-
-interface LinesMap {
-    [key: string]: string[]
+const extractRouteRelations = (elements: OsmElement[]): OsmRelation[] => {
+    const out: OsmRelation[] = []
+    for (const el of elements) {
+        if (el.type !== 'relation') continue
+        const rel = el as OsmRelation
+        if (rel.tags?.type === 'route') out.push(rel)
+    }
+    return out
 }
 
 export const seedBaseData = async (db: DbConnection) => {
-    const stationsData = stationsListJson as StationsMap
-    const linesData = linesListJson as LinesMap
+    logger.info('[seed] Loading bundled stations snapshot...')
+    const stationElements = await loadSnapshot<OsmElement[]>('stations')
+    logger.info(`[seed]   ${stationElements.length} elements`)
 
-    const stationRecords = Object.entries(stationsData).map(([id, data]) => ({
-        id,
-        name: data.name,
-        lat: data.coordinates.latitude,
-        lng: data.coordinates.longitude,
-    }))
+    logger.info('[seed] Loading bundled route geometries snapshot...')
+    const routeGeometryElements = await loadSnapshot<OsmElement[]>('route_geometries')
+    logger.info(`[seed]   ${routeGeometryElements.length} elements`)
 
-    await db.insert(stations).values(stationRecords).onConflictDoNothing()
+    logger.info('[seed] Seeding stations...')
+    const { nodeIdToStationId, stationCoordinates } = await seedStationsFromElements(db, stationElements)
 
-    const lineRecords = Object.keys(linesData).map((id) => ({
-        id,
-        name: id,
-    }))
+    logger.info('[seed] Seeding lines...')
+    const routeRelations = extractRouteRelations(stationElements)
+    const variants = await seedLinesFromRelations(db, routeRelations, nodeIdToStationId)
 
-    await db.insert(lines).values(lineRecords).onConflictDoNothing()
+    logger.info('[seed] Seeding segments...')
+    await seedSegmentsFromGeometry(db, variants, stationCoordinates, routeGeometryElements)
 
-    const stationLineRecords: Array<{
-        stationId: string
-        lineId: string
-        order: number
-    }> = []
-
-    for (const [lineId, stationIds] of Object.entries(linesData)) {
-        stationIds.forEach((stationId, index) => {
-            stationLineRecords.push({
-                stationId,
-                lineId,
-                order: index,
-            })
-        })
-    }
-
-    await db.insert(lineStations).values(stationLineRecords).onConflictDoNothing()
-
-    const segmentRecords = (segmentsJson.features as SegmentFeature[]).map((feature) => {
-        const [lineId, stationPart] = feature.properties.sid.split('.')
-        const [fromStationId, toStationId] = stationPart.split(':')
-        const position = (linesData[lineId] ?? []).indexOf(fromStationId)
-        return {
-            lineId,
-            fromStationId,
-            toStationId,
-            position,
-            color: feature.properties.line_color,
-            coordinates: feature.geometry.coordinates as [number, number][],
-        }
-    })
-
-    await db.insert(segments).values(segmentRecords).onConflictDoNothing()
+    logger.info('[seed] Done.')
 }

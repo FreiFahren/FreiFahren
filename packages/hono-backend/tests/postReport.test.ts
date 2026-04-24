@@ -438,10 +438,19 @@ describe('Report Post Processing', () => {
         if (!stationNotOnLineEntry) throw new Error('No station found that is not on the selected line')
         stationNotOnLineId = stationNotOnLineEntry[0]
 
+        const stationsOnLineForSingleLineStation = linesMap[lineIdForStationWithOneLine]
+        const terminalStationsOnLineForSingleLineStation = new Set([
+            stationsOnLineForSingleLineStation[0],
+            stationsOnLineForSingleLineStation[stationsOnLineForSingleLineStation.length - 1],
+        ])
+
         const stationOnSameLineEntry = stationEntries.find(
-            ([id, s]) => s.lines.includes(lineIdForStationWithOneLine) && id !== stationWithOneLineId
+            ([id, s]) =>
+                s.lines.includes(lineIdForStationWithOneLine) &&
+                id !== stationWithOneLineId &&
+                terminalStationsOnLineForSingleLineStation.has(id)
         )
-        if (!stationOnSameLineEntry) throw new Error('No second station on the same line found')
+        if (!stationOnSameLineEntry) throw new Error('No terminal station on the same line found')
         stationOnSameLineAsStationWithOneLineId = stationOnSameLineEntry[0]
 
         const multiLineStations = stationEntries.filter(([, s]) => s.lines.length > 1)
@@ -504,6 +513,20 @@ describe('Report Post Processing', () => {
     })
 
     it('Accept a direction only payload when a line can be inferred', async () => {
+        const directionLineId = stationsMap[directionWithOneLineId].lines[0]!
+        const stationIdOnDirectionLine = linesMap[directionLineId].find(
+            (stationId) => stationId !== directionWithOneLineId
+        )
+        if (!stationIdOnDirectionLine) throw new Error('No station found on the inferred direction line')
+
+        const candidateReportResponse = await sendReportRequest({
+            stationId: stationIdOnDirectionLine,
+            lineId: directionLineId,
+            directionId: directionWithOneLineId,
+            source: 'web_app',
+        })
+        expect(candidateReportResponse.status).toBe(200)
+
         const response = await sendReportRequest({
             source: 'web_app',
             directionId: directionWithOneLineId,
@@ -517,7 +540,8 @@ describe('Report Post Processing', () => {
             .orderBy(desc(reports.timestamp))
             .limit(1)
 
-        expect(report.lineId).toBe(lineIdForStationWithOneLine)
+        expect(report.lineId).toBe(directionLineId)
+        expect(report.stationId).toBe(stationIdOnDirectionLine)
         expect(report.directionId).toBe(directionWithOneLineId)
     })
 
