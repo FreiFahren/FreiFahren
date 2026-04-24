@@ -42,22 +42,6 @@ just db-seed
 
 To populate it with data about Berlin's public transit system.
 
-## Transit path cache (.cache)
-
-The transit distance endpoint stores precomputed path distances in `.cache/transit-paths-cache.json`.
-
-- Cache path inside container: `/app/.cache/transit-paths-cache.json`
-- Cache path on host (with current compose setup): `packages/hono-backend/.cache/transit-paths-cache.json`
-
-For cache persistence across container restarts, mount `.cache` into the container (already configured in `compose-hono.test.yaml`):
-
-```yaml
-volumes:
-  - ./.cache:/app/.cache
-```
-
-Without that volume mount, the cache is ephemeral and will be rebuilt after each container recreation.
-
 ## DB Migrations
 
 After altering the DB schema, you need to align the actual DB state with the drizzle schema. You first create the migration:

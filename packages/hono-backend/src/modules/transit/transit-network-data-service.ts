@@ -203,17 +203,6 @@ export class TransitNetworkDataService {
             .orderBy(asc(lineStations.lineId), asc(lineStations.order))
         const allLines = await this.db.select().from(lines)
 
-        const graph = buildGraph(allStations, allLines, allLineStations)
-
-        if (this.pathCacheService.size() === 0) {
-            const loaded = await this.pathCacheService.loadFromDisk(graph.stations.size)
-            if (!loaded) {
-                this.pathCacheService.precomputeAllPaths(graph).catch((error) => {
-                    console.error('error during path pre-computation:', error)
-                })
-            }
-        }
-
-        return graph
+        return buildGraph(allStations, allLines, allLineStations)
     }
 }

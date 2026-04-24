@@ -35,7 +35,6 @@ services:
             - ./tests:/app/tests:ro
             - ./drizzle.config.ts:/app/drizzle.config.ts:ro
             - ./drizzle:/app/drizzle
-            - ./.cache:/app/.cache
         depends_on:
             postgres:
                 condition: service_healthy

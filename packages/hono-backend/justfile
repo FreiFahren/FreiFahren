@@ -63,10 +63,3 @@ lint:
 
 lint-fix:
     bun run lint:fix
-
-[group('distance-api')]
-distance-local-test:
-    curl -i "http://localhost/v0/transit/distance?from=M-n30624481&to=M-n30684982" 
-    curl -i "http://localhost/v0/transit/distance?from=M-n30624481&to=M-n30624481" 
-    curl -i "http://localhost/v0/transit/distance?from=does-not-exist&to=M-n30624481" 
-    curl -i "http://localhost/v0/transit/distance" 
