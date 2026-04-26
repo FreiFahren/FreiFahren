@@ -1,13 +1,7 @@
-import { beforeAll, describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 
-import { seedBaseData } from '../src/db/seed/seed'
-import { db } from '../src/db'
 import { app } from '../src/index'
 import { appRequestWithRedirect } from './test-utils'
-
-beforeAll(async () => {
-    await seedBaseData(db)
-})
 
 describe('Versioning', () => {
     it('serves GET /v0/reports directly', async () => {

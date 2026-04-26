@@ -2,7 +2,6 @@ import { afterEach, beforeAll, describe, expect, it } from 'bun:test'
 import { asc, eq, inArray } from 'drizzle-orm'
 
 import { db, lines, lineStations, stations } from '../src/db'
-import { seedBaseData } from '../src/db/seed/seed'
 import { app, createApp } from '../src/index'
 import { appRequestWithRedirect } from './test-utils'
 
@@ -32,8 +31,6 @@ const getDistance = (from: string, to: string, targetApp = app) => {
 
 describe('GET /v0/transit/distance', () => {
     beforeAll(async () => {
-        await seedBaseData(db)
-
         const rows = await db
             .select({
                 lineId: lineStations.lineId,

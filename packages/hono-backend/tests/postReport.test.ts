@@ -4,7 +4,6 @@ import { Hono } from 'hono'
 import { Stations } from '../src/modules/transit/types'
 import { TransitNetworkDataService } from '../src/modules/transit/transit-network-data-service'
 import { db, lineStations, reports, stations } from '../src/db'
-import { seedBaseData } from '../src/db/seed/seed'
 import { and, desc, eq } from 'drizzle-orm'
 import { sendReportRequest } from './test-utils'
 
@@ -23,8 +22,6 @@ describe('Telegram notification', () => {
     let shouldFail: boolean
 
     beforeAll(async () => {
-        await seedBaseData(db)
-
         const fakeNlp = new Hono()
 
         fakeNlp.post('/report-inspector', async (c) => {
@@ -140,7 +137,6 @@ describe('Security Verification', () => {
 
 describe('Report API contract', () => {
     beforeAll(async () => {
-        await seedBaseData(db)
         process.env.NODE_ENV = 'production'
         process.env.REPORT_PASSWORD = 'test-password' // To pass the security check
     })
@@ -409,7 +405,6 @@ describe('Report Post Processing', () => {
     let firstStationOnLineId: string
 
     beforeAll(async () => {
-        await seedBaseData(db)
         const transitService = new TransitNetworkDataService(db)
         stationsMap = await transitService.getStations()
         linesMap = Object.fromEntries(
