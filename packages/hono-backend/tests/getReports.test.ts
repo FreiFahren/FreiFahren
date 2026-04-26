@@ -3,7 +3,6 @@ import { eq } from 'drizzle-orm'
 import { DateTime, Settings } from 'luxon'
 
 import { db, lineStations, lines, reports } from '../src/db'
-import { seedBaseData } from '../src/db/seed/seed'
 import { createApp } from '../src/index'
 import {
     DEFAULT_REPORTS_TIMEFRAME,
@@ -50,8 +49,6 @@ const getValidReportPayload = async () => {
 
 describe('Timeframe filtering', () => {
     beforeAll(async () => {
-        await seedBaseData(db)
-
         const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
         testLineId = line.id
 
@@ -153,8 +150,6 @@ describe('Predicted reports', () => {
     let allStationIds: string[]
 
     beforeAll(async () => {
-        await seedBaseData(db)
-
         const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
         testLineId = line.id
 
@@ -418,8 +413,6 @@ describe('Predicted reports threshold', () => {
     }
 
     beforeAll(async () => {
-        await seedBaseData(db)
-
         const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
         testLineId = line.id
 
@@ -644,8 +637,6 @@ describe('Reports by station route', () => {
     let lineId: string
 
     beforeAll(async () => {
-        await seedBaseData(db)
-
         const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
         lineId = line.id
 

@@ -2,7 +2,6 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'bun:test
 import { eq } from 'drizzle-orm'
 
 import { db, lineStations, lines, reports, segments } from '../src/db'
-import { seedBaseData } from '../src/db/seed/seed'
 import { appRequestWithRedirect, sendReportRequest } from './test-utils'
 
 type SegmentRisk = { color: string; risk: number }
@@ -16,8 +15,6 @@ let testLineId: string
 
 describe('GET /v0/risk response shape', () => {
     beforeAll(async () => {
-        await seedBaseData(db)
-
         const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
         const [stationOnLine] = await db
             .select({ stationId: lineStations.stationId })
@@ -108,8 +105,6 @@ describe('GET /v0/risk response shape', () => {
 
 describe('GET /v0/risk timeframe filtering', () => {
     beforeAll(async () => {
-        await seedBaseData(db)
-
         const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
         const [stationOnLine] = await db
             .select({ stationId: lineStations.stationId })
@@ -206,8 +201,6 @@ describe('GET /v0/risk segment targeting', () => {
     let stationOnSegmentLine: string
 
     beforeAll(async () => {
-        await seedBaseData(db)
-
         // Find a segment and a station that belongs to its line
         const [segment] = await db
             .select({
@@ -338,8 +331,6 @@ describe('GET /v0/risk segment targeting', () => {
 
 describe('GET /v0/risk report type handling', () => {
     beforeAll(async () => {
-        await seedBaseData(db)
-
         const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
         const [stationOnLine] = await db
             .select({ stationId: lineStations.stationId })
@@ -492,8 +483,6 @@ describe('GET /v0/risk overlapping segments', () => {
     let overlapStationId: string | null = null
 
     beforeAll(async () => {
-        await seedBaseData(db)
-
         const allSegments = await db
             .select({
                 id: segments.id,
