@@ -27,19 +27,19 @@ This repository contains the frontend code for the FreiFahren web application. T
 3. Set up enviromental variables
 
     ```sh
-    REACT_APP_JAWG_ACCESS_TOKEN=YOUR_JAWG_ACCESS_TOKEN
-    REACT_APP_API_URL=http://localhost:8080
+    VITE_API_URL=http://localhost:8080
+    VITE_MAP_STYLE_URL=https://tiles.freifahren.org/style/freifahren-dark
 
-    // Map view. Default values are the Berlin view.
-    REACT_APP_MAP_CENTER_LNG=13.388
-    REACT_APP_MAP_CENTER_LAT=52.5162
-    REACT_APP_MAP_BOUNDS_SW_LNG=12.8364646484805
-    REACT_APP_MAP_BOUNDS_SW_LAT=52.23115511676795
-    REACT_APP_MAP_BOUNDS_NE_LNG=14.00044556529124
-    REACT_APP_MAP_BOUNDS_NE_LAT=52.77063424239867
+    # Map view. Default values are the Berlin view.
+    VITE_MAP_CENTER_LNG=13.388
+    VITE_MAP_CENTER_LAT=52.5162
+    VITE_MAP_BOUNDS_SW_LNG=12.8364646484805
+    VITE_MAP_BOUNDS_SW_LAT=52.23115511676795
+    VITE_MAP_BOUNDS_NE_LNG=14.00044556529124
+    VITE_MAP_BOUNDS_NE_LAT=52.77063424239867
     ```
 
-    You can get a free access token from [Jawg](https://www.jawg.io/).
+    Map tiles are served from our self-hosted tile server at [tiles.freifahren.org](https://tiles.freifahren.org). For local tile server development see [`packages/tile-server/`](../tile-server/README.md).
 
     You can get the map view bounds easier from [OpenStreetMap](https://www.openstreetmap.org/). Right click to center the map and the coordinates and zoom level will be shown in the URL. 
     
