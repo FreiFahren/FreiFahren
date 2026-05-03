@@ -1,0 +1,11 @@
+services:
+  tileserver:
+    image: ghcr.io/maplibre/martin:latest
+    command: ["--config", "/config/config.yaml"]
+    ports:
+      - "8090:8090"
+    volumes:
+      - ../martin:/config:ro
+      - ./data:/tiles:ro
+      - ./styles:/styles:ro
+    restart: unless-stopped

@@ -171,9 +171,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     onRotate={handleRotate}
                     onClick={handleMapClick}
                     onDblClick={handleMapDoubleClick}
-                    mapStyle={`https://api.jawg.io/styles/c52af8db-49f6-40b8-9197-568b7fd9a940.json?access-token=${
-                        import.meta.env.VITE_JAWG_ACCESS_TOKEN
-                    }`}
+                    mapStyle={import.meta.env.VITE_MAP_STYLE_URL}
                 >
                     {!isFirstOpen ? <LocationMarker userPosition={userPosition} /> : null}
                     <MarkerContainer isFirstOpen={isFirstOpen} userPosition={userPosition} />
@@ -196,15 +194,6 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                 className="fixed bottom-0 right-1.5 rounded px-1.5 py-0.5 text-gray-500 hover:underline"
                 style={{ fontSize: 'var(--font-xxxs)' }}
             >
-                <a
-                    href="https://www.jawg.io/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="no-underline hover:underline"
-                >
-                    © JawgMaps
-                </a>{' '}
-                |
                 <a
                     href="https://www.openstreetmap.org/copyright"
                     target="_blank"
