@@ -171,9 +171,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     onRotate={handleRotate}
                     onClick={handleMapClick}
                     onDblClick={handleMapDoubleClick}
-                    mapStyle={`https://api.jawg.io/styles/c52af8db-49f6-40b8-9197-568b7fd9a940.json?access-token=${
-                        import.meta.env.VITE_JAWG_ACCESS_TOKEN
-                    }`}
+                    mapStyle={import.meta.env.VITE_MAP_STYLE_URL}
                 >
                     {!isFirstOpen ? <LocationMarker userPosition={userPosition} /> : null}
                     <MarkerContainer isFirstOpen={isFirstOpen} userPosition={userPosition} />
