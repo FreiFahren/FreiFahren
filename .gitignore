@@ -1,9 +1,14 @@
 .DS_Store
+packages/tile-server/source/
+packages/tile-server/tileserver/data/
+packages/tile-server/tileserver/styles/freifahren-dark/style.json
 settings.json
 *.log
+*.tsbuildinfo
 .env
 __pycache__
 packages/*.log.*
+packages/frontend/dist/
 data/*
 scripts/segments.geojson
 scripts/stations.json

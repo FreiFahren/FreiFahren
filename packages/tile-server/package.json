@@ -1,0 +1,11 @@
+{
+  "name": "tile-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate:berlin": "mkdir -p tileserver/data && docker run --rm -v \"$PWD/../..:/work\" -w /work ghcr.io/systemed/tilemaker:master /work/packages/tile-server/source/berlin-latest.osm.pbf --output /work/packages/tile-server/tileserver/data/freifahren-berlin.mbtiles --config /work/packages/tile-server/tilemaker/config-freifahren.json --process /work/packages/tile-server/tilemaker/process-freifahren.lua",
+    "rewrite-style": "node styles/rewrite-style.mjs source/freifahren-style.json tileserver/styles/freifahren-dark/style.json http://localhost:8090",
+    "serve": "docker compose -f tileserver/compose.yaml up"
+  }
+}

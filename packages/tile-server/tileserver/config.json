@@ -1,0 +1,29 @@
+{
+  "options": {
+    "paths": {
+      "root": "",
+      "fonts": "fonts",
+      "sprites": "sprites",
+      "styles": "styles",
+      "mbtiles": "data"
+    },
+    "domains": [
+      "localhost:8090",
+      "127.0.0.1:8090",
+      "tiles.freifahren.org"
+    ]
+  },
+  "styles": {
+    "freifahren-dark": {
+      "style": "freifahren-dark/style.json",
+      "tilejson": {
+        "bounds": [12.8364646484805, 52.23115511676795, 14.00044556529124, 52.77063424239867]
+      }
+    }
+  },
+  "data": {
+    "freifahren": {
+      "mbtiles": "freifahren-berlin.mbtiles"
+    }
+  }
+}
