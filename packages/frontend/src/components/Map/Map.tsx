@@ -195,15 +195,6 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                 style={{ fontSize: 'var(--font-xxxs)' }}
             >
                 <a
-                    href="https://www.jawg.io/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="no-underline hover:underline"
-                >
-                    © JawgMaps
-                </a>{' '}
-                |
-                <a
                     href="https://www.openstreetmap.org/copyright"
                     target="_blank"
                     rel="noopener noreferrer"
