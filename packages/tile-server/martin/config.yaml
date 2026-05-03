@@ -1,0 +1,20 @@
+listen_addresses: 0.0.0.0:8090
+
+cors: true
+
+cache:
+  size_mb: 512
+
+mbtiles:
+  sources:
+    freifahren: /tiles/freifahren-berlin.mbtiles
+
+styles:
+  sources:
+    freifahren-dark: /styles/freifahren-dark.json
+
+fonts:
+  paths: []
+
+sprites:
+  paths: []

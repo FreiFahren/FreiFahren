@@ -10,18 +10,19 @@ The package has three parts:
 
 - `tilemaker/`: Tilemaker config for generating Berlin vector tiles from OSM data.
 - `styles/rewrite-style.mjs`: helper for preparing a MapLibre style JSON for the configured tile host.
-- `tileserver/`: local TileServer GL config for serving the style and generated MBTiles.
+- `martin/`: Martin config for serving the style and generated MBTiles.
+- `tileserver/`: generated tile/style artifacts and local Docker Compose entrypoint.
 
 The frontend only needs the public style URL:
 
 ```env
-VITE_MAP_STYLE_URL=http://localhost:8090/styles/freifahren-dark/style.json
+VITE_MAP_STYLE_URL=http://localhost:8090/style/freifahren-dark
 ```
 
 For production, point the same variable at the hosted style JSON:
 
 ```env
-VITE_MAP_STYLE_URL=https://tiles.freifahren.org/styles/freifahren-dark/style.json
+VITE_MAP_STYLE_URL=https://tiles.freifahren.org/style/freifahren-dark
 ```
 
 ## Generated Files
@@ -30,7 +31,7 @@ These files are intentionally git-ignored:
 
 - `source/`: source OSM extracts and local style input files.
 - `tileserver/data/`: generated `.mbtiles` files.
-- `tileserver/styles/freifahren-dark/style.json`: generated style output.
+- `tileserver/styles/freifahren-dark.json`: generated style output.
 
 Only reproducible configs and scripts are committed.
 
@@ -82,19 +83,15 @@ npm run rewrite-style
 This writes:
 
 ```text
-tileserver/styles/freifahren-dark/style.json
+tileserver/styles/freifahren-dark.json
 ```
 
-The rewrite script updates the vector tile source, glyph URL, and sprite URL to use the configured tile host.
+The rewrite script updates the vector tile source to use Martin's TileJSON endpoint and removes glyph/sprite dependent layers for the initial no-assets deployment.
 
-To keep externally hosted glyphs and sprites during local comparison, run:
+For production URLs, run:
 
 ```sh
-node styles/rewrite-style.mjs \
-  source/freifahren-style.json \
-  tileserver/styles/freifahren-dark/style.json \
-  http://localhost:8090 \
-  --keep-assets
+npm run rewrite-style:prod
 ```
 
 ## Serve Locally
@@ -104,7 +101,7 @@ cd packages/tile-server
 npm run serve
 ```
 
-TileServer GL listens on:
+Martin listens on:
 
 ```text
 http://localhost:8090
@@ -113,13 +110,13 @@ http://localhost:8090
 Frontend style URL:
 
 ```text
-http://localhost:8090/styles/freifahren-dark/style.json
+http://localhost:8090/style/freifahren-dark
 ```
 
 Vector tile endpoint:
 
 ```text
-http://localhost:8090/data/freifahren/{z}/{x}/{y}.pbf
+http://localhost:8090/freifahren/{z}/{x}/{y}
 ```
 
 ## Frontend Setup
@@ -127,17 +124,18 @@ http://localhost:8090/data/freifahren/{z}/{x}/{y}.pbf
 Set:
 
 ```env
-VITE_MAP_STYLE_URL=http://localhost:8090/styles/freifahren-dark/style.json
+VITE_MAP_STYLE_URL=http://localhost:8090/style/freifahren-dark
 ```
 
 Restart the Vite dev server after changing this value because Vite reads `import.meta.env` at startup.
 
 ## Deployment
 
-Publish these generated artifacts to the tile host:
+Deployment is fully automated via the `Dockerfile` in this package. On every push, Coolify builds the image, which:
 
-- `freifahren-berlin.mbtiles`
-- `freifahren-dark/style.json`
-- optional `fonts/` and `sprites/` folders if the style uses self-hosted assets
+1. Downloads the Berlin OSM extract from Geofabrik.
+2. Runs Tilemaker to produce `freifahren-berlin.mbtiles`.
+3. Runs `rewrite-style` against the committed `source/freifahren-style.json` with the production base URL.
+4. Bakes the `.mbtiles`, the rewritten style JSON, and `martin/config.yaml` into a Martin image.
 
-TileServer GL can serve the current local setup directly.
+No manual artifact upload is required — `git push` is the deploy.

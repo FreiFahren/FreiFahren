@@ -1,13 +1,11 @@
 services:
   tileserver:
-    image: maptiler/tileserver-gl:latest
-    command: ["--config", "/data/config.json", "--port", "8080"]
+    image: ghcr.io/maplibre/martin:latest
+    command: ["--config", "/config/config.yaml"]
     ports:
-      - "8090:8080"
+      - "8090:8090"
     volumes:
-      - ./config.json:/data/config.json:ro
-      - ./data:/data/data:ro
-      - ./styles:/data/styles:ro
-      - ./fonts:/data/fonts:ro
-      - ./sprites:/data/sprites:ro
+      - ../martin:/config:ro
+      - ./data:/tiles:ro
+      - ./styles:/styles:ro
     restart: unless-stopped

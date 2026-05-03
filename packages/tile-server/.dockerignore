@@ -1,0 +1,8 @@
+tileserver/data/
+tileserver/styles/freifahren-dark.json
+tileserver/styles/freifahren-dark/
+source/*.osm.pbf
+node_modules/
+*.log
+.DS_Store
+README.md
