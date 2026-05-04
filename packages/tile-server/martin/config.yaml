@@ -1,4 +1,4 @@
-listen_addresses: 0.0.0.0:8090
+listen_addresses: 0.0.0.0:3000
 
 cors: true
 

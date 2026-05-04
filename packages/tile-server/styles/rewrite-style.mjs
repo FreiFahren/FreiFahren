@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
-const [, , inputPath, outputPath, baseUrl = 'http://localhost:8090'] = process.argv
+const [, , inputPath, outputPath, baseUrl = 'http://localhost:3000'] = process.argv
 
 if (!inputPath || !outputPath) {
     console.error('Usage: node rewrite-style.mjs <input-style.json> <output-style.json> [base-url]')

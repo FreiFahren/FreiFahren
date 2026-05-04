@@ -8,8 +8,8 @@
       "mbtiles": "data"
     },
     "domains": [
-      "localhost:8090",
-      "127.0.0.1:8090",
+      "localhost:3000",
+      "127.0.0.1:3000",
       "tiles.freifahren.org"
     ]
   },
