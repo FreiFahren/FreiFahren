@@ -262,7 +262,7 @@ export const useRiskData = () => {
 }
 
 export const fetchWithETag = async <T>(endpoint: string, storageKeyPrefix: string): Promise<T> => {
-    const etagKey: string = `${storageKeyPrefix}ETag`
+        const etagKey: string = `${storageKeyPrefix}ETag`
     const dataKey: string = `${storageKeyPrefix}Data`
     const cachedETag: string | null = localStorage.getItem(etagKey)
 
@@ -299,7 +299,7 @@ export const fetchWithETag = async <T>(endpoint: string, storageKeyPrefix: strin
 export const useSegments = () =>
     useQuery<GeoJSON.FeatureCollection<GeoJSON.LineString>, Error>({
         queryKey: ['segmentsETag'],
-        queryFn: () => fetchWithETag<GeoJSON.FeatureCollection<GeoJSON.LineString>>('/v0/lines/segments', 'segments'),
+        queryFn: () => fetchWithETag<GeoJSON.FeatureCollection<GeoJSON.LineString>>('/v0/transit/segments', 'segments'),
         staleTime: Infinity,
         gcTime: Infinity,
         refetchOnWindowFocus: false,
@@ -308,7 +308,7 @@ export const useSegments = () =>
 export const useStations = () =>
     useQuery<StationList, Error>({
         queryKey: ['stationsETag'],
-        queryFn: () => fetchWithETag<StationList>('/v0/stations', 'stations'),
+        queryFn: () => fetchWithETag<StationList>('/v0/transit/stations', 'stations'),
         staleTime: Infinity,
         gcTime: Infinity,
         refetchOnWindowFocus: false,
@@ -326,7 +326,7 @@ export const useLines = () =>
                 return 3 // Default priority (3) for others
             }
 
-            const data = await fetchWithETag<LinesList>('/v0/lines', 'lines')
+            const data = await fetchWithETag<LinesList>('/v0/transit/lines', 'lines')
             const sortedEntries = Object.entries(data).sort((a, b) => {
                 const groupA = groupPriority(a[0])
                 const groupB = groupPriority(b[0])
