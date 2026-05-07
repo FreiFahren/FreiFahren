@@ -9,6 +9,7 @@ The .env file contains the following variables:
 - `NLP_SERVICE_URL`: The URL of the NLP service to use.
 - `REPORT_PASSWORD`: The password to use for the report API.
 - `SECURITY_MICROSERVICE_URL`: The URL of the security microservice to use.
+- `CORS_ORIGINS`: Comma-separated list of frontend origins allowed to call the API, for example `http://localhost:1871,https://freifahren.org`.
 
 ## Start containers
 

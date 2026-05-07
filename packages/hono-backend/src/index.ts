@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { cors } from 'hono/cors'
 import { requestId } from 'hono/request-id'
 import { pinoLogger } from 'hono-pino'
 
@@ -14,6 +15,18 @@ import { RiskService } from './modules/risk/risk-service'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
 import { getDistance, getLines, getSegments, getStations } from './modules/transit/transit-routes'
 
+const getCorsOrigins = () => {
+    const configuredOrigins = Bun.env.CORS_ORIGINS?.split(',')
+        .map((origin) => origin.trim())
+        .filter((origin) => origin !== '')
+
+    if (configuredOrigins === undefined || configuredOrigins.length === 0) {
+        throw new Error('CORS_ORIGINS must be set to a comma-separated list of allowed origins')
+    }
+
+    return configuredOrigins
+}
+
 const createServices = (db: DbConnection) => {
     const transitNetworkDataService = new TransitNetworkDataService(db)
 
@@ -28,6 +41,15 @@ export const createApp = (dbConnection: DbConnection = db) => {
     const app = new Hono<Env>()
 
     app.use(requestId())
+    app.use(
+        '*',
+        cors({
+            origin: getCorsOrigins(),
+            allowHeaders: ['Accept', 'Content-Type', 'If-Modified-Since', 'If-None-Match'],
+            allowMethods: ['GET', 'POST', 'OPTIONS'],
+            exposeHeaders: ['ETag', 'Last-Modified'],
+        })
+    )
     app.use(
         pinoLogger({
             pino: logger,
