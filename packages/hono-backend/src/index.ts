@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { etag, RETAINED_304_HEADERS } from 'hono/etag'
 import { requestId } from 'hono/request-id'
 import { pinoLogger } from 'hono-pino'
 
@@ -48,6 +49,17 @@ export const createApp = (dbConnection: DbConnection = db) => {
             allowHeaders: ['Accept', 'Content-Type', 'If-Modified-Since', 'If-None-Match'],
             allowMethods: ['GET', 'POST', 'OPTIONS'],
             exposeHeaders: ['ETag', 'Last-Modified'],
+        })
+    )
+    app.use(
+        '/v0/transit/*',
+        etag({
+            retainedHeaders: [
+                ...RETAINED_304_HEADERS,
+                'access-control-allow-origin',
+                'access-control-allow-credentials',
+                'access-control-expose-headers',
+            ],
         })
     )
     app.use(
