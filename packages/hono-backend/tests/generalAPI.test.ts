@@ -55,3 +55,32 @@ describe('Versioning', () => {
         expect(body).not.toContain('availableVersions')
     })
 })
+
+describe('ETag 304 + CORS', () => {
+    const ALLOWED_ORIGIN = 'http://localhost:1871'
+
+    it('returns 304 with Access-Control-Allow-Origin when If-None-Match matches', async () => {
+        const initial = await app.request('/v0/transit/stations', {
+            headers: { Origin: ALLOWED_ORIGIN },
+        })
+        expect(initial.status).toBe(200)
+        expect(initial.headers.get('Access-Control-Allow-Origin')).toBe(ALLOWED_ORIGIN)
+
+        const etag = initial.headers.get('ETag')
+        expect(etag).not.toBeNull()
+
+        const revalidated = await app.request('/v0/transit/stations', {
+            headers: {
+                Origin: ALLOWED_ORIGIN,
+                'If-None-Match': etag!,
+            },
+        })
+
+        expect(revalidated.status).toBe(304)
+        // Without this header the browser blocks the cross-origin 304 and the
+        // frontend's localStorage cache path fails — that is the regression we
+        // are guarding against.
+        expect(revalidated.headers.get('Access-Control-Allow-Origin')).toBe(ALLOWED_ORIGIN)
+        expect(revalidated.headers.get('ETag')).toBe(etag)
+    })
+})
