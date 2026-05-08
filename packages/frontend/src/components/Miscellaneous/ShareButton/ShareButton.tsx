@@ -5,6 +5,7 @@ import './ShareButton.css'
 import i18next, { TFunction } from 'i18next'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useStations } from 'src/api/queries'
 import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 import { Report } from 'src/utils/types'
 
@@ -12,11 +13,11 @@ interface ShareButtonProps {
     report?: Report
 }
 
-const formatTime = (timestamp: string, isHistoric: boolean, t: TFunction): string => {
+const formatTime = (timestamp: string, isPredicted: boolean, t: TFunction): string => {
     const date = new Date(timestamp)
 
-    // For historic reports, show the full date and time
-    if (isHistoric) {
+    // For predicted reports, show the full date and time
+    if (isPredicted) {
         return date.toLocaleString(i18next.language === 'de' ? 'de-DE' : 'en-US', {
             year: 'numeric',
             month: 'short',
@@ -59,6 +60,7 @@ const formatTime = (timestamp: string, isHistoric: boolean, t: TFunction): strin
 
 const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
     const { t } = useTranslation()
+    const { data: stations } = useStations()
 
     const handleShare = useCallback(
         async (event: React.MouseEvent) => {
@@ -79,15 +81,15 @@ const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
                     return
                 }
 
-                const shareText = t('Share.text', {
-                    station: report.station.name,
+                const stationName = stations?.[report.stationId]?.name ?? report.stationId
+                const directionName =
+                    report.directionId !== null ? (stations?.[report.directionId]?.name ?? report.directionId) : '?'
 
-                    direction:
-                        report.direction?.name !== null && report.direction?.name !== undefined
-                            ? report.direction.name
-                            : '?',
-                    line: report.line !== null && report.line !== undefined ? report.line : '?',
-                    time: formatTime(report.timestamp, report.isHistoric, t),
+                const shareText = t('Share.text', {
+                    station: stationName,
+                    direction: directionName,
+                    line: report.lineId ?? '?',
+                    time: formatTime(report.timestamp, report.isPredicted, t),
                 })
 
                 // The error seems incorrect in this case - the navigator.share check is actually necessary because it's not available in all browsers.
@@ -100,9 +102,9 @@ const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
                     })
                     await sendAnalyticsEvent('Marker Shared', {
                         meta: {
-                            station: report.station.name,
-                            line: report.line,
-                            direction: report.direction?.name,
+                            stationId: report.stationId,
+                            lineId: report.lineId,
+                            directionId: report.directionId,
                         },
                     })
                 } else {
@@ -115,7 +117,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
                 console.error('Error sharing:', error)
             }
         },
-        [t, report]
+        [t, report, stations]
     )
 
     return (

@@ -94,25 +94,10 @@ export interface RiskData {
 
 export type Report = {
     timestamp: string
-    station: {
-        id: string
-        name: string
-        coordinates: {
-            latitude: number
-            longitude: number
-        }
-    }
-    direction: {
-        id: string
-        name: string
-        coordinates: {
-            latitude: number
-            longitude: number
-        }
-    } | null
-    line: string | null
-    isHistoric: boolean
-    message: string | null
+    stationId: string
+    directionId: string | null
+    lineId: string | null
+    isPredicted: boolean
 }
 
 export type Position = {

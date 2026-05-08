@@ -16,7 +16,6 @@ import { Line } from '../Miscellaneous/Line/Line'
 import { CenterModal } from '../Modals/CenterModal'
 import { FeedbackForm } from './FeedbackForm/FeedbackForm'
 import { SelectField } from './SelectField/SelectField'
-import { TextAreaWithPrivacy, TextAreaWithPrivacyRef } from './TextAreaWithPrivacy/TextAreaWithPrivacy'
 
 interface ReportFormProps {
     onReportFormSubmit: (reportedData: Report) => void
@@ -37,19 +36,12 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     const { userPosition } = useLocation()
     const { searchValue, setSearchValue, filteredStations } = useStationSearch()
 
-    // Detect firefox as quick fix for textarea not working on mobile
-    const userAgent = navigator.userAgent.toLowerCase()
-    const isFirefox = userAgent.includes('firefox') || userAgent.includes('fxios') || userAgent.includes('focus')
-
     const startTime = useRef<number>(Date.now())
     const searchUsed = useRef<boolean>(false)
     const stationRecommendationUsed = useRef<boolean>(false)
     const hadErrors = useRef<boolean>(false)
 
-    const textareaWithPrivacyRef = useRef<TextAreaWithPrivacyRef>(null)
     const [validationErrors, setValidationErrors] = useState<ValidationError[]>([])
-    const [textareaContent, setTextareaContent] = useState<string>('')
-    const [isPrivacyChecked, setIsPrivacyChecked] = useState<boolean>(false)
 
     const [currentEntity, setCurrentEntity] = useState<Entity>(Entity.ALL)
     const [currentLine, setCurrentLine] = useState<string | null>(null)
@@ -168,7 +160,6 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         duration: (Date.now() - startTime.current) / 1000,
         meta: {
             entity: currentEntity,
-            message: textareaWithPrivacyRef.current?.value ?? '',
             searchUsed: searchUsed.current,
             stationRecommendationUsed: stationRecommendationUsed.current,
         },
@@ -181,16 +172,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         // Clear previous validation errors
         setValidationErrors([])
 
-        const report: Report = {
-            timestamp: new Date().toISOString(),
-            station: currentStation,
-            direction: currentDirection,
-            line: currentLine,
-            isHistoric: false,
-            message: textareaWithPrivacyRef.current?.value ?? '',
-        }
-
-        const validationResult = validateReport(report, userPosition, t)
+        const validationResult = validateReport(currentStation.coordinates, userPosition, t)
         if (!validationResult.isValid) {
             setValidationErrors(validationResult.errors)
             hadErrors.current = true
@@ -204,15 +186,25 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
             return
         }
 
-        const submittedReport = await submitReport(report)
+        const submittedReport = await submitReport({
+            stationId: currentStation.id,
+            lineId: currentLine,
+            directionId: currentDirection?.id ?? null,
+        })
 
         // If validation passes, submit the report
         localStorage.setItem('lastReportedTime', new Date().toISOString())
 
-        onReportFormSubmit(submittedReport)
+        onReportFormSubmit({
+            timestamp: submittedReport.timestamp,
+            stationId: submittedReport.stationId,
+            lineId: submittedReport.lineId,
+            directionId: submittedReport.directionId,
+            isPredicted: false,
+        })
     }
 
-    const isFormValid = currentStation !== null && (!textareaContent.trim() || isPrivacyChecked)
+    const isFormValid = currentStation !== null
 
     if (showFeedback) {
         return <FeedbackForm openAnimationClass="open center-animation" />
@@ -381,25 +373,6 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                             ))}
                         </SelectField>
                     </section>
-                ) : null}
-                {currentStation && !isFirefox ? (
-                    <div
-                        className={`h-sm:block transition-all duration-300 ${
-                            isSearchFocused ? 'hidden md:block' : 'hidden'
-                        }`}
-                    >
-                        <section className="mb-2 flex min-h-0 flex-1 flex-col">
-                            <h2 className="mb-2 flex-shrink-0">{t('ReportForm.description')}</h2>
-                            <TextAreaWithPrivacy
-                                ref={textareaWithPrivacyRef}
-                                placeholder={t('ReportForm.descriptionPlaceholder')}
-                                className="w-full flex-1 resize-none rounded border border-gray-300 p-2"
-                                onTextChange={(text) => setTextareaContent(text)}
-                                onPrivacyChange={(checked) => setIsPrivacyChecked(checked)}
-                                rows={2}
-                            />
-                        </section>
-                    </div>
                 ) : null}
                 <section
                     className={`mt-auto flex-shrink-0 transition-all duration-300 ${

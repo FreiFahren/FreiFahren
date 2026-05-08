@@ -39,7 +39,7 @@ export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', c
         onRouteClick?.()
     }
 
-    const reportsNoHistoric = useMemo(() => reports?.filter((report) => report.isHistoric === false), [reports])
+    const reportsNoHistoric = useMemo(() => reports?.filter((report) => report.isPredicted === false), [reports])
 
     return (
         <div className={`info-modal modal ${className}`}>

@@ -7,40 +7,16 @@ import { getClosestStations } from '../hooks/getClosestStations'
 import { sendAnalyticsEvent } from '../hooks/useAnalytics'
 import { CACHE_KEYS } from './queryClient'
 
-const fetchNewReports = async (
-    startTime?: string,
-    endTime?: string,
-    stationId?: string,
-    lastKnownTimestamp?: string
-): Promise<Report[] | null> => {
-    const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-    }
+const fetchReports = async (params: { from?: string; to?: string; stationId?: string }): Promise<Report[]> => {
+    const search = new URLSearchParams()
+    if (params.from !== undefined && params.from !== '') search.set('from', params.from)
+    if (params.to !== undefined && params.to !== '') search.set('to', params.to)
 
-    let queryParams = ''
+    const path = params.stationId !== undefined && params.stationId !== '' ? `/v0/reports/${params.stationId}` : '/v0/reports'
+    const query = search.toString()
+    const url = `${import.meta.env.VITE_API_URL}${path}${query !== '' ? `?${query}` : ''}`
 
-    if (lastKnownTimestamp !== undefined && lastKnownTimestamp.trim() !== '') {
-        const date = new Date(lastKnownTimestamp)
-        headers['If-Modified-Since'] = date.toUTCString()
-    }
-
-    if (startTime !== undefined && startTime.trim() !== '') {
-        queryParams += `&start=${startTime}`
-    }
-
-    if (endTime !== undefined && endTime.trim() !== '') {
-        queryParams += `&end=${endTime}`
-    }
-
-    if (stationId !== undefined && stationId.trim() !== '') {
-        queryParams += `&station=${stationId}`
-    }
-
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/v0/basics/inspectors?${queryParams}`, { headers })
-
-    if (response.status === 304) {
-        return null
-    }
+    const response = await fetch(url, { headers: { Accept: 'application/json' } })
 
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -49,10 +25,10 @@ const fetchNewReports = async (
     return response.json()
 }
 
-export const useReportsByStation = (stationId: string, startTime?: string, endTime?: string) =>
+export const useReportsByStation = (stationId: string, from?: string, to?: string) =>
     useQuery({
-        queryKey: [...CACHE_KEYS.reports, stationId, startTime, endTime],
-        queryFn: () => fetchNewReports(startTime, endTime, stationId),
+        queryKey: [...CACHE_KEYS.reports, stationId, from, to],
+        queryFn: () => fetchReports({ stationId, from, to }),
     })
 
 interface SubmitReportOptions {
@@ -67,16 +43,15 @@ export const useSubmitReport = (options?: SubmitReportOptions) => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: async (report: Report) => {
+        mutationFn: async (report: { stationId?: string; lineId?: string | null; directionId?: string | null }) => {
             const requestBody = {
-                timestamp: new Date(report.timestamp),
-                line: report.line ?? '',
-                stationId: report.station.id,
-                directionId: report.direction?.id ?? '',
-                message: report.message ?? '',
+                stationId: report.stationId,
+                lineId: report.lineId ?? null,
+                directionId: report.directionId ?? null,
+                source: 'web_app' as const,
             }
 
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/v0/basics/inspectors`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/v0/reports`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -97,10 +72,9 @@ export const useSubmitReport = (options?: SubmitReportOptions) => {
             sendAnalyticsEvent('Report Submitted', {
                 meta: {
                     ...options?.meta,
-                    station: variables.station.name,
-                    line: variables.line,
-                    direction: variables.direction?.name,
-                    hasMessage: !!variables.message,
+                    stationId: variables.stationId,
+                    lineId: variables.lineId,
+                    directionId: variables.directionId,
                 },
                 duration: options?.duration,
             })
@@ -142,42 +116,30 @@ export const useCurrentReports = () => {
     const queryResult = useQuery<Report[], Error>({
         queryKey: CACHE_KEYS.byTimeframe('1h'),
         queryFn: async (): Promise<Report[]> => {
-            const endTime = new Date().toISOString()
-            const startTime = new Date(new Date(endTime).getTime() - 60 * 60 * 1000).toISOString()
+            const to = new Date().toISOString()
+            const from = new Date(new Date(to).getTime() - 60 * 60 * 1000).toISOString()
 
-            // Get previous data from the queryClient instead of destructuring from outer scope.
-            const prevData = queryClient.getQueryData<Report[]>(CACHE_KEYS.byTimeframe('1h')) ?? []
-            const lastKnownTimestamp = prevData[0]?.timestamp
+            const newData = await fetchReports({ from, to })
 
-            const result = await fetchNewReports(startTime, endTime, undefined, lastKnownTimestamp)
-            const newData = result === null ? prevData : result
+            // Refresh the risk cache shortly after new reports come in (temporary
+            // fix to avoid a race condition between reports and risk data).
+            setTimeout(() => {
+                queryClient.invalidateQueries({ queryKey: CACHE_KEYS.risk })
+            }, 2.5 * 1000)
 
-            // If we got new data, invalidate the risk cache (temporary fix to avoid race condition)
-            if (result !== null) {
-                setTimeout(() => {
-                    queryClient.invalidateQueries({ queryKey: CACHE_KEYS.risk })
-                }, 2.5 * 1000)
-            }
+            // Separate predicted (synthesized) reports from real ones so the UI can
+            // always show real reports first even when their timestamps overlap.
+            const predictedReports = newData.filter((report) => report.isPredicted)
+            const realReports = newData.filter((report) => !report.isPredicted)
 
-            // Separate historic and non-historic reports
-            const historicReports = newData.filter((report) => report.isHistoric)
-            const currentReports = newData.filter((report) => !report.isHistoric)
-
-            // Sort each group by timestamp (newest first)
-            const sortedCurrentReports = currentReports.sort(
+            const sortedRealReports = realReports.sort(
                 (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
             )
-            const sortedHistoricReports = historicReports.sort(
+            const sortedPredictedReports = predictedReports.sort(
                 (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
             )
 
-            /*
-             Combine the sorted groups: current reports first, then historic
-             Necessary because historic reports have a guessed timestamp of between 45 and 60 minutes ago
-             This means that sometimes the historic reports will be returned first, but we should always
-             show the real reports first.
-            */
-            return [...sortedCurrentReports, ...sortedHistoricReports]
+            return [...sortedRealReports, ...sortedPredictedReports]
         },
         refetchInterval: 15 * 1000,
         staleTime: 2.5 * 60 * 1000,
@@ -195,20 +157,14 @@ export const useCurrentReports = () => {
 
 export const useLast24HourReports = () => {
     const { data: lastHourReports = [] } = useCurrentReports()
-    const queryClient = useQueryClient()
 
     const queryResult = useQuery<Report[], Error>({
         queryKey: CACHE_KEYS.byTimeframe('24h'),
         queryFn: async (): Promise<Report[]> => {
-            const endTime = new Date().toISOString()
-            const startTime = new Date(new Date(endTime).getTime() - 24 * 60 * 60 * 1000).toISOString()
+            const to = new Date().toISOString()
+            const from = new Date(new Date(to).getTime() - 24 * 60 * 60 * 1000).toISOString()
 
-            // Retrieve previous 24h reports via queryClient instead of outer scope.
-            const prevData = queryClient.getQueryData<Report[]>(CACHE_KEYS.byTimeframe('24h')) ?? []
-            const lastKnownTimestamp = prevData[0]?.timestamp
-
-            const result = await fetchNewReports(startTime, endTime, undefined, lastKnownTimestamp)
-            const newData = result === null ? prevData : result
+            const newData = await fetchReports({ from, to })
 
             // Remove the most recent hour, as that is replaced by current reports.
             const oneHourAgo = Date.now() - 60 * 60 * 1000

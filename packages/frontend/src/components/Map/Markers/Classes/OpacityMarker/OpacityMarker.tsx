@@ -3,6 +3,7 @@ import './OpacityMarker.css'
 import maplibregl from 'maplibre-gl'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Marker } from 'react-map-gl/maplibre'
+import { useStations } from 'src/api/queries'
 import { useViewedReports } from 'src/contexts/ViewedReportsContext'
 import { Report } from 'src/utils/types'
 
@@ -15,7 +16,9 @@ interface OpacityMarkerProps {
 
 export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index, isFirstOpen, onMarkerClick }) => {
     const [opacity, setOpacity] = useState(0)
-    const { timestamp, station, line, isHistoric } = markerData
+    const { timestamp, stationId, lineId, isPredicted } = markerData
+    const { data: stations } = useStations()
+    const station = stations?.[stationId]
     const { setLastViewed, isRecentAndUnviewed } = useViewedReports()
 
     const adjustedTimestamp = useMemo(() => {
@@ -32,7 +35,7 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index,
         let intervalId: number
 
         if (!isFirstOpen) {
-            if (!isHistoric) {
+            if (!isPredicted) {
                 const calculateOpacity = () => {
                     const currentTime = new Date().getTime()
                     const elapsedTime = currentTime - adjustedTimestamp.getTime()
@@ -61,9 +64,9 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index,
             }
             return () => clearInterval(intervalId)
         }
-    }, [adjustedTimestamp, isHistoric, isFirstOpen, station.name, opacity])
+    }, [adjustedTimestamp, isPredicted, isFirstOpen, stationId, opacity])
 
-    if (opacity <= 0) {
+    if (opacity <= 0 || !station) {
         return null
     }
 
@@ -76,7 +79,7 @@ export const OpacityMarker: React.FC<OpacityMarkerProps> = ({ markerData, index,
 
     return (
         <Marker
-            key={`${line}-${index}`}
+            key={`${lineId}-${index}`}
             ref={markerRef}
             className="inspector-marker"
             latitude={station.coordinates.latitude}
