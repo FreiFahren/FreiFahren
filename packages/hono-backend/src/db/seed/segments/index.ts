@@ -475,12 +475,44 @@ export const seedSegmentsFromGeometry = async (
     }
 
     await db.transaction(async (tx) => {
-        await tx.execute(sql`TRUNCATE segments RESTART IDENTITY`)
-        await tx.insert(segments).values(simplifiedRecords)
+        // Upsert keyed on the natural (lineId, fromStationId, toStationId) tuple
+        // so existing segment ids stay stable across re-seeds. The serial 'id'
+        // column is what the risk model and the frontend's localStorage cache
+        // refer to, so churning ids on every seed would invalidate both.
+        await tx
+            .insert(segments)
+            .values(simplifiedRecords)
+            .onConflictDoUpdate({
+                target: [segments.lineId, segments.fromStationId, segments.toStationId],
+                set: {
+                    position: sql`excluded.position`,
+                    color: sql`excluded.color`,
+                    coordinates: sql`excluded.coordinates`,
+                },
+            })
+
+        // Prune segments that no longer exist in the snapshot.
+        const newKeys = new Set(
+            simplifiedRecords.map((r) => `${r.lineId}|${r.fromStationId}|${r.toStationId}`)
+        )
+        const existing = await tx
+            .select({
+                id: segments.id,
+                lineId: segments.lineId,
+                fromStationId: segments.fromStationId,
+                toStationId: segments.toStationId,
+            })
+            .from(segments)
+        const obsoleteIds = existing
+            .filter((row) => !newKeys.has(`${row.lineId}|${row.fromStationId}|${row.toStationId}`))
+            .map((row) => row.id)
+        if (obsoleteIds.length > 0) {
+            await tx.execute(sql`DELETE FROM segments WHERE id = ANY(${obsoleteIds})`)
+        }
     })
 
     logger.info(
-        `[seed:segments] Inserted ${simplifiedRecords.length} segments ` +
+        `[seed:segments] Upserted ${simplifiedRecords.length} segments ` +
             `(${originalVertexCount} → ${simplifiedVertexCount} coordinates after simplification)`
     )
 }

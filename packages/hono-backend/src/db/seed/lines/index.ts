@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { inArray, notInArray, sql } from 'drizzle-orm'
 
 import { logger } from '../../../common/logger'
 import type { DbConnection } from '../../index'
@@ -33,9 +33,35 @@ export const seedLinesFromRelations = async (
     )
 
     await db.transaction(async (tx) => {
-        await tx.execute(sql`TRUNCATE lines CASCADE`)
-        await tx.insert(lines).values(lineRecords)
+        // Upsert instead of TRUNCATE CASCADE so reports referencing existing
+        // lines survive a re-seed.
+        await tx
+            .insert(lines)
+            .values(lineRecords)
+            .onConflictDoUpdate({
+                target: lines.id,
+                set: {
+                    name: sql`excluded.name`,
+                    isCircular: sql`excluded.is_circular`,
+                },
+            })
+
+        // line_stations is a join table not referenced by anything else, so
+        // it's safe to wipe and rebuild for the lines we are re-seeding.
+        const newLineIds = lineRecords.map((l) => l.id)
+        await tx.delete(lineStations).where(inArray(lineStations.lineId, newLineIds))
         await tx.insert(lineStations).values(lineStationRecords)
+
+        // Drop lines no longer in the snapshot, but keep ones still
+        // referenced by reports. Cascading FKs from segments and
+        // line_stations clean themselves up.
+        await tx.execute(sql`
+            DELETE FROM lines
+            WHERE ${notInArray(lines.id, newLineIds)}
+              AND NOT EXISTS (
+                  SELECT 1 FROM reports WHERE reports.line_id = lines.id
+              )
+        `)
     })
 
     logger.info(

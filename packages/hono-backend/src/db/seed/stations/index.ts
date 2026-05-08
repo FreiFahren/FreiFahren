@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { notInArray, sql } from 'drizzle-orm'
 
 import { logger } from '../../../common/logger'
 import type { DbConnection } from '../../index'
@@ -70,10 +70,35 @@ export const seedStationsFromElements = async (
     }))
 
     await db.transaction(async (tx) => {
-        await tx.execute(sql`TRUNCATE stations CASCADE`)
-        await tx.insert(stations).values(records)
+        // Upsert instead of TRUNCATE CASCADE so that reports referencing
+        // existing stations survive a re-seed.
+        await tx
+            .insert(stations)
+            .values(records)
+            .onConflictDoUpdate({
+                target: stations.id,
+                set: {
+                    name: sql`excluded.name`,
+                    lat: sql`excluded.lat`,
+                    lng: sql`excluded.lng`,
+                },
+            })
+
+        // Drop stations no longer in the snapshot, but keep ones still
+        // referenced by reports so we don't lose user data. Cascading FKs
+        // from segments and line_stations clean themselves up.
+        const newIds = records.map((r) => r.id)
+        await tx.execute(sql`
+            DELETE FROM stations
+            WHERE ${notInArray(stations.id, newIds)}
+              AND NOT EXISTS (
+                  SELECT 1 FROM reports
+                  WHERE reports.station_id = stations.id
+                     OR reports.direction_id = stations.id
+              )
+        `)
     })
-    logger.info(`[seed:stations] Inserted ${records.length} stations`)
+    logger.info(`[seed:stations] Upserted ${records.length} stations`)
 
     const nodeIdToStationId = new Map<number, string>()
     for (const [nodeId, code] of nodeIdToCode) {
