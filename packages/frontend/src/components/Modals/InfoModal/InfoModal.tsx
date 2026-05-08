@@ -12,10 +12,9 @@ interface InfoModalProps {
     station: StationProperty
     className?: string
     children?: React.ReactNode
-    onRouteClick?: () => void
 }
 
-export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', children, onRouteClick }) => {
+export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', children }) => {
     const { t } = useTranslation()
 
     const { data: stations } = useStations()
@@ -35,10 +34,6 @@ export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', c
 
     const currentTime = useMemo(() => new Date().getTime(), [])
 
-    const handleRouteClick = () => {
-        onRouteClick?.()
-    }
-
     const reportsNoHistoric = useMemo(() => reports?.filter((report) => report.isPredicted === false), [reports])
 
     return (
@@ -52,12 +47,6 @@ export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', c
                             <Line key={line} line={line} />
                         ))}
                     </div>
-                </div>
-                <div className="route-container">
-                    <button type="button" className="route-button" onClick={handleRouteClick}>
-                        <img src="/icons/route-svgrepo-com.svg" alt="Route" />
-                    </button>
-                    <p className="route-text">{t('InfoModal.route')}</p>
                 </div>
             </section>
             <section className="reports-container">

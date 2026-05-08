@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
-import { Itinerary, Line, LinesList, Position, Report, RiskData, StationList } from 'src/utils/types'
+import { Line, LinesList, Report, RiskData, StationList } from 'src/utils/types'
 
 import { useSkeleton } from '../components/Miscellaneous/LoadingPlaceholder/Skeleton'
 import { getClosestStations } from '../hooks/getClosestStations'
@@ -375,34 +375,3 @@ export const useStationReports = (stationId: string) =>
         },
     })
 
-export type NavigationResponse = {
-    requestParameters: Record<string, unknown>
-    debugOutput: Record<string, unknown>
-    from: Position
-    to: Position
-    direct: unknown[]
-    safestItinerary: Itinerary
-    alternativeItineraries: Itinerary[]
-}
-
-export const useNavigation = (startStationId: string, endStationId: string, options?: { enabled?: boolean }) =>
-    useQuery<NavigationResponse, Error>({
-        queryKey: CACHE_KEYS.navigation(startStationId, endStationId),
-        queryFn: async () => {
-            if (!startStationId || !endStationId) {
-                return null
-            }
-
-            const response = await fetch(
-                `${
-                    import.meta.env.VITE_API_URL
-                }/v0/transit/itineraries?startStation=${startStationId}&endStation=${endStationId}`
-            )
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`)
-            }
-            const data = await response.json()
-            return data
-        },
-        enabled: options?.enabled,
-    })
