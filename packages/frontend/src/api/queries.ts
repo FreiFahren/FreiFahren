@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
-import { Line, LinesList, Report, RiskData, StationList } from 'src/utils/types'
+import { Line, LinesList, Report, RiskData, SegmentsFeatureCollection, StationList } from 'src/utils/types'
 
 import { useSkeleton } from '../components/Miscellaneous/LoadingPlaceholder/Skeleton'
 import { getClosestStations } from '../hooks/getClosestStations'
@@ -201,7 +201,10 @@ export const useRiskData = () => {
     const queryResult = useQuery<RiskData, Error>({
         queryKey: CACHE_KEYS.risk,
         queryFn: async (): Promise<RiskData> => {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/v1/risk-prediction/segment-colors`)
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/v0/risk`)
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
             return response.json()
         },
         refetchInterval: 30 * 1000,
@@ -253,9 +256,9 @@ export const fetchWithETag = async <T>(endpoint: string, storageKeyPrefix: strin
 }
 
 export const useSegments = () =>
-    useQuery<GeoJSON.FeatureCollection<GeoJSON.LineString>, Error>({
+    useQuery<SegmentsFeatureCollection, Error>({
         queryKey: ['segmentsETag'],
-        queryFn: () => fetchWithETag<GeoJSON.FeatureCollection<GeoJSON.LineString>>('/v0/transit/segments', 'segments'),
+        queryFn: () => fetchWithETag<SegmentsFeatureCollection>('/v0/transit/segments', 'segments'),
         staleTime: Infinity,
         gcTime: Infinity,
         refetchOnWindowFocus: false,

@@ -77,6 +77,7 @@ export interface Line {
 export type LinesList = Line[]
 
 export interface SegmentProperties {
+    id: number
     line: string
     from: string
     to: string
