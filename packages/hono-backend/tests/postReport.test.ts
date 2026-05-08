@@ -407,9 +407,7 @@ describe('Report Post Processing', () => {
     beforeAll(async () => {
         const transitService = new TransitNetworkDataService(db)
         stationsMap = await transitService.getStations()
-        linesMap = Object.fromEntries(
-            Object.entries(await transitService.getLines()).map(([key, value]) => [key, value ?? []])
-        )
+        linesMap = Object.fromEntries((await transitService.getLines()).map((line) => [line.id, line.stations]))
 
         const stationEntries = Object.entries(stationsMap)
 

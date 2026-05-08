@@ -129,7 +129,7 @@ const correctDirectionIfImplied =
         if (reportData.stationId === undefined) return reportData
         if (reportData.directionId === null || reportData.directionId === undefined) return reportData
 
-        const stationsOnLine = lines[reportData.lineId]
+        const stationsOnLine = lines.find((line) => line.id === reportData.lineId)?.stations
         if (stationsOnLine === undefined || stationsOnLine.length < 2) return reportData
 
         const firstStationOnLine = stationsOnLine[0]
