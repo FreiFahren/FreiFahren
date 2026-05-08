@@ -68,6 +68,7 @@ export class TransitNetworkDataService {
                     .select({
                         lineId: lines.id,
                         lineName: lines.name,
+                        lineType: lines.type,
                         stationId: lineStations.stationId,
                     })
                     .from(lines)
@@ -78,7 +79,7 @@ export class TransitNetworkDataService {
                 for (const row of joinedRows) {
                     let line = byId.get(row.lineId)
                     if (!line) {
-                        line = { id: row.lineId, name: row.lineName, stations: [] }
+                        line = { id: row.lineId, name: row.lineName, type: row.lineType, stations: [] }
                         byId.set(row.lineId, line)
                     }
                     if (row.stationId !== null) {

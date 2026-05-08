@@ -314,30 +314,30 @@ export const useStations = () =>
         refetchOnWindowFocus: false,
     })
 
+// Lower priority sorts first. Unknown types fall back to a stable position
+// after the well-known modes so callers don't need to special-case them.
+const LINE_TYPE_PRIORITY: Record<string, number> = {
+    subway: 0,
+    light_rail: 1,
+    train: 2,
+    tram: 3,
+    bus: 4,
+}
+const UNKNOWN_TYPE_PRIORITY = 100
+
 export const useLines = () =>
-    useQuery<[string, string[]][], Error>({
+    useQuery<LinesList, Error>({
         queryKey: ['linesETag'],
-        queryFn: async (): Promise<[string, string[]][]> => {
-            const groupPriority = (key: string): number => {
-                if (key.includes('U')) return 0
-                if (key.includes('S')) return 1
-                if (key.includes('M')) return 2
-                if (/^\d+$/.test(key)) return 4 // Lowest priority (4) for numeric keys
-                return 3 // Default priority (3) for others
-            }
-
-            const data = await fetchWithETag<LinesList>('/v0/lines', 'lines')
-            const sortedEntries = Object.entries(data).sort((a, b) => {
-                const groupA = groupPriority(a[0])
-                const groupB = groupPriority(b[0])
-                if (groupA !== groupB) {
-                    return groupA - groupB
+        queryFn: async (): Promise<LinesList> => {
+            const data = await fetchWithETag<LinesList>('/v0/transit/lines', 'lines')
+            return [...data].sort((a, b) => {
+                const priorityA = LINE_TYPE_PRIORITY[a.type] ?? UNKNOWN_TYPE_PRIORITY
+                const priorityB = LINE_TYPE_PRIORITY[b.type] ?? UNKNOWN_TYPE_PRIORITY
+                if (priorityA !== priorityB) {
+                    return priorityA - priorityB
                 }
-                // Sort ascending within the same group (e.g., U1 before U9)
-                return a[0].localeCompare(b[0], undefined, { numeric: true })
+                return a.id.localeCompare(b.id, undefined, { numeric: true })
             })
-
-            return sortedEntries
         },
         staleTime: Infinity,
         gcTime: Infinity,

@@ -98,8 +98,8 @@ describe('GET /v0/transit/distance', () => {
             { id: 'TEST_C', name: 'Test C', lat: 52.52, lng: 13.42 },
         ])
         await db.insert(lines).values([
-            { id: 'TEST_L1', name: 'Test Line 1', isCircular: false },
-            { id: 'TEST_L2', name: 'Test Line 2', isCircular: false },
+            { id: 'TEST_L1', name: 'Test Line 1', type: 'subway', isCircular: false },
+            { id: 'TEST_L2', name: 'Test Line 2', type: 'subway', isCircular: false },
         ])
         await db.insert(lineStations).values([
             { lineId: 'TEST_L1', stationId: 'TEST_A', order: 0 },

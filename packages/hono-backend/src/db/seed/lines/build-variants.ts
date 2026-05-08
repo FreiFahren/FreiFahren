@@ -7,6 +7,8 @@ export interface LineVariant {
     id: string
     /** Display ref, written to `lines.name` (e.g. "M1"). */
     ref: string
+    /** Transport type derived from the OSM `route` tag (e.g. `subway`, `tram`). */
+    type: string
     stationIds: string[]
     osmRelationId: number
     isCircular: boolean
@@ -14,6 +16,7 @@ export interface LineVariant {
 
 interface RawVariant {
     ref: string
+    type: string
     osmRelationId: number
     stationIds: string[]
     isCircular: boolean
@@ -123,7 +126,8 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
             continue
         }
 
-        raw.push({ ref, osmRelationId: rel.id, stationIds, isCircular })
+        const type = tags.route ?? 'unknown'
+        raw.push({ ref, type, osmRelationId: rel.id, stationIds, isCircular })
     }
 
     logger.info(
@@ -170,6 +174,7 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
             result.push({
                 id: assignVariantId(ref, null),
                 ref,
+                type: v.type,
                 stationIds: v.stationIds,
                 osmRelationId: v.osmRelationId,
                 isCircular: v.isCircular,
@@ -182,6 +187,7 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
                 result.push({
                     id: assignVariantId(ref, suffixes[i]),
                     ref,
+                    type: v.type,
                     stationIds: v.stationIds,
                     osmRelationId: v.osmRelationId,
                     isCircular: v.isCircular,

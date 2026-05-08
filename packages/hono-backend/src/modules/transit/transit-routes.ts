@@ -39,6 +39,7 @@ export const getLines = defineRoute<Env>()({
             z.object({
                 id: z.string(),
                 name: z.string(),
+                type: z.string(),
                 stations: z.array(z.string()),
             })
         ),

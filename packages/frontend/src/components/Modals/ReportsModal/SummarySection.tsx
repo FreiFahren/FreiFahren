@@ -66,11 +66,10 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
 
         const riskMap = extractMostRiskLines(segmentRiskData.segments_risk)
 
-        // Iterate over the lines array `[string, string[]][]`
-        ;(lines ?? []).forEach(([line]) => {
-            if (!riskMap.has(line)) {
+        ;(lines ?? []).forEach((line) => {
+            if (!riskMap.has(line.id)) {
                 // Ensure every line from useLines exists in the riskMap
-                riskMap.set(line, { score: 0, class: 0 })
+                riskMap.set(line.id, { score: 0, class: 0 })
             }
         })
         setRiskLines(riskMap)

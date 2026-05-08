@@ -21,6 +21,7 @@ export const seedLinesFromRelations = async (
     const lineRecords = variants.map((v) => ({
         id: v.id,
         name: v.ref,
+        type: v.type,
         isCircular: v.isCircular,
     }))
 
