@@ -4,10 +4,13 @@ export const ROUTE_TYPE_PRIORITY = ['subway', 'tram', 'light_rail'] as const // 
 
 export type RouteType = (typeof ROUTE_TYPE_PRIORITY)[number]
 
-export const DEFAULT_ROUTE_COLORS: Record<RouteType, string> = {
-    subway: '#000000', // Fallback since we use the line color for subway lines.
-    tram: '#be1414',
-    light_rail: '#007734',
+// Route types listed here always get the configured color regardless of the
+// OSM relation tags (used to give all S-Bahn lines one shared green and all
+// Tram lines one shared red). Route types absent from this map fall back to
+// The OSM colour/color tag — best for subway lines with per-line branding.
+export const ROUTE_COLORS: Partial<Record<RouteType, string>> = {
+    tram: '#be1414', // Classic Berlin tram red (tram and metro tram M* lines).
+    light_rail: '#007734', // Berlin S-Bahn green (S2), applied to all S-Bahn lines.
 }
 
 export const SEED_CONFIG = {
@@ -72,5 +75,5 @@ export const SEED_CONFIG = {
 
     mergeThresholdMeters: 250, // The threshold in meters for merging proximate stations.
     geometrySimplificationTolerance: 0.00003, // Approx. 3m in latitude; keeps endpoints while reducing vertex count.
-    defaultRouteColors: DEFAULT_ROUTE_COLORS,
+    routeColors: ROUTE_COLORS,
 } as const

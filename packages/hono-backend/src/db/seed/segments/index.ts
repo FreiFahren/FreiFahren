@@ -367,15 +367,12 @@ const buildRouteGeometries = (elements: OsmElement[]): Map<number, RouteGeometry
 }
 
 const resolveColor = (tags: Record<string, string | undefined>): string => {
-    const explicit = tags.colour ?? tags.color
-    if (explicit !== undefined && explicit !== '') return explicit
-
     const routeType = tags.route as RouteType | undefined
-    if (routeType && routeType in SEED_CONFIG.defaultRouteColors) {
-        return SEED_CONFIG.defaultRouteColors[routeType]
-    }
+    const configured = routeType ? SEED_CONFIG.routeColors[routeType] : undefined
+    if (configured !== undefined) return configured
 
-    return '#000000'
+    const explicit = tags.colour ?? tags.color
+    return explicit !== undefined && explicit !== '' ? explicit : '#000000'
 }
 
 const buildSegmentRecords = (
