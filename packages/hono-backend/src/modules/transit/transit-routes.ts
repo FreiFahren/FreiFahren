@@ -35,7 +35,13 @@ export const getLines = defineRoute<Env>()({
         summary: 'List lines',
         description: 'Returns all transit lines in the network.',
         tags: ['transit'],
-        responseSchema: z.record(z.string(), z.array(z.string())),
+        responseSchema: z.array(
+            z.object({
+                id: z.string(),
+                name: z.string(),
+                stations: z.array(z.string()),
+            })
+        ),
     },
     handler: async (c) => {
         const transitNetworkDataService = c.get('transitNetworkDataService')

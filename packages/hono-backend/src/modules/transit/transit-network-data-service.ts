@@ -5,7 +5,7 @@ import { DbConnection, stations, lineStations, lines, segments } from '../../db'
 
 import { buildGraph, type Graph, type StationId } from './pathfinding'
 import { TransitPathCacheService } from './transit-path-cache-service'
-import type { Lines, SegmentsFeatureCollection, Stations } from './types'
+import type { Line, Lines, SegmentsFeatureCollection, Stations } from './types'
 
 export class TransitNetworkDataService {
     private stationsCache: Promise<Stations> | null = null
@@ -67,20 +67,25 @@ export class TransitNetworkDataService {
                 const joinedRows = await this.db
                     .select({
                         lineId: lines.id,
+                        lineName: lines.name,
                         stationId: lineStations.stationId,
                     })
                     .from(lines)
                     .leftJoin(lineStations, eq(lineStations.lineId, lines.id))
                     .orderBy(asc(lines.id), asc(lineStations.order))
 
-                return joinedRows.reduce<Lines>((linesById, row) => {
-                    const base = Object.prototype.hasOwnProperty.call(linesById, row.lineId)
-                        ? linesById[row.lineId]
-                        : []
-                    const stations = row.stationId !== null ? [...base, row.stationId] : base
-                    linesById[row.lineId] = stations
-                    return linesById
-                }, {} as Lines)
+                const byId = new Map<string, Line>()
+                for (const row of joinedRows) {
+                    let line = byId.get(row.lineId)
+                    if (!line) {
+                        line = { id: row.lineId, name: row.lineName, stations: [] }
+                        byId.set(row.lineId, line)
+                    }
+                    if (row.stationId !== null) {
+                        line.stations.push(row.stationId)
+                    }
+                }
+                return Array.from(byId.values())
             } catch (error) {
                 this.linesCache = null
                 throw error
