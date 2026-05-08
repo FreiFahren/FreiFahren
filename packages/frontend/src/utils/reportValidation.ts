@@ -93,6 +93,13 @@ export const validateReport = (
     userPosition: UserPosition | null,
     t: TFunction
 ): ValidationResult => {
+    if (import.meta.env.DEV) {
+        return {
+            errors: [],
+            isValid: true,
+        }
+    }
+
     const errors: ValidationError[] = []
 
     const distanceError = validateStationDistance(stationCoordinates, userPosition, t)
