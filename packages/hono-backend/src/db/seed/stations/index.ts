@@ -1,7 +1,8 @@
-import { notInArray, sql } from 'drizzle-orm'
+import { and, eq, notExists, notInArray, or, sql } from 'drizzle-orm'
 
 import { logger } from '../../../common/logger'
 import type { DbConnection } from '../../index'
+import { reports } from '../../schema/reports'
 import { stations } from '../../schema/stations'
 
 import { buildDataset } from './build-dataset'
@@ -71,7 +72,7 @@ export const seedStationsFromElements = async (
 
     await db.transaction(async (tx) => {
         // Upsert instead of TRUNCATE CASCADE so that reports referencing
-        // existing stations survive a re-seed.
+        // Existing stations survive a re-seed.
         await tx
             .insert(stations)
             .values(records)
@@ -85,18 +86,20 @@ export const seedStationsFromElements = async (
             })
 
         // Drop stations no longer in the snapshot, but keep ones still
-        // referenced by reports so we don't lose user data. Cascading FKs
-        // from segments and line_stations clean themselves up.
+        // Referenced by reports so we don't lose user data. Cascading FKs
+        // From segments and line_stations clean themselves up.
         const newIds = records.map((r) => r.id)
-        await tx.execute(sql`
-            DELETE FROM stations
-            WHERE ${notInArray(stations.id, newIds)}
-              AND NOT EXISTS (
-                  SELECT 1 FROM reports
-                  WHERE reports.station_id = stations.id
-                     OR reports.direction_id = stations.id
-              )
-        `)
+        await tx.delete(stations).where(
+            and(
+                notInArray(stations.id, newIds),
+                notExists(
+                    tx
+                        .select({ ref: sql`1` })
+                        .from(reports)
+                        .where(or(eq(reports.stationId, stations.id), eq(reports.directionId, stations.id)))
+                )
+            )
+        )
     })
     logger.info(`[seed:stations] Upserted ${records.length} stations`)
 

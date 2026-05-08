@@ -1,8 +1,9 @@
-import { inArray, notInArray, sql } from 'drizzle-orm'
+import { and, eq, inArray, notExists, notInArray, sql } from 'drizzle-orm'
 
 import { logger } from '../../../common/logger'
 import type { DbConnection } from '../../index'
 import { lines, lineStations } from '../../schema/lines'
+import { reports } from '../../schema/reports'
 import type { OsmRelation } from '../stations/overpass'
 
 import { buildLineVariants, type LineVariant } from './build-variants'
@@ -55,13 +56,17 @@ export const seedLinesFromRelations = async (
         // Drop lines no longer in the snapshot, but keep ones still
         // referenced by reports. Cascading FKs from segments and
         // line_stations clean themselves up.
-        await tx.execute(sql`
-            DELETE FROM lines
-            WHERE ${notInArray(lines.id, newLineIds)}
-              AND NOT EXISTS (
-                  SELECT 1 FROM reports WHERE reports.line_id = lines.id
-              )
-        `)
+        await tx.delete(lines).where(
+            and(
+                notInArray(lines.id, newLineIds),
+                notExists(
+                    tx
+                        .select({ ref: sql`1` })
+                        .from(reports)
+                        .where(eq(reports.lineId, lines.id))
+                )
+            )
+        )
     })
 
     logger.info(
