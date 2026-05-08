@@ -328,11 +328,11 @@ export const useStationDistance = (
                 ...station,
             }))
             const [userStation] = getClosestStations(1, stationsArray, { lat: userLat, lng: userLng })
-            const response = await fetch(
-                `${import.meta.env.VITE_API_URL}/v0/transit/distance?inspectorStationId=${encodeURIComponent(
-                    stationId
-                )}&userStationId=${encodeURIComponent(userStation.id)}`
-            )
+            const search = new URLSearchParams({ from: userStation.id, to: stationId })
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/v0/transit/distance?${search.toString()}`)
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
             const data = await response.json()
             if (typeof data === 'number') return data
             return data.distance
