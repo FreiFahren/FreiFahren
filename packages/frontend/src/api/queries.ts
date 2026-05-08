@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo } from 'react'
-import { Itinerary, LinesList, Position, Report, RiskData, StationList } from 'src/utils/types'
+import { Itinerary, Line, LinesList, Position, Report, RiskData, StationList } from 'src/utils/types'
 
 import { useSkeleton } from '../components/Miscellaneous/LoadingPlaceholder/Skeleton'
 import { getClosestStations } from '../hooks/getClosestStations'
@@ -315,29 +315,27 @@ export const useStations = () =>
     })
 
 export const useLines = () =>
-    useQuery<[string, string[]][], Error>({
+    useQuery<Line[], Error>({
         queryKey: ['linesETag'],
-        queryFn: async (): Promise<[string, string[]][]> => {
-            const groupPriority = (key: string): number => {
-                if (key.includes('U')) return 0
-                if (key.includes('S')) return 1
-                if (key.includes('M')) return 2
-                if (/^\d+$/.test(key)) return 4 // Lowest priority (4) for numeric keys
+        queryFn: async (): Promise<Line[]> => {
+            const groupPriority = (id: string): number => {
+                if (id.includes('U')) return 0
+                if (id.includes('S')) return 1
+                if (id.includes('M')) return 2
+                if (/^\d+$/.test(id)) return 4 // Lowest priority (4) for numeric keys
                 return 3 // Default priority (3) for others
             }
 
             const data = await fetchWithETag<LinesList>('/v0/transit/lines', 'lines')
-            const sortedEntries = Object.entries(data).sort((a, b) => {
-                const groupA = groupPriority(a[0])
-                const groupB = groupPriority(b[0])
+            return [...data].sort((a, b) => {
+                const groupA = groupPriority(a.id)
+                const groupB = groupPriority(b.id)
                 if (groupA !== groupB) {
                     return groupA - groupB
                 }
                 // Sort ascending within the same group (e.g., U1 before U9)
-                return a[0].localeCompare(b[0], undefined, { numeric: true })
+                return a.id.localeCompare(b.id, undefined, { numeric: true })
             })
-
-            return sortedEntries
         },
         staleTime: Infinity,
         gcTime: Infinity,

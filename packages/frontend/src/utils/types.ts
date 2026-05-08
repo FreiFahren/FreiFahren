@@ -67,7 +67,25 @@ export type LineProperty = {
 }
 
 export type StationList = Record<string, StationProperty>
-export type LinesList = Record<string, string[]>
+
+export interface Line {
+    id: string
+    name: string
+    stations: string[]
+}
+
+export type LinesList = Line[]
+
+export interface SegmentProperties {
+    line: string
+    from: string
+    to: string
+    color: string
+}
+
+export type SegmentFeature = GeoJSON.Feature<GeoJSON.LineString, SegmentProperties>
+
+export type SegmentsFeatureCollection = GeoJSON.FeatureCollection<GeoJSON.LineString, SegmentProperties>
 export interface RiskData {
     segments_risk: {
         [key: string]: SegmentRisk

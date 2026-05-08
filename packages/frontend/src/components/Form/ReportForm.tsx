@@ -57,7 +57,7 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     const [currentStation, setCurrentStation] = useState<Station | null>(null)
 
     const { data: linesData } = useLines()
-    const allLines = linesData?.map(([line]) => line) ?? []
+    const allLines = linesData?.map((line) => line.id) ?? []
     const possibleLines = (() => {
         if (currentStation) {
             return allLines.filter((line) => currentStation.lines.includes(line))
@@ -95,10 +95,10 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         if (!currentLine || !allStations.length || !linesData) return []
 
         // Find the line data for the current line
-        const lineData = linesData.find(([lineName]) => lineName === currentLine)
+        const lineData = linesData.find((line) => line.id === currentLine)
         if (!lineData) return []
 
-        const [, stationIds] = lineData
+        const stationIds = lineData.stations
         if (stationIds.length === 0) return []
         if (stationIds.length === 1) {
             const [stationId] = stationIds
@@ -136,11 +136,10 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
 
         // If a line is selected, order stations according to the line's station order
         if (currentLine && linesData) {
-            const lineData = linesData.find(([lineName]) => lineName === currentLine)
+            const lineData = linesData.find((line) => line.id === currentLine)
             if (lineData) {
-                const [, stationIds] = lineData
                 // for quick lookup of station order
-                const stationOrderMap = new Map(stationIds.map((id, index) => [id, index]))
+                const stationOrderMap = new Map(lineData.stations.map((id, index) => [id, index]))
 
                 return lineFilteredStations.sort((a, b) => {
                     const orderA = stationOrderMap.get(a.id) ?? Number.MAX_SAFE_INTEGER
