@@ -29,6 +29,7 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
 
     useEffect(() => {
         const extractMostRiskLines = (segmentsRisk: Record<string, SegmentRisk>): Map<string, LineRiskData> => {
+            const lineDisplayNames = new Map((lines ?? []).map((line) => [line.id, line.name]))
             const colorScores: Record<string, number> = {
                 '#A92725': 3, // bad - red
                 '#F05044': 3, // also bad - red (otherwise we would have too many colors, therfore aggregate)
@@ -39,7 +40,8 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
 
             Object.entries(segmentsRisk).forEach(([segmentId, segment]) => {
                 // eslint-disable-next-line prefer-destructuring
-                const line = segmentId.split('.')[0]
+                const lineId = segmentId.split('.')[0]
+                const line = lineDisplayNames.get(lineId) ?? lineId
                 const score = segment.color in colorScores ? colorScores[segment.color] : 0
 
                 if (!lineScores.has(line)) {
@@ -67,9 +69,9 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
         const riskMap = extractMostRiskLines(segmentRiskData.segments_risk)
 
         ;(lines ?? []).forEach((line) => {
-            if (!riskMap.has(line.id)) {
+            if (!riskMap.has(line.name)) {
                 // Ensure every line from useLines exists in the riskMap
-                riskMap.set(line.id, { score: 0, class: 0 })
+                riskMap.set(line.name, { score: 0, class: 0 })
             }
         })
         setRiskLines(riskMap)

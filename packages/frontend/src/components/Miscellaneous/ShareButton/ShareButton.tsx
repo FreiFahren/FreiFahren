@@ -5,7 +5,7 @@ import './ShareButton.css'
 import i18next, { TFunction } from 'i18next'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useStations } from 'src/api/queries'
+import { useLines, useStations } from 'src/api/queries'
 import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 import { Report } from 'src/utils/types'
 
@@ -61,6 +61,7 @@ const formatTime = (timestamp: string, isPredicted: boolean, t: TFunction): stri
 const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
     const { t } = useTranslation()
     const { data: stations } = useStations()
+    const { data: lines } = useLines()
 
     const handleShare = useCallback(
         async (event: React.MouseEvent) => {
@@ -84,11 +85,15 @@ const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
                 const stationName = stations?.[report.stationId]?.name ?? report.stationId
                 const directionName =
                     report.directionId !== null ? (stations?.[report.directionId]?.name ?? report.directionId) : '?'
+                const lineName =
+                    report.lineId !== null
+                        ? (lines?.find((line) => line.id === report.lineId)?.name ?? report.lineId)
+                        : '?'
 
                 const shareText = t('Share.text', {
                     station: stationName,
                     direction: directionName,
-                    line: report.lineId ?? '?',
+                    line: lineName,
                     time: formatTime(report.timestamp, report.isPredicted, t),
                 })
 
@@ -117,7 +122,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ report }) => {
                 console.error('Error sharing:', error)
             }
         },
-        [t, report, stations]
+        [t, report, stations, lines]
     )
 
     return (
