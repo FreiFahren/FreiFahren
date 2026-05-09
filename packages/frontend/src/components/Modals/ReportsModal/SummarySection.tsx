@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLines, useRiskData } from 'src/api/queries'
+import { useLines, useRiskData, useSegments } from 'src/api/queries'
 import FeedbackButton from 'src/components/Buttons/FeedbackButton/FeedbackButton'
 import { Report, SegmentRisk } from 'src/utils/types'
 
@@ -23,6 +23,7 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
 
     const riskLevels = [3, 2, 1, 0]
     const { data: segmentRiskData } = useRiskData()
+    const { data: lineSegments } = useSegments()
     const [riskLines, setRiskLines] = useState<Map<string, LineRiskData>>(new Map())
 
     const { data: lines } = useLines()
@@ -30,6 +31,9 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
     useEffect(() => {
         const extractMostRiskLines = (segmentsRisk: Record<string, SegmentRisk>): Map<string, LineRiskData> => {
             const lineDisplayNames = new Map((lines ?? []).map((line) => [line.id, line.name]))
+            const segmentLines = new Map(
+                (lineSegments?.features ?? []).map((segment) => [String(segment.properties.id), segment.properties.line])
+            )
             const colorScores: Record<string, number> = {
                 '#A92725': 3, // bad - red
                 '#F05044': 3, // also bad - red (otherwise we would have too many colors, therfore aggregate)
@@ -39,8 +43,9 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
             const lineScores = new Map<string, LineRiskData>()
 
             Object.entries(segmentsRisk).forEach(([segmentId, segment]) => {
-                // eslint-disable-next-line prefer-destructuring
-                const lineId = segmentId.split('.')[0]
+                const lineId = segmentLines.get(segmentId)
+                if (lineId === undefined) return
+
                 const line = lineDisplayNames.get(lineId) ?? lineId
                 const score = segment.color in colorScores ? colorScores[segment.color] : 0
 
@@ -75,7 +80,7 @@ const SummarySection: React.FC<SummarySectionProps> = ({ sortedLinesWithReports,
             }
         })
         setRiskLines(riskMap)
-    }, [segmentRiskData, lines])
+    }, [segmentRiskData, lineSegments, lines])
 
     const filterRiskLevelLines = (level: number, riskData: LineRiskData): boolean => riskData.class === level
 
