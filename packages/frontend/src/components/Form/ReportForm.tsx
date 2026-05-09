@@ -6,13 +6,13 @@ import { getClosestStations } from 'src/hooks/getClosestStations'
 import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 import { useStationSearch } from 'src/hooks/useStationSearch'
 import { validateReport, ValidationError } from 'src/utils/reportValidation'
-import { Report, Station } from 'src/utils/types'
+import { Line, Report, Station } from 'src/utils/types'
 
 import searchIcon from '../../../public/icons/search.svg'
 import FeedbackButton from '../Buttons/FeedbackButton/FeedbackButton'
 import StationButton from '../Buttons/StationButton'
 import { SubmitButton } from '../common/SubmitButton/SubmitButton'
-import { Line } from '../Miscellaneous/Line/Line'
+import { Line as LineTag } from '../Miscellaneous/Line/Line'
 import { CenterModal } from '../Modals/CenterModal'
 import { FeedbackForm } from './FeedbackForm/FeedbackForm'
 import { SelectField } from './SelectField/SelectField'
@@ -26,6 +26,71 @@ enum Entity {
     S = 'S',
     T = 'T',
     ALL = '',
+}
+
+type ReportLineOption = Line & {
+    variants: Line[]
+}
+
+const getLongestVariant = (variants: Line[]): Line | undefined =>
+    variants.reduce<Line | undefined>((longestVariant, variant) => {
+        if (!longestVariant) return variant
+        return variant.stations.length > longestVariant.stations.length ? variant : longestVariant
+    }, undefined)
+
+const getMergedStationIds = (variants: Line[], primaryVariant: Line): string[] => {
+    const stationIds = new Set(primaryVariant.stations)
+    const mergedStationIds = [...primaryVariant.stations]
+
+    for (const variant of variants) {
+        for (const stationId of variant.stations) {
+            if (stationIds.has(stationId)) continue
+
+            stationIds.add(stationId)
+            mergedStationIds.push(stationId)
+        }
+    }
+
+    return mergedStationIds
+}
+
+const getReportLineOptions = (lines: Line[]): ReportLineOption[] => {
+    const linesByName = new Map<string, Line[]>()
+
+    for (const line of lines) {
+        linesByName.set(line.name, [...(linesByName.get(line.name) ?? []), line])
+    }
+
+    return Array.from(linesByName.values()).map((variants) => {
+        const primaryVariant = getLongestVariant(variants) ?? variants[0]
+
+        return {
+            ...primaryVariant,
+            stations: getMergedStationIds(variants, primaryVariant),
+            variants,
+        }
+    })
+}
+
+const getVariantTerminalIds = (variant: Line): string[] => {
+    if (variant.stations.length === 0) return []
+
+    const [firstStationId] = variant.stations
+    const lastStationId = variant.stations[variant.stations.length - 1]
+
+    return firstStationId === lastStationId ? [firstStationId] : [firstStationId, lastStationId]
+}
+
+const getReportLineId = (
+    line: ReportLineOption | undefined,
+    stationId: string,
+    directionId: string | null
+): string | null => {
+    const stationVariants = (line?.variants ?? []).filter((variant) => variant.stations.includes(stationId))
+    const directionVariants =
+        directionId === null ? [] : stationVariants.filter((variant) => variant.stations.includes(directionId))
+
+    return getLongestVariant(directionVariants)?.id ?? getLongestVariant(stationVariants)?.id ?? line?.id ?? null
 }
 
 export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
@@ -49,10 +114,11 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     const [currentStation, setCurrentStation] = useState<Station | null>(null)
 
     const { data: linesData } = useLines()
-    const allLines = linesData?.map((line) => line.id) ?? []
+    const allLines = useMemo(() => getReportLineOptions(linesData ?? []), [linesData])
+    const currentLineData = allLines.find((line) => line.id === currentLine)
     const possibleLines = (() => {
         if (currentStation) {
-            return allLines.filter((line) => currentStation.lines.includes(line))
+            return allLines.filter((line) => line.stations.includes(currentStation.id))
         }
 
         if (currentEntity === Entity.ALL) {
@@ -61,10 +127,10 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
 
         if (currentEntity === Entity.T) {
             // exception because T stands for tram but we want Metro trams and regular trams
-            return allLines.filter((line) => line.startsWith('M') || /^\d+$/.test(line))
+            return allLines.filter((line) => line.name.startsWith('M') || /^\d+$/.test(line.name))
         }
 
-        return allLines.filter((line) => line.startsWith(currentEntity))
+        return allLines.filter((line) => line.name.startsWith(currentEntity))
     })()
 
     const { data: stationsData } = useStations()
@@ -84,34 +150,17 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     )
 
     const possibleDirections = useMemo(() => {
-        if (!currentLine || !allStations.length || !linesData) return []
+        if (!currentLineData || !allStations.length) return []
 
-        // Find the line data for the current line
-        const lineData = linesData.find((line) => line.id === currentLine)
-        if (!lineData) return []
+        const variants = currentLineData.variants.filter(
+            (variant) => !currentStation || variant.stations.includes(currentStation.id)
+        )
+        const directionIds = Array.from(new Set(variants.flatMap(getVariantTerminalIds)))
 
-        const stationIds = lineData.stations
-        if (stationIds.length === 0) return []
-        if (stationIds.length === 1) {
-            const [stationId] = stationIds
-            const station = allStations.find((s) => s.id === stationId)
-            return station ? [station] : []
-        }
-
-        // Get first and last station ids from the line data (in correct order)
-        const [firstStationId] = stationIds
-        const lastStationId = stationIds[stationIds.length - 1]
-
-        // Look up the actual Station objects
-        const firstStation = allStations.find((s) => s.id === firstStationId)
-        const lastStation = allStations.find((s) => s.id === lastStationId)
-
-        const directions = []
-        if (firstStation) directions.push(firstStation)
-        if (lastStation && lastStation.id !== firstStation?.id) directions.push(lastStation)
-
-        return directions
-    }, [currentLine, allStations, linesData])
+        return directionIds
+            .map((stationId) => allStations.find((station) => station.id === stationId))
+            .filter((station): station is Station => station !== undefined)
+    }, [currentLineData, currentStation, allStations])
 
     const possibleStations = (() => {
         if (currentStation) {
@@ -119,26 +168,25 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         }
 
         if (searchValue.trim() !== '') {
-            return filteredStations.filter((station) => !currentLine || station.lines.includes(currentLine))
+            return filteredStations.filter(
+                (station) => !currentLineData || currentLineData.stations.includes(station.id)
+            )
         }
 
         const lineFilteredStations = allStations.filter(
-            (station) => !currentLine || station.lines.includes(currentLine)
+            (station) => !currentLineData || currentLineData.stations.includes(station.id)
         )
 
         // If a line is selected, order stations according to the line's station order
-        if (currentLine && linesData) {
-            const lineData = linesData.find((line) => line.id === currentLine)
-            if (lineData) {
-                // for quick lookup of station order
-                const stationOrderMap = new Map(lineData.stations.map((id, index) => [id, index]))
+        if (currentLineData) {
+            // for quick lookup of station order
+            const stationOrderMap = new Map(currentLineData.stations.map((id, index) => [id, index]))
 
-                return lineFilteredStations.sort((a, b) => {
-                    const orderA = stationOrderMap.get(a.id) ?? Number.MAX_SAFE_INTEGER
-                    const orderB = stationOrderMap.get(b.id) ?? Number.MAX_SAFE_INTEGER
-                    return orderA - orderB
-                })
-            }
+            return lineFilteredStations.sort((a, b) => {
+                const orderA = stationOrderMap.get(a.id) ?? Number.MAX_SAFE_INTEGER
+                const orderB = stationOrderMap.get(b.id) ?? Number.MAX_SAFE_INTEGER
+                return orderA - orderB
+            })
         }
 
         return lineFilteredStations
@@ -149,6 +197,10 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         setCurrentStation(selectedStation)
         setIsSearchExpanded(selectedStation === null) // expand again if user deselects the station
         setIsSearchFocused(false) // Hide search focus when station is selected
+        if (selectedStation && currentLineData && !currentLineData.stations.includes(selectedStation.id)) {
+            setCurrentLine(null)
+            setCurrentDirection(null)
+        }
 
         // Clear validation errors when station changes
         if (validationErrors.length > 0) {
@@ -186,9 +238,11 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
             return
         }
 
+        const reportLineId = getReportLineId(currentLineData, currentStation.id, currentDirection?.id ?? null)
+
         const submittedReport = await submitReport({
             stationId: currentStation.id,
-            lineId: currentLine,
+            lineId: reportLineId,
             directionId: currentDirection?.id ?? null,
         })
 
@@ -233,13 +287,13 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                         value={currentEntity}
                     >
                         <button type="button" className="flex min-w-0 flex-1 items-center justify-center">
-                            <Line line="U" />
+                            <LineTag line="U" />
                         </button>
                         <button type="button" className="flex min-w-0 flex-1 items-center justify-center">
-                            <Line line="S" />
+                            <LineTag line="S" />
                         </button>
                         <button type="button" className="flex min-w-0 flex-1 items-center justify-center">
-                            <Line line="T" />
+                            <LineTag line="T" />
                         </button>
                     </SelectField>
                 </section>
@@ -251,16 +305,20 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
                     <h2>{t('ReportForm.line')}</h2>
                     <SelectField
                         containerClassName="flex items-center justify-between mx-auto w-full overflow-x-visible overflow-y-hidden gap-2"
-                        onSelect={(selectedValue) => setCurrentLine(selectedValue ?? '')}
+                        onSelect={(selectedValue) => {
+                            setCurrentLine(selectedValue)
+                            setCurrentDirection(null)
+                        }}
                         value={currentLine}
                     >
                         {possibleLines.map((line) => (
                             <button
-                                key={line}
+                                key={line.id}
                                 type="button"
+                                data-select-value={line.id}
                                 className="flex h-fit min-w-0 flex-1 items-center justify-center"
                             >
-                                <Line line={line} />
+                                <LineTag line={line.name} />
                             </button>
                         ))}
                     </SelectField>
