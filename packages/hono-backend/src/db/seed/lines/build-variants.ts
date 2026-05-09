@@ -1,5 +1,5 @@
 import { logger } from '../../../common/logger'
-import { SEED_CONFIG } from '../config'
+import { ROUTE_TYPE_PRIORITY, SEED_CONFIG, type RouteType } from '../config'
 import type { OsmRelation } from '../stations/overpass'
 
 export interface LineVariant {
@@ -7,8 +7,8 @@ export interface LineVariant {
     id: string
     /** Display ref, written to `lines.name` (e.g. "M1"). */
     ref: string
-    /** Transport type derived from the OSM `route` tag (e.g. `subway`, `tram`). */
-    type: string
+    /** Transport type derived from the OSM `route` tag, restricted to the configured set. */
+    type: RouteType
     stationIds: string[]
     osmRelationId: number
     isCircular: boolean
@@ -16,11 +16,14 @@ export interface LineVariant {
 
 interface RawVariant {
     ref: string
-    type: string
+    type: RouteType
     osmRelationId: number
     stationIds: string[]
     isCircular: boolean
 }
+
+const isRouteType = (value: string | undefined): value is RouteType =>
+    value !== undefined && (ROUTE_TYPE_PRIORITY as readonly string[]).includes(value)
 
 const LINE_ID_MAX_LENGTH = 16
 const LETTERS = 'abcdefghijklmnopqrstuvwxyz'
@@ -106,6 +109,7 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
     const raw: RawVariant[] = []
     let skippedNoRef = 0
     let skippedTooShort = 0
+    let skippedUnknownType = 0
 
     for (const rel of relations) {
         const tags: Record<string, string | undefined> = rel.tags ?? {}
@@ -114,6 +118,12 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
             skippedNoRef++
             continue
         }
+
+        if (!isRouteType(tags.route)) {
+            skippedUnknownType++
+            continue
+        }
+        const type: RouteType = tags.route
 
         const resolved = resolveRouteStations(rel, nodeIdToStationId)
         if (resolved.length < 2) {
@@ -126,12 +136,11 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
             continue
         }
 
-        const type = tags.route ?? 'unknown'
         raw.push({ ref, type, osmRelationId: rel.id, stationIds, isCircular })
     }
 
     logger.info(
-        `[seed:lines] Parsed ${raw.length} route variants (${skippedNoRef} no-ref, ${skippedTooShort} too-short)`
+        `[seed:lines] Parsed ${raw.length} route variants (${skippedNoRef} no-ref, ${skippedTooShort} too-short, ${skippedUnknownType} unsupported route type)`
     )
 
     const byRef = new Map<string, RawVariant[]>()

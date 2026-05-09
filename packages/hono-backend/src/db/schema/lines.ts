@@ -1,11 +1,13 @@
 import { boolean, integer, pgTable, primaryKey, varchar } from 'drizzle-orm/pg-core'
 
+import type { RouteType } from '../seed/config'
+
 import { stations } from './stations'
 
 export const lines = pgTable('lines', {
     id: varchar({ length: 16 }).primaryKey(),
     name: varchar({ length: 255 }).notNull(),
-    type: varchar({ length: 32 }).notNull(),
+    type: varchar({ length: 32 }).$type<RouteType>().notNull(),
     isCircular: boolean().notNull().default(false),
 })
 
