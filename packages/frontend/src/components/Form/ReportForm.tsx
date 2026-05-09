@@ -57,29 +57,22 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
     const [currentStation, setCurrentStation] = useState<Station | null>(null)
 
     const { data: linesData } = useLines()
-    const allLines = linesData ?? []
+    const allLines = linesData?.map(([line]) => line) ?? []
     const possibleLines = (() => {
         if (currentStation) {
-            return allLines.filter((line) => currentStation.lines.includes(line.id)).map((line) => line.id)
+            return allLines.filter((line) => currentStation.lines.includes(line))
         }
 
         if (currentEntity === Entity.ALL) {
-            return allLines.map((line) => line.id)
-        }
-
-        if (currentEntity === Entity.U) {
-            return allLines.filter((line) => line.type === 'subway').map((line) => line.id)
-        }
-
-        if (currentEntity === Entity.S) {
-            return allLines.filter((line) => line.type === 'light_rail').map((line) => line.id)
+            return allLines
         }
 
         if (currentEntity === Entity.T) {
-            return allLines.filter((line) => line.type === 'tram').map((line) => line.id)
+            // exception because T stands for tram but we want Metro trams and regular trams
+            return allLines.filter((line) => line.startsWith('M') || /^\d+$/.test(line))
         }
 
-        return []
+        return allLines.filter((line) => line.startsWith(currentEntity))
     })()
 
     const { data: stationsData } = useStations()
@@ -102,10 +95,10 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
         if (!currentLine || !allStations.length || !linesData) return []
 
         // Find the line data for the current line
-        const lineData = linesData.find((line) => line.id === currentLine)
+        const lineData = linesData.find(([lineName]) => lineName === currentLine)
         if (!lineData) return []
 
-        const stationIds = lineData.stations
+        const [, stationIds] = lineData
         if (stationIds.length === 0) return []
         if (stationIds.length === 1) {
             const [stationId] = stationIds
@@ -143,9 +136,9 @@ export const ReportForm = ({ onReportFormSubmit }: ReportFormProps) => {
 
         // If a line is selected, order stations according to the line's station order
         if (currentLine && linesData) {
-            const lineData = linesData.find((line) => line.id === currentLine)
+            const lineData = linesData.find(([lineName]) => lineName === currentLine)
             if (lineData) {
-                const stationIds = lineData.stations
+                const [, stationIds] = lineData
                 // for quick lookup of station order
                 const stationOrderMap = new Map(stationIds.map((id, index) => [id, index]))
 

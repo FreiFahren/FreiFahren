@@ -67,15 +67,7 @@ export type LineProperty = {
 }
 
 export type StationList = Record<string, StationProperty>
-
-export interface Line {
-    id: string
-    name: string
-    type: string
-    stations: string[]
-}
-
-export type LinesList = Line[]
+export type LinesList = Record<string, string[]>
 export interface RiskData {
     segments_risk: {
         [key: string]: SegmentRisk
