@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import { Env } from '../../app-env'
 import { defineRoute } from '../../common/router'
+import { ROUTE_TYPE_PRIORITY } from '../../db/seed/config'
 
 export const getStations = defineRoute<Env>()({
     method: 'get' as const,
@@ -39,6 +40,7 @@ export const getLines = defineRoute<Env>()({
             z.object({
                 id: z.string(),
                 name: z.string(),
+                type: z.enum(ROUTE_TYPE_PRIORITY),
                 stations: z.array(z.string()),
             })
         ),

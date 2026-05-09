@@ -44,6 +44,7 @@ type Stations = Record<StationId, Station>
 type Line = {
     id: LineId
     name: LineRow['name']
+    type: LineRow['type']
     stations: StationId[]
 }
 
