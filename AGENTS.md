@@ -28,6 +28,11 @@ Use Conventional Commit prefixes for both commit messages and PR titles:
 
 Example: `fix: return 404 instead of 500 when station id is unknown`
 
+## Hono backend conventions
+
+- **Throw `AppError` at service boundaries**, not raw `Error` or ad-hoc `c.json({ error: ... })`. `AppError` (see `packages/hono-backend/src/common/errors.ts`) carries a `statusCode` and an `internalCode`, and the central error handler strips descriptions in production so internal details don't leak. Domain-specific errors should be converted to `AppError` before they reach the response.
+- **Use the Pino logger from context** (`c.get('logger')`) instead of `console.log`. It's wired up in `packages/hono-backend/src/common/logger.ts` with daily rotation and pretty-printing in dev. Log structured objects (`logger.info({ reportId }, 'report created')`), not interpolated strings, so the JSON output stays queryable.
+
 ## City-agnostic code
 
 The codebase should not assume Berlin. Keep city-specific data (station lists, line colors, network names, timezone, language) in **config files** under `packages/hono-backend/src/db/seed/config.ts` and similar locations — never hard-coded in business logic. Config files are the only sanctioned escape hatch for city-specific values.
