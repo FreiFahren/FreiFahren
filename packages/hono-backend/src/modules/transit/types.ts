@@ -45,6 +45,7 @@ type Line = {
     id: LineId
     name: LineRow['name']
     type: LineRow['type']
+    isCircular: LineRow['isCircular']
     stations: StationId[]
 }
 
