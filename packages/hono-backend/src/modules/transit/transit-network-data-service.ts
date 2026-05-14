@@ -69,6 +69,7 @@ export class TransitNetworkDataService {
                         lineId: lines.id,
                         lineName: lines.name,
                         lineType: lines.type,
+                        lineIsCircular: lines.isCircular,
                         stationId: lineStations.stationId,
                     })
                     .from(lines)
@@ -79,7 +80,13 @@ export class TransitNetworkDataService {
                 for (const row of joinedRows) {
                     let line = byId.get(row.lineId)
                     if (!line) {
-                        line = { id: row.lineId, name: row.lineName, type: row.lineType, stations: [] }
+                        line = {
+                            id: row.lineId,
+                            name: row.lineName,
+                            type: row.lineType,
+                            isCircular: row.lineIsCircular,
+                            stations: [],
+                        }
                         byId.set(row.lineId, line)
                     }
                     if (row.stationId !== null) {

@@ -41,6 +41,7 @@ export const getLines = defineRoute<Env>()({
                 id: z.string(),
                 name: z.string(),
                 type: z.enum(ROUTE_TYPE_PRIORITY),
+                isCircular: z.boolean(),
                 stations: z.array(z.string()),
             })
         ),
