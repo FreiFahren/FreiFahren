@@ -51,40 +51,41 @@ const PrivacyPolicy = () => {
             <p>{t('PrivacyPolicy.sections.preamble.content')}</p>
 
             <h2>{t('PrivacyPolicy.sections.responsible.title')}</h2>
-            <p>
-                {t('PrivacyPolicy.sections.responsible.content', {
-                    email: <a href="mailto:johan@trieloff.net">johan@trieloff.net</a>,
-                })}
-            </p>
+            <p>{t('PrivacyPolicy.sections.responsible.content')}</p>
 
             <h2>{t('PrivacyPolicy.sections.legalBasis.title')}</h2>
             <p>{t('PrivacyPolicy.sections.legalBasis.content')}</p>
-            <ul>
-                <li>{t('PrivacyPolicy.sections.legalBasis.consent')}</li>
-                <li>{t('PrivacyPolicy.sections.legalBasis.contract')}</li>
-                <li>{t('PrivacyPolicy.sections.legalBasis.legitimateInterest')}</li>
-            </ul>
+            <div className="data-usage-content">
+                <ul>
+                    <li>{t('PrivacyPolicy.sections.legalBasis.consent')}</li>
+                    <li>{t('PrivacyPolicy.sections.legalBasis.legitimateInterest')}</li>
+                </ul>
+            </div>
 
             <h2>{t('PrivacyPolicy.sections.dataUsage.title')}</h2>
-            <p>{t('PrivacyPolicy.sections.dataUsage.content')}</p>
-            <h3>{t('PrivacyPolicy.sections.dataUsage.reportFormTitle')}</h3>
-            <ul>
-                {(t('PrivacyPolicy.sections.dataUsage.dataPoints', { returnObjects: true }) as string[]).map((item) => (
-                    <li key={item}>{item}</li>
-                ))}
-            </ul>
-            <p>{t('PrivacyPolicy.sections.dataUsage.reportPurpose')}</p>
-            <p>{t('PrivacyPolicy.sections.dataUsage.ipAddressInfo', { minutes: REPORT_COOLDOWN_MINUTES })}</p>
+            <div className="data-usage-content">
+                <p>{t('PrivacyPolicy.sections.dataUsage.content')}</p>
+                <h3>{t('PrivacyPolicy.sections.dataUsage.reportFormTitle')}</h3>
+                <ul>
+                    {(t('PrivacyPolicy.sections.dataUsage.dataPoints', { returnObjects: true }) as string[]).map(
+                        (item) => (
+                            <li key={item}>{item}</li>
+                        )
+                    )}
+                </ul>
+                <p>{t('PrivacyPolicy.sections.dataUsage.reportPurpose')}</p>
+                <p>{t('PrivacyPolicy.sections.dataUsage.ipAddressInfo', { minutes: REPORT_COOLDOWN_MINUTES })}</p>
 
-            <h3>{t('PrivacyPolicy.sections.dataUsage.feedbackFormTitle')}</h3>
-            <ul>
-                {(t('PrivacyPolicy.sections.dataUsage.feedbackDataPoints', { returnObjects: true }) as string[]).map(
-                    (item) => (
-                        <li key={item}>{item}</li>
-                    )
-                )}
-            </ul>
-            <p>{t('PrivacyPolicy.sections.dataUsage.feedbackPurpose')}</p>
+                <h3>{t('PrivacyPolicy.sections.dataUsage.feedbackFormTitle')}</h3>
+                <ul>
+                    {(t('PrivacyPolicy.sections.dataUsage.feedbackDataPoints', { returnObjects: true }) as string[]).map(
+                        (item) => (
+                            <li key={item}>{item}</li>
+                        )
+                    )}
+                </ul>
+                <p>{t('PrivacyPolicy.sections.dataUsage.feedbackPurpose')}</p>
+            </div>
 
             <h2>{t('PrivacyPolicy.sections.anonymity.title')}</h2>
             <p>{t('PrivacyPolicy.sections.anonymity.content')}</p>
@@ -93,31 +94,32 @@ const PrivacyPolicy = () => {
             <p>{t('PrivacyPolicy.sections.storageAndAccess.content')}</p>
 
             <h2>{t('PrivacyPolicy.sections.userRights.title')}</h2>
-            <p>
-                {t('PrivacyPolicy.sections.userRights.content', {
-                    email: <a href="mailto:johan@trieloff.net">johan@trieloff.net</a>,
-                })}
-            </p>
+            <p>{t('PrivacyPolicy.sections.userRights.intro')}</p>
+            <div className="data-usage-content">
+                <ul>
+                    {Object.values(
+                        t('PrivacyPolicy.sections.userRights.rightsList', { returnObjects: true }) as Record<
+                            string,
+                            string
+                        >
+                    ).map((right) => (
+                        <li key={right}>{right}</li>
+                    ))}
+                </ul>
+                <p>{t('PrivacyPolicy.sections.userRights.contact')}</p>
+            </div>
 
             <h2>{t('PrivacyPolicy.sections.consent.title')}</h2>
             <p>{t('PrivacyPolicy.sections.consent.content')}</p>
 
             <h2>{t('PrivacyPolicy.sections.dataProtectionOfficer.title')}</h2>
-            <p>
-                {t('PrivacyPolicy.sections.dataProtectionOfficer.content', {
-                    email: <a href="mailto:johan@trieloff.net">johan@trieloff.net</a>,
-                })}
-            </p>
+            <p>{t('PrivacyPolicy.sections.dataProtectionOfficer.content')}</p>
 
             <h2>{t('PrivacyPolicy.sections.policyChanges.title')}</h2>
             <p>{t('PrivacyPolicy.sections.policyChanges.content')}</p>
 
             <h2>{t('PrivacyPolicy.sections.telegramMessages.title')}</h2>
             <p>{t('PrivacyPolicy.sections.telegramMessages.content')}</p>
-
-            <h2>{t('PrivacyPolicy.sections.analytics.title')}</h2>
-            <p>{t('PrivacyPolicy.sections.analytics.content')}</p>
-            <p>{t('PrivacyPolicy.sections.analytics.usage')}</p>
 
             <h2>{t('PrivacyPolicy.sections.errorMonitoring.title')}</h2>
             <p>{t('PrivacyPolicy.sections.errorMonitoring.description')}</p>
@@ -129,8 +131,36 @@ const PrivacyPolicy = () => {
             </ul>
             <p>{t('PrivacyPolicy.sections.errorMonitoring.storage')}</p>
 
-            <h2>{t('PrivacyPolicy.sections.severabilityClause.title')}</h2>
-            <p>{t('PrivacyPolicy.sections.severabilityClause.content')}</p>
+            <h2>{t('PrivacyPolicy.sections.analytics.title')}</h2>
+            <p>{t('PrivacyPolicy.sections.analytics.content')}</p>
+            <div className="data-usage-content">
+                <ul>
+                    {(t('PrivacyPolicy.sections.analytics.dataPoints', { returnObjects: true }) as string[]).map(
+                        (item) => (
+                            <li key={item}>{item}</li>
+                        )
+                    )}
+                </ul>
+                <p>{t('PrivacyPolicy.sections.analytics.ipNotice')}</p>
+                <p>{t('PrivacyPolicy.sections.analytics.legalBasis')}</p>
+            </div>
+
+            <h2>{t('PrivacyPolicy.sections.appStores.title')}</h2>
+            <p>{t('PrivacyPolicy.sections.appStores.content')}</p>
+
+            <h2>{t('PrivacyPolicy.sections.internationalTransfers.title')}</h2>
+            <p>{t('PrivacyPolicy.sections.internationalTransfers.content')}</p>
+            <div className="data-usage-content">
+                <ul>
+                    <li>{t('PrivacyPolicy.sections.internationalTransfers.transfers.cloudflare')}</li>
+                    <li>{t('PrivacyPolicy.sections.internationalTransfers.transfers.sentry')}</li>
+                    <li>{t('PrivacyPolicy.sections.internationalTransfers.transfers.telegram')}</li>
+                </ul>
+                <p>{t('PrivacyPolicy.sections.internationalTransfers.rights')}</p>
+            </div>
+
+            <h2>{t('PrivacyPolicy.sections.dataProcessing.title')}</h2>
+            <p>{t('PrivacyPolicy.sections.dataProcessing.content')}</p>
         </div>
     )
 }

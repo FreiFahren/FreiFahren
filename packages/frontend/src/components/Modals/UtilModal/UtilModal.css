@@ -1,8 +1,8 @@
 .util-modal {
     display: flex !important;
     flex-direction: column;
-    width: fit-content;
-    min-width: 300px;
+    width: min(460px, calc(100vw - 30px));
+    min-width: 360px;
     padding: var(--padding-l);
 }
 
@@ -11,13 +11,18 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    margin-bottom: var(--margin-l);
+    margin-top: var(--margin-s);
+    margin-bottom: var(--margin-m);
 }
 
 .modal-header h1 {
     margin: 0;
     margin-right: var(--margin-m);
     font-size: var(--font-l);
+}
+
+.modal-header .action {
+    border-radius: var(--borderRadius-medium);
 }
 
 .modal-content {
@@ -30,6 +35,7 @@
 .social-media-row {
     display: flex;
     gap: var(--margin-m);
+    margin-bottom: var(--margin-s);
 }
 
 .social-media-button {
@@ -52,6 +58,7 @@
 .links-row {
     display: flex;
     gap: var(--margin-l);
+    flex-wrap: wrap;
 }
 
 .links-row a,
@@ -125,7 +132,8 @@
 
 @media (max-width: 500px) {
     .util-modal {
-        width: 85%;
+        width: calc(100vw - 30px);
+        min-width: 0;
     }
 
     .modal-header h1 {

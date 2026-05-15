@@ -7,7 +7,6 @@ const Support = () => {
     return (
         <div className="legal-text">
             <h1>{t('SupportPage.title')}</h1>
-            <br />
             <h2>iOS/Android</h2>
             <p>
                 {t('SupportPage.mobile')} <a href="mailto:moritzamando@proton.me">moritzamando@proton.me</a>
@@ -17,7 +16,10 @@ const Support = () => {
                 {t('SupportPage.web')} <a href="mailto@johan@trieloff.net">johan@trieloff.net</a>
             </p>
             <div>
-                <ul className="row">
+                <ul className="row" style={{ marginTop: '24px' }}>
+                    <li>
+                        <Link to="/impressum">{t('SupportPage.impressum')}</Link>
+                    </li>
                     <li>
                         <Link to="/Datenschutz">{t('SupportPage.privacy')}</Link>
                     </li>
