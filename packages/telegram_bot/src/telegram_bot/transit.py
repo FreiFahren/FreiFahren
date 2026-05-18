@@ -14,6 +14,7 @@ class Station:
 class LineVariant:
     id: str
     name: str
+    is_circular: bool
     stations: tuple[str, ...]
 
 
@@ -30,6 +31,9 @@ class TransitData:
 
     variants_by_name: dict[str, tuple[LineVariant, ...]]
     """Variants grouped by public name."""
+
+    circular_line_names: tuple[str, ...]
+    """Deduplicated public names for circular line variants."""
 
     def station_line_names(self, station_id: str) -> set[str]:
         names: set[str] = set()
@@ -53,7 +57,13 @@ async def load_transit_data(backend_url: str) -> TransitData:
         raw_lines: list[dict] = lines_resp.json()
 
     variants = tuple(
-        LineVariant(id=line["id"], name=line["name"], stations=tuple(line["stations"])) for line in raw_lines
+        LineVariant(
+            id=line["id"],
+            name=line["name"],
+            is_circular=bool(line.get("isCircular", False)),
+            stations=tuple[str, ...](line["stations"]),
+        )
+        for line in raw_lines
     )
 
     variants_by_name: dict[str, list[LineVariant]] = {}
@@ -74,6 +84,7 @@ async def load_transit_data(backend_url: str) -> TransitData:
         line_variants=variants,
         line_names=tuple(sorted(variants_by_name.keys())),
         variants_by_name={name: tuple(vs) for name, vs in variants_by_name.items()},
+        circular_line_names=tuple(sorted({variant.name for variant in variants if variant.is_circular})),
     )
 
 

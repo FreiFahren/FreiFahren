@@ -4,14 +4,20 @@ import asyncio
 import logging
 import signal
 
+import httpx
 from mistralai.client import Mistral
-from telegram.ext import Application, filters
-from telegram.ext import MessageHandler as TgMessageHandler
 
 from telegram_bot import config
-from telegram_bot.extractor import Extractor
-from telegram_bot.reporting import ReportClient
-from telegram_bot.telegram import MessageHandler
+from telegram_bot.extractor import (
+    StationIndex,
+    build_line_pattern,
+    build_system_prompt,
+    extract,
+    extraction_to_log,
+)
+from telegram_bot.reporting import ReportClient, close_report_client, report_identifiers, submit_report
+from telegram_bot.spam import is_spam
+from telegram_bot.telegram import build_telegram_app
 from telegram_bot.transit import load_transit_data
 
 logger = logging.getLogger(__name__)
@@ -20,33 +26,68 @@ logger = logging.getLogger(__name__)
 def configure_logging() -> None:
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s %(levelname)s %(name)s — %(message)s",
+        format='%(asctime)s %(levelname)s %(name)s — %(message)s',
     )
     # python-telegram-bot polls every ~10s; silence the per-request httpx noise.
-    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger('httpx').setLevel(logging.WARNING)
 
 
 async def run() -> None:
     transit = await load_transit_data(config.BACKEND_URL)
     logger.info(
-        "Loaded transit data: %d stations, %d line variants, %d distinct line names",
+        'Loaded transit data: %d stations, %d line variants, %d distinct line names',
         len(transit.stations),
         len(transit.line_variants),
         len(transit.line_names),
     )
 
     mistral = Mistral(api_key=config.MISTRAL_API_KEY)
-    extractor = Extractor(
-        client=mistral,
-        model=config.MISTRAL_MODEL,
-        transit=transit,
+    line_pattern = build_line_pattern(transit.line_names)
+    station_index = StationIndex.build(transit)
+    system_prompt = build_system_prompt(transit)
+    reports = ReportClient(
+        client=httpx.AsyncClient(base_url=config.BACKEND_URL, timeout=15.0),
+        headers={'X-Password': config.REPORT_PASSWORD},
     )
-    reports = ReportClient(backend_url=config.BACKEND_URL, report_password=config.REPORT_PASSWORD)
 
-    handler = MessageHandler(transit=transit, extractor=extractor, reports=reports)
+    async def handle_text(text: str) -> None:
+        if is_spam(text):
+            logger.info('Skipped as spam: %r', text[:80])
+            return
 
-    app = Application.builder().token(config.TELEGRAM_BOT_TOKEN).build()
-    app.add_handler(TgMessageHandler(filters.TEXT & ~filters.COMMAND, handler.handle))
+        extraction = await extract(
+            message=text,
+            transit=transit,
+            client=mistral,
+            model=config.MISTRAL_MODEL,
+            line_pattern=line_pattern,
+            station_index=station_index,
+            system_prompt=system_prompt,
+        )
+        if extraction is None:
+            logger.info('No extraction produced (LLM error or unparseable)')
+            return
+
+        identifiers = report_identifiers(transit, extraction)
+        if identifiers is None:
+            return
+
+        station_id, line_id, direction_id = identifiers
+        logger.info(
+            'Submitting report: %s',
+            extraction_to_log(extraction)
+        )
+        await submit_report(
+            reports,
+            station_id=station_id,
+            line_id=line_id,
+            direction_id=direction_id,
+        )
+
+    app = build_telegram_app(
+        token=config.TELEGRAM_BOT_TOKEN,
+        handle_text=handle_text,
+    )
 
     stop_event = asyncio.Event()
     loop = asyncio.get_running_loop()
@@ -56,14 +97,14 @@ async def run() -> None:
     async with app:
         await app.start()
         await app.updater.start_polling()
-        logger.info("Telegram polling started")
+        logger.info('Telegram polling started')
         try:
             await stop_event.wait()
         finally:
-            logger.info("Shutting down")
+            logger.info('Shutting down')
             await app.updater.stop()
             await app.stop()
-            await reports.aclose()
+            await close_report_client(reports)
 
 
 def main() -> None:
@@ -71,5 +112,5 @@ def main() -> None:
     asyncio.run(run())
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
