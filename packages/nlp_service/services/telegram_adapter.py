@@ -46,8 +46,7 @@ def send_message(
         parse_mode (str): Message parsing mode (default: HTML).
     """
     try:
-        lp_opts = LinkPreviewOptions(
-            url=preview_url, prefer_large_media=True, show_above_text=False
+        lp_opts = LinkPreviewOptions(is_disabled=True)
         )
 
         bot.send_message(
