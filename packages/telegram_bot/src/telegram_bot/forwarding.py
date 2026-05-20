@@ -78,7 +78,7 @@ def format_forwarded_report(transit: TransitData, report: ForwardedReport, publi
         lines.append(f'<b>Direction:</b> {escape(direction.name)}')
 
     lines.append('')
-    lines.append(f'Mehr Informationen auf <a href="{escape(station_url, quote=True)}">app.freifahren.org</a>')
+    lines.append(f'Mehr Informationen auf <a href="{escape(station_url, quote=True)}">{public_app_url}</a>')
     return '\n'.join(lines)
 
 
