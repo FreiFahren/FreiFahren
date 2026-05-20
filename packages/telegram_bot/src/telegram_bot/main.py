@@ -88,6 +88,7 @@ async def run() -> None:
     app = build_telegram_app(
         token=config.TELEGRAM_BOT_TOKEN,
         handle_text=handle_text,
+        allowed_chat_id=config.TELEGRAM_REPORT_CHAT_ID,
     )
 
     stop_event = asyncio.Event()

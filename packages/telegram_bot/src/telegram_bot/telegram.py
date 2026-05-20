@@ -26,12 +26,20 @@ def message_report_text(message) -> str | None:
     return message.text or message.caption
 
 
-def telegram_text_callback(handle_text: TextHandler) -> TelegramCallback:
+def telegram_text_callback(handle_text: TextHandler, allowed_chat_id: str) -> TelegramCallback:
     async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         del context  # Required by the Telegram callback signature.
 
         message = update.effective_message
-        text = message_report_text(message) if message is not None else None
+        if message is None:
+            return
+
+        chat = message.chat
+        if chat is None or str(chat.id) != allowed_chat_id:
+            logger.info('Ignored message from chat %s (not the allowed chat)', chat.id if chat else None)
+            return
+
+        text = message_report_text(message)
         if not text:
             return
 
@@ -41,7 +49,10 @@ def telegram_text_callback(handle_text: TextHandler) -> TelegramCallback:
     return handle
 
 
-def build_telegram_app(*, token: str, handle_text: TextHandler) -> Application:
+def build_telegram_app(*, token: str, handle_text: TextHandler, allowed_chat_id: str) -> Application:
     app = Application.builder().token(token).build()
-    app.add_handler(TgMessageHandler((filters.TEXT | filters.CAPTION) & ~filters.COMMAND, telegram_text_callback(handle_text)))
+    app.add_handler(TgMessageHandler(
+        (filters.TEXT | filters.CAPTION) & ~filters.COMMAND,
+        telegram_text_callback(handle_text, allowed_chat_id),
+    ))
     return app
