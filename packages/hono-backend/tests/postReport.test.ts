@@ -24,7 +24,7 @@ describe('Telegram notification', () => {
     beforeAll(async () => {
         const fakeNlp = new Hono()
 
-        fakeNlp.post('/report-inspector', async (c) => {
+        fakeNlp.post('/report', async (c) => {
             const body = await c.req.json()
             const password = c.req.header('X-Password') ?? null
 
@@ -82,15 +82,26 @@ describe('Telegram notification', () => {
         expect(capturedRequests[0]?.password).toBe('test-password')
 
         const body = capturedRequests[0]?.body as {
-            line: string | null
-            station: string
-            direction: string | null
-            message: string | null
+            lineName: string | null
             stationId: string
+            directionId: string | null
         }
 
+        expect(Object.keys(body).sort()).toEqual(['directionId', 'lineName', 'stationId'])
         expect(body.stationId).toBe(station.id)
-        expect(typeof body.station).toBe('string')
+        expect(body.directionId).toBeNull()
+    })
+
+    it('does not send a Telegram notification when source is telegram', async () => {
+        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
+
+        const response = await sendReportRequest({
+            stationId: station.id,
+            source: 'telegram',
+        })
+
+        expect(response.status).toBe(200)
+        expect(capturedRequests.length).toBe(0)
     })
 
     it('returns 200 and a failure header when Telegram notification fails', async () => {
