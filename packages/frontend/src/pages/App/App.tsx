@@ -5,10 +5,9 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
 import MarketingModal from 'src/components/Modals/MarketingModal/MarketingModal'
-import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
-import { Itinerary, Report, Station, StationProperty } from 'src/utils/types'
+import { Report, StationProperty } from 'src/utils/types'
 
 import { useCurrentReports, useLast24HourReports, useStations } from '../../api/queries'
 import CloseButton from '../../components/Buttons/CloseButton/CloseButton'
@@ -89,7 +88,6 @@ const App = () => {
         }
     }
 
-    const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false)
     const {
         isOpen: isInfoModalOpenFromHook,
         isAnimatingOut: isInfoModalAnimatingOut,
@@ -100,14 +98,12 @@ const App = () => {
     const isNonTimedModalOpen = useMemo(
         () =>
             appUIState.isReportFormOpen ||
-            isNavigationModalOpen ||
             isInfoModalOpenFromHook ||
             appUIState.isListModalOpen ||
             showSummary ||
             isUtilOpen,
         [
             appUIState.isReportFormOpen,
-            isNavigationModalOpen,
             isInfoModalOpenFromHook,
             appUIState.isListModalOpen,
             showSummary,
@@ -254,12 +250,7 @@ const App = () => {
     }, [])
 
     const [selectedStation, setSelectedStation] = useState<StationProperty | null>(null)
-    const [navigationEndStation, setNavigationEndStation] = useState<StationProperty | null>(null)
     const [stationModalWasManuallyCloses, setStationModalWasManuallyCloses] = useState(false)
-
-    // New state for saved route
-    const [savedRoute, setSavedRoute] = useState<Itinerary | null>(null)
-    const [showSavedRoute, setShowSavedRoute] = useState(false)
 
     const onStationSelect = useCallback(
         (station: StationProperty) => {
@@ -277,14 +268,6 @@ const App = () => {
         // If we're on a station URL, navigate back to home
         if (stationId !== undefined) {
             navigate('/')
-        }
-    }
-
-    const handleRouteButtonClick = () => {
-        if (selectedStation) {
-            setNavigationEndStation(selectedStation)
-            setIsNavigationModalOpen(true)
-            closeInfoModal()
         }
     }
 
@@ -429,61 +412,10 @@ const App = () => {
                 <InfoModal
                     station={selectedStation}
                     className={`open ${isInfoModalAnimatingOut ? 'slide-out' : 'slide-in'}`}
-                    onRouteClick={handleRouteButtonClick}
                 >
                     <CloseButton handleClose={onCloseInfoModal} />
                 </InfoModal>
             ) : null}
-            {isNavigationModalOpen ? (
-                <>
-                    <NavigationModal
-                        className="open center-animation"
-                        initialEndStation={navigationEndStation as Station}
-                        onSaveRoute={(route: Itinerary) => {
-                            setSavedRoute(route)
-                            setIsNavigationModalOpen(false)
-                            setNavigationEndStation(null)
-                        }}
-                        savedRoute={savedRoute}
-                    />
-                    <Backdrop
-                        handleClick={() => {
-                            setIsNavigationModalOpen(false)
-                            setNavigationEndStation(null)
-                        }}
-                    />
-                </>
-            ) : null}
-            {savedRoute && !isNavigationModalOpen && !showSavedRoute ? (
-                <button
-                    className="small-button saved-route-button"
-                    onClick={() => setShowSavedRoute(true)}
-                    type="button"
-                >
-                    <span>{t('NavigationModal.showSavedRoute')}</span>
-                </button>
-            ) : null}
-            {showSavedRoute && savedRoute ? (
-                <>
-                    <NavigationModal
-                        className="open center-animation"
-                        initialRoute={savedRoute}
-                        onRemoveRoute={() => {
-                            setSavedRoute(null)
-                            setShowSavedRoute(false)
-                        }}
-                        savedRoute={savedRoute}
-                    />
-                    <Backdrop handleClick={() => setShowSavedRoute(false)} />
-                </>
-            ) : null}
-            <button
-                className="navigation-button small-button"
-                onClick={() => setIsNavigationModalOpen(true)}
-                type="button"
-            >
-                <img src="/icons/route-svgrepo-com.svg" alt="Navigation" />
-            </button>
             {showUpdateIndicator ? (
                 <div className="update-indicator">
                     <img src="/icons/refresh-svgrepo-com.svg" alt="Refresh" className="update-indicator-icon" />

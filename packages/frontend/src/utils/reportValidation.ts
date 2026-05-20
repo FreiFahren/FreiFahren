@@ -2,7 +2,6 @@ import { TFunction } from 'i18next'
 import { REPORT_COOLDOWN_MINUTES } from 'src/constants'
 
 import { calculateDistance } from './mapUtils'
-import { Report } from './types'
 
 export interface ValidationError {
     field: string
@@ -20,16 +19,13 @@ interface UserPosition {
     lng: number
 }
 
-/**
- * Validates the distance between user location and reported station
- * Returns error if user is more than 1.5km away from the station
- * @param report
- * @param userPosition
- * @param t translation function
- * @returns ValidationError if user is more than 1.5km away from the station, null otherwise
- */
+interface StationCoordinates {
+    latitude: number
+    longitude: number
+}
+
 const validateStationDistance = (
-    report: Report,
+    stationCoordinates: StationCoordinates,
     userPosition: UserPosition | null,
     t: TFunction
 ): ValidationError | null => {
@@ -41,8 +37,8 @@ const validateStationDistance = (
     const distance = calculateDistance(
         userPosition.lat,
         userPosition.lng,
-        report.station.coordinates.latitude,
-        report.station.coordinates.longitude
+        stationCoordinates.latitude,
+        stationCoordinates.longitude
     )
 
     // Convert 1.5km to the same unit (kilometers)
@@ -92,10 +88,21 @@ const validateReportTime = (t: TFunction): ValidationError | null => {
 /**
  * Main validation function that runs all validation checks
  */
-export const validateReport = (report: Report, userPosition: UserPosition | null, t: TFunction): ValidationResult => {
+export const validateReport = (
+    stationCoordinates: StationCoordinates,
+    userPosition: UserPosition | null,
+    t: TFunction
+): ValidationResult => {
+    if (import.meta.env.DEV) {
+        return {
+            errors: [],
+            isValid: true,
+        }
+    }
+
     const errors: ValidationError[] = []
 
-    const distanceError = validateStationDistance(report, userPosition, t)
+    const distanceError = validateStationDistance(stationCoordinates, userPosition, t)
     if (distanceError) {
         errors.push(distanceError)
     }

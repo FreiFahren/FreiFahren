@@ -17,7 +17,7 @@ const StationsSection: React.FC<StationsSectionProps> = ({ reportsList, currentT
             <h2>{t('ReportsModal.topStations')}</h2>
             <p className="time-range">{t('ReportsModal.past24Hours')}</p>
             {reportsList.map((report) => (
-                <ReportItem key={report.station.id + report.timestamp} report={report} currentTime={currentTime} />
+                <ReportItem key={report.stationId + report.timestamp} report={report} currentTime={currentTime} />
             ))}
         </section>
     )
