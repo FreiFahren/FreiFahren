@@ -116,8 +116,7 @@ async def test_unknown_station_id_returns_400(
         )
 
     assert response.status_code == 400
-    detail = response.json().get('detail', '')
-    assert 'stationId' in detail
+    assert response.json().get('error') == 'bad_request'
     app.bot.send_message.assert_not_awaited()
 
 
