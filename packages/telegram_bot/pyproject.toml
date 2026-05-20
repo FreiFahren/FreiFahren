@@ -5,6 +5,7 @@ description = "FreiFahren Telegram bot: extracts ticket-inspector reports from c
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "aiohttp>=3.13.5",
     "httpx>=0.27",
     "mistralai>=1.2",
     "pydantic>=2.7",

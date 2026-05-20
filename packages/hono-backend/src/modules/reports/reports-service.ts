@@ -3,7 +3,6 @@ import { DateTime } from 'luxon'
 import { z } from 'zod'
 
 import { AppError } from '../../common/errors'
-import { lookupStation } from '../../common/utils'
 import { DbConnection, InsertReport, reports } from '../../db/'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
 import type { StationId } from '../transit/types'
@@ -66,11 +65,9 @@ const calculateWeekendAdjustment = (currentTime: DateTime, baseThreshold: number
 }
 
 type TelegramNotificationPayload = {
-    line: string | null
-    station: string
-    direction: StationId | null
-    message: string | null
+    lineId: string | null
     stationId: StationId
+    directionId: StationId | null
 }
 
 type ReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'stationId' | 'directionId' | 'lineId'> & {
@@ -360,8 +357,8 @@ export class ReportsService {
         const nlpServiceUrl = z.string().min(1).parse(process.env.NLP_SERVICE_URL)
         const reportPassword = z.string().min(1).parse(process.env.REPORT_PASSWORD)
 
-        const endpoint = `${nlpServiceUrl.replace(/\/$/, '')}/report-inspector`
-        const payload = await this.buildTelegramNotificationPayload(reportData)
+        const endpoint = `${nlpServiceUrl.replace(/\/$/, '')}/report`
+        const payload = this.buildTelegramNotificationPayload(reportData)
 
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -378,19 +375,11 @@ export class ReportsService {
         }
     }
 
-    // This is so stupid... we should really rewrite the Bot so that the endpoint is more sensible
-    private async buildTelegramNotificationPayload(reportData: InsertReport): Promise<TelegramNotificationPayload> {
-        const stations = await this.transitNetworkDataService.getStations()
-
-        const station = lookupStation(stations, reportData.stationId)
-        const direction = lookupStation(stations, reportData.directionId)
-
+    private buildTelegramNotificationPayload(reportData: InsertReport): TelegramNotificationPayload {
         return {
-            line: reportData.lineId ?? null,
-            station: station?.name ?? reportData.stationId,
-            direction: direction?.name ?? reportData.directionId ?? null,
-            message: null,
+            lineId: reportData.lineId ?? null,
             stationId: reportData.stationId,
+            directionId: reportData.directionId ?? null,
         }
     }
 

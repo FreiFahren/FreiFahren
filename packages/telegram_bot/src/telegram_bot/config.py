@@ -16,8 +16,12 @@ BACKEND_URL = _required("BACKEND_URL").rstrip("/")
 MISTRAL_API_KEY = _required("MISTRAL_API_KEY")
 REPORT_PASSWORD = _required("REPORT_PASSWORD")
 TELEGRAM_BOT_TOKEN = _required("TELEGRAM_BOT_TOKEN")
+TELEGRAM_REPORT_CHAT_ID = _required("TELEGRAM_REPORT_CHAT_ID")
 
 MISTRAL_MODEL = os.getenv("MISTRAL_MODEL", "mistral-small-latest")
+PUBLIC_APP_URL = os.getenv("PUBLIC_APP_URL", "https://app.freifahren.org").rstrip("/")
+REPORT_HTTP_HOST = os.getenv("REPORT_HTTP_HOST", "127.0.0.1")
+REPORT_HTTP_PORT = int(os.getenv("REPORT_HTTP_PORT", "6010"))
 
 
 # --- City / language profile -------------------------------------------------
