@@ -204,11 +204,6 @@ class StationIndex:
                 if line_name is not None and line_name not in self.lines_by_id[station_id]:
                     continue
                 results.append((station_id, sc))
-        # If line-filtering wiped everything, retry without the filter so we can still return a guess.
-        if not results and line_name is not None:
-            for norm, sc in scored:
-                for station_id in self.by_norm[norm]:
-                    results.append((station_id, sc))
         return results
 
 

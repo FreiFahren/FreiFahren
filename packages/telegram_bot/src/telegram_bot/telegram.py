@@ -22,21 +22,26 @@ def log_incoming_message(update: Update, text: str) -> None:
     )
 
 
+def message_report_text(message) -> str | None:
+    return message.text or message.caption
+
+
 def telegram_text_callback(handle_text: TextHandler) -> TelegramCallback:
     async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         del context  # Required by the Telegram callback signature.
 
         message = update.effective_message
-        if message is None or not message.text:
+        text = message_report_text(message) if message is not None else None
+        if not text:
             return
 
-        log_incoming_message(update, message.text)
-        await handle_text(message.text)
+        log_incoming_message(update, text)
+        await handle_text(text)
 
     return handle
 
 
 def build_telegram_app(*, token: str, handle_text: TextHandler) -> Application:
     app = Application.builder().token(token).build()
-    app.add_handler(TgMessageHandler(filters.TEXT & ~filters.COMMAND, telegram_text_callback(handle_text)))
+    app.add_handler(TgMessageHandler((filters.TEXT | filters.CAPTION) & ~filters.COMMAND, telegram_text_callback(handle_text)))
     return app
