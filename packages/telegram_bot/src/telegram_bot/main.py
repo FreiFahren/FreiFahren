@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 import signal
+from collections.abc import Awaitable, Callable
 
 import httpx
 from mistralai.client import Mistral
@@ -19,9 +21,56 @@ from telegram_bot.forwarding import start_report_http_server
 from telegram_bot.reporting import ReportClient, close_report_client, report_identifiers, submit_report
 from telegram_bot.spam import is_spam
 from telegram_bot.telegram import build_telegram_app
-from telegram_bot.transit import load_transit_data
+from telegram_bot.transit import TransitData, load_transit_data
 
 logger = logging.getLogger(__name__)
+
+
+def build_handle_text(
+    *,
+    mistral: Mistral,
+    transit: TransitData,
+    reports: ReportClient,
+    model: str,
+    line_pattern: re.Pattern[str],
+    station_index: StationIndex,
+    system_prompt: str,
+) -> Callable[[str], Awaitable[None]]:
+    async def handle_text(text: str) -> None:
+        if is_spam(text):
+            logger.info('Skipped as spam: %r', text[:80])
+            return
+
+        extraction = await extract(
+            message=text,
+            transit=transit,
+            client=mistral,
+            model=model,
+            line_pattern=line_pattern,
+            station_index=station_index,
+            system_prompt=system_prompt,
+        )
+        if extraction is None:
+            logger.info('No extraction produced (LLM error or unparseable)')
+            return
+
+        identifiers = report_identifiers(transit, extraction)
+        if identifiers is None:
+            return
+
+        station_id, line_id, direction_id = identifiers
+        logger.info(
+            'Submitting report: %s',
+            extraction_to_log(extraction)
+        )
+        await submit_report(
+            reports,
+            station_id=station_id,
+            line_id=line_id,
+            direction_id=direction_id,
+        )
+
+    return handle_text
 
 
 def configure_logging() -> None:
@@ -51,39 +100,15 @@ async def run() -> None:
         headers={'X-Password': config.REPORT_PASSWORD},
     )
 
-    async def handle_text(text: str) -> None:
-        if is_spam(text):
-            logger.info('Skipped as spam: %r', text[:80])
-            return
-
-        extraction = await extract(
-            message=text,
-            transit=transit,
-            client=mistral,
-            model=config.MISTRAL_MODEL,
-            line_pattern=line_pattern,
-            station_index=station_index,
-            system_prompt=system_prompt,
-        )
-        if extraction is None:
-            logger.info('No extraction produced (LLM error or unparseable)')
-            return
-
-        identifiers = report_identifiers(transit, extraction)
-        if identifiers is None:
-            return
-
-        station_id, line_id, direction_id = identifiers
-        logger.info(
-            'Submitting report: %s',
-            extraction_to_log(extraction)
-        )
-        await submit_report(
-            reports,
-            station_id=station_id,
-            line_id=line_id,
-            direction_id=direction_id,
-        )
+    handle_text = build_handle_text(
+        mistral=mistral,
+        transit=transit,
+        reports=reports,
+        model=config.MISTRAL_MODEL,
+        line_pattern=line_pattern,
+        station_index=station_index,
+        system_prompt=system_prompt,
+    )
 
     app = build_telegram_app(
         token=config.TELEGRAM_BOT_TOKEN,
