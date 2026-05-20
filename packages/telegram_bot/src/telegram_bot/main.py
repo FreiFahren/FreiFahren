@@ -15,6 +15,7 @@ from telegram_bot.extractor import (
     extract,
     extraction_to_log,
 )
+from telegram_bot.forwarding import start_report_http_server
 from telegram_bot.reporting import ReportClient, close_report_client, report_identifiers, submit_report
 from telegram_bot.spam import is_spam
 from telegram_bot.telegram import build_telegram_app
@@ -96,12 +97,22 @@ async def run() -> None:
 
     async with app:
         await app.start()
+        report_http_server = await start_report_http_server(
+            host=config.REPORT_HTTP_HOST,
+            port=config.REPORT_HTTP_PORT,
+            app=app,
+            chat_id=config.TELEGRAM_REPORT_CHAT_ID,
+            password=config.REPORT_PASSWORD,
+            transit=transit,
+            public_app_url=config.PUBLIC_APP_URL,
+        )
         await app.updater.start_polling()
         logger.info('Telegram polling started')
         try:
             await stop_event.wait()
         finally:
             logger.info('Shutting down')
+            await report_http_server.cleanup()
             await app.updater.stop()
             await app.stop()
             await close_report_client(reports)
