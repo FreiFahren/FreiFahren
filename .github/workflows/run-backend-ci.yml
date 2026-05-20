@@ -1,4 +1,4 @@
-name: Hono Backend CI
+name: Backend CI
 
 on:
     pull_request:
@@ -37,6 +37,14 @@ jobs:
             - name: Check out code
               uses: actions/checkout@v4
 
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: '3.12'
+
+            - name: Install uv
+              uses: astral-sh/setup-uv@v3
+
             - name: Start services
               run: |
                   cd packages/hono-backend
@@ -65,10 +73,26 @@ jobs:
                   cd packages/hono-backend
                   docker compose -f compose-hono.test.yaml exec bun bun run db:seed
 
-            - name: Run tests
+            - name: Run hono backend tests
               run: |
                   cd packages/hono-backend
                   docker compose -f compose-hono.test.yaml exec bun bun test
+
+            - name: Install telegram bot dev deps
+              run: |
+                  cd packages/telegram_bot
+                  uv sync --group dev
+
+            - name: Run telegram bot integration tests
+              env:
+                  BACKEND_URL: http://localhost:3000
+                  REPORT_PASSWORD: password
+                  MISTRAL_API_KEY: unused-stubbed
+                  TELEGRAM_BOT_TOKEN: '1:fake'
+                  TELEGRAM_REPORT_CHAT_ID: '-1001'
+              run: |
+                  cd packages/telegram_bot
+                  uv run pytest -v
 
             - name: Stop containers
               if: always()
