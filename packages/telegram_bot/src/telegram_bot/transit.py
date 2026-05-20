@@ -42,6 +42,12 @@ class TransitData:
                 names.add(variant.name)
         return names
 
+    def line_name_for_id(self, line_id: str) -> str | None:
+        for variant in self.line_variants:
+            if variant.id == line_id:
+                return variant.name
+        return None
+
     def is_endpoint_of_line(self, line_name: str, station_id: str) -> bool:
         return any(station_id in variant.stations for variant in self.variants_by_name.get(line_name, ()))
 

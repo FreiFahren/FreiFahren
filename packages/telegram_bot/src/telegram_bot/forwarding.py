@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class ForwardedReport:
-    line_name: str | None
+    line_id: str | None
     station_id: str
     direction_id: str | None
 
@@ -24,22 +24,22 @@ def validate_forwarded_report(payload: object) -> ForwardedReport:
     if not isinstance(payload, dict):
         raise ValueError('JSON body must be an object')
 
-    line_name = payload.get('lineName')
+    line_id = payload.get('lineId')
     station_id = payload.get('stationId')
     direction_id = payload.get('directionId')
 
-    if line_name is not None and not isinstance(line_name, str):
-        raise ValueError('lineName must be a string or null')
+    if line_id is not None and not isinstance(line_id, str):
+        raise ValueError('lineId must be a string or null')
     if not isinstance(station_id, str) or station_id == '':
         raise ValueError('stationId must be a non-empty string')
     if direction_id is not None and not isinstance(direction_id, str):
         raise ValueError('directionId must be a string or null')
 
-    allowed_keys = {'lineName', 'stationId', 'directionId'}
+    allowed_keys = {'lineId', 'stationId', 'directionId'}
     if set(payload) != allowed_keys:
-        raise ValueError('body must contain exactly lineName, stationId, and directionId')
+        raise ValueError('body must contain exactly lineId, stationId, and directionId')
 
-    return ForwardedReport(line_name=line_name, station_id=station_id, direction_id=direction_id)
+    return ForwardedReport(line_id=line_id, station_id=station_id, direction_id=direction_id)
 
 
 def validate_transit_references(transit: TransitData, report: ForwardedReport) -> None:
@@ -49,29 +49,31 @@ def validate_transit_references(transit: TransitData, report: ForwardedReport) -
     if report.direction_id is not None and report.direction_id not in transit.stations:
         raise ValueError(f'unknown directionId: {report.direction_id}')
 
-    if report.line_name is not None and report.line_name not in transit.line_names:
-        raise ValueError(f'unknown lineName: {report.line_name}')
+    line_name = transit.line_name_for_id(report.line_id) if report.line_id is not None else None
+    if report.line_id is not None and line_name is None:
+        raise ValueError(f'unknown lineId: {report.line_id}')
 
-    if report.line_name is not None and report.line_name not in transit.station_line_names(report.station_id):
-        raise ValueError(f'stationId {report.station_id} is not served by lineName {report.line_name}')
+    if line_name is not None and line_name not in transit.station_line_names(report.station_id):
+        raise ValueError(f'stationId {report.station_id} is not served by lineId {report.line_id}')
 
     if (
-        report.line_name is not None
+        line_name is not None
         and report.direction_id is not None
-        and report.line_name not in transit.station_line_names(report.direction_id)
+        and line_name not in transit.station_line_names(report.direction_id)
     ):
-        raise ValueError(f'directionId {report.direction_id} is not served by lineName {report.line_name}')
+        raise ValueError(f'directionId {report.direction_id} is not served by lineId {report.line_id}')
 
 
 def format_forwarded_report(transit: TransitData, report: ForwardedReport, public_app_url: str) -> str:
     station = transit.stations[report.station_id]
     direction = transit.stations[report.direction_id] if report.direction_id is not None else None
+    line_name = transit.line_name_for_id(report.line_id) if report.line_id is not None else None
     station_url = f'{public_app_url}/station/{report.station_id}'
 
     lines = [f'<b>Station:</b> {escape(station.name)}']
 
-    if report.line_name is not None:
-        lines.append(f'<b>Line:</b> {escape(report.line_name)}')
+    if line_name is not None:
+        lines.append(f'<b>Line:</b> {escape(line_name)}')
     if direction is not None:
         lines.append(f'<b>Direction:</b> {escape(direction.name)}')
 

@@ -65,7 +65,7 @@ const calculateWeekendAdjustment = (currentTime: DateTime, baseThreshold: number
 }
 
 type TelegramNotificationPayload = {
-    lineName: string | null
+    lineId: string | null
     stationId: StationId
     directionId: StationId | null
 }
@@ -358,7 +358,7 @@ export class ReportsService {
         const reportPassword = z.string().min(1).parse(process.env.REPORT_PASSWORD)
 
         const endpoint = `${nlpServiceUrl.replace(/\/$/, '')}/report`
-        const payload = await this.buildTelegramNotificationPayload(reportData)
+        const payload = this.buildTelegramNotificationPayload(reportData)
 
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -375,16 +375,9 @@ export class ReportsService {
         }
     }
 
-    private async buildTelegramNotificationPayload(reportData: InsertReport): Promise<TelegramNotificationPayload> {
-        const lines = await this.transitNetworkDataService.getLines()
-        const line = lines.find((candidate) => candidate.id === reportData.lineId)
-
-        if (reportData.lineId !== null && reportData.lineId !== undefined && line === undefined) {
-            throw new Error(`Cannot notify Telegram for unknown line id: ${reportData.lineId}`)
-        }
-
+    private buildTelegramNotificationPayload(reportData: InsertReport): TelegramNotificationPayload {
         return {
-            lineName: line?.name ?? null,
+            lineId: reportData.lineId ?? null,
             stationId: reportData.stationId,
             directionId: reportData.directionId ?? null,
         }

@@ -82,13 +82,14 @@ describe('Telegram notification', () => {
         expect(capturedRequests[0]?.password).toBe('test-password')
 
         const body = capturedRequests[0]?.body as {
-            lineName: string | null
+            lineId: string | null
             stationId: string
             directionId: string | null
         }
 
-        expect(Object.keys(body).sort()).toEqual(['directionId', 'lineName', 'stationId'])
+        expect(Object.keys(body).sort()).toEqual(['directionId', 'lineId', 'stationId'])
         expect(body.stationId).toBe(station.id)
+        expect(body.lineId).toBeNull()
         expect(body.directionId).toBeNull()
     })
 
