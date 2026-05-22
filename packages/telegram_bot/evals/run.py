@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import json
 import random
+import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -46,14 +47,30 @@ class RowOutcome:
         return self.correct_station and self.correct_direction and self.correct_line
 
 
+_LINE_TOKEN_RE = re.compile(r'^([A-Za-z]+)(\d+)$')
+
+
 def expected_line_tokens(line_label: str | None) -> set[str] | None:
     """Tokenize the label's lineName so compound labels like 'U1 U3' or 'S41 42' both match.
 
-    Returns None when the label has no line (so the bot must also return None).
+    A bare-digit token (e.g. the '42' in 'S41 42') inherits the letter prefix from the
+    most recent letter-bearing token. Returns None when the label has no line (so the
+    bot must also return None).
     """
     if line_label is None:
         return None
-    return {tok for tok in line_label.split() if tok}
+    tokens: set[str] = set()
+    last_prefix: str | None = None
+    for raw in line_label.split():
+        m = _LINE_TOKEN_RE.match(raw)
+        if m:
+            last_prefix = m.group(1)
+            tokens.add(raw)
+        elif raw.isdigit() and last_prefix is not None:
+            tokens.add(f'{last_prefix}{raw}')
+        else:
+            tokens.add(raw)
+    return tokens
 
 
 def line_correct(expected: str | None, actual: str | None) -> bool:
@@ -186,12 +203,18 @@ def build_report(
     lines.append('# Telegram bot extractor — eval report')
     lines.append('')
     mode = 'SMOKE' if smoke else 'FULL'
+    throughput = f'{n / duration_s:.1f} msg/s' if duration_s > 0 and n > 0 else 'n/a'
     lines.append(f'**Mode:** {mode} ({n} rows of {dataset_size})  ')
     lines.append(f'**Model:** `{model}`  ')
     lines.append(f'**Parallelism:** {parallel}  ')
-    lines.append(f'**Wall time:** {duration_s:.1f}s ({n / duration_s:.1f} msg/s)  ')
+    lines.append(f'**Wall time:** {duration_s:.1f}s ({throughput})  ')
     lines.append(f'**LLM/network errors:** {errors}')
     lines.append('')
+    if n == 0:
+        lines.append('_No rows evaluated._')
+        lines.append('')
+        lines.append('See `eval_results.json` for the full per-row breakdown.')
+        return '\n'.join(lines) + '\n'
     lines.append('## Headline')
     lines.append('')
     lines.append(f'- **Fully correct rows** (all three fields match): {fully}/{n} = **{pct(fully / n)}**')
