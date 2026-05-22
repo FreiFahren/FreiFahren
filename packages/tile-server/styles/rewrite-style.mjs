@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
-const [, , inputPath, outputPath, baseUrl = 'http://localhost:8090'] = process.argv
+const [, , inputPath, outputPath, baseUrl = 'http://localhost:8090', cacheBust = ''] = process.argv
 
 if (!inputPath || !outputPath) {
     console.error('Usage: node rewrite-style.mjs <input-style.json> <output-style.json> [base-url]')
@@ -20,9 +20,14 @@ if (!inputSourceName) {
 delete style.glyphs
 delete style.sprite
 
+// `?v=<cacheBust>` invalidates Cloudflare's 1-year edge cache on each deploy.
+const tileUrl = cacheBust
+    ? `${baseUrl}/${sourceName}/{z}/{x}/{y}?v=${cacheBust}`
+    : `${baseUrl}/${sourceName}/{z}/{x}/{y}`
+
 style.sources[sourceName] = {
     type: 'vector',
-    url: `${baseUrl}/${sourceName}`,
+    tiles: [tileUrl],
     maxzoom: 14,
     attribution:
         "<a href='https://www.openstreetmap.org/copyright' target='_blank'>&copy; OpenStreetMap contributors</a>",

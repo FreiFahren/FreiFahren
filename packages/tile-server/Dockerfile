@@ -7,6 +7,7 @@
 
 ARG OSM_URL=https://download.geofabrik.de/europe/germany/berlin-latest.osm.pbf
 ARG STYLE_BASE_URL=https://tiles.freifahren.org
+ARG BUILD_SHA=
 
 # ---------- Stage 1: download OSM extract ----------
 FROM alpine:3.20 AS osm-source
@@ -28,6 +29,7 @@ RUN mkdir -p /out \
 # ---------- Stage 3: rewrite MapLibre style ----------
 FROM node:20-alpine AS style
 ARG STYLE_BASE_URL
+ARG BUILD_SHA
 WORKDIR /work
 COPY styles/ ./styles/
 COPY source/freifahren-style.json ./source/freifahren-style.json
@@ -35,7 +37,8 @@ RUN mkdir -p /out \
  && node styles/rewrite-style.mjs \
       source/freifahren-style.json \
       /out/freifahren-dark.json \
-      "$STYLE_BASE_URL"
+      "$STYLE_BASE_URL" \
+      "$BUILD_SHA"
 
 # ---------- Stage 4: final Martin image ----------
 FROM ghcr.io/maplibre/martin:latest

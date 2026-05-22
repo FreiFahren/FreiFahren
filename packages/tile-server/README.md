@@ -86,13 +86,22 @@ This writes:
 tileserver/styles/freifahren-dark.json
 ```
 
-The rewrite script updates the vector tile source to use Martin's TileJSON endpoint and removes glyph/sprite dependent layers for the initial no-assets deployment.
+The rewrite script replaces the vector tile source with a `tiles[]` URL template pointing at Martin and removes glyph/sprite dependent layers for the initial no-assets deployment.
 
 For production URLs, run:
 
 ```sh
 npm run rewrite-style:prod
 ```
+
+The script accepts an optional 4th positional argument used as a cache-bust token. When set, it is appended to each tile URL as `?v=<token>`:
+
+```sh
+node styles/rewrite-style.mjs source/freifahren-style.json out.json https://tiles.freifahren.org abc123
+# → tiles: ["https://tiles.freifahren.org/freifahren/{z}/{x}/{y}?v=abc123"]
+```
+
+This is how the Dockerfile threads the deploy SHA into the style — see [Caching](#caching).
 
 ## Serve Locally
 
@@ -135,7 +144,24 @@ Deployment is fully automated via the `Dockerfile` in this package. On every pus
 
 1. Downloads the Berlin OSM extract from Geofabrik.
 2. Runs Tilemaker to produce `freifahren-berlin.mbtiles`.
-3. Runs `rewrite-style` against the committed `source/freifahren-style.json` with the production base URL.
+3. Runs `rewrite-style` against the committed `source/freifahren-style.json` with the production base URL and the build's `BUILD_SHA` (cache-bust token — see [Caching](#caching)).
 4. Bakes the `.mbtiles`, the rewritten style JSON, and `martin/config.yaml` into a Martin image.
 
 No manual artifact upload is required — `git push` is the deploy.
+
+The image accepts two build args:
+
+| Arg              | Purpose                                                        |
+| ---------------- | -------------------------------------------------------------- |
+| `STYLE_BASE_URL` | Base URL baked into the style's tile templates.                |
+| `BUILD_SHA`      | Cache-bust token appended to tile URLs as `?v=`. Empty by default. |
+
+Coolify must pass `BUILD_SHA` as a build arg (e.g. `BUILD_SHA=${SOURCE_COMMIT}` in the service's Build Variables). Without it, the token is empty and tile URLs don't change between deploys, which means Cloudflare keeps serving old cached tiles until the 1-year TTL expires or someone purges manually.
+
+## Caching
+
+`tiles.freifahren.org` sits behind Cloudflare, and tile responses are aggressively cached at the edge — tiles are baked into the image at build time, so they're identical for every user until the next deploy.
+
+Deploy-time invalidation works via the `BUILD_SHA` token: each deploy bakes a different SHA into the style, so the `?v=<sha>` on every tile URL changes. Browsers and the edge see new URLs after a redeploy and fetch fresh tiles from Martin; old cache entries stay valid but unreferenced and age out on their own. No manual purge required.
+
+The actual cache rules live in the Cloudflare dashboard, not in this repo. To inspect or change caching behavior, check the rules under the `freifahren.org` zone (Caching → Cache Rules, and Rules → Overview).
