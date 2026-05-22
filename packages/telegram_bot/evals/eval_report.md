@@ -3,14 +3,14 @@
 **Mode:** FULL (952 rows of 952)  
 **Model:** `mistral-small-latest`  
 **Parallelism:** 16  
-**Wall time:** 610.2s (1.6 msg/s)  
+**Wall time:** 667.6s (1.4 msg/s)  
 **LLM/network errors:** 0
 
 ## Headline
 
-- **Fully correct rows** (all three fields match): 797/952 = **83.7%**
-- Station accuracy: **92.0%**
-- Direction accuracy: **91.6%**
+- **Fully correct rows** (all three fields match): 794/952 = **83.4%**
+- Station accuracy: **91.9%**
+- Direction accuracy: **91.3%**
 - Line accuracy: **97.2%**
 
 ## Per-field metrics
@@ -19,8 +19,8 @@ Null is treated as a negative prediction. *Precision* = "when the bot says X, ho
 
 | Field | Accuracy | Correct | Precision | Recall | F1 | TP | FP | FN | TN |
 |---|---|---|---|---|---|---|---|---|---|
-| stationId | 92.0% | 876/952 | 92.6% | 92.6% | 92.6% | 599 | 48 | 48 | 277 |
-| directionId | 91.6% | 872/952 | 77.6% | 95.1% | 85.5% | 235 | 68 | 12 | 637 |
+| stationId | 91.9% | 875/952 | 93.0% | 92.1% | 92.5% | 596 | 45 | 51 | 279 |
+| directionId | 91.3% | 869/952 | 77.0% | 94.7% | 84.9% | 234 | 70 | 13 | 635 |
 | lineName | 97.2% | 925/952 | 97.8% | 96.1% | 97.0% | 493 | 11 | 20 | 432 |
 
 See `eval_results.json` for the full per-row breakdown.
