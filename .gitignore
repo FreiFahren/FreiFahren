@@ -18,3 +18,5 @@ scripts/lines.json
 scripts/export.geojson
 scripts/Pipfile
 scripts/Pipfile.lock
+messages.json
+eval_results.json
