@@ -16,7 +16,7 @@ The package has three parts:
 The frontend only needs the public style URL:
 
 ```env
-VITE_MAP_STYLE_URL=http://localhost:8090/style/freifahren-dark
+VITE_MAP_STYLE_URL=http://localhost:3000/style/freifahren-dark
 ```
 
 For production, point the same variable at the hosted style JSON:
@@ -113,19 +113,19 @@ npm run serve
 Martin listens on:
 
 ```text
-http://localhost:8090
+http://localhost:3000
 ```
 
 Frontend style URL:
 
 ```text
-http://localhost:8090/style/freifahren-dark
+http://localhost:3000/style/freifahren-dark
 ```
 
 Vector tile endpoint:
 
 ```text
-http://localhost:8090/freifahren/{z}/{x}/{y}
+http://localhost:3000/freifahren/{z}/{x}/{y}
 ```
 
 ## Frontend Setup
@@ -133,7 +133,7 @@ http://localhost:8090/freifahren/{z}/{x}/{y}
 Set:
 
 ```env
-VITE_MAP_STYLE_URL=http://localhost:8090/style/freifahren-dark
+VITE_MAP_STYLE_URL=http://localhost:3000/style/freifahren-dark
 ```
 
 Restart the Vite dev server after changing this value because Vite reads `import.meta.env` at startup.

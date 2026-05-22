@@ -4,7 +4,7 @@
     "freifahren": {
       "type": "vector",
       "tiles": [
-        "http://localhost:8090/freifahren/{z}/{x}/{y}"
+        "http://localhost:3000/freifahren/{z}/{x}/{y}"
       ],
       "maxzoom": 16,
       "attribution": "<a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">© OpenStreetMap contributors</a>"

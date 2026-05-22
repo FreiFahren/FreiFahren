@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "generate:berlin": "mkdir -p tileserver/data && docker run --rm -v \"$PWD/../..:/work\" -w /work ghcr.io/systemed/tilemaker:master /work/packages/tile-server/source/berlin-latest.osm.pbf --output /work/packages/tile-server/tileserver/data/freifahren-berlin.mbtiles --config /work/packages/tile-server/tilemaker/config-freifahren.json --process /work/packages/tile-server/tilemaker/process-freifahren.lua",
-    "rewrite-style": "node styles/rewrite-style.mjs source/freifahren-style.json tileserver/styles/freifahren-dark.json http://localhost:8090",
+    "rewrite-style": "node styles/rewrite-style.mjs source/freifahren-style.json tileserver/styles/freifahren-dark.json http://localhost:3000",
     "rewrite-style:prod": "node styles/rewrite-style.mjs source/freifahren-style.json tileserver/styles/freifahren-dark.json https://tiles.freifahren.org",
     "serve": "docker compose -f tileserver/compose.yaml up",
-    "serve:prod": "docker build -t freifahren-tiles --build-arg STYLE_BASE_URL=http://localhost:8090 . && docker run --rm -p 8090:8090 freifahren-tiles"
+    "serve:prod": "docker build -t freifahren-tiles --build-arg STYLE_BASE_URL=http://localhost:3000 . && docker run --rm -p 3000:3000 freifahren-tiles"
   }
 }
