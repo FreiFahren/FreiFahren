@@ -41,9 +41,9 @@ RUN mkdir -p /out \
       "$BUILD_SHA"
 
 # ---------- Stage 4: final Martin image ----------
-FROM ghcr.io/maplibre/martin:latest
+FROM ghcr.io/maplibre/martin:1.8.2
 COPY --from=tiles /out/freifahren-berlin.mbtiles /tiles/freifahren-berlin.mbtiles
 COPY --from=style /out/freifahren-dark.json /styles/freifahren-dark.json
 COPY martin/config.yaml /config/config.yaml
-EXPOSE 8090
+EXPOSE 3000
 CMD ["--config", "/config/config.yaml"]
