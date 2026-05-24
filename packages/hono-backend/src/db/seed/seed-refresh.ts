@@ -8,7 +8,6 @@
  * the existing snapshots are left untouched until all new fetches succeed.
  */
 
-import { SEED_CONFIG } from './config'
 import {
     fetchRouteGeometryElements,
     fetchStationElements,
@@ -23,38 +22,26 @@ const writeSnapshot = async (kind: OsmSnapshotKind, raw: unknown) => {
     await Bun.write(fileUrl, `${JSON.stringify(raw, null, 2)}\n`)
 }
 
-const assertAllRefsPresent = (elements: OsmElement[]) => {
-    const seen = new Set<string>()
+const countRouteRelations = (elements: OsmElement[]): number => {
+    let count = 0
     for (const el of elements) {
         if (el.type !== 'relation') continue
         const rel = el as OsmRelation
-        const tags: Record<string, string | undefined> = rel.tags ?? {}
-        if (tags.type !== 'route') continue
-        const ref = tags.ref
-        if (ref !== undefined && ref !== '') seen.add(ref)
+        if ((rel.tags ?? {}).type === 'route') count++
     }
-    const missing = SEED_CONFIG.lines.filter((ref) => !seen.has(ref))
-    if (missing.length > 0) {
-        throw new Error(
-            `[seed:refresh] Overpass response is missing route relations for refs: ${missing.join(', ')}. ` +
-                `Existing snapshot left untouched. Re-run \`bun db:seed:refresh\` (Overpass occasionally ` +
-                `returns a truncated-but-200 body under load; a few retries usually clears it).`
-        )
-    }
+    return count
 }
 
 const refresh = async () => {
     console.log('[seed:refresh] Fetching station elements from Overpass...')
     const stationElements = await fetchStationElements()
-
-    assertAllRefsPresent(stationElements)
-    console.log(`[seed:refresh] All ${SEED_CONFIG.lines.length} configured refs present in response.`)
+    console.log(`[seed:refresh] Snapshot includes ${countRouteRelations(stationElements)} route relations.`)
 
     console.log('[seed:refresh] Fetching route geometry from Overpass...')
     const routeGeometryElements = await fetchRouteGeometryElements()
-
-    assertAllRefsPresent(routeGeometryElements)
-    console.log(`[seed:refresh] Geometry snapshot includes all ${SEED_CONFIG.lines.length} configured refs.`)
+    console.log(
+        `[seed:refresh] Geometry snapshot includes ${countRouteRelations(routeGeometryElements)} route relations.`
+    )
 
     await writeSnapshot('stations', stationElements)
     console.log(`[seed:refresh] Wrote 'stations' snapshot (${stationElements.length} elements)`)

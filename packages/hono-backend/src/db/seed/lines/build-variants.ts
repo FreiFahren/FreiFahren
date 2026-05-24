@@ -1,5 +1,5 @@
 import { logger } from '../../../common/logger'
-import { ROUTE_TYPE_PRIORITY, SEED_CONFIG, type RouteType } from '../config'
+import { ROUTE_TYPE_PRIORITY, type RouteType } from '../config'
 import type { OsmRelation } from '../stations/overpass'
 
 export interface LineVariant {
@@ -148,16 +148,6 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
         const list = byRef.get(v.ref) ?? []
         list.push(v)
         byRef.set(v.ref, list)
-    }
-
-    const missingRefs = SEED_CONFIG.lines.filter((ref) => !byRef.has(ref))
-    if (missingRefs.length > 0) {
-        /* Refresh-time assertion already guards against this; a warning here is
-         * just defense-in-depth for hand-edited snapshots. */
-        logger.warn(
-            `[seed:lines] Snapshot has no route relations for configured refs: ${missingRefs.join(', ')}. ` +
-                `Run \`bun db:seed:refresh\` to fetch a fresh snapshot.`
-        )
     }
 
     const result: LineVariant[] = []

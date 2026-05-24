@@ -38,19 +38,18 @@ export type OsmElement = OsmNode | OsmRelation | OsmWay
 
 const OVERPASS_ENDPOINTS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter']
 
-const BATCH_SIZE = 10
+const escapeForRegex = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
-const chunkLines = (lines: readonly string[]): string[][] => {
-    const chunks: string[][] = []
-    for (let i = 0; i < lines.length; i += BATCH_SIZE) {
-        chunks.push(lines.slice(i, i + BATCH_SIZE) as string[])
-    }
-    return chunks
-}
+const buildOperatorRegex = (operators: readonly string[]): string =>
+    '^(' + operators.map(escapeForRegex).join('|') + ')$'
 
-const buildBatchQuery = (lines: string[]): string => {
-    const { city, adminLevel, overpass } = SEED_CONFIG
-    const lineRegex = '^(' + lines.map((l) => l.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')$'
+const buildRouteTypeRegex = (routeTypes: readonly string[]): string =>
+    '^(' + routeTypes.map(escapeForRegex).join('|') + ')$'
+
+const buildStationsQuery = (): string => {
+    const { city, adminLevel, overpass, operators, routeTypes } = SEED_CONFIG
+    const operatorRegex = buildOperatorRegex(operators)
+    const routeTypeRegex = buildRouteTypeRegex(routeTypes)
 
     return `
 [out:json][timeout:${overpass.timeoutSeconds}];
@@ -59,8 +58,8 @@ area["name"="${city}"]["boundary"="administrative"]["admin_level"~"${adminLevel}
 
 relation
   ["type"="route"]
-  ["route"~"^(train|subway|tram|light_rail)$"]
-  ["ref"~"${lineRegex}"]
+  ["route"~"${routeTypeRegex}"]
+  ["operator"~"${operatorRegex}"]
   (area.a)
   ->.routes;
 
@@ -83,9 +82,10 @@ out body;
 `
 }
 
-const buildGeometryBatchQuery = (lines: string[]): string => {
-    const { city, adminLevel, overpass } = SEED_CONFIG
-    const lineRegex = '^(' + lines.map((l) => l.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')$'
+const buildGeometryQuery = (): string => {
+    const { city, adminLevel, overpass, operators, routeTypes } = SEED_CONFIG
+    const operatorRegex = buildOperatorRegex(operators)
+    const routeTypeRegex = buildRouteTypeRegex(routeTypes)
 
     return `
 [out:json][timeout:${overpass.timeoutSeconds}];
@@ -94,8 +94,8 @@ area["name"="${city}"]["boundary"="administrative"]["admin_level"~"${adminLevel}
 
 relation
   ["type"="route"]
-  ["route"~"^(train|subway|tram|light_rail)$"]
-  ["ref"~"${lineRegex}"]
+  ["route"~"${routeTypeRegex}"]
+  ["operator"~"${operatorRegex}"]
   (area.a)
   ->.routes;
 
@@ -155,46 +155,20 @@ const fetchWithRetry = async (query: string, fetchTimeoutMs: number): Promise<Os
 
 export const fetchStationElements = async (): Promise<OsmElement[]> => {
     const { fetchTimeoutMs } = SEED_CONFIG.overpass
-    const batches = chunkLines(SEED_CONFIG.lines)
-    const allElements: OsmElement[] = []
-
-    for (let i = 0; i < batches.length; i++) {
-        if (i > 0) {
-            console.log('[seed:stations] Waiting 30s for rate limit cooldown...')
-            await sleep(30_000)
-        }
-
-        const batch = batches[i]
-        console.log(`[seed:stations] Batch ${i + 1}/${batches.length}: ${batch.join(', ')}`)
-        const query = buildBatchQuery(batch)
-        const elements = await fetchWithRetry(query, fetchTimeoutMs)
-        console.log(`[seed:stations]   Got ${elements.length} elements`)
-        allElements.push(...elements)
-    }
-
-    console.log(`[seed:stations] Total: ${allElements.length} elements`)
-    return allElements
+    console.log(
+        `[seed:stations] Fetching routes for operators: ${SEED_CONFIG.operators.join(', ')} (route types: ${SEED_CONFIG.routeTypes.join(', ')})`
+    )
+    const elements = await fetchWithRetry(buildStationsQuery(), fetchTimeoutMs)
+    console.log(`[seed:stations] Total: ${elements.length} elements`)
+    return elements
 }
 
 export const fetchRouteGeometryElements = async (): Promise<OsmElement[]> => {
     const { fetchTimeoutMs } = SEED_CONFIG.overpass
-    const batches = chunkLines(SEED_CONFIG.lines)
-    const allElements: OsmElement[] = []
-
-    for (let i = 0; i < batches.length; i++) {
-        if (i > 0) {
-            console.log('[seed:segments] Waiting 30s for rate limit cooldown...')
-            await sleep(30_000)
-        }
-
-        const batch = batches[i]
-        console.log(`[seed:segments] Batch ${i + 1}/${batches.length}: ${batch.join(', ')}`)
-        const query = buildGeometryBatchQuery(batch)
-        const elements = await fetchWithRetry(query, fetchTimeoutMs)
-        console.log(`[seed:segments]   Got ${elements.length} elements`)
-        allElements.push(...elements)
-    }
-
-    console.log(`[seed:segments] Total: ${allElements.length} elements`)
-    return allElements
+    console.log(
+        `[seed:segments] Fetching route geometry for operators: ${SEED_CONFIG.operators.join(', ')} (route types: ${SEED_CONFIG.routeTypes.join(', ')})`
+    )
+    const elements = await fetchWithRetry(buildGeometryQuery(), fetchTimeoutMs)
+    console.log(`[seed:segments] Total: ${elements.length} elements`)
+    return elements
 }
