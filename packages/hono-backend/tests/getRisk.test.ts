@@ -472,7 +472,7 @@ describe('GET /v0/risk report type handling', () => {
         const riskyOnA = Object.keys(multiBody.segments_risk).filter((sid) => baselineIdsA.has(sid))
         expect(riskyOnA.length).toBeGreaterThan(0)
 
-        // Risk on lineA segments should be roughly half of the single-line baseline (divided by 2 lines)
+        // Multi-line risk is dampened (by sqrt of the line count) but still lower than the single-line baseline.
         const multiMaxRiskOnA = Math.max(
             ...Object.entries(multiBody.segments_risk)
                 .filter(([sid]) => baselineIdsA.has(sid))
@@ -480,6 +480,36 @@ describe('GET /v0/risk report type handling', () => {
             0
         )
         expect(multiMaxRiskOnA).toBeLessThan(baselineMaxRisk)
+    })
+
+    it('a report at a station with many connections still produces non-green risk', async () => {
+        // Linear dampening (1/N) made high-degree hubs like Alexanderplatz disappear under the
+        // green threshold. With the softer sqrt dampening the model is expected to surface at
+        // least some yellow/red segments instead of nothing.
+        const { TransitNetworkDataService } = await import('../src/modules/transit/transit-network-data-service')
+        const service = new TransitNetworkDataService(db)
+        const stationsMap = await service.getStations()
+
+        const hub = Object.entries(stationsMap).reduce<[string, (typeof stationsMap)[string]] | null>(
+            (best, entry) => (best === null || entry[1].lines.length > best[1].lines.length ? entry : best),
+            null
+        )
+        if (hub === null) return
+        const [hubStationId, hubData] = hub
+        if (hubData.lines.length < 4) return // skip if the seeded data has no high-degree hub
+
+        await postRiskReport({ stationId: hubStationId, source: 'telegram' })
+
+        const response = await getRisk()
+        expect(response.status).toBe(200)
+
+        const body = (await response.json()) as RiskResponse
+        const colors = Object.values(body.segments_risk).map((s) => s.color)
+        expect(colors.length).toBeGreaterThan(0)
+        for (const c of colors) {
+            expect(VALID_COLORS).toContain(c)
+            expect(c).not.toBe(GREEN)
+        }
     })
 })
 
