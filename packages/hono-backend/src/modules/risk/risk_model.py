@@ -1,6 +1,7 @@
 # This will inline the dependencies into the script
 # Means we can run the script without having to install the dependencies
 # /// script
+# requires-python = "==3.12.*"
 # dependencies = [
 #   "numpy",
 #   "scipy",
