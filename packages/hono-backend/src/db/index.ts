@@ -9,7 +9,7 @@ import { stations } from './schema/stations'
 
 const connectionString = process.env.DATABASE_URL!
 
-export const client = postgres(connectionString, { prepare: false })
+export const client = postgres(connectionString, { prepare: false, connect_timeout: 10 })
 export const db = drizzle(client, {
     schema: { reports, stations, lines, lineStations, feedback, segments },
     casing: 'snake_case',
