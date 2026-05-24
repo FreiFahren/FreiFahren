@@ -1,5 +1,5 @@
 import { logger } from '../../../common/logger'
-import { SEED_CONFIG, ROUTE_TYPE_PRIORITY, type RouteType } from '../config'
+import { ROUTE_TYPE_PRIORITY, type RouteType } from '../config'
 
 import type { Coordinates } from './merge-proximate'
 import type { OsmElement, OsmNode, OsmRelation } from './overpass'
@@ -28,8 +28,6 @@ interface RawStation {
 
 const STATION_RAILWAY_TAGS = new Set(['station', 'halt', 'tram_stop', 'platform'])
 const STATION_PT_TAGS = new Set(['station', 'stop_position', 'platform'])
-
-const linesWhitelist = new Set<string>(SEED_CONFIG.lines)
 
 const isRouteType = (value: string): value is RouteType => (ROUTE_TYPE_PRIORITY as readonly string[]).includes(value)
 
@@ -96,7 +94,7 @@ const processRoute = (
 ) => {
     const tags = rel.tags ?? {}
     const ref = tags.ref || tags.name
-    if (!ref || !linesWhitelist.has(ref)) return
+    if (!ref) return
 
     const routeType = tags.route
     for (const m of rel.members) {
@@ -155,11 +153,6 @@ const aggregateLinesForStation = (
                 for (const t of Array.from(memberTypes)) routeTypes.add(t)
             }
         }
-    }
-
-    // Enforce whitelist
-    for (const l of Array.from(lines)) {
-        if (!linesWhitelist.has(l)) lines.delete(l)
     }
 
     return { lines, routeTypes }
