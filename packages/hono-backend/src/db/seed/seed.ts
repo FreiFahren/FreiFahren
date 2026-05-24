@@ -1,5 +1,10 @@
+import { and, eq, notExists, or, sql } from 'drizzle-orm'
+
 import { logger } from '../../common/logger'
 import type { DbConnection } from '../index'
+import { lineStations } from '../schema/lines'
+import { reports } from '../schema/reports'
+import { stations } from '../schema/stations'
 
 import { seedLinesFromRelations } from './lines'
 import { seedSegmentsFromGeometry } from './segments/index'
@@ -27,6 +32,43 @@ const extractRouteRelations = (elements: OsmElement[]): OsmRelation[] => {
     return out
 }
 
+// Stations that ended up with no line_stations row (e.g. duplicate Alexanderplatz
+// Or Hauptbahnhof nodes from different upstream sources) are unreachable in the
+// Transit graph and cause NO_PATH_FOUND errors if a report references them.
+// Drop them, except where a report still points at the id — keeping user data
+// Alive trumps a clean graph.
+const pruneOrphanStations = async (db: DbConnection): Promise<void> => {
+    const dropped = await db
+        .delete(stations)
+        .where(
+            and(
+                notExists(
+                    db
+                        .select({ ref: sql`1` })
+                        .from(lineStations)
+                        .where(eq(lineStations.stationId, stations.id))
+                ),
+                notExists(
+                    db
+                        .select({ ref: sql`1` })
+                        .from(reports)
+                        .where(or(eq(reports.stationId, stations.id), eq(reports.directionId, stations.id)))
+                )
+            )
+        )
+        .returning({ id: stations.id, name: stations.name })
+
+    if (dropped.length === 0) {
+        logger.info('[seed:prune] No orphan stations found')
+        return
+    }
+
+    logger.warn(`[seed:prune] Dropped ${dropped.length} orphan station(s) with no line associations:`)
+    for (const row of dropped) {
+        logger.warn(`[seed:prune]   ${row.id} (${row.name})`)
+    }
+}
+
 export const seedBaseData = async (db: DbConnection) => {
     logger.info('[seed] Loading bundled stations snapshot...')
     const stationElements = await loadSnapshot<OsmElement[]>('stations')
@@ -42,6 +84,9 @@ export const seedBaseData = async (db: DbConnection) => {
     logger.info('[seed] Seeding lines...')
     const routeRelations = extractRouteRelations(stationElements)
     const variants = await seedLinesFromRelations(db, routeRelations, nodeIdToStationId)
+
+    logger.info('[seed] Pruning orphan stations...')
+    await pruneOrphanStations(db)
 
     logger.info('[seed] Seeding segments...')
     await seedSegmentsFromGeometry(db, variants, stationCoordinates, routeGeometryElements)
