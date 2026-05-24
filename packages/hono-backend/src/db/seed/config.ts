@@ -24,7 +24,7 @@ export const SEED_CONFIG = {
     // Filtering by operator keeps the query focused without coupling the
     // Pipeline to a hand-maintained list of line refs that drifts whenever
     // The network changes.
-    operators: ['BVG', 'S-Bahn Berlin GmbH'],
+    operators: ['Berliner Verkehrsbetriebe', 'S-Bahn Berlin GmbH'],
 
     // OSM `route` tag values to include.
     routeTypes: ROUTE_TYPE_PRIORITY,
