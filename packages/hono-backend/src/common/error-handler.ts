@@ -7,6 +7,7 @@ export const handleError = (err: Error, c: Context) => {
     if (err instanceof AppError) {
         c.get('logger').error(
             {
+                err,
                 internal_code: err.internalCode,
                 statusCode: err.statusCode,
                 description: err.description,

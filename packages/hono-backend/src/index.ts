@@ -65,6 +65,9 @@ export const createApp = (dbConnection: DbConnection = db) => {
     app.use(
         pinoLogger({
             pino: logger,
+            http: {
+                onResMessage: () => '',
+            },
         })
     )
 

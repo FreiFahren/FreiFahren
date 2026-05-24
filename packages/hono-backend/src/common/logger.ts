@@ -9,7 +9,7 @@ export const logger = pino({
                 options: {
                     colorize: true,
                     ignore: 'pid,hostname,req,res,responseTime,reqId',
-                    messageFormat: '{req.method} {req.url} {res.status} ({responseTime}ms)',
+                    messageFormat: '{if responseTime}{req.method} {req.url} {res.status} ({responseTime}ms){end}{msg}',
                     translateTime: 'SYS:standard',
                     destination: 1,
                 },
