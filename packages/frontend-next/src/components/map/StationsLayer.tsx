@@ -19,12 +19,7 @@ export function StationsLayer({ selectedStation }: StationsLayerProps) {
         id="stations-circle"
         type="circle"
         paint={{
-          'circle-radius': [
-            'case',
-            ['==', ['get', 'id'], selectedStation?.id ?? ''],
-            5,
-            2,
-          ],
+          'circle-radius': ['case', ['==', ['get', 'id'], selectedStation?.id ?? ''], 5, 2],
           'circle-color': '#ffffff',
           'circle-stroke-color': '#000000',
           'circle-stroke-width': 1,
