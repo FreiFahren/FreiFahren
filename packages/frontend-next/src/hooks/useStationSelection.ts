@@ -1,5 +1,4 @@
 import { useMatch, useNavigate } from '@tanstack/react-router';
-import { useCallback } from 'react';
 import type { MapLayerMouseEvent } from 'react-map-gl/maplibre';
 
 import { type Station, useStations } from '@/api/transit';
@@ -19,13 +18,10 @@ export function useStationSelection(): UseStationSelectionResult {
   const selectedStationId = match?.params.stationId;
   const selectedStation = selectedStationId ? stations?.[selectedStationId] : undefined;
 
-  const handleMapClick = useCallback(
-    (event: MapLayerMouseEvent) => {
-      const stationId = event.features?.[0]?.properties?.id as string | undefined;
-      if (stationId) navigate({ to: StationDetailRoute.to, params: { stationId } });
-    },
-    [navigate],
-  );
+  const handleMapClick = (event: MapLayerMouseEvent) => {
+    const stationId = event.features?.[0]?.properties?.id as string | undefined;
+    if (stationId) navigate({ to: StationDetailRoute.to, params: { stationId } });
+  };
 
   return { selectedStation, handleMapClick };
 }

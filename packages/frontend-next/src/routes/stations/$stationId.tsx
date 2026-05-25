@@ -12,7 +12,7 @@ export const Route = createFileRoute('/stations/$stationId')({
       queryFn: fetchStations,
     });
     const station = stations[params.stationId];
-    if (!station) throw redirect({ to: IndexRoute.to });
+    if (!station) throw redirect({ to: IndexRoute.to, replace: true });
     return { station };
   },
   component: StationRoute,
