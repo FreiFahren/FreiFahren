@@ -106,7 +106,7 @@ const App = () => {
         closeModal: closeUtilModal,
     } = useModalAnimation()
 
-    const openContributionModalFromUtil = () => {
+    const handleOpenContribution = () => {
         closeUtilModal()
         setShowContributionModal(true)
     }
@@ -401,7 +401,7 @@ const App = () => {
             {isUtilOpen ? (
                 <UtilModal
                     className={`open ${isUtilAnimatingOut ? 'slide-out' : 'slide-in'}`}
-                    onOpenContribution={openContributionModalFromUtil}
+                    onOpenContribution={handleOpenContribution}
                 >
                     <CloseButton handleClose={closeUtilModal} />
                 </UtilModal>
@@ -411,10 +411,10 @@ const App = () => {
                     <ReportSummaryModal
                         reportData={reportedData}
                         openAnimationClass="open center-animation"
-                        handleCloseModal={handleCloseSummaryModal}
+                        onCloseModal={handleCloseSummaryModal}
                         numberOfUsers={numberOfUsers}
                     />
-                    <Backdrop handleClick={handleCloseSummaryModal} />
+                    <Backdrop handleClick={() => handleCloseSummaryModal()} />
                 </>
             ) : null}
             {showContributionModal ? (
