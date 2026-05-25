@@ -57,9 +57,13 @@ export function StationDetail({ station, onClose }: StationDetailProps) {
 
   return (
     <>
-      <Backdrop aria-label="Close station details" onClose={onClose} />
+      <Backdrop
+        aria-label="Close station details"
+        onClose={onClose}
+        className="animate-in fade-in duration-150"
+      />
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20 flex justify-center p-3">
-        <Card className="pointer-events-auto w-full max-w-md gap-1 py-4">
+        <Card className="animate-in slide-in-from-bottom-4 fade-in pointer-events-auto w-full max-w-md gap-1 py-4 duration-200 ease-out">
           <CardContent className="flex items-start justify-between">
             <h2 className="font-heading text-lg font-semibold">{station.name}</h2>
             <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close">
