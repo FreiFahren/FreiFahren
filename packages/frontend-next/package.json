@@ -37,7 +37,6 @@
     "@rolldown/plugin-babel": "^0.2.3",
     "@tanstack/eslint-plugin-query": "^5.100.14",
     "@tanstack/eslint-plugin-router": "^1.162.0",
-    "@tanstack/react-query-devtools": "^5.100.14",
     "@tanstack/router-cli": "^1.167.10",
     "@tanstack/router-plugin": "^1.168.11",
     "@types/babel__core": "^7.20.5",
