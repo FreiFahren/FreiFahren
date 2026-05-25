@@ -1,0 +1,159 @@
+.contribution-modal-shell {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    z-index: 10;
+    width: min(95vw, 420px);
+    transform: translate(-50%, -50%);
+    overflow: visible;
+}
+
+.contribution-modal-shell .small-button.close-button {
+    position: absolute;
+    top: -30px;
+    right: 10px;
+}
+
+.contribution-modal-panel {
+    max-height: 80dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-radius: var(--borderRadius-default, 8px);
+    border: 1px solid #000;
+    background-color: var(--color-background);
+    box-shadow: var(--boxShadow-default);
+    color: #000;
+    /* padding: var(--padding-s, 12px) var(--padding-m, 16px); */
+}
+
+.contribution-modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--margin-m);
+    padding: var(--margin-s) var(--margin-m);
+}
+
+.contribution-modal-content h1 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.contribution-modal-content > p {
+    font-size: 0.95rem;
+    color: var(--color-gray-on-dark-background);
+    margin: 0;
+}
+
+.contribution-tabs {
+    display: flex;
+    gap: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.contribution-tab {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: transparent;
+    color: var(--color-gray-on-dark-background);
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.contribution-tab.active {
+    background: var(--color-primary, #fff);
+    color: var(--color-background, #000);
+}
+
+.contribution-stripe {
+    display: flex;
+    justify-content: center;
+    min-height: 80px;
+}
+
+.contribution-bank {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.contribution-bank-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.contribution-bank-label {
+    font-weight: 500;
+    color: var(--color-gray-on-dark-background);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.contribution-bank-value-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    min-width: 0;
+    flex: 1;
+}
+
+.contribution-bank-value {
+    text-align: right;
+    word-break: break-all;
+}
+
+.contribution-copy-button {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: var(--color-primary, #fff);
+    cursor: pointer;
+    padding: 0;
+}
+
+.contribution-copy-button--copied {
+    color: var(--color-risk-0, #7cc7ab);
+    border-color: var(--color-risk-0, #7cc7ab);
+}
+
+.contribution-copy-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.contribution-copy-button:hover {
+    opacity: 0.85;
+}
+
+.contribution-dismiss {
+    background: transparent;
+    border: none;
+    font-size: 0.8rem;
+    color: var(--color-gray-on-dark-background);
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+    text-align: center;
+    width: 100%;
+}
+
+.contribution-dismiss:hover {
+    opacity: 0.7;
+}

@@ -19,6 +19,7 @@
     "UtilModal": {
         "title": "Informationen",
         "feedback-button": "Kontakt",
+        "contribution": "Beitrag leisten",
         "impressum": "Impressum",
         "privacy": "Datenschutz",
         "terms": "Nutzungsbedingungen",
@@ -251,5 +252,17 @@
     },
     "SearchBar": {
         "placeholder": "Suche nach einer Station..."
+    },
+    "ContributionModal": {
+        "title": "Danke, dass du dabei bist.",
+        "description": "Magst du mehr der Mission beitragen? Dann unterstütze uns doch gerne hier:",
+        "tabStripe": "Karte",
+        "tabBank": "Banküberweisung",
+        "bankHolder": "Kontoinhaber",
+        "bankReference": "Verwendungszweck",
+        "bankReferenceValue": "Beitrag FreiFahren",
+        "copy": "Kopieren",
+        "copied": "Kopiert",
+        "dismiss": "Nicht wieder anzeigen"
     }
 }

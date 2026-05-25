@@ -12,11 +12,12 @@ import { LegalDisclaimer } from '../LegalDisclaimer'
 interface UtilModalProps {
     className: string
     children?: React.ReactNode
+    onOpenContribution?: () => void
 }
 
 const GITHUB_ICON = `/icons/github.svg`
 
-const UtilModal: React.FC<UtilModalProps> = ({ className, children }) => {
+const UtilModal: React.FC<UtilModalProps> = ({ className, children, onOpenContribution }) => {
     const { t } = useTranslation()
     const [isOptedOut, updateOptOut] = useAnalyticsOptOut()
 
@@ -43,6 +44,13 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children }) => {
                             <img src={GITHUB_ICON} alt="GitHub Icon" />
                         </button>
                     </div>
+                    <button
+                        className="action h-10 w-full rounded-sm"
+                        onClick={() => onOpenContribution?.()}
+                        type="button"
+                    >
+                        {t('UtilModal.contribution')}
+                    </button>
                     <div className="links-row">
                         <Link to="/Datenschutz">{t('UtilModal.privacy')}</Link>
                         <button className="text-button" onClick={() => setIsLegalDisclaimerOpen(true)} type="button">

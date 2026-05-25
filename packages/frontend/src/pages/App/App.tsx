@@ -4,6 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
+import {
+    CONTRIBUTION_MODAL_DISMISSED_KEY,
+    ContributionModal,
+} from 'src/components/Modals/ContributionModal/ContributionModal'
 import MarketingModal from 'src/components/Modals/MarketingModal/MarketingModal'
 import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
@@ -68,10 +72,31 @@ const App = () => {
 
     const [showSummary, setShowSummary] = useState<boolean>(false)
     const [reportedData, setReportedData] = useState<Report | null>(null)
+
+    const [showContributionModal, setShowContributionModal] = useState<boolean>(false)
+    const contributionShownThisSessionRef = useRef(false)
+
+    const openContributionModal = () => {
+        if (contributionShownThisSessionRef.current) return
+        if (localStorage.getItem(CONTRIBUTION_MODAL_DISMISSED_KEY) === 'true') return
+        contributionShownThisSessionRef.current = true
+        setShowContributionModal(true)
+    }
+
+    useEffect(() => {
+        const timeout = setTimeout(openContributionModal, 3 * 60 * 1000)
+        return () => clearTimeout(timeout)
+    }, [])
+
     const handleReportFormSubmit = (reportedDataForm: Report) => {
         setAppUIState((prevState) => ({ ...prevState, isReportFormOpen: false }))
         setShowSummary(true)
         setReportedData(reportedDataForm)
+    }
+
+    const handleCloseSummaryModal = () => {
+        setShowSummary(false)
+        openContributionModal()
     }
 
     const {
@@ -80,6 +105,11 @@ const App = () => {
         openModal: openUtilModal,
         closeModal: closeUtilModal,
     } = useModalAnimation()
+
+    const openContributionModalFromUtil = () => {
+        closeUtilModal()
+        setShowContributionModal(true)
+    }
 
     const toggleUtilModal = () => {
         if (isUtilOpen) {
@@ -104,6 +134,7 @@ const App = () => {
             isInfoModalOpenFromHook ||
             appUIState.isListModalOpen ||
             showSummary ||
+            showContributionModal ||
             isUtilOpen,
         [
             appUIState.isReportFormOpen,
@@ -111,6 +142,7 @@ const App = () => {
             isInfoModalOpenFromHook,
             appUIState.isListModalOpen,
             showSummary,
+            showContributionModal,
             isUtilOpen,
         ]
     )
@@ -367,7 +399,10 @@ const App = () => {
                 </>
             ) : null}
             {isUtilOpen ? (
-                <UtilModal className={`open ${isUtilAnimatingOut ? 'slide-out' : 'slide-in'}`}>
+                <UtilModal
+                    className={`open ${isUtilAnimatingOut ? 'slide-out' : 'slide-in'}`}
+                    onOpenContribution={openContributionModalFromUtil}
+                >
                     <CloseButton handleClose={closeUtilModal} />
                 </UtilModal>
             ) : null}
@@ -376,10 +411,19 @@ const App = () => {
                     <ReportSummaryModal
                         reportData={reportedData}
                         openAnimationClass="open center-animation"
-                        handleCloseModal={() => setShowSummary(false)}
+                        handleCloseModal={handleCloseSummaryModal}
                         numberOfUsers={numberOfUsers}
                     />
-                    <Backdrop handleClick={() => setShowSummary(false)} />
+                    <Backdrop handleClick={handleCloseSummaryModal} />
+                </>
+            ) : null}
+            {showContributionModal ? (
+                <>
+                    <ContributionModal
+                        onClose={() => setShowContributionModal(false)}
+                        onDismissPermanently={() => setShowContributionModal(false)}
+                    />
+                    <Backdrop handleClick={() => setShowContributionModal(false)} />
                 </>
             ) : null}
             {appUIState.isReportFormOpen ? (

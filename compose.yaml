@@ -63,9 +63,11 @@ services:
     build:
       context: ./packages/frontend
       dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_URL: http://localhost:8080
+        VITE_STRIPE_BUY_BUTTON_ID: ${VITE_STRIPE_BUY_BUTTON_ID:-}
+        VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY:-}
     container_name: frontend
-    env_file:
-      - ./packages/frontend/.env
     ports:
       - "3000:3000"
     depends_on:
