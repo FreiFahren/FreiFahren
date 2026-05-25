@@ -19,11 +19,12 @@
     "UtilModal": {
         "title": "Information",
         "feedback-button": "Contact",
+        "contribution": "Contribute",
         "impressum": "Legal notice",
         "privacy": "Privacy Policy",
         "terms": "Terms of Use",
-        "analytics-opted-in": "anonyme analytics - Click to disable",
-        "analytics-opted-out": "anonyme analytics - Click to enable"
+        "analytics-opted-in": "anonymous analytics - Click to disable",
+        "analytics-opted-out": "anonymous analytics - Click to enable"
     },
     "ContactSection": {
         "title": "Contact us",
@@ -254,5 +255,17 @@
     },
     "SearchBar": {
         "placeholder": "Search for a station..."
+    },
+    "ContributionModal": {
+        "title": "Thanks for being part of this.",
+        "description": "Want to contribute more to the mission? Then feel free to support us here:",
+        "tabStripe": "Card",
+        "tabBank": "Bank Transfer",
+        "bankHolder": "Account holder",
+        "bankReference": "Reference",
+        "bankReferenceValue": "Contribution FreiFahren",
+        "copy": "Copy",
+        "copied": "Copied",
+        "dismiss": "Don't show again"
     }
 }

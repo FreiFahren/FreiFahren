@@ -13,17 +13,18 @@ import { ReportItem } from '../ReportsModal/ReportItem'
 interface ReportSummaryModalProps {
     openAnimationClass?: string
     reportData: Report
-    handleCloseModal: () => void
+    onCloseModal: () => void
     numberOfUsers: number
 }
 
 const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({
     openAnimationClass,
     reportData,
-    handleCloseModal,
+    onCloseModal,
     numberOfUsers,
 }) => {
     const { t } = useTranslation()
+    const handleClose = onCloseModal
     const animatedCount = useCountAnimation(numberOfUsers, 1.5 * 1000)
 
     const [showFeedback, setShowFeedback] = useState<boolean>(false)
@@ -49,7 +50,7 @@ const ReportSummaryModal: React.FC<ReportSummaryModalProps> = ({
                 </span>
                 <p>{t('ReportSummaryModal.description')}</p>
                 <span className="disclaimer">{t('ReportSummaryModal.syncText')}</span>
-                <button className="action h-10 w-full rounded-sm" onClick={handleCloseModal} type="button">
+                <button className="action h-10 w-full rounded-sm" onClick={handleClose} type="button">
                     {t('ReportSummaryModal.button')}
                 </button>
             </div>
