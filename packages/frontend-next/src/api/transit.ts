@@ -60,15 +60,17 @@ async function fetchJson<T>(path: string): Promise<T> {
   return response.json();
 }
 
+export async function fetchStations(): Promise<Stations> {
+  const response = await fetchJson<Record<StationId, StationResponse>>('/v0/transit/stations');
+  const stations: Stations = {};
+  for (const [id, station] of Object.entries(response)) stations[id] = { ...station, id };
+  return stations;
+}
+
 export const useStations = () =>
   useQuery({
     queryKey: ['transit', 'stations'],
-    queryFn: async (): Promise<Stations> => {
-      const response = await fetchJson<Record<StationId, StationResponse>>('/v0/transit/stations');
-      const stations: Stations = {};
-      for (const [id, station] of Object.entries(response)) stations[id] = { ...station, id };
-      return stations;
-    },
+    queryFn: fetchStations,
   });
 
 export const useLines = () =>

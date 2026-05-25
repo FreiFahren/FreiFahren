@@ -6,9 +6,8 @@ import { Map as MapGL } from 'react-map-gl/maplibre';
 import { requireEnv } from '@/lib/utils';
 
 import { SegmentsLayer } from './SegmentsLayer';
-import { StationDetail } from './StationDetail';
 import { STATIONS_LAYER_ID, StationsLayer } from './StationsLayer';
-import { useStationSelection } from './useStationSelection';
+import { useStationSelection } from '../../hooks/useStationSelection';
 
 const MAP_STYLE_URL = requireEnv('VITE_MAP_STYLE_URL');
 
@@ -18,8 +17,8 @@ const INITIAL_VIEW = {
   zoom: requireEnv('VITE_MAP_INITIAL_ZOOM', 'number'),
 };
 
-export function Map() {
-  const { selectedStation, handleMapClick, clearSelection } = useStationSelection();
+export function MapView() {
+  const { selectedStation, handleMapClick } = useStationSelection();
 
   return (
     <div className="fixed inset-0">
@@ -33,7 +32,6 @@ export function Map() {
         <SegmentsLayer />
         <StationsLayer selectedStation={selectedStation} />
       </MapGL>
-      {selectedStation && <StationDetail station={selectedStation} onClose={clearSelection} />}
     </div>
   );
 }
