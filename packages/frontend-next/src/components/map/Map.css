@@ -1,0 +1,23 @@
+/* 
+Ensure the attribution is compact and hidden by default
+Custom CSS Overwrite to avoid CLS
+ */
+.maplibregl-ctrl-attrib.maplibregl-compact.maplibregl-compact-show {
+  padding: 2px 24px 2px 0;
+}
+
+.maplibregl-ctrl-attrib.maplibregl-compact.maplibregl-compact-show .maplibregl-ctrl-attrib-inner {
+  display: none;
+}
+
+.maplibregl-ctrl-attrib.maplibregl-compact.maplibregl-compact-show:hover,
+.maplibregl-ctrl-attrib.maplibregl-compact.maplibregl-compact-show:focus-within {
+  padding: 2px 28px 2px 8px;
+}
+
+.maplibregl-ctrl-attrib.maplibregl-compact.maplibregl-compact-show:hover
+  .maplibregl-ctrl-attrib-inner,
+.maplibregl-ctrl-attrib.maplibregl-compact.maplibregl-compact-show:focus-within
+  .maplibregl-ctrl-attrib-inner {
+  display: block;
+}
