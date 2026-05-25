@@ -5,6 +5,9 @@ import { Map as MapGL } from 'react-map-gl/maplibre';
 
 import { requireEnv } from '@/lib/utils';
 
+import { SegmentsLayer } from './SegmentsLayer';
+import { StationsLayer } from './StationsLayer';
+
 const MAP_STYLE_URL = requireEnv('VITE_MAP_STYLE_URL');
 
 const INITIAL_VIEW = {
@@ -20,7 +23,10 @@ export function Map() {
         initialViewState={INITIAL_VIEW}
         mapStyle={MAP_STYLE_URL}
         attributionControl={{ compact: true }}
-      />
+      >
+        <SegmentsLayer />
+        <StationsLayer />
+      </MapGL>
     </div>
   );
 }
