@@ -3,12 +3,14 @@ import './Map.css';
 
 import { Map as MapGL } from 'react-map-gl/maplibre';
 
-const MAP_STYLE_URL = import.meta.env.VITE_MAP_STYLE_URL;
+import { requireEnv } from '@/lib/utils';
+
+const MAP_STYLE_URL = requireEnv('VITE_MAP_STYLE_URL');
 
 const INITIAL_VIEW = {
-  longitude: Number(import.meta.env.VITE_MAP_CENTER_LNG),
-  latitude: Number(import.meta.env.VITE_MAP_CENTER_LAT),
-  zoom: Number(import.meta.env.VITE_MAP_INITIAL_ZOOM),
+  longitude: requireEnv('VITE_MAP_CENTER_LNG', 'number'),
+  latitude: requireEnv('VITE_MAP_CENTER_LAT', 'number'),
+  zoom: requireEnv('VITE_MAP_INITIAL_ZOOM', 'number'),
 };
 
 export function Map() {
