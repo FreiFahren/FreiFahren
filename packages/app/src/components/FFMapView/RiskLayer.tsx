@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { useRiskData, useSegments } from '../../api/queries'
 import { useAppStore } from '../../app.store'
 
-const useLinesWithRiskColors = (segmentColors?: { [key: string]: string }) => {
+const useLinesWithRiskColors = (segmentsRisk?: Record<string, { color?: string; risk?: number }>) => {
     const { data: segments } = useSegments()
 
     const defaultColor = '#13C184'
@@ -20,13 +20,13 @@ const useLinesWithRiskColors = (segmentColors?: { [key: string]: string }) => {
                           properties: {
                               ...feature.properties,
                               color:
-                                  segmentColors !== undefined
-                                      ? (segmentColors[feature.properties.sid] ?? defaultColor)
+                                  segmentsRisk !== undefined
+                                      ? (segmentsRisk[String(feature.properties.id)]?.color ?? defaultColor)
                                       : defaultColor,
                           },
                       })),
                   },
-        [segments, segmentColors]
+        [segments, segmentsRisk]
     )
 }
 
@@ -36,7 +36,7 @@ type RiskLayerProps = {
 
 export const RiskLayer = ({ visible }: RiskLayerProps) => {
     const { data: riskData } = useRiskData()
-    const riskGeoJson = useLinesWithRiskColors(riskData?.segmentColors)
+    const riskGeoJson = useLinesWithRiskColors(riskData ? riskData.segments_risk : undefined)
     const shouldShow = useAppStore((state) => !state.appLocked)
 
     if (riskGeoJson === null) return null

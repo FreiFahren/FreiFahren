@@ -1,10 +1,10 @@
 import { TFunction } from 'i18next'
 import { isNil } from 'lodash'
-import { ComponentProps } from 'react'
+import { ComponentProps, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Report } from '../../api'
-import { useStations } from '../../api/queries'
+import { useLines, useStations } from '../../api/queries'
 import { FFText, FFView } from './base'
 import { FFLineTag } from './FFLineTag'
 
@@ -30,23 +30,42 @@ type ReportItemProps = {
 
 export const ReportItem = ({ report, ...props }: ReportItemProps) => {
     const { t } = useTranslation('reportDetails')
-    const station = useStations().data?.[report.stationId]
+    const { data: stations } = useStations()
+    const { data: lines } = useLines()
+    const station = stations?.[report.stationId]
+
+    // Resolve line display name from lineId
+    // Show public line name (e.g., "M1") not variant id (e.g., "M1-a")
+    const lineDisplayName = useMemo(() => {
+        if (!report.lineId || !lines) return null
+        const line = lines.find((l) => l.id === report.lineId)
+
+        return line?.name ?? report.lineId
+    }, [report.lineId, lines])
+
+    // Resolve direction name from directionId (which is a station id)
+    const directionName = useMemo(() => {
+        if (!report.directionId || !stations) return null
+        return stations[report.directionId]?.name ?? null
+    }, [report.directionId, stations])
+
+    if (!stations || !lines) return null
 
     return (
         <FFView {...props}>
             <FFView gap="xxs" flexDirection="row" alignItems="center">
-                <FFLineTag line={report.line} />
+                <FFLineTag line={lineDisplayName} />
                 <FFText variant="labelBold">{station?.name}</FFText>
             </FFView>
             <FFView flexDirection="row" gap="s" mt="xxs">
                 <FFText color="darkText" fontSize={15}>
-                    {report.isHistoric ? t('historicLabel') : formatTime(report.timestamp, t)}
+                    {report.isPredicted ? t('historicLabel') : formatTime(report.timestamp, t)}
                     {`, ${t('direction')} `}
-                    {isNil(report.direction?.name) ? (
+                    {isNil(directionName) ? (
                         t('unknownDirection')
                     ) : (
                         <FFText variant="label" fontSize={15}>
-                            {report.direction.name}
+                            {directionName}
                         </FFText>
                     )}
                 </FFText>

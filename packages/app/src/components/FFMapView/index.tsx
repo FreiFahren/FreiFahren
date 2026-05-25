@@ -1,4 +1,4 @@
-import MapLibreGL, { Camera, CameraRef, MapView, UserLocation, UserTrackingMode } from '@maplibre/maplibre-react-native'
+import { Camera, CameraRef, MapView, UserLocation, UserTrackingMode } from '@maplibre/maplibre-react-native'
 import Geolocation from '@react-native-community/geolocation'
 import { isNil, noop } from 'lodash'
 import { useEffect, useRef } from 'react'
@@ -15,9 +15,6 @@ import { LinesLayer } from './LinesLayer'
 import { ReportsLayer } from './ReportsLayer'
 import { RiskLayer } from './RiskLayer'
 import { StationLayer } from './StationLayer'
-
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-MapLibreGL.setAccessToken(null)
 
 const MAP_REGION = {
     longitude: 13.40587,
@@ -54,7 +51,7 @@ const useLayersToRender = () => {
     return {
         lines: hasLines,
         risk: hasLines && hasSegments && hasRiskData,
-        stations: hasLines && hasSegments && hasStations,
+        stations: hasLines && hasSegments && hasRiskData && hasStations,
         reports: hasLines && hasSegments && hasRiskData && hasStations && hasReports,
         userLocation: hasLines && hasSegments && hasRiskData && hasStations && hasReports,
     }
