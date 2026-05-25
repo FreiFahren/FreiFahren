@@ -1,10 +1,13 @@
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { type Line, type Segments, type Station, useLines, useSegments } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Backdrop } from '@/components/ui/backdrop';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+
+import { NAMESPACE } from './StationDetail.i18n';
 
 type StationDetailProps = {
   station: Station;
@@ -47,6 +50,7 @@ function resolveDisplayLines(
 }
 
 export function StationDetail({ station, onClose }: StationDetailProps) {
+  const { t } = useTranslation(NAMESPACE);
   const { data: segments } = useSegments();
   const { data: lines } = useLines();
   const displayLines = resolveDisplayLines(
@@ -58,7 +62,7 @@ export function StationDetail({ station, onClose }: StationDetailProps) {
   return (
     <>
       <Backdrop
-        aria-label="Close station details"
+        aria-label={t('close')}
         onClose={onClose}
         className="animate-in fade-in duration-150"
       />
@@ -66,7 +70,7 @@ export function StationDetail({ station, onClose }: StationDetailProps) {
         <Card className="animate-in slide-in-from-bottom-4 fade-in pointer-events-auto w-full max-w-md gap-1 py-4 duration-200 ease-out">
           <CardContent className="flex items-start justify-between">
             <h2 className="font-heading text-lg font-semibold">{station.name}</h2>
-            <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close">
+            <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label={t('close')}>
               <X />
             </Button>
           </CardContent>
@@ -80,7 +84,7 @@ export function StationDetail({ station, onClose }: StationDetailProps) {
               variant="default"
               className="bg-destructive hover:bg-destructive/90 h-9 w-full text-sm font-medium text-white"
             >
-              Report sighting
+              {t('reportSighting')}
             </Button>
           </CardContent>
         </Card>
