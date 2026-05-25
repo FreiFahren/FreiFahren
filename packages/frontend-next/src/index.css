@@ -130,9 +130,9 @@
   --text-2: rgba(243, 244, 246, 0.78);
   --text-3: rgba(243, 244, 246, 0.55);
   --text-4: rgba(243, 244, 246, 0.36);
-  --accent-bright: #e35454;
-  --accent-press: #b22a2a;
-  --accent-dim: rgba(214, 59, 59, 0.16);
+  --accent-bright: #f04848;
+  --accent-press: #c22020;
+  --accent-dim: rgba(240, 72, 72, 0.16);
   --ok: #3fb27f;
   --warn: #d7a008;
 }
