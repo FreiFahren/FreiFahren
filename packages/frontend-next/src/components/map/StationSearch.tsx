@@ -1,6 +1,6 @@
 import { useNavigate } from '@tanstack/react-router';
 import { Search, X } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { type Station, useLines, useStations } from '@/api/transit';
@@ -36,34 +36,42 @@ export function StationSearch() {
   const { data: stations } = useStations();
   const { data: lines } = useLines();
   const [query, setQuery] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const stationList = stations ? Object.values(stations) : [];
   const results = matchStations(stationList, query);
   const hasQuery = query.length > 0;
   const showResults = query.trim().length > 0;
+  const isActive = isFocused || hasQuery;
+
+  const dismiss = () => {
+    setQuery('');
+    inputRef.current?.blur();
+  };
 
   const selectStation = (station: Station) => {
     setQuery('');
+    inputRef.current?.blur();
     navigate({ to: StationDetailRoute.to, params: { stationId: station.id } });
   };
 
   return (
     <>
-      {showResults && (
-        <Backdrop
-          aria-label={t('clear')}
-          onClose={() => setQuery('')}
-          className="z-10 bg-transparent"
-        />
+      {isActive && (
+        <Backdrop aria-label={t('clear')} onClose={dismiss} className="z-10 bg-transparent" />
       )}
       <div className="pointer-events-none fixed inset-x-0 top-0 z-20 flex justify-center p-3">
         <div className="pointer-events-auto w-full max-w-md">
           <div className="bg-card text-card-foreground ring-foreground/10 flex h-9 items-center gap-1 rounded-lg pr-1 pl-3 ring-1">
             <Search className="text-muted-foreground size-3 shrink-0" />
             <Input
+              ref={inputRef}
               type="text"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
               placeholder={t('placeholder')}
               aria-label={t('placeholder')}
               className="h-full flex-1 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0 md:text-xs dark:bg-transparent"
