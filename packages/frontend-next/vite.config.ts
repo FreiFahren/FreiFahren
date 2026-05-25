@@ -13,6 +13,12 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset({ target: '19' })] }),
     tailwindcss(),
   ],
+  server: {
+    port: 1871,
+  },
+  preview: {
+    port: 1871,
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
