@@ -5,13 +5,15 @@ import { requireEnv } from '@/lib/utils';
 
 const API_URL = requireEnv('VITE_API_URL');
 
-export type Station = {
+type StationId = string;
+
+type StationResponse = {
   name: string;
   coordinates: { latitude: number; longitude: number };
   lines: string[];
 };
 
-type StationId = string;
+export type Station = StationResponse & { id: StationId };
 export type Stations = Record<StationId, Station>;
 
 export type LineType = 'subway' | 'suburban' | 'tram' | 'bus' | 'ferry';
@@ -39,13 +41,13 @@ export type StationPointProps = { id: string; name: string };
 export function stationsToGeoJSON(stations: Stations): FeatureCollection<Point, StationPointProps> {
   return {
     type: 'FeatureCollection',
-    features: Object.entries(stations).map(([id, station]) => ({
+    features: Object.values(stations).map((station) => ({
       type: 'Feature',
       geometry: {
         type: 'Point',
         coordinates: [station.coordinates.longitude, station.coordinates.latitude],
       },
-      properties: { id, name: station.name },
+      properties: { id: station.id, name: station.name },
     })),
   };
 }
@@ -61,7 +63,12 @@ async function fetchJson<T>(path: string): Promise<T> {
 export const useStations = () =>
   useQuery({
     queryKey: ['transit', 'stations'],
-    queryFn: () => fetchJson<Stations>('/v0/transit/stations'),
+    queryFn: async (): Promise<Stations> => {
+      const response = await fetchJson<Record<StationId, StationResponse>>('/v0/transit/stations');
+      const stations: Stations = {};
+      for (const [id, station] of Object.entries(response)) stations[id] = { ...station, id };
+      return stations;
+    },
   });
 
 export const useLines = () =>
