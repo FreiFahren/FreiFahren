@@ -28,7 +28,7 @@ Use Conventional Commit prefixes for both commit messages and PR titles:
 
 Example: `fix: return 404 instead of 500 when station id is unknown`
 
-## Hono backend conventions
+## Backend conventions
 
 - **Throw `AppError` at service boundaries**, not raw `Error` or ad-hoc `c.json({ error: ... })`. `AppError` (see `packages/hono-backend/src/common/errors.ts`) carries a `statusCode` and an `internalCode`, and the central error handler strips descriptions in production so internal details don't leak. Domain-specific errors should be converted to `AppError` before they reach the response.
 - **Use the Pino logger from context** (`c.get('logger')`) instead of `console.log`. It's wired up in `packages/hono-backend/src/common/logger.ts` with daily rotation and pretty-printing in dev. Log structured objects (`logger.info({ reportId }, 'report created')`), not interpolated strings, so the JSON output stays queryable.
@@ -36,3 +36,11 @@ Example: `fix: return 404 instead of 500 when station id is unknown`
 ## City-agnostic code
 
 The codebase should not assume Berlin. Keep city-specific data (station lists, line colors, network names, timezone, language) in **config files** under `packages/hono-backend/src/db/seed/config.ts` and similar locations — never hard-coded in business logic. Config files are the only sanctioned escape hatch for city-specific values.
+
+## Frontend conventions
+
+- **kebab-case for filenames.** Components, hooks, routes, utilities — all kebab-case (`report-card.tsx`, `use-reports.ts`, `format-timestamp.ts`). The default export inside still uses PascalCase for components and camelCase for hooks/utils; only the filename changes.
+- **Optimization priorities, in order:**
+    1. **Performance — bundle size first.** Every dependency is weighed against its bytes-over-the-wire cost. Prefer tree-shakeable libraries, subset-specific imports, and native browser APIs over polyfilled packages. Audit with `bun run build` before merging anything that adds a dependency.
+    2. **Maintainability.** Clear, predictable code beats clever code. Lean on shadcn/ui primitives + Tailwind utilities rather than building bespoke design systems. Co-locate route logic in TanStack Router file routes; co-locate data fetching in TanStack Query hooks.
+- **No `useMemo` or `useCallback`.** React Compiler is enabled and emits equivalent memoization automatically. Hand-written `useMemo`/`useCallback` are noise — they don't compose with the compiler's analysis and just add maintenance cost. Same for `React.memo` on plain components. Exceptions only for cases where the compiler explicitly bails out (the ESLint rule will flag these).
