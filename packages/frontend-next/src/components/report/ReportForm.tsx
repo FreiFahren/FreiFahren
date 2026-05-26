@@ -82,7 +82,14 @@ function LinePicker({ selectedLine, onSelectLine }: LinePickerProps) {
               key={line.name}
               type="button"
               aria-pressed={isSelected}
-              onClick={() => onSelectLine(isSelected ? null : line.name)}
+              onClick={() => {
+                if (isSelected) {
+                  onSelectLine(null);
+                  return;
+                }
+                onSelectLine(line.name);
+                setFilter(line.type);
+              }}
               className="rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             >
               <LineBadge name={line.name} className={cn(isSelected && 'ring-2 ring-white')} />
