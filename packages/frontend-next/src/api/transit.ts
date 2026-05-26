@@ -16,7 +16,14 @@ type StationResponse = {
 export type Station = StationResponse & { id: StationId };
 export type Stations = Record<StationId, Station>;
 
-export type LineType = 'subway' | 'suburban' | 'tram' | 'bus' | 'ferry';
+export type LineType = 'subway' | 'suburban' | 'tram';
+
+// Display ordering for line types (U-Bahn → S-Bahn → Tram).
+export const LINE_TYPE_PRIORITY: Record<LineType, number> = {
+  subway: 0,
+  suburban: 1,
+  tram: 2,
+};
 
 export type Line = {
   id: string;
@@ -50,6 +57,24 @@ export function stationsToGeoJSON(stations: Stations): FeatureCollection<Point, 
       properties: { id: station.id, name: station.name },
     })),
   };
+}
+
+export function resolveStationLineNames(
+  lineIds: Station['lines'],
+  lines: Line[] | undefined,
+): string[] {
+  const nameById = new Map<string, string>();
+  if (lines) for (const line of lines) nameById.set(line.id, line.name);
+
+  const seen = new Set<string>();
+  const names: string[] = [];
+  for (const id of lineIds) {
+    const name = nameById.get(id) ?? id;
+    if (seen.has(name)) continue;
+    seen.add(name);
+    names.push(name);
+  }
+  return names;
 }
 
 async function fetchJson<T>(path: string): Promise<T> {

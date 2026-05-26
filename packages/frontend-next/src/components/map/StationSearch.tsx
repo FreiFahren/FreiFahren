@@ -3,9 +3,8 @@ import { Search, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { type Station, useLines, useStations } from '@/api/transit';
+import { resolveStationLineNames, type Station, useLines, useStations } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
-import { resolveStationLineNames } from '@/components/transit/displayLines';
 import { Backdrop } from '@/components/ui/backdrop';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';

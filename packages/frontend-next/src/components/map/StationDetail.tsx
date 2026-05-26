@@ -1,12 +1,13 @@
+import { Link } from '@tanstack/react-router';
 import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { type Station, useLines } from '@/api/transit';
+import { resolveStationLineNames, type Station, useLines } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
-import { resolveStationLineNames } from '@/components/transit/displayLines';
 import { Backdrop } from '@/components/ui/backdrop';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Route as ReportRoute } from '@/routes/report';
 
 import { NAMESPACE } from './StationDetail.i18n';
 
@@ -42,10 +43,11 @@ export function StationDetail({ station, onClose }: StationDetailProps) {
           </CardContent>
           <CardContent className="mt-2">
             <Button
+              asChild
               variant="default"
               className="bg-destructive hover:bg-destructive/90 h-9 w-full text-sm font-medium text-white"
             >
-              {t('reportSighting')}
+              <Link to={ReportRoute.to}>{t('reportSighting')}</Link>
             </Button>
           </CardContent>
         </Card>
