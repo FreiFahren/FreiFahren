@@ -11,11 +11,11 @@ export function ReportButton() {
   const { t } = useTranslation(NAMESPACE);
 
   return (
-    <div className="pointer-events-none fixed right-0 bottom-8 z-20 p-3">
+    <div className="pointer-events-none fixed right-0 bottom-0 z-20 p-3">
       <Button
         asChild
         size="lg"
-        className="bg-accent-bright text-primary-foreground hover:bg-accent-press pointer-events-auto h-12 gap-2 rounded-lg px-5 text-sm [&_svg:not([class*='size-'])]:size-5"
+        className="bg-accent-bright text-primary-foreground hover:bg-accent-press pointer-events-auto h-12 gap-2 rounded-lg px-5 text-sm shadow-[0_6px_16px_rgba(214,59,59,0.28)] [&_svg:not([class*='size-'])]:size-5"
       >
         <Link to={ReportRoute.to}>
           {t('report')}
