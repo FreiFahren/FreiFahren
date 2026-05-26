@@ -3,12 +3,7 @@ import { ChevronLeft } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  LINE_TYPE_PRIORITY,
-  resolveStationLineNames,
-  type LineType,
-  useLines,
-} from '@/api/transit';
+import { LINE_TYPE_PRIORITY, type LineType, useLines } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -20,17 +15,7 @@ import { NAMESPACE } from './ReportForm.i18n';
 
 type LineFilter = 'all' | LineType;
 
-const FILTERS: LineFilter[] = ['all', 'subway', 'suburban', 'tram'];
-
-// The API `type` field is unreliable (S-Bahn lines arrive as "unknown"), so
-// classify by the line name prefix: U… → U-Bahn, S… → S-Bahn, else Tram.
-// TODO: rebase to main to get the backend fix
-function lineCategory(name: string): LineType {
-  const prefix = name[0]?.toUpperCase();
-  if (prefix === 'U') return 'subway';
-  if (prefix === 'S') return 'suburban';
-  return 'tram';
-}
+const FILTERS: LineFilter[] = ['all', 'subway', 'light_rail', 'tram'];
 
 type LinePickerProps = {
   selectedLine: string | null;
@@ -42,21 +27,24 @@ function LinePicker({ selectedLine, onSelectLine }: LinePickerProps) {
   const { data: lines } = useLines();
   const [filter, setFilter] = useState<LineFilter>('all');
 
+  // One badge per line name (collapsing per-direction variants), ordered
+  // U-Bahn → S-Bahn → Tram, then ascending within a group (e.g. U1 before U9).
   const allLines = () => {
-    const names = resolveStationLineNames(lines?.map((line) => line.id) ?? [], lines);
-    return names
-      .map((name) => ({ name, category: lineCategory(name) }))
+    const typeByName = new Map<string, LineType>();
+    for (const line of lines ?? []) {
+      if (!typeByName.has(line.name)) typeByName.set(line.name, line.type);
+    }
+    return [...typeByName]
+      .map(([name, type]) => ({ name, type }))
       .sort((a, b) => {
-        if (LINE_TYPE_PRIORITY[a.category] !== LINE_TYPE_PRIORITY[b.category]) {
-          return LINE_TYPE_PRIORITY[a.category] - LINE_TYPE_PRIORITY[b.category];
+        if (LINE_TYPE_PRIORITY[a.type] !== LINE_TYPE_PRIORITY[b.type]) {
+          return LINE_TYPE_PRIORITY[a.type] - LINE_TYPE_PRIORITY[b.type];
         }
-        // Sort ascending within the same group (e.g., U1 before U9).
         return parseInt(a.name.replace(/\D/g, ''), 10) - parseInt(b.name.replace(/\D/g, ''), 10);
       });
   };
 
-  const visibleLines =
-    filter === 'all' ? allLines() : allLines().filter((l) => l.category === filter);
+  const visibleLines = filter === 'all' ? allLines() : allLines().filter((l) => l.type === filter);
 
   return (
     <section className="px-4">

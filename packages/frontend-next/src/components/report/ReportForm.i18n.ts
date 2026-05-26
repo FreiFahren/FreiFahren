@@ -9,7 +9,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   optional: 'Optional',
   all: 'All',
   subway: 'U-Bahn',
-  suburban: 'S-Bahn',
+  light_rail: 'S-Bahn',
   tram: 'Tram',
 });
 
@@ -20,6 +20,6 @@ i18n.addResourceBundle('de', NAMESPACE, {
   optional: 'Optional',
   all: 'Alle',
   subway: 'U-Bahn',
-  suburban: 'S-Bahn',
+  light_rail: 'S-Bahn',
   tram: 'Tram',
 });

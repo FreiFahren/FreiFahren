@@ -16,12 +16,12 @@ type StationResponse = {
 export type Station = StationResponse & { id: StationId };
 export type Stations = Record<StationId, Station>;
 
-export type LineType = 'subway' | 'suburban' | 'tram';
+export type LineType = 'subway' | 'light_rail' | 'tram';
 
 // Display ordering for line types (U-Bahn → S-Bahn → Tram).
 export const LINE_TYPE_PRIORITY: Record<LineType, number> = {
   subway: 0,
-  suburban: 1,
+  light_rail: 1,
   tram: 2,
 };
 
