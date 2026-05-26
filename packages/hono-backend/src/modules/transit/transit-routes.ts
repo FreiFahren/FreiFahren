@@ -29,6 +29,16 @@ export const getStations = defineRoute<Env>()({
     },
 })
 
+const linesResponseSchema = z.array(
+    z.object({
+        id: z.string(),
+        name: z.string(),
+        type: z.enum(ROUTE_TYPE_PRIORITY),
+        isCircular: z.boolean(),
+        stations: z.array(z.string()),
+    })
+)
+
 export const getLines = defineRoute<Env>()({
     method: 'get' as const,
     path: '/lines',
@@ -36,19 +46,14 @@ export const getLines = defineRoute<Env>()({
         summary: 'List lines',
         description: 'Returns all transit lines in the network.',
         tags: ['transit'],
-        responseSchema: z.array(
-            z.object({
-                id: z.string(),
-                name: z.string(),
-                type: z.enum(ROUTE_TYPE_PRIORITY),
-                isCircular: z.boolean(),
-                stations: z.array(z.string()),
-            })
-        ),
+        responseSchema: linesResponseSchema,
     },
     handler: async (c) => {
         const transitNetworkDataService = c.get('transitNetworkDataService')
-        return c.json(await transitNetworkDataService.getLines())
+        // Validate the output so an out-of-enum line type (e.g. a stale
+        // "unknown") fails loudly here instead of leaking to clients.
+        const lines = linesResponseSchema.parse(await transitNetworkDataService.getLines())
+        return c.json(lines)
     },
 })
 
