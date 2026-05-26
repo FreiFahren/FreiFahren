@@ -44,6 +44,7 @@ export const seedLinesFromRelations = async (
                 target: lines.id,
                 set: {
                     name: sql`excluded.name`,
+                    type: sql`excluded.type`,
                     isCircular: sql`excluded.is_circular`,
                 },
             })
