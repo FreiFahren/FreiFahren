@@ -1,12 +1,10 @@
-import { Link } from '@tanstack/react-router';
-import { ChevronLeft } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { LINE_TYPE_PRIORITY, type LineType, useLines } from '@/api/transit';
+import { PageHeader } from '@/components/templates/PageHeader';
 import { LineBadge } from '@/components/transit/LineBadge';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
 import { Route as IndexRoute } from '@/routes/index';
@@ -103,21 +101,13 @@ function LinePicker({ selectedLine, onSelectLine }: LinePickerProps) {
 
 export function ReportForm() {
   const { t } = useTranslation(NAMESPACE);
+  const navigate = useNavigate();
   const [lineName, setLineName] = useState<string | null>(null);
 
   return (
     <div className="bg-card animate-in fade-in fixed inset-0 z-30 overflow-y-auto duration-150">
       <div className="mx-auto flex min-h-full w-full max-w-md flex-col">
-        <header className="flex items-center gap-2 px-4 pt-6">
-          <Button asChild variant="ghost" size="icon-sm" aria-label={t('back')}>
-            <Link to={IndexRoute.to}>
-              <ChevronLeft className="size-5" />
-            </Link>
-          </Button>
-          <h1 className="font-heading text-lg font-semibold">{t('title')}</h1>
-        </header>
-        <Separator className="my-2" />
-
+        <PageHeader title={t('title')} onBack={() => navigate({ to: IndexRoute.to })} />
         <LinePicker selectedLine={lineName} onSelectLine={setLineName} />
       </div>
     </div>
