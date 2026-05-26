@@ -1,5 +1,5 @@
 import { logger } from '../../../common/logger'
-import { ROUTE_TYPE_PRIORITY, type RouteType } from '../config'
+import { ROUTE_TYPE_PRIORITY, resolveLineColor, type RouteType } from '../config'
 import type { OsmRelation } from '../stations/overpass'
 
 export interface LineVariant {
@@ -9,6 +9,8 @@ export interface LineVariant {
     ref: string
     /** Transport type derived from the OSM `route` tag, restricted to the configured set. */
     type: RouteType
+    /** Hex color written to `lines.color`; segments inherit it. */
+    color: string
     stationIds: string[]
     osmRelationId: number
     isCircular: boolean
@@ -17,6 +19,7 @@ export interface LineVariant {
 interface RawVariant {
     ref: string
     type: RouteType
+    color: string
     osmRelationId: number
     stationIds: string[]
     isCircular: boolean
@@ -136,7 +139,8 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
             continue
         }
 
-        raw.push({ ref, type, osmRelationId: rel.id, stationIds, isCircular })
+        const color = resolveLineColor(tags)
+        raw.push({ ref, type, color, osmRelationId: rel.id, stationIds, isCircular })
     }
 
     logger.info(
@@ -174,6 +178,7 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
                 id: assignVariantId(ref, null),
                 ref,
                 type: v.type,
+                color: v.color,
                 stationIds: v.stationIds,
                 osmRelationId: v.osmRelationId,
                 isCircular: v.isCircular,
@@ -187,6 +192,7 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
                     id: assignVariantId(ref, suffixes[i]),
                     ref,
                     type: v.type,
+                    color: v.color,
                     stationIds: v.stationIds,
                     osmRelationId: v.osmRelationId,
                     isCircular: v.isCircular,

@@ -70,6 +70,7 @@ export class TransitNetworkDataService {
                         lineName: lines.name,
                         lineType: lines.type,
                         lineIsCircular: lines.isCircular,
+                        lineColor: lines.color,
                         stationId: lineStations.stationId,
                     })
                     .from(lines)
@@ -85,6 +86,7 @@ export class TransitNetworkDataService {
                             name: row.lineName,
                             type: row.lineType,
                             isCircular: row.lineIsCircular,
+                            color: row.lineColor,
                             stations: [],
                         }
                         byId.set(row.lineId, line)

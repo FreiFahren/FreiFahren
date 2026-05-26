@@ -16,6 +16,22 @@ export const ROUTE_COLORS: Partial<Record<RouteType, string>> = {
     light_rail: '#007734', // Berlin S-Bahn green (S2), applied to all S-Bahn lines.
 }
 
+// Fallback when neither a configured route color nor an OSM colour/color tag is
+// Available. Mirrors the DB default on `lines.color`.
+export const DEFAULT_LINE_COLOR = '#000000'
+
+// Resolves the canonical color for an OSM route relation: configured route-type
+// Color first, then the OSM colour/color tag, then the default. Color is a line
+// Property; segments inherit it from their line.
+export const resolveLineColor = (tags: Record<string, string | undefined>): string => {
+    const routeType = tags.route as RouteType | undefined
+    const configured = routeType ? ROUTE_COLORS[routeType] : undefined
+    if (configured !== undefined) return configured
+
+    const explicit = tags.colour ?? tags.color
+    return explicit !== undefined && explicit !== '' ? explicit : DEFAULT_LINE_COLOR
+}
+
 export const SEED_CONFIG = {
     city: 'Berlin', // The city you want to seed.
     adminLevel: '^[4-6]$', // The admin level of the city. Usually 4-6 for a city boundary.

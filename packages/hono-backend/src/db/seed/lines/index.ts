@@ -24,6 +24,7 @@ export const seedLinesFromRelations = async (
         name: v.ref,
         type: v.type,
         isCircular: v.isCircular,
+        color: v.color,
     }))
 
     const lineStationRecords = variants.flatMap((v) =>
@@ -46,6 +47,7 @@ export const seedLinesFromRelations = async (
                     name: sql`excluded.name`,
                     type: sql`excluded.type`,
                     isCircular: sql`excluded.is_circular`,
+                    color: sql`excluded.color`,
                 },
             })
 
