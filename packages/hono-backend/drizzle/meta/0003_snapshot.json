@@ -71,12 +71,8 @@
                     "name": "line_stations_line_id_lines_id_fk",
                     "tableFrom": "line_stations",
                     "tableTo": "lines",
-                    "columnsFrom": [
-                        "line_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["line_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "cascade",
                     "onUpdate": "no action"
                 },
@@ -84,12 +80,8 @@
                     "name": "line_stations_station_id_stations_id_fk",
                     "tableFrom": "line_stations",
                     "tableTo": "stations",
-                    "columnsFrom": [
-                        "station_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["station_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "cascade",
                     "onUpdate": "no action"
                 }
@@ -97,10 +89,7 @@
             "compositePrimaryKeys": {
                 "line_stations_line_id_station_id_pk": {
                     "name": "line_stations_line_id_station_id_pk",
-                    "columns": [
-                        "line_id",
-                        "station_id"
-                    ]
+                    "columns": ["line_id", "station_id"]
                 }
             },
             "uniqueConstraints": {},
@@ -202,12 +191,8 @@
                     "name": "reports_station_id_stations_id_fk",
                     "tableFrom": "reports",
                     "tableTo": "stations",
-                    "columnsFrom": [
-                        "station_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["station_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -215,12 +200,8 @@
                     "name": "reports_line_id_lines_id_fk",
                     "tableFrom": "reports",
                     "tableTo": "lines",
-                    "columnsFrom": [
-                        "line_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["line_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 },
@@ -228,12 +209,8 @@
                     "name": "reports_direction_id_stations_id_fk",
                     "tableFrom": "reports",
                     "tableTo": "stations",
-                    "columnsFrom": [
-                        "direction_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["direction_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "no action",
                     "onUpdate": "no action"
                 }
@@ -325,12 +302,8 @@
                     "name": "segments_line_id_lines_id_fk",
                     "tableFrom": "segments",
                     "tableTo": "lines",
-                    "columnsFrom": [
-                        "line_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["line_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "cascade",
                     "onUpdate": "no action"
                 },
@@ -338,12 +311,8 @@
                     "name": "segments_from_station_id_stations_id_fk",
                     "tableFrom": "segments",
                     "tableTo": "stations",
-                    "columnsFrom": [
-                        "from_station_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["from_station_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "cascade",
                     "onUpdate": "no action"
                 },
@@ -351,12 +320,8 @@
                     "name": "segments_to_station_id_stations_id_fk",
                     "tableFrom": "segments",
                     "tableTo": "stations",
-                    "columnsFrom": [
-                        "to_station_id"
-                    ],
-                    "columnsTo": [
-                        "id"
-                    ],
+                    "columnsFrom": ["to_station_id"],
+                    "columnsTo": ["id"],
                     "onDelete": "cascade",
                     "onUpdate": "no action"
                 }
@@ -409,12 +374,7 @@
         "public.source": {
             "name": "source",
             "schema": "public",
-            "values": [
-                "mini_app",
-                "web_app",
-                "mobile_app",
-                "telegram"
-            ]
+            "values": ["mini_app", "web_app", "mobile_app", "telegram"]
         }
     },
     "schemas": {},
