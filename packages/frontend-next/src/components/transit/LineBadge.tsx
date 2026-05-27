@@ -7,7 +7,10 @@ type LineBadgeProps = {
   className?: string;
 };
 
-function findLineColor(name: string, lines: ReturnType<typeof useLines>['data']): string | undefined {
+function findLineColor(
+  name: string,
+  lines: ReturnType<typeof useLines>['data'],
+): string | undefined {
   return lines?.find((line) => line.name === name)?.color;
 }
 
