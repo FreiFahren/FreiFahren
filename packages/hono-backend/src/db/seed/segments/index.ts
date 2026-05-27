@@ -3,7 +3,7 @@ import { inArray, sql } from 'drizzle-orm'
 import { logger } from '../../../common/logger'
 import type { DbConnection } from '../../index'
 import { segments } from '../../schema/segments'
-import { SEED_CONFIG, type RouteType } from '../config'
+import { SEED_CONFIG } from '../config'
 import type { LineVariant } from '../lines/build-variants'
 import type { Coordinates } from '../stations/merge-proximate'
 import type { OsmElement, OsmRelation, OsmWay, OsmWayGeometryPoint } from '../stations/overpass'
@@ -366,15 +366,6 @@ const buildRouteGeometries = (elements: OsmElement[]): Map<number, RouteGeometry
     return out
 }
 
-const resolveColor = (tags: Record<string, string | undefined>): string => {
-    const routeType = tags.route as RouteType | undefined
-    const configured = routeType ? SEED_CONFIG.routeColors[routeType] : undefined
-    if (configured !== undefined) return configured
-
-    const explicit = tags.colour ?? tags.color
-    return explicit !== undefined && explicit !== '' ? explicit : '#000000'
-}
-
 const buildSegmentRecords = (
     variants: LineVariant[],
     stationCoordinates: Map<string, Coordinates>,
@@ -396,7 +387,9 @@ const buildSegmentRecords = (
             continue
         }
 
-        const color = resolveColor(routeGeometry.relation.tags ?? {})
+        // Color is a line property; segments inherit it so map rendering stays
+        // Consistent with the line badge color.
+        const color = variant.color
 
         for (let position = 0; position < variant.stationIds.length - 1; position++) {
             const fromStationId = variant.stationIds[position]

@@ -1,0 +1,1 @@
+ALTER TABLE "lines" ADD COLUMN "color" varchar(7) DEFAULT '#000000' NOT NULL;

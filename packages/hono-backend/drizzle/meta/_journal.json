@@ -22,6 +22,13 @@
             "when": 1778263972263,
             "tag": "0002_public_timeslip",
             "breakpoints": true
+        },
+        {
+            "idx": 3,
+            "version": "7",
+            "when": 1779836218642,
+            "tag": "0003_add_lines_color",
+            "breakpoints": true
         }
     ]
 }

@@ -9,6 +9,7 @@ export const lines = pgTable('lines', {
     name: varchar({ length: 255 }).notNull(),
     type: varchar({ length: 32 }).$type<RouteType>().notNull(),
     isCircular: boolean().notNull().default(false),
+    color: varchar({ length: 7 }).notNull().default('#000000'),
 })
 
 // Todo: avoid deprecated syntax: #FRE-562

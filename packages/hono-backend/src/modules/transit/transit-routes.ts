@@ -35,6 +35,7 @@ const linesResponseSchema = z.array(
         name: z.string(),
         type: z.enum(ROUTE_TYPE_PRIORITY),
         isCircular: z.boolean(),
+        color: z.string(),
         stations: z.array(z.string()),
     })
 )

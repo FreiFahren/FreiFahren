@@ -23,6 +23,7 @@ export type Line = {
   name: string;
   type: LineType;
   isCircular: boolean;
+  color: string;
   stations: StationId[];
 };
 
