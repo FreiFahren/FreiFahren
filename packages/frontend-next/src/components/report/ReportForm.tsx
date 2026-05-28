@@ -7,7 +7,6 @@ import { PageHeader } from '@/components/templates/PageHeader';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
-import { Route as IndexRoute } from '@/routes/index';
 
 import { NAMESPACE } from './ReportForm.i18n';
 
@@ -107,7 +106,7 @@ export function ReportForm() {
   return (
     <div className="bg-card animate-in fade-in fixed inset-0 z-30 overflow-y-auto duration-150">
       <div className="mx-auto flex min-h-full w-full max-w-md flex-col">
-        <PageHeader title={t('title')} onBack={() => navigate({ to: IndexRoute.to })} />
+        <PageHeader title={t('title')} onBack={() => navigate({ to: '/' })} />
         <LinePicker selectedLine={lineName} onSelectLine={setLineName} />
       </div>
     </div>
