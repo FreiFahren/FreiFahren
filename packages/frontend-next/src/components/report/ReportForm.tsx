@@ -2,7 +2,13 @@ import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { LINE_TYPE_PRIORITY, type LineType, useLines } from '@/api/transit';
+import {
+  compareLineOrder,
+  type LineType,
+  resolveStationLineNames,
+  useLines,
+  useStations,
+} from '@/api/transit';
 import { PageHeader } from '@/components/templates/PageHeader';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
@@ -17,28 +23,21 @@ const FILTERS: LineFilter[] = ['all', 'subway', 'light_rail', 'tram'];
 type LinePickerProps = {
   selectedLine: string | null;
   onSelectLine: (name: string | null) => void;
+  filter: LineFilter;
+  onChangeFilter: (filter: LineFilter) => void;
 };
 
-function LinePicker({ selectedLine, onSelectLine }: LinePickerProps) {
+function LinePicker({ selectedLine, onSelectLine, filter, onChangeFilter }: LinePickerProps) {
   const { t } = useTranslation(NAMESPACE);
   const { data: lines } = useLines();
-  const [filter, setFilter] = useState<LineFilter>('all');
 
-  // One badge per line name (collapsing per-direction variants), ordered
-  // U-Bahn → S-Bahn → Tram, then ascending within a group (e.g. U1 before U9).
+  // One badge per line name (collapsing per-direction variants).
   const allLines = () => {
     const typeByName = new Map<string, LineType>();
     for (const line of lines ?? []) {
       if (!typeByName.has(line.name)) typeByName.set(line.name, line.type);
     }
-    return [...typeByName]
-      .map(([name, type]) => ({ name, type }))
-      .sort((a, b) => {
-        if (LINE_TYPE_PRIORITY[a.type] !== LINE_TYPE_PRIORITY[b.type]) {
-          return LINE_TYPE_PRIORITY[a.type] - LINE_TYPE_PRIORITY[b.type];
-        }
-        return parseInt(a.name.replace(/\D/g, ''), 10) - parseInt(b.name.replace(/\D/g, ''), 10);
-      });
+    return [...typeByName].map(([name, type]) => ({ name, type })).sort(compareLineOrder);
   };
 
   const visibleLines = filter === 'all' ? allLines() : allLines().filter((l) => l.type === filter);
@@ -55,7 +54,7 @@ function LinePicker({ selectedLine, onSelectLine }: LinePickerProps) {
           size="sm"
           value={filter}
           onValueChange={(value) => {
-            if (value) setFilter(value as LineFilter);
+            if (value) onChangeFilter(value as LineFilter);
           }}
           className="bg-surface-solid border-border border"
         >
@@ -85,7 +84,7 @@ function LinePicker({ selectedLine, onSelectLine }: LinePickerProps) {
                   return;
                 }
                 onSelectLine(line.name);
-                setFilter(line.type);
+                onChangeFilter(line.type);
               }}
               className="rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             >
@@ -98,16 +97,90 @@ function LinePicker({ selectedLine, onSelectLine }: LinePickerProps) {
   );
 }
 
+type StationPickerProps = {
+  selectedLine: string | null;
+  lineFilter: LineFilter;
+  selectedStationId: string | null;
+  onSelectStation: (id: string | null) => void;
+};
+
+function StationPicker({
+  selectedLine,
+  lineFilter,
+  selectedStationId,
+  onSelectStation,
+}: StationPickerProps) {
+  const { t } = useTranslation(NAMESPACE);
+  const { data: stations } = useStations();
+  const { data: lines } = useLines();
+
+  const typeByName = new Map<string, LineType>();
+  for (const line of lines ?? []) typeByName.set(line.name, line.type);
+
+  const visibleStations = Object.values(stations ?? {})
+    .filter((station) => {
+      const stationLineNames = resolveStationLineNames(station.lines, lines);
+      if (selectedLine && !stationLineNames.includes(selectedLine)) return false;
+      if (lineFilter !== 'all') {
+        return stationLineNames.some((name) => typeByName.get(name) === lineFilter);
+      }
+      return true;
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  return (
+    <section className="mt-6 px-4">
+      <div className="mb-3 flex items-center gap-1 tracking-wide uppercase">
+        <h2 className="text-sm font-semibold">{t('station')}</h2>
+        <p className="text-destructive text-[0.625rem] tracking-wide">{t('required')}</p>
+      </div>
+      <ul>
+        {visibleStations.map((station) => {
+          const isSelected = selectedStationId === station.id;
+          return (
+            <li key={station.id} className="border-border/60 border-b last:border-b-0">
+              <button
+                type="button"
+                aria-pressed={isSelected}
+                onClick={() => onSelectStation(isSelected ? null : station.id)}
+                className={cn(
+                  'hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-2 py-2 text-left text-xs outline-none',
+                  isSelected && 'ring-2 ring-white',
+                )}
+              >
+                {station.name}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
 export function ReportForm() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
   const [lineName, setLineName] = useState<string | null>(null);
+  const [lineFilter, setLineFilter] = useState<LineFilter>('all');
+  const [stationId, setStationId] = useState<string | null>(null);
 
   return (
     <div className="bg-card animate-in fade-in fixed inset-0 z-30 overflow-y-auto duration-150">
       <div className="mx-auto flex min-h-full w-full max-w-md flex-col">
         <PageHeader title={t('title')} onBack={() => navigate({ to: '/' })} />
-        <LinePicker selectedLine={lineName} onSelectLine={setLineName} />
+        <LinePicker
+          selectedLine={lineName}
+          onSelectLine={setLineName}
+          filter={lineFilter}
+          onChangeFilter={setLineFilter}
+        />
+        <StationPicker
+          selectedLine={lineName}
+          lineFilter={lineFilter}
+          selectedStationId={stationId}
+          onSelectStation={setStationId}
+        />
       </div>
     </div>
   );
