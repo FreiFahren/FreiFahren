@@ -6,7 +6,7 @@ import type { Station } from '@/api/transit';
 
 const FADE_DURATION_MS = 60 * 60 * 1000;
 const MIN_OPACITY = 0.2;
-const PULSE_AGE_MS = 60 * 1000;
+const PULSE_AGE_MS = 60 * 15 * 1000;
 const RECOMPUTE_INTERVAL_MS = 30 * 1000;
 
 type ReportMarkerProps = {
@@ -40,11 +40,11 @@ export function ReportMarker({ report, station }: ReportMarkerProps) {
       longitude={station.coordinates.longitude}
       opacity={opacity.toString()}
     >
-      <span className="relative block h-5 w-5 pointer-events-none">
+      <span className="pointer-events-none relative block h-5 w-5">
         {shouldPulse && (
-          <span className="absolute inset-0 rounded-full bg-destructive opacity-75 animate-ping" />
+          <span className="bg-destructive absolute inset-0 animate-ping rounded-full opacity-75" />
         )}
-        <span className="relative block h-5 w-5 rounded-full border-2 border-white bg-destructive shadow-sm" />
+        <span className="bg-destructive relative block h-5 w-5 rounded-full border-2 border-white shadow-sm" />
       </span>
     </Marker>
   );
