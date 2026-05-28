@@ -1,8 +1,25 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { requireEnv } from '@/lib/utils';
 
-import { type Line, useLines } from './transit';
+import { fetchJson, type Line, useLines } from './transit';
+
+export type Report = {
+  timestamp: string;
+  stationId: string;
+  directionId: string | null;
+  lineId: string | null;
+  isPredicted: boolean;
+};
+
+export const useReports = () =>
+  useQuery({
+    queryKey: ['reports'],
+    queryFn: () => fetchJson<Report[]>('/v0/reports'),
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
+    staleTime: 30_000,
+  });
 
 const API_URL = requireEnv('VITE_API_URL');
 
