@@ -1,16 +1,20 @@
 import { createContext, useContext } from 'react';
 
-import type { LineType } from '@/api/transit';
+import type { LineType, Station } from '@/api/transit';
 
 export type LineFilter = 'all' | LineType;
 
 export type ReportSelectionContextValue = {
   lineName: string | null;
-  setLineName: (name: string | null) => void;
   lineFilter: LineFilter;
-  setLineFilter: (filter: LineFilter) => void;
   stationId: string | null;
-  setStationId: (id: string | null) => void;
+
+  selectLine: (name: string | null) => void;
+  setLineFilter: (filter: LineFilter) => void;
+  selectStation: (id: string | null) => void;
+
+  visibleLines: { name: string; type: LineType }[];
+  visibleStations: Station[];
 };
 
 export const ReportSelectionContext = createContext<ReportSelectionContextValue | null>(null);
