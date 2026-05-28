@@ -148,18 +148,37 @@ function StationPicker({
   for (const line of lines ?? []) typeByName.set(line.name, line.type);
 
   const selectedStation = selectedStationId ? stations?.[selectedStationId] : undefined;
-  const visibleStations = selectedStation
-    ? [selectedStation]
-    : Object.values(stations ?? {})
-        .filter((station) => {
-          const stationLineNames = resolveStationLineNames(station.lines, lines);
-          if (selectedLine && !stationLineNames.includes(selectedLine)) return false;
-          if (lineFilter !== 'all') {
-            return stationLineNames.some((name) => typeByName.get(name) === lineFilter);
-          }
-          return true;
-        })
-        .sort((a, b) => a.name.localeCompare(b.name));
+
+  const stationsAlongLine = () => {
+    // Walk every variant of the selected line and emit stations in their stored order,
+    // deduplicating across direction variants.
+    const seen = new Set<string>();
+    const ordered: Station[] = [];
+    for (const line of lines ?? []) {
+      if (line.name !== selectedLine) continue;
+      for (const stationId of line.stations) {
+        if (seen.has(stationId)) continue;
+        seen.add(stationId);
+        const station = stations?.[stationId];
+        if (station) ordered.push(station);
+      }
+    }
+    return ordered;
+  };
+
+  const stationsByType = () =>
+    Object.values(stations ?? {})
+      .filter((station) => {
+        if (lineFilter === 'all') return true;
+        const names = resolveStationLineNames(station.lines, lines);
+        return names.some((name) => typeByName.get(name) === lineFilter);
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+  let visibleStations: Station[];
+  if (selectedStation) visibleStations = [selectedStation];
+  else if (selectedLine) visibleStations = stationsAlongLine();
+  else visibleStations = stationsByType();
 
   return (
     <section className="mt-6 flex min-h-0 flex-1 flex-col px-4">

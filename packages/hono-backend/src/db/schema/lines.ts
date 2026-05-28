@@ -12,7 +12,6 @@ export const lines = pgTable('lines', {
     color: varchar({ length: 7 }).notNull().default('#000000'),
 })
 
-// Todo: avoid deprecated syntax: #FRE-562
 export const lineStations = pgTable(
     'line_stations',
     {
