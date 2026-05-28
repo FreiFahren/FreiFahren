@@ -21,6 +21,19 @@ type LineFilter = 'all' | LineType;
 
 const FILTERS: LineFilter[] = ['all', 'subway', 'light_rail', 'tram'];
 
+function ClearSelectionButton({ onClick }: { onClick: () => void }) {
+  const { t } = useTranslation(NAMESPACE);
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="text-muted-foreground hover:text-foreground text-xs outline-none focus-visible:underline"
+    >
+      {t('clearSelection')}
+    </button>
+  );
+}
+
 type LinePickerProps = {
   selectedLine: string | null;
   onSelectLine: (name: string | null) => void;
@@ -80,6 +93,12 @@ function LinePicker({
           ))}
         </ToggleGroup>
       </div>
+
+      {selectedLine && (
+        <div className="mb-1 flex justify-end">
+          <ClearSelectionButton onClick={() => onSelectLine(null)} />
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-2">
         {visibleLines.map((line) => {
@@ -144,9 +163,12 @@ function StationPicker({
 
   return (
     <section className="mt-6 px-4">
-      <div className="mb-3 flex items-center gap-1 tracking-wide uppercase">
-        <h2 className="text-sm font-semibold">{t('station')}</h2>
-        <p className="text-destructive text-[0.625rem] tracking-wide">{t('required')}</p>
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-1 tracking-wide uppercase">
+          <h2 className="text-sm font-semibold">{t('station')}</h2>
+          <p className="text-destructive text-[0.625rem] tracking-wide">{t('required')}</p>
+        </div>
+        {selectedStationId && <ClearSelectionButton onClick={() => onSelectStation(null)} />}
       </div>
       <ul>
         {visibleStations.map((station) => {

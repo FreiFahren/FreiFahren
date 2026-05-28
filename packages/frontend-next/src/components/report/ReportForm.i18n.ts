@@ -13,6 +13,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   tram: 'Tram',
   station: 'Station',
   required: 'Required',
+  clearSelection: 'clear selection',
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
@@ -26,4 +27,5 @@ i18n.addResourceBundle('de', NAMESPACE, {
   tram: 'Tram',
   station: 'Station',
   required: 'Erforderlich',
+  clearSelection: 'Auswahl löschen',
 });
