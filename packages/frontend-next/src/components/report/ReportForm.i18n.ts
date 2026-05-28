@@ -11,6 +11,9 @@ i18n.addResourceBundle('en', NAMESPACE, {
   subway: 'U-Bahn',
   light_rail: 'S-Bahn',
   tram: 'Tram',
+  station: 'Station',
+  required: 'Required',
+  clearSelection: 'clear selection',
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
@@ -22,4 +25,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
   subway: 'U-Bahn',
   light_rail: 'S-Bahn',
   tram: 'Tram',
+  station: 'Station',
+  required: 'Erforderlich',
+  clearSelection: 'Auswahl löschen',
 });

@@ -3,13 +3,12 @@ import { Search, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { resolveStationLineNames, type Station, useLines, useStations } from '@/api/transit';
-import { LineBadge } from '@/components/transit/LineBadge';
+import { type Station, useStations } from '@/api/transit';
+import { StationListItem } from '@/components/transit/StationListItem';
 import { Backdrop } from '@/components/ui/backdrop';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 import { Route as StationDetailRoute } from '@/routes/_map/stations/$stationId';
 
 import { NAMESPACE } from './StationSearch.i18n';
@@ -33,7 +32,6 @@ export function StationSearch() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
   const { data: stations } = useStations();
-  const { data: lines } = useLines();
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -92,26 +90,13 @@ export function StationSearch() {
               {results.length === 0 ? (
                 <div className="text-muted-foreground px-3 py-4 text-xs">{t('noResults')}</div>
               ) : (
-                results.map((station) => {
-                  const lineNames = resolveStationLineNames(station.lines, lines);
-                  return (
-                    <button
-                      key={station.id}
-                      type="button"
-                      onClick={() => selectStation(station)}
-                      className={cn(
-                        'hover:bg-muted focus-visible:bg-muted flex w-full items-center gap-3 rounded-md px-2 py-2 text-left outline-none',
-                      )}
-                    >
-                      <span className="shrink-0 text-xs">{station.name}</span>
-                      <div className="ml-auto flex min-w-0 gap-1 overflow-hidden">
-                        {lineNames.map((name) => (
-                          <LineBadge key={name} name={name} />
-                        ))}
-                      </div>
-                    </button>
-                  );
-                })
+                results.map((station) => (
+                  <StationListItem
+                    key={station.id}
+                    station={station}
+                    onClick={() => selectStation(station)}
+                  />
+                ))
               )}
             </Card>
           )}

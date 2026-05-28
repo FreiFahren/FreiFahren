@@ -1,47 +1,33 @@
 import { useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { LINE_TYPE_PRIORITY, type LineType, useLines } from '@/api/transit';
 import { PageHeader } from '@/components/templates/PageHeader';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
 
 import { NAMESPACE } from './ReportForm.i18n';
-
-type LineFilter = 'all' | LineType;
+import { type LineFilter, useReportSelection } from './ReportSelection.context';
+import { ReportSelectionProvider } from './ReportSelectionProvider';
 
 const FILTERS: LineFilter[] = ['all', 'subway', 'light_rail', 'tram'];
 
-type LinePickerProps = {
-  selectedLine: string | null;
-  onSelectLine: (name: string | null) => void;
-};
-
-function LinePicker({ selectedLine, onSelectLine }: LinePickerProps) {
+function ClearSelectionButton({ onClick }: { onClick: () => void }) {
   const { t } = useTranslation(NAMESPACE);
-  const { data: lines } = useLines();
-  const [filter, setFilter] = useState<LineFilter>('all');
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="text-muted-foreground hover:text-foreground text-xs outline-none focus-visible:underline"
+    >
+      {t('clearSelection')}
+    </button>
+  );
+}
 
-  // One badge per line name (collapsing per-direction variants), ordered
-  // U-Bahn → S-Bahn → Tram, then ascending within a group (e.g. U1 before U9).
-  const allLines = () => {
-    const typeByName = new Map<string, LineType>();
-    for (const line of lines ?? []) {
-      if (!typeByName.has(line.name)) typeByName.set(line.name, line.type);
-    }
-    return [...typeByName]
-      .map(([name, type]) => ({ name, type }))
-      .sort((a, b) => {
-        if (LINE_TYPE_PRIORITY[a.type] !== LINE_TYPE_PRIORITY[b.type]) {
-          return LINE_TYPE_PRIORITY[a.type] - LINE_TYPE_PRIORITY[b.type];
-        }
-        return parseInt(a.name.replace(/\D/g, ''), 10) - parseInt(b.name.replace(/\D/g, ''), 10);
-      });
-  };
-
-  const visibleLines = filter === 'all' ? allLines() : allLines().filter((l) => l.type === filter);
+function LinePicker() {
+  const { t } = useTranslation(NAMESPACE);
+  const { lineName, lineFilter, setLineFilter, selectLine, visibleLines } = useReportSelection();
 
   return (
     <section className="px-4">
@@ -53,9 +39,9 @@ function LinePicker({ selectedLine, onSelectLine }: LinePickerProps) {
         <ToggleGroup
           type="single"
           size="sm"
-          value={filter}
+          value={lineFilter}
           onValueChange={(value) => {
-            if (value) setFilter(value as LineFilter);
+            if (value) setLineFilter(value as LineFilter);
           }}
           className="bg-surface-solid border-border border"
         >
@@ -71,22 +57,21 @@ function LinePicker({ selectedLine, onSelectLine }: LinePickerProps) {
         </ToggleGroup>
       </div>
 
+      {lineName && (
+        <div className="mb-1 flex justify-end">
+          <ClearSelectionButton onClick={() => selectLine(null)} />
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-2">
         {visibleLines.map((line) => {
-          const isSelected = selectedLine === line.name;
+          const isSelected = lineName === line.name;
           return (
             <button
               key={line.name}
               type="button"
               aria-pressed={isSelected}
-              onClick={() => {
-                if (isSelected) {
-                  onSelectLine(null);
-                  return;
-                }
-                onSelectLine(line.name);
-                setFilter(line.type);
-              }}
+              onClick={() => selectLine(isSelected ? null : line.name)}
               className="rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             >
               <LineBadge name={line.name} className={cn(isSelected && 'ring-2 ring-white')} />
@@ -98,17 +83,56 @@ function LinePicker({ selectedLine, onSelectLine }: LinePickerProps) {
   );
 }
 
+function StationPicker() {
+  const { t } = useTranslation(NAMESPACE);
+  const { stationId, selectStation, visibleStations } = useReportSelection();
+
+  return (
+    <section className="mt-6 flex min-h-0 flex-1 flex-col px-4">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-1 tracking-wide uppercase">
+          <h2 className="text-sm font-semibold">{t('station')}</h2>
+          <p className="text-destructive text-[0.625rem] tracking-wide">{t('required')}</p>
+        </div>
+        {stationId && <ClearSelectionButton onClick={() => selectStation(null)} />}
+      </div>
+      <ul className="min-h-0 flex-1 overflow-y-auto">
+        {visibleStations.map((station) => {
+          const isSelected = stationId === station.id;
+          return (
+            <li key={station.id} className="border-border/60 border-b last:border-b-0">
+              <button
+                type="button"
+                aria-pressed={isSelected}
+                onClick={() => selectStation(isSelected ? null : station.id)}
+                className={cn(
+                  'hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-2 py-2 text-left text-xs outline-none',
+                  isSelected && 'ring-2 ring-white ring-inset',
+                )}
+              >
+                {station.name}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
 export function ReportForm() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
-  const [lineName, setLineName] = useState<string | null>(null);
 
   return (
-    <div className="bg-card animate-in fade-in fixed inset-0 z-30 overflow-y-auto duration-150">
-      <div className="mx-auto flex min-h-full w-full max-w-md flex-col">
-        <PageHeader title={t('title')} onBack={() => navigate({ to: '/' })} />
-        <LinePicker selectedLine={lineName} onSelectLine={setLineName} />
+    <ReportSelectionProvider>
+      <div className="bg-card animate-in fade-in fixed inset-0 z-30 duration-150">
+        <div className="mx-auto flex h-full w-full max-w-md flex-col">
+          <PageHeader title={t('title')} onBack={() => navigate({ to: '/' })} />
+          <LinePicker />
+          <StationPicker />
+        </div>
       </div>
-    </div>
+    </ReportSelectionProvider>
   );
 }

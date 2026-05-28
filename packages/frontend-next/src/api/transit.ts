@@ -25,6 +25,17 @@ export const LINE_TYPE_PRIORITY: Record<LineType, number> = {
   tram: 2,
 };
 
+// Canonical display order: U-Bahn → S-Bahn → Tram, then ascending within a group (U1 before U9).
+export function compareLineOrder(
+  a: { name: string; type?: LineType },
+  b: { name: string; type?: LineType },
+): number {
+  if (a.type && b.type && LINE_TYPE_PRIORITY[a.type] !== LINE_TYPE_PRIORITY[b.type]) {
+    return LINE_TYPE_PRIORITY[a.type] - LINE_TYPE_PRIORITY[b.type];
+  }
+  return parseInt(a.name.replace(/\D/g, ''), 10) - parseInt(b.name.replace(/\D/g, ''), 10);
+}
+
 export type Line = {
   id: string;
   name: string;
