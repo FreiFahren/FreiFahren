@@ -6,6 +6,7 @@ import {
   compareLineOrder,
   type LineType,
   resolveStationLineNames,
+  type Station,
   useLines,
   useStations,
 } from '@/api/transit';
@@ -25,9 +26,16 @@ type LinePickerProps = {
   onSelectLine: (name: string | null) => void;
   filter: LineFilter;
   onChangeFilter: (filter: LineFilter) => void;
+  station: Station | null;
 };
 
-function LinePicker({ selectedLine, onSelectLine, filter, onChangeFilter }: LinePickerProps) {
+function LinePicker({
+  selectedLine,
+  onSelectLine,
+  filter,
+  onChangeFilter,
+  station,
+}: LinePickerProps) {
   const { t } = useTranslation(NAMESPACE);
   const { data: lines } = useLines();
 
@@ -40,7 +48,10 @@ function LinePicker({ selectedLine, onSelectLine, filter, onChangeFilter }: Line
     return [...typeByName].map(([name, type]) => ({ name, type })).sort(compareLineOrder);
   };
 
-  const visibleLines = filter === 'all' ? allLines() : allLines().filter((l) => l.type === filter);
+  const stationLineNames = station ? new Set(resolveStationLineNames(station.lines, lines)) : null;
+  const visibleLines = allLines()
+    .filter((l) => filter === 'all' || l.type === filter)
+    .filter((l) => !stationLineNames || stationLineNames.has(l.name));
 
   return (
     <section className="px-4">
@@ -117,16 +128,19 @@ function StationPicker({
   const typeByName = new Map<string, LineType>();
   for (const line of lines ?? []) typeByName.set(line.name, line.type);
 
-  const visibleStations = Object.values(stations ?? {})
-    .filter((station) => {
-      const stationLineNames = resolveStationLineNames(station.lines, lines);
-      if (selectedLine && !stationLineNames.includes(selectedLine)) return false;
-      if (lineFilter !== 'all') {
-        return stationLineNames.some((name) => typeByName.get(name) === lineFilter);
-      }
-      return true;
-    })
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const selectedStation = selectedStationId ? stations?.[selectedStationId] : undefined;
+  const visibleStations = selectedStation
+    ? [selectedStation]
+    : Object.values(stations ?? {})
+        .filter((station) => {
+          const stationLineNames = resolveStationLineNames(station.lines, lines);
+          if (selectedLine && !stationLineNames.includes(selectedLine)) return false;
+          if (lineFilter !== 'all') {
+            return stationLineNames.some((name) => typeByName.get(name) === lineFilter);
+          }
+          return true;
+        })
+        .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <section className="mt-6 px-4">
@@ -164,6 +178,8 @@ export function ReportForm() {
   const [lineName, setLineName] = useState<string | null>(null);
   const [lineFilter, setLineFilter] = useState<LineFilter>('all');
   const [stationId, setStationId] = useState<string | null>(null);
+  const { data: stations } = useStations();
+  const selectedStation = stationId ? (stations?.[stationId] ?? null) : null;
 
   return (
     <div className="bg-card animate-in fade-in fixed inset-0 z-30 overflow-y-auto duration-150">
@@ -174,6 +190,7 @@ export function ReportForm() {
           onSelectLine={setLineName}
           filter={lineFilter}
           onChangeFilter={setLineFilter}
+          station={selectedStation}
         />
         <StationPicker
           selectedLine={lineName}
