@@ -89,7 +89,7 @@ export function resolveStationLineNames(
   return names;
 }
 
-async function fetchJson<T>(path: string): Promise<T> {
+export async function fetchJson<T>(path: string): Promise<T> {
   const response = await fetch(`${API_URL}${path}`);
   if (!response.ok) {
     throw new Error(`Request to ${path} failed: ${response.status}`);
