@@ -31,7 +31,7 @@ export function StationListItem({ station, onClick, selected }: StationListItemP
       onClick={onClick}
       className={cn(
         'hover:bg-muted focus-visible:bg-muted flex w-full items-center gap-3 rounded-md px-2 py-2 text-left outline-none',
-        selected && 'ring-2 ring-white',
+        selected && 'ring-2 ring-white ring-inset',
       )}
     >
       <span className="shrink-0 text-xs">{station.name}</span>

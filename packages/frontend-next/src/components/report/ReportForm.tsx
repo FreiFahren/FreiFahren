@@ -162,7 +162,7 @@ function StationPicker({
         .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <section className="mt-6 px-4">
+    <section className="mt-6 flex min-h-0 flex-1 flex-col px-4">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-1 tracking-wide uppercase">
           <h2 className="text-sm font-semibold">{t('station')}</h2>
@@ -170,7 +170,7 @@ function StationPicker({
         </div>
         {selectedStationId && <ClearSelectionButton onClick={() => onSelectStation(null)} />}
       </div>
-      <ul>
+      <ul className="min-h-0 flex-1 overflow-y-auto">
         {visibleStations.map((station) => {
           const isSelected = selectedStationId === station.id;
           return (
@@ -181,7 +181,7 @@ function StationPicker({
                 onClick={() => onSelectStation(isSelected ? null : station.id)}
                 className={cn(
                   'hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-2 py-2 text-left text-xs outline-none',
-                  isSelected && 'ring-2 ring-white',
+                  isSelected && 'ring-2 ring-white ring-inset',
                 )}
               >
                 {station.name}
@@ -204,8 +204,8 @@ export function ReportForm() {
   const selectedStation = stationId ? (stations?.[stationId] ?? null) : null;
 
   return (
-    <div className="bg-card animate-in fade-in fixed inset-0 z-30 overflow-y-auto duration-150">
-      <div className="mx-auto flex min-h-full w-full max-w-md flex-col">
+    <div className="bg-card animate-in fade-in fixed inset-0 z-30 duration-150">
+      <div className="mx-auto flex h-full w-full max-w-md flex-col">
         <PageHeader title={t('title')} onBack={() => navigate({ to: '/' })} />
         <LinePicker
           selectedLine={lineName}
