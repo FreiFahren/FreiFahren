@@ -8,13 +8,16 @@ export type ReportSelectionContextValue = {
   lineName: string | null;
   lineFilter: LineFilter;
   stationId: string | null;
+  directionStationId: string | null;
 
   selectLine: (name: string | null) => void;
   setLineFilter: (filter: LineFilter) => void;
   selectStation: (id: string | null) => void;
+  selectDirection: (id: string | null) => void;
 
   visibleLines: { name: string; type: LineType }[];
   visibleStations: Station[];
+  directionOptions: Station[];
 };
 
 export const ReportSelectionContext = createContext<ReportSelectionContextValue | null>(null);

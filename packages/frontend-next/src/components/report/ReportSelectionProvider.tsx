@@ -19,12 +19,14 @@ export function ReportSelectionProvider({ children }: { children: ReactNode }) {
   const [lineName, setLineName] = useState<string | null>(null);
   const [lineFilter, setLineFilter] = useState<LineFilter>('all');
   const [stationId, setStationId] = useState<string | null>(null);
+  const [directionStationId, setDirectionStationId] = useState<string | null>(null);
 
   const { data: lines } = useLines();
   const { data: stations } = useStations();
 
   const selectLine = (name: string | null) => {
     setLineName(name);
+    setDirectionStationId(null);
     if (name) {
       const type = lines?.find((l) => l.name === name)?.type;
       if (type) setLineFilter(type);
@@ -34,7 +36,12 @@ export function ReportSelectionProvider({ children }: { children: ReactNode }) {
   // Clearing the station also clears the chosen line so the user starts fresh.
   const selectStation = (id: string | null) => {
     setStationId(id);
+    setDirectionStationId(null);
     if (id === null) setLineName(null);
+  };
+
+  const selectDirection = (id: string | null) => {
+    setDirectionStationId(id);
   };
 
   // One badge per line name (collapses per-direction variants), sorted by canonical order.
@@ -83,15 +90,33 @@ export function ReportSelectionProvider({ children }: { children: ReactNode }) {
   else if (lineName) visibleStations = stationsAlongLine();
   else visibleStations = stationsByType();
 
+  // Direction picker shows the two endpoint stations of the selected line.
+  // For lines with multiple direction variants (U1, U1-a, U1-b …) pick the canonical "-a" variant
+  // and fall back to the only variant when there is just one.
+  const directionOptions: Station[] = [];
+  if (lineName && selectedStation) {
+    const variants = (lines ?? []).filter((l) => l.name === lineName);
+    const variant = variants.find((l) => l.id.endsWith('-a')) ?? variants[0];
+    if (variant && variant.stations.length >= 2) {
+      const first = stations?.[variant.stations[0]];
+      const last = stations?.[variant.stations[variant.stations.length - 1]];
+      if (first) directionOptions.push(first);
+      if (last && last.id !== first?.id) directionOptions.push(last);
+    }
+  }
+
   const value: ReportSelectionContextValue = {
     lineName,
     lineFilter,
     stationId,
+    directionStationId,
     selectLine,
     setLineFilter,
     selectStation,
+    selectDirection,
     visibleLines,
     visibleStations,
+    directionOptions,
   };
 
   return <ReportSelectionContext value={value}>{children}</ReportSelectionContext>;

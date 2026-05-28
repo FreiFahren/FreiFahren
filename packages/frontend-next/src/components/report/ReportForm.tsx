@@ -1,4 +1,5 @@
 import { useNavigate } from '@tanstack/react-router';
+import { ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { PageHeader } from '@/components/templates/PageHeader';
@@ -88,7 +89,15 @@ function StationPicker() {
   const { stationId, selectStation, visibleStations } = useReportSelection();
 
   return (
-    <section className="mt-6 flex min-h-0 flex-1 flex-col px-4">
+    <section
+      className={cn(
+        'mt-6 flex flex-col px-4',
+        // While the user is still browsing, the list fills the form and scrolls inside.
+        // Once a station is picked the list collapses to a single row so the direction
+        // picker (and the future submit button) stay visible.
+        !stationId && 'min-h-0 flex-1',
+      )}
+    >
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-1 tracking-wide uppercase">
           <h2 className="text-sm font-semibold">{t('station')}</h2>
@@ -96,7 +105,7 @@ function StationPicker() {
         </div>
         {stationId && <ClearSelectionButton onClick={() => selectStation(null)} />}
       </div>
-      <ul className="min-h-0 flex-1 overflow-y-auto">
+      <ul className={cn(!stationId && 'min-h-0 flex-1 overflow-y-auto')}>
         {visibleStations.map((station) => {
           const isSelected = stationId === station.id;
           return (
@@ -120,6 +129,42 @@ function StationPicker() {
   );
 }
 
+function DirectionPicker() {
+  const { t } = useTranslation(NAMESPACE);
+  const { directionStationId, selectDirection, directionOptions } = useReportSelection();
+
+  if (directionOptions.length === 0) return null;
+
+  return (
+    <section className="mt-6 px-4">
+      <div className="mb-3 flex items-center gap-1 tracking-wide uppercase">
+        <h2 className="text-sm font-semibold">{t('direction')}</h2>
+        <p className="text-muted-foreground text-[0.625rem] tracking-wide">{t('optional')}</p>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        {directionOptions.map((station) => {
+          const isSelected = directionStationId === station.id;
+          return (
+            <button
+              key={station.id}
+              type="button"
+              aria-pressed={isSelected}
+              onClick={() => selectDirection(isSelected ? null : station.id)}
+              className={cn(
+                'border-border bg-surface-solid hover:bg-muted flex items-center gap-2 rounded-md border px-2 py-1.5 text-left text-sm outline-none',
+                isSelected && 'ring-2 ring-white ring-inset',
+              )}
+            >
+              <ChevronRight className="text-muted-foreground size-4 shrink-0" />
+              <span className="truncate">{station.name}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export function ReportForm() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
@@ -131,6 +176,7 @@ export function ReportForm() {
           <PageHeader title={t('title')} onBack={() => navigate({ to: '/' })} />
           <LinePicker />
           <StationPicker />
+          <DirectionPicker />
         </div>
       </div>
     </ReportSelectionProvider>
