@@ -14,6 +14,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   station: 'Station',
   required: 'Required',
   clearSelection: 'clear selection',
+  direction: 'Direction',
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
@@ -28,4 +29,5 @@ i18n.addResourceBundle('de', NAMESPACE, {
   station: 'Station',
   required: 'Erforderlich',
   clearSelection: 'Auswahl löschen',
+  direction: 'Richtung',
 });

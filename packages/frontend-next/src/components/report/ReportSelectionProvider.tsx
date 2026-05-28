@@ -19,12 +19,14 @@ export function ReportSelectionProvider({ children }: { children: ReactNode }) {
   const [lineName, setLineName] = useState<string | null>(null);
   const [lineFilter, setLineFilter] = useState<LineFilter>('all');
   const [stationId, setStationId] = useState<string | null>(null);
+  const [directionStationId, setDirectionStationId] = useState<string | null>(null);
 
   const { data: lines } = useLines();
   const { data: stations } = useStations();
 
   const selectLine = (name: string | null) => {
     setLineName(name);
+    setDirectionStationId(null);
     if (name) {
       const type = lines?.find((l) => l.name === name)?.type;
       if (type) setLineFilter(type);
@@ -34,7 +36,12 @@ export function ReportSelectionProvider({ children }: { children: ReactNode }) {
   // Clearing the station also clears the chosen line so the user starts fresh.
   const selectStation = (id: string | null) => {
     setStationId(id);
+    setDirectionStationId(null);
     if (id === null) setLineName(null);
+  };
+
+  const selectDirection = (id: string | null) => {
+    setDirectionStationId(id);
   };
 
   // One badge per line name (collapses per-direction variants), sorted by canonical order.
@@ -83,15 +90,41 @@ export function ReportSelectionProvider({ children }: { children: ReactNode }) {
   else if (lineName) visibleStations = stationsAlongLine();
   else visibleStations = stationsByType();
 
+  // Direction picker exposes every endpoint reachable from the selected station along the
+  // chosen line. If the station sits on a single variant we get the two termini of that variant;
+  // if it sits on multiple variants (e.g. a branching trunk) we surface every endpoint across
+  // those variants, deduplicated. The variant a chosen endpoint belongs to can be resolved at
+  // submit time from (lineName, stationId, directionStationId).
+  const directionOptions: Station[] = [];
+  if (lineName && selectedStation) {
+    const seen = new Set<string>();
+    for (const variant of lines ?? []) {
+      if (variant.name !== lineName) continue;
+      if (!variant.stations.includes(selectedStation.id)) continue;
+      if (variant.stations.length < 2) continue;
+      const endpointIds = [variant.stations[0], variant.stations[variant.stations.length - 1]];
+      for (const id of endpointIds) {
+        if (seen.has(id)) continue;
+        const endpoint = stations?.[id];
+        if (!endpoint) continue;
+        seen.add(id);
+        directionOptions.push(endpoint);
+      }
+    }
+  }
+
   const value: ReportSelectionContextValue = {
     lineName,
     lineFilter,
     stationId,
+    directionStationId,
     selectLine,
     setLineFilter,
     selectStation,
+    selectDirection,
     visibleLines,
     visibleStations,
+    directionOptions,
   };
 
   return <ReportSelectionContext value={value}>{children}</ReportSelectionContext>;
