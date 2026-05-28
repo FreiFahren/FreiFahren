@@ -9,68 +9,109 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as StationsStationIdRouteImport } from './routes/stations/$stationId'
+import { Route as ReportRouteImport } from './routes/report'
+import { Route as MapRouteImport } from './routes/_map'
+import { Route as MapIndexRouteImport } from './routes/_map/index'
+import { Route as MapStationsStationIdRouteImport } from './routes/_map/stations/$stationId'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StationsStationIdRoute = StationsStationIdRouteImport.update({
+const MapRoute = MapRouteImport.update({
+  id: '/_map',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapIndexRoute = MapIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MapRoute,
+} as any)
+const MapStationsStationIdRoute = MapStationsStationIdRouteImport.update({
   id: '/stations/$stationId',
   path: '/stations/$stationId',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => MapRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/stations/$stationId': typeof StationsStationIdRoute
+  '/': typeof MapIndexRoute
+  '/report': typeof ReportRoute
+  '/stations/$stationId': typeof MapStationsStationIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/stations/$stationId': typeof StationsStationIdRoute
+  '/report': typeof ReportRoute
+  '/': typeof MapIndexRoute
+  '/stations/$stationId': typeof MapStationsStationIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/stations/$stationId': typeof StationsStationIdRoute
+  '/_map': typeof MapRouteWithChildren
+  '/report': typeof ReportRoute
+  '/_map/': typeof MapIndexRoute
+  '/_map/stations/$stationId': typeof MapStationsStationIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/stations/$stationId'
+  fullPaths: '/' | '/report' | '/stations/$stationId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/stations/$stationId'
-  id: '__root__' | '/' | '/stations/$stationId'
+  to: '/report' | '/' | '/stations/$stationId'
+  id: '__root__' | '/_map' | '/report' | '/_map/' | '/_map/stations/$stationId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  StationsStationIdRoute: typeof StationsStationIdRoute
+  MapRoute: typeof MapRouteWithChildren
+  ReportRoute: typeof ReportRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/stations/$stationId': {
-      id: '/stations/$stationId'
+    '/_map': {
+      id: '/_map'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof MapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_map/': {
+      id: '/_map/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof MapIndexRouteImport
+      parentRoute: typeof MapRoute
+    }
+    '/_map/stations/$stationId': {
+      id: '/_map/stations/$stationId'
       path: '/stations/$stationId'
       fullPath: '/stations/$stationId'
-      preLoaderRoute: typeof StationsStationIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof MapStationsStationIdRouteImport
+      parentRoute: typeof MapRoute
     }
   }
 }
 
+interface MapRouteChildren {
+  MapIndexRoute: typeof MapIndexRoute
+  MapStationsStationIdRoute: typeof MapStationsStationIdRoute
+}
+
+const MapRouteChildren: MapRouteChildren = {
+  MapIndexRoute: MapIndexRoute,
+  MapStationsStationIdRoute: MapStationsStationIdRoute,
+}
+
+const MapRouteWithChildren = MapRoute._addFileChildren(MapRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  StationsStationIdRoute: StationsStationIdRoute,
+  MapRoute: MapRouteWithChildren,
+  ReportRoute: ReportRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

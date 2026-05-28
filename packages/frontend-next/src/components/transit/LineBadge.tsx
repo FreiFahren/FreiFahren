@@ -20,7 +20,7 @@ export function LineBadge({ name, className }: LineBadgeProps) {
 
   return (
     <Badge
-      className={cn('h-6 rounded-sm px-2 text-xs font-semibold text-white', className)}
+      className={cn('h-6 w-[42px] rounded-sm px-2 text-xs font-semibold text-white', className)}
       style={color ? { backgroundColor: color } : undefined}
     >
       {name}

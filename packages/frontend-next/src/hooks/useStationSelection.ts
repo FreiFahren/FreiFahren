@@ -2,7 +2,7 @@ import { useMatch, useNavigate } from '@tanstack/react-router';
 import type { MapLayerMouseEvent } from 'react-map-gl/maplibre';
 
 import { type Station, useStations } from '@/api/transit';
-import { Route as StationDetailRoute } from '@/routes/stations/$stationId';
+import { Route as StationDetailRoute } from '@/routes/_map/stations/$stationId';
 
 type UseStationSelectionResult = {
   selectedStation: Station | undefined;
