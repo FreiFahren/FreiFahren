@@ -15,6 +15,8 @@ i18n.addResourceBundle('en', NAMESPACE, {
   required: 'Required',
   clearSelection: 'clear selection',
   direction: 'Direction',
+  submit: 'Submit report',
+  disclaimer: 'Shared anonymously with all Freifahren users.',
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
@@ -30,4 +32,6 @@ i18n.addResourceBundle('de', NAMESPACE, {
   required: 'Erforderlich',
   clearSelection: 'Auswahl löschen',
   direction: 'Richtung',
+  submit: 'Melden',
+  disclaimer: 'Anonym an alle Freifahren-Nutzer geteilt.',
 });

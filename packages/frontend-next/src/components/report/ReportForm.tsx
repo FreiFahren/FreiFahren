@@ -2,8 +2,10 @@ import { useNavigate } from '@tanstack/react-router';
 import { ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { useSubmitReport } from '@/api/reports';
 import { PageHeader } from '@/components/templates/PageHeader';
 import { LineBadge } from '@/components/transit/LineBadge';
+import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
 
@@ -165,6 +167,40 @@ function DirectionPicker() {
   );
 }
 
+function SubmitFooter() {
+  const { t } = useTranslation(NAMESPACE);
+  const { stationId, lineName, directionStationId } = useReportSelection();
+  const submitReport = useSubmitReport();
+
+  const canSubmit = stationId !== null;
+  const disabled = !canSubmit || submitReport.isPending;
+
+  const handleSubmit = () => {
+    if (!stationId) return;
+    submitReport.mutate({ stationId, lineName, directionStationId });
+  };
+
+  return (
+    <footer className="mt-auto px-4 pt-6 pb-4">
+      <Button
+        type="button"
+        size="lg"
+        disabled={disabled}
+        onClick={handleSubmit}
+        className={cn(
+          'h-12 w-full rounded-lg text-sm font-medium',
+          canSubmit
+            ? 'bg-accent-bright text-primary-foreground hover:bg-accent-press shadow-[0_6px_16px_rgba(214,59,59,0.28)]'
+            : 'bg-surface-solid text-muted-foreground border-border border',
+        )}
+      >
+        {t('submit')}
+      </Button>
+      <p className="text-muted-foreground mt-2 text-center text-[0.6875rem]">{t('disclaimer')}</p>
+    </footer>
+  );
+}
+
 export function ReportForm() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
@@ -177,6 +213,7 @@ export function ReportForm() {
           <LinePicker />
           <StationPicker />
           <DirectionPicker />
+          <SubmitFooter />
         </div>
       </div>
     </ReportSelectionProvider>
