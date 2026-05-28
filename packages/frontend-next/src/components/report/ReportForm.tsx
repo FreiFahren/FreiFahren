@@ -196,7 +196,10 @@ export function ReportForm() {
           selectedLine={lineName}
           lineFilter={lineFilter}
           selectedStationId={stationId}
-          onSelectStation={setStationId}
+          onSelectStation={(id) => {
+            setStationId(id);
+            if (id === null) setLineName(null);
+          }}
         />
       </div>
     </div>
