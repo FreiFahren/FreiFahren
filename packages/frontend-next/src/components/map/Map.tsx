@@ -5,6 +5,7 @@ import { Map as MapGL } from 'react-map-gl/maplibre';
 
 import { requireEnv } from '@/lib/utils';
 
+import { ReportsLayer } from './ReportsLayer';
 import { SegmentsLayer } from './SegmentsLayer';
 import { STATIONS_LAYER_ID, StationsLayer } from './StationsLayer';
 import { useStationSelection } from '../../hooks/useStationSelection';
@@ -31,6 +32,7 @@ export function MapView() {
       >
         <SegmentsLayer />
         <StationsLayer selectedStation={selectedStation} />
+        <ReportsLayer />
       </MapGL>
     </div>
   );
