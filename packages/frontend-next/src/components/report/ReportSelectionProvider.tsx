@@ -90,18 +90,26 @@ export function ReportSelectionProvider({ children }: { children: ReactNode }) {
   else if (lineName) visibleStations = stationsAlongLine();
   else visibleStations = stationsByType();
 
-  // Direction picker shows the two endpoint stations of the selected line.
-  // For lines with multiple direction variants (U1, U1-a, U1-b …) pick the canonical "-a" variant
-  // and fall back to the only variant when there is just one.
+  // Direction picker exposes every endpoint reachable from the selected station along the
+  // chosen line. If the station sits on a single variant we get the two termini of that variant;
+  // if it sits on multiple variants (e.g. a branching trunk) we surface every endpoint across
+  // those variants, deduplicated. The variant a chosen endpoint belongs to can be resolved at
+  // submit time from (lineName, stationId, directionStationId).
   const directionOptions: Station[] = [];
   if (lineName && selectedStation) {
-    const variants = (lines ?? []).filter((l) => l.name === lineName);
-    const variant = variants.find((l) => l.id.endsWith('-a')) ?? variants[0];
-    if (variant && variant.stations.length >= 2) {
-      const first = stations?.[variant.stations[0]];
-      const last = stations?.[variant.stations[variant.stations.length - 1]];
-      if (first) directionOptions.push(first);
-      if (last && last.id !== first?.id) directionOptions.push(last);
+    const seen = new Set<string>();
+    for (const variant of lines ?? []) {
+      if (variant.name !== lineName) continue;
+      if (!variant.stations.includes(selectedStation.id)) continue;
+      if (variant.stations.length < 2) continue;
+      const endpointIds = [variant.stations[0], variant.stations[variant.stations.length - 1]];
+      for (const id of endpointIds) {
+        if (seen.has(id)) continue;
+        const endpoint = stations?.[id];
+        if (!endpoint) continue;
+        seen.add(id);
+        directionOptions.push(endpoint);
+      }
     }
   }
 
