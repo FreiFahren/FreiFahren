@@ -32,6 +32,6 @@ i18n.addResourceBundle('de', NAMESPACE, {
   required: 'Erforderlich',
   clearSelection: 'Auswahl löschen',
   direction: 'Richtung',
-  submit: 'Sichtung absenden',
+  submit: 'Melden',
   disclaimer: 'Anonym an alle Freifahren-Nutzer geteilt.',
 });
