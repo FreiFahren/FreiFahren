@@ -9,7 +9,7 @@ export interface Coordinates {
 }
 
 /** Compute the great-circle distance between two coordinate pairs in meters. */
-const haversine = (a: Coordinates, b: Coordinates): number => {
+export const haversine = (a: Coordinates, b: Coordinates): number => {
     const toRad = (deg: number) => (deg * Math.PI) / 180
     const lat1 = toRad(a.latitude)
     const lon1 = toRad(a.longitude)
@@ -52,14 +52,14 @@ const pickRepresentative = (group: string[], dataset: StationDataset): string =>
 // Extract the core station name by stripping common transit prefixes and suffixes.
 // Works across cities: "S+U Alexanderplatz/Gontardstraße" → "alexanderplatz"
 // "Gare de Lyon - Diderot" → "gare de lyon"
-const coreName = (name: string): string =>
+export const coreName = (name: string): string =>
     name
         .toLowerCase()
         .split(/[/\-–—]/) // Split on slash or dash variants
         .map((p) => p.trim())[0] // Take the first part (main name)
 
 // Check if two stations share the same core name.
-const namesMatch = (a: string, b: string): boolean => {
+export const stationNamesMatch = (a: string, b: string): boolean => {
     const ca = coreName(a)
     const cb = coreName(b)
     return ca === cb || ca.includes(cb) || cb.includes(ca)
@@ -124,7 +124,7 @@ export const mergeProximate = (dataset: StationDataset): MergeResult => {
             const oEntry = dataset.get(codes[j])!
             if (
                 haversine(sEntry.coordinates, oEntry.coordinates) <= threshold &&
-                namesMatch(sEntry.name, oEntry.name)
+                stationNamesMatch(sEntry.name, oEntry.name)
             ) {
                 uf.union(codes[i], codes[j])
             }
