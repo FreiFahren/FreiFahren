@@ -1,5 +1,4 @@
 import { useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -16,8 +15,8 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
 
 import { NAMESPACE } from './ReportForm.i18n';
-
-type LineFilter = 'all' | LineType;
+import { type LineFilter, useReportSelection } from './ReportSelection.context';
+import { ReportSelectionProvider } from './ReportSelectionProvider';
 
 const FILTERS: LineFilter[] = ['all', 'subway', 'light_rail', 'tram'];
 
@@ -34,23 +33,11 @@ function ClearSelectionButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-type LinePickerProps = {
-  selectedLine: string | null;
-  onSelectLine: (name: string | null) => void;
-  filter: LineFilter;
-  onChangeFilter: (filter: LineFilter) => void;
-  station: Station | null;
-};
-
-function LinePicker({
-  selectedLine,
-  onSelectLine,
-  filter,
-  onChangeFilter,
-  station,
-}: LinePickerProps) {
+function LinePicker() {
   const { t } = useTranslation(NAMESPACE);
+  const { lineName, setLineName, lineFilter, setLineFilter, stationId } = useReportSelection();
   const { data: lines } = useLines();
+  const { data: stations } = useStations();
 
   // One badge per line name (collapsing per-direction variants).
   const allLines = () => {
@@ -61,9 +48,10 @@ function LinePicker({
     return [...typeByName].map(([name, type]) => ({ name, type })).sort(compareLineOrder);
   };
 
+  const station = stationId ? stations?.[stationId] : undefined;
   const stationLineNames = station ? new Set(resolveStationLineNames(station.lines, lines)) : null;
   const visibleLines = allLines()
-    .filter((l) => filter === 'all' || l.type === filter)
+    .filter((l) => lineFilter === 'all' || l.type === lineFilter)
     .filter((l) => !stationLineNames || stationLineNames.has(l.name));
 
   return (
@@ -76,9 +64,9 @@ function LinePicker({
         <ToggleGroup
           type="single"
           size="sm"
-          value={filter}
+          value={lineFilter}
           onValueChange={(value) => {
-            if (value) onChangeFilter(value as LineFilter);
+            if (value) setLineFilter(value as LineFilter);
           }}
           className="bg-surface-solid border-border border"
         >
@@ -94,15 +82,15 @@ function LinePicker({
         </ToggleGroup>
       </div>
 
-      {selectedLine && (
+      {lineName && (
         <div className="mb-1 flex justify-end">
-          <ClearSelectionButton onClick={() => onSelectLine(null)} />
+          <ClearSelectionButton onClick={() => setLineName(null)} />
         </div>
       )}
 
       <div className="flex flex-wrap gap-2">
         {visibleLines.map((line) => {
-          const isSelected = selectedLine === line.name;
+          const isSelected = lineName === line.name;
           return (
             <button
               key={line.name}
@@ -110,11 +98,11 @@ function LinePicker({
               aria-pressed={isSelected}
               onClick={() => {
                 if (isSelected) {
-                  onSelectLine(null);
+                  setLineName(null);
                   return;
                 }
-                onSelectLine(line.name);
-                onChangeFilter(line.type);
+                setLineName(line.name);
+                setLineFilter(line.type);
               }}
               className="rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             >
@@ -127,27 +115,16 @@ function LinePicker({
   );
 }
 
-type StationPickerProps = {
-  selectedLine: string | null;
-  lineFilter: LineFilter;
-  selectedStationId: string | null;
-  onSelectStation: (id: string | null) => void;
-};
-
-function StationPicker({
-  selectedLine,
-  lineFilter,
-  selectedStationId,
-  onSelectStation,
-}: StationPickerProps) {
+function StationPicker() {
   const { t } = useTranslation(NAMESPACE);
+  const { lineName, lineFilter, stationId, setStationId } = useReportSelection();
   const { data: stations } = useStations();
   const { data: lines } = useLines();
 
   const typeByName = new Map<string, LineType>();
   for (const line of lines ?? []) typeByName.set(line.name, line.type);
 
-  const selectedStation = selectedStationId ? stations?.[selectedStationId] : undefined;
+  const selectedStation = stationId ? stations?.[stationId] : undefined;
 
   const stationsAlongLine = () => {
     // Walk every variant of the selected line and emit stations in their stored order,
@@ -155,11 +132,11 @@ function StationPicker({
     const seen = new Set<string>();
     const ordered: Station[] = [];
     for (const line of lines ?? []) {
-      if (line.name !== selectedLine) continue;
-      for (const stationId of line.stations) {
-        if (seen.has(stationId)) continue;
-        seen.add(stationId);
-        const station = stations?.[stationId];
+      if (line.name !== lineName) continue;
+      for (const id of line.stations) {
+        if (seen.has(id)) continue;
+        seen.add(id);
+        const station = stations?.[id];
         if (station) ordered.push(station);
       }
     }
@@ -177,7 +154,7 @@ function StationPicker({
 
   let visibleStations: Station[];
   if (selectedStation) visibleStations = [selectedStation];
-  else if (selectedLine) visibleStations = stationsAlongLine();
+  else if (lineName) visibleStations = stationsAlongLine();
   else visibleStations = stationsByType();
 
   return (
@@ -187,17 +164,17 @@ function StationPicker({
           <h2 className="text-sm font-semibold">{t('station')}</h2>
           <p className="text-destructive text-[0.625rem] tracking-wide">{t('required')}</p>
         </div>
-        {selectedStationId && <ClearSelectionButton onClick={() => onSelectStation(null)} />}
+        {stationId && <ClearSelectionButton onClick={() => setStationId(null)} />}
       </div>
       <ul className="min-h-0 flex-1 overflow-y-auto">
         {visibleStations.map((station) => {
-          const isSelected = selectedStationId === station.id;
+          const isSelected = stationId === station.id;
           return (
             <li key={station.id} className="border-border/60 border-b last:border-b-0">
               <button
                 type="button"
                 aria-pressed={isSelected}
-                onClick={() => onSelectStation(isSelected ? null : station.id)}
+                onClick={() => setStationId(isSelected ? null : station.id)}
                 className={cn(
                   'hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-2 py-2 text-left text-xs outline-none',
                   isSelected && 'ring-2 ring-white ring-inset',
@@ -216,33 +193,16 @@ function StationPicker({
 export function ReportForm() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
-  const [lineName, setLineName] = useState<string | null>(null);
-  const [lineFilter, setLineFilter] = useState<LineFilter>('all');
-  const [stationId, setStationId] = useState<string | null>(null);
-  const { data: stations } = useStations();
-  const selectedStation = stationId ? (stations?.[stationId] ?? null) : null;
 
   return (
-    <div className="bg-card animate-in fade-in fixed inset-0 z-30 duration-150">
-      <div className="mx-auto flex h-full w-full max-w-md flex-col">
-        <PageHeader title={t('title')} onBack={() => navigate({ to: '/' })} />
-        <LinePicker
-          selectedLine={lineName}
-          onSelectLine={setLineName}
-          filter={lineFilter}
-          onChangeFilter={setLineFilter}
-          station={selectedStation}
-        />
-        <StationPicker
-          selectedLine={lineName}
-          lineFilter={lineFilter}
-          selectedStationId={stationId}
-          onSelectStation={(id) => {
-            setStationId(id);
-            if (id === null) setLineName(null);
-          }}
-        />
+    <ReportSelectionProvider>
+      <div className="bg-card animate-in fade-in fixed inset-0 z-30 duration-150">
+        <div className="mx-auto flex h-full w-full max-w-md flex-col">
+          <PageHeader title={t('title')} onBack={() => navigate({ to: '/' })} />
+          <LinePicker />
+          <StationPicker />
+        </div>
       </div>
-    </div>
+    </ReportSelectionProvider>
   );
 }
