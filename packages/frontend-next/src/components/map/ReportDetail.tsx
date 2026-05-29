@@ -5,6 +5,7 @@ import { useReports, useStationReportCount } from '@/api/reports';
 import { type Station, useLines, useStations } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { CardContent } from '@/components/ui/card';
+import { optionalEnv } from '@/lib/utils';
 
 import { DetailCard } from './DetailCard';
 import { NAMESPACE } from './ReportDetail.i18n';
@@ -14,10 +15,14 @@ type ReportDetailProps = {
   onClose: () => void;
 };
 
+// Telegram group the reports are synced with.
+const REPORTS_GROUP_HANDLE = optionalEnv('VITE_REPORTS_GROUP_HANDLE') ?? '@FreiFahren_BE';
+
 function formatElapsed(timestamp: string, t: TFunction): string {
   const minutes = Math.floor((Date.now() - new Date(timestamp).getTime()) / 60_000);
   if (minutes <= 1) return t('now');
-  if (minutes < 60) return t('minutesAgo', { count: minutes });
+  if (minutes <= 45) return t('minutesAgo', { count: minutes });
+  if (minutes < 60) return t('moreThan45Min');
   return t('hoursAgo', { count: Math.floor(minutes / 60) });
 }
 
@@ -49,18 +54,21 @@ export function ReportDetail({ station, onClose }: ReportDetailProps) {
         {report && (
           <p className="text-muted-foreground text-sm">{formatElapsed(report.timestamp, t)}</p>
         )}
-        {numberOfReports !== undefined && numberOfReports > 0 && (
-          <p className="text-sm">
-            <span className="font-semibold">
-              {numberOfReports} {t('times')}
-            </span>{' '}
-            {t('thisWeek')}
-          </p>
-        )}
+        {/* Reserve the line height so the count loading in does not shift layout. */}
+        <p className="min-h-5 text-sm">
+          {numberOfReports !== undefined && numberOfReports > 0 && (
+            <>
+              <span className="font-semibold">
+                {numberOfReports} {t('times')}
+              </span>{' '}
+              {t('thisWeek')}
+            </>
+          )}
+        </p>
       </CardContent>
       <CardContent className="text-muted-foreground space-y-0.5 text-xs">
         <p>{t('inviteText')}</p>
-        <p>{t('syncText')}</p>
+        <p>{t('syncText', { group: REPORTS_GROUP_HANDLE })}</p>
       </CardContent>
     </DetailCard>
   );

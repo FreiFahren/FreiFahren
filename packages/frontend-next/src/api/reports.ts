@@ -19,6 +19,8 @@ export const useReports = () =>
     queryFn: () => fetchJson<Report[]>('/v0/reports'),
     refetchInterval: 30_000,
     refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
     staleTime: 30_000,
   });
 
@@ -26,11 +28,12 @@ const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 const HOUR_MS = 60 * 60 * 1000;
 
 export const useStationReportCount = (stationId: string) => {
-  // Compute the window once per mount (lazy initializer), rounding `to` down to
-  // the top of the hour so the query key stays stable instead of refetching on
-  // every render.
+  // Compute the window once per mount (lazy initializer), rounding `to` up to
+  // the next hour. Rounding keeps the query key stable across renders; rounding
+  // *up* (rather than down) keeps the current partial hour inside the window, so
+  // a report submitted moments ago is still counted.
   const [{ from, to }] = useState(() => {
-    const toMs = Math.floor(Date.now() / HOUR_MS) * HOUR_MS;
+    const toMs = Math.ceil(Date.now() / HOUR_MS) * HOUR_MS;
     return { from: new Date(toMs - WEEK_MS).toISOString(), to: new Date(toMs).toISOString() };
   });
 
