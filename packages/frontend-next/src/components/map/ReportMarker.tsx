@@ -1,8 +1,10 @@
+import { useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { Marker } from 'react-map-gl/maplibre';
+import { Marker, type MarkerEvent } from 'react-map-gl/maplibre';
 
 import type { Report } from '@/api/reports';
 import type { Station } from '@/api/transit';
+import { Route as ReportDetailRoute } from '@/routes/_map/reports/$stationId';
 
 const FADE_DURATION_MS = 60 * 60 * 1000;
 const MIN_OPACITY = 0.2;
@@ -21,6 +23,7 @@ function computeOpacity(timestamp: string, nowMs: number): number {
 }
 
 export function ReportMarker({ report, station }: ReportMarkerProps) {
+  const navigate = useNavigate();
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -34,15 +37,22 @@ export function ReportMarker({ report, station }: ReportMarkerProps) {
   const age = now - new Date(report.timestamp).getTime();
   const shouldPulse = age < PULSE_AGE_MS;
 
+  const handleClick = (event: MarkerEvent<MouseEvent>) => {
+    // Stop the map's onClick from also firing (which would open the station detail).
+    event.originalEvent.stopPropagation();
+    void navigate({ to: ReportDetailRoute.to, params: { stationId: report.stationId } });
+  };
+
   return (
     <Marker
       latitude={station.coordinates.latitude}
       longitude={station.coordinates.longitude}
       opacity={opacity.toString()}
+      onClick={handleClick}
     >
-      <span className="pointer-events-none relative block h-5 w-5">
+      <span className="relative block h-5 w-5 cursor-pointer">
         {shouldPulse && (
-          <span className="bg-destructive absolute inset-0 animate-ping rounded-full opacity-75" />
+          <span className="bg-destructive pointer-events-none absolute inset-0 animate-ping rounded-full opacity-75" />
         )}
         <span className="bg-destructive relative block h-5 w-5 rounded-full border-2 border-white shadow-sm" />
       </span>

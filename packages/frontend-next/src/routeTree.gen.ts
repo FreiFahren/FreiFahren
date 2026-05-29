@@ -13,6 +13,7 @@ import { Route as ReportRouteImport } from './routes/report'
 import { Route as MapRouteImport } from './routes/_map'
 import { Route as MapIndexRouteImport } from './routes/_map/index'
 import { Route as MapStationsStationIdRouteImport } from './routes/_map/stations/$stationId'
+import { Route as MapReportsStationIdRouteImport } from './routes/_map/reports/$stationId'
 
 const ReportRoute = ReportRouteImport.update({
   id: '/report',
@@ -33,15 +34,22 @@ const MapStationsStationIdRoute = MapStationsStationIdRouteImport.update({
   path: '/stations/$stationId',
   getParentRoute: () => MapRoute,
 } as any)
+const MapReportsStationIdRoute = MapReportsStationIdRouteImport.update({
+  id: '/reports/$stationId',
+  path: '/reports/$stationId',
+  getParentRoute: () => MapRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof MapIndexRoute
   '/report': typeof ReportRoute
+  '/reports/$stationId': typeof MapReportsStationIdRoute
   '/stations/$stationId': typeof MapStationsStationIdRoute
 }
 export interface FileRoutesByTo {
   '/report': typeof ReportRoute
   '/': typeof MapIndexRoute
+  '/reports/$stationId': typeof MapReportsStationIdRoute
   '/stations/$stationId': typeof MapStationsStationIdRoute
 }
 export interface FileRoutesById {
@@ -49,14 +57,21 @@ export interface FileRoutesById {
   '/_map': typeof MapRouteWithChildren
   '/report': typeof ReportRoute
   '/_map/': typeof MapIndexRoute
+  '/_map/reports/$stationId': typeof MapReportsStationIdRoute
   '/_map/stations/$stationId': typeof MapStationsStationIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/report' | '/stations/$stationId'
+  fullPaths: '/' | '/report' | '/reports/$stationId' | '/stations/$stationId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/report' | '/' | '/stations/$stationId'
-  id: '__root__' | '/_map' | '/report' | '/_map/' | '/_map/stations/$stationId'
+  to: '/report' | '/' | '/reports/$stationId' | '/stations/$stationId'
+  id:
+    | '__root__'
+    | '/_map'
+    | '/report'
+    | '/_map/'
+    | '/_map/reports/$stationId'
+    | '/_map/stations/$stationId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -94,16 +109,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MapStationsStationIdRouteImport
       parentRoute: typeof MapRoute
     }
+    '/_map/reports/$stationId': {
+      id: '/_map/reports/$stationId'
+      path: '/reports/$stationId'
+      fullPath: '/reports/$stationId'
+      preLoaderRoute: typeof MapReportsStationIdRouteImport
+      parentRoute: typeof MapRoute
+    }
   }
 }
 
 interface MapRouteChildren {
   MapIndexRoute: typeof MapIndexRoute
+  MapReportsStationIdRoute: typeof MapReportsStationIdRoute
   MapStationsStationIdRoute: typeof MapStationsStationIdRoute
 }
 
 const MapRouteChildren: MapRouteChildren = {
   MapIndexRoute: MapIndexRoute,
+  MapReportsStationIdRoute: MapReportsStationIdRoute,
   MapStationsStationIdRoute: MapStationsStationIdRoute,
 }
 

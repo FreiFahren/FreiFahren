@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 
 import { requireEnv } from '@/lib/utils';
 
@@ -18,8 +19,34 @@ export const useReports = () =>
     queryFn: () => fetchJson<Report[]>('/v0/reports'),
     refetchInterval: 30_000,
     refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
     staleTime: 30_000,
   });
+
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const HOUR_MS = 60 * 60 * 1000;
+
+export const useStationReportCount = (stationId: string) => {
+  // Compute the window once per mount (lazy initializer), rounding `to` up to
+  // the next hour. Rounding keeps the query key stable across renders; rounding
+  // *up* (rather than down) keeps the current partial hour inside the window, so
+  // a report submitted moments ago is still counted.
+  const [{ from, to }] = useState(() => {
+    const toMs = Math.ceil(Date.now() / HOUR_MS) * HOUR_MS;
+    return { from: new Date(toMs - WEEK_MS).toISOString(), to: new Date(toMs).toISOString() };
+  });
+
+  return useQuery({
+    queryKey: ['reports', stationId, from, to],
+    queryFn: () => {
+      const params = new URLSearchParams({ from, to });
+      return fetchJson<Report[]>(`/v0/reports/${stationId}?${params.toString()}`);
+    },
+    select: (reports) => reports.length,
+    staleTime: HOUR_MS,
+  });
+};
 
 const API_URL = requireEnv('VITE_API_URL');
 
