@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 
 import { requireEnv } from '@/lib/utils';
 
@@ -20,6 +21,29 @@ export const useReports = () =>
     refetchIntervalInBackground: false,
     staleTime: 30_000,
   });
+
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const HOUR_MS = 60 * 60 * 1000;
+
+export const useStationReportCount = (stationId: string) => {
+  // Compute the window once per mount (lazy initializer), rounding `to` down to
+  // the top of the hour so the query key stays stable instead of refetching on
+  // every render.
+  const [{ from, to }] = useState(() => {
+    const toMs = Math.floor(Date.now() / HOUR_MS) * HOUR_MS;
+    return { from: new Date(toMs - WEEK_MS).toISOString(), to: new Date(toMs).toISOString() };
+  });
+
+  return useQuery({
+    queryKey: ['reports', stationId, from, to],
+    queryFn: () => {
+      const params = new URLSearchParams({ from, to });
+      return fetchJson<Report[]>(`/v0/reports/${stationId}?${params.toString()}`);
+    },
+    select: (reports) => reports.length,
+    staleTime: HOUR_MS,
+  });
+};
 
 const API_URL = requireEnv('VITE_API_URL');
 
