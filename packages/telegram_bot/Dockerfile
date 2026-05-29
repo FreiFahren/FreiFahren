@@ -9,7 +9,7 @@ ENV UV_COMPILE_BYTECODE=1 \
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project --no-dev
 
-COPY src ./src
+COPY . .
 RUN uv sync --frozen --no-dev
 
 CMD ["python", "-m", "telegram_bot.main"]
