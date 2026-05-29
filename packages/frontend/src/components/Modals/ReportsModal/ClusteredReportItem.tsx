@@ -17,7 +17,7 @@ const ClusteredReportItem: React.FC<ClusteredReportItemProps> = ({ inspectors })
     // remove the direction from all of the inspectors to make it concise
     const inspectorsWithoutDirection = inspectors.map((inspector) => ({
         ...inspector,
-        direction: { id: '', name: '', coordinates: { latitude: 0, longitude: 0 } },
+        directionId: null,
     }))
 
     const expandedListWithoutTitle = inspectorsWithoutDirection.slice(1)
@@ -41,7 +41,7 @@ const ClusteredReportItem: React.FC<ClusteredReportItemProps> = ({ inspectors })
                 {isListExpanded
                     ? expandedListWithoutTitle.map((inspector) => (
                           <ReportItem
-                              key={inspector.station.id + inspector.timestamp}
+                              key={inspector.stationId + inspector.timestamp}
                               report={inspector}
                               currentTime={currentTime}
                           />

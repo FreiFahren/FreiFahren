@@ -21,26 +21,29 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
     const { t } = useTranslation()
 
     const { data: stations } = useStations()
-    const { timestamp, station, line, direction, message } = selectedMarker
+    const { timestamp, stationId, lineId, directionId } = selectedMarker
 
-    const { data: numberOfReports } = useStationReports(station.id)
+    const stationName = stations?.[stationId]?.name ?? stationId
+    const directionName = directionId !== null ? (stations?.[directionId]?.name ?? directionId) : null
+
+    const { data: numberOfReports } = useStationReports(stationId)
     const {
         distance: stationDistance,
         isLoading,
         shouldShowSkeleton,
-    } = useStationDistance(station.id, stations ?? {}, userLat, userLng)
+    } = useStationDistance(stationId, stations ?? {}, userLat, userLng)
 
     const showSkeleton = useSkeleton({ isLoading: isLoading && shouldShowSkeleton })
-    const elapsedTimeMessage = useElapsedTimeMessage(timestamp, selectedMarker.isHistoric)
+    const elapsedTimeMessage = useElapsedTimeMessage(timestamp, selectedMarker.isPredicted)
     const stationDistanceMessage = useStationDistanceMessage(stationDistance)
 
     return (
         <div className={`marker-modal info-popup modal ${className}`}>
             {children}
-            <h1>{station.name}</h1>
+            <h1>{stationName}</h1>
             <div className="align-child-on-line direction-line">
-                {line !== null ? <Line line={line} /> : null}
-                {direction?.name !== undefined ? <h2>{direction.name}</h2> : null}
+                {lineId !== null ? <Line line={lineId} /> : null}
+                {directionName !== null ? <h2>{directionName}</h2> : null}
             </div>
             <div>
                 <p>{elapsedTimeMessage}</p>
@@ -59,10 +62,6 @@ const MarkerModal: React.FC<MarkerModalProps> = ({ className, children, selected
                     <span className="disclaimer">{t('MarkerModal.inviteText')}</span>
                 </div>
                 <span className="disclaimer">{t('MarkerModal.syncText')}</span>
-                {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
-                {message !== null && message !== '' && message !== undefined ? (
-                    <p className="description">{message}</p>
-                ) : null}
             </div>
         </div>
     )

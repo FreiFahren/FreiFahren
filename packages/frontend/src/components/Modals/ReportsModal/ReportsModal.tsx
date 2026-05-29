@@ -31,11 +31,11 @@ const ReportsModal: React.FC<ReportsModalProps> = ({ className, handleCloseModal
         const lineReports = new Map<string, Report[]>()
 
         for (const report of reports) {
-            const { line } = report
-            if (line === null) continue
+            const { lineId } = report
+            if (lineId === null) continue
 
-            const existingReports = lineReports.get(line) ?? []
-            lineReports.set(line, [...existingReports, report])
+            const existingReports = lineReports.get(lineId) ?? []
+            lineReports.set(lineId, [...existingReports, report])
         }
 
         return lineReports

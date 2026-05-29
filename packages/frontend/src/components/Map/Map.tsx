@@ -34,6 +34,24 @@ const cityViewPosition: { lng: number; lat: number } = {
 }
 const GITHUB_ICON = `/icons/github.svg`
 const INSTAGRAM_ICON = `/icons/instagram.svg`
+const STATION_QUERY_LAYERS = ['stationLayer', 'stationNameLayer'] as const
+
+const parseStationLines = (lines: unknown): string[] => {
+    if (Array.isArray(lines)) {
+        return lines.filter((item): item is string => typeof item === 'string')
+    }
+
+    if (typeof lines !== 'string') {
+        return []
+    }
+
+    try {
+        const parsedLines: unknown = JSON.parse(lines)
+        return Array.isArray(parsedLines) ? parsedLines.filter((item): item is string => typeof item === 'string') : []
+    } catch {
+        return []
+    }
+}
 
 const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     isFirstOpen,
@@ -97,8 +115,11 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
             }
         }
 
+        const queryableStationLayers = STATION_QUERY_LAYERS.filter((layerId) => currentMap.getLayer(layerId))
+        if (queryableStationLayers.length === 0) return
+
         const features = currentMap.queryRenderedFeatures(event.point, {
-            layers: ['stationLayer', 'stationNameLayer'],
+            layers: queryableStationLayers,
         })
 
         if (features.length > 0 && handleStationClick) {
@@ -106,16 +127,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
             const { properties } = feature
 
             if (typeof properties.name === 'string' && feature.geometry.type === 'Point') {
-                let parsedLines: unknown
-                try {
-                    parsedLines = JSON.parse(properties.lines ?? '[]')
-                } catch (error) {
-                    parsedLines = []
-                }
-                const lines =
-                    Array.isArray(parsedLines) && parsedLines.every((item) => typeof item === 'string')
-                        ? (parsedLines as string[])
-                        : []
+                const lines = parseStationLines(properties.lines)
 
                 const station: StationProperty = {
                     name: properties.name,

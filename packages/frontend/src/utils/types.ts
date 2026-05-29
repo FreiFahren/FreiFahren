@@ -67,7 +67,26 @@ export type LineProperty = {
 }
 
 export type StationList = Record<string, StationProperty>
-export type LinesList = Record<string, string[]>
+
+export interface Line {
+    id: string
+    name: string
+    stations: string[]
+}
+
+export type LinesList = Line[]
+
+export interface SegmentProperties {
+    id: number
+    line: string
+    from: string
+    to: string
+    color: string
+}
+
+export type SegmentFeature = GeoJSON.Feature<GeoJSON.LineString, SegmentProperties>
+
+export type SegmentsFeatureCollection = GeoJSON.FeatureCollection<GeoJSON.LineString, SegmentProperties>
 export interface RiskData {
     segments_risk: {
         [key: string]: SegmentRisk
@@ -76,63 +95,9 @@ export interface RiskData {
 
 export type Report = {
     timestamp: string
-    station: {
-        id: string
-        name: string
-        coordinates: {
-            latitude: number
-            longitude: number
-        }
-    }
-    direction: {
-        id: string
-        name: string
-        coordinates: {
-            latitude: number
-            longitude: number
-        }
-    } | null
-    line: string | null
-    isHistoric: boolean
-    message: string | null
+    stationId: string
+    directionId: string | null
+    lineId: string | null
+    isPredicted: boolean
 }
 
-export type Position = {
-    name: string
-    stopId: string
-    lat: number
-    lon: number
-    departure?: string
-    scheduledDeparture?: string
-    arrival?: string
-    scheduledArrival?: string
-}
-
-export type LegGeometry = {
-    points: string
-    length: number
-}
-
-export type Leg = {
-    mode: 'WALK' | 'BUS' | 'TRAM' | 'METRO' | 'SUBWAY' | 'REGIONAL_RAIL'
-    from: Position
-    to: Position
-    duration: number
-    startTime: string
-    endTime: string
-    scheduledStartTime: string
-    scheduledEndTime: string
-    realTime: boolean
-    routeShortName?: string
-    intermediateStops?: Position[]
-    legGeometry: LegGeometry
-}
-
-export type Itinerary = {
-    duration: number // in seconds
-    startTime: string
-    endTime: string
-    transfers: number
-    legs: Leg[]
-    calculatedRisk?: number
-}
