@@ -8,6 +8,7 @@ import { requireEnv } from '@/lib/utils';
 import { ReportsLayer } from './ReportsLayer';
 import { SegmentsLayer } from './SegmentsLayer';
 import { STATIONS_LAYER_ID, StationsLayer } from './StationsLayer';
+import { UserLocationControl } from './UserLocationControl';
 import { useStationSelection } from '../../hooks/useStationSelection';
 
 const MAP_STYLE_URL = requireEnv('VITE_MAP_STYLE_URL');
@@ -33,6 +34,7 @@ export function MapView() {
         <SegmentsLayer />
         <StationsLayer selectedStation={selectedStation} />
         <ReportsLayer />
+        <UserLocationControl />
       </MapGL>
     </div>
   );
