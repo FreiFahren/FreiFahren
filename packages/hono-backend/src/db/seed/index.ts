@@ -1,13 +1,14 @@
+import { logger } from '../../common/logger'
 import { db } from '../index'
 
 import { seedBaseData } from './seed'
 
 const seed = async () => {
-    console.log('Starting seed...')
+    logger.info('Starting seed...')
 
     await seedBaseData(db)
 
-    console.log('Seed completed successfully!')
+    logger.info('Seed completed successfully!')
 }
 
 seed()
@@ -15,6 +16,6 @@ seed()
         process.exit(0)
     })
     .catch((error) => {
-        console.error('Seed failed:', error)
+        logger.error(error, 'Seed failed')
         process.exit(1)
     })

@@ -2,7 +2,7 @@ import './InfoModal.css'
 
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useReportsByStation, useStations } from 'src/api/queries'
+import { useLines, useReportsByStation, useStations } from 'src/api/queries'
 import { Line } from 'src/components/Miscellaneous/Line/Line'
 import { StationProperty } from 'src/utils/types'
 
@@ -12,17 +12,28 @@ interface InfoModalProps {
     station: StationProperty
     className?: string
     children?: React.ReactNode
-    onRouteClick?: () => void
 }
 
-export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', children, onRouteClick }) => {
+export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', children }) => {
     const { t } = useTranslation()
 
     const { data: stations } = useStations()
+    const { data: lines } = useLines()
     const stationId = useMemo(
         () => Object.keys(stations ?? {}).find((key) => stations?.[key]?.name === station.name) ?? '',
         [stations, station.name]
     )
+    const stationLines = useMemo(() => {
+        const displayLines = new Set<string>()
+
+        return station.lines.filter((lineId) => {
+            const displayLine = lines?.find((line) => line.id === lineId)?.name ?? lineId
+            if (displayLines.has(displayLine)) return false
+
+            displayLines.add(displayLine)
+            return true
+        })
+    }, [station.lines, lines])
 
     const now = useMemo(() => new Date(), [])
     const twentyFourHoursAgo = useMemo(() => {
@@ -35,11 +46,7 @@ export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', c
 
     const currentTime = useMemo(() => new Date().getTime(), [])
 
-    const handleRouteClick = () => {
-        onRouteClick?.()
-    }
-
-    const reportsNoHistoric = useMemo(() => reports?.filter((report) => report.isHistoric === false), [reports])
+    const reportsNoHistoric = useMemo(() => reports?.filter((report) => report.isPredicted === false), [reports])
 
     return (
         <div className={`info-modal modal ${className}`}>
@@ -48,16 +55,10 @@ export const InfoModal: React.FC<InfoModalProps> = ({ station, className = '', c
                 <div className="station-info">
                     <h1>{station.name}</h1>
                     <div className="lines-container">
-                        {station.lines.map((line) => (
+                        {stationLines.map((line) => (
                             <Line key={line} line={line} />
                         ))}
                     </div>
-                </div>
-                <div className="route-container">
-                    <button type="button" className="route-button" onClick={handleRouteClick}>
-                        <img src="/icons/route-svgrepo-com.svg" alt="Route" />
-                    </button>
-                    <p className="route-text">{t('InfoModal.route')}</p>
                 </div>
             </section>
             <section className="reports-container">

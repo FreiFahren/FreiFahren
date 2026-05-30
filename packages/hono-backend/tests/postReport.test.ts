@@ -4,8 +4,7 @@ import { Hono } from 'hono'
 import { Stations } from '../src/modules/transit/types'
 import { TransitNetworkDataService } from '../src/modules/transit/transit-network-data-service'
 import { db, lineStations, reports, stations } from '../src/db'
-import { seedBaseData } from '../src/db/seed/seed'
-import { and, desc, eq } from 'drizzle-orm'
+import { and, desc, eq, sql } from 'drizzle-orm'
 import { sendReportRequest } from './test-utils'
 
 let fakeNlpServer: ReturnType<typeof Bun.serve> | null = null
@@ -23,11 +22,9 @@ describe('Telegram notification', () => {
     let shouldFail: boolean
 
     beforeAll(async () => {
-        await seedBaseData(db)
-
         const fakeNlp = new Hono()
 
-        fakeNlp.post('/report-inspector', async (c) => {
+        fakeNlp.post('/report', async (c) => {
             const body = await c.req.json()
             const password = c.req.header('X-Password') ?? null
 
@@ -73,7 +70,16 @@ describe('Telegram notification', () => {
     })
 
     it('sends a Telegram notification when source is not telegram and returns 200', async () => {
-        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
+        // Pick a station that sits on multiple lines so post-processing does not
+        // auto-fill lineId from a single-line station (which would defeat the
+        // `lineId` null assertion below).
+        const [station] = await db
+            .select({ id: lineStations.stationId })
+            .from(lineStations)
+            .groupBy(lineStations.stationId)
+            .having(sql`count(*) > 1`)
+            .orderBy(lineStations.stationId)
+            .limit(1)
 
         const response = await sendReportRequest({
             stationId: station.id,
@@ -85,15 +91,27 @@ describe('Telegram notification', () => {
         expect(capturedRequests[0]?.password).toBe('test-password')
 
         const body = capturedRequests[0]?.body as {
-            line: string | null
-            station: string
-            direction: string | null
-            message: string | null
+            lineId: string | null
             stationId: string
+            directionId: string | null
         }
 
+        expect(Object.keys(body).sort()).toEqual(['directionId', 'lineId', 'stationId'])
         expect(body.stationId).toBe(station.id)
-        expect(typeof body.station).toBe('string')
+        expect(body.lineId).toBeNull()
+        expect(body.directionId).toBeNull()
+    })
+
+    it('does not send a Telegram notification when source is telegram', async () => {
+        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
+
+        const response = await sendReportRequest({
+            stationId: station.id,
+            source: 'telegram',
+        })
+
+        expect(response.status).toBe(200)
+        expect(capturedRequests.length).toBe(0)
     })
 
     it('returns 200 and a failure header when Telegram notification fails', async () => {
@@ -140,7 +158,6 @@ describe('Security Verification', () => {
 
 describe('Report API contract', () => {
     beforeAll(async () => {
-        await seedBaseData(db)
         process.env.NODE_ENV = 'production'
         process.env.REPORT_PASSWORD = 'test-password' // To pass the security check
     })
@@ -409,39 +426,59 @@ describe('Report Post Processing', () => {
     let firstStationOnLineId: string
 
     beforeAll(async () => {
-        await seedBaseData(db)
         const transitService = new TransitNetworkDataService(db)
         stationsMap = await transitService.getStations()
-        linesMap = Object.fromEntries(
-            Object.entries(await transitService.getLines()).map(([key, value]) => [key, value ?? []])
-        )
+        linesMap = Object.fromEntries((await transitService.getLines()).map((line) => [line.id, line.stations]))
 
-        const stationEntries = Object.entries(stationsMap)
+        // Sort station entries by id so all fixture lookups are deterministic regardless of seed insertion order.
+        const stationEntries = Object.entries(stationsMap).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
 
         const stationWithOneLineEntry = stationEntries.find(([, s]) => s.lines.length === 1)
         if (!stationWithOneLineEntry) throw new Error('No station with 1 line found')
         stationWithOneLineId = stationWithOneLineEntry[0]
         lineIdForStationWithOneLine = stationWithOneLineEntry[1].lines[0]!
 
-        const stationWithMultipleLinesEntry = stationEntries.find(([, s]) => s.lines.length > 1)
-        if (!stationWithMultipleLinesEntry) throw new Error('No station with >1 lines found')
-        stationWithMultipleLinesId = stationWithMultipleLinesEntry[0]
+        // Pick a multi-line station paired with a single-line direction whose only line is one of the
+        // multi-line station's lines. Without this shared line, the post-processor sets lineId from
+        // the direction and then clears the off-line stationId, causing a 422.
+        const multiLineWithCompatibleSingleLineDirection = stationEntries
+            .filter(([, s]) => s.lines.length > 1)
+            .flatMap(([stationId, station]) =>
+                stationEntries
+                    .filter(
+                        ([directionId, direction]) =>
+                            direction.lines.length === 1 &&
+                            directionId !== stationId &&
+                            directionId !== stationWithOneLineId &&
+                            station.lines.includes(direction.lines[0]!)
+                    )
+                    .map(([directionId]) => ({ stationId, directionId }))
+            )[0]
 
-        // Find a different station for direction that has 1 line
-        const directionWithOneLineEntry = stationEntries.find(
-            ([id, s]) => s.lines.length === 1 && id !== stationWithOneLineId
-        )
-        // If we can't find a different one, reuse the first one (it's fine for testing direction logic usually)
-        directionWithOneLineId = directionWithOneLineEntry ? directionWithOneLineEntry[0] : stationWithOneLineId
+        if (!multiLineWithCompatibleSingleLineDirection) {
+            throw new Error('No multi-line station found paired with a compatible single-line direction')
+        }
+
+        stationWithMultipleLinesId = multiLineWithCompatibleSingleLineDirection.stationId
+        directionWithOneLineId = multiLineWithCompatibleSingleLineDirection.directionId
 
         const stationNotOnLineEntry = stationEntries.find(([, s]) => !s.lines.includes(lineIdForStationWithOneLine))
         if (!stationNotOnLineEntry) throw new Error('No station found that is not on the selected line')
         stationNotOnLineId = stationNotOnLineEntry[0]
 
+        const stationsOnLineForSingleLineStation = linesMap[lineIdForStationWithOneLine]
+        const terminalStationsOnLineForSingleLineStation = new Set([
+            stationsOnLineForSingleLineStation[0],
+            stationsOnLineForSingleLineStation[stationsOnLineForSingleLineStation.length - 1],
+        ])
+
         const stationOnSameLineEntry = stationEntries.find(
-            ([id, s]) => s.lines.includes(lineIdForStationWithOneLine) && id !== stationWithOneLineId
+            ([id, s]) =>
+                s.lines.includes(lineIdForStationWithOneLine) &&
+                id !== stationWithOneLineId &&
+                terminalStationsOnLineForSingleLineStation.has(id)
         )
-        if (!stationOnSameLineEntry) throw new Error('No second station on the same line found')
+        if (!stationOnSameLineEntry) throw new Error('No terminal station on the same line found')
         stationOnSameLineAsStationWithOneLineId = stationOnSameLineEntry[0]
 
         const multiLineStations = stationEntries.filter(([, s]) => s.lines.length > 1)
@@ -504,6 +541,20 @@ describe('Report Post Processing', () => {
     })
 
     it('Accept a direction only payload when a line can be inferred', async () => {
+        const directionLineId = stationsMap[directionWithOneLineId].lines[0]!
+        const stationIdOnDirectionLine = linesMap[directionLineId].find(
+            (stationId) => stationId !== directionWithOneLineId
+        )
+        if (!stationIdOnDirectionLine) throw new Error('No station found on the inferred direction line')
+
+        const candidateReportResponse = await sendReportRequest({
+            stationId: stationIdOnDirectionLine,
+            lineId: directionLineId,
+            directionId: directionWithOneLineId,
+            source: 'web_app',
+        })
+        expect(candidateReportResponse.status).toBe(200)
+
         const response = await sendReportRequest({
             source: 'web_app',
             directionId: directionWithOneLineId,
@@ -517,7 +568,8 @@ describe('Report Post Processing', () => {
             .orderBy(desc(reports.timestamp))
             .limit(1)
 
-        expect(report.lineId).toBe(lineIdForStationWithOneLine)
+        expect(report.lineId).toBe(directionLineId)
+        expect(report.stationId).toBe(stationIdOnDirectionLine)
         expect(report.directionId).toBe(directionWithOneLineId)
     })
 

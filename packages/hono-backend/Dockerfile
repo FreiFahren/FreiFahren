@@ -16,4 +16,4 @@ RUN echo '{"segments":[],"reports":[]}' | uv run src/modules/risk/risk_model.py
 
 EXPOSE 3000
 
-CMD ["bun", "run", "--hot", "src/index.ts"]
+CMD ["bun", "run", "start"]

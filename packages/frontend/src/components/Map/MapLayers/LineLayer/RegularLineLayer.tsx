@@ -23,7 +23,7 @@ const RegularLineLayer: React.FC<RegularLineLayerProps> = ({ lineSegments, isRis
                     'line-cap': 'round',
                 }}
                 paint={{
-                    'line-color': ['case', isRiskLayerOpen, neutralColor, ['get', 'line_color']],
+                    'line-color': ['case', isRiskLayerOpen, neutralColor, ['get', 'color']],
                     'line-width': 3,
                 }}
             />

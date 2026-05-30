@@ -1,13 +1,19 @@
 import { asc, eq } from 'drizzle-orm'
 
+import { AppError, NoPathFoundError } from '../../common/errors'
 import { DbConnection, stations, lineStations, lines, segments } from '../../db'
 
-import type { Lines, SegmentsFeatureCollection, Stations } from './types'
+import { buildGraph, type Graph, type StationId } from './pathfinding'
+import { TransitPathCacheService } from './transit-path-cache-service'
+import type { Line, Lines, SegmentsFeatureCollection, Stations } from './types'
 
 export class TransitNetworkDataService {
     private stationsCache: Promise<Stations> | null = null
     private linesCache: Promise<Lines> | null = null
     private segmentsCache: Promise<SegmentsFeatureCollection> | null = null
+    private graphCache: Graph | null = null
+    private graphPromise: Promise<Graph> | null = null
+    private pathCacheService = new TransitPathCacheService()
 
     constructor(private db: DbConnection) {}
 
@@ -61,20 +67,35 @@ export class TransitNetworkDataService {
                 const joinedRows = await this.db
                     .select({
                         lineId: lines.id,
+                        lineName: lines.name,
+                        lineType: lines.type,
+                        lineIsCircular: lines.isCircular,
+                        lineColor: lines.color,
                         stationId: lineStations.stationId,
                     })
                     .from(lines)
                     .leftJoin(lineStations, eq(lineStations.lineId, lines.id))
                     .orderBy(asc(lines.id), asc(lineStations.order))
 
-                return joinedRows.reduce<Lines>((linesById, row) => {
-                    const base = Object.prototype.hasOwnProperty.call(linesById, row.lineId)
-                        ? linesById[row.lineId]
-                        : []
-                    const stations = row.stationId !== null ? [...base, row.stationId] : base
-                    linesById[row.lineId] = stations
-                    return linesById
-                }, {} as Lines)
+                const byId = new Map<string, Line>()
+                for (const row of joinedRows) {
+                    let line = byId.get(row.lineId)
+                    if (!line) {
+                        line = {
+                            id: row.lineId,
+                            name: row.lineName,
+                            type: row.lineType,
+                            isCircular: row.lineIsCircular,
+                            color: row.lineColor,
+                            stations: [],
+                        }
+                        byId.set(row.lineId, line)
+                    }
+                    if (row.stationId !== null) {
+                        line.stations.push(row.stationId)
+                    }
+                }
+                return Array.from(byId.values())
             } catch (error) {
                 this.linesCache = null
                 throw error
@@ -129,5 +150,74 @@ export class TransitNetworkDataService {
 
         this.segmentsCache = segmentsPromise
         return segmentsPromise
+    }
+
+    async getDistance(from: StationId, to: StationId): Promise<number> {
+        const graph = await this.getGraph()
+
+        this.assertStationExists(graph, from, 'from')
+        this.assertStationExists(graph, to, 'to')
+
+        if (from === to) {
+            return 0
+        }
+
+        try {
+            return this.pathCacheService.getOrCompute(graph, from, to)
+        } catch (error) {
+            if (error instanceof NoPathFoundError) {
+                throw new AppError({
+                    message: 'No path found between stations',
+                    statusCode: 422,
+                    internalCode: 'NO_PATH_FOUND',
+                    description: `${from}->${to}`,
+                })
+            }
+            throw error
+        }
+    }
+
+    private assertStationExists(graph: Graph, stationId: StationId, field: 'from' | 'to'): void {
+        if (!graph.stations.has(stationId)) {
+            throw new AppError({
+                message: 'Station not found',
+                statusCode: 404,
+                internalCode: 'STATION_NOT_FOUND',
+                description: `${field}=${stationId}`,
+            })
+        }
+    }
+
+    private async getGraph(): Promise<Graph> {
+        if (this.graphCache) {
+            return this.graphCache
+        }
+
+        if (this.graphPromise) {
+            return this.graphPromise
+        }
+
+        // Share the same in-flight graph load across concurrent requests.
+        // If loading fails, clear the promise so the next request can retry.
+        this.graphPromise = this.loadGraph()
+        try {
+            const graph = await this.graphPromise
+            this.graphCache = graph
+            return graph
+        } catch (error) {
+            this.graphPromise = null
+            throw error
+        }
+    }
+
+    private async loadGraph(): Promise<Graph> {
+        const allStations = await this.db.select().from(stations)
+        const allLineStations = await this.db
+            .select()
+            .from(lineStations)
+            .orderBy(asc(lineStations.lineId), asc(lineStations.order))
+        const allLines = await this.db.select().from(lines)
+
+        return buildGraph(allStations, allLines, allLineStations)
     }
 }

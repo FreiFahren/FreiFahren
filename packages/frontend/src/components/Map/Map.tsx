@@ -34,6 +34,24 @@ const cityViewPosition: { lng: number; lat: number } = {
 }
 const GITHUB_ICON = `/icons/github.svg`
 const INSTAGRAM_ICON = `/icons/instagram.svg`
+const STATION_QUERY_LAYERS = ['stationLayer', 'stationNameLayer'] as const
+
+const parseStationLines = (lines: unknown): string[] => {
+    if (Array.isArray(lines)) {
+        return lines.filter((item): item is string => typeof item === 'string')
+    }
+
+    if (typeof lines !== 'string') {
+        return []
+    }
+
+    try {
+        const parsedLines: unknown = JSON.parse(lines)
+        return Array.isArray(parsedLines) ? parsedLines.filter((item): item is string => typeof item === 'string') : []
+    } catch {
+        return []
+    }
+}
 
 const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
     isFirstOpen,
@@ -97,8 +115,11 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
             }
         }
 
+        const queryableStationLayers = STATION_QUERY_LAYERS.filter((layerId) => currentMap.getLayer(layerId))
+        if (queryableStationLayers.length === 0) return
+
         const features = currentMap.queryRenderedFeatures(event.point, {
-            layers: ['stationLayer', 'stationNameLayer'],
+            layers: queryableStationLayers,
         })
 
         if (features.length > 0 && handleStationClick) {
@@ -106,16 +127,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
             const { properties } = feature
 
             if (typeof properties.name === 'string' && feature.geometry.type === 'Point') {
-                let parsedLines: unknown
-                try {
-                    parsedLines = JSON.parse(properties.lines ?? '[]')
-                } catch (error) {
-                    parsedLines = []
-                }
-                const lines =
-                    Array.isArray(parsedLines) && parsedLines.every((item) => typeof item === 'string')
-                        ? (parsedLines as string[])
-                        : []
+                const lines = parseStationLines(properties.lines)
 
                 const station: StationProperty = {
                     name: properties.name,
@@ -171,9 +183,7 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                     onRotate={handleRotate}
                     onClick={handleMapClick}
                     onDblClick={handleMapDoubleClick}
-                    mapStyle={`https://api.jawg.io/styles/c52af8db-49f6-40b8-9197-568b7fd9a940.json?access-token=${
-                        import.meta.env.VITE_JAWG_ACCESS_TOKEN
-                    }`}
+                    mapStyle={import.meta.env.VITE_MAP_STYLE_URL}
                 >
                     {!isFirstOpen ? <LocationMarker userPosition={userPosition} /> : null}
                     <MarkerContainer isFirstOpen={isFirstOpen} userPosition={userPosition} />
@@ -196,15 +206,6 @@ const FreifahrenMap: React.FC<FreifahrenMapProps> = ({
                 className="fixed bottom-0 right-1.5 rounded px-1.5 py-0.5 text-gray-500 hover:underline"
                 style={{ fontSize: 'var(--font-xxxs)' }}
             >
-                <a
-                    href="https://www.jawg.io/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="no-underline hover:underline"
-                >
-                    © JawgMaps
-                </a>{' '}
-                |
                 <a
                     href="https://www.openstreetmap.org/copyright"
                     target="_blank"

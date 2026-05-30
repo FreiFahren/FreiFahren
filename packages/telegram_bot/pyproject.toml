@@ -1,0 +1,43 @@
+[project]
+name = "telegram_bot"
+version = "0.1.0"
+description = "FreiFahren Telegram bot: extracts ticket-inspector reports from chat messages via an LLM and posts them to the backend."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiohttp>=3.13.5",
+    "httpx>=0.27",
+    "mistralai>=1.2",
+    "pydantic>=2.7",
+    "python-dotenv>=1.0",
+    "python-telegram-bot>=21.6",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.7",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/telegram_bot"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

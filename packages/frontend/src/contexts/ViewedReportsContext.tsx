@@ -16,7 +16,7 @@ interface ViewedReportsContextType {
     readonly isRecentAndUnviewed: (report: Report) => boolean
 }
 
-const createReportId = (report: Report): string => `${report.station.id}-${report.timestamp}` // in order to avoid duplicates with same station
+const createReportId = (report: Report): string => `${report.stationId}-${report.timestamp}` // in order to avoid duplicates with same station
 
 const isReportExpired = (report: ViewedReport): boolean => {
     const currentTime = new Date().getTime()

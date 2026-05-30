@@ -1,8 +1,8 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
 import { eq } from 'drizzle-orm'
 
+import { createApp } from '../src'
 import { db, lineStations, lines, reports, segments } from '../src/db'
-import { seedBaseData } from '../src/db/seed/seed'
 import { appRequestWithRedirect, sendReportRequest } from './test-utils'
 
 type SegmentRisk = { color: string; risk: number }
@@ -13,11 +13,17 @@ const GREEN = '#13C184'
 
 let testStationId: string
 let testLineId: string
+let routeApp = createApp()
+
+const getRisk = () => appRequestWithRedirect('/risk', undefined, routeApp)
+const postRiskReport = (payload: object) => sendReportRequest(payload, routeApp)
+
+beforeEach(() => {
+    routeApp = createApp()
+})
 
 describe('GET /v0/risk response shape', () => {
     beforeAll(async () => {
-        await seedBaseData(db)
-
         const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
         const [stationOnLine] = await db
             .select({ stationId: lineStations.stationId })
@@ -38,7 +44,7 @@ describe('GET /v0/risk response shape', () => {
     })
 
     it('returns 200 with a segments_risk object', async () => {
-        const response = await appRequestWithRedirect('/risk')
+        const response = await getRisk()
 
         expect(response.status).toBe(200)
 
@@ -49,7 +55,7 @@ describe('GET /v0/risk response shape', () => {
     })
 
     it('returns empty segments_risk when there are no recent reports', async () => {
-        const response = await appRequestWithRedirect('/risk')
+        const response = await getRisk()
 
         expect(response.status).toBe(200)
 
@@ -58,9 +64,9 @@ describe('GET /v0/risk response shape', () => {
     })
 
     it('returns non-empty segments_risk after a recent real report', async () => {
-        await sendReportRequest({ stationId: testStationId, lineId: testLineId, source: 'telegram' })
+        await postRiskReport({ stationId: testStationId, lineId: testLineId, source: 'telegram' })
 
-        const response = await appRequestWithRedirect('/risk')
+        const response = await getRisk()
 
         expect(response.status).toBe(200)
 
@@ -69,9 +75,9 @@ describe('GET /v0/risk response shape', () => {
     })
 
     it('each segment entry has a valid color and a risk score between 0 and 1', async () => {
-        await sendReportRequest({ stationId: testStationId, lineId: testLineId, source: 'telegram' })
+        await postRiskReport({ stationId: testStationId, lineId: testLineId, source: 'telegram' })
 
-        const response = await appRequestWithRedirect('/risk')
+        const response = await getRisk()
         const body = (await response.json()) as RiskResponse
 
         for (const [sid, data] of Object.entries(body.segments_risk)) {
@@ -83,9 +89,9 @@ describe('GET /v0/risk response shape', () => {
     })
 
     it('only includes segments with risk — green segments are excluded', async () => {
-        await sendReportRequest({ stationId: testStationId, lineId: testLineId, source: 'telegram' })
+        await postRiskReport({ stationId: testStationId, lineId: testLineId, source: 'telegram' })
 
-        const response = await appRequestWithRedirect('/risk')
+        const response = await getRisk()
         const body = (await response.json()) as RiskResponse
 
         for (const data of Object.values(body.segments_risk)) {
@@ -95,9 +101,9 @@ describe('GET /v0/risk response shape', () => {
     })
 
     it('segment IDs are numeric strings matching database IDs', async () => {
-        await sendReportRequest({ stationId: testStationId, lineId: testLineId, source: 'telegram' })
+        await postRiskReport({ stationId: testStationId, lineId: testLineId, source: 'telegram' })
 
-        const response = await appRequestWithRedirect('/risk')
+        const response = await getRisk()
         const body = (await response.json()) as RiskResponse
 
         for (const sid of Object.keys(body.segments_risk)) {
@@ -108,8 +114,6 @@ describe('GET /v0/risk response shape', () => {
 
 describe('GET /v0/risk timeframe filtering', () => {
     beforeAll(async () => {
-        await seedBaseData(db)
-
         const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
         const [stationOnLine] = await db
             .select({ stationId: lineStations.stationId })
@@ -140,7 +144,7 @@ describe('GET /v0/risk timeframe filtering', () => {
             source: 'telegram',
         })
 
-        const response = await appRequestWithRedirect('/risk')
+        const response = await getRisk()
 
         expect(response.status).toBe(200)
 
@@ -159,7 +163,7 @@ describe('GET /v0/risk timeframe filtering', () => {
             source: 'telegram',
         })
 
-        const response = await appRequestWithRedirect('/risk')
+        const response = await getRisk()
 
         expect(response.status).toBe(200)
 
@@ -178,7 +182,7 @@ describe('GET /v0/risk timeframe filtering', () => {
             source: 'telegram',
         })
 
-        const oldResponse = await appRequestWithRedirect('/risk')
+        const oldResponse = await getRisk()
         const oldBody = (await oldResponse.json()) as RiskResponse
 
         // The 55-minute-old report must still produce output (bidirect decay ≈ 0.3 at that age),
@@ -188,9 +192,9 @@ describe('GET /v0/risk timeframe filtering', () => {
         await db.delete(reports)
 
         // Insert a fresh report
-        await sendReportRequest({ stationId: testStationId, lineId: testLineId, source: 'telegram' })
+        await postRiskReport({ stationId: testStationId, lineId: testLineId, source: 'telegram' })
 
-        const freshResponse = await appRequestWithRedirect('/risk')
+        const freshResponse = await getRisk()
         const freshBody = (await freshResponse.json()) as RiskResponse
 
         // Both reports target the same station/line, so there must be a segment in common
@@ -206,8 +210,6 @@ describe('GET /v0/risk segment targeting', () => {
     let stationOnSegmentLine: string
 
     beforeAll(async () => {
-        await seedBaseData(db)
-
         // Find a segment and a station that belongs to its line
         const [segment] = await db
             .select({
@@ -239,9 +241,9 @@ describe('GET /v0/risk segment targeting', () => {
     })
 
     it('a report on a line causes segments of that line to appear in the risk output', async () => {
-        await sendReportRequest({ stationId: stationOnSegmentLine, lineId: segmentLineId, source: 'telegram' })
+        await postRiskReport({ stationId: stationOnSegmentLine, lineId: segmentLineId, source: 'telegram' })
 
-        const response = await appRequestWithRedirect('/risk')
+        const response = await getRisk()
         const body = (await response.json()) as RiskResponse
 
         // Resolve the DB IDs for segments on the reported line
@@ -267,9 +269,9 @@ describe('GET /v0/risk segment targeting', () => {
         const [singleLineStationId, singleLineStationData] = singleLineStation
         const inferredLineId = singleLineStationData.lines[0]!
 
-        await sendReportRequest({ stationId: singleLineStationId, source: 'telegram' })
+        await postRiskReport({ stationId: singleLineStationId, source: 'telegram' })
 
-        const response = await appRequestWithRedirect('/risk')
+        const response = await getRisk()
         const body = (await response.json()) as RiskResponse
 
         // Resolve DB IDs for segments on the inferred line
@@ -301,9 +303,9 @@ describe('GET /v0/risk segment targeting', () => {
 
         if (!stationA) return
 
-        await sendReportRequest({ stationId: stationA.stationId, lineId: lineA, source: 'telegram' })
+        await postRiskReport({ stationId: stationA.stationId, lineId: lineA, source: 'telegram' })
 
-        const response = await appRequestWithRedirect('/risk')
+        const response = await getRisk()
         const body = (await response.json()) as RiskResponse
 
         // Collect the normalized station pairs (sorted from:to) for all line A segments.
@@ -338,8 +340,6 @@ describe('GET /v0/risk segment targeting', () => {
 
 describe('GET /v0/risk report type handling', () => {
     beforeAll(async () => {
-        await seedBaseData(db)
-
         const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
         const [stationOnLine] = await db
             .select({ stationId: lineStations.stationId })
@@ -361,9 +361,9 @@ describe('GET /v0/risk report type handling', () => {
 
     it('multiple reports on the same line accumulate higher risk than a single report', async () => {
         // Single report
-        await sendReportRequest({ stationId: testStationId, lineId: testLineId, source: 'telegram' })
+        await postRiskReport({ stationId: testStationId, lineId: testLineId, source: 'telegram' })
 
-        const singleResponse = await appRequestWithRedirect('/risk')
+        const singleResponse = await getRisk()
         const singleBody = (await singleResponse.json()) as RiskResponse
         const singleRiskValues = Object.values(singleBody.segments_risk).map((s) => s.risk)
         const singleMaxRisk = Math.max(...singleRiskValues)
@@ -378,10 +378,10 @@ describe('GET /v0/risk report type handling', () => {
             .limit(2)
 
         for (const s of stationsOnLine) {
-            await sendReportRequest({ stationId: s.stationId, lineId: testLineId, source: 'telegram' })
+            await postRiskReport({ stationId: s.stationId, lineId: testLineId, source: 'telegram' })
         }
 
-        const multiResponse = await appRequestWithRedirect('/risk')
+        const multiResponse = await getRisk()
         const multiBody = (await multiResponse.json()) as RiskResponse
         const multiRiskValues = Object.values(multiBody.segments_risk).map((s) => s.risk)
         const multiMaxRisk = Math.max(...multiRiskValues)
@@ -403,17 +403,17 @@ describe('GET /v0/risk report type handling', () => {
         const directionId = stationsOnLine[stationsOnLine.length - 1]!.stationId
 
         // Report without direction
-        await sendReportRequest({ stationId, lineId: testLineId, source: 'telegram' })
+        await postRiskReport({ stationId, lineId: testLineId, source: 'telegram' })
 
-        const undirectedResponse = await appRequestWithRedirect('/risk')
+        const undirectedResponse = await getRisk()
         const undirectedBody = (await undirectedResponse.json()) as RiskResponse
 
         await db.delete(reports)
 
         // Report with direction
-        await sendReportRequest({ stationId, lineId: testLineId, directionId, source: 'telegram' })
+        await postRiskReport({ stationId, lineId: testLineId, directionId, source: 'telegram' })
 
-        const directedResponse = await appRequestWithRedirect('/risk')
+        const directedResponse = await getRisk()
         const directedBody = (await directedResponse.json()) as RiskResponse
 
         // Both should produce risky segments
@@ -442,9 +442,9 @@ describe('GET /v0/risk report type handling', () => {
         const [singleLineStationId] = singleLineStationOnA
 
         // --- Baseline: report at a single-line station on lineA with an explicit lineId ---
-        await sendReportRequest({ stationId: singleLineStationId, lineId: lineA, source: 'telegram' })
+        await postRiskReport({ stationId: singleLineStationId, lineId: lineA, source: 'telegram' })
 
-        const baselineResponse = await appRequestWithRedirect('/risk')
+        const baselineResponse = await getRisk()
         const baselineBody = (await baselineResponse.json()) as RiskResponse
         const baselineSegmentsA = await db.select({ id: segments.id }).from(segments).where(eq(segments.lineId, lineA))
         const baselineIdsA = new Set(baselineSegmentsA.map((s) => String(s.id)))
@@ -458,9 +458,9 @@ describe('GET /v0/risk report type handling', () => {
         await db.delete(reports)
 
         // --- Multi-line: same station but no lineId → lines = [lineA, lineB] ---
-        await sendReportRequest({ stationId: multiLineStationId, source: 'telegram' })
+        await postRiskReport({ stationId: multiLineStationId, source: 'telegram' })
 
-        const multiResponse = await appRequestWithRedirect('/risk')
+        const multiResponse = await getRisk()
         const multiBody = (await multiResponse.json()) as RiskResponse
 
         // Segments from BOTH lines should appear in the output
@@ -472,7 +472,7 @@ describe('GET /v0/risk report type handling', () => {
         const riskyOnA = Object.keys(multiBody.segments_risk).filter((sid) => baselineIdsA.has(sid))
         expect(riskyOnA.length).toBeGreaterThan(0)
 
-        // Risk on lineA segments should be roughly half of the single-line baseline (divided by 2 lines)
+        // Multi-line risk is dampened (by sqrt of the line count) but still lower than the single-line baseline.
         const multiMaxRiskOnA = Math.max(
             ...Object.entries(multiBody.segments_risk)
                 .filter(([sid]) => baselineIdsA.has(sid))
@@ -480,6 +480,36 @@ describe('GET /v0/risk report type handling', () => {
             0
         )
         expect(multiMaxRiskOnA).toBeLessThan(baselineMaxRisk)
+    })
+
+    it('a report at a station with many connections still produces non-green risk', async () => {
+        // Linear dampening (1/N) made high-degree hubs like Alexanderplatz disappear under the
+        // green threshold. With the softer sqrt dampening the model is expected to surface at
+        // least some yellow/red segments instead of nothing.
+        const { TransitNetworkDataService } = await import('../src/modules/transit/transit-network-data-service')
+        const service = new TransitNetworkDataService(db)
+        const stationsMap = await service.getStations()
+
+        const hub = Object.entries(stationsMap).reduce<[string, (typeof stationsMap)[string]] | null>(
+            (best, entry) => (best === null || entry[1].lines.length > best[1].lines.length ? entry : best),
+            null
+        )
+        if (hub === null) return
+        const [hubStationId, hubData] = hub
+        if (hubData.lines.length < 4) return // skip if the seeded data has no high-degree hub
+
+        await postRiskReport({ stationId: hubStationId, source: 'telegram' })
+
+        const response = await getRisk()
+        expect(response.status).toBe(200)
+
+        const body = (await response.json()) as RiskResponse
+        const colors = Object.values(body.segments_risk).map((s) => s.color)
+        expect(colors.length).toBeGreaterThan(0)
+        for (const c of colors) {
+            expect(VALID_COLORS).toContain(c)
+            expect(c).not.toBe(GREEN)
+        }
     })
 })
 
@@ -489,10 +519,9 @@ describe('GET /v0/risk overlapping segments', () => {
 
     let overlapIds: string[] = []
     let primaryLineId: string | null = null
+    let overlapStationId: string | null = null
 
     beforeAll(async () => {
-        await seedBaseData(db)
-
         const allSegments = await db
             .select({
                 id: segments.id,
@@ -503,10 +532,10 @@ describe('GET /v0/risk overlapping segments', () => {
             .from(segments)
 
         // Group by normalized (sorted) station pair to find overlapping segments
-        const pairMap = new Map<string, { ids: number[]; lineIds: string[] }>()
+        const pairMap = new Map<string, { ids: number[]; lineIds: string[]; fromStationId: string }>()
         for (const seg of allSegments) {
             const key = [seg.fromStationId, seg.toStationId].sort().join(':')
-            const entry = pairMap.get(key) ?? { ids: [], lineIds: [] }
+            const entry = pairMap.get(key) ?? { ids: [], lineIds: [], fromStationId: seg.fromStationId }
             entry.ids.push(seg.id)
             entry.lineIds.push(seg.lineId)
             pairMap.set(key, entry)
@@ -516,6 +545,7 @@ describe('GET /v0/risk overlapping segments', () => {
         if (overlap) {
             overlapIds = overlap.ids.map(String)
             primaryLineId = overlap.lineIds[0]!
+            overlapStationId = overlap.fromStationId
         }
     })
 
@@ -528,23 +558,13 @@ describe('GET /v0/risk overlapping segments', () => {
     })
 
     it('all segments sharing the same station pair get colored when one of them is risky', async () => {
-        if (!primaryLineId || overlapIds.length === 0) return // skip if seed data has no overlapping pairs
+        if (!primaryLineId || !overlapStationId || overlapIds.length === 0) return // skip if seed data has no overlapping pairs
 
         const overlapSegmentIds = overlapIds
 
-        // Find a station that is directly one of the endpoints of the overlapping segment pair.
-        // Reporting there puts the segment at distance 0, guaranteeing it appears in the output.
-        const [stationEntry] = await db
-            .select({ stationId: lineStations.stationId })
-            .from(lineStations)
-            .where(eq(lineStations.lineId, primaryLineId))
-            .limit(1)
+        await postRiskReport({ stationId: overlapStationId, lineId: primaryLineId, source: 'telegram' })
 
-        if (!stationEntry) return
-
-        await sendReportRequest({ stationId: stationEntry.stationId, lineId: primaryLineId, source: 'telegram' })
-
-        const response = await appRequestWithRedirect('/risk')
+        const response = await getRisk()
         const body = (await response.json()) as RiskResponse
 
         const riskyIds = new Set(Object.keys(body.segments_risk))

@@ -40,6 +40,16 @@ type SegmentsFeatureCollection = {
 }
 
 type Stations = Record<StationId, Station>
-type Lines = Record<LineId, StationId[]>
 
-export type { Lines, Stations, SegmentsFeatureCollection, SegmentFeature, StationId, LineId }
+type Line = {
+    id: LineId
+    name: LineRow['name']
+    type: LineRow['type']
+    isCircular: LineRow['isCircular']
+    color: LineRow['color']
+    stations: StationId[]
+}
+
+type Lines = Line[]
+
+export type { Line, Lines, Stations, SegmentsFeatureCollection, SegmentFeature, StationId, LineId }

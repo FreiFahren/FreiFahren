@@ -12,12 +12,13 @@ import { LegalDisclaimer } from '../LegalDisclaimer'
 interface UtilModalProps {
     className: string
     children?: React.ReactNode
+    onOpenContribution?: () => void
 }
 
 const GITHUB_ICON = `/icons/github.svg`
 const INSTAGRAM_ICON = `/icons/instagram.svg`
 
-const UtilModal: React.FC<UtilModalProps> = ({ className, children }) => {
+const UtilModal: React.FC<UtilModalProps> = ({ className, children, onOpenContribution }) => {
     const { t } = useTranslation()
     const [isOptedOut, updateOptOut] = useAnalyticsOptOut()
 
@@ -57,6 +58,13 @@ const UtilModal: React.FC<UtilModalProps> = ({ className, children }) => {
                             <img src={INSTAGRAM_ICON} alt="Instagram Icon" />
                         </a>
                     </div>
+                    <button
+                        className="action h-10 w-full rounded-sm"
+                        onClick={() => onOpenContribution?.()}
+                        type="button"
+                    >
+                        {t('UtilModal.contribution')}
+                    </button>
                     <div className="links-row">
                         <Link to="/impressum">{t('UtilModal.impressum')}</Link>
                         <Link to="/Datenschutz">{t('UtilModal.privacy')}</Link>

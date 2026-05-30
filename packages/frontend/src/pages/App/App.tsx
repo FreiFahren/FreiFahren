@@ -4,11 +4,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ReportsModalButton } from 'src/components/Buttons/ReportsModalButton/ReportsModalButton'
+import {
+    CONTRIBUTION_MODAL_DISMISSED_KEY,
+    ContributionModal,
+} from 'src/components/Modals/ContributionModal/ContributionModal'
 import MarketingModal from 'src/components/Modals/MarketingModal/MarketingModal'
-import NavigationModal from 'src/components/Modals/NavigationModal/NavigationModal'
 import { ReportsModal } from 'src/components/Modals/ReportsModal/ReportsModal'
 import { ReportSummaryModal } from 'src/components/Modals/ReportSummaryModal/ReportSummaryModal'
-import { Itinerary, Report, Station, StationProperty } from 'src/utils/types'
+import { Report, StationProperty } from 'src/utils/types'
 
 import { useCurrentReports, useLast24HourReports, useStations } from '../../api/queries'
 import CloseButton from '../../components/Buttons/CloseButton/CloseButton'
@@ -68,10 +71,31 @@ const App = () => {
 
     const [showSummary, setShowSummary] = useState<boolean>(false)
     const [reportedData, setReportedData] = useState<Report | null>(null)
+
+    const [showContributionModal, setShowContributionModal] = useState<boolean>(false)
+    const contributionShownThisSessionRef = useRef(false)
+
+    const openContributionModal = () => {
+        if (contributionShownThisSessionRef.current) return
+        if (localStorage.getItem(CONTRIBUTION_MODAL_DISMISSED_KEY) === 'true') return
+        contributionShownThisSessionRef.current = true
+        setShowContributionModal(true)
+    }
+
+    useEffect(() => {
+        const timeout = setTimeout(openContributionModal, 3 * 60 * 1000)
+        return () => clearTimeout(timeout)
+    }, [])
+
     const handleReportFormSubmit = (reportedDataForm: Report) => {
         setAppUIState((prevState) => ({ ...prevState, isReportFormOpen: false }))
         setShowSummary(true)
         setReportedData(reportedDataForm)
+    }
+
+    const handleCloseSummaryModal = () => {
+        setShowSummary(false)
+        openContributionModal()
     }
 
     const {
@@ -81,6 +105,11 @@ const App = () => {
         closeModal: closeUtilModal,
     } = useModalAnimation()
 
+    const handleOpenContribution = () => {
+        closeUtilModal()
+        setShowContributionModal(true)
+    }
+
     const toggleUtilModal = () => {
         if (isUtilOpen) {
             closeUtilModal()
@@ -89,7 +118,6 @@ const App = () => {
         }
     }
 
-    const [isNavigationModalOpen, setIsNavigationModalOpen] = useState(false)
     const {
         isOpen: isInfoModalOpenFromHook,
         isAnimatingOut: isInfoModalAnimatingOut,
@@ -100,17 +128,17 @@ const App = () => {
     const isNonTimedModalOpen = useMemo(
         () =>
             appUIState.isReportFormOpen ||
-            isNavigationModalOpen ||
             isInfoModalOpenFromHook ||
             appUIState.isListModalOpen ||
             showSummary ||
+            showContributionModal ||
             isUtilOpen,
         [
             appUIState.isReportFormOpen,
-            isNavigationModalOpen,
             isInfoModalOpenFromHook,
             appUIState.isListModalOpen,
             showSummary,
+            showContributionModal,
             isUtilOpen,
         ]
     )
@@ -254,12 +282,7 @@ const App = () => {
     }, [])
 
     const [selectedStation, setSelectedStation] = useState<StationProperty | null>(null)
-    const [navigationEndStation, setNavigationEndStation] = useState<StationProperty | null>(null)
     const [stationModalWasManuallyCloses, setStationModalWasManuallyCloses] = useState(false)
-
-    // New state for saved route
-    const [savedRoute, setSavedRoute] = useState<Itinerary | null>(null)
-    const [showSavedRoute, setShowSavedRoute] = useState(false)
 
     const onStationSelect = useCallback(
         (station: StationProperty) => {
@@ -277,14 +300,6 @@ const App = () => {
         // If we're on a station URL, navigate back to home
         if (stationId !== undefined) {
             navigate('/')
-        }
-    }
-
-    const handleRouteButtonClick = () => {
-        if (selectedStation) {
-            setNavigationEndStation(selectedStation)
-            setIsNavigationModalOpen(true)
-            closeInfoModal()
         }
     }
 
@@ -367,7 +382,10 @@ const App = () => {
                 </>
             ) : null}
             {isUtilOpen ? (
-                <UtilModal className={`open ${isUtilAnimatingOut ? 'slide-out' : 'slide-in'}`}>
+                <UtilModal
+                    className={`open ${isUtilAnimatingOut ? 'slide-out' : 'slide-in'}`}
+                    onOpenContribution={handleOpenContribution}
+                >
                     <CloseButton handleClose={closeUtilModal} />
                 </UtilModal>
             ) : null}
@@ -376,10 +394,19 @@ const App = () => {
                     <ReportSummaryModal
                         reportData={reportedData}
                         openAnimationClass="open center-animation"
-                        handleCloseModal={() => setShowSummary(false)}
+                        onCloseModal={handleCloseSummaryModal}
                         numberOfUsers={numberOfUsers}
                     />
-                    <Backdrop handleClick={() => setShowSummary(false)} />
+                    <Backdrop handleClick={() => handleCloseSummaryModal()} />
+                </>
+            ) : null}
+            {showContributionModal ? (
+                <>
+                    <ContributionModal
+                        onClose={() => setShowContributionModal(false)}
+                        onDismissPermanently={() => setShowContributionModal(false)}
+                    />
+                    <Backdrop handleClick={() => setShowContributionModal(false)} />
                 </>
             ) : null}
             {appUIState.isReportFormOpen ? (
@@ -429,61 +456,10 @@ const App = () => {
                 <InfoModal
                     station={selectedStation}
                     className={`open ${isInfoModalAnimatingOut ? 'slide-out' : 'slide-in'}`}
-                    onRouteClick={handleRouteButtonClick}
                 >
                     <CloseButton handleClose={onCloseInfoModal} />
                 </InfoModal>
             ) : null}
-            {isNavigationModalOpen ? (
-                <>
-                    <NavigationModal
-                        className="open center-animation"
-                        initialEndStation={navigationEndStation as Station}
-                        onSaveRoute={(route: Itinerary) => {
-                            setSavedRoute(route)
-                            setIsNavigationModalOpen(false)
-                            setNavigationEndStation(null)
-                        }}
-                        savedRoute={savedRoute}
-                    />
-                    <Backdrop
-                        handleClick={() => {
-                            setIsNavigationModalOpen(false)
-                            setNavigationEndStation(null)
-                        }}
-                    />
-                </>
-            ) : null}
-            {savedRoute && !isNavigationModalOpen && !showSavedRoute ? (
-                <button
-                    className="small-button saved-route-button"
-                    onClick={() => setShowSavedRoute(true)}
-                    type="button"
-                >
-                    <span>{t('NavigationModal.showSavedRoute')}</span>
-                </button>
-            ) : null}
-            {showSavedRoute && savedRoute ? (
-                <>
-                    <NavigationModal
-                        className="open center-animation"
-                        initialRoute={savedRoute}
-                        onRemoveRoute={() => {
-                            setSavedRoute(null)
-                            setShowSavedRoute(false)
-                        }}
-                        savedRoute={savedRoute}
-                    />
-                    <Backdrop handleClick={() => setShowSavedRoute(false)} />
-                </>
-            ) : null}
-            <button
-                className="navigation-button small-button"
-                onClick={() => setIsNavigationModalOpen(true)}
-                type="button"
-            >
-                <img src="/icons/route-svgrepo-com.svg" alt="Navigation" />
-            </button>
             {showUpdateIndicator ? (
                 <div className="update-indicator">
                     <img src="/icons/refresh-svgrepo-com.svg" alt="Refresh" className="update-indicator-icon" />

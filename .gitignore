@@ -1,9 +1,16 @@
 .DS_Store
+packages/tile-server/source/*
+!packages/tile-server/source/freifahren-style.json
+packages/tile-server/tileserver/data/
+packages/tile-server/tileserver/styles/freifahren-dark/style.json
+packages/tile-server/tileserver/styles/freifahren-dark.json
 settings.json
 *.log
+*.tsbuildinfo
 .env
 __pycache__
 packages/*.log.*
+packages/frontend/dist/
 data/*
 scripts/segments.geojson
 scripts/stations.json
@@ -11,3 +18,5 @@ scripts/lines.json
 scripts/export.geojson
 scripts/Pipfile
 scripts/Pipfile.lock
+messages.json
+eval_results.json

@@ -2,7 +2,7 @@ import './ReportsModalButton.css'
 
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { useCurrentReports } from 'src/api/queries'
+import { useCurrentReports, useStations } from 'src/api/queries'
 import { useViewedReports } from 'src/contexts/ViewedReportsContext'
 import { sendAnalyticsEvent } from 'src/hooks/useAnalytics'
 
@@ -15,6 +15,7 @@ interface ReportsModalButtonProps {
 const ReportsModalButton: React.FC<ReportsModalButtonProps> = ({ openModal }) => {
     const { t } = useTranslation()
     const { data: lastHourReports = [] } = useCurrentReports()
+    const { data: stations } = useStations()
     const { setLastViewed, isRecentAndUnviewed } = useViewedReports()
 
     const latestReport =
@@ -48,8 +49,10 @@ const ReportsModalButton: React.FC<ReportsModalButtonProps> = ({ openModal }) =>
                 </div>
                 {latestReport ? (
                     <div className="latest-report">
-                        {latestReport.line !== null ? <Line line={latestReport.line} /> : null}
-                        <p className="station-name">{latestReport.station.name}</p>
+                        {latestReport.lineId !== null ? <Line line={latestReport.lineId} /> : null}
+                        <p className="station-name">
+                            {stations?.[latestReport.stationId]?.name ?? latestReport.stationId}
+                        </p>
                         {isRecentAndUnviewed(latestReport) ? <span className="indicator live pulse" /> : null}
                     </div>
                 ) : null}

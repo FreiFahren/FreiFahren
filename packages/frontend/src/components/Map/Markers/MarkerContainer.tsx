@@ -31,9 +31,9 @@ const MarkerContainer: React.FC<MarkersProps> = ({ isFirstOpen, userPosition }) 
 
         sendAnalyticsEvent('Marker clicked', {
             meta: {
-                station: report.station.name,
+                stationId: report.stationId,
                 ageInMinutes,
-                isHistoric: report.isHistoric,
+                isPredicted: report.isPredicted,
             },
         }).catch((error) => {
             // fix later with sentry
@@ -50,7 +50,7 @@ const MarkerContainer: React.FC<MarkersProps> = ({ isFirstOpen, userPosition }) 
                     isFirstOpen={isFirstOpen}
                     markerData={ticketInspector}
                     index={index}
-                    key={`${ticketInspector.station.id}-${ticketInspector.timestamp}`}
+                    key={`${ticketInspector.stationId}-${ticketInspector.timestamp}`}
                     onMarkerClick={handleMarkerClick}
                 />
             ))}

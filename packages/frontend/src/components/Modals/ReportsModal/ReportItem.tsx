@@ -1,5 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { useStations } from 'src/api/queries'
 import { useElapsedTimeMessage } from 'src/hooks/Messages'
 import { Report } from 'src/utils/types'
 
@@ -12,31 +13,29 @@ interface ReportItemProps {
 
 const ReportItem: React.FC<ReportItemProps> = ({ report, currentTime }) => {
     const { t } = useTranslation()
+    const { data: stations } = useStations()
 
-    const elapsedTimeMessage = useElapsedTimeMessage(report.timestamp, report.isHistoric)
+    const elapsedTimeMessage = useElapsedTimeMessage(report.timestamp, report.isPredicted)
     const shouldShowTime = currentTime !== undefined
     const displayMessage = shouldShowTime ? elapsedTimeMessage : null
 
+    const stationName = stations?.[report.stationId]?.name ?? report.stationId
+    const directionName =
+        report.directionId !== null ? (stations?.[report.directionId]?.name ?? report.directionId) : null
+
     return (
-        <div key={report.station.id + report.timestamp} className="report-item">
+        <div key={report.stationId + report.timestamp} className="report-item">
             <div className="align-child-on-line">
-                {report.line !== null ? <Line line={report.line} key={report.line} /> : null}
-                <h4>{report.station.name}</h4>
+                {report.lineId !== null ? <Line line={report.lineId} key={report.lineId} /> : null}
+                <h4>{stationName}</h4>
                 {displayMessage ? <p>{displayMessage}</p> : null}
             </div>
-            {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Don't listen to the compiler, it can be undefined */}
-            {report.message !== undefined && report.message !== null && report.message.trim() !== '' ? (
-                <div className="report-message-container">
-                    <p className="report-message">{report.message}</p>
-                </div>
-            ) : null}
             <div>
                 <p className="report-item-direction">
                     {/* BECAUSE IF NULL, empty richtung is shown  */}
-                    {/* eslint-disable-next-line @typescript-eslint/strict-boolean-expressions */}
-                    {report.direction?.name ? (
+                    {directionName !== null ? (
                         <>
-                            {t('MarkerModal.direction')}: <span>{report.direction.name}</span>
+                            {t('MarkerModal.direction')}: <span>{directionName}</span>
                         </>
                     ) : null}
                 </p>

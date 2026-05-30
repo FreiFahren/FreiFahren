@@ -1,10 +1,12 @@
 import { Hono } from 'hono'
+import { cors } from 'hono/cors'
+import { etag, RETAINED_304_HEADERS } from 'hono/etag'
 import { requestId } from 'hono/request-id'
 import { pinoLogger } from 'hono-pino'
-import pino from 'pino'
 
 import { registerServices, Services, type Env } from './app-env'
 import { handleError } from './common/error-handler'
+import { logger } from './common/logger'
 import { registerVersionedRoutes } from './common/router'
 import { db, DbConnection } from './db'
 import { postFeedback } from './modules/feedback/feedback-routes'
@@ -12,7 +14,19 @@ import { getReports, getReportsByStation, postReport, ReportsService } from './m
 import { getRisk } from './modules/risk/risk-routes'
 import { RiskService } from './modules/risk/risk-service'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
-import { getLines, getSegments, getStations } from './modules/transit/transit-routes'
+import { getDistance, getLines, getSegments, getStations } from './modules/transit/transit-routes'
+
+const getCorsOrigins = () => {
+    const configuredOrigins = Bun.env.CORS_ORIGINS?.split(',')
+        .map((origin) => origin.trim())
+        .filter((origin) => origin !== '')
+
+    if (configuredOrigins === undefined || configuredOrigins.length === 0) {
+        throw new Error('CORS_ORIGINS must be set to a comma-separated list of allowed origins')
+    }
+
+    return configuredOrigins
+}
 
 const createServices = (db: DbConnection) => {
     const transitNetworkDataService = new TransitNetworkDataService(db)
@@ -29,31 +43,31 @@ export const createApp = (dbConnection: DbConnection = db) => {
 
     app.use(requestId())
     app.use(
+        '*',
+        cors({
+            origin: getCorsOrigins(),
+            allowHeaders: ['Accept', 'Content-Type', 'If-Modified-Since', 'If-None-Match'],
+            allowMethods: ['GET', 'POST', 'OPTIONS'],
+            exposeHeaders: ['ETag', 'Last-Modified'],
+        })
+    )
+    app.use(
+        '/v0/transit/*',
+        etag({
+            retainedHeaders: [
+                ...RETAINED_304_HEADERS,
+                'access-control-allow-origin',
+                'access-control-allow-credentials',
+                'access-control-expose-headers',
+            ],
+        })
+    )
+    app.use(
         pinoLogger({
-            pino: pino({
-                level: process.env.LOG_LEVEL ?? 'info',
-                transport: {
-                    targets: [
-                        {
-                            target: 'pino-pretty',
-                            options: {
-                                colorize: true,
-                                ignore: 'pid,hostname,req,res,responseTime,reqId',
-                                translateTime: 'SYS:standard',
-                                destination: 1,
-                            },
-                        },
-                        {
-                            target: 'pino-roll',
-                            options: {
-                                file: './app.log',
-                                frequency: 'daily',
-                                mkdir: true,
-                            },
-                        },
-                    ],
-                },
-            }),
+            pino: logger,
+            http: {
+                onResMessage: () => '',
+            },
         })
     )
 
@@ -64,7 +78,7 @@ export const createApp = (dbConnection: DbConnection = db) => {
         v0: [getReports, postReport, getReportsByStation],
     })
     registerVersionedRoutes(app, 'transit', 'v0', {
-        v0: [getStations, getLines, getSegments],
+        v0: [getStations, getLines, getSegments, getDistance],
     })
     registerVersionedRoutes(app, 'feedback', 'v0', {
         v0: [postFeedback],
@@ -84,4 +98,5 @@ export default {
     fetch: app.fetch,
     port: 3000,
     hostname: '0.0.0.0',
+    idleTimeout: 30,
 }
