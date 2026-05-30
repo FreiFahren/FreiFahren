@@ -66,6 +66,9 @@ export const createApp = (dbConnection: DbConnection = db) => {
         pinoLogger({
             pino: logger,
             http: {
+                // The request summary (method, path, status, duration) is rendered by the
+                // `messageFormat` in logger.ts, so we intentionally emit an empty `msg` here to
+                // avoid duplicating it.
                 onResMessage: () => '',
             },
         })
