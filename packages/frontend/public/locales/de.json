@@ -23,8 +23,8 @@
         "impressum": "Impressum",
         "privacy": "Datenschutz",
         "terms": "Nutzungsbedingungen",
-        "analytics-opted-in": "anonyme Analytics - Klicken zum Deaktivieren",
-        "analytics-opted-out": "anonyme Analytics - Klicken zum Aktivieren"
+        "analytics-opted-in": "Anonyme analytics - Klicken zum Deaktivieren",
+        "analytics-opted-out": "Anonyme analytics - Klicken zum Aktivieren"
     },
     "ContactSection": {
         "title": "Kontaktiere uns",
@@ -109,7 +109,42 @@
         "title": "Support",
         "mobile": "Bei Problemen oder Anregungen bezüglich der Mobile-App, melde dich bitte bei Moritz unter",
         "web": "Falls du ein Problem mit der Website hast, kontaktiere bitte Johan unter",
-        "privacy": "Datenschutz"
+        "privacy": "Datenschutz",
+        "impressum": "Impressum"
+    },
+    "Impressum": {
+        "title": "Impressum",
+        "switchLanguage": "English version",
+        "sections": {
+            "provider": {
+                "title": "Anbieterkennzeichnung",
+                "name": "FreiFahren e.V. - Johan Trieloff (Vorstandsvorsitzender)",
+                "careOf": "c/o Online-Impressum #7591",
+                "street": "Europaring 90",
+                "city": "53757 Sankt Augustin"
+            },
+            "contact": {
+                "title": "Kontakt",
+                "emailLabel": "E-Mail:",
+                "form": "Weiterer elektronischer Kontaktweg: Kontaktaufnahme per E-Mail."
+            },
+            "representedBy": {
+                "title": "Vertretungsberechtigt",
+                "content": "Der Verein wird jeweils durch zwei Mitglieder des Vorstands gemeinsam vertreten: Johan Trieloff, Moritz Clerc, David Brandes."
+            },
+            "register": {
+                "title": "Registereintrag",
+                "content": "Vereinsregister: Amtsgericht Charlottenburg, VR 42496"
+            },
+            "vat": {
+                "title": "Umsatzsteuer",
+                "content": "Der Verein ist nicht umsatzsteuerpflichtig."
+            }
+        },
+        "links": {
+            "privacy": "Datenschutz",
+            "support": "Support"
+        }
     },
     "PrivacyPolicy": {
         "title": "Datenschutzerklärung für die App \"Freifahren\"",
@@ -122,14 +157,13 @@
             },
             "responsible": {
                 "title": "2. Verantwortliche Stelle",
-                "content": "Verantwortlich für die Datenverarbeitung im Rahmen dieser App sind die Entwickler des FreiFahren Projekts, erreichbar unter der E-Mail-Adresse: johan@trieloff.net. FreiFahren ist ein nicht-kommerzielles Open-Source-Projekt."
+                "content": "Verantwortlich für die Datenverarbeitung im Rahmen dieser App ist FreiFahren e.V. - Johan Trieloff (Vorstandsvorsitzender), c/o Online-Impressum #7591, Europaring 90, 53757 Sankt Augustin, erreichbar unter contact@freifahren.org. Vertretungsberechtigter Vorstand: Johan Trieloff (johan@freifahren.org), Moritz Clerc (moritz@freifahren.org), David Brandes (david@freifahren.org)."
             },
             "legalBasis": {
                 "title": "3. Rechtsgrundlagen der Datenverarbeitung",
                 "content": "Die Verarbeitung personenbezogener Daten in unserer App erfolgt auf Basis der folgenden Rechtsgrundlagen gemäß der Datenschutz-Grundverordnung (DSGVO):",
-                "consent": "Einwilligung (Art. 6 Abs. 1 lit. a DSGVO): Die Nutzer unserer App geben ihre ausdrückliche Einwilligung zur Verarbeitung ihrer personenbezogenen Daten für spezifische Zwecke. Diese Einwilligung kann jederzeit widerrufen werden, wobei der Widerruf die Rechtmäßigkeit der bis zum Widerruf erfolgten Verarbeitung nicht berührt.",
-                "contract": "Vertragserfüllung und vorvertragliche Maßnahmen (Art. 6 Abs. 1 lit. b DSGVO): Die Verarbeitung ist notwendig zur Erfüllung eines Vertrags, dessen Vertragspartei die betroffene Person ist, oder zur Durchführung vorvertraglicher Maßnahmen, die auf Anfrage der betroffenen Person erfolgen.",
-                "legitimateInterest": "Berechtigte Interessen (Art. 6 Abs. 1 lit. f DSGVO): Die Verarbeitung ist zur Wahrung der berechtigten Interessen des Verantwortlichen oder eines Dritten erforderlich, sofern nicht die Interessen oder Grundrechte und Grundfreiheiten der betroffenen Person überwiegen."
+                "consent": "Einwilligung (Art. 6 Abs. 1 lit. a DSGVO): Die Nutzer unserer App geben ihre ausdrückliche Einwilligung zur Verarbeitung ihrer personenbezogenen Daten für spezifische Zwecke. Diese Einwilligung kann jederzeit mit Wirkung für die Zukunft widerrufen werden, wobei der Widerruf die Rechtmäßigkeit der bis zum Widerruf erfolgten Verarbeitung nicht berührt.",
+                "legitimateInterest": "Berechtigte Interessen (Art. 6 Abs. 1 lit. f DSGVO): Die Verarbeitung ist zur Wahrung der berechtigten Interessen des Verantwortlichen oder eines Dritten erforderlich, sofern nicht die Interessen oder Grundrechte und Grundfreiheiten der betroffenen Person überwiegen. Die berechtigten Interessen umfassen insbesondere die Sicherstellung der Funktionsfähigkeit und Sicherheit des Dienstes, die Verbesserung der App sowie die Missbrauchsprävention."
             },
             "dataUsage": {
                 "title": "4. Erhebung und Nutzung von Daten",
@@ -140,37 +174,51 @@
                     "Station",
                     "Richtung (optional)",
                     "Uhrzeit der Meldung",
-                    "Beschreibungstext (optional)",
                     "IP-Adresse des Nutzers"
                 ],
-                "reportPurpose": "Die gemeldeten Daten werden anderen Nutzern der App temporär zur Verfügung gestellt, um ihnen die Möglichkeit zu geben, sich über die aktuelle Situation in den öffentlichen Verkehrsmitteln zu informieren. Des Weiteren werden die Meldungen in die Freifahren_BE Telegram-Gruppe weitergeleitet. Diese Datenübermittlung dient dem Austausch und der Information über Vorfälle innerhalb der Community.",
-                "ipAddressInfo": "Die IP-Adresse wird verwendet, um Spam und Missbrauchsmeldungen zu erkennen, um sicherzustellen, dass die Meldungen von echten Nutzern und nicht von Bots oder anderen automatischen Quellen stammen. IP-Adressen werden in stark verschlüsselter Form für maximal {{ minutes }} Minuten gespeichert und dann gelöscht. Sie sind nicht mit anderen Daten verknüpft und können nicht auf den Nutzer zurückverfolgt werden.",
+                "reportPurpose": "Die gemeldeten Daten werden anderen Nutzern der App temporär zur Verfügung gestellt, um ihnen die Möglichkeit zu geben, sich über die aktuelle Situation in den öffentlichen Verkehrsmitteln zu informieren. Des Weiteren werden die Meldungen in die Freifahren_BE Telegram-Gruppe weitergeleitet. Diese Datenübermittlung dient dem Austausch und der Information über Vorfälle innerhalb der Community. Hinweise zur Übermittlung an Telegram finden Sie in Abschnitt 11 sowie zu internationalen Datenübermittlungen in Abschnitt 14.",
+                "ipAddressInfo": "FreiFahren selbst speichert keine IP-Adressen. Zur Abwehr von Spam und Missbrauch verarbeitet Cloudflare als vorgelagerter Infrastruktur-Dienstleister IP-Adressen kurzfristig. Cloudflare wird dabei überwiegend als Auftragsverarbeiter nach Art. 28 DSGVO auf unsere Weisung tätig (siehe Abschnitt 15); für die Abwehr von Angriffen und Missbrauch (Sicherheitstelemetrie) handelt Cloudflare zudem als eigenständig Verantwortlicher. Diese Verarbeitung erfolgt auf Grundlage berechtigter Interessen gemäß Art. 6 Abs. 1 lit. f DSGVO (Sicherstellung der Sicherheit und Funktionsfähigkeit des Dienstes). Hinweise zum damit verbundenen Drittlandtransfer finden Sie in Abschnitt 14.",
                 "feedbackFormTitle": "Bei der Übermittlung von Feedback:",
                 "feedbackDataPoints": [
                     "Feedback-Text",
+                    "User-Agent",
                     "Zeitpunkt der Übermittlung"
                 ],
-                "feedbackPurpose": "Das Feedback wird ausschließlich zur Verbesserung der App verwendet und nicht an Dritte weitergegeben oder in der Telegram-Gruppe geteilt."
+                "feedbackPurpose": "Das Feedback wird ausschließlich zur Verbesserung der App verwendet und nicht an Dritte weitergegeben oder in der Telegram-Gruppe geteilt. Der User-Agent wird erhoben, um gemeldete Probleme nachvollziehen und beheben zu können."
             },
             "anonymity": {
                 "title": "5. Anonymität",
-                "content": "Es werden keine personenbezogenen Daten der Nutzer gespeichert. Die Meldungen sind anonym, und es können keine Rückschlüsse auf einzelne Personen gezogen werden."
+                "content": "Es werden keine dauerhaft personenbezogenen Daten der Nutzer gespeichert. IP-Adressen gelten als personenbezogene Daten, werden durch FreiFahren jedoch nicht persistent gespeichert und sind nicht rekonstruierbar. Bei Meldungen, die ihren Ursprung in der öffentlich zugänglichen FreiFahren_BE-Telegram-Gruppe haben, kann theoretisch durch Korrelation der Zeitstempel ein indirekter Bezug zum jeweiligen Telegram-Account hergestellt werden. Wir empfehlen Nutzern, die ein erhöhtes Schutzinteresse haben, Meldungen direkt über die App zu senden."
             },
             "storageAndAccess": {
                 "title": "6. Speicherung und Zugriff",
-                "content": "Die erhobenen Daten werden auf unseren eigenen Servern gespeichert, die bei der Hetzner Online GmbH in Deutschland gehostet sind. Die Speicherdauer der Daten ist unbefristet. Auch die Dauer, die der Nutzer für das Melden benötigt hat, wird auf diesen Servern gespeichert. Der Zugriff auf die Daten ist streng begrenzt auf die Entwickler des FreiFahren Projekts."
+                "content": "Die erhobenen Daten werden auf eigenen Servern des FreiFahren e.V. gespeichert, die bei der Hetzner Online GmbH in Deutschland gehostet sind. Der Zugriff ist strikt auf autorisierte Vereinsmitglieder beschränkt.",
+                "retention": "Meldungen und Feedback werden so lange gespeichert, wie es für die in dieser Datenschutzerklärung genannten Zwecke erforderlich ist. Eine Überprüfung der Erforderlichkeit erfolgt mindestens jährlich; nicht mehr erforderliche Daten werden gelöscht oder weiter anonymisiert.",
+                "criteria": "Die Kriterien für die Festlegung der Speicherdauer ergeben sich aus den folgenden berechtigten Interessen des FreiFahren e.V. gemäß Art. 6 Abs. 1 lit. f DSGVO: Betriebssicherheit und Missbrauchsprävention (historische Meldedaten ermöglichen die Erkennung von Manipulationsmustern und Spam-Wellen sowie die kontinuierliche Verbesserung von Gegenmaßnahmen), Qualitätsverbesserung (die Datenbasis wird zur Kalibrierung und Validierung der Prognose- und Risikologik genutzt; hierfür sind längerfristige Zeitreihen erforderlich, um Saisonalitäten, Eventspitzen und Ferienzeiten abzubilden) sowie aggregierte Auswertungen zur technischen und inhaltlichen Weiterentwicklung der App.",
+                "safeguards": "Zur Minimierung des Datenschutzrisikos werden keine Klarnamen oder Nutzerkonten gespeichert, und der Datenzugriff unterliegt einem strikten Rollen- und Zugriffsmanagement sowie technischen und organisatorischen Schutzmaßnahmen."
             },
             "userRights": {
                 "title": "7. Rechte der Nutzer",
-                "content": "Nutzer haben das Recht, Auskunft über die sie betreffenden personenbezogenen Daten zu erhalten, sowie die Berichtigung oder Löschung dieser Daten zu verlangen. Anfragen hierzu können über das Kontaktformular der App oder direkt per E-Mail an johan@trieloff.net gestellt werden."
+                "intro": "Sie haben gegenüber FreiFahren e.V. folgende Rechte hinsichtlich der Sie betreffenden personenbezogenen Daten:",
+                "rightsList": {
+                    "access": "Recht auf Auskunft (Art. 15 DSGVO): Sie können Auskunft darüber verlangen, welche personenbezogenen Daten wir über Sie verarbeiten.",
+                    "rectification": "Recht auf Berichtigung (Art. 16 DSGVO): Sie können die Berichtigung unrichtiger oder die Vervollständigung unvollständiger Daten verlangen.",
+                    "erasure": "Recht auf Löschung (Art. 17 DSGVO): Sie können die Löschung Ihrer personenbezogenen Daten verlangen, sofern die gesetzlichen Voraussetzungen vorliegen.",
+                    "restriction": "Recht auf Einschränkung der Verarbeitung (Art. 18 DSGVO): Sie können unter bestimmten Voraussetzungen die Einschränkung der Verarbeitung Ihrer Daten verlangen.",
+                    "portability": "Recht auf Datenübertragbarkeit (Art. 20 DSGVO): Sie können verlangen, die Sie betreffenden Daten in einem strukturierten, gängigen und maschinenlesbaren Format zu erhalten.",
+                    "objection": "Recht auf Widerspruch (Art. 21 DSGVO): Sie können der Verarbeitung Ihrer Daten, die auf Grundlage berechtigter Interessen (Art. 6 Abs. 1 lit. f DSGVO) erfolgt, jederzeit aus Gründen, die sich aus Ihrer besonderen Situation ergeben, widersprechen.",
+                    "withdrawConsent": "Recht auf Widerruf der Einwilligung (Art. 7 Abs. 3 DSGVO): Sofern die Verarbeitung auf Ihrer Einwilligung beruht, können Sie diese jederzeit mit Wirkung für die Zukunft widerrufen. Die Rechtmäßigkeit der bis zum Widerruf erfolgten Verarbeitung bleibt unberührt.",
+                    "complaint": "Recht auf Beschwerde bei einer Aufsichtsbehörde (Art. 77 DSGVO): Unbeschadet anderweitiger Rechtsbehelfe steht Ihnen das Recht zu, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren. Zuständig für FreiFahren e.V. ist insbesondere die Berliner Beauftragte für Datenschutz und Informationsfreiheit, Alt-Moabit 59-61, 10555 Berlin (mailbox@datenschutz-berlin.de)."
+                },
+                "contact": "Anfragen zur Wahrnehmung Ihrer Rechte können Sie formlos per E-Mail an contact@freifahren.org richten."
             },
             "consent": {
-                "title": "8. Zustimmung zur Datenschutzerklärung",
-                "content": "Nutzer müssen dieser Datenschutzerklärung zustimmen, bevor sie eine Meldung in der App erstellen können. Diese Zustimmung ist Voraussetzung für die Nutzung der App."
+                "title": "8. Einwilligung zur Datenschutzerklärung",
+                "content": "Beim Absenden von Feedback bestätigen Nutzer über eine Checkbox ihre Einwilligung in diese Datenschutzerklärung. Für die übrige Nutzung der App sowie für das Absenden von Meldungen ist keine gesonderte Einwilligung erforderlich."
             },
             "dataProtectionOfficer": {
-                "title": "9. Datenschutzbeauftragter",
-                "content": "Für Fragen zum Datenschutz steht Ihnen unser Datenschutzbeauftragter Johan Trieloff (johan@trieloff.net) zur Verfügung."
+                "title": "9. Datenschutzkontakt",
+                "content": "Für Fragen zum Datenschutz erreichen Sie uns unter contact@freifahren.org."
             },
             "policyChanges": {
                 "title": "10. Änderungen an der Datenschutzerklärung",
@@ -178,27 +226,37 @@
             },
             "telegramMessages": {
                 "title": "11. Verarbeitung von Telegram-Nachrichten",
-                "content": "Durch den Freifahren Telegram Bot werden Nachrichten aus der Freifahren_BE-Gruppe mit Zustimmung der Administratoren ausgewertet. Die Nachrichten werden nicht gespeichert und nur für die Echtzeit-Auswertung verwendet. Es werden lediglich die nicht deterministisch extrahierten Informationen (Richtung, Linie und Station) aus den Nachrichten gespeichert. Die Uhrzeit wird abgerundet, um die Anonymität zu gewährleisten."
-            },
-            "analytics": {
-                "title": "12. Einsatz von Analysetools",
-                "content": "Für die Webanalyse setzen wir Pirsch Analytics ein. Bei Pirsch Analytics handelt es sich um eine cookiefreie Webanalysesoftware, die nach dem Grundsatz Privacy by Design entwickelt wurde. Zur Analyse der Besucherströme generiert Pirsch Analytics bei Erhalt des Seitenaufrufs mit Hilfe eines Hashing-Algorithmus eine 16-stellige Zahl als Besucher-ID. Als Eingabewerte dienen die IP-Adresse, der User Agent, das Datum und ein Salt. Die IP-Adresse des Besuchers wird weder vollständig noch in Teilen persistiert und durch den Hash vollständig und nicht reversierbar anonymisiert. Durch die Einbindung des Datums und der Verwendung von einem Salt pro Webseite ist gewährleistet, dass Webseitenbesucher nicht länger als 24 Stunden wiederzuerkennen sind und nicht über mehrere Webseiten hinweg getrackt werden können. Über eine lokal eingebundene Datenbank wird eine grobe Lokalisierung vorgenommen (Land/Stadt).",
-                "usage": "Diese Daten sind nicht personenbezogen; es werden keine Informationen gesammelt, die eine Identifizierung der Nutzer ermöglichen..."
+                "content": "Durch den Freifahren Telegram Bot werden Nachrichten aus der Freifahren_BE-Gruppe mit Zustimmung der Administratoren ausgewertet. Die Nachrichten werden nicht gespeichert und nur für die Echtzeit-Auswertung verwendet. Es werden lediglich die nicht deterministisch extrahierten Informationen (Richtung, Linie und Station) aus den Nachrichten gespeichert. Die Uhrzeit wird abgerundet, um die Anonymität zu gewährleisten. Auch bei diesen anonymisierten Meldedaten kann ein indirekter Personenbezug nicht vollständig ausgeschlossen werden; siehe hierzu Abschnitt 5. Die Auswertung der Nachrichten erfolgt mithilfe eines KI-gestützten Sprachmodells des Anbieters Mistral AI (Mistral AI SAS, Paris, Frankreich). Hierzu wird der Nachrichtentext zur Echtzeit-Extraktion an die ausschließlich in der EU gehostete API von Mistral AI übermittelt. Mistral AI wird dabei als Auftragsverarbeiter nach Art. 28 DSGVO auf unsere Weisung tätig; die Inhalte werden nicht zum Training der Modelle verwendet und von Mistral AI allenfalls kurzfristig (max. 30 Tage) zur Missbrauchserkennung vorgehalten. Eine Speicherung der Nachrichtentexte durch FreiFahren erfolgt nicht.",
+                "transferNotice": "Telegram wird betrieben durch die Telegram FZ-LLC mit Sitz in den Vereinigten Arabischen Emiraten. Bei der Nutzung des Telegram-Dienstes (sowohl beim Empfang von Nachrichten aus der FreiFahren_BE-Gruppe als auch bei der Weiterleitung von Meldungen) findet ein Drittlandtransfer statt. Hinweise hierzu finden Sie in Abschnitt 14. Für die Datenverarbeitung innerhalb von Telegram ist Telegram FZ-LLC eigenverantwortlich; es gelten die Datenschutzbestimmungen von Telegram (https://telegram.org/privacy)."
             },
             "errorMonitoring": {
-                "title": "13. Fehlererkennung und Diagnose",
-                "description": "Wir verwenden Sentry zur Fehlererkennung und Absturzberichterstattung, um unseren Service zu warten und zu verbessern. Wenn die App einen Fehler feststellt, sammeln wir anonymisierte Diagnoseinformationen, einschließlich:",
+                "title": "12. Fehlererkennung und Diagnose",
+                "description": "Wir verwenden Sentry zur Fehlererkennung und Absturzberichterstattung, um unseren Service zu warten und zu verbessern. Anbieter ist die Functional Software, Inc. (Sentry), 45 Fremont Street, 8th Floor, San Francisco, CA 94105, USA. Wir nutzen die EU-Region von Sentry, sodass die technischen Daten auf Servern innerhalb der Europäischen Union verarbeitet werden. Wenn die App einen Fehler feststellt, sammeln wir anonymisierte Diagnoseinformationen, einschließlich:",
                 "dataPoints": {
                     "os": "Betriebssystemversion",
                     "appVersion": "App-Version",
                     "device": "Gerätetyp",
                     "state": "App-Status zum Zeitpunkt des Fehlers"
                 },
-                "storage": "Diese technischen Daten werden auf der Infrastruktur von Sentry in der Europäischen Union für maximal 30 Tage gespeichert. Wir konfigurieren Sentry ausdrücklich so, dass keine IP-Adressen erfasst werden. Alle Datenerfassung erfolgt anonymisiert und dient ausschließlich der Identifizierung und Behebung technischer Probleme."
+                "storage": "Diese technischen Daten werden für maximal 30 Tage gespeichert. Wir konfigurieren Sentry ausdrücklich so, dass keine IP-Adressen erfasst werden. Alle Datenerfassung erfolgt anonymisiert und dient ausschließlich der Identifizierung und Behebung technischer Probleme. Die Verarbeitung erfolgt auf Grundlage berechtigter Interessen gemäß Art. 6 Abs. 1 lit. f DSGVO (Sicherstellung der Funktionsfähigkeit des Dienstes). Da die Functional Software, Inc. ihren Sitz in den USA hat, kann ein Drittlandtransfer (insbesondere im Rahmen des Konzernverbunds bzw. bei Support- und Wartungsleistungen) nicht ausgeschlossen werden. Hinweise zu den hierfür getroffenen Garantien finden Sie in Abschnitt 15."
             },
-            "severabilityClause": {
-                "title": "14. Salvatorische Klausel",
-                "content": "Sollten einzelne Bestimmungen dieser Datenschutzerklärung ganz oder teilweise unwirksam oder undurchführbar sein oder nachträglich unwirksam oder undurchführbar werden, so wird dadurch die Gültigkeit der übrigen Bestimmungen nicht berührt..."
+            "appStores": {
+                "title": "13. Bezug der App über App-Stores",
+                "content": "Der Download und die Installation der App erfolgen über den Apple App Store (Apple Distribution International Ltd., Hollyhill Industrial Estate, Hollyhill, Cork, Irland) bzw. den Google Play Store (Google Ireland Ltd., Gordon House, Barrow Street, Dublin 4, Irland). Diese Plattformen erheben im Rahmen des Downloads und der Installation eigenständig Daten (z.B. Apple-ID bzw. Google-Konto, Geräteinformationen, Download-Zeitpunkt, Zahlungsinformationen) in eigener datenschutzrechtlicher Verantwortung. Hierauf haben wir keinen Einfluss. Es gelten die Datenschutzbestimmungen des jeweiligen App-Store-Betreibers."
+            },
+            "internationalTransfers": {
+                "title": "14. Internationale Datenübermittlungen",
+                "content": "Im Rahmen der oben beschriebenen Verarbeitungen kann es zu Datenübermittlungen in Länder außerhalb des Europäischen Wirtschaftsraums (EWR) kommen, in denen kein dem europäischen Recht vergleichbares Datenschutzniveau besteht (\"Drittländer\"). Dies betrifft insbesondere folgende Dienste:",
+                "transfers": {
+                    "cloudflare": "Cloudflare, Inc. (USA): Eingesetzt zur Abwehr von Spam und Missbrauch. Die Übermittlung erfolgt auf Grundlage der EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) sowie - soweit anwendbar - auf Grundlage des EU-US Data Privacy Framework (Angemessenheitsbeschluss der EU-Kommission vom 10.07.2023, Art. 45 DSGVO).",
+                    "sentry": "Functional Software, Inc. / Sentry (USA): Eingesetzt zur Fehlererkennung. Die Verarbeitung erfolgt primär in der EU-Region; etwaige Übermittlungen in die USA erfolgen auf Grundlage der EU-Standardvertragsklauseln und - soweit anwendbar - des EU-US Data Privacy Framework.",
+                    "telegram": "Telegram FZ-LLC (Vereinigte Arabische Emirate): Eingesetzt zur Synchronisation von Meldungen mit der FreiFahren_BE-Gruppe. Für die VAE liegt kein Angemessenheitsbeschluss der EU-Kommission vor. Wir verarbeiten in diesem Kontext ausschließlich anonymisierte Meldedaten (Linie, Station, Richtung, Uhrzeit) ohne unmittelbare Personenbezugsdaten; zu einem möglichen indirekten Personenbezug durch Zeitstempelkorrelation siehe Abschnitt 5. Nutzern, die Meldungen direkt in der Telegram-Gruppe absetzen, empfehlen wir, die Datenschutzhinweise von Telegram zu beachten."
+                },
+                "rights": "Eine Kopie der jeweils einschlägigen Garantien (insbesondere der EU-Standardvertragsklauseln) können Sie bei uns unter contact@freifahren.org anfordern."
+            },
+            "dataProcessing": {
+                "title": "15. Auftragsverarbeitung",
+                "content": "Soweit externe Dienstleister im Rahmen der Datenverarbeitung eingesetzt werden, handelt es sich um Auftragsverarbeiter im Sinne des Art. 28 DSGVO. Mit Sentry (Functional Software, Inc.) und Cloudflare, Inc. bestehen entsprechende Auftragsverarbeitungsverträge (Data Processing Addenda). Cloudflare, Inc. wird dabei überwiegend als Auftragsverarbeiter tätig; für Maßnahmen der Angriffs- und Missbrauchsabwehr handelt Cloudflare als eigenständig Verantwortlicher. Mit Hetzner Online GmbH besteht ein Auftragsverarbeitungsvertrag. Mit Mistral AI SAS besteht ein Auftragsverarbeitungsvertrag (Data Processing Addendum), der als Bestandteil des Nutzungsvertrags gilt."
             }
         }
     },
