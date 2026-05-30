@@ -170,7 +170,7 @@
             },
             "dataUsage": {
                 "title": "4. Data Collection and Usage",
-                "content": "The App collects data through two different forms:",
+                "content": "The App collects data in three different contexts:",
                 "reportFormTitle": "When creating a report:",
                 "dataPoints": [
                     "Line (optional)",
@@ -187,7 +187,14 @@
                     "User agent",
                     "Submission timestamp"
                 ],
-                "feedbackPurpose": "The feedback is used exclusively for improving the App and is not shared with third parties or in the Telegram group. The user agent is collected to reproduce and fix reported issues."
+                "feedbackPurpose": "The feedback is used exclusively for improving the App and is not shared with third parties or in the Telegram group. The user agent is collected to reproduce and fix reported issues.",
+                "paymentFormTitle": "When making a voluntary contribution via Stripe:",
+                "paymentDataPoints": [
+                    "Name (if provided)",
+                    "Email address (if provided)",
+                    "Transaction data (amount, date, payment reference)"
+                ],
+                "paymentPurpose": "Payment processing is handled by Stripe, Inc. (510 Townsend Street, San Francisco, CA 94103, USA). As part of the payment process, Stripe transmits transaction data to FreiFahren e.V., which may include the payer's name and email address depending on the information provided. Card data is processed exclusively by Stripe and is not transmitted to us. Processing is based on Art. 6(1)(b) GDPR (contractual performance) and Art. 6(1)(a) GDPR (consent). For information on the related international data transfer, please refer to Section 14."
             },
             "anonymity": {
                 "title": "5. Anonymity",
@@ -253,13 +260,14 @@
                 "transfers": {
                     "cloudflare": "Cloudflare, Inc. (USA): Used for protection against spam and abuse. The transfer is based on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) and - where applicable - on the EU-US Data Privacy Framework (adequacy decision of the EU Commission of 10 July 2023, Art. 45 GDPR).",
                     "sentry": "Functional Software, Inc. / Sentry (USA): Used for error monitoring. Processing primarily takes place in the EU region; any transfers to the United States are based on the EU Standard Contractual Clauses and - where applicable - on the EU-US Data Privacy Framework.",
-                    "telegram": "Telegram FZ-LLC (United Arab Emirates): Used for synchronizing reports with the FreiFahren_BE group. No adequacy decision of the EU Commission exists for the UAE. In this context, we exclusively process anonymized report data (line, station, direction, rounded timestamp) without any direct personal identifiers; regarding a possible indirect link to an individual through timestamp correlation, see Section 5. Users who submit reports directly within the Telegram group are advised to consult Telegram's privacy terms."
+                    "telegram": "Telegram FZ-LLC (United Arab Emirates): Used for synchronizing reports with the FreiFahren_BE group. No adequacy decision of the EU Commission exists for the UAE. In this context, we exclusively process anonymized report data (line, station, direction, rounded timestamp) without any direct personal identifiers; regarding a possible indirect link to an individual through timestamp correlation, see Section 5. Users who submit reports directly within the Telegram group are advised to consult Telegram's privacy terms.",
+                    "stripe": "Stripe, Inc. (USA): Used for processing voluntary contributions. Stripe processes payment data (e.g. card details) under its own data protection responsibility as an independent controller. As part of the transaction, Stripe transmits transaction data to FreiFahren e.V., which may include the payer's name and email address depending on the information provided. The transfer is based on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) and (where applicable) the EU-US Data Privacy Framework (adequacy decision of the EU Commission of 10 July 2023, Art. 45 GDPR). Stripe's privacy policy is available at https://stripe.com/privacy."
                 },
                 "rights": "You may request a copy of the relevant safeguards (in particular the EU Standard Contractual Clauses) from us at contact@freifahren.org."
             },
             "dataProcessing": {
                 "title": "15. Data Processing by Service Providers",
-                "content": "Where external service providers are used in the context of data processing, they act as processors within the meaning of Art. 28 GDPR. Data Processing Agreements (Data Processing Addenda) are in place with Sentry (Functional Software, Inc.) and Cloudflare, Inc. Cloudflare, Inc. acts predominantly as a processor; for measures to prevent attacks and abuse, Cloudflare acts as an independent controller. A Data Processing Agreement with Hetzner Online GmbH is in place. A Data Processing Agreement (Data Processing Addendum) with Mistral AI SAS is in place as part of the subscription agreement."
+                "content": "Where external service providers are used in the context of data processing, they act as processors within the meaning of Art. 28 GDPR. Data Processing Agreements (Data Processing Addenda) are in place with Sentry (Functional Software, Inc.) and Cloudflare, Inc. Cloudflare, Inc. acts predominantly as a processor; for measures to prevent attacks and abuse, Cloudflare acts as an independent controller. A Data Processing Agreement with Hetzner Online GmbH is in place. A Data Processing Agreement (Data Processing Addendum) with Mistral AI SAS is in place as part of the subscription agreement. Stripe, Inc. processes payment data in connection with voluntary contributions as an independent controller and transmits transaction data to FreiFahren e.V.; there is no data processing relationship between Stripe and FreiFahren e.V."
             }
         }
     },

@@ -167,7 +167,7 @@
             },
             "dataUsage": {
                 "title": "4. Erhebung und Nutzung von Daten",
-                "content": "Die App erhebt Daten in zwei verschiedenen Formularen:",
+                "content": "Die App erhebt Daten in drei verschiedenen Kontexten:",
                 "reportFormTitle": "Bei der Erstellung einer Meldung:",
                 "dataPoints": [
                     "Linie (optional)",
@@ -184,7 +184,14 @@
                     "User-Agent",
                     "Zeitpunkt der Übermittlung"
                 ],
-                "feedbackPurpose": "Das Feedback wird ausschließlich zur Verbesserung der App verwendet und nicht an Dritte weitergegeben oder in der Telegram-Gruppe geteilt. Der User-Agent wird erhoben, um gemeldete Probleme nachvollziehen und beheben zu können."
+                "feedbackPurpose": "Das Feedback wird ausschließlich zur Verbesserung der App verwendet und nicht an Dritte weitergegeben oder in der Telegram-Gruppe geteilt. Der User-Agent wird erhoben, um gemeldete Probleme nachvollziehen und beheben zu können.",
+                "paymentFormTitle": "Bei einer freiwilligen Beitragszahlung über Stripe:",
+                "paymentDataPoints": [
+                    "Name (sofern angegeben)",
+                    "E-Mail-Adresse (sofern angegeben)",
+                    "Transaktionsdaten (Betrag, Datum, Zahlungsreferenz)"
+                ],
+                "paymentPurpose": "Die Zahlungsabwicklung erfolgt über Stripe, Inc. (510 Townsend Street, San Francisco, CA 94103, USA). Im Rahmen der Zahlungsabwicklung übermittelt Stripe an FreiFahren e.V. Transaktionsdaten, die je nach Eingabe den Namen und die E-Mail-Adresse des Zahlenden enthalten können. Kartendaten werden ausschließlich von Stripe verarbeitet und nicht an uns übermittelt. Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung) sowie Art. 6 Abs. 1 lit. a DSGVO (Einwilligung). Hinweise zum damit verbundenen Drittlandtransfer finden Sie in Abschnitt 14."
             },
             "anonymity": {
                 "title": "5. Anonymität",
@@ -250,13 +257,14 @@
                 "transfers": {
                     "cloudflare": "Cloudflare, Inc. (USA): Eingesetzt zur Abwehr von Spam und Missbrauch. Die Übermittlung erfolgt auf Grundlage der EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) sowie - soweit anwendbar - auf Grundlage des EU-US Data Privacy Framework (Angemessenheitsbeschluss der EU-Kommission vom 10.07.2023, Art. 45 DSGVO).",
                     "sentry": "Functional Software, Inc. / Sentry (USA): Eingesetzt zur Fehlererkennung. Die Verarbeitung erfolgt primär in der EU-Region; etwaige Übermittlungen in die USA erfolgen auf Grundlage der EU-Standardvertragsklauseln und - soweit anwendbar - des EU-US Data Privacy Framework.",
-                    "telegram": "Telegram FZ-LLC (Vereinigte Arabische Emirate): Eingesetzt zur Synchronisation von Meldungen mit der FreiFahren_BE-Gruppe. Für die VAE liegt kein Angemessenheitsbeschluss der EU-Kommission vor. Wir verarbeiten in diesem Kontext ausschließlich anonymisierte Meldedaten (Linie, Station, Richtung, Uhrzeit) ohne unmittelbare Personenbezugsdaten; zu einem möglichen indirekten Personenbezug durch Zeitstempelkorrelation siehe Abschnitt 5. Nutzern, die Meldungen direkt in der Telegram-Gruppe absetzen, empfehlen wir, die Datenschutzhinweise von Telegram zu beachten."
+                    "telegram": "Telegram FZ-LLC (Vereinigte Arabische Emirate): Eingesetzt zur Synchronisation von Meldungen mit der FreiFahren_BE-Gruppe. Für die VAE liegt kein Angemessenheitsbeschluss der EU-Kommission vor. Wir verarbeiten in diesem Kontext ausschließlich anonymisierte Meldedaten (Linie, Station, Richtung, Uhrzeit) ohne unmittelbare Personenbezugsdaten; zu einem möglichen indirekten Personenbezug durch Zeitstempelkorrelation siehe Abschnitt 5. Nutzern, die Meldungen direkt in der Telegram-Gruppe absetzen, empfehlen wir, die Datenschutzhinweise von Telegram zu beachten.",
+                    "stripe": "Stripe, Inc. (USA): Eingesetzt zur Zahlungsabwicklung freiwilliger Beiträge. Stripe verarbeitet Zahlungsdaten (z. B. Kartendaten) in eigener datenschutzrechtlicher Verantwortung als eigenständig Verantwortlicher. Im Rahmen der Abwicklung werden FreiFahren e.V. Transaktionsdaten übermittelt, die je nach Eingabe Namen und E-Mail-Adresse des Zahlenden enthalten können. Die Übermittlung erfolgt auf Grundlage der EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) sowie (soweit anwendbar) des EU-US Data Privacy Framework (Angemessenheitsbeschluss der EU-Kommission vom 10.07.2023, Art. 45 DSGVO). Die Datenschutzhinweise von Stripe sind unter https://stripe.com/de/privacy abrufbar."
                 },
                 "rights": "Eine Kopie der jeweils einschlägigen Garantien (insbesondere der EU-Standardvertragsklauseln) können Sie bei uns unter contact@freifahren.org anfordern."
             },
             "dataProcessing": {
                 "title": "15. Auftragsverarbeitung",
-                "content": "Soweit externe Dienstleister im Rahmen der Datenverarbeitung eingesetzt werden, handelt es sich um Auftragsverarbeiter im Sinne des Art. 28 DSGVO. Mit Sentry (Functional Software, Inc.) und Cloudflare, Inc. bestehen entsprechende Auftragsverarbeitungsverträge (Data Processing Addenda). Cloudflare, Inc. wird dabei überwiegend als Auftragsverarbeiter tätig; für Maßnahmen der Angriffs- und Missbrauchsabwehr handelt Cloudflare als eigenständig Verantwortlicher. Mit Hetzner Online GmbH besteht ein Auftragsverarbeitungsvertrag. Mit Mistral AI SAS besteht ein Auftragsverarbeitungsvertrag (Data Processing Addendum), der als Bestandteil des Nutzungsvertrags gilt."
+                "content": "Soweit externe Dienstleister im Rahmen der Datenverarbeitung eingesetzt werden, handelt es sich um Auftragsverarbeiter im Sinne des Art. 28 DSGVO. Mit Sentry (Functional Software, Inc.) und Cloudflare, Inc. bestehen entsprechende Auftragsverarbeitungsverträge (Data Processing Addenda). Cloudflare, Inc. wird dabei überwiegend als Auftragsverarbeiter tätig; für Maßnahmen der Angriffs- und Missbrauchsabwehr handelt Cloudflare als eigenständig Verantwortlicher. Mit Hetzner Online GmbH besteht ein Auftragsverarbeitungsvertrag. Mit Mistral AI SAS besteht ein Auftragsverarbeitungsvertrag (Data Processing Addendum), der als Bestandteil des Nutzungsvertrags gilt. Stripe, Inc. verarbeitet Zahlungsdaten im Rahmen der freiwilligen Beitragszahlung als eigenständig Verantwortlicher und übermittelt FreiFahren e.V. Transaktionsdaten; es besteht kein Auftragsverarbeitungsverhältnis zwischen Stripe und FreiFahren e.V."
             }
         }
     },
