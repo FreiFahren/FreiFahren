@@ -4,8 +4,6 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@sentry/cli": "^2.40.0",
-    "@sentry/react": "^8.48.0",
     "@tanstack/react-query": "^5.65.1",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^16.1.0",
@@ -29,11 +27,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:prod": "vite build && sentry-cli login --auth-token $SENTRY_AUTH_TOKEN && npm run sentry:sourcemaps",
+    "build:prod": "vite build",
     "preview": "vite preview",
     "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org freifahren-web --project javascript-react ./dist && sentry-cli sourcemaps upload --org freifahren-web --project javascript-react ./dist"
+    "lint:fix": "eslint src --fix"
   },
   "browserslist": {
     "production": [

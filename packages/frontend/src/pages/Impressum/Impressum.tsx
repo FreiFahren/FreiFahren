@@ -29,6 +29,12 @@ const Impressum = () => {
             <h2>{t('Impressum.sections.representedBy.title')}</h2>
             <p>{t('Impressum.sections.representedBy.content')}</p>
 
+            <h2>{t('Impressum.sections.register.title')}</h2>
+            <p>{t('Impressum.sections.register.content')}</p>
+
+            <h2>{t('Impressum.sections.vat.title')}</h2>
+            <p>{t('Impressum.sections.vat.content')}</p>
+
             <ul className="row" style={{ marginTop: '24px' }}>
                 <li>
                     <Link to="/datenschutz">{t('Impressum.links.privacy')}</Link>

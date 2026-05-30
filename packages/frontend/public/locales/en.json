@@ -134,6 +134,14 @@
             "representedBy": {
                 "title": "Represented by",
                 "content": "The association is represented jointly by any two members of the board: Johan Trieloff, Moritz Clerc, David Brandes."
+            },
+            "register": {
+                "title": "Register Entry",
+                "content": "Register of Associations: Amtsgericht Charlottenburg, VR 42496"
+            },
+            "vat": {
+                "title": "VAT",
+                "content": "The association is not subject to VAT."
             }
         },
         "links": {
@@ -171,15 +179,15 @@
                     "Report timestamp",
                     "User's IP address"
                 ],
-                "reportPurpose": "The reported data is temporarily made available to other users of the App to provide them with information about the current situation in public transport. Additionally, the reports are forwarded to the Freifahren_BE Telegram group. This data transmission serves the purpose of sharing and informing the community about incidents. For information regarding the transfer to Telegram, please refer to Section 11; for information on international data transfers, please refer to Section 15.",
-                "ipAddressInfo": "FreiFahren itself does not store IP addresses. To protect against spam and abuse, Cloudflare as an upstream infrastructure provider processes IP addresses briefly under its own responsibility. This processing is based on legitimate interests pursuant to Art. 6(1)(f) GDPR (ensuring the security and functionality of the service). For information regarding the associated transfer to a third country, please refer to Section 15.",
+                "reportPurpose": "The reported data is temporarily made available to other users of the App to provide them with information about the current situation in public transport. Additionally, the reports are forwarded to the Freifahren_BE Telegram group. This data transmission serves the purpose of sharing and informing the community about incidents. For information regarding the transfer to Telegram, please refer to Section 11; for information on international data transfers, please refer to Section 14.",
+                "ipAddressInfo": "FreiFahren itself does not store IP addresses. To protect against spam and abuse, Cloudflare as an upstream infrastructure provider processes IP addresses briefly. In doing so, Cloudflare acts predominantly as a processor pursuant to Art. 28 GDPR on our instruction (see Section 15); for the prevention of attacks and abuse (security telemetry), Cloudflare additionally acts as an independent controller. This processing is based on legitimate interests pursuant to Art. 6(1)(f) GDPR (ensuring the security and functionality of the service). For information regarding the associated transfer to a third country, please refer to Section 14.",
                 "feedbackFormTitle": "When submitting feedback:",
                 "feedbackDataPoints": [
                     "Feedback text",
                     "User agent",
                     "Submission timestamp"
                 ],
-                "feedbackPurpose": "The feedback is used exclusively for improving the App and is not shared with third parties or in the Telegram group."
+                "feedbackPurpose": "The feedback is used exclusively for improving the App and is not shared with third parties or in the Telegram group. The user agent is collected to reproduce and fix reported issues."
             },
             "anonymity": {
                 "title": "5. Anonymity",
@@ -188,7 +196,7 @@
             "storageAndAccess": {
                 "title": "6. Storage and Access",
                 "content": "Collected data is stored on FreiFahren e.V.'s own servers, hosted by Hetzner Online GmbH in Germany. Access is strictly limited to authorized association members.",
-                "retention": "Reports and feedback are stored for as long as is necessary for the purposes set out in this Privacy Policy. We review whether further storage is necessary at least annually; data that is no longer required is deleted or further anonymized. Backups are created daily and automatically overwritten after [BACKUP RETENTION PERIOD, e.g., 30 days].",
+                "retention": "Reports and feedback are stored for as long as is necessary for the purposes set out in this Privacy Policy. We review whether further storage is necessary at least annually; data that is no longer required is deleted or further anonymized.",
                 "criteria": "The criteria for determining the storage period derive from the following legitimate interests of FreiFahren e.V. pursuant to Art. 6(1)(f) GDPR: operational security and abuse prevention (historical report data enables the detection of manipulation patterns and spam waves as well as the continuous improvement of countermeasures); quality improvement (the data basis is used to calibrate and validate forecasting and risk logic, for which longer-term time series are required to capture seasonality, event peaks, and holiday periods); and aggregated evaluations supporting the technical and content-related further development of the App.",
                 "safeguards": "To minimize the data protection risk, no real names or user accounts are stored, and data access is subject to strict role and access management as well as technical and organizational safeguards."
             },
@@ -209,7 +217,7 @@
             },
             "consent": {
                 "title": "8. Consent to the Privacy Policy",
-                "content": "Users must agree to this Privacy Policy before submitting a report in the App. This consent is a prerequisite for using the App."
+                "content": "When submitting feedback, users confirm their consent to this Privacy Policy via a checkbox. No separate consent is required for general use of the App or for submitting reports."
             },
             "dataProtectionOfficer": {
                 "title": "9. Data Protection Contact",
@@ -221,8 +229,8 @@
             },
             "telegramMessages": {
                 "title": "11. Processing of Telegram Messages",
-                "content": "Messages from the Freifahren_BE group are evaluated by the Freifahren Telegram Bot with the consent of the administrators. Messages are not stored and are only used for real-time evaluation. Only the non-deterministically extracted information (direction, line, and station) from the messages is stored. The timestamp is rounded to ensure anonymity.",
-                "transferNotice": "Telegram is operated by Telegram FZ-LLC, headquartered in the United Arab Emirates. The use of the Telegram service (both for receiving messages from the FreiFahren_BE group and for forwarding reports) involves a transfer of data to a third country. Please refer to Section 15 for further information. For data processing within Telegram itself, Telegram FZ-LLC acts as an independent controller; the privacy terms of Telegram apply (https://telegram.org/privacy)."
+                "content": "Messages from the Freifahren_BE group are evaluated by the Freifahren Telegram Bot with the consent of the administrators. Messages are not stored and are only used for real-time evaluation. Only the non-deterministically extracted information (direction, line, and station) from the messages is stored. The timestamp is rounded to ensure anonymity. Even for this anonymized report data, an indirect link to an individual cannot be fully excluded; see Section 5 in this regard. Message evaluation is performed using an AI language model from Mistral AI (Mistral AI SAS, Paris, France). For this, the message text is transmitted for real-time extraction to Mistral AI's API, which is hosted exclusively in the EU. Mistral AI acts as a processor pursuant to Art. 28 GDPR on our instruction; the content is not used to train the models and is retained by Mistral AI only briefly (max. 30 days) for abuse monitoring, if at all. FreiFahren does not store the message texts.",
+                "transferNotice": "Telegram is operated by Telegram FZ-LLC, headquartered in the United Arab Emirates. The use of the Telegram service (both for receiving messages from the FreiFahren_BE group and for forwarding reports) involves a transfer of data to a third country. Please refer to Section 14 for further information. For data processing within Telegram itself, Telegram FZ-LLC acts as an independent controller; the privacy terms of Telegram apply (https://telegram.org/privacy)."
             },
             "errorMonitoring": {
                 "title": "12. Error Monitoring and Diagnostics",
@@ -235,35 +243,23 @@
                 },
                 "storage": "This technical data is stored for a maximum period of 30 days. We explicitly configure Sentry not to collect IP addresses. All data collection is anonymized and used solely for the purpose of identifying and fixing technical issues. Processing is based on legitimate interests pursuant to Art. 6(1)(f) GDPR (ensuring the functionality of the service). As Functional Software, Inc. is headquartered in the United States, a transfer of data to a third country (in particular within its corporate group or in the context of support and maintenance services) cannot be entirely excluded. Please refer to Section 15 for information on the safeguards in place."
             },
-            "analytics": {
-                "title": "13. Anonymous Usage Statistics (Analytics)",
-                "content": "To improve the App and to understand general usage patterns, we use PostHog via the EU Cloud (eu.posthog.com) provided by PostHog, Inc. Data processing takes place exclusively in Frankfurt am Main, Germany, on infrastructure operated by Hetzner Online GmbH, and therefore does not leave the European Economic Area. No third-country transfer takes place.",
-                "dataPoints": [
-                    "pages / screens visited",
-                    "approximate region (at country or state level, derived from the IP address without storing it)",
-                    "device type and browser or App version",
-                    "referrer (originating page)"
-                ],
-                "ipNotice": "IP addresses are processed only briefly to generate an anonymous, daily-rotating hash value and are not stored. Identification of individual users is not possible.",
-                "legalBasis": "As no information is stored on or read from your device, no consent under Section 25 of the German Telecommunications Telemedia Data Protection Act (TDDDG) is required. Processing is based on legitimate interests pursuant to Art. 6(1)(f) GDPR (improvement of the service and understanding of usage patterns). You can object to this processing at any time by disabling the analytics function in the App settings."
-            },
             "appStores": {
-                "title": "14. Distribution via App Stores",
+                "title": "13. Distribution via App Stores",
                 "content": "The App is downloaded and installed via the Apple App Store (Apple Distribution International Ltd., Hollyhill Industrial Estate, Hollyhill, Cork, Ireland) and the Google Play Store (Google Ireland Ltd., Gordon House, Barrow Street, Dublin 4, Ireland). These platforms independently collect data in connection with the download and installation (e.g., Apple ID or Google account, device information, download timestamp, payment information) under their own data protection responsibility. We have no influence on this. The privacy terms of the respective App store operator apply."
             },
             "internationalTransfers": {
-                "title": "15. International Data Transfers",
+                "title": "14. International Data Transfers",
                 "content": "In the context of the processing activities described above, data may be transferred to countries outside the European Economic Area (EEA) that do not provide a level of data protection equivalent to that under European law (\"third countries\"). This concerns in particular the following services:",
                 "transfers": {
                     "cloudflare": "Cloudflare, Inc. (USA): Used for protection against spam and abuse. The transfer is based on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) and - where applicable - on the EU-US Data Privacy Framework (adequacy decision of the EU Commission of 10 July 2023, Art. 45 GDPR).",
                     "sentry": "Functional Software, Inc. / Sentry (USA): Used for error monitoring. Processing primarily takes place in the EU region; any transfers to the United States are based on the EU Standard Contractual Clauses and - where applicable - on the EU-US Data Privacy Framework.",
-                    "telegram": "Telegram FZ-LLC (United Arab Emirates): Used for synchronizing reports with the FreiFahren_BE group. No adequacy decision of the EU Commission exists for the UAE. In this context, we exclusively process anonymized report data (line, station, direction, rounded timestamp) without any direct personal identifiers. Users who submit reports directly within the Telegram group are advised to consult Telegram's privacy terms."
+                    "telegram": "Telegram FZ-LLC (United Arab Emirates): Used for synchronizing reports with the FreiFahren_BE group. No adequacy decision of the EU Commission exists for the UAE. In this context, we exclusively process anonymized report data (line, station, direction, rounded timestamp) without any direct personal identifiers; regarding a possible indirect link to an individual through timestamp correlation, see Section 5. Users who submit reports directly within the Telegram group are advised to consult Telegram's privacy terms."
                 },
                 "rights": "You may request a copy of the relevant safeguards (in particular the EU Standard Contractual Clauses) from us at contact@freifahren.org."
             },
             "dataProcessing": {
-                "title": "16. Data Processing by Service Providers",
-                "content": "Where external service providers are used in the context of data processing, they act as processors within the meaning of Art. 28 GDPR. Data Processing Agreements (Data Processing Addenda) are in place with Sentry (Functional Software, Inc.) and Cloudflare, Inc. A Data Processing Agreement with Hetzner Online GmbH is in place. A corresponding agreement with the provider of the analytics tool referred to in Section 13 is in place or in preparation."
+                "title": "15. Data Processing by Service Providers",
+                "content": "Where external service providers are used in the context of data processing, they act as processors within the meaning of Art. 28 GDPR. Data Processing Agreements (Data Processing Addenda) are in place with Sentry (Functional Software, Inc.) and Cloudflare, Inc. Cloudflare, Inc. acts predominantly as a processor; for measures to prevent attacks and abuse, Cloudflare acts as an independent controller. A Data Processing Agreement with Hetzner Online GmbH is in place. A Data Processing Agreement (Data Processing Addendum) with Mistral AI SAS is in place as part of the subscription agreement."
             }
         }
     },

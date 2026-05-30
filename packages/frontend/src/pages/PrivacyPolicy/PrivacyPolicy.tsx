@@ -131,20 +131,6 @@ const PrivacyPolicy = () => {
             </ul>
             <p>{t('PrivacyPolicy.sections.errorMonitoring.storage')}</p>
 
-            <h2>{t('PrivacyPolicy.sections.analytics.title')}</h2>
-            <p>{t('PrivacyPolicy.sections.analytics.content')}</p>
-            <div className="data-usage-content">
-                <ul>
-                    {(t('PrivacyPolicy.sections.analytics.dataPoints', { returnObjects: true }) as string[]).map(
-                        (item) => (
-                            <li key={item}>{item}</li>
-                        )
-                    )}
-                </ul>
-                <p>{t('PrivacyPolicy.sections.analytics.ipNotice')}</p>
-                <p>{t('PrivacyPolicy.sections.analytics.legalBasis')}</p>
-            </div>
-
             <h2>{t('PrivacyPolicy.sections.appStores.title')}</h2>
             <p>{t('PrivacyPolicy.sections.appStores.content')}</p>
 
