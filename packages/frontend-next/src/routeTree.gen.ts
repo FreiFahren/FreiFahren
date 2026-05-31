@@ -12,9 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as MapRouteImport } from './routes/_map'
 import { Route as MapIndexRouteImport } from './routes/_map/index'
-import { Route as MapReportsIndexRouteImport } from './routes/_map/reports/index'
 import { Route as MapStationsStationIdRouteImport } from './routes/_map/stations/$stationId'
+import { Route as MapReportsOverviewRouteImport } from './routes/_map/reports/_overview'
 import { Route as MapReportsStationIdRouteImport } from './routes/_map/reports/$stationId'
+import { Route as MapReportsOverviewIndexRouteImport } from './routes/_map/reports/_overview/index'
+import { Route as MapReportsOverviewStationsRouteImport } from './routes/_map/reports/_overview/stations'
+import { Route as MapReportsOverviewLinesRouteImport } from './routes/_map/reports/_overview/lines'
 
 const ReportRoute = ReportRouteImport.update({
   id: '/report',
@@ -30,14 +33,14 @@ const MapIndexRoute = MapIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MapRoute,
 } as any)
-const MapReportsIndexRoute = MapReportsIndexRouteImport.update({
-  id: '/reports/',
-  path: '/reports/',
-  getParentRoute: () => MapRoute,
-} as any)
 const MapStationsStationIdRoute = MapStationsStationIdRouteImport.update({
   id: '/stations/$stationId',
   path: '/stations/$stationId',
+  getParentRoute: () => MapRoute,
+} as any)
+const MapReportsOverviewRoute = MapReportsOverviewRouteImport.update({
+  id: '/reports/_overview',
+  path: '/reports',
   getParentRoute: () => MapRoute,
 } as any)
 const MapReportsStationIdRoute = MapReportsStationIdRouteImport.update({
@@ -45,20 +48,41 @@ const MapReportsStationIdRoute = MapReportsStationIdRouteImport.update({
   path: '/reports/$stationId',
   getParentRoute: () => MapRoute,
 } as any)
+const MapReportsOverviewIndexRoute = MapReportsOverviewIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MapReportsOverviewRoute,
+} as any)
+const MapReportsOverviewStationsRoute =
+  MapReportsOverviewStationsRouteImport.update({
+    id: '/stations',
+    path: '/stations',
+    getParentRoute: () => MapReportsOverviewRoute,
+  } as any)
+const MapReportsOverviewLinesRoute = MapReportsOverviewLinesRouteImport.update({
+  id: '/lines',
+  path: '/lines',
+  getParentRoute: () => MapReportsOverviewRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof MapIndexRoute
   '/report': typeof ReportRoute
   '/reports/$stationId': typeof MapReportsStationIdRoute
+  '/reports': typeof MapReportsOverviewRouteWithChildren
   '/stations/$stationId': typeof MapStationsStationIdRoute
-  '/reports/': typeof MapReportsIndexRoute
+  '/reports/lines': typeof MapReportsOverviewLinesRoute
+  '/reports/stations': typeof MapReportsOverviewStationsRoute
+  '/reports/': typeof MapReportsOverviewIndexRoute
 }
 export interface FileRoutesByTo {
   '/report': typeof ReportRoute
   '/': typeof MapIndexRoute
   '/reports/$stationId': typeof MapReportsStationIdRoute
   '/stations/$stationId': typeof MapStationsStationIdRoute
-  '/reports': typeof MapReportsIndexRoute
+  '/reports/lines': typeof MapReportsOverviewLinesRoute
+  '/reports/stations': typeof MapReportsOverviewStationsRoute
+  '/reports': typeof MapReportsOverviewIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -66,8 +90,11 @@ export interface FileRoutesById {
   '/report': typeof ReportRoute
   '/_map/': typeof MapIndexRoute
   '/_map/reports/$stationId': typeof MapReportsStationIdRoute
+  '/_map/reports/_overview': typeof MapReportsOverviewRouteWithChildren
   '/_map/stations/$stationId': typeof MapStationsStationIdRoute
-  '/_map/reports/': typeof MapReportsIndexRoute
+  '/_map/reports/_overview/lines': typeof MapReportsOverviewLinesRoute
+  '/_map/reports/_overview/stations': typeof MapReportsOverviewStationsRoute
+  '/_map/reports/_overview/': typeof MapReportsOverviewIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -75,7 +102,10 @@ export interface FileRouteTypes {
     | '/'
     | '/report'
     | '/reports/$stationId'
+    | '/reports'
     | '/stations/$stationId'
+    | '/reports/lines'
+    | '/reports/stations'
     | '/reports/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -83,6 +113,8 @@ export interface FileRouteTypes {
     | '/'
     | '/reports/$stationId'
     | '/stations/$stationId'
+    | '/reports/lines'
+    | '/reports/stations'
     | '/reports'
   id:
     | '__root__'
@@ -90,8 +122,11 @@ export interface FileRouteTypes {
     | '/report'
     | '/_map/'
     | '/_map/reports/$stationId'
+    | '/_map/reports/_overview'
     | '/_map/stations/$stationId'
-    | '/_map/reports/'
+    | '/_map/reports/_overview/lines'
+    | '/_map/reports/_overview/stations'
+    | '/_map/reports/_overview/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -122,18 +157,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MapIndexRouteImport
       parentRoute: typeof MapRoute
     }
-    '/_map/reports/': {
-      id: '/_map/reports/'
-      path: '/reports'
-      fullPath: '/reports/'
-      preLoaderRoute: typeof MapReportsIndexRouteImport
-      parentRoute: typeof MapRoute
-    }
     '/_map/stations/$stationId': {
       id: '/_map/stations/$stationId'
       path: '/stations/$stationId'
       fullPath: '/stations/$stationId'
       preLoaderRoute: typeof MapStationsStationIdRouteImport
+      parentRoute: typeof MapRoute
+    }
+    '/_map/reports/_overview': {
+      id: '/_map/reports/_overview'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof MapReportsOverviewRouteImport
       parentRoute: typeof MapRoute
     }
     '/_map/reports/$stationId': {
@@ -143,21 +178,57 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MapReportsStationIdRouteImport
       parentRoute: typeof MapRoute
     }
+    '/_map/reports/_overview/': {
+      id: '/_map/reports/_overview/'
+      path: '/'
+      fullPath: '/reports/'
+      preLoaderRoute: typeof MapReportsOverviewIndexRouteImport
+      parentRoute: typeof MapReportsOverviewRoute
+    }
+    '/_map/reports/_overview/stations': {
+      id: '/_map/reports/_overview/stations'
+      path: '/stations'
+      fullPath: '/reports/stations'
+      preLoaderRoute: typeof MapReportsOverviewStationsRouteImport
+      parentRoute: typeof MapReportsOverviewRoute
+    }
+    '/_map/reports/_overview/lines': {
+      id: '/_map/reports/_overview/lines'
+      path: '/lines'
+      fullPath: '/reports/lines'
+      preLoaderRoute: typeof MapReportsOverviewLinesRouteImport
+      parentRoute: typeof MapReportsOverviewRoute
+    }
   }
 }
+
+interface MapReportsOverviewRouteChildren {
+  MapReportsOverviewLinesRoute: typeof MapReportsOverviewLinesRoute
+  MapReportsOverviewStationsRoute: typeof MapReportsOverviewStationsRoute
+  MapReportsOverviewIndexRoute: typeof MapReportsOverviewIndexRoute
+}
+
+const MapReportsOverviewRouteChildren: MapReportsOverviewRouteChildren = {
+  MapReportsOverviewLinesRoute: MapReportsOverviewLinesRoute,
+  MapReportsOverviewStationsRoute: MapReportsOverviewStationsRoute,
+  MapReportsOverviewIndexRoute: MapReportsOverviewIndexRoute,
+}
+
+const MapReportsOverviewRouteWithChildren =
+  MapReportsOverviewRoute._addFileChildren(MapReportsOverviewRouteChildren)
 
 interface MapRouteChildren {
   MapIndexRoute: typeof MapIndexRoute
   MapReportsStationIdRoute: typeof MapReportsStationIdRoute
+  MapReportsOverviewRoute: typeof MapReportsOverviewRouteWithChildren
   MapStationsStationIdRoute: typeof MapStationsStationIdRoute
-  MapReportsIndexRoute: typeof MapReportsIndexRoute
 }
 
 const MapRouteChildren: MapRouteChildren = {
   MapIndexRoute: MapIndexRoute,
   MapReportsStationIdRoute: MapReportsStationIdRoute,
+  MapReportsOverviewRoute: MapReportsOverviewRouteWithChildren,
   MapStationsStationIdRoute: MapStationsStationIdRoute,
-  MapReportsIndexRoute: MapReportsIndexRoute,
 }
 
 const MapRouteWithChildren = MapRoute._addFileChildren(MapRouteChildren)

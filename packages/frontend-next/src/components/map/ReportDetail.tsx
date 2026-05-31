@@ -1,7 +1,7 @@
 import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 
-import { useReports, useStationReportCount } from '@/api/reports';
+import { HOUR_MS, useReports, useStationReportCount } from '@/api/reports';
 import { type Station, useLines, useStations } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { CardContent } from '@/components/ui/card';
@@ -28,7 +28,7 @@ function formatElapsed(timestamp: string, t: TFunction): string {
 
 export function ReportDetail({ station, onClose }: ReportDetailProps) {
   const { t } = useTranslation(NAMESPACE);
-  const { data: reports } = useReports();
+  const { data: reports } = useReports(HOUR_MS);
   const { data: lines } = useLines();
   const { data: stations } = useStations();
   const { data: numberOfReports } = useStationReportCount(station.id);
