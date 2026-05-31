@@ -85,6 +85,16 @@ const PrivacyPolicy = () => {
                     )}
                 </ul>
                 <p>{t('PrivacyPolicy.sections.dataUsage.feedbackPurpose')}</p>
+
+                <h3>{t('PrivacyPolicy.sections.dataUsage.paymentFormTitle')}</h3>
+                <ul>
+                    {(t('PrivacyPolicy.sections.dataUsage.paymentDataPoints', { returnObjects: true }) as string[]).map(
+                        (item) => (
+                            <li key={item}>{item}</li>
+                        )
+                    )}
+                </ul>
+                <p>{t('PrivacyPolicy.sections.dataUsage.paymentPurpose')}</p>
             </div>
 
             <h2>{t('PrivacyPolicy.sections.anonymity.title')}</h2>
@@ -141,6 +151,7 @@ const PrivacyPolicy = () => {
                     <li>{t('PrivacyPolicy.sections.internationalTransfers.transfers.cloudflare')}</li>
                     <li>{t('PrivacyPolicy.sections.internationalTransfers.transfers.sentry')}</li>
                     <li>{t('PrivacyPolicy.sections.internationalTransfers.transfers.telegram')}</li>
+                    <li>{t('PrivacyPolicy.sections.internationalTransfers.transfers.stripe')}</li>
                 </ul>
                 <p>{t('PrivacyPolicy.sections.internationalTransfers.rights')}</p>
             </div>
