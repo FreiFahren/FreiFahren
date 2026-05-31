@@ -1,4 +1,5 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
+import type { TFunction } from 'i18next';
 import { useState } from 'react';
 
 import { requireEnv } from '@/lib/utils';
@@ -13,19 +14,90 @@ export type Report = {
   isPredicted: boolean;
 };
 
-export const useReports = () =>
-  useQuery({
-    queryKey: ['reports'],
-    queryFn: () => fetchJson<Report[]>('/v0/reports'),
-    refetchInterval: 30_000,
-    refetchIntervalInBackground: false,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
-    staleTime: 30_000,
-  });
+/**
+ * Human-readable "time since" for a report timestamp, using the caller's i18n `t`. The
+ * caller's namespace must provide the keys `now`, `minutesAgo`, `moreThan45Min`, and
+ * `hoursAgo` (see e.g. `ReportDetail.i18n.ts` / `Reports.i18n.ts`).
+ */
+export function formatElapsed(timestamp: string, t: TFunction): string {
+  const minutes = Math.floor((Date.now() - new Date(timestamp).getTime()) / 60_000);
+  if (minutes <= 1) return t('now');
+  if (minutes <= 45) return t('minutesAgo', { count: minutes });
+  if (minutes < 60) return t('moreThan45Min');
+  return t('hoursAgo', { count: Math.floor(minutes / 60) });
+}
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-const HOUR_MS = 60 * 60 * 1000;
+export const HOUR_MS = 60 * 60 * 1000;
+export const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Split a window into one or more `[fromAgo, toAgo]` slices (millis-ago, where `0` is now).
+ *
+ * Windows up to an hour are a single slice. Longer windows reuse the last-hour slice
+ * (`[HOUR_MS, 0]`) — the very same query the map and overview button already cache — and
+ * fetch only the remaining older slice (`[timeframeMs, HOUR_MS]`). Stitching them back
+ * together keeps the recent hour consistent everywhere and reuses its cache, while hiding
+ * that split from callers.
+ */
+function reportSlices(timeframeMs: number): Array<[fromAgo: number, toAgo: number]> {
+  if (timeframeMs <= HOUR_MS) return [[timeframeMs, 0]];
+  return [
+    [HOUR_MS, 0],
+    [timeframeMs, HOUR_MS],
+  ];
+}
+
+/** Merge slice results into a single de-duplicated list, or `undefined` until any load. */
+function mergeReportSlices(
+  results: ReadonlyArray<{ data: Report[] | undefined }>,
+): Report[] | undefined {
+  if (results.every((result) => result.data === undefined)) return undefined;
+  const seen = new Set<string>();
+  const merged: Report[] = [];
+  for (const { data } of results) {
+    for (const report of data ?? []) {
+      const key = `${report.stationId}-${report.timestamp}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      merged.push(report);
+    }
+  }
+  return merged;
+}
+
+/**
+ * Fetch reports from the last `timeframeMs` (e.g. `HOUR_MS` for the map, `DAY_MS` for the
+ * overview page). Each slice's cache key is stable (`['reports', fromAgo, toAgo]`) while its
+ * actual `from`/`to` window is recomputed inside `queryFn` on every (30 s) refetch, so the
+ * window rolls forward over time the same way the server's default endpoint did — without
+ * churning the key. Longer timeframes are stitched from the cached last-hour slice plus the
+ * older remainder (see `reportSlices`), so the recent hour is shared with the map.
+ */
+export const useReports = (timeframeMs: number) =>
+  useQueries({
+    queries: reportSlices(timeframeMs).map(([fromAgo, toAgo]) => ({
+      queryKey: ['reports', fromAgo, toAgo],
+      queryFn: () => {
+        const now = Date.now();
+        const params = new URLSearchParams({
+          from: new Date(now - fromAgo).toISOString(),
+          to: new Date(now - toAgo).toISOString(),
+        });
+        return fetchJson<Report[]>(`/v0/reports?${params.toString()}`);
+      },
+      refetchInterval: 30_000,
+      refetchIntervalInBackground: false,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      staleTime: 30_000,
+    })),
+    combine: (results) => ({
+      data: mergeReportSlices(results),
+      isLoading: results.some((result) => result.isLoading),
+      isError: results.some((result) => result.isError),
+    }),
+  });
 
 export const useStationReportCount = (stationId: string) => {
   // Compute the window once per mount (lazy initializer), rounding `to` up to

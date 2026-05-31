@@ -1,10 +1,10 @@
-import { useReports } from '@/api/reports';
+import { HOUR_MS, useReports } from '@/api/reports';
 import { useStations } from '@/api/transit';
 
 import { ReportMarker } from './ReportMarker';
 
 export function ReportsLayer() {
-  const { data: reports } = useReports();
+  const { data: reports } = useReports(HOUR_MS);
   const { data: stations } = useStations();
 
   if (!reports || !stations) return null;
