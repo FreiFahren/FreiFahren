@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { HOUR_MS, useReports } from '@/api/reports';
 import { useLines, useStations } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
+import { Button } from '@/components/ui/button';
 import { Route as ReportsStationsRoute } from '@/routes/reports/stations';
 
 import { NAMESPACE } from './ReportsOverviewButton.i18n';
@@ -27,26 +28,28 @@ export function ReportsOverviewButton() {
     : undefined;
   const stationName = stations?.[latest.stationId]?.name;
 
-  // TODO: use card component for this?
   return (
     <div className="pointer-events-none fixed bottom-0 left-0 z-20 p-3">
-      <Link
-        to={ReportsStationsRoute.to}
-        className="bg-card text-card-foreground ring-foreground/10 hover:bg-card/80 pointer-events-auto block w-full max-w-xs rounded-lg px-3 py-2 shadow-[0_6px_16px_rgba(0,0,0,0.28)] ring-1 transition-colors"
+      <Button
+        asChild
+        variant="secondary"
+        className="bg-card text-card-foreground ring-foreground/10 hover:bg-card/80 pointer-events-auto h-auto w-full max-w-xs flex-col items-stretch gap-1 rounded-lg px-3 py-2 shadow-[0_6px_16px_rgba(0,0,0,0.28)] ring-1"
       >
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-muted-foreground text-xs">{t('lastHour')}</span>
-          <span className="text-sm font-semibold">{recentCount}</span>
-        </div>
-        <div className="mt-1 flex items-center gap-2">
-          {lineName && <LineBadge name={lineName} />}
-          <span className="flex-1 truncate text-sm font-medium">{stationName}</span>
-          <span className="relative ml-auto block size-2 shrink-0">
-            <span className="bg-destructive absolute inset-0 animate-ping rounded-full opacity-75" />
-            <span className="bg-destructive relative block size-2 rounded-full" />
-          </span>
-        </div>
-      </Link>
+        <Link to={ReportsStationsRoute.to}>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-muted-foreground text-xs">{t('lastHour')}</span>
+            <span className="text-sm font-semibold">{recentCount}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {lineName && <LineBadge name={lineName} />}
+            <span className="flex-1 truncate text-sm font-medium">{stationName}</span>
+            <span className="relative ml-auto block size-2 shrink-0">
+              <span className="bg-destructive absolute inset-0 animate-ping rounded-full opacity-75" />
+              <span className="bg-destructive relative block size-2 rounded-full" />
+            </span>
+          </div>
+        </Link>
+      </Button>
     </div>
   );
 }
