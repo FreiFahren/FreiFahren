@@ -6,7 +6,7 @@ import { ReportsTabBar } from '@/components/reports/ReportsTabBar';
 import { NAMESPACE } from '@/components/reports/Reports.i18n';
 import { PageHeader } from '@/components/templates/PageHeader';
 
-export const Route = createFileRoute('/_map/reports/_overview')({
+export const Route = createFileRoute('/reports')({
   component: ReportsOverviewLayout,
 });
 

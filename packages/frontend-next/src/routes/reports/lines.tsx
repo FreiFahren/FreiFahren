@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '@/components/reports/Reports.i18n';
 
-export const Route = createFileRoute('/_map/reports/_overview/lines')({
+export const Route = createFileRoute('/reports/lines')({
   component: ReportsLines,
 });
 

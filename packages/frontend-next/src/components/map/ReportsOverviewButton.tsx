@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { HOUR_MS, useReports } from '@/api/reports';
 import { useLines, useStations } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
-import { Route as ReportsStationsRoute } from '@/routes/_map/reports/_overview/stations';
+import { Route as ReportsStationsRoute } from '@/routes/reports/stations';
 
 import { NAMESPACE } from './ReportsOverviewButton.i18n';
 

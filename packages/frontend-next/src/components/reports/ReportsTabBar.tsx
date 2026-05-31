@@ -2,9 +2,9 @@ import { Link, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Route as LinesRoute } from '@/routes/_map/reports/_overview/lines';
-import { Route as StationsRoute } from '@/routes/_map/reports/_overview/stations';
-import { Route as SummaryRoute } from '@/routes/_map/reports/_overview/index';
+import { Route as LinesRoute } from '@/routes/reports/lines';
+import { Route as StationsRoute } from '@/routes/reports/stations';
+import { Route as SummaryRoute } from '@/routes/reports/index';
 
 import { NAMESPACE } from './Reports.i18n';
 
