@@ -11,7 +11,9 @@ function ReportRow({ report }: { report: Report }) {
   const { data: lines } = useLines();
   const { data: stations } = useStations();
 
-  const lineName = report.lineId ? lines?.find((line) => line.id === report.lineId)?.name : undefined;
+  const lineName = report.lineId
+    ? lines?.find((line) => line.id === report.lineId)?.name
+    : undefined;
   const stationName = stations?.[report.stationId]?.name;
   const directionName = report.directionId ? stations?.[report.directionId]?.name : undefined;
 
