@@ -1,7 +1,6 @@
-import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 
-import { HOUR_MS, useReports, useStationReportCount } from '@/api/reports';
+import { formatElapsed, HOUR_MS, useReports, useStationReportCount } from '@/api/reports';
 import { type Station, useLines, useStations } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { CardContent } from '@/components/ui/card';
@@ -17,14 +16,6 @@ type ReportDetailProps = {
 
 // Telegram group the reports are synced with.
 const REPORTS_GROUP_HANDLE = optionalEnv('VITE_REPORTS_GROUP_HANDLE') ?? '@FreiFahren_BE';
-
-function formatElapsed(timestamp: string, t: TFunction): string {
-  const minutes = Math.floor((Date.now() - new Date(timestamp).getTime()) / 60_000);
-  if (minutes <= 1) return t('now');
-  if (minutes <= 45) return t('minutesAgo', { count: minutes });
-  if (minutes < 60) return t('moreThan45Min');
-  return t('hoursAgo', { count: Math.floor(minutes / 60) });
-}
 
 export function ReportDetail({ station, onClose }: ReportDetailProps) {
   const { t } = useTranslation(NAMESPACE);

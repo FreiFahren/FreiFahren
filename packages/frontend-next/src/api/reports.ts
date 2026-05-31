@@ -1,4 +1,5 @@
 import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
+import type { TFunction } from 'i18next';
 import { useState } from 'react';
 
 import { requireEnv } from '@/lib/utils';
@@ -12,6 +13,19 @@ export type Report = {
   lineId: string | null;
   isPredicted: boolean;
 };
+
+/**
+ * Human-readable "time since" for a report timestamp, using the caller's i18n `t`. The
+ * caller's namespace must provide the keys `now`, `minutesAgo`, `moreThan45Min`, and
+ * `hoursAgo` (see e.g. `ReportDetail.i18n.ts` / `Reports.i18n.ts`).
+ */
+export function formatElapsed(timestamp: string, t: TFunction): string {
+  const minutes = Math.floor((Date.now() - new Date(timestamp).getTime()) / 60_000);
+  if (minutes <= 1) return t('now');
+  if (minutes <= 45) return t('minutesAgo', { count: minutes });
+  if (minutes < 60) return t('moreThan45Min');
+  return t('hoursAgo', { count: Math.floor(minutes / 60) });
+}
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 export const HOUR_MS = 60 * 60 * 1000;
