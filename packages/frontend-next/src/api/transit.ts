@@ -46,6 +46,7 @@ export type Line = {
 };
 
 export type SegmentProperties = {
+  id: number;
   line: string;
   from: StationId;
   to: StationId;
