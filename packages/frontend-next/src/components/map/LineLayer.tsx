@@ -2,7 +2,9 @@ import { Layer, Source } from 'react-map-gl/maplibre';
 
 import { useSegments } from '@/api/transit';
 
-export function SegmentsLayer() {
+import { STATIONS_BASE_LAYER_ID } from './StationsLayer';
+
+export function LineLayer() {
   const { data: segments } = useSegments();
 
   if (!segments) return null;
@@ -12,6 +14,7 @@ export function SegmentsLayer() {
       <Layer
         id="segments-line"
         type="line"
+        beforeId={STATIONS_BASE_LAYER_ID}
         paint={{
           'line-color': ['get', 'color'],
           'line-width': 3,

@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router';
 import { lazy, Suspense } from 'react';
 
+import { LayerToggleButton } from '@/components/map/LayerToggleButton';
 import { ReportButton } from '@/components/map/ReportButton';
 import { ReportsOverviewButton } from '@/components/map/ReportsOverviewButton';
 import { StationSearch } from '@/components/map/StationSearch';
@@ -25,6 +26,7 @@ export const Route = createFileRoute('/_map')({
         <MapView />
       </Suspense>
       <StationSearch />
+      <LayerToggleButton />
       <ReportsOverviewButton />
       <ReportButton />
       <Outlet />

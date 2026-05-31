@@ -5,10 +5,12 @@ import { Map as MapGL } from 'react-map-gl/maplibre';
 
 import { requireEnv } from '@/lib/utils';
 
+import { LineLayer } from './LineLayer';
 import { ReportsLayer } from './ReportsLayer';
-import { SegmentsLayer } from './SegmentsLayer';
+import { RiskLayer } from './RiskLayer';
 import { STATIONS_LAYER_ID, StationsLayer } from './StationsLayer';
 import { UserLocationControl } from './UserLocationControl';
+import { useRiskLayer } from '../../hooks/useRiskLayer';
 import { useStationSelection } from '../../hooks/useStationSelection';
 
 const MAP_STYLE_URL = requireEnv('VITE_MAP_STYLE_URL');
@@ -21,6 +23,7 @@ const INITIAL_VIEW = {
 
 export function MapView() {
   const { selectedStation, handleMapClick } = useStationSelection();
+  const { visible: riskVisible } = useRiskLayer();
 
   return (
     <div className="fixed inset-0">
@@ -31,8 +34,8 @@ export function MapView() {
         interactiveLayerIds={[STATIONS_LAYER_ID]}
         onClick={handleMapClick}
       >
-        <SegmentsLayer />
         <StationsLayer selectedStation={selectedStation} />
+        {riskVisible ? <RiskLayer /> : <LineLayer />}
         <ReportsLayer />
         <UserLocationControl />
       </MapGL>
