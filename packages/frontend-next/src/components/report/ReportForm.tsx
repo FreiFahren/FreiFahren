@@ -21,7 +21,7 @@ function ClearSelectionButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="text-muted-foreground hover:text-foreground text-xs outline-none focus-visible:underline"
+      className="text-muted-foreground hover:text-foreground py-1 text-sm outline-none focus-visible:underline"
     >
       {t('clearSelection')}
     </button>
@@ -117,7 +117,7 @@ function StationPicker() {
                 aria-pressed={isSelected}
                 onClick={() => selectStation(isSelected ? null : station.id)}
                 className={cn(
-                  'hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-2 py-2 text-left text-xs outline-none',
+                  'hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-3 py-2.5 text-left text-sm outline-none',
                   isSelected && 'ring-2 ring-white ring-inset',
                 )}
               >
@@ -153,11 +153,11 @@ function DirectionPicker() {
               aria-pressed={isSelected}
               onClick={() => selectDirection(isSelected ? null : station.id)}
               className={cn(
-                'border-border bg-surface-solid hover:bg-muted flex items-center gap-2 rounded-md border px-2 py-1.5 text-left text-sm outline-none',
+                'border-border bg-surface-solid hover:bg-muted flex items-center gap-2 rounded-md border px-3 py-2.5 text-left text-sm outline-none',
                 isSelected && 'ring-2 ring-white ring-inset',
               )}
             >
-              <ChevronRight className="text-muted-foreground size-4 shrink-0" />
+              <ChevronRight className="text-muted-foreground size-5 shrink-0" />
               <span className="truncate">{station.name}</span>
             </button>
           );
@@ -188,7 +188,7 @@ function SubmitFooter() {
         disabled={disabled}
         onClick={handleSubmit}
         className={cn(
-          'h-12 w-full rounded-lg text-sm font-medium',
+          'h-12 w-full rounded-lg text-base font-medium',
           canSubmit
             ? 'bg-accent-bright text-primary-foreground hover:bg-accent-press shadow-[0_6px_16px_rgba(214,59,59,0.28)]'
             : 'bg-surface-solid text-muted-foreground border-border border',

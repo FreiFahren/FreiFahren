@@ -30,7 +30,7 @@ export function ReportsTabBar() {
             key={tab.route.id}
             value={tab.route.id}
             asChild
-            className="text-muted-foreground data-[state=active]:text-foreground data-[state=active]:border-foreground -mb-px rounded-none border-b-2 border-transparent py-2 text-xs font-semibold tracking-wide uppercase"
+            className="text-muted-foreground data-[state=active]:text-foreground data-[state=active]:border-foreground -mb-px rounded-none border-b-2 border-transparent py-3 text-xs font-semibold tracking-wide uppercase"
           >
             <Link to={tab.route.to}>{t(tab.labelKey)}</Link>
           </TabsTrigger>

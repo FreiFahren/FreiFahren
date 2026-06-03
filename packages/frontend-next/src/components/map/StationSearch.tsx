@@ -60,8 +60,8 @@ export function StationSearch() {
       )}
       <div className="pointer-events-none fixed inset-x-0 top-0 z-20 flex justify-center py-3 pr-16 pl-3">
         <div className="pointer-events-auto w-full max-w-md">
-          <div className="bg-card text-card-foreground ring-foreground/10 flex h-9 items-center gap-1 rounded-lg pr-1 pl-3 ring-1">
-            <Search className="text-muted-foreground size-3 shrink-0" />
+          <div className="bg-card text-card-foreground ring-foreground/10 flex h-11 items-center gap-1.5 rounded-lg pr-1 pl-3 ring-1">
+            <Search className="text-muted-foreground size-4 shrink-0" />
             <Input
               ref={inputRef}
               type="text"
@@ -71,7 +71,7 @@ export function StationSearch() {
               onBlur={() => setIsFocused(false)}
               placeholder={t('placeholder')}
               aria-label={t('placeholder')}
-              className="h-full flex-1 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0 md:text-xs dark:bg-transparent"
+              className="h-full flex-1 border-0 bg-transparent px-0 text-sm shadow-none focus-visible:ring-0 dark:bg-transparent"
             />
             {hasQuery && (
               <Button
@@ -88,7 +88,7 @@ export function StationSearch() {
           {showResults && (
             <Card className="animate-in fade-in slide-in-from-top-2 mt-2 max-h-[60vh] gap-0 overflow-auto p-1 duration-150">
               {results.length === 0 ? (
-                <div className="text-muted-foreground px-3 py-4 text-xs">{t('noResults')}</div>
+                <div className="text-muted-foreground px-3 py-4 text-sm">{t('noResults')}</div>
               ) : (
                 results.map((station) => (
                   <StationListItem
