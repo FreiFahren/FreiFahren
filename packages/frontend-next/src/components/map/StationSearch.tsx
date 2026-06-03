@@ -71,7 +71,9 @@ export function StationSearch() {
               onBlur={() => setIsFocused(false)}
               placeholder={t('placeholder')}
               aria-label={t('placeholder')}
-              className="h-full flex-1 border-0 bg-transparent px-0 text-sm shadow-none focus-visible:ring-0 dark:bg-transparent"
+              // Stay at 16px so iOS Safari never auto-zooms the page on focus (a sm:text-sm
+              // revert would re-trigger the zoom on iPads, which are >=sm but still iOS).
+              className="h-full flex-1 border-0 bg-transparent px-0 text-base shadow-none focus-visible:ring-0 dark:bg-transparent"
             />
             {hasQuery && (
               <Button

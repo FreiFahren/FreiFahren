@@ -3,7 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Lock page scale: the map owns pinch-zoom, so the page itself must never zoom.
+         This also stops iOS Safari auto-zooming when the (position:fixed) search input is focused. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>FreiFahren</title>
   </head>
   <body>
