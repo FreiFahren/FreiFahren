@@ -33,7 +33,7 @@ export function ReportsOverviewButton() {
       <Button
         asChild
         variant="secondary"
-        className="bg-card text-card-foreground ring-foreground/10 hover:bg-card/80 pointer-events-auto h-auto w-full max-w-[min(20rem,calc(100vw-12rem))] flex-col items-stretch gap-1.5 rounded-lg px-3.5 py-3 shadow-[0_6px_16px_rgba(0,0,0,0.28)] ring-1"
+        className="bg-card text-card-foreground ring-foreground/10 hover:bg-card/80 pointer-events-auto h-auto w-full max-w-[min(20rem,calc(100vw-10.5rem))] flex-col items-stretch gap-1.5 rounded-lg px-3.5 py-3 shadow-[0_6px_16px_rgba(0,0,0,0.28)] ring-1"
       >
         <Link to={ReportsStationsRoute.to}>
           <div className="flex items-center justify-between gap-3">
