@@ -23,9 +23,7 @@ export function ReportsList() {
       <ul>
         {sorted.map((report, index) => {
           const key = `${report.stationId}-${report.timestamp}`;
-          return (
-            <ReportRow key={`${key}-${index}`} report={report} recent={recentKeys.has(key)} />
-          );
+          return <ReportRow key={`${key}-${index}`} report={report} recent={recentKeys.has(key)} />;
         })}
       </ul>
     </div>

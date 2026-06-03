@@ -1,10 +1,5 @@
 import type { Report } from '@/api/reports';
-import {
-  compareLineOrder,
-  type Line,
-  resolveStationLineNames,
-  type Stations,
-} from '@/api/transit';
+import { compareLineOrder, type Line, resolveStationLineNames, type Stations } from '@/api/transit';
 
 export type LineScore = { name: string; score: number; fill: string };
 
