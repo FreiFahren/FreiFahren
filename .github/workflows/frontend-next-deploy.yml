@@ -1,0 +1,56 @@
+name: frontend-next Deploy
+
+on:
+    push:
+        branches: [main]
+        paths:
+            - 'packages/frontend-next/**'
+            - '.github/workflows/frontend-next-deploy.yml'
+    workflow_dispatch: {}
+
+# Newest commit wins; never run two deploys at once.
+concurrency:
+    group: deploy-frontend-next
+    cancel-in-progress: true
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        defaults:
+            run:
+                working-directory: packages/frontend-next
+        env:
+            # Override the localhost value from the committed .env at build time.
+            # All other VITE_* vars are read from packages/frontend-next/.env.
+            VITE_API_URL: https://api.freifahren.org
+
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v4
+
+            - name: Set up Bun
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Install dependencies
+              run: bun install --frozen-lockfile
+
+            # --- Safety gates: nothing below this point deploys unless all pass ---
+            - name: Run Prettier check
+              run: bun run format:check
+
+            - name: Run ESLint
+              run: bun run lint
+
+            - name: Build (type-checks via tsc; fails the job on any error)
+              run: bun run build
+            # ---------------------------------------------------------------------
+
+            - name: Deploy to Cloudflare Workers
+              run: bunx wrangler@latest deploy
+              env:
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
