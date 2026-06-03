@@ -1,0 +1,9 @@
+{
+  "name": "frontend",
+  "compatibility_date": "2026-05-31",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application",
+  },
+  "routes": [{ "pattern": "preview.freifahren.org", "custom_domain": true }],
+}
