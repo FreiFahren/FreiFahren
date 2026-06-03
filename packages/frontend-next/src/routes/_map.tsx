@@ -5,6 +5,7 @@ import { LayerToggleButton } from '@/components/map/LayerToggleButton';
 import { ReportButton } from '@/components/map/ReportButton';
 import { ReportsOverviewButton } from '@/components/map/ReportsOverviewButton';
 import { StationSearch } from '@/components/map/StationSearch';
+import { StatsPopUp } from '@/components/map/StatsPopUp';
 
 // Start downloading the map component and the maplibre-gl library in parallel
 // as soon as a map route loads, so the map downloads alongside the shell
@@ -26,6 +27,7 @@ export const Route = createFileRoute('/_map')({
         <MapView />
       </Suspense>
       <StationSearch />
+      <StatsPopUp />
       <LayerToggleButton />
       <ReportsOverviewButton />
       <ReportButton />
