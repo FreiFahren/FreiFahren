@@ -6,6 +6,7 @@ import { useSubmitReport } from '@/api/reports';
 import { PageHeader } from '@/components/templates/PageHeader';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
+import { SectionHeading } from '@/components/ui/section-heading';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
 
@@ -38,10 +39,7 @@ function LinePicker() {
   return (
     <section className="px-4">
       <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-1 tracking-wide uppercase">
-          <h2 className="text-sm font-semibold">{t('line')}</h2>
-          <p className="text-muted-foreground text-[0.625rem] tracking-wide">{t('optional')}</p>
-        </div>
+        <SectionHeading hint={t('optional')}>{t('line')}</SectionHeading>
         <ToggleGroup
           type="single"
           size="sm"
@@ -106,10 +104,9 @@ function StationPicker() {
       )}
     >
       <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-1 tracking-wide uppercase">
-          <h2 className="text-sm font-semibold">{t('station')}</h2>
-          <p className="text-destructive text-[0.625rem] tracking-wide">{t('required')}</p>
-        </div>
+        <SectionHeading hint={t('required')} hintTone="destructive">
+          {t('station')}
+        </SectionHeading>
         {stationId && <ClearSelectionButton onClick={() => selectStation(null)} />}
       </div>
       <ul className={cn(!stationId && 'min-h-0 flex-1 overflow-y-auto')}>
@@ -145,10 +142,7 @@ function DirectionPicker() {
   return (
     <section className="mt-6 px-4">
       <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-1 tracking-wide uppercase">
-          <h2 className="text-sm font-semibold">{t('direction')}</h2>
-          <p className="text-muted-foreground text-[0.625rem] tracking-wide">{t('optional')}</p>
-        </div>
+        <SectionHeading hint={t('optional')}>{t('direction')}</SectionHeading>
         {/* Rendered unconditionally and hidden when nothing is selected to reserve its height. */}
         <ClearSelectionButton
           onClick={() => selectDirection(null)}
