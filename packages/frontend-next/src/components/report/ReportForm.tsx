@@ -15,13 +15,7 @@ import { ReportSelectionProvider } from './ReportSelectionProvider';
 
 const FILTERS: LineFilter[] = ['all', 'subway', 'light_rail', 'tram'];
 
-function ClearSelectionButton({
-  onClick,
-  className,
-}: {
-  onClick: () => void;
-  className?: string;
-}) {
+function ClearSelectionButton({ onClick, className }: { onClick: () => void; className?: string }) {
   const { t } = useTranslation(NAMESPACE);
   return (
     <button
