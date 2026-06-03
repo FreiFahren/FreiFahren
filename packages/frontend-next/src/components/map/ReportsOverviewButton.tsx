@@ -5,7 +5,7 @@ import { HOUR_MS, useReports } from '@/api/reports';
 import { useLines, useStations } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
-import { Route as ReportsStationsRoute } from '@/routes/reports/stations';
+import { Route as ReportsSummaryRoute } from '@/routes/reports/index';
 
 import { NAMESPACE } from './ReportsOverviewButton.i18n';
 
@@ -35,7 +35,7 @@ export function ReportsOverviewButton() {
         variant="secondary"
         className="bg-card text-card-foreground ring-foreground/10 hover:bg-card/80 pointer-events-auto h-auto w-full max-w-xs flex-col items-stretch gap-1.5 rounded-lg px-3.5 py-3 shadow-[0_6px_16px_rgba(0,0,0,0.28)] ring-1"
       >
-        <Link to={ReportsStationsRoute.to}>
+        <Link to={ReportsSummaryRoute.to}>
           <div className="flex items-center justify-between gap-3">
             <span className="text-muted-foreground text-xs">{t('lastHour')}</span>
             <span className="text-sm font-semibold">{recentCount}</span>
