@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import { z } from 'zod'
 
 import { AppError } from '../../common/errors'
+import { logger } from '../../common/logger'
 import { DbConnection, InsertReport, reports } from '../../db/'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
 import type { StationId } from '../transit/types'
@@ -129,13 +130,19 @@ export class ReportsService {
             throw new Error('security service configuration error')
         }
 
-        const response = await fetch(`${securityServiceUrl.replace(/\/$/, '')}/check`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ headers }),
-        })
+        let response: Response
+        try {
+            response = await fetch(`${securityServiceUrl.replace(/\/$/, '')}/check`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ headers }),
+            })
+        } catch (err) {
+            logger.warn(err, 'Security service unreachable, skipping spam verification')
+            return
+        }
 
         if (!response.ok) {
             throw new Error(`failed to verify request with status ${response.status}: ${await response.text()}`)
