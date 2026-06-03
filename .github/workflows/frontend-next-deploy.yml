@@ -21,10 +21,6 @@ jobs:
         defaults:
             run:
                 working-directory: packages/frontend-next
-        env:
-            # Override the localhost value from the committed .env at build time.
-            # All other VITE_* vars are read from packages/frontend-next/.env.
-            VITE_API_URL: https://api.freifahren.org
 
         steps:
             - name: Check out code
