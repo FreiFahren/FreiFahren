@@ -15,13 +15,16 @@ import { ReportSelectionProvider } from './ReportSelectionProvider';
 
 const FILTERS: LineFilter[] = ['all', 'subway', 'light_rail', 'tram'];
 
-function ClearSelectionButton({ onClick }: { onClick: () => void }) {
+function ClearSelectionButton({ onClick, className }: { onClick: () => void; className?: string }) {
   const { t } = useTranslation(NAMESPACE);
   return (
     <button
       type="button"
       onClick={onClick}
-      className="text-muted-foreground hover:text-foreground text-xs outline-none focus-visible:underline"
+      className={cn(
+        'text-muted-foreground hover:text-foreground py-1 text-sm outline-none focus-visible:underline',
+        className,
+      )}
     >
       {t('clearSelection')}
     </button>
@@ -60,11 +63,13 @@ function LinePicker() {
         </ToggleGroup>
       </div>
 
-      {lineName && (
-        <div className="mb-1 flex justify-end">
-          <ClearSelectionButton onClick={() => selectLine(null)} />
-        </div>
-      )}
+      {/* Always render the row so reserving the clear button's height avoids layout shift. */}
+      <div className="mb-1 flex justify-end">
+        <ClearSelectionButton
+          onClick={() => selectLine(null)}
+          className={cn(!lineName && 'invisible')}
+        />
+      </div>
 
       <div className="flex flex-wrap gap-2">
         {visibleLines.map((line) => {
@@ -117,7 +122,7 @@ function StationPicker() {
                 aria-pressed={isSelected}
                 onClick={() => selectStation(isSelected ? null : station.id)}
                 className={cn(
-                  'hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-2 py-2 text-left text-xs outline-none',
+                  'hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-3 py-2.5 text-left text-sm outline-none',
                   isSelected && 'ring-2 ring-white ring-inset',
                 )}
               >
@@ -139,30 +144,38 @@ function DirectionPicker() {
 
   return (
     <section className="mt-6 px-4">
-      <div className="mb-3 flex items-center gap-1 tracking-wide uppercase">
-        <h2 className="text-sm font-semibold">{t('direction')}</h2>
-        <p className="text-muted-foreground text-[0.625rem] tracking-wide">{t('optional')}</p>
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-1 tracking-wide uppercase">
+          <h2 className="text-sm font-semibold">{t('direction')}</h2>
+          <p className="text-muted-foreground text-[0.625rem] tracking-wide">{t('optional')}</p>
+        </div>
+        {/* Rendered unconditionally and hidden when nothing is selected to reserve its height. */}
+        <ClearSelectionButton
+          onClick={() => selectDirection(null)}
+          className={cn(!directionStationId && 'invisible')}
+        />
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <ul>
         {directionOptions.map((station) => {
           const isSelected = directionStationId === station.id;
           return (
-            <button
-              key={station.id}
-              type="button"
-              aria-pressed={isSelected}
-              onClick={() => selectDirection(isSelected ? null : station.id)}
-              className={cn(
-                'border-border bg-surface-solid hover:bg-muted flex items-center gap-2 rounded-md border px-2 py-1.5 text-left text-sm outline-none',
-                isSelected && 'ring-2 ring-white ring-inset',
-              )}
-            >
-              <ChevronRight className="text-muted-foreground size-4 shrink-0" />
-              <span className="truncate">{station.name}</span>
-            </button>
+            <li key={station.id} className="border-border/60 border-b last:border-b-0">
+              <button
+                type="button"
+                aria-pressed={isSelected}
+                onClick={() => selectDirection(isSelected ? null : station.id)}
+                className={cn(
+                  'hover:bg-muted focus-visible:bg-muted flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm outline-none',
+                  isSelected && 'ring-2 ring-white ring-inset',
+                )}
+              >
+                <ChevronRight className="text-muted-foreground size-5 shrink-0" />
+                <span className="truncate">{station.name}</span>
+              </button>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </section>
   );
 }
@@ -188,7 +201,7 @@ function SubmitFooter() {
         disabled={disabled}
         onClick={handleSubmit}
         className={cn(
-          'h-12 w-full rounded-lg text-sm font-medium',
+          'h-12 w-full rounded-lg text-base font-medium',
           canSubmit
             ? 'bg-accent-bright text-primary-foreground hover:bg-accent-press shadow-[0_6px_16px_rgba(214,59,59,0.28)]'
             : 'bg-surface-solid text-muted-foreground border-border border',
