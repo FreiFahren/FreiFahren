@@ -9,7 +9,7 @@ import { LineLayer } from './LineLayer';
 import { ReportsLayer } from './ReportsLayer';
 import { RiskLayer } from './RiskLayer';
 import { STATIONS_LAYER_ID, StationsLayer } from './StationsLayer';
-import { UserLocationControl } from './UserLocationControl';
+import { UserLocationLayer } from './UserLocationLayer';
 import { useRiskLayer } from '../../hooks/useRiskLayer';
 import { useStationSelection } from '../../hooks/useStationSelection';
 
@@ -37,7 +37,7 @@ export function MapView() {
         <StationsLayer selectedStation={selectedStation} />
         {riskVisible ? <RiskLayer /> : <LineLayer />}
         <ReportsLayer />
-        <UserLocationControl />
+        <UserLocationLayer />
       </MapGL>
     </div>
   );
