@@ -7,6 +7,7 @@ import { NAMESPACE } from '@/components/reports/Reports.i18n';
 import { PageHeader } from '@/components/templates/PageHeader';
 
 export const Route = createFileRoute('/reports')({
+  staticData: { legalDisclaimer: false },
   component: ReportsOverviewLayout,
 });
 

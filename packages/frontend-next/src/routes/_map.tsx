@@ -21,6 +21,8 @@ const MapView = lazy(() =>
 );
 
 export const Route = createFileRoute('/_map')({
+  // Pathless layout — never the active leaf; its children declare their own flag.
+  staticData: { legalDisclaimer: false },
   component: () => (
     <>
       <Suspense fallback={null}>

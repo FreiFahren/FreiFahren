@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ReportRouteImport } from './routes/report'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MapRouteImport } from './routes/_map'
 import { Route as ReportsIndexRouteImport } from './routes/reports/index'
 import { Route as MapIndexRouteImport } from './routes/_map/index'
@@ -27,6 +28,11 @@ const ReportsRoute = ReportsRouteImport.update({
 const ReportRoute = ReportRouteImport.update({
   id: '/report',
   path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MapRoute = MapRouteImport.update({
@@ -66,6 +72,7 @@ const MapReportsStationIdRoute = MapReportsStationIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof MapIndexRoute
+  '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reports': typeof ReportsRouteWithChildren
   '/reports/lines': typeof ReportsLinesRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/stations/$stationId': typeof MapStationsStationIdRoute
 }
 export interface FileRoutesByTo {
+  '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
@@ -86,6 +94,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_map': typeof MapRouteWithChildren
+  '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reports': typeof ReportsRouteWithChildren
   '/reports/lines': typeof ReportsLinesRoute
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/privacy'
     | '/report'
     | '/reports'
     | '/reports/lines'
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/stations/$stationId'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/privacy'
     | '/report'
     | '/reports/lines'
     | '/reports/stations'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_map'
+    | '/privacy'
     | '/report'
     | '/reports'
     | '/reports/lines'
@@ -130,6 +142,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   MapRoute: typeof MapRouteWithChildren
+  PrivacyRoute: typeof PrivacyRoute
   ReportRoute: typeof ReportRoute
   ReportsRoute: typeof ReportsRouteWithChildren
 }
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/report'
       fullPath: '/report'
       preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_map': {
@@ -233,6 +253,7 @@ const ReportsRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   MapRoute: MapRouteWithChildren,
+  PrivacyRoute: PrivacyRoute,
   ReportRoute: ReportRoute,
   ReportsRoute: ReportsRouteWithChildren,
 }

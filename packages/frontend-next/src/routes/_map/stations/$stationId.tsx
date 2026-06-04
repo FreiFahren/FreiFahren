@@ -5,6 +5,7 @@ import { queryClient } from '@/api/queryClient';
 import { StationDetail } from '@/components/map/StationDetail';
 
 export const Route = createFileRoute('/_map/stations/$stationId')({
+  staticData: { legalDisclaimer: true },
   loader: async ({ params }) => {
     const stations = await queryClient.ensureQueryData({
       queryKey: ['transit', 'stations'],
