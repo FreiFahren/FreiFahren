@@ -1,6 +1,6 @@
-import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { TFunction } from 'i18next';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { requireEnv } from '@/lib/utils';
 
@@ -98,6 +98,25 @@ export const useReports = (timeframeMs: number) =>
       isError: results.some((result) => result.isError),
     }),
   });
+
+/** A counter that ticks up each time any `['reports', …]` query finishes a refetch */
+export const useReportsRefreshSignal = () => {
+  const queryClient = useQueryClient();
+  const [signal, setSignal] = useState(0);
+
+  useEffect(() => {
+    const cache = queryClient.getQueryCache();
+    return cache.subscribe((event) => {
+      if (event.type !== 'updated' || event.action.type !== 'success') return;
+      const { query } = event;
+      // `dataUpdateCount` is 1 after the initial fetch, so >1 means this success was a refetch.
+      if (query.queryKey[0] !== 'reports' || query.state.dataUpdateCount <= 1) return;
+      setSignal((n) => n + 1);
+    });
+  }, [queryClient]);
+
+  return signal;
+};
 
 export const useStationReportCount = (stationId: string) => {
   // Compute the window once per mount (lazy initializer), rounding `to` up to
