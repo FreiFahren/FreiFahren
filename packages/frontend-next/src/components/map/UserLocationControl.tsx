@@ -25,8 +25,16 @@ export function UserLocationControl() {
     let timer = 0;
     const activate = () => {
       timer = window.setTimeout(() => {
+        const control = controlRef.current;
+        // Suppress GeolocateControl's default behavior of recentering and
+        // zooming the camera to the user on the first fix. We only want the
+        // location dot/accuracy circle, which are rendered independently of
+        // this camera update.
+        if (control) {
+          (control as unknown as { _updateCamera: () => void })._updateCamera = () => {};
+        }
         notifyLoading();
-        controlRef.current?.trigger();
+        control?.trigger();
       }, 0);
     };
 
