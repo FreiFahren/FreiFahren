@@ -22,7 +22,7 @@ const INITIAL_VIEW = {
 };
 
 // Keep the city in view: stop users from zooming out past the metro-area level.
-const MIN_ZOOM = 15;
+const MIN_ZOOM = 10;
 
 export function MapView() {
   const { selectedStation, handleMapClick } = useStationSelection();
