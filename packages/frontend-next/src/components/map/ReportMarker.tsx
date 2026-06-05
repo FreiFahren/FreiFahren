@@ -4,6 +4,7 @@ import { Marker, type MarkerEvent } from 'react-map-gl/maplibre';
 
 import type { Report } from '@/api/reports';
 import type { Station } from '@/api/transit';
+import { markReportViewed, useReportViewed } from '@/lib/viewed-reports';
 import { Route as ReportDetailRoute } from '@/routes/_map/reports/$stationId';
 
 const FADE_DURATION_MS = 60 * 60 * 1000;
@@ -25,6 +26,7 @@ function computeOpacity(timestamp: string, nowMs: number): number {
 export function ReportMarker({ report, station }: ReportMarkerProps) {
   const navigate = useNavigate();
   const [now, setNow] = useState(() => Date.now());
+  const viewed = useReportViewed(report.stationId, report.timestamp);
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), RECOMPUTE_INTERVAL_MS);
@@ -35,11 +37,13 @@ export function ReportMarker({ report, station }: ReportMarkerProps) {
   if (opacity <= 0) return null;
 
   const age = now - new Date(report.timestamp).getTime();
-  const shouldPulse = age < PULSE_AGE_MS;
+  // Pulse only while the report is fresh and the user has not viewed it yet.
+  const shouldPulse = age < PULSE_AGE_MS && !viewed;
 
   const handleClick = (event: MarkerEvent<MouseEvent>) => {
     // Stop the map's onClick from also firing (which would open the station detail).
     event.originalEvent.stopPropagation();
+    markReportViewed(report.stationId, report.timestamp);
     void navigate({ to: ReportDetailRoute.to, params: { stationId: report.stationId } });
   };
 

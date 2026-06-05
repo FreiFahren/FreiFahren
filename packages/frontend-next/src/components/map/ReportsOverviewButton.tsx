@@ -5,6 +5,7 @@ import { HOUR_MS, useReports } from '@/api/reports';
 import { useLines, useStations } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
+import { markReportViewed, useReportViewed } from '@/lib/viewed-reports';
 import { Route as ReportsSummaryRoute } from '@/routes/reports/index';
 
 import { NAMESPACE } from './ReportsOverviewButton.i18n';
@@ -20,6 +21,8 @@ export function ReportsOverviewButton() {
   const allReports = reports ?? [];
   const recentCount = allReports.length;
   const latest = allReports.slice().sort((a, b) => b.timestamp.localeCompare(a.timestamp))[0];
+  // Called before the early return to keep hook order stable; empty keys match nothing.
+  const latestViewed = useReportViewed(latest?.stationId ?? '', latest?.timestamp ?? '');
 
   if (!latest) return null;
 
@@ -35,7 +38,12 @@ export function ReportsOverviewButton() {
         variant="secondary"
         className="bg-card text-card-foreground hover:bg-card/80 pointer-events-auto h-auto w-full max-w-[min(20rem,calc(100vw-10.5rem))] flex-col items-stretch gap-1.5 rounded-lg px-3.5 py-3 shadow-[0_6px_16px_rgba(0,0,0,0.28)]"
       >
-        <Link to={ReportsSummaryRoute.to}>
+        <Link
+          to={ReportsSummaryRoute.to}
+          // Opening the overview counts as viewing the latest report shown here, so it stops
+          // pulsing both on this button and on its map marker.
+          onClick={() => markReportViewed(latest.stationId, latest.timestamp)}
+        >
           <div className="flex items-center justify-between gap-3">
             <span className="text-muted-foreground text-xs">{t('lastHour')}</span>
             <span className="text-sm font-semibold">{recentCount}</span>
@@ -43,10 +51,12 @@ export function ReportsOverviewButton() {
           <div className="flex items-center gap-2">
             {lineName && <LineBadge name={lineName} />}
             <span className="flex-1 truncate text-sm font-medium">{stationName}</span>
-            <span className="relative ml-auto block size-2 shrink-0">
-              <span className="bg-destructive absolute inset-0 animate-ping rounded-full opacity-75" />
-              <span className="bg-destructive relative block size-2 rounded-full" />
-            </span>
+            {!latestViewed && (
+              <span className="relative ml-auto block size-2 shrink-0">
+                <span className="bg-destructive absolute inset-0 animate-ping rounded-full opacity-75" />
+                <span className="bg-destructive relative block size-2 rounded-full" />
+              </span>
+            )}
           </div>
         </Link>
       </Button>
