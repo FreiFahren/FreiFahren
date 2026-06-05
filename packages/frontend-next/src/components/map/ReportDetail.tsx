@@ -1,9 +1,11 @@
+import { MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { formatElapsed, HOUR_MS, useReports, useStationReportCount } from '@/api/reports';
-import { type Station, useLines, useStations } from '@/api/transit';
+import { type Station, useLines, useStations, useStationDistance } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { CardContent } from '@/components/ui/card';
+import { useGeolocation } from '@/contexts/Geolocation.context';
 import { optionalEnv } from '@/lib/utils';
 
 import { DetailCard } from './DetailCard';
@@ -23,6 +25,10 @@ export function ReportDetail({ station, onClose }: ReportDetailProps) {
   const { data: lines } = useLines();
   const { data: stations } = useStations();
   const { data: numberOfReports } = useStationReportCount(station.id);
+  const { position } = useGeolocation();
+  // Stations between the user's nearest station and this report; absent until location is shared
+  // and the lookup resolves (and stays absent if the backend can't route between them).
+  const { data: stationDistance } = useStationDistance(station.id, position);
 
   const report = (reports ?? [])
     .filter((r) => r.stationId === station.id)
@@ -44,6 +50,14 @@ export function ReportDetail({ station, onClose }: ReportDetailProps) {
       <CardContent className="space-y-1">
         {report && (
           <p className="text-muted-foreground text-sm">{formatElapsed(report.timestamp, t)}</p>
+        )}
+        {stationDistance !== undefined && (
+          <p className="text-muted-foreground flex items-center gap-1 text-sm">
+            <MapPin className="size-3.5 shrink-0" />
+            {stationDistance <= 1
+              ? t('oneStationAway')
+              : t('stationsAway', { count: stationDistance })}
+          </p>
         )}
         {/* Reserve the line height so the count loading in does not shift layout. */}
         <p className="min-h-5 text-sm">
