@@ -63,19 +63,19 @@ The `segments.py` script is responsible for converting raw transport line data i
 If you use the (local) backend, uncomment in the `main()` function the following line to this:
 
 ```python
-stations_json, lines = fetch_stations_and_lines_with_api("http://localhost:8080")
+stations_json, lines = fetch_stations_and_lines_with_api("http://localhost:3000")
 
 # stations_json, lines = fetch_stations_and_lines_with_file("stations.json", "lines.json")
 ```
 
-Change the `url` parameter for the `fetch_stations_and_lines_with_api()` function to `http://localhost:8080` or your desired hosted backend url.
+Change the `url` parameter for the `fetch_stations_and_lines_with_api()` function to `http://localhost:3000` or your desired hosted backend url.
 
 
 ### Using the local files for stations and lines data
 If you want to use the local files, uncomment in the `main()` function the following line to this:
 
 ```python
-# stations_json, lines = fetch_stations_and_lines_with_api("http://localhost:8080")
+# stations_json, lines = fetch_stations_and_lines_with_api("http://localhost:3000")
 
 stations_json, lines = fetch_stations_and_lines_with_file("stations.json", "lines.json")
 ```
@@ -138,7 +138,7 @@ Then you can run the script to generate the segments:
 python segments.py
 ```
 
-This will generate the `segments.geojson` file in the `scripts/` folder, which you can place into the `data/` folder of the backend.
+This will generate the `segments.geojson` file in the `scripts/` folder.
 
 ## Detailed Process Flow
 
@@ -165,7 +165,7 @@ def fetch_stations_and_lines_with_file(stations_file: str, lines_file: str) -> T
 ```
 
 The script can fetch data in two ways:
-1. **API Mode**: Fetches directly from the FreiFahren API. The `url` parameter can be `http://localhost:8080`, which is from the backend
+1. **API Mode**: Fetches directly from the FreiFahren API. The `url` parameter can be `http://localhost:3000` for the local hono-backend
 2. **File Mode**: Reads from local JSON files
 
 Both methods return:
