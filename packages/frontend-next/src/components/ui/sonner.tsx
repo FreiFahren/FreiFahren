@@ -8,6 +8,10 @@ const Toaster = ({ ...props }: ToasterProps) => (
     position="top-center"
     offset="4.5rem"
     mobileOffset="4.5rem"
+    // `unstyled` toasts lose sonner's `width: var(--width)`, so the <li> shrinks to content
+    // and pins to the left edge of the centered toaster box on desktop. Force full width so the
+    // pill's `mx-auto` can center it (mobile already sets this via sonner's own media query).
+    toastOptions={{ className: 'flex w-full justify-center' }}
     style={
       {
         '--normal-bg': 'var(--popover)',
