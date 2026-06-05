@@ -5,5 +5,5 @@
     "directory": "./dist",
     "not_found_handling": "single-page-application",
   },
-  "routes": [{ "pattern": "preview.freifahren.org", "custom_domain": true }],
+  "routes": [{ "pattern": "app.freifahren.org", "custom_domain": true }],
 }
