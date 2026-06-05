@@ -21,6 +21,9 @@ const INITIAL_VIEW = {
   zoom: requireEnv('VITE_MAP_INITIAL_ZOOM', 'number'),
 };
 
+// Keep the city in view: stop users from zooming out past the metro-area level.
+const MIN_ZOOM = 15;
+
 export function MapView() {
   const { selectedStation, handleMapClick } = useStationSelection();
   const { visible: riskVisible } = useRiskLayer();
@@ -29,6 +32,7 @@ export function MapView() {
     <div className="fixed inset-0">
       <MapGL
         initialViewState={INITIAL_VIEW}
+        minZoom={MIN_ZOOM}
         mapStyle={MAP_STYLE_URL}
         attributionControl={{ compact: true }}
         interactiveLayerIds={[STATIONS_LAYER_ID]}
