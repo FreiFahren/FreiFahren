@@ -37,7 +37,13 @@ export function ReportSelectionProvider({ children }: { children: ReactNode }) {
   const selectStation = (id: string | null) => {
     setStationId(id);
     setDirectionStationId(null);
-    if (id === null) setLineName(null);
+    if (id === null) {
+      setLineName(null);
+      return;
+    }
+    // A station served by a single line: pick that line so the user can skip the line step.
+    const names = resolveStationLineNames(stations?.[id]?.lines ?? [], lines);
+    if (names.length === 1) selectLine(names[0]);
   };
 
   const selectDirection = (id: string | null) => {
