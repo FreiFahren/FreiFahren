@@ -6,6 +6,8 @@ import { ReportButton } from '@/components/map/ReportButton';
 import { ReportsOverviewButton } from '@/components/map/ReportsOverviewButton';
 import { StationSearch } from '@/components/map/StationSearch';
 import { StatsPopUp } from '@/components/map/StatsPopUp';
+import { RefreshNotification } from '@/components/RefreshNotification';
+import { Toaster } from '@/components/ui/sonner';
 
 // Start downloading the map component and the maplibre-gl library in parallel
 // as soon as a map route loads, so the map downloads alongside the shell
@@ -30,10 +32,13 @@ export const Route = createFileRoute('/_map')({
       </Suspense>
       <StationSearch />
       <StatsPopUp />
+      <RefreshNotification />
       <LayerToggleButton />
       <ReportsOverviewButton />
       <ReportButton />
       <Outlet />
+      {/* Scoped to the map layout so toasts only fire/show here, never on /reports etc. */}
+      <Toaster />
     </>
   ),
 });
