@@ -217,6 +217,7 @@ function resolveLineId(input: SubmitReportInput, lines: Line[] | undefined): str
 
 export function useSubmitReport() {
   const { data: lines } = useLines();
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (input: SubmitReportInput): Promise<SubmitReportResponse> => {
       const lineId = resolveLineId(input, lines);
@@ -232,6 +233,14 @@ export function useSubmitReport() {
       });
       if (!response.ok) throw new Error(`Report submission failed: ${response.status}`);
       return response.json();
+    },
+    // The backend commits the report and clears its reports/risk caches before
+    // returning 200, so by the time we get here the new data is already live —
+    // no wait/race-condition guard is needed. Refetch both so the map and risk
+    // overlay reflect the report immediately instead of waiting for the poll.
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['reports'] });
+      void queryClient.invalidateQueries({ queryKey: ['risk'] });
     },
   });
 }
