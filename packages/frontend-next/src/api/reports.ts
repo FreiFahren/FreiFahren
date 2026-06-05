@@ -86,32 +86,39 @@ const OLDER_SLICE_POLLING = {
 } as const;
 
 /**
+ * React Query options for a single report slice (`['reports', fromAgo, toAgo]`). `fromAgo`/`toAgo`
+ * are millis-ago (`0` is now). The cache key is stable while the actual `from`/`to` window is
+ * recomputed inside `queryFn` on every refetch, so the window rolls forward over time without
+ * churning the key. A slice ending at "now" (`toAgo === 0`) is the live last-hour window and polls;
+ * anything ending in the past is the older 1 h–24 h remainder, fetched once and kept fresh for an
+ * hour. Shared by `useReports` and route loaders so a loader prefetch reuses the map's cache entry.
+ */
+export const reportsSliceQueryOptions = (fromAgo: number, toAgo: number) => {
+  const isLiveSlice = toAgo === 0;
+  return {
+    queryKey: ['reports', fromAgo, toAgo] as const,
+    queryFn: () => {
+      const now = Date.now();
+      const params = new URLSearchParams({
+        from: new Date(now - fromAgo).toISOString(),
+        to: new Date(now - toAgo).toISOString(),
+      });
+      return fetchJson<Report[]>(`/v0/reports?${params.toString()}`);
+    },
+    ...(isLiveSlice ? LIVE_SLICE_POLLING : OLDER_SLICE_POLLING),
+  };
+};
+
+/**
  * Fetch reports from the last `timeframeMs` (e.g. `HOUR_MS` for the map, `DAY_MS` for the
- * overview page). Each slice's cache key is stable (`['reports', fromAgo, toAgo]`) while its
- * actual `from`/`to` window is recomputed inside `queryFn` on every (30 s) refetch, so the
- * window rolls forward over time the same way the server's default endpoint did — without
- * churning the key. Longer timeframes are stitched from the cached last-hour slice plus the
+ * overview page). Longer timeframes are stitched from the cached last-hour slice plus the
  * older remainder (see `reportSlices`), so the recent hour is shared with the map.
  */
 export const useReports = (timeframeMs: number) =>
   useQueries({
-    queries: reportSlices(timeframeMs).map(([fromAgo, toAgo]) => {
-      // A slice ending at "now" (`toAgo === 0`) is the live last-hour window; anything ending
-      // in the past is the older 1 h–24 h remainder.
-      const isLiveSlice = toAgo === 0;
-      return {
-        queryKey: ['reports', fromAgo, toAgo],
-        queryFn: () => {
-          const now = Date.now();
-          const params = new URLSearchParams({
-            from: new Date(now - fromAgo).toISOString(),
-            to: new Date(now - toAgo).toISOString(),
-          });
-          return fetchJson<Report[]>(`/v0/reports?${params.toString()}`);
-        },
-        ...(isLiveSlice ? LIVE_SLICE_POLLING : OLDER_SLICE_POLLING),
-      };
-    }),
+    queries: reportSlices(timeframeMs).map(([fromAgo, toAgo]) =>
+      reportsSliceQueryOptions(fromAgo, toAgo),
+    ),
     combine: (results) => ({
       data: mergeReportSlices(results),
       isLoading: results.some((result) => result.isLoading),
