@@ -1,6 +1,6 @@
 import { useNavigate } from '@tanstack/react-router';
 import { Search, X } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { type PointerEvent as ReactPointerEvent, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { type Station, useStations } from '@/api/transit';
@@ -47,6 +47,13 @@ export function StationSearch() {
     inputRef.current?.blur();
   };
 
+  // The backdrop sits over the map while the search is open, so a tap on it already dismisses
+  // (via onClose). Also dismiss when the user starts panning (pointer move with a button/finger
+  // down) or zooming (wheel) the map underneath, so map gestures close the search too.
+  const dismissOnPan = (event: ReactPointerEvent) => {
+    if (event.buttons !== 0) dismiss();
+  };
+
   const selectStation = (station: Station) => {
     setQuery('');
     inputRef.current?.blur();
@@ -56,7 +63,13 @@ export function StationSearch() {
   return (
     <>
       {isActive && (
-        <Backdrop aria-label={t('clear')} onClose={dismiss} className="z-10 bg-transparent" />
+        <Backdrop
+          aria-label={t('clear')}
+          onClose={dismiss}
+          onPointerMove={dismissOnPan}
+          onWheel={dismiss}
+          className="z-10 bg-transparent"
+        />
       )}
       <div className="pointer-events-none fixed inset-x-0 top-0 z-30 px-3 py-3">
         <div className="pointer-events-auto mx-auto w-full sm:max-w-md">
