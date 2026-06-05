@@ -1,7 +1,8 @@
 import { useNavigate } from '@tanstack/react-router';
-import { ChevronRight, MapPin, Search } from 'lucide-react';
+import { ChevronRight, MapPin, Search, TriangleAlert } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 import { useSubmitReport } from '@/api/reports';
 import { type Station } from '@/api/transit';
@@ -11,13 +12,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { Separator } from '@/components/ui/separator';
+import { Toaster } from '@/components/ui/sonner';
+import { ToastPill } from '@/components/ui/toast-pill';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useGeolocation } from '@/contexts/Geolocation.context';
+import { distanceMeters } from '@/lib/geo';
 import { cn } from '@/lib/utils';
 
 import { NAMESPACE } from './ReportForm.i18n';
 import { type LineFilter, useReportSelection } from './ReportSelection.context';
 import { ReportSelectionProvider } from './ReportSelectionProvider';
+import { type ReportRejection, useReportVerification } from './useReportVerification';
 
 const FILTERS: LineFilter[] = ['all', 'subway', 'light_rail', 'tram'];
 
@@ -32,17 +37,10 @@ function normalize(value: string): string {
 
 const NEARBY_COUNT = 3;
 
-/** Haversine great-circle distance in metres. */
-function distanceMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371000;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(a));
-}
+const REJECTION_MESSAGE: Record<ReportRejection, string> = {
+  too_soon: 'errorTooSoon',
+  too_far: 'errorTooFar',
+};
 
 function ClearSelectionButton({ onClick, className }: { onClick: () => void; className?: string }) {
   const { t } = useTranslation(NAMESPACE);
@@ -271,13 +269,30 @@ function SubmitFooter() {
   const { t } = useTranslation(NAMESPACE);
   const { stationId, lineName, directionStationId } = useReportSelection();
   const submitReport = useSubmitReport();
+  const { verify, recordSubmission } = useReportVerification();
 
   const canSubmit = stationId !== null;
   const disabled = !canSubmit || submitReport.isPending;
 
   const handleSubmit = () => {
     if (!stationId) return;
-    submitReport.mutate({ stationId, lineName, directionStationId });
+    const rejection = verify(stationId);
+    if (rejection) {
+      toast.custom(
+        () => (
+          <ToastPill className="text-destructive flex w-fit items-center gap-2 text-sm font-medium">
+            <TriangleAlert className="size-4" />
+            {t(REJECTION_MESSAGE[rejection])}
+          </ToastPill>
+        ),
+        { id: 'report-verification', unstyled: true, icon: null },
+      );
+      return;
+    }
+    submitReport.mutate(
+      { stationId, lineName, directionStationId },
+      { onSuccess: recordSubmission },
+    );
   };
 
   return (
@@ -315,6 +330,8 @@ export function ReportForm() {
           <DirectionPicker />
           <SubmitFooter />
         </div>
+        {/* /report is outside the _map layout that hosts the app's Toaster, so mount one here. */}
+        <Toaster />
       </div>
     </ReportSelectionProvider>
   );

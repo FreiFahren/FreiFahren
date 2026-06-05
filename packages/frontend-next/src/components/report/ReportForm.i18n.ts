@@ -20,6 +20,8 @@ i18n.addResourceBundle('en', NAMESPACE, {
   direction: 'Direction',
   submit: 'Submit report',
   disclaimer: 'Shared anonymously with all Freifahren users.',
+  errorTooSoon: 'You reported very recently. Please wait a moment.',
+  errorTooFar: "You're not close enough to the station.",
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
@@ -40,4 +42,6 @@ i18n.addResourceBundle('de', NAMESPACE, {
   direction: 'Richtung',
   submit: 'Melden',
   disclaimer: 'Anonym an alle Freifahren-Nutzer geteilt.',
+  errorTooSoon: 'Du hast gerade erst gemeldet. Bitte warte einen Moment.',
+  errorTooFar: 'Du bist nicht nah genug an der Station.',
 });
