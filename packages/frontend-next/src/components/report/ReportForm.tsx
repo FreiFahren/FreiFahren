@@ -16,6 +16,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { ToastPill } from '@/components/ui/toast-pill';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useGeolocation } from '@/contexts/Geolocation.context';
+import { isContributeDismissed, openContributeModal } from '@/lib/contribute-modal';
 import { distanceMeters } from '@/lib/geo';
 import { cn } from '@/lib/utils';
 
@@ -327,12 +328,18 @@ export function ReportForm() {
   const navigate = useNavigate();
   const [result, setResult] = useState<SubmitReportResponse | null>(null);
 
+  const handleSuccessClose = () => {
+    navigate({ to: '/' });
+    // Invite a contribution after a successful report, unless the user opted out.
+    if (!isContributeDismissed()) openContributeModal();
+  };
+
   return (
     <ReportSelectionProvider>
       <div className="bg-card animate-in fade-in fixed inset-0 z-30 duration-150">
         <div className="mx-auto flex h-full w-full max-w-md flex-col">
           {result ? (
-            <ReportSuccess result={result} onClose={() => navigate({ to: '/' })} />
+            <ReportSuccess result={result} onClose={handleSuccessClose} />
           ) : (
             <>
               <PageHeader title={t('title')} onBack={() => navigate({ to: '/' })} />

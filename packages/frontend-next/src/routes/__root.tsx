@@ -1,5 +1,6 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router';
 
+import { ContributeCard } from '@/components/contribute/ContributeCard';
 import { LegalDisclaimer } from '@/components/LegalDisclaimer';
 import { GeolocationProvider } from '@/contexts/GeolocationProvider';
 
@@ -11,6 +12,7 @@ export const Route = createRootRoute({
     <GeolocationProvider>
       <Outlet />
       <LegalDisclaimer />
+      <ContributeCard />
     </GeolocationProvider>
   ),
 });

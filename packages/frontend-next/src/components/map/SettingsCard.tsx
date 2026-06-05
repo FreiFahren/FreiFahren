@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { Separator } from '@/components/ui/separator';
+import { openContributeModal } from '@/lib/contribute-modal';
 import { openLegalDisclaimer } from '@/lib/legal-disclaimer';
 import { Route as ContactRoute } from '@/routes/_map/settings/contact';
 import { Route as ImpressumRoute } from '@/routes/impressum';
@@ -66,9 +67,9 @@ export function SettingsCard({ onClose }: SettingsCardProps) {
       </div>
 
       <CardContent>
-        {/* Placeholder: the contribution flow is not ported yet, so this button is intentionally inert. */}
         <Button
           type="button"
+          onClick={openContributeModal}
           className="bg-accent-bright text-primary-foreground hover:bg-accent-press h-11 w-full gap-2"
         >
           <HeartHandshake />
