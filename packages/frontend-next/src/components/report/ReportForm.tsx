@@ -79,7 +79,7 @@ function LinePicker() {
               aria-pressed={isSelected}
               onClick={() => selectLine(isSelected ? null : line.name)}
               className={cn(
-                'rounded-sm outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-white/50',
+                'rounded-sm transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-white/50',
                 // No selection-ring: once a line is picked, the others dim so the choice stands out.
                 lineName && !isSelected && 'opacity-40',
               )}
