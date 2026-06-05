@@ -1,15 +1,18 @@
 import { useNavigate } from '@tanstack/react-router';
-import { ChevronRight, Search } from 'lucide-react';
+import { ChevronRight, MapPin, Search } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useSubmitReport } from '@/api/reports';
+import { type Station } from '@/api/transit';
 import { PageHeader } from '@/components/templates/PageHeader';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SectionHeading } from '@/components/ui/section-heading';
+import { Separator } from '@/components/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { useGeolocation } from '@/contexts/Geolocation.context';
 import { cn } from '@/lib/utils';
 
 import { NAMESPACE } from './ReportForm.i18n';
@@ -25,6 +28,20 @@ function normalize(value: string): string {
     .replace(/\p{Diacritic}/gu, '')
     .replace(/ß/g, 'ss')
     .toLowerCase();
+}
+
+const NEARBY_COUNT = 3;
+
+/** Haversine great-circle distance in metres. */
+function distanceMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371000;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
 }
 
 function ClearSelectionButton({ onClick, className }: { onClick: () => void; className?: string }) {
@@ -112,13 +129,46 @@ function LinePicker() {
 
 function StationPicker() {
   const { t } = useTranslation(NAMESPACE);
-  const { stationId, selectStation, visibleStations } = useReportSelection();
+  const { stationId, lineName, selectStation, visibleStations } = useReportSelection();
+  const { position } = useGeolocation();
   const [query, setQuery] = useState('');
 
-  const q = normalize(query.trim());
-  const filtered = q
-    ? visibleStations.filter((s) => normalize(s.name).includes(q))
+  const needle = normalize(query.trim());
+  const filtered = needle
+    ? visibleStations.filter((s) => normalize(s.name).includes(needle))
     : visibleStations;
+
+  // Closest stations, only while sharing location, not searching, and not browsing a line.
+  const nearby =
+    position && !needle && !lineName
+      ? visibleStations
+          .map((station) => ({
+            station,
+            distance: distanceMeters(
+              position.lat,
+              position.lng,
+              station.coordinates.latitude,
+              station.coordinates.longitude,
+            ),
+          }))
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, NEARBY_COUNT)
+          .map((n) => n.station)
+      : [];
+  const nearbyIds = new Set(nearby.map((s) => s.id));
+  const rest = filtered.filter((s) => !nearbyIds.has(s.id));
+
+  const renderStation = (station: Station) => (
+    <li key={station.id} className="border-border/60 border-b last:border-b-0">
+      <button
+        type="button"
+        onClick={() => selectStation(station.id)}
+        className="hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-3 py-2.5 text-left text-sm outline-none"
+      >
+        <span className="truncate">{station.name}</span>
+      </button>
+    </li>
+  );
 
   const clear = () => {
     selectStation(null);
@@ -150,24 +200,26 @@ function StationPicker() {
               autoComplete="off"
             />
           </div>
-          <ul className="min-h-0 flex-1 overflow-y-auto">
-            {filtered.map((station) => (
-              <li key={station.id} className="border-border/60 border-b last:border-b-0">
-                <button
-                  type="button"
-                  onClick={() => selectStation(station.id)}
-                  className="hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-3 py-2.5 text-left text-sm outline-none"
-                >
-                  {station.name}
-                </button>
-              </li>
-            ))}
-            {filtered.length === 0 && (
-              <li className="text-muted-foreground px-3 py-6 text-center text-sm">
-                {t('noMatch', { query })}
-              </li>
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            {nearby.length > 0 && (
+              <>
+                <div className="text-muted-foreground flex items-center gap-1.5 px-3 py-2 text-[0.625rem] font-semibold tracking-wide uppercase">
+                  <MapPin className="size-3.5" />
+                  {t('nearby')}
+                </div>
+                <ul>{nearby.map(renderStation)}</ul>
+                {rest.length > 0 && <Separator className="bg-border my-2 data-horizontal:h-0.5" />}
+              </>
             )}
-          </ul>
+            <ul>
+              {rest.map(renderStation)}
+              {needle && filtered.length === 0 && (
+                <li className="text-muted-foreground px-3 py-6 text-center text-sm">
+                  {t('noMatch', { query })}
+                </li>
+              )}
+            </ul>
+          </div>
         </>
       )}
     </section>
