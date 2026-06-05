@@ -66,6 +66,25 @@ function mergeReportSlices(
   return merged;
 }
 
+// The live last-hour slice (`toAgo === 0`) powers the map and recent-reports views, so it polls
+// every 30 s. The older `[DAY_MS, HOUR_MS]` remainder changes slowly: no interval polling, fresh
+// for an hour. Either way the shared last-hour slice keeps recent reports current without a full
+// 24 h refetch.
+const LIVE_SLICE_POLLING = {
+  refetchInterval: 30_000,
+  refetchIntervalInBackground: false,
+  refetchOnWindowFocus: true,
+  refetchOnReconnect: true,
+  staleTime: 30_000,
+} as const;
+
+const OLDER_SLICE_POLLING = {
+  refetchInterval: false,
+  refetchOnWindowFocus: true,
+  refetchOnReconnect: true,
+  staleTime: HOUR_MS,
+} as const;
+
 /**
  * Fetch reports from the last `timeframeMs` (e.g. `HOUR_MS` for the map, `DAY_MS` for the
  * overview page). Each slice's cache key is stable (`['reports', fromAgo, toAgo]`) while its
@@ -76,22 +95,23 @@ function mergeReportSlices(
  */
 export const useReports = (timeframeMs: number) =>
   useQueries({
-    queries: reportSlices(timeframeMs).map(([fromAgo, toAgo]) => ({
-      queryKey: ['reports', fromAgo, toAgo],
-      queryFn: () => {
-        const now = Date.now();
-        const params = new URLSearchParams({
-          from: new Date(now - fromAgo).toISOString(),
-          to: new Date(now - toAgo).toISOString(),
-        });
-        return fetchJson<Report[]>(`/v0/reports?${params.toString()}`);
-      },
-      refetchInterval: 30_000,
-      refetchIntervalInBackground: false,
-      refetchOnWindowFocus: true,
-      refetchOnReconnect: true,
-      staleTime: 30_000,
-    })),
+    queries: reportSlices(timeframeMs).map(([fromAgo, toAgo]) => {
+      // A slice ending at "now" (`toAgo === 0`) is the live last-hour window; anything ending
+      // in the past is the older 1 h–24 h remainder.
+      const isLiveSlice = toAgo === 0;
+      return {
+        queryKey: ['reports', fromAgo, toAgo],
+        queryFn: () => {
+          const now = Date.now();
+          const params = new URLSearchParams({
+            from: new Date(now - fromAgo).toISOString(),
+            to: new Date(now - toAgo).toISOString(),
+          });
+          return fetchJson<Report[]>(`/v0/reports?${params.toString()}`);
+        },
+        ...(isLiveSlice ? LIVE_SLICE_POLLING : OLDER_SLICE_POLLING),
+      };
+    }),
     combine: (results) => ({
       data: mergeReportSlices(results),
       isLoading: results.some((result) => result.isLoading),
