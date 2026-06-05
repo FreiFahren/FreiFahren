@@ -62,7 +62,7 @@ export function ContactCard({ onClose }: ContactCardProps) {
               className="bg-muted size-8 shrink-0 rounded-full object-cover"
             />
             <span className="text-sm font-medium">{member.name}</span>
-            <div className="ml-auto flex items-center gap-0.5">
+            <div className="ml-auto flex items-center gap-1">
               {member.channels.map((channel) => {
                 const Icon = CHANNEL_ICON[channel.type];
                 return (
@@ -70,7 +70,7 @@ export function ContactCard({ onClose }: ContactCardProps) {
                     key={channel.type}
                     asChild
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon-lg"
                     aria-label={`${member.name} – ${CHANNEL_LABEL[channel.type]}`}
                   >
                     <a href={channel.href} target="_blank" rel="noopener noreferrer">
