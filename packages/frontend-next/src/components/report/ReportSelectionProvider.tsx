@@ -96,13 +96,18 @@ export function ReportSelectionProvider({ children }: { children: ReactNode }) {
   else if (lineName) visibleStations = stationsAlongLine();
   else visibleStations = stationsByType();
 
+  // Circular lines (e.g. the Ringbahn) loop back on themselves, so picking a terminus as a
+  // "direction" is meaningless — leave directionOptions empty so the picker is skipped entirely.
+  const selectedLineIsCircular =
+    lineName !== null && (lines ?? []).some((l) => l.name === lineName && l.isCircular);
+
   // Direction picker exposes every endpoint reachable from the selected station along the
   // chosen line. If the station sits on a single variant we get the two termini of that variant;
   // if it sits on multiple variants (e.g. a branching trunk) we surface every endpoint across
   // those variants, deduplicated. The variant a chosen endpoint belongs to can be resolved at
   // submit time from (lineName, stationId, directionStationId).
   const directionOptions: Station[] = [];
-  if (lineName && selectedStation) {
+  if (lineName && selectedStation && !selectedLineIsCircular) {
     const seen = new Set<string>();
     for (const variant of lines ?? []) {
       if (variant.name !== lineName) continue;
