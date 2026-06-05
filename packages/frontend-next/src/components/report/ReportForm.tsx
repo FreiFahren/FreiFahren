@@ -1,11 +1,13 @@
 import { useNavigate } from '@tanstack/react-router';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Search } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useSubmitReport } from '@/api/reports';
 import { PageHeader } from '@/components/templates/PageHeader';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
@@ -15,6 +17,15 @@ import { type LineFilter, useReportSelection } from './ReportSelection.context';
 import { ReportSelectionProvider } from './ReportSelectionProvider';
 
 const FILTERS: LineFilter[] = ['all', 'subway', 'light_rail', 'tram'];
+
+/** Diacritic-insensitive match so "moritzplatz" finds "Möritzplatz" and "strasse" finds "Straße". */
+function normalize(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/ß/g, 'ss')
+    .toLowerCase();
+}
 
 function ClearSelectionButton({ onClick, className }: { onClick: () => void; className?: string }) {
   const { t } = useTranslation(NAMESPACE);
@@ -34,7 +45,26 @@ function ClearSelectionButton({ onClick, className }: { onClick: () => void; cla
 
 function LinePicker() {
   const { t } = useTranslation(NAMESPACE);
-  const { lineName, lineFilter, setLineFilter, selectLine, visibleLines } = useReportSelection();
+  const { lineName, lineFilter, setLineFilter, selectLine, visibleLines, stationId } =
+    useReportSelection();
+
+  const chips = visibleLines.map((line) => {
+    const isSelected = lineName === line.name;
+    return (
+      <button
+        key={line.name}
+        type="button"
+        aria-pressed={isSelected}
+        onClick={() => selectLine(isSelected ? null : line.name)}
+        className={cn(
+          'shrink-0 rounded-sm transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-white/50',
+          lineName && !isSelected && 'opacity-40',
+        )}
+      >
+        <LineBadge name={line.name} />
+      </button>
+    );
+  });
 
   return (
     <section className="px-4">
@@ -69,26 +99,13 @@ function LinePicker() {
         />
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {visibleLines.map((line) => {
-          const isSelected = lineName === line.name;
-          return (
-            <button
-              key={line.name}
-              type="button"
-              aria-pressed={isSelected}
-              onClick={() => selectLine(isSelected ? null : line.name)}
-              className={cn(
-                'rounded-sm transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-white/50',
-                // No selection-ring: once a line is picked, the others dim so the choice stands out.
-                lineName && !isSelected && 'opacity-40',
-              )}
-            >
-              <LineBadge name={line.name} />
-            </button>
-          );
-        })}
-      </div>
+      {stationId ? (
+        <div className="flex flex-wrap gap-2">{chips}</div>
+      ) : (
+        <div className="-mx-4 overflow-x-auto px-4 pb-1">
+          <div className="flex w-max gap-2">{chips}</div>
+        </div>
+      )}
     </section>
   );
 }
@@ -96,43 +113,63 @@ function LinePicker() {
 function StationPicker() {
   const { t } = useTranslation(NAMESPACE);
   const { stationId, selectStation, visibleStations } = useReportSelection();
+  const [query, setQuery] = useState('');
+
+  const q = normalize(query.trim());
+  const filtered = q
+    ? visibleStations.filter((s) => normalize(s.name).includes(q))
+    : visibleStations;
+
+  const clear = () => {
+    selectStation(null);
+    setQuery('');
+  };
 
   return (
-    <section
-      className={cn(
-        'mt-6 flex flex-col px-4',
-        // While the user is still browsing, the list fills the form and scrolls inside.
-        // Once a station is picked the list collapses to a single row so the direction
-        // picker (and the future submit button) stay visible.
-        !stationId && 'min-h-0 flex-1',
-      )}
-    >
+    <section className={cn('mt-6 flex flex-col px-4', !stationId && 'min-h-0 flex-1')}>
       <div className="mb-3 flex items-center justify-between">
         <SectionHeading hint={t('required')} hintTone="destructive">
           {t('station')}
         </SectionHeading>
-        {stationId && <ClearSelectionButton onClick={() => selectStation(null)} />}
+        {stationId && <ClearSelectionButton onClick={clear} />}
       </div>
-      <ul className={cn(!stationId && 'min-h-0 flex-1 overflow-y-auto')}>
-        {visibleStations.map((station) => {
-          const isSelected = stationId === station.id;
-          return (
-            <li key={station.id} className="border-border/60 border-b last:border-b-0">
-              <button
-                type="button"
-                aria-pressed={isSelected}
-                onClick={() => selectStation(isSelected ? null : station.id)}
-                className={cn(
-                  'hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-3 py-2.5 text-left text-sm outline-none',
-                  isSelected && 'bg-muted font-medium',
-                )}
-              >
-                {station.name}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+
+      {stationId ? (
+        <div className="bg-muted flex items-center rounded-md px-3 py-2.5 text-sm font-medium">
+          {visibleStations[0]?.name}
+        </div>
+      ) : (
+        <>
+          <div className="relative mb-2">
+            <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t('searchStation')}
+              className="h-10 pl-9 text-base"
+              autoComplete="off"
+            />
+          </div>
+          <ul className="min-h-0 flex-1 overflow-y-auto">
+            {filtered.map((station) => (
+              <li key={station.id} className="border-border/60 border-b last:border-b-0">
+                <button
+                  type="button"
+                  onClick={() => selectStation(station.id)}
+                  className="hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-3 py-2.5 text-left text-sm outline-none"
+                >
+                  {station.name}
+                </button>
+              </li>
+            ))}
+            {filtered.length === 0 && (
+              <li className="text-muted-foreground px-3 py-6 text-center text-sm">
+                {t('noMatch', { query })}
+              </li>
+            )}
+          </ul>
+        </>
+      )}
     </section>
   );
 }
