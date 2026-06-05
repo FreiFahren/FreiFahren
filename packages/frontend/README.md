@@ -27,7 +27,7 @@ This repository contains the frontend code for the FreiFahren web application. T
 3. Set up enviromental variables
 
     ```sh
-    VITE_API_URL=http://localhost:8080
+    VITE_API_URL=http://localhost:3000
     VITE_MAP_STYLE_URL=https://tiles.freifahren.org/style/freifahren-dark
 
     # Map view. Default values are the Berlin view.

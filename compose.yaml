@@ -14,64 +14,17 @@ services:
     networks:
       - backend-network
 
-  backend:
-    build:
-      context: ./packages/backend
-      dockerfile: Dockerfile.backend
-    container_name: backend
-    env_file:
-      - ./packages/backend/.env
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-      - content_moderation_service
-    restart: unless-stopped
-    networks:
-      - backend-network
-    # UNCOMMENT the lines below to use host.docker.internal
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-
-  nlp_service:
-    build:
-      context: ./packages/
-      dockerfile: nlp_service/Dockerfile.nlp_service
-    container_name: nlp_service
-    env_file:
-      - ./packages/nlp_service/.env
-    ports:
-      - "6000:6000"
-    depends_on:
-      - backend
-    restart: unless-stopped
-    networks:
-      - backend-network
-    platform: linux/amd64  # Force x86 architecture
-
-  content_moderation_service:
-    build:
-      context: ./packages/hate_speech_filter
-      dockerfile: Dockerfile.hatespeechfilter
-    container_name: content_moderation_service
-    ports:
-      - "9090:9090"
-    networks:
-      - backend-network
-
   frontend:
     build:
       context: ./packages/frontend
       dockerfile: Dockerfile.frontend
       args:
-        VITE_API_URL: http://localhost:8080
+        VITE_API_URL: http://localhost:3000
         VITE_STRIPE_BUY_BUTTON_ID: ${VITE_STRIPE_BUY_BUTTON_ID:-}
         VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY:-}
     container_name: frontend
     ports:
-      - "3000:3000"
-    depends_on:
-      - backend
+      - "8080:8080"
     restart: unless-stopped
     networks:
       - backend-network

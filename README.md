@@ -1,29 +1,36 @@
-# FreiFahren
+<div align="center">
+  <img src="packages/frontend/public/logo-with-text.png" alt="FreiFahren" width="480" />
 
-## Overview
+  <p>Die Blitzer-App für Öffis. Die Live-Karte der Ticketkontrolleure im Berliner Nahverkehr</p>
 
-Freifahren is an innovative project designed to map the presence of ticket inspectors across the Berlin public transport network. By offering a live map that tracks inspectors in real-time, the initiative seeks to inform and empower users to navigate the city with added confidence. The project leverages community-driven data from the [Freifahren Telegram group](https://t.me/freifahren_BE), where users report sightings of ticket inspectors.
+  [![Telegram](https://img.shields.io/badge/Telegram-Community-26A5E4?logo=telegram&logoColor=white)](https://t.me/freifahren_BE)
+  [![License](https://img.shields.io/github/license/brandesdavid/FreiFahren)](LICENSE)
+  [![Frontend CI](https://github.com/brandesdavid/FreiFahren/actions/workflows/frontend-next-ci.yml/badge.svg)](https://github.com/brandesdavid/FreiFahren/actions/workflows/frontend-next-ci.yml)
+  [![Backend CI](https://github.com/brandesdavid/FreiFahren/actions/workflows/run-backend-ci.yml/badge.svg)](https://github.com/brandesdavid/FreiFahren/actions/workflows/run-backend-ci.yml)
+</div>
 
-If you have any questions, or feedback, feel free to reach out to us at johan@trieloff.net or dbrandesx@gmail.com.
+---
 
-<img width="381" alt="Bildschirmfoto 2024-06-19 um 19 45 15" src="https://github.com/brandesdavid/FreiFahren/assets/30388999/4703d289-a94e-4a90-9659-43d9122c56cc">
-<img width="381" alt="Bildschirmfoto 2024-06-19 um 19 45 42" src="https://github.com/brandesdavid/FreiFahren/assets/30388999/a2bdba30-fbb5-494e-851d-0685d3a8ac95">
+## What is FreiFahren?
+
+FreiFahren crowdsources real-time sightings of ticket inspectors across the Berlin public transport network. Reports flow in from the in-app form or the [Freifahren Telegram group](https://t.me/freifahren_BE); The community keeps the map accurate.
+
+<div align="center">
+  <img src="docs/readme_assets/screenshot1.png" alt="FreiFahren map with reports" width="240" />
+  &nbsp;&nbsp;
+  <img src="docs/readme_assets/screenshot2.png" alt="FreiFahren map overview" width="240" />
+</div>
+
+---
 
 ## How it works
 
-FreiFahren operates by leveraging real-time, community-driven data to track the presence of ticket inspectors across the Berlin public transport network. Here's a step-by-step breakdown of how it works:
+1. **Report**: community members spot a ticket inspector and submit the station, line and direction via the web app or the [Telegram group](https://t.me/freifahren_BE)
+2. **Process**: the backend validates the report and writes it to the database
+3. **Display**: the live map updates in real-time so everyone can see where inspectors are right now
 
-1. **Data Collection:** Our primary data source is the [FreiFahren Telegram group](https://t.me/freifahren_BE) and our own form. Here, community members report sightings of ticket inspectors. Each report includes the station and time of the sighting.
+## Contact
 
-2. **Data Processing:** Once a report is submitted, our backend system processes the data. It verifies the report, extracts the necessary information, and updates our database.
+Questions or feedback? Reach us at [contact@freifahren.org](mailto:contact@freifahren.org).
 
-3. **Real-Time Updates:** The processed data is then pushed to our live map in real-time. This ensures that users always have the most up-to-date information about the presence of ticket inspectors.
-
-4. **User Interface:** Users can access the live map through our web application. The map displays the current locations of ticket inspectors, allowing users to plan their journeys accordingly.
-
-5. **Community Engagement:** Users are encouraged to contribute to the community by reporting their own sightings of ticket inspectors. This helps keep the map accurate and up-to-date.
-
-By harnessing the power of community reporting and real-time data processing, FreiFahren provides a valuable tool for navigating the Berlin public transport network with confidence.
-
-# Getting Started / Hosting your own FreiFahren  
-Do you want to host your own FreiFahren? Take a look at the [detailed setup instructions](packages/SETTING_UP.md).
+Or personally via [johan@freifahren.org](mailto:johan@freifahren.org), [moritz@freifahren.org](mailto:moritz@freifahren.org) or [david@freifahren.org](mailto:david@freifahren.org).
