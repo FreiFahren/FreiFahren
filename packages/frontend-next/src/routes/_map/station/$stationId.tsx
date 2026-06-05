@@ -4,7 +4,7 @@ import { fetchStations } from '@/api/transit';
 import { queryClient } from '@/api/queryClient';
 import { StationDetail } from '@/components/map/StationDetail';
 
-export const Route = createFileRoute('/_map/stations/$stationId')({
+export const Route = createFileRoute('/_map/station/$stationId')({
   staticData: { legalDisclaimer: true },
   loader: async ({ params }) => {
     const stations = await queryClient.ensureQueryData({
