@@ -78,9 +78,13 @@ function LinePicker() {
               type="button"
               aria-pressed={isSelected}
               onClick={() => selectLine(isSelected ? null : line.name)}
-              className="rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+              className={cn(
+                'rounded-sm outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-white/50',
+                // No selection-ring: once a line is picked, the others dim so the choice stands out.
+                lineName && !isSelected && 'opacity-40',
+              )}
             >
-              <LineBadge name={line.name} className={cn(isSelected && 'ring-2 ring-white')} />
+              <LineBadge name={line.name} />
             </button>
           );
         })}
@@ -120,7 +124,7 @@ function StationPicker() {
                 onClick={() => selectStation(isSelected ? null : station.id)}
                 className={cn(
                   'hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-3 py-2.5 text-left text-sm outline-none',
-                  isSelected && 'ring-2 ring-white ring-inset',
+                  isSelected && 'bg-muted font-medium',
                 )}
               >
                 {station.name}
@@ -160,7 +164,7 @@ function DirectionPicker() {
                 onClick={() => selectDirection(isSelected ? null : station.id)}
                 className={cn(
                   'hover:bg-muted focus-visible:bg-muted flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm outline-none',
-                  isSelected && 'ring-2 ring-white ring-inset',
+                  isSelected && 'bg-muted font-medium',
                 )}
               >
                 <ChevronRight className="text-muted-foreground size-5 shrink-0" />

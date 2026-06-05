@@ -60,7 +60,7 @@ export function StationSearch() {
       )}
       <div className="pointer-events-none fixed inset-x-0 top-0 z-20 flex justify-center py-3 pr-16 pl-3">
         <div className="pointer-events-auto w-full max-w-md">
-          <div className="bg-card text-card-foreground ring-foreground/10 flex h-11 items-center gap-1.5 rounded-lg pr-1 pl-3 ring-1">
+          <div className="bg-card text-card-foreground flex h-11 items-center gap-1.5 rounded-lg pr-1 pl-3">
             <Search className="text-muted-foreground size-4 shrink-0" />
             <Input
               ref={inputRef}
