@@ -9,7 +9,6 @@ import { handleError } from './common/error-handler'
 import { logger } from './common/logger'
 import { registerVersionedRoutes } from './common/router'
 import { db, DbConnection } from './db'
-import { postFeedback } from './modules/feedback/feedback-routes'
 import { getReports, getReportsByStation, postReport, ReportsService } from './modules/reports/'
 import { getRisk } from './modules/risk/risk-routes'
 import { RiskService } from './modules/risk/risk-service'
@@ -82,9 +81,6 @@ export const createApp = (dbConnection: DbConnection = db) => {
     })
     registerVersionedRoutes(app, 'transit', 'v0', {
         v0: [getStations, getLines, getSegments, getDistance],
-    })
-    registerVersionedRoutes(app, 'feedback', 'v0', {
-        v0: [postFeedback],
     })
     registerVersionedRoutes(app, 'risk', 'v0', {
         v0: [getRisk],

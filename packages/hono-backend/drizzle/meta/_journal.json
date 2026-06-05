@@ -29,6 +29,13 @@
             "when": 1779836218642,
             "tag": "0003_add_lines_color",
             "breakpoints": true
+        },
+        {
+            "idx": 4,
+            "version": "7",
+            "when": 1780694649193,
+            "tag": "0004_drop_feedback_table",
+            "breakpoints": true
         }
     ]
 }
