@@ -9,7 +9,7 @@ import { Backdrop } from '@/components/ui/backdrop';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Route as StationDetailRoute } from '@/routes/_map/stations/$stationId';
+import { Route as StationDetailRoute } from '@/routes/_map/station/$stationId';
 
 import { NAMESPACE } from './StationSearch.i18n';
 

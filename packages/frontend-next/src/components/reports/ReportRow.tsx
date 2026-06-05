@@ -6,7 +6,7 @@ import { formatElapsed, type Report } from '@/api/reports';
 import { useLines, useStations } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Route as ReportDetailRoute } from '@/routes/_map/reports/$stationId';
-import { Route as StationRoute } from '@/routes/_map/stations/$stationId';
+import { Route as StationRoute } from '@/routes/_map/station/$stationId';
 
 import { NAMESPACE } from './Reports.i18n';
 

@@ -3,7 +3,7 @@ import type { MapLayerMouseEvent } from 'react-map-gl/maplibre';
 
 import { HOUR_MS, useReports } from '@/api/reports';
 import { type Station, useStations } from '@/api/transit';
-import { Route as StationDetailRoute } from '@/routes/_map/stations/$stationId';
+import { Route as StationDetailRoute } from '@/routes/_map/station/$stationId';
 
 type UseStationSelectionResult = {
   selectedStation: Station | undefined;
