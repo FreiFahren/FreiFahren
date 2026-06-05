@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { useSubmitReport } from '@/api/reports';
+import { type SubmitReportResponse, useSubmitReport } from '@/api/reports';
 import { type Station } from '@/api/transit';
 import { PageHeader } from '@/components/templates/PageHeader';
 import { LineBadge } from '@/components/transit/LineBadge';
@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils';
 import { NAMESPACE } from './ReportForm.i18n';
 import { type LineFilter, useReportSelection } from './ReportSelection.context';
 import { ReportSelectionProvider } from './ReportSelectionProvider';
+import { ReportSuccess } from './ReportSuccess';
 import { type ReportRejection, useReportVerification } from './useReportVerification';
 
 const FILTERS: LineFilter[] = ['all', 'subway', 'light_rail', 'tram'];
@@ -265,7 +266,7 @@ function DirectionPicker() {
   );
 }
 
-function SubmitFooter() {
+function SubmitFooter({ onSubmitted }: { onSubmitted: (result: SubmitReportResponse) => void }) {
   const { t } = useTranslation(NAMESPACE);
   const { stationId, lineName, directionStationId } = useReportSelection();
   const submitReport = useSubmitReport();
@@ -291,7 +292,12 @@ function SubmitFooter() {
     }
     submitReport.mutate(
       { stationId, lineName, directionStationId },
-      { onSuccess: recordSubmission },
+      {
+        onSuccess: (result) => {
+          recordSubmission();
+          onSubmitted(result);
+        },
+      },
     );
   };
 
@@ -319,16 +325,23 @@ function SubmitFooter() {
 export function ReportForm() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
+  const [result, setResult] = useState<SubmitReportResponse | null>(null);
 
   return (
     <ReportSelectionProvider>
       <div className="bg-card animate-in fade-in fixed inset-0 z-30 duration-150">
         <div className="mx-auto flex h-full w-full max-w-md flex-col">
-          <PageHeader title={t('title')} onBack={() => navigate({ to: '/' })} />
-          <LinePicker />
-          <StationPicker />
-          <DirectionPicker />
-          <SubmitFooter />
+          {result ? (
+            <ReportSuccess result={result} onClose={() => navigate({ to: '/' })} />
+          ) : (
+            <>
+              <PageHeader title={t('title')} onBack={() => navigate({ to: '/' })} />
+              <LinePicker />
+              <StationPicker />
+              <DirectionPicker />
+              <SubmitFooter onSubmitted={setResult} />
+            </>
+          )}
         </div>
         {/* /report is outside the _map layout that hosts the app's Toaster, so mount one here. */}
         <Toaster />

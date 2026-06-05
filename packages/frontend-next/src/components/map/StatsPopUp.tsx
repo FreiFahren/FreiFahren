@@ -5,18 +5,13 @@ import { toast } from 'sonner';
 
 import { DAY_MS, useReports } from '@/api/reports';
 import { ToastPill } from '@/components/ui/toast-pill';
+import { pickReporterCount } from '@/lib/reporters';
 import { Route as ReportsSummaryRoute } from '@/routes/reports/index';
 
 import { NAMESPACE } from './StatsPopUp.i18n';
 
 const DURATION_MS = 7_000;
 const REPORTERS_AT = 3_500;
-
-// Fabricated social-proof count — the app has no real user metric.
-const MIN_REPORTERS = 50_000;
-const MAX_REPORTERS = 60_000;
-const pickReporterCount = () =>
-  Math.floor(Math.random() * (MAX_REPORTERS - MIN_REPORTERS + 1)) + MIN_REPORTERS;
 
 export function StatsPopUp() {
   const { data: reports, isLoading } = useReports(DAY_MS);
