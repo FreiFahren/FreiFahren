@@ -11,6 +11,8 @@ i18n.addResourceBundle('en', NAMESPACE, {
   hoursAgo_other: '{{count}} hours ago',
   times: 'times',
   thisWeek: 'this week',
+  oneStationAway: 'one station away',
+  stationsAway: '{{count}} stations away',
   inviteText: 'Data may be inaccurate.',
   syncText: 'Reports synced with {{group}}',
 });
@@ -24,6 +26,8 @@ i18n.addResourceBundle('de', NAMESPACE, {
   hoursAgo_other: 'vor {{count}} Stunden',
   times: 'mal',
   thisWeek: 'diese Woche',
+  oneStationAway: 'eine Station entfernt',
+  stationsAway: '{{count}} Stationen entfernt',
   inviteText: 'Daten vielleicht ungenau.',
   syncText: 'Meldungen mit {{group}} synchronisiert',
 });

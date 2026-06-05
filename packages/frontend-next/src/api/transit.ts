@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { Feature, FeatureCollection, LineString, Point } from 'geojson';
 
+import { distanceMeters } from '@/lib/geo';
 import { requireEnv } from '@/lib/utils';
 
 const API_URL = requireEnv('VITE_API_URL');
@@ -122,3 +123,43 @@ export const useSegments = () =>
     queryKey: ['transit', 'segments'],
     queryFn: () => fetchJson<Segments>('/v0/transit/segments'),
   });
+
+function closestStationId(
+  stations: Stations,
+  position: { lat: number; lng: number },
+): string | null {
+  let bestId: string | null = null;
+  let bestDistance = Infinity;
+  for (const station of Object.values(stations)) {
+    const d = distanceMeters(
+      position.lat,
+      position.lng,
+      station.coordinates.latitude,
+      station.coordinates.longitude,
+    );
+    if (d < bestDistance) {
+      bestDistance = d;
+      bestId = station.id;
+    }
+  }
+  return bestId;
+}
+
+export const useStationDistance = (
+  toStationId: string,
+  position: { lat: number; lng: number } | null,
+) => {
+  const { data: stations } = useStations();
+  const fromStationId = position && stations ? closestStationId(stations, position) : null;
+
+  return useQuery({
+    queryKey: ['transit', 'distance', fromStationId, toStationId],
+    queryFn: () => {
+      const params = new URLSearchParams({ from: fromStationId!, to: toStationId });
+      return fetchJson<{ distance: number }>(`/v0/transit/distance?${params.toString()}`).then(
+        (data) => data.distance,
+      );
+    },
+    enabled: fromStationId !== null && toStationId.length > 0,
+  });
+};
