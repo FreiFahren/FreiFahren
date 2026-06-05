@@ -43,14 +43,6 @@ export function PrivacyPolicy() {
         <p>{t('sections.dataUsage.reportPurpose')}</p>
         <p>{t('sections.dataUsage.ipAddressInfo')}</p>
 
-        <h3>{t('sections.dataUsage.feedbackFormTitle')}</h3>
-        <ul>
-          {toArray('sections.dataUsage.feedbackDataPoints').map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-        <p>{t('sections.dataUsage.feedbackPurpose')}</p>
-
         <h3>{t('sections.dataUsage.paymentFormTitle')}</h3>
         <ul>
           {toArray('sections.dataUsage.paymentDataPoints').map((item) => (

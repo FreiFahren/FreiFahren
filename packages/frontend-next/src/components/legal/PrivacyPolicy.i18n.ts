@@ -39,10 +39,6 @@ i18n.addResourceBundle('en', NAMESPACE, {
         'The reported data is temporarily made available to other users of the App to provide them with information about the current situation in public transport. Additionally, the reports are forwarded to the Freifahren_BE Telegram group. This data transmission serves the purpose of sharing and informing the community about incidents. For information regarding the transfer to Telegram, please refer to Section 11; for information on international data transfers, please refer to Section 14.',
       ipAddressInfo:
         'FreiFahren itself does not store IP addresses. To protect against spam and abuse, Cloudflare as an upstream infrastructure provider processes IP addresses briefly. In doing so, Cloudflare acts predominantly as a processor pursuant to Art. 28 GDPR on our instruction (see Section 15); for the prevention of attacks and abuse (security telemetry), Cloudflare additionally acts as an independent controller. This processing is based on legitimate interests pursuant to Art. 6(1)(f) GDPR (ensuring the security and functionality of the service). For information regarding the associated transfer to a third country, please refer to Section 14.',
-      feedbackFormTitle: 'When submitting feedback:',
-      feedbackDataPoints: ['Feedback text', 'User agent', 'Submission timestamp'],
-      feedbackPurpose:
-        'The feedback is used exclusively for improving the App and is not shared with third parties or in the Telegram group. The user agent is collected to reproduce and fix reported issues.',
       paymentFormTitle: 'When making a voluntary contribution via Stripe:',
       paymentDataPoints: [
         'Name (if provided)',
@@ -90,7 +86,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
     consent: {
       title: '8. Consent to the Privacy Policy',
       content:
-        'When submitting feedback, users confirm their consent to this Privacy Policy via a checkbox. No separate consent is required for general use of the App or for submitting reports. No separate consent is required for voluntary contributions via Stripe either; the transaction data is processed in order to handle the contribution (Art. 6(1)(b) GDPR).',
+        'No separate consent is required for general use of the App or for submitting reports. No separate consent is required for voluntary contributions via Stripe either; the transaction data is processed in order to handle the contribution (Art. 6(1)(b) GDPR).',
     },
     dataProtectionOfficer: {
       title: '9. Data Protection Contact',
@@ -187,10 +183,6 @@ i18n.addResourceBundle('de', NAMESPACE, {
         'Die gemeldeten Daten werden anderen Nutzern der App temporär zur Verfügung gestellt, um ihnen die Möglichkeit zu geben, sich über die aktuelle Situation in den öffentlichen Verkehrsmitteln zu informieren. Des Weiteren werden die Meldungen in die Freifahren_BE Telegram-Gruppe weitergeleitet. Diese Datenübermittlung dient dem Austausch und der Information über Vorfälle innerhalb der Community. Hinweise zur Übermittlung an Telegram finden Sie in Abschnitt 11 sowie zu internationalen Datenübermittlungen in Abschnitt 14.',
       ipAddressInfo:
         'FreiFahren selbst speichert keine IP-Adressen. Zur Abwehr von Spam und Missbrauch verarbeitet Cloudflare als vorgelagerter Infrastruktur-Dienstleister IP-Adressen kurzfristig. Cloudflare wird dabei überwiegend als Auftragsverarbeiter nach Art. 28 DSGVO auf unsere Weisung tätig (siehe Abschnitt 15); für die Abwehr von Angriffen und Missbrauch (Sicherheitstelemetrie) handelt Cloudflare zudem als eigenständig Verantwortlicher. Diese Verarbeitung erfolgt auf Grundlage berechtigter Interessen gemäß Art. 6 Abs. 1 lit. f DSGVO (Sicherstellung der Sicherheit und Funktionsfähigkeit des Dienstes). Hinweise zum damit verbundenen Drittlandtransfer finden Sie in Abschnitt 14.',
-      feedbackFormTitle: 'Bei der Übermittlung von Feedback:',
-      feedbackDataPoints: ['Feedback-Text', 'User-Agent', 'Zeitpunkt der Übermittlung'],
-      feedbackPurpose:
-        'Das Feedback wird ausschließlich zur Verbesserung der App verwendet und nicht an Dritte weitergegeben oder in der Telegram-Gruppe geteilt. Der User-Agent wird erhoben, um gemeldete Probleme nachvollziehen und beheben zu können.',
       paymentFormTitle: 'Bei einer freiwilligen Beitragszahlung über Stripe:',
       paymentDataPoints: [
         'Name (sofern angegeben)',
@@ -238,7 +230,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
     consent: {
       title: '8. Einwilligung zur Datenschutzerklärung',
       content:
-        'Beim Absenden von Feedback bestätigen Nutzer über eine Checkbox ihre Einwilligung in diese Datenschutzerklärung. Für die übrige Nutzung der App sowie für das Absenden von Meldungen ist keine gesonderte Einwilligung erforderlich. Auch für die freiwillige Beitragszahlung über Stripe ist keine gesonderte Einwilligung erforderlich; die Verarbeitung der Transaktionsdaten erfolgt zur Abwicklung des Beitrags (Art. 6 Abs. 1 lit. b DSGVO).',
+        'Für die Nutzung der App sowie für das Absenden von Meldungen ist keine gesonderte Einwilligung erforderlich. Auch für die freiwillige Beitragszahlung über Stripe ist keine gesonderte Einwilligung erforderlich; die Verarbeitung der Transaktionsdaten erfolgt zur Abwicklung des Beitrags (Art. 6 Abs. 1 lit. b DSGVO).',
     },
     dataProtectionOfficer: {
       title: '9. Datenschutzkontakt',
