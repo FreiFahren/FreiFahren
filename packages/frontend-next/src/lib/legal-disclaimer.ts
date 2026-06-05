@@ -23,7 +23,14 @@ function isWithinWindow(now: number): boolean {
 }
 
 let accepted = isWithinWindow(Date.now());
+// On-demand "review" state: the disclaimer doubles as the Terms of Use, openable from a link
+// even after acceptance. Independent of the route-driven consent gate.
+let reviewOpen = false;
 const listeners = new Set<() => void>();
+
+function notify(): void {
+  for (const listener of listeners) listener();
+}
 
 function acceptDisclaimer(): void {
   try {
@@ -32,7 +39,7 @@ function acceptDisclaimer(): void {
     // Ignore storage failures; the session-level state below still suppresses the gate.
   }
   accepted = true;
-  for (const listener of listeners) listener();
+  notify();
 }
 
 function subscribe(listener: () => void): () => void {
@@ -40,7 +47,21 @@ function subscribe(listener: () => void): () => void {
   return () => listeners.delete(listener);
 }
 
+export function openLegalDisclaimer(): void {
+  reviewOpen = true;
+  notify();
+}
+
+export function closeLegalDisclaimer(): void {
+  reviewOpen = false;
+  notify();
+}
+
 export function useLegalDisclaimer(): { accepted: boolean; accept: () => void } {
   const value = useSyncExternalStore(subscribe, () => accepted);
   return { accepted: value, accept: acceptDisclaimer };
+}
+
+export function useLegalDisclaimerReview(): boolean {
+  return useSyncExternalStore(subscribe, () => reviewOpen);
 }

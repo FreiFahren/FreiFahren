@@ -3,7 +3,7 @@ import { Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
-import { Route as SettingsRoute } from '@/routes/_map/settings';
+import { Route as SettingsRoute } from '@/routes/_map/settings/index';
 
 import { NAMESPACE } from './SettingsButton.i18n';
 

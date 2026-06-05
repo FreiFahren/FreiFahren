@@ -12,13 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ImpressumRouteImport } from './routes/impressum'
 import { Route as MapRouteImport } from './routes/_map'
 import { Route as ReportsIndexRouteImport } from './routes/reports/index'
 import { Route as MapIndexRouteImport } from './routes/_map/index'
 import { Route as ReportsStationsRouteImport } from './routes/reports/stations'
 import { Route as ReportsLinesRouteImport } from './routes/reports/lines'
-import { Route as MapSettingsRouteImport } from './routes/_map/settings'
+import { Route as MapSettingsIndexRouteImport } from './routes/_map/settings/index'
 import { Route as MapStationsStationIdRouteImport } from './routes/_map/stations/$stationId'
+import { Route as MapSettingsContactRouteImport } from './routes/_map/settings/contact'
 import { Route as MapReportsStationIdRouteImport } from './routes/_map/reports/$stationId'
 
 const ReportsRoute = ReportsRouteImport.update({
@@ -34,6 +36,11 @@ const ReportRoute = ReportRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImpressumRoute = ImpressumRouteImport.update({
+  id: '/impressum',
+  path: '/impressum',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MapRoute = MapRouteImport.update({
@@ -60,14 +67,19 @@ const ReportsLinesRoute = ReportsLinesRouteImport.update({
   path: '/lines',
   getParentRoute: () => ReportsRoute,
 } as any)
-const MapSettingsRoute = MapSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const MapSettingsIndexRoute = MapSettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
   getParentRoute: () => MapRoute,
 } as any)
 const MapStationsStationIdRoute = MapStationsStationIdRouteImport.update({
   id: '/stations/$stationId',
   path: '/stations/$stationId',
+  getParentRoute: () => MapRoute,
+} as any)
+const MapSettingsContactRoute = MapSettingsContactRouteImport.update({
+  id: '/settings/contact',
+  path: '/settings/contact',
   getParentRoute: () => MapRoute,
 } as any)
 const MapReportsStationIdRoute = MapReportsStationIdRouteImport.update({
@@ -78,82 +90,95 @@ const MapReportsStationIdRoute = MapReportsStationIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof MapIndexRoute
+  '/impressum': typeof ImpressumRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reports': typeof ReportsRouteWithChildren
-  '/settings': typeof MapSettingsRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/reports/': typeof ReportsIndexRoute
   '/reports/$stationId': typeof MapReportsStationIdRoute
+  '/settings/contact': typeof MapSettingsContactRoute
   '/stations/$stationId': typeof MapStationsStationIdRoute
+  '/settings/': typeof MapSettingsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/impressum': typeof ImpressumRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
-  '/settings': typeof MapSettingsRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/': typeof MapIndexRoute
   '/reports': typeof ReportsIndexRoute
   '/reports/$stationId': typeof MapReportsStationIdRoute
+  '/settings/contact': typeof MapSettingsContactRoute
   '/stations/$stationId': typeof MapStationsStationIdRoute
+  '/settings': typeof MapSettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_map': typeof MapRouteWithChildren
+  '/impressum': typeof ImpressumRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reports': typeof ReportsRouteWithChildren
-  '/_map/settings': typeof MapSettingsRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/_map/': typeof MapIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/_map/reports/$stationId': typeof MapReportsStationIdRoute
+  '/_map/settings/contact': typeof MapSettingsContactRoute
   '/_map/stations/$stationId': typeof MapStationsStationIdRoute
+  '/_map/settings/': typeof MapSettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/impressum'
     | '/privacy'
     | '/report'
     | '/reports'
-    | '/settings'
     | '/reports/lines'
     | '/reports/stations'
     | '/reports/'
     | '/reports/$stationId'
+    | '/settings/contact'
     | '/stations/$stationId'
+    | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/impressum'
     | '/privacy'
     | '/report'
-    | '/settings'
     | '/reports/lines'
     | '/reports/stations'
     | '/'
     | '/reports'
     | '/reports/$stationId'
+    | '/settings/contact'
     | '/stations/$stationId'
+    | '/settings'
   id:
     | '__root__'
     | '/_map'
+    | '/impressum'
     | '/privacy'
     | '/report'
     | '/reports'
-    | '/_map/settings'
     | '/reports/lines'
     | '/reports/stations'
     | '/_map/'
     | '/reports/'
     | '/_map/reports/$stationId'
+    | '/_map/settings/contact'
     | '/_map/stations/$stationId'
+    | '/_map/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   MapRoute: typeof MapRouteWithChildren
+  ImpressumRoute: typeof ImpressumRoute
   PrivacyRoute: typeof PrivacyRoute
   ReportRoute: typeof ReportRoute
   ReportsRoute: typeof ReportsRouteWithChildren
@@ -180,6 +205,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/impressum': {
+      id: '/impressum'
+      path: '/impressum'
+      fullPath: '/impressum'
+      preLoaderRoute: typeof ImpressumRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_map': {
@@ -217,11 +249,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsLinesRouteImport
       parentRoute: typeof ReportsRoute
     }
-    '/_map/settings': {
-      id: '/_map/settings'
+    '/_map/settings/': {
+      id: '/_map/settings/'
       path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof MapSettingsRouteImport
+      fullPath: '/settings/'
+      preLoaderRoute: typeof MapSettingsIndexRouteImport
       parentRoute: typeof MapRoute
     }
     '/_map/stations/$stationId': {
@@ -229,6 +261,13 @@ declare module '@tanstack/react-router' {
       path: '/stations/$stationId'
       fullPath: '/stations/$stationId'
       preLoaderRoute: typeof MapStationsStationIdRouteImport
+      parentRoute: typeof MapRoute
+    }
+    '/_map/settings/contact': {
+      id: '/_map/settings/contact'
+      path: '/settings/contact'
+      fullPath: '/settings/contact'
+      preLoaderRoute: typeof MapSettingsContactRouteImport
       parentRoute: typeof MapRoute
     }
     '/_map/reports/$stationId': {
@@ -242,17 +281,19 @@ declare module '@tanstack/react-router' {
 }
 
 interface MapRouteChildren {
-  MapSettingsRoute: typeof MapSettingsRoute
   MapIndexRoute: typeof MapIndexRoute
   MapReportsStationIdRoute: typeof MapReportsStationIdRoute
+  MapSettingsContactRoute: typeof MapSettingsContactRoute
   MapStationsStationIdRoute: typeof MapStationsStationIdRoute
+  MapSettingsIndexRoute: typeof MapSettingsIndexRoute
 }
 
 const MapRouteChildren: MapRouteChildren = {
-  MapSettingsRoute: MapSettingsRoute,
   MapIndexRoute: MapIndexRoute,
   MapReportsStationIdRoute: MapReportsStationIdRoute,
+  MapSettingsContactRoute: MapSettingsContactRoute,
   MapStationsStationIdRoute: MapStationsStationIdRoute,
+  MapSettingsIndexRoute: MapSettingsIndexRoute,
 }
 
 const MapRouteWithChildren = MapRoute._addFileChildren(MapRouteChildren)
@@ -274,6 +315,7 @@ const ReportsRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   MapRoute: MapRouteWithChildren,
+  ImpressumRoute: ImpressumRoute,
   PrivacyRoute: PrivacyRoute,
   ReportRoute: ReportRoute,
   ReportsRoute: ReportsRouteWithChildren,
