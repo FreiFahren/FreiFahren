@@ -7,7 +7,7 @@ import type { Station } from '@/api/transit';
 import { Route as ReportDetailRoute } from '@/routes/_map/reports/$stationId';
 
 const FADE_DURATION_MS = 60 * 60 * 1000;
-const MIN_OPACITY = 0.2;
+const MIN_OPACITY = 0.4;
 const PULSE_AGE_MS = 60 * 15 * 1000;
 const RECOMPUTE_INTERVAL_MS = 30 * 1000;
 
