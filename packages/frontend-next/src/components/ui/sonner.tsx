@@ -14,6 +14,9 @@ const Toaster = ({ ...props }: ToasterProps) => (
     toastOptions={{ className: 'flex w-full justify-center' }}
     style={
       {
+        // Keep toasts below the search results (z-30) but above the map controls (z-20);
+        // sonner otherwise defaults to a z-index of 999999, which covers the dropdown.
+        zIndex: 25,
         '--normal-bg': 'var(--popover)',
         '--normal-text': 'var(--popover-foreground)',
         '--normal-border': 'var(--border)',

@@ -4,6 +4,7 @@ import { lazy, Suspense } from 'react';
 import { LayerToggleButton } from '@/components/map/LayerToggleButton';
 import { ReportButton } from '@/components/map/ReportButton';
 import { ReportsOverviewButton } from '@/components/map/ReportsOverviewButton';
+import { SettingsButton } from '@/components/map/SettingsButton';
 import { StationSearch } from '@/components/map/StationSearch';
 import { StatsPopUp } from '@/components/map/StatsPopUp';
 import { RefreshNotification } from '@/components/RefreshNotification';
@@ -33,6 +34,7 @@ export const Route = createFileRoute('/_map')({
       <StationSearch />
       <StatsPopUp />
       <RefreshNotification />
+      <SettingsButton />
       <LayerToggleButton />
       <ReportsOverviewButton />
       <ReportButton />

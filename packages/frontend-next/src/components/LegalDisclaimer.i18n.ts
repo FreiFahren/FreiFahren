@@ -14,6 +14,9 @@ i18n.addResourceBundle('en', NAMESPACE, {
   saved: "Your confirmation will be saved to your browser's local storage.",
   confirm: 'I confirm',
   privacy: 'Privacy',
+  imprint: 'Imprint',
+  reviewTitle: 'Terms of Use',
+  close: 'Close',
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
@@ -28,4 +31,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
   saved: 'Die Bestätigung wird in Ihrem Browser gespeichert.',
   confirm: 'Ich bestätige',
   privacy: 'Datenschutz',
+  imprint: 'Impressum',
+  reviewTitle: 'Nutzungsbedingungen',
+  close: 'Schließen',
 });

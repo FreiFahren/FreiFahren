@@ -12,7 +12,7 @@ export function LayerToggleButton() {
   const { visible, toggle } = useRiskLayer();
 
   return (
-    <div className="pointer-events-none fixed top-0 right-0 z-20 p-3">
+    <div className="pointer-events-none fixed top-14 right-0 z-20 p-3">
       <Button
         type="button"
         variant="secondary"
