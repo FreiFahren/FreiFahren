@@ -1,4 +1,4 @@
-import { useNavigate } from '@tanstack/react-router';
+import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { ChevronRight, MapPin, Search, TriangleAlert } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -25,6 +25,8 @@ import { type LineFilter, useReportSelection } from './ReportSelection.context';
 import { ReportSelectionProvider } from './ReportSelectionProvider';
 import { ReportSuccess } from './ReportSuccess';
 import { type ReportRejection, useReportVerification } from './useReportVerification';
+
+const routeApi = getRouteApi('/report');
 
 const FILTERS: LineFilter[] = ['all', 'subway', 'light_rail', 'tram'];
 
@@ -326,6 +328,7 @@ function SubmitFooter({ onSubmitted }: { onSubmitted: (result: SubmitReportRespo
 export function ReportForm() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
+  const { stationId: initialStationId } = routeApi.useSearch();
   const [result, setResult] = useState<SubmitReportResponse | null>(null);
 
   const handleSuccessClose = () => {
@@ -335,7 +338,7 @@ export function ReportForm() {
   };
 
   return (
-    <ReportSelectionProvider>
+    <ReportSelectionProvider initialStationId={initialStationId}>
       <div className="bg-card animate-in fade-in fixed inset-0 z-30 duration-150">
         <div className="mx-auto flex h-full w-full max-w-md flex-col">
           {result ? (

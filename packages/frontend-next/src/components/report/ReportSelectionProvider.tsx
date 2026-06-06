@@ -15,10 +15,16 @@ import {
   type ReportSelectionContextValue,
 } from './ReportSelection.context';
 
-export function ReportSelectionProvider({ children }: { children: ReactNode }) {
+export function ReportSelectionProvider({
+  children,
+  initialStationId = null,
+}: {
+  children: ReactNode;
+  initialStationId?: string | null;
+}) {
   const [lineName, setLineName] = useState<string | null>(null);
   const [lineFilter, setLineFilter] = useState<LineFilter>('all');
-  const [stationId, setStationId] = useState<string | null>(null);
+  const [stationId, setStationId] = useState<string | null>(initialStationId);
   const [directionStationId, setDirectionStationId] = useState<string | null>(null);
 
   const { data: lines } = useLines();
@@ -49,6 +55,20 @@ export function ReportSelectionProvider({ children }: { children: ReactNode }) {
   const selectDirection = (id: string | null) => {
     setDirectionStationId(id);
   };
+
+  // The prefilled station is seeded into stationId above; once the transit data is available,
+  // mirror selectStation's single-line shortcut so a station served by exactly one line preselects
+  // that line (and its type filter), letting the user skip the line step.
+  const [appliedInitialStationId, setAppliedInitialStationId] = useState<string | null>(null);
+  if (initialStationId && lines && stations && appliedInitialStationId !== initialStationId) {
+    setAppliedInitialStationId(initialStationId);
+    const names = resolveStationLineNames(stations[initialStationId]?.lines ?? [], lines);
+    if (names.length === 1) {
+      setLineName(names[0]);
+      const type = lines.find((l) => l.name === names[0])?.type;
+      if (type) setLineFilter(type);
+    }
+  }
 
   // One badge per line name (collapses per-direction variants), sorted by canonical order.
   const typeByName = new Map<string, LineType>();

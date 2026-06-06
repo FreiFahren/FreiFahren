@@ -33,7 +33,9 @@ export function StationDetail({ station, onClose }: StationDetailProps) {
           variant="default"
           className="bg-destructive hover:bg-destructive/90 h-11 w-full text-sm font-medium text-white"
         >
-          <Link to={ReportRoute.to}>{t('reportSighting')}</Link>
+          <Link to={ReportRoute.to} search={{ stationId: station.id }}>
+            {t('reportSighting')}
+          </Link>
         </Button>
       </CardContent>
     </DetailCard>
