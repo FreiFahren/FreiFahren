@@ -5,6 +5,12 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="icon" href="/favicon.ico" />
+    <!-- Open the TCP+TLS connections to the map-tile and API hosts during HTML parse, so the
+         handshakes are already done when maplibre requests tiles and the route loaders fetch
+         data (otherwise those connections open ~3-4s in, on the critical path to LCP).
+         crossorigin is required: both origins are reached via CORS fetch (vector tiles / JSON). -->
+    <link rel="preconnect" href="https://tiles.freifahren.org" crossorigin />
+    <link rel="preconnect" href="https://api.freifahren.org" crossorigin />
     <!-- Paints the iOS status-bar / dynamic-island area with the card color (matches the
          report form and the map search bar). Keep in sync with --card in src/index.css. -->
     <meta name="theme-color" content="#25272b" />

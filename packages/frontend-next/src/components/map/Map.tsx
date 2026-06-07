@@ -1,8 +1,11 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './Map.css';
 
+import { useState } from 'react';
 import { Map as MapGL } from 'react-map-gl/maplibre';
 
+import { useRisk } from '@/api/risk';
+import { useSegments } from '@/api/transit';
 import { requireEnv } from '@/lib/utils';
 
 import { LineLayer } from './LineLayer';
@@ -27,6 +30,14 @@ const MIN_ZOOM = 10;
 export function MapView() {
   const { selectedStation, handleMapClick } = useStationSelection();
   const { visible: riskVisible } = useRiskLayer();
+  const [baseMapReady, setBaseMapReady] = useState(false);
+
+  // Fetch the overlay data now — in parallel with the base-map style and tiles — even though we
+  // hold off *rendering* the overlays until the base map has painted (below). The fetches must
+  // not wait for the layers to mount, or the lines/reports would visibly lag the map. (Stations
+  // and reports are already warmed by useStationSelection; this covers the segments/risk data.)
+  useSegments();
+  useRisk();
 
   return (
     <div className="fixed inset-0">
@@ -37,11 +48,25 @@ export function MapView() {
         attributionControl={{ compact: true }}
         interactiveLayerIds={[STATIONS_LAYER_ID]}
         onClick={handleMapClick}
+        // Let the base map render its first frame before we add the GeoJSON sources and the
+        // report markers, so that overlay setup doesn't compete with the heaviest part of map
+        // init. The map is persistent, so this fires once per session.
+        onLoad={() => setBaseMapReady(true)}
+        // The style is baked and version-pinned by the tile-server, so re-validating its 89 layers
+        // against the spec on every load is wasted main-thread work at the most contended moment
+        // (and lets maplibre tree-shake the validator out). See maplibre MapOptions.validateStyle.
+        validateStyle={false}
+        // App is city-wide, so no world copies are visible.
+        renderWorldCopies={false}
       >
-        <StationsLayer selectedStation={selectedStation} />
-        {riskVisible ? <RiskLayer /> : <LineLayer />}
-        <ReportsLayer />
-        <UserLocationControl />
+        {baseMapReady && (
+          <>
+            <StationsLayer selectedStation={selectedStation} />
+            {riskVisible ? <RiskLayer /> : <LineLayer />}
+            <ReportsLayer />
+            <UserLocationControl />
+          </>
+        )}
       </MapGL>
     </div>
   );
