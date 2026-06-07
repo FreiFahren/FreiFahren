@@ -104,6 +104,7 @@ export function LegalDisclaimer() {
           <div className="flex gap-4 self-end">
             <Link
               to={ImpressumRoute.to}
+              preload={false}
               onClick={dismissible ? closeLegalDisclaimer : undefined}
               className="text-muted-foreground hover:text-foreground text-xs underline"
             >
@@ -111,6 +112,7 @@ export function LegalDisclaimer() {
             </Link>
             <Link
               to={PrivacyRoute.to}
+              preload={false}
               onClick={dismissible ? closeLegalDisclaimer : undefined}
               className="text-muted-foreground hover:text-foreground text-xs underline"
             >

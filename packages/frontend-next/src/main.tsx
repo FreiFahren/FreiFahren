@@ -7,7 +7,9 @@ import './lib/i18n';
 import { routeTree } from './routeTree.gen';
 import './index.css';
 
-const router = createRouter({ routeTree, defaultPreload: 'intent' });
+// 'viewport' preloads each <Link>'s route (chunk + loader data) once it's on screen via an
+// IntersectionObserver — so the pages reachable from the current view warm in the background
+const router = createRouter({ routeTree, defaultPreload: 'viewport' });
 
 declare module '@tanstack/react-router' {
   interface Register {

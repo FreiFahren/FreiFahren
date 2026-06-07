@@ -106,23 +106,26 @@ export async function fetchStations(): Promise<Stations> {
   return stations;
 }
 
-export const useStations = () =>
-  useQuery({
-    queryKey: ['transit', 'stations'],
-    queryFn: fetchStations,
-  });
+export const stationsQueryOptions = () => ({
+  queryKey: ['transit', 'stations'] as const,
+  queryFn: fetchStations,
+});
 
-export const useLines = () =>
-  useQuery({
-    queryKey: ['transit', 'lines'],
-    queryFn: () => fetchJson<Line[]>('/v0/transit/lines'),
-  });
+export const linesQueryOptions = () => ({
+  queryKey: ['transit', 'lines'] as const,
+  queryFn: () => fetchJson<Line[]>('/v0/transit/lines'),
+});
 
-export const useSegments = () =>
-  useQuery({
-    queryKey: ['transit', 'segments'],
-    queryFn: () => fetchJson<Segments>('/v0/transit/segments'),
-  });
+export const segmentsQueryOptions = () => ({
+  queryKey: ['transit', 'segments'] as const,
+  queryFn: () => fetchJson<Segments>('/v0/transit/segments'),
+});
+
+export const useStations = () => useQuery(stationsQueryOptions());
+
+export const useLines = () => useQuery(linesQueryOptions());
+
+export const useSegments = () => useQuery(segmentsQueryOptions());
 
 function closestStationId(
   stations: Stations,

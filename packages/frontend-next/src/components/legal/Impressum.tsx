@@ -47,7 +47,9 @@ export function Impressum() {
       </section>
 
       <section>
-        <Link to="/privacy">{t('links.privacy')}</Link>
+        <Link to="/privacy" preload={false}>
+          {t('links.privacy')}
+        </Link>
       </section>
     </LegalPage>
   );

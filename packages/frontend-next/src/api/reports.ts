@@ -145,25 +145,30 @@ export const useReportsRefreshSignal = () => {
   return signal;
 };
 
-export const useStationReportCount = (stationId: string) => {
-  // Compute the window once per mount (lazy initializer), rounding `to` up to
-  // the next hour. Rounding keeps the query key stable across renders; rounding
-  // *up* (rather than down) keeps the current partial hour inside the window, so
-  // a report submitted moments ago is still counted.
-  const [{ from, to }] = useState(() => {
-    const toMs = Math.ceil(Date.now() / HOUR_MS) * HOUR_MS;
-    return { from: new Date(toMs - WEEK_MS).toISOString(), to: new Date(toMs).toISOString() };
-  });
-
-  return useQuery({
-    queryKey: ['reports', stationId, from, to],
+/**
+ * React Query options for a station's 7-day report history (`['reports', stationId, from, to]`).
+ * `to` is rounded up to the next hour so the key is stable within an hour (and rounding *up* keeps
+ * the current partial hour — and a just-submitted report — inside the window). Shared by
+ * `useStationReportCount` and the report-detail route loader so a preload warms the same entry.
+ */
+export const stationReportCountQueryOptions = (stationId: string) => {
+  const toMs = Math.ceil(Date.now() / HOUR_MS) * HOUR_MS;
+  const from = new Date(toMs - WEEK_MS).toISOString();
+  const to = new Date(toMs).toISOString();
+  return {
+    queryKey: ['reports', stationId, from, to] as const,
     queryFn: () => {
       const params = new URLSearchParams({ from, to });
       return fetchJson<Report[]>(`/v0/reports/${stationId}?${params.toString()}`);
     },
-    select: (reports) => reports.length,
     staleTime: HOUR_MS,
-  });
+  };
+};
+
+export const useStationReportCount = (stationId: string) => {
+  // Freeze the window (and thus the query key) at mount; `select` reduces to the count.
+  const [options] = useState(() => stationReportCountQueryOptions(stationId));
+  return useQuery({ ...options, select: (reports) => reports.length });
 };
 
 const API_URL = requireEnv('VITE_API_URL');
