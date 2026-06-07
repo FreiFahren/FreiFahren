@@ -1,13 +1,24 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
-import { DAY_MS, useReports } from '@/api/reports';
+import { queryClient } from '@/api/queryClient';
+import { DAY_MS, HOUR_MS, reportsSliceQueryOptions, useReports } from '@/api/reports';
+import { linesQueryOptions, stationsQueryOptions } from '@/api/transit';
 import { ReportsTabBar } from '@/components/reports/ReportsTabBar';
 import { NAMESPACE } from '@/components/reports/Reports.i18n';
 import { PageHeader } from '@/components/templates/PageHeader';
 
 export const Route = createFileRoute('/reports')({
   staticData: { legalDisclaimer: false },
+  // Prefetch what this section renders (the day window + stations + lines). Runs for any reports
+  // tab on preload (it's the shared layout). Fire-and-forget so it never blocks the transition;
+  // already-cached queries are no-ops. Covers all tabs, so they need no loader of their own.
+  loader: () => {
+    void queryClient.prefetchQuery(reportsSliceQueryOptions(HOUR_MS, 0));
+    void queryClient.prefetchQuery(reportsSliceQueryOptions(DAY_MS, HOUR_MS));
+    void queryClient.prefetchQuery(stationsQueryOptions());
+    void queryClient.prefetchQuery(linesQueryOptions());
+  },
   component: ReportsOverviewLayout,
 });
 

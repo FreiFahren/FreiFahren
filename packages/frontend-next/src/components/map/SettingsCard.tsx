@@ -30,7 +30,11 @@ function LegalLink({
 }) {
   if (to) {
     return (
-      <Link to={to} className="text-muted-foreground hover:text-foreground text-xs underline">
+      <Link
+        to={to}
+        preload={false}
+        className="text-muted-foreground hover:text-foreground text-xs underline"
+      >
         {children}
       </Link>
     );

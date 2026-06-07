@@ -1,4 +1,4 @@
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useRouter } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { Marker, type MarkerEvent } from 'react-map-gl/maplibre';
 
@@ -25,8 +25,16 @@ function computeOpacity(timestamp: string, nowMs: number): number {
 
 export function ReportMarker({ report, station }: ReportMarkerProps) {
   const navigate = useNavigate();
+  const router = useRouter();
   const [now, setNow] = useState(() => Date.now());
   const viewed = useReportViewed(report.stationId, report.timestamp);
+
+  // Markers navigate imperatively, so the router's viewport preloading doesn't see them. Mirror it:
+  // a visible marker warms its report-detail route — the chunk plus the loader data (station +
+  // this-week count) — so opening it is instant instead of fetching on tap.
+  useEffect(() => {
+    void router.preloadRoute({ to: ReportDetailRoute.to, params: { stationId: report.stationId } });
+  }, [router, report.stationId]);
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), RECOMPUTE_INTERVAL_MS);

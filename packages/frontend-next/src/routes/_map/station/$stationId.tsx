@@ -1,7 +1,7 @@
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 
 import { HOUR_MS, reportsSliceQueryOptions } from '@/api/reports';
-import { fetchStations } from '@/api/transit';
+import { stationsQueryOptions } from '@/api/transit';
 import { queryClient } from '@/api/queryClient';
 import { StationDetail } from '@/components/map/StationDetail';
 import { Route as ReportDetailRoute } from '@/routes/_map/reports/$stationId';
@@ -9,10 +9,7 @@ import { Route as ReportDetailRoute } from '@/routes/_map/reports/$stationId';
 export const Route = createFileRoute('/_map/station/$stationId')({
   staticData: { legalDisclaimer: true },
   loader: async ({ params }) => {
-    const stations = await queryClient.ensureQueryData({
-      queryKey: ['transit', 'stations'],
-      queryFn: fetchStations,
-    });
+    const stations = await queryClient.ensureQueryData(stationsQueryOptions());
     const station = stations[params.stationId];
     if (!station) throw redirect({ to: '/', replace: true });
 
