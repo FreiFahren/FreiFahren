@@ -7,10 +7,8 @@ import { useGeolocation } from '@/contexts/Geolocation.context';
 import { useLegalDisclaimer } from '@/lib/legal-disclaimer';
 import {
   dismissLocationPrompt,
-  isLocationOptedIn,
   isLocationPromptDismissed,
   LOCATION_PROMPT_DELAY_MS,
-  markLocationOptedIn,
   queryGeolocationPermission,
 } from '@/lib/location-prompt';
 
@@ -40,8 +38,10 @@ export function UserLocationControl() {
     control?.trigger();
   }, [notifyLoading]);
 
-  // Gate on disclaimer acceptance + map load. Already-consented users track immediately; everyone
-  // else gets the soft-ask, deferred so it doesn't interrupt before they can orient themselves.
+  // Gate on disclaimer acceptance + map load. Only 'granted' tracks immediately (the API call is
+  // silent then); for 'prompt'/'unsupported' we must not call the API ourselves — on Safari/iOS
+  // that would surface the native prompt — so we show the deferred soft-ask and only trigger on
+  // the user's explicit Allow.
   useEffect(() => {
     if (!map || !accepted) return;
 
@@ -52,11 +52,11 @@ export function UserLocationControl() {
       const permission = await queryGeolocationPermission();
       if (cancelled) return;
 
-      if (permission === 'denied') return;
-      if (permission === 'granted' || isLocationOptedIn()) {
+      if (permission === 'granted') {
         trigger();
         return;
       }
+      if (permission === 'denied') return;
 
       if (isLocationPromptDismissed()) return;
       timer = window.setTimeout(() => {
@@ -77,7 +77,6 @@ export function UserLocationControl() {
 
   const handleAllow = () => {
     setShowPrompt(false);
-    markLocationOptedIn();
     trigger();
   };
 
@@ -96,11 +95,7 @@ export function UserLocationControl() {
         trackUserLocation
         showUserLocation
         showAccuracyCircle
-        onGeolocate={(e) => {
-          // A fix means permission was granted — remember it for browsers without the Permissions API.
-          markLocationOptedIn();
-          notifyPosition(e.coords);
-        }}
+        onGeolocate={(e) => notifyPosition(e.coords)}
         onError={(e) => notifyError(e.code)}
         onTrackUserLocationStart={() => notifyLoading()}
       />
