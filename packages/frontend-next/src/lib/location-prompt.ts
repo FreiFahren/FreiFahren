@@ -27,3 +27,26 @@ export function isLocationPromptDismissed(): boolean {
 export function dismissLocationPrompt(): void {
   dismissed = true;
 }
+
+// iOS Safari scopes a geolocation grant to the session and never reports it back through
+// permissions.query() (it stays 'prompt'), so once the user has accepted our soft-ask we remember
+// it here to avoid re-showing the in-app prompt on every visit; the browser re-confirms natively
+// when its own session grant lapses. Set only on an explicit in-app Allow, which guarantees the
+// soft-ask is shown at least once before we ever skip it.
+const CONSENT_KEY = 'locationConsented';
+
+export function hasConsentedToLocation(): boolean {
+  try {
+    return localStorage.getItem(CONSENT_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+export function markLocationConsented(): void {
+  try {
+    localStorage.setItem(CONSENT_KEY, 'true');
+  } catch {
+    // Ignore storage failures; worst case we show the soft-ask again on the next visit.
+  }
+}
