@@ -2,6 +2,7 @@ import { createRootRoute, Outlet } from '@tanstack/react-router';
 
 import { ContributeCard } from '@/components/contribute/ContributeCard';
 import { LegalDisclaimer } from '@/components/LegalDisclaimer';
+import { PersistentMapView } from '@/components/map/PersistentMapView';
 import { GeolocationProvider } from '@/contexts/GeolocationProvider';
 
 export const Route = createRootRoute({
@@ -10,6 +11,7 @@ export const Route = createRootRoute({
   staticData: { legalDisclaimer: false },
   component: () => (
     <GeolocationProvider>
+      <PersistentMapView />
       <Outlet />
       <LegalDisclaimer />
       <ContributeCard />
