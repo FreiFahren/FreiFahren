@@ -1,0 +1,4 @@
+# app.freifahren.org is the web app, not our content surface. Disallow crawling
+# so it does not cannibalize freifahren.org in search results.
+User-agent: *
+Disallow: /
