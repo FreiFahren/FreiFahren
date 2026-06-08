@@ -64,14 +64,13 @@ export function UserLocationControl() {
       }, LOCATION_PROMPT_DELAY_MS);
     };
 
-    const start = () => void evaluate();
-    if (map.loaded()) start();
-    else map.once('load', start);
+    // Mounts only after the base map's `load` (gated by MapView), so don't wait on that one-shot
+    // event — it has already fired and won't fire again. Evaluate now.
+    void evaluate();
 
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
-      map.off('load', start);
     };
   }, [map, accepted, trigger]);
 
