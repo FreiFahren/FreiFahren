@@ -1,10 +1,10 @@
 import { RefreshCw } from 'lucide-react';
 import { useEffect } from 'react';
-import { toast } from 'sonner';
 
 import { useReportsRefreshSignal } from '@/api/reports';
 import { ToastPill } from '@/components/ui/toast-pill';
 import { i18n } from '@/lib/i18n';
+import { toast } from '@/lib/toast';
 
 import { NAMESPACE } from './RefreshNotification.i18n';
 
@@ -24,9 +24,7 @@ export function RefreshNotification() {
           {i18n.t('refreshed', { ns: NAMESPACE })}
         </ToastPill>
       ),
-      // icon: null clears sonner's own icon slot — we draw the icon inside the pill, and
-      // reusing one id would otherwise let a stale `icon` option linger and render twice.
-      { id: TOAST_ID, unstyled: true, icon: null },
+      { id: TOAST_ID },
     );
   }, [signal]);
 
