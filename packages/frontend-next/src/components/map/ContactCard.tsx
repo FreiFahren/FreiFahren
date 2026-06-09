@@ -61,7 +61,7 @@ export function ContactCard({ onClose }: ContactCardProps) {
               alt=""
               className="bg-muted size-8 shrink-0 rounded-full object-cover"
             />
-            <span className="text-sm font-medium">{member.name}</span>
+            <span className="text-sm font-semibold">{member.name}</span>
             <div className="ml-auto flex items-center gap-1">
               {member.channels.map((channel) => {
                 const Icon = CHANNEL_ICON[channel.type];

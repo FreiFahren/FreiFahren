@@ -81,11 +81,11 @@ export function LegalDisclaimer() {
         <CardContent className="min-h-0 flex-1 overflow-y-auto">
           <ol className="marker:text-muted-foreground list-decimal space-y-3 pl-5">
             <li>
-              <strong className="font-medium">{t('ticket')}</strong>
+              <strong className="font-semibold">{t('ticket')}</strong>
               <p className="text-muted-foreground mt-1 text-sm">{t('ticketDescription')}</p>
             </li>
             <li>
-              <strong className="font-medium">{t('activeUsage')}</strong>
+              <strong className="font-semibold">{t('activeUsage')}</strong>
               <p className="text-muted-foreground mt-1 text-sm">{t('activeUsageDescription')}</p>
             </li>
           </ol>

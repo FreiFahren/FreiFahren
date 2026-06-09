@@ -37,7 +37,7 @@ export function ReportSuccess({
       {stationName && (
         <div className="mt-4 flex items-center gap-2">
           {lineName && <LineBadge name={lineName} />}
-          <span className="text-sm font-medium">{stationName}</span>
+          <span className="text-sm font-semibold">{stationName}</span>
         </div>
       )}
 
@@ -56,7 +56,7 @@ export function ReportSuccess({
         type="button"
         size="lg"
         onClick={onClose}
-        className="bg-accent-bright text-primary-foreground hover:bg-accent-press mt-4 h-12 w-full rounded-lg text-base font-medium shadow-[0_6px_16px_rgba(214,59,59,0.28)]"
+        className="bg-accent-bright text-primary-foreground hover:bg-accent-press mt-4 h-12 w-full rounded-lg text-base font-semibold shadow-[0_6px_16px_rgba(214,59,59,0.28)]"
       >
         {t('continue')}
       </Button>

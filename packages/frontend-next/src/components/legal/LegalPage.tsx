@@ -10,7 +10,7 @@ const ARTICLE_CLASS = [
   'min-h-0 flex-1 overflow-y-auto px-4 pt-1 pb-10 text-sm leading-relaxed text-muted-foreground',
   '[&_section]:mt-6 [&_section:first-child]:mt-0 [&_section]:space-y-2',
   '[&_h2]:text-foreground [&_h2]:text-base [&_h2]:font-semibold',
-  '[&_h3]:text-foreground [&_h3]:font-medium [&_h3]:pt-1',
+  '[&_h3]:text-foreground [&_h3]:font-semibold [&_h3]:pt-1',
   '[&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5 [&_li]:marker:text-muted-foreground',
   '[&_a]:text-foreground [&_a]:break-words [&_a]:underline',
 ].join(' ');

@@ -44,7 +44,7 @@ export function ReportDetail({ station, onClose }: ReportDetailProps) {
       {(lineName || directionName) && (
         <CardContent className="flex items-center gap-2">
           {lineName && <LineBadge name={lineName} />}
-          {directionName && <span className="text-sm font-medium">{directionName}</span>}
+          {directionName && <span className="text-sm font-semibold">{directionName}</span>}
         </CardContent>
       )}
       <CardContent className="space-y-1">

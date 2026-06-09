@@ -19,7 +19,7 @@ export function RefreshNotification() {
     // the fixed id collapses near-simultaneous slice refetches into one toast instead of stacking.
     toast.custom(
       () => (
-        <ToastPill className="text-foreground flex w-fit items-center gap-2 text-sm font-medium">
+        <ToastPill className="text-foreground flex w-fit items-center gap-2 text-sm font-semibold">
           <RefreshCw className="size-4 animate-spin" />
           {i18n.t('refreshed', { ns: NAMESPACE })}
         </ToastPill>
