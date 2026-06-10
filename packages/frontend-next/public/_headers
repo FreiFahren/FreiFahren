@@ -1,0 +1,16 @@
+# Honored by Cloudflare Workers static assets (wrangler.jsonc -> assets.directory).
+# Vite copies this file from public/ to the dist/ root at build time.
+#
+# Everything under /assets/ is emitted by Vite with a content hash in the filename
+# (index-BVAEI_dW.js, ibm-plex-sans-latin-400-normal-CDDApCn2.woff2, ...), so a URL's
+# content can never change — a new build gets a new filename via index.html. Without
+# this rule the assets are served `max-age=0, must-revalidate`, which makes the browser
+# re-validate every JS/CSS/font file on every app open: one conditional round trip per
+# file that stalls on flaky subway connections and fails entirely offline. Cloudflare's
+# edge cache doesn't help here — it only speeds up the server side; this header is what
+# lets the *browser* skip the network entirely.
+#
+# index.html is not under /assets/ and keeps the default revalidation behavior, so
+# deploys still roll out immediately.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
