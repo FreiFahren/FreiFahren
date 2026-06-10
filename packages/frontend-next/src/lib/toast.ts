@@ -84,3 +84,20 @@ export const toast = {
     startExit(id);
   },
 };
+
+/**
+ * Drops every toast immediately (no exit animation) and cancels their timers. Called when the
+ * map-scoped <Toaster> unmounts (the user leaving the map for /report, /reports, etc.). The store
+ * is a module global that outlives the route: a toast fired on the map keeps its live timer and
+ * stays in the store, and during the route transition the <Toaster>'s `position: fixed` node can
+ * be carried into the incoming route's subtree — so the stats pill stays painted on top of a
+ * non-map page (FRE-653). Emptying the store on unmount makes the <Toaster> render nothing,
+ * enforcing the invariant that toasts only ever live on the map.
+ */
+export function clearToasts() {
+  for (const timer of timers.values()) clearTimeout(timer);
+  timers.clear();
+  if (toasts.length === 0) return;
+  toasts = [];
+  emit();
+}

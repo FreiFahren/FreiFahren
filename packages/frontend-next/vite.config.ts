@@ -113,7 +113,11 @@ export default defineConfig({
     port: 1871,
   },
   preview: {
-    port: 1871,
+    // Deliberately a different port from `server`: `preview` ships the real service worker, and a
+    // SW is scoped per origin (host + port). Sharing 1871 with `bun run dev` (which ships no SW,
+    // devOptions.enabled: false) lets a preview SW keep controlling dev and serve a stale precache.
+    // Different port = different origin = the preview SW can never bleed into the dev server.
+    port: 1872,
   },
   resolve: {
     alias: {
