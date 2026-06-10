@@ -16,12 +16,15 @@
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/ibm-plex-sans": "^5.2.8",
     "@tailwindcss/vite": "^4.3.0",
-    "@tanstack/react-query": "^5.100.14",
+    "@tanstack/query-async-storage-persister": "^5.101.0",
+    "@tanstack/react-query": "^5.101.0",
+    "@tanstack/react-query-persist-client": "^5.101.0",
     "@tanstack/react-router": "^1.170.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "i18next": "^26.2.0",
     "i18next-browser-languagedetector": "^8.2.1",
+    "idb-keyval": "^6.2.5",
     "lucide-react": "^1.16.0",
     "maplibre-gl": "^5.24.0",
     "radix-ui": "^1.4.3",
@@ -59,6 +62,7 @@
     "prettier-plugin-tailwindcss": "^0.8.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
-    "vite": "^8.0.12"
+    "vite": "^8.0.12",
+    "vite-plugin-pwa": "^1.3.0"
   }
 }
