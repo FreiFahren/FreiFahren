@@ -16,11 +16,6 @@
       "filter_below": 13,
       "filter_area": 0.00000001
     },
-    "housenum_label": {
-      "minzoom": 14,
-      "maxzoom": 14,
-      "combine_points": true
-    },
     "landuse": {
       "minzoom": 5,
       "maxzoom": 14,
@@ -29,21 +24,6 @@
       "combine_polygons_below": 8,
       "simplify_below": 12,
       "simplify_level": 0.00008
-    },
-    "natural_label": {
-      "minzoom": 0,
-      "maxzoom": 14,
-      "combine_points": true
-    },
-    "place_label": {
-      "minzoom": 1,
-      "maxzoom": 14,
-      "combine_points": true
-    },
-    "poi_label": {
-      "minzoom": 10,
-      "maxzoom": 14,
-      "combine_points": true
     },
     "road": {
       "minzoom": 5,
@@ -56,11 +36,6 @@
     "structure": {
       "minzoom": 13,
       "maxzoom": 14
-    },
-    "transit_label": {
-      "minzoom": 11,
-      "maxzoom": 14,
-      "combine_points": true
     },
     "water": {
       "minzoom": 0,

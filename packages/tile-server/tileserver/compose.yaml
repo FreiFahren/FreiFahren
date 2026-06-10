@@ -1,6 +1,6 @@
 services:
   tileserver:
-    image: ghcr.io/maplibre/martin:v0.13.0
+    image: ghcr.io/maplibre/martin:1.8.2
     command: ["--config", "/config/config.yaml"]
     ports:
       - "3000:3000"

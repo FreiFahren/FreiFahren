@@ -1,17 +1,4 @@
-node_keys = {
-  "addr:housenumber",
-  "amenity",
-  "highway",
-  "leisure",
-  "name",
-  "natural",
-  "place",
-  "public_transport",
-  "railway",
-  "shop",
-  "station",
-  "tourism"
-}
+node_keys = {}
 
 ZRES9 = 305.7
 ZRES10 = 152.9
@@ -27,9 +14,7 @@ way_keys = {
   "highway",
   "landuse",
   "leisure",
-  "name",
   "natural",
-  "oneway",
   "railway",
   "tunnel",
   "water",
@@ -44,26 +29,6 @@ function first_non_empty(...)
     end
   end
   return ""
-end
-
-function add_names()
-  local name = Find("name")
-  if name ~= "" then
-    Attribute("name", name)
-  end
-
-  local name_ltn = first_non_empty(Find("name:latin"), Find("int_name"), Find("name:en"))
-  if name_ltn ~= "" and name_ltn ~= name then
-    Attribute("name_ltn", name_ltn)
-  end
-
-  local languages = { "de", "en", "es", "fr", "it", "ja", "ko", "nl", "ru", "zh" }
-  for _, lang in ipairs(languages) do
-    local translated = Find("name:" .. lang)
-    if translated ~= "" then
-      Attribute("name_" .. lang, translated)
-    end
-  end
 end
 
 function add_structure()
@@ -135,16 +100,17 @@ function road_z_order(class)
   return orders[class] or 0
 end
 
+-- Matches the earliest zoom at which the style actually draws each class
+-- (see styles/rewrite-style.mjs output) so tiles never carry invisible geometry.
 function road_minzoom(class, type)
   if class == "motorway" or class == "motorway_link" then return 5 end
   if class == "main" and type == "trunk" then return 7 end
   if class == "main" and type == "primary" then return 8 end
   if class == "main" then return 9 end
-  if class == "major_rail" then return 10 end
-  if class == "minor_rail" then return 11 end
-  if class == "street" then return 11 end
-  if class == "street_limited" then return 12 end
-  if class == "service" or class == "driveway" or class == "path" then return 13 end
+  if class == "major_rail" then return 12 end
+  if class == "minor_rail" then return 12 end
+  if class == "street" then return 12 end
+  if class == "service" then return 13 end
 
   return 14
 end
@@ -190,43 +156,9 @@ function should_emit_landuse(class, area)
   return true
 end
 
+-- The style renders no symbol layers (rewrite-style.mjs strips every layer with
+-- text-field/icon-image), so no label layers or name attributes are emitted.
 function node_function()
-  local place = Find("place")
-  if place ~= "" then
-    Layer("place_label", false)
-    Attribute("class", place)
-    add_names()
-    if place == "city" then MinZoom(3)
-    elseif place == "town" then MinZoom(6)
-    else MinZoom(10) end
-  end
-
-  local railway = Find("railway")
-  local station = Find("station")
-  local public_transport = Find("public_transport")
-  if railway == "station" or railway == "halt" or station ~= "" or public_transport == "station" then
-    Layer("transit_label", false)
-    Attribute("class", first_non_empty(railway, public_transport, station))
-    add_names()
-    MinZoom(11)
-  end
-
-  local amenity = Find("amenity")
-  local shop = Find("shop")
-  local tourism = Find("tourism")
-  if amenity ~= "" or shop ~= "" or tourism ~= "" then
-    Layer("poi_label", false)
-    Attribute("class", first_non_empty(amenity, shop, tourism))
-    add_names()
-    MinZoom(13)
-  end
-
-  local house_num = Find("addr:housenumber")
-  if house_num ~= "" then
-    Layer("housenum_label", false)
-    Attribute("house_num", house_num)
-    MinZoom(14)
-  end
 end
 
 function way_function()
@@ -252,7 +184,6 @@ function way_function()
   if landuse ~= "" and is_area and should_emit_landuse(landuse, Area()) then
     Layer("landuse", true)
     Attribute("class", landuse)
-    add_names()
     MinZoom(landuse_minzoom(landuse))
   end
 
@@ -261,7 +192,6 @@ function way_function()
   if is_area and (natural == "water" or water ~= "" or Find("waterway") == "riverbank") and should_emit_water(first_non_empty(water, natural, "water"), Area()) then
     Layer("water", true)
     Attribute("class", first_non_empty(water, natural, "water"))
-    add_names()
   end
 
   local waterway = Find("waterway")
@@ -269,7 +199,6 @@ function way_function()
     Layer("waterway", false)
     Attribute("class", waterway)
     add_structure()
-    add_names()
   end
 
   local building = Find("building")
@@ -318,16 +247,7 @@ function way_function()
     Layer("road", is_area)
     Attribute("class", class)
     Attribute("type", type)
-    AttributeBoolean("oneway", Find("oneway") == "yes" or Find("oneway") == "1" or Find("oneway") == "true")
     add_structure()
-    add_names()
-    local ref = Find("ref")
-    if ref ~= "" then
-      Attribute("ref", ref)
-      AttributeNumeric("reflen", string.len(ref))
-    end
-    local access = Find("access")
-    if access ~= "" then Attribute("access", access) end
     MinZoom(road_minzoom(class, type))
     ZOrder(road_z_order(class))
   end
