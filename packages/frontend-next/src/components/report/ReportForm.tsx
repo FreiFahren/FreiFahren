@@ -187,7 +187,7 @@ function StationPicker() {
       </div>
 
       {stationId ? (
-        <div className="bg-muted flex items-center rounded-md px-3 py-2.5 text-sm font-medium">
+        <div className="bg-muted flex items-center rounded-md px-3 py-2.5 text-sm font-semibold">
           {visibleStations[0]?.name}
         </div>
       ) : (
@@ -255,7 +255,7 @@ function DirectionPicker() {
                 onClick={() => selectDirection(isSelected ? null : station.id)}
                 className={cn(
                   'hover:bg-muted focus-visible:bg-muted flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm outline-none',
-                  isSelected && 'bg-muted font-medium',
+                  isSelected && 'bg-muted font-semibold',
                 )}
               >
                 <ChevronRight className="text-muted-foreground size-5 shrink-0" />
@@ -284,7 +284,7 @@ function SubmitFooter({ onSubmitted }: { onSubmitted: (result: SubmitReportRespo
     if (rejection) {
       toast.custom(
         () => (
-          <ToastPill className="text-destructive flex w-fit items-center gap-2 text-sm font-medium">
+          <ToastPill className="text-destructive flex w-fit items-center gap-2 text-sm font-semibold">
             <TriangleAlert className="size-4" />
             {t(REJECTION_MESSAGE[rejection])}
           </ToastPill>
@@ -312,7 +312,7 @@ function SubmitFooter({ onSubmitted }: { onSubmitted: (result: SubmitReportRespo
         disabled={disabled}
         onClick={handleSubmit}
         className={cn(
-          'h-12 w-full rounded-lg text-base font-medium',
+          'h-12 w-full rounded-lg text-base font-semibold',
           canSubmit
             ? 'bg-accent-bright text-primary-foreground hover:bg-accent-press shadow-[0_6px_16px_rgba(214,59,59,0.28)]'
             : 'bg-surface-solid text-muted-foreground border-border border',

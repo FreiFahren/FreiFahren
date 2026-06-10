@@ -127,7 +127,7 @@ function BankTab() {
           >
             <div className="min-w-0">
               <p className="text-muted-foreground text-xs">{row.label}</p>
-              <p className="truncate text-sm font-medium">{row.value}</p>
+              <p className="truncate text-sm font-semibold">{row.value}</p>
             </div>
             <Button
               variant="ghost"

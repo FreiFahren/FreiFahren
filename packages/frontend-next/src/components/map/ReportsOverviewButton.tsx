@@ -50,7 +50,7 @@ export function ReportsOverviewButton() {
           </div>
           <div className="flex items-center gap-2">
             {lineName && <LineBadge name={lineName} />}
-            <span className="flex-1 truncate text-sm font-medium">{stationName}</span>
+            <span className="flex-1 truncate text-sm font-semibold">{stationName}</span>
             {!latestViewed && (
               <span className="relative ml-auto block size-2 shrink-0">
                 <span className="bg-destructive absolute inset-0 animate-ping rounded-full opacity-75" />

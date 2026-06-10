@@ -27,7 +27,7 @@ export function LayerToggleButton() {
         )}
       >
         <Layers className="size-5" />
-        <span className="text-[11px] leading-none font-medium">{t('risk')}</span>
+        <span className="text-[11px] leading-none font-semibold">{t('risk')}</span>
       </Button>
     </div>
   );
