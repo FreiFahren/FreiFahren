@@ -1,9 +1,4 @@
 /**
- * Risk prediction model for transit segments, ported from the former Python
- * implementation (risk_model.py) so it runs in-process instead of via a
- * subprocess. The math is intentionally identical: any change here changes
- * the published risk values.
- *
  * For each report, three risk components (direct, bidirect, line) are
  * computed as base_risk × temporal decay (logistic in report age), then
  * spread along the report's lines with a spatial decay (beta-binomial in
