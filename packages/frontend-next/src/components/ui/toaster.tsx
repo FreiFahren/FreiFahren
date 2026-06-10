@@ -1,7 +1,7 @@
-import { useSyncExternalStore } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 
 import { cn } from '@/lib/utils';
-import { getToasts, subscribeToasts } from '@/lib/toast';
+import { clearToasts, getToasts, subscribeToasts } from '@/lib/toast';
 
 /**
  * Renders the toast stack (see `@/lib/toast`) top-center, below the floating search bar.
@@ -10,6 +10,11 @@ import { getToasts, subscribeToasts } from '@/lib/toast';
  */
 export function Toaster() {
   const toasts = useSyncExternalStore(subscribeToasts, getToasts);
+
+  // The toast store is a module global that outlives this route-scoped component. Drop any
+  // lingering toasts when leaving the map layout so a pill fired here (e.g. the stats popup)
+  // can't survive the route transition and stay painted on a non-map route like /report (FRE-653).
+  useEffect(() => clearToasts, []);
 
   if (toasts.length === 0) return null;
 
