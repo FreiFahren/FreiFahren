@@ -1,11 +1,11 @@
 import { Link } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
 import { DAY_MS, useReports } from '@/api/reports';
 import { ToastPill } from '@/components/ui/toast-pill';
 import { pickReporterCount } from '@/lib/reporters';
+import { toast } from '@/lib/toast';
 import { Route as ReportsSummaryRoute } from '@/routes/reports/index';
 
 import { NAMESPACE } from './StatsPopUp.i18n';
@@ -27,7 +27,6 @@ export function StatsPopUp() {
     const reportCount = reports.length;
     toast.custom((id) => <StatsCard toastId={id} reportCount={reportCount} />, {
       duration: DURATION_MS,
-      unstyled: true,
     });
   }, [ready, reports]);
 

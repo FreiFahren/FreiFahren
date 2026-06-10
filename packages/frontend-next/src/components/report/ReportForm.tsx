@@ -2,7 +2,6 @@ import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { ChevronRight, MapPin, Search, TriangleAlert } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
 import { type SubmitReportResponse, useSubmitReport } from '@/api/reports';
 import { type Station } from '@/api/transit';
@@ -12,12 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { Separator } from '@/components/ui/separator';
-import { Toaster } from '@/components/ui/sonner';
 import { ToastPill } from '@/components/ui/toast-pill';
+import { Toaster } from '@/components/ui/toaster';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useGeolocation } from '@/contexts/Geolocation.context';
 import { isContributeDismissed, openContributeModal } from '@/lib/contribute-modal';
 import { distanceMeters } from '@/lib/geo';
+import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 
 import { NAMESPACE } from './ReportForm.i18n';
@@ -289,7 +289,7 @@ function SubmitFooter({ onSubmitted }: { onSubmitted: (result: SubmitReportRespo
             {t(REJECTION_MESSAGE[rejection])}
           </ToastPill>
         ),
-        { id: 'report-verification', unstyled: true, icon: null },
+        { id: 'report-verification' },
       );
       return;
     }
