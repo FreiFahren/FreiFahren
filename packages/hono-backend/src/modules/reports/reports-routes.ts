@@ -188,7 +188,6 @@ export const postReport = defineRoute<Env>()({
         const { telegramNotificationSuccess, report } = await reportsService.createReport({
             ...postProcessedReportData,
         })
-        c.get('riskService').clearCache()
 
         if (!telegramNotificationSuccess) {
             logger.error('Failed to notify Telegram bot about inspector report')
