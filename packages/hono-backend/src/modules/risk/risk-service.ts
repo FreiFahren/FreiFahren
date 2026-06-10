@@ -1,10 +1,10 @@
-import { join } from 'path'
-
 import { DateTime } from 'luxon'
 
 import { AppError } from '../../common/errors'
 import type { ReportsService } from '../reports/reports-service'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
+
+import { predictSegmentRisk, type RiskModelReport, type RiskModelSegment } from './risk-model'
 
 type RiskData = {
     segments_risk: Record<string, { color: string; risk: number }>
@@ -62,35 +62,35 @@ export class RiskService {
             this.transitNetworkDataService.getStations(),
         ])
 
-        const pythonReports = realReports.flatMap((r) => {
+        const segments: RiskModelSegment[] = segmentsCollection.features.map((feature) => ({
+            sid: String(feature.properties.id),
+            lineId: feature.properties.line,
+            fromStationId: feature.properties.from,
+            toStationId: feature.properties.to,
+        }))
+
+        const reports: RiskModelReport[] = realReports.flatMap((r) => {
             const lines = r.lineId !== null ? [r.lineId] : stations[r.stationId].lines
             if (lines.length === 0) return []
             return [
                 {
-                    station_id: r.stationId,
+                    stationId: r.stationId,
                     lines,
-                    direction: r.directionId ?? '',
-                    timestamp: r.timestamp.toISOString(),
+                    directionId: r.directionId,
+                    timestamp: r.timestamp,
                 },
             ]
         })
 
-        const scriptPath = join(import.meta.dir, 'risk_model.py')
-        const uvBin = process.env.UV_BIN ?? 'uv'
-        const proc = Bun.spawn([uvBin, 'run', scriptPath], { stdin: 'pipe', stdout: 'pipe', stderr: 'pipe' })
-        proc.stdin.write(JSON.stringify({ segments: segmentsCollection.features, reports: pythonReports }))
-        await proc.stdin.end()
-
-        const exitCode = await proc.exited
-        if (exitCode !== 0) {
+        try {
+            return { segments_risk: predictSegmentRisk(segments, reports, now.toJSDate()) }
+        } catch (error) {
             throw new AppError({
                 message: 'Risk model failed',
                 statusCode: 500,
                 internalCode: 'RISK_MODEL_FAILED',
-                description: await new Response(proc.stderr).text(),
+                description: error instanceof Error ? error.message : String(error),
             })
         }
-
-        return (await new Response(proc.stdout).json()) as RiskData
     }
 }
