@@ -10,6 +10,10 @@ export const riskQueryOptions = () => ({
   queryFn: () => fetchJson<RiskData>('/v0/risk'),
   refetchInterval: 30_000,
   refetchIntervalInBackground: false,
+  // Always revalidate on mount so a PWA cold start (cache rehydrated from IndexedDB with its
+  // original `dataUpdatedAt`) refetches even within `staleTime`, instead of serving a stale snapshot.
+  refetchOnMount: 'always',
+  refetchOnReconnect: true,
   staleTime: 30_000,
 });
 
