@@ -69,15 +69,12 @@ function mergeReportSlices(
 // The live last-hour slice (`toAgo === 0`) powers the map and recent-reports views, so it polls
 // every 30 s. The older `[DAY_MS, HOUR_MS]` remainder changes slowly: no interval polling, fresh
 // for an hour. Either way the shared last-hour slice keeps recent reports current without a full
-// 24 h refetch.
-// `refetchOnMount: 'always'` revalidates on mount even within `staleTime`, so a PWA cold start
-// (cache rehydrated from IndexedDB with its original `dataUpdatedAt`) always kicks off a background
-// refetch instead of serving a stale snapshot. Ongoing polling is still governed by `staleTime` /
-// `refetchInterval`.
+// 24 h refetch. PWA cold-start freshness is handled once by invalidating on cache restore (see
+// `main.tsx`), not via `refetchOnMount: 'always'` — the latter forces a refetch per observer, and
+// the map subscribes several to this same slice, so it would fan out into redundant requests.
 const LIVE_SLICE_POLLING = {
   refetchInterval: 30_000,
   refetchIntervalInBackground: false,
-  refetchOnMount: 'always',
   refetchOnWindowFocus: true,
   refetchOnReconnect: true,
   staleTime: 30_000,
@@ -85,7 +82,6 @@ const LIVE_SLICE_POLLING = {
 
 const OLDER_SLICE_POLLING = {
   refetchInterval: false,
-  refetchOnMount: 'always',
   refetchOnWindowFocus: true,
   refetchOnReconnect: true,
   staleTime: HOUR_MS,

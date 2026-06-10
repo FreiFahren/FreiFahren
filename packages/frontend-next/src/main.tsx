@@ -38,6 +38,16 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <PersistQueryClientProvider
       client={queryClient}
+      // On a PWA cold start the cache is rehydrated from IndexedDB with each query's original
+      // `dataUpdatedAt`, so a reload within `staleTime` would serve a stale snapshot with no
+      // network request. `onSuccess` fires after restore but while queries are still paused
+      // (`isRestoring`), so invalidating here only marks them stale — no fetch yet. When the
+      // queries unpause, the default staleness-gated `refetchOnMount` fires exactly one deduped
+      // refetch per key, regardless of how many observers mount. This is stale-while-revalidate
+      // without the per-observer fan-out that `refetchOnMount: 'always'` would cause.
+      onSuccess={() => {
+        void queryClient.invalidateQueries();
+      }}
       persistOptions={{
         persister,
         // persisted cache from an older build so a changed query shape can't hydrate incompatibly.
