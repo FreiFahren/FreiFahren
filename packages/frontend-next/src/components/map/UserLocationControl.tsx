@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { GeolocateControl, useMap } from 'react-map-gl/maplibre';
 
 import { useGeolocation } from '@/contexts/Geolocation.context';
+import { useContributeModalOpen } from '@/lib/contribute-modal';
 import { useLegalDisclaimer } from '@/lib/legal-disclaimer';
 import {
   dismissLocationPrompt,
@@ -27,6 +28,10 @@ export function UserLocationControl() {
   const [showPrompt, setShowPrompt] = useState(false);
   // Soft-ask only on the bare map, never over a sub-route's panel.
   const onMapIndex = useRouterState({ select: (s) => s.location.pathname === '/' });
+  // The soft-ask is the lowest-priority card: it must never overlap another card. Sub-route panels
+  // are already excluded by `onMapIndex`; the contribute card is the one card that can open over the
+  // map index (e.g. after a report submit), so yield to it and resurface once it closes.
+  const contributeOpen = useContributeModalOpen();
 
   const trigger = useCallback(() => {
     const control = controlRef.current;
@@ -98,7 +103,7 @@ export function UserLocationControl() {
         onError={(e) => notifyError(e.code)}
         onTrackUserLocationStart={() => notifyLoading()}
       />
-      {showPrompt && onMapIndex && (
+      {showPrompt && onMapIndex && !contributeOpen && (
         <LocationPermissionPrompt onAllow={handleAllow} onDismiss={handleDismiss} />
       )}
     </>
