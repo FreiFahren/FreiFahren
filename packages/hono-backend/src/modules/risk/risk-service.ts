@@ -10,50 +10,18 @@ type RiskData = {
     segments_risk: Record<string, { color: string; risk: number }>
 }
 
-const RISK_CACHE_TTL_MS = 5 * 60 * 1000
-
-type RiskCacheEntry = {
-    expiresAtMillis: number
-    promise: Promise<RiskData>
-}
-
 export class RiskService {
-    private riskCache: RiskCacheEntry | null = null
-
     constructor(
         private reportsService: ReportsService,
         private transitNetworkDataService: TransitNetworkDataService
     ) {}
 
-    async getRisk(currentTime: DateTime = DateTime.utc()): Promise<RiskData> {
-        const cachedEntry = this.riskCache
-        if (cachedEntry !== null && cachedEntry.expiresAtMillis > currentTime.toMillis()) {
-            return cachedEntry.promise
-        }
-
-        const promise = this.getRiskUncached(currentTime)
-        const cacheEntry = {
-            expiresAtMillis: currentTime.toMillis() + RISK_CACHE_TTL_MS,
-            promise,
-        }
-        this.riskCache = cacheEntry
-
-        try {
-            return await promise
-        } catch (error) {
-            if (this.riskCache === cacheEntry) {
-                this.riskCache = null
-            }
-
-            throw error
-        }
-    }
-
-    clearCache(): void {
-        this.riskCache = null
-    }
-
-    private async getRiskUncached(now: DateTime): Promise<RiskData> {
+    /*
+     * The model runs in-process in a few milliseconds, so each request recomputes
+     * from the latest reports instead of being served from a cache. This keeps the
+     * output always fresh and removes the need to invalidate on new reports.
+     */
+    async getRisk(now: DateTime = DateTime.utc()): Promise<RiskData> {
         const oneHourAgo = now.minus({ hours: 1 })
 
         const [segmentsCollection, realReports, stations] = await Promise.all([
