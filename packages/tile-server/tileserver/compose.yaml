@@ -6,6 +6,7 @@ services:
       - "3000:3000"
     volumes:
       - ../martin:/config:ro
+      - ../fonts:/fonts:ro
       - ./data:/tiles:ro
       - ./styles:/styles:ro
     restart: unless-stopped

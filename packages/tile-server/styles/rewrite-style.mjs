@@ -17,13 +17,18 @@ if (!inputSourceName) {
     throw new Error('Expected a vector source in the style JSON')
 }
 
-delete style.glyphs
 delete style.sprite
 
 // `?v=<cacheBust>` invalidates Cloudflare's 1-year edge cache on each deploy.
-const tileUrl = cacheBust
-    ? `${baseUrl}/${sourceName}/{z}/{x}/{y}?v=${cacheBust}`
-    : `${baseUrl}/${sourceName}/{z}/{x}/{y}`
+const withCacheBust = (url) => (cacheBust ? `${url}?v=${cacheBust}` : url)
+
+const tileUrl = withCacheBust(`${baseUrl}/${sourceName}/{z}/{x}/{y}`)
+
+// Glyphs are served by Martin from the fonts baked into the image (see martin/config.yaml).
+// MapLibre requires a top-level `glyphs` URL before any layer may use `text-field`, including
+// the symbol layers the frontend adds at runtime (line labels, station names).
+// Martin's `/font/{fontstack}/{start}-{end}` endpoint maps directly onto MapLibre's `{range}`.
+style.glyphs = withCacheBust(`${baseUrl}/font/{fontstack}/{range}`)
 
 style.sources[sourceName] = {
     type: 'vector',
@@ -46,7 +51,7 @@ for (const layer of style.layers ?? []) {
 style.layers = (style.layers ?? []).filter((layer) => {
     const layout = layer.layout ?? {}
 
-    return layout['icon-image'] === undefined && layout['text-field'] === undefined
+    return layout['icon-image'] === undefined
 })
 
 await fs.mkdir(path.dirname(outputPath), { recursive: true })

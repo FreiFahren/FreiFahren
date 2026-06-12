@@ -10,7 +10,8 @@ The package has three parts:
 
 - `tilemaker/`: Tilemaker config for generating Berlin vector tiles from OSM data.
 - `styles/rewrite-style.mjs`: helper for preparing a MapLibre style JSON for the configured tile host.
-- `martin/`: Martin config for serving the style and generated MBTiles.
+- `martin/`: Martin config for serving the style, generated MBTiles, and font glyphs.
+- `fonts/`: TTF fonts Martin turns into MapLibre glyph PBFs (see [Fonts & Glyphs](#fonts--glyphs)).
 - `tileserver/`: generated tile/style artifacts and local Docker Compose entrypoint.
 
 The frontend only needs the public style URL:
@@ -86,7 +87,11 @@ This writes:
 tileserver/styles/freifahren-dark.json
 ```
 
-The rewrite script replaces the vector tile source with a `tiles[]` URL template pointing at Martin and removes glyph/sprite dependent layers for the initial no-assets deployment.
+The rewrite script:
+
+- replaces the vector tile source with a `tiles[]` URL template pointing at Martin,
+- sets the top-level `glyphs` URL to Martin's font endpoint so text layers can render (see [Fonts & Glyphs](#fonts--glyphs)),
+- strips layers that depend on a sprite (`icon-image`), which the tile service does not serve yet.
 
 For production URLs, run:
 
@@ -102,6 +107,17 @@ node styles/rewrite-style.mjs source/freifahren-style.json out.json https://tile
 ```
 
 This is how the Dockerfile threads the deploy SHA into the style — see [Caching](#caching).
+
+## Fonts & Glyphs
+
+Martin serves MapLibre glyph PBFs from the TTF fonts in `fonts/` (`fonts.paths` in
+`martin/config.yaml`), and `rewrite-style.mjs` sets the style's `glyphs` to
+`<base-url>/font/{fontstack}/{range}`. This is required for any `text-field` layer to render,
+including the frontend's line/station labels.
+
+The committed `Open Sans Regular` matches MapLibre's default `text-font`, so the frontend needs no
+changes. To swap fonts, drop a `.ttf` into `fonts/`; if its name differs, set `text-font` on the
+frontend symbol layers to match. Icons (`icon-image`) still need a sprite — a separate follow-up.
 
 ## Serve Locally
 
@@ -145,7 +161,7 @@ Deployment is fully automated via the `Dockerfile` in this package. On every pus
 1. Downloads the Berlin OSM extract from Geofabrik.
 2. Runs Tilemaker to produce `freifahren-berlin.mbtiles`.
 3. Runs `rewrite-style` against the committed `source/freifahren-style.json` with the production base URL and the build's `BUILD_SHA` (cache-bust token — see [Caching](#caching)).
-4. Bakes the `.mbtiles`, the rewritten style JSON, and `martin/config.yaml` into a Martin image.
+4. Bakes the `.mbtiles`, the rewritten style JSON, the `fonts/`, and `martin/config.yaml` into a Martin image.
 
 No manual artifact upload is required — `git push` is the deploy.
 

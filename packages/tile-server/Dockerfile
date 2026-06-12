@@ -44,6 +44,7 @@ RUN mkdir -p /out \
 FROM ghcr.io/maplibre/martin:1.8.2
 COPY --from=tiles /out/freifahren-berlin.mbtiles /tiles/freifahren-berlin.mbtiles
 COPY --from=style /out/freifahren-dark.json /styles/freifahren-dark.json
+COPY fonts/ /fonts/
 COPY martin/config.yaml /config/config.yaml
 EXPOSE 3000
 CMD ["--config", "/config/config.yaml"]
