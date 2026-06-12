@@ -18,6 +18,15 @@ platform :ios do
       build_number: build_number
     )
 
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "./ios/freifahren.xcodeproj",
+      team_id: ENV["APPLE_DEVELOPER_TEAM_ID"],
+      bundle_identifier: "com.anonymous.Freifahren",
+      code_sign_identity: "iPhone Distribution",
+      profile_name: "match AppStore com.anonymous.Freifahren"
+    )
+
     cocoapods(
         clean_install: true,
         podfile: "ios/Podfile"
@@ -27,7 +36,8 @@ platform :ios do
       workspace: "./ios/freifahren.xcworkspace",
       export_method: "app-store",
       configuration: "Release",
-      clean: true
+      clean: true,
+      export_team_id: ENV["APPLE_DEVELOPER_TEAM_ID"]
     )
 
     upload_to_testflight(

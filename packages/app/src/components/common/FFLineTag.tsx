@@ -1,7 +1,6 @@
 import { isNil } from 'lodash'
 import { ComponentProps } from 'react'
 
-import { useLines } from '../../api/queries'
 import { Theme } from '../../theme'
 import { FFText, FFView } from './base'
 
@@ -15,9 +14,7 @@ type LineTagProps = {
 } & ComponentProps<typeof FFView>
 
 export const FFLineTag = ({ line, fallbackColor = 'danger', textProps, ...props }: LineTagProps) => {
-    const { data: lines } = useLines()
-    const isValidLine = !isNil(line) && lines !== undefined && line in lines
-    const bgColor = isValidLine ? getLineColor(line as string) : fallbackColor
+    const bgColor = !isNil(line) ? getLineColor(line) : fallbackColor
 
     return (
         <FFView bg={bgColor} px="xxs" borderRadius="s" {...props}>

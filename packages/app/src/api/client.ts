@@ -17,7 +17,7 @@ export const client = axios.create({
 })
 
 const etagMiddleware = createETagMiddleware({
-    endpoints: ['/v0/lines', '/v0/stations', '/v0/lines/segments'],
+    endpoints: ['/v0/transit/lines', '/v0/transit/stations', '/v0/transit/segments'],
 })
 
 etagMiddleware.applyMiddleware(client)
@@ -25,32 +25,20 @@ etagMiddleware.applyMiddleware(client)
 export const clearApiCache = etagMiddleware.clearAllCaches
 export const clearEndpointCache = etagMiddleware.clearCache
 
-export const reportSchema = z
-    .object({
-        timestamp: z.string().transform((value) => new Date(value)),
-        line: z.string().transform((value: string) => (value === '' ? null : value)),
-        isHistoric: z.boolean().default(false),
-        direction: z
-            .object({
-                id: z.string(),
-                name: z.string(),
-            })
-            .transform((value) => (value.name === '' || value.id === '' ? null : value)),
-        station: z.object({
-            id: z.string(),
-        }),
-    })
-    .transform(({ station, ...rest }) => ({
-        ...rest,
-        stationId: station.id,
-    }))
+export const reportSchema = z.object({
+    timestamp: z.string().transform((value) => new Date(value)),
+    stationId: z.string(),
+    lineId: z.string().nullable(),
+    directionId: z.string().nullable(),
+    isPredicted: z.boolean(),
+})
 
 export type Report = z.infer<typeof reportSchema>
 const getReports = async (start: DateTime, end: DateTime): Promise<Report[]> => {
-    const { data } = await client.get('/v0/basics/inspectors', {
+    const { data } = await client.get('/v0/reports', {
         params: {
-            start: start.toISO(),
-            end: end.toISO(),
+            from: start.toISO(),
+            to: end.toISO(),
         },
     })
 
@@ -65,35 +53,35 @@ const getRecentReports = async (): Promise<Report[]> => {
 }
 
 type PostReport = {
-    line: string
     stationId: string
+    lineId: string | null
     directionId: string | null
-    message?: string
 }
 
 const postReport = async (report: PostReport) => {
-    const { data } = await client.post('/v0/basics/inspectors', {
-        ...report,
-        directionId: report.directionId ?? '',
+    const { data } = await client.post('/v0/reports', {
+        stationId: report.stationId,
+        lineId: report.lineId,
+        directionId: report.directionId,
+        source: 'mobile_app',
     })
 
-    return reportSchema.parse(data)
+    return reportSchema.parse({ ...data, isPredicted: false })
 }
 
-const riskSchema = z
-    .object({
-        last_modified: z.string().transform((value) => new Date(value)),
-        segment_colors: z.record(z.string()),
-    })
-    .transform(({ last_modified, segment_colors }) => ({
-        lastModified: last_modified,
-        segmentColors: segment_colors,
-    }))
+const riskSchema = z.object({
+    segments_risk: z.record(
+        z.object({
+            color: z.string(),
+            risk: z.number(),
+        })
+    ),
+})
 
 export type RiskData = z.infer<typeof riskSchema>
 
 export const getRiskData = async (): Promise<RiskData> => {
-    const { data } = await client.get('/v0/risk-prediction/segment-colors')
+    const { data } = await client.get('/v0/risk')
 
     return riskSchema.parse(data)
 }
@@ -113,16 +101,27 @@ export const stationsSchema = z.record(stationSchema.optional())
 export type Stations = z.infer<typeof stationsSchema>
 
 export const getStations = async (): Promise<Stations> => {
-    const { data } = await client.get('/v0/stations')
+    const { data } = await client.get('/v0/transit/stations')
 
     return stationsSchema.parse(data)
 }
 
-export const linesSchema = z.record(z.array(z.string()))
+export const lineSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    type: z.enum(['subway', 'tram', 'light_rail']),
+    isCircular: z.boolean(),
+    stations: z.array(z.string()),
+})
+
+export type Line = z.infer<typeof lineSchema>
+export type LineType = Line['type']
+
+export const linesSchema = z.array(lineSchema)
 export type Lines = z.infer<typeof linesSchema>
 
-export const getLines = async (): Promise<Record<string, string[]>> => {
-    const { data } = await client.get('/v0/lines')
+export const getLines = async (): Promise<Lines> => {
+    const { data } = await client.get('/v0/transit/lines')
 
     return linesSchema.parse(data)
 }
@@ -133,9 +132,11 @@ export const featureCollectionSchema = z.object({
         z.object({
             type: z.literal('Feature'),
             properties: z.object({
-                sid: z.string(),
-                line: z.string().optional(),
-                line_color: z.string(),
+                id: z.number(),
+                line: z.string(),
+                from: z.string(),
+                to: z.string(),
+                color: z.string(),
             }),
             geometry: z.object({
                 type: z.literal('LineString'),
@@ -148,86 +149,105 @@ export const featureCollectionSchema = z.object({
 export type FeatureCollection = z.infer<typeof featureCollectionSchema>
 
 export const getSegments = async (): Promise<FeatureCollection> => {
-    const { data } = await client.get('/v0/lines/segments')
+    const { data } = await client.get('/v0/transit/segments')
 
     return featureCollectionSchema.parse(data)
 }
 
-export const stationStatisticsSchema = z.object({
-    numberOfReports: z.number(),
-})
-
-export type StationStatistics = z.infer<typeof stationStatisticsSchema>
-
-export const getStationStatistics = async (stationId: string) => {
-    const { data } = await client.get(`/v0/stations/${stationId}/statistics`)
-
-    return stationStatisticsSchema.parse(data)
+export type StationStatistics = {
+    numberOfReports: number
 }
 
-export const nodeSchema = z.object({
-    name: z.string(),
-    stopId: z.string(),
-    lat: z.number(),
-    lon: z.number(),
-    departure: z.string().optional(),
-    scheduledDeparture: z.string().optional(),
-    arrival: z.string().optional(),
-    scheduledArrival: z.string().optional(),
-})
+// Get reports for a specific station over the last 7 days to compute statistics
+export const getStationReports = async (stationId: string): Promise<Report[]> => {
+    const now = DateTime.utc()
+    const sevenDaysAgo = now.minus({ days: 7 })
 
-export const legSchema = z.object({
-    mode: z.enum(['WALK', 'BUS', 'TRAM', 'METRO', 'SUBWAY', 'REGIONAL_RAIL']),
-    from: nodeSchema,
-    to: nodeSchema,
-    duration: z.number(),
-    startTime: z.string(),
-    endTime: z.string(),
-    scheduledStartTime: z.string(),
-    scheduledEndTime: z.string(),
-    realTime: z.boolean().optional(),
-    routeShortName: z.string().optional(),
-    intermediateStops: z.array(nodeSchema).optional(),
-    legGeometry: z.object({
-        points: z.string(),
-        length: z.number(),
-    }),
-})
+    const { data } = await client.get(`/v0/reports/${stationId}`, {
+        params: {
+            from: sevenDaysAgo.toISO(),
+            to: now.toISO(),
+        },
+    })
 
-export const itinerarySchema = z.object({
-    duration: z.number(),
-    startTime: z.string(),
-    endTime: z.string(),
-    transfers: z.number(),
-    legs: z.array(legSchema),
-    calculatedRisk: z.number().optional(),
-})
+    return reportSchema.array().parse(data)
+}
 
-export const navigationResponseSchema = z.object({
-    requestParameters: z.record(z.unknown()),
-    debugOutput: z.record(z.unknown()),
-    from: nodeSchema,
-    to: nodeSchema,
-    direct: z.array(z.unknown()).default([]),
-    safestItinerary: itinerarySchema,
-    alternativeItineraries: z.array(itinerarySchema),
-})
+export const getStationStatistics = async (stationId: string): Promise<StationStatistics> => {
+    const reports = await getStationReports(stationId)
 
-export type Itinerary = z.infer<typeof itinerarySchema>
-export type NavigationResponse = z.infer<typeof navigationResponseSchema>
-export type Leg = z.infer<typeof legSchema>
-export type Node = z.infer<typeof nodeSchema>
-
-export const getItineraries = async (start: string, end: string) => {
-    const { data } = await client.get(`/v0/transit/itineraries?startStation=${start}&endStation=${end}`)
-    const result = navigationResponseSchema.safeParse(data)
-
-    if (!result.success) {
-        return undefined
+    return {
+        numberOfReports: reports.length,
     }
-
-    return result.data
 }
+
+// NOTE: Itineraries are not supported in the Hono backend yet.
+// The web frontend has dropped its NavigationModal entirely.
+// Uncomment and update these when backend support is added.
+//
+// export const nodeSchema = z.object({
+//     name: z.string(),
+//     stopId: z.string(),
+//     lat: z.number(),
+//     lon: z.number(),
+//     departure: z.string().optional(),
+//     scheduledDeparture: z.string().optional(),
+//     arrival: z.string().optional(),
+//     scheduledArrival: z.string().optional(),
+// })
+//
+// export const legSchema = z.object({
+//     mode: z.enum(['WALK', 'BUS', 'TRAM', 'METRO', 'SUBWAY', 'REGIONAL_RAIL']),
+//     from: nodeSchema,
+//     to: nodeSchema,
+//     duration: z.number(),
+//     startTime: z.string(),
+//     endTime: z.string(),
+//     scheduledStartTime: z.string(),
+//     scheduledEndTime: z.string(),
+//     realTime: z.boolean().optional(),
+//     routeShortName: z.string().optional(),
+//     intermediateStops: z.array(nodeSchema).optional(),
+//     legGeometry: z.object({
+//         points: z.string(),
+//         length: z.number(),
+//     }),
+// })
+//
+// export const itinerarySchema = z.object({
+//     duration: z.number(),
+//     startTime: z.string(),
+//     endTime: z.string(),
+//     transfers: z.number(),
+//     legs: z.array(legSchema),
+//     calculatedRisk: z.number().optional(),
+// })
+//
+// export const navigationResponseSchema = z.object({
+//     requestParameters: z.record(z.unknown()),
+//     debugOutput: z.record(z.unknown()),
+//     from: nodeSchema,
+//     to: nodeSchema,
+//     direct: z.array(z.unknown()).default([]),
+//     safestItinerary: itinerarySchema,
+//     alternativeItineraries: z.array(itinerarySchema),
+// })
+//
+// export type Itinerary = z.infer<typeof itinerarySchema>
+// export type NavigationResponse = z.infer<typeof navigationResponseSchema>
+// export type Leg = z.infer<typeof legSchema>
+// export type Node = z.infer<typeof nodeSchema>
+//
+// export const getItineraries = async (start: string, end: string) => {
+//     const { data } = await client.get(`/v0/transit/itineraries?startStation=${start}&endStation=${end}`)
+//     const result = navigationResponseSchema.safeParse(data)
+//
+//     if (!result.success) {
+//         return undefined
+//     }
+//
+//     return result.data
+// }
 
 export const api = {
     getLines,
@@ -238,5 +258,5 @@ export const api = {
     getRiskData,
     getStationStatistics,
     getSegments,
-    getItineraries,
+    // getItineraries, // Not supported in Hono backend yet
 }

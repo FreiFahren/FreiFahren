@@ -19,6 +19,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { queryClient } from './src/api'
+import { runApiMigrations } from './src/api/migrations'
 import { FFView } from './src/components/common/base'
 import { ErrorBoundary } from './src/components/ErrorBoundary'
 import i18n from './src/i18n'
@@ -57,6 +58,7 @@ const App = () => {
         Promise.all([
             NavigationBar.setPositionAsync('absolute'),
             NavigationBar.setBackgroundColorAsync('#ffffff00'),
+            runApiMigrations(),
         ]).catch(noop)
     }, [])
 

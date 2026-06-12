@@ -2,7 +2,6 @@ import { Blocker } from '../Blocker'
 import { FFSafeAreaView, FFView } from '../common/base'
 import { Attribution } from './Attribution'
 import { LayerSwitcher } from './LayerSwitcher'
-import { NavigationButton } from './Navigation/NavigationButton'
 import { ReportButton } from './Report/ReportButton'
 import { ReportDetailsSheet } from './ReportDetailsSheet'
 import { ReportListButton } from './ReportList/ReportListButton'
@@ -30,7 +29,6 @@ export const UIOverlay = () => (
                 </FFView>
             </FFView>
             <FFView>
-                <NavigationButton alignSelf="flex-end" marginBottom="xs" />
                 <FFView
                     pointerEvents="box-none"
                     flexDirection="row"

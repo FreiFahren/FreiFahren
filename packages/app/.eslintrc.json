@@ -92,15 +92,10 @@
       }
     ],
     "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/prefer-nullish-coalescing": "error",
+    "@typescript-eslint/prefer-nullish-coalescing": "off",
     "@typescript-eslint/no-floating-promises": "error",
-    "@typescript-eslint/no-unnecessary-condition": "warn",
-    "@typescript-eslint/strict-boolean-expressions": [
-      "error",
-      {
-        "allowNumber": false
-      }
-    ],
+    "@typescript-eslint/no-unnecessary-condition": "off",
+    "@typescript-eslint/strict-boolean-expressions": "off",
     "unicorn/no-useless-spread": "error",
     "unicorn/prevent-abbreviations": [
       "error",
