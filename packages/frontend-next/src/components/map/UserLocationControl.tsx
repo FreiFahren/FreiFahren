@@ -159,7 +159,9 @@ export function UserLocationControl() {
         onError={(e) => handleError(e.code)}
         onTrackUserLocationStart={() => notifyLoading()}
       />
-      {promptVisible && <LocationPermissionPrompt onAllow={handleAllow} onDismiss={handleDismiss} />}
+      {promptVisible && (
+        <LocationPermissionPrompt onAllow={handleAllow} onDismiss={handleDismiss} />
+      )}
     </>
   );
 }
