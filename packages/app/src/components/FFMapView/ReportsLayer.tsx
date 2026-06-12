@@ -76,6 +76,23 @@ const usePulseAnimation = () => {
     }))
 }
 
+// Multiple reports can share the same stationId; keep only the most recent per station
+// so each station renders a single marker (and avoids duplicate React keys).
+const useLatestReportsPerStation = (reports: Report[]) =>
+    useMemo(() => {
+        const latestByStation = new Map<string, Report>()
+
+        for (const report of reports) {
+            const existing = latestByStation.get(report.stationId)
+
+            if (existing === undefined || report.timestamp.getTime() > existing.timestamp.getTime()) {
+                latestByStation.set(report.stationId, report)
+            }
+        }
+
+        return Array.from(latestByStation.values())
+    }, [reports])
+
 const useReportsGeoJson = (reports: Report[]) => {
     const { data: stations } = useStations()
 
@@ -169,7 +186,8 @@ type ReportsLayerProps = {
 }
 
 export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
-    const reportsGeoJson = useReportsGeoJson(reports)
+    const latestReports = useLatestReportsPerStation(reports)
+    const reportsGeoJson = useReportsGeoJson(latestReports)
     const pulseAnimatedStyle = usePulseAnimation()
     const showMarkers = useShowMarkersWithDelay()
     const shouldShowReports = useAppStore((state) => !state.appLocked)
@@ -183,7 +201,7 @@ export const ReportsLayer = ({ reports, onPressReport }: ReportsLayerProps) => {
         <>
             {showMarkers &&
                 shouldShowReports &&
-                reports.map((report) => (
+                latestReports.map((report) => (
                     <ReportMarker
                         key={report.stationId}
                         report={report}

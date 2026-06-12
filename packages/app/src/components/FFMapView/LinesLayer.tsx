@@ -46,6 +46,7 @@ export const LinesLayer = () => {
                 id="route-name-layer"
                 style={{
                     textField: ['get', 'lineName'],
+                    textFont: ['Open Sans Regular'],
                     textColor: '#FFF',
                     textAnchor: 'center',
                     textSize: 12,

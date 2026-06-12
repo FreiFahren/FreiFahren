@@ -111,6 +111,7 @@ export const StationLayer = () => {
                 id="stationNameLayer"
                 style={{
                     textField: ['get', 'name'],
+                    textFont: ['Open Sans Regular'],
                     textColor: theme.colors.fg,
                     textAnchor: 'bottom',
                     textSize: 12,
