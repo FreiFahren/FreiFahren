@@ -340,7 +340,7 @@ export function ReportForm() {
   const handleSuccessClose = () => {
     navigate({ to: '/' });
     // Invite a contribution after a successful report, unless the user opted out.
-    if (!isContributeDismissed()) openContributeModal();
+    if (!isContributeDismissed()) openContributeModal('report_success');
   };
 
   return (
