@@ -68,9 +68,23 @@ createRoot(document.getElementById('root')!).render(
   posthogKey ? (
     <PostHogProvider
       apiKey={posthogKey}
-      // autocapture disabled: keep pageview tracking but don't record DOM clicks/inputs (privacy
-      // surface + event noise). Domain actions should be tracked with explicit posthog.capture().
-      options={{ api_host: posthogHost, defaults: '2025-05-24', autocapture: false }}
+      // Analytics config (see src/lib/consent.ts for the opt-out flow):
+      // - autocapture off: no DOM click/input capture; domain events go through track().
+      // - Capture is ON by default (opt-out model): the banner is informational and lets users opt
+      //   out via posthog.opt_out_capturing(). This gives retention + cross-session funnels out of
+      //   the box. NOTE: opt-out (vs opt-in) for cookie-based analytics is a deliberate product/
+      //   legal choice — reflect it in the privacy policy's legal basis.
+      // - session recording stays off; DNT is honored as an automatic opt-out signal.
+      // - capture_performance off: no web-vitals/network capture even before remote config loads
+      //   (the '2025-05-24' defaults would otherwise enable it at init); matches the project settings.
+      options={{
+        api_host: posthogHost,
+        defaults: '2025-05-24',
+        autocapture: false,
+        capture_performance: false,
+        disable_session_recording: true,
+        respect_dnt: true,
+      }}
     >
       {app}
     </PostHogProvider>
