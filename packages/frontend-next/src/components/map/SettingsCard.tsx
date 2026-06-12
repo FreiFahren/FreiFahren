@@ -75,7 +75,7 @@ export function SettingsCard({ onClose }: SettingsCardProps) {
       <CardContent>
         <Button
           type="button"
-          onClick={openContributeModal}
+          onClick={() => openContributeModal('settings')}
           className="bg-accent-bright text-primary-foreground hover:bg-accent-press h-11 w-full gap-2"
         >
           <HeartHandshake />

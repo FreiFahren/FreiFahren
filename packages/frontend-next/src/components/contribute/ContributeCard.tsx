@@ -1,14 +1,16 @@
 import { Check, Copy, HeartHandshake } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { DetailCard } from '@/components/map/DetailCard';
 import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { track } from '@/lib/analytics';
 import {
   closeContributeModal,
   dismissContributeForever,
+  getContributeSource,
   useContributeModalOpen,
 } from '@/lib/contribute-modal';
 import { optionalEnv } from '@/lib/utils';
@@ -22,6 +24,12 @@ const BANK_BIC = 'GENODEF1SLR';
 const stripePaymentLink = optionalEnv('VITE_STRIPE_PAYMENT_LINK');
 const hasStripeConfig = Boolean(stripePaymentLink);
 
+const DEFAULT_TAB = 'stripe';
+
+// Maps a tab value to the analytics method name, shared by the initial view and tab switches.
+const methodForTab = (tab: string): 'stripe' | 'bank_transfer' =>
+  tab === 'bank' ? 'bank_transfer' : 'stripe';
+
 type BankFieldId = 'holder' | 'iban' | 'bic' | 'reference';
 
 export function ContributeCard() {
@@ -33,13 +41,27 @@ export function ContributeCard() {
 function ContributeCardContent() {
   const { t } = useTranslation(NAMESPACE);
 
+  useEffect(() => {
+    // The modal mounts on the default tab (or the bank details when Stripe isn't configured).
+    // Record that initial view here since onValueChange only fires on later switches.
+    track('contribute_method_viewed', {
+      method: hasStripeConfig ? methodForTab(DEFAULT_TAB) : 'bank_transfer',
+    });
+  }, []);
+
   return (
     <DetailCard title={t('title')} closeLabel={t('close')} onClose={closeContributeModal}>
       <CardContent className="flex flex-col gap-4">
         <p className="text-muted-foreground text-sm">{t('description')}</p>
 
         {hasStripeConfig ? (
-          <Tabs defaultValue="stripe" className="gap-4">
+          <Tabs
+            defaultValue={DEFAULT_TAB}
+            className="gap-4"
+            onValueChange={(value) =>
+              track('contribute_method_viewed', { method: methodForTab(value) })
+            }
+          >
             <TabsList className="bg-surface-solid border-border grid w-full grid-cols-2 gap-0.5 rounded-md border p-0.5">
               <TabsTrigger value="stripe" className={triggerClass}>
                 {t('tabStripe')}
@@ -86,7 +108,12 @@ function StripeTab() {
         size="lg"
         className="bg-accent-bright text-primary-foreground hover:bg-accent-press h-11 w-full gap-2"
       >
-        <a href={stripePaymentLink} target="_blank" rel="noopener noreferrer">
+        <a
+          href={stripePaymentLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => track('contribute_stripe_clicked', { source: getContributeSource() })}
+        >
           <HeartHandshake />
           {t('support')}
         </a>
