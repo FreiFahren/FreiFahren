@@ -27,6 +27,7 @@
     "idb-keyval": "^6.2.5",
     "lucide-react": "^1.16.0",
     "maplibre-gl": "^5.24.0",
+    "posthog-js": "^1.386.6",
     "radix-ui": "^1.4.3",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",

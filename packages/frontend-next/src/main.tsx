@@ -4,7 +4,9 @@ import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { get, set, del } from 'idb-keyval';
+import { PostHogProvider } from 'posthog-js/react';
 import { queryClient, PERSISTED_CACHE_MAX_AGE } from './api/queryClient';
+import { optionalEnv } from './lib/utils';
 import './lib/i18n';
 import { routeTree } from './routeTree.gen';
 import './index.css';
@@ -34,7 +36,10 @@ declare module '@tanstack/react-router' {
   }
 }
 
-createRoot(document.getElementById('root')!).render(
+const posthogKey = optionalEnv('VITE_POSTHOG_KEY');
+const posthogHost = optionalEnv('VITE_POSTHOG_HOST') ?? 'https://eu.i.posthog.com';
+
+const app = (
   <StrictMode>
     <PersistQueryClientProvider
       client={queryClient}
@@ -56,5 +61,18 @@ createRoot(document.getElementById('root')!).render(
     >
       <RouterProvider router={router} />
     </PersistQueryClientProvider>
-  </StrictMode>,
+  </StrictMode>
+);
+
+createRoot(document.getElementById('root')!).render(
+  posthogKey ? (
+    <PostHogProvider
+      apiKey={posthogKey}
+      options={{ api_host: posthogHost, defaults: '2025-05-24' }}
+    >
+      {app}
+    </PostHogProvider>
+  ) : (
+    app
+  ),
 );
