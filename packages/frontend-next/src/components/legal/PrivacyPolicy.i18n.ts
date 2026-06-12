@@ -96,7 +96,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
     policyChanges: {
       title: '10. Changes to the Privacy Policy',
       content:
-        'We reserve the right to change this Privacy Policy to reflect changes in legal conditions, the App, or data processing. Users are encouraged to regularly review the content of the Privacy Policy.',
+        'We reserve the right to change this Privacy Policy to reflect changes in legal conditions, the App, or data processing. Users are encouraged to regularly review the content of the Privacy Policy. Last updated: 12 June 2026.',
     },
     telegramMessages: {
       title: '11. Processing of Telegram Messages',
@@ -155,7 +155,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
         'Coarse technical data (browser, operating system, device type, referrer)',
       ],
       storage:
-        'We configure PostHog not to store IP addresses, and we do not use session recordings (session replays). If you allow cookies, PostHog stores a pseudonymous identifier in a cookie or local-storage entry on your device so we can recognize returning visits and measure usage over time. If you decline cookies, we continue to collect only anonymous, cookieless usage statistics, with nothing stored on your device. This processing is based on our legitimate interest in analyzing and improving the service (Art. 6(1)(f) GDPR). You can change your cookie choice at any time via "Analytics" in the App\'s settings, and you can object to the analytics entirely - including the cookieless statistics - by enabling the "Do Not Track" setting in your browser or by contacting us at contact@freifahren.org; we honor both. The data is processed on PostHog\'s EU servers; for any transfer to a third country see Section 14, and for the data processing agreement see Section 15.',
+        'We configure PostHog not to store IP addresses, and we do not use session recordings (session replays). If you allow cookies, PostHog stores a pseudonymous identifier in a cookie or local-storage entry on your device so we can recognize returning visits and measure usage over time. If you decline cookies, we continue to collect only anonymous, cookieless usage statistics, with nothing stored on your device. This processing is based on our legitimate interest in analyzing and improving the service (Art. 6(1)(f) GDPR). You can change your cookie choice at any time via "Analytics" in the App\'s settings, and you can object to the analytics entirely - including the cookieless statistics - by enabling the "Do Not Track" setting in your browser or by contacting us at contact@freifahren.org; we honor both. The data is processed on PostHog\'s EU servers; for any transfer to a third country see Section 14, and for the data processing agreement see Section 15. Analytics requests are routed through our own domain to PostHog (a reverse proxy) for reliability; the data, recipient (PostHog), and purpose remain unchanged from those described above.',
     },
   },
 });
@@ -253,7 +253,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
     policyChanges: {
       title: '10. Änderungen an der Datenschutzerklärung',
       content:
-        'Wir behalten uns vor, diese Datenschutzerklärung zu ändern, um sie an geänderte Rechtslagen oder Änderungen der App sowie der Datenverarbeitung anzupassen. Nutzer werden gebeten, sich regelmäßig über den Inhalt der Datenschutzerklärung zu informieren.',
+        'Wir behalten uns vor, diese Datenschutzerklärung zu ändern, um sie an geänderte Rechtslagen oder Änderungen der App sowie der Datenverarbeitung anzupassen. Nutzer werden gebeten, sich regelmäßig über den Inhalt der Datenschutzerklärung zu informieren. Stand: 12. Juni 2026.',
     },
     telegramMessages: {
       title: '11. Verarbeitung von Telegram-Nachrichten',
@@ -312,7 +312,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
         'Technische Näherungsdaten (Browser, Betriebssystem, Gerätetyp, Referrer)',
       ],
       storage:
-        'Wir konfigurieren PostHog so, dass keine IP-Adressen gespeichert werden, und setzen keine Sitzungsaufzeichnungen (Session Replays) ein. Wenn Sie Cookies erlauben, speichert PostHog eine pseudonyme Kennung in einem Cookie- oder Local-Storage-Eintrag auf Ihrem Endgerät, damit wir wiederkehrende Besuche erkennen und die Nutzung über die Zeit messen können. Wenn Sie Cookies ablehnen, erfassen wir weiterhin ausschließlich anonyme, cookielose Nutzungsstatistiken, ohne dass etwas auf Ihrem Endgerät gespeichert wird. Diese Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses an der Analyse und Verbesserung des Dienstes (Art. 6 Abs. 1 lit. f DSGVO). Sie können Ihre Cookie-Auswahl jederzeit über "Analyse" in den Einstellungen der App ändern und der Reichweitenmessung insgesamt - einschließlich der cookielosen Statistiken - widersprechen, indem Sie die "Do Not Track"-Einstellung Ihres Browsers aktivieren oder uns unter contact@freifahren.org kontaktieren; wir berücksichtigen beides. Die Verarbeitung erfolgt auf den EU-Servern von PostHog; Hinweise zu einem etwaigen Drittlandtransfer finden Sie in Abschnitt 14 und zum Auftragsverarbeitungsvertrag in Abschnitt 15.',
+        'Wir konfigurieren PostHog so, dass keine IP-Adressen gespeichert werden, und setzen keine Sitzungsaufzeichnungen (Session Replays) ein. Wenn Sie Cookies erlauben, speichert PostHog eine pseudonyme Kennung in einem Cookie- oder Local-Storage-Eintrag auf Ihrem Endgerät, damit wir wiederkehrende Besuche erkennen und die Nutzung über die Zeit messen können. Wenn Sie Cookies ablehnen, erfassen wir weiterhin ausschließlich anonyme, cookielose Nutzungsstatistiken, ohne dass etwas auf Ihrem Endgerät gespeichert wird. Diese Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses an der Analyse und Verbesserung des Dienstes (Art. 6 Abs. 1 lit. f DSGVO). Sie können Ihre Cookie-Auswahl jederzeit über "Analyse" in den Einstellungen der App ändern und der Reichweitenmessung insgesamt - einschließlich der cookielosen Statistiken - widersprechen, indem Sie die "Do Not Track"-Einstellung Ihres Browsers aktivieren oder uns unter contact@freifahren.org kontaktieren; wir berücksichtigen beides. Die Verarbeitung erfolgt auf den EU-Servern von PostHog; Hinweise zu einem etwaigen Drittlandtransfer finden Sie in Abschnitt 14 und zum Auftragsverarbeitungsvertrag in Abschnitt 15. Analyse-Anfragen werden zur Verbesserung der Zuverlässigkeit über unsere eigene Domain an PostHog weitergeleitet (Reverse Proxy); Daten, Empfänger (PostHog) und Zweck bleiben gegenüber den oben beschriebenen unverändert.',
     },
   },
 });
