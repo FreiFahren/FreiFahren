@@ -86,6 +86,19 @@ export const getRiskData = async (): Promise<RiskData> => {
     return riskSchema.parse(data)
 }
 
+const privacyPolicyMetaSchema = z.object({
+    lastModified: z.string().transform((date) => new Date(date)),
+    version: z.number(),
+})
+
+export type PrivacyPolicyMeta = z.infer<typeof privacyPolicyMetaSchema>
+
+export const getPrivacyPolicyMeta = async (): Promise<PrivacyPolicyMeta> => {
+    const { data } = await client.get('/v0/legal/privacy-policy-meta')
+
+    return privacyPolicyMetaSchema.parse(data)
+}
+
 export const stationSchema = z.object({
     name: z.string(),
     coordinates: z.object({
@@ -256,6 +269,7 @@ export const api = {
     getRecentReports,
     postReport,
     getRiskData,
+    getPrivacyPolicyMeta,
     getStationStatistics,
     getSegments,
     // getItineraries, // Not supported in Hono backend yet
