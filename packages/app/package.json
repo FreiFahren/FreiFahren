@@ -46,7 +46,6 @@
     "intl-pluralrules": "^2.0.1",
     "lodash": "^4.17.21",
     "luxon": "^3.5.0",
-    "native-base": "^3.4.28",
     "promise": "^8.3.0",
     "react": "19.1.0",
     "react-hook-form": "^7.76.1",
