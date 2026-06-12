@@ -1,4 +1,6 @@
-import { useSyncExternalStore } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
+
+import { setSuperProperties, track } from '@/lib/analytics';
 
 // Which transit layer the map shows: risk-colored segments ('RISK') or plain line colors
 // ('LINES'). Shared between the toggle button (mounted in the map route) and the layer (nested
@@ -29,6 +31,8 @@ function setLayer(next: Layer) {
   } catch {
     // Ignore storage failures (e.g. private mode); state still works for the session.
   }
+  track('risk_layer_toggled', { to: next });
+  setSuperProperties({ map_layer: next });
   for (const listener of listeners) listener();
 }
 
@@ -39,6 +43,11 @@ function subscribe(listener: () => void): () => void {
 
 export function useRiskLayer(): { visible: boolean; toggle: () => void } {
   const current = useSyncExternalStore(subscribe, () => layer);
+  // Stamp the current layer as a super property once PostHog is initialized (it isn't yet at module
+  // load), so events fired before any toggle — pageviews, reports — still carry the default state.
+  useEffect(() => {
+    setSuperProperties({ map_layer: current });
+  }, [current]);
   return {
     visible: current === 'RISK',
     toggle: () => setLayer(layer === 'RISK' ? 'LINES' : 'RISK'),
