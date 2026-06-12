@@ -11,11 +11,12 @@ i18n.addResourceBundle('en', NAMESPACE, {
   contribute: 'Contribute',
   follow: 'Follow',
   // legal
+  association: 'Mission',
   imprint: 'Imprint',
   privacy: 'Privacy',
   terms: 'Terms of Use',
   // contact sheet
-  aboutTitle: 'About us',
+  aboutTitle: 'Mission',
   about1:
     'FreiFahren is a non-commercial, open-source project with the goal of making public transport more accessible. We are always open to new contributors on our GitHub.',
   about2:
@@ -31,11 +32,12 @@ i18n.addResourceBundle('de', NAMESPACE, {
   contribute: 'Beitrag leisten',
   follow: 'Folgen',
   // legal
+  association: 'Mission',
   imprint: 'Impressum',
   privacy: 'Datenschutz',
   terms: 'Nutzungsbedingungen',
   // contact sheet
-  aboutTitle: 'Über uns',
+  aboutTitle: 'Mission',
   about1:
     'FreiFahren ist ein nicht-kommerzielles Open-Source-Projekt, das sich zum Ziel gesetzt hat, den Zugang zum öffentlichen Nahverkehr zu erleichtern. Wir sind stets offen für neue Mithelfende auf unserem GitHub.',
   about2:

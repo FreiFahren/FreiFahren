@@ -18,6 +18,7 @@ import { NAMESPACE } from './SettingsButton.i18n';
 
 const GITHUB_URL = 'https://github.com/FreiFahren/FreiFahren';
 const INSTAGRAM_URL = 'https://www.instagram.com/frei.fahren';
+const WEBSITE_URL = 'https://freifahren.org';
 
 function LegalLink({
   to,
@@ -102,6 +103,14 @@ export function SettingsCard({ onClose }: SettingsCardProps) {
       <Separator className="my-1" />
 
       <CardContent className="flex flex-wrap gap-x-4 gap-y-1">
+        <a
+          href={WEBSITE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-muted-foreground hover:text-foreground text-xs underline"
+        >
+          {t('association')}
+        </a>
         <LegalLink to={ImpressumRoute.to}>{t('imprint')}</LegalLink>
         <LegalLink to={PrivacyRoute.to}>{t('privacy')}</LegalLink>
         <LegalLink onClick={openLegalDisclaimer}>{t('terms')}</LegalLink>
