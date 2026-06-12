@@ -15,6 +15,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   imprint: 'Imprint',
   privacy: 'Privacy',
   terms: 'Terms of Use',
+  analytics: 'Analytics',
   // contact sheet
   aboutTitle: 'Mission',
   about1:
@@ -36,6 +37,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
   imprint: 'Impressum',
   privacy: 'Datenschutz',
   terms: 'Nutzungsbedingungen',
+  analytics: 'Analyse',
   // contact sheet
   aboutTitle: 'Mission',
   about1:

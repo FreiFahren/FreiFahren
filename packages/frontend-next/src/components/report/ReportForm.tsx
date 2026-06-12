@@ -16,6 +16,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useGeolocation } from '@/contexts/Geolocation.context';
 import { isContributeDismissed, openContributeModal } from '@/lib/contribute-modal';
+import { track } from '@/lib/analytics';
 import { distanceMeters } from '@/lib/geo';
 import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
@@ -298,6 +299,11 @@ function SubmitFooter({ onSubmitted }: { onSubmitted: (result: SubmitReportRespo
       {
         onSuccess: (result) => {
           recordSubmission();
+          track('report_submitted', {
+            stationId: result.stationId,
+            lineId: result.lineId,
+            directionId: result.directionId,
+          });
           onSubmitted(result);
         },
       },
