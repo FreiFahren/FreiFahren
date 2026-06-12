@@ -14,7 +14,8 @@ styles:
     freifahren-dark: /styles/freifahren-dark.json
 
 fonts:
-  paths: []
+  paths:
+    - /fonts
 
 sprites:
   paths: []
