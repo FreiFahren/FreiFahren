@@ -112,7 +112,7 @@ const useReportsGeoJson = (reports: Report[]) => {
                         },
                         properties: {
                             id: report.stationId,
-                            opacity: report.isHistoric
+                            opacity: report.isPredicted
                                 ? 0.4
                                 : 1.4 - Math.min((now - new Date(report.timestamp).getTime()) / (1000 * 60 * 60), 1),
                         },

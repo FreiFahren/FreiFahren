@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { Separator } from '@/components/ui/separator';
+import { openConsentSettings } from '@/lib/consent';
 import { openContributeModal } from '@/lib/contribute-modal';
 import { openLegalDisclaimer } from '@/lib/legal-disclaimer';
 import { Route as ContactRoute } from '@/routes/_map/settings/contact';
@@ -114,6 +115,7 @@ export function SettingsCard({ onClose }: SettingsCardProps) {
         <LegalLink to={ImpressumRoute.to}>{t('imprint')}</LegalLink>
         <LegalLink to={PrivacyRoute.to}>{t('privacy')}</LegalLink>
         <LegalLink onClick={openLegalDisclaimer}>{t('terms')}</LegalLink>
+        <LegalLink onClick={openConsentSettings}>{t('analytics')}</LegalLink>
       </CardContent>
     </DetailCard>
   );

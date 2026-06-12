@@ -86,7 +86,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
     consent: {
       title: '8. Consent to the Privacy Policy',
       content:
-        'No separate consent is required for general use of the App or for submitting reports. No separate consent is required for voluntary contributions via Stripe either; the transaction data is processed in order to handle the contribution (Art. 6(1)(b) GDPR).',
+        'No separate consent is required for general use of the App or for submitting reports. No separate consent is required for voluntary contributions via Stripe either; the transaction data is processed in order to handle the contribution (Art. 6(1)(b) GDPR). The web analytics described in Section 16 is based on our legitimate interest and likewise requires no consent; you can object to it at any time (see Section 16).',
     },
     dataProtectionOfficer: {
       title: '9. Data Protection Contact',
@@ -134,6 +134,8 @@ i18n.addResourceBundle('en', NAMESPACE, {
           "Telegram FZ-LLC (United Arab Emirates): Used for synchronizing reports with the FreiFahren_BE group. No adequacy decision of the EU Commission exists for the UAE. In this context, we exclusively process anonymized report data (line, station, direction, rounded timestamp) without any direct personal identifiers; regarding a possible indirect link to an individual through timestamp correlation, see Section 5. Users who submit reports directly within the Telegram group are advised to consult Telegram's privacy terms.",
         stripe:
           "Stripe Payments Europe, Ltd. (Ireland) / Stripe, Inc. (USA): Used for processing voluntary contributions. The contracting party is Stripe Payments Europe, Ltd., based in Ireland; within its corporate group, transfers to its US parent company Stripe, Inc. may occur. Stripe processes payment data (e.g. card details) under its own data protection responsibility. Any transfers to the US are safeguarded on the basis of the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) and - where applicable - the EU-US Data Privacy Framework (Stripe is DPF-certified). Stripe's privacy policy is available at https://stripe.com/privacy.",
+        posthog:
+          "PostHog, Inc. (USA): Used for web analytics (see Section 16). Processing takes place in PostHog's EU Cloud, hosted in Frankfurt, Germany; any transfers to the United States are based on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) and - where applicable - the EU-US Data Privacy Framework (PostHog is DPF-certified).",
       },
       rights:
         'You may request a copy of the relevant safeguards (in particular the EU Standard Contractual Clauses) from us at contact@freifahren.org.',
@@ -141,7 +143,19 @@ i18n.addResourceBundle('en', NAMESPACE, {
     dataProcessing: {
       title: '15. Data Processing by Service Providers',
       content:
-        'Where external service providers are used in the context of data processing, they act as processors within the meaning of Art. 28 GDPR. Data Processing Agreements (Data Processing Addenda) are in place with Sentry (Functional Software, Inc.) and Cloudflare, Inc. Cloudflare, Inc. acts predominantly as a processor; for measures to prevent attacks and abuse, Cloudflare acts as an independent controller. A Data Processing Agreement with Hetzner Online GmbH is in place. A Data Processing Agreement (Data Processing Addendum) with Mistral AI SAS is in place as part of the subscription agreement. The contracting party for payment processing is Stripe Payments Europe, Ltd.; the Data Processing Agreement between the parties forms part of the Stripe Services Agreement. Insofar as Stripe processes payment data for its own purposes (in particular fraud prevention and compliance with regulatory obligations), Stripe acts as an independent controller in that respect.',
+        'Where external service providers are used in the context of data processing, they act as processors within the meaning of Art. 28 GDPR. Data Processing Agreements (Data Processing Addenda) are in place with Sentry (Functional Software, Inc.) and Cloudflare, Inc. Cloudflare, Inc. acts predominantly as a processor; for measures to prevent attacks and abuse, Cloudflare acts as an independent controller. A Data Processing Agreement with Hetzner Online GmbH is in place. A Data Processing Agreement (Data Processing Addendum) with Mistral AI SAS is in place as part of the subscription agreement. A Data Processing Agreement with PostHog, Inc. is in place. The contracting party for payment processing is Stripe Payments Europe, Ltd.; the Data Processing Agreement between the parties forms part of the Stripe Services Agreement. Insofar as Stripe processes payment data for its own purposes (in particular fraud prevention and compliance with regulatory obligations), Stripe acts as an independent controller in that respect.',
+    },
+    webAnalytics: {
+      title: '16. Web Analytics',
+      description:
+        'To understand how the App is used and to improve it, we use the product-analytics tool PostHog. The provider is PostHog, Inc., 2261 Market Street #4008, San Francisco, CA 94114, USA. We use PostHog EU Cloud, hosted on servers in Frankfurt am Main, Germany; PostHog acts as a processor pursuant to Art. 28 GDPR on our instruction. We collect:',
+      dataPoints: [
+        'Pages and views accessed within the App',
+        'Anonymous product events (e.g. that a report was submitted, together with the line, station, and direction IDs - these contain no personal identifiers)',
+        'Coarse technical data (browser, operating system, device type, referrer)',
+      ],
+      storage:
+        'We configure PostHog not to store IP addresses, and we do not use session recordings (session replays). If you allow cookies, PostHog stores a pseudonymous identifier in a cookie or local-storage entry on your device so we can recognize returning visits and measure usage over time. If you decline cookies, we continue to collect only anonymous, cookieless usage statistics, with nothing stored on your device. This processing is based on our legitimate interest in analyzing and improving the service (Art. 6(1)(f) GDPR). You can change your cookie choice at any time via "Analytics" in the App\'s settings, and you can object to the analytics entirely - including the cookieless statistics - by enabling the "Do Not Track" setting in your browser or by contacting us at contact@freifahren.org; we honor both. The data is processed on PostHog\'s EU servers; for any transfer to a third country see Section 14, and for the data processing agreement see Section 15.',
     },
   },
 });
@@ -230,7 +244,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
     consent: {
       title: '8. Einwilligung zur Datenschutzerklärung',
       content:
-        'Für die Nutzung der App sowie für das Absenden von Meldungen ist keine gesonderte Einwilligung erforderlich. Auch für die freiwillige Beitragszahlung über Stripe ist keine gesonderte Einwilligung erforderlich; die Verarbeitung der Transaktionsdaten erfolgt zur Abwicklung des Beitrags (Art. 6 Abs. 1 lit. b DSGVO).',
+        'Für die Nutzung der App sowie für das Absenden von Meldungen ist keine gesonderte Einwilligung erforderlich. Auch für die freiwillige Beitragszahlung über Stripe ist keine gesonderte Einwilligung erforderlich; die Verarbeitung der Transaktionsdaten erfolgt zur Abwicklung des Beitrags (Art. 6 Abs. 1 lit. b DSGVO). Die in Abschnitt 16 beschriebene Reichweitenmessung erfolgt auf Grundlage unseres berechtigten Interesses und erfordert ebenfalls keine gesonderte Einwilligung; Sie können ihr jederzeit widersprechen (siehe Abschnitt 16).',
     },
     dataProtectionOfficer: {
       title: '9. Datenschutzkontakt',
@@ -277,6 +291,8 @@ i18n.addResourceBundle('de', NAMESPACE, {
           'Telegram FZ-LLC (Vereinigte Arabische Emirate): Eingesetzt zur Synchronisation von Meldungen mit der FreiFahren_BE-Gruppe. Für die VAE liegt kein Angemessenheitsbeschluss der EU-Kommission vor. Wir verarbeiten in diesem Kontext ausschließlich anonymisierte Meldedaten (Linie, Station, Richtung, Uhrzeit) ohne unmittelbare Personenbezugsdaten; zu einem möglichen indirekten Personenbezug durch Zeitstempelkorrelation siehe Abschnitt 5. Nutzern, die Meldungen direkt in der Telegram-Gruppe absetzen, empfehlen wir, die Datenschutzhinweise von Telegram zu beachten.',
         stripe:
           'Stripe Payments Europe, Ltd. (Irland) / Stripe, Inc. (USA): Eingesetzt zur Abwicklung freiwilliger Beiträge. Vertragspartner ist die in Irland ansässige Stripe Payments Europe, Ltd.; im Rahmen des Konzernverbunds kann es zu Übermittlungen an die US-Muttergesellschaft Stripe, Inc. kommen. Stripe verarbeitet Zahlungsdaten (z. B. Kartendaten) in eigener datenschutzrechtlicher Verantwortung. Für etwaige Übermittlungen in die USA erfolgt die Absicherung auf Grundlage der EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) sowie - soweit anwendbar - des EU-US Data Privacy Framework (Stripe ist DPF-zertifiziert). Die Datenschutzhinweise von Stripe sind unter https://stripe.com/de/privacy abrufbar.',
+        posthog:
+          'PostHog, Inc. (USA): Eingesetzt zur Reichweitenmessung (siehe Abschnitt 16). Die Verarbeitung erfolgt in der EU-Cloud von PostHog, gehostet in Frankfurt am Main (Deutschland); etwaige Übermittlungen in die USA erfolgen auf Grundlage der EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) sowie - soweit anwendbar - des EU-US Data Privacy Framework (PostHog ist DPF-zertifiziert).',
       },
       rights:
         'Eine Kopie der jeweils einschlägigen Garantien (insbesondere der EU-Standardvertragsklauseln) können Sie bei uns unter contact@freifahren.org anfordern.',
@@ -284,7 +300,19 @@ i18n.addResourceBundle('de', NAMESPACE, {
     dataProcessing: {
       title: '15. Auftragsverarbeitung',
       content:
-        'Soweit externe Dienstleister im Rahmen der Datenverarbeitung eingesetzt werden, handelt es sich um Auftragsverarbeiter im Sinne des Art. 28 DSGVO. Mit Sentry (Functional Software, Inc.) und Cloudflare, Inc. bestehen entsprechende Auftragsverarbeitungsverträge (Data Processing Addenda). Cloudflare, Inc. wird dabei überwiegend als Auftragsverarbeiter tätig; für Maßnahmen der Angriffs- und Missbrauchsabwehr handelt Cloudflare als eigenständig Verantwortlicher. Mit Hetzner Online GmbH besteht ein Auftragsverarbeitungsvertrag. Mit Mistral AI SAS besteht ein Auftragsverarbeitungsvertrag (Data Processing Addendum), der als Bestandteil des Nutzungsvertrags gilt. Vertragspartner für die Zahlungsabwicklung ist die Stripe Payments Europe, Ltd.; die zwischen den Parteien geltende Data Processing Agreement ist Bestandteil des Stripe-Nutzungsvertrags. Soweit Stripe Zahlungsdaten zu eigenen Zwecken (insbesondere Betrugsprävention sowie zur Erfüllung regulatorischer Pflichten) verarbeitet, handelt Stripe insoweit als eigenständig Verantwortlicher.',
+        'Soweit externe Dienstleister im Rahmen der Datenverarbeitung eingesetzt werden, handelt es sich um Auftragsverarbeiter im Sinne des Art. 28 DSGVO. Mit Sentry (Functional Software, Inc.) und Cloudflare, Inc. bestehen entsprechende Auftragsverarbeitungsverträge (Data Processing Addenda). Cloudflare, Inc. wird dabei überwiegend als Auftragsverarbeiter tätig; für Maßnahmen der Angriffs- und Missbrauchsabwehr handelt Cloudflare als eigenständig Verantwortlicher. Mit Hetzner Online GmbH besteht ein Auftragsverarbeitungsvertrag. Mit Mistral AI SAS besteht ein Auftragsverarbeitungsvertrag (Data Processing Addendum), der als Bestandteil des Nutzungsvertrags gilt. Mit PostHog, Inc. besteht ein Auftragsverarbeitungsvertrag. Vertragspartner für die Zahlungsabwicklung ist die Stripe Payments Europe, Ltd.; die zwischen den Parteien geltende Data Processing Agreement ist Bestandteil des Stripe-Nutzungsvertrags. Soweit Stripe Zahlungsdaten zu eigenen Zwecken (insbesondere Betrugsprävention sowie zur Erfüllung regulatorischer Pflichten) verarbeitet, handelt Stripe insoweit als eigenständig Verantwortlicher.',
+    },
+    webAnalytics: {
+      title: '16. Reichweitenmessung',
+      description:
+        'Um zu verstehen, wie die App genutzt wird, und sie zu verbessern, setzen wir das Produktanalyse-Tool PostHog ein. Anbieter ist die PostHog, Inc., 2261 Market Street #4008, San Francisco, CA 94114, USA. Wir nutzen die EU-Cloud von PostHog, die auf Servern in Frankfurt am Main (Deutschland) gehostet wird; PostHog wird dabei als Auftragsverarbeiter nach Art. 28 DSGVO auf unsere Weisung tätig. Wir erheben:',
+      dataPoints: [
+        'Aufgerufene Seiten und Ansichten innerhalb der App',
+        'Anonyme Produktereignisse (z. B. dass eine Meldung abgesendet wurde, samt der IDs von Linie, Station und Richtung - diese enthalten keine Personenbezugsdaten)',
+        'Technische Näherungsdaten (Browser, Betriebssystem, Gerätetyp, Referrer)',
+      ],
+      storage:
+        'Wir konfigurieren PostHog so, dass keine IP-Adressen gespeichert werden, und setzen keine Sitzungsaufzeichnungen (Session Replays) ein. Wenn Sie Cookies erlauben, speichert PostHog eine pseudonyme Kennung in einem Cookie- oder Local-Storage-Eintrag auf Ihrem Endgerät, damit wir wiederkehrende Besuche erkennen und die Nutzung über die Zeit messen können. Wenn Sie Cookies ablehnen, erfassen wir weiterhin ausschließlich anonyme, cookielose Nutzungsstatistiken, ohne dass etwas auf Ihrem Endgerät gespeichert wird. Diese Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses an der Analyse und Verbesserung des Dienstes (Art. 6 Abs. 1 lit. f DSGVO). Sie können Ihre Cookie-Auswahl jederzeit über "Analyse" in den Einstellungen der App ändern und der Reichweitenmessung insgesamt - einschließlich der cookielosen Statistiken - widersprechen, indem Sie die "Do Not Track"-Einstellung Ihres Browsers aktivieren oder uns unter contact@freifahren.org kontaktieren; wir berücksichtigen beides. Die Verarbeitung erfolgt auf den EU-Servern von PostHog; Hinweise zu einem etwaigen Drittlandtransfer finden Sie in Abschnitt 14 und zum Auftragsverarbeitungsvertrag in Abschnitt 15.',
     },
   },
 });

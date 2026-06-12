@@ -125,6 +125,17 @@ export function PrivacyPolicy() {
         <h2>{t('sections.dataProcessing.title')}</h2>
         <p>{t('sections.dataProcessing.content')}</p>
       </section>
+
+      <section>
+        <h2>{t('sections.webAnalytics.title')}</h2>
+        <p>{t('sections.webAnalytics.description')}</p>
+        <ul>
+          {toArray('sections.webAnalytics.dataPoints').map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+        <p>{t('sections.webAnalytics.storage')}</p>
+      </section>
     </LegalPage>
   );
 }

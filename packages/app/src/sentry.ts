@@ -12,7 +12,7 @@ init({
         const error = hint.originalException
 
         if (error instanceof AxiosError) {
-            const status = error.response?.status
+            const { status } = error.response ?? {}
 
             if (status !== undefined && status >= 400) {
                 return event
