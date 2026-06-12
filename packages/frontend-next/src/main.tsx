@@ -68,7 +68,9 @@ createRoot(document.getElementById('root')!).render(
   posthogKey ? (
     <PostHogProvider
       apiKey={posthogKey}
-      options={{ api_host: posthogHost, defaults: '2025-05-24' }}
+      // autocapture disabled: keep pageview tracking but don't record DOM clicks/inputs (privacy
+      // surface + event noise). Domain actions should be tracked with explicit posthog.capture().
+      options={{ api_host: posthogHost, defaults: '2025-05-24', autocapture: false }}
     >
       {app}
     </PostHogProvider>
