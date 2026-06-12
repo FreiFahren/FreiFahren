@@ -6,6 +6,12 @@ import type { ContributeSource } from '@/lib/contribute-modal';
 // analytics SDK directly, so swapping PostHog for another provider is a single-file change here.
 // When no VITE_POSTHOG_KEY is set the SDK is never initialized (see main.tsx) and capture() no-ops.
 
+// Properties attached to every subsequent event (PostHog super properties), so all metrics —
+// including pageviews — can be sliced by which map layer the user is on.
+type SuperProperties = {
+  map_layer: 'RISK' | 'LINES';
+};
+
 /**
  * The events we send and their property shape. Add an entry here to introduce a new event — the
  * `track()` signature is derived from this map, so call sites get autocomplete and type-checking on
@@ -17,9 +23,7 @@ type AnalyticsEvents = {
     lineId: string | null;
     directionId: string | null;
   };
-  // Contribution funnel. `source` records which entry point opened the modal so we can compare the
-  // settings button against the prompt shown after a successful report. The donation itself happens
-  // off-site (Stripe redirect / manual bank transfer), so these events measure intent, not completion.
+  risk_layer_toggled: { to: SuperProperties['map_layer'] };
   contribute_modal_opened: { source: ContributeSource };
   contribute_method_viewed: { method: 'stripe' | 'bank_transfer' };
   contribute_stripe_clicked: { source: ContributeSource };
@@ -36,4 +40,15 @@ export function track<E extends keyof AnalyticsEvents>(
     console.log('[analytics]', event, properties);
   }
   posthog.capture(event, properties);
+}
+
+/**
+ * Register super properties — attached to every event sent afterwards. Used to stamp the current
+ * map layer onto all events so adoption and retention can be broken down by it.
+ */
+export function setSuperProperties(properties: Partial<SuperProperties>): void {
+  if (import.meta.env.DEV) {
+    console.log('[analytics] register', properties);
+  }
+  posthog.register(properties);
 }
