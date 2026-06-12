@@ -1,13 +1,13 @@
 import posthog from 'posthog-js';
 
 import type { ContributeSource } from '@/lib/contribute-modal';
+import type { GeolocationPermissionState } from '@/lib/location-prompt';
 
 // Provider-agnostic analytics facade. The rest of the app calls `track(...)` and never imports the
 // analytics SDK directly, so swapping PostHog for another provider is a single-file change here.
 // When no VITE_POSTHOG_KEY is set the SDK is never initialized (see main.tsx) and capture() no-ops.
 
-// Properties attached to every subsequent event (PostHog super properties), so all metrics —
-// including pageviews — can be sliced by which map layer the user is on.
+export type LocationRequestTrigger = 'auto' | 'soft_prompt';
 type SuperProperties = {
   map_layer: 'RISK' | 'LINES';
 };
@@ -28,6 +28,16 @@ type AnalyticsEvents = {
   contribute_method_viewed: { method: 'stripe' | 'bank_transfer' };
   contribute_stripe_clicked: { source: ContributeSource };
   contribute_dismissed: { source: ContributeSource };
+  location_permission_evaluated: { state: GeolocationPermissionState };
+  location_prompt_shown: Record<string, never>;
+  location_prompt_allowed: Record<string, never>;
+  location_prompt_dismissed: Record<string, never>;
+  location_request_started: { trigger: LocationRequestTrigger };
+  location_acquired: { trigger: LocationRequestTrigger };
+  location_failed: {
+    trigger: LocationRequestTrigger;
+    reason: 'denied' | 'unavailable' | 'timeout';
+  };
 };
 
 export function track<E extends keyof AnalyticsEvents>(
