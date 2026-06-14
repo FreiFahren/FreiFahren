@@ -5,6 +5,7 @@ import json
 import logging
 import re
 import unicodedata
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from difflib import SequenceMatcher
 
@@ -302,6 +303,8 @@ async def request_station_name_extraction(
         return None
 
 
+# Resolution stage: raw extracted strings + detected line in, station/direction ids out.
+# Kept separate from the LLM so its fuzzy-match edge cases are testable without one.
 def resolve_extraction(
     *,
     station_index: StationIndex,
@@ -326,6 +329,22 @@ def resolve_extraction(
     )
 
 
+# LLM adapter in front of the resolution stage: message in, raw extracted strings out.
+StationNameLLM = Callable[[str], Awaitable[StationNameExtraction | None]]
+
+
+def mistral_llm(*, client: Mistral, model: str, system_prompt: str) -> StationNameLLM:
+    async def call(message: str) -> StationNameExtraction | None:
+        return await request_station_name_extraction(
+            client=client,
+            model=model,
+            system_prompt=system_prompt,
+            message=message,
+        )
+
+    return call
+
+
 async def extract(
     *,
     message: str,
@@ -342,12 +361,8 @@ async def extract(
         line_pattern,
         transit.circular_line_names,
     )
-    parsed = await request_station_name_extraction(
-        client=client,
-        model=model,
-        system_prompt=system_prompt,
-        message=message,
-    )
+    llm = mistral_llm(client=client, model=model, system_prompt=system_prompt)
+    parsed = await llm(message)
     return (
         None
         if parsed is None
