@@ -96,7 +96,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
     policyChanges: {
       title: '10. Changes to the Privacy Policy',
       content:
-        'We reserve the right to change this Privacy Policy to reflect changes in legal conditions, the App, or data processing. Users are encouraged to regularly review the content of the Privacy Policy. Last updated: 12 June 2026.',
+        'We reserve the right to change this Privacy Policy to reflect changes in legal conditions, the App, or data processing. Users are encouraged to regularly review the content of the Privacy Policy. Last updated: 14 June 2026.',
     },
     telegramMessages: {
       title: '11. Processing of Telegram Messages',
@@ -104,7 +104,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
         "Messages from the Freifahren_BE group are evaluated by the Freifahren Telegram Bot with the consent of the administrators. Messages are not stored and are only used for real-time evaluation. Only the non-deterministically extracted information (direction, line, and station) from the messages is stored. The timestamp is rounded to ensure anonymity. Even for this anonymized report data, an indirect link to an individual cannot be fully excluded; see Section 5 in this regard. Message evaluation is performed using an AI language model from Mistral AI (Mistral AI SAS, Paris, France). For this, the message text is transmitted for real-time extraction to Mistral AI's API, which is hosted exclusively in the EU. Mistral AI acts as a processor pursuant to Art. 28 GDPR on our instruction; the content is not used to train the models and is retained by Mistral AI only briefly (max. 30 days) for abuse monitoring, if at all. FreiFahren does not store the message texts.",
     },
     errorMonitoring: {
-      title: '12. Error Monitoring and Diagnostics',
+      title: '12. Error Monitoring and Performance Diagnostics',
       description:
         "We use Sentry for error monitoring and crash reporting to maintain and improve our service. The provider is Functional Software, Inc. (Sentry), 45 Fremont Street, 8th Floor, San Francisco, CA 94105, USA. We use Sentry's EU region, so the technical data is processed on servers located within the European Union. When the App encounters an error, we collect anonymized diagnostic information including:",
       dataPoints: {
@@ -113,8 +113,10 @@ i18n.addResourceBundle('en', NAMESPACE, {
         device: 'Device type',
         state: 'App state at the time of the error',
       },
+      performance:
+        'In addition, we collect aggregated performance metrics - such as page-load times and Web Vitals (timings for rendering and responsiveness) - on a sampled basis to detect and fix performance problems. These metrics are technical and contain no personal identifiers; they reference only in-app screen paths and our own API endpoints, and no IP addresses.',
       storage:
-        'This technical data is stored for a maximum period of 30 days. We explicitly configure Sentry not to collect IP addresses. All data collection is anonymized and used solely for the purpose of identifying and fixing technical issues. Processing is based on legitimate interests pursuant to Art. 6(1)(f) GDPR (ensuring the functionality of the service). As Functional Software, Inc. is headquartered in the United States, a transfer of data to a third country (in particular within its corporate group or in the context of support and maintenance services) cannot be entirely excluded. Please refer to Section 15 for information on the safeguards in place.',
+        'This technical data is stored for a maximum period of 30 days. We explicitly configure Sentry not to collect IP addresses, and we do not use Session Replay. All data collection is anonymized and used solely for the purpose of identifying and fixing technical and performance issues. Processing is based on legitimate interests pursuant to Art. 6(1)(f) GDPR (ensuring the functionality of the service). As Functional Software, Inc. is headquartered in the United States, a transfer of data to a third country (in particular within its corporate group or in the context of support and maintenance services) cannot be entirely excluded. Please refer to Section 15 for information on the safeguards in place.',
     },
     appStores: {
       title: '13. Distribution via App Stores',
@@ -256,7 +258,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
     policyChanges: {
       title: '10. Änderungen an der Datenschutzerklärung',
       content:
-        'Wir behalten uns vor, diese Datenschutzerklärung zu ändern, um sie an geänderte Rechtslagen oder Änderungen der App sowie der Datenverarbeitung anzupassen. Nutzer werden gebeten, sich regelmäßig über den Inhalt der Datenschutzerklärung zu informieren. Stand: 12. Juni 2026.',
+        'Wir behalten uns vor, diese Datenschutzerklärung zu ändern, um sie an geänderte Rechtslagen oder Änderungen der App sowie der Datenverarbeitung anzupassen. Nutzer werden gebeten, sich regelmäßig über den Inhalt der Datenschutzerklärung zu informieren. Stand: 14. Juni 2026.',
     },
     telegramMessages: {
       title: '11. Verarbeitung von Telegram-Nachrichten',
@@ -264,7 +266,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
         'Durch den Freifahren Telegram Bot werden Nachrichten aus der Freifahren_BE-Gruppe mit Zustimmung der Administratoren ausgewertet. Die Nachrichten werden nicht gespeichert und nur für die Echtzeit-Auswertung verwendet. Es werden lediglich die nicht deterministisch extrahierten Informationen (Richtung, Linie und Station) aus den Nachrichten gespeichert. Die Uhrzeit wird abgerundet, um die Anonymität zu gewährleisten. Auch bei diesen anonymisierten Meldedaten kann ein indirekter Personenbezug nicht vollständig ausgeschlossen werden; siehe hierzu Abschnitt 5. Die Auswertung der Nachrichten erfolgt mithilfe eines KI-gestützten Sprachmodells des Anbieters Mistral AI (Mistral AI SAS, Paris, Frankreich). Hierzu wird der Nachrichtentext zur Echtzeit-Extraktion an die ausschließlich in der EU gehostete API von Mistral AI übermittelt. Mistral AI wird dabei als Auftragsverarbeiter nach Art. 28 DSGVO auf unsere Weisung tätig; die Inhalte werden nicht zum Training der Modelle verwendet und von Mistral AI allenfalls kurzfristig (max. 30 Tage) zur Missbrauchserkennung vorgehalten. Eine Speicherung der Nachrichtentexte durch FreiFahren erfolgt nicht.',
     },
     errorMonitoring: {
-      title: '12. Fehlererkennung und Diagnose',
+      title: '12. Fehlererkennung und Leistungsanalyse',
       description:
         'Wir verwenden Sentry zur Fehlererkennung und Absturzberichterstattung, um unseren Service zu warten und zu verbessern. Anbieter ist die Functional Software, Inc. (Sentry), 45 Fremont Street, 8th Floor, San Francisco, CA 94105, USA. Wir nutzen die EU-Region von Sentry, sodass die technischen Daten auf Servern innerhalb der Europäischen Union verarbeitet werden. Wenn die App einen Fehler feststellt, sammeln wir anonymisierte Diagnoseinformationen, einschließlich:',
       dataPoints: {
@@ -273,8 +275,10 @@ i18n.addResourceBundle('de', NAMESPACE, {
         device: 'Gerätetyp',
         state: 'App-Status zum Zeitpunkt des Fehlers',
       },
+      performance:
+        'Darüber hinaus erheben wir stichprobenartig aggregierte Leistungsdaten - etwa Seitenladezeiten und Web Vitals (Messwerte zu Darstellung und Reaktionsgeschwindigkeit) -, um Leistungsprobleme zu erkennen und zu beheben. Diese Daten sind technischer Natur und enthalten keine Personenbezugsdaten; sie beziehen sich lediglich auf In-App-Seitenpfade und unsere eigenen API-Endpunkte und keine IP-Adressen.',
       storage:
-        'Diese technischen Daten werden für maximal 30 Tage gespeichert. Wir konfigurieren Sentry ausdrücklich so, dass keine IP-Adressen erfasst werden. Alle Datenerfassung erfolgt anonymisiert und dient ausschließlich der Identifizierung und Behebung technischer Probleme. Die Verarbeitung erfolgt auf Grundlage berechtigter Interessen gemäß Art. 6 Abs. 1 lit. f DSGVO (Sicherstellung der Funktionsfähigkeit des Dienstes). Da die Functional Software, Inc. ihren Sitz in den USA hat, kann ein Drittlandtransfer (insbesondere im Rahmen des Konzernverbunds bzw. bei Support- und Wartungsleistungen) nicht ausgeschlossen werden. Hinweise zu den hierfür getroffenen Garantien finden Sie in Abschnitt 15.',
+        'Diese technischen Daten werden für maximal 30 Tage gespeichert. Wir konfigurieren Sentry ausdrücklich so, dass keine IP-Adressen erfasst werden, und setzen kein Session Replay ein. Alle Datenerfassung erfolgt anonymisiert und dient ausschließlich der Identifizierung und Behebung technischer und leistungsbezogener Probleme. Die Verarbeitung erfolgt auf Grundlage berechtigter Interessen gemäß Art. 6 Abs. 1 lit. f DSGVO (Sicherstellung der Funktionsfähigkeit des Dienstes). Da die Functional Software, Inc. ihren Sitz in den USA hat, kann ein Drittlandtransfer (insbesondere im Rahmen des Konzernverbunds bzw. bei Support- und Wartungsleistungen) nicht ausgeschlossen werden. Hinweise zu den hierfür getroffenen Garantien finden Sie in Abschnitt 15.',
     },
     appStores: {
       title: '13. Bezug der App über App-Stores',
