@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { resolveStationLineNames, type Station, useLines } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
+import { track } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
 import { Route as ReportRoute } from '@/routes/report';
@@ -33,7 +34,11 @@ export function StationDetail({ station, onClose }: StationDetailProps) {
           variant="default"
           className="bg-destructive hover:bg-destructive/90 h-11 w-full text-sm font-semibold text-white"
         >
-          <Link to={ReportRoute.to} search={{ stationId: station.id }}>
+          <Link
+            to={ReportRoute.to}
+            search={{ stationId: station.id }}
+            onClick={() => track('report_started', { source: 'station_detail' })}
+          >
             {t('reportSighting')}
           </Link>
         </Button>

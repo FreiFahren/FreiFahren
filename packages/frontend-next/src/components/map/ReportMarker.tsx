@@ -4,6 +4,7 @@ import { Marker, type MarkerEvent } from 'react-map-gl/maplibre';
 
 import type { Report } from '@/api/reports';
 import type { Station } from '@/api/transit';
+import { track } from '@/lib/analytics';
 import { markReportViewed, useReportViewed } from '@/lib/viewed-reports';
 import { Route as ReportDetailRoute } from '@/routes/_map/reports/$stationId';
 
@@ -51,6 +52,7 @@ export function ReportMarker({ report, station }: ReportMarkerProps) {
   const handleClick = (event: MarkerEvent<MouseEvent>) => {
     // Stop the map's onClick from also firing (which would open the station detail).
     event.originalEvent.stopPropagation();
+    track('report_marker_selected', { report_age_seconds: Math.round(age / 1000) });
     markReportViewed(report.stationId, report.timestamp);
     void navigate({ to: ReportDetailRoute.to, params: { stationId: report.stationId } });
   };

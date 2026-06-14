@@ -34,6 +34,10 @@ async def test_valid_request_sends_telegram_message(
     assert transit.stations[picked_station.station_id].name in text
     assert picked_station.line_name in text
     assert transit.stations[picked_station.direction_id].name in text
+    # The deep link must carry utm params so the app can attribute Telegram arrivals in analytics.
+    # The & is HTML-escaped in the message (&amp;) and unescaped by the client on click.
+    assert f'/station/{picked_station.station_id}?utm_source=telegram' in text
+    assert 'utm_medium=bot' in text
 
 
 async def test_request_without_password_is_rejected(
