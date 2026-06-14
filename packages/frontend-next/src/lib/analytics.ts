@@ -95,7 +95,9 @@ export function captureSurveyShown(surveyId: string): void {
     console.log('[analytics] survey shown', { surveyId });
   }
   const timestamp = new Date();
-  enqueuePostHog((posthog) => posthog.capture('survey shown', { $survey_id: surveyId }, { timestamp }));
+  enqueuePostHog((posthog) =>
+    posthog.capture('survey shown', { $survey_id: surveyId }, { timestamp }),
+  );
 }
 
 export function captureSurveyDismissed(surveyId: string): void {
