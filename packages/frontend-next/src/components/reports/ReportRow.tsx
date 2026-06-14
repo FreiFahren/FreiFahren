@@ -40,7 +40,7 @@ export function ReportRow({ report, recent }: { report: Report; recent: boolean 
 
   const trackSelection = () =>
     track('report_row_selected', {
-      recent,
+      report_age_minutes: Math.round((Date.now() - new Date(report.timestamp).getTime()) / 60000),
       has_line: report.lineId !== null,
       has_direction: report.directionId !== null,
     });
