@@ -52,14 +52,17 @@ export function ReportDetail({ station, onClose }: ReportDetailProps) {
         {report && (
           <p className="text-muted-foreground text-sm">{formatElapsed(report.timestamp, t)}</p>
         )}
-        {stationDistance !== undefined && (
-          <p className="text-muted-foreground flex items-center gap-1 text-sm">
-            <MapPin className="size-3.5 shrink-0" />
-            {stationDistance <= 1
-              ? t('oneStationAway')
-              : t('stationsAway', { count: stationDistance })}
-          </p>
-        )}
+        {/* Reserve the line height so the distance resolving in does not shift layout. */}
+        <p className="text-muted-foreground flex min-h-5 items-center gap-1 text-sm">
+          {stationDistance !== undefined && (
+            <>
+              <MapPin className="size-3.5 shrink-0" />
+              {stationDistance <= 1
+                ? t('oneStationAway')
+                : t('stationsAway', { count: stationDistance })}
+            </>
+          )}
+        </p>
         {/* Reserve the line height so the count loading in does not shift layout. */}
         <p className="min-h-5 text-sm">
           {numberOfReports !== undefined && numberOfReports > 0 && (
