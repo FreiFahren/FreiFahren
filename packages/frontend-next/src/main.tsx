@@ -4,9 +4,10 @@ import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { get, set, del } from 'idb-keyval';
-import { PostHogProvider } from 'posthog-js/react';
 import { queryClient, PERSISTED_CACHE_MAX_AGE } from './api/queryClient';
-import { optionalEnv } from './lib/utils';
+import { capturePageview } from './lib/analytics';
+import { syncConsentToPostHog } from './lib/consent';
+import { loadPostHog } from './lib/posthog-client';
 import { initErrorMonitoring } from './lib/error-monitoring';
 import './lib/i18n';
 import { routeTree } from './routeTree.gen';
@@ -41,8 +42,15 @@ declare module '@tanstack/react-router' {
   }
 }
 
-const posthogKey = optionalEnv('VITE_POSTHOG_KEY');
-const posthogHost = optionalEnv('VITE_POSTHOG_HOST') ?? 'https://eu.i.posthog.com';
+// Pageviews are captured here manually (PostHog's automatic capture is off). Module scope, not an
+// effect, so StrictMode doesn't double-subscribe; the href dedupe drops redundant resolves
+// (search-only navigations, StrictMode re-runs).
+let lastPageviewHref: string | null = null;
+router.subscribe('onResolved', ({ toLocation }) => {
+  if (toLocation.href === lastPageviewHref) return;
+  lastPageviewHref = toLocation.href;
+  capturePageview(toLocation.href);
+});
 
 const app = (
   <StrictMode>
@@ -79,31 +87,14 @@ const app = (
   </StrictMode>
 );
 
-createRoot(document.getElementById('root')!).render(
-  posthogKey ? (
-    <PostHogProvider
-      apiKey={posthogKey}
-      // Analytics config (see src/lib/consent.ts for the opt-out flow):
-      // - autocapture off: no DOM click/input capture; domain events go through track().
-      // - Capture is ON by default (opt-out model): the banner is informational and lets users opt
-      //   out via posthog.opt_out_capturing(). This gives retention + cross-session funnels out of
-      //   the box. NOTE: opt-out (vs opt-in) for cookie-based analytics is a deliberate product/
-      //   legal choice — reflect it in the privacy policy's legal basis.
-      // - session recording stays off; DNT is honored as an automatic opt-out signal.
-      // - capture_performance off: no web-vitals/network capture even before remote config loads
-      //   (the '2025-05-24' defaults would otherwise enable it at init); matches the project settings.
-      options={{
-        api_host: posthogHost,
-        defaults: '2025-05-24',
-        autocapture: false,
-        capture_performance: false,
-        disable_session_recording: true,
-        respect_dnt: true,
-      }}
-    >
-      {app}
-    </PostHogProvider>
-  ) : (
-    app
-  ),
-);
+createRoot(document.getElementById('root')!).render(app);
+
+// Load PostHog when the main thread is idle, off the critical render path. Calls made before it
+// resolves are buffered; syncConsentToPostHog reapplies the stored choice once it's initialized.
+const onIdle = (cb: () => void) =>
+  typeof window.requestIdleCallback === 'function'
+    ? window.requestIdleCallback(cb)
+    : window.setTimeout(cb, 1);
+onIdle(() => {
+  void loadPostHog().then(syncConsentToPostHog);
+});

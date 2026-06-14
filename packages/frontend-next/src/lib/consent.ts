@@ -1,5 +1,6 @@
-import posthog from 'posthog-js';
 import { useSyncExternalStore } from 'react';
+
+import { enqueuePostHog } from '@/lib/posthog-client';
 
 // Capture is ON by default (see main.tsx). The banner asks for cookie consent specifically; either
 // choice keeps analytics running, but at different privacy levels:
@@ -68,14 +69,19 @@ function subscribe(listener: () => void): () => void {
 
 // Bring PostHog in line with the current choice. Safe to call before a decision is made.
 function applyToPostHog(value: ConsentChoice | null): void {
+  // Ops buffer until the lazily-loaded SDK is ready.
   if (value === 'denied') {
     // Cookieless: keep capturing but store nothing on the device. reset() clears any id/cookie set
     // earlier (e.g. while undecided) so declining cookies genuinely leaves no device storage.
-    posthog.reset();
-    posthog.set_config({ persistence: 'memory' });
+    enqueuePostHog((posthog) => {
+      posthog.reset();
+      posthog.set_config({ persistence: 'memory' });
+    });
   } else if (value === 'granted') {
-    posthog.set_config({ persistence: 'localStorage+cookie' });
-    posthog.opt_in_capturing();
+    enqueuePostHog((posthog) => {
+      posthog.set_config({ persistence: 'localStorage+cookie' });
+      posthog.opt_in_capturing();
+    });
   }
   // null: leave PostHog in its init default (persistent capture).
 }

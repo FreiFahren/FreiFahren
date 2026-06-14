@@ -37,6 +37,14 @@ Example: `fix: return 404 instead of 500 when station id is unknown`
 
 The codebase should not assume Berlin. Keep city-specific data (station lists, line colors, network names, timezone, language) in **config files** under `packages/hono-backend/src/db/seed/config.ts` and similar locations — never hard-coded in business logic. Config files are the only sanctioned escape hatch for city-specific values.
 
+## Comments
+
+Comment sparingly — code should read for itself, and a comment earns its place only when it tells the reader something the code can't.
+
+- **Minimal.** Add a comment only when something is out of the ordinary or hard to understand. Don't restate what the code already says.
+- **Explain why, not what.** Capture the reason — the constraint, the trade-off, the non-obvious consequence — not a paraphrase of the statement below it.
+- **Write comments that don't expire.** Don't reference things that drift, like specific line numbers — the code moves but the comment won't. Anchor to rationale, which stays true as the surrounding code changes.
+
 ## Frontend conventions
 
 - **kebab-case for filenames.** Components, hooks, routes, utilities — all kebab-case (`report-card.tsx`, `use-reports.ts`, `format-timestamp.ts`). The default export inside still uses PascalCase for components and camelCase for hooks/utils; only the filename changes.
