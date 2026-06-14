@@ -303,12 +303,8 @@ async def request_station_name_extraction(
         return None
 
 
-# --- Resolution stage --------------------------------------------------------
-# `resolve_extraction` is the deterministic resolution stage's interface, kept separate
-# from however the raw strings were produced: raw extracted strings (a
-# `StationNameExtraction`) plus a detected line go in, resolved station/direction ids come
-# out. In production a Mistral call (see `mistral_llm` below) fills the `StationNameExtraction`;
-# unit tests construct it directly, so every fuzzy-match edge case is testable without an LLM.
+# Resolution stage: raw extracted strings + detected line in, station/direction ids out.
+# Kept separate from the LLM so its fuzzy-match edge cases are testable without one.
 def resolve_extraction(
     *,
     station_index: StationIndex,
@@ -333,17 +329,11 @@ def resolve_extraction(
     )
 
 
-# --- LLM adapter -------------------------------------------------------------
-# An LLM adapter sits in front of the resolution stage: a message goes in, the raw
-# extracted strings (or None on failure) come out. Mistral is the production adapter;
-# tests can supply any callable with this shape, or skip the adapter entirely and exercise
-# `resolve_extraction` against canned `StationNameExtraction`s.
+# LLM adapter in front of the resolution stage: message in, raw extracted strings out.
 StationNameLLM = Callable[[str], Awaitable[StationNameExtraction | None]]
 
 
 def mistral_llm(*, client: Mistral, model: str, system_prompt: str) -> StationNameLLM:
-    """Production LLM adapter: a Mistral chat completion in front of the resolution stage."""
-
     async def call(message: str) -> StationNameExtraction | None:
         return await request_station_name_extraction(
             client=client,
