@@ -2,6 +2,7 @@ import { createRootRoute, Outlet } from '@tanstack/react-router';
 
 import { ConsentBanner } from '@/components/ConsentBanner';
 import { ContributeCard } from '@/components/contribute/ContributeCard';
+import { FeedbackCard } from '@/components/feedback/FeedbackCard';
 import { LegalDisclaimer } from '@/components/LegalDisclaimer';
 import { PersistentMapView } from '@/components/map/PersistentMapView';
 import { GeolocationProvider } from '@/contexts/GeolocationProvider';
@@ -16,6 +17,7 @@ export const Route = createRootRoute({
       <Outlet />
       <LegalDisclaimer />
       <ContributeCard />
+      <FeedbackCard />
       <ConsentBanner />
     </GeolocationProvider>
   ),

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { queryClient } from '@/api/queryClient';
 import { DAY_MS, HOUR_MS, reportsSliceQueryOptions, useReports } from '@/api/reports';
 import { linesQueryOptions, stationsQueryOptions } from '@/api/transit';
+import { FeedbackButton } from '@/components/feedback/FeedbackButton';
 import { ReportsTabBar } from '@/components/reports/ReportsTabBar';
 import { NAMESPACE } from '@/components/reports/Reports.i18n';
 import { PageHeader } from '@/components/templates/PageHeader';
@@ -41,7 +42,17 @@ function ReportsOverviewLayout() {
   return (
     <div className="bg-card animate-in fade-in fixed inset-0 z-30 duration-150">
       <div className="mx-auto flex h-full w-full max-w-md flex-col">
-        <PageHeader title={t('title')} onBack={() => navigate({ to: '/' })} />
+        <PageHeader
+          title={t('title')}
+          onBack={() => navigate({ to: '/' })}
+          action={
+            <FeedbackButton
+              source="reports_overview"
+              size="xs"
+              className="text-muted-foreground hover:text-foreground"
+            />
+          }
+        />
         <div className="flex items-baseline gap-2 px-4 pt-2 pb-4">
           <span className="font-heading text-3xl font-semibold">{reports?.length ?? 0}</span>
           <span className="text-muted-foreground text-sm">{t('summaryCount')}</span>

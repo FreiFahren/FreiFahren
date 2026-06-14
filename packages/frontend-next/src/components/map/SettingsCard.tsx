@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { ChevronRight, HeartHandshake, Mail } from 'lucide-react';
+import { ChevronRight, HeartHandshake, Mail, MessageSquarePlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { GithubIcon, InstagramIcon } from '@/components/brand-icons';
@@ -9,6 +9,7 @@ import { SectionHeading } from '@/components/ui/section-heading';
 import { Separator } from '@/components/ui/separator';
 import { openConsentSettings } from '@/lib/consent';
 import { openContributeModal } from '@/lib/contribute-modal';
+import { openFeedbackModal } from '@/lib/feedback-modal';
 import { openLegalDisclaimer } from '@/lib/legal-disclaimer';
 import { Route as ContactRoute } from '@/routes/_map/settings/contact';
 import { Route as ImpressumRoute } from '@/routes/impressum';
@@ -70,6 +71,15 @@ export function SettingsCard({ onClose }: SettingsCardProps) {
           <span>{t('contact')}</span>
           <ChevronRight className="text-muted-foreground ml-auto size-4" />
         </Link>
+        <button
+          type="button"
+          onClick={() => openFeedbackModal('settings')}
+          className="hover:bg-muted focus-visible:bg-muted flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm transition-colors outline-none"
+        >
+          <MessageSquarePlus className="text-muted-foreground size-4" />
+          <span>{t('feedback')}</span>
+          <ChevronRight className="text-muted-foreground ml-auto size-4" />
+        </button>
       </div>
 
       <CardContent>

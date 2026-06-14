@@ -153,9 +153,12 @@ i18n.addResourceBundle('en', NAMESPACE, {
         'Pages and views accessed within the App',
         'Anonymous product events (e.g. that a report was submitted, together with the line, station, and direction IDs - these contain no personal identifiers)',
         'Coarse technical data (browser, operating system, device type, referrer)',
+        'Feedback you choose to submit via the in-app feedback function (the feedback type and your free-text message, together with the page you submitted it from and the app version)',
       ],
       storage:
         'We configure PostHog not to store IP addresses, and we do not use session recordings (session replays). If you allow cookies, PostHog stores a pseudonymous identifier in a cookie or local-storage entry on your device so we can recognize returning visits and measure usage over time. If you decline cookies, we continue to collect only anonymous, cookieless usage statistics, with nothing stored on your device. This processing is based on our legitimate interest in analyzing and improving the service (Art. 6(1)(f) GDPR). You can change your cookie choice at any time via "Analytics" in the App\'s settings, and you can object to the analytics entirely - including the cookieless statistics - by enabling the "Do Not Track" setting in your browser or by contacting us at contact@freifahren.org; we honor both. The data is processed on PostHog\'s EU servers; for any transfer to a third country see Section 14, and for the data processing agreement see Section 15. Analytics requests are routed through our own domain to PostHog (a reverse proxy) for reliability; the data, recipient (PostHog), and purpose remain unchanged from those described above.',
+      feedback:
+        'The App offers a feedback function that lets you voluntarily send us feature requests, bug reports, or general feedback. The content you enter is transmitted to PostHog (as described above) and processed solely to evaluate and improve the App and, where appropriate, to respond to your feedback; the legal basis is our legitimate interest in improving the service (Art. 6(1)(f) GDPR). Because the free-text field is processed as you write it, it may contain personal data; please do not enter any sensitive personal data or more personal details than necessary.',
     },
   },
 });
@@ -310,9 +313,12 @@ i18n.addResourceBundle('de', NAMESPACE, {
         'Aufgerufene Seiten und Ansichten innerhalb der App',
         'Anonyme Produktereignisse (z. B. dass eine Meldung abgesendet wurde, samt der IDs von Linie, Station und Richtung - diese enthalten keine Personenbezugsdaten)',
         'Technische Näherungsdaten (Browser, Betriebssystem, Gerätetyp, Referrer)',
+        'Rückmeldungen, die Sie über die In-App-Feedback-Funktion absenden (die Art des Feedbacks und Ihr Freitext, zusammen mit der Seite, von der Sie es abgesendet haben, und der App-Version)',
       ],
       storage:
         'Wir konfigurieren PostHog so, dass keine IP-Adressen gespeichert werden, und setzen keine Sitzungsaufzeichnungen (Session Replays) ein. Wenn Sie Cookies erlauben, speichert PostHog eine pseudonyme Kennung in einem Cookie- oder Local-Storage-Eintrag auf Ihrem Endgerät, damit wir wiederkehrende Besuche erkennen und die Nutzung über die Zeit messen können. Wenn Sie Cookies ablehnen, erfassen wir weiterhin ausschließlich anonyme, cookielose Nutzungsstatistiken, ohne dass etwas auf Ihrem Endgerät gespeichert wird. Diese Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses an der Analyse und Verbesserung des Dienstes (Art. 6 Abs. 1 lit. f DSGVO). Sie können Ihre Cookie-Auswahl jederzeit über "Analyse" in den Einstellungen der App ändern und der Reichweitenmessung insgesamt - einschließlich der cookielosen Statistiken - widersprechen, indem Sie die "Do Not Track"-Einstellung Ihres Browsers aktivieren oder uns unter contact@freifahren.org kontaktieren; wir berücksichtigen beides. Die Verarbeitung erfolgt auf den EU-Servern von PostHog; Hinweise zu einem etwaigen Drittlandtransfer finden Sie in Abschnitt 14 und zum Auftragsverarbeitungsvertrag in Abschnitt 15. Analyse-Anfragen werden zur Verbesserung der Zuverlässigkeit über unsere eigene Domain an PostHog weitergeleitet (Reverse Proxy); Daten, Empfänger (PostHog) und Zweck bleiben gegenüber den oben beschriebenen unverändert.',
+      feedback:
+        'Die App bietet eine Feedback-Funktion, über die Sie uns freiwillig Feature-Wünsche, Fehlermeldungen oder allgemeines Feedback senden können. Die von Ihnen eingegebenen Inhalte werden an PostHog (wie oben beschrieben) übermittelt und ausschließlich verarbeitet, um die App auszuwerten und zu verbessern sowie gegebenenfalls auf Ihr Feedback zu reagieren; Rechtsgrundlage ist unser berechtigtes Interesse an der Verbesserung des Dienstes (Art. 6 Abs. 1 lit. f DSGVO). Da das Freitextfeld so verarbeitet wird, wie Sie es eingeben, kann es personenbezogene Daten enthalten; bitte geben Sie keine besonderen Kategorien personenbezogener Daten und nicht mehr personenbezogene Angaben als nötig ein.',
     },
   },
 });

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { SubmitReportResponse } from '@/api/reports';
 import { useLines, useStations } from '@/api/transit';
+import { FeedbackButton } from '@/components/feedback/FeedbackButton';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
 import { useCountAnimation } from '@/hooks/useCountAnimation';
@@ -60,6 +61,10 @@ export function ReportSuccess({
       >
         {t('continue')}
       </Button>
+      <FeedbackButton
+        source="report_success"
+        className="text-muted-foreground hover:text-foreground mt-2 text-xs"
+      />
     </div>
   );
 }
