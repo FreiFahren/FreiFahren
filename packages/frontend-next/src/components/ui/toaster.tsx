@@ -27,7 +27,7 @@ export function Toaster() {
           key={item.id}
           role="status"
           className={cn(
-            'pointer-events-auto flex w-full justify-center',
+            'pointer-events-auto flex w-fit max-w-full',
             // Duration must match EXIT_MS in @/lib/toast, which unmounts after the animation.
             item.leaving && 'animate-out fade-out zoom-out-95 fill-mode-forwards duration-200',
           )}
