@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { formatElapsed, type Report } from '@/api/reports';
 import { useLines, useStations } from '@/api/transit';
+import { track } from '@/lib/analytics';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Route as ReportDetailRoute } from '@/routes/_map/reports/$stationId';
 import { Route as StationRoute } from '@/routes/_map/station/$stationId';
@@ -37,6 +38,13 @@ export function ReportRow({ report, recent }: { report: Report; recent: boolean 
     </>
   );
 
+  const trackSelection = () =>
+    track('report_row_selected', {
+      recent,
+      has_line: report.lineId !== null,
+      has_direction: report.directionId !== null,
+    });
+
   // A report from the last hour opens the live report view; older ones fall back to the station.
   return (
     <li className="border-border/60 border-b last:border-b-0">
@@ -45,6 +53,7 @@ export function ReportRow({ report, recent }: { report: Report; recent: boolean 
           to={ReportDetailRoute.to}
           params={{ stationId: report.stationId }}
           className="flex flex-col gap-1 px-4 py-3"
+          onClick={trackSelection}
         >
           {content}
         </Link>
@@ -53,6 +62,7 @@ export function ReportRow({ report, recent }: { report: Report; recent: boolean 
           to={StationRoute.to}
           params={{ stationId: report.stationId }}
           className="flex flex-col gap-1 px-4 py-3"
+          onClick={trackSelection}
         >
           {content}
         </Link>

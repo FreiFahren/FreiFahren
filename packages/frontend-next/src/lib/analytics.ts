@@ -38,14 +38,11 @@ type AnalyticsEvents = {
     trigger: LocationRequestTrigger;
     reason: 'denied' | 'unavailable' | 'timeout';
   };
-  // Map interactions. These cover deliberate in-app selections only; external arrivals (the
-  // Telegram deep link) are attributed via utm_source on the $pageview, since a cold load and an
-  // in-app tap hit the same route and the redirect erases the origin (see station/$stationId loader).
   station_selected: { source: 'map' | 'search' };
-  // Tapping a report dot on the map. No `source` — this only ever fires on a map tap (deep links
-  // redirect straight to the report view without going through the marker). `report_age_minutes`
-  // is the raw age so we can find the real engagement-vs-freshness threshold, not assume one.
   report_marker_selected: { report_age_minutes: number };
+  reports_overview_opened: { report_count: number };
+  reports_tab_selected: { tab: 'summary' | 'lines' | 'reports' };
+  report_row_selected: { recent: boolean; has_line: boolean; has_direction: boolean };
 };
 
 export function track<E extends keyof AnalyticsEvents>(

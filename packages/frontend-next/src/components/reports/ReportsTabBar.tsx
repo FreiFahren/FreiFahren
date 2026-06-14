@@ -1,6 +1,7 @@
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
+import { track } from '@/lib/analytics';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Route as LinesRoute } from '@/routes/reports/lines';
 import { Route as StationsRoute } from '@/routes/reports/stations';
@@ -9,9 +10,9 @@ import { Route as SummaryRoute } from '@/routes/reports/index';
 import { NAMESPACE } from './Reports.i18n';
 
 const TABS = [
-  { route: SummaryRoute, labelKey: 'tabSummary' },
-  { route: LinesRoute, labelKey: 'tabLines' },
-  { route: StationsRoute, labelKey: 'tabReports' },
+  { route: SummaryRoute, labelKey: 'tabSummary', tab: 'summary' },
+  { route: LinesRoute, labelKey: 'tabLines', tab: 'lines' },
+  { route: StationsRoute, labelKey: 'tabReports', tab: 'reports' },
 ] as const;
 
 export function ReportsTabBar() {
@@ -32,7 +33,9 @@ export function ReportsTabBar() {
             asChild
             className="text-muted-foreground data-[state=active]:text-foreground data-[state=active]:border-foreground -mb-px rounded-none border-b-2 border-transparent py-3 text-xs font-semibold tracking-wide uppercase"
           >
-            <Link to={tab.route.to}>{t(tab.labelKey)}</Link>
+            <Link to={tab.route.to} onClick={() => track('reports_tab_selected', { tab: tab.tab })}>
+              {t(tab.labelKey)}
+            </Link>
           </TabsTrigger>
         ))}
       </TabsList>

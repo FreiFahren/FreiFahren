@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { queryClient } from '@/api/queryClient';
@@ -7,6 +8,7 @@ import { linesQueryOptions, stationsQueryOptions } from '@/api/transit';
 import { ReportsTabBar } from '@/components/reports/ReportsTabBar';
 import { NAMESPACE } from '@/components/reports/Reports.i18n';
 import { PageHeader } from '@/components/templates/PageHeader';
+import { track } from '@/lib/analytics';
 
 export const Route = createFileRoute('/reports')({
   staticData: { legalDisclaimer: false },
@@ -26,6 +28,15 @@ function ReportsOverviewLayout() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
   const { data: reports } = useReports(DAY_MS);
+
+  // One open event per visit, fired once the count is known (so report_count is the real figure
+  // shown, not 0 before the prefetch resolves). The ref guards against re-firing on data refetch.
+  const openTracked = useRef(false);
+  useEffect(() => {
+    if (openTracked.current || reports === undefined) return;
+    openTracked.current = true;
+    track('reports_overview_opened', { report_count: reports.length });
+  }, [reports]);
 
   return (
     <div className="bg-card animate-in fade-in fixed inset-0 z-30 duration-150">
