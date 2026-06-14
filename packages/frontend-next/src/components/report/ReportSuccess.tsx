@@ -50,6 +50,7 @@ export function ReportSuccess({
           </span>
         </div>
         <p className="text-muted-foreground text-sm">{t('description')}</p>
+        <FeedbackButton source="report_success" variant="outline" className="border-border mt-4" />
       </div>
 
       <p className="text-muted-foreground text-[0.6875rem]">{t('syncText')}</p>
@@ -61,10 +62,6 @@ export function ReportSuccess({
       >
         {t('continue')}
       </Button>
-      <FeedbackButton
-        source="report_success"
-        className="text-muted-foreground hover:text-foreground mt-2 text-xs"
-      />
     </div>
   );
 }
