@@ -3,6 +3,7 @@ import type { MapLayerMouseEvent } from 'react-map-gl/maplibre';
 
 import { HOUR_MS, useReports } from '@/api/reports';
 import { type Station, useStations } from '@/api/transit';
+import { track } from '@/lib/analytics';
 import { Route as StationDetailRoute } from '@/routes/_map/station/$stationId';
 
 type UseStationSelectionResult = {
@@ -28,6 +29,7 @@ export function useStationSelection(): UseStationSelectionResult {
     // A report marker sits on top of this station; let the marker own the click so a near-miss
     // tap opens the report instead of the station detail underneath it.
     if (stationsWithReport.has(stationId)) return;
+    track('station_selected', { source: 'map' });
     navigate({ to: StationDetailRoute.to, params: { stationId } });
   };
 

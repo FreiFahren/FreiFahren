@@ -68,7 +68,9 @@ def format_forwarded_report(transit: TransitData, report: ForwardedReport, publi
     station = transit.stations[report.station_id]
     direction = transit.stations[report.direction_id] if report.direction_id is not None else None
     line_name = transit.line_name_for_id(report.line_id) if report.line_id is not None else None
-    station_url = f'{public_app_url}/station/{report.station_id}'
+    # utm_source lets the app attribute arrivals from this link in analytics (PostHog captures utm_*
+    # automatically). The app redirects /station/<id> to the live report view when one is fresh.
+    station_url = f'{public_app_url}/station/{report.station_id}?utm_source=telegram&utm_medium=bot'
 
     lines = [f'<b>Station:</b> {escape(station.name)}']
 
