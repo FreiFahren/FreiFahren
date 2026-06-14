@@ -3,19 +3,13 @@ import { useTranslation } from 'react-i18next';
 
 import { HOUR_MS, useReports } from '@/api/reports';
 import { useLines, useStations } from '@/api/transit';
-import { GithubIcon, InstagramIcon } from '@/components/brand-icons';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
 import { markReportViewed, useReportViewed } from '@/lib/viewed-reports';
 import { Route as ReportsSummaryRoute } from '@/routes/reports/index';
 
 import { NAMESPACE } from './ReportsOverviewButton.i18n';
-
-const GITHUB_URL = 'https://github.com/FreiFahren/FreiFahren';
-const INSTAGRAM_URL = 'https://www.instagram.com/frei.fahren';
-
-const socialButtonClass =
-  'bg-card text-card-foreground hover:bg-card/80 pointer-events-auto size-8 rounded-lg shadow-[0_6px_16px_rgba(0,0,0,0.28)]';
+import { SocialLinks } from './SocialLinks';
 
 export function ReportsOverviewButton() {
   const { t } = useTranslation(NAMESPACE);
@@ -40,30 +34,7 @@ export function ReportsOverviewButton() {
 
   return (
     <div className="pointer-events-none fixed bottom-0 left-0 z-20 flex flex-col items-start gap-1.5 p-3">
-      <div className="flex gap-1.5">
-        <Button
-          asChild
-          variant="secondary"
-          size="icon-sm"
-          aria-label="GitHub"
-          className={socialButtonClass}
-        >
-          <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-            <GithubIcon />
-          </a>
-        </Button>
-        <Button
-          asChild
-          variant="secondary"
-          size="icon-sm"
-          aria-label="Instagram"
-          className={socialButtonClass}
-        >
-          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
-            <InstagramIcon />
-          </a>
-        </Button>
-      </div>
+      <SocialLinks />
       <Button
         asChild
         variant="secondary"

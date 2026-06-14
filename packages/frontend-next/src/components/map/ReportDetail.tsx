@@ -10,6 +10,7 @@ import { optionalEnv } from '@/lib/utils';
 
 import { DetailCard } from './DetailCard';
 import { NAMESPACE } from './ReportDetail.i18n';
+import { SocialLinks } from './SocialLinks';
 
 type ReportDetailProps = {
   station: Station;
@@ -71,9 +72,12 @@ export function ReportDetail({ station, onClose }: ReportDetailProps) {
           )}
         </p>
       </CardContent>
-      <CardContent className="text-muted-foreground space-y-0.5 text-xs">
-        <p>{t('inviteText')}</p>
-        <p>{t('syncText', { group: REPORTS_GROUP_HANDLE })}</p>
+      <CardContent className="text-muted-foreground flex items-end justify-between gap-3 text-xs">
+        <div className="space-y-0.5">
+          <p>{t('inviteText')}</p>
+          <p>{t('syncText', { group: REPORTS_GROUP_HANDLE })}</p>
+        </div>
+        <SocialLinks appearance="inline" className="-mr-2 shrink-0" />
       </CardContent>
     </DetailCard>
   );
