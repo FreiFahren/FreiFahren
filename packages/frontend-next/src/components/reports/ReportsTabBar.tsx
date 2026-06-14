@@ -33,10 +33,7 @@ export function ReportsTabBar() {
             asChild
             className="text-muted-foreground data-[state=active]:text-foreground data-[state=active]:border-foreground -mb-px rounded-none border-b-2 border-transparent py-3 text-xs font-semibold tracking-wide uppercase"
           >
-            <Link
-              to={tab.route.to}
-              onClick={() => track('reports_tab_selected', { tab: tab.tab })}
-            >
+            <Link to={tab.route.to} onClick={() => track('reports_tab_selected', { tab: tab.tab })}>
               {t(tab.labelKey)}
             </Link>
           </TabsTrigger>
