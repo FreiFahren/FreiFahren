@@ -1,11 +1,10 @@
-import posthog from 'posthog-js';
-
 import type { ContributeSource } from '@/lib/contribute-modal';
 import type { GeolocationPermissionState } from '@/lib/location-prompt';
+import { enqueuePostHog } from '@/lib/posthog-client';
 
-// Provider-agnostic analytics facade. The rest of the app calls `track(...)` and never imports the
-// analytics SDK directly, so swapping PostHog for another provider is a single-file change here.
-// When no VITE_POSTHOG_KEY is set the SDK is never initialized (see main.tsx) and capture() no-ops.
+// Provider-agnostic analytics facade: the app calls these helpers and never imports the SDK
+// directly. Events stamp their own `timestamp` because PostHog is lazy-loaded and calls buffer
+// until it's ready — otherwise a startup burst would all collapse to the SDK's init time.
 
 export type LocationRequestTrigger = 'auto' | 'soft_prompt';
 type SuperProperties = {
@@ -50,22 +49,30 @@ export function track<E extends keyof AnalyticsEvents>(
   properties: AnalyticsEvents[E],
 ): void {
   if (import.meta.env.DEV) {
-    // In development we usually run without a PostHog key, so capture() no-ops. Log instead so the
-    // funnel events are visible in the console while wiring up tracking.
+    // No PostHog key in local dev, so capture() no-ops — log instead for visibility.
     console.log('[analytics]', event, properties);
   }
-  posthog.capture(event, properties);
+  const timestamp = new Date();
+  enqueuePostHog((posthog) => posthog.capture(event, properties, { timestamp }));
 }
 
-/**
- * Register super properties — attached to every event sent afterwards. Used to stamp the current
- * map layer onto all events so adoption and retention can be broken down by it.
- */
+// Pageviews are driven manually from the router; PostHog's automatic capture is off so they don't
+// depend on SDK load timing.
+export function capturePageview(url: string): void {
+  if (import.meta.env.DEV) {
+    console.log('[analytics] pageview', url);
+  }
+  const timestamp = new Date();
+  enqueuePostHog((posthog) => posthog.capture('$pageview', { $current_url: url }, { timestamp }));
+}
+
+// Super properties are attached to every later event — used to stamp the current map layer so
+// metrics can be broken down by it.
 export function setSuperProperties(properties: Partial<SuperProperties>): void {
   if (import.meta.env.DEV) {
     console.log('[analytics] register', properties);
   }
-  posthog.register(properties);
+  enqueuePostHog((posthog) => posthog.register(properties));
 }
 
 export type FeedbackType = 'feature_request' | 'bug_report' | 'general';
@@ -87,14 +94,20 @@ export function captureSurveyShown(surveyId: string): void {
   if (import.meta.env.DEV) {
     console.log('[analytics] survey shown', { surveyId });
   }
-  posthog.capture('survey shown', { $survey_id: surveyId });
+  const timestamp = new Date();
+  enqueuePostHog((posthog) =>
+    posthog.capture('survey shown', { $survey_id: surveyId }, { timestamp }),
+  );
 }
 
 export function captureSurveyDismissed(surveyId: string): void {
   if (import.meta.env.DEV) {
     console.log('[analytics] survey dismissed', { surveyId });
   }
-  posthog.capture('survey dismissed', { $survey_id: surveyId });
+  const timestamp = new Date();
+  enqueuePostHog((posthog) =>
+    posthog.capture('survey dismissed', { $survey_id: surveyId }, { timestamp }),
+  );
 }
 
 export function captureSurveySent(
@@ -121,5 +134,6 @@ export function captureSurveySent(
   if (import.meta.env.DEV) {
     console.log('[analytics] survey sent', properties);
   }
-  posthog.capture('survey sent', properties);
+  const timestamp = new Date();
+  enqueuePostHog((posthog) => posthog.capture('survey sent', properties, { timestamp }));
 }
