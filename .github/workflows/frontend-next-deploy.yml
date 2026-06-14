@@ -43,6 +43,10 @@ jobs:
 
             - name: Build (type-checks via tsc; fails the job on any error)
               run: bun run build
+              # Enables Sentry source-map upload during the build. If unset, the build still
+              # succeeds and simply skips the upload (see vite.config.ts).
+              env:
+                  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
             # ---------------------------------------------------------------------
 
             - name: Deploy to Cloudflare Workers

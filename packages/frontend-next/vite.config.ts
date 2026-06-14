@@ -5,11 +5,17 @@ import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 
 // Stamped into the bundle so the React Query cache persister can `buster` (drop) a persisted
 // cache whose query shapes predate this build, rather than hydrating an incompatible snapshot.
 // Date is read at build time only (Node), never at runtime.
 const BUILD_ID = new Date().toISOString();
+
+// Source maps are uploaded to Sentry only when SENTRY_AUTH_TOKEN is present (set in the deploy
+// workflow, never on PRs/forks). Without it the build is byte-for-byte unchanged: no maps emitted,
+// plugin not loaded.
+const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
 
 // The 400 (regular) weight is our body font and is on the critical render path, but it's only
 // discovered after the CSS chain resolves (index.html -> index.css -> @font-face), several round
@@ -52,6 +58,9 @@ export default defineConfig({
   define: {
     __BUILD_ID__: JSON.stringify(BUILD_ID),
   },
+  // 'hidden' emits source maps for the upload but ships no sourceMappingURL comment, so the maps are
+  // never referenced by (or served to) clients; the Sentry plugin deletes them after upload.
+  build: { sourcemap: sentryAuthToken ? 'hidden' : false },
   plugins: [
     tanstackRouter({ target: 'react', autoCodeSplitting: true }),
     react(),
@@ -108,6 +117,23 @@ export default defineConfig({
       },
       devOptions: { enabled: false },
     }),
+    // Must be last so it sees the final emitted bundle + maps. No-op without an auth token.
+    ...(sentryAuthToken
+      ? [
+          sentryVitePlugin({
+            org: 'freifahren-web',
+            project: 'web-app',
+            authToken: sentryAuthToken,
+            // EU region: upload to the de.sentry.io API, matching the org's data region.
+            url: 'https://de.sentry.io',
+            // Tie uploaded maps to the same release name the SDK reports at runtime (__BUILD_ID__).
+            release: { name: BUILD_ID },
+            // Don't deploy the maps as public assets — Sentry has them after upload.
+            sourcemaps: { filesToDeleteAfterUpload: ['./dist/**/*.map'] },
+            telemetry: false,
+          }),
+        ]
+      : []),
   ],
   server: {
     port: 1871,

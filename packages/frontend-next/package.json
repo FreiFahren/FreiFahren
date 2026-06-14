@@ -15,6 +15,7 @@
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/ibm-plex-sans": "^5.2.8",
+    "@sentry/react": "^10.57.0",
     "@tailwindcss/vite": "^4.3.0",
     "@tanstack/query-async-storage-persister": "^5.101.0",
     "@tanstack/react-query": "^5.101.0",
@@ -42,6 +43,7 @@
     "@babel/core": "^7.29.6",
     "@eslint/js": "^10.0.1",
     "@rolldown/plugin-babel": "^0.2.3",
+    "@sentry/vite-plugin": "^5.3.0",
     "@tanstack/eslint-plugin-query": "^5.100.14",
     "@tanstack/eslint-plugin-router": "^1.162.0",
     "@tanstack/router-cli": "^1.167.10",

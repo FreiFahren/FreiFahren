@@ -102,6 +102,7 @@ export function PrivacyPolicy() {
           <li>{t('sections.errorMonitoring.dataPoints.device')}</li>
           <li>{t('sections.errorMonitoring.dataPoints.state')}</li>
         </ul>
+        <p>{t('sections.errorMonitoring.performance')}</p>
         <p>{t('sections.errorMonitoring.storage')}</p>
       </section>
 
