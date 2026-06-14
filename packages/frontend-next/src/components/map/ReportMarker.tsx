@@ -52,7 +52,7 @@ export function ReportMarker({ report, station }: ReportMarkerProps) {
   const handleClick = (event: MarkerEvent<MouseEvent>) => {
     // Stop the map's onClick from also firing (which would open the station detail).
     event.originalEvent.stopPropagation();
-    track('report_marker_selected', { report_age_seconds: Math.round(age / 1000) });
+    track('report_marker_selected', { report_age_minutes: Math.round(age / 60000) });
     markReportViewed(report.stationId, report.timestamp);
     void navigate({ to: ReportDetailRoute.to, params: { stationId: report.stationId } });
   };
