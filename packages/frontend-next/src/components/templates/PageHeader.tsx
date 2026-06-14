@@ -9,9 +9,11 @@ import { NAMESPACE } from './PageHeader.i18n';
 type PageHeaderProps = {
   title: string;
   onBack: () => void;
+  /** Optional trailing content, right-aligned in the header (e.g. a feedback button). */
+  action?: React.ReactNode;
 };
 
-export function PageHeader({ title, onBack }: PageHeaderProps) {
+export function PageHeader({ title, onBack, action }: PageHeaderProps) {
   const { t } = useTranslation(NAMESPACE);
 
   return (
@@ -28,6 +30,7 @@ export function PageHeader({ title, onBack }: PageHeaderProps) {
           <ChevronLeft className="size-5" />{' '}
         </Button>
         <h1 className="font-heading text-lg font-semibold">{title}</h1>
+        {action && <div className="-mr-2 ml-auto">{action}</div>}
       </header>
       <Separator className="my-2" />
     </>

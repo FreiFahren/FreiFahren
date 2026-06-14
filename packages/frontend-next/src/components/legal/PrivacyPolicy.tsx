@@ -135,6 +135,7 @@ export function PrivacyPolicy() {
           ))}
         </ul>
         <p>{t('sections.webAnalytics.storage')}</p>
+        <p>{t('sections.webAnalytics.feedback')}</p>
       </section>
     </LegalPage>
   );

@@ -67,3 +67,59 @@ export function setSuperProperties(properties: Partial<SuperProperties>): void {
   }
   posthog.register(properties);
 }
+
+export type FeedbackType = 'feature_request' | 'bug_report' | 'general';
+
+export const SURVEY_QUESTIONS = [
+  { id: 'feedback_type', question: 'What kind of feedback is this?' },
+  { id: 'feedback_message', question: 'Tell us more' },
+] as const;
+
+// The single-choice answer must match the survey's choice labels (defined in English in PostHog,
+// regardless of the app's UI language) so responses aggregate under the right option.
+const FEEDBACK_TYPE_CHOICE: Record<FeedbackType, string> = {
+  feature_request: 'Feature request',
+  bug_report: 'Bug report',
+  general: 'General feedback',
+};
+
+export function captureSurveyShown(surveyId: string): void {
+  if (import.meta.env.DEV) {
+    console.log('[analytics] survey shown', { surveyId });
+  }
+  posthog.capture('survey shown', { $survey_id: surveyId });
+}
+
+export function captureSurveyDismissed(surveyId: string): void {
+  if (import.meta.env.DEV) {
+    console.log('[analytics] survey dismissed', { surveyId });
+  }
+  posthog.capture('survey dismissed', { $survey_id: surveyId });
+}
+
+export function captureSurveySent(
+  surveyId: string,
+  response: {
+    feedbackType: FeedbackType;
+    message: string;
+    pageRoute: string;
+    appVersion: string;
+  },
+): void {
+  const properties = {
+    $survey_id: surveyId,
+    $survey_questions: SURVEY_QUESTIONS.map((q) => ({ id: q.id, question: q.question })),
+    // Index-keyed responses are the format PostHog attributes to the survey's questions in order.
+    $survey_response: FEEDBACK_TYPE_CHOICE[response.feedbackType],
+    $survey_response_1: response.message,
+    // Duplicated under plain names + context so the feedback is self-contained for Linear routing.
+    feedback_type: response.feedbackType,
+    feedback_message: response.message,
+    page_route: response.pageRoute,
+    app_version: response.appVersion,
+  };
+  if (import.meta.env.DEV) {
+    console.log('[analytics] survey sent', properties);
+  }
+  posthog.capture('survey sent', properties);
+}

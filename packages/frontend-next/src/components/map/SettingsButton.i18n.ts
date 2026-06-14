@@ -8,6 +8,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   close: 'Close',
   // hub menu
   contact: 'Contact us',
+  feedback: 'Send feedback',
   contribute: 'Contribute',
   follow: 'Follow',
   // legal
@@ -30,6 +31,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
   close: 'Schließen',
   // hub menu
   contact: 'Kontaktiere uns',
+  feedback: 'Feedback geben',
   contribute: 'Beitrag leisten',
   follow: 'Folgen',
   // legal

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { SubmitReportResponse } from '@/api/reports';
 import { useLines, useStations } from '@/api/transit';
+import { FeedbackButton } from '@/components/feedback/FeedbackButton';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
 import { useCountAnimation } from '@/hooks/useCountAnimation';
@@ -49,6 +50,7 @@ export function ReportSuccess({
           </span>
         </div>
         <p className="text-muted-foreground text-sm">{t('description')}</p>
+        <FeedbackButton source="report_success" variant="outline" className="border-border mt-4" />
       </div>
 
       <p className="text-muted-foreground text-[0.6875rem]">{t('syncText')}</p>

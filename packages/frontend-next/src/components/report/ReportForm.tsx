@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { type SubmitReportResponse, useSubmitReport } from '@/api/reports';
 import { type Station } from '@/api/transit';
+import { FeedbackButton } from '@/components/feedback/FeedbackButton';
 import { PageHeader } from '@/components/templates/PageHeader';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
@@ -351,7 +352,17 @@ export function ReportForm() {
             <ReportSuccess result={result} onClose={handleSuccessClose} />
           ) : (
             <>
-              <PageHeader title={t('title')} onBack={() => navigate({ to: '/' })} />
+              <PageHeader
+                title={t('title')}
+                onBack={() => navigate({ to: '/' })}
+                action={
+                  <FeedbackButton
+                    source="report_form"
+                    size="xs"
+                    className="text-muted-foreground hover:text-foreground"
+                  />
+                }
+              />
               <LinePicker />
               <StationPicker />
               <DirectionPicker />
