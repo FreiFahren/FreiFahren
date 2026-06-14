@@ -9,6 +9,7 @@ import { markReportViewed, useReportViewed } from '@/lib/viewed-reports';
 import { Route as ReportsSummaryRoute } from '@/routes/reports/index';
 
 import { NAMESPACE } from './ReportsOverviewButton.i18n';
+import { SocialLinks } from './SocialLinks';
 
 export function ReportsOverviewButton() {
   const { t } = useTranslation(NAMESPACE);
@@ -32,7 +33,8 @@ export function ReportsOverviewButton() {
   const stationName = stations?.[latest.stationId]?.name;
 
   return (
-    <div className="pointer-events-none fixed bottom-0 left-0 z-20 p-3">
+    <div className="pointer-events-none fixed bottom-0 left-0 z-20 flex flex-col items-start gap-1.5 p-3">
+      <SocialLinks />
       <Button
         asChild
         variant="secondary"

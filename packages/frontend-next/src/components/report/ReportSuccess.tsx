@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { SubmitReportResponse } from '@/api/reports';
 import { useLines, useStations } from '@/api/transit';
 import { FeedbackButton } from '@/components/feedback/FeedbackButton';
+import { SocialLinks } from '@/components/map/SocialLinks';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
 import { useCountAnimation } from '@/hooks/useCountAnimation';
@@ -62,6 +63,7 @@ export function ReportSuccess({
       >
         {t('continue')}
       </Button>
+      <SocialLinks appearance="inline" className="mt-3 justify-center" />
     </div>
   );
 }

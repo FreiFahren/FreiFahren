@@ -2,7 +2,6 @@ import { Link } from '@tanstack/react-router';
 import { ChevronRight, HeartHandshake, Mail, MessageSquarePlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { GithubIcon, InstagramIcon } from '@/components/brand-icons';
 import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
 import { SectionHeading } from '@/components/ui/section-heading';
@@ -17,9 +16,8 @@ import { Route as PrivacyRoute } from '@/routes/privacy';
 
 import { DetailCard } from './DetailCard';
 import { NAMESPACE } from './SettingsButton.i18n';
+import { SocialLinks } from './SocialLinks';
 
-const GITHUB_URL = 'https://github.com/FreiFahren/FreiFahren';
-const INSTAGRAM_URL = 'https://www.instagram.com/frei.fahren';
 const WEBSITE_URL = 'https://freifahren.org';
 
 function LegalLink({
@@ -97,18 +95,7 @@ export function SettingsCard({ onClose }: SettingsCardProps) {
 
       <CardContent className="flex flex-col gap-2">
         <SectionHeading className="text-muted-foreground">{t('follow')}</SectionHeading>
-        <div className="flex -space-x-2">
-          <Button asChild variant="ghost" size="icon" aria-label="GitHub">
-            <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-              <GithubIcon />
-            </a>
-          </Button>
-          <Button asChild variant="ghost" size="icon" aria-label="Instagram">
-            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
-              <InstagramIcon />
-            </a>
-          </Button>
-        </div>
+        <SocialLinks appearance="inline" className="-ml-2" />
       </CardContent>
 
       <Separator className="my-1" />
