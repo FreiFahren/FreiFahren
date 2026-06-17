@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'org.freifahren.app',
+  appId: 'com.anonymous.Freifahren',
   appName: 'FreiFahren',
   webDir: 'dist',
   plugins: {

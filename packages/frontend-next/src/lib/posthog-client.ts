@@ -57,7 +57,10 @@ export function loadPostHog(): Promise<void> {
       capture_pageview: false,
     });
     // Stamp every event with the runtime so funnels can be split by web vs native.
-    posthog.register({ platform: Capacitor.getPlatform(), is_native: Capacitor.isNativePlatform() });
+    posthog.register({
+      platform: Capacitor.getPlatform(),
+      is_native: Capacitor.isNativePlatform(),
+    });
     instance = posthog;
     for (const op of queue) op(posthog);
     queue.length = 0;
