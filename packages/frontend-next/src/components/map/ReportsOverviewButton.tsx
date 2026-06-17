@@ -33,7 +33,7 @@ export function ReportsOverviewButton() {
   const stationName = stations?.[latest.stationId]?.name;
 
   return (
-    <div className="pointer-events-none fixed bottom-0 left-0 z-20 flex flex-col items-start gap-1.5 p-3">
+    <div className="pb-safe-3 pointer-events-none fixed bottom-0 left-0 z-20 flex flex-col items-start gap-1.5 px-3 pt-3">
       <SocialLinks />
       <Button
         asChild

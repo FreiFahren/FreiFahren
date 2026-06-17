@@ -12,6 +12,7 @@ import {
   isLocationPromptDismissed,
   LOCATION_PROMPT_DELAY_MS,
   queryGeolocationPermission,
+  requestGeolocationPermission,
 } from '@/lib/location-prompt';
 
 import { LocationPermissionPrompt } from './LocationPermissionPrompt';
@@ -105,9 +106,16 @@ export function UserLocationControl() {
     };
   }, [map, accepted, trigger]);
 
-  const handleAllow = () => {
+  const handleAllow = async () => {
     track('location_prompt_allowed', {});
     setShowPrompt(false);
+    // On native, get the OS permission first — GeolocateControl's navigator.geolocation only returns
+    // a fix once CoreLocation is authorized. No-op on web, where trigger() surfaces the prompt.
+    const permission = await requestGeolocationPermission();
+    if (permission === 'denied') {
+      handleError(1);
+      return;
+    }
     trigger('soft_prompt');
   };
 

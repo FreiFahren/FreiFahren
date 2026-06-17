@@ -27,6 +27,14 @@ const INITIAL_VIEW = {
 // Keep the city in view: stop users from zooming out past the metro-area level.
 const MIN_ZOOM = 10;
 
+// Cap render resolution at 2x: iPhones report devicePixelRatio 3 (~9x the CSS pixels), the dominant
+// GPU/CPU cost and the first thing iOS Low Power Mode throttles. 2x stays crisp but ~halves the work.
+const MAX_PIXEL_RATIO = 2;
+const PIXEL_RATIO = Math.min(
+  typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1,
+  MAX_PIXEL_RATIO,
+);
+
 export function MapView() {
   const { selectedStation, handleMapClick } = useStationSelection();
   const { visible: riskVisible } = useRiskLayer();
@@ -45,6 +53,10 @@ export function MapView() {
         initialViewState={INITIAL_VIEW}
         minZoom={MIN_ZOOM}
         mapStyle={MAP_STYLE_URL}
+        pixelRatio={PIXEL_RATIO}
+        // 0 disables MapLibre's label cross-fade, which otherwise re-renders frames after every
+        // pan/zoom and tile load — needless CPU churn on a dense transit map.
+        fadeDuration={0}
         attributionControl={{ compact: true }}
         interactiveLayerIds={[STATIONS_LAYER_ID]}
         onClick={handleMapClick}

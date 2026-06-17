@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsr generate && tsc -b && vite build",
+    "build:ios": "CAPACITOR=true bun run build && bunx cap sync ios",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -13,9 +14,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/core": "^8.4.0",
+    "@capacitor/geolocation": "^8.2.0",
+    "@capacitor/ios": "^8.4.0",
+    "@capacitor/keyboard": "^8.0.5",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/ibm-plex-sans": "^5.2.8",
-    "@sentry/react": "^10.57.0",
+    "@sentry/capacitor": "4.1.0",
+    "@sentry/react": "10.52.0",
     "@tailwindcss/vite": "^4.3.0",
     "@tanstack/query-async-storage-persister": "^5.101.0",
     "@tanstack/react-query": "^5.101.0",
@@ -41,6 +50,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.29.6",
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.4.0",
     "@eslint/js": "^10.0.1",
     "@rolldown/plugin-babel": "^0.2.3",
     "@sentry/vite-plugin": "^5.3.0",

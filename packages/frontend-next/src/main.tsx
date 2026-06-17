@@ -9,6 +9,7 @@ import { capturePageview } from './lib/analytics';
 import { syncConsentToPostHog } from './lib/consent';
 import { loadPostHog } from './lib/posthog-client';
 import { initErrorMonitoring } from './lib/error-monitoring';
+import { initNativePlatform } from './lib/native';
 import './lib/i18n';
 import { routeTree } from './routeTree.gen';
 import './index.css';
@@ -16,6 +17,8 @@ import './index.css';
 // Initialize error monitoring before anything else renders so errors during startup are captured.
 // No-ops without VITE_SENTRY_DSN or when Do Not Track is set (see lib/error-monitoring.ts).
 initErrorMonitoring();
+
+void initNativePlatform();
 
 // Persist the React Query cache to IndexedDB so the last-known transit data, reports, and risk
 // survive a cold start with no network — the user opens the app in a tunnel and still sees the
