@@ -143,4 +143,23 @@
   html {
     @apply font-sans;
   }
+  /* Stop the iOS rubber-band bounce so the full-screen map doesn't feel like a scrollable page;
+     inner scroll areas are unaffected. */
+  html,
+  body {
+    overscroll-behavior: none;
+  }
+}
+
+/* Spacing utilities that add the iOS safe-area inset on top of a normal spacing step, so anchored
+   UI clears the status bar / home indicator in the full-bleed native WebView. The inset is 0 on the
+   web. Centralized here so the env() math isn't repeated per component. e.g. pt-safe-6 == pt-6 + top inset. */
+@utility pt-safe-* {
+  padding-top: calc(var(--spacing) * --value(integer) + env(safe-area-inset-top));
+}
+@utility pb-safe-* {
+  padding-bottom: calc(var(--spacing) * --value(integer) + env(safe-area-inset-bottom));
+}
+@utility top-safe-* {
+  top: calc(var(--spacing) * --value(integer) + env(safe-area-inset-top));
 }

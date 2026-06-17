@@ -26,7 +26,7 @@ export function PopupCard({ onClose, closeLabel, children }: PopupCardProps) {
           className="animate-in fade-in z-40 duration-150"
         />
       )}
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center p-3">
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pt-3 pb-safe-3">
         <Card className="animate-in slide-in-from-bottom-4 fade-in pointer-events-auto w-full max-w-md gap-1 py-4 duration-200 ease-out">
           {children}
         </Card>

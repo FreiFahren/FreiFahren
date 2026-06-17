@@ -17,6 +17,10 @@ const BUILD_ID = new Date().toISOString();
 // plugin not loaded.
 const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
 
+// Set by `bun run build:ios`. A service worker inside the native WebView serves a stale shell
+// (FRE-649), so the PWA plugin is dropped for Capacitor builds.
+const isCapacitor = process.env.CAPACITOR === 'true';
+
 // The 400 (regular) weight is our body font and is on the critical render path, but it's only
 // discovered after the CSS chain resolves (index.html -> index.css -> @font-face), several round
 // trips in on a slow connection. Inject a <link rel="preload"> so the browser starts fetching it
@@ -67,13 +71,15 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset({ target: '19' })] }),
     tailwindcss(),
     preloadPrimaryFont(),
-    VitePWA({
+    // `false` is a valid (skipped) Vite plugin slot — keeps the SW out of Capacitor builds.
+    !isCapacitor &&
+      VitePWA({
       // Silent update: the new service worker takes over and the fresh shell loads on the next
       // navigation, with no prompt UI (AGENTS.md: keep registration/update UI minimal). skipWaiting
       // + clientsClaim are implied by autoUpdate, so no rider gets stuck on a stale shell.
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      // Minimal, offline-first manifest reusing the existing favicons (no bespoke maskable art).
+      // Icons are generated into public/ from packages/app's app-icon.png (matches the native icon).
       manifest: {
         name: 'FreiFahren',
         short_name: 'FreiFahren',
@@ -86,10 +92,11 @@ export default defineConfig({
         display: 'standalone',
         start_url: '/',
         icons: [
-          { src: '/favicon.svg', type: 'image/svg+xml', sizes: 'any' },
-          { src: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
           { src: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
-          { src: '/logo-with-text.png', type: 'image/png', sizes: '512x512' },
+          { src: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
+          { src: '/pwa-192x192.png', type: 'image/png', sizes: '192x192' },
+          { src: '/pwa-512x512.png', type: 'image/png', sizes: '512x512' },
+          { src: '/pwa-maskable-512x512.png', type: 'image/png', sizes: '512x512', purpose: 'maskable' },
         ],
       },
       workbox: {

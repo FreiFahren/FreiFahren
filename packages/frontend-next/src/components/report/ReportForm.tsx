@@ -312,7 +312,7 @@ function SubmitFooter({ onSubmitted }: { onSubmitted: (result: SubmitReportRespo
   };
 
   return (
-    <footer className="mt-auto px-4 pt-6 pb-4">
+    <footer className="mt-auto px-4 pt-6 pb-safe-4">
       <Button
         type="button"
         size="lg"

@@ -18,7 +18,7 @@ export function PageHeader({ title, onBack, action }: PageHeaderProps) {
 
   return (
     <>
-      <header className="flex items-center gap-2 px-4 pt-6">
+      <header className="flex items-center gap-2 px-4 pt-safe-6">
         <Button
           variant="ghost"
           size="icon-sm"
