@@ -61,6 +61,9 @@ function preloadPrimaryFont(): Plugin {
 export default defineConfig({
   define: {
     __BUILD_ID__: JSON.stringify(BUILD_ID),
+    // Compile-time flag so the native-only branches (e.g. @sentry/capacitor) are dead-code
+    // eliminated from the web bundle.
+    __CAPACITOR__: JSON.stringify(isCapacitor),
   },
   // 'hidden' emits source maps for the upload but ships no sourceMappingURL comment, so the maps are
   // never referenced by (or served to) clients; the Sentry plugin deletes them after upload.

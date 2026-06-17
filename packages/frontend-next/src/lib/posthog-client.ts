@@ -1,6 +1,13 @@
+import { Capacitor } from '@capacitor/core';
 import type { PostHog } from 'posthog-js';
 
 import { optionalEnv } from './utils';
+
+// In the native WKWebView (capacitor://localhost) cookies are unreliable, so persistent capture uses
+// localStorage only; the web keeps the cookie too. Consent ('denied' -> memory) still applies on top.
+export const PERSISTENT_PERSISTENCE = Capacitor.isNativePlatform()
+  ? 'localStorage'
+  : 'localStorage+cookie';
 
 // posthog-js is lazy-loaded after first paint to keep it out of the eager bundle. Calls made before
 // it finishes loading are buffered here and flushed in order, so startup events aren't lost.
@@ -40,6 +47,7 @@ export function loadPostHog(): Promise<void> {
     posthog.init(apiKey, {
       api_host: apiHost,
       defaults: '2025-05-24',
+      persistence: PERSISTENT_PERSISTENCE,
       autocapture: false,
       capture_performance: false,
       disable_session_recording: true,
@@ -48,6 +56,8 @@ export function loadPostHog(): Promise<void> {
       // lazily-loaded SDK initializes; capture_pageleave stays on by default.
       capture_pageview: false,
     });
+    // Stamp every event with the runtime so funnels can be split by web vs native.
+    posthog.register({ platform: Capacitor.getPlatform(), is_native: Capacitor.isNativePlatform() });
     instance = posthog;
     for (const op of queue) op(posthog);
     queue.length = 0;

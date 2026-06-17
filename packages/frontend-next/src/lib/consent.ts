@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react';
 
-import { enqueuePostHog } from '@/lib/posthog-client';
+import { enqueuePostHog, PERSISTENT_PERSISTENCE } from '@/lib/posthog-client';
 
 // Capture is ON by default (see main.tsx). The banner asks for cookie consent specifically; either
 // choice keeps analytics running, but at different privacy levels:
@@ -79,7 +79,7 @@ function applyToPostHog(value: ConsentChoice | null): void {
     });
   } else if (value === 'granted') {
     enqueuePostHog((posthog) => {
-      posthog.set_config({ persistence: 'localStorage+cookie' });
+      posthog.set_config({ persistence: PERSISTENT_PERSISTENCE });
       posthog.opt_in_capturing();
     });
   }
