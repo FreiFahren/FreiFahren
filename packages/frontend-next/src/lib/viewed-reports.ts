@@ -25,8 +25,12 @@ function readInitial(): Set<string> {
   }
 }
 
-const viewed = readInitial();
+let viewed = readInitial();
 const listeners = new Set<() => void>();
+
+function getViewed(): ReadonlySet<string> {
+  return viewed;
+}
 
 function subscribe(listener: () => void): () => void {
   listeners.add(listener);
@@ -36,7 +40,7 @@ function subscribe(listener: () => void): () => void {
 export function markReportViewed(stationId: string, timestamp: string): void {
   const key = reportKey(stationId, timestamp);
   if (viewed.has(key)) return;
-  viewed.add(key);
+  viewed = new Set(viewed).add(key);
   try {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify([...viewed]));
   } catch {
@@ -48,4 +52,15 @@ export function markReportViewed(stationId: string, timestamp: string): void {
 /** Reactive: re-renders the caller when this specific report is marked viewed. */
 export function useReportViewed(stationId: string, timestamp: string): boolean {
   return useSyncExternalStore(subscribe, () => viewed.has(reportKey(stationId, timestamp)));
+}
+
+/**
+ * Reactive: a membership predicate that updates whenever any report is marked viewed. Used by the
+ * reports layer to drive the `pulse` property for the whole GeoJSON source at once (the per-report
+ * `useReportViewed` can't). The predicate closes over the viewed Set, which is replaced rather than
+ * mutated on each change, so memoized consumers recompute exactly when it does.
+ */
+export function useIsReportViewed(): (stationId: string, timestamp: string) => boolean {
+  const viewedSet = useSyncExternalStore(subscribe, getViewed);
+  return (stationId, timestamp) => viewedSet.has(reportKey(stationId, timestamp));
 }
