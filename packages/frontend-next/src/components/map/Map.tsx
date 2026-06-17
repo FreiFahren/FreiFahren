@@ -9,6 +9,7 @@ import { useSegments } from '@/api/transit';
 import { requireEnv } from '@/lib/utils';
 
 import { LineLayer } from './LineLayer';
+import { MapCameraController } from './MapCameraController';
 import { ReportsLayer } from './ReportsLayer';
 import { RiskLayer } from './RiskLayer';
 import { STATIONS_LAYER_ID, StationsLayer } from './StationsLayer';
@@ -78,6 +79,7 @@ export function MapView() {
             {riskVisible ? <RiskLayer /> : <LineLayer />}
             <ReportsLayer />
             <UserLocationControl />
+            <MapCameraController />
           </>
         )}
       </MapGL>
