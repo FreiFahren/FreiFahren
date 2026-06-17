@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { formatElapsed, type Report } from '@/api/reports';
 import { useLines, useStations } from '@/api/transit';
 import { track } from '@/lib/analytics';
+import { selectionTap } from '@/lib/haptics';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Route as ReportDetailRoute } from '@/routes/_map/reports/$stationId';
 import { Route as StationRoute } from '@/routes/_map/station/$stationId';
@@ -38,12 +39,14 @@ export function ReportRow({ report, recent }: { report: Report; recent: boolean 
     </>
   );
 
-  const trackSelection = () =>
+  const trackSelection = () => {
+    selectionTap();
     track('report_row_selected', {
       report_age_minutes: Math.round((Date.now() - new Date(report.timestamp).getTime()) / 60000),
       has_line: report.lineId !== null,
       has_direction: report.directionId !== null,
     });
+  };
 
   // A report from the last hour opens the live report view; older ones fall back to the station.
   return (

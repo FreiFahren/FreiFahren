@@ -3,6 +3,7 @@ import type { MapLayerMouseEvent } from 'react-map-gl/maplibre';
 
 import { type Station, useStations } from '@/api/transit';
 import { track } from '@/lib/analytics';
+import { selectionTap } from '@/lib/haptics';
 import { markReportViewed } from '@/lib/viewed-reports';
 import { REPORTS_HIT_LAYER_ID, type ReportPointProps } from '@/hooks/useReportsLayer';
 import { Route as ReportDetailRoute } from '@/routes/_map/reports/$stationId';
@@ -32,6 +33,7 @@ export function useStationSelection(): UseStationSelectionResult {
       const { stationId, timestamp } = reportFeature.properties as ReportPointProps;
       const ageMinutes = Math.round((Date.now() - new Date(timestamp).getTime()) / 60000);
       track('report_marker_selected', { report_age_minutes: ageMinutes });
+      selectionTap();
       markReportViewed(stationId, timestamp);
       void navigate({ to: ReportDetailRoute.to, params: { stationId } });
       return;
@@ -42,6 +44,7 @@ export function useStationSelection(): UseStationSelectionResult {
       | undefined;
     if (!stationId) return;
     track('station_selected', { source: 'map' });
+    selectionTap();
     navigate({ to: StationDetailRoute.to, params: { stationId } });
   };
 
