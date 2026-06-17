@@ -13,6 +13,7 @@ import { ReportsLayer } from './ReportsLayer';
 import { RiskLayer } from './RiskLayer';
 import { STATIONS_LAYER_ID, StationsLayer } from './StationsLayer';
 import { UserLocationControl } from './UserLocationControl';
+import { REPORTS_HIT_LAYER_ID } from '../../hooks/useReportsLayer';
 import { useRiskLayer } from '../../hooks/useRiskLayer';
 import { useStationSelection } from '../../hooks/useStationSelection';
 
@@ -58,7 +59,7 @@ export function MapView() {
         // pan/zoom and tile load — needless CPU churn on a dense transit map.
         fadeDuration={0}
         attributionControl={{ compact: true }}
-        interactiveLayerIds={[STATIONS_LAYER_ID]}
+        interactiveLayerIds={[REPORTS_HIT_LAYER_ID, STATIONS_LAYER_ID]}
         onClick={handleMapClick}
         // Let the base map render its first frame before we add the GeoJSON sources and the
         // report markers, so that overlay setup doesn't compete with the heaviest part of map
