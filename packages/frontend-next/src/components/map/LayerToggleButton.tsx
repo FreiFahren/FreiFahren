@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { useRiskLayer } from '@/hooks/useRiskLayer';
+import { selectionTap } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
 
 import { NAMESPACE } from './LayerToggleButton.i18n';
@@ -16,7 +17,10 @@ export function LayerToggleButton() {
       <Button
         type="button"
         variant="secondary"
-        onClick={toggle}
+        onClick={() => {
+          selectionTap();
+          toggle();
+        }}
         aria-pressed={visible}
         aria-label={visible ? t('hideRiskLayer') : t('showRiskLayer')}
         className={cn(

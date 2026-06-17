@@ -19,6 +19,7 @@ import { useGeolocation } from '@/contexts/Geolocation.context';
 import { isContributeDismissed, openContributeModal } from '@/lib/contribute-modal';
 import { track } from '@/lib/analytics';
 import { distanceMeters } from '@/lib/geo';
+import { notifySuccess, selectionTap } from '@/lib/haptics';
 import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 
@@ -76,7 +77,10 @@ function LinePicker() {
         key={line.name}
         type="button"
         aria-pressed={isSelected}
-        onClick={() => selectLine(isSelected ? null : line.name)}
+        onClick={() => {
+          selectionTap();
+          selectLine(isSelected ? null : line.name);
+        }}
         className={cn(
           'shrink-0 rounded-sm transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-white/50',
           lineName && !isSelected && 'opacity-40',
@@ -166,7 +170,10 @@ function StationPicker() {
     <li key={station.id} className="border-border/60 border-b last:border-b-0">
       <button
         type="button"
-        onClick={() => selectStation(station.id)}
+        onClick={() => {
+          selectionTap();
+          selectStation(station.id);
+        }}
         className="hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-3 py-2.5 text-left text-sm outline-none"
       >
         <span className="truncate">{station.name}</span>
@@ -254,7 +261,10 @@ function DirectionPicker() {
               <button
                 type="button"
                 aria-pressed={isSelected}
-                onClick={() => selectDirection(isSelected ? null : station.id)}
+                onClick={() => {
+                  selectionTap();
+                  selectDirection(isSelected ? null : station.id);
+                }}
                 className={cn(
                   'hover:bg-muted focus-visible:bg-muted flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm outline-none',
                   isSelected && 'bg-muted font-semibold',
@@ -299,6 +309,7 @@ function SubmitFooter({ onSubmitted }: { onSubmitted: (result: SubmitReportRespo
       { stationId, lineName, directionStationId },
       {
         onSuccess: (result) => {
+          notifySuccess();
           recordSubmission();
           track('report_submitted', {
             stationId: result.stationId,

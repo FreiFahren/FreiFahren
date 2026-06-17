@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { type Station, useStations } from '@/api/transit';
 import { track } from '@/lib/analytics';
+import { selectionTap } from '@/lib/haptics';
 import { StationListItem } from '@/components/transit/StationListItem';
 import { Backdrop } from '@/components/ui/backdrop';
 import { Button } from '@/components/ui/button';
@@ -59,6 +60,7 @@ export function StationSearch() {
     setQuery('');
     inputRef.current?.blur();
     track('station_selected', { source: 'search' });
+    selectionTap();
     navigate({ to: StationDetailRoute.to, params: { stationId: station.id } });
   };
 
