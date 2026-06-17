@@ -11,7 +11,7 @@ export function ReportButton() {
   const { t } = useTranslation(NAMESPACE);
 
   return (
-    <div className="pointer-events-none fixed right-0 bottom-0 z-20 px-3 pt-3 pb-safe-3">
+    <div className="pb-safe-3 pointer-events-none fixed right-0 bottom-0 z-20 px-3 pt-3">
       <Button
         asChild
         size="lg"

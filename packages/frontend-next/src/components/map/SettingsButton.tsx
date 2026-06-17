@@ -11,7 +11,7 @@ export function SettingsButton() {
   const { t } = useTranslation(NAMESPACE);
 
   return (
-    <div className="pointer-events-none fixed top-safe-14 left-0 z-20 p-3 sm:top-0">
+    <div className="top-safe-14 pointer-events-none fixed left-0 z-20 p-3 sm:top-0">
       <Button
         asChild
         variant="secondary"

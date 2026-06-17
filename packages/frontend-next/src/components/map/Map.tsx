@@ -30,7 +30,10 @@ const MIN_ZOOM = 10;
 // Cap render resolution at 2x: iPhones report devicePixelRatio 3 (~9x the CSS pixels), the dominant
 // GPU/CPU cost and the first thing iOS Low Power Mode throttles. 2x stays crisp but ~halves the work.
 const MAX_PIXEL_RATIO = 2;
-const PIXEL_RATIO = Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, MAX_PIXEL_RATIO);
+const PIXEL_RATIO = Math.min(
+  typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1,
+  MAX_PIXEL_RATIO,
+);
 
 export function MapView() {
   const { selectedStation, handleMapClick } = useStationSelection();

@@ -74,56 +74,61 @@ export default defineConfig({
     // `false` is a valid (skipped) Vite plugin slot — keeps the SW out of Capacitor builds.
     !isCapacitor &&
       VitePWA({
-      // Silent update: the new service worker takes over and the fresh shell loads on the next
-      // navigation, with no prompt UI (AGENTS.md: keep registration/update UI minimal). skipWaiting
-      // + clientsClaim are implied by autoUpdate, so no rider gets stuck on a stale shell.
-      registerType: 'autoUpdate',
-      injectRegister: 'auto',
-      // Icons are generated into public/ from packages/app's app-icon.png (matches the native icon).
-      manifest: {
-        name: 'FreiFahren',
-        short_name: 'FreiFahren',
-        description:
-          'Freifahren ist eine Webapp, die es Nutzern ermöglicht Ticketkontrollen zu melden und sich vor Kontrollen zu warnen.',
-        lang: 'de',
-        // Keep theme/background in sync with --card in src/index.css and index.html's theme-color.
-        theme_color: '#25272b',
-        background_color: '#25272b',
-        display: 'standalone',
-        start_url: '/',
-        icons: [
-          { src: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
-          { src: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
-          { src: '/pwa-192x192.png', type: 'image/png', sizes: '192x192' },
-          { src: '/pwa-512x512.png', type: 'image/png', sizes: '512x512' },
-          { src: '/pwa-maskable-512x512.png', type: 'image/png', sizes: '512x512', purpose: 'maskable' },
-        ],
-      },
-      workbox: {
-        // Precache the app shell: HTML, hashed JS/CSS, the IBM Plex woff2 files, and the lazy
-        // maplibre chunk (~1 MB, under the 2 MB default cap) so the map engine paints offline too.
-        globPatterns: ['**/*.{js,css,html,woff2,svg,png,ico}'],
-        // Offline SPA navigations resolve to the precached shell. Navigation routing only matches
-        // navigation requests, so it doesn't touch the cross-origin tile/API fetches, nor does it
-        // clash with wrangler's server-side single-page-application fallback (that only runs online).
-        navigateFallback: '/index.html',
-        runtimeCaching: [
-          {
-            // Tiles + style are served immutable with a ?v=<hash>, so CacheFirst is safe and gives
-            // a zero-network repaint of a previously-viewed area. Bounded so storage can't grow
-            // unbounded as a rider pans around.
-            urlPattern: ({ url }) => url.origin === 'https://tiles.freifahren.org',
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'map-tiles',
-              expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 30 },
-              cacheableResponse: { statuses: [0, 200] },
+        // Silent update: the new service worker takes over and the fresh shell loads on the next
+        // navigation, with no prompt UI (AGENTS.md: keep registration/update UI minimal). skipWaiting
+        // + clientsClaim are implied by autoUpdate, so no rider gets stuck on a stale shell.
+        registerType: 'autoUpdate',
+        injectRegister: 'auto',
+        // Icons are generated into public/ from packages/app's app-icon.png (matches the native icon).
+        manifest: {
+          name: 'FreiFahren',
+          short_name: 'FreiFahren',
+          description:
+            'Freifahren ist eine Webapp, die es Nutzern ermöglicht Ticketkontrollen zu melden und sich vor Kontrollen zu warnen.',
+          lang: 'de',
+          // Keep theme/background in sync with --card in src/index.css and index.html's theme-color.
+          theme_color: '#25272b',
+          background_color: '#25272b',
+          display: 'standalone',
+          start_url: '/',
+          icons: [
+            { src: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
+            { src: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
+            { src: '/pwa-192x192.png', type: 'image/png', sizes: '192x192' },
+            { src: '/pwa-512x512.png', type: 'image/png', sizes: '512x512' },
+            {
+              src: '/pwa-maskable-512x512.png',
+              type: 'image/png',
+              sizes: '512x512',
+              purpose: 'maskable',
             },
-          },
-        ],
-      },
-      devOptions: { enabled: false },
-    }),
+          ],
+        },
+        workbox: {
+          // Precache the app shell: HTML, hashed JS/CSS, the IBM Plex woff2 files, and the lazy
+          // maplibre chunk (~1 MB, under the 2 MB default cap) so the map engine paints offline too.
+          globPatterns: ['**/*.{js,css,html,woff2,svg,png,ico}'],
+          // Offline SPA navigations resolve to the precached shell. Navigation routing only matches
+          // navigation requests, so it doesn't touch the cross-origin tile/API fetches, nor does it
+          // clash with wrangler's server-side single-page-application fallback (that only runs online).
+          navigateFallback: '/index.html',
+          runtimeCaching: [
+            {
+              // Tiles + style are served immutable with a ?v=<hash>, so CacheFirst is safe and gives
+              // a zero-network repaint of a previously-viewed area. Bounded so storage can't grow
+              // unbounded as a rider pans around.
+              urlPattern: ({ url }) => url.origin === 'https://tiles.freifahren.org',
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'map-tiles',
+                expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+          ],
+        },
+        devOptions: { enabled: false },
+      }),
     // Must be last so it sees the final emitted bundle + maps. No-op without an auth token.
     ...(sentryAuthToken
       ? [

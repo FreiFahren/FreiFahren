@@ -16,7 +16,7 @@ export function Toaster() {
   return (
     // top-safe-18 clears the search bar; z-25 sits below the search results (z-30) but above the
     // map controls (z-20).
-    <div className="pointer-events-none fixed inset-x-4 top-safe-18 z-25 flex flex-col items-center gap-2">
+    <div className="top-safe-18 pointer-events-none fixed inset-x-4 z-25 flex flex-col items-center gap-2">
       {toasts.map((item) => (
         <div
           key={item.id}
