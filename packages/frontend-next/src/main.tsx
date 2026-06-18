@@ -20,6 +20,18 @@ initErrorMonitoring();
 
 void initNativePlatform();
 
+// Vite's documented recovery for a failed lazy import: a deploy purges the old chunks, so reload to
+// fetch the fresh shell. Skip when offline — a reload can't fetch a new chunk and the SW already
+// serves the precached shell, so it'd only wipe UI state. The timestamp bounds repeated reloads.
+window.addEventListener('vite:preloadError', (event) => {
+  if (!navigator.onLine) return;
+  const KEY = 'vite:preloadError:lastReload';
+  if (Date.now() - Number(sessionStorage.getItem(KEY) ?? 0) < 10_000) return;
+  sessionStorage.setItem(KEY, String(Date.now()));
+  event.preventDefault();
+  window.location.reload();
+});
+
 // Persist the React Query cache to IndexedDB so the last-known transit data, reports, and risk
 // survive a cold start with no network — the user opens the app in a tunnel and still sees the
 // map populated. IndexedDB (not localStorage) because the transit-segments GeoJSON can exceed the
