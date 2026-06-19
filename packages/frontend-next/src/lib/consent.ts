@@ -68,6 +68,11 @@ function subscribe(listener: () => void): () => void {
 }
 
 // Bring PostHog in line with the current choice. Safe to call before a decision is made.
+// Every branch also stamps the choice as a super-property so traffic can be split by consent
+// state: 'denied' users get a fresh anonymous id each visit and can never register as "returned",
+// so a breakdown on `cookie_consent` sizes that retention blind spot and lets retention be read
+// cleanly on the non-'denied' slice. The value rides along in memory for 'denied' sessions, which
+// is exactly the slice we want to count, so it stays readable without cookies.
 function applyToPostHog(value: ConsentChoice | null): void {
   // Ops buffer until the lazily-loaded SDK is ready.
   if (value === 'denied') {
@@ -76,14 +81,21 @@ function applyToPostHog(value: ConsentChoice | null): void {
     enqueuePostHog((posthog) => {
       posthog.reset();
       posthog.set_config({ persistence: 'memory' });
+      // register() after reset() so the super-property survives the clear (in memory for this session).
+      posthog.register({ cookie_consent: 'denied', persistence_mode: 'memory' });
     });
   } else if (value === 'granted') {
     enqueuePostHog((posthog) => {
       posthog.set_config({ persistence: PERSISTENT_PERSISTENCE });
       posthog.opt_in_capturing();
+      posthog.register({ cookie_consent: 'granted', persistence_mode: PERSISTENT_PERSISTENCE });
+    });
+  } else {
+    // null: leave PostHog in its init default (persistent capture), just label the slice.
+    enqueuePostHog((posthog) => {
+      posthog.register({ cookie_consent: 'undecided', persistence_mode: PERSISTENT_PERSISTENCE });
     });
   }
-  // null: leave PostHog in its init default (persistent capture).
 }
 
 export function setConsent(value: ConsentChoice): void {
