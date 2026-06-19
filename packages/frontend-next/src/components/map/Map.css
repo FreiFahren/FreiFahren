@@ -22,10 +22,13 @@ Custom CSS Overwrite to avoid CLS
   display: block;
 }
 
-/*
-Lift the bottom-right attribution control above the floating Report button
-(which sits flush at the bottom) so the two no longer overlap.
-*/
+/* Clear the attribution control off the floating Report button: button footprint
+   (h-14 + pb-safe-3 + inset) plus a gap-1.5 to match the opposite corner. */
 .maplibregl-ctrl-bottom-right {
-  bottom: 4rem;
+  bottom: calc(3.5rem + 0.75rem + 0.375rem + env(safe-area-inset-bottom));
+}
+
+/* Zero MapLibre's default bottom margin (else the gap is 10px too large) and match px-3. */
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl {
+  margin: 0 0.75rem 0 0;
 }
