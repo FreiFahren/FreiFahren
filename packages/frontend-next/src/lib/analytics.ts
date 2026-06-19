@@ -39,6 +39,7 @@ type AnalyticsEvents = {
   reports_overview_opened: { report_count: number };
   reports_tab_selected: { tab: 'summary' | 'lines' | 'reports' };
   report_row_selected: { report_age_minutes: number; has_line: boolean; has_direction: boolean };
+  detail_modal_closed: { modal: 'station' | 'report'; duration_ms: number };
 };
 
 export function track<E extends keyof AnalyticsEvents>(
