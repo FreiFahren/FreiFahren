@@ -3,6 +3,7 @@ import { type ReactNode, useCallback, useState } from 'react';
 import {
   GeolocationContext,
   type GeolocationContextValue,
+  type GeolocationCoords,
   type GeolocationStatus,
   type UserPosition,
 } from './Geolocation.context';
@@ -14,7 +15,7 @@ export function GeolocationProvider({ children }: { children: ReactNode }) {
 
   const notifyLoading = useCallback(() => setStatus('loading'), []);
 
-  const notifyPosition = useCallback((coords: GeolocationCoordinates) => {
+  const notifyPosition = useCallback((coords: GeolocationCoords) => {
     setPosition({ lng: coords.longitude, lat: coords.latitude });
     setAccuracy(coords.accuracy);
     setStatus('tracking');

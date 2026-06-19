@@ -1,71 +1,84 @@
-import { useRouterState } from '@tanstack/react-router';
-import type { GeolocateControl as GeolocateControlInstance } from 'maplibre-gl';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { GeolocateControl, useMap } from 'react-map-gl/maplibre';
+import { useCallback, useEffect, useRef } from 'react';
+import { useMap } from 'react-map-gl/maplibre';
 
-import { useGeolocation } from '@/contexts/Geolocation.context';
-import { type LocationRequestTrigger, track } from '@/lib/analytics';
-import { useContributeModalOpen } from '@/lib/contribute-modal';
+import { type GeolocationCoords, useGeolocation } from '@/contexts/Geolocation.context';
+import { track } from '@/lib/analytics';
 import { useLegalDisclaimer } from '@/lib/legal-disclaimer';
 import {
-  dismissLocationPrompt,
-  isLocationPromptDismissed,
   LOCATION_PROMPT_DELAY_MS,
   queryGeolocationPermission,
   requestGeolocationPermission,
 } from '@/lib/location-prompt';
 
-import { LocationPermissionPrompt } from './LocationPermissionPrompt';
+import { UserLocationLayer } from './UserLocationLayer';
 
-// GeolocationPositionError codes (1/2/3). 'denied' after a soft-ask Allow is the key browser-quirk
-// signal: the user consented in-app but the native prompt (or OS-level setting) blocked us.
+// GeolocationPositionError codes (1/2/3).
 const failureReason = (code: number) =>
   code === 1 ? 'denied' : code === 3 ? 'timeout' : 'unavailable';
 
+// Optimised for phones (GPS): high accuracy on every platform. Desktop browsers without GPS may
+// fail to get a fix, but they aren't the target.
+const WATCH_OPTIONS = { enableHighAccuracy: true };
+
 /**
- * Renders maplibre's GeolocateControl (location dot, accuracy circle, tracking) and mirrors its
- * events into GeolocationProvider. Location is not requested eagerly — it is gated and delayed;
- * see `@/lib/location-prompt`.
+ * Sources location solely from the Capacitor Geolocation plugin (CoreLocation on native,
+ * navigator.geolocation on web) and renders the dot via UserLocationLayer — one native prompt, no
+ * extra WebKit per-site prompt on iOS. Requested once: at once if granted, else after a delay.
  */
 export function UserLocationControl() {
   const { current: map } = useMap();
-  const controlRef = useRef<GeolocateControlInstance>(null);
   const { notifyLoading, notifyPosition, notifyError } = useGeolocation();
   const { accepted } = useLegalDisclaimer();
-  const [showPrompt, setShowPrompt] = useState(false);
-  // Soft-ask only on the bare map, never over a sub-route's panel.
-  const onMapIndex = useRouterState({ select: (s) => s.location.pathname === '/' });
-  // The soft-ask is the lowest-priority card: it must never overlap another card. Sub-route panels
-  // are already excluded by `onMapIndex`; the contribute card is the one card that can open over the
-  // map index (e.g. after a report submit), so yield to it and resurface once it closes.
-  const contributeOpen = useContributeModalOpen();
-  // Funnel tracking state. GeolocateControl keeps tracking after the first fix (onGeolocate fires
-  // on every update, onError can repeat), so report acquired/failed once per request.
-  const requestRef = useRef<{ trigger: LocationRequestTrigger } | null>(null);
+  // The watch callback repeats; report acquired/failed only once.
   const outcomeReportedRef = useRef(false);
-  const permissionTrackedRef = useRef(false);
-  const promptShownTrackedRef = useRef(false);
+  const watchIdRef = useRef<string | null>(null);
+  // The gate effect can re-run; evaluate once.
+  const evaluatedRef = useRef(false);
 
-  const trigger = useCallback(
-    (requestTrigger: LocationRequestTrigger) => {
-      const control = controlRef.current;
-      // Suppress GeolocateControl recentering/zooming the camera on the first fix; we only want the dot.
-      if (control) {
-        (control as unknown as { _updateCamera: () => void })._updateCamera = () => {};
+  const handleGeolocate = useCallback(
+    (coords: GeolocationCoords) => {
+      notifyPosition(coords);
+      if (!outcomeReportedRef.current) {
+        outcomeReportedRef.current = true;
+        track('location_acquired', { trigger: 'auto' });
       }
-      track('location_request_started', { trigger: requestTrigger });
-      requestRef.current = { trigger: requestTrigger };
-      outcomeReportedRef.current = false;
-      notifyLoading();
-      control?.trigger();
     },
-    [notifyLoading],
+    [notifyPosition],
   );
 
-  // Gate on disclaimer acceptance + map load. Only 'granted' tracks immediately (the API call is
-  // silent then); for 'prompt'/'unsupported' we must not call the API ourselves — on Safari/iOS
-  // that would surface the native prompt — so we show the deferred soft-ask and only trigger on
-  // the user's explicit Allow.
+  const handleError = useCallback(
+    (code: number) => {
+      notifyError(code);
+      if (!outcomeReportedRef.current) {
+        outcomeReportedRef.current = true;
+        track('location_failed', { trigger: 'auto', reason: failureReason(code) });
+      }
+    },
+    [notifyError],
+  );
+
+  const startWatch = useCallback(async () => {
+    track('location_request_started', { trigger: 'auto' });
+    outcomeReportedRef.current = false;
+    notifyLoading();
+    try {
+      const { Geolocation } = await import('@capacitor/geolocation');
+      if (watchIdRef.current) await Geolocation.clearWatch({ id: watchIdRef.current });
+      watchIdRef.current = await Geolocation.watchPosition(WATCH_OPTIONS, (position, err) => {
+        if (err) {
+          // Native plugin errors have no code; fall back to POSITION_UNAVAILABLE.
+          handleError(typeof err.code === 'number' ? err.code : 2);
+          return;
+        }
+        if (position) handleGeolocate(position.coords);
+      });
+    } catch {
+      handleError(2);
+    }
+  }, [notifyLoading, handleError, handleGeolocate]);
+
+  // Gate on the legal disclaimer and map load. Granted → watch at once; otherwise wait, then
+  // surface the native prompt (requestPermissions on native; the watch itself prompts on web).
   useEffect(() => {
     if (!map || !accepted) return;
 
@@ -74,102 +87,51 @@ export function UserLocationControl() {
 
     const evaluate = async () => {
       const permission = await queryGeolocationPermission();
-      if (cancelled) return;
+      if (cancelled || evaluatedRef.current) return;
+      evaluatedRef.current = true;
 
-      // Funnel entry: the pre-existing permission state, where browsers diverge the most (older
-      // Safari has no Permissions API → 'unsupported', "Allow once" doesn't persist, etc.).
-      // Once per session — the effect can re-run on dependency changes.
-      if (!permissionTrackedRef.current) {
-        permissionTrackedRef.current = true;
-        track('location_permission_evaluated', { state: permission });
-      }
+      track('location_permission_evaluated', { state: permission });
 
       if (permission === 'granted') {
-        trigger('auto');
+        void startWatch();
         return;
       }
       if (permission === 'denied') return;
 
-      if (isLocationPromptDismissed()) return;
-      timer = window.setTimeout(() => {
-        if (!cancelled && !isLocationPromptDismissed()) setShowPrompt(true);
+      timer = window.setTimeout(async () => {
+        if (cancelled) return;
+        const requested = await requestGeolocationPermission();
+        if (cancelled) return;
+        if (requested === 'denied') {
+          handleError(1);
+          return;
+        }
+        void startWatch();
       }, LOCATION_PROMPT_DELAY_MS);
     };
 
-    // Mounts only after the base map's `load` (gated by MapView), so don't wait on that one-shot
-    // event — it has already fired and won't fire again. Evaluate now.
+    // Mounts after the base map's `load` (gated by MapView), so that one-shot event has fired already.
     void evaluate();
 
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [map, accepted, trigger]);
+  }, [map, accepted, startWatch, handleError]);
 
-  const handleAllow = async () => {
-    track('location_prompt_allowed', {});
-    setShowPrompt(false);
-    // On native, get the OS permission first — GeolocateControl's navigator.geolocation only returns
-    // a fix once CoreLocation is authorized. No-op on web, where trigger() surfaces the prompt.
-    const permission = await requestGeolocationPermission();
-    if (permission === 'denied') {
-      handleError(1);
-      return;
-    }
-    trigger('soft_prompt');
-  };
-
-  const handleDismiss = () => {
-    track('location_prompt_dismissed', {});
-    setShowPrompt(false);
-    dismissLocationPrompt();
-  };
-
-  const handleGeolocate = (coords: GeolocationCoordinates) => {
-    notifyPosition(coords);
-    const request = requestRef.current;
-    if (request && !outcomeReportedRef.current) {
-      outcomeReportedRef.current = true;
-      track('location_acquired', { trigger: request.trigger });
-    }
-  };
-
-  const handleError = (code: number) => {
-    notifyError(code);
-    const request = requestRef.current;
-    if (request && !outcomeReportedRef.current) {
-      outcomeReportedRef.current = true;
-      track('location_failed', { trigger: request.trigger, reason: failureReason(code) });
-    }
-  };
-
-  // The card is conditionally rendered below; count it as "shown" only when it is actually visible,
-  // not when the timer merely arms it while a sub-route panel or the contribute card covers the map.
-  const promptVisible = showPrompt && onMapIndex && !contributeOpen;
-  useEffect(() => {
-    if (promptVisible && !promptShownTrackedRef.current) {
-      promptShownTrackedRef.current = true;
-      track('location_prompt_shown', {});
-    }
-  }, [promptVisible]);
-
-  return (
-    <>
-      <GeolocateControl
-        ref={controlRef}
-        // Requested programmatically, so hide the control's button; the dot/accuracy circle stay.
-        style={{ display: 'none' }}
-        positionOptions={{ enableHighAccuracy: true }}
-        trackUserLocation
-        showUserLocation
-        showAccuracyCircle
-        onGeolocate={(e) => handleGeolocate(e.coords)}
-        onError={(e) => handleError(e.code)}
-        onTrackUserLocationStart={() => notifyLoading()}
-      />
-      {promptVisible && (
-        <LocationPermissionPrompt onAllow={handleAllow} onDismiss={handleDismiss} />
-      )}
-    </>
+  // Release the location sensor on unmount.
+  useEffect(
+    () => () => {
+      const id = watchIdRef.current;
+      if (id) {
+        watchIdRef.current = null;
+        void import('@capacitor/geolocation').then(({ Geolocation }) =>
+          Geolocation.clearWatch({ id }),
+        );
+      }
+    },
+    [],
   );
+
+  return <UserLocationLayer />;
 }
