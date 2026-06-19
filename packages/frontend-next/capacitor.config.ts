@@ -12,6 +12,14 @@ const config: CapacitorConfig = {
       showSpinner: false,
       launchFadeOutDuration: 200,
     },
+    // Self-hosted Capgo over-the-air updates. The Worker at updateUrl answers the version check and
+    // serves bundles from R2; we collect no telemetry, so statsUrl is empty to disable the stats POST.
+    CapacitorUpdater: {
+      autoUpdate: true,
+      updateUrl: 'https://updates.freifahren.org/updates',
+      statsUrl: '',
+      defaultChannel: 'production',
+    },
   },
 };
 

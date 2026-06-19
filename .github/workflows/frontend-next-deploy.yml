@@ -54,3 +54,55 @@ jobs:
               env:
                   CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+    # Publish a Capgo OTA bundle to the production channel. Gated on `deploy` so it only runs after
+    # the lint/format/build safety gates pass. Build is rerun with CAPACITOR=true because the
+    # Capacitor bundle differs from the web bundle (service-worker gating, native flags).
+    publish-ota:
+        needs: deploy
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        defaults:
+            run:
+                working-directory: packages/frontend-next
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v4
+
+            - name: Set up Bun
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Install dependencies
+              run: bun install --frozen-lockfile
+
+            - name: Build Capacitor web bundle
+              run: CAPACITOR=true bun run build
+              env:
+                  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
+            - name: Package and publish OTA bundle to R2
+              env:
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+              run: |
+                  set -euo pipefail
+                  VERSION="1.0.${{ github.run_number }}"
+
+                  # --no-code-check: the built bundle is minified, so the CLI can't find the literal
+                  # notifyAppReady() call; it is wired in src/lib/native.ts. Checksum is sha256(zip).
+                  OUT=$(bunx @capgo/cli bundle zip com.anonymous.Freifahren \
+                          --path dist --bundle "$VERSION" --json --no-code-check 2>/dev/null)
+                  ZIP=$(echo "$OUT" | jq -r .filename)
+                  CHECKSUM=$(echo "$OUT" | jq -r .checksum)
+
+                  jq -n --arg v "$VERSION" --arg c "$CHECKSUM" \
+                      '{version: $v, checksum: $c}' > manifest.json
+
+                  # The bundle key is immutable; the channel manifest is overwritten to point at it.
+                  bunx wrangler@latest r2 object put "freifahren-ota/bundles/$VERSION.zip" \
+                      --file "$ZIP" --content-type application/zip --remote
+                  bunx wrangler@latest r2 object put "freifahren-ota/channels/production.json" \
+                      --file manifest.json --content-type application/json --remote

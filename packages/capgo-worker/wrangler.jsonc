@@ -1,0 +1,9 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "capgo-updates",
+    "main": "src/index.ts",
+    "compatibility_date": "2026-05-31",
+    "observability": { "enabled": true },
+    "r2_buckets": [{ "binding": "BUNDLES", "bucket_name": "freifahren-ota" }],
+    "routes": [{ "pattern": "updates.freifahren.org", "custom_domain": true }],
+}
