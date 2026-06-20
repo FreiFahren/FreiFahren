@@ -5,6 +5,7 @@ import { resolveStationLineNames, type Station, useLines } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
+import { useModalViewDuration } from '@/hooks/useModalViewDuration';
 import { Route as ReportRoute } from '@/routes/report';
 
 import { DetailCard } from './DetailCard';
@@ -19,6 +20,7 @@ export function StationDetail({ station, onClose }: StationDetailProps) {
   const { t } = useTranslation(NAMESPACE);
   const { data: lines } = useLines();
   const lineNames = resolveStationLineNames(station.lines, lines);
+  useModalViewDuration('station');
 
   return (
     <DetailCard title={station.name} closeLabel={t('close')} onClose={onClose}>
