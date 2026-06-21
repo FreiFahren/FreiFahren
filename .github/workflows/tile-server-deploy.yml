@@ -26,8 +26,6 @@ jobs:
         defaults:
             run:
                 working-directory: packages/tile-server
-        env:
-            OSM_URL: https://download.geofabrik.de/europe/germany/berlin-latest.osm.pbf
         steps:
             - name: Check out code
               uses: actions/checkout@v4
@@ -37,24 +35,14 @@ jobs:
               with:
                   bun-version: latest
 
-            - name: Download Berlin OSM extract
-              run: |
-                  mkdir -p source
-                  curl -fsSL -o source/berlin-latest.osm.pbf "$OSM_URL"
-
-            # Reuses the committed npm script (single source of truth with local dev). Tilemaker runs
-            # in Docker and writes dist/berlin.pmtiles.
-            - name: Generate PMTiles
-              run: bun run pmtiles:generate
-
-            # The commit sha is the single version lever: it goes into both the style's archive URL
-            # and the upload key below, so they can never diverge (the contract documented in
-            # rewrite-style.ts).
-            - name: Rewrite style for R2
-              run: |
-                  bun styles/rewrite-style.ts --pmtiles \
-                      source/freifahren-style.json dist/styles/berlin.json \
-                      "${{ vars.TILES_BASE_URL }}" "${GITHUB_SHA::8}"
+            # Downloads each city's OSM extract, runs tilemaker, and writes dist/<city>.pmtiles +
+            # dist/styles/<city>.json — the same script local dev uses. The commit sha is the single
+            # version lever: it goes into both the style's archive URL (here) and the upload key
+            # (below), so they can never diverge.
+            - name: Generate tiles + styles
+              env:
+                  TILES_BASE_URL: ${{ vars.TILES_BASE_URL }}
+              run: TILES_VERSION="${GITHUB_SHA::8}" bun run generate
 
             - name: Upload to R2
               env:
@@ -63,19 +51,19 @@ jobs:
               run: |
                   set -euo pipefail
                   SHA="${GITHUB_SHA::8}"
-
-                  # Immutable, versioned archive — long cache, never purged (the /v<sha>/ path is the
-                  # cache-bust).
-                  bunx wrangler@latest r2 object put "freifahren-tiles/v$SHA/berlin.pmtiles" \
-                      --file dist/berlin.pmtiles \
-                      --content-type application/octet-stream \
-                      --cache-control "public, max-age=31536000, immutable" \
-                      --remote
-
-                  # The style is the only mutable pointer — short TTL so a redeploy/cutover propagates
-                  # quickly. It already references this build's immutable /v<sha>/ archive.
-                  bunx wrangler@latest r2 object put "freifahren-tiles/styles/berlin.json" \
-                      --file dist/styles/berlin.json \
-                      --content-type application/json \
-                      --cache-control "public, max-age=60, must-revalidate" \
-                      --remote
+                  for city in $(jq -r '.cities[].name' cities.json); do
+                      # Immutable, versioned archive — long cache, never purged (the /v<sha>/ path is
+                      # the cache-bust).
+                      bunx wrangler@latest r2 object put "freifahren-tiles/v$SHA/$city.pmtiles" \
+                          --file "dist/$city.pmtiles" \
+                          --content-type application/octet-stream \
+                          --cache-control "public, max-age=31536000, immutable" \
+                          --remote
+                      # The style is the only mutable pointer — short TTL so a redeploy propagates
+                      # quickly. It already references this build's immutable /v<sha>/ archive.
+                      bunx wrangler@latest r2 object put "freifahren-tiles/styles/$city.json" \
+                          --file "dist/styles/$city.json" \
+                          --content-type application/json \
+                          --cache-control "public, max-age=60, must-revalidate" \
+                          --remote
+                  done
