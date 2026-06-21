@@ -1,0 +1,5 @@
+# Prettier only loads a .prettierignore from its working directory, so the
+# repo-root ignore doesn't apply to the package-local `prettier --check .` that
+# CI runs here. Mirror its JSON rule: JSON is not prettier-managed — notably the
+# generated OSM seed snapshots in src/db/seed/snapshots.
+*.json

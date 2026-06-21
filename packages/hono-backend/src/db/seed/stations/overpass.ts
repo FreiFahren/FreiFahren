@@ -270,12 +270,45 @@ const fetchInBatches = async (
     return all
 }
 
+/* Given the line refs we set out to fetch, return those that have no route
+ * relation in the response. A batched `out geom`/`out body` query can hit a
+ * server-side Overpass timeout and still return HTTP 200 with partial data, so
+ * checking for missing refs is the only way to distinguish a truncated response
+ * from a genuinely complete one. */
+export const findMissingRouteRefs = (expectedRefs: readonly string[], elements: OsmElement[]): string[] => {
+    const present = new Set<string>()
+    for (const el of elements) {
+        if (el.type !== 'relation') continue
+        if (el.tags?.type !== 'route') continue
+        const ref = el.tags?.ref
+        if (ref !== undefined && ref !== '') present.add(ref)
+    }
+    return expectedRefs.filter((ref) => !present.has(ref))
+}
+
+/* Turn a silently-truncated Overpass response into a hard failure so the
+ * snapshot is never written from incomplete data (which would drop whole
+ * lines, e.g. a freshly added S15). */
+const assertAllRefsPresent = (label: string, expectedRefs: readonly string[], elements: OsmElement[]): void => {
+    const missing = findMissingRouteRefs(expectedRefs, elements)
+    if (missing.length > 0) {
+        throw new Error(
+            `[${label}] Incomplete Overpass response: ${missing.length}/${expectedRefs.length} discovered line refs returned no route relation (${missing.join(', ')}). ` +
+                'A batch likely hit a server-side timeout and returned partial data — re-run the refresh.'
+        )
+    }
+}
+
 export const fetchStationElements = async (): Promise<OsmElement[]> => {
     const refs = await fetchLineRefs('seed:stations')
-    return fetchInBatches('seed:stations', refs, buildStationsQuery)
+    const elements = await fetchInBatches('seed:stations', refs, buildStationsQuery)
+    assertAllRefsPresent('seed:stations', refs, elements)
+    return elements
 }
 
 export const fetchRouteGeometryElements = async (): Promise<OsmElement[]> => {
     const refs = await fetchLineRefs('seed:segments')
-    return fetchInBatches('seed:segments', refs, buildGeometryQuery)
+    const elements = await fetchInBatches('seed:segments', refs, buildGeometryQuery)
+    assertAllRefsPresent('seed:segments', refs, elements)
+    return elements
 }
