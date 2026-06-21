@@ -174,6 +174,38 @@ What differs from the Martin path:
 
 `dist/` is git-ignored. Output layout mirrors the R2 bucket: `berlin.pmtiles` and `styles/berlin.json`.
 
+### Deploy
+
+`.github/workflows/tile-server-deploy.yml` runs on every push to `main` that touches this package
+(and via manual dispatch). It downloads the OSM extract, generates `dist/`, and uploads to the
+`freifahren-tiles` R2 bucket: `v<sha>/berlin.pmtiles` (immutable, 1-year cache) and
+`styles/berlin.json` (60s TTL — the only mutable pointer, already referencing this build's archive).
+
+The deploy job is **gated on the `TILES_BASE_URL` repo variable** — until it's set the job is
+skipped, so this can merge with zero effect on production or existing users.
+
+### Cutover (one-time, manual)
+
+This is what flips traffic from Martin to R2. Everything above ships dormant; these are the only
+steps that change what users see.
+
+1. **Prepare the edge** (Cloudflare dashboard, R2 → `freifahren-tiles`):
+   - Attach a custom domain (e.g. `basemap.freifahren.org`).
+   - Add a Cache Rule for that hostname with **Respect Strong ETags** enabled, so byte-range reads
+     return `206` through the proxy. _Verify before flipping:_
+     `curl -I -H 'Range: bytes=0-99' https://basemap.freifahren.org/v<sha>/berlin.pmtiles` → `206`.
+   - Set the `TILES_BASE_URL` repo variable to that origin and re-run the deploy workflow so the
+     style is uploaded pointing at the live archive.
+2. **Flip the frontend**: change `VITE_MAP_STYLE_URL` in `packages/frontend-next/.env.production`
+   from the Martin style to `https://basemap.freifahren.org/styles/berlin.json`. The frontend
+   already registers the `pmtiles://` protocol, so this is the only frontend change. Merging it
+   redeploys the app onto R2.
+3. **Decommission**: once the new app is live and verified, remove the Coolify Martin service.
+
+Stale service-worker clients self-heal on reload (web-only, `autoUpdate`); pmtiles served from a new
+origin aren't matched by the existing `map-tiles` cache rule, so there's no range-cache poisoning to
+worry about. (Offline caching of pmtiles is a separate follow-up.)
+
 ## Frontend Setup
 
 Set:

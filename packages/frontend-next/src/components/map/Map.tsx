@@ -1,8 +1,16 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './Map.css';
 
+import maplibregl from 'maplibre-gl';
+import { Protocol } from 'pmtiles';
 import { useState } from 'react';
 import { Map as MapGL } from 'react-map-gl/maplibre';
+
+// Register the `pmtiles://` protocol so MapLibre can range-read the static PMTiles basemap archive
+// directly from R2 (see packages/tile-server). This runs once when the lazy map chunk loads, before
+// the map mounts. No-op until VITE_MAP_STYLE_URL points at a pmtiles-based style, so it's safe to
+// ship ahead of the cutover.
+maplibregl.addProtocol('pmtiles', new Protocol().tile);
 
 import { useRisk } from '@/api/risk';
 import { useSegments } from '@/api/transit';
