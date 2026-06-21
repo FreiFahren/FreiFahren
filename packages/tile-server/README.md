@@ -164,7 +164,10 @@ What differs from the Martin path:
   range-reads the archive via the `pmtiles` protocol the frontend registers) and points `glyphs`
   at a static `{fontstack}/{range}.pbf` path. No `tiles[]` template, no Martin glyph endpoint.
 - **Cache-bust**: the version is a path segment (`/v<sha>/berlin.pmtiles`), not a `?v=` query — an
-  immutable versioned object, so a deploy never needs an edge purge.
+  immutable versioned object, so a deploy never needs an edge purge. Versioning is applied **only by
+  the deploy workflow**, which threads one git sha into both the style URL and the R2 upload key so
+  they can't diverge. The local `pmtiles:build`/`pmtiles:serve` flow passes no version: the style
+  points at a flat `dist/berlin.pmtiles` that the build actually produces.
 - **Glyphs**: the basemap style currently has no `text-field` layers, so glyphs are not fetched.
   The `glyphs` URL is emitted for forward-compatibility; generating the static PBF tree is a
   follow-up (needed only once labels are added).

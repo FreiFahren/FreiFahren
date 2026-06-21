@@ -35,6 +35,11 @@ if (pmtiles) {
     // The browser reads the PMTiles archive directly over HTTP range requests via the `pmtiles://`
     // protocol (registered in the frontend). The version segment is the cache-bust: a new deploy
     // writes an immutable `/v<sha>/berlin.pmtiles`, so the URL changes and no edge purge is needed.
+    //
+    // Contract: `version` is the single lever shared with the upload — whoever passes it MUST also
+    // upload the archive to the matching `/v<version>/berlin.pmtiles` key (the deploy workflow owns
+    // both, keyed off one git sha), or the basemap 404s. The local `pmtiles:*` scripts pass no
+    // version and serve a flat `dist/berlin.pmtiles`, so the style and artifact stay in lockstep.
     const archivePath = version ? `/v${version}/berlin.pmtiles` : '/berlin.pmtiles'
 
     style.sources[sourceName] = {
