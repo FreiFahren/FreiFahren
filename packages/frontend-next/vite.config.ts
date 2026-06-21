@@ -117,17 +117,36 @@ export default defineConfig({
           navigateFallback: '/index.html',
           runtimeCaching: [
             {
-              // Tiles + style are served immutable with a ?v=<hash>, so CacheFirst is safe and gives
-              // a zero-network repaint of a previously-viewed area. Bounded so storage can't grow
-              // unbounded as a rider pans around.
-              urlPattern: ({ url }) => url.origin === 'https://tiles.freifahren.org',
-              handler: 'CacheFirst',
+              // Style JSON is the one mutable pointer (it names the current immutable /v<sha>/ archive).
+              // StaleWhileRevalidate paints instantly from cache but refreshes in the background, so a
+              // new tile-server deploy is picked up on the next load — never the 30-day staleness a
+              // CacheFirst rule would impose.
+              urlPattern: ({ url }) =>
+                url.origin === 'https://tiles.freifahren.org' && url.pathname.endsWith('.json'),
+              handler: 'StaleWhileRevalidate',
               options: {
-                cacheName: 'map-tiles',
-                expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                cacheName: 'map-style',
+                expiration: { maxEntries: 4, maxAgeSeconds: 60 * 60 * 24 },
                 cacheableResponse: { statuses: [0, 200] },
               },
             },
+            {
+              // Glyph PBFs are immutable, so CacheFirst is safe (currently unused — the basemap has no
+              // text layers — but ready for when labels are added).
+              urlPattern: ({ url }) =>
+                url.origin === 'https://tiles.freifahren.org' && url.pathname.endsWith('.pbf'),
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'map-fonts',
+                expiration: { maxEntries: 256, maxAgeSeconds: 60 * 60 * 24 * 365 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+            // The PMTiles archive (.pmtiles) is deliberately NOT given a runtime cache rule: it's read
+            // via HTTP range requests, and a CacheFirst store could hand a full 200 back to a range
+            // request and corrupt the read. Range reads go straight to the network (the immutable
+            // /v<sha>/ archive is still cached by the browser's HTTP cache). Offline tile caching —
+            // which needs workbox-range-requests — is a separate follow-up.
           ],
         },
         devOptions: { enabled: false },
