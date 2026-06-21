@@ -145,8 +145,7 @@ export default defineConfig({
             // The PMTiles archive (.pmtiles) is deliberately NOT given a runtime cache rule: it's read
             // via HTTP range requests, and a CacheFirst store could hand a full 200 back to a range
             // request and corrupt the read. Range reads go straight to the network (the immutable
-            // /v<sha>/ archive is still cached by the browser's HTTP cache). Offline tile caching —
-            // which needs workbox-range-requests — is a separate follow-up.
+            // /v<sha>/ archive is still cached by the browser's HTTP cache).
           ],
         },
         devOptions: { enabled: false },
