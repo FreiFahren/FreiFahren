@@ -42,9 +42,13 @@ for (const city of selected) {
   const pbf = resolve(SOURCE, basename(new URL(city.osmUrl).pathname))
   if (!(await Bun.file(pbf).exists())) {
     console.log(`↓ ${city.name}: ${city.osmUrl}`)
-    const res = await fetch(city.osmUrl)
-    if (!res.ok) throw new Error(`OSM download failed (${res.status}) for ${city.name}`)
-    await Bun.write(pbf, res)
+    // curl, not fetch + Bun.write: streaming the ~100 MB extract through Bun.write stalled on CI
+    // (the whole deploy hung). curl streams straight to disk and retries.
+    const dl = Bun.spawn(['curl', '-fSL', '--retry', '3', '-o', pbf, city.osmUrl], {
+      stdout: 'inherit',
+      stderr: 'inherit',
+    })
+    if ((await dl.exited) !== 0) throw new Error(`OSM download failed for ${city.name}`)
   }
 
   // 2. Vector tiles via tilemaker (in Docker — paths resolved inside the /work mount).
