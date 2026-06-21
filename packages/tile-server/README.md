@@ -144,6 +144,33 @@ Vector tile endpoint:
 http://localhost:3000/freifahren/{z}/{x}/{y}
 ```
 
+## PMTiles (R2 migration)
+
+We're migrating off the Martin server to **static PMTiles read directly by the browser over HTTP
+range requests** (hosted on Cloudflare R2). The Martin path above still builds and deploys
+production today; the scripts below produce the static artifacts for the new path. Both share the
+same Tilemaker config/Lua and the same `source/freifahren-style.json`.
+
+```sh
+cd packages/tile-server
+npm run pmtiles:build   # generate dist/berlin.pmtiles + dist/styles/berlin.json
+npm run pmtiles:serve   # serve dist/ with range support + CORS on http://localhost:3000
+```
+
+What differs from the Martin path:
+
+- **Tiles**: Tilemaker writes `.pmtiles` purely by output extension — same config, same tile size.
+- **Style**: `rewrite-style.mjs --pmtiles` emits a single `pmtiles://` vector source (the browser
+  range-reads the archive via the `pmtiles` protocol the frontend registers) and points `glyphs`
+  at a static `{fontstack}/{range}.pbf` path. No `tiles[]` template, no Martin glyph endpoint.
+- **Cache-bust**: the version is a path segment (`/v<sha>/berlin.pmtiles`), not a `?v=` query — an
+  immutable versioned object, so a deploy never needs an edge purge.
+- **Glyphs**: the basemap style currently has no `text-field` layers, so glyphs are not fetched.
+  The `glyphs` URL is emitted for forward-compatibility; generating the static PBF tree is a
+  follow-up (needed only once labels are added).
+
+`dist/` is git-ignored. Output layout mirrors the R2 bucket: `berlin.pmtiles` and `styles/berlin.json`.
+
 ## Frontend Setup
 
 Set:
