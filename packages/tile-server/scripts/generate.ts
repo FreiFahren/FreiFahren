@@ -43,8 +43,9 @@ for (const city of selected) {
   if (!(await Bun.file(pbf).exists())) {
     console.log(`↓ ${city.name}: ${city.osmUrl}`)
     // curl, not fetch + Bun.write: streaming the ~100 MB extract through Bun.write stalled on CI
-    // (the whole deploy hung). curl streams straight to disk and retries.
-    const dl = Bun.spawn(['curl', '-fSL', '--retry', '3', '-o', pbf, city.osmUrl], {
+    // (the whole deploy hung). curl streams straight to disk and retries. --remove-on-error so an
+    // interrupted transfer can't leave a truncated file the exists() check above would later reuse.
+    const dl = Bun.spawn(['curl', '-fSL', '--retry', '3', '--remove-on-error', '-o', pbf, city.osmUrl], {
       stdout: 'inherit',
       stderr: 'inherit',
     })
