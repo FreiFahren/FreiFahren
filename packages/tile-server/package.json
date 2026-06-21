@@ -4,10 +4,20 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "generate:berlin": "mkdir -p tileserver/data && docker run --rm -v \"$PWD/../..:/work\" -w /work ghcr.io/systemed/tilemaker:master /work/packages/tile-server/source/berlin-latest.osm.pbf --output /work/packages/tile-server/tileserver/data/freifahren-berlin.mbtiles --config /work/packages/tile-server/tilemaker/config-freifahren.json --process /work/packages/tile-server/tilemaker/process-freifahren.lua",
-    "rewrite-style": "node styles/rewrite-style.mjs source/freifahren-style.json tileserver/styles/freifahren-dark.json http://localhost:3000",
-    "rewrite-style:prod": "node styles/rewrite-style.mjs source/freifahren-style.json tileserver/styles/freifahren-dark.json https://tiles.freifahren.org",
+    "rewrite-style": "bun styles/rewrite-style.ts source/freifahren-style.json tileserver/styles/freifahren-dark.json http://localhost:3000",
+    "rewrite-style:prod": "bun styles/rewrite-style.ts source/freifahren-style.json tileserver/styles/freifahren-dark.json https://tiles.freifahren.org",
     "serve": "docker compose -f tileserver/compose.yaml up",
-    "serve:prod": "docker build -t freifahren-tiles --build-arg STYLE_BASE_URL=http://localhost:3000 . && docker run --rm -p 3000:3000 freifahren-tiles"
+    "serve:prod": "docker build -t freifahren-tiles --build-arg STYLE_BASE_URL=http://localhost:3000 . && docker run --rm -p 3000:3000 freifahren-tiles",
+    "pmtiles:generate": "mkdir -p dist && docker run --rm -v \"$PWD/../..:/work\" -w /work ghcr.io/systemed/tilemaker:master /work/packages/tile-server/source/berlin-latest.osm.pbf --output /work/packages/tile-server/dist/berlin.pmtiles --config /work/packages/tile-server/tilemaker/config-freifahren.json --process /work/packages/tile-server/tilemaker/process-freifahren.lua",
+    "pmtiles:style": "bun styles/rewrite-style.ts --pmtiles source/freifahren-style.json dist/styles/berlin.json http://localhost:3000",
+    "pmtiles:style:prod": "bun styles/rewrite-style.ts --pmtiles source/freifahren-style.json dist/styles/berlin.json https://tiles.freifahren.org",
+    "pmtiles:build": "bun run pmtiles:generate && bun run pmtiles:style",
+    "pmtiles:serve": "bun styles/serve.ts dist 3000"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.10",
+    "typescript": "~6.0.2"
   }
 }

@@ -1,0 +1,32 @@
+name: tile-server CI
+
+on:
+    pull_request:
+        branches: [main]
+        paths:
+            - 'packages/tile-server/**'
+            - '.github/workflows/tile-server-ci.yml'
+
+jobs:
+    typecheck:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        defaults:
+            run:
+                working-directory: packages/tile-server
+
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v4
+
+            - name: Set up Bun
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Install dependencies
+              run: bun install --frozen-lockfile
+
+            - name: Typecheck
+              run: bun run typecheck

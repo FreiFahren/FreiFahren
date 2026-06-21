@@ -2,7 +2,7 @@
 # Stages:
 #   1. osm-source — download the OSM extract
 #   2. tiles      — run tilemaker to produce the .mbtiles
-#   3. style      — run rewrite-style.mjs against the committed source style
+#   3. style      — run rewrite-style.ts against the committed source style
 #   4. final      — Martin serving the baked artifacts
 
 ARG OSM_URL=https://download.geofabrik.de/europe/germany/berlin-latest.osm.pbf
@@ -27,14 +27,14 @@ RUN mkdir -p /out \
       --process /work/tilemaker/process-freifahren.lua
 
 # ---------- Stage 3: rewrite MapLibre style ----------
-FROM node:20-alpine AS style
+FROM oven/bun:1-alpine AS style
 ARG STYLE_BASE_URL
 ARG BUILD_SHA
 WORKDIR /work
 COPY styles/ ./styles/
 COPY source/freifahren-style.json ./source/freifahren-style.json
 RUN mkdir -p /out \
- && node styles/rewrite-style.mjs \
+ && bun styles/rewrite-style.ts \
       source/freifahren-style.json \
       /out/freifahren-dark.json \
       "$STYLE_BASE_URL" \

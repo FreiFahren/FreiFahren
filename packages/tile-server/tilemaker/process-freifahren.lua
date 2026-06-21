@@ -101,7 +101,7 @@ function road_z_order(class)
 end
 
 -- Matches the earliest zoom at which the style actually draws each class
--- (see styles/rewrite-style.mjs output) so tiles never carry invisible geometry.
+-- (see styles/rewrite-style.ts output) so tiles never carry invisible geometry.
 function road_minzoom(class, type)
   if class == "motorway" or class == "motorway_link" then return 5 end
   if class == "main" and type == "trunk" then return 7 end
@@ -156,7 +156,7 @@ function should_emit_landuse(class, area)
   return true
 end
 
--- The style renders no symbol layers (rewrite-style.mjs strips every layer with
+-- The style renders no symbol layers (rewrite-style.ts strips every layer with
 -- text-field/icon-image), so no label layers or name attributes are emitted.
 function node_function()
 end

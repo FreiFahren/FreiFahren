@@ -9,7 +9,7 @@ It turns an OpenStreetMap extract into vector tiles, serves those tiles through 
 The package has three parts:
 
 - `tilemaker/`: Tilemaker config for generating Berlin vector tiles from OSM data.
-- `styles/rewrite-style.mjs`: helper for preparing a MapLibre style JSON for the configured tile host.
+- `styles/rewrite-style.ts`: helper for preparing a MapLibre style JSON for the configured tile host.
 - `martin/`: Martin config for serving the style, generated MBTiles, and font glyphs.
 - `fonts/`: TTF fonts Martin turns into MapLibre glyph PBFs (see [Fonts & Glyphs](#fonts--glyphs)).
 - `tileserver/`: generated tile/style artifacts and local Docker Compose entrypoint.
@@ -39,7 +39,7 @@ Only reproducible configs and scripts are committed.
 ## Prerequisites
 
 - Docker
-- Node.js/npm
+- Bun
 - A Berlin or Berlin/Brandenburg OSM extract at:
 
 ```text
@@ -52,7 +52,7 @@ A clipped Berlin extract is fastest for local iteration.
 
 ```sh
 cd packages/tile-server
-npm run generate:berlin
+bun run generate:berlin
 ```
 
 This runs Tilemaker in Docker and writes:
@@ -78,7 +78,7 @@ Then run:
 
 ```sh
 cd packages/tile-server
-npm run rewrite-style
+bun run rewrite-style
 ```
 
 This writes:
@@ -96,13 +96,13 @@ The rewrite script:
 For production URLs, run:
 
 ```sh
-npm run rewrite-style:prod
+bun run rewrite-style:prod
 ```
 
 The script accepts an optional 4th positional argument used as a cache-bust token. When set, it is appended to each tile URL as `?v=<token>`:
 
 ```sh
-node styles/rewrite-style.mjs source/freifahren-style.json out.json https://tiles.freifahren.org abc123
+bun styles/rewrite-style.ts source/freifahren-style.json out.json https://tiles.freifahren.org abc123
 # → tiles: ["https://tiles.freifahren.org/freifahren/{z}/{x}/{y}?v=abc123"]
 ```
 
@@ -111,7 +111,7 @@ This is how the Dockerfile threads the deploy SHA into the style — see [Cachin
 ## Fonts & Glyphs
 
 Martin serves MapLibre glyph PBFs from the TTF fonts in `fonts/` (`fonts.paths` in
-`martin/config.yaml`), and `rewrite-style.mjs` sets the style's `glyphs` to
+`martin/config.yaml`), and `rewrite-style.ts` sets the style's `glyphs` to
 `<base-url>/font/{fontstack}/{range}`. This is required for any `text-field` layer to render,
 including the frontend's line/station labels.
 
@@ -123,7 +123,7 @@ frontend symbol layers to match. Icons (`icon-image`) still need a sprite — a 
 
 ```sh
 cd packages/tile-server
-npm run serve
+bun run serve
 ```
 
 Martin listens on:
@@ -143,6 +143,68 @@ Vector tile endpoint:
 ```text
 http://localhost:3000/freifahren/{z}/{x}/{y}
 ```
+
+## PMTiles (R2 migration)
+
+We're migrating off the Martin server to **static PMTiles read directly by the browser over HTTP
+range requests** (hosted on Cloudflare R2). The Martin path above still builds and deploys
+production today; the scripts below produce the static artifacts for the new path. Both share the
+same Tilemaker config/Lua and the same `source/freifahren-style.json`.
+
+```sh
+cd packages/tile-server
+bun run pmtiles:build   # generate dist/berlin.pmtiles + dist/styles/berlin.json
+bun run pmtiles:serve   # serve dist/ with range support + CORS on http://localhost:3000
+```
+
+What differs from the Martin path:
+
+- **Tiles**: Tilemaker writes `.pmtiles` purely by output extension — same config, same tile size.
+- **Style**: `rewrite-style.ts --pmtiles` emits a single `pmtiles://` vector source (the browser
+  range-reads the archive via the `pmtiles` protocol the frontend registers) and points `glyphs`
+  at a static `{fontstack}/{range}.pbf` path. No `tiles[]` template, no Martin glyph endpoint.
+- **Cache-bust**: the version is a path segment (`/v<sha>/berlin.pmtiles`), not a `?v=` query — an
+  immutable versioned object, so a deploy never needs an edge purge. Versioning is applied **only by
+  the deploy workflow**, which threads one git sha into both the style URL and the R2 upload key so
+  they can't diverge. The local `pmtiles:build`/`pmtiles:serve` flow passes no version: the style
+  points at a flat `dist/berlin.pmtiles` that the build actually produces.
+- **Glyphs**: the basemap style currently has no `text-field` layers, so glyphs are not fetched.
+  The `glyphs` URL is emitted for forward-compatibility; generating the static PBF tree is a
+  follow-up (needed only once labels are added).
+
+`dist/` is git-ignored. Output layout mirrors the R2 bucket: `berlin.pmtiles` and `styles/berlin.json`.
+
+### Deploy
+
+`.github/workflows/tile-server-deploy.yml` runs on every push to `main` that touches this package
+(and via manual dispatch). It downloads the OSM extract, generates `dist/`, and uploads to the
+`freifahren-tiles` R2 bucket: `v<sha>/berlin.pmtiles` (immutable, 1-year cache) and
+`styles/berlin.json` (60s TTL — the only mutable pointer, already referencing this build's archive).
+
+The deploy job is **gated on the `TILES_BASE_URL` repo variable** — until it's set the job is
+skipped, so this can merge with zero effect on production or existing users.
+
+### Cutover (one-time, manual)
+
+This is what flips traffic from Martin to R2. Everything above ships dormant; these are the only
+steps that change what users see.
+
+1. **Prepare the edge** (Cloudflare dashboard, R2 → `freifahren-tiles`):
+   - Attach a custom domain (e.g. `basemap.freifahren.org`).
+   - Add a Cache Rule for that hostname with **Respect Strong ETags** enabled, so byte-range reads
+     return `206` through the proxy. _Verify before flipping:_
+     `curl -I -H 'Range: bytes=0-99' https://basemap.freifahren.org/v<sha>/berlin.pmtiles` → `206`.
+   - Set the `TILES_BASE_URL` repo variable to that origin and re-run the deploy workflow so the
+     style is uploaded pointing at the live archive.
+2. **Flip the frontend**: change `VITE_MAP_STYLE_URL` in `packages/frontend-next/.env.production`
+   from the Martin style to `https://basemap.freifahren.org/styles/berlin.json`. The frontend
+   already registers the `pmtiles://` protocol, so this is the only frontend change. Merging it
+   redeploys the app onto R2.
+3. **Decommission**: once the new app is live and verified, remove the Coolify Martin service.
+
+Stale service-worker clients self-heal on reload (web-only, `autoUpdate`); pmtiles served from a new
+origin aren't matched by the existing `map-tiles` cache rule, so there's no range-cache poisoning to
+worry about. (Offline caching of pmtiles is a separate follow-up.)
 
 ## Frontend Setup
 
