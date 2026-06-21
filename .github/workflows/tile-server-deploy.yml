@@ -49,10 +49,10 @@ jobs:
 
             # The commit sha is the single version lever: it goes into both the style's archive URL
             # and the upload key below, so they can never diverge (the contract documented in
-            # rewrite-style.mjs).
+            # rewrite-style.ts).
             - name: Rewrite style for R2
               run: |
-                  node styles/rewrite-style.mjs --pmtiles \
+                  bun styles/rewrite-style.ts --pmtiles \
                       source/freifahren-style.json dist/styles/berlin.json \
                       "${{ vars.TILES_BASE_URL }}" "${GITHUB_SHA::8}"
 

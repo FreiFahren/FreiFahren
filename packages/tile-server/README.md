@@ -9,7 +9,7 @@ It turns an OpenStreetMap extract into vector tiles, serves those tiles through 
 The package has three parts:
 
 - `tilemaker/`: Tilemaker config for generating Berlin vector tiles from OSM data.
-- `styles/rewrite-style.mjs`: helper for preparing a MapLibre style JSON for the configured tile host.
+- `styles/rewrite-style.ts`: helper for preparing a MapLibre style JSON for the configured tile host.
 - `martin/`: Martin config for serving the style, generated MBTiles, and font glyphs.
 - `fonts/`: TTF fonts Martin turns into MapLibre glyph PBFs (see [Fonts & Glyphs](#fonts--glyphs)).
 - `tileserver/`: generated tile/style artifacts and local Docker Compose entrypoint.
@@ -39,7 +39,7 @@ Only reproducible configs and scripts are committed.
 ## Prerequisites
 
 - Docker
-- Node.js/npm
+- Bun
 - A Berlin or Berlin/Brandenburg OSM extract at:
 
 ```text
@@ -52,7 +52,7 @@ A clipped Berlin extract is fastest for local iteration.
 
 ```sh
 cd packages/tile-server
-npm run generate:berlin
+bun run generate:berlin
 ```
 
 This runs Tilemaker in Docker and writes:
@@ -78,7 +78,7 @@ Then run:
 
 ```sh
 cd packages/tile-server
-npm run rewrite-style
+bun run rewrite-style
 ```
 
 This writes:
@@ -96,13 +96,13 @@ The rewrite script:
 For production URLs, run:
 
 ```sh
-npm run rewrite-style:prod
+bun run rewrite-style:prod
 ```
 
 The script accepts an optional 4th positional argument used as a cache-bust token. When set, it is appended to each tile URL as `?v=<token>`:
 
 ```sh
-node styles/rewrite-style.mjs source/freifahren-style.json out.json https://tiles.freifahren.org abc123
+bun styles/rewrite-style.ts source/freifahren-style.json out.json https://tiles.freifahren.org abc123
 # → tiles: ["https://tiles.freifahren.org/freifahren/{z}/{x}/{y}?v=abc123"]
 ```
 
@@ -111,7 +111,7 @@ This is how the Dockerfile threads the deploy SHA into the style — see [Cachin
 ## Fonts & Glyphs
 
 Martin serves MapLibre glyph PBFs from the TTF fonts in `fonts/` (`fonts.paths` in
-`martin/config.yaml`), and `rewrite-style.mjs` sets the style's `glyphs` to
+`martin/config.yaml`), and `rewrite-style.ts` sets the style's `glyphs` to
 `<base-url>/font/{fontstack}/{range}`. This is required for any `text-field` layer to render,
 including the frontend's line/station labels.
 
@@ -123,7 +123,7 @@ frontend symbol layers to match. Icons (`icon-image`) still need a sprite — a 
 
 ```sh
 cd packages/tile-server
-npm run serve
+bun run serve
 ```
 
 Martin listens on:
@@ -153,14 +153,14 @@ same Tilemaker config/Lua and the same `source/freifahren-style.json`.
 
 ```sh
 cd packages/tile-server
-npm run pmtiles:build   # generate dist/berlin.pmtiles + dist/styles/berlin.json
-npm run pmtiles:serve   # serve dist/ with range support + CORS on http://localhost:3000
+bun run pmtiles:build   # generate dist/berlin.pmtiles + dist/styles/berlin.json
+bun run pmtiles:serve   # serve dist/ with range support + CORS on http://localhost:3000
 ```
 
 What differs from the Martin path:
 
 - **Tiles**: Tilemaker writes `.pmtiles` purely by output extension — same config, same tile size.
-- **Style**: `rewrite-style.mjs --pmtiles` emits a single `pmtiles://` vector source (the browser
+- **Style**: `rewrite-style.ts --pmtiles` emits a single `pmtiles://` vector source (the browser
   range-reads the archive via the `pmtiles` protocol the frontend registers) and points `glyphs`
   at a static `{fontstack}/{range}.pbf` path. No `tiles[]` template, no Martin glyph endpoint.
 - **Cache-bust**: the version is a path segment (`/v<sha>/berlin.pmtiles`), not a `?v=` query — an

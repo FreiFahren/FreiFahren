@@ -1,11 +1,35 @@
-import fs from 'node:fs/promises'
-import path from 'node:path'
-
+// Prepares a MapLibre style JSON for the configured tile host. Run with bun (`bun rewrite-style.ts`).
+//
 // Two output modes:
 //   default  — Martin/xyz: vector `tiles[]` template + `?v=<token>` cache-bust + Martin glyph endpoint.
 //   --pmtiles — static PMTiles on R2: single `pmtiles://` vector source, versioned path (no query
 //               token), and a static `{fontstack}/{range}.pbf` glyph path.
 // The default is what the prod Dockerfile/Martin image still bakes; --pmtiles is the R2 migration path.
+
+type Source = {
+    type: string
+    url?: string
+    tiles?: string[]
+    maxzoom?: number
+    attribution?: string
+}
+
+type Layer = {
+    id?: string
+    type?: string
+    source?: string
+    layout?: Record<string, unknown>
+    [key: string]: unknown
+}
+
+type Style = {
+    sources?: Record<string, Source>
+    layers?: Layer[]
+    glyphs?: string
+    sprite?: string
+    [key: string]: unknown
+}
+
 const argv = process.argv.slice(2)
 const pmtiles = argv.includes('--pmtiles')
 const [inputPath, outputPath, baseUrl = 'http://localhost:3000', version = ''] = argv.filter(
@@ -13,14 +37,18 @@ const [inputPath, outputPath, baseUrl = 'http://localhost:3000', version = ''] =
 )
 
 if (!inputPath || !outputPath) {
-    console.error('Usage: node rewrite-style.mjs [--pmtiles] <input-style.json> <output-style.json> [base-url] [version]')
+    console.error(
+        'Usage: bun rewrite-style.ts [--pmtiles] <input-style.json> <output-style.json> [base-url] [version]',
+    )
     process.exit(1)
 }
 
-const style = JSON.parse(await fs.readFile(inputPath, 'utf8'))
+const style = (await Bun.file(inputPath).json()) as Style
 const sourceName = 'freifahren'
 
-const inputSourceName = Object.keys(style.sources ?? {}).find((name) => style.sources[name]?.type === 'vector')
+const inputSourceName = Object.keys(style.sources ?? {}).find(
+    (name) => style.sources?.[name]?.type === 'vector',
+)
 
 if (!inputSourceName) {
     throw new Error('Expected a vector source in the style JSON')
@@ -30,6 +58,8 @@ delete style.sprite
 
 const attribution =
     "<a href='https://www.openstreetmap.org/copyright' target='_blank'>&copy; OpenStreetMap contributors</a>"
+
+const sources = (style.sources ??= {})
 
 if (pmtiles) {
     // The browser reads the PMTiles archive directly over HTTP range requests via the `pmtiles://`
@@ -42,7 +72,7 @@ if (pmtiles) {
     // version and serve a flat `dist/berlin.pmtiles`, so the style and artifact stay in lockstep.
     const archivePath = version ? `/v${version}/berlin.pmtiles` : '/berlin.pmtiles'
 
-    style.sources[sourceName] = {
+    sources[sourceName] = {
         type: 'vector',
         url: `pmtiles://${baseUrl}${archivePath}`,
         attribution,
@@ -53,9 +83,9 @@ if (pmtiles) {
     style.glyphs = `${baseUrl}/fonts/{fontstack}/{range}.pbf`
 } else {
     // `?v=<version>` invalidates Cloudflare's 1-year edge cache on each deploy.
-    const withCacheBust = (url) => (version ? `${url}?v=${version}` : url)
+    const withCacheBust = (url: string) => (version ? `${url}?v=${version}` : url)
 
-    style.sources[sourceName] = {
+    sources[sourceName] = {
         type: 'vector',
         tiles: [withCacheBust(`${baseUrl}/${sourceName}/{z}/{x}/{y}`)],
         maxzoom: 14,
@@ -70,7 +100,7 @@ if (pmtiles) {
 }
 
 if (inputSourceName !== sourceName) {
-    delete style.sources[inputSourceName]
+    delete sources[inputSourceName]
 }
 
 for (const layer of style.layers ?? []) {
@@ -79,11 +109,10 @@ for (const layer of style.layers ?? []) {
     }
 }
 
-style.layers = (style.layers ?? []).filter((layer) => {
-    const layout = layer.layout ?? {}
+style.layers = (style.layers ?? []).filter((layer) => (layer.layout ?? {})['icon-image'] === undefined)
 
-    return layout['icon-image'] === undefined
-})
+// Bun.write creates parent directories as needed.
+await Bun.write(outputPath, `${JSON.stringify(style, null, 2)}\n`)
 
-await fs.mkdir(path.dirname(outputPath), { recursive: true })
-await fs.writeFile(outputPath, `${JSON.stringify(style, null, 2)}\n`)
+// Mark the file as a module so top-level `await` is allowed under tsc.
+export {}
