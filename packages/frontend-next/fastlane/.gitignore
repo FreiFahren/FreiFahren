@@ -1,0 +1,6 @@
+# Secrets and generated artifacts — never commit.
+.env
+*.p8
+*.p12
+*.mobileprovision
+report.xml

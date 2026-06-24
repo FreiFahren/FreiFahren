@@ -4,6 +4,14 @@
 <dict>
     <key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
+	<!-- Let the WebView render above 60 Hz on ProMotion (120 Hz) devices; without this, WKWebView
+	     caps web content at 60 Hz and map pan/zoom animations feel sluggish next to the rest of iOS. -->
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<!-- App uses only standard HTTPS/TLS (exempt). Declaring this skips the App Store Connect
+	     export-compliance prompt on every TestFlight build. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
