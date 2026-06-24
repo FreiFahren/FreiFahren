@@ -9,6 +9,7 @@ import { handleError } from './common/error-handler'
 import { logger } from './common/logger'
 import { registerVersionedRoutes } from './common/router'
 import { db, DbConnection } from './db'
+import { getPrivacyPolicyMeta } from './modules/legal'
 import { getReports, getReportsByStation, postReport, ReportsService } from './modules/reports/'
 import { getRisk } from './modules/risk/risk-routes'
 import { RiskService } from './modules/risk/risk-service'
@@ -84,6 +85,9 @@ export const createApp = (dbConnection: DbConnection = db) => {
     })
     registerVersionedRoutes(app, 'risk', 'v0', {
         v0: [getRisk],
+    })
+    registerVersionedRoutes(app, 'legal', 'v0', {
+        v0: [getPrivacyPolicyMeta],
     })
 
     return app

@@ -1,8 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import axios from 'axios'
-import { z } from 'zod'
 
-import { config } from '../config'
 import { api, FeatureCollection, Lines, Report, RiskData, Stations, StationStatistics } from './client'
 import { CACHE_KEYS } from './queryClient'
 
@@ -64,16 +61,7 @@ export const useRiskData = <T = RiskData>(select?: (data: RiskData) => T) =>
 export const usePrivacyPolicyMeta = () =>
     useQuery({
         queryKey: CACHE_KEYS.privacyPolicyMeta,
-        queryFn: async () => {
-            const { data } = await axios.get(config.PRIVACY_POLICY_META_URL)
-
-            return z
-                .object({
-                    lastModified: z.string().transform((date) => new Date(date)),
-                    version: z.number(),
-                })
-                .parse(data)
-        },
+        queryFn: api.getPrivacyPolicyMeta,
     })
 
 export const useStationStatistics = <T = StationStatistics>(
