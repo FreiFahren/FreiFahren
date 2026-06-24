@@ -211,7 +211,7 @@ function StationPicker() {
               autoComplete="off"
             />
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="min-h-0 flex-1 overflow-y-auto mask-b-from-[calc(100%-2.5rem)] mask-b-to-100% pb-2">
             {nearby.length > 0 && (
               <>
                 <div className="text-muted-foreground flex items-center gap-1.5 px-3 py-2 text-[0.625rem] font-semibold tracking-wide uppercase">
