@@ -230,7 +230,7 @@ export function useSubmitReport() {
       const lineId = resolveLineId(input, lines);
       const response = await fetch(`${API_URL}/v0/reports`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'ff-platform': 'web' },
         body: JSON.stringify({
           stationId: input.stationId,
           lineId,

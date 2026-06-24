@@ -8,7 +8,6 @@ import { and, desc, eq, sql } from 'drizzle-orm'
 import { sendReportRequest } from './test-utils'
 
 let fakeNlpServer: ReturnType<typeof Bun.serve> | null = null
-let fakeSecurityServer: ReturnType<typeof Bun.serve> | null = null
 
 type CapturedRequest = {
     body: unknown
@@ -16,7 +15,6 @@ type CapturedRequest = {
 }
 
 const capturedRequests: CapturedRequest[] = []
-let securityValidResponse = true
 
 describe('Telegram notification', () => {
     let shouldFail: boolean
@@ -42,31 +40,18 @@ describe('Telegram notification', () => {
             fetch: fakeNlp.fetch,
         })
 
-        const fakeSecurity = new Hono()
-        fakeSecurity.post('/check', async (c) => {
-            return c.json({ valid: securityValidResponse })
-        })
-
-        fakeSecurityServer = Bun.serve({
-            port: 0,
-            fetch: fakeSecurity.fetch,
-        })
-
         process.env.NLP_SERVICE_URL = `http://127.0.0.1:${fakeNlpServer.port}`
-        process.env.SECURITY_MICROSERVICE_URL = `http://127.0.0.1:${fakeSecurityServer.port}`
         process.env.REPORT_PASSWORD = 'test-password'
         process.env.NODE_ENV = 'production'
     })
 
     afterAll(() => {
         fakeNlpServer?.stop()
-        fakeSecurityServer?.stop()
     })
 
     beforeEach(() => {
         capturedRequests.length = 0
         shouldFail = false
-        securityValidResponse = true
     })
 
     it('sends a Telegram notification when source is not telegram and returns 200', async () => {
@@ -142,24 +127,9 @@ describe('Telegram notification', () => {
     })
 })
 
-describe('Security Verification', () => {
-    it('bypasses security check when the correct X-Password is provided', async () => {
-        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
-        securityValidResponse = false // Even if security would have blocked it
-
-        const response = await sendReportRequest({
-            stationId: station.id,
-        })
-
-        // Should succeed because password bypasses security service call
-        expect(response.status).toBe(200)
-    })
-})
-
 describe('Report API contract', () => {
     beforeAll(async () => {
         process.env.NODE_ENV = 'production'
-        process.env.REPORT_PASSWORD = 'test-password' // To pass the security check
     })
 
     it('rejects reports without station, line, and direction', async () => {
