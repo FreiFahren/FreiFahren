@@ -1,6 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 
 import { queryClient } from '@/api/queryClient';
+import { track } from '@/lib/analytics';
 
 /**
  * Native-only platform setup for the Capacitor (iOS/Android) builds; a no-op on web. Plugins are
@@ -48,4 +49,8 @@ export async function initNativePlatform(): Promise<void> {
   } catch {
     /* ignore */
   }
+
+  // AppDelegate bridges iOS's userDidTakeScreenshot notification to this window event. The current
+  // route rides along automatically as posthog-js's `$pathname`.
+  window.addEventListener('screenshotTaken', () => track('screenshot_taken', {}));
 }
