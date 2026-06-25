@@ -45,7 +45,7 @@ export const createApp = (dbConnection: DbConnection = db) => {
         '*',
         cors({
             origin: getCorsOrigins(),
-            allowHeaders: ['Accept', 'Content-Type', 'If-Modified-Since', 'If-None-Match'],
+            allowHeaders: ['Accept', 'Content-Type', 'If-Modified-Since', 'If-None-Match', 'ff-platform'],
             allowMethods: ['GET', 'POST', 'OPTIONS'],
             exposeHeaders: ['ETag', 'Last-Modified'],
         })
