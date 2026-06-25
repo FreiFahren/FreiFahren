@@ -20,6 +20,19 @@ initErrorMonitoring();
 
 void initNativePlatform();
 
+// Register the PWA service worker ourselves rather than via vite-plugin-pwa's injected
+// registerSW.js, whose generated call has no .catch — so any registration rejection (bots,
+// crawlers, locked-down WebViews) bubbles up as an unhandled rejection and floods Sentry
+// (WEB-APP-1). The .catch here keeps that failure quiet; the SW is optional, so there's nothing
+// to do on failure. Gated on __CAPACITOR__ because the native build drops the PWA plugin and
+// ships no sw.js (FRE-649). registerType: 'autoUpdate' still applies — it lives in the generated
+// sw.js, not the registration snippet.
+if (!__CAPACITOR__ && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    void navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {});
+  });
+}
+
 // Vite's documented recovery for a failed lazy import: a deploy purges the old chunks, so reload to
 // fetch the fresh shell. Skip when offline — a reload can't fetch a new chunk and the SW already
 // serves the precached shell, so it'd only wipe UI state. The timestamp bounds repeated reloads.
