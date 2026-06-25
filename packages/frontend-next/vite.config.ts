@@ -81,7 +81,11 @@ export default defineConfig({
         // navigation, with no prompt UI (AGENTS.md: keep registration/update UI minimal). skipWaiting
         // + clientsClaim are implied by autoUpdate, so no rider gets stuck on a stale shell.
         registerType: 'autoUpdate',
-        injectRegister: 'auto',
+        // Register the SW ourselves in main.tsx instead of letting the plugin inject registerSW.js.
+        // That generated snippet calls navigator.serviceWorker.register() with no .catch, so a
+        // rejection (common in bots/crawlers and locked-down WebViews) surfaces as an unhandled
+        // rejection and floods Sentry (WEB-APP-1). Our own registration swallows the rejection.
+        injectRegister: false,
         // Icons are generated into public/ from packages/app's app-icon.png (matches the native icon).
         manifest: {
           name: 'FreiFahren',
