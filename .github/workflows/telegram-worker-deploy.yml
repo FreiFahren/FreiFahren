@@ -1,0 +1,54 @@
+name: telegram-worker Deploy
+
+on:
+    push:
+        branches: [main]
+        paths:
+            - 'packages/telegram-worker/**'
+            - '.github/workflows/telegram-worker-deploy.yml'
+    workflow_dispatch: {}
+
+# Newest commit wins; never run two deploys at once.
+concurrency:
+    group: deploy-telegram-worker
+    cancel-in-progress: true
+
+jobs:
+    deploy:
+        # Gated on one-time setup being done. Set the `TELEGRAM_WORKER_ENABLED` repo variable
+        # (to any non-empty value) only after: the `telegram-updates` + `telegram-updates-dlq`
+        # queues exist, the secrets are set (`wrangler secret put MISTRAL_API_KEY` etc.), and
+        # TELEGRAM_REPORT_CHAT_ID is filled in. Until then this job is skipped, so merging never
+        # deploys against an unconfigured Worker.
+        if: ${{ vars.TELEGRAM_WORKER_ENABLED != '' }}
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        defaults:
+            run:
+                working-directory: packages/telegram-worker
+
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v4
+
+            - name: Set up Bun
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Install dependencies
+              run: bun install --frozen-lockfile
+
+            # --- Safety gates: nothing below this point deploys unless all pass ---
+            - name: Typecheck
+              run: bun run typecheck
+
+            - name: Test
+              run: bun run test
+
+            - name: Deploy to Cloudflare Workers
+              run: bunx wrangler@latest deploy
+              env:
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
