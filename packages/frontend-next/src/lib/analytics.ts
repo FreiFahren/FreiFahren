@@ -22,6 +22,7 @@ type AnalyticsEvents = {
     lineId: string | null;
     directionId: string | null;
   };
+  screenshot_taken: Record<string, never>;
   risk_layer_toggled: { to: SuperProperties['map_layer'] };
   contribute_modal_opened: { source: ContributeSource };
   contribute_method_viewed: { method: 'stripe' | 'bank_transfer' };

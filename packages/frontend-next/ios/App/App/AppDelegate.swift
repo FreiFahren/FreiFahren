@@ -7,8 +7,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Forward iOS's screenshot notification to the web layer as a `screenshotTaken` window event
+        // (handled in native.ts). iOS fires this after the capture, which is fine for analytics.
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(userDidTakeScreenshot),
+            name: UIApplication.userDidTakeScreenshotNotification,
+            object: nil
+        )
         return true
+    }
+
+    @objc private func userDidTakeScreenshot() {
+        let bridgeVC = window?.rootViewController as? CAPBridgeViewController
+        bridgeVC?.bridge?.triggerWindowJSEvent(eventName: "screenshotTaken")
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
