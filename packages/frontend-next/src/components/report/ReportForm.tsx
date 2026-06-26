@@ -82,7 +82,7 @@ function LinePicker() {
           selectLine(isSelected ? null : line.name);
         }}
         className={cn(
-          'shrink-0 rounded-sm outline-none transition-all focus-visible:ring-2 focus-visible:ring-white/50',
+          'shrink-0 rounded-sm transition-all outline-none focus-visible:ring-2 focus-visible:ring-white/50',
           isSelected && 'ring-2 ring-white',
           lineName && !isSelected && 'opacity-40',
         )}
@@ -267,7 +267,7 @@ function DirectionPicker() {
                   selectDirection(isSelected ? null : station.id);
                 }}
                 className={cn(
-                  'hover:bg-muted focus-visible:bg-muted flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm outline-none transition-opacity',
+                  'hover:bg-muted focus-visible:bg-muted flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm transition-opacity outline-none',
                   isSelected && 'bg-muted ring-2 ring-white',
                   directionStationId && !isSelected && 'opacity-40',
                 )}
