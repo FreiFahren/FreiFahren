@@ -55,6 +55,7 @@ export async function handleWebhook(
     process: Processor = processMessage,
 ): Promise<Response> {
     if (request.headers.get(WEBHOOK_SECRET_HEADER) !== env.TELEGRAM_WEBHOOK_SECRET) {
+        console.warn('Webhook rejected: bad secret token')
         return new Response('unauthorized', { status: 401 })
     }
 
@@ -62,6 +63,7 @@ export async function handleWebhook(
     try {
         update = TelegramUpdate.parse(await request.json())
     } catch {
+        console.warn('Webhook ignored: unparseable update body')
         return new Response('ok', { status: 200 })
     }
 

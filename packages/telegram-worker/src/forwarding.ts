@@ -131,6 +131,7 @@ export async function handleReportForward(request: Request, env: Env): Promise<R
     const cfg = readConfig(env)
 
     if (request.headers.get('X-Password') !== cfg.reportPassword) {
+        console.warn('Report forward rejected: bad password')
         return json({ error: 'unauthorized' }, 401)
     }
 
@@ -170,5 +171,6 @@ export async function handleReportForward(request: Request, env: Env): Promise<R
         return json({ error: 'telegram_send_failed' }, 502)
     }
 
+    console.info('Forwarded app report to Telegram', { stationId: report.stationId })
     return json({ status: 'success' })
 }

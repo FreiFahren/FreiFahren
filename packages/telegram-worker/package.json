@@ -11,6 +11,7 @@
     "eval": "bun run evals/run.ts"
   },
   "dependencies": {
+    "@sentry/cloudflare": "^10.62.0",
     "zod": "^3.25.0"
   },
   "devDependencies": {
