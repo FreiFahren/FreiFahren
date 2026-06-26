@@ -65,5 +65,12 @@ export function loadPostHog(): Promise<void> {
     for (const op of queue) op(posthog);
     queue.length = 0;
   });
+  // Analytics is non-critical: a content blocker or a stale chunk can make the dynamic import
+  // resolve empty (destructuring `default` then throws) or reject outright. Swallow it and disable
+  // capture so it doesn't surface as an unhandled rejection.
+  loadPromise = loadPromise.catch(() => {
+    disabled = true;
+    queue.length = 0;
+  });
   return loadPromise;
 }
