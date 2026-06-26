@@ -84,3 +84,14 @@ describe('ETag 304 + CORS', () => {
         expect(revalidated.headers.get('ETag')).toBe(etag)
     })
 })
+
+describe('Transit cache headers', () => {
+    it('sets Cache-Control and Vary on transit responses', async () => {
+        const response = await app.request('/v0/transit/stations')
+
+        expect(response.status).toBe(200)
+        expect(response.headers.get('Cache-Control')).toContain('max-age=2592000')
+        expect(response.headers.get('Vary')).toBe('Origin')
+        expect(response.headers.get('Cache-Tag')).toBe('transit-network')
+    })
+})
