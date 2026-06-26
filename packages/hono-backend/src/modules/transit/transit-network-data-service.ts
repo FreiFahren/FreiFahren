@@ -1,9 +1,10 @@
-import { and, asc, eq } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 
-import { AppError } from '../../common/errors'
-import { DbConnection, stations, lineStations, lines, segments, stationDistances } from '../../db'
+import { AppError, NoPathFoundError } from '../../common/errors'
+import { DbConnection, stations, lineStations, lines, segments } from '../../db'
 
-import type { Line, Lines, SegmentsFeatureCollection, Stations, StationId } from './types'
+import { buildGraph, findPathWithAStar, type Graph, type StationId } from './pathfinding'
+import type { Line, Lines, SegmentsFeatureCollection, Stations } from './types'
 
 export class TransitNetworkDataService {
     constructor(private db: DbConnection) {}
@@ -102,36 +103,32 @@ export class TransitNetworkDataService {
     }
 
     async getDistance(from: StationId, to: StationId): Promise<number> {
+        const graph = await this.loadGraph()
+
+        this.assertStationExists(graph, from, 'from')
+        this.assertStationExists(graph, to, 'to')
+
         if (from === to) {
-            await this.assertStationExists(from, 'from')
             return 0
         }
 
-        await this.assertStationExists(from, 'from')
-        await this.assertStationExists(to, 'to')
-
-        const rows = await this.db
-            .select({ distance: stationDistances.distance })
-            .from(stationDistances)
-            .where(and(eq(stationDistances.fromStationId, from), eq(stationDistances.toStationId, to)))
-            .limit(1)
-
-        if (rows.length === 0) {
-            throw new AppError({
-                message: 'No path found between stations',
-                statusCode: 422,
-                internalCode: 'NO_PATH_FOUND',
-                description: `${from}->${to}`,
-            })
+        try {
+            return findPathWithAStar(graph, from, to)
+        } catch (error) {
+            if (error instanceof NoPathFoundError) {
+                throw new AppError({
+                    message: 'No path found between stations',
+                    statusCode: 422,
+                    internalCode: 'NO_PATH_FOUND',
+                    description: `${from}->${to}`,
+                })
+            }
+            throw error
         }
-
-        return rows[0].distance
     }
 
-    private async assertStationExists(stationId: StationId, field: 'from' | 'to'): Promise<void> {
-        const rows = await this.db.select({ id: stations.id }).from(stations).where(eq(stations.id, stationId)).limit(1)
-
-        if (rows.length === 0) {
+    private assertStationExists(graph: Graph, stationId: StationId, field: 'from' | 'to'): void {
+        if (!graph.stations.has(stationId)) {
             throw new AppError({
                 message: 'Station not found',
                 statusCode: 404,
@@ -139,5 +136,16 @@ export class TransitNetworkDataService {
                 description: `${field}=${stationId}`,
             })
         }
+    }
+
+    private async loadGraph(): Promise<Graph> {
+        const allStations = await this.db.select().from(stations)
+        const allLineStations = await this.db
+            .select()
+            .from(lineStations)
+            .orderBy(asc(lineStations.lineId), asc(lineStations.order))
+        const allLines = await this.db.select().from(lines)
+
+        return buildGraph(allStations, allLines, allLineStations)
     }
 }

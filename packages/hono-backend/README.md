@@ -12,6 +12,16 @@ The .env file contains the following variables:
 - `CLOUDFLARE_ZONE_ID`: (optional) Cloudflare zone ID used to purge the transit API cache after `db:seed`.
 - `CLOUDFLARE_API_TOKEN`: (optional) API token with Cache Purge permission. When set together with `CLOUDFLARE_ZONE_ID`, `db:seed` purges the `transit-network` cache tag from the Cloudflare edge cache.
 
+## Transit edge caching
+
+Static transit data is served with HTTP cache headers so Cloudflare can cache responses at the edge. `GET /:version/transit/stations`, `/lines`, and `/segments` return `Cache-Control: public, max-age=2592000, stale-while-revalidate=86400` and `Cache-Tag: transit-network`.
+
+`GET /:version/transit/distance` is not edge-cached (`Cache-Control: no-store`). Distances are computed at request time from the graph in the database.
+
+All transit routes support ETag-based conditional requests (`If-None-Match` → `304`).
+
+After `db:seed`, the origin purges cached transit responses via the `transit-network` tag when the Cloudflare env vars above are set. Production should use a Cloudflare cache rule on `api.freifahren.org` for `GET /v*/transit/*` that respects `Cache-Control` from the origin.
+
 ## Start containers
 
 You can start the DB and bun container like so:

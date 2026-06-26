@@ -1,4 +1,4 @@
-import { afterEach, beforeAll, beforeEach, describe, expect, it, setSystemTime } from 'bun:test'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, setSystemTime } from 'bun:test'
 import { eq } from 'drizzle-orm'
 import { DateTime, Settings } from 'luxon'
 
@@ -391,13 +391,11 @@ describe('Predicted reports', () => {
 describe('Predicted reports threshold', () => {
     let testStations: string[]
 
-    // Helper to create historical data for predictions
     const seedHistoricalData = async () => {
-        // Create historical data across multiple days, times, and stations
         for (let weeksAgo = 1; weeksAgo <= 2; weeksAgo++) {
-            for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
-                for (const hour of [7, 9, 12, 15, 18, 21]) {
-                    for (let stationIdx = 0; stationIdx < Math.min(testStations.length, 7); stationIdx++) {
+            for (let dayOffset = 0; dayOffset < 5; dayOffset++) {
+                for (const hour of [7, 9, 12, 15, 18, 20, 21]) {
+                    for (let stationIdx = 0; stationIdx < Math.min(testStations.length, 5); stationIdx++) {
                         const historicalTime = DateTime.utc(2024, 1, 1, hour, 0).minus({
                             weeks: weeksAgo,
                             days: dayOffset,
@@ -423,17 +421,16 @@ describe('Predicted reports threshold', () => {
             .limit(10)
 
         testStations = stationsOnLine.map((s) => s.stationId)
-    })
-
-    beforeEach(async () => {
-        await db.delete(reports)
-        // Seed historical data before each test
         await seedHistoricalData()
     })
 
-    afterEach(async () => {
+    beforeEach(() => {
+        Settings.now = () => Date.now()
+        setSystemTime()
+    })
+
+    afterAll(async () => {
         await db.delete(reports)
-        // Reset time mocking after each test
         Settings.now = () => Date.now()
         setSystemTime()
     })
@@ -645,6 +642,9 @@ describe('Reports by station route', () => {
             .from(lineStations)
             .where(eq(lineStations.lineId, lineId))
             .limit(2)
+        if (stationRows.length < 2) {
+            throw new Error('expected at least two stations on the selected line')
+        }
         stationOneId = stationRows[0].stationId
         stationTwoId = stationRows[1].stationId
     })
@@ -660,7 +660,7 @@ describe('Reports by station route', () => {
     })
 
     it('returns only reports for the requested station in the given timeframe', async () => {
-        const now = DateTime.now().toUTC()
+        const now = DateTime.utc(2024, 6, 15, 12, 0, 0)
         const from = now.minus({ minutes: 45 })
         const to = now.plus({ minutes: 1 })
 
