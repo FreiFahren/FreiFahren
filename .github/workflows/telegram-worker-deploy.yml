@@ -15,12 +15,9 @@ concurrency:
 
 jobs:
     deploy:
-        # Gated on one-time setup being done. Set the `TELEGRAM_WORKER_ENABLED` repo variable
-        # (to any non-empty value) only after: the `telegram-updates` + `telegram-updates-dlq`
-        # queues exist, the secrets are set (`wrangler secret put MISTRAL_API_KEY` etc.), and
-        # TELEGRAM_REPORT_CHAT_ID is filled in. Until then this job is skipped, so merging never
-        # deploys against an unconfigured Worker.
-        if: ${{ vars.TELEGRAM_WORKER_ENABLED != '' }}
+        # One-time setup before the first deploy: set the Worker secrets
+        # (`wrangler secret put MISTRAL_API_KEY` etc.) and fill TELEGRAM_REPORT_CHAT_ID in
+        # wrangler.jsonc.
         runs-on: ubuntu-latest
         permissions:
             contents: read
