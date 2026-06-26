@@ -1,0 +1,23 @@
+{
+  "name": "telegram-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "eval": "bun run evals/run.ts"
+  },
+  "dependencies": {
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.9.0",
+    "@cloudflare/workers-types": "^4.20251001.0",
+    "typescript": "~6.0.2",
+    "vitest": "~3.2.0",
+    "wrangler": "^4.103.0"
+  }
+}

@@ -1,0 +1,7 @@
+# Secrets for `wrangler dev` (copy to .dev.vars). In production set these with
+# `wrangler secret put <NAME>` — do NOT put secrets in wrangler.jsonc.
+MISTRAL_API_KEY=
+TELEGRAM_BOT_TOKEN=
+REPORT_PASSWORD=password
+# The secret_token you pass to Telegram setWebhook; the worker checks it on every webhook.
+TELEGRAM_WEBHOOK_SECRET=

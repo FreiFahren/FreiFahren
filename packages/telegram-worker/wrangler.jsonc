@@ -1,0 +1,20 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "telegram-worker",
+    "main": "src/index.ts",
+    "compatibility_date": "2025-10-11",
+    "vars": {
+        // Backend that serves /v0/transit/* and accepts POST /v0/reports.
+        "BACKEND_URL": "https://api.freifahren.org",
+        "PUBLIC_APP_URL": "https://app.freifahren.org",
+        "CITY_NAME": "Berlin",
+        "MISTRAL_MODEL": "mistral-small-latest",
+        // Group chat the bot listens to and forwards app reports into. Negative for groups.
+        "TELEGRAM_REPORT_CHAT_ID": "-1001370021231",
+    },
+    // Messages are processed in the background (ctx.waitUntil) with no queue/retry; failed
+    // runs are dropped (error tracking is TODO, FreiFahren/FreiFahren#689). Transit data is
+    // fetched per message from BACKEND_URL; cache it with a Cloudflare cache rule on
+    // /v0/transit/*. Secrets (set via `wrangler secret put`): MISTRAL_API_KEY,
+    // TELEGRAM_BOT_TOKEN, REPORT_PASSWORD, TELEGRAM_WEBHOOK_SECRET.
+}
