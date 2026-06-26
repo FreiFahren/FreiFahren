@@ -9,6 +9,7 @@ import { stations } from '../schema/stations'
 import { SEED_CONFIG } from './config'
 import { seedLinesFromRelations } from './lines'
 import { seedSegmentsFromGeometry } from './segments/index'
+import { rebuildStationDistances } from './station-distances'
 import { seedStationsFromElements } from './stations'
 import { haversine, stationNamesMatch } from './stations/merge-proximate'
 import type { OsmElement, OsmRelation } from './stations/overpass'
@@ -298,6 +299,8 @@ export const seedBaseData = async (db: DbConnection) => {
 
     logger.info('[seed] Seeding segments...')
     await seedSegmentsFromGeometry(db, variants, stationCoordinates, routeGeometryElements)
+
+    await rebuildStationDistances(db)
 
     logger.info('[seed] Done.')
 }

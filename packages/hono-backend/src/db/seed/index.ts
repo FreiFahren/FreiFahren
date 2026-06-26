@@ -1,12 +1,14 @@
 import { logger } from '../../common/logger'
 import { db } from '../index'
 
+import { purgeTransitCache } from './purge-transit-cache'
 import { seedBaseData } from './seed'
 
 const seed = async () => {
     logger.info('Starting seed...')
 
     await seedBaseData(db)
+    await purgeTransitCache()
 
     logger.info('Seed completed successfully!')
 }
