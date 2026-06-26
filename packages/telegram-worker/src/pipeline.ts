@@ -19,7 +19,9 @@ import { postReport, reportIdentifiers } from './reporting'
  */
 export async function processMessage(text: string, env: Env): Promise<void> {
     if (isSpam(text)) {
-        console.info('Skipped as spam:', text.slice(0, 80))
+        // Never log the message text — the privacy policy promises we don't store it, and logs are
+        // persisted in Sentry. Length is a non-identifying signal that's still useful for triage.
+        console.info('Skipped as spam', { length: text.length })
         return
     }
 
