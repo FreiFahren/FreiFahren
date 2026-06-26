@@ -82,7 +82,8 @@ function LinePicker() {
           selectLine(isSelected ? null : line.name);
         }}
         className={cn(
-          'shrink-0 rounded-sm transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-white/50',
+          'shrink-0 rounded-sm outline-none transition-all focus-visible:ring-2 focus-visible:ring-white/50',
+          isSelected && 'ring-2 ring-white',
           lineName && !isSelected && 'opacity-40',
         )}
       >
@@ -127,7 +128,7 @@ function LinePicker() {
       {stationId ? (
         <div className="flex flex-wrap gap-2">{chips}</div>
       ) : (
-        <div className="-mx-4 overflow-x-auto px-4 pb-1">
+        <div className="-mx-4 overflow-x-auto px-4 py-1.5">
           <div className="flex w-max gap-2">{chips}</div>
         </div>
       )}
@@ -196,7 +197,7 @@ function StationPicker() {
       </div>
 
       {stationId ? (
-        <div className="bg-muted flex items-center rounded-md px-3 py-2.5 text-sm font-semibold">
+        <div className="bg-muted flex items-center rounded-md px-3 py-2.5 text-sm ring-2 ring-white">
           {visibleStations[0]?.name}
         </div>
       ) : (
@@ -266,8 +267,9 @@ function DirectionPicker() {
                   selectDirection(isSelected ? null : station.id);
                 }}
                 className={cn(
-                  'hover:bg-muted focus-visible:bg-muted flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm outline-none',
-                  isSelected && 'bg-muted font-semibold',
+                  'hover:bg-muted focus-visible:bg-muted flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm outline-none transition-opacity',
+                  isSelected && 'bg-muted ring-2 ring-white',
+                  directionStationId && !isSelected && 'opacity-40',
                 )}
               >
                 <ChevronRight className="text-muted-foreground size-5 shrink-0" />
