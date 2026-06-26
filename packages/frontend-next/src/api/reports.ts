@@ -2,6 +2,7 @@ import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/rea
 import type { TFunction } from 'i18next';
 import { useEffect, useState } from 'react';
 
+import { traceAction } from '@/lib/error-monitoring';
 import { requireEnv } from '@/lib/utils';
 
 import { fetchJson, type Line, useLines } from './transit';
@@ -226,21 +227,22 @@ export function useSubmitReport() {
   const { data: lines } = useLines();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (input: SubmitReportInput): Promise<SubmitReportResponse> => {
-      const lineId = resolveLineId(input, lines);
-      const response = await fetch(`${API_URL}/v0/reports`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'ff-platform': 'web' },
-        body: JSON.stringify({
-          stationId: input.stationId,
-          lineId,
-          directionId: input.directionStationId ?? null,
-          source: 'web_app',
-        }),
-      });
-      if (!response.ok) throw new Error(`Report submission failed: ${response.status}`);
-      return response.json();
-    },
+    mutationFn: (input: SubmitReportInput): Promise<SubmitReportResponse> =>
+      traceAction('Submit Report', async () => {
+        const lineId = resolveLineId(input, lines);
+        const response = await fetch(`${API_URL}/v0/reports`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'ff-platform': 'web' },
+          body: JSON.stringify({
+            stationId: input.stationId,
+            lineId,
+            directionId: input.directionStationId ?? null,
+            source: 'web_app',
+          }),
+        });
+        if (!response.ok) throw new Error(`Report submission failed: ${response.status}`);
+        return response.json();
+      }),
     // The backend commits the report and clears its reports/risk caches before
     // returning 200, so by the time we get here the new data is already live —
     // no wait/race-condition guard is needed. Refetch both so the map and risk

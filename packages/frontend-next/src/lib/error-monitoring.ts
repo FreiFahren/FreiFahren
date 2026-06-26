@@ -31,11 +31,11 @@ export function initErrorMonitoring(): void {
     initialScope: { tags: { platform: Capacitor.getPlatform() } },
     // No IP address, cookies, or request payloads — see the file header.
     sendDefaultPii: false,
-    // Performance: capture page-load/navigation timing and Web Vitals (LCP, INP, CLS, ...) on a 10%
+    // Performance: capture page-load/navigation timing and Web Vitals (LCP, INP, CLS, ...) on a 50%
     // sample. These spans carry only in-app route + own-API URLs (no personal data); disclosed in
     // the privacy policy alongside error diagnostics.
     integrations: [SentryReact.browserTracingIntegration()],
-    tracesSampleRate: 0.1,
+    tracesSampler: (samplingContext) => (samplingContext.name === 'Submit Report' ? 1.0 : 0.5),
     // Same-origin only: never attach sentry-trace/baggage headers to the cross-origin API (its CORS
     // config doesn't allow them, and we don't do distributed tracing into the backend).
     tracePropagationTargets: ['localhost', /^\//],
@@ -52,4 +52,13 @@ export function initErrorMonitoring(): void {
   }
 
   SentryReact.init(options);
+}
+
+// Wrap a user action so the API calls inside it are recorded as a trace with timing. The
+// auto-instrumented fetch spans only attach to an active root span (pageload/navigation), which
+// has usually closed by the time the user triggers an action — so without this the request is
+// never captured. The action name doubles as the tracesSampler key (see init). When Sentry is
+// uninitialized (local dev / Do Not Track) startSpan still runs the callback, so this is a no-op.
+export function traceAction<T>(name: string, callback: () => Promise<T>): Promise<T> {
+  return SentryReact.startSpan({ name, op: 'ui.action.submit' }, callback);
 }
