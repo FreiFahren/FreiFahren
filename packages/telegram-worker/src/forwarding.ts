@@ -4,7 +4,7 @@ import { getTransitIndex } from './transit'
 import { readConfig } from './config'
 import { reportError } from './observability'
 
-/** Mirrors Python's `html.escape(s, quote=True)`. */
+/** HTML-escape for Telegram markup, quotes included. */
 function escapeHtml(s: string): string {
     return s
         .replace(/&/g, '&amp;')

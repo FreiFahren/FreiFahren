@@ -13,7 +13,7 @@ import {
 import { postReport, reportIdentifiers } from './reporting'
 
 /**
- * The extract -> resolve -> submit chain (was Python's handle_text). Throws on failure
+ * The extract -> resolve -> submit chain. Throws on failure
  * (Mistral or backend) for the caller to report; returns normally when there's nothing to
  * submit (spam, no extraction, no station). Runs in the background via waitUntil — no retry.
  */

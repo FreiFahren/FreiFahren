@@ -37,8 +37,7 @@ export function normalizeName(name: string): string {
     return n
 }
 
-// Faithful port of CPython's difflib.SequenceMatcher.ratio() (no custom junk; autojunk
-// kicks in at len>=200 as upstream). Station names are short, but we keep parity exact.
+// Implements difflib.SequenceMatcher.ratio() (no custom junk; autojunk kicks in at len>=200).
 
 function buildB2J(b: string): Map<string, number[]> {
     const b2j = new Map<string, number[]>()
@@ -184,7 +183,7 @@ function candidates(
     if (scored.length === 0) {
         return []
     }
-    // Stable sort by score descending (matches Python's list.sort stability).
+    // Stable sort by score descending.
     scored.sort((x, y) => y[1] - x[1])
 
     const results: [string, number][] = []

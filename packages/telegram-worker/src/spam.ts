@@ -2,7 +2,7 @@ export const MINIMUM_MESSAGE_LENGTH = 3
 export const MAXIMUM_MESSAGE_LENGTH = 250
 export const MAX_EMOJIS = 5
 
-// Matches the Python classifier's emoji range (Emoticons block, U+1F600–U+1F64F).
+// Emoji range: Emoticons block, U+1F600–U+1F64F.
 const EMOJI_PATTERN = /[\u{1f600}-\u{1f64f}]/gu
 
 export function isSpam(text: string): boolean {
