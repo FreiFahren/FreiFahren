@@ -264,6 +264,34 @@ async function mapPool<T, R>(items: T[], limit: number, fn: (item: T, i: number)
 
 const NULL_RESULT: ExtractionResult = { stationId: null, lineName: null, directionId: null }
 
+const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
+
+/** Retry transient Mistral failures (429 rate-limit, 5xx, timeouts) with exponential backoff +
+ *  jitter. The production worker has no retry by design; the eval needs it so rate-limiting
+ *  doesn't poison the measurement (the old Python run relied on the Mistral client's retries). */
+async function extractWithRetry(
+    text: string,
+    systemPrompt: string,
+    apiKey: string,
+    model: string,
+    attempts = 7,
+): Promise<Awaited<ReturnType<typeof extractWithMistral>>> {
+    let last: unknown
+    for (let i = 0; i < attempts; i++) {
+        try {
+            return await extractWithMistral(text, systemPrompt, apiKey, model)
+        } catch (exc) {
+            last = exc
+            const msg = exc instanceof Error ? exc.message : String(exc)
+            if (!/\b429\b|\b5\d\d\b|timeout|timed out|fetch failed|network|ECONNRESET/i.test(msg)) {
+                throw exc
+            }
+            await sleep(Math.min(20000, 1000 * 2 ** i) + Math.floor(Math.random() * 400))
+        }
+    }
+    throw last
+}
+
 async function runOne(
     row: Row,
     index: TransitIndex,
@@ -276,7 +304,7 @@ async function runOne(
     let error: string | null = null
     try {
         const detectedLine = detectLineName(row.text, index.lineNames, linePattern, index.circularLineNames)
-        const parsed = await extractWithMistral(row.text, systemPrompt, apiKey, model)
+        const parsed = await extractWithRetry(row.text, systemPrompt, apiKey, model)
         result = parsed === null ? NULL_RESULT : resolveExtraction(index, parsed, detectedLine)
     } catch (exc) {
         error = exc instanceof Error ? `${exc.name}: ${exc.message}` : String(exc)
