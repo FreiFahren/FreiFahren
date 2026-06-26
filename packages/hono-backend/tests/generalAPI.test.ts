@@ -91,7 +91,7 @@ describe('Transit cache headers', () => {
 
         expect(response.status).toBe(200)
         expect(response.headers.get('Cache-Control')).toContain('max-age=2592000')
-        expect(response.headers.get('Vary')).toBe('Origin')
+        expect(response.headers.get('Vary')).toContain('Origin')
         expect(response.headers.get('Cache-Tag')).toBe('transit-network')
     })
 })

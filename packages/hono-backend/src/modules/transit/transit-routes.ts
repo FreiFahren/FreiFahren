@@ -115,6 +115,7 @@ export const getDistance = defineRoute<Env>()({
         const transitNetworkDataService = c.get('transitNetworkDataService')
         const query = c.req.valid('query')
         const distance = await transitNetworkDataService.getDistance(query.from, query.to)
+        c.header('Cache-Control', 'no-store')
         return c.json({ distance })
     },
 })

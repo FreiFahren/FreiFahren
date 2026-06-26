@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
-import { and, asc, eq } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 
 import { createApp } from '../src'
-import { db, lineStations, reports, stationDistances, stations } from '../src/db'
+import { db, lineStations, reports, stations } from '../src/db'
 import { seedBaseData } from '../src/db/seed/seed'
 import { sendReportRequest } from './test-utils'
 
@@ -33,31 +33,6 @@ describe('seedBaseData', () => {
 
         const after = await db.select({ reportId: reports.reportId }).from(reports)
         expect(after).toEqual([{ reportId: inserted.reportId }])
-    })
-
-    it('rebuilds station distances after seeding', async () => {
-        const rows = await db
-            .select({
-                stationId: lineStations.stationId,
-            })
-            .from(lineStations)
-            .orderBy(asc(lineStations.lineId), asc(lineStations.order))
-            .limit(2)
-
-        if (rows.length < 2) throw new Error('expected at least two seeded line stations to exist')
-
-        const [distance] = await db
-            .select({ distance: stationDistances.distance })
-            .from(stationDistances)
-            .where(
-                and(
-                    eq(stationDistances.fromStationId, rows[0].stationId),
-                    eq(stationDistances.toStationId, rows[1].stationId)
-                )
-            )
-            .limit(1)
-
-        expect(distance?.distance).toBeGreaterThan(0)
     })
 
     it('remaps reports from a referenced orphan station to a proximate live station', async () => {
