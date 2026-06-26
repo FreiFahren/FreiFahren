@@ -70,8 +70,10 @@ export async function handleWebhook(
     const text = acceptUpdate(update, env.TELEGRAM_REPORT_CHAT_ID)
     if (text) {
         ctx.waitUntil(
+            // Pass the length, not the text: the privacy policy promises we don't store message
+            // content, and reportError persists to Sentry. Length still helps correlate failures.
             process(text, env).catch((err) =>
-                reportError('telegram pipeline failed', err, { text: text.slice(0, 80) }),
+                reportError('telegram pipeline failed', err, { length: text.length }),
             ),
         )
     }
