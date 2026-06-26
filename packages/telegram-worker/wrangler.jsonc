@@ -10,7 +10,7 @@
         "CITY_NAME": "Berlin",
         "MISTRAL_MODEL": "mistral-small-latest",
         // Group chat the bot listens to and forwards app reports into. Negative for groups.
-        "TELEGRAM_REPORT_CHAT_ID": ""
+        "TELEGRAM_REPORT_CHAT_ID": "-5176241055"
     }
     // Messages are processed in the background (ctx.waitUntil) with no queue/retry; failed
     // runs are dropped (error tracking is TODO, FreiFahren/FreiFahren#689). Transit data is
