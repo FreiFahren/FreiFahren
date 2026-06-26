@@ -14,6 +14,7 @@ import { getRisk } from './modules/risk/risk-routes'
 import { RiskService } from './modules/risk/risk-service'
 import {
     transitCacheMiddleware,
+    VERSIONED_TRANSIT_CACHEABLE_PATHS,
     VERSIONED_TRANSIT_PATH,
 } from './modules/transit/transit-cache-middleware'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
@@ -65,14 +66,16 @@ export const createApp = (dbConnection: DbConnection = db) => {
             ],
         })
     )
-    app.use(VERSIONED_TRANSIT_PATH, transitCacheMiddleware)
+    for (const path of VERSIONED_TRANSIT_CACHEABLE_PATHS) {
+        app.use(path, transitCacheMiddleware)
+    }
     app.use(
         pinoLogger({
             pino: logger,
             http: {
                 // The request summary (method, path, status, duration) is rendered by the
                 // `messageFormat` in logger.ts, so we intentionally emit an empty `msg` here to
-                // avoid duplicating it.
+                // Avoid duplicating it.
                 onResMessage: () => '',
             },
         })

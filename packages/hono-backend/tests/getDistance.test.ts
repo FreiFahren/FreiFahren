@@ -2,7 +2,6 @@ import { afterEach, beforeAll, describe, expect, it } from 'bun:test'
 import { asc, eq, inArray } from 'drizzle-orm'
 
 import { db, lines, lineStations, stations } from '../src/db'
-import { rebuildStationDistances } from '../src/db/seed/station-distances'
 import { app, createApp } from '../src/index'
 import { appRequestWithRedirect } from './test-utils'
 
@@ -108,8 +107,6 @@ describe('GET /v0/transit/distance', () => {
             { lineId: 'TEST_L2', stationId: 'TEST_B', order: 0 },
             { lineId: 'TEST_L2', stationId: 'TEST_C', order: 1 },
         ])
-        await rebuildStationDistances(db)
-
         const transferApp = createApp(db)
         const response = await getDistance('TEST_A', 'TEST_C', transferApp)
 
@@ -150,8 +147,6 @@ describe('GET /v0/transit/distance', () => {
             lat: 52.52,
             lng: 13.405,
         })
-        await rebuildStationDistances(db)
-
         const isolatedApp = createApp(db)
         const response = await getDistance(fromStationId, ISOLATED_STATION_ID, isolatedApp)
 

@@ -43,6 +43,13 @@
       "when": 1782482341231,
       "tag": "0005_add_station_distances",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1782486052362,
+      "tag": "0006_drop_station_distances",
+      "breakpoints": true
     }
   ]
 }
