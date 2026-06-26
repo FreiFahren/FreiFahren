@@ -12,7 +12,10 @@ import { db, DbConnection } from './db'
 import { getReports, getReportsByStation, postReport, ReportsService } from './modules/reports/'
 import { getRisk } from './modules/risk/risk-routes'
 import { RiskService } from './modules/risk/risk-service'
-import { transitCacheMiddleware } from './modules/transit/transit-cache-middleware'
+import {
+    transitCacheMiddleware,
+    VERSIONED_TRANSIT_PATH,
+} from './modules/transit/transit-cache-middleware'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
 import { getDistance, getLines, getSegments, getStations } from './modules/transit/transit-routes'
 
@@ -52,7 +55,7 @@ export const createApp = (dbConnection: DbConnection = db) => {
         })
     )
     app.use(
-        '/v0/transit/*',
+        VERSIONED_TRANSIT_PATH,
         etag({
             retainedHeaders: [
                 ...RETAINED_304_HEADERS,
@@ -62,7 +65,7 @@ export const createApp = (dbConnection: DbConnection = db) => {
             ],
         })
     )
-    app.use('/v0/transit/*', transitCacheMiddleware)
+    app.use(VERSIONED_TRANSIT_PATH, transitCacheMiddleware)
     app.use(
         pinoLogger({
             pino: logger,

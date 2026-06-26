@@ -1,6 +1,5 @@
 import { logger } from '../../common/logger'
-
-const PURGE_PREFIX = 'api.freifahren.org/v0/transit'
+import { TRANSIT_CACHE_TAG } from '../../modules/transit/transit-cache-middleware'
 
 export const purgeTransitCache = async () => {
     const zoneId = Bun.env.CLOUDFLARE_ZONE_ID
@@ -18,7 +17,7 @@ export const purgeTransitCache = async () => {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            prefixes: [PURGE_PREFIX],
+            tags: [TRANSIT_CACHE_TAG],
         }),
     })
 
@@ -28,5 +27,5 @@ export const purgeTransitCache = async () => {
         return
     }
 
-    logger.info({ prefix: PURGE_PREFIX }, 'Cloudflare transit cache purged')
+    logger.info({ tag: TRANSIT_CACHE_TAG }, 'Cloudflare transit cache purged')
 }

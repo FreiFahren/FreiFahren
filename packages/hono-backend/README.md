@@ -10,7 +10,7 @@ The .env file contains the following variables:
 - `REPORT_PASSWORD`: The password to use for the report API.
 - `CORS_ORIGINS`: Comma-separated list of frontend origins allowed to call the API, for example `http://localhost:1871,https://freifahren.org`.
 - `CLOUDFLARE_ZONE_ID`: (optional) Cloudflare zone ID used to purge the transit API cache after `db:seed`.
-- `CLOUDFLARE_API_TOKEN`: (optional) API token with Cache Purge permission. When set together with `CLOUDFLARE_ZONE_ID`, `db:seed` purges `api.freifahren.org/v0/transit` from the Cloudflare edge cache.
+- `CLOUDFLARE_API_TOKEN`: (optional) API token with Cache Purge permission. When set together with `CLOUDFLARE_ZONE_ID`, `db:seed` purges the `transit-network` cache tag from the Cloudflare edge cache.
 
 ## Start containers
 
