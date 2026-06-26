@@ -7,6 +7,7 @@ export interface Env {
     CITY_NAME: string
     MISTRAL_MODEL: string
     TELEGRAM_REPORT_CHAT_ID: string
+    SENTRY_DSN: string
 
     // Secrets (wrangler secret put)
     MISTRAL_API_KEY: string
