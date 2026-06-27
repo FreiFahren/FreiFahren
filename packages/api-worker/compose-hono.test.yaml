@@ -27,8 +27,6 @@ services:
             TELEGRAM_WORKER_URL: http://localhost:6000
             REPORT_PASSWORD: password
             CORS_ORIGINS: http://localhost:1871,http://127.0.0.1:1871,capacitor://localhost
-        ports:
-            - '3000:3000'
         volumes:
             - ./src:/app/src:ro
             - ./bunfig.toml:/app/bunfig.toml:ro

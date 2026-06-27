@@ -4,37 +4,23 @@
 
 Copy [`.env.example`](./.env.example) to `.env` for local development; each variable is documented there.
 
-## Start containers
+## Local development
 
-You can start the DB and bun container like so:
-
-```sh
-just up
-```
-
-Hot reloading is enabled and the API container should reload any code changes automatically.
-
-When modifying dependencies, or when something breaks in a weird way in general, try rebuilding the containers:
+The API runs as a Cloudflare Worker. Locally you serve it with `wrangler dev`, backed by a Postgres
+container. The `compose-hono.test.yaml` stack is a **CLI/test harness** — a Postgres instance plus a
+Bun container that `just db-*` and CI `exec` into to run migrations, seed, and tests. It does **not**
+serve the API.
 
 ```sh
-just rebuild
+just up                  # start Postgres + the harness container
+just db-migrate          # initialize the schema (first run)
+just db-seed             # populate Berlin stations/lines/segments
+bun run dev              # serve the Worker locally (wrangler dev) on http://localhost:8787
 ```
 
-On the first run, you will also have to initialize the DB with
-
-```sh
-just db-migrate
-```
-
-Once this is done, the API should be available on `localhost:80`.
-
-You might want to populate the DB with stations and lines. Simply run
-
-```sh
-just db-seed
-```
-
-To populate it with data about Berlin's public transit system.
+`bun run dev` uses the Hyperdrive `localConnectionString` from `wrangler.jsonc` to reach the local
+Postgres. Put any local secrets/vars in `.dev.vars` (see `.env.example`). If dependencies change or
+the harness misbehaves, rebuild it with `just rebuild`.
 
 ## DB Migrations
 
@@ -58,8 +44,6 @@ If you want to access the DB with something like Postico, use the following conn
 
 ## API Documentation
 
-The rewrite backend now exposes OpenAPI docs and an interactive Scalar UI.
-
-- Interactive docs: `http://localhost:3000/docs`
-
-The docs are generated from route-level metadata in the rewrite endpoint definitions.
+An OpenAPI document and an interactive Scalar UI are defined in `src/common/openapi.ts`
+(`/openapi.json` and `/docs`), generated from route-level metadata. They are not currently mounted
+on the Worker — call `registerOpenApi(app)` in `createApp` to enable them.

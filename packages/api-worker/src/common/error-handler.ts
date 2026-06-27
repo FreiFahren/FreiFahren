@@ -1,11 +1,15 @@
 import { Context } from 'hono'
 import { ContentfulStatusCode } from 'hono/utils/http-status'
 
-import { Env } from '../app-env'
+import { AppConfig, Env } from '../app-env'
 
 import { AppError } from './errors'
 
 export const handleError = (err: Error, c: Context<Env>) => {
+    // config is unset if registerContext threw before storing it (e.g. missing CORS_ORIGINS or db
+    // binding); fall back to hiding descriptions rather than throwing a second error.
+    const config = c.get('config') as AppConfig | undefined
+
     if (err instanceof AppError) {
         c.get('logger').error(
             {
@@ -22,7 +26,7 @@ export const handleError = (err: Error, c: Context<Env>) => {
                 details: {
                     internal_code: err.internalCode,
                     // We do not want to leak sensitive information to the client in production
-                    description: c.get('config').nodeEnv === 'development' ? err.description : undefined,
+                    description: config?.nodeEnv === 'development' ? err.description : undefined,
                 },
             },
             err.statusCode
@@ -36,7 +40,7 @@ export const handleError = (err: Error, c: Context<Env>) => {
             details: {
                 internal_code: 'UNKNOWN_ERROR',
                 // We do not want to leak sensitive information to the client in production
-                description: c.get('config').nodeEnv === 'development' ? err.message : undefined,
+                description: config?.nodeEnv === 'development' ? err.message : undefined,
             },
         },
         500 as ContentfulStatusCode
