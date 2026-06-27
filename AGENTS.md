@@ -8,7 +8,7 @@ Prefer **integration tests** over unit tests. Drive behavior through the public 
 
 - **No manual DB inserts in tests.** To set up state, send a request to the API (e.g. `POST /reports`) instead of writing to the database directly. This keeps tests realistic and avoids coupling them to schema details.
 - **Mock time, don't backdate rows.** When a test needs "old" data, use `setSystemTime` from `bun:test` to move the clock, send the request, then move the clock forward — instead of inserting rows with old timestamps.
-- **Use `appRequestWithRedirect`** (from `packages/hono-backend/tests/test-utils.ts`) instead of `app.request` directly. It follows the version redirect so tests automatically exercise the latest API version without hard-coding `/v0/...` paths.
+- **Use `appRequestWithRedirect`** (from `packages/api-worker/tests/test-utils.ts`) instead of `app.request` directly. It follows the version redirect so tests automatically exercise the latest API version without hard-coding `/v0/...` paths.
 - **Don't assert on exact error message strings.** Assert on status codes and structured error fields (codes, types). Exact wording is presentational and will churn.
 
 ## Migrations
@@ -30,12 +30,12 @@ Example: `fix: return 404 instead of 500 when station id is unknown`
 
 ## Backend conventions
 
-- **Throw `AppError` at service boundaries**, not raw `Error` or ad-hoc `c.json({ error: ... })`. `AppError` (see `packages/hono-backend/src/common/errors.ts`) carries a `statusCode` and an `internalCode`, and the central error handler strips descriptions in production so internal details don't leak. Domain-specific errors should be converted to `AppError` before they reach the response.
-- **Use the Pino logger from context** (`c.get('logger')`) instead of `console.log`. It's wired up in `packages/hono-backend/src/common/logger.ts` with daily rotation and pretty-printing in dev. Log structured objects (`logger.info({ reportId }, 'report created')`), not interpolated strings, so the JSON output stays queryable.
+- **Throw `AppError` at service boundaries**, not raw `Error` or ad-hoc `c.json({ error: ... })`. `AppError` (see `packages/api-worker/src/common/errors.ts`) carries a `statusCode` and an `internalCode`, and the central error handler strips descriptions in production so internal details don't leak. Domain-specific errors should be converted to `AppError` before they reach the response.
+- **Use the logger from context** (`c.get('logger')`) instead of `console.log`. It's a thin structured logger (`packages/api-worker/src/common/logger.ts`); on Workers, `@sentry/cloudflare`'s console integration forwards it to Sentry Logs, which is the only observability sink. Log structured objects (`logger.info({ reportId }, 'report created')`), not interpolated strings, so the output stays queryable.
 
 ## City-agnostic code
 
-The codebase should not assume Berlin. Keep city-specific data (station lists, line colors, network names, timezone, language) in **config files** under `packages/hono-backend/src/db/seed/config.ts` and similar locations — never hard-coded in business logic. Config files are the only sanctioned escape hatch for city-specific values.
+The codebase should not assume Berlin. Keep city-specific data (station lists, line colors, network names, timezone, language) in **config files** under `packages/api-worker/src/db/seed/config.ts` and similar locations — never hard-coded in business logic. Config files are the only sanctioned escape hatch for city-specific values.
 
 ## Comments
 

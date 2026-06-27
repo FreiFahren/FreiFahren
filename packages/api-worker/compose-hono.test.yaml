@@ -1,0 +1,42 @@
+services:
+    postgres:
+        image: postgres:18.0-alpine3.22
+        container_name: hono-postgres
+        environment:
+            POSTGRES_DB: freifahren
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+        ports:
+            - '5432:5432'
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+            - ./postgres-init:/docker-entrypoint-initdb.d:ro
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U postgres']
+            interval: 5s
+            timeout: 5s
+            retries: 5
+
+    bun:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: hono-bun
+        environment:
+            DATABASE_URL: postgres://postgres:postgres@postgres:5432/freifahren
+            TELEGRAM_WORKER_URL: http://localhost:6000
+            REPORT_PASSWORD: password
+            CORS_ORIGINS: http://localhost:1871,http://127.0.0.1:1871,capacitor://localhost
+        volumes:
+            - ./src:/app/src:ro
+            - ./bunfig.toml:/app/bunfig.toml:ro
+            - ./tests:/app/tests:ro
+            - ./drizzle.config.ts:/app/drizzle.config.ts:ro
+            - ./drizzle:/app/drizzle
+        depends_on:
+            postgres:
+                condition: service_healthy
+        restart: unless-stopped
+
+volumes:
+    postgres_data:
