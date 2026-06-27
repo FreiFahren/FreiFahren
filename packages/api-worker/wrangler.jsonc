@@ -5,6 +5,7 @@
     "compatibility_date": "2025-10-11",
     "compatibility_flags": ["nodejs_compat"],
     "workers_dev": true,
+    "routes": [{ "pattern": "api.freifahren.org/*", "zone_name": "freifahren.org" }],
     "hyperdrive": [
         {
             "binding": "HYPERDRIVE",
