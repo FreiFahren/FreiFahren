@@ -8,7 +8,7 @@ import { seedBaseData } from './seed'
 const seed = async () => {
     logger.info('Starting seed...')
 
-    const db = createDb(process.env.DATABASE_URL!)
+    const { db } = createDb(process.env.DATABASE_URL!)
     await seedBaseData(db)
 
     logger.info('Seed completed successfully!')
