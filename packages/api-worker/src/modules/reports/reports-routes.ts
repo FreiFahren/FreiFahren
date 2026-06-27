@@ -43,25 +43,6 @@ const reportsQuerySchema = z
 export const getReports = defineRoute<Env>()({
     method: 'get',
     path: '/',
-    docs: {
-        summary: 'List reports',
-        description:
-            'Returns reports between an optional from/to ISO datetime range. Caching is disabled for routes that specify the from and to parameters.',
-        tags: ['reports'],
-        querySchema: z.object({
-            from: z.iso.datetime().optional(),
-            to: z.iso.datetime().optional(),
-        }),
-        responseSchema: z.array(
-            z.object({
-                timestamp: z.iso.datetime(),
-                stationId: z.string(),
-                directionId: z.string().nullable(),
-                lineId: z.string().nullable(),
-                isPredicted: z.boolean(),
-            })
-        ),
-    },
     schemas: {
         query: reportsQuerySchema,
     },
@@ -80,24 +61,6 @@ export const getReports = defineRoute<Env>()({
 export const getReportsByStation = defineRoute<Env>()({
     method: 'get',
     path: '/:stationId',
-    docs: {
-        summary: 'List reports by station',
-        description: 'Returns reports for a specific station between an optional from/to ISO datetime range.',
-        tags: ['reports'],
-        querySchema: z.object({
-            from: z.iso.datetime().optional(),
-            to: z.iso.datetime().optional(),
-        }),
-        responseSchema: z.array(
-            z.object({
-                timestamp: z.iso.datetime(),
-                stationId: z.string(),
-                directionId: z.string().nullable(),
-                lineId: z.string().nullable(),
-                isPredicted: z.boolean(),
-            })
-        ),
-    },
     schemas: {
         param: z.object({
             stationId: z.string().min(1),
@@ -124,25 +87,6 @@ export const getReportsByStation = defineRoute<Env>()({
 export const postReport = defineRoute<Env>()({
     method: 'post',
     path: '/',
-    docs: {
-        summary: 'Create a report',
-        description:
-            'Creates a report after anti-spam verification and post-processing. At least one of stationId, lineId, or directionId must be provided.',
-        tags: ['reports'],
-        requestSchema: z.object({
-            stationId: z.string().max(16).optional(),
-            lineId: z.string().max(16).nullable().optional(),
-            directionId: z.string().max(16).nullable().optional(),
-            source: z.enum(['mini_app', 'web_app', 'mobile_app', 'telegram']).optional(),
-        }),
-        responseSchema: z.object({
-            reportId: z.number().int(),
-            stationId: z.string(),
-            lineId: z.string().nullable(),
-            directionId: z.string().nullable(),
-            timestamp: z.iso.datetime(),
-        }),
-    },
     schemas: {
         json: insertReportSchema,
     },
