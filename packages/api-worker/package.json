@@ -45,6 +45,7 @@
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prefer-arrow": "^1.2.3",
+    "jiti": "^2.4.2",
     "prettier": "^3.6.2",
     "typescript-eslint": "^8.46.3",
     "wrangler": "^4.103.0"
