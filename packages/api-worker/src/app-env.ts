@@ -1,4 +1,4 @@
-import { Hono } from 'hono'
+import { Context, Hono } from 'hono'
 
 import { createLogger, Logger, LogLevel } from './common/logger'
 import { createDb, DbConnection } from './db'
@@ -67,30 +67,29 @@ const resolveConnectionString = (env: Bindings): string => {
     return connectionString
 }
 
-const createServices = (db: DbConnection, config: AppConfig): Services => {
+const applyServices = (c: Context<Env>, db: DbConnection, config: AppConfig) => {
     const transitNetworkDataService = new TransitNetworkDataService(db)
     const reportsService = new ReportsService(db, transitNetworkDataService, {
         nodeEnv: config.nodeEnv,
         telegramWorkerUrl: config.telegramWorkerUrl,
         reportPassword: config.reportPassword,
     })
-    const riskService = new RiskService(reportsService, transitNetworkDataService)
 
-    return { transitNetworkDataService, reportsService, riskService }
+    c.set('config', config)
+    c.set('reportsService', reportsService)
+    c.set('riskService', new RiskService(reportsService, transitNetworkDataService))
+    c.set('transitNetworkDataService', transitNetworkDataService)
 }
 
-// Memoize the db client (the expensive part) per connection string. Services are built per
-// Request instead, so config like NODE_ENV stays current and no request state is shared.
-let cachedDb: { key: string; db: DbConnection } | null = null
+// Reused connection for non-Workers runtimes (tests, seed/CLI scripts), where there is no
+// cross-request I/O restriction — opening one per request would exhaust the connection pool.
+let nodeDb: { key: string; db: DbConnection } | null = null
 
-const getDb = (env: Bindings): DbConnection => {
-    const key = resolveConnectionString(env)
-    if (cachedDb && cachedDb.key === key) {
-        return cachedDb.db
+const getNodeDb = (key: string): DbConnection => {
+    if (!nodeDb || nodeDb.key !== key) {
+        nodeDb = { key, db: createDb(key).db }
     }
-    const db = createDb(key)
-    cachedDb = { key, db }
-    return db
+    return nodeDb.db
 }
 
 export const registerContext = (app: Hono<Env>) => {
@@ -99,13 +98,30 @@ export const registerContext = (app: Hono<Env>) => {
         c.set('logger', createLogger(c.env.LOG_LEVEL ?? 'info'))
 
         const config = resolveConfig(c.env)
-        const services = createServices(getDb(c.env), config)
+        const key = resolveConnectionString(c.env)
 
-        c.set('config', config)
-        c.set('reportsService', services.reportsService)
-        c.set('riskService', services.riskService)
-        c.set('transitNetworkDataService', services.transitNetworkDataService)
+        // The "no I/O across requests" limit is Workers-only. Off Workers (no execution context)
+        // reuse one connection; on Workers a postgres.js client is bound to the request that opened
+        // it, so build it per request and close it after the response (Hyperdrive pools upstream).
+        let executionCtx: { waitUntil: (promise: Promise<unknown>) => void } | undefined
+        try {
+            executionCtx = c.executionCtx
+        } catch {
+            executionCtx = undefined
+        }
 
-        await next()
+        if (executionCtx === undefined) {
+            applyServices(c, getNodeDb(key), config)
+            await next()
+            return
+        }
+
+        const { db, client } = createDb(key)
+        applyServices(c, db, config)
+        try {
+            await next()
+        } finally {
+            executionCtx.waitUntil(client.end({ timeout: 5 }))
+        }
     })
 }

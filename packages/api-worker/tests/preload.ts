@@ -9,7 +9,7 @@ const [{ migrate }, { createDb }, { seedBaseData }] = await Promise.all([
     import('../src/db/seed/seed'),
 ])
 
-const db = createDb(process.env.DATABASE_URL!)
+const { db } = createDb(process.env.DATABASE_URL!)
 
 await migrate(db, { migrationsFolder: './drizzle' })
 

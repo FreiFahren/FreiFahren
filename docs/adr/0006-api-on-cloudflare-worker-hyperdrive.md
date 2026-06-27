@@ -39,9 +39,10 @@ db:purge-cache`. Postgres is kept for now; **D1 is a deliberate later step**.
 
 ## Consequences
 
-- The Worker is stateless: env/db/services are built per request from `c.env` (the db client is
-  memoized per isolate). No import-time env access, and no in-process caches — the 1-minute reports
-  cache was dropped.
+- The Worker is stateless: env/db/services are built per request from `c.env`. A fresh Postgres
+  connection is opened per request and closed after the response — Workers forbid reusing an I/O
+  object (a `postgres.js` client) across requests, and Hyperdrive pools the upstream connections.
+  No import-time env access, and no in-process caches — the 1-minute reports cache was dropped.
 - **Hyperdrive TLS constraint:** Hyperdrive's TLS stack (BoringSSL) will not negotiate Coolify's
   default ECDSA **P-521** Postgres certificate (`SSLV3_ALERT_HANDSHAKE_FAILURE`). The database must
   serve an **RSA** certificate. Coolify's "Regenerate SSL Certificates" button or a DB re-deploy
