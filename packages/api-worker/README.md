@@ -41,9 +41,3 @@ just db-migrate
 Drizzle provides it's own UI to interact with the DB. Simply run `just db-studio` and open the link you get in your browser.
 
 If you want to access the DB with something like Postico, use the following connection string: `postgres://postgres:postgres@localhost:5432/freifahren`
-
-## API Documentation
-
-An OpenAPI document and an interactive Scalar UI are defined in `src/common/openapi.ts`
-(`/openapi.json` and `/docs`), generated from route-level metadata. They are not currently mounted
-on the Worker — call `registerOpenApi(app)` in `createApp` to enable them.
