@@ -1,0 +1,354 @@
+import { and, desc, eq, gte, lte } from 'drizzle-orm'
+import { DateTime } from 'luxon'
+import { z } from 'zod'
+
+import { AppError } from '../../common/errors'
+import { DbConnection, InsertReport, reports } from '../../db/'
+import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
+import type { StationId } from '../transit/types'
+
+import {
+    assignLineIfSingleOption,
+    clearStationReferenceIfNotOnLine,
+    correctDirectionIfImplied,
+    determineLineBasedOnStationAndDirection,
+    guessStation,
+    pipeAsync,
+    RawReport,
+    clearDirectionIfStationAndDirectionAreTheSame,
+    ifDirectionPresentWithoutLineClearDirection,
+} from './post-process-report'
+
+const MIN_PREDICTED_REPORTS_THRESHOLD = 1
+const MAX_PREDICTED_REPORTS_THRESHOLD = 7
+
+type LuxonWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7
+
+const isWeekend = (weekday: LuxonWeekday): boolean => weekday === 6 || weekday === 7
+
+const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value))
+
+const calculateBasePredictedReportsThreshold = (currentTime: DateTime): number => {
+    const minutesPastMidnight = currentTime.hour * 60 + currentTime.minute
+
+    const isSaturday = currentTime.weekday === 6
+
+    if (minutesPastMidnight >= 18 * 60 && isSaturday && minutesPastMidnight < 24 * 60) {
+        // On Saturdays, decrease linearly from 18:00 to 24:00
+        return 7 - (minutesPastMidnight - 18 * 60) * (6.0 / (6 * 60))
+    }
+
+    if (minutesPastMidnight >= 18 * 60 && minutesPastMidnight < 21 * 60) {
+        // On other days, decrease linearly from 18:00 to 21:00
+        return 7 - (minutesPastMidnight - 18 * 60) * (6.0 / (3 * 60))
+    }
+
+    if (minutesPastMidnight >= 21 * 60 || minutesPastMidnight < 7 * 60) {
+        // Stay at 1 between 21:00 to 7:00
+        return 1
+    }
+
+    if (minutesPastMidnight >= 7 * 60 && minutesPastMidnight < 9 * 60) {
+        // Increase linearly from 7:00 to 9:00
+        return 1 + (minutesPastMidnight - 7 * 60) * (6.0 / (2 * 60))
+    }
+
+    return 7
+}
+
+const calculateWeekendAdjustment = (currentTime: DateTime, baseThreshold: number): number => {
+    if (!isWeekend(currentTime.weekday as LuxonWeekday)) return 0
+
+    const truncatedBase = Math.trunc(baseThreshold)
+    return truncatedBase * 0.5
+}
+
+type TelegramNotificationPayload = {
+    lineId: string | null
+    stationId: StationId
+    directionId: StationId | null
+}
+
+type ReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'stationId' | 'directionId' | 'lineId'> & {
+    isPredicted: boolean
+}
+
+export type ReportsServiceConfig = {
+    nodeEnv: string
+    telegramWorkerUrl?: string
+    reportPassword?: string
+}
+
+export class ReportsService {
+    constructor(
+        private db: DbConnection,
+        private transitNetworkDataService: TransitNetworkDataService,
+        private config: ReportsServiceConfig
+    ) {}
+
+    async getRealReports({
+        from,
+        to,
+        stationId,
+    }: {
+        from: DateTime
+        to: DateTime
+        stationId?: StationId
+    }): Promise<ReportSummary[]> {
+        const dbResults = await this.db
+            .select({
+                timestamp: reports.timestamp,
+                stationId: reports.stationId,
+                directionId: reports.directionId,
+                lineId: reports.lineId,
+            })
+            .from(reports)
+            .where(
+                and(
+                    gte(reports.timestamp, from.toJSDate()),
+                    lte(reports.timestamp, to.toJSDate()),
+                    stationId !== undefined ? eq(reports.stationId, stationId) : undefined
+                )
+            )
+
+        return dbResults.map((report) => ({ ...report, isPredicted: false }))
+    }
+
+    async getReports({
+        from,
+        to,
+        stationId,
+        currentTime,
+    }: {
+        from: DateTime
+        to: DateTime
+        stationId?: StationId
+        currentTime: DateTime
+    }): Promise<ReportSummary[]> {
+        const result = await this.getRealReports({ from, to, stationId })
+
+        // Predict reports if we don't have enough, so that users always see at least some data
+        const predictedReportsThreshold = this.calculatePredictedReportsThreshold(currentTime)
+        if (result.length < predictedReportsThreshold) {
+            const numberOfReportsToFetch = predictedReportsThreshold - result.length
+            const reportedStationIds = new Set(result.map((r) => r.stationId as StationId))
+            const allowedStationIds = await this.resolveAllowedStationIds(stationId, reportedStationIds)
+            const historicReports = await this.predictReports(numberOfReportsToFetch, from, to, allowedStationIds)
+            result.push(...historicReports)
+        }
+
+        return result
+    }
+
+    // Determines which stations the prediction algorithm may emit reports for.
+    // When the query is scoped to a specific station, predictions are restricted to that station.
+    // When the query is unscoped, any station that hasn't already reported is a candidate.
+    private async resolveAllowedStationIds(
+        stationId: StationId | undefined,
+        reportedStationIds: ReadonlySet<StationId>
+    ): Promise<ReadonlySet<StationId>> {
+        if (stationId !== undefined) {
+            return reportedStationIds.has(stationId) ? new Set() : new Set([stationId])
+        }
+
+        const allStations = await this.transitNetworkDataService.getStations()
+        return new Set((Object.keys(allStations) as StationId[]).filter((id) => !reportedStationIds.has(id)))
+    }
+
+    // Returns the integer threshold that controls how many predicted/historic reports we should show.
+    private calculatePredictedReportsThreshold(currentTime: DateTime): number {
+        const base = calculateBasePredictedReportsThreshold(currentTime)
+        const adjustment = calculateWeekendAdjustment(currentTime, base)
+        const threshold = base - adjustment
+
+        return Math.trunc(clamp(threshold, MIN_PREDICTED_REPORTS_THRESHOLD, MAX_PREDICTED_REPORTS_THRESHOLD))
+    }
+
+    private async predictReports(
+        numberOfReportsToFetch: number,
+        from: DateTime,
+        to: DateTime,
+        allowedStationIds: ReadonlySet<StationId>
+    ): Promise<ReportSummary[]> {
+        if (numberOfReportsToFetch <= 0) return []
+        if (allowedStationIds.size === 0) return []
+
+        // We only want predicted timestamps to appear old, so we constrain them to the first quarter of the requested range.
+        // We limit to the first quarter to make it obvious to users that this data is historic/less reliable.
+        const fromMillis = from.toMillis()
+        const toMillis = to.toMillis()
+        const rangeMillis = Math.max(0, toMillis - fromMillis)
+        const toRandomDate = (millis: number): Date => new Date(Math.floor(millis))
+
+        const randomTimestampInWindow = (windowStartMillis: number, windowEndMillis: number): Date => {
+            const clampedStartMillis = Math.max(fromMillis, Math.min(windowStartMillis, toMillis))
+            const clampedEndMillis = Math.max(fromMillis, Math.min(windowEndMillis, toMillis))
+            const windowRange = clampedEndMillis - clampedStartMillis
+            const millis = clampedStartMillis + Math.random() * windowRange
+            return toRandomDate(millis)
+        }
+
+        const firstQuarterEndMillis = fromMillis + Math.floor(rangeMillis / 4)
+        const firstHalfEndMillis = fromMillis + Math.floor(rangeMillis / 2)
+
+        const candidateRows = await this.db
+            .select({ stationId: reports.stationId, timestamp: reports.timestamp })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1000)
+
+        const usedStationIds = new Set<StationId>()
+        const maxUniqueCount = Math.min(numberOfReportsToFetch, allowedStationIds.size)
+
+        const results: ReportSummary[] = []
+
+        // We only use `guessStation`. If we get a disallowed/duplicate/undefined guess, we broaden the timestamp window
+        // (first quarter -> first half -> full range) and retry.
+        const windows = [
+            { start: fromMillis, end: firstQuarterEndMillis },
+            { start: fromMillis, end: firstHalfEndMillis },
+            { start: fromMillis, end: toMillis },
+        ]
+
+        const triesPerWindow = 25
+
+        for (const window of windows) {
+            for (let attempts = 0; attempts < triesPerWindow && results.length < maxUniqueCount; attempts++) {
+                const timestamp = randomTimestampInWindow(window.start, window.end)
+                const guessTime = DateTime.fromJSDate(timestamp, { zone: 'utc' })
+
+                const guessInput: { stationId?: StationId } = {}
+                const guessed = guessStation(candidateRows)(guessTime.hour, guessTime.weekday)(guessInput)
+
+                const stationId = guessed.stationId
+                if (stationId === undefined) continue
+                if (!allowedStationIds.has(stationId)) continue
+                if (usedStationIds.has(stationId)) continue
+
+                usedStationIds.add(stationId)
+                results.push({ timestamp, stationId, directionId: null, lineId: null, isPredicted: true })
+            }
+        }
+
+        // Prediction is inherently best-effort: if we cannot infer enough unique stations from history,
+        // We return the subset we managed to infer instead of failing the whole request.
+        return results
+    }
+
+    async createReport(reportData: InsertReport): Promise<{
+        telegramNotificationSuccess: boolean
+        report: {
+            reportId: number
+            stationId: string
+            lineId: string | null
+            directionId: string | null
+            timestamp: Date
+        }
+    }> {
+        const [insertedReport] = await this.db
+            .insert(reports)
+            .values({ ...reportData, timestamp: new Date() })
+            .returning({
+                reportId: reports.reportId,
+                stationId: reports.stationId,
+                lineId: reports.lineId,
+                directionId: reports.directionId,
+                timestamp: reports.timestamp,
+            })
+        // Drizzle returns the inserted row for Postgres. If this ever becomes undefined, we want to surface it fast.
+        const report = insertedReport!
+
+        let telegramNotificationSuccess = true
+
+        if (reportData.source !== 'telegram' && this.config.nodeEnv === 'production') {
+            try {
+                await this.notifyTelegram(reportData)
+            } catch {
+                telegramNotificationSuccess = false
+            }
+        }
+
+        return { telegramNotificationSuccess, report }
+    }
+
+    private async notifyTelegram(reportData: InsertReport) {
+        const telegramWorkerUrl = z.string().min(1).parse(this.config.telegramWorkerUrl)
+        const reportPassword = z.string().min(1).parse(this.config.reportPassword)
+
+        const endpoint = `${telegramWorkerUrl.replace(/\/$/, '')}/report`
+        const payload = this.buildTelegramNotificationPayload(reportData)
+
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Password': reportPassword,
+            },
+            body: JSON.stringify(payload),
+        })
+
+        if (!response.ok) {
+            const errorDetail = await response.text().catch(() => 'No response body')
+            throw new Error(`Telegram bot notification failed with status ${response.status}: ${errorDetail}`)
+        }
+    }
+
+    private buildTelegramNotificationPayload(reportData: InsertReport): TelegramNotificationPayload {
+        return {
+            lineId: reportData.lineId ?? null,
+            stationId: reportData.stationId,
+            directionId: reportData.directionId ?? null,
+        }
+    }
+
+    async postProcessReport(reportData: RawReport): Promise<InsertReport> {
+        const stations = await this.transitNetworkDataService.getStations()
+        const lines = await this.transitNetworkDataService.getLines()
+
+        const now = DateTime.utc()
+
+        const processed = await pipeAsync(
+            reportData,
+            clearStationReferenceIfNotOnLine(stations, 'stationId'),
+            clearStationReferenceIfNotOnLine(stations, 'directionId'),
+            assignLineIfSingleOption(stations),
+            determineLineBasedOnStationAndDirection(stations),
+            correctDirectionIfImplied(lines),
+            clearDirectionIfStationAndDirectionAreTheSame,
+            ifDirectionPresentWithoutLineClearDirection,
+            async (currentReport) => {
+                // Avoid guessing the station if we don't have a line
+                // Otherwise the guess would be too broad and we would end up with a lot of false positives
+                if (
+                    currentReport.stationId !== undefined ||
+                    currentReport.lineId === null ||
+                    currentReport.lineId === undefined
+                ) {
+                    return currentReport
+                }
+
+                const candidateRows = await this.db
+                    .select({ stationId: reports.stationId, timestamp: reports.timestamp })
+                    .from(reports)
+                    .where(eq(reports.lineId, currentReport.lineId))
+                    .orderBy(desc(reports.timestamp))
+                    .limit(1000)
+
+                return guessStation(candidateRows)(now.hour, now.weekday)(currentReport)
+            },
+            clearStationReferenceIfNotOnLine(stations, 'stationId'),
+            clearStationReferenceIfNotOnLine(stations, 'directionId')
+        )
+
+        if (processed.stationId === undefined) {
+            throw new AppError({
+                message: 'Could not infer station from the provided information',
+                statusCode: 422,
+                internalCode: 'VALIDATION_FAILED',
+                description: `Input data: ${JSON.stringify(reportData)} Current report: ${JSON.stringify(processed)}`,
+            })
+        }
+
+        return { ...processed, stationId: processed.stationId }
+    }
+}

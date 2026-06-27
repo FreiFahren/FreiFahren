@@ -1,0 +1,21 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "api-worker",
+    "main": "src/worker.ts",
+    "compatibility_date": "2025-10-11",
+    "compatibility_flags": ["nodejs_compat"],
+    "workers_dev": true,
+    "hyperdrive": [
+        {
+            "binding": "HYPERDRIVE",
+            "id": "17d4ade3a9cc4cf1a94543f1ff85c119",
+            "localConnectionString": "postgres://postgres:postgres@localhost:5432/freifahren",
+        },
+    ],
+    "vars": {
+        "NODE_ENV": "production",
+        "CORS_ORIGINS": "https://freifahren.org,https://app.freifahren.org,https://www.freifahren.org,http://localhost:1871,http://192.168.178.65:1871,capacitor://localhost",
+        "TELEGRAM_WORKER_URL": "https://telegram-worker.freifahren.workers.dev",
+        "SENTRY_DSN": "https://8f49e71a73d689efdcaabfd8794457b6@o4508609338867712.ingest.de.sentry.io/4511638467051600",
+    },
+}
