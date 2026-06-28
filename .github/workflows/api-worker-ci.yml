@@ -48,4 +48,8 @@ jobs:
             # Tests run against a local libsql SQLite file: tests/preload.ts creates the file,
             # applies migrations and seeds the reference data. No external database required.
             - name: Run api worker tests
+              env:
+                  CORS_ORIGINS: http://localhost:1871,http://127.0.0.1:1871,capacitor://localhost
+                  REPORT_PASSWORD: password
+                  TELEGRAM_WORKER_URL: http://localhost:6010
               run: cd packages/api-worker && bun test

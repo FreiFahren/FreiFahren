@@ -1,6 +1,6 @@
 # Local `wrangler dev` secrets/vars (copy to .dev.vars — gitignored). Production secrets are set
-# with `wrangler secret put`. The local DB connection comes from the Hyperdrive
-# `localConnectionString` in wrangler.jsonc, so DATABASE_URL is not needed here.
+# with `wrangler secret put`. The worker uses the local D1 binding (miniflare state under
+# .wrangler/), so DATABASE_URL is not needed here.
 REPORT_PASSWORD=password
 TELEGRAM_WORKER_URL=http://localhost:6010
 SENTRY_DSN=

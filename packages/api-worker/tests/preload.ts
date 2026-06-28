@@ -1,4 +1,9 @@
+import { setDefaultTimeout } from 'bun:test'
 import { existsSync, rmSync } from 'node:fs'
+
+// Seeding/historical-data hooks issue hundreds of requests through the app; libsql file I/O on CI
+// runners is slower than the 5s default, so raise the per-test/hook timeout.
+setDefaultTimeout(30_000)
 
 // We suppress logging in tests to avoid cluttering the output.
 // But to debug a test failure, you can run `TEST_LOG_LEVEL=info bun test` to enable logging.

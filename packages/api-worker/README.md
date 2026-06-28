@@ -6,38 +6,37 @@ Copy [`.env.example`](./.env.example) to `.env` for local development; each vari
 
 ## Local development
 
-The API runs as a Cloudflare Worker. Locally you serve it with `wrangler dev`, backed by a Postgres
-container. The `compose-hono.test.yaml` stack is a **CLI/test harness** — a Postgres instance plus a
-Bun container that `just db-*` and CI `exec` into to run migrations, seed, and tests. It does **not**
-serve the API.
+The API runs as a Cloudflare Worker backed by **D1** (SQLite). The worker uses the `DB` binding; the
+seed CLI, drizzle-kit, and tests run on **libsql** (a local SQLite file) via `DATABASE_URL`.
 
 ```sh
-just up                  # start Postgres + the harness container
-just db-migrate          # initialize the schema (first run)
-just db-seed             # populate Berlin stations/lines/segments
-bun run dev              # serve the Worker locally (wrangler dev) on http://localhost:8787
+bun install
+bun test                                   # runs against a local libsql file (auto-created + seeded)
 ```
 
-`bun run dev` uses the Hyperdrive `localConnectionString` from `wrangler.jsonc` to reach the local
-Postgres. Put any local secrets/vars in `.dev.vars` (see `.env.example`). If dependencies change or
-the harness misbehaves, rebuild it with `just rebuild`.
+To serve the worker locally with data:
+
+```sh
+DATABASE_URL='file:./local.db' bun run db:seed   # seed reference data into a libsql file
+bunx wrangler d1 migrations apply DB --local     # create the local D1 schema
+sqlite3 local.db ".mode insert stations" "select * from stations;" > /tmp/seed.sql
+for t in lines line_stations segments; do sqlite3 local.db ".mode insert $t" "select * from $t;" >> /tmp/seed.sql; done
+bunx wrangler d1 execute DB --local --file=/tmp/seed.sql   # load reference data into local D1
+bun run dev                                       # wrangler dev on local D1 → http://localhost:8787
+```
+
+Put local secrets/vars in `.dev.vars` (see `.dev.vars.example`).
 
 ## DB Migrations
 
-After altering the DB schema, you need to align the actual DB state with the drizzle schema. You first create the migration:
+After altering the schema, generate a migration and apply it:
 
 ```sh
-just db-generate # Generate migration
-```
-
-And then apply it to the DB:
-
-```sh
-just db-migrate
+bun run db:generate                          # generate the SQLite migration
+bunx wrangler d1 migrations apply DB --local # apply to the local D1 (use --remote for production)
 ```
 
 ## DB Access / Drizzle Studio
 
-Drizzle provides it's own UI to interact with the DB. Simply run `just db-studio` and open the link you get in your browser.
-
-If you want to access the DB with something like Postico, use the following connection string: `postgres://postgres:postgres@localhost:5432/freifahren`
+`bun run db:studio` opens Drizzle Studio against the libsql file in `DATABASE_URL`. For production D1,
+query it with `bunx wrangler d1 execute DB --remote --command "..."`.
