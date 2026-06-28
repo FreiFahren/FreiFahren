@@ -1,8 +1,8 @@
-import { doublePrecision, pgTable, varchar } from 'drizzle-orm/pg-core'
+import { real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
-export const stations = pgTable('stations', {
-    id: varchar({ length: 16 }).primaryKey(),
-    name: varchar({ length: 255 }).notNull(),
-    lat: doublePrecision().notNull(),
-    lng: doublePrecision().notNull(),
+export const stations = sqliteTable('stations', {
+    id: text({ length: 16 }).primaryKey(),
+    name: text({ length: 255 }).notNull(),
+    lat: real().notNull(),
+    lng: real().notNull(),
 })

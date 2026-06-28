@@ -37,41 +37,15 @@ jobs:
             - name: Check out code
               uses: actions/checkout@v4
 
-            - name: Start services
-              run: |
-                  cd packages/api-worker
-                  docker compose -f compose-hono.test.yaml up -d
+            - name: Set up Bun
+              uses: oven-sh/setup-bun@v1
+              with:
+                  bun-version: latest
 
-            - name: Wait for Postgres
-              run: |
-                  for i in {1..30}; do
-                    if docker exec hono-postgres pg_isready -U postgres > /dev/null 2>&1; then
-                      echo "Postgres is ready"
-                      exit 0
-                    fi
-                    echo "Waiting for Postgres..."
-                    sleep 3
-                  done
-                  echo "Postgres did not become ready in time"
-                  exit 1
+            - name: Install dependencies
+              run: cd packages/api-worker && bun install
 
-            - name: Run migrations
-              run: |
-                  cd packages/api-worker
-                  docker compose -f compose-hono.test.yaml exec bun bun run db:migrate
-
-            - name: Seed base data
-              run: |
-                  cd packages/api-worker
-                  docker compose -f compose-hono.test.yaml exec bun bun run db:seed
-
+            # Tests run against a local libsql SQLite file: tests/preload.ts creates the file,
+            # applies migrations and seeds the reference data. No external database required.
             - name: Run api worker tests
-              run: |
-                  cd packages/api-worker
-                  docker compose -f compose-hono.test.yaml exec bun bun test
-
-            - name: Stop containers
-              if: always()
-              run: |
-                  cd packages/api-worker
-                  docker compose -f compose-hono.test.yaml down
+              run: cd packages/api-worker && bun test

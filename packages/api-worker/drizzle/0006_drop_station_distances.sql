@@ -1,1 +1,0 @@
-DROP TABLE "station_distances" CASCADE;

@@ -1,24 +1,24 @@
-import { boolean, integer, pgTable, primaryKey, varchar } from 'drizzle-orm/pg-core'
+import { integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 import type { RouteType } from '../seed/config'
 
 import { stations } from './stations'
 
-export const lines = pgTable('lines', {
-    id: varchar({ length: 16 }).primaryKey(),
-    name: varchar({ length: 255 }).notNull(),
-    type: varchar({ length: 32 }).$type<RouteType>().notNull(),
-    isCircular: boolean().notNull().default(false),
-    color: varchar({ length: 7 }).notNull().default('#000000'),
+export const lines = sqliteTable('lines', {
+    id: text({ length: 16 }).primaryKey(),
+    name: text({ length: 255 }).notNull(),
+    type: text({ length: 32 }).$type<RouteType>().notNull(),
+    isCircular: integer({ mode: 'boolean' }).notNull().default(false),
+    color: text({ length: 7 }).notNull().default('#000000'),
 })
 
-export const lineStations = pgTable(
+export const lineStations = sqliteTable(
     'line_stations',
     {
-        lineId: varchar({ length: 16 })
+        lineId: text({ length: 16 })
             .notNull()
             .references(() => lines.id, { onDelete: 'cascade' }),
-        stationId: varchar({ length: 16 })
+        stationId: text({ length: 16 })
             .notNull()
             .references(() => stations.id, { onDelete: 'cascade' }),
         order: integer().notNull(),

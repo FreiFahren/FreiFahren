@@ -6,11 +6,12 @@
     "compatibility_flags": ["nodejs_compat"],
     "workers_dev": true,
     "routes": [{ "pattern": "api.freifahren.org/*", "zone_name": "freifahren.org" }],
-    "hyperdrive": [
+    "d1_databases": [
         {
-            "binding": "HYPERDRIVE",
-            "id": "17d4ade3a9cc4cf1a94543f1ff85c119",
-            "localConnectionString": "postgres://postgres:postgres@localhost:5432/freifahren",
+            "binding": "DB",
+            "database_name": "api-worker-db",
+            "database_id": "f11691e9-e6a5-4da2-a5af-d91ca782ee78",
+            "migrations_dir": "drizzle",
         },
     ],
     "vars": {

@@ -1,54 +1,12 @@
 {
   "version": "7",
-  "dialect": "postgresql",
+  "dialect": "sqlite",
   "entries": [
     {
       "idx": 0,
-      "version": "7",
-      "when": 1765472567170,
-      "tag": "0000_modern_runaways",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1770824145557,
-      "tag": "0001_tearful_slayback",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1778263972263,
-      "tag": "0002_public_timeslip",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1779836218642,
-      "tag": "0003_add_lines_color",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1780694649193,
-      "tag": "0004_drop_feedback_table",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1782482341231,
-      "tag": "0005_add_station_distances",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1782486052362,
-      "tag": "0006_drop_station_distances",
+      "version": "6",
+      "when": 1782587466326,
+      "tag": "0000_initial_sqlite_schema",
       "breakpoints": true
     }
   ]
