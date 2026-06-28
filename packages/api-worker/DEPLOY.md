@@ -36,7 +36,7 @@ The seed is report-preserving (upsert + orphan-remap) and uses async transaction
 ## One-time cutover (Postgres → D1)
 
 > ⚠️ **Merging the PR deploys the D1-bound worker → prod is on D1.** Do the data steps below
-> *before* merge. Pre-staging is idempotent and does not touch prod (prod still serves from Postgres
+> _before_ merge. Pre-staging is idempotent and does not touch prod (prod still serves from Postgres
 > until the worker is redeployed).
 
 Pre-staged already (D1 `api-worker-db`, id `f11691e9-e6a5-4da2-a5af-d91ca782ee78`, region EEUR):
