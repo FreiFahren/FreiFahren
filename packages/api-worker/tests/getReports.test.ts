@@ -390,7 +390,13 @@ describe('Predicted reports', () => {
 describe('Predicted reports threshold', () => {
     let testStations: string[]
 
+    // Seed directly rather than via the POST pipeline: that path mutates the global system
+    // clock per report, so the ~350 inserts must run sequentially and pushed beforeAll past
+    // Bun's 5s hook timeout on CI. A bulk insert with explicit timestamps is equivalent — the
+    // handler stores `timestamp: new Date()` (the mocked clock) and leaves on-line stations
+    // unchanged — and runs in a single round-trip.
     const seedHistoricalData = async () => {
+        const rows: (typeof reports.$inferInsert)[] = []
         for (let weeksAgo = 1; weeksAgo <= 2; weeksAgo++) {
             for (let dayOffset = 0; dayOffset < 5; dayOffset++) {
                 for (const hour of [7, 9, 12, 15, 18, 20, 21]) {
@@ -400,13 +406,17 @@ describe('Predicted reports threshold', () => {
                             days: dayOffset,
                             minutes: stationIdx * 2,
                         })
-                        await sendReportAt(historicalTime.toJSDate(), testStations[stationIdx], testLineId)
+                        rows.push({
+                            stationId: testStations[stationIdx],
+                            lineId: testLineId,
+                            timestamp: historicalTime.toJSDate(),
+                            source: 'telegram',
+                        })
                     }
                 }
             }
         }
-        Settings.now = () => Date.now()
-        setSystemTime()
+        await db.insert(reports).values(rows)
     }
 
     beforeAll(async () => {
