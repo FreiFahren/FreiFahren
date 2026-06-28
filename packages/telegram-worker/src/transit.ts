@@ -50,8 +50,7 @@ export function buildIndex(rawStations: Record<string, RawStation>, rawLines: Ra
     return { stations, byNorm, linesByStation, lineNames, circularLineNames, variants }
 }
 
-// Fetched fresh from the backend on every call. Response caching is handled at the
-// Cloudflare edge (a cache rule on /v0/transit/*), not here.
+// No caching here; the api-worker serves these from its edge cache.
 export async function getTransitIndex(backendUrl: string): Promise<TransitIndex> {
     const [stationsResp, linesResp] = await Promise.all([
         fetch(`${backendUrl}/v0/transit/stations`),

@@ -10,6 +10,7 @@ import { getReports, getReportsByStation, postReport } from './modules/reports/'
 import { getRisk } from './modules/risk/risk-routes'
 import {
     transitCacheMiddleware,
+    transitEdgeCacheMiddleware,
     VERSIONED_TRANSIT_CACHEABLE_PATHS,
     VERSIONED_TRANSIT_PATH,
 } from './modules/transit/transit-cache-middleware'
@@ -49,6 +50,12 @@ export const createApp = () => {
             exposeHeaders: ['ETag', 'Last-Modified'],
         })
     )
+    // Edge cache must be outermost so the entry it stores carries the ETag and
+    // Cache-Control/Cache-Tag added by the inner middleware. etag() also spans /distance.
+    for (const path of VERSIONED_TRANSIT_CACHEABLE_PATHS) {
+        app.use(path, transitEdgeCacheMiddleware)
+        app.use(path, transitCacheMiddleware)
+    }
     app.use(
         VERSIONED_TRANSIT_PATH,
         etag({
@@ -60,9 +67,6 @@ export const createApp = () => {
             ],
         })
     )
-    for (const path of VERSIONED_TRANSIT_CACHEABLE_PATHS) {
-        app.use(path, transitCacheMiddleware)
-    }
 
     app.onError(handleError)
 
