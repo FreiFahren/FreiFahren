@@ -8,3 +8,8 @@ node_modules/
 # wrangler
 .dev.vars
 .wrangler/
+
+# local libsql/sqlite db files (tests, seed, drizzle-kit)
+*.db
+*.db-wal
+*.db-shm

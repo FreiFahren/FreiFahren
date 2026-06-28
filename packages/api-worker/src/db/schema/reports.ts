@@ -1,21 +1,27 @@
-import { pgTable, varchar, serial, timestamp, pgEnum } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
+import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
 
 import { lines } from './lines'
 import { stations } from './stations'
 
-export const sourceEnum = pgEnum('source', ['mini_app', 'web_app', 'mobile_app', 'telegram'])
+export const REPORT_SOURCES = ['mini_app', 'web_app', 'mobile_app', 'telegram'] as const
 
-export const reports = pgTable('reports', {
-    reportId: serial().primaryKey(),
-    stationId: varchar({ length: 16 })
+export const reports = sqliteTable('reports', {
+    reportId: integer().primaryKey({ autoIncrement: true }),
+    stationId: text({ length: 16 })
         .notNull()
         .references(() => stations.id),
-    lineId: varchar({ length: 16 }).references(() => lines.id),
-    directionId: varchar({ length: 16 }).references(() => stations.id),
-    timestamp: timestamp().notNull().defaultNow(),
-    source: sourceEnum().notNull(),
+    lineId: text({ length: 16 }).references(() => lines.id),
+    directionId: text({ length: 16 }).references(() => stations.id),
+    // Millisecond resolution (matches the explicit `new Date()` set on every insert) so that
+    // "latest report" ordering stays deterministic — second resolution ties across same-second
+    // Reports and breaks the risk/prediction reads.
+    timestamp: integer({ mode: 'timestamp_ms' })
+        .notNull()
+        .default(sql`(unixepoch() * 1000)`),
+    source: text({ enum: REPORT_SOURCES }).notNull(),
 })
 
 const insertReportDbSchema = createInsertSchema(reports).pick({
