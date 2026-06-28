@@ -55,8 +55,7 @@ const ifNoneMatchSatisfied = (header: string, etag: string): boolean => {
  */
 export const transitEdgeCacheMiddleware: MiddlewareHandler<Env> = async (c, next) => {
     // Absent under unit tests (Bun); fall through to the live handler.
-    const cache =
-        typeof caches !== 'undefined' ? (caches as unknown as { default: EdgeCache }).default : undefined
+    const cache = typeof caches !== 'undefined' ? (caches as unknown as { default: EdgeCache }).default : undefined
     let executionCtx: { waitUntil(promise: Promise<unknown>): void } | undefined
     try {
         executionCtx = c.executionCtx
