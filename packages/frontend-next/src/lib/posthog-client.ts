@@ -31,6 +31,23 @@ export function enqueuePostHog(op: PostHogOp): void {
   queue.push(op);
 }
 
+// Register the app/bundle version super properties. On native the store binary version comes from
+// the already-present @capacitor/app plugin (a pure bundle change, ships via Capgo OTA); web has
+// only the bundle build. Failures are non-critical and stay silent so analytics never breaks boot.
+async function registerVersion(posthog: PostHog): Promise<void> {
+  try {
+    if (Capacitor.isNativePlatform()) {
+      const { App } = await import('@capacitor/app');
+      const { version, build } = await App.getInfo();
+      posthog.register({ app_version: version, app_build: build, bundle_build: __BUILD_ID__ });
+    } else {
+      posthog.register({ app_version: __BUILD_ID__, bundle_build: __BUILD_ID__ });
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 export function loadPostHog(): Promise<void> {
   if (loadPromise) return loadPromise;
 
@@ -64,6 +81,11 @@ export function loadPostHog(): Promise<void> {
     instance = posthog;
     for (const op of queue) op(posthog);
     queue.length = 0;
+    // Stamp the version so insights can break down adoption by app_version x platform. On native
+    // App.getInfo() reports the installed store binary (app_version/app_build, only changes on a
+    // store update), kept separate from the web bundle (bundle_build, moves with every deploy and
+    // Capgo OTA push). This trails posthog.register because it awaits a native plugin call.
+    void registerVersion(posthog);
   });
   // Analytics is non-critical: a content blocker or a stale chunk can make the dynamic import
   // resolve empty (destructuring `default` then throws) or reject outright. Swallow it and disable
