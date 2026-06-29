@@ -31,6 +31,21 @@ export function enqueuePostHog(op: PostHogOp): void {
   queue.push(op);
 }
 
+// On native, app_version/app_build track the store binary; bundle_build tracks the OTA bundle.
+async function registerVersion(posthog: PostHog): Promise<void> {
+  try {
+    if (Capacitor.isNativePlatform()) {
+      const { App } = await import('@capacitor/app');
+      const { version, build } = await App.getInfo();
+      posthog.register({ app_version: version, app_build: build, bundle_build: __BUILD_ID__ });
+    } else {
+      posthog.register({ app_version: __BUILD_ID__, bundle_build: __BUILD_ID__ });
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 export function loadPostHog(): Promise<void> {
   if (loadPromise) return loadPromise;
 
@@ -64,6 +79,8 @@ export function loadPostHog(): Promise<void> {
     instance = posthog;
     for (const op of queue) op(posthog);
     queue.length = 0;
+    // Trails the register above because it awaits a native plugin call.
+    void registerVersion(posthog);
   });
   // Analytics is non-critical: a content blocker or a stale chunk can make the dynamic import
   // resolve empty (destructuring `default` then throws) or reject outright. Swallow it and disable
