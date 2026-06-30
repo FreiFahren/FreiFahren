@@ -23,8 +23,10 @@ export const purgeTransitCache = async () => {
 
     if (!response.ok) {
         const body = await response.text()
-        logger.warn({ status: response.status, body }, 'Cloudflare transit cache purge failed')
-        return
+        // Throw rather than warn-and-return: a swallowed failure (e.g. a 401 from a
+        // Token without Cache Purge rights) lets a stale transit response keep serving
+        // For its full 30-day TTL, which silently breaks the risk map after a reseed.
+        throw new Error(`Cloudflare transit cache purge failed (status ${response.status}): ${body}`)
     }
 
     logger.info({ tag: TRANSIT_CACHE_TAG }, 'Cloudflare transit cache purged')
