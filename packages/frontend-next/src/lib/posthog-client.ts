@@ -62,6 +62,13 @@ export function loadPostHog(): Promise<void> {
     posthog.init(apiKey, {
       api_host: apiHost,
       defaults: '2025-05-24',
+      // We never call identify() (the app has no login), so under the default 'identified_only'
+      // mode PostHog ingests every event personless and builds no person profiles at all — which
+      // leaves lifecycle, retention, and stickiness permanently empty. 'always' lets the persistent
+      // anonymous distinct_id form a person profile so returning visits are measurable. Consent still
+      // governs persistence: a 'denied' choice switches to memory + reset() in consent.ts, so declined
+      // users stay un-retained by design, and respect_dnt keeps DNT users out entirely.
+      person_profiles: 'always',
       persistence: PERSISTENT_PERSISTENCE,
       autocapture: false,
       capture_performance: false,
