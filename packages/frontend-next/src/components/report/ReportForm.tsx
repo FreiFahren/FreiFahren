@@ -1,6 +1,7 @@
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { ChevronRight, MapPin, Search, TriangleAlert } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { type SubmitReportResponse, useSubmitReport } from '@/api/reports';
@@ -167,6 +168,19 @@ function StationPicker() {
   const nearbyIds = new Set(nearby.map((s) => s.id));
   const rest = filtered.filter((s) => !nearbyIds.has(s.id));
 
+  // The full station list is hundreds of rows. Virtualize it so only the visible rows mount.
+  // `nearby` (≤3) renders in normal flow above the list, so scrollMargin offsets the virtualizer
+  // past it (the scroll container is `relative` so listRef.offsetTop is measured against it).
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const virtualizer = useVirtualizer({
+    count: rest.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 45,
+    overscan: 10,
+    scrollMargin: listRef.current?.offsetTop ?? 0,
+  });
+
   const renderStation = (station: Station) => (
     <li key={station.id} className="border-border/60 border-b last:border-b-0">
       <button
@@ -212,7 +226,10 @@ function StationPicker() {
               autoComplete="off"
             />
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto mask-b-from-[calc(100%-2.5rem)] mask-b-to-100% pb-2">
+          <div
+            ref={scrollRef}
+            className="relative min-h-0 flex-1 overflow-y-auto mask-b-from-[calc(100%-2.5rem)] mask-b-to-100% pb-2"
+          >
             {nearby.length > 0 && (
               <>
                 <div className="text-muted-foreground flex items-center gap-1.5 px-3 py-2 text-[0.625rem] font-semibold tracking-wide uppercase">
@@ -223,14 +240,46 @@ function StationPicker() {
                 {rest.length > 0 && <Separator className="bg-border my-2 data-horizontal:h-0.5" />}
               </>
             )}
-            <ul>
-              {rest.map(renderStation)}
-              {needle && filtered.length === 0 && (
-                <li className="text-muted-foreground px-3 py-6 text-center text-sm">
-                  {t('noMatch', { query })}
-                </li>
-              )}
-            </ul>
+            {needle && filtered.length === 0 ? (
+              <p className="text-muted-foreground px-3 py-6 text-center text-sm">
+                {t('noMatch', { query })}
+              </p>
+            ) : (
+              <ul
+                ref={listRef}
+                style={{ height: virtualizer.getTotalSize(), position: 'relative' }}
+              >
+                {virtualizer.getVirtualItems().map((virtualRow) => {
+                  const station = rest[virtualRow.index];
+                  return (
+                    <li
+                      key={station.id}
+                      ref={virtualizer.measureElement}
+                      data-index={virtualRow.index}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        transform: `translateY(${virtualRow.start - virtualizer.options.scrollMargin}px)`,
+                      }}
+                      className="border-border/60 border-b"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          selectionTap();
+                          selectStation(station.id);
+                        }}
+                        className="hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-3 py-2.5 text-left text-sm outline-none"
+                      >
+                        <span className="truncate">{station.name}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
         </>
       )}
