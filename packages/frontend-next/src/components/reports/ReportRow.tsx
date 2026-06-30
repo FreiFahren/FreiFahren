@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { ChevronRight } from 'lucide-react';
+import { type CSSProperties, type Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { formatElapsed, type Report } from '@/api/reports';
@@ -12,7 +13,20 @@ import { Route as StationRoute } from '@/routes/_map/station/$stationId';
 
 import { NAMESPACE } from './Reports.i18n';
 
-export function ReportRow({ report, recent }: { report: Report; recent: boolean }) {
+export function ReportRow({
+  report,
+  recent,
+  ref,
+  style,
+  dataIndex,
+}: {
+  report: Report;
+  recent: boolean;
+  // Optional hooks so the row can be positioned by a virtualizer (absolute style + measure ref).
+  ref?: Ref<HTMLLIElement>;
+  style?: CSSProperties;
+  dataIndex?: number;
+}) {
   const { t } = useTranslation(NAMESPACE);
   const { data: lines } = useLines();
   const { data: stations } = useStations();
@@ -50,7 +64,7 @@ export function ReportRow({ report, recent }: { report: Report; recent: boolean 
 
   // A report from the last hour opens the live report view; older ones fall back to the station.
   return (
-    <li className="border-border/60 border-b last:border-b-0">
+    <li ref={ref} data-index={dataIndex} style={style} className="border-border/60 border-b">
       {recent ? (
         <Link
           to={ReportDetailRoute.to}
