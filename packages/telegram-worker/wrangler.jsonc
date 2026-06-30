@@ -6,6 +6,7 @@
     // @sentry/cloudflare needs the AsyncLocalStorage API.
     "compatibility_flags": ["nodejs_compat"],
     "vars": {
+        "NODE_ENV": "production",
         // Backend that serves /v0/transit/* and accepts POST /v0/reports.
         "BACKEND_URL": "https://api.freifahren.org",
         "PUBLIC_APP_URL": "https://app.freifahren.org",

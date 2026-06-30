@@ -9,6 +9,8 @@ import { handleReportForward } from './forwarding'
 export default withSentry(
     (env: Env) => ({
         dsn: env.SENTRY_DSN,
+        release: env.SENTRY_RELEASE,
+        environment: env.NODE_ENV,
         enableLogs: true,
         integrations: [consoleLoggingIntegration({ levels: ['info', 'warn', 'error'] })],
         tracesSampleRate: 1.0,

@@ -17,6 +17,9 @@ export type Bindings = {
     TELEGRAM_WORKER_URL?: string
     REPORT_PASSWORD?: string
     SENTRY_DSN?: string
+    // Git SHA injected at deploy via `wrangler deploy --var SENTRY_RELEASE:<sha>`; tags Sentry
+    // Events with a release so issues can be resolved in the next release. Absent locally.
+    SENTRY_RELEASE?: string
     LOG_LEVEL?: LogLevel
 }
 
