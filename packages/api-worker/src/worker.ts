@@ -1,14 +1,18 @@
 /// <reference types="@cloudflare/workers-types" />
-import { consoleLoggingIntegration, withSentry } from '@sentry/cloudflare'
+import { captureException, consoleLoggingIntegration, withSentry } from '@sentry/cloudflare'
 
-import { Bindings } from './app-env'
+import { Bindings, setErrorReporter } from './app-env'
 
 import { app } from './index'
+
+// Wired here, not in index.ts, so @sentry/cloudflare stays out of the test bundle.
+// AsyncLocalStorage (set up by withSentry) keeps captures inside a request's waitUntil on its scope.
+setErrorReporter((error, context) => captureException(error, context))
 
 // The @sentry/cloudflare HTTP instrumentation names transactions from the raw URL pathname.
 // Each station therefore turns GET /v0/reports/<stationId> into its own transaction (…/BAHU,
 // …/BOSB, …). Collapse that single trailing segment into the route pattern so Sentry tracks the
-// per-station reads as one transaction, while leaving the list endpoint (GET /v0/reports) untouched.
+// Per-station reads as one transaction, while leaving the list endpoint (GET /v0/reports) untouched.
 const normalizeTransactionName = (name: string): string =>
     name.replace(/^(\w+ \/v\d+\/reports)\/[^/]+$/, '$1/:stationId')
 

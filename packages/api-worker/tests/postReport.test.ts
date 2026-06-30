@@ -99,7 +99,7 @@ describe('Telegram notification', () => {
         expect(capturedRequests.length).toBe(0)
     })
 
-    it('returns 200 and a failure header when Telegram notification fails', async () => {
+    it('still returns 200 when the Telegram notification fails (failure is logged, not surfaced)', async () => {
         const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
 
         shouldFail = true
@@ -110,9 +110,8 @@ describe('Telegram notification', () => {
         })
 
         expect(response.status).toBe(200)
-        expect(response.headers.get('X-Telegram-Notification-Status')).toBe('failed')
-
-        // ensure we still attempted to call the NLP service
+        expect(response.headers.get('X-Telegram-Notification-Status')).toBeNull()
+        // The forward was still attempted; only its failure is swallowed.
         expect(capturedRequests.length).toBe(1)
     })
 

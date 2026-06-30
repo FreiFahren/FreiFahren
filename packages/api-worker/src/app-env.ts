@@ -79,6 +79,21 @@ export const setNodeDbProvider = (provider: (url: string) => DbConnection) => {
     nodeDbProvider = provider
 }
 
+// Injected by worker.ts so @sentry/cloudflare stays out of index.ts and the test bundle,
+// Like nodeDbProvider above. No-op until injected.
+export type ErrorReporter = (
+    error: unknown,
+    context?: { tags?: Record<string, string>; extra?: Record<string, unknown> }
+) => void
+
+let errorReporter: ErrorReporter = () => undefined
+
+export const setErrorReporter = (reporter: ErrorReporter) => {
+    errorReporter = reporter
+}
+
+export const reportError: ErrorReporter = (error, context) => errorReporter(error, context)
+
 const applyServices = (c: Context<Env>, db: DbConnection, config: AppConfig) => {
     const transitNetworkDataService = new TransitNetworkDataService(db)
     const reportsService = new ReportsService(db, transitNetworkDataService, {

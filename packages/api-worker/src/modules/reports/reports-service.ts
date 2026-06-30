@@ -253,14 +253,11 @@ export class ReportsService {
     }
 
     async createReport(reportData: InsertReport): Promise<{
-        telegramNotificationSuccess: boolean
-        report: {
-            reportId: number
-            stationId: string
-            lineId: string | null
-            directionId: string | null
-            timestamp: Date
-        }
+        reportId: number
+        stationId: string
+        lineId: string | null
+        directionId: string | null
+        timestamp: Date
     }> {
         const [insertedReport] = await this.db
             .insert(reports)
@@ -273,19 +270,15 @@ export class ReportsService {
                 timestamp: reports.timestamp,
             })
         // Drizzle returns the inserted row for Postgres. If this ever becomes undefined, we want to surface it fast.
-        const report = insertedReport!
+        return insertedReport!
+    }
 
-        let telegramNotificationSuccess = true
-
-        if (reportData.source !== 'telegram' && this.config.nodeEnv === 'production') {
-            try {
-                await this.notifyTelegram(reportData)
-            } catch {
-                telegramNotificationSuccess = false
-            }
+    // Skips telegram-sourced reports (they already came from the group) and non-production.
+    forwardReportToTelegram(reportData: InsertReport): Promise<void> {
+        if (reportData.source === 'telegram' || this.config.nodeEnv !== 'production') {
+            return Promise.resolve()
         }
-
-        return { telegramNotificationSuccess, report }
+        return this.notifyTelegram(reportData)
     }
 
     private async notifyTelegram(reportData: InsertReport) {

@@ -66,17 +66,11 @@ export function validateTransitReferences(index: TransitIndex, report: Forwarded
         report.directionId !== null &&
         !stationLineNames(index, report.directionId).includes(lineName)
     ) {
-        throw new BadRequestError(
-            `directionId ${report.directionId} is not served by lineId ${report.lineId}`,
-        )
+        throw new BadRequestError(`directionId ${report.directionId} is not served by lineId ${report.lineId}`)
     }
 }
 
-export function formatForwardedReport(
-    index: TransitIndex,
-    report: ForwardedReport,
-    publicAppUrl: string,
-): string {
+export function formatForwardedReport(index: TransitIndex, report: ForwardedReport, publicAppUrl: string): string {
     const station = index.stations[report.stationId]
     const direction = report.directionId !== null ? index.stations[report.directionId] : null
     const lineName = report.lineId !== null ? lineNameForId(index, report.lineId) : null
@@ -97,11 +91,7 @@ export function formatForwardedReport(
     return lines.join('\n')
 }
 
-async function sendTelegramMessage(
-    botToken: string,
-    chatId: string,
-    text: string,
-): Promise<void> {
+async function sendTelegramMessage(botToken: string, chatId: string, text: string): Promise<void> {
     const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -109,12 +99,15 @@ async function sendTelegramMessage(
             chat_id: chatId,
             text,
             parse_mode: 'HTML',
+            // Telegram fetches the og:image server-side to build the card, so it's kept small.
             link_preview_options: {
                 is_disabled: false,
                 prefer_large_media: false,
                 show_above_text: false,
             },
         }),
+        // No retry: a timed-out send may already have posted to the group.
+        signal: AbortSignal.timeout(5_000),
     })
     if (!response.ok) {
         throw new Error(`Telegram sendMessage failed: ${response.status} ${await response.text()}`)
@@ -164,7 +157,7 @@ export async function handleReportForward(request: Request, env: Env): Promise<R
         await sendTelegramMessage(
             cfg.telegramBotToken,
             cfg.telegramReportChatId,
-            formatForwardedReport(index, report, cfg.publicAppUrl),
+            formatForwardedReport(index, report, cfg.publicAppUrl)
         )
     } catch (err) {
         reportError('Failed to forward app report to Telegram', err)
