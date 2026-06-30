@@ -139,12 +139,13 @@ export class TransitNetworkDataService {
     }
 
     private async loadGraph(): Promise<Graph> {
-        const allStations = await this.db.select().from(stations)
-        const allLineStations = await this.db
-            .select()
-            .from(lineStations)
-            .orderBy(asc(lineStations.lineId), asc(lineStations.order))
-        const allLines = await this.db.select().from(lines)
+        // The three reads are independent, so issue them concurrently rather than as
+        // Three back-to-back D1 round-trips (Sentry "consecutive DB queries").
+        const [allStations, allLineStations, allLines] = await Promise.all([
+            this.db.select().from(stations),
+            this.db.select().from(lineStations).orderBy(asc(lineStations.lineId), asc(lineStations.order)),
+            this.db.select().from(lines),
+        ])
 
         return buildGraph(allStations, allLines, allLineStations)
     }
