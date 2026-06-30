@@ -91,16 +91,29 @@ export function resolveStationLineNames(
   return names;
 }
 
-export async function fetchJson<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`);
+export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(`${API_URL}${path}`, init);
   if (!response.ok) {
     throw new Error(`Request to ${path} failed: ${response.status}`);
   }
   return response.json();
 }
 
+/*
+ * Transit reference data is edge-cached for 30 days, so we must force the
+ * client (browser HTTP cache / native WebView cache) to revalidate rather than
+ * blindly serve its stored copy: an id-changing reseed otherwise leaves a
+ * client painting risk colours onto stale geometry until the cached entry
+ * expires. `no-cache` revalidates with an If-None-Match — a cheap 304 when
+ * unchanged, the fresh body (new ETag) right after a reseed.
+ */
+const REVALIDATE: RequestInit = { cache: 'no-cache' };
+
 export async function fetchStations(): Promise<Stations> {
-  const response = await fetchJson<Record<StationId, StationResponse>>('/v0/transit/stations');
+  const response = await fetchJson<Record<StationId, StationResponse>>(
+    '/v0/transit/stations',
+    REVALIDATE,
+  );
   const stations: Stations = {};
   for (const [id, station] of Object.entries(response)) stations[id] = { ...station, id };
   return stations;
@@ -113,12 +126,12 @@ export const stationsQueryOptions = () => ({
 
 export const linesQueryOptions = () => ({
   queryKey: ['transit', 'lines'] as const,
-  queryFn: () => fetchJson<Line[]>('/v0/transit/lines'),
+  queryFn: () => fetchJson<Line[]>('/v0/transit/lines', REVALIDATE),
 });
 
 export const segmentsQueryOptions = () => ({
   queryKey: ['transit', 'segments'] as const,
-  queryFn: () => fetchJson<Segments>('/v0/transit/segments'),
+  queryFn: () => fetchJson<Segments>('/v0/transit/segments', REVALIDATE),
 });
 
 export const useStations = () => useQuery(stationsQueryOptions());
