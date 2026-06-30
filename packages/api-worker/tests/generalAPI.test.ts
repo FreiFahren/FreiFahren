@@ -102,7 +102,10 @@ describe('Transit cache headers', () => {
         const response = await app.request('/v0/transit/stations', undefined, testEnv())
 
         expect(response.status).toBe(200)
-        expect(response.headers.get('Cache-Control')).toContain('max-age=2592000')
+        // Edge keeps the response 30 days (s-maxage) while browsers revalidate (max-age=0).
+        expect(response.headers.get('Cache-Control')).toContain('s-maxage=2592000')
+        expect(response.headers.get('Cache-Control')).toContain('max-age=0')
+        expect(response.headers.get('Cache-Control')).toContain('must-revalidate')
         expect(response.headers.get('Vary')).toContain('Origin')
         expect(response.headers.get('Cache-Tag')).toBe('transit-network')
     })

@@ -12,7 +12,16 @@ export const VERSIONED_TRANSIT_CACHEABLE_PATHS = [
 ] as const
 
 export const TRANSIT_CACHE_TAG = 'transit-network'
-export const TRANSIT_CACHE_CONTROL = 'public, max-age=2592000, stale-while-revalidate=86400'
+/*
+ * Split TTL: the edge (a shared cache, including the Workers Cache API entry
+ * below) keeps the response for 30 days via s-maxage, but browsers get
+ * max-age=0 + must-revalidate so they always revalidate with an If-None-Match.
+ * On a hit that revalidation is a cheap 304; after a reseed/purge the body's
+ * ETag changes and the browser gets the fresh segments immediately. A single
+ * long max-age would instead let every client serve stale geometry for up to
+ * 30 days after an id-changing reseed, which silently breaks the risk map.
+ */
+export const TRANSIT_CACHE_CONTROL = 'public, max-age=0, s-maxage=2592000, must-revalidate'
 
 export const transitCacheMiddleware: MiddlewareHandler<Env> = async (c, next) => {
     await next()
