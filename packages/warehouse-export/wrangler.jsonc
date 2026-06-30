@@ -12,7 +12,7 @@
             "database_id": "f8e11f14-15a5-42a8-8eba-5ab513175890",
         },
     ],
-    "r2_buckets": [{ "binding": "WAREHOUSE", "bucket_name": "freifahren-warehouse" }],
+    "r2_buckets": [{ "binding": "WAREHOUSE", "bucket_name": "freifahren-warehouse", "jurisdiction": "eu" }],
     // Daily snapshot at 03:00 UTC; PostHog re-syncs the R2 files on its own schedule.
     "triggers": { "crons": ["0 3 * * *"] },
 }
