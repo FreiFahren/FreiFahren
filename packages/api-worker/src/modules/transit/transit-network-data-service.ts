@@ -102,6 +102,22 @@ export class TransitNetworkDataService {
         }
     }
 
+    // The risk model needs only segment topology, not the large `coordinates`
+    // Geometry that getSegments() returns.
+    async getSegmentSummaries(): Promise<
+        Array<{ id: number; lineId: string; fromStationId: string; toStationId: string }>
+    > {
+        return this.db
+            .select({
+                id: segments.id,
+                lineId: segments.lineId,
+                fromStationId: segments.fromStationId,
+                toStationId: segments.toStationId,
+            })
+            .from(segments)
+            .orderBy(asc(segments.lineId), asc(segments.position))
+    }
+
     async getDistance(from: StationId, to: StationId): Promise<number> {
         const graph = await this.loadGraph()
 

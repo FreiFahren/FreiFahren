@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
 
@@ -8,21 +8,31 @@ import { stations } from './stations'
 
 export const REPORT_SOURCES = ['mini_app', 'web_app', 'mobile_app', 'telegram'] as const
 
-export const reports = sqliteTable('reports', {
-    reportId: integer().primaryKey({ autoIncrement: true }),
-    stationId: text({ length: 16 })
-        .notNull()
-        .references(() => stations.id),
-    lineId: text({ length: 16 }).references(() => lines.id),
-    directionId: text({ length: 16 }).references(() => stations.id),
-    // Millisecond resolution (matches the explicit `new Date()` set on every insert) so that
-    // "latest report" ordering stays deterministic — second resolution ties across same-second
-    // Reports and breaks the risk/prediction reads.
-    timestamp: integer({ mode: 'timestamp_ms' })
-        .notNull()
-        .default(sql`(unixepoch() * 1000)`),
-    source: text({ enum: REPORT_SOURCES }).notNull(),
-})
+export const reports = sqliteTable(
+    'reports',
+    {
+        reportId: integer().primaryKey({ autoIncrement: true }),
+        stationId: text({ length: 16 })
+            .notNull()
+            .references(() => stations.id),
+        lineId: text({ length: 16 }).references(() => lines.id),
+        directionId: text({ length: 16 }).references(() => stations.id),
+        // Millisecond resolution (matches the explicit `new Date()` set on every insert) so that
+        // "latest report" ordering stays deterministic — second resolution ties across same-second
+        // Reports and breaks the risk/prediction reads.
+        timestamp: integer({ mode: 'timestamp_ms' })
+            .notNull()
+            .default(sql`(unixepoch() * 1000)`),
+        source: text({ enum: REPORT_SOURCES }).notNull(),
+    },
+    // Reads filter by a time window, often scoped to a station or line; the leading
+    // Equality column lets the range predicate use an index seek instead of a full scan.
+    (table) => [
+        index('reports_station_ts_idx').on(table.stationId, table.timestamp),
+        index('reports_ts_idx').on(table.timestamp),
+        index('reports_line_ts_idx').on(table.lineId, table.timestamp),
+    ]
+)
 
 const insertReportDbSchema = createInsertSchema(reports).pick({
     stationId: true,
