@@ -24,17 +24,17 @@ export class RiskService {
     async getRisk(now: DateTime = DateTime.utc()): Promise<RiskData> {
         const oneHourAgo = now.minus({ hours: 1 })
 
-        const [segmentSummaries, realReports, stations] = await Promise.all([
-            this.transitNetworkDataService.getSegmentSummaries(),
+        const [segmentCollection, realReports, stations] = await Promise.all([
+            this.transitNetworkDataService.getSegments(),
             this.reportsService.getRealReports({ from: oneHourAgo, to: now }),
             this.transitNetworkDataService.getStations(),
         ])
 
-        const segments: RiskModelSegment[] = segmentSummaries.map((segment) => ({
-            sid: String(segment.id),
-            lineId: segment.lineId,
-            fromStationId: segment.fromStationId,
-            toStationId: segment.toStationId,
+        const segments: RiskModelSegment[] = segmentCollection.features.map((feature) => ({
+            sid: String(feature.properties.id),
+            lineId: feature.properties.line,
+            fromStationId: feature.properties.from,
+            toStationId: feature.properties.to,
         }))
 
         const reports: RiskModelReport[] = realReports.flatMap((r) => {

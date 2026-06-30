@@ -5,6 +5,7 @@ import { createLogger, Logger, LogLevel } from './common/logger'
 import { createD1Db, DbConnection } from './db'
 import { ReportsService } from './modules/reports'
 import { RiskService } from './modules/risk'
+import type { CacheCtx } from './modules/transit/reference-cache'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
 
 export type Bindings = {
@@ -95,7 +96,16 @@ export const setErrorReporter = (reporter: ErrorReporter) => {
 export const reportError: ErrorReporter = (error, context) => errorReporter(error, context)
 
 const applyServices = (c: Context<Env>, db: DbConnection, config: AppConfig) => {
-    const transitNetworkDataService = new TransitNetworkDataService(db)
+    // The executionCtx powers the cache write in cachedReference (waitUntil). It throws off
+    // Workers (tests, seed CLI), where the cache is absent anyway, so fall back to undefined.
+    let cacheCtx: CacheCtx
+    try {
+        cacheCtx = c.executionCtx
+    } catch {
+        cacheCtx = undefined
+    }
+
+    const transitNetworkDataService = new TransitNetworkDataService(db, cacheCtx)
     const reportsService = new ReportsService(db, transitNetworkDataService, {
         nodeEnv: config.nodeEnv,
         telegramWorkerUrl: config.telegramWorkerUrl,
