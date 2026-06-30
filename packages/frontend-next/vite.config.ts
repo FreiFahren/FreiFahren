@@ -86,7 +86,7 @@ export default defineConfig({
         // rejection (common in bots/crawlers and locked-down WebViews) surfaces as an unhandled
         // rejection and floods Sentry (WEB-APP-1). Our own registration swallows the rejection.
         injectRegister: false,
-        // Icons are generated into public/ from packages/app's app-icon.png (matches the native icon).
+        // Icons live in public/ (generated from the source app-icon.png, matching the native icon).
         manifest: {
           name: 'FreiFahren',
           short_name: 'FreiFahren',
