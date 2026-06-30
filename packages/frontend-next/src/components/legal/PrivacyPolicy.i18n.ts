@@ -38,7 +38,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
       reportPurpose:
         'The reported data is temporarily made available to other users of the App to provide them with information about the current situation in public transport. Additionally, the reports are forwarded to the Freifahren_BE Telegram group. This data transmission serves the purpose of sharing and informing the community about incidents. For information regarding the transfer to Telegram, please refer to Section 11; for information on international data transfers, please refer to Section 14.',
       ipAddressInfo:
-        'FreiFahren itself does not store IP addresses. To protect against spam and abuse, Cloudflare as an upstream infrastructure provider processes IP addresses briefly. In doing so, Cloudflare acts predominantly as a processor pursuant to Art. 28 GDPR on our instruction (see Section 15); for the prevention of attacks and abuse (security telemetry), Cloudflare additionally acts as an independent controller. This processing is based on legitimate interests pursuant to Art. 6(1)(f) GDPR (ensuring the security and functionality of the service). For information regarding the associated transfer to a third country, please refer to Section 14.',
+        'FreiFahren itself does not store IP addresses. Cloudflare, Inc. hosts our application and infrastructure and, to protect against spam and abuse, processes IP addresses briefly. In doing so, Cloudflare acts predominantly as a processor pursuant to Art. 28 GDPR on our instruction (see Section 15); for the prevention of attacks and abuse (security telemetry), Cloudflare additionally acts as an independent controller. This processing is based on legitimate interests pursuant to Art. 6(1)(f) GDPR (ensuring the security and functionality of the service). For information regarding the associated transfer to a third country, please refer to Section 14.',
       paymentFormTitle: 'When making a voluntary contribution via Stripe:',
       paymentDataPoints: [
         'Name (if provided)',
@@ -56,7 +56,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
     storageAndAccess: {
       title: '6. Storage and Access',
       content:
-        "Collected data is stored on FreiFahren e.V.'s own servers, hosted by Hetzner Online GmbH in Germany. Access is strictly limited to authorized association members.",
+        'Collected report data (line, station, direction, and rounded timestamp; no IP addresses) is stored in a Cloudflare D1 database operated by Cloudflare, Inc. on our behalf. This database is pinned to the EU jurisdiction - a contractual guarantee set at creation - so the report data is stored exclusively within the European Union. Cloudflare acts as our processor in this respect (see Section 15). Access is strictly limited to authorized association members.',
     },
     userRights: {
       title: '7. User Rights',
@@ -96,7 +96,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
     policyChanges: {
       title: '10. Changes to the Privacy Policy',
       content:
-        'We reserve the right to change this Privacy Policy to reflect changes in legal conditions, the App, or data processing. Users are encouraged to regularly review the content of the Privacy Policy. Last updated: 14 June 2026.',
+        'We reserve the right to change this Privacy Policy to reflect changes in legal conditions, the App, or data processing. Users are encouraged to regularly review the content of the Privacy Policy. Last updated: 30 June 2026.',
     },
     telegramMessages: {
       title: '11. Processing of Telegram Messages',
@@ -129,7 +129,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
         'In the context of the processing activities described above, data may be transferred to countries outside the European Economic Area (EEA) that do not provide a level of data protection equivalent to that under European law ("third countries"). This concerns in particular the following services:',
       transfers: {
         cloudflare:
-          'Cloudflare, Inc. (USA): Used for protection against spam and abuse. The transfer is based on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) and - where applicable - on the EU-US Data Privacy Framework (adequacy decision of the EU Commission of 10 July 2023, Art. 45 GDPR).',
+          'Cloudflare, Inc. (USA): Hosts the application (Cloudflare Workers), stores the report database (Cloudflare D1, pinned to the EU jurisdiction) and assets such as map tiles and update packages (Cloudflare R2), and provides protection against spam and abuse. The report database is pinned to the EU jurisdiction and is therefore stored within the European Union; as Cloudflare is a US company, administrative or support access from a third country cannot be entirely excluded. Such transfers are based on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) and - where applicable - on the EU-US Data Privacy Framework (adequacy decision of the EU Commission of 10 July 2023, Art. 45 GDPR).',
         sentry:
           'Functional Software, Inc. / Sentry (USA): Used for error monitoring. Processing primarily takes place in the EU region; any transfers to the United States are based on the EU Standard Contractual Clauses and - where applicable - on the EU-US Data Privacy Framework.',
         telegram:
@@ -145,7 +145,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
     dataProcessing: {
       title: '15. Data Processing by Service Providers',
       content:
-        'Where external service providers are used in the context of data processing, they act as processors within the meaning of Art. 28 GDPR. Data Processing Agreements (Data Processing Addenda) are in place with Sentry (Functional Software, Inc.) and Cloudflare, Inc. Cloudflare, Inc. acts predominantly as a processor; for measures to prevent attacks and abuse, Cloudflare acts as an independent controller. A Data Processing Agreement with Hetzner Online GmbH is in place. A Data Processing Agreement (Data Processing Addendum) with Mistral AI SAS is in place as part of the subscription agreement. A Data Processing Agreement with PostHog, Inc. is in place. The contracting party for payment processing is Stripe Payments Europe, Ltd.; the Data Processing Agreement between the parties forms part of the Stripe Services Agreement. Insofar as Stripe processes payment data for its own purposes (in particular fraud prevention and compliance with regulatory obligations), Stripe acts as an independent controller in that respect.',
+        'Where external service providers are used in the context of data processing, they act as processors within the meaning of Art. 28 GDPR. Data Processing Agreements (Data Processing Addenda) are in place with Sentry (Functional Software, Inc.) and Cloudflare, Inc. Cloudflare, Inc. hosts the application and stores the report database and assets on our behalf and acts predominantly as a processor in this respect; for measures to prevent attacks and abuse, Cloudflare acts as an independent controller. A Data Processing Agreement (Data Processing Addendum) with Mistral AI SAS is in place as part of the subscription agreement. A Data Processing Agreement with PostHog, Inc. is in place. The contracting party for payment processing is Stripe Payments Europe, Ltd.; the Data Processing Agreement between the parties forms part of the Stripe Services Agreement. Insofar as Stripe processes payment data for its own purposes (in particular fraud prevention and compliance with regulatory obligations), Stripe acts as an independent controller in that respect.',
     },
     webAnalytics: {
       title: '16. Web Analytics',
@@ -201,7 +201,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
       reportPurpose:
         'Die gemeldeten Daten werden anderen Nutzern der App temporär zur Verfügung gestellt, um ihnen die Möglichkeit zu geben, sich über die aktuelle Situation in den öffentlichen Verkehrsmitteln zu informieren. Des Weiteren werden die Meldungen in die Freifahren_BE Telegram-Gruppe weitergeleitet. Diese Datenübermittlung dient dem Austausch und der Information über Vorfälle innerhalb der Community. Hinweise zur Übermittlung an Telegram finden Sie in Abschnitt 11 sowie zu internationalen Datenübermittlungen in Abschnitt 14.',
       ipAddressInfo:
-        'FreiFahren selbst speichert keine IP-Adressen. Zur Abwehr von Spam und Missbrauch verarbeitet Cloudflare als vorgelagerter Infrastruktur-Dienstleister IP-Adressen kurzfristig. Cloudflare wird dabei überwiegend als Auftragsverarbeiter nach Art. 28 DSGVO auf unsere Weisung tätig (siehe Abschnitt 15); für die Abwehr von Angriffen und Missbrauch (Sicherheitstelemetrie) handelt Cloudflare zudem als eigenständig Verantwortlicher. Diese Verarbeitung erfolgt auf Grundlage berechtigter Interessen gemäß Art. 6 Abs. 1 lit. f DSGVO (Sicherstellung der Sicherheit und Funktionsfähigkeit des Dienstes). Hinweise zum damit verbundenen Drittlandtransfer finden Sie in Abschnitt 14.',
+        'FreiFahren selbst speichert keine IP-Adressen. Cloudflare, Inc. hostet unsere Anwendung und Infrastruktur und verarbeitet zur Abwehr von Spam und Missbrauch IP-Adressen kurzfristig. Cloudflare wird dabei überwiegend als Auftragsverarbeiter nach Art. 28 DSGVO auf unsere Weisung tätig (siehe Abschnitt 15); für die Abwehr von Angriffen und Missbrauch (Sicherheitstelemetrie) handelt Cloudflare zudem als eigenständig Verantwortlicher. Diese Verarbeitung erfolgt auf Grundlage berechtigter Interessen gemäß Art. 6 Abs. 1 lit. f DSGVO (Sicherstellung der Sicherheit und Funktionsfähigkeit des Dienstes). Hinweise zum damit verbundenen Drittlandtransfer finden Sie in Abschnitt 14.',
       paymentFormTitle: 'Bei einer freiwilligen Beitragszahlung über Stripe:',
       paymentDataPoints: [
         'Name (sofern angegeben)',
@@ -219,7 +219,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
     storageAndAccess: {
       title: '6. Speicherung und Zugriff',
       content:
-        'Die erhobenen Daten werden auf eigenen Servern des FreiFahren e.V. gespeichert, die bei der Hetzner Online GmbH in Deutschland gehostet sind. Der Zugriff ist strikt auf autorisierte Vereinsmitglieder beschränkt.',
+        'Die erhobenen Meldedaten (Linie, Station, Richtung und abgerundete Uhrzeit; keine IP-Adressen) werden in einer Cloudflare-D1-Datenbank gespeichert, die von Cloudflare, Inc. in unserem Auftrag betrieben wird. Diese Datenbank ist auf die EU-Jurisdiktion festgelegt - eine bei der Erstellung gesetzte vertragliche Garantie -, sodass die Meldedaten ausschließlich innerhalb der Europäischen Union gespeichert werden. Cloudflare wird insoweit als unser Auftragsverarbeiter tätig (siehe Abschnitt 15). Der Zugriff ist strikt auf autorisierte Vereinsmitglieder beschränkt.',
     },
     userRights: {
       title: '7. Rechte der Nutzer',
@@ -258,7 +258,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
     policyChanges: {
       title: '10. Änderungen an der Datenschutzerklärung',
       content:
-        'Wir behalten uns vor, diese Datenschutzerklärung zu ändern, um sie an geänderte Rechtslagen oder Änderungen der App sowie der Datenverarbeitung anzupassen. Nutzer werden gebeten, sich regelmäßig über den Inhalt der Datenschutzerklärung zu informieren. Stand: 14. Juni 2026.',
+        'Wir behalten uns vor, diese Datenschutzerklärung zu ändern, um sie an geänderte Rechtslagen oder Änderungen der App sowie der Datenverarbeitung anzupassen. Nutzer werden gebeten, sich regelmäßig über den Inhalt der Datenschutzerklärung zu informieren. Stand: 30. Juni 2026.',
     },
     telegramMessages: {
       title: '11. Verarbeitung von Telegram-Nachrichten',
@@ -291,7 +291,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
         'Im Rahmen der oben beschriebenen Verarbeitungen kann es zu Datenübermittlungen in Länder außerhalb des Europäischen Wirtschaftsraums (EWR) kommen, in denen kein dem europäischen Recht vergleichbares Datenschutzniveau besteht ("Drittländer"). Dies betrifft insbesondere folgende Dienste:',
       transfers: {
         cloudflare:
-          'Cloudflare, Inc. (USA): Eingesetzt zur Abwehr von Spam und Missbrauch. Die Übermittlung erfolgt auf Grundlage der EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) sowie - soweit anwendbar - auf Grundlage des EU-US Data Privacy Framework (Angemessenheitsbeschluss der EU-Kommission vom 10.07.2023, Art. 45 DSGVO).',
+          'Cloudflare, Inc. (USA): Hostet die Anwendung (Cloudflare Workers), speichert die Meldedatenbank (Cloudflare D1, festgelegt auf die EU-Jurisdiktion) sowie Assets wie Kartenkacheln und Update-Pakete (Cloudflare R2) und dient der Abwehr von Spam und Missbrauch. Die Meldedatenbank ist auf die EU-Jurisdiktion festgelegt und wird daher innerhalb der Europäischen Union gespeichert; da Cloudflare ein US-Unternehmen ist, kann ein administrativer oder unterstützender Zugriff aus einem Drittland nicht vollständig ausgeschlossen werden. Etwaige Übermittlungen erfolgen auf Grundlage der EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) sowie - soweit anwendbar - auf Grundlage des EU-US Data Privacy Framework (Angemessenheitsbeschluss der EU-Kommission vom 10.07.2023, Art. 45 DSGVO).',
         sentry:
           'Functional Software, Inc. / Sentry (USA): Eingesetzt zur Fehlererkennung. Die Verarbeitung erfolgt primär in der EU-Region; etwaige Übermittlungen in die USA erfolgen auf Grundlage der EU-Standardvertragsklauseln und - soweit anwendbar - des EU-US Data Privacy Framework.',
         telegram:
@@ -307,7 +307,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
     dataProcessing: {
       title: '15. Auftragsverarbeitung',
       content:
-        'Soweit externe Dienstleister im Rahmen der Datenverarbeitung eingesetzt werden, handelt es sich um Auftragsverarbeiter im Sinne des Art. 28 DSGVO. Mit Sentry (Functional Software, Inc.) und Cloudflare, Inc. bestehen entsprechende Auftragsverarbeitungsverträge (Data Processing Addenda). Cloudflare, Inc. wird dabei überwiegend als Auftragsverarbeiter tätig; für Maßnahmen der Angriffs- und Missbrauchsabwehr handelt Cloudflare als eigenständig Verantwortlicher. Mit Hetzner Online GmbH besteht ein Auftragsverarbeitungsvertrag. Mit Mistral AI SAS besteht ein Auftragsverarbeitungsvertrag (Data Processing Addendum), der als Bestandteil des Nutzungsvertrags gilt. Mit PostHog, Inc. besteht ein Auftragsverarbeitungsvertrag. Vertragspartner für die Zahlungsabwicklung ist die Stripe Payments Europe, Ltd.; die zwischen den Parteien geltende Data Processing Agreement ist Bestandteil des Stripe-Nutzungsvertrags. Soweit Stripe Zahlungsdaten zu eigenen Zwecken (insbesondere Betrugsprävention sowie zur Erfüllung regulatorischer Pflichten) verarbeitet, handelt Stripe insoweit als eigenständig Verantwortlicher.',
+        'Soweit externe Dienstleister im Rahmen der Datenverarbeitung eingesetzt werden, handelt es sich um Auftragsverarbeiter im Sinne des Art. 28 DSGVO. Mit Sentry (Functional Software, Inc.) und Cloudflare, Inc. bestehen entsprechende Auftragsverarbeitungsverträge (Data Processing Addenda). Cloudflare, Inc. hostet die Anwendung und speichert die Meldedatenbank sowie Assets in unserem Auftrag und wird insoweit überwiegend als Auftragsverarbeiter tätig; für Maßnahmen der Angriffs- und Missbrauchsabwehr handelt Cloudflare als eigenständig Verantwortlicher. Mit Mistral AI SAS besteht ein Auftragsverarbeitungsvertrag (Data Processing Addendum), der als Bestandteil des Nutzungsvertrags gilt. Mit PostHog, Inc. besteht ein Auftragsverarbeitungsvertrag. Vertragspartner für die Zahlungsabwicklung ist die Stripe Payments Europe, Ltd.; die zwischen den Parteien geltende Data Processing Agreement ist Bestandteil des Stripe-Nutzungsvertrags. Soweit Stripe Zahlungsdaten zu eigenen Zwecken (insbesondere Betrugsprävention sowie zur Erfüllung regulatorischer Pflichten) verarbeitet, handelt Stripe insoweit als eigenständig Verantwortlicher.',
     },
     webAnalytics: {
       title: '16. Reichweitenmessung',
