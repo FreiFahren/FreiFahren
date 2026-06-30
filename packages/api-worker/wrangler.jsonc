@@ -9,8 +9,8 @@
     "d1_databases": [
         {
             "binding": "DB",
-            "database_name": "api-worker-db",
-            "database_id": "f11691e9-e6a5-4da2-a5af-d91ca782ee78",
+            "database_name": "api-worker-db-eu",
+            "database_id": "f8e11f14-15a5-42a8-8eba-5ab513175890",
             "migrations_dir": "drizzle",
         },
     ],
