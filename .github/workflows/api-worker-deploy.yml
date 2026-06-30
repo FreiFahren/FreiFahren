@@ -22,6 +22,10 @@ jobs:
         steps:
             - name: Check out code
               uses: actions/checkout@v4
+              with:
+                  # Full history so `sentry-cli releases set-commits --auto` can resolve the
+                  # commit range between the previous release and this deploy.
+                  fetch-depth: 0
 
             - name: Set up Bun
               uses: oven-sh/setup-bun@v1
@@ -46,6 +50,8 @@ jobs:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   workingDirectory: packages/api-worker
+                  # The commit SHA becomes the Sentry release the worker reports at runtime.
+                  command: deploy --var SENTRY_RELEASE:${{ github.sha }}
                   secrets: |
                       REPORT_PASSWORD
               env:
@@ -56,3 +62,18 @@ jobs:
                   CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
                   CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
               run: bun run db:purge-cache
+
+            # Register the release in Sentry (named after the commit SHA the worker reports) so
+            # issues can be resolved "in the next release". Commit association is best-effort:
+            # the release is still created/finalized if set-commits can't resolve the range.
+            - name: Create Sentry release
+              env:
+                  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+                  SENTRY_ORG: freifahren-web
+                  SENTRY_PROJECT: api-worker
+                  SENTRY_URL: https://de.sentry.io
+              run: |
+                  bunx @sentry/cli releases new "$GITHUB_SHA"
+                  bunx @sentry/cli releases set-commits "$GITHUB_SHA" --auto --ignore-missing || echo "set-commits skipped"
+                  bunx @sentry/cli releases finalize "$GITHUB_SHA"
+                  bunx @sentry/cli releases deploys "$GITHUB_SHA" new --env production

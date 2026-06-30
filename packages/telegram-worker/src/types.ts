@@ -8,6 +8,10 @@ export interface Env {
     MISTRAL_MODEL: string
     TELEGRAM_REPORT_CHAT_ID: string
     SENTRY_DSN: string
+    NODE_ENV?: string
+    // Git SHA injected at deploy via `wrangler deploy --var SENTRY_RELEASE:<sha>`; tags Sentry
+    // Events with a release so issues can be resolved in the next release. Absent locally.
+    SENTRY_RELEASE?: string
 
     // Secrets (wrangler secret put)
     MISTRAL_API_KEY: string
