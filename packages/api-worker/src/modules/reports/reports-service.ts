@@ -132,8 +132,20 @@ export class ReportsService {
         if (result.length < predictedReportsThreshold) {
             const numberOfReportsToFetch = predictedReportsThreshold - result.length
             const reportedStationIds = new Set(result.map((r) => r.stationId as StationId))
-            const allowedStationIds = await this.resolveAllowedStationIds(stationId, reportedStationIds)
-            const historicReports = await this.predictReports(numberOfReportsToFetch, from, to, allowedStationIds)
+            // The allowed-station lookup may read the full station list and the historic
+            // Candidate fetch reads recent reports; the two are independent, so issue
+            // Them concurrently rather than as back-to-back D1 round-trips.
+            const [allowedStationIds, candidateRows] = await Promise.all([
+                this.resolveAllowedStationIds(stationId, reportedStationIds),
+                this.loadPredictionCandidates(),
+            ])
+            const historicReports = this.predictReports(
+                numberOfReportsToFetch,
+                from,
+                to,
+                allowedStationIds,
+                candidateRows
+            )
             result.push(...historicReports)
         }
 
@@ -164,12 +176,23 @@ export class ReportsService {
         return Math.trunc(clamp(threshold, MIN_PREDICTED_REPORTS_THRESHOLD, MAX_PREDICTED_REPORTS_THRESHOLD))
     }
 
-    private async predictReports(
+    // Recent reports used as the historic sample for prediction. Fetched separately
+    // So getReports can run it concurrently with resolveAllowedStationIds.
+    private async loadPredictionCandidates() {
+        return this.db
+            .select({ stationId: reports.stationId, timestamp: reports.timestamp })
+            .from(reports)
+            .orderBy(desc(reports.timestamp))
+            .limit(1000)
+    }
+
+    private predictReports(
         numberOfReportsToFetch: number,
         from: DateTime,
         to: DateTime,
-        allowedStationIds: ReadonlySet<StationId>
-    ): Promise<ReportSummary[]> {
+        allowedStationIds: ReadonlySet<StationId>,
+        candidateRows: Awaited<ReturnType<ReportsService['loadPredictionCandidates']>>
+    ): ReportSummary[] {
         if (numberOfReportsToFetch <= 0) return []
         if (allowedStationIds.size === 0) return []
 
@@ -190,12 +213,6 @@ export class ReportsService {
 
         const firstQuarterEndMillis = fromMillis + Math.floor(rangeMillis / 4)
         const firstHalfEndMillis = fromMillis + Math.floor(rangeMillis / 2)
-
-        const candidateRows = await this.db
-            .select({ stationId: reports.stationId, timestamp: reports.timestamp })
-            .from(reports)
-            .orderBy(desc(reports.timestamp))
-            .limit(1000)
 
         const usedStationIds = new Set<StationId>()
         const maxUniqueCount = Math.min(numberOfReportsToFetch, allowedStationIds.size)
@@ -302,8 +319,11 @@ export class ReportsService {
     }
 
     async postProcessReport(reportData: RawReport): Promise<InsertReport> {
-        const stations = await this.transitNetworkDataService.getStations()
-        const lines = await this.transitNetworkDataService.getLines()
+        // Independent reads — fetch concurrently instead of back-to-back round-trips.
+        const [stations, lines] = await Promise.all([
+            this.transitNetworkDataService.getStations(),
+            this.transitNetworkDataService.getLines(),
+        ])
 
         const now = DateTime.utc()
 
