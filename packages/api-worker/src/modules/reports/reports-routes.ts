@@ -2,7 +2,7 @@ import { isNil } from 'lodash'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
 
-import { Env } from '../../app-env'
+import { Env, reportError } from '../../app-env'
 import { defineRoute } from '../../common/router'
 import { insertReportSchema } from '../../db'
 
@@ -101,13 +101,32 @@ export const postReport = defineRoute<Env>()({
             source: reportData.source ?? 'telegram',
         })
 
-        const { telegramNotificationSuccess, report } = await reportsService.createReport({
-            ...postProcessedReportData,
+        const report = await reportsService.createReport(postProcessedReportData)
+
+        // Fire-and-forget: the report is already saved, and a slow Telegram call must not block the response.
+        const forward = reportsService.forwardReportToTelegram(postProcessedReportData).catch((error) => {
+            reportError(error, {
+                tags: { task: 'telegram-report-forward' },
+                extra: {
+                    stationId: postProcessedReportData.stationId,
+                    lineId: postProcessedReportData.lineId,
+                    directionId: postProcessedReportData.directionId,
+                },
+            })
+            logger.error(error, 'Failed to forward inspector report to Telegram')
         })
 
-        if (!telegramNotificationSuccess) {
-            logger.error('Failed to notify Telegram bot about inspector report')
-            c.header('X-Telegram-Notification-Status', 'failed')
+        // No Workers runtime under unit tests, so executionCtx is absent; await there instead.
+        let executionCtx: { waitUntil(promise: Promise<unknown>): void } | undefined
+        try {
+            executionCtx = c.executionCtx
+        } catch {
+            executionCtx = undefined
+        }
+        if (executionCtx !== undefined) {
+            executionCtx.waitUntil(forward)
+        } else {
+            await forward
         }
 
         return c.json(report)
