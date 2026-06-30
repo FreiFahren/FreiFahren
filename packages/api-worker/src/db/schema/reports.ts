@@ -25,10 +25,8 @@ export const reports = sqliteTable(
             .default(sql`(unixepoch() * 1000)`),
         source: text({ enum: REPORT_SOURCES }).notNull(),
     },
-    // Every read filters reports by a time window, often also scoped to a station or line.
-    // Without these indexes each risk/reports request full-scans the table (~103k rows and
-    // Growing). Leading with the equality column makes the time-range predicate a covered
-    // Range seek instead of a full scan.
+    // Reads filter by a time window, often scoped to a station or line; the leading
+    // Equality column lets the range predicate use an index seek instead of a full scan.
     (table) => [
         index('reports_station_ts_idx').on(table.stationId, table.timestamp),
         index('reports_ts_idx').on(table.timestamp),
