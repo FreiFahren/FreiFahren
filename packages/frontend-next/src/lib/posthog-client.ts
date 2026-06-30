@@ -61,6 +61,8 @@ export function loadPostHog(): Promise<void> {
   loadPromise = import('posthog-js').then(({ default: posthog }) => {
     posthog.init(apiKey, {
       api_host: apiHost,
+      // api_host is our reverse proxy in prod; keep PostHog UI/toolbar links on the real app.
+      ui_host: 'https://eu.posthog.com',
       defaults: '2025-05-24',
       // We never call identify() (the app has no login), so under the default 'identified_only'
       // mode PostHog ingests every event personless and builds no person profiles at all — which
