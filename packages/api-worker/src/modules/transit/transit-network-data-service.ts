@@ -102,6 +102,26 @@ export class TransitNetworkDataService {
         }
     }
 
+    /*
+     * Slim segment list for the risk model, which only needs the topology
+     * (id + line + endpoints) and never the `coordinates` geometry. Selecting the
+     * geometry column is the bulk of the full segments read (~463 KB payload), so
+     * skipping it keeps /v0/risk's heaviest query small.
+     */
+    async getSegmentSummaries(): Promise<
+        Array<{ id: number; lineId: string; fromStationId: string; toStationId: string }>
+    > {
+        return this.db
+            .select({
+                id: segments.id,
+                lineId: segments.lineId,
+                fromStationId: segments.fromStationId,
+                toStationId: segments.toStationId,
+            })
+            .from(segments)
+            .orderBy(asc(segments.lineId), asc(segments.position))
+    }
+
     async getDistance(from: StationId, to: StationId): Promise<number> {
         const graph = await this.loadGraph()
 
