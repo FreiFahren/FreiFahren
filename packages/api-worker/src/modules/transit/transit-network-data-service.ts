@@ -4,12 +4,30 @@ import { AppError, NoPathFoundError } from '../../common/errors'
 import { DbConnection, stations, lineStations, lines, segments } from '../../db'
 
 import { buildGraph, findPathWithAStar, type Graph, type StationId } from './pathfinding'
+import { cachedReference, type CacheCtx } from './reference-cache'
 import type { Line, Lines, SegmentsFeatureCollection, Stations } from './types'
 
 export class TransitNetworkDataService {
-    constructor(private db: DbConnection) {}
+    constructor(
+        private db: DbConnection,
+        private cacheCtx: CacheCtx = undefined
+    ) {}
 
+    // Static reference data — read through the transit edge cache so the hot in-process
+    // Callers (risk, reports) don't re-scan the full tables in D1 on every request.
     async getStations(): Promise<Stations> {
+        return cachedReference('stations', () => this.loadStations(), this.cacheCtx)
+    }
+
+    async getLines(): Promise<Lines> {
+        return cachedReference('lines', () => this.loadLines(), this.cacheCtx)
+    }
+
+    async getSegments(): Promise<SegmentsFeatureCollection> {
+        return cachedReference('segments', () => this.loadSegments(), this.cacheCtx)
+    }
+
+    private async loadStations(): Promise<Stations> {
         const joinedRows = await this.db
             .select({
                 id: stations.id,
@@ -35,7 +53,7 @@ export class TransitNetworkDataService {
         }, {} as Stations)
     }
 
-    async getLines(): Promise<Lines> {
+    private async loadLines(): Promise<Lines> {
         const joinedRows = await this.db
             .select({
                 lineId: lines.id,
@@ -70,7 +88,7 @@ export class TransitNetworkDataService {
         return Array.from(byId.values())
     }
 
-    async getSegments(): Promise<SegmentsFeatureCollection> {
+    private async loadSegments(): Promise<SegmentsFeatureCollection> {
         const rows = await this.db
             .select({
                 id: segments.id,
@@ -100,22 +118,6 @@ export class TransitNetworkDataService {
                 },
             })),
         }
-    }
-
-    // The risk model needs only segment topology, not the large `coordinates`
-    // Geometry that getSegments() returns.
-    async getSegmentSummaries(): Promise<
-        Array<{ id: number; lineId: string; fromStationId: string; toStationId: string }>
-    > {
-        return this.db
-            .select({
-                id: segments.id,
-                lineId: segments.lineId,
-                fromStationId: segments.fromStationId,
-                toStationId: segments.toStationId,
-            })
-            .from(segments)
-            .orderBy(asc(segments.lineId), asc(segments.position))
     }
 
     async getDistance(from: StationId, to: StationId): Promise<number> {
