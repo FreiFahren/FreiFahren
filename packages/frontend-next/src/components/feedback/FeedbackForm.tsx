@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { captureSurveySent, type FeedbackType } from '@/lib/analytics';
+import { captureSurveySent, type FeedbackSentiment, type FeedbackType } from '@/lib/analytics';
 import { FEEDBACK_SURVEY_ID } from '@/lib/feedback-modal';
 import { cn } from '@/lib/utils';
 
@@ -17,16 +17,17 @@ const TYPE_OPTIONS: { value: FeedbackType; labelKey: string }[] = [
   { value: 'general', labelKey: 'typeGeneral' },
 ];
 
-// The feedback form body, decoupled from any surface. Used both inside the modal (FeedbackCard) and
-// embedded directly into a page (e.g. the report-success screen). onSubmitted lets the modal auto-
-// dismiss after the success state; embedded usages can leave the thank-you in place. `compact`
-// shrinks the footprint (smaller textarea, tighter spacing) so it's easy to skip past when embedded.
+// The feedback form body, shared by the modal (FeedbackCard) and the embedded report-success screen.
 export function FeedbackForm({
   onSubmitted,
   compact = false,
+  sentiment,
+  submitVariant = 'accent',
 }: {
   onSubmitted?: () => void;
   compact?: boolean;
+  sentiment?: FeedbackSentiment;
+  submitVariant?: 'accent' | 'neutral';
 }) {
   const { t } = useTranslation(NAMESPACE);
   const pageRoute = useRouterState({ select: (s) => s.location.pathname });
@@ -45,6 +46,7 @@ export function FeedbackForm({
         message: trimmed,
         pageRoute,
         appVersion: __BUILD_ID__,
+        sentiment,
       });
       setStatus('done');
       onSubmitted?.();
@@ -115,9 +117,13 @@ export function FeedbackForm({
         className={cn(
           'w-full gap-2',
           compact ? 'h-10' : 'h-11',
-          canSubmit
-            ? 'bg-accent-bright text-primary-foreground hover:bg-accent-press'
-            : 'bg-surface-solid text-muted-foreground border-border border',
+          canSubmit &&
+            submitVariant === 'accent' &&
+            'bg-accent-bright text-primary-foreground hover:bg-accent-press',
+          canSubmit &&
+            submitVariant === 'neutral' &&
+            'bg-foreground text-background hover:bg-foreground/90',
+          !canSubmit && 'bg-surface-solid text-muted-foreground border-border border',
         )}
       >
         {sending ? t('submitting') : status === 'error' ? t('retry') : t('submit')}

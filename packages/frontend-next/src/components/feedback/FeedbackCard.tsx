@@ -20,7 +20,6 @@ function FeedbackCardContent() {
   return (
     <DetailCard title={t('title')} closeLabel={t('close')} onClose={closeFeedbackModal}>
       <CardContent>
-        {/* Brief success confirmation, then dismiss. */}
         <FeedbackForm onSubmitted={() => window.setTimeout(closeFeedbackModal, 1200)} />
       </CardContent>
     </DetailCard>
