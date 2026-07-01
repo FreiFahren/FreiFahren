@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { track } from '@/lib/analytics';
 import { APP_STORE_URL, dismissAppBanner, useShowAppBanner } from '@/lib/app-banner';
 
 import { NAMESPACE } from './AppBanner.i18n';
@@ -14,6 +15,10 @@ import { NAMESPACE } from './AppBanner.i18n';
 export function AppBanner() {
   const { t } = useTranslation(NAMESPACE);
   const show = useShowAppBanner();
+
+  useEffect(() => {
+    if (show) track('app_banner_shown', {});
+  }, [show]);
 
   useEffect(() => {
     if (!show) return;
@@ -47,14 +52,22 @@ export function AppBanner() {
         size="xs"
         className="bg-accent-bright text-primary-foreground hover:bg-accent-press shrink-0"
       >
-        <a href={APP_STORE_URL} target="_blank" rel="noreferrer">
+        <a
+          href={APP_STORE_URL}
+          target="_blank"
+          rel="noreferrer"
+          onClick={() => track('app_banner_store_clicked', {})}
+        >
           {t('open')}
         </a>
       </Button>
       <button
         type="button"
         aria-label={t('dismiss')}
-        onClick={dismissAppBanner}
+        onClick={() => {
+          track('app_banner_dismissed', {});
+          dismissAppBanner();
+        }}
         className="text-muted-foreground hover:text-foreground -mr-1 shrink-0 p-1"
       >
         <X className="size-4" />
