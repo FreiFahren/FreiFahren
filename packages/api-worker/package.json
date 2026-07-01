@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
+    "seed": "./scripts/seed-local-d1.sh",
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
     "test": "bun test",

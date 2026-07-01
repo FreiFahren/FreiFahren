@@ -41,13 +41,10 @@ type AnalyticsEvents = {
   reports_tab_selected: { tab: 'summary' | 'lines' | 'reports' };
   report_row_selected: { report_age_minutes: number; has_line: boolean; has_direction: boolean };
   detail_modal_closed: { modal: 'station' | 'report'; duration_ms: number };
-  // Custom "Get the app" banner shown to iOS users off Safari (Safari's native Smart App Banner is
-  // OS-owned and can't be instrumented). No props needed: PostHog's auto-captured $browser slices the
-  // funnel — Chrome iOS / Firefox iOS, and "Mobile Safari" here means an in-app webview since these
-  // events never fire in real Safari.
   app_banner_shown: Record<string, never>;
   app_banner_store_clicked: Record<string, never>;
   app_banner_dismissed: Record<string, never>;
+  feedback_sentiment_selected: { sentiment: FeedbackSentiment };
 };
 
 export function track<E extends keyof AnalyticsEvents>(
@@ -82,6 +79,8 @@ export function setSuperProperties(properties: Partial<SuperProperties>): void {
 }
 
 export type FeedbackType = 'feature_request' | 'bug_report' | 'general';
+
+export type FeedbackSentiment = 'positive' | 'negative';
 
 export const SURVEY_QUESTIONS = [
   { id: 'feedback_type', question: 'What kind of feedback is this?' },
@@ -123,6 +122,7 @@ export function captureSurveySent(
     message: string;
     pageRoute: string;
     appVersion: string;
+    sentiment?: FeedbackSentiment;
   },
 ): void {
   const properties = {
@@ -136,6 +136,7 @@ export function captureSurveySent(
     feedback_message: response.message,
     page_route: response.pageRoute,
     app_version: response.appVersion,
+    ...(response.sentiment ? { feedback_sentiment: response.sentiment } : {}),
   };
   if (import.meta.env.DEV) {
     console.log('[analytics] survey sent', properties);
