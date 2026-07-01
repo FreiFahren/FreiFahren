@@ -15,6 +15,13 @@
     <!-- Paints the iOS status-bar / dynamic-island area with the card color (matches the
          report form and the map search bar). Keep in sync with --card in src/index.css. -->
     <meta name="theme-color" content="#25272b" />
+    <!-- Native Smart App Banner (iOS Safari only; other iOS browsers get the custom AppBanner). app-argument
+         deep-links to the current URL when the app is installed. Keep app-id in sync with APP_STORE_ID in
+         src/lib/app-banner.ts. -->
+    <meta
+      name="apple-itunes-app"
+      content="app-id=6738277309, app-argument=https://app.freifahren.org/"
+    />
     <!-- Lock page scale: the map owns pinch-zoom, so the page itself must never zoom.
          This also stops iOS Safari auto-zooming when the (position:fixed) search input is focused. -->
     <meta
