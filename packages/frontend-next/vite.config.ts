@@ -112,14 +112,37 @@ export default defineConfig({
           ],
         },
         workbox: {
-          // Precache the app shell: HTML, hashed JS/CSS, the IBM Plex woff2 files, and the lazy
-          // maplibre chunk (~1 MB, under the 2 MB default cap) so the map engine paints offline too.
+          // Precache the immutable, content-hashed assets: JS/CSS, the IBM Plex woff2 files, and the
+          // lazy maplibre chunk (~1 MB, under the 2 MB default cap) so the map engine paints offline
+          // too. Cache-first is correct for these — a new build gets new filenames, so they're never
+          // stale. The HTML document is deliberately handled by the network-first rule below, not this
+          // precache, so a deploy is never served stale.
           globPatterns: ['**/*.{js,css,html,woff2,svg,png,ico}'],
-          // Offline SPA navigations resolve to the precached shell. Navigation routing only matches
-          // navigation requests, so it doesn't touch the cross-origin tile/API fetches, nor does it
-          // clash with wrangler's server-side single-page-application fallback (that only runs online).
-          navigateFallback: '/index.html',
+          // Disable navigateFallback (vite-plugin-pwa defaults it to index.html). Its NavigationRoute is
+          // registered *before* runtimeCaching and first-match-wins, so a precache navigateFallback would
+          // shadow the network-first rule below and keep serving the stale shell. With it off, the
+          // network-first navigation rule is the sole navigation handler; it caches each visited shell, so
+          // returning visitors still cold-boot offline (previously-visited pages only — the best-effort web
+          // offline of ADR 0005). It only matches navigation requests, so it never touches the cross-origin
+          // tile/API fetches.
+          navigateFallback: null,
           runtimeCaching: [
+            {
+              // The HTML document is network-first: a fresh deploy is picked up on the very next load,
+              // not one navigation later (the autoUpdate lag) and never needing a manual cache clear.
+              // The hashed JS/CSS it references stay precache/cache-first (immutable, so never stale).
+              // The last successful shell is cached, so a returning visitor still cold-boots offline.
+              // See ADR 0008.
+              urlPattern: ({ request }) => request.mode === 'navigate',
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'app-shell',
+                // Fall back to the cached shell quickly on a flaky/tunnel connection rather than hanging.
+                networkTimeoutSeconds: 3,
+                expiration: { maxEntries: 8, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
             {
               // Style JSON is the one mutable pointer (it names the current immutable /v<sha>/ archive).
               // StaleWhileRevalidate paints instantly from cache but refreshes in the background, so a
