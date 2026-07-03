@@ -4,11 +4,10 @@
         "module": "esnext",
         "moduleResolution": "bundler",
         "strict": true,
-        "jsx": "react-jsx",
-        "jsxImportSource": "hono/jsx",
+        "declaration": true,
+        "noEmit": true,
         "esModuleInterop": true,
-        "paths": {
-            "@freifahren/cities": ["../cities/src/index.ts"]
-        }
-    }
+        "skipLibCheck": true
+    },
+    "include": ["src"]
 }
