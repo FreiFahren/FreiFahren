@@ -1,3 +1,4 @@
+import type { CityProfile } from './config'
 import type { IndexVariant, TransitIndex } from './types'
 import { normalizeName } from './extractor'
 
@@ -16,7 +17,11 @@ interface RawLine {
 // Lines-per-station are derived from the variants (not the /stations `lines` field) so we
 // index PUBLIC line names ("S85") rather than variant names ("S85-a") the /stations endpoint
 // sometimes returns.
-export function buildIndex(rawStations: Record<string, RawStation>, rawLines: RawLine[]): TransitIndex {
+export function buildIndex(
+    rawStations: Record<string, RawStation>,
+    rawLines: RawLine[],
+    profile: CityProfile,
+): TransitIndex {
     const variants: IndexVariant[] = rawLines.map((line) => ({
         id: line.id,
         name: line.name,
@@ -37,7 +42,7 @@ export function buildIndex(rawStations: Record<string, RawStation>, rawLines: Ra
     const byNorm: Record<string, string[]> = {}
     for (const [stationId, props] of Object.entries(rawStations)) {
         stations[stationId] = { id: stationId, name: props.name }
-        const norm = normalizeName(props.name)
+        const norm = normalizeName(props.name, profile)
         ;(byNorm[norm] ??= []).push(stationId)
         linesByStation[stationId] ??= []
     }
@@ -51,7 +56,7 @@ export function buildIndex(rawStations: Record<string, RawStation>, rawLines: Ra
 }
 
 // No caching here; the api-worker serves these from its edge cache.
-export async function getTransitIndex(backendUrl: string): Promise<TransitIndex> {
+export async function getTransitIndex(backendUrl: string, profile: CityProfile): Promise<TransitIndex> {
     const [stationsResp, linesResp] = await Promise.all([
         fetch(`${backendUrl}/v0/transit/stations`),
         fetch(`${backendUrl}/v0/transit/lines`),
@@ -64,7 +69,7 @@ export async function getTransitIndex(backendUrl: string): Promise<TransitIndex>
     }
     const rawStations = (await stationsResp.json()) as Record<string, RawStation>
     const rawLines = (await linesResp.json()) as RawLine[]
-    return buildIndex(rawStations, rawLines)
+    return buildIndex(rawStations, rawLines, profile)
 }
 
 export function stationLineNames(index: TransitIndex, stationId: string): string[] {

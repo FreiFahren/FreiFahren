@@ -1,7 +1,7 @@
 import type { Env, ForwardedReport, TransitIndex } from './types'
 import { lineNameForId, stationLineNames } from './transit'
 import { getTransitIndex } from './transit'
-import { readConfig } from './config'
+import { profileFor, readConfig } from './config'
 import { reportError } from './observability'
 
 /** HTML-escape for Telegram markup, quotes included. */
@@ -140,7 +140,7 @@ export async function handleReportForward(request: Request, env: Env): Promise<R
 
     let index: TransitIndex
     try {
-        index = await getTransitIndex(cfg.backendUrl)
+        index = await getTransitIndex(cfg.backendUrl, profileFor(cfg.cityName))
     } catch (err) {
         reportError('Failed to load transit data', err)
         return json({ error: 'transit_unavailable' }, 502)

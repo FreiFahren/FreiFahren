@@ -1,29 +1,12 @@
+import { getCity } from '@freifahren/cities'
+
 import type { Env } from './types'
 
-// =============================================================================
-// City / language profile
-//
-// THIS IS THE ONLY PLACE with Berlin/German specifics. Extraction logic in
-// extractor.ts reads from here and never hardcodes city specifics. To port the
-// bot to another city, swap the constants below (and the CITY_NAME var).
-// =============================================================================
-
-/** Free-text reminder of the local circular-line name. Empty = no circular line. */
-export const CIRCULAR_LINE_ALIAS = 'Ringbahn'
-
-/** Regex recognizing user shorthand for the circular line. Empty = no circular line. */
-export const CIRCULAR_LINE_PATTERN = String.raw`(?<![A-Za-z])(?:s[-\s]?)?ring(?:bahn)?`
-
-/**
- * Language-specific letter folding for normalization.
- *
- * Collapse umlauts to their base letter rather than the digraph form: when users
- * type on ASCII keyboards they almost always write "u"/"o"/"a" (sudkreuz, mockern,
- * bulow), not the "ue"/"oe"/"ae" expansion. Mapping to the base letter makes user
- * input line up with normalized station names. ß stays "ss" — the universally
- * typed substitute.
- */
-export const LANGUAGE_LETTER_MAP: Record<string, string> = {
+// German language normalization. Shared by every German-speaking city, so kept here
+// rather than in the per-city registry; city-specific data comes from packages/cities
+// via profileFor() below. Umlauts fold to their base letter, not the digraph, because
+// on ASCII keyboards users type "u"/"o"/"a" (sudkreuz, mockern), not "ue"/"oe"/"ae".
+const GERMAN_LETTER_MAP: Record<string, string> = {
     ä: 'a',
     ö: 'o',
     ü: 'u',
@@ -33,25 +16,11 @@ export const LANGUAGE_LETTER_MAP: Record<string, string> = {
     Ü: 'u',
 }
 
-/**
- * (pattern, replacement) pairs applied during normalization so user-typed
- * abbreviations match canonical names. German: "str."/"straße" -> "strasse", etc.
- * Patterns run after lowercasing and letter folding, so they target lowercase.
- */
-export const LANGUAGE_ABBREVIATIONS: [RegExp, string][] = [
-    [/straße/g, 'strasse'],
-    [/str\.?(?=\s|$|\/|,|\)|-)/g, 'strasse'],
-    [/str$/g, 'strasse'],
-    [/\bbhf\.?\b/g, 'bahnhof'],
-    [/\bhbf\.?\b/g, 'hauptbahnhof'],
-    [/\bpl\.?\b/g, 'platz'],
-]
+// Leading prefixes users type that aren't part of the station name ("S Alexanderplatz").
+const GERMAN_STATION_NAME_PREFIX_PATTERN = /^(?:bahnhof\s+|bhf\s+|s\s+|u\s+|s-bahn\s+|u-bahn\s+)+/i
 
-/** Prefixes users write before a station name that aren't part of it ("S Alexanderplatz"). */
-export const STATION_NAME_PREFIX_PATTERN = /^(?:bahnhof\s+|bhf\s+|s\s+|u\s+|s-bahn\s+|u-bahn\s+)+/i
-
-/** Words the LLM might emit as a stationName that really refer to platforms/vehicles. */
-export const GENERIC_NON_STATION_WORDS: ReadonlySet<string> = new Set([
+// Words that are never a station name on their own (platforms, vehicle types).
+const GERMAN_GENERIC_NON_STATION_WORDS: ReadonlySet<string> = new Set([
     'bahnsteig',
     'bahnsteige',
     'bahnhof',
@@ -70,58 +39,46 @@ export const GENERIC_NON_STATION_WORDS: ReadonlySet<string> = new Set([
     'stop',
 ])
 
-/** Inspector-report vocabulary the prompt highlights to the model. */
-export const INSPECTOR_KEYWORDS =
-    'Kontrolleur, BVG-Kontrolle, BOS, BW, Blauwesten, Zivilkontrolle, blaue Westen'
-
 /**
- * Few-shot examples appended to the prompt. Tuned to teach disambiguation the model
- * gets wrong: slang names, direction-vs-station, all-clear messages, the implicit-
- * direction case. Kept in the local language since the chat is mixed German/English.
- * Empty string disables few-shot.
+ * Everything the extractor needs, resolved once per run: the German constants above
+ * plus the city's registry profile (see CityTelegramProfile in packages/cities), with
+ * its regex sources compiled here.
  */
-export const PROMPT_EXAMPLES = `Message: "U2 alex hab in dem bahnstation gesehen"
-{"stationName": "Alex", "directionName": null}
+export interface CityProfile {
+    displayName: string
+    letterMap: Record<string, string>
+    stationNamePrefixPattern: RegExp
+    genericNonStationWords: ReadonlySet<string>
+    abbreviations: [RegExp, string][]
+    /** null when the city has no circular line. */
+    circularLineRegex: RegExp | null
+    inspectorKeywords: string
+    promptExamples: string
+}
 
-Message: "3x kotti u3 am Gleis"
-{"stationName": "Kottbusser Tor", "directionName": null}
-
-Message: "gorli u1/u3 3 Männer"
-{"stationName": "Görlitzer Bahnhof", "directionName": null}
-
-Message: "U7 Rathaus Spandau Richt Rudow Höhe sbhf Neukölln 4 Mann BOS"
-{"stationName": "Neukölln", "directionName": "Rudow"}
-
-Message: "u 8 wittenau in blauen westen höhe osloer"
-{"stationName": "osloer", "directionName": "wittenau"}
-
-Message: "Gesundbrunnen clean on u8"
-{"stationName": "Gesundbrunnen", "directionName": null}
-
-Message: "M29 bus moritzplatz"
-{"stationName": "Moritzplatz", "directionName": null}
-
-Message: "3 Bos Jacken M29 Anhalter Bahnhof Richtung Hermannplatz"
-{"stationName": "Anhalter Bahnhof", "directionName": "Hermannplatz"}
-
-Message: "S3 nach ostbahnof"
-{"stationName": null, "directionName": "Ostbahnhof"}
-
-Message: "To Rathaus SPANDAU"
-{"stationName": null, "directionName": "Rathaus Spandau"}
-
-Message: "U7 Rathaus Neukölln 3x BOS just got off the train"
-{"stationName": "Rathaus Neukölln", "directionName": null}
-
-Message: "U6 Kaiserin Augusta 2x bos"
-{"stationName": "Kaiserin-Augusta-Straße", "directionName": null}
-
-Message: "Zoo Richtung Steglitz"
-{"stationName": "Zoo", "directionName": "Steglitz"}
-
-Message: "Hi, kann mir wer ein Ticket verkaufen?"
-{"stationName": null, "directionName": null}
-`
+// Throws on an unknown city so a misconfigured deployment fails loudly rather than
+// silently prompting the model with the wrong city's examples.
+export function profileFor(cityName: string): CityProfile {
+    const city = getCity(cityName.toLowerCase())
+    if (!city) {
+        throw new Error(`No city registry entry for CITY_NAME="${cityName}"`)
+    }
+    const { telegram } = city
+    return {
+        displayName: city.displayName,
+        letterMap: GERMAN_LETTER_MAP,
+        stationNamePrefixPattern: GERMAN_STATION_NAME_PREFIX_PATTERN,
+        genericNonStationWords: GERMAN_GENERIC_NON_STATION_WORDS,
+        abbreviations: telegram.abbreviations.map(
+            ([pattern, replacement]): [RegExp, string] => [new RegExp(pattern, 'g'), replacement],
+        ),
+        circularLineRegex: telegram.circularLinePattern
+            ? new RegExp(telegram.circularLinePattern, 'i')
+            : null,
+        inspectorKeywords: telegram.inspectorKeywords,
+        promptExamples: telegram.promptExamples,
+    }
+}
 
 // =============================================================================
 // Runtime config (from env bindings) — non-city-specific.

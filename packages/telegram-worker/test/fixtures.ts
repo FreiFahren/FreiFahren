@@ -1,5 +1,9 @@
+import { profileFor } from '../src/config'
 import { buildIndex } from '../src/transit'
 import type { TransitIndex } from '../src/types'
+
+/** Berlin profile for tests — mirrors the production CITY_NAME default. */
+export const berlinProfile = profileFor('Berlin')
 
 export const ALLOWED_CHAT_ID = '-1001'
 export const PUBLIC_APP_URL = 'https://app.example.test'
@@ -35,7 +39,7 @@ export function rawTransit() {
 
 export function makeIndex(): TransitIndex {
     const { rawStations, rawLines } = rawTransit()
-    return buildIndex(rawStations, rawLines)
+    return buildIndex(rawStations, rawLines, berlinProfile)
 }
 
 export interface PickedStation {

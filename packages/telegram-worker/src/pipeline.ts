@@ -1,5 +1,5 @@
 import type { Env } from './types'
-import { readConfig } from './config'
+import { profileFor, readConfig } from './config'
 import { isSpam } from './spam'
 import { getTransitIndex } from './transit'
 import {
@@ -26,19 +26,20 @@ export async function processMessage(text: string, env: Env): Promise<void> {
     }
 
     const cfg = readConfig(env)
-    const index = await getTransitIndex(cfg.backendUrl)
+    const profile = profileFor(cfg.cityName)
+    const index = await getTransitIndex(cfg.backendUrl, profile)
 
     const linePattern = buildLinePattern(index.lineNames)
-    const detectedLine = detectLineName(text, index.lineNames, linePattern, index.circularLineNames)
+    const detectedLine = detectLineName(text, index.lineNames, linePattern, index.circularLineNames, profile)
 
-    const systemPrompt = buildSystemPrompt(index, cfg.cityName)
+    const systemPrompt = buildSystemPrompt(index, profile)
     const parsed = await extractWithMistral(text, systemPrompt, cfg.mistralApiKey, cfg.mistralModel)
     if (parsed === null) {
         console.info('No extraction produced (LLM error or unparseable)')
         return
     }
 
-    const result = resolveExtraction(index, parsed, detectedLine)
+    const result = resolveExtraction(index, parsed, detectedLine, profile)
     const ids = reportIdentifiers(index, result)
     if (ids === null) {
         return
