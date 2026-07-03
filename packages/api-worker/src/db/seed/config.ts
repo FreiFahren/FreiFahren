@@ -1,24 +1,17 @@
-// This file contains the configuration for the seeding process.
-// Adapt this file to your needs. Based on your cities requirements.
+// Seed configuration. City-specific inputs (operators, admin level, colors,
+// Route-type priority) come from the shared `@freifahren/cities` registry; the
+// Pipeline-global tuning below (Overpass endpoint, merge threshold, geometry
+// Tolerance) doesn't vary by city and stays here with the pipeline.
 
-// Ordered most-to-least prioritized — used to pick a single "highest"
-// Route type when a station is served by several.
-export const ROUTE_TYPE_PRIORITY = ['subway', 'tram', 'light_rail', 'train'] as const
+import { BERLIN, type RouteType } from '@freifahren/cities'
 
-export type RouteType = (typeof ROUTE_TYPE_PRIORITY)[number]
+const CITY = BERLIN
 
-// Route types listed here always get the configured color regardless of the
-// OSM relation tags (used to give all S-Bahn lines one shared green and all
-// Tram lines one shared red). Route types absent from this map fall back to
-// The OSM colour/color tag — best for subway lines with per-line branding.
-export const ROUTE_COLORS: Partial<Record<RouteType, string>> = {
-    tram: '#be1414', // Classic Berlin tram red (tram and metro tram M* lines).
-    light_rail: '#007734', // Berlin S-Bahn green (S2), applied to all S-Bahn lines.
-}
+export type { RouteType }
 
-// Fallback when neither a configured route color nor an OSM colour/color tag is
-// Available. Mirrors the DB default on `lines.color`.
-export const DEFAULT_LINE_COLOR = '#000000'
+export const ROUTE_TYPE_PRIORITY = CITY.seed.routeTypePriority
+export const ROUTE_COLORS: Partial<Record<RouteType, string>> = CITY.seed.colors
+export const DEFAULT_LINE_COLOR = CITY.seed.defaultLineColor
 
 // Resolves the canonical color for an OSM route relation: configured route-type
 // Color first, then the OSM colour/color tag, then the default. Color is a line
@@ -33,16 +26,9 @@ export const resolveLineColor = (tags: Record<string, string | undefined>): stri
 }
 
 export const SEED_CONFIG = {
-    city: 'Berlin', // The city you want to seed.
-    adminLevel: '^[4-6]$', // The admin level of the city. Usually 4-6 for a city boundary.
-
-    // OSM `operator` tag values whose route relations should be seeded.
-    // Filtering by operator keeps the query focused without coupling the
-    // Pipeline to a hand-maintained list of line refs that drifts whenever
-    // The network changes.
-    operators: ['Berliner Verkehrsbetriebe', 'S-Bahn Berlin GmbH'],
-
-    // OSM `route` tag values to include.
+    city: CITY.displayName,
+    adminLevel: CITY.seed.adminLevel,
+    operators: CITY.seed.operators,
     routeTypes: ROUTE_TYPE_PRIORITY,
 
     // The Overpass API configuration.
