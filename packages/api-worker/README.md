@@ -7,11 +7,12 @@ Copy [`.env.example`](./.env.example) to `.env` for local development; each vari
 ## Local development
 
 The API runs as a Cloudflare Worker backed by **D1** (SQLite). The worker uses the `DB` binding; the
-seed CLI, drizzle-kit, and tests run on **libsql** (a local SQLite file) via `DATABASE_URL`.
+seed CLI and drizzle-kit run on **libsql** (a local SQLite file) via `DATABASE_URL`. Tests run on the
+Workers runtime via Vitest (`@cloudflare/vitest-pool-workers`) against a real D1 binding.
 
 ```sh
 bun install
-bun test                                   # runs against a local libsql file (auto-created + seeded)
+bun run test                               # Vitest on the Workers runtime; migrates + seeds a test D1
 ```
 
 To serve the worker locally with data:

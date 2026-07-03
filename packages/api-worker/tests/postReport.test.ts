@@ -1,13 +1,13 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
-import { Hono } from 'hono'
+import { fetchMock } from 'cloudflare:test'
+import { and, desc, eq, sql } from 'drizzle-orm'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { Stations } from '../src/modules/transit/types'
 import { TransitNetworkDataService } from '../src/modules/transit/transit-network-data-service'
 import { db, lineStations, reports, stations } from './test-db'
-import { and, desc, eq, sql } from 'drizzle-orm'
-import { sendReportRequest } from './test-utils'
+import { resetTestEnv, sendReportRequest, setTestEnv } from './test-utils'
 
-let fakeNlpServer: ReturnType<typeof Bun.serve> | null = null
+const TELEGRAM_ORIGIN = 'https://telegram-worker.test'
 
 type CapturedRequest = {
     body: unknown
@@ -15,40 +15,36 @@ type CapturedRequest = {
 }
 
 const capturedRequests: CapturedRequest[] = []
+let shouldFail = false
+
+// The report handler forwards non-telegram reports to the telegram-worker via outbound fetch when
+// NODE_ENV=production. Intercept that fetch with the Workers runtime's fetchMock so no real network
+// is touched: capture the payload and let the suite toggle a 500 to exercise the failure path.
+beforeAll(() => {
+    setTestEnv({ NODE_ENV: 'production', TELEGRAM_WORKER_URL: TELEGRAM_ORIGIN, REPORT_PASSWORD: 'test-password' })
+    fetchMock.activate()
+    fetchMock.disableNetConnect()
+    fetchMock
+        .get(TELEGRAM_ORIGIN)
+        .intercept({ path: '/report', method: 'POST' })
+        .reply((opts) => {
+            const { headers } = opts
+            const password = headers instanceof Headers ? headers.get('X-Password') : (headers['x-password'] ?? null)
+            capturedRequests.push({ body: JSON.parse(String(opts.body)), password })
+            return shouldFail
+                ? { statusCode: 500, data: { status: 'error' } }
+                : { statusCode: 200, data: { status: 'success' } }
+        })
+        .persist()
+})
+
+afterAll(() => {
+    resetTestEnv()
+    fetchMock.enableNetConnect()
+    fetchMock.deactivate()
+})
 
 describe('Telegram notification', () => {
-    let shouldFail: boolean
-
-    beforeAll(async () => {
-        const fakeNlp = new Hono()
-
-        fakeNlp.post('/report', async (c) => {
-            const body = await c.req.json()
-            const password = c.req.header('X-Password') ?? null
-
-            capturedRequests.push({ body, password })
-
-            if (shouldFail) {
-                return c.json({ status: 'error' }, 500)
-            }
-
-            return c.json({ status: 'success' }, 200)
-        })
-
-        fakeNlpServer = Bun.serve({
-            port: 0,
-            fetch: fakeNlp.fetch,
-        })
-
-        process.env.TELEGRAM_WORKER_URL = `http://127.0.0.1:${fakeNlpServer.port}`
-        process.env.REPORT_PASSWORD = 'test-password'
-        process.env.NODE_ENV = 'production'
-    })
-
-    afterAll(() => {
-        fakeNlpServer?.stop()
-    })
-
     beforeEach(() => {
         capturedRequests.length = 0
         shouldFail = false
@@ -127,10 +123,6 @@ describe('Telegram notification', () => {
 })
 
 describe('Report API contract', () => {
-    beforeAll(async () => {
-        process.env.NODE_ENV = 'production'
-    })
-
     it('rejects reports without station, line, and direction', async () => {
         const response = await sendReportRequest({
             source: 'web_app',

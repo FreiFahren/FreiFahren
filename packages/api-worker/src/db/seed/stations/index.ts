@@ -1,9 +1,10 @@
-import { and, eq, notExists, notInArray, or, sql } from 'drizzle-orm'
+import { and, eq, inArray, notExists, or, sql } from 'drizzle-orm'
 
 import { logger } from '../../../common/logger'
 import type { DbConnection } from '../../index'
 import { reports } from '../../schema/reports'
 import { stations } from '../../schema/stations'
+import { chunkRowsForInsert, chunkValues } from '../batch'
 
 import { buildDataset } from './build-dataset'
 import { mergeProximate, type Coordinates } from './merge-proximate'
@@ -70,12 +71,14 @@ export const seedStationsFromElements = async (
         lng: entry.coordinates.longitude,
     }))
 
-    await db.transaction(async (tx) => {
-        // Upsert instead of TRUNCATE CASCADE so that reports referencing
-        // Existing stations survive a re-seed.
-        await tx
+    // Run as sequential, chunked statements rather than an interactive transaction: the seed is
+    // Idempotent and offline, and the D1 driver (used by the test runtime) has no BEGIN/COMMIT and
+    // A low bound-parameter ceiling. Upsert instead of TRUNCATE CASCADE so that reports referencing
+    // Existing stations survive a re-seed.
+    for (const batch of chunkRowsForInsert(records, 4)) {
+        await db
             .insert(stations)
-            .values(records)
+            .values(batch)
             .onConflictDoUpdate({
                 target: stations.id,
                 set: {
@@ -84,23 +87,28 @@ export const seedStationsFromElements = async (
                     lng: sql`excluded.lng`,
                 },
             })
+    }
 
-        // Drop stations no longer in the snapshot, but keep ones still
-        // Referenced by reports so we don't lose user data. Cascading FKs
-        // From segments and line_stations clean themselves up.
-        const newIds = records.map((r) => r.id)
-        await tx.delete(stations).where(
+    // Drop stations no longer in the snapshot, but keep ones still referenced by reports so we
+    // Don't lose user data. Cascading FKs from segments and line_stations clean themselves up.
+    // Obsolete ids are computed in memory so the delete only binds the (usually tiny) removal set,
+    // Rather than every current station id via notInArray.
+    const newIds = new Set(records.map((r) => r.id))
+    const existingIds = await db.select({ id: stations.id }).from(stations)
+    const obsoleteIds = existingIds.map((row) => row.id).filter((id) => !newIds.has(id))
+    for (const batch of chunkValues(obsoleteIds)) {
+        await db.delete(stations).where(
             and(
-                notInArray(stations.id, newIds),
+                inArray(stations.id, batch),
                 notExists(
-                    tx
+                    db
                         .select({ ref: sql`1` })
                         .from(reports)
                         .where(or(eq(reports.stationId, stations.id), eq(reports.directionId, stations.id)))
                 )
             )
         )
-    })
+    }
     logger.info(`[seed:stations] Upserted ${records.length} stations`)
 
     const nodeIdToStationId = new Map<number, string>()

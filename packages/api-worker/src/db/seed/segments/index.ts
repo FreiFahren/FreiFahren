@@ -3,6 +3,7 @@ import { inArray, sql } from 'drizzle-orm'
 import { logger } from '../../../common/logger'
 import type { DbConnection } from '../../index'
 import { segments } from '../../schema/segments'
+import { chunkRowsForInsert, chunkValues } from '../batch'
 import { SEED_CONFIG } from '../config'
 import type { LineVariant } from '../lines/build-variants'
 import type { Coordinates } from '../stations/merge-proximate'
@@ -467,14 +468,16 @@ export const seedSegmentsFromGeometry = async (
         throw new Error('Segment seed produced zero segments — aborting')
     }
 
-    await db.transaction(async (tx) => {
-        // Upsert keyed on the natural (lineId, fromStationId, toStationId) tuple
-        // So existing segment ids stay stable across re-seeds. The serial 'id'
-        // Column is what the risk model and the frontend's localStorage cache
-        // Refer to, so churning ids on every seed would invalidate both.
-        await tx
+    // Sequential, chunked statements rather than an interactive transaction: the seed is
+    // Idempotent and offline, and the D1 driver (used by the test runtime) has no BEGIN/COMMIT and
+    // A low bound-parameter ceiling. Upsert keyed on the natural (lineId, fromStationId,
+    // ToStationId) tuple so existing segment ids stay stable across re-seeds. The serial 'id'
+    // Column is what the risk model and the frontend's localStorage cache refer to, so churning
+    // Ids on every seed would invalidate both.
+    for (const batch of chunkRowsForInsert(simplifiedRecords, 6)) {
+        await db
             .insert(segments)
-            .values(simplifiedRecords)
+            .values(batch)
             .onConflictDoUpdate({
                 target: [segments.lineId, segments.fromStationId, segments.toStationId],
                 set: {
@@ -483,24 +486,24 @@ export const seedSegmentsFromGeometry = async (
                     coordinates: sql`excluded.coordinates`,
                 },
             })
+    }
 
-        // Prune segments that no longer exist in the snapshot.
-        const newKeys = new Set(simplifiedRecords.map((r) => `${r.lineId}|${r.fromStationId}|${r.toStationId}`))
-        const existing = await tx
-            .select({
-                id: segments.id,
-                lineId: segments.lineId,
-                fromStationId: segments.fromStationId,
-                toStationId: segments.toStationId,
-            })
-            .from(segments)
-        const obsoleteIds = existing
-            .filter((row) => !newKeys.has(`${row.lineId}|${row.fromStationId}|${row.toStationId}`))
-            .map((row) => row.id)
-        if (obsoleteIds.length > 0) {
-            await tx.delete(segments).where(inArray(segments.id, obsoleteIds))
-        }
-    })
+    // Prune segments that no longer exist in the snapshot.
+    const newKeys = new Set(simplifiedRecords.map((r) => `${r.lineId}|${r.fromStationId}|${r.toStationId}`))
+    const existing = await db
+        .select({
+            id: segments.id,
+            lineId: segments.lineId,
+            fromStationId: segments.fromStationId,
+            toStationId: segments.toStationId,
+        })
+        .from(segments)
+    const obsoleteIds = existing
+        .filter((row) => !newKeys.has(`${row.lineId}|${row.fromStationId}|${row.toStationId}`))
+        .map((row) => row.id)
+    for (const batch of chunkValues(obsoleteIds)) {
+        await db.delete(segments).where(inArray(segments.id, batch))
+    }
 
     logger.info(
         `[seed:segments] Upserted ${simplifiedRecords.length} segments ` +

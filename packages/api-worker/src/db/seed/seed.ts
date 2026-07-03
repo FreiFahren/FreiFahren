@@ -13,15 +13,24 @@ import { seedStationsFromElements } from './stations'
 import { haversine, stationNamesMatch } from './stations/merge-proximate'
 import type { OsmElement, OsmRelation } from './stations/overpass'
 
-type OsmSnapshotKind = 'stations' | 'route_geometries'
+export type OsmSnapshotKind = 'stations' | 'route_geometries'
+
+// Loads a bundled OSM snapshot. Injected rather than importing `Bun.file` (or a fixed
+// `fs` path) directly so the same seed runs under the Bun CLI (fs loader) and inside the
+// Workers test runtime (bundled-import loader) — neither runtime shares the other's file API.
+export type SnapshotLoader = <T>(kind: OsmSnapshotKind) => Promise<T>
+
+let snapshotLoader: SnapshotLoader | null = null
+
+export const setSnapshotLoader = (loader: SnapshotLoader) => {
+    snapshotLoader = loader
+}
 
 const loadSnapshot = async <T>(kind: OsmSnapshotKind): Promise<T> => {
-    const file = Bun.file(new URL(`./snapshots/${kind}.json`, import.meta.url))
-    if (!(await file.exists())) {
-        throw new Error(`[seed] Bundled '${kind}' snapshot is missing. Run \`bun db:seed:refresh\` to populate it.`)
+    if (snapshotLoader === null) {
+        throw new Error('[seed] No snapshot loader registered — call setSnapshotLoader() before seedBaseData()')
     }
-
-    return (await file.json()) as T
+    return snapshotLoader<T>(kind)
 }
 
 const extractRouteRelations = (elements: OsmElement[]): OsmRelation[] => {

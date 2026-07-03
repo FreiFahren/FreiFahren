@@ -1,9 +1,10 @@
-import { and, eq, inArray, notExists, notInArray, sql } from 'drizzle-orm'
+import { and, eq, inArray, notExists, sql } from 'drizzle-orm'
 
 import { logger } from '../../../common/logger'
 import type { DbConnection } from '../../index'
 import { lines, lineStations } from '../../schema/lines'
 import { reports } from '../../schema/reports'
+import { chunkRowsForInsert, chunkValues } from '../batch'
 import type { OsmRelation } from '../stations/overpass'
 
 import { buildLineVariants, type LineVariant } from './build-variants'
@@ -35,11 +36,14 @@ export const seedLinesFromRelations = async (
         }))
     )
 
-    await db.transaction(async (tx) => {
-        // Upsert instead of TRUNCATE CASCADE so reports referencing existing lines survive a re-seed.
-        await tx
+    // Sequential, chunked statements rather than an interactive transaction: the seed is
+    // Idempotent and offline, and the D1 driver (used by the test runtime) has no BEGIN/COMMIT and
+    // A low bound-parameter ceiling. Upsert instead of TRUNCATE CASCADE so reports referencing
+    // Existing lines survive a re-seed.
+    for (const batch of chunkRowsForInsert(lineRecords, 5)) {
+        await db
             .insert(lines)
-            .values(lineRecords)
+            .values(batch)
             .onConflictDoUpdate({
                 target: lines.id,
                 set: {
@@ -49,26 +53,36 @@ export const seedLinesFromRelations = async (
                     color: sql`excluded.color`,
                 },
             })
+    }
 
-        // The line_stations join table is referenced by nothing else, so it is safe to wipe and rebuild for the lines we are re-seeding.
-        const newLineIds = lineRecords.map((l) => l.id)
-        await tx.delete(lineStations).where(inArray(lineStations.lineId, newLineIds))
-        await tx.insert(lineStations).values(lineStationRecords)
+    // The line_stations join table is referenced by nothing else, so it is safe to wipe and rebuild for the lines we are re-seeding.
+    const newLineIds = lineRecords.map((l) => l.id)
+    for (const batch of chunkValues(newLineIds)) {
+        await db.delete(lineStations).where(inArray(lineStations.lineId, batch))
+    }
+    for (const batch of chunkRowsForInsert(lineStationRecords, 3)) {
+        await db.insert(lineStations).values(batch)
+    }
 
-        // Drop lines no longer in the snapshot, but keep ones still referenced by reports.
-        // Cascading FKs from segments and line_stations clean themselves up.
-        await tx.delete(lines).where(
+    // Drop lines no longer in the snapshot, but keep ones still referenced by reports.
+    // Cascading FKs from segments and line_stations clean themselves up. Obsolete ids are computed
+    // In memory so the delete binds only the removal set, not every current line id.
+    const newLineIdSet = new Set(newLineIds)
+    const existingLineIds = await db.select({ id: lines.id }).from(lines)
+    const obsoleteLineIds = existingLineIds.map((row) => row.id).filter((id) => !newLineIdSet.has(id))
+    for (const batch of chunkValues(obsoleteLineIds)) {
+        await db.delete(lines).where(
             and(
-                notInArray(lines.id, newLineIds),
+                inArray(lines.id, batch),
                 notExists(
-                    tx
+                    db
                         .select({ ref: sql`1` })
                         .from(reports)
                         .where(eq(reports.lineId, lines.id))
                 )
             )
         )
-    })
+    }
 
     logger.info(
         `[seed:lines] Inserted ${lineRecords.length} line variants, ${lineStationRecords.length} line_stations rows`

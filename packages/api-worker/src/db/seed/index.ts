@@ -3,7 +3,8 @@ import { migrate } from 'drizzle-orm/libsql/migrator'
 import { logger } from '../../common/logger'
 import { createNodeDbHandle } from '../node'
 
-import { seedBaseData } from './seed'
+import { seedBaseData, setSnapshotLoader } from './seed'
+import { fsSnapshotLoader } from './snapshots'
 
 // Seeds the read-only reference tables from the bundled OSM snapshots into a local libsql file.
 // Report-preserving (upsert + orphan-remap), so it is safe to run on every deploy. The resulting
@@ -17,6 +18,7 @@ const seed = async () => {
 
     await client.execute('PRAGMA foreign_keys = ON')
     await migrate(db, { migrationsFolder: './drizzle' })
+    setSnapshotLoader(fsSnapshotLoader)
     await seedBaseData(db)
 
     logger.info('Seed completed successfully!')

@@ -7,8 +7,9 @@ Guidance for AI agents (and humans) contributing to FreiFahren.
 Prefer **integration tests** over unit tests. Drive behavior through the public API surface so tests cover routing, validation, and persistence together.
 
 - **No manual DB inserts in tests.** To set up state, send a request to the API (e.g. `POST /reports`) instead of writing to the database directly. This keeps tests realistic and avoids coupling them to schema details.
-- **Mock time, don't backdate rows.** When a test needs "old" data, use `setSystemTime` from `bun:test` to move the clock, send the request, then move the clock forward — instead of inserting rows with old timestamps.
+- **Mock time, don't backdate rows.** When a test needs "old" data, use `setSystemTime` (from `packages/api-worker/tests/test-utils.ts`, backed by Vitest fake timers) to move the clock, send the request, then move the clock forward — instead of inserting rows with old timestamps.
 - **Use `appRequestWithRedirect`** (from `packages/api-worker/tests/test-utils.ts`) instead of `app.request` directly. It follows the version redirect so tests automatically exercise the latest API version without hard-coding `/v0/...` paths.
+- **`api-worker` tests run on the Workers runtime** via Vitest with `@cloudflare/vitest-pool-workers` (not `bun test`), against a real D1 binding. `tests/setup.ts` applies the migrations and seeds the reference tables once; import the shared drizzle handle from `tests/test-db.ts`. Keep Bun for non-test scripts (seed CLIs, drizzle-kit).
 - **Don't assert on exact error message strings.** Assert on status codes and structured error fields (codes, types). Exact wording is presentational and will churn.
 
 ## Migrations
