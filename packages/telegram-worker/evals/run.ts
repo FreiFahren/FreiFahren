@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { profileFor, type CityProfile } from '../src/config'
 import { getTransitIndex } from '../src/transit'
 import {
     buildLinePattern,
@@ -38,10 +39,6 @@ interface RowOutcome {
 
 const fullyCorrect = (o: RowOutcome): boolean => o.correctStation && o.correctDirection && o.correctLine
 
-// ---------------------------------------------------------------------------
-// Line scoring (port of expected_line_tokens / line_correct)
-// ---------------------------------------------------------------------------
-
 const LINE_TOKEN_RE = /^([A-Za-z]+)(\d+)$/
 
 /**
@@ -77,10 +74,6 @@ function lineCorrect(expected: string | null, actual: string | null): boolean {
     }
     return actual !== null && tokens.has(actual)
 }
-
-// ---------------------------------------------------------------------------
-// Metrics (port of field_metrics) — null treated as a negative prediction.
-// ---------------------------------------------------------------------------
 
 interface FieldMetrics {
     accuracy: number
@@ -129,10 +122,6 @@ function fieldMetrics(
     const f1 = precision + recall ? (2 * precision * recall) / (precision + recall) : 0
     return { accuracy: total ? correct / total : 0, correct, total, tp, fp, fn, tn, precision, recall, f1 }
 }
-
-// ---------------------------------------------------------------------------
-// Report (port of build_report)
-// ---------------------------------------------------------------------------
 
 const pct = (x: number): string => `${(x * 100).toFixed(1)}%`
 
@@ -195,10 +184,6 @@ function buildReport(opts: {
     )
     return lines.join('\n') + '\n'
 }
-
-// ---------------------------------------------------------------------------
-// Runtime plumbing
-// ---------------------------------------------------------------------------
 
 /** Load .dev.vars (KEY=VALUE, # comments) into process.env without overriding what's set. */
 function loadDevVars(): void {
@@ -274,7 +259,7 @@ async function extractWithRetry(
     systemPrompt: string,
     apiKey: string,
     model: string,
-    attempts = 7,
+    attempts = 7
 ): Promise<Awaited<ReturnType<typeof extractWithMistral>>> {
     let last: unknown
     for (let i = 0; i < attempts; i++) {
@@ -298,14 +283,15 @@ async function runOne(
     linePattern: RegExp,
     systemPrompt: string,
     apiKey: string,
-    model: string
+    model: string,
+    profile: CityProfile
 ): Promise<RowOutcome> {
     let result: ExtractionResult = NULL_RESULT
     let error: string | null = null
     try {
-        const detectedLine = detectLineName(row.text, index.lineNames, linePattern, index.circularLineNames)
+        const detectedLine = detectLineName(row.text, index.lineNames, linePattern, index.circularLineNames, profile)
         const parsed = await extractWithRetry(row.text, systemPrompt, apiKey, model)
-        result = parsed === null ? NULL_RESULT : resolveExtraction(index, parsed, detectedLine)
+        result = parsed === null ? NULL_RESULT : resolveExtraction(index, parsed, detectedLine, profile)
     } catch (exc) {
         error = exc instanceof Error ? `${exc.name}: ${exc.message}` : String(exc)
     }
@@ -362,14 +348,15 @@ async function main(): Promise<void> {
     const datasetSize = dataset.length
     const rows = args.smoke ? sample(dataset, args.n, args.seed) : dataset
 
-    const index = await getTransitIndex(backendUrl)
+    const profile = profileFor(cityName)
+    const index = await getTransitIndex(backendUrl, profile)
     const linePattern = buildLinePattern(index.lineNames)
-    const systemPrompt = buildSystemPrompt(index, cityName)
+    const systemPrompt = buildSystemPrompt(index, profile)
 
     console.log(`running ${rows.length} rows with parallel=${args.parallel} model=${model}...`)
     const start = performance.now()
     const outcomes = await mapPool(rows, args.parallel, (row) =>
-        runOne(row, index, linePattern, systemPrompt, apiKey, model)
+        runOne(row, index, linePattern, systemPrompt, apiKey, model, profile)
     )
     const durationS = (performance.now() - start) / 1000
 

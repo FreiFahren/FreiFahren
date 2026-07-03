@@ -9,7 +9,10 @@
     "skipLibCheck": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "verbatimModuleSyntax": false
+    "verbatimModuleSyntax": false,
+    "paths": {
+      "@freifahren/cities": ["../cities/src/index.ts"]
+    }
   },
   "include": ["src", "test"]
 }

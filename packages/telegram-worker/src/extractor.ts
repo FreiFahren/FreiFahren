@@ -1,4 +1,4 @@
-import * as config from './config'
+import type { CityProfile } from './config'
 import { StationNameExtraction, type TransitIndex } from './types'
 import { stationLineNames } from './transit'
 
@@ -20,17 +20,17 @@ export function extractionToLog(result: ExtractionResult): string {
     })
 }
 
-function translateLetters(s: string): string {
-    return s.replace(/[äöüßÄÖÜ]/g, (c) => config.LANGUAGE_LETTER_MAP[c] ?? c)
+function translateLetters(s: string, letterMap: Record<string, string>): string {
+    return s.replace(/[äöüßÄÖÜ]/g, (c) => letterMap[c] ?? c)
 }
 
-export function normalizeName(name: string): string {
+export function normalizeName(name: string, profile: CityProfile): string {
     let n = name.trim().toLowerCase()
-    n = n.replace(config.STATION_NAME_PREFIX_PATTERN, '')
-    n = translateLetters(n)
+    n = n.replace(profile.stationNamePrefixPattern, '')
+    n = translateLetters(n, profile.letterMap)
     // Strip any diacritics that survived the letter map.
     n = n.normalize('NFKD').replace(/\p{M}/gu, '')
-    for (const [pattern, repl] of config.LANGUAGE_ABBREVIATIONS) {
+    for (const [pattern, repl] of profile.abbreviations) {
         n = n.replace(pattern, repl)
     }
     n = n.replace(/[^a-z0-9]+/g, '')
@@ -145,9 +145,10 @@ function candidates(
     index: TransitIndex,
     query: string,
     lineName: string | null,
+    profile: CityProfile,
     minScore = 0.6,
 ): [string, number][] {
-    const full = normalizeName(query)
+    const full = normalizeName(query, profile)
     if (!full) {
         return []
     }
@@ -168,7 +169,7 @@ function candidates(
         const wordQueries = query
             .split(/[\s\-/,]+/)
             .filter((p) => p.trim() && p.trim().length > 4)
-            .map((p) => normalizeName(p))
+            .map((p) => normalizeName(p, profile))
             .filter((w) => w && w !== full)
         for (const candNorm of Object.keys(index.byNorm)) {
             for (const w of wordQueries) {
@@ -210,20 +211,21 @@ export function pickStation(
     index: TransitIndex,
     query: string | null,
     lineName: string | null,
+    profile: CityProfile,
     allowOffLine = true,
 ): [string, boolean] | null {
     if (!query) {
         return null
     }
-    if (config.GENERIC_NON_STATION_WORDS.has(normalizeName(query))) {
+    if (profile.genericNonStationWords.has(normalizeName(query, profile))) {
         return null
     }
-    const onLine = lineName !== null ? candidates(index, query, lineName) : []
+    const onLine = lineName !== null ? candidates(index, query, lineName, profile) : []
     let offLine: [string, number][] = []
     if (allowOffLine && (onLine.length === 0 || (lineName !== null && onLine[0][1] < 0.92))) {
         // Only compare against an unfiltered search when the line-filtered match isn't
         // already near-exact, else we'd risk swapping in a slightly higher off-line station.
-        offLine = candidates(index, query, null)
+        offLine = candidates(index, query, null, profile)
     }
 
     if (onLine.length === 0 && offLine.length === 0) {
@@ -250,11 +252,12 @@ export function pickDirection(
     index: TransitIndex,
     query: string | null,
     lineName: string | null,
+    profile: CityProfile,
 ): string | null {
     if (!query) {
         return null
     }
-    const picked = pickStation(index, query, lineName, lineName === null)
+    const picked = pickStation(index, query, lineName, profile, lineName === null)
     return picked !== null ? picked[0] : null
 }
 
@@ -266,8 +269,9 @@ export function resolveExtraction(
     index: TransitIndex,
     parsed: StationNameExtraction,
     detectedLine: string | null,
+    profile: CityProfile,
 ): ExtractionResult {
-    const picked = pickStation(index, parsed.stationName, detectedLine)
+    const picked = pickStation(index, parsed.stationName, detectedLine, profile)
     const stationId = picked !== null ? picked[0] : null
     const stationOnLine = picked !== null ? picked[1] : false
 
@@ -279,15 +283,11 @@ export function resolveExtraction(
     return {
         stationId,
         lineName,
-        directionId: pickDirection(index, parsed.directionName, lineName),
+        directionId: pickDirection(index, parsed.directionName, lineName, profile),
     }
 }
 
 const escapeRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-
-const CIRCULAR_LINE_REGEX = config.CIRCULAR_LINE_PATTERN
-    ? new RegExp(config.CIRCULAR_LINE_PATTERN, 'i')
-    : null
 
 export function buildLinePattern(lineNames: string[]): RegExp {
     const alternatives: string[] = []
@@ -308,7 +308,8 @@ export function detectLineName(
     message: string,
     lineNames: string[],
     linePattern: RegExp,
-    circularLineNames: string[] = [],
+    circularLineNames: string[],
+    profile: CityProfile,
 ): string | null {
     const normalizedLines = new Map<string, string>()
     for (const lineName of lineNames) {
@@ -321,18 +322,22 @@ export function detectLineName(
             return hit
         }
     }
-    if (circularLineNames.length > 0 && CIRCULAR_LINE_REGEX !== null && CIRCULAR_LINE_REGEX.test(message)) {
+    if (
+        circularLineNames.length > 0 &&
+        profile.circularLineRegex !== null &&
+        profile.circularLineRegex.test(message)
+    ) {
         return circularLineNames[0]
     }
     return null
 }
 
-export function buildSystemPrompt(index: TransitIndex, cityName: string): string {
+export function buildSystemPrompt(index: TransitIndex, profile: CityProfile): string {
     const tracked = [...index.lineNames].sort().join(', ')
-    const examples = config.PROMPT_EXAMPLES.trim()
+    const examples = profile.promptExamples.trim()
     return (
-        `This is a ${cityName} public-transit chat where users report ticket-inspector ` +
-        `sightings (${config.INSPECTOR_KEYWORDS}, etc.). Almost every message is a sighting report.\n` +
+        `This is a ${profile.displayName} public-transit chat where users report ticket-inspector ` +
+        `sightings (${profile.inspectorKeywords}, etc.). Almost every message is a sighting report.\n` +
         '\n' +
         'Respond with ONLY a JSON object — no prose, no markdown — exactly matching this shape:\n' +
         '{"stationName": <string or null>, "directionName": <string or null>}\n' +
