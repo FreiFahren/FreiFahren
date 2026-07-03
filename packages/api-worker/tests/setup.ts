@@ -2,13 +2,16 @@ import { applyD1Migrations, env } from 'cloudflare:test'
 
 import { createD1Db, stations } from '../src/db'
 import { seedBaseData, setSnapshotLoader, type OsmSnapshotKind } from '../src/db/seed/seed'
-import routeGeometriesSnapshot from '../src/db/seed/snapshots/route_geometries.json'
-import stationsSnapshot from '../src/db/seed/snapshots/stations.json'
 
-// Bundled-import snapshot loader for the Workers runtime (no filesystem). The Bun seed CLI
-// injects an fs-based loader instead; both feed the same seedBaseData pipeline.
+// Bundled-import snapshot loader for the Workers runtime (no filesystem). The Bun seed CLI injects
+// an fs-based loader instead; both feed the same seedBaseData pipeline. The snapshots are imported
+// lazily (dynamic import) so setup files that skip the guarded seed below never pay the cost of
+// parsing the ~21MB geometry snapshot.
 setSnapshotLoader(async <T>(kind: OsmSnapshotKind): Promise<T> => {
-    const snapshot = kind === 'stations' ? stationsSnapshot : routeGeometriesSnapshot
+    const snapshot =
+        kind === 'stations'
+            ? (await import('../src/db/seed/snapshots/stations.json')).default
+            : (await import('../src/db/seed/snapshots/route_geometries.json')).default
     return snapshot as unknown as T
 })
 
