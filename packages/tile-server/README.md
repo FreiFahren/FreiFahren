@@ -5,11 +5,14 @@ server: an OSM extract is turned into a single `.pmtiles` archive per city, uplo
 `freifahren-tiles` R2 bucket behind `tiles.freifahren.org`, and read directly by the browser via HTTP
 range requests (MapLibre's `pmtiles://` protocol).
 
-Which cities get built is driven by [`cities.json`](./cities.json).
+Which cities get built is a projection of the shared [`@freifahren/cities`](../cities) registry: every
+city in it (each carries a `tiles` block with its Geofabrik `osmUrl`). There is no hand-maintained list.
 
 ## Layout
 
-- `cities.json` — the cities to build (`name` + Geofabrik `osmUrl`).
+- `packages/cities` — the registry; a city's `tiles` block is what makes it buildable here.
+- `tilemaker/config-freifahren.json` — city-agnostic layer/settings tuning. Per-city identity (name,
+  description, schema, `default_view`) is injected by `generate.ts` from the registry.
 - `tilemaker/` — Tilemaker config + Lua that map OSM into the basemap layers (city-agnostic).
 - `source/freifahren-style.json` — the source MapLibre style (the only committed `source/` file).
 - `scripts/generate.ts` — download extract → tilemaker → `dist/<city>.pmtiles` + `dist/styles/<city>.json`.
@@ -26,7 +29,7 @@ Which cities get built is driven by [`cities.json`](./cities.json).
 
 ```sh
 cd packages/tile-server
-bun run generate     # all cities in cities.json → dist/  (CITY=berlin builds just one)
+bun run generate     # all buildable cities in the registry → dist/  (CITY=berlin builds just one)
 bun run serve        # serve dist/ with range + CORS on http://localhost:3000
 ```
 
@@ -56,19 +59,21 @@ The deploy job is gated on the `TILES_BASE_URL` repo variable (the R2 custom dom
 
 ## Adding a city
 
-1. Add an entry to `cities.json` (`name` is the slug used in URLs/filenames; `osmUrl` is its Geofabrik
-   extract):
+1. Add a `tiles` block to the city's entry in `packages/cities` (`slug` is used in URLs/filenames;
+   `osmUrl` is its Geofabrik extract):
 
-   ```json
-   { "name": "munich", "osmUrl": "https://download.geofabrik.de/europe/germany/bayern/oberbayern-latest.osm.pbf" }
+   ```ts
+   tiles: {
+       osmUrl: 'https://download.geofabrik.de/europe/germany/bayern/oberbayern-latest.osm.pbf',
+   },
    ```
 
-2. Push. The deploy builds and uploads `v<sha>/munich.pmtiles` + `styles/munich.json` alongside the
+2. Push. The deploy builds and uploads `v<sha>/<slug>.pmtiles` + `styles/<slug>.json` alongside the
    existing cities — additive, so other cities' URLs are untouched.
 
-3. Point the relevant frontend deployment at `https://tiles.freifahren.org/styles/munich.json` and set
-   its map center/zoom. (The Tilemaker config is city-agnostic; only its embedded `default_view`/name
-   metadata is Berlin-flavoured and unused by the frontend.)
+3. Point the relevant frontend deployment at `https://tiles.freifahren.org/styles/<slug>.json`. (The
+   Tilemaker config is city-agnostic; `generate.ts` injects the per-city name/description/schema from
+   the registry, and the archive's `default_view` from the city's `map` center + zoom.)
 
 See `docs/adr/0004-static-pmtiles-basemap-on-cloudflare-r2.md` for why this is static-on-R2 rather
 than a tile server.

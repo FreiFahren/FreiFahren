@@ -83,6 +83,16 @@ export interface CityCommunity {
     instagram: string
 }
 
+/**
+ * Basemap tile-build inputs for a city. Consumed by the tile-server pipeline
+ * (packages/tile-server). The archive's suggested view is derived from `map`
+ * (center + zoom), so there is no separate view to keep in sync here.
+ */
+export interface CityTiles {
+    /** Geofabrik OSM extract the basemap is built from. */
+    osmUrl: string
+}
+
 /** Map defaults for the city's basemap. */
 export interface CityMap {
     /** Initial map center. */
@@ -118,6 +128,8 @@ export interface CityConfig {
     /** BCP-47 language tag for the city's primary language. */
     lang: string
     map: CityMap
+    /** Basemap tile-build inputs. Every city ships with a basemap. */
+    tiles: CityTiles
     seed: CitySeedConfig
     telegram: CityTelegramProfile
     community: CityCommunity
