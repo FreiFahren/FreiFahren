@@ -1,8 +1,0 @@
-{
-  "cities": [
-    {
-      "name": "berlin",
-      "osmUrl": "https://download.geofabrik.de/europe/germany/berlin-latest.osm.pbf"
-    }
-  ]
-}

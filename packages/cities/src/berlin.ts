@@ -63,6 +63,9 @@ export const BERLIN: CityConfig = {
         bounds: [13.088, 52.338, 13.761, 52.675],
         styleUrl: 'https://tiles.freifahren.org/styles/berlin.json',
     },
+    tiles: {
+        osmUrl: 'https://download.geofabrik.de/europe/germany/berlin-latest.osm.pbf',
+    },
     seed: {
         adminLevel: '^[4-6]$',
         operators: ['Berliner Verkehrsbetriebe', 'S-Bahn Berlin GmbH'],
