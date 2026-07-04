@@ -3,9 +3,25 @@
 // Pipeline-global tuning below (Overpass endpoint, merge threshold, geometry
 // Tolerance) doesn't vary by city and stays here with the pipeline.
 
-import { BERLIN, type RouteType } from '@freifahren/cities'
+import { getCity, type CityConfig, type RouteType } from '@freifahren/cities'
 
-const CITY = BERLIN
+// The seed pipeline runs as a single-city process. The city is selected via the
+// SEED_CITY env var (the seed entry points set it from their `--city` flag),
+// Defaulting to Berlin, and resolved once here so every transform reads the
+// Constants below for that one city. In the Worker bundle SEED_CITY is unset, so
+// This resolves to Berlin — unchanged from before.
+const SEED_CITY_SLUG = process.env.SEED_CITY ?? 'berlin'
+
+const CITY: CityConfig = (() => {
+    const city = getCity(SEED_CITY_SLUG)
+    if (!city) {
+        throw new Error(`Unknown SEED_CITY="${SEED_CITY_SLUG}" — not in the @freifahren/cities registry`)
+    }
+    return city
+})()
+
+/** Slug of the city this seed run targets — used to namespace snapshots per city. */
+export const SEED_CITY = CITY.slug
 
 export type { RouteType }
 
