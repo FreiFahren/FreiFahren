@@ -137,9 +137,9 @@ jobs:
                   CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
               run: bun run seed --city "$SEED_CITY_INPUT" --remote
 
-            # NOTE: purges the single global transit-network tag; per-city cache tags are FRE-709.
+            # Purge only this city's transit Cache-Tag, so reseeding one city leaves the others' caches intact.
             - name: Purge transit edge cache
               env:
                   CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
                   CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-              run: bun run db:purge-cache
+              run: bun run db:purge-cache --city "$SEED_CITY_INPUT"

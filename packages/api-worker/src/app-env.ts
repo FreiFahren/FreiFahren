@@ -146,7 +146,7 @@ const applyServices = (c: Context<Env>, db: DbConnection, config: AppConfig) => 
         cacheCtx = undefined
     }
 
-    const transitNetworkDataService = new TransitNetworkDataService(db, cacheCtx)
+    const transitNetworkDataService = new TransitNetworkDataService(db, c.get('city').slug, cacheCtx)
     const reportsService = new ReportsService(db, transitNetworkDataService, {
         nodeEnv: config.nodeEnv,
         telegramWorkerUrl: config.telegramWorkerUrl,

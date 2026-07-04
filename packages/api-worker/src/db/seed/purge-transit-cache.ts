@@ -1,9 +1,12 @@
 import { logger } from '../../common/logger'
-import { TRANSIT_CACHE_TAG } from '../../modules/transit/transit-cache-middleware'
+import { transitCacheTag } from '../../modules/transit/transit-cache-middleware'
 
-export const purgeTransitCache = async () => {
+// Purge only the given city's transit Cache-Tag, so reseeding one city never
+// Invalidates another city's cached transit responses.
+export const purgeTransitCache = async (citySlug: string) => {
     const zoneId = Bun.env.CLOUDFLARE_ZONE_ID
     const apiToken = Bun.env.CLOUDFLARE_API_TOKEN
+    const tag = transitCacheTag(citySlug)
 
     if (zoneId === undefined || zoneId === '' || apiToken === undefined || apiToken === '') {
         logger.info('Skipping Cloudflare transit cache purge (CLOUDFLARE_ZONE_ID or CLOUDFLARE_API_TOKEN not set)')
@@ -17,7 +20,7 @@ export const purgeTransitCache = async () => {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            tags: [TRANSIT_CACHE_TAG],
+            tags: [tag],
         }),
     })
 
@@ -29,5 +32,5 @@ export const purgeTransitCache = async () => {
         throw new Error(`Cloudflare transit cache purge failed (status ${response.status}): ${body}`)
     }
 
-    logger.info({ tag: TRANSIT_CACHE_TAG }, 'Cloudflare transit cache purged')
+    logger.info({ tag }, 'Cloudflare transit cache purged')
 }

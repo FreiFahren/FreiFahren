@@ -11,7 +11,21 @@ export const VERSIONED_TRANSIT_CACHEABLE_PATHS = [
     '/:version{v\\d+}/transit/segments',
 ] as const
 
-export const TRANSIT_CACHE_TAG = 'transit-network'
+export const TRANSIT_CACHE_TAG_PREFIX = 'transit-network'
+
+// Per-city Cache-Tag. Purging one city's tag (on its reseed) leaves every other
+// City's cached entries intact — the single global tag would purge all cities.
+export const transitCacheTag = (citySlug: string): string => `${TRANSIT_CACHE_TAG_PREFIX}-${citySlug}`
+
+// Canonical edge cache key: force the resolved `?city=` onto the URL and sort the
+// Params, so the default (no param) and an explicit `?city=berlin` collapse to one
+// Entry while different cities get distinct entries. The city is always in the key.
+export const cityCacheKey = (requestUrl: string, citySlug: string): Request => {
+    const url = new URL(requestUrl)
+    url.searchParams.set('city', citySlug)
+    url.searchParams.sort()
+    return new Request(url.toString(), { method: 'GET' })
+}
 /*
  * Split TTL: the edge (a shared cache, including the Workers Cache API entry
  * below) keeps the response for 30 days via s-maxage, but browsers get
@@ -35,7 +49,7 @@ export const transitCacheMiddleware: MiddlewareHandler<Env> = async (c, next) =>
     }
 
     c.header('Cache-Control', TRANSIT_CACHE_CONTROL)
-    c.header('Cache-Tag', TRANSIT_CACHE_TAG)
+    c.header('Cache-Tag', transitCacheTag(c.get('city').slug))
 }
 
 // Stripped before storing so one entry serves every origin; cors() re-adds them per request.
@@ -77,7 +91,7 @@ export const transitEdgeCacheMiddleware: MiddlewareHandler<Env> = async (c, next
         return
     }
 
-    const cacheKey = new Request(c.req.url, { method: 'GET' })
+    const cacheKey = cityCacheKey(c.req.url, c.get('city').slug)
     const cached = await cache.match(cacheKey)
 
     if (cached !== undefined) {

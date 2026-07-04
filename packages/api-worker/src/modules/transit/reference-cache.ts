@@ -1,5 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
-import { TRANSIT_CACHE_CONTROL, TRANSIT_CACHE_TAG } from './transit-cache-middleware'
+import { TRANSIT_CACHE_CONTROL, transitCacheTag } from './transit-cache-middleware'
 
 // The global CacheStorage type (DOM lib) lacks the Cloudflare-specific `default` cache.
 interface EdgeCache {
@@ -10,6 +10,9 @@ interface EdgeCache {
 // Synthetic origin for internal cache keys — never routed, just a stable key namespace
 // That cannot collide with real request URLs stored by transitEdgeCacheMiddleware.
 const INTERNAL_ORIGIN = 'https://transit-reference.internal'
+
+// City-scoped internal cache key, so one city's reference data never serves another's.
+export const referenceCacheKey = (citySlug: string, key: string): string => `${INTERNAL_ORIGIN}/${citySlug}/${key}`
 
 export type CacheCtx = { waitUntil(promise: Promise<unknown>): void } | undefined
 
@@ -23,13 +26,18 @@ export type CacheCtx = { waitUntil(promise: Promise<unknown>): void } | undefine
  * Falls through to the loader (a direct D1 read) whenever the Cache API is absent —
  * i.e. under Bun (tests) and the Node seed CLI — so those paths are unchanged.
  */
-export const cachedReference = async <T>(key: string, loader: () => Promise<T>, ctx: CacheCtx): Promise<T> => {
+export const cachedReference = async <T>(
+    citySlug: string,
+    key: string,
+    loader: () => Promise<T>,
+    ctx: CacheCtx
+): Promise<T> => {
     const cache = typeof caches !== 'undefined' ? (caches as unknown as { default: EdgeCache }).default : undefined
     if (cache === undefined) {
         return loader()
     }
 
-    const cacheKey = new Request(`${INTERNAL_ORIGIN}/${key}`)
+    const cacheKey = new Request(referenceCacheKey(citySlug, key))
     const cached = await cache.match(cacheKey)
     if (cached !== undefined) {
         return (await cached.json()) as T
@@ -40,7 +48,7 @@ export const cachedReference = async <T>(key: string, loader: () => Promise<T>, 
         headers: {
             'Content-Type': 'application/json',
             'Cache-Control': TRANSIT_CACHE_CONTROL,
-            'Cache-Tag': TRANSIT_CACHE_TAG,
+            'Cache-Tag': transitCacheTag(citySlug),
         },
     })
     // Don't let the cache write delay the response; on Node/tests (no ctx) it is a no-op anyway.
