@@ -17,12 +17,6 @@ i18n.addResourceBundle('en', NAMESPACE, {
   privacy: 'Privacy',
   terms: 'Terms of Use',
   analytics: 'Analytics',
-  // contact sheet
-  aboutTitle: 'Mission',
-  about1:
-    'FreiFahren is a non-commercial, open-source project with the goal of making public transport more accessible. We are always open to new contributors on our GitHub.',
-  about2:
-    'Most reports come from the FreiFahren_BE Telegram group. Many thanks to the admins for letting our Telegram bot extract the relevant information.',
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
@@ -40,10 +34,4 @@ i18n.addResourceBundle('de', NAMESPACE, {
   privacy: 'Datenschutz',
   terms: 'Nutzungsbedingungen',
   analytics: 'Analyse',
-  // contact sheet
-  aboutTitle: 'Mission',
-  about1:
-    'FreiFahren ist ein nicht-kommerzielles Open-Source-Projekt, das sich zum Ziel gesetzt hat, den Zugang zum öffentlichen Nahverkehr zu erleichtern. Wir sind stets offen für neue Mithelfende auf unserem GitHub.',
-  about2:
-    'Ein Großteil der Meldungen stammt aus der FreiFahren_BE Telegram-Gruppe. Vielen Dank an die Admins, dass wir mit unserem Telegram Bot die relevanten Informationen extrahieren dürfen.',
 });
