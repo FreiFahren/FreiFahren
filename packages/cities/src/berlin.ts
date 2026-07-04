@@ -92,6 +92,5 @@ export const BERLIN: CityConfig = {
     },
     community: {
         telegramHandle: '@FreiFahren_BE',
-        instagram: 'frei.fahren',
     },
 }

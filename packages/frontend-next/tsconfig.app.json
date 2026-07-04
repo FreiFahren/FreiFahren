@@ -23,7 +23,8 @@
 
     /* Path aliases */
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@freifahren/cities": ["../cities/src/index.ts"]
     }
   },
   "include": ["src"]
