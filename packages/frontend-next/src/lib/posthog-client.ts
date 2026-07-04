@@ -81,9 +81,13 @@ export function loadPostHog(): Promise<void> {
       capture_pageview: false,
     });
     // Stamp every event with the runtime so funnels can be split by web vs native.
+    // city is a registered super property (not derived from $host) because native
+    // (Capacitor) events have no meaningful host. Hardcoded to berlin for now;
+    // switches to hostname-resolved once runtime city resolution lands on the frontend.
     posthog.register({
       platform: Capacitor.getPlatform(),
       is_native: Capacitor.isNativePlatform(),
+      city: 'berlin',
     });
     instance = posthog;
     for (const op of queue) op(posthog);

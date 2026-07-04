@@ -28,7 +28,9 @@ export function initErrorMonitoring(): void {
     release: __BUILD_ID__,
     environment: import.meta.env.MODE,
     // Tag every event with the runtime so native (ios/android) and web issues are filterable.
-    initialScope: { tags: { platform: Capacitor.getPlatform() } },
+    // city is hardcoded to berlin for now; switches to hostname-resolved once runtime city
+    // resolution lands on the frontend.
+    initialScope: { tags: { platform: Capacitor.getPlatform(), city: 'berlin' } },
     // No IP address, cookies, or request payloads — see the file header.
     sendDefaultPii: false,
     // Performance: capture page-load/navigation timing and Web Vitals (LCP, INP, CLS, ...) on a 50%
