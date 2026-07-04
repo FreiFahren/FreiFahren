@@ -208,6 +208,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // Shared city registry (small static data), bundled into the client. Vite does not
+      // read tsconfig `paths`, so the alias is declared here too.
+      '@freifahren/cities': path.resolve(__dirname, '../cities/src/index.ts'),
     },
   },
 });

@@ -2,6 +2,7 @@ import { GithubIcon, InstagramIcon } from '@/components/brand-icons';
 import { Button } from '@/components/ui/button';
 import { cn, optionalEnv } from '@/lib/utils';
 
+// GitHub and Instagram are the same across all cities (one shared account each).
 const GITHUB_URL = optionalEnv('VITE_GITHUB_URL') ?? 'https://github.com/FreiFahren/FreiFahren';
 const INSTAGRAM_URL = optionalEnv('VITE_INSTAGRAM_URL') ?? 'https://www.instagram.com/frei.fahren';
 

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { Feature, FeatureCollection, LineString, Point } from 'geojson';
 
+import { currentCitySlug } from '@/lib/city';
 import { distanceMeters } from '@/lib/geo';
 import { requireEnv } from '@/lib/utils';
 
@@ -92,7 +93,10 @@ export function resolveStationLineNames(
 }
 
 export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, init);
+  // Every API call carries the resolved city so the worker scopes it to the right DB/cache.
+  const url = new URL(`${API_URL}${path}`);
+  url.searchParams.set('city', currentCitySlug);
+  const response = await fetch(url, init);
   if (!response.ok) {
     throw new Error(`Request to ${path} failed: ${response.status}`);
   }

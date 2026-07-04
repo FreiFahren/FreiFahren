@@ -15,7 +15,7 @@ maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile);
 
 import { useRisk } from '@/api/risk';
 import { useSegments } from '@/api/transit';
-import { requireEnv } from '@/lib/utils';
+import { currentCity } from '@/lib/city';
 
 import { LineLayer } from './LineLayer';
 import { MapCameraController } from './MapCameraController';
@@ -27,12 +27,12 @@ import { REPORTS_HIT_LAYER_ID } from '../../hooks/useReportsLayer';
 import { useRiskLayer } from '../../hooks/useRiskLayer';
 import { useStationSelection } from '../../hooks/useStationSelection';
 
-const MAP_STYLE_URL = requireEnv('VITE_MAP_STYLE_URL');
+const MAP_STYLE_URL = currentCity.map.styleUrl;
 
 const INITIAL_VIEW = {
-  longitude: requireEnv('VITE_MAP_CENTER_LNG', 'number'),
-  latitude: requireEnv('VITE_MAP_CENTER_LAT', 'number'),
-  zoom: requireEnv('VITE_MAP_INITIAL_ZOOM', 'number'),
+  longitude: currentCity.map.center[0],
+  latitude: currentCity.map.center[1],
+  zoom: currentCity.map.zoom,
 };
 
 // Keep the city in view: stop users from zooming out past the metro-area level.

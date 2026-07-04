@@ -1,6 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import * as SentryReact from '@sentry/react';
 
+import { currentCitySlug } from '@/lib/city';
 import { optionalEnv } from '@/lib/utils';
 
 // Provider-agnostic error-monitoring facade. The rest of the app never imports the Sentry SDK
@@ -28,9 +29,8 @@ export function initErrorMonitoring(): void {
     release: __BUILD_ID__,
     environment: import.meta.env.MODE,
     // Tag every event with the runtime so native (ios/android) and web issues are filterable.
-    // city is hardcoded to berlin for now; switches to hostname-resolved once runtime city
-    // resolution lands on the frontend.
-    initialScope: { tags: { platform: Capacitor.getPlatform(), city: 'berlin' } },
+    // city is resolved at boot from the hostname (web) or stored preference (native).
+    initialScope: { tags: { platform: Capacitor.getPlatform(), city: currentCitySlug } },
     // No IP address, cookies, or request payloads — see the file header.
     sendDefaultPii: false,
     // Performance: capture page-load/navigation timing and Web Vitals (LCP, INP, CLS, ...) on a 50%
