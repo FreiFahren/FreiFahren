@@ -8,6 +8,7 @@ export type InternalCode =
     | 'RISK_MODEL_FAILED'
     | 'STATION_NOT_FOUND'
     | 'NO_PATH_FOUND'
+    | 'UNKNOWN_CITY'
 export interface AppErrorDetails {
     internal_code: InternalCode
     description?: string

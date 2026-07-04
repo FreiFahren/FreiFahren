@@ -1,13 +1,16 @@
 /// <reference types="@cloudflare/workers-types" />
-import { captureException, consoleLoggingIntegration, withSentry } from '@sentry/cloudflare'
+import { captureException, consoleLoggingIntegration, setTag, withSentry } from '@sentry/cloudflare'
 
-import { Bindings, setErrorReporter } from './app-env'
+import { Bindings, setErrorReporter, setScopeTagger } from './app-env'
 
 import { app } from './index'
 
 // Wired here, not in index.ts, so @sentry/cloudflare stays out of the test bundle.
 // AsyncLocalStorage (set up by withSentry) keeps captures inside a request's waitUntil on its scope.
 setErrorReporter((error, context) => captureException(error, context))
+
+// Same reason: let app-env tag the request scope (e.g. the resolved city) without importing the SDK.
+setScopeTagger((key, value) => setTag(key, value))
 
 // The @sentry/cloudflare HTTP instrumentation names transactions from the raw URL pathname.
 // Each station therefore turns GET /v0/reports/<stationId> into its own transaction (…/BAHU,
