@@ -13,9 +13,9 @@ import type { OsmElement, OsmRelation } from './stations/overpass'
 
 export type OsmSnapshotKind = 'stations' | 'route_geometries'
 
-// Loads a bundled OSM snapshot. Injected rather than importing `Bun.file` (or a fixed
-// `fs` path) directly so the same seed runs under the Bun CLI (fs loader) and inside the
-// Workers test runtime (bundled-import loader) — neither runtime shares the other's file API.
+// Loads a bundled OSM snapshot. Injected rather than reading the filesystem directly so the same
+// Seed runs under the Node/tsx seed CLI (fs loader) and inside the Workers test runtime
+// (bundled-import loader) — neither runtime shares the other's file API.
 export type SnapshotLoader = <T>(kind: OsmSnapshotKind) => Promise<T>
 
 let snapshotLoader: SnapshotLoader | null = null

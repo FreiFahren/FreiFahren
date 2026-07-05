@@ -11,10 +11,8 @@ import type { CacheCtx } from './modules/transit/reference-cache'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
 
 export type Bindings = {
-    // Cloudflare D1 binding, present on Workers.
+    // Cloudflare D1 binding. Present on Workers and, in tests, provided by the Miniflare pool.
     DB?: D1Database
-    // Libsql connection URL (e.g. file:./local.db) for Node runtimes: tests and the seed CLI.
-    DATABASE_URL?: string
     CORS_ORIGINS?: string
     NODE_ENV?: string
     TELEGRAM_WORKER_URL?: string
@@ -70,23 +68,7 @@ export const resolveConfig = (env: Bindings): AppConfig => {
     }
 }
 
-const resolveNodeUrl = (env: Bindings): string => {
-    if (env.DATABASE_URL === undefined || env.DATABASE_URL === '') {
-        throw new Error('No database connection: set DATABASE_URL to a libsql URL (Bun/Node)')
-    }
-    return env.DATABASE_URL
-}
-
-// Node runtimes (tests, seed CLI) register a libsql-backed provider here. Keeping it injected
-// Rather than imported means libsql never enters the Worker bundle — the Worker uses D1 only.
-let nodeDbProvider: ((url: string) => DbConnection) | null = null
-
-export const setNodeDbProvider = (provider: (url: string) => DbConnection) => {
-    nodeDbProvider = provider
-}
-
-// Injected by worker.ts so @sentry/cloudflare stays out of index.ts and the test bundle,
-// Like nodeDbProvider above. No-op until injected.
+// Injected by worker.ts so @sentry/cloudflare stays out of index.ts and the test bundle.
 export type ErrorReporter = (
     error: unknown,
     context?: { tags?: Record<string, string>; extra?: Record<string, unknown> }
@@ -173,18 +155,14 @@ export const registerContext = (app: Hono<Env>) => {
         // Tag the Sentry request scope so every event/transaction is filterable by city.
         scopeTagger('city', city.slug)
 
-        // On Workers the city's D1 binding is the connection — no per-request lifecycle to
-        // Manage. Off Workers (tests, seed CLI) there is no binding, so use the injected
-        // Libsql provider.
+        // The city's D1 binding is the connection — no per-request lifecycle to manage. It is
+        // Present on Workers and provided by the Miniflare pool in tests; the seed CLI reaches the
+        // Same D1 through getPlatformProxy rather than this request path.
         const binding = cityDbBinding(c.env, city.dbBinding)
-        if (binding !== undefined) {
-            applyServices(c, createD1Db(binding), config)
-        } else {
-            if (nodeDbProvider === null) {
-                throw new Error('No D1 binding and no Node db provider registered (call setNodeDbProvider)')
-            }
-            applyServices(c, nodeDbProvider(resolveNodeUrl(c.env)), config)
+        if (binding === undefined) {
+            throw new Error(`No D1 binding "${city.dbBinding}" bound for city "${city.slug}"`)
         }
+        applyServices(c, createD1Db(binding), config)
 
         await next()
     })
