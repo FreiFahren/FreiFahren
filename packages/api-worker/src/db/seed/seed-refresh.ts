@@ -1,26 +1,21 @@
 /**
  * Live-fetch entry point. Hits Overpass and stores the raw response in the
- * bundled snapshot JSON files. Does not touch seed tables (e.g. stations) —
- * the apply path (`bun db:seed`) reads the bundled snapshots and runs the
- * transforms.
+ * bundled snapshot JSON files under `snapshots/<city>/`. Does not touch seed
+ * tables (e.g. stations) — the apply path (`bun db:seed`) reads the bundled
+ * snapshots and runs the transforms.
  *
- * Run this manually when the OSM snapshot should be refreshed. Safe to retry —
- * the existing snapshots are left untouched until all new fetches succeed.
+ * Run this manually when the OSM snapshot should be refreshed:
+ *   bun db:seed:refresh --city <slug>   (defaults to berlin)
+ * Safe to retry — the existing snapshots are left untouched until all new
+ * fetches succeed.
  */
 
-import {
-    fetchRouteGeometryElements,
-    fetchStationElements,
-    type OsmElement,
-    type OsmRelation,
-} from './stations/overpass'
+import { parseCityArg } from './city-arg'
+// Type-only import: erased at build, so it does not evaluate the Overpass module
+// (and its registry-backed config) before SEED_CITY is set below.
+import type { OsmElement, OsmRelation } from './stations/overpass'
 
 type OsmSnapshotKind = 'stations' | 'route_geometries'
-
-const writeSnapshot = async (kind: OsmSnapshotKind, raw: unknown) => {
-    const fileUrl = new URL(`./snapshots/${kind}.json`, import.meta.url)
-    await Bun.write(fileUrl, `${JSON.stringify(raw, null, 2)}\n`)
-}
 
 const countRouteRelations = (elements: OsmElement[]): number => {
     let count = 0
@@ -33,7 +28,19 @@ const countRouteRelations = (elements: OsmElement[]): number => {
 }
 
 const refresh = async () => {
-    console.log('[seed:refresh] Fetching station elements from Overpass...')
+    const city = parseCityArg()
+    // Select the city before importing the Overpass module, which reads the
+    // Registry-backed SEED_CONFIG at import time (see ./config).
+    process.env.SEED_CITY = city
+
+    const { fetchRouteGeometryElements, fetchStationElements } = await import('./stations/overpass')
+
+    const writeSnapshot = async (kind: OsmSnapshotKind, raw: unknown) => {
+        const fileUrl = new URL(`./snapshots/${city}/${kind}.json`, import.meta.url)
+        await Bun.write(fileUrl, `${JSON.stringify(raw, null, 2)}\n`)
+    }
+
+    console.log(`[seed:refresh] Fetching station elements from Overpass for '${city}'...`)
     const stationElements = await fetchStationElements()
     console.log(`[seed:refresh] Snapshot includes ${countRouteRelations(stationElements)} route relations.`)
 

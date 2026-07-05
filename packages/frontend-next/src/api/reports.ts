@@ -2,6 +2,7 @@ import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/rea
 import type { TFunction } from 'i18next';
 import { useEffect, useState } from 'react';
 
+import { currentCitySlug } from '@/lib/city';
 import { traceAction } from '@/lib/error-monitoring';
 import { requireEnv } from '@/lib/utils';
 
@@ -230,7 +231,9 @@ export function useSubmitReport() {
     mutationFn: (input: SubmitReportInput): Promise<SubmitReportResponse> =>
       traceAction('Submit Report', async () => {
         const lineId = resolveLineId(input, lines);
-        const response = await fetch(`${API_URL}/v0/reports`, {
+        const submitUrl = new URL(`${API_URL}/v0/reports`);
+        submitUrl.searchParams.set('city', currentCitySlug);
+        const response = await fetch(submitUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'ff-platform': 'web' },
           body: JSON.stringify({

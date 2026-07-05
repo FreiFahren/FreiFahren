@@ -7,7 +7,7 @@ import { LineBadge } from '@/components/transit/LineBadge';
 import { CardContent } from '@/components/ui/card';
 import { useGeolocation } from '@/contexts/Geolocation.context';
 import { useModalViewDuration } from '@/hooks/useModalViewDuration';
-import { optionalEnv } from '@/lib/utils';
+import { currentCity } from '@/lib/city';
 
 import { DetailCard } from './DetailCard';
 import { NAMESPACE } from './ReportDetail.i18n';
@@ -19,7 +19,7 @@ type ReportDetailProps = {
 };
 
 // Telegram group the reports are synced with.
-const REPORTS_GROUP_HANDLE = optionalEnv('VITE_REPORTS_GROUP_HANDLE') ?? '@FreiFahren_BE';
+const REPORTS_GROUP_HANDLE = currentCity.community.telegramHandle;
 
 export function ReportDetail({ station, onClose }: ReportDetailProps) {
   const { t } = useTranslation(NAMESPACE);

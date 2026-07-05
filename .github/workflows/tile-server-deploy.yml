@@ -51,7 +51,9 @@ jobs:
               run: |
                   set -euo pipefail
                   SHA="${GITHUB_SHA::8}"
-                  for city in $(jq -r '.cities[].name' cities.json); do
+                  # Upload exactly what `generate` produced — one archive per dist/<city>.pmtiles.
+                  for f in dist/*.pmtiles; do
+                      city="$(basename "$f" .pmtiles)"
                       # Immutable, versioned archive — long cache, never purged (the /v<sha>/ path is
                       # the cache-bust).
                       bunx wrangler@latest r2 object put "freifahren-tiles/v$SHA/$city.pmtiles" \

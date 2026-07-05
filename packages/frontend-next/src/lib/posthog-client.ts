@@ -1,6 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import type { PostHog } from 'posthog-js';
 
+import { currentCitySlug } from './city';
 import { optionalEnv } from './utils';
 
 // In the native WKWebView (capacitor://localhost) cookies are unreliable, so persistent capture uses
@@ -81,9 +82,13 @@ export function loadPostHog(): Promise<void> {
       capture_pageview: false,
     });
     // Stamp every event with the runtime so funnels can be split by web vs native.
+    // city is a registered super property (not derived from $host) because native
+    // (Capacitor) events have no meaningful host. Resolved at boot from the hostname
+    // (web) or the stored preference (native).
     posthog.register({
       platform: Capacitor.getPlatform(),
       is_native: Capacitor.isNativePlatform(),
+      city: currentCitySlug,
     });
     instance = posthog;
     for (const op of queue) op(posthog);

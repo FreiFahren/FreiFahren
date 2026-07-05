@@ -1,3 +1,4 @@
+import { DEFAULT_CITY_SLUG } from '@freifahren/cities'
 import { asc, eq } from 'drizzle-orm'
 
 import { AppError, NoPathFoundError } from '../../common/errors'
@@ -10,21 +11,24 @@ import type { Line, Lines, SegmentsFeatureCollection, Stations } from './types'
 export class TransitNetworkDataService {
     constructor(
         private db: DbConnection,
+        // Scopes the reference-cache entries to this city so one city's data never
+        // Serves another's. Defaults to Berlin for direct construction in tests.
+        private citySlug: string = DEFAULT_CITY_SLUG,
         private cacheCtx: CacheCtx = undefined
     ) {}
 
     // Static reference data — read through the transit edge cache so the hot in-process
     // Callers (risk, reports) don't re-scan the full tables in D1 on every request.
     async getStations(): Promise<Stations> {
-        return cachedReference('stations', () => this.loadStations(), this.cacheCtx)
+        return cachedReference(this.citySlug, 'stations', () => this.loadStations(), this.cacheCtx)
     }
 
     async getLines(): Promise<Lines> {
-        return cachedReference('lines', () => this.loadLines(), this.cacheCtx)
+        return cachedReference(this.citySlug, 'lines', () => this.loadLines(), this.cacheCtx)
     }
 
     async getSegments(): Promise<SegmentsFeatureCollection> {
-        return cachedReference('segments', () => this.loadSegments(), this.cacheCtx)
+        return cachedReference(this.citySlug, 'segments', () => this.loadSegments(), this.cacheCtx)
     }
 
     private async loadStations(): Promise<Stations> {

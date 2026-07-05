@@ -75,12 +75,24 @@ export interface CityTelegramProfile {
     promptExamples: string
 }
 
-/** Public community channels surfaced in the app for a city. */
+/**
+ * Public community channels surfaced in the app for a city. Only genuinely per-city
+ * channels live here — Instagram/GitHub are shared across all cities (one account
+ * each) and stay as frontend constants.
+ */
 export interface CityCommunity {
     /** Telegram group handle reports are synced with (e.g. `@FreiFahren_BE`). */
     telegramHandle: string
-    /** Instagram handle (without the `@` or URL). */
-    instagram: string
+}
+
+/**
+ * Basemap tile-build inputs for a city. Consumed by the tile-server pipeline
+ * (packages/tile-server). The archive's suggested view is derived from `map`
+ * (center + zoom), so there is no separate view to keep in sync here.
+ */
+export interface CityTiles {
+    /** Geofabrik OSM extract the basemap is built from. */
+    osmUrl: string
 }
 
 /** Map defaults for the city's basemap. */
@@ -118,6 +130,8 @@ export interface CityConfig {
     /** BCP-47 language tag for the city's primary language. */
     lang: string
     map: CityMap
+    /** Basemap tile-build inputs. Every city ships with a basemap. */
+    tiles: CityTiles
     seed: CitySeedConfig
     telegram: CityTelegramProfile
     community: CityCommunity

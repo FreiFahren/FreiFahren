@@ -37,8 +37,8 @@ edge-cached.
 - No tile server to operate; tiles are globally edge-cached and range-served from the nearest PoP.
 - The frontend must register the `pmtiles://` protocol. Overlays are unaffected (separate GeoJSON
   sources).
-- New cities become add-an-archive + pointer rather than a new server — the `cities.json`-driven
-  generalisation is a planned follow-up.
+- New cities become add-an-archive + pointer rather than a new server — driven by the
+  `@freifahren/cities` registry (a city's `tiles` block), not a hand-maintained list.
 - CORS is per-origin (`Vary: Origin` from R2); an unconditional `Access-Control-Allow-Origin: *`
   transform rule is an option if cold-cache CORS races appear.
 - Provisioning (bucket, custom domain, cache rule) currently lives in the Cloudflare API/MCP, not

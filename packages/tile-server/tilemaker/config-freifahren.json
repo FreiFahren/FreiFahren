@@ -59,15 +59,11 @@
     "basezoom": 14,
     "include_ids": false,
     "compress": "gzip",
-    "name": "FreiFahren Berlin vector tiles",
     "version": "0.1.0",
-    "description": "OSM-derived vector tiles for the FreiFahren Berlin basemap.",
     "high_resolution": false,
-    "default_view": [13.40587, 52.51346, 11],
     "mvt_version": 2,
     "metadata": {
-      "attribution": "OpenStreetMap contributors",
-      "schema": "freifahren-berlin"
+      "attribution": "OpenStreetMap contributors"
     }
   }
 }

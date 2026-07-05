@@ -107,6 +107,7 @@ describe('Transit cache headers', () => {
         expect(response.headers.get('Cache-Control')).toContain('max-age=0')
         expect(response.headers.get('Cache-Control')).toContain('must-revalidate')
         expect(response.headers.get('Vary')).toContain('Origin')
-        expect(response.headers.get('Cache-Tag')).toBe('transit-network')
+        // Per-city tag: the default (no ?city) resolves to berlin.
+        expect(response.headers.get('Cache-Tag')).toBe('transit-network-berlin')
     })
 })
