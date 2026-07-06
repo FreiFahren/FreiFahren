@@ -1,6 +1,6 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, setSystemTime } from 'bun:test'
 import { eq } from 'drizzle-orm'
 import { DateTime, Settings } from 'luxon'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { createApp } from '../src/index'
 import {
@@ -9,7 +9,7 @@ import {
     MAX_REPORTS_TIMEFRAME,
 } from '../src/modules/reports/constants'
 import { db, lineStations, lines, reports } from './test-db'
-import { appRequestWithRedirect, sendReportRequest } from './test-utils'
+import { appRequestWithRedirect, sendReportRequest, setSystemTime } from './test-utils'
 
 let testStationId: string
 let testLineId: string
@@ -416,7 +416,10 @@ describe('Predicted reports threshold', () => {
                 }
             }
         }
-        await db.insert(reports).values(rows)
+        // D1 caps bound parameters per statement, so insert in chunks rather than one round-trip.
+        for (let i = 0; i < rows.length; i += 20) {
+            await db.insert(reports).values(rows.slice(i, i + 20))
+        }
     }
 
     beforeAll(async () => {

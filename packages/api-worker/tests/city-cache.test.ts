@@ -1,4 +1,5 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { fetchMock } from 'cloudflare:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { purgeTransitCache } from '../src/db/seed/purge-transit-cache'
 import { referenceCacheKey } from '../src/modules/transit/reference-cache'
@@ -55,25 +56,27 @@ describe('Cache-Tag is per city', () => {
 })
 
 describe('purge is city-scoped', () => {
-    const originalFetch = globalThis.fetch
+    beforeEach(() => {
+        fetchMock.activate()
+        fetchMock.disableNetConnect()
+    })
 
     afterEach(() => {
-        globalThis.fetch = originalFetch
-        delete process.env.CLOUDFLARE_ZONE_ID
-        delete process.env.CLOUDFLARE_API_TOKEN
+        fetchMock.enableNetConnect()
+        fetchMock.deactivate()
     })
 
     it("purges only the given city's tag, leaving the other city's entries intact", async () => {
-        process.env.CLOUDFLARE_ZONE_ID = 'test-zone'
-        process.env.CLOUDFLARE_API_TOKEN = 'test-token'
-
         const purged: string[][] = []
-        globalThis.fetch = (async (_url: string, init: RequestInit) => {
-            purged.push((JSON.parse(init.body as string) as { tags: string[] }).tags)
-            return new Response('{"success":true}', { status: 200 })
-        }) as unknown as typeof fetch
+        fetchMock
+            .get('https://api.cloudflare.com')
+            .intercept({ path: (p) => p.endsWith('/purge_cache'), method: 'POST' })
+            .reply((opts) => {
+                purged.push((JSON.parse(String(opts.body)) as { tags: string[] }).tags)
+                return { statusCode: 200, data: { success: true } }
+            })
 
-        await purgeTransitCache('leipzig')
+        await purgeTransitCache('leipzig', { zoneId: 'test-zone', apiToken: 'test-token' })
 
         expect(purged).toEqual([['transit-network-leipzig']])
         // Berlin's tag is never in the payload, so purging Leipzig can't touch Berlin.

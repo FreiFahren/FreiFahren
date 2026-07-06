@@ -3,17 +3,18 @@
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
-    "seed": "bun run src/db/seed/seed-d1.ts",
+    "seed": "tsx src/db/seed/seed-d1.ts",
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
-    "test": "bun test",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
+    "db:migrate": "wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
     "db:studio": "drizzle-kit studio",
     "db:drop": "drizzle-kit drop",
     "db:seed:refresh": "bun run src/db/seed/seed-refresh.ts",
@@ -32,9 +33,9 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.9.0",
     "@cloudflare/workers-types": "^4.20251001.0",
     "@hono/zod-validator": "^0.7.4",
-    "@libsql/client": "^0.17.4",
     "@types/bun": "1.3.1",
     "@typescript-eslint/eslint-plugin": "^8.46.3",
     "@typescript-eslint/parser": "^8.46.3",
@@ -45,10 +46,15 @@
     "eslint-plugin-prefer-arrow": "^1.2.3",
     "jiti": "^2.4.2",
     "prettier": "^3.6.2",
+    "tsx": "^4.22.4",
     "typescript-eslint": "^8.46.3",
+    "vitest": "~3.2.0",
     "wrangler": "^4.103.0"
   },
   "trustedDependencies": [
-    "unrs-resolver"
+    "esbuild",
+    "sharp",
+    "unrs-resolver",
+    "workerd"
   ]
 }

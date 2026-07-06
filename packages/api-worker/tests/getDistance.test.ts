@@ -1,5 +1,5 @@
-import { afterEach, beforeAll, describe, expect, it } from 'bun:test'
 import { asc, eq, inArray } from 'drizzle-orm'
+import { afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import { db, lines, lineStations, stations } from './test-db'
 import { app, createApp } from '../src/index'

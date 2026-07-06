@@ -2,10 +2,11 @@ import { logger } from '../../common/logger'
 import { transitCacheTag } from '../../modules/transit/transit-cache-middleware'
 
 // Purge only the given city's transit Cache-Tag, so reseeding one city never
-// Invalidates another city's cached transit responses.
-export const purgeTransitCache = async (citySlug: string) => {
-    const zoneId = Bun.env.CLOUDFLARE_ZONE_ID
-    const apiToken = Bun.env.CLOUDFLARE_API_TOKEN
+// Invalidates another city's cached transit responses. Credentials come from the
+// Environment by default (the deploy-pipeline CLI); callers may inject them instead.
+export const purgeTransitCache = async (citySlug: string, credentials: { zoneId?: string; apiToken?: string } = {}) => {
+    const zoneId = credentials.zoneId ?? process.env.CLOUDFLARE_ZONE_ID
+    const apiToken = credentials.apiToken ?? process.env.CLOUDFLARE_API_TOKEN
     const tag = transitCacheTag(citySlug)
 
     if (zoneId === undefined || zoneId === '' || apiToken === undefined || apiToken === '') {

@@ -6,24 +6,29 @@ import { lineStations } from '../schema/lines'
 import { reports } from '../schema/reports'
 import { stations } from '../schema/stations'
 
-import { SEED_CITY } from './config'
 import { seedLinesFromRelations } from './lines'
 import { seedSegmentsFromGeometry } from './segments/index'
 import { seedStationsFromElements } from './stations'
 import type { OsmElement, OsmRelation } from './stations/overpass'
 
-type OsmSnapshotKind = 'stations' | 'route_geometries'
+export type OsmSnapshotKind = 'stations' | 'route_geometries'
+
+// Loads a bundled OSM snapshot. Injected rather than reading the filesystem directly so the same
+// Seed runs under the Node/tsx seed CLI (fs loader) and inside the Workers test runtime
+// (bundled-import loader) — neither runtime shares the other's file API.
+export type SnapshotLoader = <T>(kind: OsmSnapshotKind) => Promise<T>
+
+let snapshotLoader: SnapshotLoader | null = null
+
+export const setSnapshotLoader = (loader: SnapshotLoader) => {
+    snapshotLoader = loader
+}
 
 const loadSnapshot = async <T>(kind: OsmSnapshotKind): Promise<T> => {
-    const file = Bun.file(new URL(`./snapshots/${SEED_CITY}/${kind}.json`, import.meta.url))
-    if (!(await file.exists())) {
-        throw new Error(
-            `[seed] Bundled '${kind}' snapshot for '${SEED_CITY}' is missing. ` +
-                `Run \`bun db:seed:refresh --city ${SEED_CITY}\` to populate it.`
-        )
+    if (snapshotLoader === null) {
+        throw new Error('[seed] No snapshot loader registered — call setSnapshotLoader() before seedBaseData()')
     }
-
-    return (await file.json()) as T
+    return snapshotLoader<T>(kind)
 }
 
 const extractRouteRelations = (elements: OsmElement[]): OsmRelation[] => {

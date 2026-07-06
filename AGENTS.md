@@ -7,8 +7,9 @@ Guidance for AI agents (and humans) contributing to FreiFahren.
 Prefer **integration tests** over unit tests. Drive behavior through the public API surface so tests cover routing, validation, and persistence together.
 
 - **No manual DB inserts in tests.** To set up state, send a request to the API (e.g. `POST /reports`) instead of writing to the database directly. This keeps tests realistic and avoids coupling them to schema details.
-- **Mock time, don't backdate rows.** When a test needs "old" data, use `setSystemTime` from `bun:test` to move the clock, send the request, then move the clock forward — instead of inserting rows with old timestamps.
+- **Mock time, don't backdate rows.** When a test needs "old" data, use `setSystemTime` (from `packages/api-worker/tests/test-utils.ts`, backed by Vitest fake timers) to move the clock, send the request, then move the clock forward — instead of inserting rows with old timestamps.
 - **Use `appRequestWithRedirect`** (from `packages/api-worker/tests/test-utils.ts`) instead of `app.request` directly. It follows the version redirect so tests automatically exercise the latest API version without hard-coding `/v0/...` paths.
+- **`api-worker` runs on D1 everywhere** — the worker, the Vitest suite, and the seed CLI all use a real D1 binding (no libsql). Tests use `@cloudflare/vitest-pool-workers` (not `bun test`): `tests/setup.ts` applies the migrations and seeds the reference tables once via the same `seedBaseData` the CLI runs, so the seed under test matches production. Import the shared drizzle handle from `tests/test-db.ts`. The seed CLI (`bun run seed`) runs under `tsx`/Node because `getPlatformProxy` and Miniflare don't run under Bun.
 - **Don't assert on exact error message strings.** Assert on status codes and structured error fields (codes, types). Exact wording is presentational and will churn.
 
 ## Migrations

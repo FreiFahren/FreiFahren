@@ -45,11 +45,8 @@ jobs:
             - name: Install dependencies
               run: cd packages/api-worker && bun install
 
-            # Tests run against a local libsql SQLite file: tests/preload.ts creates the file,
-            # applies migrations and seeds the reference data. No external database required.
+            # Tests run on the Workers runtime via Vitest (@cloudflare/vitest-pool-workers):
+            # tests/setup.ts applies the D1 migrations and seeds the reference tables into the
+            # test D1 binding. Env vars are provided by vitest.config.ts, so none are needed here.
             - name: Run api worker tests
-              env:
-                  CORS_ORIGINS: http://localhost:1871,http://127.0.0.1:1871,capacitor://localhost
-                  REPORT_PASSWORD: password
-                  TELEGRAM_WORKER_URL: http://localhost:6010
-              run: cd packages/api-worker && bun test
+              run: cd packages/api-worker && bun run test

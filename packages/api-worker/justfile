@@ -32,7 +32,7 @@ db-push:
     docker compose -f {{compose_file}} exec {{service}} bun run db:push
 
 test:
-    DATABASE_URL={{test_db_url}} bun test
+    bun run test
 
 logs:
     docker compose -f {{compose_file}} logs -f {{service}}

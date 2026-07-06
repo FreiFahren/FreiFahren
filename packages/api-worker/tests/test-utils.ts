@@ -1,26 +1,52 @@
+import { env as workerEnv } from 'cloudflare:test'
+import { vi } from 'vitest'
+
 import { Bindings } from '../src/app-env'
 import { app } from '../src/index'
 
-// Derived from process.env on every call so a test can flip an env var (e.g. NODE_ENV) right
-// before a request and have it take effect.
+// Per-test overrides so a suite can flip an env var (e.g. NODE_ENV, TELEGRAM_WORKER_URL) without
+// mutating the shared worker bindings. Cleared between suites via resetTestEnv().
+const overrides: Partial<Bindings> = {}
+
+export const setTestEnv = (values: Partial<Bindings>) => {
+    Object.assign(overrides, values)
+}
+
+export const resetTestEnv = () => {
+    for (const key of Object.keys(overrides)) {
+        delete overrides[key as keyof Bindings]
+    }
+}
+
+// Derived on every call so a test can flip an override right before a request and have it take effect.
 export const testEnv = (): Bindings => ({
-    DATABASE_URL: process.env.DATABASE_URL,
-    CORS_ORIGINS: process.env.CORS_ORIGINS ?? 'http://localhost',
-    NODE_ENV: process.env.NODE_ENV,
-    TELEGRAM_WORKER_URL: process.env.TELEGRAM_WORKER_URL,
-    REPORT_PASSWORD: process.env.REPORT_PASSWORD,
-    LOG_LEVEL: process.env.LOG_LEVEL as Bindings['LOG_LEVEL'],
+    DB: workerEnv.DB,
+    CORS_ORIGINS: overrides.CORS_ORIGINS ?? workerEnv.CORS_ORIGINS,
+    NODE_ENV: overrides.NODE_ENV ?? workerEnv.NODE_ENV,
+    TELEGRAM_WORKER_URL: overrides.TELEGRAM_WORKER_URL ?? workerEnv.TELEGRAM_WORKER_URL,
+    REPORT_PASSWORD: overrides.REPORT_PASSWORD ?? workerEnv.REPORT_PASSWORD,
+    LOG_LEVEL: (overrides.LOG_LEVEL ?? workerEnv.LOG_LEVEL) as Bindings['LOG_LEVEL'],
 })
 
 /**
- * Sends a request to the app and follows redirects.
- * @param path - The path to request.
- * @param init - The request init.
- * @param targetApp - The app to send the request to. Defaults to the singleton app.
- * @returns The response.
- * We use this instead of app.request because we want to test the latest version of the API.
- * Otherwise we would have to specify the route version in every test.
- * With this function we can just call the route path and it will be redirected to the latest version.
+ * Mock the system clock. `setSystemTime(date)` freezes Date at `date`; `setSystemTime()` restores
+ * the real clock. Only Date is faked (not setTimeout/setInterval), matching how the old bun:test
+ * helper behaved. luxon's `DateTime.now()` reads the faked `Date.now()`, so both are affected.
+ */
+export const setSystemTime = (date?: Date) => {
+    if (date === undefined) {
+        vi.useRealTimers()
+        return
+    }
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(date)
+}
+
+/**
+ * Sends a request to the app and follows the version redirect so tests exercise the latest API
+ * version without hard-coding `/v0/...` paths. No ExecutionContext is passed, so the transit
+ * cache and background waitUntil paths stay inert here (they are covered separately on the
+ * Cloudflare runtime); requests behave like the previous libsql tests, just against real D1.
  */
 export const appRequestWithRedirect = async (path: string, init?: RequestInit, targetApp = app) => {
     const response = await targetApp.request(path, init, testEnv())
@@ -36,9 +62,6 @@ export const appRequestWithRedirect = async (path: string, init?: RequestInit, t
 
 /**
  * Sends a report request to the app.
- * @param payload - The report payload.
- * @param routeApp - The app to send the request to. Defaults to the singleton app.
- * @returns The response.
  */
 export const sendReportRequest = async (payload: object, routeApp = app) => {
     return appRequestWithRedirect(
@@ -47,7 +70,7 @@ export const sendReportRequest = async (payload: object, routeApp = app) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Password': process.env.REPORT_PASSWORD ?? '',
+                'X-Password': testEnv().REPORT_PASSWORD ?? '',
             },
             body: JSON.stringify(payload),
         },
