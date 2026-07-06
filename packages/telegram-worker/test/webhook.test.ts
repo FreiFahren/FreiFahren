@@ -1,9 +1,13 @@
-import { env } from 'cloudflare:test'
+import { createExecutionContext, env, waitOnExecutionContext } from 'cloudflare:test'
 import { describe, expect, it, vi } from 'vitest'
 import { WEBHOOK_SECRET_HEADER, acceptUpdate, handleWebhook } from '../src/webhook'
 import { TelegramUpdate } from '../src/types'
 import type { Env } from '../src/types'
+import { reportError } from '../src/observability'
 import { ALLOWED_CHAT_ID } from './fixtures'
+
+// Spy seam for the privacy assertions below; the real implementation writes to Sentry.
+vi.mock('../src/observability', () => ({ reportError: vi.fn() }))
 
 function makeUpdate(opts: {
     text?: string
@@ -32,7 +36,7 @@ describe('acceptUpdate (filtering)', () => {
 
     it('accepts a photo caption', () => {
         expect(acceptUpdate(makeUpdate({ caption: 'U2 alex 2x BOS', hasPhoto: true }), ALLOWED_CHAT_ID)).toBe(
-            'U2 alex 2x BOS',
+            'U2 alex 2x BOS'
         )
     })
 
@@ -70,7 +74,12 @@ describe('handleWebhook', () => {
     it('rejects a wrong secret token with 401 and does not process', async () => {
         const process = vi.fn(async () => {})
         const { ctx, promises } = fakeCtx()
-        const res = await handleWebhook(webhookRequest(makeUpdate({ text: 'U2 alex' }), 'wrong'), env as unknown as Env, ctx, process)
+        const res = await handleWebhook(
+            webhookRequest(makeUpdate({ text: 'U2 alex' }), 'wrong'),
+            env as unknown as Env,
+            ctx,
+            process
+        )
         expect(res.status).toBe(401)
         expect(process).not.toHaveBeenCalled()
         expect(promises).toHaveLength(0)
@@ -79,7 +88,12 @@ describe('handleWebhook', () => {
     it('returns 200 and processes an accepted message in the background', async () => {
         const process = vi.fn(async () => {})
         const { ctx, promises } = fakeCtx()
-        const res = await handleWebhook(webhookRequest(makeUpdate({ text: 'U2 alex 2x BOS' })), env as unknown as Env, ctx, process)
+        const res = await handleWebhook(
+            webhookRequest(makeUpdate({ text: 'U2 alex 2x BOS' })),
+            env as unknown as Env,
+            ctx,
+            process
+        )
         expect(res.status).toBe(200)
         expect(process).toHaveBeenCalledExactlyOnceWith('U2 alex 2x BOS', expect.anything())
         expect(promises).toHaveLength(1)
@@ -93,11 +107,51 @@ describe('handleWebhook', () => {
             webhookRequest(makeUpdate({ text: 'U2 alex', chatId: -9999 })),
             env as unknown as Env,
             ctx,
-            process,
+            process
         )
         expect(res.status).toBe(200)
         expect(process).not.toHaveBeenCalled()
         expect(promises).toHaveLength(0)
+    })
+
+    it('runs the pipeline in the background of a real ExecutionContext', async () => {
+        const processed: string[] = []
+        const process = vi.fn(async (text: string) => void processed.push(text))
+        const ctx = createExecutionContext()
+
+        const res = await handleWebhook(
+            webhookRequest(makeUpdate({ text: 'U8 Hermannplatz' })),
+            env as unknown as Env,
+            ctx,
+            process
+        )
+        expect(res.status).toBe(200)
+
+        // waitOnExecutionContext resolves only after the waitUntil promise settles, proving
+        // the pipeline genuinely ran as background work of this request.
+        await waitOnExecutionContext(ctx)
+        expect(processed).toEqual(['U8 Hermannplatz'])
+    })
+
+    it('reports a background failure with only the message length, never the text', async () => {
+        vi.mocked(reportError).mockClear()
+        const text = 'U2 alex 2x BOS'
+        const process = vi.fn(async () => {
+            throw new Error('mistral timeout')
+        })
+        const ctx = createExecutionContext()
+
+        const res = await handleWebhook(webhookRequest(makeUpdate({ text })), env as unknown as Env, ctx, process)
+        // The failure stays in the background: Telegram still gets its 200 ack.
+        expect(res.status).toBe(200)
+        await waitOnExecutionContext(ctx)
+
+        expect(reportError).toHaveBeenCalledTimes(1)
+        const [, err, extra] = vi.mocked(reportError).mock.calls[0]!
+        expect((err as Error).message).toBe('mistral timeout')
+        // The privacy invariant: the extra payload carries the length and nothing else — the
+        // message text must never reach the (persisted) error report.
+        expect(extra).toEqual({ length: text.length })
     })
 
     it('acks malformed JSON with 200 and does not process', async () => {
