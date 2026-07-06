@@ -70,6 +70,19 @@ describe('processMessage', () => {
         await processMessage('this is fine', testEnv)
     })
 
+    it('throws when the backend rejects the report, so the caller reports it', async () => {
+        interceptTransit()
+        interceptMistral('Rudow', null)
+        fetchMock
+            .get('https://backend.test')
+            .intercept({ path: '/v0/reports', method: 'POST' })
+            .reply(500, '{"error":"boom"}')
+
+        // A backend 5xx must reject (webhook routes it to reportError); swallowing it here
+        // would silently drop reports with no error-rate signal.
+        await expect(processMessage('U7 Rudow 2x BOS', testEnv)).rejects.toThrow()
+    })
+
     it('submits station-only with no lineId/directionId', async () => {
         interceptTransit()
         interceptMistral('Rudow', null)

@@ -1,11 +1,13 @@
-import { fetchMock } from 'cloudflare:test'
+import { createExecutionContext, fetchMock, waitOnExecutionContext } from 'cloudflare:test'
 import { and, desc, eq, sql } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
+import { app } from '../src/index'
+import { referenceCacheKey } from '../src/modules/transit/reference-cache'
 import { Stations } from '../src/modules/transit/types'
 import { TransitNetworkDataService } from '../src/modules/transit/transit-network-data-service'
 import { db, lineStations, reports, stations } from './test-db'
-import { resetTestEnv, sendReportRequest, setTestEnv } from './test-utils'
+import { resetTestEnv, sendReportRequest, setTestEnv, testEnv } from './test-utils'
 
 const TELEGRAM_ORIGIN = 'https://telegram-worker.test'
 
@@ -109,6 +111,36 @@ describe('Telegram notification', () => {
         expect(response.headers.get('X-Telegram-Notification-Status')).toBeNull()
         // The forward was still attempted; only its failure is swallowed.
         expect(capturedRequests.length).toBe(1)
+    })
+
+    it('forwards in the background via waitUntil when an ExecutionContext is present', async () => {
+        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
+
+        // A real ExecutionContext takes the waitUntil branch instead of awaiting inline; a
+        // failing forward must neither fail the response nor leak out of the background task.
+        shouldFail = true
+        const ctx = createExecutionContext()
+        const response = await app.request(
+            '/v0/reports',
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Password': testEnv().REPORT_PASSWORD ?? '' },
+                body: JSON.stringify({ stationId: station.id, source: 'web_app' }),
+            },
+            testEnv(),
+            ctx
+        )
+
+        expect(response.status).toBe(200)
+        await waitOnExecutionContext(ctx)
+        expect(capturedRequests.length).toBe(1)
+
+        // The real ExecutionContext also let cachedReference warm the shared reference cache;
+        // drop those entries so later suites keep reading straight from D1.
+        const cache = (caches as unknown as { default: Cache }).default
+        for (const key of ['stations', 'lines', 'segments']) {
+            await cache.delete(new Request(referenceCacheKey('berlin', key)))
+        }
     })
 
     it('does not send a Telegram notification if database insertion fails', async () => {
