@@ -2,6 +2,7 @@
 import { captureException, consoleLoggingIntegration, setTag, withSentry } from '@sentry/cloudflare'
 
 import { Bindings, setErrorReporter, setScopeTagger } from './app-env'
+import { normalizeTransactionName } from './common/normalize-transaction-name'
 
 import { app } from './index'
 
@@ -11,13 +12,6 @@ setErrorReporter((error, context) => captureException(error, context))
 
 // Same reason: let app-env tag the request scope (e.g. the resolved city) without importing the SDK.
 setScopeTagger((key, value) => setTag(key, value))
-
-// The @sentry/cloudflare HTTP instrumentation names transactions from the raw URL pathname.
-// Each station therefore turns GET /v0/reports/<stationId> into its own transaction (…/BAHU,
-// …/BOSB, …). Collapse that single trailing segment into the route pattern so Sentry tracks the
-// Per-station reads as one transaction, while leaving the list endpoint (GET /v0/reports) untouched.
-const normalizeTransactionName = (name: string): string =>
-    name.replace(/^(\w+ \/v\d+\/reports)\/[^/]+$/, '$1/:stationId')
 
 // Cloudflare Worker entry. The Hono app lives in index.ts so tests can run it without the Sentry SDK.
 export default withSentry(

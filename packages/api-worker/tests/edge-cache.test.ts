@@ -124,6 +124,12 @@ describe('transitEdgeCacheMiddleware (real Cache API)', () => {
         const star = await edgeRequest(url, { 'If-None-Match': '*' })
         expect(star.status).toBe(304)
 
+        // A comma list revalidates when any member matches, and misses when none do.
+        const listWithMatch = await edgeRequest(url, { 'If-None-Match': `"stale-one", W/${etag!}, "stale-two"` })
+        expect(listWithMatch.status).toBe(304)
+        const listWithoutMatch = await edgeRequest(url, { 'If-None-Match': '"stale-one", "stale-two"' })
+        expect(listWithoutMatch.status).toBe(200)
+
         // A stale tag (post-reseed ETag change) must get the full body again, not a 304.
         const stale = await edgeRequest(url, { 'If-None-Match': '"no-longer-current"' })
         expect(stale.status).toBe(200)

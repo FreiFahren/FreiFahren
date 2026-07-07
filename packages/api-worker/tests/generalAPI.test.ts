@@ -97,6 +97,58 @@ describe('ETag 304 + CORS', () => {
     })
 })
 
+describe('CORS', () => {
+    const ALLOWED_ORIGIN = 'http://localhost:1871'
+    const DISALLOWED_ORIGIN = 'https://not-on-the-list.example'
+
+    it('does not echo a disallowed origin', async () => {
+        const response = await app.request(
+            '/v0/transit/stations',
+            { headers: { Origin: DISALLOWED_ORIGIN } },
+            testEnv()
+        )
+
+        expect(response.status).toBe(200)
+        expect(response.headers.get('Access-Control-Allow-Origin')).toBeNull()
+    })
+
+    it('grants a preflight from an allowed origin', async () => {
+        const response = await app.request(
+            '/v0/reports',
+            {
+                method: 'OPTIONS',
+                headers: {
+                    Origin: ALLOWED_ORIGIN,
+                    'Access-Control-Request-Method': 'POST',
+                    'Access-Control-Request-Headers': 'Content-Type',
+                },
+            },
+            testEnv()
+        )
+
+        expect(response.status).toBe(204)
+        expect(response.headers.get('Access-Control-Allow-Origin')).toBe(ALLOWED_ORIGIN)
+        expect(response.headers.get('Access-Control-Allow-Methods')).toContain('POST')
+        expect(response.headers.get('Access-Control-Allow-Headers')).toContain('Content-Type')
+    })
+
+    it('does not grant a preflight from a disallowed origin', async () => {
+        const response = await app.request(
+            '/v0/reports',
+            {
+                method: 'OPTIONS',
+                headers: {
+                    Origin: DISALLOWED_ORIGIN,
+                    'Access-Control-Request-Method': 'POST',
+                },
+            },
+            testEnv()
+        )
+
+        expect(response.headers.get('Access-Control-Allow-Origin')).toBeNull()
+    })
+})
+
 describe('Transit cache headers', () => {
     it('sets Cache-Control and Vary on transit responses', async () => {
         const response = await app.request('/v0/transit/stations', undefined, testEnv())

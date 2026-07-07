@@ -63,6 +63,15 @@ const calculateWeekendAdjustment = (currentTime: DateTime, baseThreshold: number
     return truncatedBase * 0.5
 }
 
+// Returns the integer threshold that controls how many predicted/historic reports we should show.
+export const calculatePredictedReportsThreshold = (currentTime: DateTime): number => {
+    const base = calculateBasePredictedReportsThreshold(currentTime)
+    const adjustment = calculateWeekendAdjustment(currentTime, base)
+    const threshold = base - adjustment
+
+    return Math.trunc(clamp(threshold, MIN_PREDICTED_REPORTS_THRESHOLD, MAX_PREDICTED_REPORTS_THRESHOLD))
+}
+
 type TelegramNotificationPayload = {
     lineId: string | null
     stationId: StationId
@@ -128,7 +137,7 @@ export class ReportsService {
         const result = await this.getRealReports({ from, to, stationId })
 
         // Predict reports if we don't have enough, so that users always see at least some data
-        const predictedReportsThreshold = this.calculatePredictedReportsThreshold(currentTime)
+        const predictedReportsThreshold = calculatePredictedReportsThreshold(currentTime)
         if (result.length < predictedReportsThreshold) {
             const numberOfReportsToFetch = predictedReportsThreshold - result.length
             const reportedStationIds = new Set(result.map((r) => r.stationId as StationId))
@@ -165,15 +174,6 @@ export class ReportsService {
 
         const allStations = await this.transitNetworkDataService.getStations()
         return new Set((Object.keys(allStations) as StationId[]).filter((id) => !reportedStationIds.has(id)))
-    }
-
-    // Returns the integer threshold that controls how many predicted/historic reports we should show.
-    private calculatePredictedReportsThreshold(currentTime: DateTime): number {
-        const base = calculateBasePredictedReportsThreshold(currentTime)
-        const adjustment = calculateWeekendAdjustment(currentTime, base)
-        const threshold = base - adjustment
-
-        return Math.trunc(clamp(threshold, MIN_PREDICTED_REPORTS_THRESHOLD, MAX_PREDICTED_REPORTS_THRESHOLD))
     }
 
     // Recent reports used as the historic sample for prediction. Fetched separately
