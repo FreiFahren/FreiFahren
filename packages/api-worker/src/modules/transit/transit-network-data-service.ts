@@ -8,6 +8,15 @@ import { buildGraph, findPathWithAStar, type Graph, type StationId } from './pat
 import { cachedReference, type CacheCtx } from './reference-cache'
 import type { Line, Lines, SegmentsFeatureCollection, Stations } from './types'
 
+// Raw table rows buildGraph consumes, cached as one JSON entry. All columns are
+// Plain strings/numbers/booleans, so the rows round-trip through the cache intact;
+// LineStations keeps its (lineId, order) ordering as a JSON array.
+type GraphInputs = {
+    stations: (typeof stations.$inferSelect)[]
+    lines: (typeof lines.$inferSelect)[]
+    lineStations: (typeof lineStations.$inferSelect)[]
+}
+
 export class TransitNetworkDataService {
     constructor(
         private db: DbConnection,
@@ -161,6 +170,13 @@ export class TransitNetworkDataService {
     }
 
     private async loadGraph(): Promise<Graph> {
+        // Cache the raw rows rather than the built Graph — Graph holds Maps, which
+        // Don't survive the JSON round-trip; rebuilding from rows is cheap in-process.
+        const inputs = await cachedReference(this.citySlug, 'graph-inputs', () => this.loadGraphInputs(), this.cacheCtx)
+        return buildGraph(inputs.stations, inputs.lines, inputs.lineStations)
+    }
+
+    private async loadGraphInputs(): Promise<GraphInputs> {
         // The three reads are independent, so issue them concurrently rather than as
         // Three back-to-back D1 round-trips (Sentry "consecutive DB queries").
         const [allStations, allLineStations, allLines] = await Promise.all([
@@ -169,6 +185,6 @@ export class TransitNetworkDataService {
             this.db.select().from(lines),
         ])
 
-        return buildGraph(allStations, allLines, allLineStations)
+        return { stations: allStations, lines: allLines, lineStations: allLineStations }
     }
 }
