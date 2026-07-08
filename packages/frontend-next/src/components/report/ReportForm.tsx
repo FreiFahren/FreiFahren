@@ -345,6 +345,7 @@ function SubmitFooter({ onSubmitted }: { onSubmitted: (result: SubmitReportRespo
     if (!stationId) return;
     const rejection = verify(stationId);
     if (rejection) {
+      track('report_rejected', { reason: rejection, stationId });
       toast.custom(
         () => (
           <ToastPill className="text-destructive flex w-fit items-center gap-2 text-sm font-semibold">

@@ -22,6 +22,10 @@ type AnalyticsEvents = {
     lineId: string | null;
     directionId: string | null;
   };
+  report_rejected: {
+    reason: 'too_soon' | 'too_far';
+    stationId: string;
+  };
   screenshot_taken: Record<string, never>;
   risk_layer_toggled: { to: SuperProperties['map_layer'] };
   contribute_modal_opened: { source: ContributeSource };
