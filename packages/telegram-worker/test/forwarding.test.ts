@@ -96,6 +96,7 @@ describe('handleReportForward', () => {
 
     it.each([
         ['missing_station', { lineId: null, directionId: null }],
+        ['missing_direction_key', { lineId: null, stationId: 'x' }],
         ['empty_station_id', { lineId: null, stationId: '', directionId: null }],
         ['extra_key', { lineId: null, stationId: 'x', directionId: null, extra: 1 }],
         ['wrong_type_line', { lineId: 123, stationId: 'x', directionId: null }],
@@ -116,6 +117,39 @@ describe('handleReportForward', () => {
         expect(((await res.json()) as { error: string }).error).toBe('bad_request')
     })
 
+    it('returns 400 for an unknown lineId', async () => {
+        interceptTransit()
+        const res = await handleReportForward(
+            reportRequest({ lineId: 'NO_SUCH_LINE', stationId: picked.stationId, directionId: null }),
+            testEnv,
+        )
+        expect(res.status).toBe(400)
+        expect(((await res.json()) as { error: string }).error).toBe('bad_request')
+    })
+
+    it('returns 400 for an unknown directionId', async () => {
+        interceptTransit()
+        const res = await handleReportForward(
+            reportRequest({ lineId: picked.lineId, stationId: picked.stationId, directionId: 'DOES_NOT_EXIST' }),
+            testEnv,
+        )
+        expect(res.status).toBe(400)
+        expect(((await res.json()) as { error: string }).error).toBe('bad_request')
+    })
+
+    it('returns 400 when the line does not serve the direction', async () => {
+        interceptTransit()
+        // Both stations exist, but the direction sits on a different line than the reported one.
+        const line = index.variants.find((v) => v.id === picked.lineId)!
+        const foreignDirection = Object.keys(index.stations).find((id) => !line.stations.includes(id))
+        expect(foreignDirection).toBeDefined()
+        const res = await handleReportForward(
+            reportRequest({ lineId: picked.lineId, stationId: picked.stationId, directionId: foreignDirection }),
+            testEnv,
+        )
+        expect(res.status).toBe(400)
+    })
+
     it('returns 400 when the line does not serve the station', async () => {
         interceptTransit()
         const badLine = index.variants.find((v) => !v.stations.includes(picked.stationId))
@@ -125,6 +159,37 @@ describe('handleReportForward', () => {
             testEnv,
         )
         expect(res.status).toBe(400)
+    })
+
+    it('HTML-escapes station names so they cannot inject Telegram markup', async () => {
+        const rawStations = {
+            'U-evil': { name: `<script>alert('x') & "quotes"</script>`, lines: ['U1'] },
+            'U-end': { name: 'End > Start', lines: ['U1'] },
+        }
+        const rawLines = [{ id: 'U1-v', name: 'U1', isCircular: false, stations: ['U-evil', 'U-end'] }]
+        fetchMock
+            .get('https://backend.test')
+            .intercept({ path: '/v0/transit/stations', method: 'GET' })
+            .reply(200, JSON.stringify(rawStations), { headers: { 'content-type': 'application/json' } })
+        fetchMock
+            .get('https://backend.test')
+            .intercept({ path: '/v0/transit/lines', method: 'GET' })
+            .reply(200, JSON.stringify(rawLines), { headers: { 'content-type': 'application/json' } })
+        const capture: { body?: Record<string, unknown> } = {}
+        interceptTelegram(200, capture)
+
+        const res = await handleReportForward(
+            reportRequest({ stationId: 'U-evil', lineId: 'U1-v', directionId: 'U-end' }),
+            testEnv,
+        )
+
+        expect(res.status).toBe(200)
+        const text = capture.body!.text as string
+        // The message is sent with parse_mode HTML, so raw <, >, &, and quotes in
+        // station names would be interpreted as markup (or break parsing) by Telegram.
+        expect(text).toContain('&lt;script&gt;alert(&#x27;x&#x27;) &amp; &quot;quotes&quot;&lt;/script&gt;')
+        expect(text).not.toContain('<script>')
+        expect(text).toContain('End &gt; Start')
     })
 
     it('returns 502 when the Telegram send fails', async () => {
