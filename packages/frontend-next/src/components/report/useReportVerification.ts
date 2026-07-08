@@ -4,7 +4,7 @@ import { distanceMeters } from '@/lib/geo';
 
 export type ReportRejection = 'too_soon' | 'too_far';
 
-const MAX_REPORT_DISTANCE_M = 1500;
+const MAX_REPORT_DISTANCE_M = 2000;
 const MIN_REPORT_INTERVAL_MS = 15 * 60 * 1000;
 const STORAGE_KEY = 'lastReportAt';
 
