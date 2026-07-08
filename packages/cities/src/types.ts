@@ -3,7 +3,7 @@
 // Worker bundles, and the seed scripts). Do not import runtime dependencies here.
 
 /** The transit route types the pipeline understands, in no particular order. */
-export const ROUTE_TYPES = ['subway', 'tram', 'light_rail', 'train'] as const
+export const ROUTE_TYPES = ['subway', 'tram', 'light_rail', 'train', 'bus'] as const
 
 export type RouteType = (typeof ROUTE_TYPES)[number]
 
@@ -37,6 +37,14 @@ export interface CitySeedConfig {
      * OSM `route` values to include.
      */
     routeTypePriority: readonly [RouteType, ...RouteType[]]
+    /**
+     * Optional per-route-type regex a line's `ref` must match to be seeded.
+     * Route types absent from this map include every ref. Used to scope bus
+     * coverage to a curated subset (e.g. Berlin MetroBus `^M\d+$`) — seeding
+     * every city bus line would triple the network for lines that are rarely
+     * checked or reported.
+     */
+    routeRefPatterns?: Partial<Record<RouteType, string>>
     /**
      * Route types listed here always get the configured color regardless of the
      * OSM relation tags (used to give all S-Bahn lines one shared green and all

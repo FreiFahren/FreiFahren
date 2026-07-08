@@ -69,10 +69,16 @@ export const BERLIN: CityConfig = {
     seed: {
         adminLevel: '^[4-6]$',
         operators: ['Berliner Verkehrsbetriebe', 'S-Bahn Berlin GmbH'],
-        routeTypePriority: ['subway', 'tram', 'light_rail', 'train'],
+        // Bus is last: when a stop serves rail and bus, the rail type stays the
+        // station's representative type (and wins the proximate-merge pick).
+        routeTypePriority: ['subway', 'tram', 'light_rail', 'train', 'bus'],
+        // MetroBus (M11–M85) only: BVG runs ~300 bus lines, but only the Metro
+        // network is frequent enough to be checked/reported in practice.
+        routeRefPatterns: { bus: String.raw`^M\d+$` },
         colors: {
             tram: '#be1414', // Classic Berlin tram red (tram and metro tram M* lines).
             light_rail: '#007734', // Berlin S-Bahn green (S2), applied to all S-Bahn lines.
+            bus: '#95276E', // VBB MetroBus purple, one shared color for all bus lines.
         },
         defaultLineColor: '#000000',
     },

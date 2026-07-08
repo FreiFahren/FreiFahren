@@ -1,5 +1,5 @@
 import { logger } from '../../../common/logger'
-import { ROUTE_TYPE_PRIORITY, resolveLineColor, type RouteType } from '../config'
+import { ROUTE_REF_PATTERNS, ROUTE_TYPE_PRIORITY, resolveLineColor, type RouteType } from '../config'
 import type { OsmRelation } from '../stations/overpass'
 
 export interface LineVariant {
@@ -113,6 +113,7 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
     let skippedNoRef = 0
     let skippedTooShort = 0
     let skippedUnknownType = 0
+    let skippedRefPattern = 0
 
     for (const rel of relations) {
         const tags: Record<string, string | undefined> = rel.tags ?? {}
@@ -127,6 +128,15 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
             continue
         }
         const type: RouteType = tags.route
+
+        // Same ref scoping the Overpass discovery applies (e.g. bus → MetroBus
+        // only), enforced again here so an over-complete snapshot can't widen
+        // the seeded network.
+        const refPattern = ROUTE_REF_PATTERNS[type]
+        if (refPattern !== undefined && !new RegExp(refPattern).test(ref)) {
+            skippedRefPattern++
+            continue
+        }
 
         const resolved = resolveRouteStations(rel, nodeIdToStationId)
         if (resolved.length < 2) {
@@ -144,7 +154,7 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
     }
 
     logger.info(
-        `[seed:lines] Parsed ${raw.length} route variants (${skippedNoRef} no-ref, ${skippedTooShort} too-short, ${skippedUnknownType} unsupported route type)`
+        `[seed:lines] Parsed ${raw.length} route variants (${skippedNoRef} no-ref, ${skippedTooShort} too-short, ${skippedUnknownType} unsupported route type, ${skippedRefPattern} ref-pattern filtered)`
     )
 
     const byRef = new Map<string, RawVariant[]>()

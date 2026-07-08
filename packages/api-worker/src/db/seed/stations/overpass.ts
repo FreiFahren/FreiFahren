@@ -1,4 +1,4 @@
-import { SEED_CONFIG } from '../config'
+import { ROUTE_REF_PATTERNS, SEED_CONFIG, type RouteType } from '../config'
 
 export interface OsmNode {
     type: 'node'
@@ -227,6 +227,13 @@ const fetchWithRetry = async (query: string, fetchTimeoutMs: number): Promise<Os
     throw new Error('All Overpass API endpoints failed after retries')
 }
 
+/* Route types can be scoped to a curated ref subset (e.g. Berlin bus → MetroBus
+ * `^M\d+$` only). A ref is kept if any of its relations' route types accepts it. */
+const refAcceptedForRouteType = (ref: string, routeType: string | undefined): boolean => {
+    const pattern = routeType !== undefined ? ROUTE_REF_PATTERNS[routeType as RouteType] : undefined
+    return pattern === undefined || new RegExp(pattern).test(ref)
+}
+
 const fetchLineRefs = async (label: string): Promise<string[]> => {
     const { fetchTimeoutMs } = SEED_CONFIG.overpass
     console.log(
@@ -234,13 +241,21 @@ const fetchLineRefs = async (label: string): Promise<string[]> => {
     )
     const elements = await fetchWithRetry(buildLineRefsQuery(), fetchTimeoutMs)
     const refs = new Set<string>()
+    let filtered = 0
     for (const el of elements) {
         if (el.type !== 'relation') continue
         const ref = el.tags?.ref
-        if (ref !== undefined && ref !== '') refs.add(ref)
+        if (ref === undefined || ref === '') continue
+        if (!refAcceptedForRouteType(ref, el.tags?.route)) {
+            filtered++
+            continue
+        }
+        refs.add(ref)
     }
     const sorted = Array.from(refs).sort()
-    console.log(`[${label}] Found ${sorted.length} line refs: ${sorted.join(', ')}`)
+    console.log(
+        `[${label}] Found ${sorted.length} line refs${filtered > 0 ? ` (${filtered} relations filtered by ref pattern)` : ''}: ${sorted.join(', ')}`
+    )
     return sorted
 }
 

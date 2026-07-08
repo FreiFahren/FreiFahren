@@ -26,6 +26,7 @@ export const SEED_CITY = CITY.slug
 export type { RouteType }
 
 export const ROUTE_TYPE_PRIORITY = CITY.seed.routeTypePriority
+export const ROUTE_REF_PATTERNS: Partial<Record<RouteType, string>> = CITY.seed.routeRefPatterns ?? {}
 export const ROUTE_COLORS: Partial<Record<RouteType, string>> = CITY.seed.colors
 export const DEFAULT_LINE_COLOR = CITY.seed.defaultLineColor
 
