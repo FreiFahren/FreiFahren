@@ -17,7 +17,8 @@ export const referenceCacheKey = (citySlug: string, key: string): string => `${I
 export type CacheCtx = { waitUntil(promise: Promise<unknown>): void } | undefined
 
 /*
- * Read-through cache for static transit reference data (stations, lines, segments),
+ * Read-through cache for static transit reference data (stations, lines, segments,
+ * and the /distance graph inputs),
  * backed by the same Workers Cache API + `transit-network` Cache-Tag that
  * transitEdgeCacheMiddleware uses for the HTTP responses. Because the entry carries
  * that tag, the existing `db:purge-cache` tag purge invalidates it too — so a reseed
