@@ -1,11 +1,11 @@
 import { createExecutionContext, waitOnExecutionContext } from 'cloudflare:test'
-import { asc, eq, inArray } from 'drizzle-orm'
+import { asc } from 'drizzle-orm'
 import { afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import { app } from '../src/index'
 import { referenceCacheKey } from '../src/modules/transit/reference-cache'
 import { TRANSIT_CACHE_CONTROL, transitCacheTag } from '../src/modules/transit/transit-cache-middleware'
-import { db, lines, lineStations, stations } from './test-db'
+import { db, lineStations } from './test-db'
 import { appRequestWithRedirect, testEnv } from './test-utils'
 
 type DistanceResponse = {
@@ -31,9 +31,6 @@ const cache = (
 
 const graphKey = (): Request => new Request(referenceCacheKey('berlin', 'graph-inputs'))
 
-const TEST_STATION_IDS = ['GRAPH_A', 'GRAPH_B'] as const
-const TEST_LINE_ID = 'GRAPH_L1'
-
 // Two adjacent stations on one seeded line — the warm-up request that populates the cache.
 let fromStationId: string
 let toStationId: string
@@ -53,18 +50,32 @@ const distanceRequest = async (from: string, to: string) => {
     return response
 }
 
-// Stations that exist in D1 but not in a previously warmed graph entry — the observable
-// that tells a cache hit (404, D1 not re-read) apart from a fresh load (200).
-const insertStationsUnknownToTheCachedGraph = async () => {
-    await db.insert(stations).values([
-        { id: 'GRAPH_A', name: 'Graph A', lat: 52.5, lng: 13.4 },
-        { id: 'GRAPH_B', name: 'Graph B', lat: 52.51, lng: 13.41 },
-    ])
-    await db.insert(lines).values({ id: TEST_LINE_ID, name: 'Graph Line 1', type: 'subway', isCircular: false })
-    await db.insert(lineStations).values([
-        { lineId: TEST_LINE_ID, stationId: 'GRAPH_A', order: 0 },
-        { lineId: TEST_LINE_ID, stationId: 'GRAPH_B', order: 1 },
-    ])
+// A fabricated graph-inputs entry whose stations exist nowhere in D1, written through the
+// same Cache API the service reads. Answering a distance between them is only possible
+// from this entry, which makes cache hits observable without any manual DB writes; the
+// body mirrors the GraphInputs row shape the service stores.
+const putSyntheticGraphEntry = async () => {
+    const inputs = {
+        stations: [
+            { id: 'FAKE_A', name: 'Fake A', lat: 52.5, lng: 13.4 },
+            { id: 'FAKE_B', name: 'Fake B', lat: 52.51, lng: 13.41 },
+        ],
+        lines: [{ id: 'FAKE_L1', name: 'Fake Line 1', type: 'subway', isCircular: false, color: '#000000' }],
+        lineStations: [
+            { lineId: 'FAKE_L1', stationId: 'FAKE_A', order: 0 },
+            { lineId: 'FAKE_L1', stationId: 'FAKE_B', order: 1 },
+        ],
+    }
+    await cache.put(
+        graphKey(),
+        new Response(JSON.stringify(inputs), {
+            headers: {
+                'Content-Type': 'application/json',
+                'Cache-Control': TRANSIT_CACHE_CONTROL,
+                'Cache-Tag': transitCacheTag('berlin'),
+            },
+        })
+    )
 }
 
 describe('GET /v0/transit/distance graph caching (real Cache API)', () => {
@@ -89,11 +100,9 @@ describe('GET /v0/transit/distance graph caching (real Cache API)', () => {
     })
 
     // Storage is shared across suites (isolatedStorage: false); drop the warmed graph entry
-    // and the fabricated topology so no other suite reads this file's state.
+    // so no other suite reads this file's cache state.
     afterEach(async () => {
         await cache.delete(graphKey())
-        await db.delete(lines).where(eq(lines.id, TEST_LINE_ID))
-        await db.delete(stations).where(inArray(stations.id, [...TEST_STATION_IDS]))
     })
 
     it('warms a graph-inputs entry with the city Cache-Tag while the response itself stays no-store', async () => {
@@ -108,39 +117,39 @@ describe('GET /v0/transit/distance graph caching (real Cache API)', () => {
         expect(entry!.headers.get('Cache-Control')).toBe(TRANSIT_CACHE_CONTROL)
     })
 
-    it('serves later requests from the cached graph without re-reading D1', async () => {
-        const warm = await distanceRequest(fromStationId, toStationId)
-        expect(warm.status).toBe(200)
-        const warmBody = (await warm.json()) as DistanceResponse
+    it('serves requests from the cached graph without re-reading D1', async () => {
+        await putSyntheticGraphEntry()
 
-        await insertStationsUnknownToTheCachedGraph()
-
-        // The new stations are in D1 but not in the cached graph: a 404 proves the graph
-        // was rebuilt from the cache entry, not from a fresh table scan.
-        const staleRead = await distanceRequest('GRAPH_A', 'GRAPH_B')
-        expect(staleRead.status).toBe(404)
-        const staleBody = (await staleRead.json()) as ErrorResponse
-        expect(staleBody.details.internal_code).toBe('STATION_NOT_FOUND')
-
-        // And the cached JSON round-trips into a working graph for the seeded stations.
-        const cachedHit = await distanceRequest(fromStationId, toStationId)
+        // The fabricated stations exist only in the cache entry: a 200 proves the graph
+        // was rebuilt from the cached JSON, not from a fresh D1 table scan.
+        const cachedHit = await distanceRequest('FAKE_A', 'FAKE_B')
         expect(cachedHit.status).toBe(200)
-        expect(((await cachedHit.json()) as DistanceResponse).distance).toBe(warmBody.distance)
+        expect(((await cachedHit.json()) as DistanceResponse).distance).toBe(1)
+
+        // And the seeded stations, present in D1 but absent from the cached graph, are
+        // not found — D1 was never consulted.
+        const seededMiss = await distanceRequest(fromStationId, toStationId)
+        expect(seededMiss.status).toBe(404)
+        expect(((await seededMiss.json()) as ErrorResponse).details.internal_code).toBe('STATION_NOT_FOUND')
     })
 
     it('reads fresh data from D1 after a purge and re-warms the entry', async () => {
-        await distanceRequest(fromStationId, toStationId)
-        await insertStationsUnknownToTheCachedGraph()
+        await putSyntheticGraphEntry()
+        expect((await distanceRequest('FAKE_A', 'FAKE_B')).status).toBe(200)
 
         // Local analogue of the production reseed tag purge (the Cloudflare API call itself
         // is covered in city-cache.test.ts): drop the entry, the next request must miss.
         expect(await cache.delete(graphKey())).toBe(true)
 
-        const afterPurge = await distanceRequest('GRAPH_A', 'GRAPH_B')
-        expect(afterPurge.status).toBe(200)
-        expect(((await afterPurge.json()) as DistanceResponse).distance).toBe(1)
+        const afterPurge = await distanceRequest('FAKE_A', 'FAKE_B')
+        expect(afterPurge.status).toBe(404)
+        expect(((await afterPurge.json()) as ErrorResponse).details.internal_code).toBe('STATION_NOT_FOUND')
 
+        // The miss re-read D1 and re-warmed the entry with the real seeded topology.
         expect(await cache.match(graphKey())).toBeDefined()
+        const seededHit = await distanceRequest(fromStationId, toStationId)
+        expect(seededHit.status).toBe(200)
+        expect(((await seededHit.json()) as DistanceResponse).distance).toBe(1)
     })
 
     it('skips the cache write without an ExecutionContext, matching the Bun/seed-CLI fallback', async () => {
