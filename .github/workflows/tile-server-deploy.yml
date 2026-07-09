@@ -5,6 +5,8 @@ on:
         branches: [main]
         paths:
             - 'packages/tile-server/**'
+            # `generate` builds tiles per registry city, so a registry-only change must rebuild.
+            - 'packages/cities/**'
             - '.github/workflows/tile-server-deploy.yml'
     workflow_dispatch: {}
 

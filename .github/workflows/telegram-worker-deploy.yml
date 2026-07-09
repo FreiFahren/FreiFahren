@@ -5,6 +5,8 @@ on:
         branches: [main]
         paths:
             - 'packages/telegram-worker/**'
+            # Bundled at runtime, so a registry-only change must redeploy this worker.
+            - 'packages/cities/**'
             - '.github/workflows/telegram-worker-deploy.yml'
     workflow_dispatch: {}
 
