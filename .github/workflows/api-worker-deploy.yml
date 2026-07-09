@@ -16,6 +16,10 @@ concurrency:
 jobs:
     deploy:
         runs-on: ubuntu-latest
+        # Records a GitHub deployment for this worker so it shows in the repo's Deployments tab.
+        environment:
+            name: api-worker
+            url: https://api.freifahren.org
         permissions:
             contents: read
         defaults:
