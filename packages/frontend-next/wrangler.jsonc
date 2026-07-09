@@ -9,5 +9,11 @@
     // Without this the SPA fallback swallows /relay/* before the proxy Worker runs.
     "run_worker_first": ["/relay/*"],
   },
-  "routes": [{ "pattern": "app.freifahren.org", "custom_domain": true }],
+  // app.freifahren.org stays a Berlin alias (PWA install + Capacitor origin + App Store deep-link
+  // target); berlin.freifahren.org is the canonical per-city host. Both serve the same bundle,
+  // which resolves the city from the hostname at runtime.
+  "routes": [
+    { "pattern": "app.freifahren.org", "custom_domain": true },
+    { "pattern": "berlin.freifahren.org", "custom_domain": true },
+  ],
 }

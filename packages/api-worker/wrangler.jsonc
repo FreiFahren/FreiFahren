@@ -16,7 +16,7 @@
     ],
     "vars": {
         "NODE_ENV": "production",
-        "CORS_ORIGINS": "https://freifahren.org,https://app.freifahren.org,https://www.freifahren.org,http://localhost:1871,http://192.168.178.65:1871,capacitor://localhost",
+        "CORS_ORIGINS": "https://freifahren.org,https://app.freifahren.org,https://www.freifahren.org,https://berlin.freifahren.org,http://localhost:1871,http://192.168.178.65:1871,capacitor://localhost",
         "TELEGRAM_WORKER_URL": "https://telegram-worker.freifahren.workers.dev",
         "SENTRY_DSN": "https://8f49e71a73d689efdcaabfd8794457b6@o4508609338867712.ingest.de.sentry.io/4511638467051600",
     },
