@@ -4,11 +4,11 @@ import type { PostHog } from 'posthog-js';
 import { currentCitySlug } from './city';
 import { optionalEnv } from './utils';
 
-// In the native WKWebView (capacitor://localhost) cookies are unreliable, so persistent capture uses
-// localStorage only; the web keeps the cookie too. Consent ('denied' -> memory) still applies on top.
-export const PERSISTENT_PERSISTENCE = Capacitor.isNativePlatform()
-  ? 'localStorage'
-  : 'localStorage+cookie';
+// Web uses a cookie, not localStorage: localStorage is per-origin, so a visitor crossing city
+// subdomains would land on empty storage and be minted a new anonymous id. The cookie is shared
+// across subdomains (see cross_subdomain_cookie), so the id survives the switch. Native keeps
+// localStorage because cookies are unreliable in the WKWebView (capacitor://localhost).
+export const PERSISTENT_PERSISTENCE = Capacitor.isNativePlatform() ? 'localStorage' : 'cookie';
 
 // posthog-js is lazy-loaded after first paint to keep it out of the eager bundle. Calls made before
 // it finishes loading are buffered here and flushed in order, so startup events aren't lost.
@@ -73,6 +73,9 @@ export function loadPostHog(): Promise<void> {
       // users stay un-retained by design, and respect_dnt keeps DNT users out entirely.
       person_profiles: 'always',
       persistence: PERSISTENT_PERSISTENCE,
+      // Explicit so the cross-subdomain intent can't be silently flipped to per-host. posthog-js
+      // also derives this for registrable domains; it stays host-only on single-label hosts.
+      cross_subdomain_cookie: true,
       autocapture: false,
       capture_performance: false,
       disable_session_recording: true,
