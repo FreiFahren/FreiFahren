@@ -112,7 +112,8 @@ export function useTrunkStationsGeoJSON(): FeatureCollection<Point, StationPoint
   if (!stations) return undefined;
 
   const trunkLineIds = new Set<string>();
-  if (lines) for (const line of lines) if (!secondaryTypes.has(line.type)) trunkLineIds.add(line.id);
+  if (lines)
+    for (const line of lines) if (!secondaryTypes.has(line.type)) trunkLineIds.add(line.id);
   const linesLoaded = Boolean(lines);
 
   return {

@@ -4,7 +4,12 @@ import { Layer, Source } from 'react-map-gl/maplibre';
 import { useRisk } from '@/api/risk';
 
 import { STATIONS_BASE_LAYER_ID } from './StationsLayer';
-import { LINE_OPACITY, LINE_WIDTH, type TypedSegmentProperties, useTypedSegments } from './line-style';
+import {
+  LINE_OPACITY,
+  LINE_WIDTH,
+  type TypedSegmentProperties,
+  useTypedSegments,
+} from './line-style';
 
 // Neutral green for segments without elevated risk. The backend
 // only returns risky (non-green) segments, so everything else falls back to this.
