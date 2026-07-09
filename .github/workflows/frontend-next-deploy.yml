@@ -5,6 +5,8 @@ on:
         branches: [main]
         paths:
             - 'packages/frontend-next/**'
+            # Bundled into the client, so a registry-only change must redeploy.
+            - 'packages/cities/**'
             - '.github/workflows/frontend-next-deploy.yml'
     workflow_dispatch: {}
 
