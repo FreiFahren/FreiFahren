@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import type { Feature, FeatureCollection, LineString, Point } from 'geojson';
+import type { Feature, FeatureCollection, LineString } from 'geojson';
 
 import { currentCitySlug } from '@/lib/city';
 import { distanceMeters } from '@/lib/geo';
@@ -57,22 +57,6 @@ export type SegmentProperties = {
 
 export type Segment = Feature<LineString, SegmentProperties>;
 export type Segments = FeatureCollection<LineString, SegmentProperties>;
-
-export type StationPointProps = { id: string; name: string };
-
-export function stationsToGeoJSON(stations: Stations): FeatureCollection<Point, StationPointProps> {
-  return {
-    type: 'FeatureCollection',
-    features: Object.values(stations).map((station) => ({
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: [station.coordinates.longitude, station.coordinates.latitude],
-      },
-      properties: { id: station.id, name: station.name },
-    })),
-  };
-}
 
 export function resolveStationLineNames(
   lineIds: Station['lines'],

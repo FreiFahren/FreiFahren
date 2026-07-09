@@ -3,8 +3,8 @@ import './Map.css';
 
 import maplibregl, { type StyleSpecification } from 'maplibre-gl';
 import { Protocol } from 'pmtiles';
-import { useEffect, useState } from 'react';
-import { Map as MapGL } from 'react-map-gl/maplibre';
+import { useEffect, useRef, useState } from 'react';
+import { Map as MapGL, type ViewStateChangeEvent } from 'react-map-gl/maplibre';
 
 // Register the `pmtiles://` protocol so MapLibre can range-read the static PMTiles basemap archive
 // directly from R2 (see packages/tile-server). This runs once when the lazy map chunk loads, before
@@ -15,9 +15,11 @@ maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile);
 
 import { useRisk } from '@/api/risk';
 import { useSegments } from '@/api/transit';
+import { track } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';
 
 import { LineLayer } from './LineLayer';
+import { SECONDARY_REVEAL_ZOOM } from './line-style';
 import { MapCameraController } from './MapCameraController';
 import { ReportsLayer } from './ReportsLayer';
 import { RiskLayer } from './RiskLayer';
@@ -50,6 +52,16 @@ export function MapView() {
   const { selectedStation, handleMapClick } = useStationSelection();
   const { visible: riskVisible } = useRiskLayer();
   const [baseMapReady, setBaseMapReady] = useState(false);
+
+  // Fire once per session the first time the user zooms in far enough to reveal the secondary
+  // (tram/bus) tier. The map is persistent, so this ref spans the whole session; sessions that
+  // never fire it never surfaced those lines (see the discoverability analysis).
+  const secondaryRevealedRef = useRef(false);
+  const trackSecondaryReveal = (e: ViewStateChangeEvent) => {
+    if (secondaryRevealedRef.current || e.viewState.zoom < SECONDARY_REVEAL_ZOOM) return;
+    secondaryRevealedRef.current = true;
+    track('secondary_lines_revealed', { zoom: Math.round(e.viewState.zoom * 10) / 10 });
+  };
 
   // On web the style is just the URL (MapLibre fetches it, and the SW + immutable HTTP cache handle
   // offline). The Capacitor build has no service worker, so it resolves the style + a locally-cached
@@ -97,6 +109,7 @@ export function MapView() {
         attributionControl={{ compact: true }}
         interactiveLayerIds={[REPORTS_HIT_LAYER_ID, STATIONS_LAYER_ID]}
         onClick={handleMapClick}
+        onZoomEnd={trackSecondaryReveal}
         // Let the base map render its first frame before we add the GeoJSON sources and the
         // report markers, so that overlay setup doesn't compete with the heaviest part of map
         // init. The map is persistent, so this fires once per session.
