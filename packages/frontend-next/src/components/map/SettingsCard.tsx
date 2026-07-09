@@ -13,6 +13,7 @@ import { openLegalDisclaimer } from '@/lib/legal-disclaimer';
 import { Route as ImpressumRoute } from '@/routes/impressum';
 import { Route as PrivacyRoute } from '@/routes/privacy';
 
+import { CitySwitcher } from './CitySwitcher';
 import { DetailCard } from './DetailCard';
 import { NAMESPACE } from './SettingsButton.i18n';
 import { SocialLinks } from './SocialLinks';
@@ -60,6 +61,7 @@ export function SettingsCard({ onClose }: SettingsCardProps) {
   return (
     <DetailCard title={t('title')} closeLabel={t('close')} onClose={onClose}>
       <div className="flex flex-col px-2">
+        <CitySwitcher />
         <a
           href={`${WEBSITE_URL}/contact`}
           className="hover:bg-muted focus-visible:bg-muted flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm transition-colors outline-none"
