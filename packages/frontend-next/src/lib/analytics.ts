@@ -39,6 +39,10 @@ type AnalyticsEvents = {
     trigger: LocationRequestTrigger;
     reason: 'denied' | 'unavailable' | 'timeout';
   };
+  // Fires once per session the first time the map is zoomed in far enough to reveal the secondary
+  // (tram/bus) tier. Sessions that never fire it never discovered those lines exist — the
+  // denominator being map pageviews. `zoom` is where the reveal happened.
+  secondary_lines_revealed: { zoom: number };
   station_selected: { source: 'map' | 'search' };
   report_marker_selected: { report_age_minutes: number };
   reports_overview_opened: { report_count: number };
