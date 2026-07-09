@@ -19,6 +19,10 @@ jobs:
         # (`wrangler secret put MISTRAL_API_KEY` etc.) and fill TELEGRAM_REPORT_CHAT_ID in
         # wrangler.jsonc.
         runs-on: ubuntu-latest
+        # Records a GitHub deployment for this worker so it shows in the repo's Deployments tab.
+        environment:
+            name: telegram-worker
+            url: https://telegram-worker.freifahren.workers.dev
         permissions:
             contents: read
         defaults:

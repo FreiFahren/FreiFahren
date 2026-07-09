@@ -16,6 +16,10 @@ concurrency:
 jobs:
     deploy:
         runs-on: ubuntu-latest
+        # Records a GitHub deployment for this worker so it shows in the repo's Deployments tab.
+        # No url: warehouse-export has no public HTTP endpoint (it's a scheduled export worker).
+        environment:
+            name: warehouse-export
         permissions:
             contents: read
         defaults:
