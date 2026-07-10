@@ -1,6 +1,8 @@
 import { Capacitor } from '@capacitor/core';
 import { useSyncExternalStore } from 'react';
 
+import { safeLocalStorage } from '@/lib/safe-storage';
+
 // Numeric App Store ID (not the bundle id). Keep in sync with the apple-itunes-app tag in index.html.
 export const APP_STORE_ID = '6738277309';
 
@@ -32,11 +34,7 @@ const eligible =
   !detectIosSafari(navigator.userAgent);
 
 function readDismissed(): boolean {
-  try {
-    return localStorage.getItem(STORAGE_KEY) === '1';
-  } catch {
-    return false;
-  }
+  return safeLocalStorage.getItem(STORAGE_KEY) === '1';
 }
 
 let dismissed = readDismissed();
@@ -53,11 +51,7 @@ function shouldShow(): boolean {
 
 export function dismissAppBanner(): void {
   dismissed = true;
-  try {
-    localStorage.setItem(STORAGE_KEY, '1');
-  } catch {
-    // In-memory flag still hides it for this session.
-  }
+  safeLocalStorage.setItem(STORAGE_KEY, '1');
   for (const listener of listeners) listener();
 }
 

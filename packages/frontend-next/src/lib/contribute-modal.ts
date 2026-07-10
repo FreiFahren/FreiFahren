@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
 import { track } from '@/lib/analytics';
+import { safeLocalStorage } from '@/lib/safe-storage';
 
 // "Don't show again" preference. Reuse the old frontend's key so users who already
 // dismissed the modal there are not nagged again after the rewrite ships.
@@ -43,20 +44,11 @@ export function useContributeModalOpen(): boolean {
 }
 
 export function isContributeDismissed(): boolean {
-  try {
-    return localStorage.getItem(DISMISSED_KEY) === 'true';
-  } catch {
-    // Private mode / disabled storage: treat as not dismissed so the modal can still appear.
-    return false;
-  }
+  return safeLocalStorage.getItem(DISMISSED_KEY) === 'true';
 }
 
 export function dismissContributeForever(): void {
   track('contribute_dismissed', { source });
-  try {
-    localStorage.setItem(DISMISSED_KEY, 'true');
-  } catch {
-    // Ignore storage failures; closing the modal below still suppresses it for this session.
-  }
+  safeLocalStorage.setItem(DISMISSED_KEY, 'true');
   closeContributeModal();
 }

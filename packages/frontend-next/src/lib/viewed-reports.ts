@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
+import { safeSessionStorage } from '@/lib/safe-storage';
+
 // Reports the user has already looked at (by opening the report detail or the reports overview)
 // stop pulsing on the map and on the overview button. Tracked by the app-wide
 // `${stationId}-${timestamp}` report key and persisted in sessionStorage so the state survives
@@ -14,7 +16,7 @@ function reportKey(stationId: string, timestamp: string): string {
 
 function readInitial(): Set<string> {
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
+    const raw = safeSessionStorage.getItem(STORAGE_KEY);
     if (!raw) return new Set();
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return new Set();
@@ -41,11 +43,7 @@ export function markReportViewed(stationId: string, timestamp: string): void {
   const key = reportKey(stationId, timestamp);
   if (viewed.has(key)) return;
   viewed = new Set(viewed).add(key);
-  try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify([...viewed]));
-  } catch {
-    // Storage unavailable: keep the in-memory state so it still works for this session.
-  }
+  safeSessionStorage.setItem(STORAGE_KEY, JSON.stringify([...viewed]));
   for (const listener of listeners) listener();
 }
 
