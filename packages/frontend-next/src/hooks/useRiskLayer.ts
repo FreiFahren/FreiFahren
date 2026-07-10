@@ -1,6 +1,7 @@
 import { useEffect, useSyncExternalStore } from 'react';
 
 import { setSuperProperties, track } from '@/lib/analytics';
+import { safeLocalStorage } from '@/lib/safe-storage';
 
 // Which transit layer the map shows: risk-colored segments ('RISK') or plain line colors
 // ('LINES'). Shared between the toggle button (mounted in the map route) and the layer (nested
@@ -13,11 +14,7 @@ const STORAGE_KEY = 'defaultLayer';
 const DEFAULT_LAYER: Layer = 'RISK';
 
 function readInitial(): Layer {
-  try {
-    return localStorage.getItem(STORAGE_KEY) === 'LINES' ? 'LINES' : 'RISK';
-  } catch {
-    return DEFAULT_LAYER;
-  }
+  return safeLocalStorage.getItem(STORAGE_KEY) === 'LINES' ? 'LINES' : DEFAULT_LAYER;
 }
 
 let layer = readInitial();
@@ -26,11 +23,7 @@ const listeners = new Set<() => void>();
 function setLayer(next: Layer) {
   if (next === layer) return;
   layer = next;
-  try {
-    localStorage.setItem(STORAGE_KEY, next);
-  } catch {
-    // Ignore storage failures (e.g. private mode); state still works for the session.
-  }
+  safeLocalStorage.setItem(STORAGE_KEY, next);
   track('risk_layer_toggled', { to: next });
   setSuperProperties({ map_layer: next });
   for (const listener of listeners) listener();

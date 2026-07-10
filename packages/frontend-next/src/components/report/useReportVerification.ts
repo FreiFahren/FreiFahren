@@ -1,6 +1,7 @@
 import { useStations } from '@/api/transit';
 import { useGeolocation } from '@/contexts/Geolocation.context';
 import { distanceMeters } from '@/lib/geo';
+import { safeLocalStorage } from '@/lib/safe-storage';
 
 export type ReportRejection = 'too_soon' | 'too_far';
 
@@ -9,21 +10,13 @@ const MIN_REPORT_INTERVAL_MS = 15 * 60 * 1000;
 const STORAGE_KEY = 'lastReportAt';
 
 function readLastReportAt(): number | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const value = raw ? Number(raw) : NaN;
-    return Number.isFinite(value) ? value : null;
-  } catch {
-    return null;
-  }
+  const raw = safeLocalStorage.getItem(STORAGE_KEY);
+  const value = raw ? Number(raw) : NaN;
+  return Number.isFinite(value) ? value : null;
 }
 
 function writeLastReportAt(timestamp: number): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, String(timestamp));
-  } catch {
-    // Private mode / storage unavailable: skip.
-  }
+  safeLocalStorage.setItem(STORAGE_KEY, String(timestamp));
 }
 
 /**

@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
+import { safeLocalStorage } from '@/lib/safe-storage';
+
 // Acceptance is re-asked every six months. localStorage has no native expiry, so
 // we store the acceptance timestamp and compare against this window on read.
 // (Note: on Safari/iOS, ITP may purge script-writable storage after ~7 days of
@@ -10,16 +12,11 @@ const STORAGE_KEY = 'legalDisclaimerAcceptedAt';
 const SIX_MONTHS_MS = 1000 * 60 * 60 * 24 * 182;
 
 function isWithinWindow(now: number): boolean {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw === null) return false;
-    const acceptedAt = new Date(raw).getTime();
-    if (Number.isNaN(acceptedAt)) return false;
-    return now - acceptedAt < SIX_MONTHS_MS;
-  } catch {
-    // Private mode / disabled storage: treat as not accepted so the gate still works.
-    return false;
-  }
+  const raw = safeLocalStorage.getItem(STORAGE_KEY);
+  if (raw === null) return false;
+  const acceptedAt = new Date(raw).getTime();
+  if (Number.isNaN(acceptedAt)) return false;
+  return now - acceptedAt < SIX_MONTHS_MS;
 }
 
 let accepted = isWithinWindow(Date.now());
@@ -33,11 +30,7 @@ function notify(): void {
 }
 
 function acceptDisclaimer(): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, new Date().toISOString());
-  } catch {
-    // Ignore storage failures; the session-level state below still suppresses the gate.
-  }
+  safeLocalStorage.setItem(STORAGE_KEY, new Date().toISOString());
   accepted = true;
   notify();
 }

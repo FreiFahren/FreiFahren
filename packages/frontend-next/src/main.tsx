@@ -10,6 +10,7 @@ import { syncConsentToPostHog } from './lib/consent';
 import { loadPostHog } from './lib/posthog-client';
 import { initErrorMonitoring } from './lib/error-monitoring';
 import { initNativePlatform } from './lib/native';
+import { safeSessionStorage } from './lib/safe-storage';
 import './lib/i18n';
 import { routeTree } from './routeTree.gen';
 import './index.css';
@@ -37,11 +38,12 @@ if (!__CAPACITOR__ && 'serviceWorker' in navigator) {
 // fetch the fresh shell. Skip when offline — a reload can't fetch a new chunk and the SW already
 // serves the precached shell, so it'd only wipe UI state. The timestamp bounds repeated reloads.
 window.addEventListener('vite:preloadError', (event) => {
+  // Prevent Vite from rethrowing the underlying import failure whether recovery is possible or not.
+  event.preventDefault();
   if (!navigator.onLine) return;
   const KEY = 'vite:preloadError:lastReload';
-  if (Date.now() - Number(sessionStorage.getItem(KEY) ?? 0) < 10_000) return;
-  sessionStorage.setItem(KEY, String(Date.now()));
-  event.preventDefault();
+  if (Date.now() - Number(safeSessionStorage.getItem(KEY) ?? 0) < 10_000) return;
+  if (!safeSessionStorage.setItem(KEY, String(Date.now()))) return;
   window.location.reload();
 });
 

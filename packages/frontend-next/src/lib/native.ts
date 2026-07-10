@@ -12,17 +12,6 @@ export async function initNativePlatform(): Promise<void> {
   if (!Capacitor.isNativePlatform()) return;
 
   try {
-    // Capgo OTA: signal that this bundle booted cleanly. If notifyAppReady() isn't called within
-    // appReadyTimeout the updater treats the bundle as broken and rolls back to the previous one on
-    // the next launch — that auto-rollback is our safety net for a bad bundle. The download/install
-    // itself is handled by autoUpdate (see capacitor.config.ts).
-    const { CapacitorUpdater } = await import('@capgo/capacitor-updater');
-    await CapacitorUpdater.notifyAppReady();
-  } catch {
-    /* ignore */
-  }
-
-  try {
     // The app has no multi-field forms, so the keyboard accessory bar (the "‹ › Done" toolbar) only
     // reads as a stray dialog.
     const { Keyboard } = await import('@capacitor/keyboard');
@@ -53,4 +42,16 @@ export async function initNativePlatform(): Promise<void> {
   // AppDelegate bridges iOS's userDidTakeScreenshot notification to this window event. The current
   // route rides along automatically as posthog-js's `$pathname`.
   window.addEventListener('screenshotTaken', () => track('screenshot_taken', {}));
+}
+
+let appReadyPromise: Promise<void> | null = null;
+
+/** Confirm an OTA bundle only after the initial route's critical JavaScript loaded successfully. */
+export function notifyNativeAppReady(): Promise<void> {
+  if (!Capacitor.isNativePlatform()) return Promise.resolve();
+  appReadyPromise ??= import('@capgo/capacitor-updater')
+    .then(({ CapacitorUpdater }) => CapacitorUpdater.notifyAppReady())
+    .then(() => undefined)
+    .catch(() => {});
+  return appReadyPromise;
 }

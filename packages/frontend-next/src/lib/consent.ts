@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
 import { enqueuePostHog, PERSISTENT_PERSISTENCE } from '@/lib/posthog-client';
+import { safeLocalStorage } from '@/lib/safe-storage';
 
 // Capture is ON by default (see main.tsx). The banner asks for cookie consent specifically; either
 // choice keeps analytics running, but at different privacy levels:
@@ -21,7 +22,7 @@ type StoredConsent = { choice: ConsentChoice; decidedAt: number };
 
 function read(): StoredConsent | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = safeLocalStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
     if (
@@ -38,7 +39,7 @@ function read(): StoredConsent | null {
     }
     return null;
   } catch {
-    // Private mode / disabled storage / legacy value: treat as undecided.
+    // Malformed or legacy values are treated as undecided.
     return null;
   }
 }
@@ -101,14 +102,10 @@ function applyToPostHog(value: ConsentChoice | null): void {
 export function setConsent(value: ConsentChoice): void {
   const now = new Date();
   decidedAt = now.getTime();
-  try {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ choice: value, decidedAt: now.toISOString() }),
-    );
-  } catch {
-    // Ignore storage failures; the in-memory choice still applies for this session.
-  }
+  safeLocalStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({ choice: value, decidedAt: now.toISOString() }),
+  );
   choice = value;
   reviewOpen = false;
   applyToPostHog(value);

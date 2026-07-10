@@ -12,13 +12,13 @@ const store = createStore('freifahren-basemap', 'cache');
 const STYLE_KEY = 'style';
 const ARCHIVE_PREFIX = 'archive:';
 
-/** A pmtiles Source backed by the whole archive held in memory, for offline range reads. */
-class BufferSource implements Source {
-  private readonly buffer: ArrayBuffer;
+/** A pmtiles Source that reads only the requested range from the persisted archive. */
+class BlobSource implements Source {
+  private readonly blob: Blob;
   private readonly key: string;
 
-  constructor(buffer: ArrayBuffer, key: string) {
-    this.buffer = buffer;
+  constructor(blob: Blob, key: string) {
+    this.blob = blob;
     this.key = key;
   }
 
@@ -27,7 +27,7 @@ class BufferSource implements Source {
   }
 
   async getBytes(offset: number, length: number): Promise<RangeResponse> {
-    return { data: this.buffer.slice(offset, offset + length) };
+    return { data: await this.blob.slice(offset, offset + length).arrayBuffer() };
   }
 }
 
@@ -102,7 +102,7 @@ export async function prepareOfflineBasemap(
   const cached = await get<Blob>(key, store);
   if (cached) {
     if (fresh) await set(STYLE_KEY, fresh, store);
-    protocol.add(new PMTiles(new BufferSource(await cached.arrayBuffer(), archiveUrl)));
+    protocol.add(new PMTiles(new BlobSource(cached, archiveUrl)));
   } else if (fresh && navigator.onLine) {
     // New deploy: its archive isn't downloaded yet. Persist the style only *after* its archive lands,
     // and prune older archives only then — so the persisted style always has a matching archive and an
