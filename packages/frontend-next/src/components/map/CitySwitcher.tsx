@@ -1,10 +1,8 @@
 import { ChevronDown, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { CITIES } from '@freifahren/cities';
-
 import { currentCity } from '@/lib/city';
-import { FEATURE_FLAGS, useFeatureFlag } from '@/lib/feature-flags';
+import { selectableCities, useCitySwitchingEnabled } from '@/lib/city-switching';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,8 +12,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { NAMESPACE } from './CitySwitcher.i18n';
-
-const cities = Object.values(CITIES);
 
 // Switching city means switching hostname: one bundle serves every subdomain and resolves the city
 // from the hostname at boot (see lib/city.ts). Swap the leftmost label for the target subdomain and
@@ -32,12 +28,10 @@ function urlForSubdomain(subdomain: string): string {
 // tapping it opens a menu to switch. Lives in settings rather than on the map because switching is
 // rare — but the row makes it discoverable that more than one city exists.
 export function CitySwitcher() {
-  const enabled = useFeatureFlag(FEATURE_FLAGS.citySwitcher);
+  const enabled = useCitySwitchingEnabled();
   const { t } = useTranslation(NAMESPACE);
 
-  // Built but not launched: hidden until PostHog turns the flag on. With only one city there is
-  // nothing to switch to or discover, so the row stays hidden until a second city ships.
-  if (!enabled || cities.length < 2) return null;
+  if (!enabled) return null;
 
   return (
     <DropdownMenu>
@@ -57,12 +51,12 @@ export function CitySwitcher() {
           value={currentCity.slug}
           onValueChange={(slug) => {
             if (slug !== currentCity.slug) {
-              const city = cities.find((c) => c.slug === slug);
+              const city = selectableCities.find((c) => c.slug === slug);
               if (city) window.location.assign(urlForSubdomain(city.subdomain));
             }
           }}
         >
-          {cities.map((city) => (
+          {selectableCities.map((city) => (
             <DropdownMenuRadioItem key={city.slug} value={city.slug}>
               {city.displayName}
             </DropdownMenuRadioItem>

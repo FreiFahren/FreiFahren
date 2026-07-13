@@ -3,7 +3,7 @@ import { useMap } from 'react-map-gl/maplibre';
 
 import { type GeolocationCoords, useGeolocation } from '@/contexts/Geolocation.context';
 import { track } from '@/lib/analytics';
-import { useLegalDisclaimer } from '@/lib/legal-disclaimer';
+import { useOnboardingComplete } from '@/lib/onboarding';
 import {
   LOCATION_PROMPT_DELAY_MS,
   queryGeolocationPermission,
@@ -28,7 +28,7 @@ const WATCH_OPTIONS = { enableHighAccuracy: true };
 export function UserLocationControl() {
   const { current: map } = useMap();
   const { notifyLoading, notifyPosition, notifyError } = useGeolocation();
-  const { accepted } = useLegalDisclaimer();
+  const onboarded = useOnboardingComplete();
   // The watch callback repeats; report acquired/failed only once.
   const outcomeReportedRef = useRef(false);
   const watchIdRef = useRef<string | null>(null);
@@ -77,10 +77,10 @@ export function UserLocationControl() {
     }
   }, [notifyLoading, handleError, handleGeolocate]);
 
-  // Gate on the legal disclaimer and map load. Granted → watch at once; otherwise wait, then
+  // Gate on onboarding completion and map load. Granted → watch at once; otherwise wait, then
   // surface the native prompt (requestPermissions on native; the watch itself prompts on web).
   useEffect(() => {
-    if (!map || !accepted) return;
+    if (!map || !onboarded) return;
 
     let cancelled = false;
     let timer = 0;
@@ -117,7 +117,7 @@ export function UserLocationControl() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [map, accepted, startWatch, handleError]);
+  }, [map, onboarded, startWatch, handleError]);
 
   // Release the location sensor on unmount.
   useEffect(

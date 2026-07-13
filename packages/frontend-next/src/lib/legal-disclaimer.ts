@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 
+import { restoreNativePreference, saveNativePreference } from '@/lib/native-preference';
 import { safeLocalStorage } from '@/lib/safe-storage';
 
 // Acceptance is re-asked every six months. localStorage has no native expiry, so
@@ -20,8 +21,7 @@ function isWithinWindow(now: number): boolean {
 }
 
 let accepted = isWithinWindow(Date.now());
-// On-demand "review" state: the disclaimer doubles as the Terms of Use, openable from a link
-// even after acceptance. Independent of the route-driven consent gate.
+// The disclaimer doubles as the Terms of Use, openable on demand even after acceptance.
 let reviewOpen = false;
 const listeners = new Set<() => void>();
 
@@ -29,13 +29,21 @@ function notify(): void {
   for (const listener of listeners) listener();
 }
 
-function acceptDisclaimer(): void {
-  safeLocalStorage.setItem(STORAGE_KEY, new Date().toISOString());
+export function acceptLegalDisclaimer(): void {
+  void saveNativePreference(STORAGE_KEY, new Date().toISOString());
   accepted = true;
   notify();
 }
 
-function subscribe(listener: () => void): () => void {
+export function isLegalDisclaimerAccepted(): boolean {
+  return accepted;
+}
+
+export function restoreLegalAcceptance(): Promise<boolean> {
+  return restoreNativePreference(STORAGE_KEY);
+}
+
+export function subscribeLegalDisclaimer(listener: () => void): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
 }
@@ -50,11 +58,6 @@ export function closeLegalDisclaimer(): void {
   notify();
 }
 
-export function useLegalDisclaimer(): { accepted: boolean; accept: () => void } {
-  const value = useSyncExternalStore(subscribe, () => accepted);
-  return { accepted: value, accept: acceptDisclaimer };
-}
-
 export function useLegalDisclaimerReview(): boolean {
-  return useSyncExternalStore(subscribe, () => reviewOpen);
+  return useSyncExternalStore(subscribeLegalDisclaimer, () => reviewOpen);
 }

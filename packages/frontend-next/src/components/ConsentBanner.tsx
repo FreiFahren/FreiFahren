@@ -13,7 +13,7 @@ import {
   useConsentPrompt,
   useConsentReview,
 } from '@/lib/consent';
-import { useLegalDisclaimer } from '@/lib/legal-disclaimer';
+import { useOnboardingComplete } from '@/lib/onboarding';
 import { optionalEnv } from '@/lib/utils';
 import { Route as PrivacyRoute } from '@/routes/privacy';
 
@@ -26,13 +26,13 @@ const analyticsEnabled = optionalEnv('VITE_POSTHOG_KEY') != null;
  * Non-blocking bottom prompt for analytics. Shown until the user decides, and reopenable from
  * settings to change the choice. Uses the same PopupCard wrapper as the location permission prompt;
  * "Decline" is given equal weight to "Accept" so the choice is genuinely free. The first-run prompt
- * waits until the legal disclaimer has been accepted so the two prompts never stack.
+ * waits until onboarding is done so the prompts never stack.
  */
 export function ConsentBanner() {
   const { t } = useTranslation(NAMESPACE);
   const showPrompt = useConsentPrompt();
   const reviewOpen = useConsentReview();
-  const { accepted } = useLegalDisclaimer();
+  const onboarded = useOnboardingComplete();
 
   // Reapply a returning visitor's stored choice once the SDK has initialized.
   useEffect(() => {
@@ -40,9 +40,9 @@ export function ConsentBanner() {
   }, []);
 
   if (!analyticsEnabled) return null;
-  // Reopened from settings always shows. The first-run/expired prompt appears only once the legal
-  // disclaimer is accepted, then stays until the user (re-)decides.
-  if (!reviewOpen && (!showPrompt || !accepted)) return null;
+  // Reopened from settings always shows; the first-run/expired prompt stays until the user
+  // (re-)decides.
+  if (!reviewOpen && (!showPrompt || !onboarded)) return null;
 
   return createPortal(
     <PopupCard>
