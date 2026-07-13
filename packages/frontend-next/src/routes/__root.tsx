@@ -6,6 +6,7 @@ import { ConsentBanner } from '@/components/ConsentBanner';
 import { ContributeCard } from '@/components/contribute/ContributeCard';
 import { FeedbackCard } from '@/components/feedback/FeedbackCard';
 import { LegalDisclaimer } from '@/components/LegalDisclaimer';
+import { Onboarding } from '@/components/onboarding/Onboarding';
 import { PersistentMapView } from '@/components/map/PersistentMapView';
 import { ScreenshotBranding } from '@/components/ScreenshotBranding';
 import { GeolocationProvider } from '@/contexts/GeolocationProvider';
@@ -33,6 +34,7 @@ export const Route = createRootRoute({
       <PersistentMapView />
       <AppBanner />
       <Outlet />
+      <Onboarding />
       <LegalDisclaimer />
       <ContributeCard />
       <FeedbackCard />

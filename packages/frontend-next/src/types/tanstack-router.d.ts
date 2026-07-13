@@ -9,9 +9,10 @@ declare module '@tanstack/react-router' {
   // a route is a compile error, not a silent omission.
   interface StaticDataRouteOption {
     /**
-     * Whether the legal disclaimer must be shown when this route is the active
-     * leaf. The disclaimer reads the deepest matched route's value, so layout
-     * and root routes (never a leaf themselves) can safely be `false`.
+     * Whether the onboarding flow (legal disclaimer + required setup steps)
+     * may be shown when this route is the active leaf. The flow reads the
+     * deepest matched route's value, so layout and root routes (never a leaf
+     * themselves) can safely be `false`.
      */
     legalDisclaimer: boolean;
   }

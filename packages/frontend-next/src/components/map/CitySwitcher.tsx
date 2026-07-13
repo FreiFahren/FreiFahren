@@ -1,10 +1,9 @@
+import { Capacitor } from '@capacitor/core';
 import { ChevronDown, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { CITIES } from '@freifahren/cities';
-
-import { currentCity } from '@/lib/city';
-import { FEATURE_FLAGS, useFeatureFlag } from '@/lib/feature-flags';
+import { currentCity, setCityPreference } from '@/lib/city';
+import { selectableCities, useCitySwitchingEnabled } from '@/lib/city-switching';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,12 +14,10 @@ import {
 
 import { NAMESPACE } from './CitySwitcher.i18n';
 
-const cities = Object.values(CITIES);
-
-// Switching city means switching hostname: one bundle serves every subdomain and resolves the city
-// from the hostname at boot (see lib/city.ts). Swap the leftmost label for the target subdomain and
-// keep the rest (app.freifahren.org -> berlin.freifahren.org). On a single-label host (localhost)
-// there is nothing to swap, so the app stays put — expected, since only one city resolves there.
+// Web resolves the city from the hostname at boot (see lib/city.ts), so switching means navigating
+// to the target subdomain: swap the leftmost label and keep the rest (app.freifahren.org ->
+// berlin.freifahren.org). Native has no subdomain (capacitor://localhost) and resolves from a
+// stored preference instead, so it switches via setCityPreference (see the handler below).
 function urlForSubdomain(subdomain: string): string {
   const { protocol, hostname, port, pathname, search } = window.location;
   const labels = hostname.split('.');
@@ -32,12 +29,10 @@ function urlForSubdomain(subdomain: string): string {
 // tapping it opens a menu to switch. Lives in settings rather than on the map because switching is
 // rare — but the row makes it discoverable that more than one city exists.
 export function CitySwitcher() {
-  const enabled = useFeatureFlag(FEATURE_FLAGS.citySwitcher);
+  const enabled = useCitySwitchingEnabled();
   const { t } = useTranslation(NAMESPACE);
 
-  // Built but not launched: hidden until PostHog turns the flag on. With only one city there is
-  // nothing to switch to or discover, so the row stays hidden until a second city ships.
-  if (!enabled || cities.length < 2) return null;
+  if (!enabled) return null;
 
   return (
     <DropdownMenu>
@@ -56,13 +51,17 @@ export function CitySwitcher() {
         <DropdownMenuRadioGroup
           value={currentCity.slug}
           onValueChange={(slug) => {
-            if (slug !== currentCity.slug) {
-              const city = cities.find((c) => c.slug === slug);
-              if (city) window.location.assign(urlForSubdomain(city.subdomain));
+            if (slug === currentCity.slug) return;
+            const city = selectableCities.find((c) => c.slug === slug);
+            if (!city) return;
+            if (Capacitor.isNativePlatform()) {
+              setCityPreference(city.slug);
+            } else {
+              window.location.assign(urlForSubdomain(city.subdomain));
             }
           }}
         >
-          {cities.map((city) => (
+          {selectableCities.map((city) => (
             <DropdownMenuRadioItem key={city.slug} value={city.slug}>
               {city.displayName}
             </DropdownMenuRadioItem>

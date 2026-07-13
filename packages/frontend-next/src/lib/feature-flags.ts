@@ -44,16 +44,19 @@ function ensureSubscribed(): void {
   });
 }
 
-function subscribe(listener: () => void): () => void {
+export function subscribeToFeatureFlags(listener: () => void): () => void {
   ensureSubscribed();
   listeners.add(listener);
   return () => listeners.delete(listener);
 }
 
+// In dev every flag reads on, so gated work is visible locally without touching PostHog. In
+// prod the value comes from the resolved flag (false until PostHog turns it on).
+export function getFeatureFlag(flag: FlagKey): boolean {
+  ensureSubscribed();
+  return import.meta.env.DEV ? true : (values.get(flag) ?? false);
+}
+
 export function useFeatureFlag(flag: FlagKey): boolean {
-  // In dev every flag reads on, so gated work is visible locally without touching PostHog. In
-  // prod the value comes from the resolved flag (false until PostHog turns it on).
-  return useSyncExternalStore(subscribe, () =>
-    import.meta.env.DEV ? true : (values.get(flag) ?? false),
-  );
+  return useSyncExternalStore(subscribeToFeatureFlags, () => getFeatureFlag(flag));
 }

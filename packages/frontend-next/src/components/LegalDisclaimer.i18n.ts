@@ -11,7 +11,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   activeUsage: 'I am not actively using the app during my journey.',
   activeUsageDescription:
     'I understand that the active use of the app during my journey can disturb other passengers and violate the terms of use of the public transport operator.',
-  saved: "Your confirmation will be saved to your browser's local storage.",
+  saved: 'Your confirmation will be saved on this device.',
   confirm: 'I confirm',
   privacy: 'Privacy',
   imprint: 'Imprint',
@@ -28,7 +28,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
   activeUsage: 'Ich nutze die App nicht aktiv während der Fahrt.',
   activeUsageDescription:
     'Ich verstehe, dass die aktive Nutzung der App während der Fahrt andere Fahrgäste stören und gegen die Nutzungsbedingungen des Verkehrsbetriebs verstoßen kann.',
-  saved: 'Die Bestätigung wird in Ihrem Browser gespeichert.',
+  saved: 'Die Bestätigung wird auf diesem Gerät gespeichert.',
   confirm: 'Ich bestätige',
   privacy: 'Datenschutz',
   imprint: 'Impressum',
