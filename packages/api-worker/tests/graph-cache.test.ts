@@ -3,8 +3,8 @@ import { asc } from 'drizzle-orm'
 import { afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import { app } from '../src/index'
-import { referenceCacheKey } from '../src/modules/transit/reference-cache'
-import { TRANSIT_CACHE_CONTROL, transitCacheTag } from '../src/modules/transit/transit-cache-middleware'
+import { REFERENCE_CACHE_CONTROL, referenceCacheKey } from '../src/modules/transit/reference-cache'
+import { transitCacheTag } from '../src/modules/transit/transit-cache-middleware'
 import { db, lineStations } from './test-db'
 import { appRequestWithRedirect, testEnv } from './test-utils'
 
@@ -71,7 +71,7 @@ const putSyntheticGraphEntry = async () => {
         new Response(JSON.stringify(inputs), {
             headers: {
                 'Content-Type': 'application/json',
-                'Cache-Control': TRANSIT_CACHE_CONTROL,
+                'Cache-Control': REFERENCE_CACHE_CONTROL,
                 'Cache-Tag': transitCacheTag('berlin'),
             },
         })
@@ -114,7 +114,7 @@ describe('GET /v0/transit/distance graph caching (real Cache API)', () => {
         const entry = await cache.match(graphKey())
         expect(entry).toBeDefined()
         expect(entry!.headers.get('Cache-Tag')).toBe(transitCacheTag('berlin'))
-        expect(entry!.headers.get('Cache-Control')).toBe(TRANSIT_CACHE_CONTROL)
+        expect(entry!.headers.get('Cache-Control')).toBe(REFERENCE_CACHE_CONTROL)
     })
 
     it('serves requests from the cached graph without re-reading D1', async () => {

@@ -8,6 +8,7 @@ export const VERSIONED_TRANSIT_PATH = '/:version{v\\d+}/transit/*'
 export const VERSIONED_TRANSIT_CACHEABLE_PATHS = [
     '/:version{v\\d+}/transit/stations',
     '/:version{v\\d+}/transit/lines',
+    '/:version{v\\d+}/transit/segments',
 ] as const
 
 export const TRANSIT_CACHE_TAG_PREFIX = 'transit-network'
