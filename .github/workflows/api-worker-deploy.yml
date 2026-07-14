@@ -14,8 +14,54 @@ concurrency:
     cancel-in-progress: false
 
 jobs:
+    migrate:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        defaults:
+            run:
+                working-directory: packages/api-worker
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v4
+
+            - name: Set up Bun
+              uses: oven-sh/setup-bun@v1
+              with:
+                  bun-version: latest
+
+            - name: Install dependencies
+              run: bun install --frozen-lockfile
+
+            - name: Apply migrations and verify city databases are in sync
+              env:
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+              run: |
+                  latest_migration=''
+                  while IFS= read -r binding; do
+                    echo "Applying migrations to $binding"
+                    bunx wrangler d1 migrations apply "$binding" --remote
+
+                    applied=$(bunx wrangler d1 execute "$binding" --remote --json \
+                      --command 'SELECT name FROM d1_migrations ORDER BY id DESC LIMIT 1' \
+                      | bun -e 'const result = await Bun.stdin.json(); const name = result[0]?.results?.[0]?.name; if (typeof name !== "string") process.exit(1); console.log(name)')
+
+                    if [ -z "$applied" ]; then
+                      echo "No applied migration found for $binding" >&2
+                      exit 1
+                    fi
+
+                    echo "$binding is at $applied"
+                    if [ -n "$latest_migration" ] && [ "$applied" != "$latest_migration" ]; then
+                      echo "Migration drift detected: $binding is at $applied, expected $latest_migration" >&2
+                      exit 1
+                    fi
+                    latest_migration="$applied"
+                  done < <(bun -e 'import { CITY_DATABASES } from "../../packages/cities/src/index.ts"; for (const { dbBinding } of Object.values(CITY_DATABASES)) console.log(dbBinding)')
+
     deploy:
-        needs: seed
+        needs: [migrate, seed]
         runs-on: ubuntu-latest
         # Records a GitHub deployment for this worker so it shows in the repo's Deployments tab.
         environment:
@@ -100,7 +146,7 @@ jobs:
     # additive and idempotent, so reports stay intact and re-running is a no-op if unchanged.
     # Each matrix leg touches only that city's isolated DB. Preconditions: the city's D1 binding exists.
     seed:
-        needs: plan
+        needs: [migrate, plan]
         runs-on: ubuntu-latest
         permissions:
             contents: read

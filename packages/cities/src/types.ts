@@ -112,21 +112,13 @@ export interface CityMap {
  * from the hostname (or an explicit `?city=` param on the API); this registry is
  * the single source of truth for everything that differs between cities.
  */
-export interface CityConfig {
+export interface CityConfig extends CityDatabaseConfig {
     /** Stable identifier used as the registry key and the API `?city=` value. */
     slug: string
     /** Subdomain the city is served from (`<subdomain>.freifahren.org`). */
     subdomain: string
     /** Human-readable name shown in the UI. */
     displayName: string
-    /**
-     * D1 database name. Berlin keeps the existing `api-worker-db-eu` — D1
-     * databases can't be renamed and we don't migrate data. New cities follow
-     * `api-worker-db-<slug>`.
-     */
-    dbName: string
-    /** Static Worker binding name for this city's D1 database. */
-    dbBinding: string
     /** BCP-47 language tag for the city's primary language. */
     lang: string
     map: CityMap
@@ -135,4 +127,12 @@ export interface CityConfig {
     seed: CitySeedConfig
     telegram: CityTelegramProfile
     community: CityCommunity
+}
+
+/** The D1 resources provisioned for each city. */
+export interface CityDatabaseConfig {
+    /** D1 database name. */
+    dbName: string
+    /** Static Worker binding name for this city's D1 database. */
+    dbBinding: string
 }
