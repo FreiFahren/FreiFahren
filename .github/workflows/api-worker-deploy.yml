@@ -102,7 +102,7 @@ jobs:
                   list=$(bun -e 'import { CITY_SLUGS } from "./packages/cities/src/index.ts"; console.log(JSON.stringify(CITY_SLUGS))')
                   echo "list=$list" >> "$GITHUB_OUTPUT"
 
-    # Reseed each city's remote D1 with the bundled reference data, then purge its cache.
+    # Reseed each city's remote D1 with the bundled reference data, then purge its cache.default entries.
     # Builds the data via the report-preserving seed and loads it with INSERT OR IGNORE —
     # additive and idempotent, so reports stay intact and re-running is a no-op if unchanged.
     # Runs after deploy so the two don't apply migrations concurrently. Each matrix leg
@@ -143,8 +143,8 @@ jobs:
                   CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
               run: bun run seed --city "$SEED_CITY_INPUT" --remote
 
-            # Purge only this city's transit Cache-Tag, so reseeding one city leaves the others' caches intact.
-            - name: Purge transit edge cache
+            # Purge only this city's cache.default Cache-Tag, so reseeding one city leaves the others' entries intact.
+            - name: Purge transit reference cache
               env:
                   CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
                   CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

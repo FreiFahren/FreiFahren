@@ -1,5 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
-import { TRANSIT_CACHE_CONTROL, transitCacheTag } from './transit-cache-middleware'
+import { transitCacheTag } from './transit-cache-middleware'
+
+export const REFERENCE_CACHE_CONTROL = 'public, max-age=2592000'
 
 // The global CacheStorage type (DOM lib) lacks the Cloudflare-specific `default` cache.
 interface EdgeCache {
@@ -8,7 +10,7 @@ interface EdgeCache {
 }
 
 // Synthetic origin for internal cache keys — never routed, just a stable key namespace
-// That cannot collide with real request URLs stored by transitEdgeCacheMiddleware.
+// That cannot collide with request URLs.
 const INTERNAL_ORIGIN = 'https://transit-reference.internal'
 
 // City-scoped internal cache key, so one city's reference data never serves another's.
@@ -19,10 +21,8 @@ export type CacheCtx = { waitUntil(promise: Promise<unknown>): void } | undefine
 /*
  * Read-through cache for static transit reference data (stations, lines, segments,
  * and the /distance graph inputs),
- * backed by the same Workers Cache API + `transit-network` Cache-Tag that
- * transitEdgeCacheMiddleware uses for the HTTP responses. Because the entry carries
- * that tag, the existing `db:purge-cache` tag purge invalidates it too — so a reseed
- * clears both layers and there is no TTL to tune.
+ * backed by `cache.default`. Because the entry carries the `transit-network` Cache-Tag,
+ * the existing `db:purge-cache` tag purge invalidates it after a reseed.
  *
  * Falls through to the loader (a direct D1 read) whenever the Cache API is absent —
  * i.e. under Bun (tests) and the Node seed CLI — so those paths are unchanged.
@@ -48,7 +48,7 @@ export const cachedReference = async <T>(
     const entry = new Response(JSON.stringify(value), {
         headers: {
             'Content-Type': 'application/json',
-            'Cache-Control': TRANSIT_CACHE_CONTROL,
+            'Cache-Control': REFERENCE_CACHE_CONTROL,
             'Cache-Tag': transitCacheTag(citySlug),
         },
     })

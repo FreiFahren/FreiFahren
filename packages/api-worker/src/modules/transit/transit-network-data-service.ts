@@ -26,7 +26,7 @@ export class TransitNetworkDataService {
         private cacheCtx: CacheCtx = undefined
     ) {}
 
-    // Static reference data — read through the transit edge cache so the hot in-process
+    // Static reference data — read through cache.default so the hot in-process
     // Callers (risk, reports) don't re-scan the full tables in D1 on every request.
     async getStations(): Promise<Stations> {
         return cachedReference(this.citySlug, 'stations', () => this.loadStations(), this.cacheCtx)

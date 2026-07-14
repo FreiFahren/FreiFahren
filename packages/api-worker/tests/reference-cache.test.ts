@@ -1,8 +1,8 @@
 import { createExecutionContext, waitOnExecutionContext } from 'cloudflare:test'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { cachedReference, referenceCacheKey } from '../src/modules/transit/reference-cache'
-import { cityCacheKey, TRANSIT_CACHE_CONTROL, transitCacheTag } from '../src/modules/transit/transit-cache-middleware'
+import { cachedReference, REFERENCE_CACHE_CONTROL, referenceCacheKey } from '../src/modules/transit/reference-cache'
+import { transitCacheTag } from '../src/modules/transit/transit-cache-middleware'
 
 // The Workers pool provides a real caches.default (the DOM CacheStorage type lacks it).
 const cache = (
@@ -58,24 +58,18 @@ describe('cachedReference (real Cache API)', () => {
         const entry = await cache.match(key)
         expect(entry).toBeDefined()
         expect(entry!.headers.get('Cache-Tag')).toBe(transitCacheTag('berlin'))
-        expect(entry!.headers.get('Cache-Control')).toBe(TRANSIT_CACHE_CONTROL)
+        expect(entry!.headers.get('Cache-Control')).toBe(REFERENCE_CACHE_CONTROL)
     })
 
-    it('does not collide with the HTTP edge-cache keys for the same resource', async () => {
-        // A warm HTTP entry for /v0/transit/stations must not satisfy the internal
-        // "stations" lookup — the synthetic INTERNAL_ORIGIN keeps the namespaces apart.
-        const edgeKey = cityCacheKey('https://api.test/v0/transit/stations', 'berlin')
-        usedKeys.push(edgeKey)
-        await cache.put(edgeKey, new Response('"http-entry"', { headers: { 'Cache-Control': 'max-age=60' } }))
-
+    it('namespaces cached values by resource key', async () => {
         internalKey('berlin', 'stations')
+        internalKey('berlin', 'lines')
         const loader = vi.fn(async () => 'from-loader')
         const value = await withCtx((ctx) => cachedReference('berlin', 'stations', loader, ctx))
 
         expect(loader).toHaveBeenCalledTimes(1)
         expect(value).toBe('from-loader')
-        // And the reference write must not clobber the HTTP entry either.
-        expect(await (await cache.match(edgeKey))!.text()).toBe('"http-entry"')
+        expect(await cache.match(new Request(referenceCacheKey('berlin', 'lines')))).toBeUndefined()
     })
 
     it('skips the cache write without an ExecutionContext, so the next call loads again', async () => {

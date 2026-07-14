@@ -150,16 +150,22 @@ describe('CORS', () => {
 })
 
 describe('Transit cache headers', () => {
-    it('sets Cache-Control and Vary on transit responses', async () => {
-        const response = await app.request('/v0/transit/stations', undefined, testEnv())
+    it.each(['/transit/stations', '/transit/lines'])('sets Workers Cache headers on %s', async (path) => {
+        const response = await appRequestWithRedirect(path)
 
         expect(response.status).toBe(200)
-        // Edge keeps the response 30 days (s-maxage) while browsers revalidate (max-age=0).
-        expect(response.headers.get('Cache-Control')).toContain('s-maxage=2592000')
         expect(response.headers.get('Cache-Control')).toContain('max-age=0')
         expect(response.headers.get('Cache-Control')).toContain('must-revalidate')
+        expect(response.headers.get('Cloudflare-CDN-Cache-Control')).toBe('public, max-age=2592000')
         expect(response.headers.get('Vary')).toContain('Origin')
-        // Per-city tag: the default (no ?city) resolves to berlin.
         expect(response.headers.get('Cache-Tag')).toBe('transit-network-berlin')
+    })
+
+    it('does not make other transit endpoints eligible for Workers Cache', async () => {
+        const response = await appRequestWithRedirect('/transit/segments')
+
+        expect(response.status).toBe(200)
+        expect(response.headers.get('Cache-Control')).toBeNull()
+        expect(response.headers.get('Cache-Tag')).toBeNull()
     })
 })
