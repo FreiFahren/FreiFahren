@@ -1,4 +1,5 @@
 import type { CityConfig } from './types'
+import { CITY_DATABASES } from './databases'
 
 // Few-shot examples appended to the Telegram extraction prompt. Tuned to teach
 // disambiguation the model gets wrong: slang names, direction-vs-station,
@@ -53,8 +54,8 @@ export const BERLIN: CityConfig = {
     displayName: 'Berlin',
     // D1 databases can't be renamed and we don't migrate data, so Berlin keeps
     // the existing database and its `DB` binding.
-    dbName: 'api-worker-db-eu',
-    dbBinding: 'DB',
+    dbName: CITY_DATABASES.berlin.dbName,
+    dbBinding: CITY_DATABASES.berlin.dbBinding,
     lang: 'de',
     map: {
         center: [13.388, 52.5162],

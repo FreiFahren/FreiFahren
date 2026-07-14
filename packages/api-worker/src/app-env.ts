@@ -13,6 +13,7 @@ import { TransitNetworkDataService } from './modules/transit/transit-network-dat
 export type Bindings = {
     // Cloudflare D1 binding. Present on Workers and, in tests, provided by the Miniflare pool.
     DB?: D1Database
+    DB_LEIPZIG?: D1Database
     CORS_ORIGINS?: string
     NODE_ENV?: string
     TELEGRAM_WORKER_URL?: string
@@ -110,9 +111,8 @@ const resolveCity = (c: Context<Env>): CityConfig => {
     return city
 }
 
-// Look up a city's D1 binding by name on the Worker env. Dynamic by design: today
-// Every city resolves to the single `DB` binding, but this is the switch that will
-// Fan out to per-city bindings (DB_LEIPZIG, …) once they exist.
+// Looks up a city's D1 binding by name on the Worker env. Dynamic by design.
+// Each city can use its isolated database.
 const cityDbBinding = (env: Bindings, dbBinding: string): D1Database | undefined =>
     (env as unknown as Record<string, D1Database | undefined>)[dbBinding]
 

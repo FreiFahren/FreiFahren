@@ -8,12 +8,23 @@
         "enabled": true,
     },
     "workers_dev": true,
-    "routes": [{ "pattern": "api.freifahren.org/*", "zone_name": "freifahren.org" }],
+    "routes": [
+        {
+            "pattern": "api.freifahren.org/*",
+            "zone_name": "freifahren.org",
+        },
+    ],
     "d1_databases": [
         {
             "binding": "DB",
             "database_name": "api-worker-db-eu",
             "database_id": "f8e11f14-15a5-42a8-8eba-5ab513175890",
+            "migrations_dir": "drizzle",
+        },
+        {
+            "binding": "DB_LEIPZIG",
+            "database_name": "api-worker-db-leipzig",
+            "database_id": "e590b909-ce9e-4b32-8761-8e86f2e036d3",
             "migrations_dir": "drizzle",
         },
     ],
