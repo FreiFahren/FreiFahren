@@ -53,6 +53,10 @@ export const createApp = () => {
     for (const path of VERSIONED_TRANSIT_CACHEABLE_PATHS) {
         app.use(path, transitCacheMiddleware)
     }
+    app.use('*', async (c, next) => {
+        await next()
+        c.header('Cache-Control', 'no-store')
+    })
     app.use(
         VERSIONED_TRANSIT_PATH,
         etag({

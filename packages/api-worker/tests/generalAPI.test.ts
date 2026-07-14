@@ -168,7 +168,16 @@ describe('Transit cache headers', () => {
         const response = await appRequestWithRedirect('/transit/distance?from=900000100001&to=900000100002')
 
         expect(response.status).toBe(404)
-        expect(response.headers.get('Cache-Control')).toBeNull()
+        expect(response.headers.get('Cache-Control')).toBe('no-store')
         expect(response.headers.get('Cache-Tag')).toBeNull()
+    })
+})
+
+describe('dynamic API cache headers', () => {
+    it('keeps risk responses out of Workers Cache', async () => {
+        const response = await app.request('/v0/risk', undefined, testEnv())
+
+        expect(response.status).toBe(200)
+        expect(response.headers.get('Cache-Control')).toBe('no-store')
     })
 })

@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
     deploy:
+        needs: seed
         runs-on: ubuntu-latest
         # Records a GitHub deployment for this worker so it shows in the repo's Deployments tab.
         environment:
@@ -40,14 +41,6 @@ jobs:
 
             - name: Install dependencies
               run: bun install --frozen-lockfile
-
-            # Apply any new D1 migrations before deploying the worker that depends on them.
-            # The seed job (which runs after this) reapplies them idempotently per city.
-            - name: Apply D1 migrations
-              env:
-                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-              run: bunx wrangler d1 migrations apply DB --remote
 
             - name: Deploy worker
               uses: cloudflare/wrangler-action@v3
@@ -102,13 +95,12 @@ jobs:
                   list=$(bun -e 'import { CITY_SLUGS } from "./packages/cities/src/index.ts"; console.log(JSON.stringify(CITY_SLUGS))')
                   echo "list=$list" >> "$GITHUB_OUTPUT"
 
-    # Reseed each city's remote D1 with the bundled reference data, then purge its cache.default entries.
+    # Reseed each city's remote D1 with the bundled reference data before deploying the Worker.
     # Builds the data via the report-preserving seed and loads it with INSERT OR IGNORE —
     # additive and idempotent, so reports stay intact and re-running is a no-op if unchanged.
-    # Runs after deploy so the two don't apply migrations concurrently. Each matrix leg
-    # touches only that city's isolated DB. Preconditions: the city's D1 binding exists.
+    # Each matrix leg touches only that city's isolated DB. Preconditions: the city's D1 binding exists.
     seed:
-        needs: [plan, deploy]
+        needs: plan
         runs-on: ubuntu-latest
         permissions:
             contents: read
