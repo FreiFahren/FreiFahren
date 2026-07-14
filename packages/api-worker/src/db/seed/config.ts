@@ -45,6 +45,7 @@ export const SEED_CONFIG = {
     city: CITY.displayName,
     adminLevel: CITY.seed.adminLevel,
     operators: CITY.seed.operators,
+    stationBounds: CITY.seed.stationBounds,
     routeTypes: ROUTE_TYPE_PRIORITY,
 
     // The Overpass API configuration.

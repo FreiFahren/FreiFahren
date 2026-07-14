@@ -6,6 +6,7 @@ import { lineStations } from '../schema/lines'
 import { reports } from '../schema/reports'
 import { stations } from '../schema/stations'
 
+import { SEED_CONFIG } from './config'
 import { seedLinesFromRelations } from './lines'
 import { seedSegmentsFromGeometry } from './segments/index'
 import { seedStationsFromElements } from './stations'
@@ -39,6 +40,18 @@ const extractRouteRelations = (elements: OsmElement[]): OsmRelation[] => {
         if (rel.tags?.type === 'route') out.push(rel)
     }
     return out
+}
+
+const filterStationElementsToBounds = (elements: OsmElement[]): OsmElement[] => {
+    const bounds = SEED_CONFIG.stationBounds
+    if (bounds === undefined) return elements
+
+    const [west, south, east, north] = bounds
+    return elements.filter(
+        (element) =>
+            element.type !== 'node' ||
+            (element.lon >= west && element.lon <= east && element.lat >= south && element.lat <= north)
+    )
 }
 
 // Stations that ended up with no line_stations row (e.g. duplicate Alexanderplatz
@@ -81,8 +94,9 @@ const pruneOrphanStations = async (db: DbConnection): Promise<void> => {
 
 export const seedBaseData = async (db: DbConnection) => {
     logger.info('[seed] Loading bundled stations snapshot...')
-    const stationElements = await loadSnapshot<OsmElement[]>('stations')
-    logger.info(`[seed]   ${stationElements.length} elements`)
+    const rawStationElements = await loadSnapshot<OsmElement[]>('stations')
+    const stationElements = filterStationElementsToBounds(rawStationElements)
+    logger.info(`[seed]   ${rawStationElements.length} elements → ${stationElements.length} within city service area`)
 
     logger.info('[seed] Loading bundled route geometries snapshot...')
     const routeGeometryElements = await loadSnapshot<OsmElement[]>('route_geometries')
