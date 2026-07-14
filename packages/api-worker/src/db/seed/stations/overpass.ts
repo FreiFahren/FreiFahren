@@ -101,14 +101,14 @@ relation
   (area.a)
   ->.routes;
 
-node(r.routes)->.routeNodes;
+    node(r.routes)->.routeNodes;
 
 rel
   ["public_transport"="stop_area"]
   (bn.routeNodes)
   ->.stopAreas;
 
-node(r.stopAreas)->.stopNodes;
+  node(r.stopAreas)->.stopNodes;
 
 (
   .routes;

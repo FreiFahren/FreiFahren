@@ -32,6 +32,11 @@ export interface CitySeedConfig {
      */
     operators: readonly string[]
     /**
+     * Optional operational area for the seeded stop set. Route relations remain
+     * intact so their geometry and stop ordering come from one OSM snapshot.
+     */
+    stationBounds?: BBox
+    /**
      * Route types ordered most-to-least prioritized — used to pick a single
      * "highest" route type when a station is served by several. Also the set of
      * OSM `route` values to include.
