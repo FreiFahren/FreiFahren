@@ -44,9 +44,9 @@ export const setSystemTime = (date?: Date) => {
 
 /**
  * Sends a request to the app and follows the version redirect so tests exercise the latest API
- * version without hard-coding `/v0/...` paths. No ExecutionContext is passed, so the transit
- * cache and background waitUntil paths stay inert here (they are covered separately on the
- * Cloudflare runtime); requests behave like the previous libsql tests, just against real D1.
+ * version without hard-coding `/v0/...` paths. No ExecutionContext is passed, so background
+ * cache.default writes stay inert here; requests behave like the previous libsql tests, just
+ * against real D1.
  */
 export const appRequestWithRedirect = async (path: string, init?: RequestInit, targetApp = app) => {
     const response = await targetApp.request(path, init, testEnv())

@@ -4,6 +4,9 @@
     "main": "src/worker.ts",
     "compatibility_date": "2025-10-11",
     "compatibility_flags": ["nodejs_compat"],
+    "cache": {
+        "enabled": true,
+    },
     "workers_dev": true,
     "routes": [{ "pattern": "api.freifahren.org/*", "zone_name": "freifahren.org" }],
     "d1_databases": [

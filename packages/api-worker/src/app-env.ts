@@ -94,9 +94,7 @@ export const setScopeTagger = (tagger: ScopeTagger) => {
 }
 
 // Resolve the request's city from the explicit `?city=` query parameter. It is a
-// Query param, not a header, because the transit edge cache keys on the full request
-// URL — a header would let one city's cached responses serve another. A missing param
-// Defaults to Berlin (legacy clients: the Capacitor app and old PWA shells); an unknown
+// Query param, not a header, because Workers Cache keys requests by URL, preventing one city's cached responses from serving another. A missing param defaults to Berlin (legacy clients: the Capacitor app and old PWA shells); an unknown
 // City is a 400 rather than a silent fallback.
 const resolveCity = (c: Context<Env>): CityConfig => {
     const requested = c.req.query('city') ?? DEFAULT_CITY_SLUG
