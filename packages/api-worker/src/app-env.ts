@@ -15,6 +15,10 @@ export type Bindings = {
     DB?: D1Database
     DB_LEIPZIG?: D1Database
     CORS_ORIGINS?: string
+    // This repo's Cloudflare account subdomain (e.g. `freifahren` for `*.freifahren.workers.dev`).
+    // Scopes the frontend preview CORS allowance to our own account so another tenant can't claim
+    // The `frontend-pr-<n>` name pattern and gain production API access. Unset => no previews.
+    PREVIEW_WORKERS_SUBDOMAIN?: string
     NODE_ENV?: string
     TELEGRAM_WORKER_URL?: string
     REPORT_PASSWORD?: string
@@ -30,12 +34,25 @@ export type AppConfig = {
     corsOrigins: string[]
     telegramWorkerUrl?: string
     reportPassword?: string
+    // See PREVIEW_WORKERS_SUBDOMAIN on Bindings. Undefined disables preview-origin CORS entirely.
+    previewWorkersSubdomain?: string
 }
 
-const previewOriginPattern = /^https:\/\/frontend-pr-\d+\.[a-z0-9-]+\.workers\.dev$/
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
-export const isAllowedCorsOrigin = (origin: string, corsOrigins: string[]) =>
-    corsOrigins.includes(origin) || previewOriginPattern.test(origin)
+// Frontend previews are deployed as `frontend-pr-<n>.<our-subdomain>.workers.dev`. Pinning the
+// Subdomain (rather than accepting any `*.workers.dev` tenant) keeps a Worker in someone else's
+// Cloudflare account from claiming the same name pattern and being granted production API CORS.
+const buildPreviewOriginPattern = (subdomain: string) =>
+    new RegExp(`^https:\\/\\/frontend-pr-\\d+\\.${escapeRegExp(subdomain)}\\.workers\\.dev$`)
+
+export const isAllowedCorsOrigin = (origin: string, config: AppConfig) => {
+    if (config.corsOrigins.includes(origin)) {
+        return true
+    }
+    const { previewWorkersSubdomain } = config
+    return previewWorkersSubdomain !== undefined && buildPreviewOriginPattern(previewWorkersSubdomain).test(origin)
+}
 
 export type Services = {
     reportsService: ReportsService
@@ -71,6 +88,7 @@ export const resolveConfig = (env: Bindings): AppConfig => {
         corsOrigins,
         telegramWorkerUrl: env.TELEGRAM_WORKER_URL,
         reportPassword: env.REPORT_PASSWORD,
+        previewWorkersSubdomain: env.PREVIEW_WORKERS_SUBDOMAIN,
     }
 }
 

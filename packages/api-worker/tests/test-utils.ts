@@ -22,6 +22,7 @@ export const resetTestEnv = () => {
 export const testEnv = (): Bindings => ({
     DB: workerEnv.DB,
     CORS_ORIGINS: overrides.CORS_ORIGINS ?? workerEnv.CORS_ORIGINS,
+    PREVIEW_WORKERS_SUBDOMAIN: overrides.PREVIEW_WORKERS_SUBDOMAIN ?? workerEnv.PREVIEW_WORKERS_SUBDOMAIN,
     NODE_ENV: overrides.NODE_ENV ?? workerEnv.NODE_ENV,
     TELEGRAM_WORKER_URL: overrides.TELEGRAM_WORKER_URL ?? workerEnv.TELEGRAM_WORKER_URL,
     REPORT_PASSWORD: overrides.REPORT_PASSWORD ?? workerEnv.REPORT_PASSWORD,

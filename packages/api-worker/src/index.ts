@@ -41,8 +41,8 @@ export const createApp = () => {
         '*',
         cors({
             origin: (origin, c) => {
-                const allowed = (c as Context<Env>).get('config').corsOrigins
-                return isAllowedCorsOrigin(origin, allowed) ? origin : null
+                const config = (c as Context<Env>).get('config')
+                return isAllowedCorsOrigin(origin, config) ? origin : null
             },
             allowHeaders: ['Accept', 'Content-Type', 'If-Modified-Since', 'If-None-Match', 'ff-platform'],
             allowMethods: ['GET', 'POST', 'OPTIONS'],

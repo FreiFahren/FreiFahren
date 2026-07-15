@@ -102,6 +102,9 @@ describe('CORS', () => {
     const PREVIEW_ORIGIN = 'https://frontend-pr-744.freifahren.workers.dev'
     const DISALLOWED_ORIGIN = 'https://not-on-the-list.example'
     const MALFORMED_PREVIEW_ORIGIN = 'https://frontend-pr-not-a-number.freifahren.workers.dev'
+    // Same name pattern, but a foreign Cloudflare account subdomain — must be rejected so another
+    // tenant can't impersonate our previews and gain production API CORS access.
+    const FOREIGN_PREVIEW_ORIGIN = 'https://frontend-pr-744.someone-else.workers.dev'
 
     it('does not echo a disallowed origin', async () => {
         const response = await app.request(
@@ -143,17 +146,20 @@ describe('CORS', () => {
         expect(response.headers.get('Access-Control-Allow-Origin')).toBe(PREVIEW_ORIGIN)
     })
 
-    it.each([DISALLOWED_ORIGIN, MALFORMED_PREVIEW_ORIGIN])('does not grant a preflight from %s', async (origin) => {
-        const response = await appRequestWithRedirect('/reports', {
-            method: 'OPTIONS',
-            headers: {
-                Origin: origin,
-                'Access-Control-Request-Method': 'POST',
-            },
-        })
+    it.each([DISALLOWED_ORIGIN, MALFORMED_PREVIEW_ORIGIN, FOREIGN_PREVIEW_ORIGIN])(
+        'does not grant a preflight from %s',
+        async (origin) => {
+            const response = await appRequestWithRedirect('/reports', {
+                method: 'OPTIONS',
+                headers: {
+                    Origin: origin,
+                    'Access-Control-Request-Method': 'POST',
+                },
+            })
 
-        expect(response.headers.get('Access-Control-Allow-Origin')).toBeNull()
-    })
+            expect(response.headers.get('Access-Control-Allow-Origin')).toBeNull()
+        }
+    )
 })
 
 describe('Transit cache headers', () => {
