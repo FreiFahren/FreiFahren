@@ -32,6 +32,11 @@ export type AppConfig = {
     reportPassword?: string
 }
 
+const previewOriginPattern = /^https:\/\/frontend-pr-\d+\.[a-z0-9-]+\.workers\.dev$/
+
+export const isAllowedCorsOrigin = (origin: string, corsOrigins: string[]) =>
+    corsOrigins.includes(origin) || previewOriginPattern.test(origin)
+
 export type Services = {
     reportsService: ReportsService
     riskService: RiskService

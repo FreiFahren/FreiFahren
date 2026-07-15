@@ -3,7 +3,7 @@ import { cors } from 'hono/cors'
 import { etag, RETAINED_304_HEADERS } from 'hono/etag'
 import { requestId } from 'hono/request-id'
 
-import { Env, registerContext } from './app-env'
+import { Env, isAllowedCorsOrigin, registerContext } from './app-env'
 import { handleError } from './common/error-handler'
 import { registerVersionedRoutes } from './common/router'
 import { getReports, getReportsByStation, postReport } from './modules/reports/'
@@ -42,7 +42,7 @@ export const createApp = () => {
         cors({
             origin: (origin, c) => {
                 const allowed = (c as Context<Env>).get('config').corsOrigins
-                return allowed.includes(origin) ? origin : null
+                return isAllowedCorsOrigin(origin, allowed) ? origin : null
             },
             allowHeaders: ['Accept', 'Content-Type', 'If-Modified-Since', 'If-None-Match', 'ff-platform'],
             allowMethods: ['GET', 'POST', 'OPTIONS'],
