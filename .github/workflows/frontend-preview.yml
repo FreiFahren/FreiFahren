@@ -21,6 +21,7 @@ jobs:
         permissions:
             contents: read
             issues: write
+            pull-requests: write
         defaults:
             run:
                 working-directory: packages/frontend-next
