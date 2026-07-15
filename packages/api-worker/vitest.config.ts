@@ -33,6 +33,7 @@ export default defineWorkersConfig(async () => {
                             TEST_MIGRATIONS: migrations,
                             CORS_ORIGINS:
                                 'http://localhost,http://localhost:1871,http://127.0.0.1:1871,capacitor://localhost',
+                            PREVIEW_WORKERS_SUBDOMAIN: 'freifahren',
                             NODE_ENV: 'development',
                             REPORT_PASSWORD: 'password',
                             TELEGRAM_WORKER_URL: 'https://telegram-worker.test',

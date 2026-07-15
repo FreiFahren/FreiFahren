@@ -1,0 +1,164 @@
+name: Frontend preview
+
+# No `paths:` filter here on purpose: it would also gate the `closed` event, so a PR that deployed
+# a preview and then moved its frontend/cities changes out of the diff before closing would never
+# trigger cleanup, leaving the `frontend-pr-<n>` Worker (and its cost) behind. The path check lives
+# on the `changes` job below instead, which only gates deployment.
+on:
+    pull_request:
+        types: [opened, reopened, synchronize, closed]
+
+concurrency:
+    group: frontend-preview-${{ github.event.pull_request.number }}
+    cancel-in-progress: false
+
+jobs:
+    # Deployment path check (see the note on `on:` above). Runs only for non-close events; the
+    # deploy job consumes its output so previews are still limited to frontend/cities changes.
+    changes:
+        if: github.event.action != 'closed'
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            pull-requests: read
+        outputs:
+            frontend: ${{ steps.filter.outputs.frontend }}
+        steps:
+            - name: Detect frontend changes
+              id: filter
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const { owner, repo } = context.repo
+                      const files = await github.paginate(github.rest.pulls.listFiles, {
+                        owner,
+                        repo,
+                        pull_number: context.issue.number,
+                        per_page: 100,
+                      })
+                      const patterns = [
+                        /^packages\/frontend-next\//,
+                        /^packages\/cities\//,
+                        /^\.github\/workflows\/frontend-preview\.yml$/,
+                      ]
+                      const changed = files.some((file) => patterns.some((pattern) => pattern.test(file.filename)))
+                      core.setOutput('frontend', changed ? 'true' : 'false')
+
+    deploy:
+        needs: changes
+        if: >-
+            github.event.action != 'closed' &&
+            needs.changes.outputs.frontend == 'true' &&
+            github.event.pull_request.head.repo.full_name == github.repository
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            issues: write
+            pull-requests: write
+        defaults:
+            run:
+                working-directory: packages/frontend-next
+
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v4
+
+            - name: Set up Bun
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Install dependencies
+              run: bun install --frozen-lockfile
+
+            - name: Build preview against the production API
+              run: bun run build
+              env:
+                  VITE_API_URL: https://api.freifahren.org
+
+            - name: Deploy preview worker
+              id: deploy
+              run: |
+                  set -euo pipefail
+                  worker_name="frontend-pr-${{ github.event.pull_request.number }}"
+                  bunx wrangler@latest deploy --config wrangler.preview.jsonc --name "$worker_name"
+                  subdomain=$(curl --fail --silent --show-error \
+                    --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+                    "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" \
+                    | jq --exit-status --raw-output '.result.subdomain')
+                  url="https://${worker_name}.${subdomain}.workers.dev"
+                  echo "url=$url" >> "$GITHUB_OUTPUT"
+              env:
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+            - name: Comment preview link on pull request
+              uses: actions/github-script@v7
+              env:
+                  PREVIEW_URL: ${{ steps.deploy.outputs.url }}
+              with:
+                  script: |
+                      const marker = '<!-- frontend-preview -->'
+                      const body = `${marker}\n🚀 Frontend preview: [Open preview](${process.env.PREVIEW_URL})\n\nThis preview uses the production API.`
+                      const { owner, repo } = context.repo
+                      const issue_number = context.issue.number
+                      const comments = await github.paginate(github.rest.issues.listComments, {
+                        owner,
+                        repo,
+                        issue_number,
+                      })
+                      const existing = comments.find(
+                        (comment) => comment.user.type === 'Bot' && comment.body?.includes(marker)
+                      )
+                      if (existing) {
+                        await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body })
+                      } else {
+                        await github.rest.issues.createComment({ owner, repo, issue_number, body })
+                      }
+
+    cleanup:
+        # Runs for every closed PR from this repo (no path gate) so a preview can never outlive its
+        # PR, even if the frontend changes were reverted before closing. The delete is idempotent:
+        # a PR that never deployed a preview is a no-op rather than a failure.
+        if: >-
+            github.event.action == 'closed' &&
+            github.event.pull_request.head.repo.full_name == github.repository
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        defaults:
+            run:
+                working-directory: packages/frontend-next
+
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v4
+
+            - name: Set up Bun
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Delete preview worker
+              run: |
+                  set -uo pipefail
+                  worker_name="frontend-pr-${{ github.event.pull_request.number }}"
+                  output=$(bunx wrangler@latest delete --name "$worker_name" --force 2>&1)
+                  status=$?
+                  echo "$output"
+                  if [ "$status" -eq 0 ]; then
+                    echo "Deleted preview worker $worker_name."
+                    exit 0
+                  fi
+                  # A PR that never deployed a preview (or was already cleaned up) has no Worker to
+                  # delete — Cloudflare returns script_not_found (code 10007). That is expected, not a
+                  # failure. Any other error (auth, network) must fail loudly so a real leak is noticed.
+                  if echo "$output" | grep -qiE 'code: *10007|script_not_found|workers\.api\.error\.not_found'; then
+                    echo "No preview worker named $worker_name exists; nothing to clean up."
+                    exit 0
+                  fi
+                  echo "Failed to delete preview worker $worker_name (exit $status)." >&2
+                  exit "$status"
+              env:
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
