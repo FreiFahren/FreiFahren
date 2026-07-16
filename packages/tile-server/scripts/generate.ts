@@ -10,7 +10,7 @@
 //   CITY              limit to one city (by slug); default: all buildable cities
 //   TILES_BASE_URL    style host; default http://localhost:3000 (the deploy sets the R2 domain)
 //   TILES_VERSION     immutable path segment, i.e. the git sha (deploy only); default none (flat path)
-import { mkdir } from 'node:fs/promises'
+import { mkdir, rename, unlink } from 'node:fs/promises'
 import { basename, resolve } from 'node:path'
 
 import { CITIES } from '@freifahren/cities'
@@ -23,6 +23,7 @@ const DIST = resolve(PKG, 'dist')
 const SOURCE = resolve(PKG, 'source')
 const STYLE_SRC = resolve(SOURCE, 'freifahren-style.json')
 const BASE_CONFIG = resolve(PKG, 'tilemaker/config-freifahren.json')
+const OSMIUM_IMAGE = 'mschilde/osmium-tool@sha256:0495d0356b688e642b74b8cb64f140f7315e3bf2e4682701131b3bad30597285'
 
 const baseUrl = process.env.TILES_BASE_URL ?? 'http://localhost:3000'
 const version = process.env.TILES_VERSION ?? ''
@@ -58,22 +59,52 @@ const baseConfig = (await Bun.file(BASE_CONFIG).json()) as TilemakerConfig
 
 for (const city of selected) {
   // 1. OSM extract — download once if not already present locally.
-  const pbf = resolve(SOURCE, basename(new URL(city.tiles.osmUrl).pathname))
-  if (!(await Bun.file(pbf).exists())) {
+  const sourcePbf = resolve(SOURCE, basename(new URL(city.tiles.osmUrl).pathname))
+  if (!(await Bun.file(sourcePbf).exists())) {
+    const partialSourcePbf = `${sourcePbf}.part`
+    await unlink(partialSourcePbf).catch((error: unknown) => {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+    })
     console.log(`↓ ${city.slug}: ${city.tiles.osmUrl}`)
-    // curl, not fetch + Bun.write: streaming the ~100 MB extract through Bun.write stalled on CI
-    // (the whole deploy hung). curl streams straight to disk and retries. --remove-on-error so an
-    // interrupted transfer can't leave a truncated file the exists() check above would later reuse.
-    const dl = Bun.spawn(['curl', '-fSL', '--retry', '3', '--remove-on-error', '-o', pbf, city.tiles.osmUrl], {
+    // A .part file is only renamed after curl succeeds, so an interrupted download cannot be
+    // mistaken for a cached source extract on the next build.
+    const dl = Bun.spawn(['curl', '-fSL', '--retry', '3', '--remove-on-error', '-o', partialSourcePbf, city.tiles.osmUrl], {
       stdout: 'inherit',
       stderr: 'inherit',
     })
     if ((await dl.exited) !== 0) throw new Error(`OSM download failed for ${city.slug}`)
+    await rename(partialSourcePbf, sourcePbf)
   }
 
-  // 2. Per-city tilemaker config: base tuning + this city's identity, written into dist/
-  // (inside the /work mount) so tilemaker can read it. The archive's suggested view is
-  // the city's map center + zoom — one source, no drift.
+  const pbf = city.tiles.clipToMapBounds ? resolve(SOURCE, `${city.slug}.osm.pbf`) : sourcePbf
+  if (city.tiles.clipToMapBounds) {
+    console.log(`✂ ${city.slug}: crop to map bounds`)
+    const crop = Bun.spawn(
+      [
+        'docker',
+        'run',
+        '--rm',
+        '-v',
+        `${REPO}:/work`,
+        '-w',
+        '/work',
+        OSMIUM_IMAGE,
+        'osmium',
+        'extract',
+        '--strategy=complete_ways',
+        `--bbox=${city.map.bounds.join(',')}`,
+        '--set-bounds',
+        '--overwrite',
+        '--output',
+        inContainer(pbf),
+        inContainer(sourcePbf),
+      ],
+      { stdout: 'inherit', stderr: 'inherit' },
+    )
+    if ((await crop.exited) !== 0) throw new Error(`OSM crop failed for ${city.slug}`)
+  }
+
+  // 2. Per-city tilemaker config: base tuning + this city's identity, written into dist/.
   const config = structuredClone(baseConfig)
   config.settings.name = `FreiFahren ${city.displayName} vector tiles`
   config.settings.description = `OSM-derived vector tiles for the FreiFahren ${city.displayName} basemap.`
@@ -110,6 +141,5 @@ for (const city of selected) {
   const style = (await Bun.file(STYLE_SRC).json()) as Style
   const rewritten = rewritePmtilesStyle(style, { city: city.slug, baseUrl, version })
   await Bun.write(resolve(DIST, 'styles', `${city.slug}.json`), `${JSON.stringify(rewritten, null, 2)}\n`)
-
   console.log(`✓ ${city.slug}: dist/${city.slug}.pmtiles + dist/styles/${city.slug}.json`)
 }

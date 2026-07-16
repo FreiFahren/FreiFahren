@@ -16,6 +16,8 @@ city in it (each carries a `tiles` block with its Geofabrik `osmUrl`). There is 
 - `tilemaker/` — Tilemaker config + Lua that map OSM into the basemap layers (city-agnostic).
 - `source/freifahren-style.json` — the source MapLibre style (the only committed `source/` file).
 - `scripts/generate.ts` — download extract → tilemaker → `dist/<city>.pmtiles` + `dist/styles/<city>.json`.
+  Leipzig opts into a crop to its configured `map.bounds` before tile generation, keeping its archive
+  focused on the city rather than all of Saxony.
 - `styles/rewrite-style.ts` — points the style at a city's archive (pure function used by `generate.ts`).
 - `styles/serve.ts` — a range-capable static server for local `dist/`.
 - `fonts/` — TTF the glyph PBFs would be generated from (unused until the style gets text layers).
@@ -36,7 +38,7 @@ bun run serve        # serve dist/ with range + CORS on http://localhost:3000
 Then point the frontend at the local style:
 
 ```env
-VITE_MAP_STYLE_URL=http://localhost:3000/styles/berlin.json
+VITE_TILES_BASE_URL=http://localhost:3000
 ```
 
 `generate` downloads each city's OSM extract into `source/` on first run (cached afterwards). Locally

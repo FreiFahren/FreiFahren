@@ -29,7 +29,9 @@ import { REPORTS_HIT_LAYER_ID } from '../../hooks/useReportsLayer';
 import { useRiskLayer } from '../../hooks/useRiskLayer';
 import { useStationSelection } from '../../hooks/useStationSelection';
 
-const MAP_STYLE_URL = currentCity.map.styleUrl;
+const MAP_STYLE_URL = import.meta.env.VITE_TILES_BASE_URL
+  ? `${import.meta.env.VITE_TILES_BASE_URL}/styles/${currentCity.slug}.json`
+  : currentCity.map.styleUrl;
 
 const INITIAL_VIEW = {
   longitude: currentCity.map.center[0],
