@@ -35,6 +35,7 @@ export const LEIPZIG: CityConfig = {
     },
     tiles: {
         osmUrl: 'https://download.geofabrik.de/europe/germany/sachsen-latest.osm.pbf',
+        clipToMapBounds: true,
     },
     seed: {
         adminLevel: '^6$',

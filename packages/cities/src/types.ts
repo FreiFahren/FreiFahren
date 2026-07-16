@@ -98,6 +98,8 @@ export interface CityCommunity {
 export interface CityTiles {
     /** Geofabrik OSM extract the basemap is built from. */
     osmUrl: string
+    /** Crop this regional extract to `map.bounds` before generating the archive. */
+    clipToMapBounds?: boolean
 }
 
 /** Map defaults for the city's basemap. */
@@ -106,7 +108,7 @@ export interface CityMap {
     center: LngLat
     /** Initial zoom level. */
     zoom: number
-    /** Metro-area extent. Not yet consumed by the frontend; recorded for camera/bounds work. */
+    /** Metro-area extent. Used for optional tile cropping. */
     bounds: BBox
     /** URL of the MapLibre style JSON served by the tile-server. */
     styleUrl: string
