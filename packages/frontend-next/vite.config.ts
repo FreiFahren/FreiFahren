@@ -74,109 +74,113 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset({ target: '19' })] }),
     tailwindcss(),
     preloadPrimaryFont(),
-    // `false` is a valid (skipped) Vite plugin slot — keeps the SW out of Capacitor builds.
-    !isCapacitor &&
-      VitePWA({
-        // Silent update: the new service worker takes over and the fresh shell loads on the next
-        // navigation, with no prompt UI (AGENTS.md: keep registration/update UI minimal). skipWaiting
-        // + clientsClaim are implied by autoUpdate, so no rider gets stuck on a stale shell.
-        registerType: 'autoUpdate',
-        // Register the SW ourselves in main.tsx instead of letting the plugin inject registerSW.js.
-        // That generated snippet calls navigator.serviceWorker.register() with no .catch, so a
-        // rejection (common in bots/crawlers and locked-down WebViews) surfaces as an unhandled
-        // rejection and floods Sentry (WEB-APP-1). Our own registration swallows the rejection.
-        injectRegister: false,
-        // Icons live in public/ (generated from the source app-icon.png, matching the native icon).
-        manifest: {
-          name: 'FreiFahren',
-          short_name: 'FreiFahren',
-          description:
-            'Freifahren ist eine Webapp, die es Nutzern ermöglicht Ticketkontrollen zu melden und sich vor Kontrollen zu warnen.',
-          lang: 'de',
-          // Keep theme/background in sync with --card in src/index.css and index.html's theme-color.
-          theme_color: '#25272b',
-          background_color: '#25272b',
-          display: 'standalone',
-          start_url: '/',
-          icons: [
-            { src: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
-            { src: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
-            { src: '/pwa-192x192.png', type: 'image/png', sizes: '192x192' },
-            { src: '/pwa-512x512.png', type: 'image/png', sizes: '512x512' },
-            {
-              src: '/pwa-maskable-512x512.png',
-              type: 'image/png',
-              sizes: '512x512',
-              purpose: 'maskable',
+    VitePWA({
+      // Keep the virtual registration module resolvable for native builds without emitting a
+      // service worker there. The call site itself is compile-time gated by __CAPACITOR__.
+      disable: isCapacitor,
+      // Silent update: the new service worker takes over and the fresh shell reloads immediately,
+      // with no prompt UI (AGENTS.md: keep registration/update UI minimal).
+      registerType: 'autoUpdate',
+      // Register the SW ourselves in main.tsx instead of letting the plugin inject registerSW.js.
+      // That generated snippet calls navigator.serviceWorker.register() with no .catch, so a
+      // rejection (common in bots/crawlers and locked-down WebViews) surfaces as an unhandled
+      // rejection and floods Sentry (WEB-APP-1). Our own registration swallows the rejection.
+      injectRegister: false,
+      // Icons live in public/ (generated from the source app-icon.png, matching the native icon).
+      manifest: {
+        name: 'FreiFahren',
+        short_name: 'FreiFahren',
+        description:
+          'Freifahren ist eine Webapp, die es Nutzern ermöglicht Ticketkontrollen zu melden und sich vor Kontrollen zu warnen.',
+        lang: 'de',
+        // Keep theme/background in sync with --card in src/index.css and index.html's theme-color.
+        theme_color: '#25272b',
+        background_color: '#25272b',
+        display: 'standalone',
+        start_url: '/',
+        icons: [
+          { src: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
+          { src: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
+          { src: '/pwa-192x192.png', type: 'image/png', sizes: '192x192' },
+          { src: '/pwa-512x512.png', type: 'image/png', sizes: '512x512' },
+          {
+            src: '/pwa-maskable-512x512.png',
+            type: 'image/png',
+            sizes: '512x512',
+            purpose: 'maskable',
+          },
+        ],
+      },
+      workbox: {
+        // injectRegister is disabled, so configure the auto-update lifecycle explicitly rather
+        // than relying on vite-plugin-pwa's injected registration snippet to do it for us.
+        skipWaiting: true,
+        clientsClaim: true,
+        // Precache the immutable, content-hashed assets: JS/CSS, the IBM Plex woff2 files, and the
+        // lazy maplibre chunk (~1 MB, under the 2 MB default cap) so the map engine paints offline
+        // too. Cache-first is correct for these — a new build gets new filenames, so they're never
+        // stale. The HTML document is deliberately handled by the network-first rule below, not this
+        // precache, so a deploy is never served stale.
+        globPatterns: ['**/*.{js,css,woff2,svg,png,ico}'],
+        // Disable navigateFallback (vite-plugin-pwa defaults it to index.html). Its NavigationRoute is
+        // registered *before* runtimeCaching and first-match-wins, so a precache navigateFallback would
+        // shadow the network-first rule below and keep serving the stale shell. With it off, the
+        // network-first navigation rule is the sole navigation handler; it caches each visited shell, so
+        // returning visitors still cold-boot offline (previously-visited pages only — the best-effort web
+        // offline of ADR 0005). It only matches navigation requests, so it never touches the cross-origin
+        // tile/API fetches.
+        navigateFallback: null,
+        runtimeCaching: [
+          {
+            // The HTML document is network-first: a fresh deploy is picked up on the very next load,
+            // not one navigation later (the autoUpdate lag) and never needing a manual cache clear.
+            // The hashed JS/CSS it references stay precache/cache-first (immutable, so never stale).
+            // The last successful shell is cached, so a returning visitor still cold-boots offline.
+            // See ADR 0008.
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'app-shell',
+              // Fall back to the cached shell quickly on a flaky/tunnel connection rather than hanging.
+              networkTimeoutSeconds: 3,
+              expiration: { maxEntries: 8, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              cacheableResponse: { statuses: [0, 200] },
             },
-          ],
-        },
-        workbox: {
-          // Precache the immutable, content-hashed assets: JS/CSS, the IBM Plex woff2 files, and the
-          // lazy maplibre chunk (~1 MB, under the 2 MB default cap) so the map engine paints offline
-          // too. Cache-first is correct for these — a new build gets new filenames, so they're never
-          // stale. The HTML document is deliberately handled by the network-first rule below, not this
-          // precache, so a deploy is never served stale.
-          globPatterns: ['**/*.{js,css,html,woff2,svg,png,ico}'],
-          // Disable navigateFallback (vite-plugin-pwa defaults it to index.html). Its NavigationRoute is
-          // registered *before* runtimeCaching and first-match-wins, so a precache navigateFallback would
-          // shadow the network-first rule below and keep serving the stale shell. With it off, the
-          // network-first navigation rule is the sole navigation handler; it caches each visited shell, so
-          // returning visitors still cold-boot offline (previously-visited pages only — the best-effort web
-          // offline of ADR 0005). It only matches navigation requests, so it never touches the cross-origin
-          // tile/API fetches.
-          navigateFallback: null,
-          runtimeCaching: [
-            {
-              // The HTML document is network-first: a fresh deploy is picked up on the very next load,
-              // not one navigation later (the autoUpdate lag) and never needing a manual cache clear.
-              // The hashed JS/CSS it references stay precache/cache-first (immutable, so never stale).
-              // The last successful shell is cached, so a returning visitor still cold-boots offline.
-              // See ADR 0008.
-              urlPattern: ({ request }) => request.mode === 'navigate',
-              handler: 'NetworkFirst',
-              options: {
-                cacheName: 'app-shell',
-                // Fall back to the cached shell quickly on a flaky/tunnel connection rather than hanging.
-                networkTimeoutSeconds: 3,
-                expiration: { maxEntries: 8, maxAgeSeconds: 60 * 60 * 24 * 30 },
-                cacheableResponse: { statuses: [0, 200] },
-              },
+          },
+          {
+            // Style JSON is the one mutable pointer (it names the current immutable /v<sha>/ archive).
+            // StaleWhileRevalidate paints instantly from cache but refreshes in the background, so a
+            // new tile-server deploy is picked up on the next load — never the 30-day staleness a
+            // CacheFirst rule would impose.
+            urlPattern: ({ url }) =>
+              url.origin === 'https://tiles.freifahren.org' && url.pathname.endsWith('.json'),
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'map-style',
+              expiration: { maxEntries: 4, maxAgeSeconds: 60 * 60 * 24 },
+              cacheableResponse: { statuses: [0, 200] },
             },
-            {
-              // Style JSON is the one mutable pointer (it names the current immutable /v<sha>/ archive).
-              // StaleWhileRevalidate paints instantly from cache but refreshes in the background, so a
-              // new tile-server deploy is picked up on the next load — never the 30-day staleness a
-              // CacheFirst rule would impose.
-              urlPattern: ({ url }) =>
-                url.origin === 'https://tiles.freifahren.org' && url.pathname.endsWith('.json'),
-              handler: 'StaleWhileRevalidate',
-              options: {
-                cacheName: 'map-style',
-                expiration: { maxEntries: 4, maxAgeSeconds: 60 * 60 * 24 },
-                cacheableResponse: { statuses: [0, 200] },
-              },
+          },
+          {
+            // Glyph PBFs are immutable, so CacheFirst is safe (currently unused — the basemap has no
+            // text layers — but ready for when labels are added).
+            urlPattern: ({ url }) =>
+              url.origin === 'https://tiles.freifahren.org' && url.pathname.endsWith('.pbf'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'map-fonts',
+              expiration: { maxEntries: 256, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
             },
-            {
-              // Glyph PBFs are immutable, so CacheFirst is safe (currently unused — the basemap has no
-              // text layers — but ready for when labels are added).
-              urlPattern: ({ url }) =>
-                url.origin === 'https://tiles.freifahren.org' && url.pathname.endsWith('.pbf'),
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'map-fonts',
-                expiration: { maxEntries: 256, maxAgeSeconds: 60 * 60 * 24 * 365 },
-                cacheableResponse: { statuses: [0, 200] },
-              },
-            },
-            // The PMTiles archive (.pmtiles) is deliberately NOT given a runtime cache rule: it's read
-            // via HTTP range requests, and a CacheFirst store could hand a full 200 back to a range
-            // request and corrupt the read. Range reads go straight to the network (the immutable
-            // /v<sha>/ archive is still cached by the browser's HTTP cache).
-          ],
-        },
-        devOptions: { enabled: false },
-      }),
+          },
+          // The PMTiles archive (.pmtiles) is deliberately NOT given a runtime cache rule: it's read
+          // via HTTP range requests, and a CacheFirst store could hand a full 200 back to a range
+          // request and corrupt the read. Range reads go straight to the network (the immutable
+          // /v<sha>/ archive is still cached by the browser's HTTP cache).
+        ],
+      },
+      devOptions: { enabled: false },
+    }),
     // Must be last so it sees the final emitted bundle + maps. No-op without an auth token.
     ...(sentryAuthToken
       ? [

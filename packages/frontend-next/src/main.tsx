@@ -4,6 +4,7 @@ import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { get, set, del } from 'idb-keyval';
+import { registerSW } from 'virtual:pwa-register';
 import { queryClient, PERSISTED_CACHE_MAX_AGE } from './api/queryClient';
 import { capturePageview } from './lib/analytics';
 import { syncConsentToPostHog } from './lib/consent';
@@ -21,16 +22,33 @@ initErrorMonitoring();
 
 void initNativePlatform();
 
-// Register the PWA service worker ourselves rather than via vite-plugin-pwa's injected
-// registerSW.js, whose generated call has no .catch — so any registration rejection (bots,
-// crawlers, locked-down WebViews) bubbles up as an unhandled rejection and floods Sentry
-// (WEB-APP-1). The .catch here keeps that failure quiet; the SW is optional, so there's nothing
-// to do on failure. Gated on __CAPACITOR__ because the native build drops the PWA plugin and
-// ships no sw.js (FRE-649). registerType: 'autoUpdate' still applies — it lives in the generated
-// sw.js, not the registration snippet.
+// vite-plugin-pwa's registration API catches failures (bots, crawlers, locked-down WebViews) and
+// reloads once when an auto-updated worker takes control. Recheck after the app returns online or
+// to the foreground so an installed PWA does not keep a suspended shell indefinitely.
 if (!__CAPACITOR__ && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    void navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {});
+  registerSW({
+    onRegisteredSW: (_swUrl, registration) => {
+      if (!registration) return;
+
+      // The install page is not controlled yet, so its navigation cannot populate the runtime cache.
+      // Seed the shell once while online to retain the first offline cold start.
+      void navigator.serviceWorker.ready
+        .then(async () => {
+          const appShell = await caches.open('app-shell');
+          if (!(await appShell.match('/'))) await appShell.add('/');
+        })
+        .catch(() => {});
+
+      const update = () => {
+        void registration.update().catch(() => {});
+      };
+
+      window.addEventListener('online', update);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') update();
+      });
+    },
+    onRegisterError: () => {},
   });
 }
 
