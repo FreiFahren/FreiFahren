@@ -35,6 +35,15 @@ const toSqlLiteral = (value: unknown): string => {
 // Invoke the locally-installed wrangler CLI (via npx so the package's own binary is used).
 const wrangler = (...args: string[]) => execFileSync('npx', ['wrangler', ...args], { stdio: 'inherit' })
 
+const parsePersistToArg = (argv: string[] = process.argv): string | undefined => {
+    const flag = argv.indexOf('--persist-to')
+    if (flag === -1) return undefined
+
+    const path = argv[flag + 1]
+    if (!path) throw new Error('--persist-to requires a directory path')
+    return path
+}
+
 // Dump the reference tables to additive INSERT OR IGNORE statements so a prod load leaves existing
 // Rows (and the reports that reference them) intact.
 const dumpReferenceTables = async (d1: D1Database): Promise<string> => {
@@ -52,6 +61,7 @@ const dumpReferenceTables = async (d1: D1Database): Promise<string> => {
 const seedD1 = async () => {
     const city = parseCityArg()
     const remote = process.argv.includes('--remote')
+    const persistTo = parsePersistToArg()
     process.env.SEED_CITY = city
 
     const binding = getCity(city)!.dbBinding
@@ -66,8 +76,11 @@ const seedD1 = async () => {
     logger.info({ city, binding, target: remote ? 'remote' : 'local' }, 'Seeding D1...')
 
     // Build the reference tables on the local Miniflare D1 via the shared pipeline.
-    wrangler('d1', 'migrations', 'apply', binding, '--local')
-    const { env, dispose } = await getPlatformProxy<Record<string, D1Database>>()
+    const localPersistenceArgs = persistTo !== undefined ? ['--persist-to', persistTo] : []
+    wrangler('d1', 'migrations', 'apply', binding, '--local', ...localPersistenceArgs)
+    const { env, dispose } = await getPlatformProxy<Record<string, D1Database>>(
+        persistTo !== undefined ? { persist: { path: join(persistTo, 'v3') } } : undefined
+    )
     try {
         const d1 = env[binding]
         await seedBaseData(createD1Db(d1))
