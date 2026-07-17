@@ -11,9 +11,11 @@
         "BACKEND_URL": "https://api.freifahren.org",
         "PUBLIC_APP_URL": "https://app.freifahren.org",
         "MISTRAL_MODEL": "mistral-small-latest",
-        // TODO: Add each group chat ID after the bot has been added to that group.
         // One bot and webhook route messages by their incoming chat ID.
-        "TELEGRAM_CHAT_CITIES": {},
+        "TELEGRAM_CHAT_CITIES": {
+            "-1001370021231": "berlin",
+            "-1001138115617": "leipzig"
+        },
         "SENTRY_DSN": "https://9d9ac700f1213d4db367b557167a0594@o4508609338867712.ingest.de.sentry.io/4511633367564368",
     },
     // Messages are processed in the background (ctx.waitUntil) with no queue/retry; failed

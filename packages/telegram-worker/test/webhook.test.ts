@@ -12,7 +12,7 @@ vi.mock('../src/observability', () => ({ reportError: vi.fn() }))
 const testEnv: Env = {
     BACKEND_URL: 'https://backend.test',
     PUBLIC_APP_URL: 'https://app.example.test',
-    TELEGRAM_CHAT_CITIES: { [ALLOWED_CHAT_ID]: 'berlin', '-5211691627': 'leipzig' },
+    TELEGRAM_CHAT_CITIES: { [ALLOWED_CHAT_ID]: 'berlin', '-1002': 'leipzig' },
     MISTRAL_MODEL: 'mistral-small-latest',
     SENTRY_DSN: 'https://example.invalid/1',
     MISTRAL_API_KEY: 'test-mistral-key',
@@ -191,7 +191,7 @@ describe('handleWebhook', () => {
 
         await handleWebhook(webhookRequest(makeUpdate({ text: 'U2 Alex', chatId: -1001 })), testEnv, berlin.ctx, process)
         await handleWebhook(
-            webhookRequest(makeUpdate({ text: '3k Hbf', chatId: -5211691627 })),
+            webhookRequest(makeUpdate({ text: '3k Hbf', chatId: -1002 })),
             testEnv,
             leipzig.ctx,
             process

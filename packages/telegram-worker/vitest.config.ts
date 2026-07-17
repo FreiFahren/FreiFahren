@@ -17,7 +17,7 @@ export default defineWorkersConfig({
                         BACKEND_URL: 'https://backend.test',
                         PUBLIC_APP_URL: 'https://app.example.test',
                         MISTRAL_MODEL: 'mistral-small-latest',
-                        TELEGRAM_CHAT_CITIES: { '-1001': 'berlin', '-5211691627': 'leipzig' },
+                        TELEGRAM_CHAT_CITIES: { '-1001': 'berlin', '-1002': 'leipzig' },
                         MISTRAL_API_KEY: 'test-mistral-key',
                         TELEGRAM_BOT_TOKEN: '1:fake',
                         REPORT_PASSWORD: 'password',
