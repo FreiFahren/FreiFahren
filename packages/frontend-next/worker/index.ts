@@ -3,6 +3,32 @@ const API_HOST = 'eu.i.posthog.com';
 const ASSET_HOST = 'eu-assets.i.posthog.com';
 const PREFIX = '/relay';
 
+function withHostMetadata(response: Response, origin: string, method: string): Response {
+  if (method !== 'GET' || !response.headers.get('content-type')?.includes('text/html')) {
+    return response;
+  }
+
+  const canonicalUrl = `${origin}/`;
+
+  return new HTMLRewriter()
+    .on('meta[property="og:url"]', {
+      element(element) {
+        element.setAttribute('content', canonicalUrl);
+      },
+    })
+    .on('meta[property="og:image"]', {
+      element(element) {
+        element.setAttribute('content', `${canonicalUrl}og-image.jpg`);
+      },
+    })
+    .on('link[rel="canonical"]', {
+      element(element) {
+        element.setAttribute('href', canonicalUrl);
+      },
+    })
+    .transform(response);
+}
+
 interface Env {
   ASSETS: { fetch: (request: Request) => Promise<Response> };
 }
@@ -15,7 +41,7 @@ export default {
   async fetch(request: Request, env: Env, ctx: Ctx): Promise<Response> {
     const url = new URL(request.url);
     if (!url.pathname.startsWith(`${PREFIX}/`)) {
-      return env.ASSETS.fetch(request);
+      return withHostMetadata(await env.ASSETS.fetch(request), url.origin, request.method);
     }
 
     const upstreamPath = url.pathname.slice(PREFIX.length) + url.search;
