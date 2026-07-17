@@ -59,7 +59,7 @@ export function loadPostHog(): Promise<void> {
   }
   const apiHost = optionalEnv('VITE_POSTHOG_HOST') ?? 'https://eu.i.posthog.com';
 
-  loadPromise = import('posthog-js').then(({ default: posthog }) => {
+  loadPromise = import('posthog-js').then(async ({ default: posthog }) => {
     posthog.init(apiKey, {
       api_host: apiHost,
       // api_host is our reverse proxy in prod; keep PostHog UI/toolbar links on the real app.
@@ -93,11 +93,12 @@ export function loadPostHog(): Promise<void> {
       is_native: Capacitor.isNativePlatform(),
       city: currentCitySlug,
     });
+    // Native version discovery awaits @capacitor/app. Finish it before startup events become
+    // observable so the first pageview has the same super properties as later events.
+    await registerVersion(posthog);
     instance = posthog;
     for (const op of queue) op(posthog);
     queue.length = 0;
-    // Trails the register above because it awaits a native plugin call.
-    void registerVersion(posthog);
   });
   // Analytics is non-critical: a content blocker or a stale chunk can make the dynamic import
   // resolve empty (destructuring `default` then throws) or reject outright. Swallow it and disable
