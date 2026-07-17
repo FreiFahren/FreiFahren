@@ -56,10 +56,16 @@ export function buildIndex(
 }
 
 // No caching here; the api-worker serves these from its edge cache.
-export async function getTransitIndex(backendUrl: string, profile: CityProfile): Promise<TransitIndex> {
+const cityUrl = (backendUrl: string, path: string, city: string): string => {
+    const url = new URL(path, `${backendUrl}/`)
+    url.searchParams.set('city', city)
+    return url.toString()
+}
+
+export async function getTransitIndex(backendUrl: string, profile: CityProfile, city: string): Promise<TransitIndex> {
     const [stationsResp, linesResp] = await Promise.all([
-        fetch(`${backendUrl}/v0/transit/stations`),
-        fetch(`${backendUrl}/v0/transit/lines`),
+        fetch(cityUrl(backendUrl, '/v0/transit/stations', city)),
+        fetch(cityUrl(backendUrl, '/v0/transit/lines', city)),
     ])
     if (!stationsResp.ok) {
         throw new Error(`GET /v0/transit/stations failed: ${stationsResp.status}`)

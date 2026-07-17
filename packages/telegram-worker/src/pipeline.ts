@@ -1,5 +1,6 @@
 import type { Env } from './types'
-import { profileFor, readConfig } from './config'
+import { profileFor, readConfigForCity } from './config'
+import type { CitySlug } from '@freifahren/cities'
 import { isSpam } from './spam'
 import { getTransitIndex } from './transit'
 import {
@@ -17,7 +18,7 @@ import { postReport, reportIdentifiers } from './reporting'
  * (Mistral or backend) for the caller to report; returns normally when there's nothing to
  * submit (spam, no extraction, no station). Runs in the background via waitUntil — no retry.
  */
-export async function processMessage(text: string, env: Env): Promise<void> {
+export async function processMessage(text: string, env: Env, city: CitySlug): Promise<void> {
     if (isSpam(text)) {
         // Never log the message text — the privacy policy promises we don't store it, and logs are
         // persisted in Sentry. Length is a non-identifying signal that's still useful for triage.
@@ -25,9 +26,9 @@ export async function processMessage(text: string, env: Env): Promise<void> {
         return
     }
 
-    const cfg = readConfig(env)
-    const profile = profileFor(cfg.cityName)
-    const index = await getTransitIndex(cfg.backendUrl, profile)
+    const cfg = readConfigForCity(env, city)
+    const profile = profileFor(cfg.city.slug)
+    const index = await getTransitIndex(cfg.backendUrl, profile, cfg.city.slug)
 
     const linePattern = buildLinePattern(index.lineNames)
     const detectedLine = detectLineName(text, index.lineNames, linePattern, index.circularLineNames, profile)
@@ -46,5 +47,5 @@ export async function processMessage(text: string, env: Env): Promise<void> {
     }
 
     console.info('Submitting report:', extractionToLog(result))
-    await postReport(cfg.backendUrl, cfg.reportPassword, ids)
+    await postReport(cfg.backendUrl, cfg.reportPassword, ids, cfg.city.slug)
 }

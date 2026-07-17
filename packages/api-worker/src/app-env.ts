@@ -152,6 +152,7 @@ const applyServices = (c: Context<Env>, db: DbConnection, config: AppConfig) => 
     const transitNetworkDataService = new TransitNetworkDataService(db, c.get('city').slug, cacheCtx)
     const reportsService = new ReportsService(db, transitNetworkDataService, {
         nodeEnv: config.nodeEnv,
+        city: c.get('city').slug,
         telegramWorkerUrl: config.telegramWorkerUrl,
         reportPassword: config.reportPassword,
     })

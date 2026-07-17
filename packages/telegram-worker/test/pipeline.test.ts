@@ -6,15 +6,15 @@ import { rawTransit } from './fixtures'
 
 const testEnv = env as unknown as Env
 
-function interceptTransit() {
+function interceptTransit(city = 'berlin') {
     const { rawStations, rawLines } = rawTransit()
     fetchMock
         .get('https://backend.test')
-        .intercept({ path: '/v0/transit/stations', method: 'GET' })
+        .intercept({ path: `/v0/transit/stations?city=${city}`, method: 'GET' })
         .reply(200, JSON.stringify(rawStations), { headers: { 'content-type': 'application/json' } })
     fetchMock
         .get('https://backend.test')
-        .intercept({ path: '/v0/transit/lines', method: 'GET' })
+        .intercept({ path: `/v0/transit/lines?city=${city}`, method: 'GET' })
         .reply(200, JSON.stringify(rawLines), { headers: { 'content-type': 'application/json' } })
 }
 
@@ -28,10 +28,10 @@ function interceptMistral(stationName: string | null, directionName: string | nu
         .reply(200, body, { headers: { 'content-type': 'application/json' } })
 }
 
-function interceptBackendReport(capture: { body?: Record<string, unknown> }) {
+function interceptBackendReport(capture: { body?: Record<string, unknown> }, city = 'berlin') {
     fetchMock
         .get('https://backend.test')
-        .intercept({ path: '/v0/reports', method: 'POST' })
+        .intercept({ path: `/v0/reports?city=${city}`, method: 'POST' })
         .reply((opts) => {
             capture.body = JSON.parse(opts.body as string)
             return { statusCode: 200, data: '{}' }
@@ -54,20 +54,20 @@ describe('processMessage', () => {
         const capture: { body?: Record<string, unknown> } = {}
         interceptBackendReport(capture)
 
-        await processMessage('U7 Rudow 2x BOS', testEnv)
+        await processMessage('U7 Rudow 2x BOS', testEnv, 'berlin')
 
         expect(capture.body).toEqual({ stationId: 'U-rudow', source: 'telegram', lineId: 'U7-v' })
     })
 
     it('drops spam before fetching transit, Mistral, or the backend', async () => {
         // No interceptors registered: any outbound fetch would throw on disableNetConnect.
-        await processMessage('ok', testEnv)
+        await processMessage('ok', testEnv, 'berlin')
     })
 
     it('does not submit when the extraction is empty', async () => {
         interceptTransit()
         interceptMistral(null, null)
-        await processMessage('this is fine', testEnv)
+        await processMessage('this is fine', testEnv, 'berlin')
     })
 
     it('throws when the backend rejects the report, so the caller reports it', async () => {
@@ -75,12 +75,12 @@ describe('processMessage', () => {
         interceptMistral('Rudow', null)
         fetchMock
             .get('https://backend.test')
-            .intercept({ path: '/v0/reports', method: 'POST' })
+            .intercept({ path: '/v0/reports?city=berlin', method: 'POST' })
             .reply(500, '{"error":"boom"}')
 
         // A backend 5xx must reject (webhook routes it to reportError); swallowing it here
         // would silently drop reports with no error-rate signal.
-        await expect(processMessage('U7 Rudow 2x BOS', testEnv)).rejects.toThrow()
+        await expect(processMessage('U7 Rudow 2x BOS', testEnv, 'berlin')).rejects.toThrow()
     })
 
     it('submits station-only with no lineId/directionId', async () => {
@@ -89,7 +89,18 @@ describe('processMessage', () => {
         const capture: { body?: Record<string, unknown> } = {}
         interceptBackendReport(capture)
 
-        await processMessage('Rudow 2x bos', testEnv)
+        await processMessage('Rudow 2x bos', testEnv, 'berlin')
+
+        expect(capture.body).toEqual({ stationId: 'U-rudow', source: 'telegram' })
+    })
+
+    it('submits a Leipzig message to the Leipzig city-scoped API', async () => {
+        interceptTransit('leipzig')
+        interceptMistral('Rudow', null)
+        const capture: { body?: Record<string, unknown> } = {}
+        interceptBackendReport(capture, 'leipzig')
+
+        await processMessage('Rudow 3k Kontrolle', testEnv, 'leipzig')
 
         expect(capture.body).toEqual({ stationId: 'U-rudow', source: 'telegram' })
     })

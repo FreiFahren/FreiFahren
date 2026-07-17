@@ -1,4 +1,4 @@
-import { getCity } from '@freifahren/cities'
+import { DEFAULT_CITY_SLUG, getCity, type CityConfig, type CitySlug } from '@freifahren/cities'
 
 import type { Env } from './types'
 
@@ -87,7 +87,7 @@ export function profileFor(cityName: string): CityProfile {
 export interface RuntimeConfig {
     backendUrl: string
     publicAppUrl: string
-    cityName: string
+    city: CityConfig
     mistralModel: string
     telegramReportChatId: string
     mistralApiKey: string
@@ -106,13 +106,42 @@ function required(env: Env, name: keyof Env): string {
 
 const stripTrailingSlash = (url: string): string => url.replace(/\/+$/, '')
 
-export function readConfig(env: Env): RuntimeConfig {
+function cityForSlug(slug: string): CityConfig {
+    const city = getCity(slug)
+    if (!city) {
+        throw new Error(`Unknown city in TELEGRAM_CHAT_CITIES: ${slug}`)
+    }
+    return city
+}
+
+function cityAppUrl(baseUrl: string, city: CityConfig): string {
+    const url = new URL(baseUrl)
+    if (city.slug !== DEFAULT_CITY_SLUG) {
+        const [, ...domain] = url.hostname.split('.')
+        url.hostname = `${city.subdomain}.${domain.join('.')}`
+    }
+    return stripTrailingSlash(url.toString())
+}
+
+export function cityForChat(env: Env, chatId: string): CityConfig | null {
+    const slug = env.TELEGRAM_CHAT_CITIES[chatId]
+    return slug === undefined ? null : cityForSlug(slug)
+}
+
+export function readConfigForCity(env: Env, citySlug: CitySlug): RuntimeConfig {
+    const city = cityForSlug(citySlug)
+    const chatIds = Object.entries(env.TELEGRAM_CHAT_CITIES)
+        .filter(([, slug]) => slug === city.slug)
+        .map(([chatId]) => chatId)
+    if (chatIds.length !== 1) {
+        throw new Error(`Expected exactly one Telegram chat for city "${city.slug}"`)
+    }
     return {
         backendUrl: stripTrailingSlash(required(env, 'BACKEND_URL')),
-        publicAppUrl: stripTrailingSlash(env.PUBLIC_APP_URL || 'https://app.freifahren.org'),
-        cityName: env.CITY_NAME || 'Berlin',
+        publicAppUrl: cityAppUrl(env.PUBLIC_APP_URL || 'https://app.freifahren.org', city),
+        city,
         mistralModel: env.MISTRAL_MODEL || 'mistral-small-latest',
-        telegramReportChatId: required(env, 'TELEGRAM_REPORT_CHAT_ID'),
+        telegramReportChatId: chatIds[0]!,
         mistralApiKey: required(env, 'MISTRAL_API_KEY'),
         telegramBotToken: required(env, 'TELEGRAM_BOT_TOKEN'),
         reportPassword: required(env, 'REPORT_PASSWORD'),

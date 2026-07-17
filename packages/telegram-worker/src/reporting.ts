@@ -53,8 +53,11 @@ export async function postReport(
     backendUrl: string,
     reportPassword: string,
     ids: ReportIdentifiers,
+    city: string,
 ): Promise<void> {
-    const response = await fetch(`${backendUrl}/v0/reports`, {
+    const url = new URL('/v0/reports', `${backendUrl}/`)
+    url.searchParams.set('city', city)
+    const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Password': reportPassword },
         body: JSON.stringify(buildReportPayload(ids)),
