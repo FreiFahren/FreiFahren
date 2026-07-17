@@ -77,5 +77,6 @@ The deploy job is gated on the `TILES_BASE_URL` repo variable (the R2 custom dom
    Tilemaker config is city-agnostic; `generate.ts` injects the per-city name/description/schema from
    the registry, and the archive's `default_view` from the city's `map` center + zoom.)
 
-See `docs/adr/0004-static-pmtiles-basemap-on-cloudflare-r2.md` for why this is static-on-R2 rather
-than a tile server.
+This is served as a static PMTiles archive on R2 (read directly via HTTP range requests) rather than
+from a running tile server: the city data barely changes, so a stateful server would be ops cost and a
+single point of failure for effectively static content.

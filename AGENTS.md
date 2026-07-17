@@ -29,6 +29,13 @@ Use Conventional Commit prefixes for both commit messages and PR titles:
 
 Example: `fix: return 404 instead of 500 when station id is unknown`
 
+## Documentation
+
+**The codebase is the single source of truth.** We don't keep separate architecture docs (ADRs, design docs) that mirror decisions already expressed in code. Coding agents research a codebase far better than they remember to update prose, so a second source of truth drifts out of date the moment it's written.
+
+- **Prefer code over prose.** When a decision is genuinely unclear from the code — a non-obvious trade-off, a constraint that isn't visible locally — leave a short comment at the relevant spot explaining *why* (see [Comments](#comments)).
+- **PRs are documentation.** The pull request that introduces a change is part of the project's documentation. Write PR descriptions that explain the context and reasoning behind a change, so the "why" lives alongside the diff and stays discoverable through git history and the PR that touched a given line.
+
 ## Backend conventions
 
 - **Throw `AppError` at service boundaries**, not raw `Error` or ad-hoc `c.json({ error: ... })`. `AppError` (see `packages/api-worker/src/common/errors.ts`) carries a `statusCode` and an `internalCode`, and the central error handler strips descriptions in production so internal details don't leak. Domain-specific errors should be converted to `AppError` before they reach the response.
