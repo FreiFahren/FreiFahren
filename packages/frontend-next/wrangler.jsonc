@@ -6,14 +6,27 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    // Without this the SPA fallback swallows /relay/* before the proxy Worker runs.
-    "run_worker_first": ["/relay/*"],
+    // HTML needs to pass through the Worker so it can set the host-specific canonical and Open
+    // Graph tags. Keep Vite's hashed bundle files on Cloudflare's direct asset path.
+    "run_worker_first": [
+      "/*",
+      "!/assets/*",
+      "!/favicon*",
+      "!/icons.svg",
+      "!/manifest.webmanifest",
+      "!/og-image.jpg",
+      "!/profiles/*",
+      "!/pwa-*",
+      "!/robots.txt",
+      "!/sw.js",
+      "!/workbox-*.js",
+    ],
   },
   // app.freifahren.org stays a Berlin alias (PWA install + Capacitor origin + App Store deep-link
-  // target); berlin.freifahren.org is the canonical per-city host. Both serve the same bundle,
-  // which resolves the city from the hostname at runtime.
+  // target); each city hostname serves the same bundle and resolves its city at runtime.
   "routes": [
     { "pattern": "app.freifahren.org", "custom_domain": true },
     { "pattern": "berlin.freifahren.org", "custom_domain": true },
+    { "pattern": "leipzig.freifahren.org", "custom_domain": true },
   ],
 }
