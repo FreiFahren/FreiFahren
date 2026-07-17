@@ -2,8 +2,12 @@ import type { Env, TelegramMessage } from './types'
 import { TelegramUpdate } from './types'
 import { processMessage } from './pipeline'
 import { reportError } from './observability'
+import { cityForChat } from './config'
+import { setTag } from '@sentry/cloudflare'
+import type { CitySlug } from '@freifahren/cities'
 
 export const WEBHOOK_SECRET_HEADER = 'X-Telegram-Bot-Api-Secret-Token'
+type WebhookContext = Pick<ExecutionContext, 'waitUntil'>
 
 function effectiveMessage(update: TelegramUpdate): TelegramMessage | null {
     return update.message ?? update.edited_message ?? update.channel_post ?? update.edited_channel_post ?? null
@@ -25,22 +29,24 @@ function isCommand(message: TelegramMessage): boolean {
 
 // Filter to the allowed chat (text/caption, non-command). Returns the text to process, or
 // null to ignore. Pure, so the filtering rules are testable without the pipeline.
-export function acceptUpdate(update: TelegramUpdate, allowedChatId: string): string | null {
+export function acceptUpdate(update: TelegramUpdate, env: Env): { text: string; city: CitySlug } | null {
     const message = effectiveMessage(update)
     if (message === null) {
         return null
     }
     const chat = message.chat
-    if (!chat || String(chat.id) !== allowedChatId) {
+    const city = chat ? cityForChat(env, String(chat.id)) : null
+    if (!city) {
         return null
     }
     if (isCommand(message)) {
         return null
     }
-    return messageReportText(message)
+    const text = messageReportText(message)
+    return text === null ? null : { text, city: city.slug as CitySlug }
 }
 
-type Processor = (text: string, env: Env) => Promise<void>
+type Processor = (text: string, env: Env, city: CitySlug) => Promise<void>
 
 /**
  * Verify the Telegram secret, filter, then process in the background via waitUntil so we
@@ -51,7 +57,7 @@ type Processor = (text: string, env: Env) => Promise<void>
 export async function handleWebhook(
     request: Request,
     env: Env,
-    ctx: ExecutionContext,
+    ctx: WebhookContext,
     process: Processor = processMessage,
 ): Promise<Response> {
     if (request.headers.get(WEBHOOK_SECRET_HEADER) !== env.TELEGRAM_WEBHOOK_SECRET) {
@@ -67,13 +73,14 @@ export async function handleWebhook(
         return new Response('ok', { status: 200 })
     }
 
-    const text = acceptUpdate(update, env.TELEGRAM_REPORT_CHAT_ID)
-    if (text) {
+    const accepted = acceptUpdate(update, env)
+    if (accepted) {
+        setTag('city', accepted.city)
         ctx.waitUntil(
             // Pass the length, not the text: the privacy policy promises we don't store message
             // content, and reportError persists to Sentry. Length still helps correlate failures.
-            process(text, env).catch((err) =>
-                reportError('telegram pipeline failed', err, { length: text.length }),
+            process(accepted.text, env, accepted.city).catch((err) =>
+                reportError('telegram pipeline failed', err, { length: accepted.text.length, city: accepted.city }),
             ),
         )
     }

@@ -14,9 +14,6 @@ export default withSentry(
         enableLogs: true,
         integrations: [consoleLoggingIntegration({ levels: ['info', 'warn', 'error'] })],
         tracesSampleRate: 1.0,
-        // Tag every event with the city so all three Sentry projects are filterable by it.
-        // Static berlin for now (this worker is Berlin-only); resolve per-message later.
-        initialScope: { tags: { city: 'berlin' } },
     }),
     {
         async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {

@@ -4,9 +4,8 @@ export interface Env {
     // Vars (wrangler.jsonc)
     BACKEND_URL: string
     PUBLIC_APP_URL: string
-    CITY_NAME: string
+    TELEGRAM_CHAT_CITIES: Record<string, string>
     MISTRAL_MODEL: string
-    TELEGRAM_REPORT_CHAT_ID: string
     SENTRY_DSN: string
     NODE_ENV?: string
     // Git SHA injected at deploy via `wrangler deploy --var SENTRY_RELEASE:<sha>`; tags Sentry

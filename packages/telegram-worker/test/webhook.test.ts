@@ -1,4 +1,4 @@
-import { createExecutionContext, env, waitOnExecutionContext } from 'cloudflare:test'
+import { createExecutionContext, waitOnExecutionContext } from 'cloudflare:test'
 import { describe, expect, it, vi } from 'vitest'
 import { WEBHOOK_SECRET_HEADER, acceptUpdate, handleWebhook } from '../src/webhook'
 import { TelegramUpdate } from '../src/types'
@@ -8,6 +8,18 @@ import { ALLOWED_CHAT_ID } from './fixtures'
 
 // Spy seam for the privacy assertions below; the real implementation writes to Sentry.
 vi.mock('../src/observability', () => ({ reportError: vi.fn() }))
+
+const testEnv: Env = {
+    BACKEND_URL: 'https://backend.test',
+    PUBLIC_APP_URL: 'https://app.example.test',
+    TELEGRAM_CHAT_CITIES: { [ALLOWED_CHAT_ID]: 'berlin', '-5211691627': 'leipzig' },
+    MISTRAL_MODEL: 'mistral-small-latest',
+    SENTRY_DSN: 'https://example.invalid/1',
+    MISTRAL_API_KEY: 'test-mistral-key',
+    TELEGRAM_BOT_TOKEN: '1:fake',
+    REPORT_PASSWORD: 'password',
+    TELEGRAM_WEBHOOK_SECRET: 'webhook-secret',
+}
 
 function makeUpdate(opts: {
     text?: string
@@ -31,26 +43,30 @@ function makeUpdate(opts: {
 
 describe('acceptUpdate (filtering)', () => {
     it('accepts a text message from the allowed chat', () => {
-        expect(acceptUpdate(makeUpdate({ text: 'U2 alex 2x BOS' }), ALLOWED_CHAT_ID)).toBe('U2 alex 2x BOS')
+        expect(acceptUpdate(makeUpdate({ text: 'U2 alex 2x BOS' }), testEnv)).toEqual({
+            text: 'U2 alex 2x BOS',
+            city: 'berlin',
+        })
     })
 
     it('accepts a photo caption', () => {
-        expect(acceptUpdate(makeUpdate({ caption: 'U2 alex 2x BOS', hasPhoto: true }), ALLOWED_CHAT_ID)).toBe(
-            'U2 alex 2x BOS'
-        )
+        expect(acceptUpdate(makeUpdate({ caption: 'U2 alex 2x BOS', hasPhoto: true }), testEnv)).toEqual({
+            text: 'U2 alex 2x BOS',
+            city: 'berlin',
+        })
     })
 
     it('ignores a sticker with no text or caption', () => {
-        expect(acceptUpdate(makeUpdate({}), ALLOWED_CHAT_ID)).toBeNull()
+        expect(acceptUpdate(makeUpdate({}), testEnv)).toBeNull()
     })
 
     it('ignores a message from an unallowed chat', () => {
-        expect(acceptUpdate(makeUpdate({ text: 'U2 alex 2x BOS', chatId: -9999 }), ALLOWED_CHAT_ID)).toBeNull()
+        expect(acceptUpdate(makeUpdate({ text: 'U2 alex 2x BOS', chatId: -9999 }), testEnv)).toBeNull()
     })
 
     it('ignores bot commands', () => {
         const update = makeUpdate({ text: '/start', entities: [{ type: 'bot_command', offset: 0, length: 6 }] })
-        expect(acceptUpdate(update, ALLOWED_CHAT_ID)).toBeNull()
+        expect(acceptUpdate(update, testEnv)).toBeNull()
     })
 })
 
@@ -65,7 +81,7 @@ function webhookRequest(body: unknown, secret = 'webhook-secret'): Request {
 function fakeCtx() {
     const promises: Promise<unknown>[] = []
     return {
-        ctx: { waitUntil: (p: Promise<unknown>) => void promises.push(p) } as unknown as ExecutionContext,
+        ctx: { waitUntil: (p: Promise<unknown>) => void promises.push(p) },
         promises,
     }
 }
@@ -76,7 +92,7 @@ describe('handleWebhook', () => {
         const { ctx, promises } = fakeCtx()
         const res = await handleWebhook(
             webhookRequest(makeUpdate({ text: 'U2 alex' }), 'wrong'),
-            env as unknown as Env,
+            testEnv,
             ctx,
             process
         )
@@ -90,12 +106,12 @@ describe('handleWebhook', () => {
         const { ctx, promises } = fakeCtx()
         const res = await handleWebhook(
             webhookRequest(makeUpdate({ text: 'U2 alex 2x BOS' })),
-            env as unknown as Env,
+            testEnv,
             ctx,
             process
         )
         expect(res.status).toBe(200)
-        expect(process).toHaveBeenCalledExactlyOnceWith('U2 alex 2x BOS', expect.anything())
+        expect(process).toHaveBeenCalledExactlyOnceWith('U2 alex 2x BOS', expect.anything(), 'berlin')
         expect(promises).toHaveLength(1)
         await Promise.all(promises)
     })
@@ -105,7 +121,7 @@ describe('handleWebhook', () => {
         const { ctx, promises } = fakeCtx()
         const res = await handleWebhook(
             webhookRequest(makeUpdate({ text: 'U2 alex', chatId: -9999 })),
-            env as unknown as Env,
+            testEnv,
             ctx,
             process
         )
@@ -121,7 +137,7 @@ describe('handleWebhook', () => {
 
         const res = await handleWebhook(
             webhookRequest(makeUpdate({ text: 'U8 Hermannplatz' })),
-            env as unknown as Env,
+            testEnv,
             ctx,
             process
         )
@@ -141,7 +157,7 @@ describe('handleWebhook', () => {
         })
         const ctx = createExecutionContext()
 
-        const res = await handleWebhook(webhookRequest(makeUpdate({ text })), env as unknown as Env, ctx, process)
+        const res = await handleWebhook(webhookRequest(makeUpdate({ text })), testEnv, ctx, process)
         // The failure stays in the background: Telegram still gets its 200 ack.
         expect(res.status).toBe(200)
         await waitOnExecutionContext(ctx)
@@ -151,7 +167,7 @@ describe('handleWebhook', () => {
         expect((err as Error).message).toBe('mistral timeout')
         // The privacy invariant: the extra payload carries the length and nothing else — the
         // message text must never reach the (persisted) error report.
-        expect(extra).toEqual({ length: text.length })
+        expect(extra).toEqual({ length: text.length, city: 'berlin' })
     })
 
     it('acks malformed JSON with 200 and does not process', async () => {
@@ -162,8 +178,29 @@ describe('handleWebhook', () => {
             headers: { 'Content-Type': 'application/json', [WEBHOOK_SECRET_HEADER]: 'webhook-secret' },
             body: 'not json',
         })
-        const res = await handleWebhook(badReq, env as unknown as Env, ctx, process)
+        const res = await handleWebhook(badReq, testEnv, ctx, process)
         expect(res.status).toBe(200)
         expect(process).not.toHaveBeenCalled()
+    })
+
+    it('routes Berlin and Leipzig chats to their configured cities and ignores an unknown chat', async () => {
+        const process = vi.fn(async () => {})
+        const berlin = fakeCtx()
+        const leipzig = fakeCtx()
+        const unknown = fakeCtx()
+
+        await handleWebhook(webhookRequest(makeUpdate({ text: 'U2 Alex', chatId: -1001 })), testEnv, berlin.ctx, process)
+        await handleWebhook(
+            webhookRequest(makeUpdate({ text: '3k Hbf', chatId: -5211691627 })),
+            testEnv,
+            leipzig.ctx,
+            process
+        )
+        await handleWebhook(webhookRequest(makeUpdate({ text: 'not allowed', chatId: -9999 })), testEnv, unknown.ctx, process)
+
+        await Promise.all([...berlin.promises, ...leipzig.promises, ...unknown.promises])
+        expect(process).toHaveBeenNthCalledWith(1, 'U2 Alex', expect.anything(), 'berlin')
+        expect(process).toHaveBeenNthCalledWith(2, '3k Hbf', expect.anything(), 'leipzig')
+        expect(process).toHaveBeenCalledTimes(2)
     })
 })

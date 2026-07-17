@@ -2,7 +2,7 @@ import { env, fetchMock } from 'cloudflare:test'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { handleReportForward } from '../src/forwarding'
 import type { Env } from '../src/types'
-import { makeIndex, pickStationFixture, rawTransit } from './fixtures'
+import { ALLOWED_CHAT_ID, makeIndex, pickStationFixture, rawTransit } from './fixtures'
 
 const testEnv = env as unknown as Env
 const index = makeIndex()
@@ -12,11 +12,11 @@ function interceptTransit() {
     const { rawStations, rawLines } = rawTransit()
     fetchMock
         .get('https://backend.test')
-        .intercept({ path: '/v0/transit/stations', method: 'GET' })
+        .intercept({ path: '/v0/transit/stations?city=berlin', method: 'GET' })
         .reply(200, JSON.stringify(rawStations), { headers: { 'content-type': 'application/json' } })
     fetchMock
         .get('https://backend.test')
-        .intercept({ path: '/v0/transit/lines', method: 'GET' })
+        .intercept({ path: '/v0/transit/lines?city=berlin', method: 'GET' })
         .reply(200, JSON.stringify(rawLines), { headers: { 'content-type': 'application/json' } })
 }
 
@@ -33,7 +33,7 @@ function interceptTelegram(statusCode: number, capture?: { body?: Record<string,
 function reportRequest(body: unknown, password: string | null = 'password'): Request {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' }
     if (password !== null) headers['X-Password'] = password
-    return new Request('https://worker.test/report', {
+    return new Request('https://worker.test/report?city=berlin', {
         method: 'POST',
         headers,
         body: JSON.stringify(body),
@@ -66,6 +66,7 @@ describe('handleReportForward', () => {
 
         expect(res.status).toBe(200)
         expect(await res.json()).toEqual({ status: 'success' })
+        expect(capture.body?.chat_id).toBe(ALLOWED_CHAT_ID)
 
         const text = capture.body!.text as string
         expect(text).toContain(index.stations[picked.stationId].name)
@@ -169,11 +170,11 @@ describe('handleReportForward', () => {
         const rawLines = [{ id: 'U1-v', name: 'U1', isCircular: false, stations: ['U-evil', 'U-end'] }]
         fetchMock
             .get('https://backend.test')
-            .intercept({ path: '/v0/transit/stations', method: 'GET' })
+            .intercept({ path: '/v0/transit/stations?city=berlin', method: 'GET' })
             .reply(200, JSON.stringify(rawStations), { headers: { 'content-type': 'application/json' } })
         fetchMock
             .get('https://backend.test')
-            .intercept({ path: '/v0/transit/lines', method: 'GET' })
+            .intercept({ path: '/v0/transit/lines?city=berlin', method: 'GET' })
             .reply(200, JSON.stringify(rawLines), { headers: { 'content-type': 'application/json' } })
         const capture: { body?: Record<string, unknown> } = {}
         interceptTelegram(200, capture)

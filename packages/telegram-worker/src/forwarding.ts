@@ -1,7 +1,8 @@
 import type { Env, ForwardedReport, TransitIndex } from './types'
 import { lineNameForId, stationLineNames } from './transit'
 import { getTransitIndex } from './transit'
-import { profileFor, readConfig } from './config'
+import { profileFor, readConfigForCity } from './config'
+import { getCity, type CitySlug } from '@freifahren/cities'
 import { reportError } from './observability'
 
 /** HTML-escape for Telegram markup, quotes included. */
@@ -121,7 +122,12 @@ const json = (body: unknown, status = 200): Response =>
     })
 
 export async function handleReportForward(request: Request, env: Env): Promise<Response> {
-    const cfg = readConfig(env)
+    const citySlug = new URL(request.url).searchParams.get('city')
+    const city = citySlug === null ? null : getCity(citySlug)
+    if (city === null || city === undefined) {
+        return json({ error: 'bad_request', detail: 'unknown city' }, 400)
+    }
+    const cfg = readConfigForCity(env, city.slug as CitySlug)
 
     if (request.headers.get('X-Password') !== cfg.reportPassword) {
         console.warn('Report forward rejected: bad password')
@@ -140,7 +146,7 @@ export async function handleReportForward(request: Request, env: Env): Promise<R
 
     let index: TransitIndex
     try {
-        index = await getTransitIndex(cfg.backendUrl, profileFor(cfg.cityName))
+        index = await getTransitIndex(cfg.backendUrl, profileFor(cfg.city.slug), cfg.city.slug)
     } catch (err) {
         reportError('Failed to load transit data', err)
         return json({ error: 'transit_unavailable' }, 502)

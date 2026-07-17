@@ -28,7 +28,7 @@ beforeAll(() => {
     fetchMock.disableNetConnect()
     fetchMock
         .get(TELEGRAM_ORIGIN)
-        .intercept({ path: '/report', method: 'POST' })
+        .intercept({ path: '/report?city=berlin', method: 'POST' })
         .reply((opts) => {
             const { headers } = opts
             const password = headers instanceof Headers ? headers.get('X-Password') : (headers['x-password'] ?? null)

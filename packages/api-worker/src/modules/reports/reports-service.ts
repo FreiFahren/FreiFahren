@@ -84,6 +84,7 @@ type ReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'stationId'
 
 export type ReportsServiceConfig = {
     nodeEnv: string
+    city: string
     telegramWorkerUrl?: string
     reportPassword?: string
 }
@@ -285,7 +286,8 @@ export class ReportsService {
         const telegramWorkerUrl = z.string().min(1).parse(this.config.telegramWorkerUrl)
         const reportPassword = z.string().min(1).parse(this.config.reportPassword)
 
-        const endpoint = `${telegramWorkerUrl.replace(/\/$/, '')}/report`
+        const endpoint = new URL(`${telegramWorkerUrl.replace(/\/$/, '')}/report`)
+        endpoint.searchParams.set('city', this.config.city)
         const payload = this.buildTelegramNotificationPayload(reportData)
 
         const response = await fetch(endpoint, {
