@@ -56,16 +56,6 @@ Applying migrations is idempotent: wrangler tracks applied migrations in each da
 helper before loading reference data, and the deploy workflow runs `db:migrate:remote` across every
 city in `CITY_DATABASES` (with a drift guard that fails if the databases land on different heads).
 
-### Adding a new city
-
-1. Provision the city's D1 database, add it to `CITY_DATABASES` in
-   `packages/cities/src/databases.ts` with its Worker binding, and declare that binding in
-   `wrangler.jsonc`.
-2. Apply the schema: `bun run db:migrate:remote --city <slug>`.
-
-Once the city is in the registry, the deploy migration fan-out (and, after it joins the seed
-registry, `bun run seed`) keeps it on the shared schema automatically — no one-off migration step.
-
 ## DB Access / Drizzle Studio
 
 `bun run db:studio` opens Drizzle Studio against the remote D1 over the Cloudflare API (set
