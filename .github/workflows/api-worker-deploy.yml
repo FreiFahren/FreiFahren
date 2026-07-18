@@ -33,32 +33,36 @@ jobs:
             - name: Install dependencies
               run: bun install --frozen-lockfile
 
+            # Fan out over every provisioned city database. The apply uses the same city-aware
+            # migration command as local dev and the seed (resolves the binding from the registry),
+            # then the drift guard reads each database's d1_migrations ledger and fails if any city
+            # is missing migrations or lands on a different head than the others.
             - name: Apply migrations and verify city databases are in sync
               env:
                   CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
               run: |
                   latest_migration=''
-                  while IFS= read -r binding; do
-                    echo "Applying migrations to $binding"
-                    bunx wrangler d1 migrations apply "$binding" --remote
+                  while IFS=' ' read -r slug binding; do
+                    echo "Applying migrations to $slug ($binding)"
+                    bun run db:migrate:remote --city "$slug"
 
                     applied=$(bunx wrangler d1 execute "$binding" --remote --json \
                       --command 'SELECT name FROM d1_migrations ORDER BY id DESC LIMIT 1' \
                       | bun -e 'const result = await Bun.stdin.json(); const name = result[0]?.results?.[0]?.name; if (typeof name !== "string") process.exit(1); console.log(name)')
 
                     if [ -z "$applied" ]; then
-                      echo "No applied migration found for $binding" >&2
+                      echo "No applied migration found for $slug ($binding)" >&2
                       exit 1
                     fi
 
-                    echo "$binding is at $applied"
+                    echo "$slug is at $applied"
                     if [ -n "$latest_migration" ] && [ "$applied" != "$latest_migration" ]; then
-                      echo "Migration drift detected: $binding is at $applied, expected $latest_migration" >&2
+                      echo "Migration drift detected: $slug is at $applied, expected $latest_migration" >&2
                       exit 1
                     fi
                     latest_migration="$applied"
-                  done < <(bun -e 'import { CITY_DATABASES } from "../../packages/cities/src/index.ts"; for (const { dbBinding } of Object.values(CITY_DATABASES)) console.log(dbBinding)')
+                  done < <(bun -e 'import { CITY_DATABASES } from "../../packages/cities/src/index.ts"; for (const [slug, { dbBinding }] of Object.entries(CITY_DATABASES)) console.log(`${slug} ${dbBinding}`)')
 
     deploy:
         needs: [migrate, seed]
