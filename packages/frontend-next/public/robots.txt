@@ -1,4 +1,2 @@
-# The city hosts are interactive web apps, not our content surface. Disallow crawling
-# so they do not cannibalize freifahren.org in search results.
 User-agent: *
-Disallow: /
+Allow: /

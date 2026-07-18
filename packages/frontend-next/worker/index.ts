@@ -3,14 +3,19 @@ const API_HOST = 'eu.i.posthog.com';
 const ASSET_HOST = 'eu-assets.i.posthog.com';
 const PREFIX = '/relay';
 
-function withHostMetadata(response: Response, origin: string, method: string): Response {
+function withHostMetadata(response: Response, url: URL, method: string): Response {
   if (method !== 'GET' || !response.headers.get('content-type')?.includes('text/html')) {
     return response;
   }
 
+  const origin = url.origin;
   const canonicalUrl = `${origin}/`;
+  // Every route shares this single index.html (SPA, no per-route head), so only each host's
+  // root is a distinct, indexable "product for city X" page. Deep routes (reports, station
+  // detail, settings, ...) would otherwise all present identical head metadata to crawlers.
+  const isRoot = url.pathname === '/';
 
-  return new HTMLRewriter()
+  const rewriter = new HTMLRewriter()
     .on('meta[property="og:url"]', {
       element(element) {
         element.setAttribute('content', canonicalUrl);
@@ -25,8 +30,22 @@ function withHostMetadata(response: Response, origin: string, method: string): R
       element(element) {
         element.setAttribute('href', canonicalUrl);
       },
-    })
-    .transform(response);
+    });
+
+  if (!isRoot) {
+    rewriter.on('head', {
+      element(element) {
+        element.append('<meta name="robots" content="noindex, nofollow">', { html: true });
+      },
+    });
+  }
+
+  const transformed = rewriter.transform(response);
+  if (!isRoot) {
+    transformed.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  }
+
+  return transformed;
 }
 
 interface Env {
@@ -41,7 +60,7 @@ export default {
   async fetch(request: Request, env: Env, ctx: Ctx): Promise<Response> {
     const url = new URL(request.url);
     if (!url.pathname.startsWith(`${PREFIX}/`)) {
-      return withHostMetadata(await env.ASSETS.fetch(request), url.origin, request.method);
+      return withHostMetadata(await env.ASSETS.fetch(request), url, request.method);
     }
 
     const upstreamPath = url.pathname.slice(PREFIX.length) + url.search;
