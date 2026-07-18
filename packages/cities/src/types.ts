@@ -128,6 +128,8 @@ export interface CityConfig extends CityDatabaseConfig {
     displayName: string
     /** BCP-47 language tag for the city's primary language. */
     lang: string
+    /** IANA timezone used to bucket reports into local service hours. */
+    timezone: string
     map: CityMap
     /** Basemap tile-build inputs. Every city ships with a basemap. */
     tiles: CityTiles

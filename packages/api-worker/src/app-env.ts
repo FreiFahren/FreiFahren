@@ -5,6 +5,7 @@ import { Context, Hono } from 'hono'
 import { AppError } from './common/errors'
 import { createLogger, Logger, LogLevel } from './common/logger'
 import { createD1Db, DbConnection } from './db'
+import { InsightsService } from './modules/insights'
 import { ReportsService } from './modules/reports'
 import { RiskService } from './modules/risk'
 import type { CacheCtx } from './modules/transit/reference-cache'
@@ -56,6 +57,7 @@ export const isAllowedCorsOrigin = (origin: string, config: AppConfig) => {
 
 export type Services = {
     reportsService: ReportsService
+    insightsService: InsightsService
     riskService: RiskService
     transitNetworkDataService: TransitNetworkDataService
 }
@@ -159,6 +161,10 @@ const applyServices = (c: Context<Env>, db: DbConnection, config: AppConfig) => 
 
     c.set('config', config)
     c.set('reportsService', reportsService)
+    c.set(
+        'insightsService',
+        new InsightsService(db, transitNetworkDataService, c.get('city').slug, c.get('city').timezone)
+    )
     c.set('riskService', new RiskService(reportsService, transitNetworkDataService))
     c.set('transitNetworkDataService', transitNetworkDataService)
 }

@@ -27,6 +27,7 @@ export const LEIPZIG: CityConfig = {
     dbName: CITY_DATABASES.leipzig.dbName,
     dbBinding: CITY_DATABASES.leipzig.dbBinding,
     lang: 'de',
+    timezone: 'Europe/Berlin',
     map: {
         center: [12.3731, 51.3397],
         zoom: 12,
