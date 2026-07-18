@@ -1,41 +1,35 @@
-import { getCityDatabase } from '@freifahren/cities'
+import { CITY_DATABASE_SLUGS, getCityDatabase } from '@freifahren/cities'
 
 import { logger } from '../common/logger'
 
 import { applyMigrations } from './migrate'
 
-// Applies the shared drizzle/ migrations to one city's D1 database, resolving the binding from the
-// @freifahren/cities database registry (never a hard-coded binding).
-//
-//   Local:  bun run db:migrate                      → berlin's local D1 in .wrangler/state
-//   Local:  bun run db:migrate --city leipzig       → leipzig's local D1
-//   Remote: bun run db:migrate:remote --city <slug> → that city's production D1
-//
-// Runs under tsx (see the db:migrate* scripts) so it can import the @freifahren/cities alias.
-
-// Validate against the provisioned-database registry (not the runtime city registry) so a database
-// Can be migrated before its transit configuration lands. Defaults to berlin.
-const parseCityArg = (argv: string[] = process.argv): string => {
+// Without --city, migrate every provisioned city so all databases stay on one schema. A slug is
+// Validated against the database registry (not the runtime city registry), so a database can be
+// Migrated before its transit configuration lands.
+const parseCitiesArg = (argv: string[] = process.argv): string[] => {
     const flag = argv.indexOf('--city')
-    const slug = flag !== -1 ? argv[flag + 1] : 'berlin'
+    if (flag === -1) return [...CITY_DATABASE_SLUGS]
 
+    const slug = argv[flag + 1]
     if (!slug) {
         throw new Error('--city requires a value, e.g. --city berlin')
     }
     if (!getCityDatabase(slug)) {
         throw new Error(`Unknown city "${slug}" — not a provisioned city database in @freifahren/cities`)
     }
-    return slug
+    return [slug]
 }
 
 const migrate = () => {
-    const city = parseCityArg()
     const remote = process.argv.includes('--remote')
-    const { dbBinding } = getCityDatabase(city)!
+    const target = remote ? 'remote' : 'local'
 
-    logger.info({ city, binding: dbBinding, target: remote ? 'remote' : 'local' }, 'Applying D1 migrations...')
-    applyMigrations({ binding: dbBinding, remote })
-    logger.info({ city, binding: dbBinding, target: remote ? 'remote' : 'local' }, 'D1 migrations applied')
+    for (const city of parseCitiesArg()) {
+        const { dbBinding } = getCityDatabase(city)!
+        logger.info({ city, binding: dbBinding, target }, 'Applying D1 migrations...')
+        applyMigrations({ binding: dbBinding, remote })
+    }
 }
 
 try {

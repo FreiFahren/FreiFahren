@@ -33,27 +33,28 @@ Put local secrets/vars in `.dev.vars` (see `.dev.vars.example`).
 ## DB Migrations
 
 Each city has its own isolated D1 database (see the `CITY_DATABASES` registry in
-`packages/cities`), and they all share the same `drizzle/` migrations. The migrate commands take a
-`--city <slug>` and resolve that city's binding from the registry — no binding is hard-coded.
+`packages/cities`), and they all share the same `drizzle/` migrations. The migrate commands resolve
+each city's binding from the registry — no binding is hard-coded. With no `--city`, they fan out
+over every provisioned city so all databases stay on one schema; pass `--city <slug>` to target one.
 
 After altering the schema, generate a migration and apply it:
 
 ```sh
 bun run db:generate                          # generate the SQLite migration (offline)
 
-# Berlin is the default when --city is omitted:
-bun run db:migrate                           # apply to Berlin's local D1
-bun run db:migrate:remote                    # apply to Berlin's remote (production) D1
+# Every provisioned city (keeps all databases on one schema):
+bun run db:migrate                           # apply to all cities' local D1
+bun run db:migrate:remote                    # apply to all cities' remote (production) D1
 
-# Any other provisioned city, e.g. Leipzig:
+# A single city, e.g. Leipzig:
 bun run db:migrate --city leipzig            # local
 bun run db:migrate:remote --city leipzig     # remote
 ```
 
 Applying migrations is idempotent: wrangler tracks applied migrations in each database's
 `d1_migrations` ledger, so re-running is a no-op. `bun run seed` applies migrations through the same
-helper before loading reference data, and the deploy workflow fans the command out over every city
-in `CITY_DATABASES` (with a drift guard that fails if the databases land on different heads).
+helper before loading reference data, and the deploy workflow runs `db:migrate:remote` across every
+city in `CITY_DATABASES` (with a drift guard that fails if the databases land on different heads).
 
 ### Adding a new city
 
