@@ -10,7 +10,7 @@ export const INSIGHTS_WORKERS_CACHE_CONTROL = 'public, max-age=86400'
 export const insightsCacheMiddleware: MiddlewareHandler<Env> = async (c, next) => {
     await next()
 
-    if (c.req.method !== 'GET' || c.res.status >= 500) return
+    if (c.req.method !== 'GET' || c.res.status >= 400) return
 
     c.header('Cache-Control', INSIGHTS_CACHE_CONTROL)
     c.header('Cloudflare-CDN-Cache-Control', INSIGHTS_WORKERS_CACHE_CONTROL)

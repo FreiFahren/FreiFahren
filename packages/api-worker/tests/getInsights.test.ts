@@ -67,6 +67,8 @@ describe('GET /insights/station/:stationId', () => {
         const response = await appRequestWithRedirect('/insights/station/UNKNOWN_STATION')
 
         expect(response.status).toBe(404)
+        expect(response.headers.get('Cache-Control')).toBe('no-store')
+        expect(response.headers.get('Cloudflare-CDN-Cache-Control')).toBeNull()
         await expect(response.json()).resolves.toMatchObject({ details: { internal_code: 'STATION_NOT_FOUND' } })
     })
 })
