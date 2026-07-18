@@ -8,6 +8,7 @@ import { getCity } from '@freifahren/cities'
 import { getPlatformProxy } from 'wrangler'
 
 import { createD1Db } from '../index'
+import { applyMigrations } from '../migrate'
 
 import { parseCityArg } from './city-arg'
 
@@ -76,8 +77,7 @@ const seedD1 = async () => {
     logger.info({ city, binding, target: remote ? 'remote' : 'local' }, 'Seeding D1...')
 
     // Build the reference tables on the local Miniflare D1 via the shared pipeline.
-    const localPersistenceArgs = persistTo !== undefined ? ['--persist-to', persistTo] : []
-    wrangler('d1', 'migrations', 'apply', binding, '--local', ...localPersistenceArgs)
+    applyMigrations({ binding, remote: false, persistTo })
     const { env, dispose } = await getPlatformProxy<Record<string, D1Database>>(
         persistTo !== undefined ? { persist: { path: join(persistTo, 'v3') } } : undefined
     )
@@ -90,7 +90,7 @@ const seedD1 = async () => {
             // Over via wrangler (additive INSERT OR IGNORE).
             const sqlPath = join(tmpdir(), `freifahren-seed-${city}.sql`)
             writeFileSync(sqlPath, await dumpReferenceTables(d1))
-            wrangler('d1', 'migrations', 'apply', binding, '--remote')
+            applyMigrations({ binding, remote: true })
             wrangler('d1', 'execute', binding, '--remote', `--file=${sqlPath}`)
         }
     } finally {

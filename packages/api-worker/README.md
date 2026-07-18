@@ -32,12 +32,29 @@ Put local secrets/vars in `.dev.vars` (see `.dev.vars.example`).
 
 ## DB Migrations
 
+Each city has its own isolated D1 database (see the `CITY_DATABASES` registry in
+`packages/cities`), and they all share the same `drizzle/` migrations. The migrate commands resolve
+each city's binding from the registry — no binding is hard-coded. With no `--city`, they fan out
+over every provisioned city so all databases stay on one schema; pass `--city <slug>` to target one.
+
 After altering the schema, generate a migration and apply it:
 
 ```sh
 bun run db:generate                          # generate the SQLite migration (offline)
-bun run db:migrate                           # apply to the local D1 (db:migrate:remote for production)
+
+# Every provisioned city (keeps all databases on one schema):
+bun run db:migrate                           # apply to all cities' local D1
+bun run db:migrate:remote                    # apply to all cities' remote (production) D1
+
+# A single city, e.g. Leipzig:
+bun run db:migrate --city leipzig            # local
+bun run db:migrate:remote --city leipzig     # remote
 ```
+
+Applying migrations is idempotent: wrangler tracks applied migrations in each database's
+`d1_migrations` ledger, so re-running is a no-op. `bun run seed` applies migrations through the same
+helper before loading reference data, and the deploy workflow runs `db:migrate:remote` across every
+city in `CITY_DATABASES` (with a drift guard that fails if the databases land on different heads).
 
 ## DB Access / Drizzle Studio
 

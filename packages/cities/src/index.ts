@@ -1,12 +1,12 @@
 import { BERLIN } from './berlin'
-import { CITY_DATABASES } from './databases'
 import { LEIPZIG } from './leipzig'
 import type { CityConfig } from './types'
 
 export * from './types'
 export { BERLIN }
 export { LEIPZIG }
-export { CITY_DATABASES }
+export { CITY_DATABASES, CITY_DATABASE_SLUGS, getCityDatabase } from './databases'
+export type { CityDatabaseSlug } from './databases'
 
 /**
  * The city registry: the single source of truth for everything that differs
