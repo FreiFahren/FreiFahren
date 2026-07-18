@@ -57,6 +57,7 @@ export const BERLIN: CityConfig = {
     dbName: CITY_DATABASES.berlin.dbName,
     dbBinding: CITY_DATABASES.berlin.dbBinding,
     lang: 'de',
+    timezone: 'Europe/Berlin',
     map: {
         center: [13.388, 52.5162],
         zoom: 11,
