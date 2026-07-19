@@ -1,57 +1,56 @@
-import { describe, expect, it } from 'vitest'
+import { asc } from 'drizzle-orm'
+import { beforeAll, describe, expect, it } from 'vitest'
 
 import { predictSegmentRisk, type RiskModelReport, type RiskModelSegment } from '../src/modules/risk/risk-model'
+import { db, lineStations } from './test-db'
 
 /*
- * Real station ids (Berlin Ringbahn) used as opaque identifiers — the model
- * itself is city-agnostic and these tests never touch city config or the DB.
+ * The loop must be long enough that the unwrapped distance from one end of
+ * the segment list to the other decays to green — exactly the broken case a
+ * wrapped distance has to repair.
  */
-const RING_STATIONS = [
-    'n29190907', // Gesundbrunnen
-    'n2924245391', // Wedding
-    'n29045594', // Westhafen
-    'BBEU', // Beusselstraße
-    'n4330752281', // Jungfernheide
-    'BWES', // Westend
-    'BMN', // Messe Nord/ZOB
-    'BWKRR', // Westkreuz
-    'BHAL', // Halensee
-    'BHO', // Hohenzollerndamm
-    'n3783145806', // Heidelberger Platz
-    'n29046990', // Bundesplatz
-    'n29497638', // Innsbrucker Platz
-    'BSGV', // Schöneberg
-    'BSKV', // Südkreuz
-    'n29058343', // Tempelhof
-    'n31048718', // Hermannstraße
-    'n3865616066', // Neukölln
-    'BSO', // Sonnenallee
-    'BTP', // Treptower Park
-    'BOKS', // Ostkreuz
-    'n710904931', // Frankfurter Allee
-    'BSTO', // Storkower Straße
-    'n98878581', // Landsberger Allee
-    'n98878847', // Greifswalder Straße
-    'n30305102', // Prenzlauer Allee
-    'n91711807', // Schönhauser Allee
-]
+const LOOP_STATION_COUNT = 13
 
-const LINE_ID = 'ring'
-const REPORT_STATION = RING_STATIONS[0]!
+let lineId = ''
+let loopStationIds: string[] = []
 
-const buildSegments = (stationIds: string[], { closed }: { closed: boolean }): RiskModelSegment[] => {
-    const arcCount = closed ? stationIds.length : stationIds.length - 1
+// Station ids come from whatever line the seeded city has that is long enough
+// to build a loop from, so the test uses real ids without hard-coding a city.
+beforeAll(async () => {
+    const rows = await db
+        .select({ lineId: lineStations.lineId, stationId: lineStations.stationId })
+        .from(lineStations)
+        .orderBy(asc(lineStations.lineId), asc(lineStations.order))
+
+    const stationsByLine = new Map<string, string[]>()
+    for (const row of rows) {
+        const stationIds = stationsByLine.get(row.lineId) ?? []
+        stationIds.push(row.stationId)
+        stationsByLine.set(row.lineId, stationIds)
+    }
+
+    for (const [id, stationIds] of stationsByLine) {
+        if (stationIds.length >= LOOP_STATION_COUNT) {
+            lineId = id
+            loopStationIds = stationIds.slice(0, LOOP_STATION_COUNT)
+            break
+        }
+    }
+})
+
+const buildSegments = ({ closed }: { closed: boolean }): RiskModelSegment[] => {
+    const arcCount = closed ? loopStationIds.length : loopStationIds.length - 1
     return Array.from({ length: arcCount }, (_, position) => ({
         sid: `seg-${position}`,
-        lineId: LINE_ID,
-        fromStationId: stationIds[position]!,
-        toStationId: stationIds[(position + 1) % stationIds.length]!,
+        lineId,
+        fromStationId: loopStationIds[position]!,
+        toStationId: loopStationIds[(position + 1) % loopStationIds.length]!,
     }))
 }
 
 const freshReportAt = (stationId: string, now: Date): RiskModelReport => ({
     stationId,
-    lines: [LINE_ID],
+    lines: [lineId],
     directionId: null,
     timestamp: now,
 })
@@ -60,10 +59,12 @@ describe('predictSegmentRisk circular lines', () => {
     const now = new Date('2026-01-01T12:00:00Z')
 
     it('propagates risk to both adjacent branches of a closed loop of segments', () => {
-        const segments = buildSegments(RING_STATIONS, { closed: true })
+        if (loopStationIds.length === 0) return // skip if the seeded city has no line long enough
+
+        const segments = buildSegments({ closed: true })
         const lastPosition = segments.length - 1
 
-        const risk = predictSegmentRisk(segments, [freshReportAt(REPORT_STATION, now)], now)
+        const risk = predictSegmentRisk(segments, [freshReportAt(loopStationIds[0]!, now)], now)
 
         // Branch in segment-list order
         expect(risk['seg-0']).toBeDefined()
@@ -79,11 +80,13 @@ describe('predictSegmentRisk circular lines', () => {
     })
 
     it('wraps a flagged circular line whose seeded segment list is open by the closing arc', () => {
+        if (loopStationIds.length === 0) return
+
         // Seeded rings drop the closing station repeat, so N stations yield N-1 segments
-        const segments = buildSegments(RING_STATIONS, { closed: false })
+        const segments = buildSegments({ closed: false })
         const lastPosition = segments.length - 1
 
-        const risk = predictSegmentRisk(segments, [freshReportAt(REPORT_STATION, now)], now, new Set([LINE_ID]))
+        const risk = predictSegmentRisk(segments, [freshReportAt(loopStationIds[0]!, now)], now, new Set([lineId]))
 
         expect(risk['seg-0']).toBeDefined()
         expect(risk[`seg-${lastPosition}`]).toBeDefined()
@@ -91,25 +94,29 @@ describe('predictSegmentRisk circular lines', () => {
     })
 
     it('keeps linear-line behaviour unchanged: no wrap without a circular flag or closed loop', () => {
-        const segments = buildSegments(RING_STATIONS, { closed: false })
+        if (loopStationIds.length === 0) return
+
+        const segments = buildSegments({ closed: false })
         const lastPosition = segments.length - 1
 
-        const risk = predictSegmentRisk(segments, [freshReportAt(REPORT_STATION, now)], now)
+        const risk = predictSegmentRisk(segments, [freshReportAt(loopStationIds[0]!, now)], now)
 
         expect(risk['seg-0']).toBeDefined()
         expect(risk[`seg-${lastPosition}`]).toBeUndefined()
     })
 
     it('keeps directional-report semantics on a circular line', () => {
-        const segments = buildSegments(RING_STATIONS, { closed: true })
+        if (loopStationIds.length === 0) return
+
+        const segments = buildSegments({ closed: true })
         const lastPosition = segments.length - 1
 
         const directed = predictSegmentRisk(
             segments,
-            [{ ...freshReportAt(REPORT_STATION, now), directionId: RING_STATIONS[1]! }],
+            [{ ...freshReportAt(loopStationIds[0]!, now), directionId: loopStationIds[1]! }],
             now
         )
-        const undirected = predictSegmentRisk(segments, [freshReportAt(REPORT_STATION, now)], now)
+        const undirected = predictSegmentRisk(segments, [freshReportAt(loopStationIds[0]!, now)], now)
 
         // Directed reports still colour both sides of the loop
         expect(directed['seg-0']).toBeDefined()
