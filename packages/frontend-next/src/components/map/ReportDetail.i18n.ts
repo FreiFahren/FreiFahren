@@ -4,6 +4,7 @@ export const NAMESPACE = 'reportDetail';
 
 i18n.addResourceBundle('en', NAMESPACE, {
   close: 'Close',
+  openStationDetails: 'Open details for {{station}}',
   now: 'Just now',
   minutesAgo: '{{count}} min ago',
   moreThan45Min: 'More than 45 min ago',
@@ -19,6 +20,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
 
 i18n.addResourceBundle('de', NAMESPACE, {
   close: 'Schließen',
+  openStationDetails: 'Details zu {{station}} öffnen',
   now: 'Gerade eben',
   minutesAgo: 'vor {{count}} min',
   moreThan45Min: 'Vor mehr als 45 min',

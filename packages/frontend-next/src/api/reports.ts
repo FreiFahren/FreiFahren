@@ -127,6 +127,7 @@ export const useReports = (timeframeMs: number) =>
       data: mergeReportSlices(results),
       isLoading: results.some((result) => result.isLoading),
       isError: results.some((result) => result.isError),
+      isSuccess: results.every((result) => result.isSuccess),
     }),
   });
 

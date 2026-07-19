@@ -43,7 +43,8 @@ type AnalyticsEvents = {
   // (tram/bus) tier. Sessions that never fire it never discovered those lines exist — the
   // denominator being map pageviews. `zoom` is where the reveal happened.
   secondary_lines_revealed: { zoom: number };
-  station_selected: { source: 'map' | 'search' };
+  station_selected: { source: 'map' | 'search' | 'report' | 'reports_list' };
+  station_detail_lines_expanded: { additional_line_count: number };
   report_marker_selected: { report_age_minutes: number };
   reports_overview_opened: { report_count: number };
   reports_tab_selected: { tab: 'summary' | 'lines' | 'reports' };
