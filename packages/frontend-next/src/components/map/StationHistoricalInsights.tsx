@@ -13,19 +13,19 @@ export function StationHistoricalInsights({ stationId }: StationHistoricalInsigh
   const { t } = useTranslation(NAMESPACE);
   const { data: insights } = useStationInsights(stationId);
 
-  if (!insights) return null;
-
   return (
-    <CardContent>
-      <div className="text-muted-foreground flex items-baseline justify-between gap-3 text-sm">
-        <p>
-          {t('stationRank', {
-            position: insights.ranking.position,
-            population: insights.ranking.population,
-          })}
-        </p>
-        <p>{t('stationReportsLast30Days', { count: insights.reportCount.value })}</p>
-      </div>
+    <CardContent className="min-h-5">
+      {insights && (
+        <div className="text-muted-foreground flex items-baseline justify-between gap-3 text-sm">
+          <p>
+            {t('stationRank', {
+              position: insights.ranking.position,
+              population: insights.ranking.population,
+            })}
+          </p>
+          <p>{t('stationReportsLast30Days', { count: insights.reportCount.value })}</p>
+        </div>
+      )}
     </CardContent>
   );
 }
