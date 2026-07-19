@@ -11,6 +11,7 @@ import { Route as ReportRoute } from '@/routes/report';
 import { DetailCard } from './DetailCard';
 import { NAMESPACE } from './StationDetail.i18n';
 import { StationLineReports } from './StationLineReports';
+import { StationHistoricalInsights } from './StationHistoricalInsights';
 import { stationLiveData } from './station-detail-data';
 
 type StationDetailProps = {
@@ -32,6 +33,7 @@ export function StationDetail({ station, onClose }: StationDetailProps) {
       onClose={onClose}
       cardClassName="max-h-[calc(100dvh-6rem)]"
     >
+      <StationHistoricalInsights stationId={station.id} />
       {hasLiveReports && lineReports.length > 0 && (
         <StationLineReports stationReportCount={stationReportCount} lineReports={lineReports} />
       )}
