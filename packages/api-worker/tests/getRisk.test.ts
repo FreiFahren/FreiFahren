@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { createApp } from '../src'
@@ -510,6 +510,40 @@ describe('GET /v0/risk report type handling', () => {
             expect(VALID_COLORS).toContain(c)
             expect(c).not.toBe(GREEN)
         }
+    })
+})
+
+describe('GET /v0/risk circular lines', () => {
+    beforeEach(async () => {
+        await db.delete(reports)
+    })
+
+    afterEach(async () => {
+        await db.delete(reports)
+    })
+
+    it('a report at the segment-list boundary of a circular line colours both adjacent branches', async () => {
+        const [circularLine] = await db.select({ id: lines.id }).from(lines).where(eq(lines.isCircular, true)).limit(1)
+        if (!circularLine) return // skip if the seeded city has no circular line
+
+        const lineSegments = await db
+            .select({ id: segments.id, fromStationId: segments.fromStationId })
+            .from(segments)
+            .where(eq(segments.lineId, circularLine.id))
+            .orderBy(asc(segments.position))
+        if (lineSegments.length < 2) return
+
+        // The first segment's fromStation sits at the boundary where the list wraps
+        const boundaryStationId = lineSegments[0]!.fromStationId
+        await postRiskReport({ stationId: boundaryStationId, lineId: circularLine.id, source: 'telegram' })
+
+        const response = await getRisk()
+        const body = (await response.json()) as RiskResponse
+
+        const firstSid = String(lineSegments[0]!.id)
+        const lastSid = String(lineSegments[lineSegments.length - 1]!.id)
+        expect(body.segments_risk[firstSid]).toBeDefined()
+        expect(body.segments_risk[lastSid]).toBeDefined()
     })
 })
 
