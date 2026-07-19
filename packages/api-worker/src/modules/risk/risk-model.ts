@@ -2,7 +2,8 @@
  * For each report, three risk components (direct, bidirect, line) are
  * computed as base_risk × temporal decay (logistic in report age), then
  * spread along the report's lines with a spatial decay (beta-binomial in
- * segment distance). Components accumulate additively across reports
+ * segment distance; on circular lines the distance wraps around the ring).
+ * Components accumulate additively across reports
  * (capped at 1.0), are summed into a final risk per segment (capped at
  * 1.0), mapped to a color, and finally propagated to overlapping segments
  * (segments sharing the same unordered station pair).
@@ -158,6 +159,49 @@ type LineIndex = {
      * original linear scan did.
      */
     stationRank: Map<string, number>
+    firstFromStationId: string
+    lastToStationId: string
+}
+
+/*
+ * Number of arcs a circular line's segment list wraps over, or null for
+ * linear lines. A segment list that closes on itself (last toStation ===
+ * first fromStation) is a ring regardless of any flag. Seeded rings instead
+ * drop the closing station repeat (the line_stations PK forbids it), leaving
+ * the list open by exactly one arc — the modulus adds it back.
+ */
+const ringSize = (lineIndex: LineIndex, isFlaggedCircular: boolean): number | null => {
+    const count = lineIndex.segments.length
+    if (count < 2) return null
+    if (lineIndex.lastToStationId === lineIndex.firstFromStationId) return count
+    return isFlaggedCircular ? count + 1 : null
+}
+
+// Per-line index so the per-report loop is O(line segments) with O(1) lookups
+const buildLineIndexes = (segments: RiskModelSegment[]): Map<string, LineIndex> => {
+    const lineIndexes = new Map<string, LineIndex>()
+    for (const segment of segments) {
+        let lineIndex = lineIndexes.get(segment.lineId)
+        if (!lineIndex) {
+            lineIndex = {
+                segments: [],
+                stationRank: new Map(),
+                firstFromStationId: segment.fromStationId,
+                lastToStationId: segment.toStationId,
+            }
+            lineIndexes.set(segment.lineId, lineIndex)
+        }
+        const rank = lineIndex.segments.length
+        lineIndex.segments.push({ sid: segment.sid, rank })
+        lineIndex.lastToStationId = segment.toStationId
+        if (!lineIndex.stationRank.has(segment.fromStationId)) {
+            lineIndex.stationRank.set(segment.fromStationId, rank)
+        }
+        if (!lineIndex.stationRank.has(segment.toStationId)) {
+            lineIndex.stationRank.set(segment.toStationId, rank)
+        }
+    }
+    return lineIndexes
 }
 
 const sortedPairKey = (a: string, b: string): string => (a < b ? `${a}\u0000${b}` : `${b}\u0000${a}`)
@@ -172,26 +216,13 @@ const sortedPairKey = (a: string, b: string): string => (a < b ? `${a}\u0000${b}
 export const predictSegmentRisk = (
     segments: RiskModelSegment[],
     reports: RiskModelReport[],
-    now: Date
+    now: Date,
+    circularLineIds: ReadonlySet<string> = new Set()
 ): Record<string, SegmentRisk> => {
-    // Per-line index so the per-report loop is O(line segments) with O(1) lookups
-    const lineIndexes = new Map<string, LineIndex>()
+    const lineIndexes = buildLineIndexes(segments)
+
     const segmentsByStationPair = new Map<string, string[]>()
     for (const segment of segments) {
-        let lineIndex = lineIndexes.get(segment.lineId)
-        if (!lineIndex) {
-            lineIndex = { segments: [], stationRank: new Map() }
-            lineIndexes.set(segment.lineId, lineIndex)
-        }
-        const rank = lineIndex.segments.length
-        lineIndex.segments.push({ sid: segment.sid, rank })
-        if (!lineIndex.stationRank.has(segment.fromStationId)) {
-            lineIndex.stationRank.set(segment.fromStationId, rank)
-        }
-        if (!lineIndex.stationRank.has(segment.toStationId)) {
-            lineIndex.stationRank.set(segment.toStationId, rank)
-        }
-
         const pairKey = sortedPairKey(segment.fromStationId, segment.toStationId)
         const overlapping = segmentsByStationPair.get(pairKey)
         if (overlapping) {
@@ -222,8 +253,13 @@ export const predictSegmentRisk = (
                 const stationRank = lineIndex.stationRank.get(report.stationId)
                 if (stationRank === undefined) continue
 
+                // A ring has no terminal, so risk spreads the shorter way around
+                const lineRingSize = ringSize(lineIndex, circularLineIds.has(lineId))
+
                 for (const segment of lineIndex.segments) {
-                    const distance = Math.abs(segment.rank - stationRank)
+                    const linearDistance = Math.abs(segment.rank - stationRank)
+                    const distance =
+                        lineRingSize === null ? linearDistance : Math.min(linearDistance, lineRingSize - linearDistance)
                     const risks = segmentRisks.get(segment.sid)!
                     risks.direct = Math.min(1, risks.direct + reportDirectRisk * spatialDecay(distance, 'direct'))
                     risks.bidirect = Math.min(

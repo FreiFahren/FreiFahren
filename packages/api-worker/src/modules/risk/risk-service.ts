@@ -24,11 +24,14 @@ export class RiskService {
     async getRisk(now: DateTime = DateTime.utc()): Promise<RiskData> {
         const oneHourAgo = now.minus({ hours: 1 })
 
-        const [segmentCollection, realReports, stations] = await Promise.all([
+        const [segmentCollection, realReports, stations, lines] = await Promise.all([
             this.transitNetworkDataService.getSegments(),
             this.reportsService.getRealReports({ from: oneHourAgo, to: now }),
             this.transitNetworkDataService.getStations(),
+            this.transitNetworkDataService.getLines(),
         ])
+
+        const circularLineIds = new Set(lines.filter((line) => line.isCircular).map((line) => line.id))
 
         const segments: RiskModelSegment[] = segmentCollection.features.map((feature) => ({
             sid: String(feature.properties.id),
@@ -51,7 +54,7 @@ export class RiskService {
         })
 
         try {
-            return { segments_risk: predictSegmentRisk(segments, reports, now.toJSDate()) }
+            return { segments_risk: predictSegmentRisk(segments, reports, now.toJSDate(), circularLineIds) }
         } catch (error) {
             throw new AppError({
                 message: 'Risk model failed',
