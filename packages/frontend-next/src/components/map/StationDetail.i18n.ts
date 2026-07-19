@@ -5,13 +5,6 @@ export const NAMESPACE = 'stationDetail';
 i18n.addResourceBundle('en', NAMESPACE, {
   reportSighting: 'Report sighting',
   close: 'Close',
-  allClear: 'All clear',
-  riskLevel: '{{level}} risk',
-  riskLevels: {
-    moderate: 'Moderate',
-    high: 'High',
-    severe: 'Very high',
-  },
   stationReportsLast24Hours_one: '{{count}} report · 24h',
   stationReportsLast24Hours_other: '{{count}} reports · 24h',
   lineReports: 'Line-wide · 24h',
@@ -24,13 +17,6 @@ i18n.addResourceBundle('en', NAMESPACE, {
 i18n.addResourceBundle('de', NAMESPACE, {
   reportSighting: 'Sichtung melden',
   close: 'Schließen',
-  allClear: 'Alles ruhig',
-  riskLevel: '{{level}}es Risiko',
-  riskLevels: {
-    moderate: 'Mäßig',
-    high: 'Hoh',
-    severe: 'Sehr hoh',
-  },
   stationReportsLast24Hours_one: '{{count}} Meldung · 24 Std.',
   stationReportsLast24Hours_other: '{{count}} Meldungen · 24 Std.',
   lineReports: 'Linienweit · 24 Std.',

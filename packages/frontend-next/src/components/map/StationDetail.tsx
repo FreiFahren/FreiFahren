@@ -2,8 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
 import { DAY_MS, useReports } from '@/api/reports';
-import { useRisk } from '@/api/risk';
-import { type Station, useLines, useSegments } from '@/api/transit';
+import { type Station, useLines } from '@/api/transit';
 import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
 import { useModalViewDuration } from '@/hooks/useModalViewDuration';
@@ -12,8 +11,7 @@ import { Route as ReportRoute } from '@/routes/report';
 import { DetailCard } from './DetailCard';
 import { NAMESPACE } from './StationDetail.i18n';
 import { StationLineReports } from './StationLineReports';
-import { StationRiskStatus } from './StationRiskStatus';
-import { stationLiveData, stationRiskFor } from './station-detail-data';
+import { stationLiveData } from './station-detail-data';
 
 type StationDetailProps = {
   station: Station;
@@ -23,12 +21,8 @@ type StationDetailProps = {
 export function StationDetail({ station, onClose }: StationDetailProps) {
   const { t } = useTranslation(NAMESPACE);
   const { data: lines } = useLines();
-  const { data: risk, isSuccess: hasRisk } = useRisk();
-  const { data: segments } = useSegments();
   const { data: reports, isSuccess: hasLiveReports } = useReports(DAY_MS);
   const { stationReportCount, lineReports } = stationLiveData(station, lines, reports);
-  const stationRisk = stationRiskFor(station.id, segments, risk);
-  const hasRiskStatus = hasRisk && segments !== undefined;
   useModalViewDuration('station');
 
   return (
@@ -38,7 +32,6 @@ export function StationDetail({ station, onClose }: StationDetailProps) {
       onClose={onClose}
       cardClassName="max-h-[calc(100dvh-6rem)]"
     >
-      {hasRiskStatus && <StationRiskStatus risk={stationRisk} />}
       {hasLiveReports && lineReports.length > 0 && (
         <StationLineReports stationReportCount={stationReportCount} lineReports={lineReports} />
       )}
