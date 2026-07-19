@@ -1,4 +1,5 @@
-import { MapPin } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
+import { ChevronRight, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { formatElapsed, HOUR_MS, useReports, useStationReportCount } from '@/api/reports';
@@ -7,7 +8,9 @@ import { LineBadge } from '@/components/transit/LineBadge';
 import { CardContent } from '@/components/ui/card';
 import { useGeolocation } from '@/contexts/Geolocation.context';
 import { useModalViewDuration } from '@/hooks/useModalViewDuration';
+import { track } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';
+import { Route as StationRoute } from '@/routes/_map/station/$stationId';
 
 import { DetailCard } from './DetailCard';
 import { NAMESPACE } from './ReportDetail.i18n';
@@ -43,7 +46,22 @@ export function ReportDetail({ station, onClose }: ReportDetailProps) {
   const directionName = report?.directionId ? stations?.[report.directionId]?.name : undefined;
 
   return (
-    <DetailCard title={station.name} closeLabel={t('close')} onClose={onClose}>
+    <DetailCard
+      title={
+        <Link
+          to={StationRoute.to}
+          params={{ stationId: station.id }}
+          className="inline-flex items-center gap-0.5 rounded-sm hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
+          aria-label={t('openStationDetails', { station: station.name })}
+          onClick={() => track('station_selected', { source: 'report' })}
+        >
+          {station.name}
+          <ChevronRight className="size-4" aria-hidden />
+        </Link>
+      }
+      closeLabel={t('close')}
+      onClose={onClose}
+    >
       {(lineName || directionName) && (
         <CardContent className="flex items-center gap-2">
           {lineName && <LineBadge name={lineName} />}

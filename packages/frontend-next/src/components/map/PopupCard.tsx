@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { Backdrop } from '@/components/ui/backdrop';
 import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 type PopupCardProps = {
   /**
@@ -11,10 +12,11 @@ type PopupCardProps = {
    */
   onClose?: () => void;
   closeLabel?: string;
+  cardClassName?: string;
   children: React.ReactNode;
 };
 
-export function PopupCard({ onClose, closeLabel, children }: PopupCardProps) {
+export function PopupCard({ onClose, closeLabel, cardClassName, children }: PopupCardProps) {
   return (
     <>
       {onClose && (
@@ -27,7 +29,12 @@ export function PopupCard({ onClose, closeLabel, children }: PopupCardProps) {
         />
       )}
       <div className="pb-safe-3 pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pt-3">
-        <Card className="animate-in slide-in-from-bottom-4 fade-in pointer-events-auto w-full max-w-md gap-1 py-4 duration-200 ease-out">
+        <Card
+          className={cn(
+            'animate-in slide-in-from-bottom-4 fade-in pointer-events-auto w-full max-w-md gap-1 py-4 duration-200 ease-out',
+            cardClassName,
+          )}
+        >
           {children}
         </Card>
       </div>

@@ -53,13 +53,14 @@ export function ReportRow({
     </>
   );
 
-  const trackSelection = () => {
+  const trackSelection = (opensStationDetail: boolean) => {
     selectionTap();
     track('report_row_selected', {
       report_age_minutes: Math.round((Date.now() - new Date(report.timestamp).getTime()) / 60000),
       has_line: report.lineId !== null,
       has_direction: report.directionId !== null,
     });
+    if (opensStationDetail) track('station_selected', { source: 'reports_list' });
   };
 
   // A report from the last hour opens the live report view; older ones fall back to the station.
@@ -70,7 +71,7 @@ export function ReportRow({
           to={ReportDetailRoute.to}
           params={{ stationId: report.stationId }}
           className="flex flex-col gap-1 px-4 py-3"
-          onClick={trackSelection}
+          onClick={() => trackSelection(false)}
         >
           {content}
         </Link>
@@ -79,7 +80,7 @@ export function ReportRow({
           to={StationRoute.to}
           params={{ stationId: report.stationId }}
           className="flex flex-col gap-1 px-4 py-3"
-          onClick={trackSelection}
+          onClick={() => trackSelection(true)}
         >
           {content}
         </Link>

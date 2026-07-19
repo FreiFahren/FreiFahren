@@ -1,7 +1,7 @@
 import type { FeatureCollection, LineString } from 'geojson';
 import { Layer, Source } from 'react-map-gl/maplibre';
 
-import { useRisk } from '@/api/risk';
+import { riskColor, useRisk } from '@/api/risk';
 
 import { STATIONS_BASE_LAYER_ID } from './StationsLayer';
 import {
@@ -10,10 +10,6 @@ import {
   type TypedSegmentProperties,
   useTypedSegments,
 } from './line-style';
-
-// Neutral green for segments without elevated risk. The backend
-// only returns risky (non-green) segments, so everything else falls back to this.
-const NEUTRAL_GREEN = '#13C184';
 
 type RiskSegmentProperties = TypedSegmentProperties & { line_color: string };
 
@@ -30,7 +26,7 @@ export function RiskLayer() {
       ...feature,
       properties: {
         ...feature.properties,
-        line_color: segmentsRisk?.[String(feature.properties.id)]?.color ?? NEUTRAL_GREEN,
+        line_color: riskColor(segmentsRisk?.[String(feature.properties.id)]?.risk),
       },
     })),
   };
