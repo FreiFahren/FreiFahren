@@ -1,6 +1,5 @@
 import { HOUR_MS, type Report } from '@/api/reports';
-import type { RiskData } from '@/api/risk';
-import { compareLineOrder, type Line, type Segments, type Station } from '@/api/transit';
+import { compareLineOrder, type Line, type Station } from '@/api/transit';
 
 type StationLine = Pick<Line, 'name' | 'type'> & { ids: string[] };
 
@@ -55,24 +54,6 @@ export function stationLiveData(
   }
 
   return { stationReportCount, lineReports };
-}
-
-export function stationRiskFor(
-  stationId: string,
-  segments: Segments | undefined,
-  risk: RiskData | undefined,
-): number {
-  if (!segments || !risk) return 0;
-
-  let highestRisk = 0;
-  for (const segment of segments.features) {
-    if (segment.properties.from !== stationId && segment.properties.to !== stationId) continue;
-    highestRisk = Math.max(
-      highestRisk,
-      risk.segments_risk[String(segment.properties.id)]?.risk ?? 0,
-    );
-  }
-  return highestRisk;
 }
 
 export function sortStationLineReports(lineReports: StationLineReports[]): StationLineReports[] {
