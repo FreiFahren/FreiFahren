@@ -11,7 +11,7 @@ import { Route as ReportRoute } from '@/routes/report';
 import { DetailCard } from './DetailCard';
 import { NAMESPACE } from './StationDetail.i18n';
 import { StationLineReports } from './StationLineReports';
-import { StationHistoricalInsights } from './station-historical-insights';
+import { StationHistoricalInsights } from './StationHistoricalInsights';
 import { stationLiveData } from './station-detail-data';
 
 type StationDetailProps = {
