@@ -11,7 +11,9 @@ i18n.addResourceBundle('en', NAMESPACE, {
   lineReportsLast24Hours_one: '{{count}} report',
   lineReportsLast24Hours_other: '{{count}} reports',
   inLastHour: '{{count}} in the last hour',
-  showMoreLines: '{{count}} more lines',
+  stationRank: '#{{position}} of {{population}} stations',
+  stationReportsLast30Days_one: '{{count}} report · 30d',
+  stationReportsLast30Days_other: '{{count}} reports · 30d',
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
@@ -23,5 +25,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
   lineReportsLast24Hours_one: '{{count}} Meldung',
   lineReportsLast24Hours_other: '{{count}} Meldungen',
   inLastHour: '{{count}} in der letzten Stunde',
-  showMoreLines: '{{count}} weitere Linien',
+  stationRank: '#{{position}} von {{population}} Stationen',
+  stationReportsLast30Days_one: '{{count}} Meldung · 30 Tg.',
+  stationReportsLast30Days_other: '{{count}} Meldungen · 30 Tg.',
 });
