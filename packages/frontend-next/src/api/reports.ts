@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { TFunction } from 'i18next';
 import { useEffect, useState } from 'react';
@@ -234,14 +235,21 @@ export function useSubmitReport() {
         const lineId = resolveLineId(input, lines);
         const submitUrl = new URL(`${API_URL}/v0/reports`);
         submitUrl.searchParams.set('city', currentCitySlug);
+        // The native (Capacitor iOS/Android) builds and the web build share this same code, so the
+        // report `source` — which the Reports dashboard splits on — must be derived at runtime.
+        // `getPlatform()` is 'ios' | 'android' | 'web'; only 'web' is the browser build.
+        const isNative = Capacitor.isNativePlatform();
         const response = await fetch(submitUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'ff-platform': 'web' },
+          headers: {
+            'Content-Type': 'application/json',
+            'ff-platform': Capacitor.getPlatform(),
+          },
           body: JSON.stringify({
             stationId: input.stationId,
             lineId,
             directionId: input.directionStationId ?? null,
-            source: 'web_app',
+            source: isNative ? 'mobile_app' : 'web_app',
           }),
         });
         if (!response.ok) throw new Error(`Report submission failed: ${response.status}`);
