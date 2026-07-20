@@ -7,7 +7,7 @@ import { track } from '@/lib/analytics';
 // that lifecycle is the open window. We use performance.now() (monotonic) so a wall-clock shift
 // can't produce garbage durations. A page close/refresh while open won't unmount cleanly, so those
 // sessions are dropped — acceptable for an engagement metric.
-export function useModalViewDuration(modal: 'station' | 'report'): void {
+export function useModalViewDuration(modal: 'station' | 'line' | 'report'): void {
   useEffect(() => {
     const openedAt = performance.now();
     return () => {

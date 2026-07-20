@@ -23,7 +23,7 @@ export function DetailCard({
 }: DetailCardProps) {
   return (
     <PopupCard onClose={onClose} closeLabel={closeLabel} cardClassName={cardClassName}>
-      <CardContent className="flex items-start justify-between">
+      <CardContent className="flex shrink-0 items-start justify-between">
         <h2 className="font-heading text-lg font-semibold">{title}</h2>
         <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label={closeLabel}>
           <X />
