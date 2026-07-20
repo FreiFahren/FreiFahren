@@ -7,6 +7,7 @@ export type InternalCode =
     | 'VALIDATION_FAILED'
     | 'RISK_MODEL_FAILED'
     | 'STATION_NOT_FOUND'
+    | 'LINE_NOT_FOUND'
     | 'NO_PATH_FOUND'
     | 'UNKNOWN_CITY'
 export interface AppErrorDetails {

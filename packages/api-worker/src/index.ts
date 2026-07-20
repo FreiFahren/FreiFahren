@@ -6,10 +6,10 @@ import { requestId } from 'hono/request-id'
 import { Env, isAllowedCorsOrigin, registerContext } from './app-env'
 import { handleError } from './common/error-handler'
 import { registerVersionedRoutes } from './common/router'
-import { getStationInsights } from './modules/insights'
+import { getLineInsights, getStationInsights } from './modules/insights'
 import {
     insightsCacheMiddleware,
-    VERSIONED_INSIGHTS_CACHEABLE_PATH,
+    VERSIONED_INSIGHTS_CACHEABLE_PATHS,
 } from './modules/insights/insights-cache-middleware'
 import { getReports, getReportsByStation, postReport } from './modules/reports/'
 import { getRisk } from './modules/risk/risk-routes'
@@ -58,7 +58,9 @@ export const createApp = () => {
     for (const path of VERSIONED_TRANSIT_CACHEABLE_PATHS) {
         app.use(path, transitCacheMiddleware)
     }
-    app.use(VERSIONED_INSIGHTS_CACHEABLE_PATH, insightsCacheMiddleware)
+    for (const path of VERSIONED_INSIGHTS_CACHEABLE_PATHS) {
+        app.use(path, insightsCacheMiddleware)
+    }
     app.use('*', async (c, next) => {
         await next()
         c.header('Cache-Control', 'no-store')
@@ -87,7 +89,7 @@ export const createApp = () => {
         v0: [getRisk],
     })
     registerVersionedRoutes(app, 'insights', 'v0', {
-        v0: [getStationInsights],
+        v0: [getStationInsights, getLineInsights],
     })
 
     return app

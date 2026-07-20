@@ -1,12 +1,15 @@
-import { count, gte } from 'drizzle-orm'
+import { asc, count, desc, eq, gte } from 'drizzle-orm'
+import { DateTime } from 'luxon'
 import { z } from 'zod'
 
 import { AppError } from '../../common/errors'
-import { DbConnection, reports } from '../../db'
+import { DbConnection, lines, reports, stations } from '../../db'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
 import type { StationId } from '../transit/types'
 
 const THIRTY_DAYS_IN_MS = 30 * 24 * 60 * 60 * 1000
+const MIN_PROFILE_REPORTS = 80
+const MIN_PROFILE_WEEKS = 24
 
 const rangeSchema = z.object({
     start: z.iso.datetime(),
@@ -26,12 +29,46 @@ export const stationInsightsSchema = z.object({
 
 export type StationInsights = z.infer<typeof stationInsightsSchema>
 
+const profileHourSchema = z.object({
+    hour: z.number().int().min(0).max(23),
+    value: z.number().int().nonnegative(),
+})
+
+const metricSchema = z.object({
+    name: z.literal('report_count'),
+    range: rangeSchema,
+})
+
+export const lineInsightsSchema = z.object({
+    profile: z.object({
+        source: z.enum(['line_reports', 'city_reports']),
+        metric: metricSchema,
+        weekday: z.number().int().min(1).max(7),
+        hours: z.array(profileHourSchema).length(24),
+    }),
+    hotspots: z.object({
+        source: z.literal('reports'),
+        metric: metricSchema,
+        stations: z.array(
+            z.object({
+                stationId: z.string(),
+                name: z.string(),
+                value: z.number().int().nonnegative(),
+                share: z.number().min(0).max(1),
+            })
+        ),
+    }),
+})
+
+export type LineInsights = z.infer<typeof lineInsightsSchema>
+
 const toIso = (date: Date) => date.toISOString()
 
 export class InsightsService {
     constructor(
         private db: DbConnection,
-        private transitNetworkDataService: TransitNetworkDataService
+        private transitNetworkDataService: TransitNetworkDataService,
+        private timezone: string = 'UTC'
     ) {}
 
     async getStationInsights(stationId: StationId, now: Date = new Date()): Promise<StationInsights> {
@@ -62,6 +99,79 @@ export class InsightsService {
             ranking: {
                 position,
                 population,
+            },
+        })
+    }
+
+    async getLineInsights(lineId: string, now: Date = new Date()): Promise<LineInsights> {
+        const matchingLines = await this.db.select({ id: lines.id }).from(lines).where(eq(lines.id, lineId)).limit(1)
+        if (matchingLines.length === 0) {
+            throw new AppError({
+                message: 'Line not found',
+                statusCode: 404,
+                internalCode: 'LINE_NOT_FOUND',
+                description: `lineId=${lineId}`,
+            })
+        }
+
+        // Historical insights read the reports table directly. Predictions belong only to the live
+        // Reports service and must never enter this cacheable response.
+        const historicalReports = await this.db
+            .select({ timestamp: reports.timestamp, stationId: reports.stationId })
+            .from(reports)
+            .where(eq(reports.lineId, lineId))
+            .orderBy(asc(reports.timestamp))
+
+        const weekday = DateTime.fromJSDate(now, { zone: this.timezone }).weekday
+        const lineProfileReports = historicalReports.filter(
+            (report) => DateTime.fromJSDate(report.timestamp, { zone: this.timezone }).weekday === weekday
+        )
+        const profileWeeks = new Set(
+            lineProfileReports.map((report) => {
+                const time = DateTime.fromJSDate(report.timestamp, { zone: this.timezone })
+                return `${time.weekYear}-${time.weekNumber}`
+            })
+        )
+        const profileUsesCityFallback =
+            lineProfileReports.length < MIN_PROFILE_REPORTS || profileWeeks.size < MIN_PROFILE_WEEKS
+        const profileReports = profileUsesCityFallback
+            ? await this.db.select({ timestamp: reports.timestamp }).from(reports).orderBy(asc(reports.timestamp))
+            : lineProfileReports
+        const profileRange = { start: toIso(profileReports[0]?.timestamp ?? now), end: toIso(now) }
+        const observedRange = { start: toIso(historicalReports[0]?.timestamp ?? now), end: toIso(now) }
+        const hours = Array.from({ length: 24 }, (_, hour) => ({ hour, value: 0 }))
+        const totalsByStation = new Map<string, number>()
+        for (const report of profileReports) {
+            const time = DateTime.fromJSDate(report.timestamp, { zone: this.timezone })
+            if (time.weekday === weekday) hours[time.hour]!.value += 1
+        }
+        for (const report of historicalReports) {
+            totalsByStation.set(report.stationId, (totalsByStation.get(report.stationId) ?? 0) + 1)
+        }
+
+        const hotspotRows = await this.db
+            .select({ stationId: stations.id, name: stations.name, value: count() })
+            .from(reports)
+            .innerJoin(stations, eq(stations.id, reports.stationId))
+            .where(eq(reports.lineId, lineId))
+            .groupBy(stations.id, stations.name)
+            .orderBy(desc(count()))
+
+        const total = historicalReports.length
+        return lineInsightsSchema.parse({
+            profile: {
+                source: profileUsesCityFallback ? 'city_reports' : 'line_reports',
+                metric: { name: 'report_count', range: profileRange },
+                weekday,
+                hours,
+            },
+            hotspots: {
+                source: 'reports',
+                metric: { name: 'report_count', range: observedRange },
+                stations: hotspotRows.map((station) => ({
+                    ...station,
+                    share: total === 0 ? 0 : station.value / total,
+                })),
             },
         })
     }

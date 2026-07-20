@@ -161,7 +161,7 @@ const applyServices = (c: Context<Env>, db: DbConnection, config: AppConfig) => 
 
     c.set('config', config)
     c.set('reportsService', reportsService)
-    c.set('insightsService', new InsightsService(db, transitNetworkDataService))
+    c.set('insightsService', new InsightsService(db, transitNetworkDataService, c.get('city').timezone))
     c.set('riskService', new RiskService(reportsService, transitNetworkDataService))
     c.set('transitNetworkDataService', transitNetworkDataService)
 }
