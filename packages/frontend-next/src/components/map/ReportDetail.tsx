@@ -10,6 +10,7 @@ import { useGeolocation } from '@/contexts/Geolocation.context';
 import { useModalViewDuration } from '@/hooks/useModalViewDuration';
 import { track } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';
+import { Route as LineDetailRoute } from '@/routes/_map/line/$lineName';
 import { Route as StationRoute } from '@/routes/_map/station/$stationId';
 
 import { DetailCard } from './DetailCard';
@@ -62,11 +63,24 @@ export function ReportDetail({ station, onClose }: ReportDetailProps) {
       closeLabel={t('close')}
       onClose={onClose}
     >
-      {(lineName || directionName) && (
-        <CardContent className="flex items-center gap-2">
-          {lineName && <LineBadge name={lineName} />}
-          {directionName && <span className="text-sm font-semibold">{directionName}</span>}
+      {lineName ? (
+        <CardContent className="px-0">
+          <Link
+            to={LineDetailRoute.to}
+            params={{ lineName }}
+            className="hover:bg-muted/70 focus-visible:ring-ring flex items-center gap-2 px-4 py-2 outline-none focus-visible:ring-2"
+          >
+            <LineBadge name={lineName} className="underline underline-offset-2" />
+            {directionName && <span className="text-sm font-semibold">{directionName}</span>}
+            <ChevronRight className="text-muted-foreground ml-auto size-4 shrink-0" aria-hidden />
+          </Link>
         </CardContent>
+      ) : (
+        directionName && (
+          <CardContent className="flex items-center gap-2">
+            <span className="text-sm font-semibold">{directionName}</span>
+          </CardContent>
+        )
       )}
       <CardContent className="space-y-1">
         {report && (

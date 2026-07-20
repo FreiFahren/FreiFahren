@@ -1,4 +1,8 @@
+import { Link } from '@tanstack/react-router';
+import { ChevronRight } from 'lucide-react';
+
 import { LineBadge } from '@/components/transit/LineBadge';
+import { Route as LineDetailRoute } from '@/routes/_map/line/$lineName';
 
 import type { LineScore } from './lineScores';
 
@@ -22,17 +26,24 @@ export function LineScoreList({ scores, total }: LineScoreListProps) {
         const percent = denominator > 0 ? Math.round((entry.score / denominator) * 100) : 0;
         const width = maxScore > 0 ? (entry.score / maxScore) * 100 : 0;
         return (
-          <li key={entry.name} className="flex h-14 items-center gap-3 px-4">
-            <LineBadge name={entry.name} />
-            <div className="bg-muted h-2.5 flex-1 overflow-hidden rounded-full">
-              <div
-                className="h-full rounded-full"
-                style={{ width: `${width}%`, backgroundColor: entry.fill }}
-              />
-            </div>
-            <span className="w-9 shrink-0 text-right text-sm font-semibold tabular-nums">
-              {percent}%
-            </span>
+          <li key={entry.name}>
+            <Link
+              to={LineDetailRoute.to}
+              params={{ lineName: entry.name }}
+              className="hover:bg-muted/70 focus-visible:ring-ring flex h-14 items-center gap-3 px-4 outline-none focus-visible:ring-2"
+            >
+              <LineBadge name={entry.name} className="underline underline-offset-2" />
+              <div className="bg-muted h-2.5 flex-1 overflow-hidden rounded-full">
+                <div
+                  className="h-full rounded-full"
+                  style={{ width: `${width}%`, backgroundColor: entry.fill }}
+                />
+              </div>
+              <span className="w-9 shrink-0 text-right text-sm font-semibold tabular-nums">
+                {percent}%
+              </span>
+              <ChevronRight className="text-muted-foreground size-4 shrink-0" aria-hidden />
+            </Link>
           </li>
         );
       })}
