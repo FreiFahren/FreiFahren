@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { CardContent } from '@/components/ui/card';
 import { track } from '@/lib/analytics';
-import { Route as LineDetailRoute } from '@/routes/_map/line/$lineId';
+import { Route as LineDetailRoute } from '@/routes/_map/line/$lineName';
 
 import { NAMESPACE } from './StationDetail.i18n';
 import { sortStationLineReports, type StationLineReports } from './station-detail-data';
@@ -22,8 +22,8 @@ function LineReportRow({ line }: { line: StationLineReports }) {
   return (
     <Link
       to={LineDetailRoute.to}
-      params={{ lineId: line.ids[0]! }}
-      onClick={() => track('station_line_selected', { line_id: line.ids[0]! })}
+      params={{ lineName: line.name }}
+      onClick={() => track('station_line_selected', { line_id: line.name })}
       className="hover:bg-muted/70 focus-visible:ring-ring flex items-center gap-3 px-3 py-2.5 outline-none focus-visible:ring-2"
     >
       <LineBadge name={line.name} className="underline underline-offset-2" />

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useLineInsights } from '@/api/insights';
 import { DAY_MS, useReports } from '@/api/reports';
-import { type Line, useStations } from '@/api/transit';
+import { useStations } from '@/api/transit';
 import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
 import { useModalViewDuration } from '@/hooks/useModalViewDuration';
@@ -18,7 +18,16 @@ import { HotspotList } from './HotspotList';
 import { NAMESPACE } from './LineDetail.i18n';
 import { RhythmChart } from './RhythmChart';
 
-type LineDetailProps = { line: Line; onClose: () => void };
+export type LineDetailLine = {
+  name: string;
+  type: 'subway' | 'light_rail' | 'tram';
+  isCircular: boolean;
+  color: string;
+  stations: string[];
+  variantIds: string[];
+};
+
+type LineDetailProps = { line: LineDetailLine; onClose: () => void };
 
 const cityHourFormatter = new Intl.DateTimeFormat('en-GB', {
   timeZone: currentCity.timezone,
@@ -31,19 +40,20 @@ const currentCityHour = () => hourInCityTime(new Date().toISOString());
 
 export function LineDetail({ line, onClose }: LineDetailProps) {
   const { t, i18n } = useTranslation(NAMESPACE);
-  const { data: insights } = useLineInsights(line.id);
+  const { data: insights } = useLineInsights(line.name);
   const { data: reports } = useReports(DAY_MS);
   const { data: stations } = useStations();
   useModalViewDuration('line');
 
   useEffect(() => {
-    track('line_detail_opened', { line_id: line.id, source: 'station' });
-  }, [line.id]);
+    track('line_detail_opened', { line_id: line.name, source: 'station' });
+  }, [line.name]);
 
-  let todayCount = 0;
+  const variantIds = new Set(line.variantIds);
+  let recentReportCount = 0;
   for (const report of reports ?? []) {
-    if (report.isPredicted || report.lineId !== line.id) continue;
-    todayCount += 1;
+    if (report.isPredicted || !report.lineId || !variantIds.has(report.lineId)) continue;
+    recentReportCount += 1;
   }
 
   const weekday = insights
@@ -91,7 +101,9 @@ export function LineDetail({ line, onClose }: LineDetailProps) {
                     ? t('typicalCity', { weekday, city: currentCity.displayName })
                     : t('typical', { weekday })}
                 </h3>
-                <span className="text-sm font-semibold">{t('today', { count: todayCount })}</span>
+                <span className="text-sm font-semibold">
+                  {t('last24Hours', { count: recentReportCount })}
+                </span>
               </div>
               <RhythmChart
                 hours={insights.profile.hours}
@@ -109,7 +121,7 @@ export function LineDetail({ line, onClose }: LineDetailProps) {
               </h3>
               <div className="max-h-[16.125rem] min-h-0 overflow-y-auto overscroll-contain pr-1">
                 <HotspotList
-                  lineId={line.id}
+                  lineName={line.name}
                   color={line.color}
                   hotspots={insights.hotspots.stations}
                   stationOrder={line.stations}
@@ -129,8 +141,8 @@ export function LineDetail({ line, onClose }: LineDetailProps) {
         >
           <Link
             to={ReportRoute.to}
-            search={{ lineId: line.id }}
-            onClick={() => track('line_detail_cta_clicked', { line_id: line.id })}
+            search={{ lineName: line.name }}
+            onClick={() => track('line_detail_cta_clicked', { line_id: line.name })}
           >
             {t('reportSighting', { line: line.name })}
           </Link>

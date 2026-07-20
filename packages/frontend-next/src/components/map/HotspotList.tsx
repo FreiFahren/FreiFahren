@@ -18,7 +18,7 @@ type ListEntry =
   | { kind: 'quiet'; group: QuietGroup };
 
 type HotspotListProps = {
-  lineId: string;
+  lineName: string;
   color: string;
   hotspots: LineInsights['hotspots']['stations'];
   stationOrder: string[];
@@ -114,12 +114,12 @@ function StationActivity({
 }
 
 function StationLink({
-  lineId,
+  lineName,
   station,
   largestShare,
   compact = false,
 }: {
-  lineId: string;
+  lineName: string;
   station: HotspotStation;
   largestShare: number;
   compact?: boolean;
@@ -129,7 +129,7 @@ function StationLink({
       to={StationDetailRoute.to}
       params={{ stationId: station.stationId }}
       onClick={() =>
-        track('line_hotspot_selected', { line_id: lineId, station_id: station.stationId })
+        track('line_hotspot_selected', { line_id: lineName, station_id: station.stationId })
       }
       className="hover:bg-muted/70 focus-visible:ring-ring flex min-w-0 items-center gap-3 rounded-sm py-1 outline-none focus-visible:ring-2"
     >
@@ -139,7 +139,7 @@ function StationLink({
 }
 
 export function HotspotList({
-  lineId,
+  lineName,
   color,
   hotspots,
   stationOrder,
@@ -182,7 +182,11 @@ export function HotspotList({
                 className="border-card z-10 mt-2 size-3 rounded-full border-[3px]"
                 style={{ backgroundColor: color }}
               />
-              <StationLink lineId={lineId} station={entry.station} largestShare={largestShare} />
+              <StationLink
+                lineName={lineName}
+                station={entry.station}
+                largestShare={largestShare}
+              />
             </li>
           );
         }
@@ -220,7 +224,7 @@ export function HotspotList({
                 {group.stations.map((station) => (
                   <li key={station.stationId}>
                     <StationLink
-                      lineId={lineId}
+                      lineName={lineName}
                       station={station}
                       largestShare={largestShare}
                       compact

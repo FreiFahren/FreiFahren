@@ -18,11 +18,11 @@ import {
 export function ReportSelectionProvider({
   children,
   initialStationId = null,
-  initialLineId = null,
+  initialLineName = null,
 }: {
   children: ReactNode;
   initialStationId?: string | null;
-  initialLineId?: string | null;
+  initialLineName?: string | null;
 }) {
   const [lineName, setLineName] = useState<string | null>(null);
   const [lineFilter, setLineFilter] = useState<LineFilter>('all');
@@ -64,7 +64,7 @@ export function ReportSelectionProvider({
   const [appliedInitialStationId, setAppliedInitialStationId] = useState<string | null>(null);
   if (
     initialStationId &&
-    !initialLineId &&
+    !initialLineName &&
     lines &&
     stations &&
     appliedInitialStationId !== initialStationId
@@ -78,10 +78,10 @@ export function ReportSelectionProvider({
     }
   }
 
-  const [appliedInitialLineId, setAppliedInitialLineId] = useState<string | null>(null);
-  if (initialLineId && lines && appliedInitialLineId !== initialLineId) {
-    setAppliedInitialLineId(initialLineId);
-    const initialLine = lines.find((line) => line.id === initialLineId);
+  const [appliedInitialLineName, setAppliedInitialLineName] = useState<string | null>(null);
+  if (initialLineName && lines && appliedInitialLineName !== initialLineName) {
+    setAppliedInitialLineName(initialLineName);
+    const initialLine = lines.find((line) => line.name === initialLineName);
     if (initialLine) {
       setLineName(initialLine.name);
       setLineFilter(initialLine.type);
