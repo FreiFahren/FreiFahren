@@ -12,12 +12,19 @@ export function computeLineScores(
   stations: Stations | undefined,
   lines: Line[] | undefined,
 ): LineScore[] {
+  if (!lines) return [];
+
   const scores = new Map<string, number>();
   const add = (name: string, value: number) => scores.set(name, (scores.get(name) ?? 0) + value);
+  const lineById = new Map(lines.map((line) => [line.id, line]));
+  const lineByName = new Map<string, Line>();
+  for (const line of lines) {
+    if (!lineByName.has(line.name)) lineByName.set(line.name, line);
+  }
 
   for (const report of reports) {
     if (report.lineId) {
-      const name = lines?.find((line) => line.id === report.lineId)?.name;
+      const name = lineById.get(report.lineId)?.name;
       if (name) add(name, 1);
       continue;
     }
@@ -26,15 +33,15 @@ export function computeLineScores(
     const names = resolveStationLineNames(stationLines, lines);
     if (names.length === 0) continue;
     const share = 1 / names.length;
-    for (const name of names) add(name, share);
+    for (const name of names) {
+      if (lineByName.has(name)) add(name, share);
+    }
   }
 
-  const colorByName = new Map(lines?.map((line) => [line.name, line.color]));
   return [...scores.entries()]
-    .map(([name, score]) => ({
-      name,
-      score,
-      fill: colorByName.get(name) ?? 'var(--color-muted-foreground)',
-    }))
+    .flatMap(([name, score]) => {
+      const line = lineByName.get(name);
+      return line ? [{ name, score, fill: line.color }] : [];
+    })
     .sort((a, b) => b.score - a.score || compareLineOrder(a, b));
 }
