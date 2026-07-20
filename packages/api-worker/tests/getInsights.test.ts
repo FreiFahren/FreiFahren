@@ -58,6 +58,15 @@ describe('GET /insights/station/:stationId', () => {
         expect(stationInsightsSchema.parse(responseBody)).toEqual(responseBody)
     })
 
+    it('keeps the regular one-day CDN cache across city-local midnight', async () => {
+        setSystemTime(new Date('2026-07-13T21:59:30.000Z'))
+
+        const response = await appRequestWithRedirect(`/insights/station/${stationId}`)
+
+        expect(response.status).toBe(200)
+        expect(response.headers.get('Cloudflare-CDN-Cache-Control')).toBe('public, max-age=86400')
+    })
+
     it('returns the standard station-not-found error', async () => {
         const response = await appRequestWithRedirect('/insights/station/UNKNOWN_STATION')
 
@@ -91,7 +100,6 @@ describe('GET /insights/line/:lineId', () => {
 
         expect(response.status).toBe(200)
         expect(response.headers.get('Cache-Control')).toBe('public, max-age=0, must-revalidate')
-        expect(response.headers.get('Cloudflare-CDN-Cache-Control')).toBe('public, max-age=86400')
 
         const responseBody = await response.json()
         expect(responseBody).toMatchObject({
@@ -117,6 +125,15 @@ describe('GET /insights/line/:lineId', () => {
             },
         })
         expect(lineInsightsSchema.parse(responseBody)).toEqual(responseBody)
+    })
+
+    it('expires the CDN cache at the next city-local midnight', async () => {
+        setSystemTime(new Date('2026-07-13T21:59:30.000Z'))
+
+        const response = await appRequestWithRedirect(`/insights/line/${lineId}`)
+
+        expect(response.status).toBe(200)
+        expect(response.headers.get('Cloudflare-CDN-Cache-Control')).toBe('public, max-age=30')
     })
 
     it('returns the standard line-not-found error', async () => {
