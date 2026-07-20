@@ -44,6 +44,7 @@ export function stationLiveData(
   let stationReportCount = 0;
 
   for (const report of reports ?? []) {
+    if (report.isPredicted) continue;
     if (report.stationId === station.id) stationReportCount += 1;
 
     const line = report.lineId ? lineById.get(report.lineId) : undefined;

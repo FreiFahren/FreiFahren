@@ -398,7 +398,7 @@ function SubmitFooter({ onSubmitted }: { onSubmitted: (result: SubmitReportRespo
 export function ReportForm() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
-  const { stationId: initialStationId } = routeApi.useSearch();
+  const { stationId: initialStationId, lineName: initialLineName } = routeApi.useSearch();
   const [result, setResult] = useState<SubmitReportResponse | null>(null);
 
   const handleSuccessClose = () => {
@@ -408,7 +408,7 @@ export function ReportForm() {
   };
 
   return (
-    <ReportSelectionProvider initialStationId={initialStationId}>
+    <ReportSelectionProvider initialStationId={initialStationId} initialLineName={initialLineName}>
       <div className="bg-card animate-in fade-in fixed inset-0 z-30 duration-150">
         <div className="mx-auto flex h-full w-full max-w-md flex-col">
           {result ? (

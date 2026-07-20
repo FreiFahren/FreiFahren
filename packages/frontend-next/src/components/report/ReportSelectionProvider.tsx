@@ -18,9 +18,11 @@ import {
 export function ReportSelectionProvider({
   children,
   initialStationId = null,
+  initialLineName = null,
 }: {
   children: ReactNode;
   initialStationId?: string | null;
+  initialLineName?: string | null;
 }) {
   const [lineName, setLineName] = useState<string | null>(null);
   const [lineFilter, setLineFilter] = useState<LineFilter>('all');
@@ -60,13 +62,29 @@ export function ReportSelectionProvider({
   // mirror selectStation's single-line shortcut so a station served by exactly one line preselects
   // that line (and its type filter), letting the user skip the line step.
   const [appliedInitialStationId, setAppliedInitialStationId] = useState<string | null>(null);
-  if (initialStationId && lines && stations && appliedInitialStationId !== initialStationId) {
+  if (
+    initialStationId &&
+    !initialLineName &&
+    lines &&
+    stations &&
+    appliedInitialStationId !== initialStationId
+  ) {
     setAppliedInitialStationId(initialStationId);
     const names = resolveStationLineNames(stations[initialStationId]?.lines ?? [], lines);
     if (names.length === 1) {
       setLineName(names[0]);
       const type = lines.find((l) => l.name === names[0])?.type;
       if (type) setLineFilter(type);
+    }
+  }
+
+  const [appliedInitialLineName, setAppliedInitialLineName] = useState<string | null>(null);
+  if (initialLineName && lines && appliedInitialLineName !== initialLineName) {
+    setAppliedInitialLineName(initialLineName);
+    const initialLine = lines.find((line) => line.name === initialLineName);
+    if (initialLine) {
+      setLineName(initialLine.name);
+      setLineFilter(initialLine.type);
     }
   }
 

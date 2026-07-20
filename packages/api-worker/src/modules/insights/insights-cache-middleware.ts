@@ -5,7 +5,7 @@ import type { Env } from '../../app-env'
 
 export const VERSIONED_INSIGHTS_CACHEABLE_PATHS = [
     '/:version{v\\d+}/insights/station/:stationId',
-    '/:version{v\\d+}/insights/line/:lineId',
+    '/:version{v\\d+}/insights/lines/:lineName',
 ] as const
 
 export const INSIGHTS_CACHE_CONTROL = 'public, max-age=0, must-revalidate'
@@ -24,9 +24,11 @@ export const insightsCacheMiddleware: MiddlewareHandler<Env> = async (c, next) =
     if (c.req.method !== 'GET' || c.res.status >= 400) return
 
     c.header('Cache-Control', INSIGHTS_CACHE_CONTROL)
-    const lineId = c.req.param('lineId')
+    const lineName = c.req.param('lineName')
     c.header(
         'Cloudflare-CDN-Cache-Control',
-        lineId !== undefined ? lineInsightsWorkersCacheControl(c.get('city').timezone) : INSIGHTS_WORKERS_CACHE_CONTROL
+        lineName !== undefined
+            ? lineInsightsWorkersCacheControl(c.get('city').timezone)
+            : INSIGHTS_WORKERS_CACHE_CONTROL
     )
 }

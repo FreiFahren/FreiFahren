@@ -1,4 +1,4 @@
-import { asc, count, desc, eq, gte } from 'drizzle-orm'
+import { asc, count, desc, eq, gte, inArray } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
 
@@ -40,6 +40,10 @@ const metricSchema = z.object({
 })
 
 export const lineInsightsSchema = z.object({
+    line: z.object({
+        name: z.string(),
+        variantCount: z.number().int().positive(),
+    }),
     profile: z.object({
         source: z.enum(['line_reports', 'city_reports']),
         metric: metricSchema,
@@ -103,23 +107,24 @@ export class InsightsService {
         })
     }
 
-    async getLineInsights(lineId: string, now: Date = new Date()): Promise<LineInsights> {
-        const matchingLines = await this.db.select({ id: lines.id }).from(lines).where(eq(lines.id, lineId)).limit(1)
+    async getLineInsights(lineName: string, now: Date = new Date()): Promise<LineInsights> {
+        const matchingLines = await this.db.select({ id: lines.id }).from(lines).where(eq(lines.name, lineName))
         if (matchingLines.length === 0) {
             throw new AppError({
                 message: 'Line not found',
                 statusCode: 404,
                 internalCode: 'LINE_NOT_FOUND',
-                description: `lineId=${lineId}`,
+                description: `lineName=${lineName}`,
             })
         }
+        const variantIds = matchingLines.map((line) => line.id)
 
         // Historical insights read the reports table directly. Predictions belong only to the live
         // Reports service and must never enter this cacheable response.
         const historicalReports = await this.db
             .select({ timestamp: reports.timestamp, stationId: reports.stationId })
             .from(reports)
-            .where(eq(reports.lineId, lineId))
+            .where(inArray(reports.lineId, variantIds))
             .orderBy(asc(reports.timestamp))
 
         const weekday = DateTime.fromJSDate(now, { zone: this.timezone }).weekday
@@ -153,12 +158,13 @@ export class InsightsService {
             .select({ stationId: stations.id, name: stations.name, value: count() })
             .from(reports)
             .innerJoin(stations, eq(stations.id, reports.stationId))
-            .where(eq(reports.lineId, lineId))
+            .where(inArray(reports.lineId, variantIds))
             .groupBy(stations.id, stations.name)
             .orderBy(desc(count()))
 
         const total = historicalReports.length
         return lineInsightsSchema.parse({
+            line: { name: lineName, variantCount: variantIds.length },
             profile: {
                 source: profileUsesCityFallback ? 'city_reports' : 'line_reports',
                 metric: { name: 'report_count', range: profileRange },

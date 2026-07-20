@@ -21,6 +21,7 @@ import { Route as ReportsLinesRouteImport } from './routes/reports/lines'
 import { Route as MapSettingsIndexRouteImport } from './routes/_map/settings/index'
 import { Route as MapStationStationIdRouteImport } from './routes/_map/station/$stationId'
 import { Route as MapReportsStationIdRouteImport } from './routes/_map/reports/$stationId'
+import { Route as MapLineLineNameRouteImport } from './routes/_map/line/$lineName'
 
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
@@ -81,6 +82,11 @@ const MapReportsStationIdRoute = MapReportsStationIdRouteImport.update({
   path: '/reports/$stationId',
   getParentRoute: () => MapRoute,
 } as any)
+const MapLineLineNameRoute = MapLineLineNameRouteImport.update({
+  id: '/line/$lineName',
+  path: '/line/$lineName',
+  getParentRoute: () => MapRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof MapIndexRoute
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/reports/': typeof ReportsIndexRoute
+  '/line/$lineName': typeof MapLineLineNameRoute
   '/reports/$stationId': typeof MapReportsStationIdRoute
   '/station/$stationId': typeof MapStationStationIdRoute
   '/settings/': typeof MapSettingsIndexRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/reports/stations': typeof ReportsStationsRoute
   '/': typeof MapIndexRoute
   '/reports': typeof ReportsIndexRoute
+  '/line/$lineName': typeof MapLineLineNameRoute
   '/reports/$stationId': typeof MapReportsStationIdRoute
   '/station/$stationId': typeof MapStationStationIdRoute
   '/settings': typeof MapSettingsIndexRoute
@@ -118,6 +126,7 @@ export interface FileRoutesById {
   '/reports/stations': typeof ReportsStationsRoute
   '/_map/': typeof MapIndexRoute
   '/reports/': typeof ReportsIndexRoute
+  '/_map/line/$lineName': typeof MapLineLineNameRoute
   '/_map/reports/$stationId': typeof MapReportsStationIdRoute
   '/_map/station/$stationId': typeof MapStationStationIdRoute
   '/_map/settings/': typeof MapSettingsIndexRoute
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/reports/lines'
     | '/reports/stations'
     | '/reports/'
+    | '/line/$lineName'
     | '/reports/$stationId'
     | '/station/$stationId'
     | '/settings/'
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
     | '/reports/stations'
     | '/'
     | '/reports'
+    | '/line/$lineName'
     | '/reports/$stationId'
     | '/station/$stationId'
     | '/settings'
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '/reports/stations'
     | '/_map/'
     | '/reports/'
+    | '/_map/line/$lineName'
     | '/_map/reports/$stationId'
     | '/_map/station/$stationId'
     | '/_map/settings/'
@@ -258,11 +270,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MapReportsStationIdRouteImport
       parentRoute: typeof MapRoute
     }
+    '/_map/line/$lineName': {
+      id: '/_map/line/$lineName'
+      path: '/line/$lineName'
+      fullPath: '/line/$lineName'
+      preLoaderRoute: typeof MapLineLineNameRouteImport
+      parentRoute: typeof MapRoute
+    }
   }
 }
 
 interface MapRouteChildren {
   MapIndexRoute: typeof MapIndexRoute
+  MapLineLineNameRoute: typeof MapLineLineNameRoute
   MapReportsStationIdRoute: typeof MapReportsStationIdRoute
   MapStationStationIdRoute: typeof MapStationStationIdRoute
   MapSettingsIndexRoute: typeof MapSettingsIndexRoute
@@ -270,6 +290,7 @@ interface MapRouteChildren {
 
 const MapRouteChildren: MapRouteChildren = {
   MapIndexRoute: MapIndexRoute,
+  MapLineLineNameRoute: MapLineLineNameRoute,
   MapReportsStationIdRoute: MapReportsStationIdRoute,
   MapStationStationIdRoute: MapStationStationIdRoute,
   MapSettingsIndexRoute: MapSettingsIndexRoute,

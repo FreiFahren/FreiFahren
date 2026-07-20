@@ -48,7 +48,11 @@ type AnalyticsEvents = {
   reports_overview_opened: { report_count: number };
   reports_tab_selected: { tab: 'summary' | 'lines' | 'reports' };
   report_row_selected: { report_age_minutes: number; has_line: boolean; has_direction: boolean };
-  detail_modal_closed: { modal: 'station' | 'report'; duration_ms: number };
+  detail_modal_closed: { modal: 'station' | 'line' | 'report'; duration_ms: number };
+  line_detail_opened: { line_id: string; source: 'station' };
+  line_detail_cta_clicked: { line_id: string };
+  line_hotspot_selected: { line_id: string; station_id: string };
+  station_line_selected: { line_id: string };
   app_banner_shown: Record<string, never>;
   app_banner_store_clicked: Record<string, never>;
   app_banner_dismissed: Record<string, never>;
