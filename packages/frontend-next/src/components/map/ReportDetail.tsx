@@ -1,7 +1,10 @@
 import { Link } from '@tanstack/react-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { ChevronRight, MapPin } from 'lucide-react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { lineInsightsQueryOptions, stationInsightsQueryOptions } from '@/api/insights';
 import { formatElapsed, HOUR_MS, useReports, useStationReportCount } from '@/api/reports';
 import { type Station, useLines, useStations, useStationDistance } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
@@ -27,6 +30,7 @@ const REPORTS_GROUP_HANDLE = currentCity.community.telegramHandle;
 
 export function ReportDetail({ station, onClose }: ReportDetailProps) {
   const { t } = useTranslation(NAMESPACE);
+  const queryClient = useQueryClient();
   useModalViewDuration('report');
   const { data: reports } = useReports(HOUR_MS);
   const { data: lines } = useLines();
@@ -45,6 +49,15 @@ export function ReportDetail({ station, onClose }: ReportDetailProps) {
     ? lines?.find((line) => line.id === report.lineId)?.name
     : undefined;
   const directionName = report?.directionId ? stations?.[report.directionId]?.name : undefined;
+
+  useEffect(() => {
+    void queryClient.prefetchQuery(stationInsightsQueryOptions(station.id));
+  }, [queryClient, station.id]);
+
+  useEffect(() => {
+    if (!lineName) return;
+    void queryClient.prefetchQuery(lineInsightsQueryOptions(lineName));
+  }, [lineName, queryClient]);
 
   return (
     <DetailCard
