@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useLineInsights } from '@/api/insights';
-import { DAY_MS, useReports } from '@/api/reports';
+import { DAY_MS, HOUR_MS, useReports } from '@/api/reports';
 import { useStations } from '@/api/transit';
 import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import { Route as ReportRoute } from '@/routes/report';
 
 import { DetailCard } from './DetailCard';
 import { HotspotList } from './HotspotList';
+import { LineCurrentActivity } from './LineCurrentActivity';
 import { NAMESPACE } from './LineDetail.i18n';
 import { RhythmChart } from './RhythmChart';
 
@@ -38,10 +39,23 @@ const cityHourFormatter = new Intl.DateTimeFormat('en-GB', {
 const hourInCityTime = (timestamp: string) => Number(cityHourFormatter.format(new Date(timestamp)));
 const currentCityHour = () => hourInCityTime(new Date().toISOString());
 
+function countReportsOnLine(
+  reports: ReturnType<typeof useReports>['data'],
+  variantIds: Set<string>,
+) {
+  let count = 0;
+  for (const report of reports ?? []) {
+    if (report.isPredicted || !report.lineId || !variantIds.has(report.lineId)) continue;
+    count += 1;
+  }
+  return count;
+}
+
 export function LineDetail({ line, onClose }: LineDetailProps) {
   const { t, i18n } = useTranslation(NAMESPACE);
   const { data: insights } = useLineInsights(line.name);
-  const { data: reports } = useReports(DAY_MS);
+  const { data: reports, isSuccess: hasLiveReports } = useReports(DAY_MS);
+  const { data: lastHourReports } = useReports(HOUR_MS);
   const { data: stations } = useStations();
   useModalViewDuration('line');
 
@@ -50,11 +64,8 @@ export function LineDetail({ line, onClose }: LineDetailProps) {
   }, [line.name]);
 
   const variantIds = new Set(line.variantIds);
-  let recentReportCount = 0;
-  for (const report of reports ?? []) {
-    if (report.isPredicted || !report.lineId || !variantIds.has(report.lineId)) continue;
-    recentReportCount += 1;
-  }
+  const recentReportCount = countReportsOnLine(reports, variantIds);
+  const lastHourReportCount = countReportsOnLine(lastHourReports, variantIds);
 
   const weekday = insights
     ? new Intl.DateTimeFormat(i18n.language, { weekday: 'long' }).format(
@@ -86,50 +97,67 @@ export function LineDetail({ line, onClose }: LineDetailProps) {
       }
       closeLabel={t('close')}
       onClose={onClose}
-      cardClassName="max-h-[min(38rem,calc(100dvh-3rem))] overflow-hidden"
+      cardClassName="h-[min(38rem,calc(100dvh-3rem))] overflow-hidden"
     >
       <div
-        className={cn('flex min-h-0 flex-col', !insights && 'min-h-[23.5rem]')}
+        className={cn(
+          'flex min-h-0 flex-1 flex-col overflow-hidden',
+          !insights && 'min-h-[23.5rem]',
+        )}
         aria-busy={!insights}
       >
         {insights && (
           <>
-            <CardContent className="shrink-0 space-y-3 pt-1">
-              <div className="flex items-baseline justify-between gap-3">
-                <h3 className="text-text-3 text-[11px] font-semibold tracking-widest uppercase">
+            {hasLiveReports && (
+              <LineCurrentActivity
+                reportsInLast24Hours={recentReportCount}
+                reportsInLastHour={lastHourReportCount}
+              />
+            )}
+            <section aria-labelledby="line-typical-activity-heading" className="shrink-0">
+              <CardContent className="shrink-0 space-y-3 pt-1">
+                <h3
+                  id="line-typical-activity-heading"
+                  className="text-text-3 text-[11px] font-semibold tracking-widest uppercase"
+                >
                   {insights.profile.source === 'city_reports'
                     ? t('typicalCity', { weekday, city: currentCity.displayName })
                     : t('typical', { weekday })}
                 </h3>
-                <span className="text-sm font-semibold">
-                  {t('last24Hours', { count: recentReportCount })}
-                </span>
-              </div>
-              <RhythmChart
-                hours={insights.profile.hours}
-                currentHour={currentCityHour()}
-                label={t('chartLabel', { weekday })}
-              />
-              <div className="text-text-3 flex justify-between text-xs">
-                <span>{peak ? t('peak', { hour: peak.hour }) : null}</span>
-                <span>{quietAfter ? t('quietAfter', { hour: quietAfter }) : null}</span>
-              </div>
-            </CardContent>
-            <CardContent className="flex min-h-0 flex-col space-y-3 pt-2">
-              <h3 className="text-text-3 text-[11px] font-semibold tracking-widest uppercase">
-                {t('usualHotspots')}
-              </h3>
-              <div className="max-h-[16.125rem] min-h-0 overflow-y-auto overscroll-contain pr-1">
-                <HotspotList
-                  lineName={line.name}
-                  color={line.color}
-                  hotspots={insights.hotspots.stations}
-                  stationOrder={line.stations}
-                  stationData={stations}
-                  emptyLabel={t('noHotspots')}
+                <RhythmChart
+                  hours={insights.profile.hours}
+                  currentHour={currentCityHour()}
+                  label={t('chartLabel', { weekday })}
                 />
-              </div>
-            </CardContent>
+                <div className="text-text-3 flex justify-between text-xs">
+                  <span>{peak ? t('peak', { hour: peak.hour }) : null}</span>
+                  <span>{quietAfter ? t('quietAfter', { hour: quietAfter }) : null}</span>
+                </div>
+              </CardContent>
+            </section>
+            <section
+              aria-labelledby="line-hotspots-heading"
+              className="flex min-h-0 flex-1 flex-col"
+            >
+              <CardContent className="flex min-h-0 flex-1 flex-col space-y-3 pt-1">
+                <h3
+                  id="line-hotspots-heading"
+                  className="text-text-3 text-[11px] font-semibold tracking-widest uppercase"
+                >
+                  {t('usualHotspots')}
+                </h3>
+                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+                  <HotspotList
+                    lineName={line.name}
+                    color={line.color}
+                    hotspots={insights.hotspots.stations}
+                    stationOrder={line.stations}
+                    stationData={stations}
+                    emptyLabel={t('noHotspots')}
+                  />
+                </div>
+              </CardContent>
+            </section>
           </>
         )}
       </div>
