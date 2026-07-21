@@ -25,6 +25,7 @@ function LineReportRow({ line }: { line: StationLineReports }) {
       onClick={() => track('station_line_selected', { line_id: line.name })}
       className="hover:bg-muted/70 focus-visible:ring-ring flex items-center gap-3 px-3 py-2.5 outline-none focus-visible:ring-2"
     >
+      <ChevronRight className="text-muted-foreground size-4 shrink-0" aria-hidden />
       <LineBadge name={line.name} />
       <div className="text-muted-foreground text-sm">
         <p>{t('lineReportsLast24Hours', { count: line.reportsInLast24Hours })}</p>
@@ -34,7 +35,6 @@ function LineReportRow({ line }: { line: StationLineReports }) {
           </p>
         )}
       </div>
-      <ChevronRight className="text-muted-foreground ml-auto size-4 shrink-0" aria-hidden />
     </Link>
   );
 }
