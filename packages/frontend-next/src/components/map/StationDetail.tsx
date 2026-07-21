@@ -23,7 +23,7 @@ export function StationDetail({ station, onClose }: StationDetailProps) {
   const { t } = useTranslation(NAMESPACE);
   const { data: lines } = useLines();
   const { data: reports, isSuccess: hasLiveReports } = useReports(DAY_MS);
-  const { stationReportCount, lineReports } = stationLiveData(station, lines, reports);
+  const { lineReports } = stationLiveData(station, lines, reports);
   useModalViewDuration('station');
 
   return (
@@ -34,9 +34,7 @@ export function StationDetail({ station, onClose }: StationDetailProps) {
       cardClassName="max-h-[calc(100dvh-6rem)]"
     >
       <StationHistoricalInsights stationId={station.id} />
-      {hasLiveReports && lineReports.length > 0 && (
-        <StationLineReports stationReportCount={stationReportCount} lineReports={lineReports} />
-      )}
+      {hasLiveReports && lineReports.length > 0 && <StationLineReports lineReports={lineReports} />}
       <CardContent className="mt-2">
         <Button
           asChild
