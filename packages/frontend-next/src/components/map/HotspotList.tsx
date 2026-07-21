@@ -35,17 +35,16 @@ function orderedStations(
   hotspots: HotspotStation[],
 ): HotspotStation[] {
   const metricsById = new Map(hotspots.map((station) => [station.stationId, station]));
-  return stationOrder.map((stationId) => {
+  return stationOrder.flatMap((stationId) => {
     const metric = metricsById.get(stationId);
-    return (
-      metric ?? {
-        stationId,
-        name: stationData?.[stationId]?.name ?? stationId,
-        value: 0,
-        share: 0,
-      }
-    );
+    if (!metric || metric.value === 0) return [];
+    return [{ ...metric, name: stationData?.[stationId]?.name ?? metric.name }];
   });
+}
+
+function formatShare(share: number): string {
+  if (share > 0 && share < 0.01) return '<1%';
+  return `${Math.round(share * 100)}%`;
 }
 
 function routeEntries(stations: HotspotStation[]): ListEntry[] {
@@ -90,24 +89,24 @@ function StationActivity({
   largestShare: number;
   compact?: boolean;
 }) {
-  const percentage = Math.round(station.share * 100);
+  const percentage = formatShare(station.share);
   return (
     <>
       <span className="min-w-0 flex-1 truncate text-sm font-medium">{station.name}</span>
       <span
+        aria-hidden="true"
         className={cn('bg-muted h-3 overflow-hidden rounded-full', compact ? 'w-16' : 'w-24')}
-        aria-label={`${percentage}%`}
       >
         <span
           className={cn(
             'block h-full rounded-full',
             station.share === largestShare ? 'bg-accent-bright' : 'bg-muted-foreground/65',
           )}
-          style={{ width: `${percentage}%` }}
+          style={{ width: `${Math.max(4, station.share * 100)}%` }}
         />
       </span>
       <span className="text-muted-foreground w-8 text-right text-sm font-semibold">
-        {percentage}%
+        {percentage}
       </span>
     </>
   );
@@ -148,9 +147,8 @@ export function HotspotList({
 }: HotspotListProps) {
   const { t } = useTranslation(NAMESPACE);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => new Set());
-  if (hotspots.length === 0) return <p className="text-muted-foreground text-sm">{emptyLabel}</p>;
-
   const stations = orderedStations(stationOrder, stationData, hotspots);
+  if (stations.length === 0) return <p className="text-muted-foreground text-sm">{emptyLabel}</p>;
   const entries = routeEntries(stations);
   const largestShare = Math.max(...stations.map((station) => station.share));
 
@@ -193,8 +191,8 @@ export function HotspotList({
 
         const { group } = entry;
         const isExpanded = expandedGroups.has(group.id);
-        const groupShare = Math.round(
-          group.stations.reduce((sum, station) => sum + station.share, 0) * 100,
+        const groupShare = formatShare(
+          group.stations.reduce((sum, station) => sum + station.share, 0),
         );
         return (
           <li key={group.id} className="relative">
@@ -213,7 +211,7 @@ export function HotspotList({
                 <span className="min-w-0 flex-1 truncate">
                   {t('quieterStations', { count: group.stations.length })}
                 </span>
-                <span className="text-xs font-semibold">{groupShare}%</span>
+                <span className="text-xs font-semibold">{groupShare}</span>
                 <ChevronDown
                   className={cn('size-4 shrink-0 transition-transform', isExpanded && 'rotate-180')}
                 />

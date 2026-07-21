@@ -46,12 +46,15 @@ export function StationLineReports({ stationReportCount, lineReports }: StationL
 
   return (
     <CardContent className="space-y-2">
-      <p className="text-muted-foreground text-sm">
-        {t('stationReportsLast24Hours', { count: stationReportCount })}
-      </p>
+      {stationReportCount > 0 && (
+        <p className="text-muted-foreground text-sm">
+          {t('stationReportsLast24Hours', { count: stationReportCount })}
+        </p>
+      )}
       <h3 className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
         {t('lineReports')}
       </h3>
+      <p className="text-muted-foreground text-xs">{t('lineReportsDescription')}</p>
       <div className="divide-border max-h-[30dvh] overflow-y-auto overscroll-contain rounded-md border">
         {rankedLines.map((line) => (
           <LineReportRow key={line.name} line={line} />
