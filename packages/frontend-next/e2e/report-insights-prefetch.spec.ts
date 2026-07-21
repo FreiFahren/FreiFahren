@@ -85,4 +85,7 @@ test('prefetches the report station and line without duplicate requests', async 
 
   await expect.poll(() => stationInsightRequests).toBe(1);
   await expect.poll(() => lineInsightRequests).toBe(1);
+  await page.waitForTimeout(250);
+  expect(stationInsightRequests).toBe(1);
+  expect(lineInsightRequests).toBe(1);
 });
