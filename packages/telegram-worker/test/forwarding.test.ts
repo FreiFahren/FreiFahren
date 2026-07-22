@@ -76,6 +76,22 @@ describe('handleReportForward', () => {
         expect(text).toContain('utm_medium=bot')
     })
 
+    it('skips writing to a disabled city without affecting request validation', async () => {
+        const disabledEnv: Env = { ...testEnv, TELEGRAM_WRITING_DISABLED_CITIES: 'leipzig, berlin' }
+
+        const res = await handleReportForward(
+            reportRequest({
+                stationId: picked.stationId,
+                lineId: picked.lineId,
+                directionId: picked.directionId,
+            }),
+            disabledEnv,
+        )
+
+        expect(res.status).toBe(200)
+        expect(await res.json()).toEqual({ status: 'skipped' })
+    })
+
     it('rejects a request with no password (401)', async () => {
         const res = await handleReportForward(
             reportRequest({ stationId: picked.stationId, lineId: picked.lineId, directionId: picked.directionId }, null),

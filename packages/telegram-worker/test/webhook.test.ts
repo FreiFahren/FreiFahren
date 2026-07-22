@@ -116,6 +116,23 @@ describe('handleWebhook', () => {
         await Promise.all(promises)
     })
 
+    it('continues reading messages from a city with writing disabled', async () => {
+        const process = vi.fn(async () => {})
+        const { ctx, promises } = fakeCtx()
+        const writingDisabledEnv: Env = { ...testEnv, TELEGRAM_WRITING_DISABLED_CITIES: 'leipzig' }
+
+        const res = await handleWebhook(
+            webhookRequest(makeUpdate({ text: '3k Hbf', chatId: -1002 })),
+            writingDisabledEnv,
+            ctx,
+            process,
+        )
+
+        expect(res.status).toBe(200)
+        expect(process).toHaveBeenCalledExactlyOnceWith('3k Hbf', expect.anything(), 'leipzig')
+        await Promise.all(promises)
+    })
+
     it('returns 200 without processing a filtered message', async () => {
         const process = vi.fn(async () => {})
         const { ctx, promises } = fakeCtx()

@@ -16,6 +16,9 @@
             "-1001370021231": "berlin",
             "-1001138115617": "leipzig"
         },
+        // Comma-separated city slugs for which app-to-Telegram notifications are paused.
+        // Webhook reading and report creation remain enabled. Leave empty to enable all cities.
+        "TELEGRAM_WRITING_DISABLED_CITIES": "leipzig",
         "SENTRY_DSN": "https://9d9ac700f1213d4db367b557167a0594@o4508609338867712.ingest.de.sentry.io/4511633367564368",
     },
     // Messages are processed in the background (ctx.waitUntil) with no queue/retry; failed
