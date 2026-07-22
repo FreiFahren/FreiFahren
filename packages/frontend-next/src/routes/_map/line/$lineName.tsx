@@ -3,6 +3,18 @@ import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { queryClient } from '@/api/queryClient';
 import { type Line, linesQueryOptions, stationsQueryOptions } from '@/api/transit';
 import { LineDetail, type LineDetailLine } from '@/components/map/LineDetail';
+import type { LineDetailSource } from '@/lib/analytics';
+
+const lineDetailSources = new Set<LineDetailSource>([
+  'direct',
+  'map',
+  'report',
+  'reports_list',
+  'search',
+  'station',
+]);
+
+type LineDetailSearch = { source: LineDetailSource };
 
 function mergeStationOrder(variants: Line[]): string[] {
   const orderedVariants = [...variants].sort((a, b) => b.stations.length - a.stations.length);
@@ -39,6 +51,12 @@ function mergeLineVariants(variants: Line[]): LineDetailLine {
 
 export const Route = createFileRoute('/_map/line/$lineName')({
   staticData: { legalDisclaimer: true },
+  validateSearch: (search: Record<string, unknown>): LineDetailSearch => ({
+    source:
+      typeof search.source === 'string' && lineDetailSources.has(search.source as LineDetailSource)
+        ? (search.source as LineDetailSource)
+        : 'direct',
+  }),
   loader: async ({ params }) => {
     const [lines] = await Promise.all([
       queryClient.ensureQueryData(linesQueryOptions()),
@@ -53,6 +71,7 @@ export const Route = createFileRoute('/_map/line/$lineName')({
 
 function LineRoute() {
   const { line } = Route.useLoaderData();
+  const { source } = Route.useSearch();
   const navigate = useNavigate();
-  return <LineDetail line={line} onClose={() => navigate({ to: '/' })} />;
+  return <LineDetail line={line} source={source} onClose={() => navigate({ to: '/' })} />;
 }

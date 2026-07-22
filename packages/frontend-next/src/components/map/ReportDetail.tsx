@@ -81,6 +81,7 @@ export function ReportDetail({ station, onClose }: ReportDetailProps) {
           <Link
             to={LineDetailRoute.to}
             params={{ lineName }}
+            search={{ source: 'report' }}
             className="hover:bg-muted/70 focus-visible:ring-ring flex items-center gap-2 px-4 py-2 outline-none focus-visible:ring-2"
           >
             <LineBadge name={lineName} className="underline underline-offset-2" />
