@@ -1,8 +1,11 @@
 import { Link } from '@tanstack/react-router';
+import { useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { lineInsightsQueryOptions } from '@/api/insights';
 import { DAY_MS, useReports } from '@/api/reports';
-import { type Station, useLines } from '@/api/transit';
+import { resolveStationLineNames, type Station, useLines } from '@/api/transit';
 import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
 import { useModalViewDuration } from '@/hooks/useModalViewDuration';
@@ -21,10 +24,18 @@ type StationDetailProps = {
 
 export function StationDetail({ station, onClose }: StationDetailProps) {
   const { t } = useTranslation(NAMESPACE);
+  const queryClient = useQueryClient();
   const { data: lines } = useLines();
   const { data: reports, isSuccess: hasLiveReports } = useReports(DAY_MS);
   const { lineReports } = stationLiveData(station, lines, reports);
   useModalViewDuration('station');
+
+  useEffect(() => {
+    if (!lines) return;
+    for (const lineName of resolveStationLineNames(station.lines, lines)) {
+      void queryClient.prefetchQuery(lineInsightsQueryOptions(lineName));
+    }
+  }, [lines, queryClient, station.lines]);
 
   return (
     <DetailCard
