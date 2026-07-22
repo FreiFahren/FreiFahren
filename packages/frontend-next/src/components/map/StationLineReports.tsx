@@ -11,7 +11,6 @@ import { NAMESPACE } from './StationDetail.i18n';
 import { sortStationLineReports, type StationLineReports } from './station-detail-data';
 
 type StationLineReportsProps = {
-  stationReportCount: number;
   lineReports: StationLineReports[];
 };
 
@@ -40,17 +39,12 @@ function LineReportRow({ line }: { line: StationLineReports }) {
   );
 }
 
-export function StationLineReports({ stationReportCount, lineReports }: StationLineReportsProps) {
+export function StationLineReports({ lineReports }: StationLineReportsProps) {
   const { t } = useTranslation(NAMESPACE);
   const rankedLines = sortStationLineReports(lineReports);
 
   return (
     <CardContent className="space-y-2">
-      {stationReportCount > 0 && (
-        <p className="text-muted-foreground text-sm">
-          {t('stationReportsLast24Hours', { count: stationReportCount })}
-        </p>
-      )}
       <h3 className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
         {t('lineReports')}
       </h3>

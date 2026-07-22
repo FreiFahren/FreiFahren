@@ -9,7 +9,6 @@ export type StationLineReports = StationLine & {
 };
 
 export type StationLiveData = {
-  stationReportCount: number;
   lineReports: StationLineReports[];
 };
 
@@ -41,11 +40,9 @@ export function stationLiveData(
   }));
   const lineById = new Map(lineReports.flatMap((line) => line.ids.map((id) => [id, line])));
   const lastHourStart = now - HOUR_MS;
-  let stationReportCount = 0;
 
   for (const report of reports ?? []) {
     if (report.isPredicted) continue;
-    if (report.stationId === station.id) stationReportCount += 1;
 
     const line = report.lineId ? lineById.get(report.lineId) : undefined;
     if (!line) continue;
@@ -54,7 +51,7 @@ export function stationLiveData(
     if (new Date(report.timestamp).getTime() >= lastHourStart) line.reportsInLastHour += 1;
   }
 
-  return { stationReportCount, lineReports };
+  return { lineReports };
 }
 
 export function sortStationLineReports(lineReports: StationLineReports[]): StationLineReports[] {
