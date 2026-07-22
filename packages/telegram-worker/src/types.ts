@@ -5,6 +5,8 @@ export interface Env {
     BACKEND_URL: string
     PUBLIC_APP_URL: string
     TELEGRAM_CHAT_CITIES: Record<string, string>
+    /** Comma-separated city slugs whose Telegram group notifications are paused. */
+    TELEGRAM_WRITING_DISABLED_CITIES?: string
     MISTRAL_MODEL: string
     SENTRY_DSN: string
     NODE_ENV?: string

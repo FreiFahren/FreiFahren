@@ -1,7 +1,7 @@
 import type { Env, ForwardedReport, TransitIndex } from './types'
 import { lineNameForId, stationLineNames } from './transit'
 import { getTransitIndex } from './transit'
-import { profileFor, readConfigForCity } from './config'
+import { isTelegramWritingDisabled, profileFor, readConfigForCity } from './config'
 import { getCity, type CitySlug } from '@freifahren/cities'
 import { reportError } from './observability'
 
@@ -142,6 +142,11 @@ export async function handleReportForward(request: Request, env: Env): Promise<R
     } catch (err) {
         const detail = err instanceof Error ? err.message : 'invalid request'
         return json({ error: 'bad_request', detail }, 400)
+    }
+
+    if (isTelegramWritingDisabled(env, cfg.city)) {
+        console.info('Skipped Telegram report forward: writing disabled for city', { city: cfg.city.slug })
+        return json({ status: 'skipped' })
     }
 
     let index: TransitIndex

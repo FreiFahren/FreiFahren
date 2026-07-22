@@ -128,6 +128,13 @@ export function cityForChat(env: Env, chatId: string): CityConfig | null {
     return slug === undefined ? null : cityForSlug(slug)
 }
 
+export function isTelegramWritingDisabled(env: Env, city: CityConfig): boolean {
+    return (env.TELEGRAM_WRITING_DISABLED_CITIES ?? '')
+        .split(',')
+        .map((slug) => slug.trim())
+        .includes(city.slug)
+}
+
 export function readConfigForCity(env: Env, citySlug: CitySlug): RuntimeConfig {
     const city = cityForSlug(citySlug)
     const chatIds = Object.entries(env.TELEGRAM_CHAT_CITIES)
