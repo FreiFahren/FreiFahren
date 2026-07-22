@@ -22,6 +22,7 @@ function LineReportRow({ line }: { line: StationLineReports }) {
     <Link
       to={LineDetailRoute.to}
       params={{ lineName: line.name }}
+      search={{ source: 'station' }}
       onClick={() => track('station_line_selected', { line_id: line.name })}
       className="hover:bg-muted/70 focus-visible:ring-ring flex items-center gap-3 px-3 py-2.5 outline-none focus-visible:ring-2"
     >

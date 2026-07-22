@@ -30,6 +30,7 @@ export function LineScoreList({ scores, total }: LineScoreListProps) {
             <Link
               to={LineDetailRoute.to}
               params={{ lineName: entry.name }}
+              search={{ source: 'reports_list' }}
               className="hover:bg-muted/70 focus-visible:ring-ring flex h-14 items-center gap-3 px-4 outline-none focus-visible:ring-2"
             >
               <LineBadge name={entry.name} className="underline underline-offset-2" />

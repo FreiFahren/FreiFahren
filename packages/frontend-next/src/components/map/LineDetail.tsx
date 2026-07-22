@@ -8,7 +8,7 @@ import { useStations } from '@/api/transit';
 import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
 import { useModalViewDuration } from '@/hooks/useModalViewDuration';
-import { track } from '@/lib/analytics';
+import { track, type LineDetailSource } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';
 import { cn } from '@/lib/utils';
 import { Route as ReportRoute } from '@/routes/report';
@@ -28,7 +28,11 @@ export type LineDetailLine = {
   variantIds: string[];
 };
 
-type LineDetailProps = { line: LineDetailLine; onClose: () => void };
+type LineDetailProps = {
+  line: LineDetailLine;
+  onClose: () => void;
+  source: LineDetailSource;
+};
 
 const cityHourFormatter = new Intl.DateTimeFormat('en-GB', {
   timeZone: currentCity.timezone,
@@ -51,7 +55,7 @@ function countReportsOnLine(
   return count;
 }
 
-export function LineDetail({ line, onClose }: LineDetailProps) {
+export function LineDetail({ line, onClose, source }: LineDetailProps) {
   const { t, i18n } = useTranslation(NAMESPACE);
   const { data: insights } = useLineInsights(line.name);
   const { data: reports, isSuccess: hasLiveReports } = useReports(DAY_MS);
@@ -60,8 +64,8 @@ export function LineDetail({ line, onClose }: LineDetailProps) {
   useModalViewDuration('line');
 
   useEffect(() => {
-    track('line_detail_opened', { line_id: line.name, source: 'station' });
-  }, [line.name]);
+    track('line_detail_opened', { line_id: line.name, source });
+  }, [line.name, source]);
 
   const variantIds = new Set(line.variantIds);
   const recentReportCount = countReportsOnLine(reports, variantIds);
