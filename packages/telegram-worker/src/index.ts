@@ -2,6 +2,7 @@ import { withSentry, consoleLoggingIntegration } from '@sentry/cloudflare'
 import type { Env } from './types'
 import { handleWebhook } from './webhook'
 import { handleReportForward } from './forwarding'
+import { redactTelegramBotTokenFromBreadcrumb, redactTelegramBotTokenFromSpan } from './observability'
 
 // withSentry wraps the handler: unhandled errors in fetch are captured automatically,
 // console.* is forwarded to Sentry Logs, and Sentry.captureException works inside
@@ -14,6 +15,8 @@ export default withSentry(
         enableLogs: true,
         integrations: [consoleLoggingIntegration({ levels: ['info', 'warn', 'error'] })],
         tracesSampleRate: 1.0,
+        beforeBreadcrumb: redactTelegramBotTokenFromBreadcrumb,
+        beforeSendSpan: redactTelegramBotTokenFromSpan,
     }),
     {
         async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -31,5 +34,5 @@ export default withSentry(
 
             return new Response('not found', { status: 404 })
         },
-    } satisfies ExportedHandler<Env>,
+    } satisfies ExportedHandler<Env>
 )
