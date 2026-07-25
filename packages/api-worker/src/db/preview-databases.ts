@@ -35,7 +35,9 @@ const parseFlag = (name: string, argv: string[] = process.argv): string | undefi
     return value
 }
 
-const previewDatabaseName = (dbName: string, pr: string) => `${dbName}-pr-${pr}`
+const previewSuffix = (pr: string) => `-pr-${pr}`
+
+const previewDatabaseName = (dbName: string, pr: string) => `${dbName}${previewSuffix(pr)}`
 
 const assertCompatibilityDateMatchesProduction = () => {
     const production = readFileSync(resolve(PACKAGE_ROOT, 'wrangler.jsonc'), 'utf-8')
@@ -56,28 +58,50 @@ const listDatabases = (): D1ListEntry[] => {
     return JSON.parse(stdout.slice(stdout.indexOf('['))) as D1ListEntry[]
 }
 
+// Matched by PR suffix rather than derived from the registry, so a database created under a name that
+// A later revision renamed or removed is still torn down. Listing first also keeps this idempotent
+// Without parsing wrangler's error output. Returns the ids removed.
+const destroy = (pr: string): Set<string> => {
+    const deleted = new Set<string>()
+    for (const { name, uuid } of listDatabases().filter(({ name }) => name.endsWith(previewSuffix(pr)))) {
+        logger.info({ database: name }, 'Deleting preview database...')
+        execFileSync('npx', ['wrangler', 'd1', 'delete', name, '--skip-confirmation'], { stdio: 'inherit' })
+        deleted.add(uuid)
+    }
+    if (deleted.size === 0) {
+        logger.info({ pr }, 'No preview databases to delete')
+    }
+    return deleted
+}
+
 const provision = (pr: string, out: string) => {
     assertCompatibilityDateMatchesProduction()
+
+    // Every run rebuilds from empty. Reusing a database would show something other than the revision
+    // Under review: wrangler's ledger records applied migration *filenames*, so a migration edited
+    // During review is never reapplied, and the seed's additive load keeps the previous revision's
+    // Reference rows.
+    const deleted = destroy(pr)
 
     const wanted = Object.values(CITY_DATABASES).map(({ dbName, dbBinding }) => ({
         binding: dbBinding,
         name: previewDatabaseName(dbName, pr),
     }))
-
-    let existing = listDatabases()
-    const missing = wanted.filter(({ name }) => !existing.some((database) => database.name === name))
-    for (const { name } of missing) {
+    for (const { name } of wanted) {
         logger.info({ database: name }, 'Creating preview database...')
         execFileSync('npx', ['wrangler', 'd1', 'create', name], { stdio: 'inherit' })
     }
-    if (missing.length > 0) {
-        existing = listDatabases()
-    }
 
+    const existing = listDatabases()
     const d1Databases = wanted.map(({ binding, name }) => {
         const database = existing.find((candidate) => candidate.name === name)
         if (!database) {
-            throw new Error(`Preview database ${name} is still missing after creation`)
+            throw new Error(`Preview database ${name} is missing after creation`)
+        }
+        // A list that hasn't caught up with the delete above would resolve the name to the database
+        // Just removed, which the Worker would bind and then fail every query against.
+        if (deleted.has(database.uuid)) {
+            throw new Error(`Preview database ${name} still resolves to deleted database ${database.uuid}`)
         }
         return { binding, database_name: name, database_id: database.uuid, migrations_dir: 'drizzle' }
     })
@@ -105,20 +129,6 @@ const provision = (pr: string, out: string) => {
 
     writeFileSync(resolve(PACKAGE_ROOT, out), `${JSON.stringify(config, null, 2)}\n`)
     logger.info({ out, databases: d1Databases.map(({ database_name }) => database_name) }, 'Preview config written')
-}
-
-// Checking the list first keeps this idempotent without parsing wrangler's error output.
-const destroy = (pr: string) => {
-    const existing = listDatabases()
-    for (const { dbName } of Object.values(CITY_DATABASES)) {
-        const name = previewDatabaseName(dbName, pr)
-        if (!existing.some((database) => database.name === name)) {
-            logger.info({ database: name }, 'No preview database to delete')
-            continue
-        }
-        logger.info({ database: name }, 'Deleting preview database...')
-        execFileSync('npx', ['wrangler', 'd1', 'delete', name, '--skip-confirmation'], { stdio: 'inherit' })
-    }
 }
 
 const run = () => {
