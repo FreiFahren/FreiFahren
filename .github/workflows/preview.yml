@@ -1,8 +1,8 @@
 name: Preview
 
 # No `paths:` filter here on purpose: it would also gate the `closed` event, so a PR that provisioned
-# a preview and then moved its backend changes out of the diff before closing would never trigger
-# cleanup, leaving the Worker and its databases behind. The path check lives on the `changes` job.
+# a preview and then moved its changes out of the diff before closing would never trigger cleanup,
+# leaving the Workers and databases behind. The path check lives on the `plan` job.
 on:
     pull_request:
         types: [opened, reopened, synchronize, closed]
@@ -13,7 +13,7 @@ concurrency:
     cancel-in-progress: false
 
 jobs:
-    changes:
+    plan:
         if: github.event.action != 'closed'
         runs-on: ubuntu-latest
         permissions:
@@ -21,8 +21,10 @@ jobs:
             pull-requests: read
         outputs:
             api: ${{ steps.filter.outputs.api }}
+            frontend: ${{ steps.filter.outputs.frontend }}
+            subdomain: ${{ steps.subdomain.outputs.subdomain }}
         steps:
-            - name: Detect backend changes
+            - name: Detect what changed
               id: filter
               uses: actions/github-script@v7
               with:
@@ -34,25 +36,40 @@ jobs:
                         pull_number: context.issue.number,
                         per_page: 100,
                       })
-                      const patterns = [
-                        /^packages\/api-worker\//,
-                        /^packages\/cities\//,
-                        /^\.github\/workflows\/preview\.yml$/,
-                      ]
-                      const changed = files.some((file) => patterns.some((pattern) => pattern.test(file.filename)))
-                      core.setOutput('api', changed ? 'true' : 'false')
+                      const workflow = /^\.github\/workflows\/preview\.yml$/
+                      const registry = /^packages\/cities\//
+                      const touches = (...patterns) =>
+                        files.some((file) => patterns.some((pattern) => pattern.test(file.filename)))
+                      core.setOutput('api', touches(/^packages\/api-worker\//, registry, workflow) ? 'true' : 'false')
+                      core.setOutput(
+                        'frontend',
+                        touches(/^packages\/frontend-next\//, registry, workflow) ? 'true' : 'false'
+                      )
+
+            # Resolved once and shared, so both deploys and the comment agree on the hostnames without
+            # each recomputing them.
+            - name: Resolve workers.dev subdomain
+              id: subdomain
+              env:
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+              run: |
+                  set -euo pipefail
+                  subdomain=$(curl --fail --silent --show-error \
+                    --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+                    "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" \
+                    | jq --exit-status --raw-output '.result.subdomain')
+                  echo "subdomain=$subdomain" >> "$GITHUB_OUTPUT"
 
     api:
-        needs: changes
+        needs: plan
         if: >-
             github.event.action != 'closed' &&
-            needs.changes.outputs.api == 'true' &&
+            needs.plan.outputs.api == 'true' &&
             github.event.pull_request.head.repo.full_name == github.repository
         runs-on: ubuntu-latest
         permissions:
             contents: read
-            issues: write
-            pull-requests: write
         defaults:
             run:
                 working-directory: packages/api-worker
@@ -62,6 +79,7 @@ jobs:
             # Passed via env (not interpolated into a run script) to avoid shell injection.
             PR_NUMBER: ${{ github.event.pull_request.number }}
             PREVIEW_CONFIG: wrangler.preview.json
+            PREVIEW_URL: https://api-pr-${{ github.event.pull_request.number }}.${{ needs.plan.outputs.subdomain }}.workers.dev
 
         steps:
             - name: Check out code
@@ -108,19 +126,7 @@ jobs:
                   workingDirectory: packages/api-worker
                   command: deploy --config wrangler.preview.json
 
-            - name: Resolve preview URL
-              id: url
-              run: |
-                  set -euo pipefail
-                  subdomain=$(curl --fail --silent --show-error \
-                    --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-                    "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" \
-                    | jq --exit-status --raw-output '.result.subdomain')
-                  echo "url=https://api-pr-${PR_NUMBER}.${subdomain}.workers.dev" >> "$GITHUB_OUTPUT"
-
             - name: Smoke test every city
-              env:
-                  PREVIEW_URL: ${{ steps.url.outputs.url }}
               run: |
                   set -euo pipefail
 
@@ -149,24 +155,75 @@ jobs:
                     echo "$city: $stations stations"
                   done
 
+    frontend:
+        needs: [plan, api]
+        # Runs whenever either side changed, so a backend-only PR still gets a clickable app to review.
+        # `!cancelled()` is what lets it proceed when `api` was skipped rather than skipping with it.
+        if: >-
+            !cancelled() &&
+            github.event.action != 'closed' &&
+            needs.api.result != 'failure' &&
+            (needs.plan.outputs.api == 'true' || needs.plan.outputs.frontend == 'true') &&
+            github.event.pull_request.head.repo.full_name == github.repository
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            issues: write
+            pull-requests: write
+        defaults:
+            run:
+                working-directory: packages/frontend-next
+        env:
+            CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+            CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+            PR_NUMBER: ${{ github.event.pull_request.number }}
+            APP_URL: https://frontend-pr-${{ github.event.pull_request.number }}.${{ needs.plan.outputs.subdomain }}.workers.dev
+            # The preview API when this PR deployed one, production otherwise — a frontend-only PR has
+            # no preview API to point at.
+            API_URL: ${{ needs.plan.outputs.api == 'true' && format('https://api-pr-{0}.{1}.workers.dev', github.event.pull_request.number, needs.plan.outputs.subdomain) || 'https://api.freifahren.org' }}
+
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v4
+
+            - name: Set up Bun
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - name: Install dependencies
+              run: bun install --frozen-lockfile
+
+            # VITE_PREVIEW switches city resolution to `?city=` and opens the feature flags, both of
+            # which a single workers.dev host cannot get from the subdomain or from PostHog. The blank
+            # PostHog key keeps preview traffic out of the production project.
+            - name: Build preview
+              run: bun run build
+              env:
+                  VITE_API_URL: ${{ env.API_URL }}
+                  VITE_PREVIEW: 'true'
+                  VITE_POSTHOG_KEY: ''
+
+            - name: Deploy preview frontend
+              run: bunx wrangler@latest deploy --config wrangler.preview.jsonc --name "frontend-pr-${PR_NUMBER}"
+
             - name: Comment preview link on pull request
               uses: actions/github-script@v7
               env:
-                  PREVIEW_URL: ${{ steps.url.outputs.url }}
+                  USES_PREVIEW_API: ${{ needs.plan.outputs.api == 'true' }}
               with:
                   script: |
-                      const marker = '<!-- api-preview -->'
-                      const url = process.env.PREVIEW_URL
-                      const [city] = (process.env.CITY_SLUGS ?? '').split(' ').filter(Boolean)
-                      const lines = [marker, `🧪 **API preview** — \`${url}\``, '']
-                      if (city) {
-                        lines.push(
-                          `The root has no route, so start at [recent reports](${url}/v0/reports?city=${city}).`,
-                          ''
-                        )
-                      }
-                      lines.push('Not previewed: the app, the Telegram bot and the basemap still point at production.')
-                      const body = lines.join('\n')
+                      const marker = '<!-- preview -->'
+                      const body = [
+                        marker,
+                        `🧪 **Preview:** ${process.env.APP_URL}`,
+                        '',
+                        process.env.USES_PREVIEW_API === 'true'
+                          ? 'Running against this PR\'s own API and database. Reports you submit stay here, and are discarded on the next push.'
+                          : 'Running against the production API.',
+                        '',
+                        'Not previewed: the Telegram bot and the basemap still point at production.',
+                      ].join('\n')
                       const { owner, repo } = context.repo
                       const issue_number = context.issue.number
                       const comments = await github.paginate(github.rest.issues.listComments, {
@@ -184,8 +241,8 @@ jobs:
                       }
 
     cleanup:
-        # No path gate, so a preview can never outlive its PR even if the backend changes were
-        # reverted before closing. Both deletes are idempotent.
+        # No path gate, so a preview can never outlive its PR even if the changes were reverted before
+        # closing. Every delete is idempotent.
         if: >-
             github.event.action == 'closed' &&
             github.event.pull_request.head.repo.full_name == github.repository
@@ -212,26 +269,27 @@ jobs:
             - name: Install dependencies
               run: bun install --frozen-lockfile
 
-            - name: Delete preview API worker
+            - name: Delete preview workers
               run: |
                   set -uo pipefail
-                  worker_name="api-pr-${PR_NUMBER}"
-                  output=$(npx wrangler delete --name "$worker_name" --force 2>&1)
-                  status=$?
-                  echo "$output"
-                  if [ "$status" -eq 0 ]; then
-                    echo "Deleted preview worker $worker_name."
-                    exit 0
-                  fi
-                  # A PR that never deployed a preview (or was already cleaned up) has no Worker to
-                  # delete — Cloudflare returns script_not_found (code 10007). That is expected, not a
-                  # failure. Any other error (auth, network) must fail loudly so a real leak is noticed.
-                  if echo "$output" | grep -qiE 'code: *10007|script_not_found|workers\.api\.error\.not_found'; then
-                    echo "No preview worker named $worker_name exists; nothing to clean up."
-                    exit 0
-                  fi
-                  echo "Failed to delete preview worker $worker_name (exit $status)." >&2
-                  exit "$status"
+                  for worker_name in "api-pr-${PR_NUMBER}" "frontend-pr-${PR_NUMBER}"; do
+                    output=$(npx wrangler delete --name "$worker_name" --force 2>&1)
+                    status=$?
+                    echo "$output"
+                    if [ "$status" -eq 0 ]; then
+                      echo "Deleted preview worker $worker_name."
+                      continue
+                    fi
+                    # A PR that never deployed this preview (or was already cleaned up) has no Worker to
+                    # delete — Cloudflare returns script_not_found (code 10007). That is expected, not a
+                    # failure. Any other error (auth, network) must fail loudly so a real leak is noticed.
+                    if echo "$output" | grep -qiE 'code: *10007|script_not_found|workers\.api\.error\.not_found'; then
+                      echo "No preview worker named $worker_name exists; nothing to clean up."
+                      continue
+                    fi
+                    echo "Failed to delete preview worker $worker_name (exit $status)." >&2
+                    exit "$status"
+                  done
 
             - name: Delete preview databases
               run: bun run preview:databases --pr "$PR_NUMBER" --destroy

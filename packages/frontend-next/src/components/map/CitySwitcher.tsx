@@ -1,9 +1,11 @@
 import { Capacitor } from '@capacitor/core';
+import { type CityConfig } from '@freifahren/cities';
 import { ChevronDown, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { currentCity, setCityPreference } from '@/lib/city';
 import { selectableCities, useCitySwitchingEnabled } from '@/lib/city-switching';
+import { isPreviewBuild } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,12 +18,21 @@ import { NAMESPACE } from './CitySwitcher.i18n';
 
 // Web resolves the city from the hostname at boot (see lib/city.ts), so switching means navigating
 // to the target subdomain: swap the leftmost label and keep the rest (app.freifahren.org ->
-// berlin.freifahren.org). Native has no subdomain (capacitor://localhost) and resolves from a
-// stored preference instead, so it switches via setCityPreference (see the handler below).
-function urlForSubdomain(subdomain: string): string {
+// berlin.freifahren.org). A preview has no per-city hostname, so it switches with `?city=` on the
+// host it is already on. Native has no subdomain (capacitor://localhost) and resolves from a stored
+// preference instead, so it switches via setCityPreference (see the handler below).
+function urlForCity(city: CityConfig): string {
   const { protocol, hostname, port, pathname, search } = window.location;
+  const origin = `${protocol}//${hostname}${port ? `:${port}` : ''}`;
+
+  if (isPreviewBuild) {
+    const params = new URLSearchParams(search);
+    params.set('city', city.slug);
+    return `${origin}${pathname}?${params.toString()}`;
+  }
+
   const labels = hostname.split('.');
-  const host = labels.length < 2 ? hostname : [subdomain, ...labels.slice(1)].join('.');
+  const host = labels.length < 2 ? hostname : [city.subdomain, ...labels.slice(1)].join('.');
   return `${protocol}//${host}${port ? `:${port}` : ''}${pathname}${search}`;
 }
 
@@ -57,7 +68,7 @@ export function CitySwitcher() {
             if (Capacitor.isNativePlatform()) {
               setCityPreference(city.slug);
             } else {
-              window.location.assign(urlForSubdomain(city.subdomain));
+              window.location.assign(urlForCity(city));
             }
           }}
         >

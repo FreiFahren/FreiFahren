@@ -10,6 +10,10 @@ export function optionalEnv(key: string): string | undefined {
   return typeof raw === 'string' && raw.length > 0 ? raw : undefined;
 }
 
+// A PR preview serves every city from one workers.dev host, so anything keyed off the subdomain
+// (city resolution) or off PostHog (feature flags) needs a different source there.
+export const isPreviewBuild = optionalEnv('VITE_PREVIEW') !== undefined;
+
 export function requireEnv(key: string): string;
 export function requireEnv(key: string, as: 'number'): number;
 export function requireEnv(key: string, as?: 'number'): string | number {
