@@ -156,20 +156,13 @@ jobs:
               with:
                   script: |
                       const marker = '<!-- api-preview -->'
-                      const url = process.env.PREVIEW_URL
-                      const cities = (process.env.CITY_SLUGS ?? '').split(' ').filter(Boolean)
                       const body = [
                         marker,
-                        `🧪 API preview: \`${url}\``,
+                        `🧪 **API preview:** \`${process.env.PREVIEW_URL}\``,
                         '',
-                        'One D1 database per city, migrated from empty and seeded from the committed',
-                        'snapshots, with the last 30 days of production reports copied in.',
+                        'An API base URL rather than a page, so a browser gets a 404 on `/`.',
                         '',
-                        ...cities.map(
-                          (city) => `- \`?city=${city}\`: [stations](${url}/v0/transit/stations?city=${city})`
-                        ),
-                        '',
-                        'Telegram forwarding is not wired up yet, so reports created here stay in the preview.',
+                        'Not previewed: the app, the Telegram bot and the basemap still point at production.',
                       ].join('\n')
                       const { owner, repo } = context.repo
                       const issue_number = context.issue.number
