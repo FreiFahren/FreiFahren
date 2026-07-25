@@ -97,10 +97,16 @@ export const registerVersionedRoutes = <E extends Env>(
 
     // Redirect unversioned requests to the latest version.
     // 307 preserves the original HTTP method and body
+    /*
+     * The Location is relative on purpose. Behind the edge, `c.req.url` can carry the scheme of the
+     * internal hop rather than the client's, so re-serialising it emitted `http://` for HTTPS
+     * requests and instructed clients to downgrade — and because 307 replays the method and body,
+     * an unversioned POST /reports would have been replayed over plaintext. A relative Location is
+     * resolved by the client against the URL it actually requested, so the scheme cannot be wrong.
+     */
     const redirect = (c: Context) => {
-        const url = new URL(c.req.url)
-        url.pathname = `/${latestVersion}${url.pathname}`
-        return c.redirect(url.toString(), 307)
+        const { pathname, search } = new URL(c.req.url)
+        return c.redirect(`/${latestVersion}${pathname}${search}`, 307)
     }
     app.all(`/${basePath}/*`, redirect)
     app.all(`/${basePath}`, redirect)
