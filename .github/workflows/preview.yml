@@ -123,6 +123,22 @@ jobs:
                   PREVIEW_URL: ${{ steps.url.outputs.url }}
               run: |
                   set -euo pipefail
+
+                  # A freshly deployed workers.dev hostname 404s at the edge until it propagates, which
+                  # is a second or two after `wrangler deploy` returns. Wait for the Worker to answer so
+                  # that the assertions below fail only on a genuinely broken preview.
+                  for attempt in $(seq 1 12); do
+                    if curl --fail --silent --output /dev/null \
+                        "${PREVIEW_URL}/v0/transit/stations?city=${CITY_SLUGS%% *}"; then
+                      break
+                    fi
+                    if [ "$attempt" -eq 12 ]; then
+                      echo "Preview never became reachable at $PREVIEW_URL" >&2
+                      exit 1
+                    fi
+                    sleep 5
+                  done
+
                   for city in $CITY_SLUGS; do
                     stations=$(curl --fail --silent --show-error --location \
                       "${PREVIEW_URL}/v0/transit/stations?city=${city}" | jq 'length')
