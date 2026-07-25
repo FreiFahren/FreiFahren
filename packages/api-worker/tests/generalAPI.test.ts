@@ -12,13 +12,13 @@ describe('Versioning', () => {
     it('redirects GET /reports to /v0/reports with 307', async () => {
         const response = await app.request('/reports', undefined, testEnv())
         expect(response.status).toBe(307)
-        expect(new URL(response.headers.get('Location')!).pathname).toBe('/v0/reports')
+        expect(response.headers.get('Location')).toBe('/v0/reports')
     })
 
     it('redirects POST /reports to /v0/reports with 307', async () => {
         const response = await app.request('/reports', { method: 'POST' }, testEnv())
         expect(response.status).toBe(307)
-        expect(new URL(response.headers.get('Location')!).pathname).toBe('/v0/reports')
+        expect(response.headers.get('Location')).toBe('/v0/reports')
     })
 
     it('preserves query params through redirects', async () => {
@@ -29,11 +29,27 @@ describe('Versioning', () => {
         )
         expect(response.status).toBe(307)
 
-        const location = new URL(response.headers.get('Location')!)
+        const location = new URL(response.headers.get('Location')!, 'http://localhost')
         expect(location.pathname).toBe('/v0/reports')
         expect(location.searchParams.get('from')).toBe('2024-01-01T00:00:00Z')
         expect(location.searchParams.get('to')).toBe('2024-01-02T00:00:00Z')
     })
+
+    // An absolute Location rebuilt from `c.req.url` emitted `http://` for HTTPS requests in
+    // production, instructing clients to downgrade. 307 replays method and body, so an
+    // unversioned POST /reports would have been replayed over plaintext. Keeping the Location
+    // relative makes the scheme the client's concern, so it cannot be wrong.
+    it.each(['/reports', '/transit/lines', '/insights/lines/U8'])(
+        'sends a scheme-less relative Location for %s',
+        async (path) => {
+            const response = await app.request(`https://api.freifahren.org${path}`, { method: 'GET' }, testEnv())
+
+            expect(response.status).toBe(307)
+            const location = response.headers.get('Location')!
+            expect(location.startsWith('/v0/')).toBe(true)
+            expect(location).not.toMatch(/^https?:/)
+        }
+    )
 
     it('does not set deprecation headers on the latest version', async () => {
         const response = await appRequestWithRedirect('/v0/reports')

@@ -54,7 +54,8 @@ export const appRequestWithRedirect = async (path: string, init?: RequestInit, t
     if (response.status === 307) {
         const location = response.headers.get('Location')
         if (location) {
-            const url = new URL(location)
+            // The version redirect sends a relative Location, so resolving it needs a base.
+            const url = new URL(location, 'http://localhost')
             return targetApp.request(url.pathname + url.search, init, testEnv())
         }
     }
