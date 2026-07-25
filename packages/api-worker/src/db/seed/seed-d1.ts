@@ -7,8 +7,10 @@ import type { D1Database } from '@cloudflare/workers-types'
 import { getCity } from '@freifahren/cities'
 import { getPlatformProxy } from 'wrangler'
 
+import { parseConfigArg } from '../cli-args'
 import { createD1Db } from '../index'
 import { applyMigrations } from '../migrate'
+import { toSqlLiteral } from '../sql-literal'
 
 import { parseCityArg } from './city-arg'
 
@@ -26,11 +28,26 @@ import { parseCityArg } from './city-arg'
 // Parents before children for FK order.
 const REFERENCE_TABLES = ['stations', 'lines', 'line_stations', 'segments'] as const
 
-const toSqlLiteral = (value: unknown): string => {
-    if (value === null || value === undefined) return 'NULL'
-    if (typeof value === 'number' || typeof value === 'bigint') return String(value)
-    if (typeof value === 'boolean') return value ? '1' : '0'
-    return `'${String(value).replace(/'/g, "''")}'`
+// Tables holding user data rather than reference data, so the seed deliberately leaves them alone.
+const NON_REFERENCE_TABLES = ['reports'] as const
+
+// A new table is a decision — reference data to seed, or user data to leave alone — so an unlisted one
+// Fails here instead of being silently left out of every seeded database.
+const assertEveryTableIsAccountedFor = async (d1: D1Database): Promise<void> => {
+    const { results } = await d1
+        .prepare(
+            `SELECT name FROM sqlite_master
+             WHERE type = 'table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%' AND name <> 'd1_migrations'`
+        )
+        .all<{ name: string }>()
+
+    const accounted = new Set<string>([...REFERENCE_TABLES, ...NON_REFERENCE_TABLES])
+    const unaccounted = results.map(({ name }) => name).filter((name) => !accounted.has(name))
+    if (unaccounted.length > 0) {
+        throw new Error(
+            `Tables missing from the seed: ${unaccounted.join(', ')} — add each to REFERENCE_TABLES (seeded, parents first) or NON_REFERENCE_TABLES (left alone)`
+        )
+    }
 }
 
 // Invoke the locally-installed wrangler CLI (via npx so the package's own binary is used).
@@ -63,6 +80,7 @@ const seedD1 = async () => {
     const city = parseCityArg()
     const remote = process.argv.includes('--remote')
     const persistTo = parsePersistToArg()
+    const configPath = parseConfigArg()
     process.env.SEED_CITY = city
 
     const binding = getCity(city)!.dbBinding
@@ -74,15 +92,17 @@ const seedD1 = async () => {
     const { logger } = await import('../../common/logger')
     setSnapshotLoader(fsSnapshotLoader)
 
-    logger.info({ city, binding, target: remote ? 'remote' : 'local' }, 'Seeding D1...')
+    logger.info({ city, binding, target: remote ? 'remote' : 'local', configPath }, 'Seeding D1...')
 
     // Build the reference tables on the local Miniflare D1 via the shared pipeline.
-    applyMigrations({ binding, remote: false, persistTo })
-    const { env, dispose } = await getPlatformProxy<Record<string, D1Database>>(
-        persistTo !== undefined ? { persist: { path: join(persistTo, 'v3') } } : undefined
-    )
+    applyMigrations({ binding, remote: false, persistTo, configPath })
+    const { env, dispose } = await getPlatformProxy<Record<string, D1Database>>({
+        ...(configPath !== undefined ? { configPath } : {}),
+        ...(persistTo !== undefined ? { persist: { path: join(persistTo, 'v3') } } : {}),
+    })
     try {
         const d1 = env[binding]
+        await assertEveryTableIsAccountedFor(d1)
         await seedBaseData(createD1Db(d1))
 
         if (remote) {
@@ -90,8 +110,9 @@ const seedD1 = async () => {
             // Over via wrangler (additive INSERT OR IGNORE).
             const sqlPath = join(tmpdir(), `freifahren-seed-${city}.sql`)
             writeFileSync(sqlPath, await dumpReferenceTables(d1))
-            applyMigrations({ binding, remote: true })
-            wrangler('d1', 'execute', binding, '--remote', `--file=${sqlPath}`)
+            const configArgs = configPath !== undefined ? ['--config', configPath] : []
+            applyMigrations({ binding, remote: true, configPath })
+            wrangler('d1', 'execute', binding, '--remote', `--file=${sqlPath}`, ...configArgs)
         }
     } finally {
         await dispose()

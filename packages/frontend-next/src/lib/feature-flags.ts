@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
 import { enqueuePostHog } from '@/lib/posthog-client';
+import { isPreviewBuild } from '@/lib/utils';
 
 // PostHog feature flags read through the same lazy-loaded client as analytics, so components never
 // touch the SDK directly. Flags gate UI that ships in the bundle but isn't launched yet; the value
@@ -50,11 +51,11 @@ export function subscribeToFeatureFlags(listener: () => void): () => void {
   return () => listeners.delete(listener);
 }
 
-// In dev every flag reads on, so gated work is visible locally without touching PostHog. In
-// prod the value comes from the resolved flag (false until PostHog turns it on).
+// In dev and on a PR preview every flag reads on, so gated work is visible without touching PostHog
+// (a preview has no PostHog key). In prod the value comes from the resolved flag.
 export function getFeatureFlag(flag: FlagKey): boolean {
   ensureSubscribed();
-  return import.meta.env.DEV ? true : (values.get(flag) ?? false);
+  return import.meta.env.DEV || isPreviewBuild ? true : (values.get(flag) ?? false);
 }
 
 export function useFeatureFlag(flag: FlagKey): boolean {
