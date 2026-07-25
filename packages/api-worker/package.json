@@ -18,7 +18,9 @@
     "db:studio": "drizzle-kit studio",
     "db:drop": "drizzle-kit drop",
     "db:seed:refresh": "bun run src/db/seed/seed-refresh.ts",
-    "db:purge-cache": "bun run src/db/purge-cache.ts"
+    "db:purge-cache": "bun run src/db/purge-cache.ts",
+    "db:copy-reports": "bun run src/db/copy-reports.ts",
+    "preview:databases": "bun run src/db/preview-databases.ts"
   },
   "dependencies": {
     "@sentry/cloudflare": "^10.62.0",
