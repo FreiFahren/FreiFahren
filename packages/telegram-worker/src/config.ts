@@ -19,7 +19,9 @@ const GERMAN_LETTER_MAP: Record<string, string> = {
 // Leading prefixes users type that aren't part of the station name ("S Alexanderplatz").
 const GERMAN_STATION_NAME_PREFIX_PATTERN = /^(?:bahnhof\s+|bhf\s+|s\s+|u\s+|s-bahn\s+|u-bahn\s+)+/i
 
-// Words that are never a station name on their own (platforms, vehicle types).
+// Words that are never a station name on their own (platforms, vehicle types, and
+// vague civic directions like "Innenstadt"/"stadteinwärts" that have no matching
+// stop — without this they get snapped onto a central station).
 const GERMAN_GENERIC_NON_STATION_WORDS: ReadonlySet<string> = new Set([
     'bahnsteig',
     'bahnsteige',
@@ -37,6 +39,16 @@ const GERMAN_GENERIC_NON_STATION_WORDS: ReadonlySet<string> = new Set([
     'bus',
     'station',
     'stop',
+    'innenstadt',
+    'zentrum',
+    'stadt',
+    'stadteinwarts',
+    'stadtauswarts',
+    'norden',
+    'suden',
+    'sueden',
+    'osten',
+    'westen',
 ])
 
 /**
