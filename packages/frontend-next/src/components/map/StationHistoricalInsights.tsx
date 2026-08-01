@@ -23,7 +23,9 @@ export function StationHistoricalInsights({ stationId }: StationHistoricalInsigh
               population: insights.ranking.population,
             })}
           </p>
-          <p>{t('stationReportsLast30Days', { count: insights.reportCount.value })}</p>
+          <p className="font-semibold">
+            {t('stationReportsLast30Days', { count: insights.reportCount.value })}
+          </p>
         </div>
       )}
     </CardContent>

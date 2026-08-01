@@ -34,7 +34,6 @@ export function LineScoreList({ scores, total }: LineScoreListProps) {
               className="hover:bg-muted/70 focus-visible:ring-ring flex h-14 items-center gap-3 px-4 outline-none focus-visible:ring-2"
             >
               <LineBadge name={entry.name} />
-              <ChevronRight className="text-muted-foreground size-4 shrink-0" aria-hidden />
               <div className="bg-muted h-2.5 flex-1 overflow-hidden rounded-full">
                 <div
                   className="h-full rounded-full"
@@ -44,6 +43,7 @@ export function LineScoreList({ scores, total }: LineScoreListProps) {
               <span className="w-9 shrink-0 text-right text-sm font-semibold tabular-nums">
                 {percent}%
               </span>
+              <ChevronRight className="text-muted-foreground size-4 shrink-0" aria-hidden />
             </Link>
           </li>
         );

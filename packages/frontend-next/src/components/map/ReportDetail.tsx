@@ -85,8 +85,8 @@ export function ReportDetail({ station, onClose }: ReportDetailProps) {
             className="hover:bg-muted/70 focus-visible:ring-ring flex items-center gap-2 px-4 py-2 outline-none focus-visible:ring-2"
           >
             <LineBadge name={lineName} />
-            <ChevronRight className="text-muted-foreground size-4 shrink-0" aria-hidden />
             {directionName && <span className="text-sm font-semibold">{directionName}</span>}
+            <ChevronRight className="text-muted-foreground size-4 shrink-0" aria-hidden />
           </Link>
         </CardContent>
       ) : (

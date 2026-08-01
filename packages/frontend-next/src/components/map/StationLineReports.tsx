@@ -26,7 +26,6 @@ function LineReportRow({ line }: { line: StationLineReports }) {
       onClick={() => track('station_line_selected', { line_id: line.name })}
       className="hover:bg-muted/70 focus-visible:ring-ring flex items-center gap-3 px-3 py-2.5 outline-none focus-visible:ring-2"
     >
-      <ChevronRight className="text-muted-foreground size-4 shrink-0" aria-hidden />
       <LineBadge name={line.name} />
       <div className="text-muted-foreground text-sm">
         <p>{t('lineReportsLast24Hours', { count: line.reportsInLast24Hours })}</p>
@@ -36,6 +35,7 @@ function LineReportRow({ line }: { line: StationLineReports }) {
           </p>
         )}
       </div>
+      <ChevronRight className="text-muted-foreground size-4 shrink-0" aria-hidden />
     </Link>
   );
 }
@@ -46,9 +46,6 @@ export function StationLineReports({ lineReports }: StationLineReportsProps) {
 
   return (
     <CardContent className="space-y-2">
-      <h3 className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-        {t('lineReports')}
-      </h3>
       <p className="text-muted-foreground text-xs">{t('lineReportsDescription')}</p>
       <div className="divide-border max-h-[30dvh] overflow-y-auto overscroll-contain rounded-md border">
         {rankedLines.map((line) => (
