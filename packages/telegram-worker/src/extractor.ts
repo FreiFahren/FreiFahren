@@ -292,9 +292,7 @@ const escapeRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$
 export function buildLinePattern(lineNames: string[]): RegExp {
     const alternatives: string[] = []
     for (const lineName of [...lineNames].sort((a, b) => b.length - a.length)) {
-        // Match common chat variants like "U6", "u 6", "M 10" while avoiding words like "Uhr".
-        // Numeric-only names (e.g. "3", "16" — all Leipzig trams, all Berlin trams) are matched
-        // too, but detectLineName only accepts them in a line context; see numericLineContextOk.
+        // Match common variants like "U6", "u 6", and "M 10".
         const parts = /^([A-Za-z]+)(\d+)$/.exec(lineName)
         alternatives.push(
             parts ? `${escapeRegex(parts[1])}\\s*${escapeRegex(parts[2])}` : escapeRegex(lineName),
@@ -306,20 +304,16 @@ export function buildLinePattern(lineNames: string[]): RegExp {
 const foldWord = (w: string): string =>
     w.toLowerCase().replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ß/g, 'ss')
 
-/** The word (letters/digits only) immediately before `idx`, folded; '' if none. */
 function wordBefore(message: string, idx: number): string {
     const m = /([\p{L}\d]+)[^\p{L}\d]*$/u.exec(message.slice(0, idx))
     return m ? foldWord(m[1]) : ''
 }
 
-/** The word (letters/digits only) immediately after `idx`, folded; '' if none. */
 function wordAfter(message: string, idx: number): string {
     const m = /^[^\p{L}\d]*([\p{L}\d]+)/u.exec(message.slice(idx))
     return m ? foldWord(m[1]) : ''
 }
 
-// Article/line words that, right before a bare number, mark it as a transit line ("der 3",
-// "linie 7", "in der 11" — "der/die" sit directly before the number).
 const NUMERIC_LINE_CUE_BEFORE = new Set([
     'der',
     'die',
@@ -341,7 +335,6 @@ const NUMERIC_LINE_CUE_BEFORE = new Set([
     'im',
     'auf',
 ])
-// Direction words that, right after a bare number, mark it as a line (a destination follows it).
 const NUMERIC_LINE_CUE_AFTER = new Set([
     'richtung',
     'richtg',
@@ -353,9 +346,6 @@ const NUMERIC_LINE_CUE_AFTER = new Set([
     'stadteinwarts',
     'stadtauswarts',
 ])
-// Words that, right after a number, mark it as a COUNT, not a line ("3 kontrolleure", "3 k",
-// "2 zivil"). Exact tokens (so a station like "Kleinzschocher" isn't caught); the kontroll-/zivi-
-// stems are safe because no station name starts with them.
 const NUMERIC_COUNT_MARKER_AFTER = new Set([
     'k',
     'ks',
@@ -385,8 +375,6 @@ const NUMERIC_COUNT_MARKER_AFTER = new Set([
 const isCountMarker = (w: string): boolean =>
     NUMERIC_COUNT_MARKER_AFTER.has(w) || /^kontrol/.test(w) || /^zivi/.test(w)
 
-// Words that, right before a number, mark it as NOT a line: a platform/track ("gleis 4"), a
-// vehicle/house number ("wagen 3", "nr 2134"), etc.
 const NUMERIC_NON_LINE_BEFORE = new Set([
     'nr',
     'nummer',
@@ -399,12 +387,7 @@ const NUMERIC_NON_LINE_BEFORE = new Set([
     'bahnsteig',
 ])
 
-/**
- * A bare number matched the line pattern — decide whether it's really a line reference and not
- * a count ("3 Kontrolleure"), a clock time, a house number, etc. Requires a positive line cue
- * (article/line word before, or direction word after) and no count marker after. Data-driven
- * from real Leipzig messages (#865): "der/die/in der 3", "linie 7", "3 richtung X".
- */
+/** Distinguish numeric lines from counts, times, platform numbers, and similar values. */
 function numericLineContextOk(message: string, start: number, end: number): boolean {
     const before = wordBefore(message, start)
     const after = wordAfter(message, end)
@@ -434,8 +417,6 @@ export function detectLineName(
         if (hit === undefined) {
             continue
         }
-        // A numeric-only line (all Leipzig/Berlin trams) is only trusted in a line context,
-        // so bare counts like "3 Kontrolleure" don't read as line 3. See numericLineContextOk.
         if (/^\d+$/.test(hit)) {
             const start = match.index ?? 0
             if (!numericLineContextOk(message, start, start + match[0].length)) {
