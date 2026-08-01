@@ -34,6 +34,10 @@ export default withSentry(
         },
     }),
     {
-        fetch: app.fetch,
+        fetch: (request, env, ctx) => {
+            const rayId = request.headers.get('cf-ray')
+            if (rayId !== null) setTag('cloudflare.ray_id', rayId)
+            return app.fetch(request, env, ctx)
+        },
     } satisfies ExportedHandler<Bindings>
 )

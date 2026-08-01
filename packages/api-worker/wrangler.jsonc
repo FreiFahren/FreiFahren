@@ -7,6 +7,14 @@
     "cache": {
         "enabled": true,
     },
+    "observability": {
+        "traces": {
+            "enabled": true,
+            "destinations": ["sentry-traces"],
+            // Slow D1 calls are frequent enough for 10% sampling to capture several each day.
+            "head_sampling_rate": 0.1,
+        },
+    },
     "workers_dev": true,
     "routes": [
         {
