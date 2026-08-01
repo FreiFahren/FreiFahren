@@ -1,12 +1,6 @@
 import { CITY_DATABASES } from './databases'
 import type { CityConfig } from './types'
 
-// Few-shot examples appended to the Telegram extraction prompt. Curated to teach the
-// Leipzig-specific cases the model gets wrong: the "3k" inspector shorthand alongside
-// numeric lines, current-station-vs-direction ("jetzt"/"gerade"), all-clear messages,
-// vague civic directions that must stay null (Innenstadt/stadteinwärts), and clear
-// non-reports (broken ticket machines, questions, chit-chat). Kept in German since the
-// chat is German with some English.
 const promptExamples = `Message: "3k Haltestelle Zoo Richtung gohlis"
 {"stationName": "Zoo", "directionName": "Gohlis"}
 
@@ -68,13 +62,8 @@ export const LEIPZIG: CityConfig = {
         clipToMapBounds: true,
     },
     seed: {
-        // Leipzig is an independent city (kreisfreie Stadt); its boundary is admin_level 6.
         adminLevel: '^6$',
-        // Tram + S-Bahn for now. LVB actually runs tram + bus, but the shared RouteType
-        // has no 'bus' yet (#866); once it lands, switch operators to LVB only and
-        // routeTypePriority to ['tram', 'bus'].
         operators: ['Leipziger Verkehrsbetriebe', 'DB Regio Südost'],
-        // Crop the Saxony-wide stop set down to the Leipzig metro area.
         stationBounds: [12.18, 51.24, 12.56, 51.45],
         routeTypePriority: ['tram', 'train', 'light_rail', 'subway'],
         // Empty on purpose: keep each line's own OSM colour (official LVB per-line
