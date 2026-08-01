@@ -130,29 +130,23 @@ jobs:
               run: |
                   set -euo pipefail
 
-                  # A freshly deployed workers.dev hostname 404s at the edge until it propagates, which
-                  # is a second or two after `wrangler deploy` returns. Wait for the Worker to answer so
-                  # that the assertions below fail only on a genuinely broken preview.
-                  for attempt in $(seq 1 12); do
-                    if curl --fail --silent --output /dev/null \
-                        "${PREVIEW_URL}/v0/transit/stations?city=${CITY_SLUGS%% *}"; then
-                      break
-                    fi
-                    if [ "$attempt" -eq 12 ]; then
-                      echo "Preview never became reachable at $PREVIEW_URL" >&2
-                      exit 1
-                    fi
-                    sleep 5
-                  done
-
                   for city in $CITY_SLUGS; do
-                    stations=$(curl --fail --silent --show-error --location \
-                      "${PREVIEW_URL}/v0/transit/stations?city=${city}" | jq 'length')
-                    if [ "$stations" -lt 1 ]; then
-                      echo "No stations returned for $city" >&2
-                      exit 1
-                    fi
-                    echo "$city: $stations stations"
+                    # A freshly deployed workers.dev hostname can briefly return 404 at the edge. Each
+                    # city must become reachable before the preview can be considered ready.
+                    for attempt in $(seq 1 12); do
+                      if stations=$(curl --fail --silent --show-error --location \
+                        "${PREVIEW_URL}/v0/transit/stations?city=${city}" | jq 'length'); then
+                        if [ "$stations" -ge 1 ]; then
+                          echo "$city: $stations stations"
+                          break
+                        fi
+                      fi
+                      if [ "$attempt" -eq 12 ]; then
+                        echo "Preview never became ready for $city at $PREVIEW_URL" >&2
+                        exit 1
+                      fi
+                      sleep 5
+                    done
                   done
 
     frontend:
