@@ -292,16 +292,112 @@ const escapeRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$
 export function buildLinePattern(lineNames: string[]): RegExp {
     const alternatives: string[] = []
     for (const lineName of [...lineNames].sort((a, b) => b.length - a.length)) {
-        if (/^\d+$/.test(lineName)) {
-            continue
-        }
-        // Match common chat variants like "U6", "u 6", "M 10" while avoiding words like "Uhr".
+        // Match common variants like "U6", "u 6", and "M 10".
         const parts = /^([A-Za-z]+)(\d+)$/.exec(lineName)
         alternatives.push(
             parts ? `${escapeRegex(parts[1])}\\s*${escapeRegex(parts[2])}` : escapeRegex(lineName),
         )
     }
     return new RegExp(`(?<![A-Za-z0-9])(${alternatives.join('|')})(?![A-Za-z0-9])`, 'gi')
+}
+
+const foldWord = (w: string): string =>
+    w.toLowerCase().replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/ß/g, 'ss')
+
+function wordBefore(message: string, idx: number): string {
+    const m = /([\p{L}\d]+)[^\p{L}\d]*$/u.exec(message.slice(0, idx))
+    return m ? foldWord(m[1]) : ''
+}
+
+function wordAfter(message: string, idx: number): string {
+    const m = /^[^\p{L}\d]*([\p{L}\d]+)/u.exec(message.slice(idx))
+    return m ? foldWord(m[1]) : ''
+}
+
+const NUMERIC_LINE_CUE_BEFORE = new Set([
+    'der',
+    'die',
+    'den',
+    'dem',
+    'ner',
+    'nem',
+    'nen',
+    'linie',
+    'linien',
+    'tram',
+    'trams',
+    'strab',
+    'bus',
+    'busse',
+    'bahn',
+    'l',
+    'in',
+    'im',
+    'auf',
+])
+const NUMERIC_LINE_CUE_AFTER = new Set([
+    'richtung',
+    'richtg',
+    'richt',
+    'rtg',
+    'ri',
+    'nach',
+    'gen',
+    'stadteinwarts',
+    'stadtauswarts',
+])
+const NUMERIC_COUNT_MARKER_AFTER = new Set([
+    'k',
+    'ks',
+    'kk',
+    'mann',
+    'manner',
+    'leute',
+    'person',
+    'personen',
+    'typ',
+    'typen',
+    'waggon',
+    'wagen',
+    'uhr',
+    'min',
+    'minuten',
+    'euro',
+    'zimmer',
+    'jahr',
+    'jahre',
+    'jahren',
+    'stuck',
+    'cops',
+    'bullen',
+    'polizisten',
+])
+const isCountMarker = (w: string): boolean =>
+    NUMERIC_COUNT_MARKER_AFTER.has(w) || /^kontrol/.test(w) || /^zivi/.test(w)
+
+const NUMERIC_NON_LINE_BEFORE = new Set([
+    'nr',
+    'nummer',
+    'no',
+    'wagen',
+    'waggon',
+    'wg',
+    'gleis',
+    'steig',
+    'bahnsteig',
+])
+
+/** Distinguish numeric lines from counts, times, platform numbers, and similar values. */
+function numericLineContextOk(message: string, start: number, end: number): boolean {
+    const before = wordBefore(message, start)
+    const after = wordAfter(message, end)
+    if (isCountMarker(after)) {
+        return false
+    }
+    if (NUMERIC_NON_LINE_BEFORE.has(before)) {
+        return false
+    }
+    return NUMERIC_LINE_CUE_BEFORE.has(before) || NUMERIC_LINE_CUE_AFTER.has(after)
 }
 
 export function detectLineName(
@@ -318,9 +414,16 @@ export function detectLineName(
     for (const match of message.matchAll(linePattern)) {
         const normalizedMatch = match[1].replace(/\s+/g, '').toUpperCase()
         const hit = normalizedLines.get(normalizedMatch)
-        if (hit !== undefined) {
-            return hit
+        if (hit === undefined) {
+            continue
         }
+        if (/^\d+$/.test(hit)) {
+            const start = match.index ?? 0
+            if (!numericLineContextOk(message, start, start + match[0].length)) {
+                continue
+            }
+        }
+        return hit
     }
     if (
         circularLineNames.length > 0 &&

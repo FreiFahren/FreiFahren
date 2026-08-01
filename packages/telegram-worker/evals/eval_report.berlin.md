@@ -3,15 +3,15 @@
 **Mode:** FULL (1000 rows of 1000)  
 **Model:** `mistral-small-latest`  
 **Parallelism:** 8  
-**Wall time:** 511.0s (2.0 msg/s)  
-**LLM/network errors:** 8
+**Wall time:** 1044.8s (1.0 msg/s)  
+**LLM/network errors:** 32
 
 ## Headline
 
-- **Fully correct rows** (all three fields match): 856/1000 = **85.6%**
-- Station accuracy: **91.3%**
-- Direction accuracy: **94.4%**
-- Line accuracy: **96.9%**
+- **Fully correct rows** (all three fields match): 838/1000 = **83.8%**
+- Station accuracy: **89.3%**
+- Direction accuracy: **94.1%**
+- Line accuracy: **95.3%**
 
 ## Per-field metrics
 
@@ -19,8 +19,8 @@ Null is treated as a negative prediction. *Precision* = "when the bot says X, ho
 
 | Field | Accuracy | Correct | Precision | Recall | F1 | TP | FP | FN | TN |
 |---|---|---|---|---|---|---|---|---|---|
-| stationId | 91.3% | 913/1000 | 92.6% | 93.1% | 92.8% | 648 | 52 | 48 | 265 |
-| directionId | 94.4% | 944/1000 | 89.4% | 91.7% | 90.5% | 319 | 38 | 29 | 625 |
-| lineName | 96.9% | 969/1000 | 99.0% | 95.8% | 97.4% | 576 | 6 | 25 | 393 |
+| stationId | 89.3% | 893/1000 | 91.7% | 90.8% | 91.3% | 632 | 57 | 64 | 261 |
+| directionId | 94.1% | 941/1000 | 90.0% | 90.5% | 90.3% | 315 | 35 | 33 | 626 |
+| lineName | 95.3% | 953/1000 | 98.9% | 93.2% | 96.0% | 560 | 6 | 41 | 393 |
 
 See `eval_results.berlin.json` for the full per-row breakdown.
