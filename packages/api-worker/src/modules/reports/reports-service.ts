@@ -142,12 +142,15 @@ export class ReportsService {
         if (result.length < predictedReportsThreshold) {
             const numberOfReportsToFetch = predictedReportsThreshold - result.length
             const reportedStationIds = new Set(result.map((r) => r.stationId as StationId))
+
+            if (stationId !== undefined && reportedStationIds.has(stationId)) return result
+
             // The allowed-station lookup may read the full station list and the historic
             // Candidate fetch reads recent reports; the two are independent, so issue
             // Them concurrently rather than as back-to-back D1 round-trips.
             const [allowedStationIds, candidateRows] = await Promise.all([
                 this.resolveAllowedStationIds(stationId, reportedStationIds),
-                this.loadPredictionCandidates(),
+                this.loadPredictionCandidates(stationId),
             ])
             const historicReports = this.predictReports(
                 numberOfReportsToFetch,
@@ -179,10 +182,11 @@ export class ReportsService {
 
     // Recent reports used as the historic sample for prediction. Fetched separately
     // So getReports can run it concurrently with resolveAllowedStationIds.
-    private async loadPredictionCandidates() {
+    private async loadPredictionCandidates(stationId?: StationId) {
         return this.db
             .select({ stationId: reports.stationId, timestamp: reports.timestamp })
             .from(reports)
+            .where(stationId !== undefined ? eq(reports.stationId, stationId) : undefined)
             .orderBy(desc(reports.timestamp))
             .limit(1000)
     }

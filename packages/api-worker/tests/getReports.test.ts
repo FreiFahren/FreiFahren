@@ -707,6 +707,12 @@ describe('Reports by station route', () => {
             await sendReportAt(historicalTime.minus({ minutes: 10 }).toJSDate(), stationOneId, lineId)
         }
 
+        // City-wide history favors another station. A scoped lookup must still use the
+        // requested station's history rather than predict globally and discard the result.
+        for (let reportIndex = 0; reportIndex < 8; reportIndex++) {
+            await sendReportAt(mondayNoon.minus({ weeks: 1, minutes: reportIndex }).toJSDate(), stationTwoId, lineId)
+        }
+
         setSystemTime(mondayNoon.toJSDate())
 
         // No real reports for stationOneId exist in the query timeframe
