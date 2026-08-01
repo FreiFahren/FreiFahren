@@ -65,7 +65,7 @@ export function ReportDetail({ station, onClose }: ReportDetailProps) {
         <Link
           to={StationRoute.to}
           params={{ stationId: station.id }}
-          className="inline-flex items-center gap-0.5 rounded-sm hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
+          className="inline-flex items-center gap-0.5 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2"
           aria-label={t('openStationDetails', { station: station.name })}
           onClick={() => track('station_selected', { source: 'report' })}
         >
@@ -84,9 +84,9 @@ export function ReportDetail({ station, onClose }: ReportDetailProps) {
             search={{ source: 'report' }}
             className="hover:bg-muted/70 focus-visible:ring-ring flex items-center gap-2 px-4 py-2 outline-none focus-visible:ring-2"
           >
-            <LineBadge name={lineName} className="underline underline-offset-2" />
+            <LineBadge name={lineName} />
+            <ChevronRight className="text-muted-foreground size-4 shrink-0" aria-hidden />
             {directionName && <span className="text-sm font-semibold">{directionName}</span>}
-            <ChevronRight className="text-muted-foreground ml-auto size-4 shrink-0" aria-hidden />
           </Link>
         </CardContent>
       ) : (
