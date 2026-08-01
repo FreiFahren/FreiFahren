@@ -18,16 +18,25 @@ bun run dev                      # http://localhost:8787
 ## Evals
 
 `evals/run.ts` runs the extraction pipeline over a labeled dataset and reports per-field
-accuracy / precision / recall / F1. Drop the dataset in at `evals/messages.json` (gitignored;
+accuracy / precision / recall / F1. Drop the dataset in at `evals/messages.berlin.json` (gitignored;
 rows of `{ id, text, naive_labels: { stationId, directionId, lineName } }`), then:
 
 ```sh
-bun run eval                       # full dataset
-bun run eval --smoke --n 200       # seeded random sample
+bun run eval                       # full Berlin dataset
+bun run eval --smoke --n 200       # seeded random Berlin sample
 ```
 
 Reads `MISTRAL_API_KEY` / `BACKEND_URL` / `MISTRAL_MODEL` from the env or `.dev.vars`. The
-shared dataset contains cases for every supported city.
+default dataset is Berlin's (`CITY_NAME` defaults to `Berlin`).
+
+Per-city datasets live next to it as `evals/messages.<city>.json` (also gitignored) and are
+selected automatically from `CITY_NAME` (or explicitly with `--data`); the city must match,
+since the labels are station ids from that city's index. Outputs go to
+`eval_report.<city>.md` / `eval_results.<city>.json`:
+
+```sh
+CITY_NAME=Leipzig bun run eval --parallel 8
+```
 
 ## Deploy
 

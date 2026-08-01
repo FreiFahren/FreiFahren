@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import { basename, dirname, isAbsolute, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { profileFor, type CityProfile } from '../src/config'
@@ -15,9 +15,18 @@ import {
 import type { TransitIndex } from '../src/types'
 
 const EVAL_DIR = dirname(fileURLToPath(import.meta.url))
-const DATA_PATH = join(EVAL_DIR, 'messages.json')
-const REPORT_PATH = join(EVAL_DIR, 'eval_report.md')
-const RESULTS_PATH = join(EVAL_DIR, 'eval_results.json')
+
+/** Per-dataset output names keep every city's artifacts separate. */
+function outputPaths(dataPath: string): { report: string; results: string } {
+    const suffix = /^messages\.([^.]+)\.json$/.exec(basename(dataPath))?.[1]
+    if (suffix === undefined) {
+        throw new Error('Dataset name must follow messages.<city>.json')
+    }
+    return {
+        report: join(EVAL_DIR, `eval_report.${suffix}.md`),
+        results: join(EVAL_DIR, `eval_results.${suffix}.json`),
+    }
+}
 
 type Labels = { stationId: string | null; directionId: string | null; lineName: string | null }
 interface Row {
@@ -132,8 +141,9 @@ function buildReport(opts: {
     datasetSize: number
     parallel: number
     model: string
+    resultsFilename: string
 }): string {
-    const { outcomes, durationS, smoke, datasetSize, parallel, model } = opts
+    const { outcomes, durationS, smoke, datasetSize, parallel, model, resultsFilename } = opts
     const n = outcomes.length
     const station = fieldMetrics(outcomes, 'stationId', 'correctStation')
     const direction = fieldMetrics(outcomes, 'directionId', 'correctDirection')
@@ -157,7 +167,7 @@ function buildReport(opts: {
         '',
     ]
     if (n === 0) {
-        lines.push('_No rows evaluated._', '', 'See `eval_results.json` for the full per-row breakdown.')
+        lines.push('_No rows evaluated._', '', `See \`${resultsFilename}\` for the full per-row breakdown.`)
         return lines.join('\n') + '\n'
     }
     lines.push(
@@ -180,7 +190,7 @@ function buildReport(opts: {
         fieldRow('directionId', direction),
         fieldRow('lineName', line),
         '',
-        'See `eval_results.json` for the full per-row breakdown.'
+        `See \`${resultsFilename}\` for the full per-row breakdown.`
     )
     return lines.join('\n') + '\n'
 }
@@ -313,14 +323,26 @@ async function runOne(
     }
 }
 
-function parseArgs(argv: string[]): { smoke: boolean; n: number; parallel: number; seed: number } {
-    const opts = { smoke: false, n: 200, parallel: 1, seed: 42 }
+function parseArgs(argv: string[]): {
+    smoke: boolean
+    n: number
+    parallel: number
+    seed: number
+    data?: string
+} {
+    const opts: { smoke: boolean; n: number; parallel: number; seed: number; data?: string } = {
+        smoke: false,
+        n: 200,
+        parallel: 1,
+        seed: 42,
+    }
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i]
         if (a === '--smoke') opts.smoke = true
         else if (a === '--n') opts.n = Number(argv[++i])
         else if (a === '--parallel') opts.parallel = Number(argv[++i])
         else if (a === '--seed') opts.seed = Number(argv[++i])
+        else if (a === '--data') opts.data = argv[++i]
     }
     return opts
 }
@@ -337,14 +359,17 @@ async function main(): Promise<void> {
     const model = process.env.MISTRAL_MODEL || 'mistral-small-latest'
     const cityName = process.env.CITY_NAME || 'Berlin'
 
-    if (!existsSync(DATA_PATH)) {
+    const dataName = args.data || `messages.${cityName.toLowerCase()}.json`
+    const dataPath = isAbsolute(dataName) ? dataName : join(EVAL_DIR, dataName)
+    if (!existsSync(dataPath)) {
         throw new Error(
-            `Dataset not found: ${DATA_PATH}\n` +
-                'It is gitignored — drop in messages.json (rows of ' +
+            `Dataset not found: ${dataPath}\n` +
+                'It is gitignored — drop in messages.<city>.json (rows of ' +
                 '{ id, text, naive_labels: { stationId, directionId, lineName } }).'
         )
     }
-    const dataset = JSON.parse(readFileSync(DATA_PATH, 'utf8')) as Row[]
+    const { report: REPORT_PATH, results: RESULTS_PATH } = outputPaths(dataPath)
+    const dataset = JSON.parse(readFileSync(dataPath, 'utf8')) as Row[]
     const datasetSize = dataset.length
     const rows = args.smoke ? sample(dataset, args.n, args.seed) : dataset
 
@@ -360,7 +385,15 @@ async function main(): Promise<void> {
     )
     const durationS = (performance.now() - start) / 1000
 
-    const report = buildReport({ outcomes, durationS, smoke: args.smoke, datasetSize, parallel: args.parallel, model })
+    const report = buildReport({
+        outcomes,
+        durationS,
+        smoke: args.smoke,
+        datasetSize,
+        parallel: args.parallel,
+        model,
+        resultsFilename: basename(RESULTS_PATH),
+    })
     writeFileSync(REPORT_PATH, report)
     writeFileSync(
         RESULTS_PATH,

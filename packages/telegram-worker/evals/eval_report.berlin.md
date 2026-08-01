@@ -23,4 +23,4 @@ Null is treated as a negative prediction. *Precision* = "when the bot says X, ho
 | directionId | 94.1% | 941/1000 | 87.8% | 93.1% | 90.4% | 324 | 45 | 24 | 617 |
 | lineName | 97.5% | 975/1000 | 99.0% | 96.8% | 97.9% | 582 | 6 | 19 | 393 |
 
-See `eval_results.json` for the full per-row breakdown.
+See `eval_results.berlin.json` for the full per-row breakdown.
