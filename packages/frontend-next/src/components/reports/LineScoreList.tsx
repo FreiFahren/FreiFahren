@@ -33,7 +33,7 @@ export function LineScoreList({ scores, total }: LineScoreListProps) {
               search={{ source: 'reports_list' }}
               className="hover:bg-muted/70 focus-visible:ring-ring flex h-14 items-center gap-3 px-4 outline-none focus-visible:ring-2"
             >
-              <LineBadge name={entry.name} className="underline underline-offset-2" />
+              <LineBadge name={entry.name} />
               <div className="bg-muted h-2.5 flex-1 overflow-hidden rounded-full">
                 <div
                   className="h-full rounded-full"
