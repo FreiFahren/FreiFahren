@@ -5,7 +5,7 @@ name: Preview
 # leaving the Workers and databases behind. The path check lives on the `plan` job.
 on:
     pull_request:
-        types: [opened, reopened, synchronize, closed]
+        types: [opened, reopened, ready_for_review, synchronize, closed]
 
 # Never cancelled: a cancelled migration or report load would leave a half-provisioned database.
 concurrency:
