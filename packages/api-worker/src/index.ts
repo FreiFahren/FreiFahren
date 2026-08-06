@@ -12,6 +12,7 @@ import {
     VERSIONED_INSIGHTS_CACHEABLE_PATHS,
 } from './modules/insights/insights-cache-middleware'
 import { getReports, getReportsByStation, postReport } from './modules/reports/'
+import { reportsCacheMiddleware, VERSIONED_REPORTS_CACHEABLE_PATHS } from './modules/reports/reports-cache-middleware'
 import { getRisk } from './modules/risk/risk-routes'
 import {
     transitCacheMiddleware,
@@ -60,6 +61,9 @@ export const createApp = () => {
     }
     for (const path of VERSIONED_INSIGHTS_CACHEABLE_PATHS) {
         app.use(path, insightsCacheMiddleware)
+    }
+    for (const path of VERSIONED_REPORTS_CACHEABLE_PATHS) {
+        app.use(path, reportsCacheMiddleware)
     }
     app.use('*', async (c, next) => {
         await next()
