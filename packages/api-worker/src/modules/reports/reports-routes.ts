@@ -7,6 +7,7 @@ import { defineRoute } from '../../common/router'
 import { insertReportSchema } from '../../db'
 
 import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from './constants'
+import { invalidateStationReportsCache } from './reports-cache-middleware'
 
 const reportsQuerySchema = z
     .object({
@@ -102,6 +103,23 @@ export const postReport = defineRoute<Env>()({
         })
 
         const report = await reportsService.createReport(postProcessedReportData)
+
+        /*
+         * Awaited, not deferred: the app invalidates and refetches this station's count as soon as
+         * it sees the 200, so the entry has to be gone before we send it. A colo-local delete is
+         * cheap, and a cache miss must never fail a report that is already committed.
+         */
+        try {
+            await invalidateStationReportsCache(
+                c.req.url,
+                c.req.header('Origin') ?? null,
+                c.get('city').slug,
+                report.stationId
+            )
+        } catch (error) {
+            logger.warn({ stationId: report.stationId }, 'Failed to invalidate station reports cache')
+            reportError(error, { tags: { task: 'reports-cache-invalidation' } })
+        }
 
         // Fire-and-forget: the report is already saved, and a slow Telegram call must not block the response.
         const forward = reportsService.forwardReportToTelegram(postProcessedReportData).catch((error) => {
