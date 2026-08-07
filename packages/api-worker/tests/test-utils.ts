@@ -28,6 +28,7 @@ export const testEnv = (): Bindings => ({
     REPORT_PASSWORD: overrides.REPORT_PASSWORD ?? workerEnv.REPORT_PASSWORD,
     TURNSTILE_SECRET_KEY: overrides.TURNSTILE_SECRET_KEY ?? workerEnv.TURNSTILE_SECRET_KEY,
     REPORTING_ENABLED: overrides.REPORTING_ENABLED ?? workerEnv.REPORTING_ENABLED,
+    TURNSTILE_ENFORCE: overrides.TURNSTILE_ENFORCE ?? workerEnv.TURNSTILE_ENFORCE,
     LOG_LEVEL: (overrides.LOG_LEVEL ?? workerEnv.LOG_LEVEL) as Bindings['LOG_LEVEL'],
 })
 

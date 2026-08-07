@@ -27,6 +27,8 @@ export type Bindings = {
     TURNSTILE_SECRET_KEY?: string
     // "true" resumes app report submissions; anything else keeps the killswitch on.
     REPORTING_ENABLED?: string
+    // "false" puts Turnstile in monitor mode: verify, log, allow through. Anything else enforces.
+    TURNSTILE_ENFORCE?: string
     SENTRY_DSN?: string
     // Git SHA injected at deploy via `wrangler deploy --var SENTRY_RELEASE:<sha>`; tags Sentry
     // Events with a release so issues can be resolved in the next release. Absent locally.
@@ -41,6 +43,7 @@ export type AppConfig = {
     reportPassword?: string
     turnstileSecretKey?: string
     reportingEnabled: boolean
+    turnstileEnforce: boolean
     // See PREVIEW_WORKERS_SUBDOMAIN on Bindings. Undefined disables preview-origin CORS entirely.
     previewWorkersSubdomain?: string
 }
@@ -98,6 +101,8 @@ export const resolveConfig = (env: Bindings): AppConfig => {
         reportPassword: env.REPORT_PASSWORD,
         turnstileSecretKey: env.TURNSTILE_SECRET_KEY,
         reportingEnabled: env.REPORTING_ENABLED === 'true',
+        // Defaults to enforcing: only an explicit "false" downgrades to monitor mode.
+        turnstileEnforce: env.TURNSTILE_ENFORCE !== 'false',
         previewWorkersSubdomain: env.PREVIEW_WORKERS_SUBDOMAIN,
     }
 }

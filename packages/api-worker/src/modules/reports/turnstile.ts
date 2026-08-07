@@ -1,4 +1,4 @@
-import type { Context, MiddlewareHandler } from 'hono'
+import type { Context, MiddlewareHandler, Next } from 'hono'
 
 import type { Env } from '../../app-env'
 import { AppError } from '../../common/errors'
@@ -69,6 +69,26 @@ const turnstileFailed = (errorCodes: string[]): AppError =>
     })
 
 /*
+ * Monitor mode exists for one thing we cannot test: whether the native WebView can mint a token at
+ * all. Enforcing straight away would surface that as users unable to report; monitoring surfaces it
+ * as log lines instead, with the platform attached so the native share is measurable.
+ *
+ * It lets *everything* through while it is on, including traffic that has no token. That is the
+ * point — and the reason it is meant for a short, watched window, not a resting state.
+ */
+const reject = async (
+    c: Context<Env>,
+    errorCodes: string[],
+    platform: string,
+    enforce: boolean,
+    next: Next
+): Promise<void> => {
+    c.get('logger').warn({ errorCodes, platform, enforce }, 'Turnstile verification failed')
+    if (enforce) throw turnstileFailed(errorCodes)
+    return next()
+}
+
+/*
  * Requires a fresh, unredeemed Turnstile token on every report.
  *
  * This is the only control that costs an attacker something per *request* rather than per address.
@@ -87,15 +107,17 @@ export const turnstileMiddleware: MiddlewareHandler<Env> = async (c, next) => {
     // The shared secret instead.
     if (isTrustedWorkerCall(c as Context<Env>)) return next()
 
+    const enforce = c.get('config').turnstileEnforce
+    const platform = c.req.header('ff-platform') ?? 'unknown'
+
     const token = c.req.header(TURNSTILE_TOKEN_HEADER)
     if (token === undefined || token === '') {
-        throw turnstileFailed(['missing-input-response'])
+        return reject(c, ['missing-input-response'], platform, enforce, next)
     }
 
     const { ok, errorCodes } = await verifyTurnstileToken(token, secret, c.req.header('CF-Connecting-IP'))
     if (!ok) {
-        c.get('logger').warn({ errorCodes }, 'Turnstile verification failed')
-        throw turnstileFailed(errorCodes)
+        return reject(c, errorCodes, platform, enforce, next)
     }
 
     return next()
