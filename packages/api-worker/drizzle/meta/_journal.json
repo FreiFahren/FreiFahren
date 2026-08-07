@@ -15,6 +15,13 @@
       "when": 1782824085893,
       "tag": "0001_add_reports_time_window_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1786122416592,
+      "tag": "0002_add_reports_client_attribution",
+      "breakpoints": true
     }
   ]
 }

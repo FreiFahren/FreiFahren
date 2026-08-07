@@ -25,6 +25,11 @@ export type Bindings = {
     REPORT_PASSWORD?: string
     // Turnstile secret for the report widget. Unset disables verification entirely.
     TURNSTILE_SECRET_KEY?: string
+    /*
+     * HMAC secret behind reports.client_hash. Unset stores no client attribution at all, so the
+     * deploy that introduces this collects nothing until the secret is set deliberately.
+     */
+    CLIENT_HASH_SECRET?: string
     // "true" resumes app report submissions; anything else keeps the killswitch on.
     REPORTING_ENABLED?: string
     // "false" puts Turnstile in monitor mode: verify, log, allow through. Anything else enforces.
@@ -42,6 +47,7 @@ export type AppConfig = {
     telegramWorkerUrl?: string
     reportPassword?: string
     turnstileSecretKey?: string
+    clientHashSecret?: string
     reportingEnabled: boolean
     turnstileEnforce: boolean
     // See PREVIEW_WORKERS_SUBDOMAIN on Bindings. Undefined disables preview-origin CORS entirely.
@@ -100,6 +106,7 @@ export const resolveConfig = (env: Bindings): AppConfig => {
         telegramWorkerUrl: env.TELEGRAM_WORKER_URL,
         reportPassword: env.REPORT_PASSWORD,
         turnstileSecretKey: env.TURNSTILE_SECRET_KEY,
+        clientHashSecret: env.CLIENT_HASH_SECRET,
         reportingEnabled: env.REPORTING_ENABLED === 'true',
         // Defaults to enforcing: only an explicit "false" downgrades to monitor mode.
         turnstileEnforce: env.TURNSTILE_ENFORCE !== 'false',

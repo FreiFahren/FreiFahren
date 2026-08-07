@@ -7,6 +7,7 @@ import { DbConnection, InsertReport, reports } from '../../db/'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
 import type { StationId } from '../transit/types'
 
+import { ANONYMOUS_CLIENT, type ClientIdentity } from './client-identity'
 import {
     assignLineIfSingleOption,
     clearStationReferenceIfNotOnLine,
@@ -257,7 +258,16 @@ export class ReportsService {
         return results
     }
 
-    async createReport(reportData: InsertReport): Promise<{
+    /*
+     * `client` is a separate argument rather than part of `reportData` on purpose: `reportData` is
+     * what the request body validated into, so folding attribution in there would let a caller
+     * choose its own. Defaulting to ANONYMOUS_CLIENT keeps every other caller (seeds, tests,
+     * telegram relays) storing nulls without having to say so.
+     */
+    async createReport(
+        reportData: InsertReport,
+        client: ClientIdentity = ANONYMOUS_CLIENT
+    ): Promise<{
         reportId: number
         stationId: string
         lineId: string | null
@@ -266,7 +276,7 @@ export class ReportsService {
     }> {
         const [insertedReport] = await this.db
             .insert(reports)
-            .values({ ...reportData, timestamp: new Date() })
+            .values({ ...reportData, ...client, timestamp: new Date() })
             .returning({
                 reportId: reports.reportId,
                 stationId: reports.stationId,

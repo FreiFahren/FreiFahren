@@ -24,6 +24,27 @@ export const reports = sqliteTable(
             .notNull()
             .default(sql`(unixepoch() * 1000)`),
         source: text({ enum: REPORT_SOURCES }).notNull(),
+        /*
+         * Client attribution, derived at intake — never accepted from the request body, so a
+         * caller cannot label itself. Null for telegram-relayed reports, which arrive
+         * server-to-server with no browser behind them, and null everywhere until
+         * CLIENT_HASH_SECRET is set.
+         *
+         * The network, as Cloudflare resolved it. An ASN identifies a carrier, not a person,
+         * which is the same line the Turnstile logging draws.
+         */
+        asn: integer(),
+        asOrganization: text(),
+        /*
+         * Coarse browser+OS family ('Chrome/140 Android'), from a fixed vocabulary. Enough to tell
+         * a headless stack from a real phone without keeping the full fingerprint.
+         */
+        uaFamily: text({ length: 32 }),
+        /*
+         * See client-identity.ts: HMAC over ip+ua+asn under a rotating salt. The raw address is
+         * never stored, and the rotation means the value stops linking after the period ends.
+         */
+        clientHash: text({ length: 32 }),
     },
     // Reads filter by a time window, often scoped to a station or line; the leading
     // Equality column lets the range predicate use an index seek instead of a full scan.
@@ -31,6 +52,11 @@ export const reports = sqliteTable(
         index('reports_station_ts_idx').on(table.stationId, table.timestamp),
         index('reports_ts_idx').on(table.timestamp),
         index('reports_line_ts_idx').on(table.lineId, table.timestamp),
+        /*
+         * Abuse analysis reads a single client's recent history ("what else did this client
+         * file?"), which is the same shape as the station/line indexes above.
+         */
+        index('reports_client_ts_idx').on(table.clientHash, table.timestamp),
     ]
 )
 
