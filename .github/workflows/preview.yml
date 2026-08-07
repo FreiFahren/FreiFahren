@@ -46,8 +46,8 @@ jobs:
                         touches(/^packages\/frontend-next\//, registry, workflow) ? 'true' : 'false'
                       )
 
-            # Resolved once and shared, so both deploys and the comment agree on the hostnames without
-            # each recomputing them.
+            # Resolved once and shared, so both deploys and the recorded deployment URL agree on the
+            # hostnames without each recomputing them.
             - name: Resolve workers.dev subdomain
               id: subdomain
               env:
