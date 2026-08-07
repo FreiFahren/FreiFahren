@@ -108,6 +108,26 @@ const turnstileFailed = (errorCodes: string[]): AppError =>
  */
 type TurnstileOutcome = 'passed' | 'refused'
 
+/*
+ * The network the request came from, as Cloudflare resolved it. Deliberately the network and not
+ * the address: an ASN identifies a carrier, not a person, so it stays on the right side of the
+ * privacy note at the top of common/logger.ts while still separating traffic by where it enters.
+ *
+ * Without it a refusal is anonymous, and refusals spread evenly across consumer carriers are
+ * indistinguishable in the log from the same count arriving through one network — which are very
+ * different situations. The organisation name rides along so a line is readable without a second
+ * lookup.
+ */
+type RequestNetwork = { asn?: number; asOrganization?: string }
+
+const requestNetwork = (c: Context<Env>): RequestNetwork => {
+    // Absent off Cloudflare — the seed CLI and the test runner both call in without a cf object.
+    const asn = c.req.raw.cf?.asn
+    if (typeof asn !== 'number') return {}
+    const asOrganization = c.req.raw.cf?.asOrganization
+    return { asn, ...(typeof asOrganization === 'string' ? { asOrganization } : {}) }
+}
+
 const record = (
     c: Context<Env>,
     outcome: TurnstileOutcome,
@@ -120,6 +140,7 @@ const record = (
         enforce,
         widgetHostname: metadata.hostname,
         tokenAgeMs: metadata.tokenAgeMs,
+        ...requestNetwork(c),
         ...(outcome === 'passed' ? {} : { errorCodes }),
     }
     const log = c.get('logger')
