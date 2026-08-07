@@ -1,6 +1,6 @@
 import { fetchMock } from 'cloudflare:test'
 import { eq } from 'drizzle-orm'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { TURNSTILE_ACTION, TURNSTILE_TOKEN_HEADER } from '../src/modules/reports/turnstile'
 import { db, lineStations, lines } from './test-db'
@@ -11,10 +11,35 @@ const SECRET = 'test-turnstile-secret'
 
 let stationId: string
 
-type Verification = { success: boolean; action?: string; errorCodes?: string[]; statusCode?: number }
+type Verification = {
+    success: boolean
+    action?: string
+    errorCodes?: string[]
+    statusCode?: number
+    hostname?: string
+    challengeTs?: string
+}
 
 let verification: Verification = { success: true, action: TURNSTILE_ACTION }
 const siteverifyCalls: Array<Record<string, string>> = []
+
+type TurnstileLogEntry = {
+    outcome: string
+    platform: string
+    enforce: boolean
+    widgetHostname?: string
+    tokenAgeMs?: number
+    errorCodes?: string[]
+}
+
+// The logger writes structured fields through console.{info,warn}, which is what Sentry Logs
+// ingests — so asserting on the console call is asserting on what actually reaches the sink.
+const consoleCalls: unknown[][] = []
+
+const turnstileLogs = (): TurnstileLogEntry[] =>
+    consoleCalls
+        .filter(([message]) => message === 'Turnstile verification')
+        .map(([, entry]) => entry as TurnstileLogEntry)
 
 const postReport = (headers: Record<string, string> = {}) =>
     appRequestWithRedirect('/reports', {
@@ -44,6 +69,8 @@ beforeAll(async () => {
                 data: {
                     success: verification.success,
                     action: verification.action,
+                    hostname: verification.hostname,
+                    challenge_ts: verification.challengeTs,
                     'error-codes': verification.errorCodes ?? [],
                 },
             }
@@ -55,10 +82,17 @@ beforeEach(() => {
     siteverifyCalls.length = 0
     verification = { success: true, action: TURNSTILE_ACTION }
     setTestEnv({ TURNSTILE_SECRET_KEY: SECRET, REPORTING_ENABLED: 'true' })
+    consoleCalls.length = 0
+    for (const level of ['info', 'warn'] as const) {
+        vi.spyOn(console, level).mockImplementation((...args: unknown[]) => {
+            consoleCalls.push(args)
+        })
+    }
 })
 
 afterEach(() => {
     resetTestEnv()
+    vi.restoreAllMocks()
 })
 
 afterAll(() => {
@@ -160,6 +194,90 @@ describe('Turnstile verification', () => {
         setTestEnv({ TURNSTILE_SECRET_KEY: SECRET, REPORTING_ENABLED: 'true', TURNSTILE_ENFORCE: '' })
 
         expect((await postReport()).status).toBe(403)
+    })
+
+    /*
+     * A pass rate needs both halves of the ratio. These assert the denominator exists at all, which
+     * is the part that goes missing when only refusals are logged.
+     */
+    describe('decision log', () => {
+        // The suite default is 'error', which would drop the very lines under test.
+        beforeEach(() => {
+            setTestEnv({ LOG_LEVEL: 'info' })
+        })
+
+        it('records a pass, so the rate has a denominator', async () => {
+            await postReport({ [TURNSTILE_TOKEN_HEADER]: 'a-valid-token' })
+
+            expect(turnstileLogs()).toEqual([
+                expect.objectContaining({ outcome: 'passed', platform: 'unknown', enforce: true }),
+            ])
+        })
+
+        it('records a refusal with the reason, and no reason on a pass', async () => {
+            verification = { success: false, errorCodes: ['timeout-or-duplicate'] }
+            await postReport({ [TURNSTILE_TOKEN_HEADER]: 'a-spent-token' })
+
+            const [refused] = turnstileLogs()
+            expect(refused).toMatchObject({ outcome: 'refused', errorCodes: ['timeout-or-duplicate'] })
+
+            consoleCalls.length = 0
+            verification = { success: true, action: TURNSTILE_ACTION }
+            await postReport({ [TURNSTILE_TOKEN_HEADER]: 'a-valid-token' })
+
+            expect(turnstileLogs().at(-1)).not.toHaveProperty('errorCodes')
+        })
+
+        it('attributes the decision to the platform that sent it', async () => {
+            await postReport({ [TURNSTILE_TOKEN_HEADER]: 'a-valid-token', 'ff-platform': 'ios' })
+
+            expect(turnstileLogs()[0]).toMatchObject({ platform: 'ios' })
+        })
+
+        it('records the hostname the widget was rendered on, as Cloudflare reports it', async () => {
+            verification = { success: true, action: TURNSTILE_ACTION, hostname: 'localhost' }
+
+            await postReport({ [TURNSTILE_TOKEN_HEADER]: 'a-valid-token' })
+
+            expect(turnstileLogs()[0]).toMatchObject({ widgetHostname: 'localhost' })
+        })
+
+        it('records how long the token was held between solve and submit', async () => {
+            verification = {
+                success: true,
+                action: TURNSTILE_ACTION,
+                challengeTs: new Date(Date.now() - 5_000).toISOString(),
+            }
+
+            await postReport({ [TURNSTILE_TOKEN_HEADER]: 'a-valid-token' })
+
+            const { tokenAgeMs } = turnstileLogs()[0]!
+            expect(tokenAgeMs).toBeGreaterThanOrEqual(5_000)
+            expect(tokenAgeMs).toBeLessThan(60_000)
+        })
+
+        it('omits the age rather than inventing one when the timestamp is unusable', async () => {
+            verification = { success: true, action: TURNSTILE_ACTION, challengeTs: 'not-a-timestamp' }
+
+            await postReport({ [TURNSTILE_TOKEN_HEADER]: 'a-valid-token' })
+
+            expect(turnstileLogs()[0]!.tokenAgeMs).toBeUndefined()
+        })
+
+        it('records a tokenless attempt, which never reaches Cloudflare', async () => {
+            await postReport()
+
+            expect(turnstileLogs()).toEqual([
+                expect.objectContaining({ outcome: 'refused', errorCodes: ['missing-input-response'] }),
+            ])
+        })
+
+        it('records what monitor mode let through', async () => {
+            setTestEnv({ TURNSTILE_SECRET_KEY: SECRET, REPORTING_ENABLED: 'true', TURNSTILE_ENFORCE: 'false' })
+
+            expect((await postReport()).status).toBe(200)
+            expect(turnstileLogs()).toEqual([expect.objectContaining({ outcome: 'refused', enforce: false })])
+        })
     })
 
     it('does not treat a wrong shared secret as the telegram relay', async () => {
