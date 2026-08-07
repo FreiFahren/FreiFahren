@@ -34,6 +34,13 @@ export const reports = sqliteTable(
          * which is the same line the Turnstile logging draws.
          */
         asn: integer(),
+        /*
+         * A label, never a grouping key. One network reports under several names: AS3209 arrives as
+         * both "Vodafone GmbH" and "Kabel Deutschland Vertrieb und Service GmbH", AS3320 as both
+         * "Deutsche Telekom AG" and "Telekom Deutschland GmbH". Grouping on this splits one carrier
+         * into several and understates each — quietly, with a result that still looks plausible.
+         * Group by asn and use this only to read a row.
+         */
         asOrganization: text(),
         /*
          * Coarse browser+OS family ('Chrome/140 Android'), from a fixed vocabulary. Enough to tell

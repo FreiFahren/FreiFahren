@@ -214,6 +214,32 @@ describe('normalizeUserAgent', () => {
         expect(normalizeUserAgent(userAgent)).toBe(expected)
     })
 
+    /*
+     * Our own iOS app. Before this was recognised the first native report in production came back as
+     * `other iOS`, which is also where an agent claiming to be an iPhone without naming a known
+     * browser lands — so the app we ship and something imitating it were indistinguishable.
+     */
+    it('names the native app WebView rather than leaving it unrecognised', () => {
+        const wkWebView =
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
+        expect(normalizeUserAgent(wkWebView)).toBe('WKWebView iOS')
+    })
+
+    // The WebView is recognised by the absence of `Safari`, so the agents that do carry it must not
+    // be caught by the same test.
+    it.each([
+        [
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1',
+            'Safari/18 iOS',
+        ],
+        [
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 26_5_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/150.0.7871.113 Mobile/15E148 Safari/604.1',
+            'Chrome/150 iOS',
+        ],
+    ])('still names an iOS browser that carries Safari', (userAgent, expected) => {
+        expect(normalizeUserAgent(userAgent)).toBe(expected)
+    })
+
     it('reports a missing user agent distinctly from an unrecognised one', () => {
         expect(normalizeUserAgent(undefined)).toBe('none')
         expect(normalizeUserAgent('')).toBe('none')
