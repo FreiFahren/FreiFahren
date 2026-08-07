@@ -124,7 +124,13 @@ jobs:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   workingDirectory: packages/api-worker
-                  command: deploy --config wrangler.preview.json
+                  # Cloudflare's documented always-pass Turnstile test secret, paired with the test
+                  # site key the preview frontend builds with. Lets a preview exercise the real
+                  # verification path without minting a widget or sharing the production secret.
+                  command: >-
+                      deploy --config wrangler.preview.json
+                      --var REPORTING_ENABLED:true
+                      --var TURNSTILE_SECRET_KEY:1x0000000000000000000000000000000AA
 
             - name: Smoke test every city
               run: |
@@ -133,7 +139,9 @@ jobs:
                   for city in $CITY_SLUGS; do
                     # A freshly deployed workers.dev hostname can briefly return 404 at the edge. Each
                     # city must become reachable before the preview can be considered ready.
-                    for attempt in $(seq 1 12); do
+                    # 12 attempts (60s) was not enough on a cold deploy: the edge served 404s and then
+                  # 500s past the budget while the Worker and its D1 settled.
+                  for attempt in $(seq 1 30); do
                       if stations=$(curl --fail --silent --show-error --location \
                         "${PREVIEW_URL}/v0/transit/stations?city=${city}" | jq 'length'); then
                         if [ "$stations" -ge 1 ]; then
@@ -141,7 +149,7 @@ jobs:
                           break
                         fi
                       fi
-                      if [ "$attempt" -eq 12 ]; then
+                      if [ "$attempt" -eq 30 ]; then
                         echo "Preview never became ready for $city at $PREVIEW_URL" >&2
                         exit 1
                       fi
@@ -197,6 +205,10 @@ jobs:
                   VITE_API_URL: ${{ env.API_URL }}
                   VITE_PREVIEW: 'true'
                   VITE_POSTHOG_KEY: ''
+                  # A preview exists to be clicked through, so reporting is on here even while it is
+                  # off in production. Paired with the always-pass test secret on the preview API.
+                  VITE_REPORTING_ENABLED: 'true'
+                  VITE_TURNSTILE_SITE_KEY: '1x00000000000000000000AA'
 
             - name: Deploy preview frontend
               run: bunx wrangler@latest deploy --config wrangler.preview.jsonc --name "frontend-pr-${PR_NUMBER}"

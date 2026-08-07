@@ -3,21 +3,29 @@ import type { Context, MiddlewareHandler } from 'hono'
 import type { Env } from '../../app-env'
 import { AppError } from '../../common/errors'
 
-// Manual killswitch for POST /v0/reports. Telegram-worker's relayed reports still get through via
-// The shared REPORT_PASSWORD/X-Password bypass below. Flip back to false once submissions should resume.
-const REPORTING_DISABLED: boolean = true
+/*
+ * Killswitch for POST /v0/reports, driven by the REPORTING_ENABLED var so it can be flipped with
+ * `wrangler deploy --var` instead of a code change and a full release. Absent or anything other
+ * than "true" keeps reporting off, so a typo or a forgotten variable fails closed.
+ *
+ * Telegram-worker's relayed reports still get through via the shared REPORT_PASSWORD/X-Password
+ * bypass below.
+ */
+const isReportingEnabled = (c: Context<Env>): boolean => c.get('config').reportingEnabled
 
-// Telegram-worker already sends this header (REPORT_PASSWORD, the same secret used for the reverse
-// Api-worker -> telegram-worker call) on every relayed report; api-worker just didn't validate it
-// Inbound before now. Reusing it here avoids minting a new shared secret for the bypass.
-const isTrustedWorkerCall = (c: Context<Env>): boolean => {
+/*
+ * Telegram-worker already sends this header (REPORT_PASSWORD, the same secret used for the reverse
+ * api-worker -> telegram-worker call) on every relayed report. Reusing it here avoids minting a new
+ * shared secret for the bypass.
+ */
+export const isTrustedWorkerCall = (c: Context<Env>): boolean => {
     const reportPassword = c.get('config').reportPassword
     if (reportPassword === undefined || reportPassword === '') return false
     return c.req.header('X-Password') === reportPassword
 }
 
 export const reportsDisabledMiddleware: MiddlewareHandler<Env> = async (c, next) => {
-    if (!REPORTING_DISABLED || isTrustedWorkerCall(c)) {
+    if (isReportingEnabled(c as Context<Env>) || isTrustedWorkerCall(c as Context<Env>)) {
         return next()
     }
 

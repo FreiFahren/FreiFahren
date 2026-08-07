@@ -8,6 +8,8 @@ declare module 'cloudflare:test' {
         CORS_ORIGINS: string
         NODE_ENV: string
         REPORT_PASSWORD: string
+        TURNSTILE_SECRET_KEY: string
+        REPORTING_ENABLED: string
         TELEGRAM_WORKER_URL: string
         LOG_LEVEL: string
     }
