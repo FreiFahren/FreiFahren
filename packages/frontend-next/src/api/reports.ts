@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 
 import { currentCitySlug } from '@/lib/city';
 import { getTurnstileToken, TURNSTILE_TOKEN_HEADER } from '@/lib/turnstile';
-import { traceAction } from '@/lib/error-monitoring';
+import { captureIssue, traceAction } from '@/lib/error-monitoring';
 import { requireEnv } from '@/lib/utils';
 
 import { fetchJson, type Line, useLines } from './transit';
@@ -240,9 +240,22 @@ export function useSubmitReport() {
         // report `source` — which the Reports dashboard splits on — must be derived at runtime.
         // `getPlatform()` is 'ios' | 'android' | 'web'; only 'web' is the browser build.
         const isNative = Capacitor.isNativePlatform();
-        // Minted per submission: the API rejects a replayed token, so it cannot be cached. Resolves
-        // to undefined when no site key is configured (dev, previews) and the API skips the check.
-        const turnstileToken = await getTurnstileToken();
+        /*
+         * Minted per submission: the API rejects a replayed token, so it cannot be cached. Resolves
+         * to undefined when no site key is configured (dev, previews) and the API skips the check.
+         *
+         * A failure here is reported and then swallowed, and the report is sent without a token, so
+         * the accept/reject decision stays solely with the API. Throwing instead would hide native
+         * challenge failures as generic submit errors, with nothing recorded anywhere.
+         */
+        let turnstileToken: string | undefined;
+        try {
+          turnstileToken = await getTurnstileToken();
+        } catch (error) {
+          captureIssue('Turnstile token could not be obtained', {
+            reason: error instanceof Error ? error.message : String(error),
+          });
+        }
         const response = await fetch(submitUrl, {
           method: 'POST',
           headers: {

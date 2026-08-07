@@ -64,3 +64,16 @@ export function initErrorMonitoring(): void {
 export function traceAction<T>(name: string, callback: () => Promise<T>): Promise<T> {
   return SentryReact.startSpan({ name, op: 'ui.action.submit' }, callback);
 }
+
+/**
+ * Record a handled problem that isn't a thrown error. Used for failures the server can never see —
+ * a Turnstile challenge that never produces a token means the client stops before it ever calls the
+ * API, so the only place that failure exists is here.
+ */
+export function captureIssue(message: string, context?: Record<string, unknown>): void {
+  SentryReact.captureMessage(message, {
+    level: 'warning',
+    tags: { platform: Capacitor.getPlatform() },
+    extra: context,
+  });
+}

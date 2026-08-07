@@ -140,6 +140,28 @@ describe('Turnstile verification', () => {
         expect(siteverifyCalls).toHaveLength(0)
     })
 
+    it('monitor mode lets a refused token through, and still records it', async () => {
+        setTestEnv({ TURNSTILE_SECRET_KEY: SECRET, REPORTING_ENABLED: 'true', TURNSTILE_ENFORCE: 'false' })
+        verification = { success: false, errorCodes: ['invalid-input-response'] }
+
+        const response = await postReport({ [TURNSTILE_TOKEN_HEADER]: 'a-rejected-token' })
+
+        expect(response.status).toBe(200)
+        expect(siteverifyCalls).toHaveLength(1)
+    })
+
+    it('monitor mode also lets a tokenless report through', async () => {
+        setTestEnv({ TURNSTILE_SECRET_KEY: SECRET, REPORTING_ENABLED: 'true', TURNSTILE_ENFORCE: 'false' })
+
+        expect((await postReport()).status).toBe(200)
+    })
+
+    it('enforces by default when TURNSTILE_ENFORCE is unset', async () => {
+        setTestEnv({ TURNSTILE_SECRET_KEY: SECRET, REPORTING_ENABLED: 'true', TURNSTILE_ENFORCE: '' })
+
+        expect((await postReport()).status).toBe(403)
+    })
+
     it('does not treat a wrong shared secret as the telegram relay', async () => {
         const response = await postReport({ 'X-Password': 'not-the-password' })
 

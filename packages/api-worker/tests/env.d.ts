@@ -10,6 +10,7 @@ declare module 'cloudflare:test' {
         REPORT_PASSWORD: string
         TURNSTILE_SECRET_KEY: string
         REPORTING_ENABLED: string
+        TURNSTILE_ENFORCE: string
         TELEGRAM_WORKER_URL: string
         LOG_LEVEL: string
     }

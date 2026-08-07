@@ -40,6 +40,7 @@ export default defineWorkersConfig(async () => {
                             TURNSTILE_SECRET_KEY: '',
                             // Killswitch on by default, matching production; suites opt in via setTestEnv.
                             REPORTING_ENABLED: '',
+                            TURNSTILE_ENFORCE: '',
                             TELEGRAM_WORKER_URL: 'https://telegram-worker.test',
                             LOG_LEVEL: 'error',
                         },
