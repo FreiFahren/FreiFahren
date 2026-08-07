@@ -285,6 +285,12 @@ jobs:
             - name: Delete preview workers
               run: |
                   set -uo pipefail
+                  # GitHub runs this as `bash -e`, which `set -uo pipefail` does not clear. Under
+                  # errexit the capture below aborts the whole step the moment wrangler exits
+                  # non-zero — before $? is read — so the script never reaches the branches that
+                  # decide whether that exit was expected. Turning it off is what makes the
+                  # not-found case below reachable at all; real failures still exit explicitly.
+                  set +e
                   for worker_name in "api-pr-${PR_NUMBER}" "frontend-pr-${PR_NUMBER}"; do
                     output=$(npx wrangler delete --name "$worker_name" --force 2>&1)
                     status=$?
