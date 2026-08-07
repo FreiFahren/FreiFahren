@@ -31,6 +31,7 @@ export const testEnv = (): Bindings => ({
     CLIENT_HASH_SECRET: overrides.CLIENT_HASH_SECRET ?? workerEnv.CLIENT_HASH_SECRET,
     REPORTING_ENABLED: overrides.REPORTING_ENABLED ?? workerEnv.REPORTING_ENABLED,
     TURNSTILE_ENFORCE: overrides.TURNSTILE_ENFORCE ?? workerEnv.TURNSTILE_ENFORCE,
+    MIN_STATION_TRUST: overrides.MIN_STATION_TRUST ?? workerEnv.MIN_STATION_TRUST,
     LOG_LEVEL: (overrides.LOG_LEVEL ?? workerEnv.LOG_LEVEL) as Bindings['LOG_LEVEL'],
 })
 

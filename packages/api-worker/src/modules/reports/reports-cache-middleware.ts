@@ -37,6 +37,20 @@ export const reportsCacheMiddleware: MiddlewareHandler<Env> = async (c, next) =>
     const stationId = c.req.param('stationId')
     if (stationId === undefined) return
 
+    /*
+     * A station below the trust threshold answers differently depending on who asks, so its response
+     * cannot be shared — and that includes the empty list a non-owner gets. Caching that empty list
+     * would let the edge replay it to the owner on their next request, showing them their own
+     * reports had vanished, which is exactly what this design exists to avoid telling them.
+     *
+     * Only stations that are actually below the threshold skip the cache. Everything else still
+     * shares one entry per station per hour.
+     */
+    if (c.get('reportsUncacheable') === true) {
+        c.header('Cache-Control', 'no-store')
+        return
+    }
+
     c.header('Cache-Control', REPORTS_CACHE_CONTROL)
     c.header('Cloudflare-CDN-Cache-Control', `public, max-age=${REPORTS_EDGE_TTL_SECONDS}`)
     c.header('Cache-Tag', stationReportsCacheTag(c.get('city').slug, stationId))

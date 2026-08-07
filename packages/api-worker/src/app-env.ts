@@ -40,6 +40,16 @@ export type Bindings = {
     REPORTING_ENABLED?: string
     // "false" puts Turnstile in monitor mode: verify, log, allow through. Anything else enforces.
     TURNSTILE_ENFORCE?: string
+    /*
+     * How much trust a station must accumulate before its reports are shown, as a number. 1 (the
+     * default) means a single honest report is enough, since an unflagged report scores 1. Raise it
+     * to 2 or 3 under attack to demand corroboration; 0 disables the check.
+     *
+     * Note this is the opposite direction from a killswitch: 0 is the *most* permissive setting.
+     * REPORTING_ENABLED is what closes the door, and keeping the two separate means neither dial
+     * has a value that means the reverse of everything either side of it.
+     */
+    MIN_STATION_TRUST?: string
     SENTRY_DSN?: string
     // Git SHA injected at deploy via `wrangler deploy --var SENTRY_RELEASE:<sha>`; tags Sentry
     // Events with a release so issues can be resolved in the next release. Absent locally.
@@ -56,8 +66,20 @@ export type AppConfig = {
     clientHashSecret?: string
     reportingEnabled: boolean
     turnstileEnforce: boolean
+    minStationTrust: number
     // See PREVIEW_WORKERS_SUBDOMAIN on Bindings. Undefined disables preview-origin CORS entirely.
     previewWorkersSubdomain?: string
+}
+
+/*
+ * Absent, blank or unparseable all fall back to the default rather than to 0. Switching the check
+ * off is a decision worth typing a number for, not something a typo or a cleared variable should
+ * do quietly.
+ */
+const parseMinStationTrust = (raw: string | undefined): number => {
+    if (raw === undefined || raw.trim() === '') return 1
+    const parsed = Number(raw)
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 1
 }
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -93,6 +115,12 @@ export type Env = {
         // From KV and therefore needs real parameter binding rather than a query builder.
         db: DbConnection
         d1: D1Database
+        /*
+         * Set when a reports response covers a station that fell below the trust threshold. Such a
+         * response depends on who asked — including when it is empty — and the edge keys by URL,
+         * so storing it would serve one client's answer to another.
+         */
+        reportsUncacheable?: boolean
         // The city resolved for this request (from `?city=`), the single source for
         // Which DB the request talks to and how downstream code scopes per-city work.
         city: CityConfig
@@ -121,6 +149,7 @@ export const resolveConfig = (env: Bindings): AppConfig => {
         reportingEnabled: env.REPORTING_ENABLED === 'true',
         // Defaults to enforcing: only an explicit "false" downgrades to monitor mode.
         turnstileEnforce: env.TURNSTILE_ENFORCE !== 'false',
+        minStationTrust: parseMinStationTrust(env.MIN_STATION_TRUST),
         previewWorkersSubdomain: env.PREVIEW_WORKERS_SUBDOMAIN,
     }
 }

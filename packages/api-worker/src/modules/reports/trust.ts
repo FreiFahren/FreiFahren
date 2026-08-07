@@ -126,6 +126,9 @@ export const assessReport = async (
  * Runs after the response, via waitUntil: nothing reads trust synchronously, and a report that is
  * already committed must not wait on the flags. Until this lands the row's trust is null, which
  * reads as unscored — not as untrusted.
+ *
+ * Returns the trust it assigned, or null if it scored nothing. The caller needs that: a report is
+ * briefly visible as unscored, and a score below 1 can change what the station should show.
  */
 export const scoreReportInBackground = async (
     db: DbConnection,
@@ -133,9 +136,9 @@ export const scoreReportInBackground = async (
     kv: KVNamespace | undefined,
     logger: Logger,
     reportId: number
-): Promise<void> => {
+): Promise<number | null> => {
     const flags = await loadTrustFlags(kv, logger)
-    if (flags.length === 0) return
+    if (flags.length === 0) return null
 
     const { trust, fired } = await assessReport(d1, flags, reportId, logger)
 
@@ -145,4 +148,5 @@ export const scoreReportInBackground = async (
         .where(eq(reports.reportId, reportId))
 
     logger.info({ reportId, trust, fired, flagCount: flags.length }, 'Report trust scored')
+    return trust
 }

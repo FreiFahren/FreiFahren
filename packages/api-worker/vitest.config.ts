@@ -43,6 +43,8 @@ export default defineWorkersConfig(async () => {
                             // Killswitch on by default, matching production; suites opt in via setTestEnv.
                             REPORTING_ENABLED: '',
                             TURNSTILE_ENFORCE: '',
+                            // Blank => the default of 1; suites that exercise suppression set it explicitly.
+                            MIN_STATION_TRUST: '',
                             TELEGRAM_WORKER_URL: 'https://telegram-worker.test',
                             LOG_LEVEL: 'error',
                         },
