@@ -10,6 +10,7 @@ export type InternalCode =
     | 'LINE_NOT_FOUND'
     | 'NO_PATH_FOUND'
     | 'UNKNOWN_CITY'
+    | 'REPORTING_DISABLED'
 export interface AppErrorDetails {
     internal_code: InternalCode
     description?: string

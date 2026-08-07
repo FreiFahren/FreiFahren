@@ -8,6 +8,7 @@ import { insertReportSchema } from '../../db'
 
 import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from './constants'
 import { invalidateStationReportsCache } from './reports-cache-middleware'
+import { reportsDisabledMiddleware } from './reports-disabled-middleware'
 
 const reportsQuerySchema = z
     .object({
@@ -88,6 +89,7 @@ export const getReportsByStation = defineRoute<Env>()({
 export const postReport = defineRoute<Env>()({
     method: 'post',
     path: '/',
+    middlewares: [reportsDisabledMiddleware],
     schemas: {
         json: insertReportSchema,
     },
