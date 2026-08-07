@@ -116,11 +116,11 @@ export type Env = {
         db: DbConnection
         d1: D1Database
         /*
-         * Set when a reports response included a row only because it belongs to the requester, so
-         * the response differs from the one anyone else would get. The station-scoped cache reads
-         * this and declines to store such a response.
+         * Set when a reports response covers a station that fell below the trust threshold. Such a
+         * response depends on who asked — including when it is empty — and the edge keys by URL,
+         * so storing it would serve one client's answer to another.
          */
-        reportsPersonalized?: boolean
+        reportsUncacheable?: boolean
         // The city resolved for this request (from `?city=`), the single source for
         // Which DB the request talks to and how downstream code scopes per-city work.
         city: CityConfig

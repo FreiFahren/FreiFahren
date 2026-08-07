@@ -12,6 +12,6 @@ export const getRisk = defineRoute<Env>()({
          * nothing — and it is the surface that matters most here. A flooder whose reports moved no
          * segment would notice immediately.
          */
-        return c.json(await riskService.getRisk(undefined, await resolveViewer(c)))
+        return c.json(await riskService.getRisk({ viewer: await resolveViewer(c) }))
     },
 })

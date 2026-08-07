@@ -27,6 +27,6 @@ export const resolveViewer = async (c: Context<Env>): Promise<ViewerContext> => 
     return {
         minStationTrust: config.minStationTrust,
         clientHash: identity.clientHash ?? undefined,
-        onPersonalized: () => c.set('reportsPersonalized', true),
+        onSuppressed: () => c.set('reportsUncacheable', true),
     }
 }

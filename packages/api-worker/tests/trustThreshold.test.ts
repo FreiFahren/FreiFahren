@@ -134,19 +134,37 @@ describe('a suppressed client still sees its own reports', () => {
         }
     })
 
-    // Caching a personalised response would hand one client's hidden reports to everyone behind
-    // The same edge entry, which is the exact failure this feature exists to avoid.
-    it('marks a personalised station response as uncacheable', async () => {
+    /*
+     * Both answers for a below-threshold station must be uncacheable, not just the owner's. The
+     * edge keys by URL and never by client, so storing the empty list a non-owner receives lets it
+     * be replayed to the owner on their next request — showing them their reports had vanished,
+     * which is the one thing this design must not tell them. Integration tests reach the origin
+     * every time and so cannot observe that replay; asserting the header is what stands in for it.
+     */
+    it('marks every response for a below-threshold station as uncacheable', async () => {
         expect((await post(SPAMMER)).status).toBe(200)
 
-        const personalised = await appRequestWithRedirect(`/reports/${stationId}`, {
+        const owner = await appRequestWithRedirect(`/reports/${stationId}`, {
             headers: { 'User-Agent': SPAMMER, 'CF-Connecting-IP': '203.0.113.9' },
         })
-        expect(personalised.headers.get('Cache-Control')).toBe('no-store')
+        expect(owner.headers.get('Cache-Control')).toBe('no-store')
 
-        const shared = await appRequestWithRedirect(`/reports/${stationId}`, {
+        const nonOwner = await appRequestWithRedirect(`/reports/${stationId}`, {
             headers: { 'User-Agent': SOMEONE_ELSE, 'CF-Connecting-IP': '203.0.113.9' },
         })
-        expect(shared.headers.get('Cache-Control')).not.toBe('no-store')
+        expect(nonOwner.headers.get('Cache-Control')).toBe('no-store')
+    })
+
+    // The converse: gating must not cost the cache on stations that are perfectly fine, or every
+    // Station response becomes uncacheable and the edge stops absorbing the read load entirely.
+    it('still caches a station whose reports clear the threshold', async () => {
+        await workerEnv.TRUST_FLAGS.delete(TRUST_FLAGS_KEY)
+
+        expect((await post(SPAMMER)).status).toBe(200)
+
+        const response = await appRequestWithRedirect(`/reports/${stationId}`, {
+            headers: { 'User-Agent': SOMEONE_ELSE, 'CF-Connecting-IP': '203.0.113.9' },
+        })
+        expect(response.headers.get('Cache-Control')).not.toBe('no-store')
     })
 })

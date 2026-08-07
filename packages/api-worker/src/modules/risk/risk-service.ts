@@ -21,7 +21,10 @@ export class RiskService {
      * from the latest reports instead of being served from a cache. This keeps the
      * output always fresh and removes the need to invalidate on new reports.
      */
-    async getRisk(now: DateTime = DateTime.utc(), viewer?: ViewerContext): Promise<RiskData> {
+    async getRisk({
+        now = DateTime.utc(),
+        viewer,
+    }: { now?: DateTime; viewer?: ViewerContext } = {}): Promise<RiskData> {
         const oneHourAgo = now.minus({ hours: 1 })
 
         const [segmentCollection, realReports, stations, lines] = await Promise.all([

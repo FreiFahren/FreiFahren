@@ -38,12 +38,15 @@ export const reportsCacheMiddleware: MiddlewareHandler<Env> = async (c, next) =>
     if (stationId === undefined) return
 
     /*
-     * A response that included the requester's own suppressed report is theirs alone. Storing it at
-     * the edge would hand a flooder's reports to everyone behind the same cache entry, which is the
-     * exact opposite of the intent. Only the few requests that were actually personalised skip the
-     * cache; everybody else still shares one entry per station per hour.
+     * A station below the trust threshold answers differently depending on who asks, so its response
+     * cannot be shared — and that includes the empty list a non-owner gets. Caching that empty list
+     * would let the edge replay it to the owner on their next request, showing them their own
+     * reports had vanished, which is exactly what this design exists to avoid telling them.
+     *
+     * Only stations that are actually below the threshold skip the cache. Everything else still
+     * shares one entry per station per hour.
      */
-    if (c.get('reportsPersonalized') === true) {
+    if (c.get('reportsUncacheable') === true) {
         c.header('Cache-Control', 'no-store')
         return
     }

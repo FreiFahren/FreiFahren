@@ -92,9 +92,16 @@ type ReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'stationId'
 export type ViewerContext = {
     minStationTrust: number
     clientHash?: string
-    // Called when a row survived only because it belongs to the viewer, i.e. this response is not
-    // The same as the one anybody else would get. The station-scoped route uses it to skip caching.
-    onPersonalized?: () => void
+    /*
+     * Called when any station in the result failed the threshold, whether or not the viewer owned
+     * a report there. The station-scoped route uses it to skip edge caching.
+     *
+     * It has to fire on the shared, empty answer too, not just on the owner's personalised one.
+     * The edge keys by URL, never by client: cache the empty list a non-owner gets and the owner's
+     * next request is served that same empty list without reaching the worker, which is precisely
+     * the moment they learn they have been suppressed.
+     */
+    onSuppressed?: () => void
 }
 
 type ScoredRow = {
@@ -127,25 +134,26 @@ const TRUST_SUM_TOLERANCE = 1e-9
 export const selectVisibleReports = (
     rows: ScoredRow[],
     viewer: ViewerContext
-): { rows: ScoredRow[]; personalized: boolean } => {
-    if (viewer.minStationTrust <= 0) return { rows, personalized: false }
+): { rows: ScoredRow[]; suppressed: boolean } => {
+    if (viewer.minStationTrust <= 0) return { rows, suppressed: false }
 
     const trustByStation = new Map<string, number>()
     for (const row of rows) {
         trustByStation.set(row.stationId, (trustByStation.get(row.stationId) ?? 0) + (row.trust ?? 1))
     }
 
-    let personalized = false
+    let suppressed = false
     const visible = rows.filter((row) => {
         if ((trustByStation.get(row.stationId) ?? 0) >= viewer.minStationTrust - TRUST_SUM_TOLERANCE) return true
-        if (viewer.clientHash !== undefined && row.clientHash === viewer.clientHash) {
-            personalized = true
-            return true
-        }
-        return false
+
+        // This station did not clear the bar, so what we return for it depends on who is asking —
+        // True even when the answer is an empty list, which is why this is set before the ownership
+        // Check rather than inside it.
+        suppressed = true
+        return viewer.clientHash !== undefined && row.clientHash === viewer.clientHash
     })
 
-    return { rows: visible, personalized }
+    return { rows: visible, suppressed }
 }
 
 export type ReportsServiceConfig = {
@@ -192,7 +200,7 @@ export class ReportsService {
             )
 
         const visible = selectVisibleReports(dbResults, viewer ?? { minStationTrust: 0 })
-        if (visible.personalized) viewer?.onPersonalized?.()
+        if (visible.suppressed) viewer?.onSuppressed?.()
 
         /*
          * Trust and the client signature are dropped here and never reach a response body.

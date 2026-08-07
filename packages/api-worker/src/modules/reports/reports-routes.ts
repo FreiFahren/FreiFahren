@@ -167,16 +167,26 @@ export const postReport = defineRoute<Env>()({
          * is under load. Nothing reads trust synchronously, so the row simply carries null for a
          * moment.
          */
-        const score = scoreReportInBackground(
-            c.get('db'),
-            c.get('d1'),
-            c.env.TRUST_FLAGS,
-            logger,
-            report.reportId
-        ).catch((error) => {
-            reportError(error, { tags: { task: 'report-trust-scoring' }, extra: { reportId: report.reportId } })
-            logger.error(error, 'Failed to score report trust')
-        })
+        const score = scoreReportInBackground(c.get('db'), c.get('d1'), c.env.TRUST_FLAGS, logger, report.reportId)
+            .then(async (trust) => {
+                /*
+                 * Between the write and the score the row counts as unscored, which reads as fully
+                 * trusted — so the station may already have been served, and edge-cached, as
+                 * visible. Once a score lands below 1 that cached answer can be wrong for the whole
+                 * edge TTL, so drop the entry rather than wait it out.
+                 */
+                if (trust === null || trust >= 1) return
+                await invalidateStationReportsCache(
+                    c.req.url,
+                    c.req.header('Origin') ?? null,
+                    c.get('city').slug,
+                    report.stationId
+                )
+            })
+            .catch((error) => {
+                reportError(error, { tags: { task: 'report-trust-scoring' }, extra: { reportId: report.reportId } })
+                logger.error(error, 'Failed to score report trust')
+            })
 
         // No Workers runtime under unit tests, so executionCtx is absent; await there instead.
         let executionCtx: { waitUntil(promise: Promise<unknown>): void } | undefined
