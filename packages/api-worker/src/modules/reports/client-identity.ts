@@ -83,6 +83,20 @@ const firstMatch = (ua: string, patterns: Array<[RegExp, string]>): { name: stri
 }
 
 /*
+ * The WebView our own iOS app runs in. It omits both the `Version/` and `Safari` tokens that every
+ * iOS browser carries, so it matches nothing in the browser table — which is how the first native
+ * report to arrive landed in `other`, alongside any agent that merely claims to be an iPhone
+ * without naming a browser we know. That is the bucket a spoofed agent falls into, so the app we
+ * ship has to be named rather than sharing it.
+ *
+ * Recognised by what is missing, since there is nothing positive to match on: WebKit and a `Mobile/`
+ * build token, with no `Safari`. (Android's WebView announces itself with a `wv` token instead, so
+ * it would want its own pattern if that platform ever ships.)
+ */
+const isAppleWebView = (userAgent: string): boolean =>
+    /AppleWebKit/.test(userAgent) && /\bMobile\/\w+/.test(userAgent) && !/Safari/.test(userAgent)
+
+/*
  * Collapse a User-Agent to a bounded vocabulary: a name, a major version, and a platform. The
  * output is assembled from the tables above rather than copied out of the header, so a crafted
  * User-Agent cannot smuggle unbounded text — or a high-entropy fingerprint — into the column.
@@ -93,6 +107,11 @@ export const normalizeUserAgent = (userAgent: string | undefined): string => {
     const tool = firstMatch(userAgent, TOOL_PATTERNS)
     if (tool !== undefined) {
         return tool.version === undefined ? tool.name : `${tool.name}/${tool.version}`
+    }
+
+    if (isAppleWebView(userAgent)) {
+        const webViewPlatform = firstMatch(userAgent, PLATFORM_PATTERNS)
+        return webViewPlatform === undefined ? 'WKWebView' : `WKWebView ${webViewPlatform.name}`
     }
 
     const browser = firstMatch(userAgent, BROWSER_PATTERNS)
