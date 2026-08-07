@@ -4,6 +4,7 @@ import type { TFunction } from 'i18next';
 import { useEffect, useState } from 'react';
 
 import { currentCitySlug } from '@/lib/city';
+import { getTurnstileToken, TURNSTILE_TOKEN_HEADER } from '@/lib/turnstile';
 import { traceAction } from '@/lib/error-monitoring';
 import { requireEnv } from '@/lib/utils';
 
@@ -239,11 +240,15 @@ export function useSubmitReport() {
         // report `source` — which the Reports dashboard splits on — must be derived at runtime.
         // `getPlatform()` is 'ios' | 'android' | 'web'; only 'web' is the browser build.
         const isNative = Capacitor.isNativePlatform();
+        // Minted per submission: the API rejects a replayed token, so it cannot be cached. Resolves
+        // to undefined when no site key is configured (dev, previews) and the API skips the check.
+        const turnstileToken = await getTurnstileToken();
         const response = await fetch(submitUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'ff-platform': Capacitor.getPlatform(),
+            ...(turnstileToken === undefined ? {} : { [TURNSTILE_TOKEN_HEADER]: turnstileToken }),
           },
           body: JSON.stringify({
             stationId: input.stationId,

@@ -9,6 +9,7 @@ import { insertReportSchema } from '../../db'
 import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from './constants'
 import { invalidateStationReportsCache } from './reports-cache-middleware'
 import { reportsDisabledMiddleware } from './reports-disabled-middleware'
+import { turnstileMiddleware } from './turnstile'
 
 const reportsQuerySchema = z
     .object({
@@ -89,7 +90,8 @@ export const getReportsByStation = defineRoute<Env>()({
 export const postReport = defineRoute<Env>()({
     method: 'post',
     path: '/',
-    middlewares: [reportsDisabledMiddleware],
+    // Killswitch first: a 503 must not consume the caller's single-use Turnstile token.
+    middlewares: [reportsDisabledMiddleware, turnstileMiddleware],
     schemas: {
         json: insertReportSchema,
     },

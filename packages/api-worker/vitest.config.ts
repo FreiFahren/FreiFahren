@@ -36,6 +36,10 @@ export default defineWorkersConfig(async () => {
                             PREVIEW_WORKERS_SUBDOMAIN: 'freifahren',
                             NODE_ENV: 'development',
                             REPORT_PASSWORD: 'password',
+                            // Empty => Turnstile verification off by default; suites opt in via setTestEnv.
+                            TURNSTILE_SECRET_KEY: '',
+                            // Killswitch on by default, matching production; suites opt in via setTestEnv.
+                            REPORTING_ENABLED: '',
                             TELEGRAM_WORKER_URL: 'https://telegram-worker.test',
                             LOG_LEVEL: 'error',
                         },

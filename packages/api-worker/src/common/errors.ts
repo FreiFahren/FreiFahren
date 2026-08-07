@@ -11,6 +11,7 @@ export type InternalCode =
     | 'NO_PATH_FOUND'
     | 'UNKNOWN_CITY'
     | 'REPORTING_DISABLED'
+    | 'TURNSTILE_FAILED'
 export interface AppErrorDetails {
     internal_code: InternalCode
     description?: string

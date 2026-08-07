@@ -23,6 +23,10 @@ export type Bindings = {
     NODE_ENV?: string
     TELEGRAM_WORKER_URL?: string
     REPORT_PASSWORD?: string
+    // Turnstile secret for the report widget. Unset disables verification entirely.
+    TURNSTILE_SECRET_KEY?: string
+    // "true" resumes app report submissions; anything else keeps the killswitch on.
+    REPORTING_ENABLED?: string
     SENTRY_DSN?: string
     // Git SHA injected at deploy via `wrangler deploy --var SENTRY_RELEASE:<sha>`; tags Sentry
     // Events with a release so issues can be resolved in the next release. Absent locally.
@@ -35,6 +39,8 @@ export type AppConfig = {
     corsOrigins: string[]
     telegramWorkerUrl?: string
     reportPassword?: string
+    turnstileSecretKey?: string
+    reportingEnabled: boolean
     // See PREVIEW_WORKERS_SUBDOMAIN on Bindings. Undefined disables preview-origin CORS entirely.
     previewWorkersSubdomain?: string
 }
@@ -90,6 +96,8 @@ export const resolveConfig = (env: Bindings): AppConfig => {
         corsOrigins,
         telegramWorkerUrl: env.TELEGRAM_WORKER_URL,
         reportPassword: env.REPORT_PASSWORD,
+        turnstileSecretKey: env.TURNSTILE_SECRET_KEY,
+        reportingEnabled: env.REPORTING_ENABLED === 'true',
         previewWorkersSubdomain: env.PREVIEW_WORKERS_SUBDOMAIN,
     }
 }
