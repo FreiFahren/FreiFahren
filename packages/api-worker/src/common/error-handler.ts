@@ -6,8 +6,8 @@ import { AppConfig, Env } from '../app-env'
 import { AppError } from './errors'
 
 export const handleError = (err: Error, c: Context<Env>) => {
-    // Config is unset if registerContext threw before storing it (e.g. missing CORS_ORIGINS or db
-    // Binding); fall back to hiding descriptions rather than throwing a second error.
+    // config is unset if registerContext threw before storing it (e.g. missing CORS_ORIGINS or db
+    // binding); fall back to hiding descriptions rather than throwing a second error.
     const config = c.get('config') as AppConfig | undefined
 
     if (err instanceof AppError) {
