@@ -60,6 +60,18 @@ export const getReports = defineRoute<Env>()({
     },
 })
 
+// Lets clients (the app's /report screen) check the killswitch before rendering the report form,
+// Without guessing from a failed POST. Public and unauthenticated: it reveals nothing beyond the
+// Same disabled/enabled state a POST attempt would already expose via its 503.
+export const getReportsStatus = defineRoute<Env>()({
+    method: 'get',
+    path: '/status',
+    handler: async (c) => {
+        c.header('Cache-Control', 'no-store')
+        return c.json({ disabled: c.get('config').reportsDisabled })
+    },
+})
+
 export const getReportsByStation = defineRoute<Env>()({
     method: 'get',
     path: '/:stationId',

@@ -43,5 +43,9 @@
         "PREVIEW_WORKERS_SUBDOMAIN": "freifahren",
         "TELEGRAM_WORKER_URL": "https://telegram-worker.freifahren.workers.dev",
         "SENTRY_DSN": "https://8f49e71a73d689efdcaabfd8794457b6@o4508609338867712.ingest.de.sentry.io/4511638467051600",
+        // Killswitch for POST /v0/reports (see reports-disabled-middleware.ts). Plain var, not a
+        // secret, so it can be flipped from the Cloudflare dashboard (Settings > Variables) or via
+        // `wrangler deploy` without touching code.
+        "REPORTS_DISABLED": "true",
     },
 }

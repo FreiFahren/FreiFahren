@@ -36,6 +36,7 @@ export default defineWorkersConfig(async () => {
                             PREVIEW_WORKERS_SUBDOMAIN: 'freifahren',
                             NODE_ENV: 'development',
                             REPORT_PASSWORD: 'password',
+                            REPORTS_DISABLED: 'false',
                             TELEGRAM_WORKER_URL: 'https://telegram-worker.test',
                             LOG_LEVEL: 'error',
                         },

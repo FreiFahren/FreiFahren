@@ -23,6 +23,10 @@ export type Bindings = {
     NODE_ENV?: string
     TELEGRAM_WORKER_URL?: string
     REPORT_PASSWORD?: string
+    // Killswitch for POST /v0/reports, toggleable from the Cloudflare dashboard (Settings >
+    // Variables) or `wrangler deploy` without a code change. "true" disables public submissions;
+    // Telegram-worker's relayed reports still get through (see reports-disabled-middleware.ts).
+    REPORTS_DISABLED?: string
     SENTRY_DSN?: string
     // Git SHA injected at deploy via `wrangler deploy --var SENTRY_RELEASE:<sha>`; tags Sentry
     // Events with a release so issues can be resolved in the next release. Absent locally.
@@ -35,6 +39,7 @@ export type AppConfig = {
     corsOrigins: string[]
     telegramWorkerUrl?: string
     reportPassword?: string
+    reportsDisabled: boolean
     // See PREVIEW_WORKERS_SUBDOMAIN on Bindings. Undefined disables preview-origin CORS entirely.
     previewWorkersSubdomain?: string
 }
@@ -90,6 +95,7 @@ export const resolveConfig = (env: Bindings): AppConfig => {
         corsOrigins,
         telegramWorkerUrl: env.TELEGRAM_WORKER_URL,
         reportPassword: env.REPORT_PASSWORD,
+        reportsDisabled: env.REPORTS_DISABLED === 'true',
         previewWorkersSubdomain: env.PREVIEW_WORKERS_SUBDOMAIN,
     }
 }

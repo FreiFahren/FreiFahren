@@ -11,7 +11,7 @@ import {
     insightsCacheMiddleware,
     VERSIONED_INSIGHTS_CACHEABLE_PATHS,
 } from './modules/insights/insights-cache-middleware'
-import { getReports, getReportsByStation, postReport } from './modules/reports/'
+import { getReports, getReportsByStation, getReportsStatus, postReport } from './modules/reports/'
 import { reportsCacheMiddleware, VERSIONED_REPORTS_CACHEABLE_PATHS } from './modules/reports/reports-cache-middleware'
 import { getRisk } from './modules/risk/risk-routes'
 import {
@@ -84,7 +84,7 @@ export const createApp = () => {
     app.onError(handleError)
 
     registerVersionedRoutes(app, 'reports', 'v0', {
-        v0: [getReports, postReport, getReportsByStation],
+        v0: [getReports, postReport, getReportsStatus, getReportsByStation],
     })
     registerVersionedRoutes(app, 'transit', 'v0', {
         v0: [getStations, getLines, getSegments, getDistance],

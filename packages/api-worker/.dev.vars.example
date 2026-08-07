@@ -4,3 +4,5 @@
 REPORT_PASSWORD=password
 TELEGRAM_WORKER_URL=http://localhost:6010
 SENTRY_DSN=
+# REPORTS_DISABLED defaults to the value in wrangler.jsonc; uncomment to override locally.
+# REPORTS_DISABLED=false
