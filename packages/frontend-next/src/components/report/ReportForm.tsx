@@ -4,7 +4,12 @@ import { ChevronRight, MapPin, Search, Send, TriangleAlert } from 'lucide-react'
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { type SubmitReportResponse, useSubmitReport } from '@/api/reports';
+import { useReportingEnabled } from '@/api/config';
+import {
+  isReportingDisabledError,
+  type SubmitReportResponse,
+  useSubmitReport,
+} from '@/api/reports';
 import { type Station } from '@/api/transit';
 import { FeedbackButton } from '@/components/feedback/FeedbackButton';
 import { PageHeader } from '@/components/templates/PageHeader';
@@ -45,11 +50,6 @@ function normalize(value: string): string {
 }
 
 const NEARBY_COUNT = 3;
-
-// Killswitch for reporting through the app, mirroring the API's REPORTING_ENABLED. Reports posted
-// directly in the Telegram group still sync normally. Anything other than 'true' keeps reporting
-// off, so a missing or misspelt value fails closed rather than silently re-opening submissions.
-const REPORTING_DISABLED = import.meta.env.VITE_REPORTING_ENABLED !== 'true';
 
 const REJECTION_MESSAGE: Record<ReportRejection, string> = {
   too_soon: 'errorTooSoon',
@@ -363,7 +363,13 @@ function ReportingDisabledNotice() {
   );
 }
 
-function SubmitFooter({ onSubmitted }: { onSubmitted: (result: SubmitReportResponse) => void }) {
+function SubmitFooter({
+  onSubmitted,
+  onReportingDisabled,
+}: {
+  onSubmitted: (result: SubmitReportResponse) => void;
+  onReportingDisabled: () => void;
+}) {
   const { t } = useTranslation(NAMESPACE);
   const { stationId, lineName, directionStationId } = useReportSelection();
   const submitReport = useSubmitReport();
@@ -401,6 +407,15 @@ function SubmitFooter({ onSubmitted }: { onSubmitted: (result: SubmitReportRespo
           });
           onSubmitted(result);
         },
+        /*
+         * Backstop for the cases the probe cannot cover: the switch flipping between the probe and
+         * this submit, and a client whose probe never answered (offline, or an install that has not
+         * reached the API since). Without it the user fills in the whole form and gets a generic
+         * failure for a state the API told us about explicitly.
+         */
+        onError: (error) => {
+          if (isReportingDisabledError(error)) onReportingDisabled();
+        },
       },
     );
   };
@@ -431,6 +446,8 @@ export function ReportForm() {
   const navigate = useNavigate();
   const { stationId: initialStationId, lineName: initialLineName } = routeApi.useSearch();
   const [result, setResult] = useState<SubmitReportResponse | null>(null);
+  const [refusedBySubmit, setRefusedBySubmit] = useState(false);
+  const reportingEnabled = useReportingEnabled();
 
   const handleSuccessClose = () => {
     navigate({ to: '/' });
@@ -457,15 +474,18 @@ export function ReportForm() {
                   />
                 }
               />
-              {REPORTING_DISABLED ? (
-                <ReportingDisabledNotice />
-              ) : (
+              {reportingEnabled && !refusedBySubmit ? (
                 <>
                   <LinePicker />
                   <StationPicker />
                   <DirectionPicker />
-                  <SubmitFooter onSubmitted={setResult} />
+                  <SubmitFooter
+                    onSubmitted={setResult}
+                    onReportingDisabled={() => setRefusedBySubmit(true)}
+                  />
                 </>
+              ) : (
+                <ReportingDisabledNotice />
               )}
             </>
           )}

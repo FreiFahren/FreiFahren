@@ -6,6 +6,7 @@ import { requestId } from 'hono/request-id'
 import { Env, isAllowedCorsOrigin, registerContext } from './app-env'
 import { handleError } from './common/error-handler'
 import { registerVersionedRoutes } from './common/router'
+import { getConfig } from './modules/config'
 import { getLineInsights, getStationInsights } from './modules/insights'
 import {
     insightsCacheMiddleware,
@@ -108,6 +109,10 @@ export const createApp = () => {
     })
     registerVersionedRoutes(app, 'insights', 'v0', {
         v0: [getStationInsights, getLineInsights],
+    })
+    // Deliberately absent from the Workers Cache middlewares above — see config-routes.
+    registerVersionedRoutes(app, 'config', 'v0', {
+        v0: [getConfig],
     })
 
     return app
