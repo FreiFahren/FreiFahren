@@ -6,9 +6,10 @@ import { Env, reportError } from '../../app-env'
 import { defineRoute } from '../../common/router'
 import { insertReportSchema } from '../../db'
 
+import { ANONYMOUS_CLIENT, resolveClientIdentity } from './client-identity'
 import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from './constants'
 import { invalidateStationReportsCache } from './reports-cache-middleware'
-import { reportsDisabledMiddleware } from './reports-disabled-middleware'
+import { isTrustedWorkerCall, reportsDisabledMiddleware } from './reports-disabled-middleware'
 import { turnstileMiddleware } from './turnstile'
 
 const reportsQuerySchema = z
@@ -106,7 +107,18 @@ export const postReport = defineRoute<Env>()({
             source: reportData.source ?? 'telegram',
         })
 
-        const report = await reportsService.createReport(postProcessedReportData)
+        /*
+         * Telegram relays reach us server-to-server, so the cf data and User-Agent on that hop
+         * describe telegram-worker rather than anyone who reported anything — attributing it would
+         * be worse than storing nothing. Keyed off the authenticated shared-secret header and not
+         * off the body's `source`, which the caller picks and could set to 'telegram' precisely to
+         * shed attribution.
+         */
+        const client = isTrustedWorkerCall(c)
+            ? ANONYMOUS_CLIENT
+            : await resolveClientIdentity(c, { secret: c.get('config').clientHashSecret })
+
+        const report = await reportsService.createReport(postProcessedReportData, client)
 
         /*
          * Awaited, not deferred: the app invalidates and refetches this station's count as soon as
