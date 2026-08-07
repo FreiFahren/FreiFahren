@@ -46,8 +46,8 @@ jobs:
                         touches(/^packages\/frontend-next\//, registry, workflow) ? 'true' : 'false'
                       )
 
-            # Resolved once and shared, so both deploys and the comment agree on the hostnames without
-            # each recomputing them.
+            # Resolved once and shared, so both deploys and the recorded deployment URL agree on the
+            # hostnames without each recomputing them.
             - name: Resolve workers.dev subdomain
               id: subdomain
               env:
@@ -177,8 +177,7 @@ jobs:
         runs-on: ubuntu-latest
         permissions:
             contents: read
-            issues: write
-            pull-requests: write
+            deployments: write
         defaults:
             run:
                 working-directory: packages/frontend-next
@@ -220,38 +219,48 @@ jobs:
             - name: Deploy preview frontend
               run: bunx wrangler@latest deploy --config wrangler.preview.jsonc --name "frontend-pr-${PR_NUMBER}"
 
-            - name: Comment preview link on pull request
+            # A deployment rather than a comment. GitHub renders it in the PR's merge box and against
+            # the commit, supersedes the previous one on every push instead of leaving a trail, and —
+            # because it is transient — can be retired by cleanup, so a link never outlives the Worker
+            # it points at. A comment does none of those, and the previous one had to hunt for its own
+            # marker to avoid piling up.
+            - name: Record preview deployment
               uses: actions/github-script@v7
               env:
                   USES_PREVIEW_API: ${{ needs.plan.outputs.api == 'true' }}
               with:
                   script: |
-                      const marker = '<!-- preview -->'
-                      const body = [
-                        marker,
-                        `🧪 **Preview:** ${process.env.APP_URL}`,
-                        '',
-                        process.env.USES_PREVIEW_API === 'true'
-                          ? 'Running against this PR\'s own API and database. Reports you submit stay here, and are discarded on the next push.'
-                          : 'Running against the production API.',
-                        '',
-                        'Not previewed: the Telegram bot and the basemap still point at production.',
-                      ].join('\n')
                       const { owner, repo } = context.repo
-                      const issue_number = context.issue.number
-                      const comments = await github.paginate(github.rest.issues.listComments, {
+                      const deployment = await github.rest.repos.createDeployment({
                         owner,
                         repo,
-                        issue_number,
+                        // The head sha, so the deployment attaches to this PR rather than to the base.
+                        ref: context.payload.pull_request.head.sha,
+                        environment: `pr-${process.env.PR_NUMBER}`,
+                        // Ephemeral: tells GitHub the environment stops existing when it goes inactive.
+                        transient_environment: true,
+                        production_environment: false,
+                        // Defaults to true, which asks GitHub to merge the base in first and fails the
+                        // call outright on a conflict. We deploy the head as-is.
+                        auto_merge: false,
+                        // Without this the API holds the deployment until every check context passes,
+                        // including the ones still running, and it is simply never created.
+                        required_contexts: [],
+                        description: 'FreiFahren preview',
                       })
-                      const existing = comments.find(
-                        (comment) => comment.user.type === 'Bot' && comment.body?.includes(marker)
-                      )
-                      if (existing) {
-                        await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body })
-                      } else {
-                        await github.rest.issues.createComment({ owner, repo, issue_number, body })
-                      }
+                      await github.rest.repos.createDeploymentStatus({
+                        owner,
+                        repo,
+                        deployment_id: deployment.data.id,
+                        state: 'success',
+                        environment_url: process.env.APP_URL,
+                        // Retires this PR's earlier previews, so only the current one reads as live.
+                        auto_inactive: true,
+                        description:
+                          process.env.USES_PREVIEW_API === 'true'
+                            ? "This PR's own API and database; reports stay here."
+                            : 'Production API; only the frontend is previewed.',
+                      })
 
     cleanup:
         # No path gate, so a preview can never outlive its PR even if the changes were reverted before
@@ -262,6 +271,7 @@ jobs:
         runs-on: ubuntu-latest
         permissions:
             contents: read
+            deployments: write
         defaults:
             run:
                 working-directory: packages/api-worker
@@ -285,6 +295,12 @@ jobs:
             - name: Delete preview workers
               run: |
                   set -uo pipefail
+                  # GitHub runs this as `bash -e`, which `set -uo pipefail` does not clear. Under
+                  # errexit the capture below aborts the whole step the moment wrangler exits
+                  # non-zero — before $? is read — so the script never reaches the branches that
+                  # decide whether that exit was expected. Turning it off is what makes the
+                  # not-found case below reachable at all; real failures still exit explicitly.
+                  set +e
                   for worker_name in "api-pr-${PR_NUMBER}" "frontend-pr-${PR_NUMBER}"; do
                     output=$(npx wrangler delete --name "$worker_name" --force 2>&1)
                     status=$?
@@ -306,3 +322,26 @@ jobs:
 
             - name: Delete preview databases
               run: bun run preview:databases --pr "$PR_NUMBER" --destroy
+
+            # Last, so the link stays live exactly as long as the Worker behind it does: if a delete
+            # above fails, the job stops here and the deployment correctly still reads as active.
+            # Marking it inactive drops the environment from the PR; the record stays as history.
+            - name: Retire preview deployment
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const { owner, repo } = context.repo
+                      const deployments = await github.paginate(github.rest.repos.listDeployments, {
+                        owner,
+                        repo,
+                        environment: `pr-${process.env.PR_NUMBER}`,
+                        per_page: 100,
+                      })
+                      for (const deployment of deployments) {
+                        await github.rest.repos.createDeploymentStatus({
+                          owner,
+                          repo,
+                          deployment_id: deployment.id,
+                          state: 'inactive',
+                        })
+                      }
