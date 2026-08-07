@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
 
@@ -52,6 +52,18 @@ export const reports = sqliteTable(
          * never stored, and the rotation means the value stops linking after the period ends.
          */
         clientHash: text({ length: 32 }),
+        /*
+         * How much this report counts on its own, in (0, 1]. Assigned after the write by the flags
+         * in trust.ts, so null means *not yet scored* rather than untrusted. Nothing that reads this
+         * may conflate the two: during an outage of the scorer every report is null, and treating
+         * that as untrusted would empty the map.
+         */
+        trust: real(),
+        /*
+         * Which flags fired, comma-separated. Kept so a score can be explained later without
+         * re-running the flags against a database that has moved on since.
+         */
+        trustFlags: text(),
     },
     // Reads filter by a time window, often scoped to a station or line; the leading
     // Equality column lets the range predicate use an index seek instead of a full scan.

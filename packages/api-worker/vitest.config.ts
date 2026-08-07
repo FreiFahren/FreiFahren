@@ -29,6 +29,8 @@ export default defineWorkersConfig(async () => {
                         // vitest-pool-workers runner. The app under test (src/index.ts) has no Sentry
                         // and needs no node builtins, so omitting it is safe.
                         d1Databases: ['DB'],
+                        // Trust-flag definitions; suites write their own set and clear it afterwards.
+                        kvNamespaces: ['TRUST_FLAGS'],
                         bindings: {
                             TEST_MIGRATIONS: migrations,
                             CORS_ORIGINS:

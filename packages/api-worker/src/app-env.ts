@@ -1,4 +1,4 @@
-import type { D1Database } from '@cloudflare/workers-types'
+import type { D1Database, KVNamespace } from '@cloudflare/workers-types'
 import { CITY_SLUGS, type CityConfig, DEFAULT_CITY_SLUG, getCity } from '@freifahren/cities'
 import { Context, Hono } from 'hono'
 
@@ -15,6 +15,12 @@ export type Bindings = {
     // Cloudflare D1 binding. Present on Workers and, in tests, provided by the Miniflare pool.
     DB?: D1Database
     DB_LEIPZIG?: D1Database
+    /*
+     * Trust-flag definitions (see modules/reports/trust.ts). In KV rather than in the bundle so a
+     * newly recognised spam pattern is a KV write, not a deploy — a pattern is found while it is
+     * running, and a release is the wrong unit of latency for that. Unbound disables scoring.
+     */
+    TRUST_FLAGS?: KVNamespace
     CORS_ORIGINS?: string
     // This repo's Cloudflare account subdomain (e.g. `freifahren` for `*.freifahren.workers.dev`).
     // Scopes the frontend preview CORS allowance to our own account so another tenant can't claim
@@ -82,6 +88,11 @@ export type Env = {
     Variables: Services & {
         logger: Logger
         config: AppConfig
+        // This request's city database, both ways round. The drizzle handle is what everything
+        // Should use; the raw binding exists for trust scoring, which runs operator-authored SQL
+        // From KV and therefore needs real parameter binding rather than a query builder.
+        db: DbConnection
+        d1: D1Database
         // The city resolved for this request (from `?city=`), the single source for
         // Which DB the request talks to and how downstream code scopes per-city work.
         city: CityConfig
@@ -207,7 +218,10 @@ export const registerContext = (app: Hono<Env>) => {
         if (binding === undefined) {
             throw new Error(`No D1 binding "${city.dbBinding}" bound for city "${city.slug}"`)
         }
-        applyServices(c, createD1Db(binding), config)
+        const db = createD1Db(binding)
+        c.set('db', db)
+        c.set('d1', binding)
+        applyServices(c, db, config)
 
         await next()
     })

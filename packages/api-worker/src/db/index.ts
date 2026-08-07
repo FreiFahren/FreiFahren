@@ -11,7 +11,7 @@ export type Schema = typeof schema
 
 // Every context — the Worker, the Vitest suite, and the seed CLI (via getPlatformProxy) — uses the
 // D1 driver over the same schema. The concrete result-type generic is widened here since the app
-// only ever uses the query builder.
+// Only ever uses the query builder.
 export type DbConnection = BaseSQLiteDatabase<'async', unknown, Schema>
 
 // Workers talk to D1 through the `DB` binding. No client lifecycle: unlike postgres.js there is
