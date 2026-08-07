@@ -46,9 +46,10 @@ function normalize(value: string): string {
 
 const NEARBY_COUNT = 3;
 
-// Manual killswitch for reporting through the app. Reports posted directly in the Telegram group
-// still sync normally. Flip back to false once submissions should resume.
-const REPORTING_DISABLED = true;
+// Killswitch for reporting through the app, mirroring the API's REPORTING_ENABLED. Reports posted
+// directly in the Telegram group still sync normally. Anything other than 'true' keeps reporting
+// off, so a missing or misspelt value fails closed rather than silently re-opening submissions.
+const REPORTING_DISABLED = import.meta.env.VITE_REPORTING_ENABLED !== 'true';
 
 const REJECTION_MESSAGE: Record<ReportRejection, string> = {
   too_soon: 'errorTooSoon',
