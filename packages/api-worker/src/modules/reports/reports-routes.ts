@@ -10,6 +10,7 @@ import { ANONYMOUS_CLIENT, resolveClientIdentity } from './client-identity'
 import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from './constants'
 import { invalidateStationReportsCache } from './reports-cache-middleware'
 import { isTrustedWorkerCall, reportsDisabledMiddleware } from './reports-disabled-middleware'
+import { scoreReportInBackground } from './trust'
 import { turnstileMiddleware } from './turnstile'
 
 const reportsQuerySchema = z
@@ -150,6 +151,24 @@ export const postReport = defineRoute<Env>()({
             logger.error(error, 'Failed to forward inspector report to Telegram')
         })
 
+        /*
+         * Also deferred, and for a stronger reason than the Telegram call: trust scoring runs one
+         * query per flag, and the number of flags is an operational dial someone will turn during
+         * an incident. On the write path that would make report submission slower exactly when it
+         * is under load. Nothing reads trust synchronously, so the row simply carries null for a
+         * moment.
+         */
+        const score = scoreReportInBackground(
+            c.get('db'),
+            c.get('d1'),
+            c.env.TRUST_FLAGS,
+            logger,
+            report.reportId
+        ).catch((error) => {
+            reportError(error, { tags: { task: 'report-trust-scoring' }, extra: { reportId: report.reportId } })
+            logger.error(error, 'Failed to score report trust')
+        })
+
         // No Workers runtime under unit tests, so executionCtx is absent; await there instead.
         let executionCtx: { waitUntil(promise: Promise<unknown>): void } | undefined
         try {
@@ -159,8 +178,10 @@ export const postReport = defineRoute<Env>()({
         }
         if (executionCtx !== undefined) {
             executionCtx.waitUntil(forward)
+            executionCtx.waitUntil(score)
         } else {
             await forward
+            await score
         }
 
         return c.json(report)
