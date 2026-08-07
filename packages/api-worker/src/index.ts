@@ -13,6 +13,7 @@ import {
 } from './modules/insights/insights-cache-middleware'
 import { getReports, getReportsByStation, postReport } from './modules/reports/'
 import { reportsCacheMiddleware, VERSIONED_REPORTS_CACHEABLE_PATHS } from './modules/reports/reports-cache-middleware'
+import { TURNSTILE_TOKEN_HEADER } from './modules/reports/turnstile'
 import { getRisk } from './modules/risk/risk-routes'
 import {
     transitCacheMiddleware,
@@ -50,7 +51,20 @@ export const createApp = () => {
                 const config = (c as Context<Env>).get('config')
                 return isAllowedCorsOrigin(origin, config) ? origin : null
             },
-            allowHeaders: ['Accept', 'Content-Type', 'If-Modified-Since', 'If-None-Match', 'ff-platform'],
+            /*
+             * Every header the client attaches to a report has to be listed here, or the browser
+             * fails the preflight and the POST is never sent at all — the API sees nothing, and
+             * React Query swallows the resulting network error, so the failure is invisible on both
+             * sides. TURNSTILE_TOKEN_HEADER is the one that carries the challenge token.
+             */
+            allowHeaders: [
+                'Accept',
+                'Content-Type',
+                'If-Modified-Since',
+                'If-None-Match',
+                'ff-platform',
+                TURNSTILE_TOKEN_HEADER,
+            ],
             allowMethods: ['GET', 'POST', 'OPTIONS'],
             exposeHeaders: ['ETag', 'Last-Modified'],
         })
