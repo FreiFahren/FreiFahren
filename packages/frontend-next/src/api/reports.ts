@@ -177,6 +177,19 @@ export const useStationReportCount = (stationId: string) => {
   return useQuery({ ...options, select: (reports) => reports.length });
 };
 
+/**
+ * Whether report submission is currently paused (the /report screen shows a notice instead of the
+ * form when it is). Backed by the same REPORTS_DISABLED killswitch a POST would otherwise hit with
+ * a 503, so the app can check ahead of time instead of surfacing a failed submission.
+ */
+export const reportingStatusQueryOptions = {
+  queryKey: ['reportingStatus'] as const,
+  queryFn: () => fetchJson<{ disabled: boolean }>('/v0/reports/status'),
+  staleTime: 60_000,
+};
+
+export const useReportingStatus = () => useQuery(reportingStatusQueryOptions);
+
 const API_URL = requireEnv('VITE_API_URL');
 
 export type SubmitReportInput = {

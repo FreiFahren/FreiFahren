@@ -4,7 +4,7 @@ import { ChevronRight, MapPin, Search, Send, TriangleAlert } from 'lucide-react'
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { type SubmitReportResponse, useSubmitReport } from '@/api/reports';
+import { type SubmitReportResponse, useReportingStatus, useSubmitReport } from '@/api/reports';
 import { type Station } from '@/api/transit';
 import { FeedbackButton } from '@/components/feedback/FeedbackButton';
 import { PageHeader } from '@/components/templates/PageHeader';
@@ -45,10 +45,6 @@ function normalize(value: string): string {
 }
 
 const NEARBY_COUNT = 3;
-
-// Manual killswitch for reporting through the app. Reports posted directly in the Telegram group
-// still sync normally. Flip back to false once submissions should resume.
-const REPORTING_DISABLED = true;
 
 const REJECTION_MESSAGE: Record<ReportRejection, string> = {
   too_soon: 'errorTooSoon',
@@ -430,6 +426,14 @@ export function ReportForm() {
   const navigate = useNavigate();
   const { stationId: initialStationId, lineName: initialLineName } = routeApi.useSearch();
   const [result, setResult] = useState<SubmitReportResponse | null>(null);
+  const {
+    data: reportingStatus,
+    isLoading: reportingStatusLoading,
+    isError: reportingStatusError,
+  } = useReportingStatus();
+  // Fail closed: an unresolved or failed status check shows the notice rather than a form that
+  // would just 503 on submit.
+  const reportingDisabled = reportingStatusError || (reportingStatus?.disabled ?? true);
 
   const handleSuccessClose = () => {
     navigate({ to: '/' });
@@ -456,7 +460,9 @@ export function ReportForm() {
                   />
                 }
               />
-              {REPORTING_DISABLED ? (
+              {reportingStatusLoading ? (
+                <div className="flex-1" />
+              ) : reportingDisabled ? (
                 <ReportingDisabledNotice />
               ) : (
                 <>
