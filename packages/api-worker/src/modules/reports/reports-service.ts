@@ -83,6 +83,71 @@ type ReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'stationId'
     isPredicted: boolean
 }
 
+/*
+ * Who is asking. `clientHash` is the requester's own signature, computed the same way intake
+ * computes it, and it is what makes suppression invisible to the suppressed: a client always sees
+ * its own reports whatever they scored. Somebody flooding the map watches their reports appear
+ * exactly as before, learns nothing, and keeps using an approach that reaches nobody else.
+ */
+export type ViewerContext = {
+    minStationTrust: number
+    clientHash?: string
+    // Called when a row survived only because it belongs to the viewer, i.e. this response is not
+    // The same as the one anybody else would get. The station-scoped route uses it to skip caching.
+    onPersonalized?: () => void
+}
+
+type ScoredRow = {
+    timestamp: Date
+    stationId: string
+    directionId: string | null
+    lineId: string | null
+    trust: number | null
+    clientHash: string | null
+}
+
+/*
+ * A station shows when the trust of its reports adds up to the configured threshold — so one
+ * ordinary report (scoring 1) is enough at the default of 1, while several flagged ones are not.
+ * That is the point: an attacker spreading one report per station to cover the most ground gets
+ * nothing shown, and concentrating enough reports on a single station to clear the bar costs them
+ * the spread that made it worth doing.
+ *
+ * An unscored report counts as 1. Scoring is asynchronous and can lag or fail, and treating "not
+ * yet scored" as untrusted would empty the map every time the scorer hiccuped.
+ */
+/*
+ * Trust values are fractions like 1/(1 + cost), which binary floating point cannot represent
+ * exactly, so a sum that should land on the threshold arrives just under it — ten reports scoring
+ * 0.1 add up to 0.9999999999999999. Without this a station with exactly enough corroboration stays
+ * hidden, and nothing about the numbers would explain why.
+ */
+const TRUST_SUM_TOLERANCE = 1e-9
+
+export const selectVisibleReports = (
+    rows: ScoredRow[],
+    viewer: ViewerContext
+): { rows: ScoredRow[]; personalized: boolean } => {
+    if (viewer.minStationTrust <= 0) return { rows, personalized: false }
+
+    const trustByStation = new Map<string, number>()
+    for (const row of rows) {
+        trustByStation.set(row.stationId, (trustByStation.get(row.stationId) ?? 0) + (row.trust ?? 1))
+    }
+
+    let personalized = false
+    const visible = rows.filter((row) => {
+        if ((trustByStation.get(row.stationId) ?? 0) >= viewer.minStationTrust - TRUST_SUM_TOLERANCE) return true
+        if (viewer.clientHash !== undefined && row.clientHash === viewer.clientHash) {
+            personalized = true
+            return true
+        }
+        return false
+    })
+
+    return { rows: visible, personalized }
+}
+
 export type ReportsServiceConfig = {
     nodeEnv: string
     city: string
@@ -101,10 +166,12 @@ export class ReportsService {
         from,
         to,
         stationId,
+        viewer,
     }: {
         from: DateTime
         to: DateTime
         stationId?: StationId
+        viewer?: ViewerContext
     }): Promise<ReportSummary[]> {
         const dbResults = await this.db
             .select({
@@ -112,6 +179,8 @@ export class ReportsService {
                 stationId: reports.stationId,
                 directionId: reports.directionId,
                 lineId: reports.lineId,
+                trust: reports.trust,
+                clientHash: reports.clientHash,
             })
             .from(reports)
             .where(
@@ -122,7 +191,21 @@ export class ReportsService {
                 )
             )
 
-        return dbResults.map((report) => ({ ...report, isPredicted: false }))
+        const visible = selectVisibleReports(dbResults, viewer ?? { minStationTrust: 0 })
+        if (visible.personalized) viewer?.onPersonalized?.()
+
+        /*
+         * Trust and the client signature are dropped here and never reach a response body.
+         * Returning either would tell a suppressed client that it has been suppressed, which is the
+         * one thing this design cannot afford to leak.
+         */
+        return visible.rows.map((report) => ({
+            timestamp: report.timestamp,
+            stationId: report.stationId,
+            directionId: report.directionId,
+            lineId: report.lineId,
+            isPredicted: false,
+        }))
     }
 
     async getReports({
@@ -130,13 +213,15 @@ export class ReportsService {
         to,
         stationId,
         currentTime,
+        viewer,
     }: {
         from: DateTime
         to: DateTime
         stationId?: StationId
         currentTime: DateTime
+        viewer?: ViewerContext
     }): Promise<ReportSummary[]> {
-        const result = await this.getRealReports({ from, to, stationId })
+        const result = await this.getRealReports({ from, to, stationId, viewer })
 
         // Predict reports if we don't have enough, so that users always see at least some data
         const predictedReportsThreshold = calculatePredictedReportsThreshold(currentTime)
@@ -151,7 +236,7 @@ export class ReportsService {
             // Them concurrently rather than as back-to-back D1 round-trips.
             const [allowedStationIds, candidateRows] = await Promise.all([
                 this.resolveAllowedStationIds(stationId, reportedStationIds),
-                this.loadPredictionCandidates(stationId),
+                this.loadPredictionCandidates(stationId, viewer),
             ])
             const historicReports = this.predictReports(
                 numberOfReportsToFetch,
@@ -183,13 +268,30 @@ export class ReportsService {
 
     // Recent reports used as the historic sample for prediction. Fetched separately
     // So getReports can run it concurrently with resolveAllowedStationIds.
-    private async loadPredictionCandidates(stationId?: StationId) {
-        return this.db
-            .select({ stationId: reports.stationId, timestamp: reports.timestamp })
+    private async loadPredictionCandidates(stationId?: StationId, viewer?: ViewerContext) {
+        const rows = await this.db
+            .select({
+                stationId: reports.stationId,
+                timestamp: reports.timestamp,
+                directionId: reports.directionId,
+                lineId: reports.lineId,
+                trust: reports.trust,
+                clientHash: reports.clientHash,
+            })
             .from(reports)
             .where(stationId !== undefined ? eq(reports.stationId, stationId) : undefined)
             .orderBy(desc(reports.timestamp))
             .limit(1000)
+
+        /*
+         * Filtered by the same rule as the reports themselves. Prediction infers where inspectors
+         * usually are from where they have recently been reported, so leaving suppressed traffic in
+         * here would let it shape the map anyway — hidden from the list, then handed straight back
+         * as a synthesised report. Nothing about the viewer applies to a historic sample, so this
+         * asks only about trust.
+         */
+        const visible = selectVisibleReports(rows, { minStationTrust: viewer?.minStationTrust ?? 0 })
+        return visible.rows.map((row) => ({ stationId: row.stationId, timestamp: row.timestamp }))
     }
 
     private predictReports(

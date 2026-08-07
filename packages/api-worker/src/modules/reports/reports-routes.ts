@@ -12,6 +12,7 @@ import { invalidateStationReportsCache } from './reports-cache-middleware'
 import { isTrustedWorkerCall, reportsDisabledMiddleware } from './reports-disabled-middleware'
 import { scoreReportInBackground } from './trust'
 import { turnstileMiddleware } from './turnstile'
+import { resolveViewer } from './viewer'
 
 const reportsQuerySchema = z
     .object({
@@ -59,7 +60,14 @@ export const getReports = defineRoute<Env>()({
         c.header('Cache-Control', 'no-store')
 
         // The query schema fills in the default range when from/to are absent.
-        return c.json(await reportsService.getReports({ from: query.from, to: query.to, currentTime: now })) // Intentionally pass in local time
+        return c.json(
+            await reportsService.getReports({
+                from: query.from,
+                to: query.to,
+                currentTime: now,
+                viewer: await resolveViewer(c),
+            })
+        ) // Intentionally pass in local time
     },
 })
 
@@ -84,6 +92,7 @@ export const getReportsByStation = defineRoute<Env>()({
                 to: query.to,
                 stationId,
                 currentTime: DateTime.now(),
+                viewer: await resolveViewer(c),
             })
         ) // Intentionally pass in local time
     },

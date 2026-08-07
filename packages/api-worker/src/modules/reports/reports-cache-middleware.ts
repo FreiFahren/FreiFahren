@@ -37,6 +37,17 @@ export const reportsCacheMiddleware: MiddlewareHandler<Env> = async (c, next) =>
     const stationId = c.req.param('stationId')
     if (stationId === undefined) return
 
+    /*
+     * A response that included the requester's own suppressed report is theirs alone. Storing it at
+     * the edge would hand a flooder's reports to everyone behind the same cache entry, which is the
+     * exact opposite of the intent. Only the few requests that were actually personalised skip the
+     * cache; everybody else still shares one entry per station per hour.
+     */
+    if (c.get('reportsPersonalized') === true) {
+        c.header('Cache-Control', 'no-store')
+        return
+    }
+
     c.header('Cache-Control', REPORTS_CACHE_CONTROL)
     c.header('Cloudflare-CDN-Cache-Control', `public, max-age=${REPORTS_EDGE_TTL_SECONDS}`)
     c.header('Cache-Tag', stationReportsCacheTag(c.get('city').slug, stationId))

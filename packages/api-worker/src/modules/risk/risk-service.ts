@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 
 import { AppError } from '../../common/errors'
-import type { ReportsService } from '../reports/reports-service'
+import type { ReportsService, ViewerContext } from '../reports/reports-service'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
 
 import { predictSegmentRisk, type RiskModelReport, type RiskModelSegment } from './risk-model'
@@ -21,12 +21,12 @@ export class RiskService {
      * from the latest reports instead of being served from a cache. This keeps the
      * output always fresh and removes the need to invalidate on new reports.
      */
-    async getRisk(now: DateTime = DateTime.utc()): Promise<RiskData> {
+    async getRisk(now: DateTime = DateTime.utc(), viewer?: ViewerContext): Promise<RiskData> {
         const oneHourAgo = now.minus({ hours: 1 })
 
         const [segmentCollection, realReports, stations, lines] = await Promise.all([
             this.transitNetworkDataService.getSegments(),
-            this.reportsService.getRealReports({ from: oneHourAgo, to: now }),
+            this.reportsService.getRealReports({ from: oneHourAgo, to: now, viewer }),
             this.transitNetworkDataService.getStations(),
             this.transitNetworkDataService.getLines(),
         ])
