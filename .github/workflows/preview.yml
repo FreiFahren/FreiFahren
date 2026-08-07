@@ -310,10 +310,16 @@ jobs:
                       echo "Deleted preview worker $worker_name."
                       continue
                     fi
-                    # A PR that never deployed this preview (or was already cleaned up) has no Worker to
-                    # delete — Cloudflare returns script_not_found (code 10007). That is expected, not a
-                    # failure. Any other error (auth, network) must fail loudly so a real leak is noticed.
-                    if echo "$output" | grep -qiE 'code: *10007|script_not_found|workers\.api\.error\.not_found'; then
+                    # A PR that never deployed this preview (or was already cleaned up) has no Worker
+                    # to delete. That is expected, not a failure; any other error (auth, network) must
+                    # fail loudly so a real leak is noticed.
+                    #
+                    # Which code says "no such Worker" has already changed once: wrangler 4.105 returns
+                    # 10090 "This Worker does not exist on this account", not the 10007 script_not_found
+                    # this originally matched. Since that moves under us, the human-readable sentence is
+                    # matched too — belt and braces, because the cost of missing it is a failed cleanup
+                    # that strands Workers and skips the database teardown entirely.
+                    if echo "$output" | grep -qiE 'code: *(10007|10090)|script_not_found|workers\.api\.error\.not_found|Worker does not exist'; then
                       echo "No preview worker named $worker_name exists; nothing to clean up."
                       continue
                     fi
