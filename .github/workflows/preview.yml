@@ -127,10 +127,17 @@ jobs:
                   # Cloudflare's documented always-pass Turnstile test secret, paired with the test
                   # site key the preview frontend builds with. Lets a preview exercise the real
                   # verification path without minting a widget or sharing the production secret.
+                  #
+                  # CLIENT_HASH_SECRET is a throwaway for the same reason: client attribution
+                  # short-circuits to nulls while it is unset, so without it a preview silently
+                  # skips that path and cannot show whether intake still records a client. The
+                  # value only has to be stable within one preview — the hashes it produces are
+                  # scoped to a database that is deleted with the PR.
                   command: >-
                       deploy --config wrangler.preview.json
                       --var REPORTING_ENABLED:true
                       --var TURNSTILE_SECRET_KEY:1x0000000000000000000000000000000AA
+                      --var CLIENT_HASH_SECRET:preview-client-hash-not-a-real-secret
 
             - name: Smoke test every city
               run: |
