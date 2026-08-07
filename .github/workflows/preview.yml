@@ -133,6 +133,10 @@ jobs:
                   # skips that path and cannot show whether intake still records a client. The
                   # value only has to be stable within one preview — the hashes it produces are
                   # scoped to a database that is deleted with the PR.
+                  #
+                  # REPORTING_ENABLED is what makes a preview's report form appear at all: the
+                  # frontend asks this worker whether reporting is open, so a preview is clickable
+                  # through here even while production reporting is closed.
                   command: >-
                       deploy --config wrangler.preview.json
                       --var REPORTING_ENABLED:true
@@ -211,9 +215,6 @@ jobs:
                   VITE_API_URL: ${{ env.API_URL }}
                   VITE_PREVIEW: 'true'
                   VITE_POSTHOG_KEY: ''
-                  # A preview exists to be clicked through, so reporting is on here even while it is
-                  # off in production. Paired with the always-pass test secret on the preview API.
-                  VITE_REPORTING_ENABLED: 'true'
                   VITE_TURNSTILE_SITE_KEY: '1x00000000000000000000AA'
 
             - name: Deploy preview frontend

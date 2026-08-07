@@ -194,6 +194,27 @@ export type SubmitReportResponse = {
   timestamp: string;
 };
 
+/*
+ * The API answers a rejected submission with a stable `details.internal_code` alongside the status.
+ * Carrying that code on the error is what lets the form tell "reporting is switched off" apart from
+ * any other failure — matching on the human-readable message instead would break the moment the
+ * wording changes, which it is free to do.
+ */
+export class SubmitReportError extends Error {
+  readonly status: number;
+  readonly internalCode: string | undefined;
+
+  constructor(status: number, internalCode: string | undefined) {
+    super(`Report submission failed: ${status}`);
+    this.name = 'SubmitReportError';
+    this.status = status;
+    this.internalCode = internalCode;
+  }
+}
+
+export const isReportingDisabledError = (error: unknown): boolean =>
+  error instanceof SubmitReportError && error.internalCode === 'REPORTING_DISABLED';
+
 /**
  * Pick the concrete `lines.id` variant to submit from the user's high-level selection.
  * Narrows by station membership first, then by terminus when a direction was picked.
@@ -270,7 +291,12 @@ export function useSubmitReport() {
             source: isNative ? 'mobile_app' : 'web_app',
           }),
         });
-        if (!response.ok) throw new Error(`Report submission failed: ${response.status}`);
+        if (!response.ok) {
+          const body = (await response.json().catch(() => undefined)) as
+            | { details?: { internal_code?: string } }
+            | undefined;
+          throw new SubmitReportError(response.status, body?.details?.internal_code);
+        }
         return response.json();
       }),
     // The backend commits the report and clears its reports/risk caches before
