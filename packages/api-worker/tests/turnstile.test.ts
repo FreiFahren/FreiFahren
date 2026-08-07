@@ -29,6 +29,8 @@ type TurnstileLogEntry = {
     enforce: boolean
     widgetHostname?: string
     tokenAgeMs?: number
+    asn?: number
+    asOrganization?: string
     errorCodes?: string[]
 }
 
@@ -41,10 +43,13 @@ const turnstileLogs = (): TurnstileLogEntry[] =>
         .filter(([message]) => message === 'Turnstile verification')
         .map(([, entry]) => entry as TurnstileLogEntry)
 
-const postReport = (headers: Record<string, string> = {}) =>
+// `cf` is what Cloudflare attaches at the edge; workerd honours it in RequestInit, so a test can
+// stand a request up on a named network without reaching past the public surface.
+const postReport = (headers: Record<string, string> = {}, cf?: Record<string, unknown>) =>
     appRequestWithRedirect('/reports', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...headers },
+        ...(cf === undefined ? {} : { cf }),
         body: JSON.stringify({ stationId, source: 'web_app' }),
     })
 
@@ -262,6 +267,44 @@ describe('Turnstile verification', () => {
             await postReport({ [TURNSTILE_TOKEN_HEADER]: 'a-valid-token' })
 
             expect(turnstileLogs()[0]!.tokenAgeMs).toBeUndefined()
+        })
+
+        it('records the network a pass came from', async () => {
+            await postReport(
+                { [TURNSTILE_TOKEN_HEADER]: 'a-valid-token' },
+                {
+                    asn: 3320,
+                    asOrganization: 'Deutsche Telekom AG',
+                }
+            )
+
+            expect(turnstileLogs()[0]).toMatchObject({
+                outcome: 'passed',
+                asn: 3320,
+                asOrganization: 'Deutsche Telekom AG',
+            })
+        })
+
+        // The reason the field exists: a refusal with no network attached cannot be told apart from
+        // any other refusal, which is exactly the question asked of these logs.
+        it('records the network a refusal came from', async () => {
+            await postReport({}, { asn: 64496, asOrganization: 'Example Hosting' })
+
+            expect(turnstileLogs()[0]).toMatchObject({
+                outcome: 'refused',
+                errorCodes: ['missing-input-response'],
+                asn: 64496,
+                asOrganization: 'Example Hosting',
+            })
+        })
+
+        it('omits the network rather than guessing when there is no edge metadata', async () => {
+            await postReport({ [TURNSTILE_TOKEN_HEADER]: 'a-valid-token' })
+
+            const [entry] = turnstileLogs()
+            expect(entry).toMatchObject({ outcome: 'passed' })
+            expect(entry).not.toHaveProperty('asn')
+            expect(entry).not.toHaveProperty('asOrganization')
         })
 
         it('records a tokenless attempt, which never reaches Cloudflare', async () => {
