@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { app } from '../src/index'
+import { TURNSTILE_TOKEN_HEADER } from '../src/modules/reports/turnstile'
 import { appRequestWithRedirect, testEnv } from './test-utils'
 
 describe('Versioning', () => {
@@ -145,6 +146,27 @@ describe('CORS', () => {
         expect(response.headers.get('Access-Control-Allow-Methods')).toContain('POST')
         expect(response.headers.get('Access-Control-Allow-Headers')).toContain('Content-Type')
     })
+
+    /*
+     * A missing entry here is invisible in production: the browser refuses the preflight, so the
+     * POST never reaches the API and there is nothing to see in the API's own telemetry.
+     */
+    it.each(['Content-Type', 'ff-platform', TURNSTILE_TOKEN_HEADER])(
+        'allows %s on a report preflight',
+        async (header) => {
+            const response = await appRequestWithRedirect('/reports', {
+                method: 'OPTIONS',
+                headers: {
+                    Origin: ALLOWED_ORIGIN,
+                    'Access-Control-Request-Method': 'POST',
+                    'Access-Control-Request-Headers': header,
+                },
+            })
+
+            expect(response.status).toBe(204)
+            expect(response.headers.get('Access-Control-Allow-Headers')?.toLowerCase()).toContain(header.toLowerCase())
+        }
+    )
 
     it('grants a preflight from a frontend preview origin', async () => {
         const response = await appRequestWithRedirect('/reports', {
