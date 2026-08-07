@@ -1,6 +1,6 @@
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ChevronRight, MapPin, Search, TriangleAlert } from 'lucide-react';
+import { ChevronRight, MapPin, Search, Send, TriangleAlert } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -19,6 +19,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useGeolocation } from '@/contexts/Geolocation.context';
 import { isContributeDismissed, openContributeModal } from '@/lib/contribute-modal';
 import { track } from '@/lib/analytics';
+import { currentCity } from '@/lib/city';
 import { distanceMeters } from '@/lib/geo';
 import { notifySuccess, selectionTap } from '@/lib/haptics';
 import { toast } from '@/lib/toast';
@@ -44,6 +45,10 @@ function normalize(value: string): string {
 }
 
 const NEARBY_COUNT = 3;
+
+// Manual killswitch for reporting through the app. Reports posted directly in the Telegram group
+// still sync normally. Flip back to false once submissions should resume.
+const REPORTING_DISABLED = true;
 
 const REJECTION_MESSAGE: Record<ReportRejection, string> = {
   too_soon: 'errorTooSoon',
@@ -332,6 +337,31 @@ function DirectionPicker() {
   );
 }
 
+function ReportingDisabledNotice() {
+  const { t } = useTranslation(NAMESPACE);
+  const telegramUrl = `https://t.me/${currentCity.community.telegramHandle.replace(/^@/, '')}`;
+
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
+      <TriangleAlert className="text-muted-foreground size-8" />
+      <div className="space-y-2">
+        <p className="font-heading text-base font-semibold">{t('disabledTitle')}</p>
+        <p className="text-muted-foreground text-sm">{t('disabledBody')}</p>
+      </div>
+      <Button
+        asChild
+        size="lg"
+        className="bg-accent-bright text-primary-foreground hover:bg-accent-press h-12 rounded-lg px-6 text-base font-semibold shadow-[0_6px_16px_rgba(214,59,59,0.28)]"
+      >
+        <a href={telegramUrl} target="_blank" rel="noopener noreferrer">
+          <Send data-icon="inline-start" />
+          {t('disabledTelegramCta')}
+        </a>
+      </Button>
+    </div>
+  );
+}
+
 function SubmitFooter({ onSubmitted }: { onSubmitted: (result: SubmitReportResponse) => void }) {
   const { t } = useTranslation(NAMESPACE);
   const { stationId, lineName, directionStationId } = useReportSelection();
@@ -426,10 +456,16 @@ export function ReportForm() {
                   />
                 }
               />
-              <LinePicker />
-              <StationPicker />
-              <DirectionPicker />
-              <SubmitFooter onSubmitted={setResult} />
+              {REPORTING_DISABLED ? (
+                <ReportingDisabledNotice />
+              ) : (
+                <>
+                  <LinePicker />
+                  <StationPicker />
+                  <DirectionPicker />
+                  <SubmitFooter onSubmitted={setResult} />
+                </>
+              )}
             </>
           )}
         </div>

@@ -22,6 +22,10 @@ i18n.addResourceBundle('en', NAMESPACE, {
   disclaimer: 'Shared anonymously with all Freifahren users.',
   errorTooSoon: 'You reported very recently. Please wait a moment.',
   errorTooFar: "You're not close enough to the station.",
+  disabledTitle: 'Reporting is currently off',
+  disabledBody:
+    "Reporting in the app is paused for now. You can still report sightings in the Telegram group, and they'll show up here as usual.",
+  disabledTelegramCta: 'Open Telegram group',
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
@@ -44,4 +48,8 @@ i18n.addResourceBundle('de', NAMESPACE, {
   disclaimer: 'Anonym an alle Freifahren-Nutzer geteilt.',
   errorTooSoon: 'Du hast gerade erst gemeldet. Bitte warte einen Moment.',
   errorTooFar: 'Du bist nicht nah genug an der Station.',
+  disabledTitle: 'Melden ist aktuell aus',
+  disabledBody:
+    'Melden in der App ist vorübergehend pausiert. In der Telegram-Gruppe kannst du weiterhin Sichtungen melden, sie werden wie gewohnt hier angezeigt.',
+  disabledTelegramCta: 'Telegram-Gruppe öffnen',
 });
