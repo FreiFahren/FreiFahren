@@ -33,11 +33,27 @@ DATABASES = {
 # valid SQLite — so the opening keyword alone decides neither way. Check both ends.
 MUTATING = re.compile(r"\b(insert|update|delete|drop|alter|create|replace|attach|pragma|vacuum)\b", re.I)
 
+# Keywords only count where they can execute. `SELECT 'update' AS label` and a trailing
+# `-- delete old rows` are both read-only, and matching the raw text rejects them.
+NON_EXECUTABLE = (
+    (re.compile(r"--[^\n]*"), " "),          # line comment
+    (re.compile(r"/\*.*?\*/", re.S), " "),   # block comment
+    (re.compile(r"'(?:[^']|'')*'"), " '' "),  # string literal, '' being the escaped quote
+    (re.compile(r'"(?:[^"]|"")*"'), ' "" '),  # quoted identifier, e.g. "order"
+    (re.compile(r"\[[^\]]*\]"), " [] "),     # bracketed identifier
+)
+
+
+def strip_non_executable(statement: str) -> str:
+    for pattern, replacement in NON_EXECUTABLE:
+        statement = pattern.sub(replacement, statement)
+    return statement
+
 
 def is_read_only(statement: str) -> bool:
     if not statement.lower().startswith(("select", "with", "explain")):
         return False
-    return MUTATING.search(statement) is None
+    return MUTATING.search(strip_non_executable(statement)) is None
 
 
 def read_token() -> str:

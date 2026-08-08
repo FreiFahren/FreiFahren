@@ -206,9 +206,16 @@ CV << 1   too regular  -> a sleep() loop, the classic beaconing signature
 CV >> 1   too bursty   -> volleys from a single source
 ```
 
-The reference is stable for a structural reason: by the superposition theorem, many independent
-arrival processes sum to Poisson whatever the individuals are doing. So the honest *aggregate*
-stream sits near 1 without needing calibration, which is rare and worth exploiting.
+**The reference is not free, and it is tempting to think it is.** Superposition is exactly Poisson
+only when the components are themselves Poisson; for general independent renewal processes it holds
+as a limit (Palm–Khintchine), needing many sources each contributing rarely. Neither condition is
+safe here. Reports are *correlated by construction* — one inspector produces several sightings from
+different people within minutes — which is exactly the synchronised behaviour that breaks the
+assumption, and at 10–20 reports an hour there are not many sources contributing rarely either.
+
+So CV = 1 is a useful null to reason from, not a baseline you can assume. **Measure the honest
+aggregate for the window you care about before treating any deviation as a signal**; the figure
+below came out at 1.30, not 1.00, on real traffic.
 
 Computable in one query — SQLite has no `STDDEV`, so variance comes from `E[x²] − E[x]²`:
 
