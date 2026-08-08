@@ -149,6 +149,64 @@ attack makes its own patterns common and collapses their weight exactly when the
 Per-ASN flags need lower weights than per-client ones because they catch bystanders: AS3320 is
 Telekom, and an honest report arriving mid-burst on the same carrier will trip an ASN rate flag.
 
+**A weight is meaningless when a flag fires alone.** Trust is `1/(1 + cost)` and the display
+threshold defaults to `1`, so any positive cost puts a single uncorroborated report under the bar —
+0.4 and 6.0 have identical effect. Weights only ever separate flags in combination. This is worst
+overnight, when no second report is coming to lift the first over the threshold, so a weak flag
+silently censors the hours when a report is hardest to replace.
+
+## Judging whether a flag earns its place
+
+Once reports carry `trust_flags`, `scripts/flag_stats.py` scores every live flag against traffic
+that actually happened:
+
+```bash
+python3 scripts/flag_stats.py --since '2026-08-07T19:57:00' --threshold 1.0
+```
+
+```
+flag                           on   prec  recall  uniq   marginal (spam/honest)
+client-burst-10m              104   1.00    0.81     0      +7 spam / +0 honest
+client-station-spread-30m      88   1.00    0.69     0      +3 spam / +0 honest
+bare-station-only              84   0.88    0.58     3      +5 spam / +5 honest
+asn-rate-vs-hour              124   0.99    0.96     6     +17 spam / +0 honest
+```
+
+**Read the marginal column first.** Precision and recall describe a flag in isolation, and both can
+look respectable on a flag that is doing nothing — because the reports it catches are already caught
+by something stronger. Marginal replays the station-level verdict with that flag removed and reports
+what actually changes.
+
+`bare-station-only` above is the case worth internalising: 0.88 precision, 0.58 recall, and three
+spam reports no other flag caught — all of which reads like a contributing flag. Its marginal says
+**+5 spam / +5 honest**: it bought five suppressed spam reports at the price of five suppressed real
+ones, one for one, while `asn-rate-vs-hour` was delivering seventeen for nothing. It was disabled on
+that basis, not on the precision figure.
+
+A flag with `+0 spam / +N honest` is pure cost and should be disabled immediately. A flag that never
+fires is free, and worth keeping only if it targets an evasion you expect rather than one you have
+seen.
+
+**Labels are behavioural, and that is a deliberate constraint.** The tool treats any identity filing
+several reports in the window as the actor, because `client_hash` rotates — anything keyed on a
+specific hash, or on a per-window volume threshold, under-counts a rotating actor and inflates
+apparent harm to real users. That error has been made twice by hand here, both times arguing for
+weakening the defence on bad numbers. Check the identity list the tool prints before trusting the
+table under it.
+
+## Turning a dial
+
+Both live controls take effect immediately, with no deploy, because both are Worker secrets:
+
+```bash
+wrangler secret put REPORTING_ENABLED     # true / false — the killswitch
+wrangler secret put MIN_STATION_TRUST     # how much trust a station needs before it shows
+```
+
+Prefer measuring a threshold change before making it. Replaying the night of 2026-08-07 showed that
+disabling one weak flag took honest suppression from 5 to 0 on its own, while lowering the threshold
+cost four more spam reports and changed the honest count not at all.
+
 ## Reporting what you found
 
 Give the shape, not just the count: reports, distinct clients, distinct ASNs, and reports per
