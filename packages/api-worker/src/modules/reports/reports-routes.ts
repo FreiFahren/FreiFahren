@@ -124,7 +124,8 @@ export const postReport = defineRoute<Env>()({
          * off the body's `source`, which the caller picks and could set to 'telegram' precisely to
          * shed attribution.
          */
-        const client = isTrustedWorkerCall(c)
+        const isRelayedReport = isTrustedWorkerCall(c)
+        const client = isRelayedReport
             ? ANONYMOUS_CLIENT
             : await resolveClientIdentity(c, { secret: c.get('config').clientHashSecret })
 
@@ -167,7 +168,22 @@ export const postReport = defineRoute<Env>()({
          * is under load. Nothing reads trust synchronously, so the row simply carries null for a
          * moment.
          */
-        const score = scoreReportInBackground(c.get('db'), c.get('d1'), c.env.TRUST_FLAGS, logger, report.reportId)
+        /*
+         * Relayed reports are not scored at all. Every flag that carries the detection is
+         * attribution-based, and the per-client and per-ASN ones cannot evaluate against columns
+         * that are null by design — so the only flag a relay can ever trip is the content one, and
+         * being the only one it fires alone and is therefore decisive. That is how a Telegram
+         * report naming a station with no line ends up hidden, which is the opposite of what
+         * Telegram is for: it is the channel the app sends people to when reporting is off.
+         *
+         * Keyed off the authenticated shared secret, never off the body's `source`. A caller picks
+         * that field, so trusting it here would turn "skip scoring" into a request parameter.
+         */
+        const score = (
+            isRelayedReport
+                ? Promise.resolve(null)
+                : scoreReportInBackground(c.get('db'), c.get('d1'), c.env.TRUST_FLAGS, logger, report.reportId)
+        )
             .then(async (trust) => {
                 /*
                  * Between the write and the score the row counts as unscored, which reads as fully

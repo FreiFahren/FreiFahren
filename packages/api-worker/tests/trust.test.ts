@@ -6,7 +6,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { loadTrustFlags, TRUST_FLAGS_KEY, trustFromCost, type TrustFlag } from '../src/modules/reports/trust'
 
 import { db, lineStations, lines, reports } from './test-db'
-import { appRequestWithRedirect, resetTestEnv, setTestEnv } from './test-utils'
+import { appRequestWithRedirect, resetTestEnv, setTestEnv, testEnv } from './test-utils'
 
 let stationId: string
 
@@ -103,6 +103,43 @@ describe('trust scoring on report intake', () => {
         const stored = await lastReport()
         expect(stored.trust).toBeCloseTo(1 / 2, 10)
         expect(stored.trustFlags).toBe('works')
+    })
+
+    /*
+     * A relay has no attribution, so only the content flag can ever fire on it — and alone, it is
+     * decisive. Not scoring at all is the fix; leaving trust null keeps the report fully visible.
+     */
+    it('does not score a report relayed with the shared worker secret', async () => {
+        await putFlags([flag({ id: 'always', sql: 'SELECT 1 FROM reports WHERE report_id = ?1', weight: 9 })])
+
+        const response = await appRequestWithRedirect('/reports', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'User-Agent': 'curl/8.7.1',
+                'X-Password': testEnv().REPORT_PASSWORD ?? '',
+            },
+            body: JSON.stringify({ stationId, source: 'telegram' }),
+        })
+        expect(response.status).toBe(200)
+
+        const stored = await lastReport()
+        expect(stored.trust).toBeNull()
+        expect(stored.trustFlags).toBeNull()
+    })
+
+    /*
+     * `source` is chosen by the caller, so it must not be what decides this — otherwise skipping
+     * the flags is a field anyone can set.
+     */
+    it('still scores a report that merely claims to be telegram-sourced', async () => {
+        await putFlags([flag({ id: 'always', sql: 'SELECT 1 FROM reports WHERE report_id = ?1', weight: 9 })])
+
+        expect((await postReport({ stationId, source: 'telegram' })).status).toBe(200)
+
+        const stored = await lastReport()
+        expect(stored.trust).toBeCloseTo(0.1, 10)
+        expect(stored.trustFlags).toBe('always')
     })
 
     // Null is "not yet scored", and must stay distinguishable from a low score.
