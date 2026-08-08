@@ -82,12 +82,29 @@ export const loadTrustFlags = async (kv: KVNamespace | undefined, logger: Logger
 export type TrustAssessment = { trust: number; fired: string[] }
 
 /*
+ * Evidence below this is advisory: it is recorded, but it does not on its own make a report need
+ * corroborating.
+ *
+ * Without it a flag's weight is meaningless whenever it fires alone. Trust is 1/(1 + cost) and the
+ * default display threshold is 1, so *any* positive cost puts a lone report under the bar — 0.4 and
+ * 6.0 have identical effect when nothing else fires. That is not what weights are for, and it bit:
+ * `bare-station-only`, weighted 0.4 precisely because it fires on a lot of honest traffic, was
+ * responsible for 7 of the 8 honest reports suppressed on the night of 2026-08-07, while
+ * contributing nothing the stronger flags had not already caught.
+ *
+ * The harm is worst when traffic is thin. A flagged report escapes by being corroborated at the
+ * same station, and at four in the morning no second report is coming — so the flag silently
+ * censors exactly the hours when a report is hardest to replace.
+ */
+const ADVISORY_COST = 0.5
+
+/*
  * Trust falls off as 1/(1 + cost), so an honest report scores 1 and every flag makes the report
  * need proportionally more corroboration before it counts for anything. It cannot reach zero,
  * which is deliberate: a flagged report is one that has to be confirmed by somebody else, not one
  * that has been decided about.
  */
-export const trustFromCost = (cost: number): number => 1 / (1 + cost)
+export const trustFromCost = (cost: number): number => (cost < ADVISORY_COST ? 1 : 1 / (1 + cost))
 
 export const assessReport = async (
     d1: D1Database,

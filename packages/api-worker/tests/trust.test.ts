@@ -105,6 +105,17 @@ describe('trust scoring on report intake', () => {
         expect(stored.trustFlags).toBe('works')
     })
 
+    it('stores full trust when only a sub-advisory flag fires', async () => {
+        await putFlags([flag({ id: 'weak', sql: 'SELECT 1 FROM reports WHERE report_id = ?1', weight: 0.4 })])
+
+        expect((await postReport()).status).toBe(200)
+
+        const stored = await lastReport()
+        expect(stored.trust).toBe(1)
+        // Still recorded — the evidence is kept even when it does not change the verdict.
+        expect(stored.trustFlags).toBe('weak')
+    })
+
     // Null is "not yet scored", and must stay distinguishable from a low score.
     it('leaves trust null when no flags are configured', async () => {
         expect((await postReport()).status).toBe(200)
@@ -179,6 +190,21 @@ describe('trustFromCost', () => {
         [9, 0.1],
     ])('maps a cost of %d to %f', (cost, expected) => {
         expect(trustFromCost(cost)).toBeCloseTo(expected, 10)
+    })
+
+    /*
+     * The case this exists for: one weak flag firing alone. Below the advisory floor the report
+     * still scores 1 and so still shows without needing a second reporter, which at four in the
+     * morning is not going to arrive.
+     */
+    it.each([0.1, 0.4, 0.49])('leaves a report fully trusted at an advisory cost of %f', (cost) => {
+        expect(trustFromCost(cost)).toBe(1)
+    })
+
+    // But the same weak flag alongside anything else still demands corroboration.
+    it('demands corroboration once weak evidence is joined by more', () => {
+        expect(trustFromCost(0.4)).toBe(1)
+        expect(trustFromCost(0.4 + 2)).toBeCloseTo(1 / 3.4, 10)
     })
 
     it('never reaches zero', () => {
