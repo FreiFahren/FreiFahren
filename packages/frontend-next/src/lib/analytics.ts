@@ -57,6 +57,9 @@ type AnalyticsEvents = {
   app_banner_shown: Record<string, never>;
   app_banner_store_clicked: Record<string, never>;
   app_banner_dismissed: Record<string, never>;
+  app_removal_banner_shown: Record<string, never>;
+  app_removal_banner_clicked: Record<string, never>;
+  app_removal_banner_dismissed: Record<string, never>;
   feedback_sentiment_selected: { sentiment: FeedbackSentiment };
 };
 
