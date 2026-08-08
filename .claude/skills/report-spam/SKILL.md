@@ -194,6 +194,66 @@ apparent harm to real users. That error has been made twice by hand here, both t
 weakening the defence on bad numbers. Check the identity list the tool prints before trusting the
 table under it.
 
+## Arrival rhythm: too regular and too bursty are both suspicious
+
+Uncoordinated people produce a memoryless arrival process, whose inter-arrival times are
+exponentially distributed — so the coefficient of variation `CV = sd/mean` is **exactly 1**. That
+gives a two-sided test with a principled centre rather than a tuned threshold:
+
+```
+CV ~ 1    what a crowd looks like
+CV << 1   too regular  -> a sleep() loop, the classic beaconing signature
+CV >> 1   too bursty   -> volleys from a single source
+```
+
+The reference is stable for a structural reason: by the superposition theorem, many independent
+arrival processes sum to Poisson whatever the individuals are doing. So the honest *aggregate*
+stream sits near 1 without needing calibration, which is rare and worth exploiting.
+
+Computable in one query — SQLite has no `STDDEV`, so variance comes from `E[x²] − E[x]²`:
+
+```sql
+WITH g AS (
+  SELECT (timestamp - LAG(timestamp) OVER (PARTITION BY client_hash ORDER BY timestamp))/1000.0 AS gap,
+         substr(client_hash,1,10) AS ch
+  FROM reports WHERE client_hash IS NOT NULL AND timestamp >= unixepoch('...')*1000
+)
+SELECT ch, count(*) gaps, round(AVG(gap),1) mean_s,
+       round(sqrt(AVG(gap*gap) - AVG(gap)*AVG(gap)) / AVG(gap), 2) cv
+FROM g WHERE gap IS NOT NULL GROUP BY ch HAVING gaps >= 4 ORDER BY cv
+```
+
+**Measured on the 2026-08-07/08 incident, it did not separate.** Recorded so nobody re-derives it
+and assumes it works:
+
+```
+identity      gaps  mean_s    cv
+8698224762       5    25.4  0.13   <- metronomic
+fb65b8ea40      52    24.2  0.59
+2c5c8c0eca       6    35.2  0.85
+6e80c006ce      18    38.0  1.13   <- indistinguishable from honest
+fd18b7aead      53    71.2  1.83
+270c546a7c      42   139.7  5.21   <- bursty
+
+honest aggregate stream                1.30
+```
+
+Attack CVs span 0.13 to 5.21, straddling the honest value from both sides. Splitting a block into
+contiguous runs (cutting at gaps over five minutes, since a loop is only punctual while it is
+running) tightens it to a median of 0.67 against 1.30, but individual runs still land at 1.13 and
+1.37. These are not `sleep(30)` loops: the gaps carry real jitter, from a hand-driven tool or
+deliberate randomisation.
+
+**Where it would still earn its place** is not as a detector but as a discriminator *within* the
+already-flagged set. `client-burst-10m` fires on anyone filing more than four reports in ten
+minutes and cannot tell a script from a person caught in a genuine inspection sweep. CV can: the
+person is irregular, the script is not.
+
+That case cannot be validated yet — **no honest client in the dataset has filed four reports**, so
+the false positive it would prevent has never been observed. Shipping it now would be tuning
+against a projection. Revisit if `client-burst-10m` ever starts catching real people, and validate
+with `flag_stats.py` against that traffic rather than against this incident.
+
 ## Turning a dial
 
 Both live controls take effect immediately, with no deploy, because both are Worker secrets:

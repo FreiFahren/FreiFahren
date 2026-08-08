@@ -14,6 +14,7 @@ stray UPDATE against production reports while chasing a spammer is not recoverab
 """
 import argparse
 import json
+import re
 import subprocess
 import sys
 import urllib.error
@@ -26,6 +27,17 @@ DATABASES = {
     "berlin": "f8e11f14-15a5-42a8-8eba-5ab513175890",
     "leipzig": "e590b909-ce9e-4b32-8761-8e86f2e036d3",
 }
+
+
+# A CTE is read-only but does not start with SELECT, and `WITH ... AS (...) DELETE FROM ...` is
+# valid SQLite — so the opening keyword alone decides neither way. Check both ends.
+MUTATING = re.compile(r"\b(insert|update|delete|drop|alter|create|replace|attach|pragma|vacuum)\b", re.I)
+
+
+def is_read_only(statement: str) -> bool:
+    if not statement.lower().startswith(("select", "with", "explain")):
+        return False
+    return MUTATING.search(statement) is None
 
 
 def read_token() -> str:
@@ -100,8 +112,8 @@ def main():
     args = parser.parse_args()
 
     statement = args.sql.strip()
-    if not statement.lower().startswith(("select", "explain")):
-        raise SystemExit("Refusing: this tool is read-only (SELECT / EXPLAIN QUERY PLAN).")
+    if not is_read_only(statement):
+        raise SystemExit("Refusing: this tool is read-only (SELECT / WITH / EXPLAIN QUERY PLAN).")
 
     rows = run(statement, args.params, args.city)
     print(json.dumps(rows, indent=2) if args.json else as_table(rows))
