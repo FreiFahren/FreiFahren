@@ -187,6 +187,27 @@ A flag with `+0 spam / +N honest` is pure cost and should be disabled immediatel
 fires is free, and worth keeping only if it targets an evasion you expect rather than one you have
 seen.
 
+## Marginal value misses when a flag fires
+
+The rule above is right about cost and blind to *timing*, and disabling `bare-station-only` on it
+turned out to be a mistake worth writing down.
+
+**Most flags cannot score a client's first report.** `client-burst-10m`, `client-station-spread-30m`
+and `client-teleport` all compare a report against earlier ones from the same `client_hash`, so on
+report #1 there is nothing to compare and they stay silent. Only flags that read the report itself —
+`bare-station-only`, `unusual-user-agent` — or its neighbourhood — `asn-rate-vs-hour` — can fire
+before a client has any history.
+
+Disabling `bare-station-only` at 03:54 on 2026-08-08 left `asn-rate-vs-hour` as the only
+first-report flag. `client-teleport` did not go live until 11:53. The burst at 07:58 landed in that
+gap and **leaked 8 stations, where the six other bursts leaked 0 or 1**. Marginal value had said the
+flag was break-even; it did not and could not say that removing it opened an eight-hour hole in the
+only layer that acts on arrival.
+
+So read marginal value as *what this flag costs per unit of suppression*, and ask separately: **if I
+disable this, what still fires on report #1?** If the answer is "nothing", the marginal number is not
+the whole decision.
+
 **Labels are behavioural, and that is a deliberate constraint.** The tool treats any identity filing
 several reports in the window as the actor, because `client_hash` rotates — anything keyed on a
 specific hash, or on a per-window volume threshold, under-counts a rotating actor and inflates
