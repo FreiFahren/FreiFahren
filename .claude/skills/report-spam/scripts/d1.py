@@ -35,19 +35,24 @@ MUTATING = re.compile(r"\b(insert|update|delete|drop|alter|create|replace|attach
 
 # Keywords only count where they can execute. `SELECT 'update' AS label` and a trailing
 # `-- delete old rows` are both read-only, and matching the raw text rejects them.
-NON_EXECUTABLE = (
-    (re.compile(r"--[^\n]*"), " "),          # line comment
-    (re.compile(r"/\*.*?\*/", re.S), " "),   # block comment
-    (re.compile(r"'(?:[^']|'')*'"), " '' "),  # string literal, '' being the escaped quote
-    (re.compile(r'"(?:[^"]|"")*"'), ' "" '),  # quoted identifier, e.g. "order"
-    (re.compile(r"\[[^\]]*\]"), " [] "),     # bracketed identifier
+#
+# One pass, not a sequence of substitutions: strings and comments nest into each other, so whichever
+# opens first must consume its own body. Stripping comments before strings lets a literal containing
+# `/*` pair with a later real `*/` and swallow the executable text between them --
+# `WITH x(v) AS (SELECT '/*') DELETE FROM reports WHERE 0 /*'*/` would have read as harmless.
+NON_EXECUTABLE = re.compile(
+    r"""'(?:[^']|'')*'      # string literal, '' being the escaped quote
+      | "(?:[^"]|"")*"      # quoted identifier, e.g. "order"
+      | \[[^\]]*\]         # bracketed identifier
+      | --[^\n]*            # line comment
+      | /\*.*?\*/           # block comment
+    """,
+    re.S | re.X,
 )
 
 
 def strip_non_executable(statement: str) -> str:
-    for pattern, replacement in NON_EXECUTABLE:
-        statement = pattern.sub(replacement, statement)
-    return statement
+    return NON_EXECUTABLE.sub(" ", statement)
 
 
 def is_read_only(statement: str) -> bool:
