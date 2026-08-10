@@ -1,4 +1,4 @@
-import type { D1Database, KVNamespace } from '@cloudflare/workers-types'
+import type { D1Database } from '@cloudflare/workers-types'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 
@@ -6,17 +6,10 @@ import type { Logger } from '../../common/logger'
 import { DbConnection, reports } from '../../db'
 
 /*
- * A report earns trust on its own. Each flag is a read-only SQL predicate evaluated against the
- * report that was just written; the ones that fire subtract from its trust.
- *
- * The predicates live in KV rather than in this file because a spam pattern is discovered while it
- * is happening, and a deploy is the wrong unit of latency for that. Adding a flag is a KV write.
- *
- * Deliberately *not* here: anything asking whether the sighting itself is plausible. A report from
- * a station that rarely sees one is the most valuable report we get, and a filter built on the
- * historical distribution would suppress exactly those. Flags describe the submission — what the
- * client announced, what else arrived alongside it — never whether inspectors are likely to be
- * there.
+ * Deliberately *not* here: anything asking whether the sighting itself is plausible. A report from a
+ * station that rarely sees one is the most valuable report we get, and a filter built on the
+ * historical distribution would suppress exactly those. Flags describe the submission, never whether
+ * inspectors are likely to be there.
  */
 export const trustFlagSchema = z.object({
     id: z.string().min(1).max(64),
@@ -33,42 +26,38 @@ export const trustFlagSchema = z.object({
      */
     weight: z.number().positive().finite(),
     enabled: z.boolean(),
+    // Part of the schema, not a stray key: z.object strips what it does not know.
+    description: z.string().optional(),
 })
 
 export type TrustFlag = z.infer<typeof trustFlagSchema>
 
-export const TRUST_FLAGS_KEY = 'flags'
-
-/*
- * Read-only and single-statement. These predicates come from KV, so whoever can write that
- * namespace can already run code here — this is not a privilege boundary, and it is not pretending
- * to be one. It is a guard against a typo in an operator's ad-hoc query truncating the reports
- * table at three in the morning.
- */
+// Stops a predicate pasted in under pressure from mutating the table.
 const isReadOnlyStatement = (statement: string): boolean => /^\s*select\b/i.test(statement) && !statement.includes(';')
 
-/*
- * Cached per isolate for a minute. A new flag is live within that; the alternative is a KV read on
- * every report, which buys freshness nobody is waiting on.
- */
-const FLAGS_CACHE_TTL_SECONDS = 60
+// Unset disables scoring — dev, previews, tests — leaving trust null, which reads as unscored.
+export const loadTrustFlags = (raw: string | undefined, logger: Logger): TrustFlag[] => {
+    // A leftover KV binding of the same name arrives as an object, and scoring must not throw here.
+    if (typeof raw !== 'string' || raw.trim() === '') return []
 
-export const loadTrustFlags = async (kv: KVNamespace | undefined, logger: Logger): Promise<TrustFlag[]> => {
-    if (kv === undefined) return []
+    let decoded: unknown
+    try {
+        decoded = JSON.parse(raw)
+    } catch (error) {
+        logger.error(
+            { reason: error instanceof Error ? error.message : String(error) },
+            'Trust flag definitions are not valid JSON'
+        )
+        return []
+    }
 
-    const raw = await kv.get(TRUST_FLAGS_KEY, { type: 'json', cacheTtl: FLAGS_CACHE_TTL_SECONDS })
-    if (raw === null) return []
-
-    const parsed = z.array(trustFlagSchema).safeParse(raw)
+    const parsed = z.array(trustFlagSchema).safeParse(decoded)
     if (!parsed.success) {
         logger.error({ issues: parsed.error.issues.length }, 'Trust flag definitions are malformed')
         return []
     }
 
-    /*
-     * One bad definition drops itself rather than the whole set: a malformed flag added mid-incident
-     * must not silently disarm the flags that were already working.
-     */
+    // One bad definition drops itself rather than disarming the whole set.
     return parsed.data.filter((flag) => {
         if (!flag.enabled) return false
         if (!isReadOnlyStatement(flag.sql)) {
@@ -133,11 +122,11 @@ export const assessReport = async (
 export const scoreReportInBackground = async (
     db: DbConnection,
     d1: D1Database,
-    kv: KVNamespace | undefined,
+    flagDefinitions: string | undefined,
     logger: Logger,
     reportId: number
 ): Promise<number | null> => {
-    const flags = await loadTrustFlags(kv, logger)
+    const flags = loadTrustFlags(flagDefinitions, logger)
     if (flags.length === 0) return null
 
     const { trust, fired } = await assessReport(d1, flags, reportId, logger)

@@ -21,7 +21,8 @@ export const resetTestEnv = () => {
 // Derived on every call so a test can flip an override right before a request and have it take effect.
 export const testEnv = (): Bindings => ({
     DB: workerEnv.DB,
-    TRUST_FLAGS: workerEnv.TRUST_FLAGS,
+    // Unbound in vitest.config.ts: scoring is off unless a suite opts in.
+    TRUST_FLAGS: overrides.TRUST_FLAGS,
     CORS_ORIGINS: overrides.CORS_ORIGINS ?? workerEnv.CORS_ORIGINS,
     PREVIEW_WORKERS_SUBDOMAIN: overrides.PREVIEW_WORKERS_SUBDOMAIN ?? workerEnv.PREVIEW_WORKERS_SUBDOMAIN,
     NODE_ENV: overrides.NODE_ENV ?? workerEnv.NODE_ENV,

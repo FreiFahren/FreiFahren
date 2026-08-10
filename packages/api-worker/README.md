@@ -61,3 +61,30 @@ city in `CITY_DATABASES` (with a drift guard that fails if the databases land on
 `bun run db:studio` opens Drizzle Studio against the remote D1 over the Cloudflare API (set
 `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_D1_DATABASE_ID`, `CLOUDFLARE_API_TOKEN`). For quick queries,
 use `bunx wrangler d1 execute DB --local|--remote --command "..."`.
+
+## Trust flags
+
+The flag definitions are committed encrypted, as `trust-flags.enc`, because publishing the
+thresholds publishes how to stay under them. Changing them is a pull request against the decrypted
+file; the deploy publishes it as the `TRUST_FLAGS` secret.
+
+```bash
+brew install age                    # once
+bun run flags:decrypt               # trust-flags.enc  -> trust-flags.json (gitignored), then edit it
+bun run flags:encrypt               # trust-flags.json -> trust-flags.enc, commit that
+bun run flags:recipients            # who can currently decrypt
+```
+
+There is no passphrase to share: the file is encrypted to the SSH keys this repo's collaborators
+publish on their GitHub profiles, and decrypted with the key you already push with. If you cannot
+decrypt, ask anyone with access to re-run `flags:encrypt` — that is also what applies a membership
+change, in either direction. `TRUST_FLAGS_AGE_IDENTITY` overrides the key file if yours is not
+`~/.ssh/id_ed25519` or `~/.ssh/id_rsa`.
+
+Flags are unset in dev, previews and tests, which leaves reports unscored and shows everything on
+the map. Two levers stay out of the deploy loop, as secrets that take effect in seconds:
+
+```bash
+wrangler secret put REPORTING_ENABLED     # true / false — the killswitch
+wrangler secret put MIN_STATION_TRUST     # trust a station needs before it shows
+```
