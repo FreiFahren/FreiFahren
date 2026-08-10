@@ -67,11 +67,47 @@ jobs:
                           --content-type application/octet-stream \
                           --cache-control "public, max-age=31536000, immutable" \
                           --remote
-                      # The style is the only mutable pointer — short TTL so a redeploy propagates
-                      # quickly. It already references this build's immutable /v<sha>/ archive.
+                      # Pre-compressed because a custom domain serves R2 objects byte-for-byte — the
+                      # zone's Brotli setting reaches Pages assets but never R2 — and the style is on
+                      # the critical path: MapLibre requests no tile until it resolves. `-n` keeps the
+                      # bytes identical for identical input, so the strong ETag survives a rebuild.
+                      gzip -9 -n -c "dist/styles/$city.json" > "dist/styles/$city.json.gz"
+                      # The style is the only mutable pointer, and it already references this build's
+                      # immutable /v<sha>/ archive. `s-maxage` holds it at the edge for a day (at 60s
+                      # it fell out constantly, so most requests paid a full origin round trip) while
+                      # `max-age` keeps browsers checking back; the purge below propagates a redeploy.
                       bunx wrangler@latest r2 object put "freifahren-tiles/styles/$city.json" \
-                          --file "dist/styles/$city.json" \
+                          --file "dist/styles/$city.json.gz" \
                           --content-type application/json \
-                          --cache-control "public, max-age=60, must-revalidate" \
+                          --content-encoding gzip \
+                          --cache-control "public, max-age=60, s-maxage=86400" \
                           --remote
                   done
+
+            # Only the style needs purging — the archive is immutable under /v<sha>/ and is never
+            # overwritten. A skipped purge degrades gracefully (the edge keeps serving the previous
+            # style, which points at a still-present archive), but a *failed* one is a real problem
+            # worth failing the deploy over, so a bad token can't quietly pin the basemap for a day.
+            - name: Purge basemap style cache
+              env:
+                  CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  TILES_BASE_URL: ${{ vars.TILES_BASE_URL }}
+              run: |
+                  set -euo pipefail
+                  if [ -z "${CLOUDFLARE_ZONE_ID:-}" ] || [ -z "${CLOUDFLARE_API_TOKEN:-}" ]; then
+                      echo "Skipping style cache purge (CLOUDFLARE_ZONE_ID or CLOUDFLARE_API_TOKEN not set)"
+                      exit 0
+                  fi
+                  files=""
+                  for f in dist/*.pmtiles; do
+                      city="$(basename "$f" .pmtiles)"
+                      files="${files:+$files,}\"${TILES_BASE_URL%/}/styles/$city.json\""
+                  done
+                  response="$(curl -sS -X POST \
+                      "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/purge_cache" \
+                      -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+                      -H "Content-Type: application/json" \
+                      --data "{\"files\":[$files]}")"
+                  echo "$response"
+                  echo "$response" | grep -q '"success":true'
