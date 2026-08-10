@@ -15,6 +15,7 @@ import { Route as PrivacyRoute } from '@/routes/privacy';
 
 import { CitySwitcher } from './CitySwitcher';
 import { DetailCard } from './DetailCard';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { NAMESPACE } from './SettingsButton.i18n';
 import { SocialLinks } from './SocialLinks';
 
@@ -61,6 +62,7 @@ export function SettingsCard({ onClose }: SettingsCardProps) {
   return (
     <DetailCard title={t('title')} closeLabel={t('close')} onClose={onClose}>
       <div className="flex flex-col px-2">
+        <LanguageSwitcher />
         <CitySwitcher />
         <a
           href={`${WEBSITE_URL}/contact`}
