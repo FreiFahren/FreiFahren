@@ -64,40 +64,27 @@ use `bunx wrangler d1 execute DB --local|--remote --command "..."`.
 
 ## Trust flags
 
-Every report is scored after it is written: each flag in the set is a read-only SQL predicate run
-against that report, and the ones that fire reduce its trust (`trust = 1 / (1 + Σ weights)`). A
-station shows on the map once the trust of its reports in the last hour reaches `MIN_STATION_TRUST`,
-so a flagged report is one that needs corroborating rather than one that has been decided about.
-
-The definitions live in `trust-flags.enc`, encrypted, because publishing them publishes the
-thresholds — `client-burst-10m` fires above four reports in ten minutes, and the evasion is to file
-three. The plaintext is gitignored.
+The flag definitions are committed encrypted, as `trust-flags.enc`, because publishing the
+thresholds publishes how to stay under them. Changing them is a pull request against the decrypted
+file; the deploy publishes it as the `TRUST_FLAGS` secret.
 
 ```bash
 brew install age                    # once
-bun run flags:decrypt               # trust-flags.enc  -> trust-flags.json, then edit it
+bun run flags:decrypt               # trust-flags.enc  -> trust-flags.json (gitignored), then edit it
 bun run flags:encrypt               # trust-flags.json -> trust-flags.enc, commit that
+bun run flags:recipients            # who can currently decrypt
 ```
 
-There is no passphrase and nothing to share. The file is encrypted to every collaborator on this
-repo, using the SSH keys they already publish on their GitHub profile, and decrypted with the key you
-already push with — so access follows repo membership by itself. Joining means you can read the next
-version; leaving means you are not a recipient of it. If you joined recently and cannot decrypt, ask
-anyone with access to re-run `flags:encrypt`; if you have no SSH key on your GitHub profile, add one
-under Settings → SSH and GPG keys (`flags:encrypt` names anyone it had to skip).
+There is no passphrase to share: the file is encrypted to the SSH keys this repo's collaborators
+publish on their GitHub profiles, and decrypted with the key you already push with. If you cannot
+decrypt, ask anyone with access to re-run `flags:encrypt` — that is also what applies a membership
+change, in either direction. `TRUST_FLAGS_AGE_IDENTITY` overrides the key file if yours is not
+`~/.ssh/id_ed25519` or `~/.ssh/id_rsa`.
 
-Changing a flag is a pull request. Review the decrypted diff — `bun run flags:decrypt` on either side
-of the branch — and merge; the deploy workflow decrypts the blob with its own age identity and sets
-it as the `TRUST_FLAGS` secret. A blob that will not decrypt, or a flag set the schema rejects, fails
-the deploy rather than reaching production. Rolling a flag back is reverting the commit.
-
-Two controls stay outside this loop, as Worker secrets that take effect in seconds with no deploy,
-because they are what an incident actually reaches for:
+Flags are unset in dev, previews and tests, which leaves reports unscored and shows everything on
+the map. Two levers stay out of the deploy loop, as secrets that take effect in seconds:
 
 ```bash
 wrangler secret put REPORTING_ENABLED     # true / false — the killswitch
 wrangler secret put MIN_STATION_TRUST     # trust a station needs before it shows
 ```
-
-Flags are unset in dev, previews and tests. Trust then stays null, which reads as _unscored_ rather
-than untrusted, and the map shows everything.

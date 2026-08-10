@@ -90,21 +90,15 @@ jobs:
             - name: Install dependencies
               run: bun install --frozen-lockfile
 
-            # Fails the deploy rather than letting an unreadable blob reach production as silently
-            # unscored reports.
-            - name: Publish trust flag definitions
+            # Before the deploy, because a worker that cannot be given its flags should not ship at all.
+            - name: Check the trust flag key is present
               env:
                   TRUST_FLAGS_AGE_KEY: ${{ secrets.TRUST_FLAGS_AGE_KEY }}
-                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
               run: |
                   if [ -z "$TRUST_FLAGS_AGE_KEY" ]; then
                     echo "TRUST_FLAGS_AGE_KEY is not set — trust scoring would silently do nothing." >&2
                     exit 1
                   fi
-                  sudo apt-get update && sudo apt-get install -y age
-                  # Piped, so the plaintext touches neither the disk nor a step output.
-                  bun run src/trust-flags.ts print | bunx wrangler secret put TRUST_FLAGS
 
             - name: Deploy worker
               uses: cloudflare/wrangler-action@v3
@@ -118,6 +112,26 @@ jobs:
                       REPORT_PASSWORD
               env:
                   REPORT_PASSWORD: ${{ secrets.REPORT_PASSWORD }}
+
+            # After the deploy, so this never has to add a secret named TRUST_FLAGS to a live version
+            # that still carries the KV binding of that name. A failure here leaves the previously
+            # published set in place, so the worker keeps scoring while the job goes red.
+            - name: Publish trust flag definitions
+              env:
+                  TRUST_FLAGS_AGE_KEY: ${{ secrets.TRUST_FLAGS_AGE_KEY }}
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+              run: |
+                  # Setting a secret mints a worker version of its own, so most deploys skip this:
+                  # only an unpublished set, or a set that changed in this push, needs writing.
+                  if bunx wrangler secret list | grep -q '"TRUST_FLAGS"' &&
+                     git diff --quiet '${{ github.event.before }}' "$GITHUB_SHA" -- trust-flags.enc; then
+                    echo 'trust-flags.enc unchanged and already published — nothing to do.'
+                    exit 0
+                  fi
+                  sudo apt-get update && sudo apt-get install -y age
+                  # Piped, so the plaintext touches neither the disk nor a step output.
+                  bun run src/trust-flags.ts print | bunx wrangler secret put TRUST_FLAGS
 
             # Register the release in Sentry (named after the commit SHA the worker reports) so
             # issues can be resolved "in the next release". Commit association is best-effort:

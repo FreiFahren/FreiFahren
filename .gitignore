@@ -26,7 +26,7 @@ eval_results.*.json
 # evening — the measurements, the thresholds, which defence the current actor has already beaten.
 # That is worth more to them than the flag predicates are, and this repo is meant to be public
 # again. Kept locally and shared out of band.
-.claude/skills/
+.claude/skills/report-spam/
 
 # Decrypted trust-flag definitions. The committed artefact is trust-flags.enc; see
 # packages/api-worker/src/trust-flags.ts.

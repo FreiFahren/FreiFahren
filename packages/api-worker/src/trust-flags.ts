@@ -88,13 +88,44 @@ const describeAccess = ({ readers, skipped }: { readers: string[]; skipped: stri
     }
 }
 
-// Also validated at runtime; a set the Worker would reject must not reach a commit.
-const validate = (json: string): string => {
-    const flags = z.array(trustFlagSchema).parse(JSON.parse(json))
+// A set the Worker would reject must not reach a commit. Strict where the Worker is lenient, so an
+// unknown key is an error naming it rather than a field the next round trip silently drops.
+const parseFlags = (json: string) => {
+    let decoded: unknown
+    try {
+        decoded = JSON.parse(json)
+    } catch (error) {
+        throw new Error(`Not valid JSON: ${error instanceof Error ? error.message : String(error)}`)
+    }
+
+    const parsed = z.array(trustFlagSchema.strict()).safeParse(decoded)
+    if (!parsed.success) {
+        const issues = parsed.error.issues.map((issue) => `flag ${issue.path.join('.') || '?'}: ${issue.message}`)
+        throw new Error(`Not a valid flag set:\n${issues.join('\n')}`)
+    }
+    const flags = parsed.data
     const ids = flags.map((flag) => flag.id)
     const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index)
     if (duplicates.length > 0) throw new Error(`Duplicate flag ids: ${duplicates.join(', ')}`)
-    return JSON.stringify(flags, null, 4)
+    return flags
+}
+
+// Cloudflare caps a plain-text binding at 5 KB, and reports the overflow as the opaque error 10054.
+const SECRET_LIMIT_BYTES = 5120
+
+const asSecretValue = (flags: unknown[]): string => {
+    const value = JSON.stringify(flags)
+    const bytes = Buffer.byteLength(value)
+    if (bytes > SECRET_LIMIT_BYTES) {
+        throw new Error(
+            `The flag set serialises to ${bytes} bytes; a Worker secret holds ${SECRET_LIMIT_BYTES}. ` +
+                'Shorten the descriptions, or drop a flag that has stopped earning its place.'
+        )
+    }
+    if (bytes > SECRET_LIMIT_BYTES * 0.9) {
+        console.warn(`Warning: ${bytes} of ${SECRET_LIMIT_BYTES} bytes used — another flag will not fit.`)
+    }
+    return value
 }
 
 // Identities are read from a path, not stdin, so CI's has to touch disk briefly.
@@ -111,16 +142,24 @@ const decryptWithEnvIdentity = (identity: string): string => {
 
 const SSH_IDENTITIES = ['id_ed25519', 'id_rsa']
 
+// A key file age cannot find by convention — a custom filename, or one only the agent holds.
+const identityOverride = (): string[] => {
+    const path = process.env.TRUST_FLAGS_AGE_IDENTITY
+    return path !== undefined && path !== '' ? [path] : []
+}
+
 const decrypt = (): string => {
     const fromEnvironment = process.env.TRUST_FLAGS_AGE_KEY
     if (fromEnvironment !== undefined && fromEnvironment !== '') return decryptWithEnvIdentity(fromEnvironment)
 
     const home = process.env.HOME ?? ''
-    const candidates = SSH_IDENTITIES.map((name) => join(home, '.ssh', name)).filter((path) => existsSync(path))
+    const searched = [...identityOverride(), ...SSH_IDENTITIES.map((name) => join(home, '.ssh', name))]
+    const candidates = searched.filter((path) => existsSync(path))
     if (candidates.length === 0) {
         throw new Error(
-            'No SSH key in ~/.ssh. Decryption uses the key you push with, and its public half has to be on ' +
-                'your GitHub profile — add one there, then ask anyone with access to re-run `bun run flags:encrypt`.'
+            `No key file at ${searched.join(' or ')}. Decryption uses the key you push with, and its public half ` +
+                'has to be on your GitHub profile — add one there, then ask anyone with access to re-run ' +
+                '`bun run flags:encrypt`. Point TRUST_FLAGS_AGE_IDENTITY at the file if your key lives elsewhere.'
         )
     }
 
@@ -144,7 +183,7 @@ const main = async () => {
 
     if (mode === 'decrypt') {
         requireTools('age')
-        writeFileSync(PLAINTEXT_PATH, `${validate(decrypt())}\n`)
+        writeFileSync(PLAINTEXT_PATH, `${JSON.stringify(parseFlags(decrypt()), null, 4)}\n`)
         console.log(`Wrote ${PLAINTEXT_PATH} — gitignored. Edit it, then run \`bun run flags:encrypt\`.`)
         return
     }
@@ -171,18 +210,20 @@ const main = async () => {
             throw new Error('No collaborator publishes an SSH key — refusing to encrypt to the deploy alone.')
         }
 
-        const plaintext = validate(readFileSync(PLAINTEXT_PATH, 'utf8'))
+        const flags = parseFlags(readFileSync(PLAINTEXT_PATH, 'utf8'))
+        // Checked here too, so the ceiling is hit by whoever edits the set, not by the deploy.
+        asSecretValue(flags)
         const args = [...recipients.args, '-R', CI_RECIPIENT_PATH]
-        writeFileSync(CIPHERTEXT_PATH, run('age', ['-e', '-a', ...args], { input: plaintext }))
+        writeFileSync(CIPHERTEXT_PATH, run('age', ['-e', '-a', ...args], { input: JSON.stringify(flags, null, 4) }))
         console.log(`Wrote ${CIPHERTEXT_PATH} — commit this.`)
         describeAccess(recipients)
         return
     }
 
-    // Deploy workflow: plaintext to stdout, never to the runner's disk.
+    // Deploy workflow: plaintext to stdout, never to the runner's disk, and compact to save bytes.
     if (mode === 'print') {
         requireTools('age')
-        process.stdout.write(validate(decrypt()))
+        process.stdout.write(asSecretValue(parseFlags(decrypt())))
         return
     }
 
