@@ -1,4 +1,4 @@
-import type { D1Database, KVNamespace } from '@cloudflare/workers-types'
+import type { D1Database } from '@cloudflare/workers-types'
 import { CITY_SLUGS, type CityConfig, DEFAULT_CITY_SLUG, getCity } from '@freifahren/cities'
 import { Context, Hono } from 'hono'
 
@@ -15,12 +15,8 @@ export type Bindings = {
     // Cloudflare D1 binding. Present on Workers and, in tests, provided by the Miniflare pool.
     DB?: D1Database
     DB_LEIPZIG?: D1Database
-    /*
-     * Trust-flag definitions (see modules/reports/trust.ts). In KV rather than in the bundle so a
-     * newly recognised spam pattern is a KV write, not a deploy — a pattern is found while it is
-     * running, and a release is the wrong unit of latency for that. Unbound disables scoring.
-     */
-    TRUST_FLAGS?: KVNamespace
+    // Trust-flag definitions as a JSON array, set by the deploy workflow from `trust-flags.enc`.
+    TRUST_FLAGS?: string
     CORS_ORIGINS?: string
     // This repo's Cloudflare account subdomain (e.g. `freifahren` for `*.freifahren.workers.dev`).
     // Scopes the frontend preview CORS allowance to our own account so another tenant can't claim
@@ -112,7 +108,7 @@ export type Env = {
         config: AppConfig
         // This request's city database, both ways round. The drizzle handle is what everything
         // Should use; the raw binding exists for trust scoring, which runs operator-authored SQL
-        // From KV and therefore needs real parameter binding rather than a query builder.
+        // And therefore needs real parameter binding rather than a query builder.
         db: DbConnection
         d1: D1Database
         /*

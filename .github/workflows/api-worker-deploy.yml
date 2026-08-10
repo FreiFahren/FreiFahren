@@ -90,6 +90,22 @@ jobs:
             - name: Install dependencies
               run: bun install --frozen-lockfile
 
+            # Fails the deploy rather than letting an unreadable blob reach production as silently
+            # unscored reports.
+            - name: Publish trust flag definitions
+              env:
+                  TRUST_FLAGS_AGE_KEY: ${{ secrets.TRUST_FLAGS_AGE_KEY }}
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+              run: |
+                  if [ -z "$TRUST_FLAGS_AGE_KEY" ]; then
+                    echo "TRUST_FLAGS_AGE_KEY is not set — trust scoring would silently do nothing." >&2
+                    exit 1
+                  fi
+                  sudo apt-get update && sudo apt-get install -y age
+                  # Piped, so the plaintext touches neither the disk nor a step output.
+                  bun run src/trust-flags.ts print | bunx wrangler secret put TRUST_FLAGS
+
             - name: Deploy worker
               uses: cloudflare/wrangler-action@v3
               with:

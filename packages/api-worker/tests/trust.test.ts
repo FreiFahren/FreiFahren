@@ -1,9 +1,7 @@
-import type { KVNamespace } from '@cloudflare/workers-types'
-import { env as workerEnv } from 'cloudflare:test'
 import { desc, eq } from 'drizzle-orm'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import { loadTrustFlags, TRUST_FLAGS_KEY, trustFromCost, type TrustFlag } from '../src/modules/reports/trust'
+import { loadTrustFlags, trustFromCost, type TrustFlag } from '../src/modules/reports/trust'
 
 import { db, lineStations, lines, reports } from './test-db'
 import { appRequestWithRedirect, resetTestEnv, setTestEnv } from './test-utils'
@@ -18,8 +16,8 @@ const flag = (overrides: Partial<TrustFlag> & Pick<TrustFlag, 'id' | 'sql'>): Tr
     ...overrides,
 })
 
-const putFlags = async (flags: TrustFlag[]) => {
-    await workerEnv.TRUST_FLAGS.put(TRUST_FLAGS_KEY, JSON.stringify(flags))
+const putFlags = (flags: TrustFlag[]) => {
+    setTestEnv({ TRUST_FLAGS: JSON.stringify(flags) })
 }
 
 const postReport = (body?: object) =>
@@ -57,14 +55,13 @@ beforeEach(() => {
     setTestEnv({ REPORTING_ENABLED: 'true', CLIENT_HASH_SECRET: 'test-client-hash-secret' })
 })
 
-afterEach(async () => {
+afterEach(() => {
     resetTestEnv()
-    await workerEnv.TRUST_FLAGS.delete(TRUST_FLAGS_KEY)
 })
 
 describe('trust scoring on report intake', () => {
     it('scores a report that trips no flag as fully trusted', async () => {
-        await putFlags([flag({ id: 'never', sql: 'SELECT 0 FROM reports WHERE report_id = ?1' })])
+        putFlags([flag({ id: 'never', sql: 'SELECT 0 FROM reports WHERE report_id = ?1' })])
 
         expect((await postReport()).status).toBe(200)
 
@@ -74,7 +71,7 @@ describe('trust scoring on report intake', () => {
     })
 
     it('reduces trust for each flag that fires, and records which ones', async () => {
-        await putFlags([
+        putFlags([
             flag({ id: 'tool-ua', sql: "SELECT ua_family LIKE 'curl%' FROM reports WHERE report_id = ?1", weight: 3 }),
             flag({
                 id: 'no-direction',
@@ -93,7 +90,7 @@ describe('trust scoring on report intake', () => {
 
     // A report that is already committed must not be lost to a bad predicate.
     it('still stores a score when a flag fails to evaluate', async () => {
-        await putFlags([
+        putFlags([
             flag({ id: 'broken', sql: 'SELECT no_such_column FROM reports WHERE report_id = ?1', weight: 5 }),
             flag({ id: 'works', sql: 'SELECT 1 FROM reports WHERE report_id = ?1', weight: 1 }),
         ])
@@ -116,56 +113,49 @@ describe('trust scoring on report intake', () => {
 })
 
 describe('trust flag definitions', () => {
-    it('ignores disabled flags', async () => {
-        const flags = await loadTrustFlags(
-            {
-                get: async () => [flag({ id: 'off', sql: 'SELECT 1', enabled: false })],
-            } as unknown as KVNamespace,
+    it('ignores disabled flags', () => {
+        const flags = loadTrustFlags(
+            JSON.stringify([flag({ id: 'off', sql: 'SELECT 1', enabled: false })]),
             silentLogger
         )
         expect(flags).toHaveLength(0)
     })
 
-    /*
-     * The guard is not a privilege boundary — whoever writes this namespace can already run code
-     * here. It is there so a mistyped ad-hoc statement cannot mutate the table.
-     */
+    // A predicate pasted in under pressure must not be able to mutate the table.
     it.each([
         ['delete', 'DELETE FROM reports'],
         ['update', 'UPDATE reports SET trust = 1'],
         ['stacked statement', 'SELECT 1; DROP TABLE reports'],
-    ])('rejects a %s definition', async (_name, statement) => {
-        const flags = await loadTrustFlags(
-            { get: async () => [flag({ id: 'bad', sql: statement })] } as unknown as KVNamespace,
-            silentLogger
-        )
+    ])('rejects a %s definition', (_name, statement) => {
+        const flags = loadTrustFlags(JSON.stringify([flag({ id: 'bad', sql: statement })]), silentLogger)
         expect(flags).toHaveLength(0)
     })
 
     // One malformed definition added mid-incident must not disarm the flags already working.
-    it('drops only the invalid entries from a set', async () => {
-        const flags = await loadTrustFlags(
-            {
-                get: async () => [
-                    flag({ id: 'good', sql: 'SELECT 1 FROM reports WHERE report_id = ?1' }),
-                    flag({ id: 'bad', sql: 'DELETE FROM reports' }),
-                ],
-            } as unknown as KVNamespace,
+    it('drops only the invalid entries from a set', () => {
+        const flags = loadTrustFlags(
+            JSON.stringify([
+                flag({ id: 'good', sql: 'SELECT 1 FROM reports WHERE report_id = ?1' }),
+                flag({ id: 'bad', sql: 'DELETE FROM reports' }),
+            ]),
             silentLogger
         )
         expect(flags.map((f) => f.id)).toEqual(['good'])
     })
 
-    it('returns nothing rather than throwing when the payload is malformed', async () => {
-        const flags = await loadTrustFlags(
-            { get: async () => ({ not: 'an array' }) } as unknown as KVNamespace,
-            silentLogger
-        )
+    it('returns nothing rather than throwing when the payload is malformed', () => {
+        const flags = loadTrustFlags(JSON.stringify({ not: 'an array' }), silentLogger)
         expect(flags).toEqual([])
     })
 
-    it('is inert when no namespace is bound', async () => {
-        expect(await loadTrustFlags(undefined, silentLogger)).toEqual([])
+    // A truncated secret is the realistic corruption, and must not throw on the intake path.
+    it('returns nothing rather than throwing when the payload is not JSON', () => {
+        expect(loadTrustFlags('[{"id": "half', silentLogger)).toEqual([])
+    })
+
+    it('is inert when the definitions are unset', () => {
+        expect(loadTrustFlags(undefined, silentLogger)).toEqual([])
+        expect(loadTrustFlags('', silentLogger)).toEqual([])
     })
 })
 

@@ -61,3 +61,43 @@ city in `CITY_DATABASES` (with a drift guard that fails if the databases land on
 `bun run db:studio` opens Drizzle Studio against the remote D1 over the Cloudflare API (set
 `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_D1_DATABASE_ID`, `CLOUDFLARE_API_TOKEN`). For quick queries,
 use `bunx wrangler d1 execute DB --local|--remote --command "..."`.
+
+## Trust flags
+
+Every report is scored after it is written: each flag in the set is a read-only SQL predicate run
+against that report, and the ones that fire reduce its trust (`trust = 1 / (1 + Σ weights)`). A
+station shows on the map once the trust of its reports in the last hour reaches `MIN_STATION_TRUST`,
+so a flagged report is one that needs corroborating rather than one that has been decided about.
+
+The definitions live in `trust-flags.enc`, encrypted, because publishing them publishes the
+thresholds — `client-burst-10m` fires above four reports in ten minutes, and the evasion is to file
+three. The plaintext is gitignored.
+
+```bash
+brew install age                    # once
+bun run flags:decrypt               # trust-flags.enc  -> trust-flags.json, then edit it
+bun run flags:encrypt               # trust-flags.json -> trust-flags.enc, commit that
+```
+
+There is no passphrase and nothing to share. The file is encrypted to every collaborator on this
+repo, using the SSH keys they already publish on their GitHub profile, and decrypted with the key you
+already push with — so access follows repo membership by itself. Joining means you can read the next
+version; leaving means you are not a recipient of it. If you joined recently and cannot decrypt, ask
+anyone with access to re-run `flags:encrypt`; if you have no SSH key on your GitHub profile, add one
+under Settings → SSH and GPG keys (`flags:encrypt` names anyone it had to skip).
+
+Changing a flag is a pull request. Review the decrypted diff — `bun run flags:decrypt` on either side
+of the branch — and merge; the deploy workflow decrypts the blob with its own age identity and sets
+it as the `TRUST_FLAGS` secret. A blob that will not decrypt, or a flag set the schema rejects, fails
+the deploy rather than reaching production. Rolling a flag back is reverting the commit.
+
+Two controls stay outside this loop, as Worker secrets that take effect in seconds with no deploy,
+because they are what an incident actually reaches for:
+
+```bash
+wrangler secret put REPORTING_ENABLED     # true / false — the killswitch
+wrangler secret put MIN_STATION_TRUST     # trust a station needs before it shows
+```
+
+Flags are unset in dev, previews and tests. Trust then stays null, which reads as *unscored* rather
+than untrusted, and the map shows everything.

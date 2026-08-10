@@ -1,8 +1,5 @@
-import { env as workerEnv } from 'cloudflare:test'
 import { eq } from 'drizzle-orm'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-
-import { TRUST_FLAGS_KEY } from '../src/modules/reports/trust'
 
 import { db, lineStations, lines, reports } from './test-db'
 import { appRequestWithRedirect, resetTestEnv, setTestEnv } from './test-utils'
@@ -51,15 +48,14 @@ beforeEach(async () => {
         REPORTING_ENABLED: 'true',
         CLIENT_HASH_SECRET: 'test-client-hash-secret',
         MIN_STATION_TRUST: '1',
+        TRUST_FLAGS: JSON.stringify(alwaysFiringFlag),
     })
     await db.delete(reports).where(eq(reports.stationId, stationId))
-    await workerEnv.TRUST_FLAGS.put(TRUST_FLAGS_KEY, JSON.stringify(alwaysFiringFlag))
 })
 
 afterEach(async () => {
     resetTestEnv()
     await db.delete(reports).where(eq(reports.stationId, stationId))
-    await workerEnv.TRUST_FLAGS.delete(TRUST_FLAGS_KEY)
 })
 
 describe('station trust threshold', () => {
@@ -79,7 +75,7 @@ describe('station trust threshold', () => {
     })
 
     it('shows an unscored report, because null means not yet scored rather than untrusted', async () => {
-        await workerEnv.TRUST_FLAGS.delete(TRUST_FLAGS_KEY)
+        setTestEnv({ TRUST_FLAGS: '' })
 
         expect((await post(SPAMMER)).status).toBe(200)
 
@@ -158,7 +154,7 @@ describe('a suppressed client still sees its own reports', () => {
     // The converse: gating must not cost the cache on stations that are perfectly fine, or every
     // Station response becomes uncacheable and the edge stops absorbing the read load entirely.
     it('still caches a station whose reports clear the threshold', async () => {
-        await workerEnv.TRUST_FLAGS.delete(TRUST_FLAGS_KEY)
+        setTestEnv({ TRUST_FLAGS: '' })
 
         expect((await post(SPAMMER)).status).toBe(200)
 
