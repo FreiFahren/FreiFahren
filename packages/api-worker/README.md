@@ -99,5 +99,5 @@ wrangler secret put REPORTING_ENABLED     # true / false — the killswitch
 wrangler secret put MIN_STATION_TRUST     # trust a station needs before it shows
 ```
 
-Flags are unset in dev, previews and tests. Trust then stays null, which reads as *unscored* rather
+Flags are unset in dev, previews and tests. Trust then stays null, which reads as _unscored_ rather
 than untrusted, and the map shows everything.
