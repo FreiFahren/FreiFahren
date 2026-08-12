@@ -924,6 +924,28 @@ describe('Telegram forward follows map visibility', () => {
     })
 
     /*
+     * The race a burst creates: reports land together, so a report being scored sees its neighbours
+     * still unscored. The map counts those as trusted and corrects itself once their scores land,
+     * but a forward cannot be taken back — so an in-flight row must not count as corroboration.
+     *
+     * A directly inserted trust-null row stands in for the concurrent request, which reproduces the
+     * state deterministically instead of racing two posts and hoping for the interleaving.
+     */
+    it('does not treat a concurrent unscored report as corroboration', async () => {
+        await db.insert(reports).values({
+            stationId,
+            source: 'web_app',
+            timestamp: new Date(),
+            trust: null,
+        })
+
+        const response = await post(FLAGGED_UA)
+
+        expect(response.status).toBe(200)
+        expect(capturedRequests.length).toBe(0)
+    })
+
+    /*
      * Fail open. Scoring is best-effort and leaves trust null when it is disabled or broken, and
      * null reads as trusted — a missing TRUST_FLAGS secret must not silence the group.
      */

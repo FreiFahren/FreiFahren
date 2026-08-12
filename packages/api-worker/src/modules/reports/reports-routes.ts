@@ -160,8 +160,14 @@ export const postReport = defineRoute<Env>()({
          * neither — so it delays the group post by the scoring round-trips and nothing else.
          */
         const deferred = (async () => {
+            /*
+             * Null covers both "scoring is switched off" and "scoring threw", and the forward gate
+             * treats the two the same: without a score for this report there is nothing to gate on.
+             */
+            let trust: number | null = null
+
             try {
-                const trust = await scoreReportInBackground(
+                trust = await scoreReportInBackground(
                     c.get('db'),
                     c.get('d1'),
                     c.env.TRUST_FLAGS,
@@ -197,11 +203,18 @@ export const postReport = defineRoute<Env>()({
                 const outcome = await reportsService.forwardReportToTelegramIfVisible(postProcessedReportData, {
                     currentTime: DateTime.now(),
                     minStationTrust: c.get('config').minStationTrust,
+                    reportTrust: trust,
                 })
                 if (outcome === 'skipped-low-trust') {
                     logger.info(
                         { reportId: report.reportId, stationId: report.stationId },
                         'Skipped Telegram forward: station is not visible to other users'
+                    )
+                }
+                if (outcome === 'sent-unscored') {
+                    logger.warn(
+                        { reportId: report.reportId, stationId: report.stationId },
+                        'Forwarded to Telegram without a trust check: report has no score'
                     )
                 }
             } catch (error) {

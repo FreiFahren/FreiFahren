@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lte } from 'drizzle-orm'
+import { and, desc, eq, gte, isNotNull, lte } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
 
@@ -74,7 +74,14 @@ export const calculatePredictedReportsThreshold = (currentTime: DateTime): numbe
     return Math.trunc(clamp(threshold, MIN_PREDICTED_REPORTS_THRESHOLD, MAX_PREDICTED_REPORTS_THRESHOLD))
 }
 
-export type TelegramForwardOutcome = 'sent' | 'skipped-source' | 'skipped-environment' | 'skipped-low-trust'
+export type TelegramForwardOutcome =
+    | 'sent'
+    // Forwarded without a trust check because this report has no score. Worth telling apart from a
+    // Checked 'sent': a rise in these means scoring stopped running, not that traffic got cleaner.
+    | 'sent-unscored'
+    | 'skipped-source'
+    | 'skipped-environment'
+    | 'skipped-low-trust'
 
 type TelegramNotificationPayload = {
     lineId: string | null
@@ -402,14 +409,26 @@ export class ReportsService {
     }
 
     /*
-     * Whether the station would be shown to somebody who did not report it. Deliberately asks the
-     * same question the read path asks, through the same function: the group is just another viewer,
-     * and a rule re-implemented here would drift from the one the map actually applies.
+     * Whether the station will still be shown to somebody who did not report it once every report
+     * in the window has been scored. Asks the read path's question through the same function, so the
+     * threshold rule cannot drift — but deliberately asks it of a different row set.
+     *
+     * Only scored rows count. The map treats an unscored report as trusted because scoring lags and
+     * can fail, and emptying the map on a scorer hiccup would be worse than showing a report that
+     * later turns out to be flagged — the map corrects itself when the score lands. A Telegram
+     * message cannot be withdrawn, so the same optimism here is not conservative but permanent: a
+     * burst of reports on one station would see each other as unscored, count each other as full
+     * corroboration, and forward every one of them, moments before all the scores land and the
+     * station goes suppressed. Waiting for this report's own score is not enough, because the rows
+     * racing it are the ones inflating the sum.
+     *
+     * The cost is that a report whose scoring genuinely failed never corroborates anything here. That
+     * only ever withholds a forward, which is the direction this should fail in.
      *
      * No `clientHash`, which is the point — the reporter always sees their own report, and gating on
      * the view they get would forward everything.
      */
-    async isStationVisibleToOthers({
+    async isStationVisibleOnceScoresSettle({
         stationId,
         currentTime,
         minStationTrust,
@@ -437,7 +456,8 @@ export class ReportsService {
                 and(
                     gte(reports.timestamp, from.toJSDate()),
                     lte(reports.timestamp, to.toJSDate()),
-                    eq(reports.stationId, stationId)
+                    eq(reports.stationId, stationId),
+                    isNotNull(reports.trust)
                 )
             )
 
@@ -453,13 +473,24 @@ export class ReportsService {
      */
     async forwardReportToTelegramIfVisible(
         reportData: InsertReport,
-        visibility: { currentTime: DateTime; minStationTrust: number }
+        visibility: { currentTime: DateTime; minStationTrust: number; reportTrust: number | null }
     ): Promise<TelegramForwardOutcome> {
         // Checked before the visibility query so the common skips cost nothing.
         if (reportData.source === 'telegram') return 'skipped-source'
         if (this.config.nodeEnv !== 'production') return 'skipped-environment'
 
-        const visible = await this.isStationVisibleToOthers({
+        /*
+         * This report has no score, so scoring is switched off or did not complete — and with it off
+         * every row stays null, which a scored-rows-only sum would read as an empty station forever.
+         * Gating on that would make a missing TRUST_FLAGS secret a silent, permanent outage of the
+         * group. Nothing is being suppressed in that state either, so there is nothing to withhold.
+         */
+        if (visibility.reportTrust === null) {
+            await this.notifyTelegram(reportData)
+            return 'sent-unscored'
+        }
+
+        const visible = await this.isStationVisibleOnceScoresSettle({
             stationId: reportData.stationId,
             currentTime: visibility.currentTime,
             minStationTrust: visibility.minStationTrust,
