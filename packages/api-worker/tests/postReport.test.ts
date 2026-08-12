@@ -1,13 +1,13 @@
 import { createExecutionContext, fetchMock, waitOnExecutionContext } from 'cloudflare:test'
 import { and, desc, eq, sql } from 'drizzle-orm'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { app } from '../src/index'
 import { referenceCacheKey } from '../src/modules/transit/reference-cache'
 import { Stations } from '../src/modules/transit/types'
 import { TransitNetworkDataService } from '../src/modules/transit/transit-network-data-service'
 import { db, lineStations, reports, stations } from './test-db'
-import { resetTestEnv, sendReportRequest, setTestEnv, testEnv } from './test-utils'
+import { appRequestWithRedirect, resetTestEnv, sendReportRequest, setTestEnv, testEnv } from './test-utils'
 
 const TELEGRAM_ORIGIN = 'https://telegram-worker.test'
 
@@ -841,5 +841,98 @@ describe('Report Post Processing', () => {
 
         expect(report.lineId).toBe(lineIdForStationWithOneLine)
         expect(report.directionId).toBeNull()
+    })
+})
+
+/*
+ * The group is fed by the same rule the map applies, so a report the map is suppressing must not
+ * reach Telegram — otherwise suppression is undone by the channel most likely to be watched, and a
+ * suppressed reporter learns they were suppressed by noticing their report missing from it.
+ */
+describe('Telegram forward follows map visibility', () => {
+    // Mirrors the real tool-user-agent flag: `curl` normalizes to ua_family 'curl', a browser UA
+    // Does not, which is what lets one report here be flagged and the next one not.
+    const FLAGGED_UA = 'curl/8.0.1'
+    const HONEST_UA =
+        'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
+
+    // Weight 9 scores a flagged report 1/10, so it cannot clear a threshold of 1 by itself.
+    const toolUserAgentFlag = [
+        { id: 'tool-ua', sql: "SELECT ua_family = 'curl' FROM reports WHERE report_id = ?1", weight: 9, enabled: true },
+    ]
+
+    let stationId: string
+
+    const post = (userAgent: string) =>
+        appRequestWithRedirect('/reports', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'User-Agent': userAgent,
+                'CF-Connecting-IP': '203.0.113.9',
+            },
+            body: JSON.stringify({ stationId, source: 'web_app' }),
+        })
+
+    beforeAll(async () => {
+        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
+        stationId = station.id
+    })
+
+    beforeEach(async () => {
+        capturedRequests.length = 0
+        shouldFail = false
+        setTestEnv({
+            REPORTING_ENABLED: 'true',
+            CLIENT_HASH_SECRET: 'test-client-hash-secret',
+            MIN_STATION_TRUST: '1',
+            TRUST_FLAGS: JSON.stringify(toolUserAgentFlag),
+        })
+        await db.delete(reports).where(eq(reports.stationId, stationId))
+    })
+
+    afterEach(async () => {
+        // Scoring is off by default for every other suite; leaving these set would flag their reports.
+        setTestEnv({ TRUST_FLAGS: undefined, MIN_STATION_TRUST: undefined })
+        await db.delete(reports).where(eq(reports.stationId, stationId))
+    })
+
+    it('does not forward a report whose station stays below the trust threshold', async () => {
+        const response = await post(FLAGGED_UA)
+
+        expect(response.status).toBe(200)
+        expect(capturedRequests.length).toBe(0)
+    })
+
+    it('forwards once corroboration lifts the station over the threshold', async () => {
+        // Alone this scores 1/10 and is suppressed, so it must not forward...
+        expect((await post(FLAGGED_UA)).status).toBe(200)
+        expect(capturedRequests.length).toBe(0)
+
+        // ...but an unflagged report scores 1, which clears the bar and makes the station visible.
+        expect((await post(HONEST_UA)).status).toBe(200)
+
+        expect(capturedRequests.length).toBe(1)
+        expect((capturedRequests[0]?.body as { stationId: string }).stationId).toBe(stationId)
+    })
+
+    it('forwards an unflagged report immediately', async () => {
+        const response = await post(HONEST_UA)
+
+        expect(response.status).toBe(200)
+        expect(capturedRequests.length).toBe(1)
+    })
+
+    /*
+     * Fail open. Scoring is best-effort and leaves trust null when it is disabled or broken, and
+     * null reads as trusted — a missing TRUST_FLAGS secret must not silence the group.
+     */
+    it('forwards when trust scoring is disabled entirely', async () => {
+        setTestEnv({ TRUST_FLAGS: undefined })
+
+        const response = await post(FLAGGED_UA)
+
+        expect(response.status).toBe(200)
+        expect(capturedRequests.length).toBe(1)
     })
 })

@@ -147,46 +147,75 @@ export const postReport = defineRoute<Env>()({
             reportError(error, { tags: { task: 'reports-cache-invalidation' } })
         }
 
-        // Fire-and-forget: the report is already saved, and a slow Telegram call must not block the response.
-        const forward = reportsService.forwardReportToTelegram(postProcessedReportData).catch((error) => {
-            reportError(error, {
-                tags: { task: 'telegram-report-forward' },
-                extra: {
-                    stationId: postProcessedReportData.stationId,
-                    lineId: postProcessedReportData.lineId,
-                    directionId: postProcessedReportData.directionId,
-                },
-            })
-            logger.error(error, 'Failed to forward inspector report to Telegram')
-        })
-
         /*
-         * Also deferred, and for a stronger reason than the Telegram call: trust scoring runs one
-         * query per flag, and the number of flags is an operational dial someone will turn during
-         * an incident. On the write path that would make report submission slower exactly when it
-         * is under load. Nothing reads trust synchronously, so the row simply carries null for a
-         * moment.
+         * All deferred, and scoring is deferred for a stronger reason than the Telegram call: trust
+         * scoring runs one query per flag, and the number of flags is an operational dial someone
+         * will turn during an incident. On the write path that would make report submission slower
+         * exactly when it is under load. Nothing reads trust synchronously, so the row simply
+         * carries null for a moment.
+         *
+         * Scoring now runs *before* the forward rather than alongside it, because the forward asks
+         * whether the map is showing this station and that answer is only meaningful once this
+         * report has a score. The cost is paid entirely after the response — the reporter waits on
+         * neither — so it delays the group post by the scoring round-trips and nothing else.
          */
-        const score = scoreReportInBackground(c.get('db'), c.get('d1'), c.env.TRUST_FLAGS, logger, report.reportId)
-            .then(async (trust) => {
+        const deferred = (async () => {
+            try {
+                const trust = await scoreReportInBackground(
+                    c.get('db'),
+                    c.get('d1'),
+                    c.env.TRUST_FLAGS,
+                    logger,
+                    report.reportId
+                )
+
                 /*
                  * Between the write and the score the row counts as unscored, which reads as fully
                  * trusted — so the station may already have been served, and edge-cached, as
                  * visible. Once a score lands below 1 that cached answer can be wrong for the whole
                  * edge TTL, so drop the entry rather than wait it out.
                  */
-                if (trust === null || trust >= 1) return
-                await invalidateStationReportsCache(
-                    c.req.url,
-                    c.req.header('Origin') ?? null,
-                    c.get('city').slug,
-                    report.stationId
-                )
-            })
-            .catch((error) => {
+                if (trust !== null && trust < 1) {
+                    await invalidateStationReportsCache(
+                        c.req.url,
+                        c.req.header('Origin') ?? null,
+                        c.get('city').slug,
+                        report.stationId
+                    )
+                }
+            } catch (error) {
                 reportError(error, { tags: { task: 'report-trust-scoring' }, extra: { reportId: report.reportId } })
                 logger.error(error, 'Failed to score report trust')
-            })
+            }
+
+            /*
+             * Outside the catch above on purpose: scoring is best-effort, and a report whose score
+             * never landed stays null, which reads as trusted. Letting a scoring failure also skip
+             * the forward would turn one broken flag into a silent outage of the Telegram group.
+             */
+            try {
+                const outcome = await reportsService.forwardReportToTelegramIfVisible(postProcessedReportData, {
+                    currentTime: DateTime.now(),
+                    minStationTrust: c.get('config').minStationTrust,
+                })
+                if (outcome === 'skipped-low-trust') {
+                    logger.info(
+                        { reportId: report.reportId, stationId: report.stationId },
+                        'Skipped Telegram forward: station is not visible to other users'
+                    )
+                }
+            } catch (error) {
+                reportError(error, {
+                    tags: { task: 'telegram-report-forward' },
+                    extra: {
+                        stationId: postProcessedReportData.stationId,
+                        lineId: postProcessedReportData.lineId,
+                        directionId: postProcessedReportData.directionId,
+                    },
+                })
+                logger.error(error, 'Failed to forward inspector report to Telegram')
+            }
+        })()
 
         // No Workers runtime under unit tests, so executionCtx is absent; await there instead.
         let executionCtx: { waitUntil(promise: Promise<unknown>): void } | undefined
@@ -196,11 +225,9 @@ export const postReport = defineRoute<Env>()({
             executionCtx = undefined
         }
         if (executionCtx !== undefined) {
-            executionCtx.waitUntil(forward)
-            executionCtx.waitUntil(score)
+            executionCtx.waitUntil(deferred)
         } else {
-            await forward
-            await score
+            await deferred
         }
 
         return c.json(report)

@@ -8,6 +8,7 @@ import type { TransitNetworkDataService } from '../transit/transit-network-data-
 import type { StationId } from '../transit/types'
 
 import { ANONYMOUS_CLIENT, type ClientIdentity } from './client-identity'
+import { getDefaultReportsRange } from './constants'
 import {
     assignLineIfSingleOption,
     clearStationReferenceIfNotOnLine,
@@ -72,6 +73,8 @@ export const calculatePredictedReportsThreshold = (currentTime: DateTime): numbe
 
     return Math.trunc(clamp(threshold, MIN_PREDICTED_REPORTS_THRESHOLD, MAX_PREDICTED_REPORTS_THRESHOLD))
 }
+
+export type TelegramForwardOutcome = 'sent' | 'skipped-source' | 'skipped-environment' | 'skipped-low-trust'
 
 type TelegramNotificationPayload = {
     lineId: string | null
@@ -398,12 +401,73 @@ export class ReportsService {
         return insertedReport!
     }
 
-    // Skips telegram-sourced reports (they already came from the group) and non-production.
-    forwardReportToTelegram(reportData: InsertReport): Promise<void> {
-        if (reportData.source === 'telegram' || this.config.nodeEnv !== 'production') {
-            return Promise.resolve()
-        }
-        return this.notifyTelegram(reportData)
+    /*
+     * Whether the station would be shown to somebody who did not report it. Deliberately asks the
+     * same question the read path asks, through the same function: the group is just another viewer,
+     * and a rule re-implemented here would drift from the one the map actually applies.
+     *
+     * No `clientHash`, which is the point — the reporter always sees their own report, and gating on
+     * the view they get would forward everything.
+     */
+    async isStationVisibleToOthers({
+        stationId,
+        currentTime,
+        minStationTrust,
+    }: {
+        stationId: string
+        currentTime: DateTime
+        minStationTrust: number
+    }): Promise<boolean> {
+        // Nothing is suppressed at or below zero, so the answer cannot be no and the query is waste.
+        if (minStationTrust <= 0) return true
+
+        const { from, to } = getDefaultReportsRange(currentTime)
+
+        const rows = await this.db
+            .select({
+                timestamp: reports.timestamp,
+                stationId: reports.stationId,
+                directionId: reports.directionId,
+                lineId: reports.lineId,
+                trust: reports.trust,
+                clientHash: reports.clientHash,
+            })
+            .from(reports)
+            .where(
+                and(
+                    gte(reports.timestamp, from.toJSDate()),
+                    lte(reports.timestamp, to.toJSDate()),
+                    eq(reports.stationId, stationId)
+                )
+            )
+
+        return selectVisibleReports(rows, { minStationTrust }).rows.length > 0
+    }
+
+    /*
+     * Forwards only what the map is already showing to everyone else, so the group cannot become a
+     * side channel that republishes a report the map is suppressing.
+     *
+     * The outcome is returned rather than logged here because the service has no logger, and a
+     * forward that silently does nothing is the failure mode worth being able to see.
+     */
+    async forwardReportToTelegramIfVisible(
+        reportData: InsertReport,
+        visibility: { currentTime: DateTime; minStationTrust: number }
+    ): Promise<TelegramForwardOutcome> {
+        // Checked before the visibility query so the common skips cost nothing.
+        if (reportData.source === 'telegram') return 'skipped-source'
+        if (this.config.nodeEnv !== 'production') return 'skipped-environment'
+
+        const visible = await this.isStationVisibleToOthers({
+            stationId: reportData.stationId,
+            currentTime: visibility.currentTime,
+            minStationTrust: visibility.minStationTrust,
+        })
+        if (!visible) return 'skipped-low-trust'
+
+        await this.notifyTelegram(reportData)
+        return 'sent'
     }
 
     private async notifyTelegram(reportData: InsertReport) {
