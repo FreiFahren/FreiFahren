@@ -1,4 +1,8 @@
 .DS_Store
+
+# Each package ignores its own node_modules, which leaves a root-level one — created by tooling run
+# From the repo root rather than inside a package — tracked by nothing and staged by `git add -A`.
+node_modules/
 packages/tile-server/source/*
 !packages/tile-server/source/freifahren-style.json
 packages/tile-server/dist/
