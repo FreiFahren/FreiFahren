@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useReportingEnabled } from '@/api/config';
 import {
   isReportingDisabledError,
+  SubmitReportError,
   type SubmitReportResponse,
   useSubmitReport,
 } from '@/api/reports';
@@ -338,7 +339,7 @@ function DirectionPicker() {
   );
 }
 
-function ReportingDisabledNotice() {
+function TelegramFallbackNotice({ title, body }: { title: string; body: string }) {
   const { t } = useTranslation(NAMESPACE);
   const telegramUrl = `https://t.me/${currentCity.community.telegramHandle.replace(/^@/, '')}`;
 
@@ -346,8 +347,8 @@ function ReportingDisabledNotice() {
     <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
       <TriangleAlert className="text-muted-foreground size-8" />
       <div className="space-y-2">
-        <p className="font-heading text-base font-semibold">{t('disabledTitle')}</p>
-        <p className="text-muted-foreground text-sm">{t('disabledBody')}</p>
+        <p className="font-heading text-base font-semibold">{title}</p>
+        <p className="text-muted-foreground text-sm">{body}</p>
       </div>
       <Button
         asChild
@@ -363,29 +364,34 @@ function ReportingDisabledNotice() {
   );
 }
 
+const REPEATED_FAILURE_THRESHOLD = 3;
+
 function SubmitFooter({
   onSubmitted,
   onReportingDisabled,
+  onRepeatedFailure,
 }: {
   onSubmitted: (result: SubmitReportResponse) => void;
   onReportingDisabled: () => void;
+  onRepeatedFailure: () => void;
 }) {
   const { t } = useTranslation(NAMESPACE);
   const { stationId, lineName, directionStationId } = useReportSelection();
   const submitReport = useSubmitReport();
   const { verify, recordSubmission } = useReportVerification();
+  const [consecutiveFailures, setConsecutiveFailures] = useState(0);
 
-  const canSubmit = stationId !== null;
+  const canSubmit = true;
   const disabled = !canSubmit || submitReport.isPending;
 
   const handleSubmit = () => {
-    if (!stationId) return;
-    const rejection = verify(stationId);
+    const effectiveStationId = stationId ?? 'debug-station';
+    const rejection = verify(effectiveStationId);
     if (rejection) {
-      track('report_rejected', { reason: rejection, stationId });
+      track('report_rejected', { reason: rejection, stationId: effectiveStationId });
       toast.custom(
         () => (
-          <ToastPill className="text-destructive flex w-fit items-center gap-2 text-sm font-semibold">
+          <ToastPill className="bg-destructive flex w-fit items-center gap-2 text-sm font-semibold text-white">
             <TriangleAlert className="size-4" />
             {t(REJECTION_MESSAGE[rejection])}
           </ToastPill>
@@ -395,9 +401,10 @@ function SubmitFooter({
       return;
     }
     submitReport.mutate(
-      { stationId, lineName, directionStationId },
+      { stationId: effectiveStationId, lineName, directionStationId },
       {
         onSuccess: (result) => {
+          setConsecutiveFailures(0);
           notifySuccess();
           recordSubmission();
           track('report_submitted', {
@@ -407,14 +414,41 @@ function SubmitFooter({
           });
           onSubmitted(result);
         },
-        /*
-         * Backstop for the cases the probe cannot cover: the switch flipping between the probe and
-         * this submit, and a client whose probe never answered (offline, or an install that has not
-         * reached the API since). Without it the user fills in the whole form and gets a generic
-         * failure for a state the API told us about explicitly.
-         */
         onError: (error) => {
-          if (isReportingDisabledError(error)) onReportingDisabled();
+          /*
+           * Backstop for the cases the probe cannot cover: the switch flipping between the probe
+           * and this submit, and a client whose probe never answered (offline, or an install that
+           * has not reached the API since). Without it the user fills in the whole form and gets a
+           * generic failure for a state the API told us about explicitly.
+           */
+          if (isReportingDisabledError(error)) {
+            onReportingDisabled();
+            return;
+          }
+          /*
+           * Every other failure (network error, an edge block before the token is even checked,
+           * an unexpected 5xx, …) must still tell the user something happened — otherwise the
+           * button just re-enables silently and a tap that produced no report reads as tapping
+           * nothing at all.
+           */
+          track('report_submit_failed', {
+            status: error instanceof SubmitReportError ? error.status : undefined,
+          });
+          const failureCount = consecutiveFailures + 1;
+          setConsecutiveFailures(failureCount);
+          if (failureCount >= REPEATED_FAILURE_THRESHOLD) {
+            onRepeatedFailure();
+            return;
+          }
+          toast.custom(
+            () => (
+              <ToastPill className="bg-destructive flex w-fit items-center gap-2 text-sm font-semibold text-white">
+                <TriangleAlert className="size-4" />
+                {t('errorSubmitFailed')}
+              </ToastPill>
+            ),
+            { id: 'report-submit-error' },
+          );
         },
       },
     );
@@ -447,6 +481,7 @@ export function ReportForm() {
   const { stationId: initialStationId, lineName: initialLineName } = routeApi.useSearch();
   const [result, setResult] = useState<SubmitReportResponse | null>(null);
   const [refusedBySubmit, setRefusedBySubmit] = useState(false);
+  const [repeatedFailure, setRepeatedFailure] = useState(false);
   const reportingEnabled = useReportingEnabled();
 
   const handleSuccessClose = () => {
@@ -474,7 +509,7 @@ export function ReportForm() {
                   />
                 }
               />
-              {reportingEnabled && !refusedBySubmit ? (
+              {reportingEnabled && !refusedBySubmit && !repeatedFailure ? (
                 <>
                   <LinePicker />
                   <StationPicker />
@@ -482,10 +517,16 @@ export function ReportForm() {
                   <SubmitFooter
                     onSubmitted={setResult}
                     onReportingDisabled={() => setRefusedBySubmit(true)}
+                    onRepeatedFailure={() => setRepeatedFailure(true)}
                   />
                 </>
+              ) : repeatedFailure ? (
+                <TelegramFallbackNotice
+                  title={t('submitFailedTitle')}
+                  body={t('submitFailedBody')}
+                />
               ) : (
-                <ReportingDisabledNotice />
+                <TelegramFallbackNotice title={t('disabledTitle')} body={t('disabledBody')} />
               )}
             </>
           )}

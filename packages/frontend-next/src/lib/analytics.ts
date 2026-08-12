@@ -27,6 +27,10 @@ type AnalyticsEvents = {
     reason: 'too_soon' | 'too_far';
     stationId: string;
   };
+  // Fires on any submit failure other than the reporting killswitch (which has its own UI). The
+  // status is what separates an edge block (no response reaches the API) from an API-level
+  // rejection, without needing the response body, which callers may not have.
+  report_submit_failed: { status: number | undefined };
   screenshot_taken: Record<string, never>;
   risk_layer_toggled: { to: SuperProperties['map_layer'] };
   contribute_modal_opened: { source: ContributeSource };

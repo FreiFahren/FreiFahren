@@ -22,6 +22,10 @@ i18n.addResourceBundle('en', NAMESPACE, {
   disclaimer: 'Shared anonymously with all Freifahren users.',
   errorTooSoon: 'You reported very recently. Please wait a moment.',
   errorTooFar: "You're not close enough to the station.",
+  errorSubmitFailed: 'Report could not be sent. Please try again.',
+  submitFailedTitle: "Reports aren't going through",
+  submitFailedBody:
+    "Something's blocking your reports right now. It may clear up on its own, but you can report sightings in the Telegram group instead, and they'll show up here as usual.",
   disabledTitle: 'Reporting is currently off',
   disabledBody:
     "Reporting in the app is paused for now. You can still report sightings in the Telegram group, and they'll show up here as usual.",
@@ -48,6 +52,10 @@ i18n.addResourceBundle('de', NAMESPACE, {
   disclaimer: 'Anonym an alle Freifahren-Nutzer geteilt.',
   errorTooSoon: 'Du hast gerade erst gemeldet. Bitte warte einen Moment.',
   errorTooFar: 'Du bist nicht nah genug an der Station.',
+  errorSubmitFailed: 'Meldung konnte nicht gesendet werden. Bitte versuche es erneut.',
+  submitFailedTitle: 'Melden klappt gerade nicht',
+  submitFailedBody:
+    'Deine Meldungen kommen momentan nicht durch. Das kann sich von selbst wieder lösen, du kannst Sichtungen aber auch stattdessen in der Telegram-Gruppe melden, sie werden wie gewohnt hier angezeigt.',
   disabledTitle: 'Melden ist aktuell aus',
   disabledBody:
     'Melden in der App ist vorübergehend pausiert. In der Telegram-Gruppe kannst du weiterhin Sichtungen melden, sie werden wie gewohnt hier angezeigt.',
