@@ -11,6 +11,7 @@ import { Onboarding } from '@/components/onboarding/Onboarding';
 import { PersistentMapView } from '@/components/map/PersistentMapView';
 import { ScreenshotBranding } from '@/components/ScreenshotBranding';
 import { GeolocationProvider } from '@/contexts/GeolocationProvider';
+import { ReportSimulationProvider } from '@/contexts/ReportSimulationProvider';
 import { notifyNativeAppReady } from '@/lib/native';
 
 function NativeAppReady() {
@@ -31,17 +32,19 @@ export const Route = createRootRoute({
   staticData: { legalDisclaimer: false },
   component: () => (
     <GeolocationProvider>
-      <NativeAppReady />
-      <PersistentMapView />
-      <AppBanner />
-      <AppRemovalBanner />
-      <Outlet />
-      <Onboarding />
-      <LegalDisclaimer />
-      <ContributeCard />
-      <FeedbackCard />
-      <ConsentBanner />
-      <ScreenshotBranding />
+      <ReportSimulationProvider>
+        <NativeAppReady />
+        <PersistentMapView />
+        <AppBanner />
+        <AppRemovalBanner />
+        <Outlet />
+        <Onboarding />
+        <LegalDisclaimer />
+        <ContributeCard />
+        <FeedbackCard />
+        <ConsentBanner />
+        <ScreenshotBranding />
+      </ReportSimulationProvider>
     </GeolocationProvider>
   ),
 });
