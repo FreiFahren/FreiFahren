@@ -137,11 +137,25 @@ jobs:
                   # REPORTING_ENABLED is what makes a preview's report form appear at all: the
                   # frontend asks this worker whether reporting is open, so a preview is clickable
                   # through here even while production reporting is closed.
+                  #
+                  # MIN_STATION_TRUST is a production secret, and a preview worker is a different
+                  # worker that never receives it — so previews ran at the code default of 1 while
+                  # production gates harder. Since previews are seeded with copied production
+                  # reports, that showed reviewers every low-trust report production suppresses:
+                  # the map looked busier than production and risk was painted from reports no one
+                  # is actually shown. A preview is meant to answer "what will this look like once
+                  # it ships", so it has to gate the same way.
+                  #
+                  # The `|| '1'` spells out the code's own default rather than letting an unset repo
+                  # secret expand to an empty `--var`, which would leave wrangler to interpret a
+                  # blank value: previews without the secret keep exactly the behaviour they had
+                  # before this line existed, and are never silently ungated by a typo.
                   command: >-
                       deploy --config wrangler.preview.json
                       --var REPORTING_ENABLED:true
                       --var TURNSTILE_SECRET_KEY:1x0000000000000000000000000000000AA
                       --var CLIENT_HASH_SECRET:preview-client-hash-not-a-real-secret
+                      --var MIN_STATION_TRUST:${{ secrets.MIN_STATION_TRUST || '1' }}
 
             - name: Smoke test every city
               run: |
