@@ -844,7 +844,7 @@ describe('Report decay', () => {
     it('stamps real reports with an expiry, in the past once they are no longer live', async () => {
         const now = DateTime.utc(2024, 1, 15, 12, 0, 0)
 
-        // Well within the burst-adaptive ttl (max 60min in a quiet period)
+        // Well within the burst-adaptive ttl (max 45min in a quiet period)
         await sendReportAt(now.minus({ minutes: 10 }).toJSDate())
         // Past its ttl, so it is no longer live — but still returned
         await sendReportAt(now.minus({ minutes: 70 }).toJSDate())

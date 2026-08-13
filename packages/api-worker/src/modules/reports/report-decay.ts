@@ -22,7 +22,20 @@ export type DecayableReport = {
 export const BURST_WINDOW_MS = 15 * 60 * 1000
 export const BURST_REFERENCE_RATE_PER_MIN = 0.5
 export const TTL_MIN_MS = 15 * 60 * 1000
-export const TTL_MAX_MS = 60 * 60 * 1000
+
+/*
+ * The quiet-period ttl, and with it the longest a report can live at all. It has to leave the
+ * boosted ceiling (`TTL_MAX_MS * CHAIN_HEAD_TTL_BOOST`) inside the hour the map actually fetches,
+ * or the top of the curve is unreachable: the model calls a report live while the client never
+ * asks for it. At 60min the ceiling was 75min, and a replay over a day of Berlin traffic put the
+ * rate low enough for that to bite about a third of the day. 45min keeps the ceiling at 56.25min,
+ * always inside the window.
+ *
+ * Shortening it is also the direction the model already argues for. The ttl only reaches its
+ * maximum when reporting is quiet, and a report approaching an hour old with nothing else around
+ * it is exactly the stale marker the burst-adaptive ttl exists to retire.
+ */
+export const TTL_MAX_MS = 45 * 60 * 1000
 
 export const AVG_HOP_TRAVEL_MS = 3 * 60 * 1000
 export const CHAIN_SLACK_FACTOR = 2.5

@@ -44,6 +44,17 @@ describe('burstAdaptiveTtlMs', () => {
     it('drops toward the min ttl as the rate grows', () => {
         expect(burstAdaptiveTtlMs(100_000)).toBeLessThan(TTL_MIN_MS + 1000)
     })
+
+    /*
+     * The map fetches the last hour, so a ttl that can outrun that hour is a ttl the client never
+     * gets to honour: the model calls a report live while nothing ever asks for it. Raising
+     * TTL_MAX_MS past 48min (48 * 1.25 = 60) silently reintroduces that gap, which is invisible in
+     * every other test here because they all reason about a report the caller already has.
+     */
+    it('cannot outlive the hour the map fetches, even with the chain-head boost', () => {
+        const MAP_FETCH_WINDOW_MS = 60 * 60 * 1000
+        expect(burstAdaptiveTtlMs(0) * CHAIN_HEAD_TTL_BOOST).toBeLessThanOrEqual(MAP_FETCH_WINDOW_MS)
+    })
 })
 
 describe('computeChainInfo', () => {

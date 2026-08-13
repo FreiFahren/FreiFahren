@@ -18,7 +18,8 @@ export type DecayableReport = {
 export const BURST_WINDOW_MS = 15 * 60 * 1000;
 export const BURST_REFERENCE_RATE_PER_MIN = 0.5;
 export const TTL_MIN_MS = 15 * 60 * 1000;
-export const TTL_MAX_MS = 60 * 60 * 1000;
+// Kept in step with the API's `report-decay.ts`, which carries the reasoning for the value.
+export const TTL_MAX_MS = 45 * 60 * 1000;
 
 export const AVG_HOP_TRAVEL_MS = 3 * 60 * 1000;
 export const CHAIN_SLACK_FACTOR = 2.5;
