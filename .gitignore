@@ -27,7 +27,3 @@ eval_results.*.json
 # That is worth more to them than the flag predicates are, and this repo is meant to be public
 # again. Kept locally and shared out of band.
 .claude/skills/report-spam/
-
-# Decrypted trust-flag definitions. The committed artefact is trust-flags.enc; see
-# packages/api-worker/src/trust-flags.ts.
-packages/api-worker/trust-flags.json
