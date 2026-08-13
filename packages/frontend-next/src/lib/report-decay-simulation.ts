@@ -3,6 +3,14 @@ import type { Line, Stations } from '@/api/transit';
 
 import { AVG_HOP_TRAVEL_MS, BURST_WINDOW_MS } from './report-decay';
 
+/*
+ * Scenario builders produce the reports themselves; the expiry that follows from them is stamped on
+ * afterwards by `annotateReportExpiry`, in one pass over the whole scenario — a report's ttl depends
+ * on how many others are around it and on what came later down the line, so it cannot be decided
+ * one report at a time as they are built.
+ */
+type UnexpiredReport = Omit<Report, 'expiresAt'>;
+
 export const FALLBACK_LINES: Line[] = [
   {
     id: 'debug-line-a',
@@ -51,11 +59,11 @@ export function buildBurstReports(
   count: number,
   nowMs: number,
   windowMs: number = BURST_WINDOW_MS,
-): Report[] {
+): UnexpiredReport[] {
   const stationIds = Object.keys(stations);
   if (stationIds.length === 0) return [];
 
-  const reports: Report[] = [];
+  const reports: UnexpiredReport[] = [];
   for (let i = 0; i < count; i++) {
     const stationId = stationIds[Math.floor(Math.random() * stationIds.length)]!;
     const offsetMs = Math.random() * windowMs;
@@ -88,13 +96,13 @@ export function buildControllerWalk({
   hopCount,
   hopMs = AVG_HOP_TRAVEL_MS,
   allowLineSwitch,
-}: ControllerWalkOptions): Report[] {
+}: ControllerWalkOptions): UnexpiredReport[] {
   const lineById = new Map(lines.map((line) => [line.id, line]));
   const startLine = lineById.get(startLineId);
   if (!startLine) return [];
   let currentLine: Line = startLine;
 
-  const reports: Report[] = [];
+  const reports: UnexpiredReport[] = [];
   let cursor = currentLine.stations.length > 0 ? 0 : -1;
   let switched = false;
   let timestampMs = startMs;

@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-    applyReportDecay,
+    annotateReportExpiry,
     BURST_REFERENCE_RATE_PER_MIN,
     burstAdaptiveTtlMs,
     burstRatePerMinute,
     CHAIN_HEAD_TTL_BOOST,
     computeChainInfo,
-    computeReportDecay,
-    MIN_OPACITY,
+    computeExpiresAtMs,
+    isLive,
     SUPERSEDED_FADE_MS,
     TTL_MAX_MS,
     TTL_MIN_MS,
@@ -86,105 +86,93 @@ describe('computeChainInfo', () => {
     })
 })
 
-describe('computeReportDecay', () => {
-    it('is fully opaque for a brand-new, unchained report', () => {
+describe('computeExpiresAtMs', () => {
+    it('expires an unchained report one full ttl after it was reported', () => {
         const now = new Date('2024-01-15T12:00:00Z')
-        const { opacity, dropped } = computeReportDecay(now.getTime(), now.getTime(), 0)
+        const chain = { supersededAtMs: null, isChainHead: false } // no chain-head boost
 
-        expect(opacity).toBe(1)
-        expect(dropped).toBe(false)
+        // Quiet period -> base ttl == TTL_MAX_MS
+        expect(computeExpiresAtMs(now.getTime(), 0, chain)).toBe(now.getTime() + TTL_MAX_MS)
     })
 
-    it('drops a report once its age reaches the ttl', () => {
+    it('boosts a chain head by CHAIN_HEAD_TTL_BOOST', () => {
         const now = new Date('2024-01-15T12:00:00Z')
-        const ratePerMinute = 0 // quiet -> base ttl == TTL_MAX_MS
-        const chain = { supersededAtMs: null, isChainHead: false } // no chain-head boost, so ttl == TTL_MAX_MS
-        const timestampMs = now.getTime() - TTL_MAX_MS
+        const baseTtl = burstAdaptiveTtlMs(0)
 
-        const { opacity, dropped } = computeReportDecay(timestampMs, now.getTime(), ratePerMinute, chain)
+        const expiresAt = computeExpiresAtMs(now.getTime(), 0, { supersededAtMs: null, isChainHead: true })
 
-        expect(dropped).toBe(true)
-        expect(opacity).toBe(0)
+        expect(expiresAt).toBeCloseTo(now.getTime() + baseTtl * CHAIN_HEAD_TTL_BOOST)
     })
 
-    it('never fades below MIN_OPACITY while still inside its ttl', () => {
+    it('cuts a superseded report short, one fade window after it was overtaken', () => {
         const now = new Date('2024-01-15T12:00:00Z')
-        const ratePerMinute = 0
-        const almostExpiredMs = now.getTime() - (TTL_MAX_MS - 1)
+        const reportedAtMs = minutesAgo(now, 10).getTime()
+        const supersededAtMs = minutesAgo(now, 4).getTime()
 
-        const { opacity, dropped } = computeReportDecay(almostExpiredMs, now.getTime(), ratePerMinute)
+        const expiresAt = computeExpiresAtMs(reportedAtMs, 0, { supersededAtMs, isChainHead: false })
 
-        expect(dropped).toBe(false)
-        expect(opacity).toBeGreaterThanOrEqual(MIN_OPACITY)
+        expect(expiresAt).toBe(supersededAtMs + SUPERSEDED_FADE_MS)
     })
 
-    it('boosts the ttl of a chain head by CHAIN_HEAD_TTL_BOOST', () => {
+    /*
+     * Being overtaken is evidence a report is stale, so it can only ever shorten a report's life.
+     * A report already near the end of its ttl when it is overtaken must not have its life extended
+     * out to the fade window.
+     */
+    it('never lets being superseded extend a report past its own ttl', () => {
         const now = new Date('2024-01-15T12:00:00Z')
-        const ratePerMinute = 0
-        const baseTtl = burstAdaptiveTtlMs(ratePerMinute)
+        const chain = { supersededAtMs: now.getTime(), isChainHead: false }
+        // Reported a full ttl ago, so its own expiry is now — before the fade window would end.
+        const reportedAtMs = now.getTime() - TTL_MAX_MS
 
-        const { ttlMs } = computeReportDecay(now.getTime(), now.getTime(), ratePerMinute, {
-            supersededAtMs: null,
-            isChainHead: true,
-        })
-
-        expect(ttlMs).toBeCloseTo(baseTtl * CHAIN_HEAD_TTL_BOOST)
-    })
-
-    it('fades a superseded report out quickly, independent of its normal ttl', () => {
-        const now = new Date('2024-01-15T12:00:00Z')
-        const supersededAtMs = now.getTime() - SUPERSEDED_FADE_MS / 2
-
-        const { opacity, dropped } = computeReportDecay(now.getTime() - 60_000, now.getTime(), 0, {
-            supersededAtMs,
-            isChainHead: false,
-        })
-
-        expect(dropped).toBe(false)
-        expect(opacity).toBeCloseTo(MIN_OPACITY * 0.5)
-        expect(opacity).toBeLessThan(MIN_OPACITY)
-    })
-
-    it('drops a superseded report once the fade window has fully elapsed', () => {
-        const now = new Date('2024-01-15T12:00:00Z')
-        const supersededAtMs = now.getTime() - SUPERSEDED_FADE_MS
-
-        const { opacity, dropped } = computeReportDecay(now.getTime() - 60_000, now.getTime(), 0, {
-            supersededAtMs,
-            isChainHead: false,
-        })
-
-        expect(dropped).toBe(true)
-        expect(opacity).toBe(0)
+        expect(computeExpiresAtMs(reportedAtMs, 0, chain)).toBe(now.getTime())
     })
 })
 
-describe('applyReportDecay', () => {
-    it('drops expired reports and attaches opacity to the ones that survive', () => {
+describe('annotateReportExpiry', () => {
+    it('stamps every report with its expiry without dropping any of them', () => {
         const now = new Date('2024-01-15T12:00:00Z')
         const reports = [
             { stationId: 'a0', lineId: null, timestamp: minutesAgo(now, 0) },
-            { stationId: 'a1', lineId: null, timestamp: minutesAgo(now, 120) }, // well past TTL_MAX_MS
+            { stationId: 'a1', lineId: null, timestamp: minutesAgo(now, 70) }, // long past any ttl
         ]
 
-        const result = applyReportDecay(reports, [LINE_A], now.getTime())
+        const result = annotateReportExpiry(reports, [LINE_A], now.getTime())
 
-        expect(result).toHaveLength(1)
-        expect(result[0]!.stationId).toBe('a0')
-        expect(result[0]!.opacity).toBeGreaterThan(0)
+        expect(result).toHaveLength(2)
+        expect(isLive(result[0]!, now.getTime())).toBe(true)
+        expect(isLive(result[1]!, now.getTime())).toBe(false)
     })
 
-    it('fades out the earlier report of a chain faster than an equally-aged, unchained one', () => {
+    /*
+     * The 24h line/station panels and the 7d station counter read the same endpoint as the map.
+     * Every report in those windows is older than any ttl, so annotating (rather than dropping)
+     * is what keeps those views populated.
+     */
+    it('returns long-expired reports so historical windows stay populated', () => {
+        const now = new Date('2024-01-15T12:00:00Z')
+        const reports = [
+            { stationId: 'a0', lineId: LINE_A.id, timestamp: minutesAgo(now, 120) },
+            { stationId: 'a2', lineId: LINE_A.id, timestamp: minutesAgo(now, 126) },
+        ]
+
+        const result = annotateReportExpiry(reports, [LINE_A], now.getTime())
+
+        expect(result).toHaveLength(2)
+        expect(result.every((report) => isLive(report, now.getTime()))).toBe(false)
+    })
+
+    it('expires the earlier report of a chain sooner than an equally-aged, unchained one', () => {
         const now = new Date('2024-01-15T12:00:00Z')
         const supersededStation = { stationId: 'a0', lineId: LINE_A.id, timestamp: minutesAgo(now, 6) }
         const chainHead = { stationId: 'a2', lineId: LINE_A.id, timestamp: minutesAgo(now, 0) }
         const unchained = { stationId: 'a0', lineId: null, timestamp: minutesAgo(now, 6) }
 
-        const result = applyReportDecay([supersededStation, chainHead, unchained], [LINE_A], now.getTime())
+        const result = annotateReportExpiry([supersededStation, chainHead, unchained], [LINE_A], now.getTime())
 
-        const supersededOpacity = result.find((r) => r.lineId === LINE_A.id && r.stationId === 'a0')!.opacity
-        const unchainedOpacity = result.find((r) => r.lineId === null)!.opacity
+        const supersededExpiry = result.find((r) => r.lineId === LINE_A.id && r.stationId === 'a0')!.expiresAt
+        const unchainedExpiry = result.find((r) => r.lineId === null)!.expiresAt
 
-        expect(supersededOpacity).toBeLessThan(unchainedOpacity)
+        expect(supersededExpiry.getTime()).toBeLessThan(unchainedExpiry.getTime())
     })
 })

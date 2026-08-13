@@ -205,6 +205,72 @@ describe('GET /v0/risk timeframe filtering', () => {
     })
 })
 
+/*
+ * Risk spreads a report's weight several segments along its line, so a report the map has already
+ * stopped showing used to keep painting colour across a stretch of line with no marker anywhere on
+ * it. Risk now reads the same live set the map draws, so an expired report contributes nothing.
+ */
+describe('GET /v0/risk expiry', () => {
+    let chainLineId: string
+    let earlyStationId: string
+    let laterStationId: string
+
+    beforeAll(async () => {
+        // A line with at least three stations in travel order, so a later report two hops along it
+        // supersedes an earlier one (2 hops * 3min * 2.5 slack = a 15min budget).
+        const [line] = await db.select({ id: lines.id }).from(lines).limit(1)
+        chainLineId = line!.id
+
+        const stationsInOrder = await db
+            .select({ stationId: lineStations.stationId })
+            .from(lineStations)
+            .where(eq(lineStations.lineId, chainLineId))
+            .orderBy(asc(lineStations.order))
+            .limit(3)
+
+        earlyStationId = stationsInOrder[0]!.stationId
+        laterStationId = stationsInOrder[2]!.stationId
+    })
+
+    beforeEach(async () => {
+        await db.delete(reports)
+    })
+
+    afterEach(async () => {
+        await db.delete(reports)
+    })
+
+    it('an expired report adds no risk on top of the live one that superseded it', async () => {
+        const now = Date.now()
+        const supersededReport = {
+            stationId: earlyStationId,
+            lineId: chainLineId,
+            directionId: null,
+            // 10min before the later report, inside the 15min travel budget, so it is superseded and
+            // expires 3min after being overtaken — 7min ago.
+            timestamp: new Date(now - 20 * 60 * 1000),
+            source: 'telegram' as const,
+        }
+        const liveReport = {
+            stationId: laterStationId,
+            lineId: chainLineId,
+            directionId: null,
+            timestamp: new Date(now - 10 * 60 * 1000),
+            source: 'telegram' as const,
+        }
+
+        await db.insert(reports).values([supersededReport, liveReport])
+        const withBoth = (await (await getRisk()).json()) as RiskResponse
+
+        await db.delete(reports)
+        await db.insert(reports).values([liveReport])
+        const withLiveOnly = (await (await getRisk()).json()) as RiskResponse
+
+        expect(Object.keys(withLiveOnly.segments_risk).length).toBeGreaterThan(0)
+        expect(withBoth.segments_risk).toEqual(withLiveOnly.segments_risk)
+    })
+})
+
 describe('GET /v0/risk segment targeting', () => {
     let segmentLineId: string
     let stationOnSegmentLine: string

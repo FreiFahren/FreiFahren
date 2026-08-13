@@ -1,3 +1,13 @@
+/**
+ * How a report fades while it runs down, and — for the debug simulation only — a client-side mirror
+ * of the API's expiry model.
+ *
+ * The split matters: *when* a report stops being live is the API's call (`expiresAt`), because it
+ * takes the whole city's reports to see a burst or spot a controller moving down a line, and
+ * because the map, the risk model and the report counter have to agree on the answer. *How* a live
+ * report looks on its way out is purely presentation, and lives here.
+ */
+
 export type DecayableReport = {
   stationId: string;
   lineId: string | null;
@@ -9,12 +19,39 @@ export const BURST_WINDOW_MS = 15 * 60 * 1000;
 export const BURST_REFERENCE_RATE_PER_MIN = 0.5;
 export const TTL_MIN_MS = 15 * 60 * 1000;
 export const TTL_MAX_MS = 60 * 60 * 1000;
-export const MIN_OPACITY = 0.4;
 
 export const AVG_HOP_TRAVEL_MS = 3 * 60 * 1000;
 export const CHAIN_SLACK_FACTOR = 2.5;
 export const SUPERSEDED_FADE_MS = 3 * 60 * 1000;
 export const CHAIN_HEAD_TTL_BOOST = 1.25;
+
+/** Faintest a report gets while it is still live; it fades from here to nothing as it expires. */
+export const MIN_OPACITY = 0.4;
+/** How long before expiry a report starts fading out completely, rather than snapping away. */
+export const FADE_OUT_MS = 3 * 60 * 1000;
+
+/**
+ * How opaque a report should render right now, or `null` if it is no longer live and should not be
+ * drawn at all. Reports with no expiry (predicted ones) never fade.
+ *
+ * The ramp runs from full opacity at the moment of reporting down to `MIN_OPACITY`, where it holds
+ * until the last `FADE_OUT_MS` before expiry and then fades to nothing.
+ */
+export function reportOpacity(
+  timestampMs: number,
+  expiresAtMs: number | null,
+  nowMs: number,
+): number | null {
+  if (expiresAtMs === null) return 1;
+
+  const remaining = expiresAtMs - nowMs;
+  if (remaining <= 0) return null;
+  if (remaining < FADE_OUT_MS) return MIN_OPACITY * (remaining / FADE_OUT_MS);
+
+  const lifetime = expiresAtMs - timestampMs;
+  if (lifetime <= 0) return MIN_OPACITY;
+  return Math.max(MIN_OPACITY, 1 - (nowMs - timestampMs) / lifetime);
+}
 
 export function burstRatePerMinute(
   reports: readonly DecayableReport[],
@@ -105,30 +142,42 @@ export function computeChainInfo<T extends DecayableReport>(
   return info;
 }
 
-export type DecayResult = {
-  opacity: number;
-  ttlMs: number;
-  dropped: boolean;
-};
-
-export function computeReportDecay(
+/**
+ * When a report stops being live. Mirrors `computeExpiresAtMs` in the API's `report-decay.ts` —
+ * kept in step by hand so the debug page can play the model forward without a backend round-trip.
+ * Nothing on the live map path calls this: there, `expiresAt` comes from the API.
+ */
+export function computeExpiresAtMs(
   reportTimestampMs: number,
-  nowMs: number,
   ratePerMinute: number,
   chain: ChainInfo = NOT_CHAINED,
-): DecayResult {
+): number {
   const baseTtl = burstAdaptiveTtlMs(ratePerMinute);
   const ttlMs = chain.isChainHead ? baseTtl * CHAIN_HEAD_TTL_BOOST : baseTtl;
+  const ttlExpiry = reportTimestampMs + ttlMs;
 
-  if (chain.supersededAtMs !== null && nowMs >= chain.supersededAtMs) {
-    const sinceSuperseded = nowMs - chain.supersededAtMs;
-    if (sinceSuperseded >= SUPERSEDED_FADE_MS) return { opacity: 0, ttlMs, dropped: true };
-    const opacity = MIN_OPACITY * (1 - sinceSuperseded / SUPERSEDED_FADE_MS);
-    return { opacity, ttlMs, dropped: false };
-  }
+  if (chain.supersededAtMs === null) return ttlExpiry;
+  return Math.min(ttlExpiry, chain.supersededAtMs + SUPERSEDED_FADE_MS);
+}
 
-  const age = nowMs - reportTimestampMs;
-  if (age >= ttlMs) return { opacity: 0, ttlMs, dropped: true };
-  const opacity = Math.max(MIN_OPACITY, 1 - age / ttlMs);
-  return { opacity, ttlMs, dropped: false };
+/** Stamps simulated reports with an expiry, the way the API does for real ones. */
+export function annotateReportExpiry<T extends DecayableReport>(
+  reports: readonly T[],
+  lines: readonly { id: string; stations: readonly string[] }[],
+  nowMs: number,
+  keyOf: (report: T) => string,
+): (T & { expiresAt: string })[] {
+  const chainByKey = computeChainInfo(reports, buildLineTopologies(lines), keyOf);
+  const ratePerMinute = burstRatePerMinute(reports, nowMs);
+
+  return reports.map((report) => ({
+    ...report,
+    expiresAt: new Date(
+      computeExpiresAtMs(
+        new Date(report.timestamp).getTime(),
+        ratePerMinute,
+        chainByKey.get(keyOf(report)),
+      ),
+    ).toISOString(),
+  }));
 }

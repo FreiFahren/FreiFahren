@@ -16,7 +16,19 @@ export type Report = {
   directionId: string | null;
   lineId: string | null;
   isPredicted: boolean;
+  /*
+   * When this report stops counting as live — the API's call, since it takes the whole city's
+   * reports to spot a burst or a controller moving down a line. Everything that asks "is this
+   * current?" compares this one instant against the clock, so the map, the risk overlay and the
+   * counter cannot drift apart. It is often in the past: a 24h or 7d window is mostly reports that
+   * expired long ago, and they still happened. `null` means it never expires (predicted reports).
+   */
+  expiresAt: string | null;
 };
+
+/** Whether a report is still current, as opposed to something that merely happened in the window. */
+export const isReportLive = (report: Report, nowMs: number): boolean =>
+  report.expiresAt === null || new Date(report.expiresAt).getTime() > nowMs;
 
 /**
  * Human-readable "time since" for a report timestamp, using the caller's i18n `t`. The
@@ -109,11 +121,6 @@ export const reportsSliceQueryOptions = (fromAgo: number, toAgo: number) => {
         from: new Date(now - fromAgo).toISOString(),
         to: new Date(now - toAgo).toISOString(),
       });
-      // The live slice is the map's rolling window, so the API's burst-adaptive decay (which
-      // drops anything older than ~60 min) applies. The older slice is explicit history — a
-      // report doesn't stop having happened just because it would have faded off the map by
-      // now — so it opts out and gets every real report in range back.
-      if (toAgo !== 0) params.set('decay', 'false');
       return fetchJson<Report[]>(`/v0/reports?${params.toString()}`);
     },
     ...(isLiveSlice ? LIVE_SLICE_POLLING : OLDER_SLICE_POLLING),
@@ -170,8 +177,7 @@ export const stationReportCountQueryOptions = (stationId: string) => {
   return {
     queryKey: ['reports', stationId, from, to] as const,
     queryFn: () => {
-      // A 7-day lookback is explicit history, not the live map, so it opts out of decay too.
-      const params = new URLSearchParams({ from, to, decay: 'false' });
+      const params = new URLSearchParams({ from, to });
       return fetchJson<Report[]>(`/v0/reports/${stationId}?${params.toString()}`);
     },
     staleTime: HOUR_MS,

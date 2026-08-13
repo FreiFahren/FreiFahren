@@ -1,10 +1,16 @@
 /**
- * A report's on-map visibility (`opacity`) shrinks over time, but not at a fixed rate: the more
- * reports are coming in right now (the "burst rate"), the faster old ones become stale, since a
- * moving inspection can render a report irrelevant within minutes instead of an hour. On top of
- * that, a later report further along the same line's stop order counts as having "overtaken" an
- * earlier one — that earlier report then fades out fast on its own clock instead of riding out
- * its normal ttl.
+ * How long a report stays *live* — that is, how long it counts as current evidence that someone is
+ * being checked right now. Not a fixed hour: the more reports are coming in (the "burst rate"), the
+ * faster an old one becomes stale, since a moving inspection can make a report irrelevant within
+ * minutes. On top of that, a later report further along the same line's stop order counts as having
+ * "overtaken" an earlier one, which then expires shortly after instead of riding out its full ttl.
+ *
+ * The output is a single `expiresAt` per report — an absolute instant, not a fade level. That is
+ * what makes it safe to cache and safe to share: every consumer (the map, the risk model, the
+ * report counter) decides "is this live?" by comparing one timestamp against its own clock, so they
+ * cannot drift apart, and a cached response stays correct as it ages instead of carrying a
+ * fade value that was only true at the moment it was computed. How a live report *looks* while it
+ * runs down — the opacity ramp — is presentation and belongs to whoever is drawing it.
  */
 
 export type DecayableReport = {
@@ -17,7 +23,6 @@ export const BURST_WINDOW_MS = 15 * 60 * 1000
 export const BURST_REFERENCE_RATE_PER_MIN = 0.5
 export const TTL_MIN_MS = 15 * 60 * 1000
 export const TTL_MAX_MS = 60 * 60 * 1000
-export const MIN_OPACITY = 0.4
 
 export const AVG_HOP_TRAVEL_MS = 3 * 60 * 1000
 export const CHAIN_SLACK_FACTOR = 2.5
@@ -115,57 +120,53 @@ export const computeChainInfo = <T extends DecayableReport>(
     return info
 }
 
-export type DecayResult = {
-    opacity: number
-    ttlMs: number
-    dropped: boolean
-}
-
-export const computeReportDecay = (
+/*
+ * When a report stops being live. Being overtaken can only ever shorten a report's life, never
+ * extend it, so the two candidate instants are combined with a min rather than by branching on
+ * which case applies.
+ */
+export const computeExpiresAtMs = (
     reportTimestampMs: number,
-    nowMs: number,
     ratePerMinute: number,
     chain: ChainInfo = NOT_CHAINED
-): DecayResult => {
+): number => {
     const baseTtl = burstAdaptiveTtlMs(ratePerMinute)
     const ttlMs = chain.isChainHead ? baseTtl * CHAIN_HEAD_TTL_BOOST : baseTtl
+    const ttlExpiry = reportTimestampMs + ttlMs
 
-    if (chain.supersededAtMs !== null && nowMs >= chain.supersededAtMs) {
-        const sinceSuperseded = nowMs - chain.supersededAtMs
-        if (sinceSuperseded >= SUPERSEDED_FADE_MS) return { opacity: 0, ttlMs, dropped: true }
-        const opacity = MIN_OPACITY * (1 - sinceSuperseded / SUPERSEDED_FADE_MS)
-        return { opacity, ttlMs, dropped: false }
-    }
-
-    const age = nowMs - reportTimestampMs
-    if (age >= ttlMs) return { opacity: 0, ttlMs, dropped: true }
-    const opacity = Math.max(MIN_OPACITY, 1 - age / ttlMs)
-    return { opacity, ttlMs, dropped: false }
+    if (chain.supersededAtMs === null) return ttlExpiry
+    return Math.min(ttlExpiry, chain.supersededAtMs + SUPERSEDED_FADE_MS)
 }
 
 const decayKey = (report: DecayableReport): string =>
     `${report.stationId}|${report.lineId ?? ''}|${report.timestamp.getTime()}`
 
+// A `null` expiry never expires — see the `ReportSummary` note on predicted reports.
+export const isLive = (report: { expiresAt: Date | null }, nowMs: number): boolean =>
+    report.expiresAt === null || report.expiresAt.getTime() > nowMs
+
 /*
- * Runs the full pipeline (burst rate -> chain detection -> per-report decay) over one batch of
- * reports and drops whichever ones decayed to zero opacity, so callers get back exactly the set
- * that should still be visible, each carrying the opacity it should be rendered at.
+ * Runs the full pipeline (burst rate -> chain detection -> per-report expiry) over one batch and
+ * stamps every report with when it stops being live.
+ *
+ * Nothing is filtered out here. A report past its expiry is still a report that happened, and the
+ * same endpoint serves both the live map and plain history (the 24h line/station panels, the 7d
+ * station counter) — dropping the expired ones would empty those views out. Callers that only want
+ * what is live right now say so with `isLive`.
  */
-export const applyReportDecay = <T extends DecayableReport>(
+export const annotateReportExpiry = <T extends DecayableReport>(
     reports: readonly T[],
     lines: readonly { id: string; stations: readonly string[] }[],
     nowMs: number
-): (T & { opacity: number })[] => {
+): (T & { expiresAt: Date })[] => {
     const lineTopologies = buildLineTopologies(lines)
     const chainByKey = computeChainInfo(reports, lineTopologies, decayKey)
     const ratePerMinute = burstRatePerMinute(reports, nowMs)
 
-    const visible: (T & { opacity: number })[] = []
-    for (const report of reports) {
-        const chain = chainByKey.get(decayKey(report))
-        const { opacity, dropped } = computeReportDecay(report.timestamp.getTime(), nowMs, ratePerMinute, chain)
-        if (dropped) continue
-        visible.push({ ...report, opacity })
-    }
-    return visible
+    return reports.map((report) => ({
+        ...report,
+        expiresAt: new Date(
+            computeExpiresAtMs(report.timestamp.getTime(), ratePerMinute, chainByKey.get(decayKey(report)))
+        ),
+    }))
 }
