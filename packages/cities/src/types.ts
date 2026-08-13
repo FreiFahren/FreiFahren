@@ -3,7 +3,7 @@
 // Worker bundles, and the seed scripts). Do not import runtime dependencies here.
 
 /** The transit route types the pipeline understands, in no particular order. */
-export const ROUTE_TYPES = ['subway', 'tram', 'light_rail', 'train'] as const
+export const ROUTE_TYPES = ['subway', 'tram', 'light_rail', 'train', 'bus'] as const
 
 export type RouteType = (typeof ROUTE_TYPES)[number]
 

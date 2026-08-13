@@ -63,9 +63,13 @@ export const LEIPZIG: CityConfig = {
     },
     seed: {
         adminLevel: '^6$',
-        operators: ['Leipziger Verkehrsbetriebe', 'DB Regio Südost'],
+        // LVB only. S-Bahn ("DB Regio Südost") is intentionally dropped — a separate
+        // operator, routinely inspected anyway, and of little added value here.
+        operators: ['Leipziger Verkehrsbetriebe'],
         stationBounds: [12.18, 51.24, 12.56, 51.45],
-        routeTypePriority: ['tram', 'train', 'light_rail', 'subway'],
+        // LVB is a tram + bus network. Bus is last so that where a stop serves both,
+        // tram stays the station's representative type (and wins the proximate-merge pick).
+        routeTypePriority: ['tram', 'bus'],
         // Empty on purpose: keep each line's own OSM colour (official LVB per-line
         // colors) instead of forcing one shared color per vehicle type.
         colors: {},
