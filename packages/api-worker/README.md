@@ -64,22 +64,15 @@ use `bunx wrangler d1 execute DB --local|--remote --command "..."`.
 
 ## Trust flags
 
-The flag definitions are committed encrypted, as `trust-flags.enc`, because publishing the
-thresholds publishes how to stay under them. Changing them is a pull request against the decrypted
-file; the deploy publishes it as the `TRUST_FLAGS` secret.
+The flag definitions live in `trust-flags.json`, committed in plain text. Publishing the
+thresholds would publish how to stay under them, but the repo is private for now — if it goes
+public again, restore the age encryption this file carried before (`git log -- trust-flags.enc`).
+Changing flags is a pull request against the JSON; the deploy publishes it as the `TRUST_FLAGS`
+secret.
 
 ```bash
-brew install age                    # once
-bun run flags:decrypt               # trust-flags.enc  -> trust-flags.json (gitignored), then edit it
-bun run flags:encrypt               # trust-flags.json -> trust-flags.enc, commit that
-bun run flags:recipients            # who can currently decrypt
+bun run flags:check                 # schema, duplicate ids, and the 5 KB secret ceiling
 ```
-
-There is no passphrase to share: the file is encrypted to the SSH keys this repo's collaborators
-publish on their GitHub profiles, and decrypted with the key you already push with. If you cannot
-decrypt, ask anyone with access to re-run `flags:encrypt` — that is also what applies a membership
-change, in either direction. `TRUST_FLAGS_AGE_IDENTITY` overrides the key file if yours is not
-`~/.ssh/id_ed25519` or `~/.ssh/id_rsa`.
 
 Flags are unset in dev, previews and tests, which leaves reports unscored and shows everything on
 the map. Two levers stay out of the deploy loop, as secrets that take effect in seconds:
