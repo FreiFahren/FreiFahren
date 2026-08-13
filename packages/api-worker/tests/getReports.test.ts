@@ -26,6 +26,7 @@ const getRealReports = async (response: Response) => {
         timestamp: string
         stationId: string
         isPredicted: boolean
+        opacity: number
     }>
 
     return body.filter((report) => !report.isPredicted)
@@ -862,7 +863,7 @@ describe('Report decay', () => {
         // Only the fresh report survives decay; the 3h-old one was dropped.
         expect(realReports.length).toBe(1)
 
-        const fresh = realReports[0] as { opacity: number }
+        const fresh = realReports[0]!
         expect(fresh.opacity).toBeGreaterThan(0)
         expect(fresh.opacity).toBeLessThanOrEqual(1)
     })
