@@ -828,3 +828,70 @@ describe('GET reports default-window routing', () => {
         expect((await getRealReports(second)).length).toBe(2)
     })
 })
+
+describe('Report decay', () => {
+    beforeEach(async () => {
+        await db.delete(reports)
+    })
+
+    afterEach(async () => {
+        await db.delete(reports)
+        Settings.now = () => Date.now()
+        setSystemTime()
+    })
+
+    it('attaches an opacity to real reports and omits fully-decayed ones from the response', async () => {
+        const now = DateTime.utc(2024, 1, 15, 12, 0, 0)
+
+        // Well within the burst-adaptive ttl (max 60min in a quiet period)
+        await sendReportAt(now.minus({ minutes: 10 }).toJSDate())
+        // Old enough to have fully decayed regardless of burst rate (ttl caps at 60min)
+        await sendReportAt(now.minus({ hours: 3 }).toJSDate())
+
+        setSystemTime(now.toJSDate())
+        const from = now.minus({ hours: 4 })
+        const to = now.plus({ minutes: 1 })
+
+        const response = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        )
+
+        expect(response.status).toBe(200)
+        const realReports = await getRealReports(response)
+
+        // Only the fresh report survives decay; the 3h-old one was dropped.
+        expect(realReports.length).toBe(1)
+
+        const fresh = realReports[0] as { opacity: number }
+        expect(fresh.opacity).toBeGreaterThan(0)
+        expect(fresh.opacity).toBeLessThanOrEqual(1)
+    })
+
+    it('gives predicted reports full opacity', async () => {
+        const mondayNoon = DateTime.utc(2024, 1, 15, 12, 0) // peak hours -> high predicted threshold
+
+        // Historic reports at the same time-of-day in past weeks so the prediction algorithm has
+        // A pattern to guess from.
+        for (let weeksAgo = 1; weeksAgo <= 2; weeksAgo++) {
+            const historicTime = mondayNoon.minus({ weeks: weeksAgo })
+            await sendReportAt(historicTime.toJSDate())
+            await sendReportAt(historicTime.minus({ minutes: 5 }).toJSDate())
+        }
+
+        setSystemTime(mondayNoon.toJSDate())
+
+        const from = mondayNoon.minus({ hours: 1 })
+        const to = mondayNoon.plus({ hours: 1 })
+
+        const response = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        )
+
+        expect(response.status).toBe(200)
+        const body = (await response.json()) as Array<{ isPredicted: boolean; opacity: number }>
+        const predicted = body.filter((report) => report.isPredicted)
+
+        expect(predicted.length).toBeGreaterThan(0)
+        expect(predicted.every((report) => report.opacity === 1)).toBe(true)
+    })
+})
