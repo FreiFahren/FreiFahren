@@ -19,6 +19,7 @@ import {
     clearDirectionIfStationAndDirectionAreTheSame,
     ifDirectionPresentWithoutLineClearDirection,
 } from './post-process-report'
+import { applyReportDecay } from './report-decay'
 
 const MIN_PREDICTED_REPORTS_THRESHOLD = 1
 const MAX_PREDICTED_REPORTS_THRESHOLD = 7
@@ -79,9 +80,13 @@ type TelegramNotificationPayload = {
     directionId: StationId | null
 }
 
-type ReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'stationId' | 'directionId' | 'lineId'> & {
+type RawReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'stationId' | 'directionId' | 'lineId'> & {
     isPredicted: boolean
 }
+
+// `opacity` is how faded the report should render right now (see report-decay.ts); reports that
+// decayed all the way to 0 are dropped before this type is reached, so it never carries a 0 here.
+type ReportSummary = RawReportSummary & { opacity: number }
 
 /*
  * Who is asking. `clientHash` is the requester's own signature, computed the same way intake
@@ -180,7 +185,7 @@ export class ReportsService {
         to: DateTime
         stationId?: StationId
         viewer?: ViewerContext
-    }): Promise<ReportSummary[]> {
+    }): Promise<RawReportSummary[]> {
         const dbResults = await this.db
             .select({
                 timestamp: reports.timestamp,
@@ -229,7 +234,17 @@ export class ReportsService {
         currentTime: DateTime
         viewer?: ViewerContext
     }): Promise<ReportSummary[]> {
-        const result = await this.getRealReports({ from, to, stationId, viewer })
+        const realReports = await this.getRealReports({ from, to, stationId, viewer })
+
+        /*
+         * Decay is computed from the same batch the caller sees, so opacity/ttl is identical for
+         * every viewer looking at this station/timeframe right now — one shared "now" and one
+         * shared burst rate, rather than each client deriving its own from a locally-ticking
+         * clock. Reports that decayed to full transparency are dropped here rather than shipped
+         * with opacity 0, so the threshold below reacts to what is actually still visible.
+         */
+        const lines = await this.transitNetworkDataService.getLines()
+        const result: ReportSummary[] = applyReportDecay(realReports, lines, currentTime.toMillis())
 
         // Predict reports if we don't have enough, so that users always see at least some data
         const predictedReportsThreshold = calculatePredictedReportsThreshold(currentTime)
@@ -253,7 +268,9 @@ export class ReportsService {
                 allowedStationIds,
                 candidateRows
             )
-            result.push(...historicReports)
+            // Predicted reports are a synthesised stand-in for missing data, not something that
+            // was actually reported, so they don't age via the decay model — full opacity always.
+            result.push(...historicReports.map((report) => ({ ...report, opacity: 1 })))
         }
 
         return result
@@ -308,7 +325,7 @@ export class ReportsService {
         to: DateTime,
         allowedStationIds: ReadonlySet<StationId>,
         candidateRows: Awaited<ReturnType<ReportsService['loadPredictionCandidates']>>
-    ): ReportSummary[] {
+    ): RawReportSummary[] {
         if (numberOfReportsToFetch <= 0) return []
         if (allowedStationIds.size === 0) return []
 
@@ -333,7 +350,7 @@ export class ReportsService {
         const usedStationIds = new Set<StationId>()
         const maxUniqueCount = Math.min(numberOfReportsToFetch, allowedStationIds.size)
 
-        const results: ReportSummary[] = []
+        const results: RawReportSummary[] = []
 
         // We only use `guessStation`. If we get a disallowed/duplicate/undefined guess, we broaden the timestamp window
         // (first quarter -> first half -> full range) and retry.
