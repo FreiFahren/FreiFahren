@@ -227,12 +227,14 @@ export class ReportsService {
         stationId,
         currentTime,
         viewer,
+        decay = true,
     }: {
         from: DateTime
         to: DateTime
         stationId?: StationId
         currentTime: DateTime
         viewer?: ViewerContext
+        decay?: boolean
     }): Promise<ReportSummary[]> {
         const realReports = await this.getRealReports({ from, to, stationId, viewer })
 
@@ -242,9 +244,16 @@ export class ReportsService {
          * shared burst rate, rather than each client deriving its own from a locally-ticking
          * clock. Reports that decayed to full transparency are dropped here rather than shipped
          * with opacity 0, so the threshold below reacts to what is actually still visible.
+         *
+         * This only fits the live/default window: a caller explicitly browsing history (a day,
+         * a week, a station's past reports) wants what was actually reported in that range, not
+         * that range with anything the burst-adaptive ttl (at most 60 minutes) would already have
+         * faded off today's map. Those callers pass `decay: false` to skip the drop and get every
+         * real report back at full opacity, same as a predicted report.
          */
-        const lines = await this.transitNetworkDataService.getLines()
-        const result: ReportSummary[] = applyReportDecay(realReports, lines, currentTime.toMillis())
+        const result: ReportSummary[] = decay
+            ? applyReportDecay(realReports, await this.transitNetworkDataService.getLines(), currentTime.toMillis())
+            : realReports.map((report) => ({ ...report, opacity: 1 }))
 
         // Predict reports if we don't have enough, so that users always see at least some data
         const predictedReportsThreshold = calculatePredictedReportsThreshold(currentTime)

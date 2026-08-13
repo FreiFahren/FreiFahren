@@ -77,6 +77,7 @@ export const stationReportsCacheKey = (reportsUrl: URL, citySlug: string, statio
     const key = new URL(`${reportsUrl.origin}${reportsUrl.pathname.replace(/\/$/, '')}/${stationId}`)
     key.searchParams.set('from', new Date(toMs - WEEK_MS).toISOString())
     key.searchParams.set('to', new Date(toMs).toISOString())
+    key.searchParams.set('decay', 'false')
     key.searchParams.set('city', citySlug)
     return key
 }
