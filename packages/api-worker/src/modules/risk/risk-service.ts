@@ -27,9 +27,15 @@ export class RiskService {
     }: { now?: DateTime; viewer?: ViewerContext } = {}): Promise<RiskData> {
         const oneHourAgo = now.minus({ hours: 1 })
 
-        const [segmentCollection, realReports, stations, lines] = await Promise.all([
+        /*
+         * Live reports only, the same set the map draws markers for. Risk spreads a report's weight
+         * several segments along its line, so feeding it reports that have already expired off the
+         * map is what paints a red line with no marker anywhere near it. The model still applies
+         * its own temporal decay on top; expiry only decides which reports it gets to see at all.
+         */
+        const [segmentCollection, liveReports, stations, lines] = await Promise.all([
             this.transitNetworkDataService.getSegments(),
-            this.reportsService.getRealReports({ from: oneHourAgo, to: now, viewer }),
+            this.reportsService.getLiveReports({ from: oneHourAgo, to: now, currentTime: now, viewer }),
             this.transitNetworkDataService.getStations(),
             this.transitNetworkDataService.getLines(),
         ])
@@ -43,7 +49,7 @@ export class RiskService {
             toStationId: feature.properties.to,
         }))
 
-        const reports: RiskModelReport[] = realReports.flatMap((r) => {
+        const reports: RiskModelReport[] = liveReports.flatMap((r) => {
             const lines = r.lineId !== null ? [r.lineId] : stations[r.stationId].lines
             if (lines.length === 0) return []
             return [

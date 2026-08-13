@@ -26,7 +26,7 @@ const getRealReports = async (response: Response) => {
         timestamp: string
         stationId: string
         isPredicted: boolean
-        opacity: number
+        expiresAt: string | null
     }>
 
     return body.filter((report) => !report.isPredicted)
@@ -841,13 +841,13 @@ describe('Report decay', () => {
         setSystemTime()
     })
 
-    it('attaches an opacity to real reports and omits fully-decayed ones from the response', async () => {
+    it('stamps real reports with an expiry, in the past once they are no longer live', async () => {
         const now = DateTime.utc(2024, 1, 15, 12, 0, 0)
 
         // Well within the burst-adaptive ttl (max 60min in a quiet period)
         await sendReportAt(now.minus({ minutes: 10 }).toJSDate())
-        // Old enough to have fully decayed regardless of burst rate (ttl caps at 60min)
-        await sendReportAt(now.minus({ hours: 3 }).toJSDate())
+        // Past its ttl, so it is no longer live — but still returned
+        await sendReportAt(now.minus({ minutes: 70 }).toJSDate())
 
         setSystemTime(now.toJSDate())
         const from = now.minus({ hours: 4 })
@@ -860,39 +860,63 @@ describe('Report decay', () => {
         expect(response.status).toBe(200)
         const realReports = await getRealReports(response)
 
-        // Only the fresh report survives decay; the 3h-old one was dropped.
-        expect(realReports.length).toBe(1)
+        expect(realReports.length).toBe(2)
 
-        const fresh = realReports[0]!
-        expect(fresh.opacity).toBeGreaterThan(0)
-        expect(fresh.opacity).toBeLessThanOrEqual(1)
+        const expiries = realReports.map((report) => new Date(report.expiresAt!).getTime() > now.toMillis()).sort()
+        expect(expiries).toEqual([false, true])
     })
 
-    it('returns every real report at full opacity when decay=false, even far outside the burst-adaptive ttl', async () => {
+    // The line/station panels ask for the last 24h and the station counter for the last 7d, through
+    // this same endpoint. Every report in those windows is long expired, so annotating rather than
+    // dropping is what keeps them populated.
+    it('returns long-expired reports so historical windows are not emptied', async () => {
         const now = DateTime.utc(2024, 1, 15, 12, 0, 0)
 
-        // Well within the burst-adaptive ttl (max 60min in a quiet period)
-        await sendReportAt(now.minus({ minutes: 10 }).toJSDate())
-        // Old enough to have fully decayed regardless of burst rate (ttl caps at 60min) — this is
-        // exactly the report a 24h/7d history view needs back, unlike the live map.
-        await sendReportAt(now.minus({ hours: 3 }).toJSDate())
+        for (const hoursAgo of [2, 6, 20]) {
+            await sendReportAt(now.minus({ hours: hoursAgo }).toJSDate())
+        }
 
         setSystemTime(now.toJSDate())
-        const from = now.minus({ hours: 4 })
-        const to = now.plus({ minutes: 1 })
+        // The older 24h-to-1h remainder slice the frontend fetches alongside the live last hour.
+        const from = now.minus({ hours: 24 })
+        const to = now.minus({ hours: 1 })
 
         const response = await appRequestWithRedirect(
-            `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}&decay=false`
+            `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
         )
 
         expect(response.status).toBe(200)
         const realReports = await getRealReports(response)
 
-        expect(realReports.length).toBe(2)
-        expect(realReports.every((report) => report.opacity === 1)).toBe(true)
+        expect(realReports.length).toBe(3)
+        expect(realReports.every((report) => new Date(report.expiresAt!).getTime() <= now.toMillis())).toBe(true)
     })
 
-    it('gives predicted reports full opacity', async () => {
+    // Predictions exist to fill a genuine hole in the data. A window full of expired reports is not
+    // a hole — decay hiding stale reports is a statement about them, not missing data — so it must
+    // not be answered with synthesised ones.
+    it('does not backfill a historical window that already has real reports', async () => {
+        const now = DateTime.utc(2024, 1, 15, 12, 0)
+
+        for (const hoursAgo of [2, 6, 20]) {
+            await sendReportAt(now.minus({ hours: hoursAgo }).toJSDate())
+        }
+
+        setSystemTime(now.toJSDate())
+        const from = now.minus({ hours: 24 })
+        const to = now.minus({ hours: 1 })
+
+        const response = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}`
+        )
+
+        expect(response.status).toBe(200)
+        const body = (await response.json()) as Array<{ isPredicted: boolean }>
+
+        expect(body.filter((report) => report.isPredicted)).toHaveLength(0)
+    })
+
+    it('gives predicted reports no expiry at all', async () => {
         const mondayNoon = DateTime.utc(2024, 1, 15, 12, 0) // peak hours -> high predicted threshold
 
         // Historic reports at the same time-of-day in past weeks so the prediction algorithm has
@@ -913,10 +937,10 @@ describe('Report decay', () => {
         )
 
         expect(response.status).toBe(200)
-        const body = (await response.json()) as Array<{ isPredicted: boolean; opacity: number }>
+        const body = (await response.json()) as Array<{ isPredicted: boolean; expiresAt: string | null }>
         const predicted = body.filter((report) => report.isPredicted)
 
         expect(predicted.length).toBeGreaterThan(0)
-        expect(predicted.every((report) => report.opacity === 1)).toBe(true)
+        expect(predicted.every((report) => report.expiresAt === null)).toBe(true)
     })
 })

@@ -19,7 +19,7 @@ import {
     clearDirectionIfStationAndDirectionAreTheSame,
     ifDirectionPresentWithoutLineClearDirection,
 } from './post-process-report'
-import { applyReportDecay } from './report-decay'
+import { annotateReportExpiry, isLive } from './report-decay'
 
 const MIN_PREDICTED_REPORTS_THRESHOLD = 1
 const MAX_PREDICTED_REPORTS_THRESHOLD = 7
@@ -84,9 +84,14 @@ type RawReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'station
     isPredicted: boolean
 }
 
-// `opacity` is how faded the report should render right now (see report-decay.ts); reports that
-// decayed all the way to 0 are dropped before this type is reached, so it never carries a 0 here.
-type ReportSummary = RawReportSummary & { opacity: number }
+/*
+ * `expiresAt` is when the report stops counting as live (see report-decay.ts), serialised as an ISO
+ * instant like `timestamp`. It can be in the past: a historical query returns reports that expired
+ * long ago, and whether that matters is the caller's business. `null` means the report never
+ * expires — only predicted reports, which stand in for missing data rather than describing an event
+ * that ages.
+ */
+type ReportSummary = RawReportSummary & { expiresAt: Date | null }
 
 /*
  * Who is asking. `clientHash` is the requester's own signature, computed the same way intake
@@ -227,35 +232,31 @@ export class ReportsService {
         stationId,
         currentTime,
         viewer,
-        decay = true,
     }: {
         from: DateTime
         to: DateTime
         stationId?: StationId
         currentTime: DateTime
         viewer?: ViewerContext
-        decay?: boolean
     }): Promise<ReportSummary[]> {
-        const realReports = await this.getRealReports({ from, to, stationId, viewer })
+        const result: ReportSummary[] = await this.getReportsWithExpiry({
+            from,
+            to,
+            stationId,
+            currentTime,
+            viewer,
+        })
 
         /*
-         * Decay is computed from the same batch the caller sees, so opacity/ttl is identical for
-         * every viewer looking at this station/timeframe right now — one shared "now" and one
-         * shared burst rate, rather than each client deriving its own from a locally-ticking
-         * clock. Reports that decayed to full transparency are dropped here rather than shipped
-         * with opacity 0, so the threshold below reacts to what is actually still visible.
+         * Predict reports if we don't have enough, so that users always see at least some data.
          *
-         * This only fits the live/default window: a caller explicitly browsing history (a day,
-         * a week, a station's past reports) wants what was actually reported in that range, not
-         * that range with anything the burst-adaptive ttl (at most 60 minutes) would already have
-         * faded off today's map. Those callers pass `decay: false` to skip the drop and get every
-         * real report back at full opacity, same as a predicted report.
+         * The threshold counts every report in range, not just the ones still live. An expired
+         * report is not a gap in the data to paper over — decay hiding a stale report is a
+         * deliberate statement that it is stale, and answering that with synthesised reports would
+         * replace "we hid something stale" with "here is something invented". It also keeps
+         * historical windows honest: a 24h range full of expired reports has plenty of data and
+         * must not be backfilled with predictions.
          */
-        const result: ReportSummary[] = decay
-            ? applyReportDecay(realReports, await this.transitNetworkDataService.getLines(), currentTime.toMillis())
-            : realReports.map((report) => ({ ...report, opacity: 1 }))
-
-        // Predict reports if we don't have enough, so that users always see at least some data
         const predictedReportsThreshold = calculatePredictedReportsThreshold(currentTime)
         if (result.length < predictedReportsThreshold) {
             const numberOfReportsToFetch = predictedReportsThreshold - result.length
@@ -277,12 +278,65 @@ export class ReportsService {
                 allowedStationIds,
                 candidateRows
             )
-            // Predicted reports are a synthesised stand-in for missing data, not something that
-            // was actually reported, so they don't age via the decay model — full opacity always.
-            result.push(...historicReports.map((report) => ({ ...report, opacity: 1 })))
+            // Predicted reports stand in for missing data rather than describing an event that
+            // ages, so they have no expiry — see the `ReportSummary` note.
+            result.push(...historicReports.map((report) => ({ ...report, expiresAt: null })))
         }
 
         return result
+    }
+
+    /**
+     * Real reports in range, each stamped with when it stops being live.
+     *
+     * Expiry is computed once per request from the whole batch, so every viewer looking at this
+     * station/timeframe right now agrees on it: one shared "now", one shared burst rate, one shared
+     * view of which reports overtook which. A client deriving it from its own slice would compute a
+     * different burst rate from a different set of reports.
+     */
+    private async getReportsWithExpiry({
+        from,
+        to,
+        stationId,
+        currentTime,
+        viewer,
+    }: {
+        from: DateTime
+        to: DateTime
+        stationId?: StationId
+        currentTime: DateTime
+        viewer?: ViewerContext
+    }): Promise<(RawReportSummary & { expiresAt: Date })[]> {
+        const [realReports, lines] = await Promise.all([
+            this.getRealReports({ from, to, stationId, viewer }),
+            this.transitNetworkDataService.getLines(),
+        ])
+        return annotateReportExpiry(realReports, lines, currentTime.toMillis())
+    }
+
+    /**
+     * Only the reports that are live right now — the set the map is showing.
+     *
+     * The risk model reads through here rather than through `getRealReports` so that risk and
+     * markers cannot disagree: a report that has expired off the map paints no risk, which is what
+     * makes "a coloured line with no marker on it" impossible by construction rather than by two
+     * decay models happening to agree.
+     */
+    async getLiveReports({
+        from,
+        to,
+        stationId,
+        currentTime,
+        viewer,
+    }: {
+        from: DateTime
+        to: DateTime
+        stationId?: StationId
+        currentTime: DateTime
+        viewer?: ViewerContext
+    }): Promise<RawReportSummary[]> {
+        const annotated = await this.getReportsWithExpiry({ from, to, stationId, currentTime, viewer })
+        return annotated.filter((report) => isLive(report, currentTime.toMillis()))
     }
 
     // Determines which stations the prediction algorithm may emit reports for.

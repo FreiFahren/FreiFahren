@@ -7,10 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useReportSimulation } from '@/contexts/ReportSimulation.context';
 import {
+  annotateReportExpiry,
   burstRatePerMinute,
   buildLineTopologies,
   computeChainInfo,
-  computeReportDecay,
+  reportOpacity,
 } from '@/lib/report-decay';
 import {
   buildBurstReports,
@@ -96,9 +97,16 @@ export function ReportDecayDebugPanel() {
     return buildBurstReports(stations, count, rangeStartMs + totalRangeMs, totalRangeMs);
   }, [stations, burstIntensity, scenarioStartMs]);
 
+  const simulatedNowMs = scenarioStartMs + simMinutes * 60_000;
+
+  /*
+   * The API stamps real reports with an `expiresAt`; here the same model runs client-side so the
+   * scenario can be played forward without a backend. Downstream — the map layer included — sees
+   * simulated and real reports in exactly the same shape.
+   */
   const combinedReports = useMemo(
-    () => [...burstReports, ...walkReports],
-    [burstReports, walkReports],
+    () => annotateReportExpiry([...burstReports, ...walkReports], lines, simulatedNowMs, reportKey),
+    [burstReports, walkReports, lines, simulatedNowMs],
   );
 
   const generateWalk = () => {
@@ -115,8 +123,6 @@ export function ReportDecayDebugPanel() {
     );
   };
 
-  const simulatedNowMs = scenarioStartMs + simMinutes * 60_000;
-
   useEffect(() => {
     setSimulation({
       reports: active ? combinedReports : null,
@@ -129,6 +135,17 @@ export function ReportDecayDebugPanel() {
   const lineTopologies = buildLineTopologies(lines);
   const chainByKey = computeChainInfo(walkReports, lineTopologies, reportKey);
   const ratePerMinute = burstRatePerMinute(combinedReports, simulatedNowMs);
+  // Read back the expiry the simulation assigned, so this readout and the map agree exactly.
+  const expiresAtMsByKey = new Map(
+    combinedReports.map((report) => [reportKey(report), new Date(report.expiresAt).getTime()]),
+  );
+
+  const walkReportOpacity = (report: (typeof walkReports)[number]): number | null =>
+    reportOpacity(
+      new Date(report.timestamp).getTime(),
+      expiresAtMsByKey.get(reportKey(report)) ?? null,
+      simulatedNowMs,
+    );
   const lineColorById = new Map(lines.map((line) => [line.id, line.color]));
 
   return (
@@ -231,12 +248,8 @@ export function ReportDecayDebugPanel() {
               <div className="flex flex-wrap items-center gap-1.5 py-1">
                 {walkReports.map((report) => {
                   const chain = chainByKey.get(reportKey(report));
-                  const { opacity, dropped } = computeReportDecay(
-                    new Date(report.timestamp).getTime(),
-                    simulatedNowMs,
-                    ratePerMinute,
-                    chain,
-                  );
+                  const opacity = walkReportOpacity(report);
+                  const dropped = opacity === null;
                   return (
                     <span
                       key={reportKey(report)}
@@ -248,7 +261,7 @@ export function ReportDecayDebugPanel() {
                       )}
                       style={{
                         backgroundColor: report.lineId ? lineColorById.get(report.lineId) : '#999',
-                        opacity: dropped ? 0.08 : Math.max(opacity, 0.08),
+                        opacity: opacity === null ? 0.08 : Math.max(opacity, 0.08),
                       }}
                     />
                   );
@@ -257,12 +270,8 @@ export function ReportDecayDebugPanel() {
             )}
             {walkReports.map((report) => {
               const chain = chainByKey.get(reportKey(report));
-              const { opacity, dropped } = computeReportDecay(
-                new Date(report.timestamp).getTime(),
-                simulatedNowMs,
-                ratePerMinute,
-                chain,
-              );
+              const opacity = walkReportOpacity(report);
+              const dropped = opacity === null;
               const ageMin = Math.round(
                 (simulatedNowMs - new Date(report.timestamp).getTime()) / 60_000,
               );

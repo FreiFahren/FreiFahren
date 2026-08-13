@@ -1,10 +1,12 @@
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
-import { HOUR_MS, useReports } from '@/api/reports';
+import { HOUR_MS, isReportLive, useReports } from '@/api/reports';
 import { useLines, useStations } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
+import { useNow } from '@/hooks/useNow';
+import { REPORT_RECOMPUTE_INTERVAL_MS } from '@/hooks/useReportsLayer';
 import { markReportViewed, useReportViewed } from '@/lib/viewed-reports';
 import { Route as ReportsSummaryRoute } from '@/routes/reports/index';
 
@@ -16,12 +18,17 @@ export function ReportsOverviewButton() {
   const { data: reports } = useReports(HOUR_MS);
   const { data: lines } = useLines();
   const { data: stations } = useStations();
+  // Matches the map layer's cadence, so the count and the markers roll over together.
+  const now = useNow(REPORT_RECOMPUTE_INTERVAL_MS);
 
-  // useReports(HOUR_MS) already scopes the data to the last hour, so the count is just the
-  // number of reports and the latest is the newest by timestamp.
-  const allReports = reports ?? [];
-  const recentCount = allReports.length;
-  const latest = allReports.slice().sort((a, b) => b.timestamp.localeCompare(a.timestamp))[0];
+  /*
+   * Counts the reports that are still live, not every report in the last hour — this button sits on
+   * the map, and a count that disagreed with the markers next to it ("17" over six dots) reads as a
+   * bug rather than as two different questions being answered.
+   */
+  const liveReports = (reports ?? []).filter((report) => isReportLive(report, now));
+  const recentCount = liveReports.length;
+  const latest = liveReports.slice().sort((a, b) => b.timestamp.localeCompare(a.timestamp))[0];
   // Called before the early return to keep hook order stable; empty keys match nothing.
   const latestViewed = useReportViewed(latest?.stationId ?? '', latest?.timestamp ?? '');
 
@@ -47,7 +54,7 @@ export function ReportsOverviewButton() {
           onClick={() => markReportViewed(latest.stationId, latest.timestamp)}
         >
           <div className="flex items-center justify-between gap-3">
-            <span className="text-muted-foreground text-xs">{t('lastHour')}</span>
+            <span className="text-muted-foreground text-xs">{t('currentReports')}</span>
             <span className="text-sm font-semibold">{recentCount}</span>
           </div>
           <div className="flex items-center gap-2">
