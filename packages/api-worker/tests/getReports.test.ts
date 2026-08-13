@@ -868,6 +868,30 @@ describe('Report decay', () => {
         expect(fresh.opacity).toBeLessThanOrEqual(1)
     })
 
+    it('returns every real report at full opacity when decay=false, even far outside the burst-adaptive ttl', async () => {
+        const now = DateTime.utc(2024, 1, 15, 12, 0, 0)
+
+        // Well within the burst-adaptive ttl (max 60min in a quiet period)
+        await sendReportAt(now.minus({ minutes: 10 }).toJSDate())
+        // Old enough to have fully decayed regardless of burst rate (ttl caps at 60min) — this is
+        // exactly the report a 24h/7d history view needs back, unlike the live map.
+        await sendReportAt(now.minus({ hours: 3 }).toJSDate())
+
+        setSystemTime(now.toJSDate())
+        const from = now.minus({ hours: 4 })
+        const to = now.plus({ minutes: 1 })
+
+        const response = await appRequestWithRedirect(
+            `/reports?from=${encodeURIComponent(from.toISO()!)}&to=${encodeURIComponent(to.toISO()!)}&decay=false`
+        )
+
+        expect(response.status).toBe(200)
+        const realReports = await getRealReports(response)
+
+        expect(realReports.length).toBe(2)
+        expect(realReports.every((report) => report.opacity === 1)).toBe(true)
+    })
+
     it('gives predicted reports full opacity', async () => {
         const mondayNoon = DateTime.utc(2024, 1, 15, 12, 0) // peak hours -> high predicted threshold
 

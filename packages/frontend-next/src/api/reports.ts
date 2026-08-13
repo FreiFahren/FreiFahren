@@ -109,6 +109,11 @@ export const reportsSliceQueryOptions = (fromAgo: number, toAgo: number) => {
         from: new Date(now - fromAgo).toISOString(),
         to: new Date(now - toAgo).toISOString(),
       });
+      // The live slice is the map's rolling window, so the API's burst-adaptive decay (which
+      // drops anything older than ~60 min) applies. The older slice is explicit history — a
+      // report doesn't stop having happened just because it would have faded off the map by
+      // now — so it opts out and gets every real report in range back.
+      if (toAgo !== 0) params.set('decay', 'false');
       return fetchJson<Report[]>(`/v0/reports?${params.toString()}`);
     },
     ...(isLiveSlice ? LIVE_SLICE_POLLING : OLDER_SLICE_POLLING),
@@ -165,7 +170,8 @@ export const stationReportCountQueryOptions = (stationId: string) => {
   return {
     queryKey: ['reports', stationId, from, to] as const,
     queryFn: () => {
-      const params = new URLSearchParams({ from, to });
+      // A 7-day lookback is explicit history, not the live map, so it opts out of decay too.
+      const params = new URLSearchParams({ from, to, decay: 'false' });
       return fetchJson<Report[]>(`/v0/reports/${stationId}?${params.toString()}`);
     },
     staleTime: HOUR_MS,

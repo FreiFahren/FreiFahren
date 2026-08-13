@@ -24,6 +24,17 @@ const reportsQuerySchema = z
             .datetime()
             .transform((str) => DateTime.fromISO(str))
             .optional(),
+        /*
+         * Decay drops reports once they age past the burst-adaptive ttl (at most 60 minutes) — a
+         * fit for the live map's rolling window, but not for callers explicitly browsing history
+         * (a day-, week-, or station-scoped lookback), where "too old to still be relevant on the
+         * map" isn't the question being asked. Defaults to on so the live/default window keeps its
+         * existing behaviour; historical lookbacks opt out with `decay=false`.
+         */
+        decay: z
+            .string()
+            .optional()
+            .transform((value) => value !== 'false'),
     })
     .refine(({ to, from }) => {
         if (isNil(to) && isNil(from)) return true
@@ -40,10 +51,11 @@ const reportsQuerySchema = z
             return {
                 from: query.from,
                 to: query.to,
+                decay: query.decay,
             }
         }
 
-        return getDefaultReportsRange(DateTime.now())
+        return { ...getDefaultReportsRange(DateTime.now()), decay: query.decay }
     })
 
 export const getReports = defineRoute<Env>()({
@@ -64,6 +76,7 @@ export const getReports = defineRoute<Env>()({
             await reportsService.getReports({
                 from: query.from,
                 to: query.to,
+                decay: query.decay,
                 currentTime: now,
                 viewer: await resolveViewer(c),
             })
@@ -90,6 +103,7 @@ export const getReportsByStation = defineRoute<Env>()({
             await reportsService.getReports({
                 from: query.from,
                 to: query.to,
+                decay: query.decay,
                 stationId,
                 currentTime: DateTime.now(),
                 viewer: await resolveViewer(c),
