@@ -26,6 +26,7 @@ import { useGeolocation } from '@/contexts/Geolocation.context';
 import { isContributeDismissed, openContributeModal } from '@/lib/contribute-modal';
 import { track } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';
+import { captureIssue } from '@/lib/error-monitoring';
 import { distanceMeters } from '@/lib/geo';
 import { notifySuccess, selectionTap } from '@/lib/haptics';
 import { toast } from '@/lib/toast';
@@ -431,7 +432,7 @@ function SubmitFooter({
            * button just re-enables silently and a tap that produced no report reads as tapping
            * nothing at all.
            */
-          track('report_submit_failed', {
+          captureIssue('Report submit failed', {
             status: error instanceof SubmitReportError ? error.status : undefined,
           });
           const failureCount = consecutiveFailures + 1;
