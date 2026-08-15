@@ -6,7 +6,7 @@ import { enqueuePostHog } from '@/lib/posthog-client';
 // directly. Events stamp their own `timestamp` because PostHog is lazy-loaded and calls buffer
 // until it's ready — otherwise a startup burst would all collapse to the SDK's init time.
 
-export type LocationRequestTrigger = 'auto';
+export type LocationRequestTrigger = 'auto' | 'soft_prompt' | 'report';
 export type LineDetailSource = 'direct' | 'map' | 'report' | 'reports_list' | 'search' | 'station';
 type SuperProperties = {
   map_layer: 'RISK' | 'LINES';
@@ -34,6 +34,9 @@ type AnalyticsEvents = {
   contribute_stripe_clicked: { source: ContributeSource };
   contribute_dismissed: { source: ContributeSource };
   location_permission_evaluated: { state: GeolocationPermissionState };
+  location_prompt_shown: { source: 'map' | 'report' };
+  location_prompt_allowed: { source: 'map' | 'report' };
+  location_prompt_dismissed: { source: 'map' | 'report' };
   location_request_started: { trigger: LocationRequestTrigger };
   location_acquired: { trigger: LocationRequestTrigger };
   location_failed: {

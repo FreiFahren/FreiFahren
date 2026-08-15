@@ -14,6 +14,7 @@ import {
   useConsentReview,
 } from '@/lib/consent';
 import { useOnboardingComplete } from '@/lib/onboarding';
+import { useActiveLocationPrompt } from '@/lib/location-prompt';
 import { optionalEnv } from '@/lib/utils';
 import { Route as PrivacyRoute } from '@/routes/privacy';
 
@@ -33,6 +34,7 @@ export function ConsentBanner() {
   const showPrompt = useConsentPrompt();
   const reviewOpen = useConsentReview();
   const onboarded = useOnboardingComplete();
+  const locationPrompt = useActiveLocationPrompt();
 
   // Reapply a returning visitor's stored choice once the SDK has initialized.
   useEffect(() => {
@@ -40,6 +42,7 @@ export function ConsentBanner() {
   }, []);
 
   if (!analyticsEnabled) return null;
+  if (locationPrompt) return null;
   // Reopened from settings always shows; the first-run/expired prompt stays until the user
   // (re-)decides.
   if (!reviewOpen && (!showPrompt || !onboarded)) return null;

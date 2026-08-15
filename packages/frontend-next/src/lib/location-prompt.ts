@@ -1,6 +1,9 @@
 import { Capacitor } from '@capacitor/core';
 
-// How long after the map loads before the native permission dialog fires (unless already granted).
+import { useSyncExternalStore } from 'react';
+
+// Let users orient themselves before the in-app explanation appears. The browser/OS prompt still
+// requires a later explicit tap on "Use location".
 export const LOCATION_PROMPT_DELAY_MS = 10_000;
 
 export type GeolocationPermissionState = 'granted' | 'denied' | 'prompt' | 'unsupported';
@@ -40,4 +43,46 @@ export async function requestGeolocationPermission(): Promise<GeolocationPermiss
   } catch {
     return 'unsupported';
   }
+}
+
+// "Not now" lasts only for this session. The report flow may still ask again when location has a
+// clear, immediate purpose.
+let mapPromptDismissed = false;
+
+export function isMapLocationPromptDismissed(): boolean {
+  return mapPromptDismissed;
+}
+
+export function dismissMapLocationPrompt(): void {
+  mapPromptDismissed = true;
+}
+
+export type LocationPromptSource = 'map' | 'report';
+
+let activePrompt: LocationPromptSource | null = null;
+const promptListeners = new Set<() => void>();
+
+function notifyPromptListeners(): void {
+  for (const listener of promptListeners) listener();
+}
+
+export function openLocationPrompt(source: LocationPromptSource): void {
+  activePrompt = source;
+  notifyPromptListeners();
+}
+
+export function closeLocationPrompt(source: LocationPromptSource): void {
+  if (activePrompt !== source) return;
+  activePrompt = null;
+  notifyPromptListeners();
+}
+
+export function useActiveLocationPrompt(): LocationPromptSource | null {
+  return useSyncExternalStore(
+    (listener) => {
+      promptListeners.add(listener);
+      return () => promptListeners.delete(listener);
+    },
+    () => activePrompt,
+  );
 }
