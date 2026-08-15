@@ -9,6 +9,7 @@ import {
   LOCATION_PROMPT_DELAY_MS,
   openLocationPrompt,
   queryGeolocationPermission,
+  type GeolocationPermissionState,
 } from '@/lib/location-prompt';
 
 function useMountedRef() {
@@ -29,53 +30,50 @@ export function useMapLocationSharing({
   enabled: boolean;
   canDisplay: boolean;
 }) {
-  const { notifyError, position, requestLocation, status } = useGeolocation();
+  const { position, requestLocation, status } = useGeolocation();
   const [showPrompt, setShowPrompt] = useState(false);
-  const evaluatedRef = useRef(false);
+  const [permission, setPermission] = useState<GeolocationPermissionState | null>(null);
   const promptTrackedRef = useRef(false);
   const requestLocationRef = useRef(requestLocation);
-  const notifyErrorRef = useRef(notifyError);
   const hasLocation = position !== null || status === 'tracking';
 
   useEffect(() => {
     requestLocationRef.current = requestLocation;
-    notifyErrorRef.current = notifyError;
-  }, [requestLocation, notifyError]);
+  }, [requestLocation]);
 
   useEffect(() => {
     if (hasLocation) {
-      evaluatedRef.current = true;
       closeLocationPrompt('map');
     }
   }, [hasLocation]);
 
   useEffect(() => {
-    if (!enabled || hasLocation || evaluatedRef.current) return;
+    if (!enabled || hasLocation || permission !== null) return;
 
     let cancelled = false;
-    let timer = 0;
-
-    void queryGeolocationPermission().then((permission) => {
-      if (cancelled || evaluatedRef.current) return;
-      evaluatedRef.current = true;
-      track('location_permission_evaluated', { state: permission });
-
-      if (permission === 'granted') {
-        void requestLocationRef.current('auto');
-      } else if (permission === 'denied') {
-        notifyErrorRef.current(1);
-      } else {
-        timer = window.setTimeout(() => {
-          if (!cancelled && !isMapLocationPromptDismissed()) setShowPrompt(true);
-        }, LOCATION_PROMPT_DELAY_MS);
-      }
+    void queryGeolocationPermission().then((result) => {
+      if (cancelled) return;
+      track('location_permission_evaluated', { state: result });
+      setPermission(result);
     });
-
     return () => {
       cancelled = true;
-      window.clearTimeout(timer);
     };
-  }, [enabled, hasLocation]);
+  }, [enabled, hasLocation, permission]);
+
+  useEffect(() => {
+    if (!enabled || hasLocation || permission === null) return;
+
+    if (permission === 'granted') {
+      void requestLocationRef.current('auto');
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      if (!isMapLocationPromptDismissed()) setShowPrompt(true);
+    }, LOCATION_PROMPT_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [enabled, hasLocation, permission]);
 
   const visible = showPrompt && canDisplay && !hasLocation;
   useEffect(() => {
@@ -112,33 +110,28 @@ export function useMapLocationSharing({
 export function useReportLocationSharing() {
   const { position, requestLocation, status } = useGeolocation();
   const [phase, setPhase] = useState<'checking' | 'prompt' | 'complete'>(
-    position || status === 'denied' ? 'complete' : 'checking',
+    position ? 'complete' : 'checking',
   );
   const mountedRef = useMountedRef();
   const promptTrackedRef = useRef(false);
   const initialPositionRef = useRef(position);
-  const initialStatusRef = useRef(status);
   const requestLocationRef = useRef(requestLocation);
 
   useEffect(() => {
     let cancelled = false;
 
     const prepare = async () => {
-      if (initialPositionRef.current || initialStatusRef.current === 'denied') {
-        setPhase('complete');
-        return;
-      }
+      if (initialPositionRef.current) return;
 
       const permission = await queryGeolocationPermission();
       if (cancelled) return;
       if (permission === 'granted') {
-        await requestLocationRef.current('report');
-        if (!cancelled) setPhase('complete');
-        return;
-      }
-      if (permission === 'denied') {
-        setPhase('complete');
-        return;
+        const coords = await requestLocationRef.current('report');
+        if (cancelled) return;
+        if (coords) {
+          setPhase('complete');
+          return;
+        }
       }
 
       setPhase('prompt');
