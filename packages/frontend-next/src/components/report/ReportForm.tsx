@@ -13,6 +13,7 @@ import {
 } from '@/api/reports';
 import { type Station } from '@/api/transit';
 import { FeedbackButton } from '@/components/feedback/FeedbackButton';
+import { ReportLocationStep } from '@/components/map/UserLocationControl';
 import { PageHeader } from '@/components/templates/PageHeader';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
@@ -511,7 +512,10 @@ export function ReportForm() {
                 }
               />
               {reportingEnabled && !refusedBySubmit && !repeatedFailure ? (
-                <>
+                <ReportLocationStep>
+                  <p className="text-muted-foreground px-4 pt-1 text-[0.625rem] font-semibold tracking-wide uppercase">
+                    {t('reportLocationStep')}
+                  </p>
                   <LinePicker />
                   <StationPicker />
                   <DirectionPicker />
@@ -520,7 +524,7 @@ export function ReportForm() {
                     onReportingDisabled={() => setRefusedBySubmit(true)}
                     onRepeatedFailure={() => setRepeatedFailure(true)}
                   />
-                </>
+                </ReportLocationStep>
               ) : repeatedFailure ? (
                 <TelegramFallbackNotice
                   title={t('submitFailedTitle')}
