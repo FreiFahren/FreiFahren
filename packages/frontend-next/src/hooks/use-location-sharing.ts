@@ -29,12 +29,13 @@ export function useMapLocationSharing({
   enabled: boolean;
   canDisplay: boolean;
 }) {
-  const { notifyError, requestLocation } = useGeolocation();
+  const { notifyError, position, requestLocation, status } = useGeolocation();
   const [showPrompt, setShowPrompt] = useState(false);
   const evaluatedRef = useRef(false);
   const promptTrackedRef = useRef(false);
   const requestLocationRef = useRef(requestLocation);
   const notifyErrorRef = useRef(notifyError);
+  const hasLocation = position !== null || status === 'tracking';
 
   useEffect(() => {
     requestLocationRef.current = requestLocation;
@@ -42,7 +43,14 @@ export function useMapLocationSharing({
   }, [requestLocation, notifyError]);
 
   useEffect(() => {
-    if (!enabled || evaluatedRef.current) return;
+    if (hasLocation) {
+      evaluatedRef.current = true;
+      closeLocationPrompt('map');
+    }
+  }, [hasLocation]);
+
+  useEffect(() => {
+    if (!enabled || hasLocation || evaluatedRef.current) return;
 
     let cancelled = false;
     let timer = 0;
@@ -67,9 +75,9 @@ export function useMapLocationSharing({
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [enabled]);
+  }, [enabled, hasLocation]);
 
-  const visible = showPrompt && canDisplay;
+  const visible = showPrompt && canDisplay && !hasLocation;
   useEffect(() => {
     if (!visible) {
       closeLocationPrompt('map');
