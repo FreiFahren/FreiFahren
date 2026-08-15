@@ -5,7 +5,6 @@ import { RISK_COLORS } from '@/api/risk';
 import { Button } from '@/components/ui/button';
 import { useRiskLayer } from '@/hooks/useRiskLayer';
 import { selectionTap } from '@/lib/haptics';
-import { cn } from '@/lib/utils';
 
 import { NAMESPACE } from './LayerToggleButton.i18n';
 
@@ -26,12 +25,11 @@ export function LayerToggleButton() {
         }}
         aria-pressed={visible}
         aria-label={visible ? t('hideRiskLayer') : t('showRiskLayer')}
-        className={cn(
-          'bg-card hover:bg-card/80 pointer-events-auto h-11 w-[4.5rem] flex-col gap-0.5 rounded-lg px-3 shadow-[0_6px_16px_rgba(0,0,0,0.28)]',
-          // Risk is the default and switching is rare, so keep the states quiet: full-strength
-          // when on, dimmed when off. The fixed width keeps the two labels from reflowing the row.
-          visible ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
-        )}
+        // Both states stay full-strength: dimming the control in the lines state made the only way
+        // back to risk read as unavailable (grey is the disabled convention). State is carried by
+        // the label, the legend below, and aria-pressed instead. The fixed width keeps the two
+        // labels from reflowing the row.
+        className="bg-card text-foreground hover:bg-card/80 pointer-events-auto h-11 w-[4.5rem] flex-col gap-0.5 rounded-lg px-3 shadow-[0_6px_16px_rgba(0,0,0,0.28)]"
       >
         <Layers className="size-5" />
         <span className="text-[11px] leading-none font-semibold">
