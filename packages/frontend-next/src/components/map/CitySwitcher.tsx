@@ -3,7 +3,7 @@ import { type CityConfig } from '@freifahren/cities';
 import { ChevronDown, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { currentCity, setCityPreference } from '@/lib/city';
+import { currentCity, hostForCity, setCityPreference } from '@/lib/city';
 import { selectableCities, useCitySwitchingEnabled } from '@/lib/city-switching';
 import { isPreviewBuild } from '@/lib/utils';
 import {
@@ -31,8 +31,7 @@ function urlForCity(city: CityConfig): string {
     return `${origin}${pathname}?${params.toString()}`;
   }
 
-  const labels = hostname.split('.');
-  const host = labels.length < 2 ? hostname : [city.subdomain, ...labels.slice(1)].join('.');
+  const host = hostForCity(hostname, city);
   return `${protocol}//${host}${port ? `:${port}` : ''}${pathname}${search}`;
 }
 

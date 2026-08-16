@@ -11,7 +11,7 @@ import {
   type SubmitReportResponse,
   useSubmitReport,
 } from '@/api/reports';
-import { type Station } from '@/api/transit';
+import { LINE_TYPE_PRIORITY, type LineType, type Station } from '@/api/transit';
 import { FeedbackButton } from '@/components/feedback/FeedbackButton';
 import { ReportLocationStep } from '@/components/map/UserLocationControl';
 import { PageHeader } from '@/components/templates/PageHeader';
@@ -41,7 +41,14 @@ import { type ReportRejection, useReportVerification } from './useReportVerifica
 
 const routeApi = getRouteApi('/report');
 
-const FILTERS: LineFilter[] = ['all', 'subway', 'light_rail', 'tram'];
+const LINE_TYPES = new Set<string>(Object.keys(LINE_TYPE_PRIORITY));
+
+const FILTERS: LineFilter[] = [
+  'all',
+  ...currentCity.seed.routeTypePriority
+    .filter((type): type is LineType => LINE_TYPES.has(type))
+    .sort((a, b) => LINE_TYPE_PRIORITY[a] - LINE_TYPE_PRIORITY[b]),
+];
 
 /** Diacritic-insensitive match so "moritzplatz" finds "Möritzplatz" and "strasse" finds "Straße". */
 function normalize(value: string): string {
@@ -513,9 +520,6 @@ export function ReportForm() {
               />
               {reportingEnabled && !refusedBySubmit && !repeatedFailure ? (
                 <ReportLocationStep>
-                  <p className="text-muted-foreground px-4 pt-1 text-[0.625rem] font-semibold tracking-wide uppercase">
-                    {t('reportLocationStep')}
-                  </p>
                   <LinePicker />
                   <StationPicker />
                   <DirectionPicker />

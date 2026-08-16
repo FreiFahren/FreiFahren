@@ -15,7 +15,6 @@ i18n.addResourceBundle('en', NAMESPACE, {
   allow: 'Use location',
   notNow: 'Not now',
   continueWithout: 'Continue without',
-  reportStep: 'Step 1 of 2',
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
@@ -31,5 +30,4 @@ i18n.addResourceBundle('de', NAMESPACE, {
   allow: 'Standort verwenden',
   notNow: 'Jetzt nicht',
   continueWithout: 'Ohne fortfahren',
-  reportStep: 'Schritt 1 von 2',
 });

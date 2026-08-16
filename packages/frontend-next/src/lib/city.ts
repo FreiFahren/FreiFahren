@@ -39,6 +39,9 @@ const resolvePreviewCity = (): CityConfig | undefined => {
   return stored ? getCity(stored) : undefined;
 };
 
+const isLocalhost = (hostname: string): boolean =>
+  hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.localhost');
+
 // Web: the subdomain selects the city (berlin.freifahren.org -> berlin). Unknown hosts
 // (freifahren.org, app./www., localhost) fall back to the default.
 const resolveWebCity = (hostname: string): CityConfig => {
@@ -48,6 +51,16 @@ const resolveWebCity = (hostname: string): CityConfig => {
   const label = hostname.split('.')[0];
   return Object.values(CITIES).find((city) => city.subdomain === label) ?? defaultCity();
 };
+
+export function hostForCity(hostname: string, city: CityConfig): string {
+  if (isLocalhost(hostname)) {
+    return city.slug === DEFAULT_CITY_SLUG ? 'localhost' : `${city.subdomain}.localhost`;
+  }
+
+  const labels = hostname.split('.');
+  if (labels.length < 2) return hostname;
+  return [city.subdomain, ...labels.slice(1)].join('.');
+}
 
 // The active city for this session. The resolution source is pluggable (stored preference on
 // native, hostname on web); the resolved city is fixed once the app boots.
