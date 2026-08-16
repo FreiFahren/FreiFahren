@@ -65,6 +65,7 @@ export interface CityProfile {
     /** null when the city has no circular line. */
     circularLineRegex: RegExp | null
     inspectorKeywords: string
+    untrackedLinesNote: string
     promptExamples: string
 }
 
@@ -88,6 +89,7 @@ export function profileFor(cityName: string): CityProfile {
             ? new RegExp(telegram.circularLinePattern, 'i')
             : null,
         inspectorKeywords: telegram.inspectorKeywords,
+        untrackedLinesNote: telegram.untrackedLinesNote,
         promptExamples: telegram.promptExamples,
     }
 }

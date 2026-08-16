@@ -71,15 +71,29 @@ export const BERLIN: CityConfig = {
     seed: {
         adminLevel: '^[4-6]$',
         operators: ['Berliner Verkehrsbetriebe', 'S-Bahn Berlin GmbH'],
-        routeTypePriority: ['subway', 'tram', 'light_rail', 'train'],
+        // Bus is last: when a stop serves rail and bus, the rail type stays the
+        // station's representative type (and wins the proximate-merge pick).
+        routeTypePriority: ['subway', 'tram', 'light_rail', 'train', 'bus'],
+        // MetroBus (M11–M85) only: BVG runs ~300 bus lines, but only the Metro
+        // network runs frequently enough to be checked and reported in practice.
+        // Berlin's Metrotram refs (M1–M17) are disjoint from the MetroBus refs,
+        // so scoping bus this way can't collide with a tram of the same name.
+        routeRefPatterns: { bus: String.raw`^M\d+$` },
         colors: {
             tram: '#be1414', // Classic Berlin tram red (tram and metro tram M* lines).
             light_rail: '#007734', // Berlin S-Bahn green (S2), applied to all S-Bahn lines.
+            bus: '#95276E', // VBB MetroBus purple, one shared color for all bus lines.
         },
         defaultLineColor: '#000000',
     },
     telegram: {
         inspectorKeywords: 'Kontrolleur, BVG-Kontrolle, BOS, BW, Blauwesten, Zivilkontrolle, blaue Westen',
+        // MetroBus (M11-M85) IS tracked, so it must not be listed here; what stays
+        // outside the network is the rest of the BVG bus system.
+        untrackedLinesNote:
+            'Sightings on OTHER lines (X-lines, three-digit bus lines, night buses, ' +
+            'replacement services) are still reports if a station name is mentioned — ' +
+            'extract the station (bus stops are named after the nearby U/S station).',
         circularLineAlias: 'Ringbahn',
         circularLinePattern: String.raw`(?<![A-Za-z])(?:s[-\s]?)?ring(?:bahn)?`,
         abbreviations: [

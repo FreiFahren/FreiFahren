@@ -113,6 +113,7 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
     let skippedNoRef = 0
     let skippedTooShort = 0
     let skippedUnknownType = 0
+    let skippedRefPattern = 0
 
     for (const rel of relations) {
         const tags: Record<string, string | undefined> = rel.tags ?? {}
@@ -121,13 +122,20 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
             skippedNoRef++
             continue
         }
-        if (!isSeedLineRefIncluded(ref)) continue
-
         if (!isRouteType(tags.route)) {
             skippedUnknownType++
             continue
         }
         const type: RouteType = tags.route
+
+        // Re-apply the ref filtering the Overpass discovery already did, now that
+        // the route type is known, so an over-complete snapshot — a ref shared
+        // across route types, or one fetched before the patterns existed — can't
+        // widen the seeded network.
+        if (!isSeedLineRefIncluded(ref, type)) {
+            skippedRefPattern++
+            continue
+        }
 
         const resolved = resolveRouteStations(rel, nodeIdToStationId)
         if (resolved.length < 2) {
@@ -145,7 +153,7 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
     }
 
     logger.info(
-        `[seed:lines] Parsed ${raw.length} route variants (${skippedNoRef} no-ref, ${skippedTooShort} too-short, ${skippedUnknownType} unsupported route type)`
+        `[seed:lines] Parsed ${raw.length} route variants (${skippedNoRef} no-ref, ${skippedTooShort} too-short, ${skippedUnknownType} unsupported route type, ${skippedRefPattern} ref-pattern filtered)`
     )
 
     const byRef = new Map<string, RawVariant[]>()
