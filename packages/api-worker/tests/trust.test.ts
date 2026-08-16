@@ -110,6 +110,38 @@ describe('trust scoring on report intake', () => {
         expect(stored.trust).toBeNull()
         expect(stored.trustFlags).toBeNull()
     })
+
+    it('leaves trust null when every flag is scoped to another city', async () => {
+        putFlags([
+            flag({
+                id: 'leipzig-only',
+                sql: 'SELECT 1 FROM reports WHERE report_id = ?1',
+                cities: ['leipzig'],
+            }),
+        ])
+
+        expect((await postReport()).status).toBe(200)
+
+        const stored = await lastReport()
+        expect(stored.trust).toBeNull()
+        expect(stored.trustFlags).toBeNull()
+    })
+
+    it('still scores when the flag is scoped to berlin', async () => {
+        putFlags([
+            flag({
+                id: 'berlin-only',
+                sql: 'SELECT 1 FROM reports WHERE report_id = ?1',
+                cities: ['berlin'],
+            }),
+        ])
+
+        expect((await postReport()).status).toBe(200)
+
+        const stored = await lastReport()
+        expect(stored.trust).toBe(0.5)
+        expect(stored.trustFlags).toBe('berlin-only')
+    })
 })
 
 describe('trust flag definitions', () => {
@@ -156,6 +188,20 @@ describe('trust flag definitions', () => {
     it('is inert when the definitions are unset', () => {
         expect(loadTrustFlags(undefined, silentLogger)).toEqual([])
         expect(loadTrustFlags('', silentLogger)).toEqual([])
+    })
+
+    it('keeps a berlin-only flag for berlin and drops it for leipzig', () => {
+        const payload = JSON.stringify([
+            flag({ id: 'berlin-only', sql: 'SELECT 1 FROM reports WHERE report_id = ?1', cities: ['berlin'] }),
+        ])
+        expect(loadTrustFlags(payload, silentLogger, 'berlin').map((f) => f.id)).toEqual(['berlin-only'])
+        expect(loadTrustFlags(payload, silentLogger, 'leipzig')).toEqual([])
+    })
+
+    it('applies a flag with no cities list to every city', () => {
+        const payload = JSON.stringify([flag({ id: 'global', sql: 'SELECT 1 FROM reports WHERE report_id = ?1' })])
+        expect(loadTrustFlags(payload, silentLogger, 'berlin').map((f) => f.id)).toEqual(['global'])
+        expect(loadTrustFlags(payload, silentLogger, 'leipzig').map((f) => f.id)).toEqual(['global'])
     })
 })
 

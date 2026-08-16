@@ -3,32 +3,37 @@
         "id": "tool-user-agent",
         "sql": "SELECT ua_family IN ('curl','python','go','node','okhttp','postman','wget','bot') OR ua_family LIKE 'HeadlessChrome%' FROM reports WHERE report_id = ?1",
         "weight": 6,
-        "enabled": true
+        "enabled": true,
+        "cities": ["berlin"]
     },
     {
         "id": "client-burst-10m",
         "sql": "SELECT count(*) > 4 FROM reports r, reports n WHERE n.report_id = ?1 AND r.client_hash IS NOT NULL AND r.client_hash = n.client_hash AND r.timestamp > n.timestamp - 600000 AND r.timestamp <= n.timestamp",
         "weight": 3,
-        "enabled": true
+        "enabled": true,
+        "cities": ["berlin"]
     },
     {
         "id": "client-station-spread-30m",
         "sql": "SELECT count(DISTINCT r.station_id) >= 8 AND count(DISTINCT r.station_id) = count(*) FROM reports r, reports n WHERE n.report_id = ?1 AND r.client_hash IS NOT NULL AND r.client_hash = n.client_hash AND r.timestamp > n.timestamp - 1800000 AND r.timestamp <= n.timestamp",
         "weight": 3,
-        "enabled": true
+        "enabled": true,
+        "cities": ["berlin"]
     },
     {
         "id": "client-teleport",
         "sql": "SELECT EXISTS (SELECT 1 FROM reports p, reports n, stations sp, stations sn WHERE n.report_id = ?1 AND p.report_id <> n.report_id AND p.timestamp < n.timestamp AND p.timestamp > n.timestamp - 900000 AND p.station_id <> n.station_id AND sp.id = p.station_id AND sn.id = n.station_id AND ((n.client_hash IS NOT NULL AND p.client_hash = n.client_hash) OR (n.asn IN (207137,147049,136787,8607,8422,41230,8767,60294,209854,39944,15943,15763,9145,12605,3303) AND p.asn = n.asn AND p.ua_family = n.ua_family)) AND (n.timestamp - p.timestamp) < 1000 * MAX(COALESCE((SELECT MIN(ABS(la.\"order\" - lb.\"order\")) * 40 FROM line_stations la JOIN line_stations lb ON la.line_id = lb.line_id WHERE la.station_id = p.station_id AND lb.station_id = n.station_id), 180), 45 * sqrt(((sp.lat - sn.lat) * 111.0) * ((sp.lat - sn.lat) * 111.0) + ((sp.lng - sn.lng) * 68.0) * ((sp.lng - sn.lng) * 68.0))))",
         "weight": 3,
         "enabled": true,
-        "description": "Matches on client_hash as before, or on (asn, ua_family) when the ASN is on the hosting-asn list. An identity that rotates client_hash every report still shares ASN and UA, so this catches the teleport pattern client-history matching structurally misses. Deliberately scoped to the hosting-asn list rather than ASN in general - widening it risks fusing two strangers who share a residential/VPN ASN. Replayed against live Packethub traffic: 173 of 257 reports match (64 beyond client_hash alone), all on the actor's own UA - zero fires on the other UA families sharing those ASNs."
+        "cities": ["berlin"],
+        "description": "Matches on client_hash as before, or on (asn, ua_family) when the ASN is on the hosting-asn list. An identity that rotates client_hash every report still shares ASN and UA, so this catches the teleport pattern client-history matching structurally misses. Deliberately scoped to the hosting-asn list rather than ASN in general - widening it risks fusing two strangers who share a residential/VPN ASN."
     },
     {
         "id": "unusual-user-agent",
         "sql": "SELECT EXISTS (SELECT 1 FROM reports WHERE report_id = ?1 AND ua_family IS NOT NULL AND ((ua_family LIKE 'Samsung/%' AND ua_family NOT LIKE '%Android') OR (ua_family LIKE 'Safari/%' AND ua_family NOT LIKE '%iOS' AND ua_family NOT LIKE '%macOS') OR (ua_family LIKE 'WKWebView%' AND ua_family NOT LIKE '%iOS')))",
         "weight": 4,
         "enabled": true,
+        "cities": ["berlin"],
         "description": "Browser/platform pairing that no shipping browser emits: Samsung Internet off Android, Safari off Apple, WKWebView off iOS. Unlike tool-user-agent this catches a UA assembled by hand rather than one that announces itself. Fires on report #1, which burst, spread and teleport structurally cannot. Edge on iOS is deliberately NOT here - EdgiOS is real."
     },
     {
@@ -36,6 +41,7 @@
         "sql": "SELECT EXISTS (SELECT 1 FROM reports WHERE report_id = ?1 AND asn IN (207137,147049,136787,8607,8422,41230,8767,60294,209854,39944,15943,15763,9145,12605,3303))",
         "weight": 3,
         "enabled": true,
+        "cities": ["berlin"],
         "description": "Proxy/hosting networks (Packethub). Reports come from phones on consumer carriers or transit wifi, so a submission relayed through a hosting provider is implausible for how this product is used. Fires on report #1 - the property the client-history flags structurally lack, and what an actor rotating client_hash exploits. An ASN list, not a classifier: expect to add entries when they move provider, and do not generalise it to non-carrier networks, which would catch institutional and municipal ones that carry real users."
     },
     {
@@ -43,6 +49,7 @@
         "sql": "SELECT CASE WHEN n.source <> 'telegram' AND CAST(strftime('%H',(n.timestamp/1000)+7200,'unixepoch') AS INT) IN (21,22,23,0,1,2,3,4,5) THEN NOT EXISTS (SELECT 1 FROM reports o WHERE o.timestamp > n.timestamp - 2700000 AND o.timestamp <= n.timestamp AND o.report_id <> n.report_id AND (o.source = 'telegram' OR o.client_hash IS NOT n.client_hash) AND (o.station_id = n.station_id OR o.station_id IN (SELECT lb.station_id FROM line_stations la JOIN line_stations lb ON lb.line_id = la.line_id AND ABS(la.\"order\" - lb.\"order\") <= 1 WHERE la.station_id = n.station_id))) ELSE 0 END FROM reports n WHERE n.report_id = ?1",
         "weight": 3,
         "enabled": true,
+        "cities": ["berlin"],
         "description": "Witness rule, not plausibility: 21:00-06:00 Berlin (telegram puts inspector activity then at ~3.5% of the day), a web report shows only once a second client, telegram, or a report one station away on the same line corroborates it within 45 min. Corroborated stations light on witness #2 (0.25+1>=1). Backtested: 81% of the 08-06 evening attack at same-station scope, 53% at +/-1; +/-2 fell to 36% because dense spam self-corroborates - do not widen further. Hardcodes CEST (+7200); winter drift to 20:00-05:00 is accepted."
     }
 ]

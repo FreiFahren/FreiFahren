@@ -11,6 +11,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { isCitySlug } from '@freifahren/cities'
 import { z } from 'zod'
 
 import { trustFlagSchema } from './modules/reports/trust'
@@ -39,6 +40,10 @@ const parseFlags = (json: string) => {
     const ids = flags.map((flag) => flag.id)
     const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index)
     if (duplicates.length > 0) throw new Error(`Duplicate flag ids: ${duplicates.join(', ')}`)
+    const unknown = flags.flatMap((flag) => (flag.cities ?? []).filter((slug) => !isCitySlug(slug)))
+    if (unknown.length > 0) {
+        throw new Error(`Unknown city slug(s) in flag cities: ${[...new Set(unknown)].join(', ')}`)
+    }
     return flags
 }
 

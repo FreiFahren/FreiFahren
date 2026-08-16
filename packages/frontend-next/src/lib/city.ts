@@ -62,6 +62,20 @@ export function hostForCity(hostname: string, city: CityConfig): string {
   return [city.subdomain, ...labels.slice(1)].join('.');
 }
 
+export function urlForCity(city: CityConfig): string {
+  const { protocol, hostname, port, pathname, search } = window.location;
+  const origin = `${protocol}//${hostname}${port ? `:${port}` : ''}`;
+
+  if (isPreviewBuild) {
+    const params = new URLSearchParams(search);
+    params.set('city', city.slug);
+    return `${origin}${pathname}?${params.toString()}`;
+  }
+
+  const host = hostForCity(hostname, city);
+  return `${protocol}//${host}${port ? `:${port}` : ''}${pathname}${search}`;
+}
+
 // The active city for this session. The resolution source is pluggable (stored preference on
 // native, hostname on web); the resolved city is fixed once the app boots.
 export const currentCity: CityConfig = Capacitor.isNativePlatform()

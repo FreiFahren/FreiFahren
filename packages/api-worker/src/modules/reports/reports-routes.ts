@@ -167,7 +167,14 @@ export const postReport = defineRoute<Env>()({
          * is under load. Nothing reads trust synchronously, so the row simply carries null for a
          * moment.
          */
-        const score = scoreReportInBackground(c.get('db'), c.get('d1'), c.env.TRUST_FLAGS, logger, report.reportId)
+        const score = scoreReportInBackground(
+            c.get('db'),
+            c.get('d1'),
+            c.env.TRUST_FLAGS,
+            logger,
+            report.reportId,
+            c.get('city').slug
+        )
             .then(async (trust) => {
                 /*
                  * Between the write and the score the row counts as unscored, which reads as fully

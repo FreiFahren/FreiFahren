@@ -1,11 +1,9 @@
 import { Capacitor } from '@capacitor/core';
-import { type CityConfig } from '@freifahren/cities';
 import { ChevronDown, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { currentCity, hostForCity, setCityPreference } from '@/lib/city';
+import { currentCity, setCityPreference, urlForCity } from '@/lib/city';
 import { selectableCities, useCitySwitchingEnabled } from '@/lib/city-switching';
-import { isPreviewBuild } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,28 +14,6 @@ import {
 
 import { NAMESPACE } from './CitySwitcher.i18n';
 
-// Web resolves the city from the hostname at boot (see lib/city.ts), so switching means navigating
-// to the target subdomain: swap the leftmost label and keep the rest (app.freifahren.org ->
-// berlin.freifahren.org). A preview has no per-city hostname, so it switches with `?city=` on the
-// host it is already on. Native has no subdomain (capacitor://localhost) and resolves from a stored
-// preference instead, so it switches via setCityPreference (see the handler below).
-function urlForCity(city: CityConfig): string {
-  const { protocol, hostname, port, pathname, search } = window.location;
-  const origin = `${protocol}//${hostname}${port ? `:${port}` : ''}`;
-
-  if (isPreviewBuild) {
-    const params = new URLSearchParams(search);
-    params.set('city', city.slug);
-    return `${origin}${pathname}?${params.toString()}`;
-  }
-
-  const host = hostForCity(hostname, city);
-  return `${protocol}//${host}${port ? `:${port}` : ''}${pathname}${search}`;
-}
-
-// A row in the settings card (matches the Contact/Feedback rows): the current city on the right,
-// tapping it opens a menu to switch. Lives in settings rather than on the map because switching is
-// rare — but the row makes it discoverable that more than one city exists.
 export function CitySwitcher() {
   const enabled = useCitySwitchingEnabled();
   const { t } = useTranslation(NAMESPACE);
