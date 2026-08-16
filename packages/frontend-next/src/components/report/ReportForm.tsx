@@ -390,14 +390,29 @@ function SubmitFooter({
   const { verify, recordSubmission } = useReportVerification();
   const [consecutiveFailures, setConsecutiveFailures] = useState(0);
 
-  const canSubmit = true;
-  const disabled = !canSubmit || submitReport.isPending;
+  const canSubmit = stationId !== null;
 
   const handleSubmit = () => {
-    const effectiveStationId = stationId ?? 'debug-station';
-    const rejection = verify(effectiveStationId);
+    /*
+     * The button reads as disabled but stays clickable (aria-disabled, not disabled), because a
+     * truly disabled button swallows the tap and a user who has not noticed the station picker
+     * gets no feedback at all. Tell them what is missing instead.
+     */
+    if (stationId === null) {
+      toast.custom(
+        () => (
+          <ToastPill className="bg-destructive flex w-fit items-center gap-2 text-sm font-semibold text-white">
+            <TriangleAlert className="size-4" />
+            {t('errorNoStation')}
+          </ToastPill>
+        ),
+        { id: 'report-station-required' },
+      );
+      return;
+    }
+    const rejection = verify(stationId);
     if (rejection) {
-      track('report_rejected', { reason: rejection, stationId: effectiveStationId });
+      track('report_rejected', { reason: rejection, stationId });
       toast.custom(
         () => (
           <ToastPill className="bg-destructive flex w-fit items-center gap-2 text-sm font-semibold text-white">
@@ -410,7 +425,7 @@ function SubmitFooter({
       return;
     }
     submitReport.mutate(
-      { stationId: effectiveStationId, lineName, directionStationId },
+      { stationId, lineName, directionStationId },
       {
         onSuccess: (result) => {
           setConsecutiveFailures(0);
@@ -468,7 +483,8 @@ function SubmitFooter({
       <Button
         type="button"
         size="lg"
-        disabled={disabled}
+        disabled={submitReport.isPending}
+        aria-disabled={!canSubmit}
         onClick={handleSubmit}
         className={cn(
           'h-12 w-full rounded-lg text-base font-semibold',
