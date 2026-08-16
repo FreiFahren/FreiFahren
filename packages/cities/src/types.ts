@@ -54,6 +54,7 @@ export interface CitySeedConfig {
      * colour/color tag is available. Mirrors the DB default on `lines.color`.
      */
     defaultLineColor: string
+    excludeLineRefPatterns?: readonly string[]
 }
 
 /**

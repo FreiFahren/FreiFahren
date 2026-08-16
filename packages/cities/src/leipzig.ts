@@ -74,6 +74,13 @@ export const LEIPZIG: CityConfig = {
         // colors) instead of forcing one shared color per vehicle type.
         colors: {},
         defaultLineColor: '#000000',
+        excludeLineRefPatterns: [
+            String.raw`^\+`,
+            String.raw`^SEV(\s|$)`,
+            String.raw`^N`,
+            String.raw`^Messe Transport$`,
+            String.raw`^108$`,
+        ],
     },
     telegram: {
         // Chosen from ~60k Leipzig group messages: the "3k" shorthand, "uniformiert" and

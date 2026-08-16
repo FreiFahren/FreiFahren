@@ -1,5 +1,5 @@
 import { logger } from '../../../common/logger'
-import { ROUTE_TYPE_PRIORITY, type RouteType } from '../config'
+import { ROUTE_TYPE_PRIORITY, isSeedLineRefIncluded, type RouteType } from '../config'
 
 import type { Coordinates } from './merge-proximate'
 import type { OsmElement, OsmNode, OsmRelation } from './overpass'
@@ -95,6 +95,7 @@ const processRoute = (
     const tags = rel.tags ?? {}
     const ref = tags.ref || tags.name
     if (!ref) return
+    if (tags.ref !== undefined && tags.ref !== '' && !isSeedLineRefIncluded(tags.ref)) return
 
     const routeType = tags.route
     for (const m of rel.members) {

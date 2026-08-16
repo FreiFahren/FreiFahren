@@ -1,3 +1,4 @@
+import { LEIPZIG, isExcludedLineRef } from '@freifahren/cities'
 import { describe, expect, it } from 'vitest'
 
 import { buildRefRegex, findMissingRouteRefs, type OsmElement } from '../src/db/seed/stations/overpass'
@@ -7,6 +8,21 @@ const routeRelation = (id: number, ref: string): OsmElement => ({
     id,
     tags: { type: 'route', route: 'light_rail', ref },
     members: [],
+})
+
+describe('Leipzig excludeLineRefPatterns', () => {
+    const patterns = LEIPZIG.seed.excludeLineRefPatterns
+
+    it.each(['+65', '+65E', '+91', 'N1', 'N60', 'NXL', 'SEV 11', 'SEV 3E', 'Messe Transport', '108'])(
+        'drops %s',
+        (ref) => {
+            expect(isExcludedLineRef(ref, patterns)).toBe(true)
+        },
+    )
+
+    it.each(['1', '11E', '3E', '60', '60E', '65', '89', '90'])('keeps %s', (ref) => {
+        expect(isExcludedLineRef(ref, patterns)).toBe(false)
+    })
 })
 
 describe('buildRefRegex', () => {

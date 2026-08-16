@@ -1,4 +1,4 @@
-import { SEED_CONFIG } from '../config'
+import { SEED_CONFIG, isSeedLineRefIncluded } from '../config'
 
 export interface OsmNode {
     type: 'node'
@@ -246,7 +246,9 @@ const fetchLineRefs = async (label: string): Promise<string[]> => {
         const ref = el.tags?.ref
         if (ref !== undefined && ref !== '') refs.add(ref)
     }
-    const sorted = Array.from(refs).sort()
+    const sorted = Array.from(refs)
+        .filter(isSeedLineRefIncluded)
+        .sort()
     console.log(`[${label}] Found ${sorted.length} line refs: ${sorted.join(', ')}`)
     return sorted
 }

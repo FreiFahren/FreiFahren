@@ -32,3 +32,11 @@ export const isCitySlug = (value: string): value is CitySlug => Object.prototype
 
 /** Look up a city by slug, or `undefined` if the slug is unknown. */
 export const getCity = (slug: string): CityConfig | undefined => (isCitySlug(slug) ? CITIES[slug] : undefined)
+
+export const isExcludedLineRef = (ref: string, patterns: readonly string[] | undefined): boolean => {
+    if (patterns === undefined) return false
+    for (const source of patterns) {
+        if (new RegExp(source).test(ref)) return true
+    }
+    return false
+}
