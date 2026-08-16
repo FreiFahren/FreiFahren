@@ -43,6 +43,14 @@ export interface CitySeedConfig {
      */
     routeTypePriority: readonly [RouteType, ...RouteType[]]
     /**
+     * Optional per-route-type regex a line's `ref` must match to be seeded.
+     * Route types absent from this map include every ref. Used to scope bus
+     * coverage to a curated subset (e.g. Berlin MetroBus `^M\d+$`) — seeding
+     * every city bus line would multiply the network for lines that are rarely
+     * checked or reported.
+     */
+    routeRefPatterns?: Partial<Record<RouteType, string>>
+    /**
      * Route types listed here always get the configured color regardless of the
      * OSM relation tags (used to give all S-Bahn lines one shared green and all
      * tram lines one shared red). Route types absent from this map fall back to
@@ -68,6 +76,14 @@ export interface CityTelegramProfile {
     circularLineAlias: string
     /** Regex source recognizing user shorthand for the circular line. Empty = no circular line. */
     circularLinePattern: string
+    /**
+     * Prompt sentence about lines OUTSIDE the seeded network, so the model still
+     * extracts a station from sightings on them instead of treating them as
+     * non-reports. Which lines these are depends entirely on what the city seeds
+     * (Berlin seeds MetroBus but not the ~280 other BVG bus lines), so the whole
+     * sentence lives here rather than in the extractor. Empty = omit it.
+     */
+    untrackedLinesNote: string
     /**
      * `[pattern, replacement]` regex-source pairs applied during normalization
      * so user-typed abbreviations match canonical names (e.g. "str." -> "strasse").

@@ -17,7 +17,7 @@ describe('Leipzig excludeLineRefPatterns', () => {
         'drops %s',
         (ref) => {
             expect(isExcludedLineRef(ref, patterns)).toBe(true)
-        },
+        }
     )
 
     it.each(['1', '11E', '3E', '60', '60E', '65', '89', '90'])('keeps %s', (ref) => {

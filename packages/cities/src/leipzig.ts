@@ -88,6 +88,11 @@ export const LEIPZIG: CityConfig = {
         // Police terms are intentionally excluded (police are not ticket inspectors).
         inspectorKeywords:
             'K (for example "3k" means three ticket inspectors), Kontrolleur, Kontrolleure, Kontrolle, Konti, Kontis, Kontrolletti, Kontrollettis, uniformiert, Uniform, Zivil, in Zivil, LVB-Kontrolle, Fahrkartenkontrolle',
+        // LVB's tram and bus network is seeded in full, so only the deliberately
+        // excluded S-Bahn/regional operators fall outside it.
+        untrackedLinesNote:
+            'Sightings on OTHER lines (S-Bahn, regional trains, replacement services) are ' +
+            'still reports if a station name is mentioned — extract the station.',
         circularLineAlias: '',
         circularLinePattern: '',
         abbreviations: [

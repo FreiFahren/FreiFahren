@@ -240,15 +240,25 @@ const fetchLineRefs = async (label: string): Promise<string[]> => {
     )
     const elements = await fetchWithRetry(buildLineRefsQuery(), fetchTimeoutMs)
     const refs = new Set<string>()
+    let filtered = 0
+    /* Filter during discovery, not just downstream: each surviving ref costs a
+     * batched query with a 30s cooldown, so discarding here is what keeps a
+     * curated subset (Berlin bus -> MetroBus) from fetching the whole network.
+     * The route type is only available per relation, hence the loop. */
     for (const el of elements) {
         if (el.type !== 'relation') continue
         const ref = el.tags?.ref
-        if (ref !== undefined && ref !== '') refs.add(ref)
+        if (ref === undefined || ref === '') continue
+        if (!isSeedLineRefIncluded(ref, el.tags?.route)) {
+            filtered++
+            continue
+        }
+        refs.add(ref)
     }
-    const sorted = Array.from(refs)
-        .filter(isSeedLineRefIncluded)
-        .sort()
-    console.log(`[${label}] Found ${sorted.length} line refs: ${sorted.join(', ')}`)
+    const sorted = Array.from(refs).sort()
+    console.log(
+        `[${label}] Found ${sorted.length} line refs${filtered > 0 ? ` (${filtered} relations filtered by ref pattern)` : ''}: ${sorted.join(', ')}`
+    )
     return sorted
 }
 

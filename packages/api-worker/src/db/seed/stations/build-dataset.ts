@@ -95,7 +95,7 @@ const processRoute = (
     const tags = rel.tags ?? {}
     const ref = tags.ref || tags.name
     if (!ref) return
-    if (tags.ref !== undefined && tags.ref !== '' && !isSeedLineRefIncluded(tags.ref)) return
+    if (tags.ref !== undefined && tags.ref !== '' && !isSeedLineRefIncluded(tags.ref, tags.route)) return
 
     const routeType = tags.route
     for (const m of rel.members) {
