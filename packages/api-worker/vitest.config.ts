@@ -28,7 +28,10 @@ export default defineWorkersConfig(async () => {
                         // @sentry/cloudflare: the flag swaps in workerd's real node:vm and breaks the
                         // vitest-pool-workers runner. The app under test (src/index.ts) has no Sentry
                         // and needs no node builtins, so omitting it is safe.
-                        d1Databases: ['DB'],
+                        // DB_RECONCILE is a scratch database: with isolatedStorage off, a suite that
+                        // rewrites whole tables would otherwise corrupt the shared seed for every
+                        // other suite.
+                        d1Databases: ['DB', 'DB_RECONCILE'],
                         bindings: {
                             TEST_MIGRATIONS: migrations,
                             CORS_ORIGINS:
