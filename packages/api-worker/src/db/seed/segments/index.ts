@@ -367,12 +367,29 @@ const buildRouteGeometries = (elements: OsmElement[]): Map<number, RouteGeometry
     return out
 }
 
+/*
+ * Segment ids are derived from the station pair, never assigned by insertion order. Clients cache
+ * the segments GeoJSON and join the risk model's output onto it by id, so an id that changed when
+ * the network was reseeded would paint risk colours onto the wrong lines. FNV-1a truncated to 53
+ * bits to stay a safe JS integer; collisions would violate the natural-key unique index and fail
+ * the seed.
+ */
+export const segmentId = (lineId: string, fromStationId: string, toStationId: string): number => {
+    const key = `${lineId}|${fromStationId}|${toStationId}`
+    let hash = 0xcbf29ce484222325n
+    for (let i = 0; i < key.length; i++) {
+        hash = ((hash ^ BigInt(key.charCodeAt(i))) * 0x100000001b3n) & 0xffffffffffffffffn
+    }
+    return Number(hash & 0x1fffffffffffffn)
+}
+
 const buildSegmentRecords = (
     variants: LineVariant[],
     stationCoordinates: Map<string, Coordinates>,
     geometries: Map<number, RouteGeometry>
 ) => {
     const records: Array<{
+        id: number
         lineId: string
         fromStationId: string
         toStationId: string
@@ -436,6 +453,7 @@ const buildSegmentRecords = (
             }
 
             records.push({
+                id: segmentId(variant.id, fromStationId, toStationId),
                 lineId: variant.id,
                 fromStationId,
                 toStationId,
@@ -470,17 +488,16 @@ export const seedSegmentsFromGeometry = async (
 
     // Sequential, chunked statements rather than an interactive transaction: the seed is
     // Idempotent and offline, and the D1 driver (used by the test runtime) has no BEGIN/COMMIT and
-    // A low bound-parameter ceiling. Upsert keyed on the natural (lineId, fromStationId,
-    // ToStationId) tuple so existing segment ids stay stable across re-seeds. The serial 'id'
-    // Column is what the risk model and the frontend's localStorage cache refer to, so churning
-    // Ids on every seed would invalidate both.
-    for (const batch of chunkRowsForInsert(simplifiedRecords, 6)) {
+    // A low bound-parameter ceiling. `id` is set from excluded too, so a database seeded before
+    // Ids became content-derived adopts the stable one.
+    for (const batch of chunkRowsForInsert(simplifiedRecords, 7)) {
         await db
             .insert(segments)
             .values(batch)
             .onConflictDoUpdate({
                 target: [segments.lineId, segments.fromStationId, segments.toStationId],
                 set: {
+                    id: sql`excluded.id`,
                     position: sql`excluded.position`,
                     color: sql`excluded.color`,
                     coordinates: sql`excluded.coordinates`,

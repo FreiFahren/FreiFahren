@@ -1,89 +1,129 @@
-import type { D1Database } from '@cloudflare/workers-types'
-import { describe, expect, it } from 'vitest'
+import { env } from 'cloudflare:test'
+import { sql } from 'drizzle-orm'
+import { beforeAll, describe, expect, it } from 'vitest'
 
-import { REFERENCE_TABLE_NAMES, dumpReferenceTables } from '../src/db/seed/dump-reference-tables'
+import { dumpReferenceTables } from '../src/db/seed/dump-reference-tables'
 
-// Minimal stand-in for the local D1 the seed dumps from: every SELECT * returns the
-// rows registered for that table.
-const fakeD1 = (tables: Record<string, Record<string, unknown>[]>): D1Database =>
-    ({
-        prepare: (query: string) => ({
-            all: async () => ({ results: tables[query.replace('SELECT * FROM ', '')] ?? [] }),
-        }),
-    }) as unknown as D1Database
+import { db } from './test-db'
 
-const segmentRow = {
-    id: 7,
-    line_id: 'M41',
-    from_station_id: 'a',
-    to_station_id: 'b',
-    position: 0,
-    color: '#95276E',
-    coordinates: '[[1,2],[3,4]]',
+// The shared D1 is migrated and seeded with the real Berlin network in tests/setup.ts, so the
+// dump under test is the one a deploy would actually load.
+type SegmentRow = { id: number; line_id: string; from_station_id: string; to_station_id: string; position: number }
+
+const segmentRows = async (): Promise<SegmentRow[]> =>
+    (
+        await db.run(
+            sql`SELECT id, line_id, from_station_id, to_station_id, position FROM segments ORDER BY line_id, position`
+        )
+    ).results as SegmentRow[]
+
+const keyOf = (row: SegmentRow) => `${row.line_id}|${row.from_station_id}|${row.to_station_id}`
+
+const countOf = async (table: string): Promise<number> =>
+    Number((await db.run(sql.raw(`SELECT COUNT(*) AS n FROM ${table}`))).results[0].n)
+
+// `wrangler d1 execute --file` runs the statements in order; exec() is the closest equivalent.
+const applyDump = async (dump: string): Promise<void> => {
+    const statements = dump.trim().split('\n')
+    for (let i = 0; i < statements.length; i += 500) {
+        await env.DB.exec(statements.slice(i, i + 500).join('\n'))
+    }
 }
 
-const dumpOf = (tables: Record<string, Record<string, unknown>[]>) => dumpReferenceTables(fakeD1(tables))
+let dump: string
+let expected: SegmentRow[]
+
+beforeAll(async () => {
+    dump = await dumpReferenceTables(env.DB)
+    expected = await segmentRows()
+})
+
+// A station pair the build can never produce (a segment always joins two different stations), so
+// this row is unambiguously obsolete.
+const insertObsoleteSegment = () =>
+    db.run(sql`INSERT INTO segments (line_id, from_station_id, to_station_id, position, color, coordinates)
+               SELECT line_id, from_station_id, from_station_id, 99, '#000000', '[[1,2],[3,4]]'
+               FROM segments LIMIT 1`)
+
+// Simulate what a deployed database drifts into: some lines never landed, ids mean something
+// else, and a row survives for a station pair no line has.
+const driftDatabase = async () => {
+    await db.run(sql`DELETE FROM segments WHERE line_id IN (SELECT id FROM lines WHERE type = 'bus')`)
+    await db.run(sql`UPDATE segments SET id = id + 100000`)
+    await insertObsoleteSegment()
+}
 
 describe('dumpReferenceTables', () => {
-    it('never writes the segments surrogate id', async () => {
-        const sql = await dumpOf({ segments: [segmentRow] })
+    it('converges a drifted database onto the built data', async () => {
+        await driftDatabase()
+        expect(await segmentRows()).not.toEqual(expected)
 
-        // The id is assigned by insertion order into a database CI rebuilds from scratch, so
-        // carrying it over would name a different segment on every network change.
-        expect(sql).not.toMatch(/INSERT INTO segments \([^)]*"id"/)
-        expect(sql).toContain(
-            'INSERT INTO segments ("line_id", "from_station_id", "to_station_id", "position", "color", "coordinates")'
-        )
+        await applyDump(dump)
+
+        const after = await segmentRows()
+        expect(after.map(keyOf)).toEqual(expected.map(keyOf))
+        expect(after.map((row) => row.position)).toEqual(expected.map((row) => row.position))
     })
 
-    it('matches an existing remote segment on its natural key and refreshes the payload', async () => {
-        const sql = await dumpOf({ segments: [segmentRow] })
+    it('removes rows that are no longer in the snapshot', async () => {
+        await insertObsoleteSegment()
 
-        expect(sql).toContain('ON CONFLICT ("line_id", "from_station_id", "to_station_id") DO UPDATE SET')
-        expect(sql).toContain('"coordinates" = excluded."coordinates"')
-        // Key columns are what the row is matched on; rewriting them to themselves is noise.
-        expect(sql).not.toContain('"line_id" = excluded."line_id"')
+        await applyDump(dump)
+
+        expect(await countOf('segments')).toBe(expected.length)
+        expect(
+            Number((await db.run(sql`SELECT COUNT(*) AS n FROM segments WHERE color = '#000000'`)).results[0].n)
+        ).toBe(0)
     })
 
-    it('brackets a swept table with a marker update and a sweep delete', async () => {
-        const statements = (await dumpOf({ segments: [segmentRow] }))
+    // The marker must not be self-inverse: an interrupted load leaves rows already marked, and a
+    // retry that flipped them back would let obsolete rows escape the sweep.
+    it('converges when a partially applied load is retried', async () => {
+        await driftDatabase()
+        const marker = dump
             .trim()
             .split('\n')
-            .filter((statement) => statement.includes('segments'))
+            .find((statement) => statement.startsWith('UPDATE segments SET'))
+        await env.DB.exec(marker!)
 
-        // The marker has to be set before the upserts write real values back, and swept after.
-        expect(statements[0]).toBe('UPDATE segments SET "position" = -"position" - 1;')
-        expect(statements[statements.length - 1]).toBe('DELETE FROM segments WHERE "position" < 0;')
-        expect(statements[1]).toContain('INSERT INTO segments')
+        await applyDump(dump)
+
+        expect((await segmentRows()).map(keyOf)).toEqual(expected.map(keyOf))
+        expect(await countOf('segments')).toBe(expected.length)
     })
 
-    it('quotes marker columns that are SQL keywords', async () => {
-        const sql = await dumpOf({ line_stations: [{ line_id: 'M41', station_id: 'a', order: 0 }] })
+    it('keeps the ids of rows that survive', async () => {
+        const before = new Map((await segmentRows()).map((row) => [keyOf(row), row.id]))
 
-        expect(sql).toContain('UPDATE line_stations SET "order" = -"order" - 1;')
-        expect(sql).toContain('DELETE FROM line_stations WHERE "order" < 0;')
+        await applyDump(dump)
+
+        const after = await segmentRows()
+        expect(after.every((row) => before.get(keyOf(row)) === row.id)).toBe(true)
     })
 
-    it('leaves tables that reports depend on unswept', async () => {
-        const sql = await dumpOf({
-            stations: [{ id: 'a', name: 'Kottbusser Tor', lat: 1, lng: 2 }],
-            lines: [{ id: 'M41', name: 'M41', type: 'bus', is_circular: 0, color: '#95276E' }],
-        })
+    it('leaves user reports and the tables they reference intact', async () => {
+        const stations = await countOf('stations')
+        const lines = await countOf('lines')
 
-        // reports references stations and lines with ON DELETE no action, so pruning them
-        // would either fail the load or orphan user data.
-        expect(sql).not.toContain('DELETE FROM stations')
-        expect(sql).not.toContain('DELETE FROM lines')
-        expect(sql).toContain('ON CONFLICT ("id") DO UPDATE SET "name" = excluded."name"')
+        await applyDump(dump)
+
+        expect(await countOf('stations')).toBe(stations)
+        expect(await countOf('lines')).toBe(lines)
+        expect(dump).not.toContain('DELETE FROM stations')
+        expect(dump).not.toContain('DELETE FROM lines')
     })
 
-    it('emits parents before children so the load satisfies foreign keys', () => {
-        expect(REFERENCE_TABLE_NAMES).toEqual(['stations', 'lines', 'line_stations', 'segments'])
-    })
+    // Ids are content-derived, so reloading the same data must leave every one of them alone.
+    // A client caches the segments GeoJSON and joins risk onto it by id; churning ids would paint
+    // risk colours onto the wrong lines until that cache happens to refresh.
+    it('assigns ids that survive a reload', async () => {
+        const before = new Map((await segmentRows()).map((row) => [keyOf(row), row.id]))
 
-    it('escapes quotes in values', async () => {
-        const sql = await dumpOf({ stations: [{ id: 'a', name: "O'Brien", lat: 1, lng: 2 }] })
+        await driftDatabase()
+        await applyDump(dump)
 
-        expect(sql).toContain("'O''Brien'")
+        const after = await segmentRows()
+        expect(after.length).toBe(before.size)
+        expect(after.every((row) => before.get(keyOf(row)) === row.id)).toBe(true)
     })
 })
