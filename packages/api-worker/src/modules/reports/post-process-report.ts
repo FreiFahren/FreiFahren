@@ -221,6 +221,28 @@ const clearStationReferenceIfNotOnLine =
         return reportData
     }
 
+/*
+ * A station id the network doesn't know is the caller's mistake, so say so rather than letting it
+ * reach the insert, where the reports->stations foreign key turns it into a 500. Rejecting here
+ * also keeps it away from `guessStation`: an unknown id that a later step clears would otherwise be
+ * silently replaced by whichever station that line sees most at this hour, storing a report the
+ * caller never described.
+ */
+const rejectUnknownStationReference =
+    (stations: Stations, stationReferenceField: StationReferenceField) =>
+    (reportData: RawReport): RawReport => {
+        const stationId = reportData[stationReferenceField]
+        if (stationId === null || stationId === undefined) return reportData
+        if (lookupStation(stations, stationId) !== undefined) return reportData
+
+        throw new AppError({
+            message: `Unknown ${stationReferenceField}`,
+            statusCode: 422,
+            internalCode: 'VALIDATION_FAILED',
+            description: `No station with id "${stationId}"`,
+        })
+    }
+
 const assignLineIfSingleOption =
     (stations: Stations) =>
     (reportData: RawReport): RawReport => {
@@ -254,4 +276,5 @@ export {
     isStationOnLine,
     pipeAsync,
     RawReport,
+    rejectUnknownStationReference,
 }

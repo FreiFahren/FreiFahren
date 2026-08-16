@@ -143,13 +143,16 @@ describe('Telegram notification', () => {
         }
     })
 
-    it('does not send a Telegram notification if database insertion fails', async () => {
+    // Used to assert a 500: this id is short enough to clear the schema's length guard, so it
+    // reached the insert and tripped the reports->stations foreign key. It is refused up front now,
+    // but the point of the test is unchanged — nothing goes to Telegram unless a report was stored.
+    it('does not send a Telegram notification if the report is rejected', async () => {
         const response = await sendReportRequest({
-            stationId: 'invalid_id', // Triggers FK violation
+            stationId: 'invalid_id',
             source: 'web_app',
         })
 
-        expect(response.status).toBe(500)
+        expect(response.status).toBe(422)
         expect(capturedRequests.length).toBe(0)
     })
 })
@@ -395,6 +398,67 @@ describe('Report API contract', () => {
             source: 'NON_EXISTENT_SOURCE',
         })
         expect(response.status).toBe(400)
+    })
+
+    /*
+     * The id checks above only reach the schema's length-16 guard, so an unknown id short enough to
+     * pass it used to reach the insert and fail the reports->stations foreign key as a 500. That is
+     * what shipped when the report form sent a placeholder id for an unpicked station.
+     */
+    describe('unknown station ids that fit the schema', () => {
+        const UNKNOWN_ID = 'no-such-stn'
+
+        const countReports = async () => {
+            const [row] = await db.select({ count: sql<number>`count(*)` }).from(reports)
+            return Number(row.count)
+        }
+
+        it('rejects an unknown stationId with 422 rather than a 500 from the foreign key', async () => {
+            const before = await countReports()
+
+            const response = await sendReportRequest({
+                stationId: UNKNOWN_ID,
+                source: 'web_app',
+            })
+
+            expect(response.status).toBe(422)
+            const body = (await response.json()) as { details: { internal_code: string } }
+            expect(body.details.internal_code).toBe('VALIDATION_FAILED')
+            expect(await countReports()).toBe(before)
+        })
+
+        it('rejects an unknown stationId sent with a valid line instead of guessing a station', async () => {
+            const [lineStation] = await db
+                .select({ lineId: lineStations.lineId })
+                .from(lineStations)
+                .orderBy(lineStations.lineId)
+                .limit(1)
+
+            const before = await countReports()
+
+            const response = await sendReportRequest({
+                stationId: UNKNOWN_ID,
+                lineId: lineStation.lineId,
+                source: 'web_app',
+            })
+
+            expect(response.status).toBe(422)
+            // Without the check the unknown id is cleared as "not on this line" and post-processing
+            // substitutes the line's most frequent station, storing a report nobody filed.
+            expect(await countReports()).toBe(before)
+        })
+
+        it('rejects an unknown directionId with 422', async () => {
+            const [station] = await db.select({ id: stations.id }).from(stations).orderBy(stations.id).limit(1)
+
+            const response = await sendReportRequest({
+                stationId: station.id,
+                directionId: UNKNOWN_ID,
+                source: 'web_app',
+            })
+
+            expect(response.status).toBe(422)
+        })
     })
 })
 

@@ -1,7 +1,7 @@
 import { Context } from 'hono'
 import { ContentfulStatusCode } from 'hono/utils/http-status'
 
-import { AppConfig, Env } from '../app-env'
+import { AppConfig, Env, reportError } from '../app-env'
 
 import { AppError } from './errors'
 
@@ -33,6 +33,15 @@ export const handleError = (err: Error, c: Context<Env>) => {
         )
     }
 
+    /*
+     * Captured as an error, not just logged: a 500 is a bug, and logs alone raise no issue, so
+     * every 500 this API has served has been invisible on the Sentry issues side. AppError above
+     * is deliberately excluded — those are controlled responses, and the vast majority (Turnstile
+     * refusals, unknown cities) are routine client-side failures that would drown the signal.
+     */
+    reportError(err, {
+        tags: { method: c.req.method, path: new URL(c.req.url).pathname },
+    })
     c.get('logger').error(err, 'Unhandled error')
     return c.json(
         {
