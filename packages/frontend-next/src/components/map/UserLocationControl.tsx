@@ -43,11 +43,6 @@ function LocationPermissionPrompt({
   const content = (
     <>
       <CardContent className="flex flex-col gap-1">
-        {source === 'report' && (
-          <p className="text-muted-foreground text-[0.625rem] font-semibold tracking-wide uppercase">
-            {t('reportStep')}
-          </p>
-        )}
         <h2 className="font-heading flex items-center gap-2 text-lg font-semibold">
           <MapPin className="text-accent-bright size-5" />
           {t(denied ? 'deniedTitle' : source === 'map' ? 'mapTitle' : 'reportTitle')}

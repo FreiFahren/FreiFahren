@@ -26,6 +26,7 @@ export const trustFlagSchema = z.object({
      */
     weight: z.number().positive().finite(),
     enabled: z.boolean(),
+    cities: z.array(z.string().min(1)).optional(),
     // Part of the schema, not a stray key: z.object strips what it does not know.
     description: z.string().optional(),
 })
@@ -36,7 +37,7 @@ export type TrustFlag = z.infer<typeof trustFlagSchema>
 const isReadOnlyStatement = (statement: string): boolean => /^\s*select\b/i.test(statement) && !statement.includes(';')
 
 // Unset disables scoring — dev, previews, tests — leaving trust null, which reads as unscored.
-export const loadTrustFlags = (raw: string | undefined, logger: Logger): TrustFlag[] => {
+export const loadTrustFlags = (raw: string | undefined, logger: Logger, citySlug?: string): TrustFlag[] => {
     // A leftover KV binding of the same name arrives as an object, and scoring must not throw here.
     if (typeof raw !== 'string' || raw.trim() === '') return []
 
@@ -62,6 +63,14 @@ export const loadTrustFlags = (raw: string | undefined, logger: Logger): TrustFl
         if (!flag.enabled) return false
         if (!isReadOnlyStatement(flag.sql)) {
             logger.error({ flagId: flag.id }, 'Trust flag rejected: not a single read-only SELECT')
+            return false
+        }
+        if (
+            citySlug !== undefined &&
+            flag.cities !== undefined &&
+            flag.cities.length > 0 &&
+            !flag.cities.includes(citySlug)
+        ) {
             return false
         }
         return true
@@ -124,9 +133,10 @@ export const scoreReportInBackground = async (
     d1: D1Database,
     flagDefinitions: string | undefined,
     logger: Logger,
-    reportId: number
+    reportId: number,
+    citySlug: string
 ): Promise<number | null> => {
-    const flags = loadTrustFlags(flagDefinitions, logger)
+    const flags = loadTrustFlags(flagDefinitions, logger, citySlug)
     if (flags.length === 0) return null
 
     const { trust, fired } = await assessReport(d1, flags, reportId, logger)
