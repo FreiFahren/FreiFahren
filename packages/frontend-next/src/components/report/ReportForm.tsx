@@ -111,7 +111,9 @@ function LinePicker() {
 
   return (
     <section className="px-4">
-      <div className="mb-3 flex items-center justify-between">
+      {/* Stacked on phones: with enough route types (Berlin adds bus) the filters need ~420px
+          beside the heading, so sharing a row cuts off the last one. */}
+      <div className="mb-3 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
         <SectionHeading hint={t('optional')}>{t('line')}</SectionHeading>
         <ToggleGroup
           type="single"
@@ -120,7 +122,7 @@ function LinePicker() {
           onValueChange={(value) => {
             if (value) setLineFilter(value as LineFilter);
           }}
-          className="bg-surface-solid border-border border"
+          className="bg-surface-solid border-border max-w-full overflow-x-auto border"
         >
           {FILTERS.map((option) => (
             <ToggleGroupItem
