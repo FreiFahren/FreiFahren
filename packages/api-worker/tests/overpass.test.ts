@@ -1,12 +1,18 @@
 import { describe, expect, it } from 'vitest'
 
-import { findMissingRouteRefs, type OsmElement } from '../src/db/seed/stations/overpass'
+import { buildRefRegex, findMissingRouteRefs, type OsmElement } from '../src/db/seed/stations/overpass'
 
 const routeRelation = (id: number, ref: string): OsmElement => ({
     type: 'relation',
     id,
     tags: { type: 'route', route: 'light_rail', ref },
     members: [],
+})
+
+describe('buildRefRegex', () => {
+    it('puts plus in a character class so Overpass ERE does not treat it as a quantifier', () => {
+        expect(buildRefRegex(['+65', '+65E', '1'])).toBe('^([+]65|[+]65E|1)$')
+    })
 })
 
 describe('findMissingRouteRefs', () => {
