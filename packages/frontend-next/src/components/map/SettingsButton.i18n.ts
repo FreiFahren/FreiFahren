@@ -17,6 +17,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   privacy: 'Privacy',
   terms: 'Terms of Use',
   analytics: 'Analytics',
+  ticketReminder: 'FreiFahren does not replace a ticket. A valid ticket is always required.',
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
@@ -34,4 +35,6 @@ i18n.addResourceBundle('de', NAMESPACE, {
   privacy: 'Datenschutz',
   terms: 'Nutzungsbedingungen',
   analytics: 'Analyse',
+  ticketReminder:
+    'FreiFahren ersetzt keinen Fahrschein. Ein gültiges Ticket ist immer erforderlich.',
 });
