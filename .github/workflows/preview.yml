@@ -30,12 +30,27 @@ jobs:
               with:
                   script: |
                       const { owner, repo } = context.repo
-                      const files = await github.paginate(github.rest.pulls.listFiles, {
-                        owner,
-                        repo,
-                        pull_number: context.issue.number,
-                        per_page: 100,
-                      })
+                      // A pull request carrying a very large file (the seed's Overpass snapshots run
+                      // to tens of megabytes) makes GitHub give up computing the diff and answer 422,
+                      // which used to fail this step and silently skip every preview below it. Fall
+                      // back to building both previews: an extra preview deploy is cheap, whereas a
+                      // skipped one looks identical to "nothing to deploy".
+                      let files = null
+                      try {
+                        files = await github.paginate(github.rest.pulls.listFiles, {
+                          owner,
+                          repo,
+                          pull_number: context.issue.number,
+                          per_page: 100,
+                        })
+                      } catch (error) {
+                        core.warning(`Could not list changed files (${error.status ?? 'unknown'}); building all previews.`)
+                      }
+                      if (files === null) {
+                        core.setOutput('api', 'true')
+                        core.setOutput('frontend', 'true')
+                        return
+                      }
                       const workflow = /^\.github\/workflows\/preview\.yml$/
                       const registry = /^packages\/cities\//
                       const touches = (...patterns) =>
