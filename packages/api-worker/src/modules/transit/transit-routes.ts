@@ -1,8 +1,8 @@
+import { ROUTE_TYPES } from '@freifahren/cities'
 import { z } from 'zod'
 
 import { Env } from '../../app-env'
 import { defineRoute } from '../../common/router'
-import { ROUTE_TYPE_PRIORITY } from '../../db/seed/config'
 
 export const getStations = defineRoute<Env>()({
     method: 'get' as const,
@@ -17,7 +17,7 @@ const linesResponseSchema = z.array(
     z.object({
         id: z.string(),
         name: z.string(),
-        type: z.enum(ROUTE_TYPE_PRIORITY),
+        type: z.enum(ROUTE_TYPES),
         isCircular: z.boolean(),
         color: z.string(),
         stations: z.array(z.string()),
