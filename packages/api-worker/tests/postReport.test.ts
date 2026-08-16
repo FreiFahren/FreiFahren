@@ -97,6 +97,29 @@ describe('Telegram notification', () => {
         expect(capturedRequests.length).toBe(0)
     })
 
+    it('does not send a Telegram notification when the report scores below the threshold', async () => {
+        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
+
+        setTestEnv({
+            MIN_STATION_TRUST: '1',
+            TRUST_FLAGS: JSON.stringify([
+                { id: 'always', sql: 'SELECT 1 FROM reports WHERE report_id = ?1', weight: 9, enabled: true },
+            ]),
+        })
+
+        try {
+            const response = await sendReportRequest({
+                stationId: station.id,
+                source: 'web_app',
+            })
+
+            expect(response.status).toBe(200)
+            expect(capturedRequests.length).toBe(0)
+        } finally {
+            setTestEnv({ MIN_STATION_TRUST: undefined, TRUST_FLAGS: undefined })
+        }
+    })
+
     it('still returns 200 when the Telegram notification fails (failure is logged, not surfaced)', async () => {
         const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
 

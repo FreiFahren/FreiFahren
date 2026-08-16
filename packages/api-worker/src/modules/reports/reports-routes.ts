@@ -147,25 +147,11 @@ export const postReport = defineRoute<Env>()({
             reportError(error, { tags: { task: 'reports-cache-invalidation' } })
         }
 
-        // Fire-and-forget: the report is already saved, and a slow Telegram call must not block the response.
-        const forward = reportsService.forwardReportToTelegram(postProcessedReportData).catch((error) => {
-            reportError(error, {
-                tags: { task: 'telegram-report-forward' },
-                extra: {
-                    stationId: postProcessedReportData.stationId,
-                    lineId: postProcessedReportData.lineId,
-                    directionId: postProcessedReportData.directionId,
-                },
-            })
-            logger.error(error, 'Failed to forward inspector report to Telegram')
-        })
-
         /*
-         * Also deferred, and for a stronger reason than the Telegram call: trust scoring runs one
-         * query per flag, and the number of flags is an operational dial someone will turn during
-         * an incident. On the write path that would make report submission slower exactly when it
-         * is under load. Nothing reads trust synchronously, so the row simply carries null for a
-         * moment.
+         * Deferred: trust scoring runs one query per flag, and the number of flags is an operational
+         * dial someone will turn during an incident. On the write path that would make report
+         * submission slower exactly when it is under load. Nothing reads trust synchronously, so the
+         * row simply carries null for a moment.
          */
         const score = scoreReportInBackground(
             c.get('db'),
@@ -176,6 +162,21 @@ export const postReport = defineRoute<Env>()({
             c.get('city').slug
         )
             .then(async (trust) => {
+                // A report too weak to be shown on the map must not reach Telegram either.
+                if (trust === null || trust >= c.get('config').minStationTrust) {
+                    await reportsService.forwardReportToTelegram(postProcessedReportData).catch((error) => {
+                        reportError(error, {
+                            tags: { task: 'telegram-report-forward' },
+                            extra: {
+                                stationId: postProcessedReportData.stationId,
+                                lineId: postProcessedReportData.lineId,
+                                directionId: postProcessedReportData.directionId,
+                            },
+                        })
+                        logger.error(error, 'Failed to forward inspector report to Telegram')
+                    })
+                }
+
                 /*
                  * Between the write and the score the row counts as unscored, which reads as fully
                  * trusted — so the station may already have been served, and edge-cached, as
@@ -203,10 +204,8 @@ export const postReport = defineRoute<Env>()({
             executionCtx = undefined
         }
         if (executionCtx !== undefined) {
-            executionCtx.waitUntil(forward)
             executionCtx.waitUntil(score)
         } else {
-            await forward
             await score
         }
 
