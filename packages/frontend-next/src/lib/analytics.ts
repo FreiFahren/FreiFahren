@@ -34,6 +34,7 @@ type AnalyticsEvents = {
   contribute_stripe_clicked: { source: ContributeSource };
   contribute_dismissed: { source: ContributeSource };
   location_permission_evaluated: { state: GeolocationPermissionState };
+  location_permission_blocked_shown: { source: 'report' };
   location_prompt_shown: { source: 'map' | 'report' };
   location_prompt_allowed: { source: 'map' | 'report' };
   location_prompt_dismissed: { source: 'map' | 'report' };
