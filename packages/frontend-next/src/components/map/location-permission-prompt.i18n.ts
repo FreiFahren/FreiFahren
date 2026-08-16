@@ -9,6 +9,9 @@ i18n.addResourceBundle('en', NAMESPACE, {
   reportTitle: 'Use your location for this report?',
   reportDescription:
     'Confirming that you are near the selected station helps us filter false reports. Your precise location is not shown to others.',
+  deniedTitle: 'Location access is disabled',
+  deniedDescription:
+    'To share your location, enable access for FreiFahren in your device or browser settings. You can still continue without it.',
   allow: 'Use location',
   notNow: 'Not now',
   continueWithout: 'Continue without',
@@ -22,6 +25,9 @@ i18n.addResourceBundle('de', NAMESPACE, {
   reportTitle: 'Standort für diese Meldung verwenden?',
   reportDescription:
     'Wenn du bestätigst, dass du in der Nähe der ausgewählten Station bist, können wir Falschmeldungen besser filtern. Dein genauer Standort wird anderen nicht angezeigt.',
+  deniedTitle: 'Standortzugriff ist deaktiviert',
+  deniedDescription:
+    'Aktiviere den Standortzugriff für FreiFahren in den Geräte- oder Browsereinstellungen, um deinen Standort zu teilen. Du kannst auch ohne fortfahren.',
   allow: 'Standort verwenden',
   notNow: 'Jetzt nicht',
   continueWithout: 'Ohne fortfahren',

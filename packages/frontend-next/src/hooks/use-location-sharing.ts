@@ -69,6 +69,8 @@ export function useMapLocationSharing({
       return;
     }
 
+    if (permission === 'denied') return;
+
     const timer = window.setTimeout(() => {
       if (!isMapLocationPromptDismissed()) setShowPrompt(true);
     }, LOCATION_PROMPT_DELAY_MS);
@@ -109,7 +111,7 @@ export function useMapLocationSharing({
 
 export function useReportLocationSharing() {
   const { position, requestLocation, status } = useGeolocation();
-  const [phase, setPhase] = useState<'checking' | 'prompt' | 'complete'>(
+  const [phase, setPhase] = useState<'checking' | 'prompt' | 'denied' | 'complete'>(
     position ? 'complete' : 'checking',
   );
   const mountedRef = useMountedRef();
@@ -125,6 +127,7 @@ export function useReportLocationSharing() {
 
       const permission = await queryGeolocationPermission();
       if (cancelled) return;
+      track('location_permission_evaluated', { state: permission });
       if (permission === 'granted') {
         const coords = await requestLocationRef.current('report');
         if (cancelled) return;
@@ -132,6 +135,13 @@ export function useReportLocationSharing() {
           setPhase('complete');
           return;
         }
+      }
+
+      if (permission === 'denied') {
+        setPhase('denied');
+        openLocationPrompt('report');
+        track('location_permission_blocked_shown', { source: 'report' });
+        return;
       }
 
       setPhase('prompt');

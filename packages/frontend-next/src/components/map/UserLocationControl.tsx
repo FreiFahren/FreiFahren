@@ -25,6 +25,7 @@ const analyticsEnabled = optionalEnv('VITE_POSTHOG_KEY') != null;
 type LocationPermissionPromptProps = {
   source: 'map' | 'report';
   inline?: boolean;
+  denied?: boolean;
   loading?: boolean;
   onAllow: () => void;
   onDismiss: () => void;
@@ -33,6 +34,7 @@ type LocationPermissionPromptProps = {
 function LocationPermissionPrompt({
   source,
   inline = false,
+  denied = false,
   loading = false,
   onAllow,
   onDismiss,
@@ -48,23 +50,36 @@ function LocationPermissionPrompt({
         )}
         <h2 className="font-heading flex items-center gap-2 text-lg font-semibold">
           <MapPin className="text-accent-bright size-5" />
-          {t(source === 'map' ? 'mapTitle' : 'reportTitle')}
+          {t(denied ? 'deniedTitle' : source === 'map' ? 'mapTitle' : 'reportTitle')}
         </h2>
         <p className="text-muted-foreground text-sm">
-          {t(source === 'map' ? 'mapDescription' : 'reportDescription')}
+          {t(
+            denied
+              ? 'deniedDescription'
+              : source === 'map'
+                ? 'mapDescription'
+                : 'reportDescription',
+          )}
         </p>
       </CardContent>
       <CardFooter className="gap-2">
-        <Button variant="outline" className="flex-1" disabled={loading} onClick={onDismiss}>
+        <Button
+          variant={denied ? 'default' : 'outline'}
+          className="flex-1"
+          disabled={loading}
+          onClick={onDismiss}
+        >
           {t(source === 'map' ? 'notNow' : 'continueWithout')}
         </Button>
-        <Button
-          className="bg-accent-bright text-primary-foreground hover:bg-accent-press flex-1"
-          disabled={loading}
-          onClick={onAllow}
-        >
-          {t('allow')}
-        </Button>
+        {!denied && (
+          <Button
+            className="bg-accent-bright text-primary-foreground hover:bg-accent-press flex-1"
+            disabled={loading}
+            onClick={onAllow}
+          >
+            {t('allow')}
+          </Button>
+        )}
       </CardFooter>
     </>
   );
@@ -83,6 +98,7 @@ export function ReportLocationStep({ children }: { children: ReactNode }) {
       <LocationPermissionPrompt
         source="report"
         inline
+        denied={sharing.phase === 'denied'}
         loading={sharing.loading}
         onAllow={() => void sharing.allow()}
         onDismiss={sharing.dismiss}
