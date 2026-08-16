@@ -18,7 +18,7 @@ import {
     RawReport,
     clearDirectionIfStationAndDirectionAreTheSame,
     ifDirectionPresentWithoutLineClearDirection,
-    rejectUnknownStationReference,
+    assertKnownStationReference,
 } from './post-process-report'
 import { annotateReportExpiry, isLive } from './report-decay'
 
@@ -527,10 +527,11 @@ export class ReportsService {
 
         const now = DateTime.utc()
 
+        assertKnownStationReference(stations, reportData, 'stationId')
+        assertKnownStationReference(stations, reportData, 'directionId')
+
         const processed = await pipeAsync(
             reportData,
-            rejectUnknownStationReference(stations, 'stationId'),
-            rejectUnknownStationReference(stations, 'directionId'),
             clearStationReferenceIfNotOnLine(stations, 'stationId'),
             clearStationReferenceIfNotOnLine(stations, 'directionId'),
             assignLineIfSingleOption(stations),
