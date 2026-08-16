@@ -45,7 +45,13 @@ const USER_AGENT = 'FreiFahren-Seed/1.0 (+https://github.com/FreiFahren/FreiFahr
 const BATCH_SIZE = 10
 const BATCH_COOLDOWN_MS = 30_000
 
-const escapeForRegex = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+const escapeForRegex = (value: string): string =>
+    value.replace(/[.*+?^${}()|[\]\\]/g, (ch) => {
+        if (ch === ']') return '[\\]]'
+        if (ch === '\\') return '[\\\\]'
+        if (ch === '^') return '[\\^]'
+        return `[${ch}]`
+    })
 
 const buildOperatorRegex = (operators: readonly string[]): string =>
     '^(' + operators.map(escapeForRegex).join('|') + ')$'
@@ -53,7 +59,8 @@ const buildOperatorRegex = (operators: readonly string[]): string =>
 const buildRouteTypeRegex = (routeTypes: readonly string[]): string =>
     '^(' + routeTypes.map(escapeForRegex).join('|') + ')$'
 
-const buildRefRegex = (refs: readonly string[]): string => '^(' + refs.map(escapeForRegex).join('|') + ')$'
+export const buildRefRegex = (refs: readonly string[]): string =>
+    '^(' + refs.map(escapeForRegex).join('|') + ')$'
 
 const chunk = <T>(items: readonly T[], size: number): T[][] => {
     const chunks: T[][] = []
