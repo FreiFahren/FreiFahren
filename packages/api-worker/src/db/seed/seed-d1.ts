@@ -10,9 +10,9 @@ import { getPlatformProxy } from 'wrangler'
 import { parseConfigArg } from '../cli-args'
 import { createD1Db } from '../index'
 import { applyMigrations } from '../migrate'
-import { toSqlLiteral } from '../sql-literal'
 
 import { parseCityArg } from './city-arg'
+import { REFERENCE_TABLE_NAMES, dumpReferenceTables } from './dump-reference-tables'
 
 // Seeds a city's D1 database. The reference tables are built by running the shared seedBaseData
 // Pipeline directly against a D1 binding (the local Miniflare D1, obtained via getPlatformProxy) —
@@ -24,9 +24,6 @@ import { parseCityArg } from './city-arg'
 //
 // Note: getPlatformProxy (and the whole Miniflare/workerd toolchain) only runs under Node, and the
 // Seed imports the @freifahren/cities alias, so this entry runs under tsx rather than bun (see package.json).
-
-// Parents before children for FK order.
-const REFERENCE_TABLES = ['stations', 'lines', 'line_stations', 'segments'] as const
 
 // Tables holding user data rather than reference data, so the seed deliberately leaves them alone.
 const NON_REFERENCE_TABLES = ['reports'] as const
@@ -41,7 +38,7 @@ const assertEveryTableIsAccountedFor = async (d1: D1Database): Promise<void> => 
         )
         .all<{ name: string }>()
 
-    const accounted = new Set<string>([...REFERENCE_TABLES, ...NON_REFERENCE_TABLES])
+    const accounted = new Set<string>([...REFERENCE_TABLE_NAMES, ...NON_REFERENCE_TABLES])
     const unaccounted = results.map(({ name }) => name).filter((name) => !accounted.has(name))
     if (unaccounted.length > 0) {
         throw new Error(
@@ -60,20 +57,6 @@ const parsePersistToArg = (argv: string[] = process.argv): string | undefined =>
     const path = argv[flag + 1]
     if (!path) throw new Error('--persist-to requires a directory path')
     return path
-}
-
-// Dump the reference tables to additive INSERT OR IGNORE statements so a prod load leaves existing
-// Rows (and the reports that reference them) intact.
-const dumpReferenceTables = async (d1: D1Database): Promise<string> => {
-    let sql = ''
-    for (const table of REFERENCE_TABLES) {
-        const { results } = await d1.prepare(`SELECT * FROM ${table}`).all<Record<string, unknown>>()
-        for (const row of results) {
-            const values = Object.values(row).map(toSqlLiteral).join(', ')
-            sql += `INSERT OR IGNORE INTO ${table} VALUES (${values});\n`
-        }
-    }
-    return sql
 }
 
 const seedD1 = async () => {
