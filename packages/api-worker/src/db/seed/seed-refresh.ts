@@ -33,7 +33,7 @@ const refresh = async () => {
     // Registry-backed SEED_CONFIG at import time (see ./config).
     process.env.SEED_CITY = city
 
-    const { fetchRouteGeometryElements, fetchStationElements } = await import('./stations/overpass')
+    const { fetchLineRefs, fetchRouteGeometryElements, fetchStationElements } = await import('./stations/overpass')
 
     const writeSnapshot = async (kind: OsmSnapshotKind, raw: unknown) => {
         const fileUrl = new URL(`./snapshots/${city}/${kind}.json`, import.meta.url)
@@ -41,11 +41,12 @@ const refresh = async () => {
     }
 
     console.log(`[seed:refresh] Fetching station elements from Overpass for '${city}'...`)
-    const stationElements = await fetchStationElements()
+    const refs = await fetchLineRefs()
+    const stationElements = await fetchStationElements(refs)
     console.log(`[seed:refresh] Snapshot includes ${countRouteRelations(stationElements)} route relations.`)
 
     console.log('[seed:refresh] Fetching route geometry from Overpass...')
-    const routeGeometryElements = await fetchRouteGeometryElements()
+    const routeGeometryElements = await fetchRouteGeometryElements(refs)
     console.log(
         `[seed:refresh] Geometry snapshot includes ${countRouteRelations(routeGeometryElements)} route relations.`
     )
