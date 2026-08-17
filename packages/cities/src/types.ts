@@ -105,6 +105,7 @@ export interface CityTelegramProfile {
 export interface CityCommunity {
     /** Telegram group handle reports are synced with (e.g. `@FreiFahren_BE`). */
     telegramHandle: string
+    reporterCount?: { min: number; max: number }
 }
 
 /**
