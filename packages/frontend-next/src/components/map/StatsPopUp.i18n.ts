@@ -4,16 +4,16 @@ export const NAMESPACE = 'statsPopUp';
 
 i18n.addResourceBundle('en', NAMESPACE, {
   reports: 'reports',
-  todayInBerlin: 'today in Berlin',
+  todayInCity: 'today in {{city}}',
   over: 'Over',
   reporters: 'reporters',
-  inBerlin: 'in Berlin',
+  inCity: 'in {{city}}',
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
   reports: 'Meldungen',
-  todayInBerlin: 'heute in Berlin',
+  todayInCity: 'heute in {{city}}',
   over: 'Über',
   reporters: 'Meldende',
-  inBerlin: 'in Berlin',
+  inCity: 'in {{city}}',
 });

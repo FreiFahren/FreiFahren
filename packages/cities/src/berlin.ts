@@ -108,5 +108,6 @@ export const BERLIN: CityConfig = {
     },
     community: {
         telegramHandle: '@FreiFahren_BE',
+        reporterCount: { min: 50_000, max: 60_000 },
     },
 }

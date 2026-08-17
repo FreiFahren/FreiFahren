@@ -8,6 +8,7 @@ import { SocialLinks } from '@/components/map/SocialLinks';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
 import { useCountAnimation } from '@/hooks/useCountAnimation';
+import { currentCity } from '@/lib/city';
 import { pickReporterCount } from '@/lib/reporters';
 
 import { ReportFeedback } from './ReportFeedback';
@@ -23,8 +24,8 @@ export function ReportSuccess({
   const { t } = useTranslation(NAMESPACE);
   const { data: stations } = useStations();
   const { data: lines } = useLines();
-  const [reporters] = useState(pickReporterCount);
-  const count = useCountAnimation(reporters, 1500);
+  const [reporters] = useState(() => pickReporterCount(currentCity));
+  const count = useCountAnimation(reporters ?? 0, 1500);
 
   const stationName = stations?.[result.stationId]?.name;
   const lineName = result.lineId ? lines?.find((l) => l.id === result.lineId)?.name : null;
@@ -46,15 +47,17 @@ export function ReportSuccess({
           </div>
         )}
 
-        <div className="mt-5 flex flex-col items-center gap-1">
-          <div className="text-foreground flex items-center gap-2">
-            <Users className="text-muted-foreground size-6" />
-            <span className="font-heading text-4xl font-bold tabular-nums">
-              {count.toLocaleString()}
-            </span>
+        {reporters !== null && (
+          <div className="mt-5 flex flex-col items-center gap-1">
+            <div className="text-foreground flex items-center gap-2">
+              <Users className="text-muted-foreground size-6" />
+              <span className="font-heading text-4xl font-bold tabular-nums">
+                {count.toLocaleString()}
+              </span>
+            </div>
+            <p className="text-muted-foreground text-sm">{t('description')}</p>
           </div>
-          <p className="text-muted-foreground text-sm">{t('description')}</p>
-        </div>
+        )}
 
         <div className="mt-6 w-full">
           <ReportFeedback onDone={onClose} />
@@ -62,7 +65,9 @@ export function ReportSuccess({
       </div>
 
       <div className="border-border/60 bg-card flex shrink-0 flex-col items-center border-t px-6 pt-3 pb-6">
-        <p className="text-muted-foreground text-[0.6875rem]">{t('syncText')}</p>
+        <p className="text-muted-foreground text-[0.6875rem]">
+          {t('syncText', { handle: currentCity.community.telegramHandle })}
+        </p>
         <Button
           type="button"
           size="lg"
