@@ -8,7 +8,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "eval": "bun run evals/run.ts"
+    "eval": "bun run evals/run.ts",
+    "extract": "bun run evals/extract.ts"
   },
   "dependencies": {
     "@sentry/cloudflare": "^10.62.0",

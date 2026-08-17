@@ -18,6 +18,7 @@ scripts/Pipfile
 scripts/Pipfile.lock
 messages.*.json
 eval_results.*.json
+extract.*.jsonl
 
 # Agent worktrees are local scratch, not project state.
 .claude/worktrees/
