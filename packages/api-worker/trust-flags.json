@@ -46,10 +46,10 @@
     },
     {
         "id": "quiet-hours-solo",
-        "sql": "SELECT CASE WHEN n.source <> 'telegram' AND CAST(strftime('%H',(n.timestamp/1000)+7200,'unixepoch') AS INT) IN (21,22,23,0,1,2,3,4,5) THEN NOT EXISTS (SELECT 1 FROM reports o WHERE o.timestamp > n.timestamp - 2700000 AND o.timestamp <= n.timestamp AND o.report_id <> n.report_id AND (o.source = 'telegram' OR o.client_hash IS NOT n.client_hash) AND (o.station_id = n.station_id OR o.station_id IN (SELECT lb.station_id FROM line_stations la JOIN line_stations lb ON lb.line_id = la.line_id AND ABS(la.\"order\" - lb.\"order\") <= 1 WHERE la.station_id = n.station_id))) ELSE 0 END FROM reports n WHERE n.report_id = ?1",
+        "sql": "SELECT CASE WHEN n.source <> 'telegram' AND CAST(strftime('%H%M',(n.timestamp/1000)+7200,'unixepoch') AS INT) NOT BETWEEN 600 AND 1929 THEN NOT EXISTS (SELECT 1 FROM reports o WHERE o.timestamp > n.timestamp - 2700000 AND o.timestamp <= n.timestamp AND o.report_id <> n.report_id AND (o.source = 'telegram' OR o.client_hash IS NOT n.client_hash) AND (o.station_id = n.station_id OR o.station_id IN (SELECT lb.station_id FROM line_stations la JOIN line_stations lb ON lb.line_id = la.line_id AND ABS(la.\"order\" - lb.\"order\") <= 1 WHERE la.station_id = n.station_id))) ELSE 0 END FROM reports n WHERE n.report_id = ?1",
         "weight": 3,
         "enabled": true,
         "cities": ["berlin"],
-        "description": "Witness rule, not plausibility: 21:00-06:00 Berlin (telegram puts inspector activity then at ~3.5% of the day), a web report shows only once a second client, telegram, or a report one station away on the same line corroborates it within 45 min. Corroborated stations light on witness #2 (0.25+1>=1). Backtested: 81% of the 08-06 evening attack at same-station scope, 53% at +/-1; +/-2 fell to 36% because dense spam self-corroborates - do not widen further. Hardcodes CEST (+7200); winter drift to 20:00-05:00 is accepted."
+        "description": "Witness rule, not plausibility: 19:30-06:00 Berlin (telegram puts inspector activity then at ~3.5% of the day), a web report shows only once a second client, telegram, or a report one station away on the same line corroborates it within 45 min. Corroborated stations light on witness #2 (0.25+1>=1). Backtested: 81% of the 08-06 evening attack at same-station scope, 53% at +/-1; +/-2 fell to 36% because dense spam self-corroborates - do not widen further. Hardcodes CEST (+7200); winter drift to 18:30-05:00 is accepted."
     }
 ]
