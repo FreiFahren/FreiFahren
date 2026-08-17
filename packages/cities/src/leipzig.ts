@@ -107,6 +107,6 @@ export const LEIPZIG: CityConfig = {
     },
     community: {
         telegramHandle: '@freifahren_leipzig',
-        reporterCount: { min: 7_532, max: 7_532 },
+        reporterCount: { min: 7_000, max: 8_000 },
     },
 }
