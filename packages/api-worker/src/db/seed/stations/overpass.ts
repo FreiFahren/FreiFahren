@@ -229,8 +229,13 @@ const fetchWithRetry = async (query: string, fetchTimeoutMs: number): Promise<Os
                     continue
                 }
 
-                const json = (await response.json()) as { elements: OsmElement[] }
-                return json.elements
+                const json = (await response.json()) as { elements?: OsmElement[] }
+                const elements = json.elements ?? []
+                if (elements.length === 0) {
+                    console.warn(`[seed:stations]   ${endpoint} returned 0 elements, trying next...`)
+                    continue
+                }
+                return elements
             } catch (err) {
                 console.warn(`[seed:stations]   ${endpoint} failed: ${err instanceof Error ? err.message : err}`)
             }
@@ -293,7 +298,21 @@ const fetchInBatches = async (
 
         const batch = batches[i]
         console.log(`[${label}] Batch ${i + 1}/${batches.length}: ${batch.join(', ')}`)
-        const elements = await fetchWithRetry(buildQuery(batch), fetchTimeoutMs)
+        let elements: OsmElement[] = []
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            elements = await fetchWithRetry(buildQuery(batch), fetchTimeoutMs)
+            const missing = findMissingRouteRefs(batch, elements)
+            if (missing.length === 0) break
+            console.warn(
+                `[${label}]   Incomplete batch (${missing.join(', ')} missing), retry ${attempt}/${MAX_RETRIES}...`
+            )
+            if (attempt === MAX_RETRIES) {
+                throw new Error(
+                    `[${label}] Incomplete Overpass response: ${missing.length}/${batch.length} line refs returned no route relation (${missing.join(', ')})`
+                )
+            }
+            await sleep(FALLBACK_DELAY_MS * attempt)
+        }
         console.log(`[${label}]   Got ${elements.length} elements`)
         all.push(...elements)
     }
