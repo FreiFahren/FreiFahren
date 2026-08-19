@@ -194,6 +194,20 @@ const mergeServerWait = async (current: number | null, endpoint: string): Promis
     return Math.max(current ?? 0, wait)
 }
 
+const waitAfterRetryableStatus = async (
+    status: number,
+    endpoint: string,
+    currentWaitMs: number | null
+): Promise<number | null> => {
+    console.warn(`[seed:stations]   ${endpoint} returned ${status}`)
+    const serverSuggestedWaitMs = await mergeServerWait(currentWaitMs, endpoint)
+    if (status !== 429) return serverSuggestedWaitMs
+    const delay = serverSuggestedWaitMs ?? RATE_LIMIT_FALLBACK_MS
+    console.log(`[seed:stations]   Rate limited, waiting ${Math.round(delay / 1000)}s before next try...`)
+    await sleep(delay)
+    return serverSuggestedWaitMs
+}
+
 const fetchWithRetry = async (query: string, fetchTimeoutMs: number): Promise<OsmElement[]> => {
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         let serverSuggestedWaitMs: number | null = null
@@ -212,15 +226,11 @@ const fetchWithRetry = async (query: string, fetchTimeoutMs: number): Promise<Os
                 })
 
                 if (response.status === 429 || response.status === 504 || response.status === 406) {
-                    console.warn(`[seed:stations]   ${endpoint} returned ${response.status}`)
-                    serverSuggestedWaitMs = await mergeServerWait(serverSuggestedWaitMs, endpoint)
-                    if (response.status === 429) {
-                        const delay = serverSuggestedWaitMs ?? RATE_LIMIT_FALLBACK_MS
-                        console.log(
-                            `[seed:stations]   Rate limited, waiting ${Math.round(delay / 1000)}s before next try...`
-                        )
-                        await sleep(delay)
-                    }
+                    serverSuggestedWaitMs = await waitAfterRetryableStatus(
+                        response.status,
+                        endpoint,
+                        serverSuggestedWaitMs
+                    )
                     continue
                 }
 
@@ -280,6 +290,23 @@ export const fetchLineRefs = async (): Promise<string[]> => {
     return sorted
 }
 
+/* Given the line refs we set out to fetch, return those that have no route
+ * relation in the response. A batched `out geom`/`out body` query can hit a
+ * server-side Overpass timeout and still return HTTP 200 with partial data, so
+ * checking for missing refs is the only way to distinguish a truncated response
+ * from a genuinely complete one. */
+export const findMissingRouteRefs = (expectedRefs: readonly string[], elements: OsmElement[]): string[] => {
+    const present = new Set<string>()
+    for (const el of elements) {
+        if (el.type !== 'relation') continue
+        if (el.tags?.type !== 'route') continue
+        // Record indexing is typed `string` but a relation may have no `ref` tag.
+        const ref = el.tags.ref as string | undefined
+        if (ref !== undefined && ref !== '') present.add(ref)
+    }
+    return expectedRefs.filter((ref) => !present.has(ref))
+}
+
 const fetchInBatches = async (
     label: string,
     refs: readonly string[],
@@ -319,23 +346,6 @@ const fetchInBatches = async (
 
     console.log(`[${label}] Total: ${all.length} elements`)
     return all
-}
-
-/* Given the line refs we set out to fetch, return those that have no route
- * relation in the response. A batched `out geom`/`out body` query can hit a
- * server-side Overpass timeout and still return HTTP 200 with partial data, so
- * checking for missing refs is the only way to distinguish a truncated response
- * from a genuinely complete one. */
-export const findMissingRouteRefs = (expectedRefs: readonly string[], elements: OsmElement[]): string[] => {
-    const present = new Set<string>()
-    for (const el of elements) {
-        if (el.type !== 'relation') continue
-        if (el.tags?.type !== 'route') continue
-        // Record indexing is typed `string` but a relation may have no `ref` tag.
-        const ref = el.tags.ref as string | undefined
-        if (ref !== undefined && ref !== '') present.add(ref)
-    }
-    return expectedRefs.filter((ref) => !present.has(ref))
 }
 
 /* Turn a silently-truncated Overpass response into a hard failure so the

@@ -116,6 +116,7 @@ export function MapView() {
         // report markers, so that overlay setup doesn't compete with the heaviest part of map
         // init. The map is persistent, so this fires once per session.
         onLoad={() => setBaseMapReady(true)}
+        onIdle={() => setBaseMapReady(true)}
         // The style is baked and version-pinned by the tile-server, so re-validating its 89 layers
         // against the spec on every load is wasted main-thread work at the most contended moment
         // (and lets maplibre tree-shake the validator out). See maplibre MapOptions.validateStyle.

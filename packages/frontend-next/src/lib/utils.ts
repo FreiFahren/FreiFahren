@@ -14,6 +14,9 @@ export function optionalEnv(key: string): string | undefined {
 // (city resolution) or off PostHog (feature flags) needs a different source there.
 export const isPreviewBuild = optionalEnv('VITE_PREVIEW') !== undefined;
 
+export const isTelegramInAppBrowser =
+  typeof navigator !== 'undefined' && /Telegram/i.test(navigator.userAgent);
+
 export function requireEnv(key: string): string;
 export function requireEnv(key: string, as: 'number'): number;
 export function requireEnv(key: string, as?: 'number'): string | number {
