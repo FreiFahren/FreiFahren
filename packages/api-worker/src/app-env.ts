@@ -97,6 +97,19 @@ export const isAllowedCorsOrigin = (origin: string, config: AppConfig) => {
     return previewWorkersSubdomain !== undefined && buildPreviewOriginPattern(previewWorkersSubdomain).test(origin)
 }
 
+export const corsAllowOrigin = (
+    origin: string,
+    method: string,
+    accessControlRequestMethod: string | undefined,
+    config: AppConfig
+): string | null => {
+    const effectiveMethod = method === 'OPTIONS' ? (accessControlRequestMethod ?? 'GET') : method
+    if (effectiveMethod === 'GET' || effectiveMethod === 'HEAD') {
+        return '*'
+    }
+    return isAllowedCorsOrigin(origin, config) ? origin : null
+}
+
 export type Services = {
     reportsService: ReportsService
     insightsService: InsightsService
