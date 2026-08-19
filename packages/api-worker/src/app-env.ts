@@ -14,6 +14,7 @@ import { TransitNetworkDataService } from './modules/transit/transit-network-dat
 export type Bindings = {
     // Cloudflare D1 binding. Present on Workers and, in tests, provided by the Miniflare pool.
     DB?: D1Database
+    DB_HAMBURG?: D1Database
     DB_LEIPZIG?: D1Database
     // Trust-flag definitions as a JSON array, set by the deploy workflow from `trust-flags.enc`.
     TRUST_FLAGS?: string
