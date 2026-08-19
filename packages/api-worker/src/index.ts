@@ -3,7 +3,7 @@ import { cors } from 'hono/cors'
 import { etag, RETAINED_304_HEADERS } from 'hono/etag'
 import { requestId } from 'hono/request-id'
 
-import { Env, isAllowedCorsOrigin, registerContext } from './app-env'
+import { corsAllowOrigin, Env, registerContext } from './app-env'
 import { handleError } from './common/error-handler'
 import { registerVersionedRoutes } from './common/router'
 import { getConfig } from './modules/config'
@@ -50,7 +50,7 @@ export const createApp = () => {
         cors({
             origin: (origin, c) => {
                 const config = (c as Context<Env>).get('config')
-                return isAllowedCorsOrigin(origin, config) ? origin : null
+                return corsAllowOrigin(origin, c.req.method, c.req.header('Access-Control-Request-Method'), config)
             },
             /*
              * Every header the client attaches to a report has to be listed here, or the browser
