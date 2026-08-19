@@ -2,7 +2,7 @@
   "name": "api-worker",
   "private": true,
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --ip 0.0.0.0",
     "seed": "tsx src/db/seed/seed-d1.ts",
     "deploy": "wrangler deploy",
     "flags:check": "bun run src/trust-flags.ts check",

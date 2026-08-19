@@ -27,31 +27,49 @@ void initNativePlatform();
 // vite-plugin-pwa's registration API catches failures (bots, crawlers, locked-down WebViews) and
 // reloads once when an auto-updated worker takes control. Recheck after the app returns online or
 // to the foreground so an installed PWA does not keep a suspended shell indefinitely.
-if (!__CAPACITOR__ && !isTelegramInAppBrowser && 'serviceWorker' in navigator) {
-  registerSW({
-    onRegisteredSW: (_swUrl, registration) => {
-      if (!registration) return;
+if (!__CAPACITOR__ && 'serviceWorker' in navigator) {
+  if (isTelegramInAppBrowser) {
+    const TELEGRAM_SW_CLEAR_MARK = 'ff-tg-sw-cleared';
+    void navigator.serviceWorker
+      .getRegistrations()
+      .then((registrations) =>
+        Promise.all(registrations.map((registration) => registration.unregister())),
+      )
+      .then(() => caches.keys())
+      .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
+      .then(() => {
+        if (!navigator.serviceWorker.controller) return;
+        if (window.name === TELEGRAM_SW_CLEAR_MARK) return;
+        window.name = TELEGRAM_SW_CLEAR_MARK;
+        window.location.reload();
+      })
+      .catch(() => {});
+  } else {
+    registerSW({
+      onRegisteredSW: (_swUrl, registration) => {
+        if (!registration) return;
 
-      // The install page is not controlled yet, so its navigation cannot populate the runtime cache.
-      // Seed the shell once while online to retain the first offline cold start.
-      void navigator.serviceWorker.ready
-        .then(async () => {
-          const appShell = await caches.open('app-shell');
-          if (!(await appShell.match('/'))) await appShell.add('/');
-        })
-        .catch(() => {});
+        // The install page is not controlled yet, so its navigation cannot populate the runtime cache.
+        // Seed the shell once while online to retain the first offline cold start.
+        void navigator.serviceWorker.ready
+          .then(async () => {
+            const appShell = await caches.open('app-shell');
+            if (!(await appShell.match('/'))) await appShell.add('/');
+          })
+          .catch(() => {});
 
-      const update = () => {
-        void registration.update().catch(() => {});
-      };
+        const update = () => {
+          void registration.update().catch(() => {});
+        };
 
-      window.addEventListener('online', update);
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') update();
-      });
-    },
-    onRegisterError: () => {},
-  });
+        window.addEventListener('online', update);
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') update();
+        });
+      },
+      onRegisterError: () => {},
+    });
+  }
 }
 
 // Vite's documented recovery for a failed lazy import: a deploy purges the old chunks, so reload to

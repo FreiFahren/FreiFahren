@@ -17,6 +17,7 @@ import { useRisk } from '@/api/risk';
 import { useSegments } from '@/api/transit';
 import { track } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';
+import { isTelegramInAppBrowser } from '@/lib/utils';
 
 import { LineLayer } from './LineLayer';
 import { SECONDARY_REVEAL_ZOOM } from './line-style';
@@ -54,6 +55,12 @@ export function MapView() {
   const { selectedStation, handleMapClick } = useStationSelection();
   const { visible: riskVisible } = useRiskLayer();
   const [baseMapReady, setBaseMapReady] = useState(false);
+
+  useEffect(() => {
+    if (!isTelegramInAppBrowser) return;
+    const id = window.setTimeout(() => setBaseMapReady(true), 1500);
+    return () => window.clearTimeout(id);
+  }, []);
 
   // Fire once per session the first time the user zooms in far enough to reveal the secondary
   // (tram/bus) tier. The map is persistent, so this ref spans the whole session; sessions that

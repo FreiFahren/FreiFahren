@@ -86,8 +86,11 @@ const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\
 const buildPreviewOriginPattern = (subdomain: string) =>
     new RegExp(`^https:\\/\\/frontend-pr-\\d+\\.${escapeRegExp(subdomain)}\\.workers\\.dev$`)
 
+const PRIVATE_HTTP_ORIGIN =
+    /^http:\/\/(?:localhost|127\.0\.0\.1|10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?::\d+)?$/
+
 export const isAllowedCorsOrigin = (origin: string, config: AppConfig) => {
-    if (config.corsOrigins.includes(origin)) {
+    if (config.corsOrigins.includes(origin) || PRIVATE_HTTP_ORIGIN.test(origin)) {
         return true
     }
     const { previewWorkersSubdomain } = config
