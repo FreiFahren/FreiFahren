@@ -17,7 +17,6 @@ import { useRisk } from '@/api/risk';
 import { useSegments } from '@/api/transit';
 import { track } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';
-import { isTelegramInAppBrowser } from '@/lib/utils';
 
 import { LineLayer } from './LineLayer';
 import { SECONDARY_REVEAL_ZOOM } from './line-style';
@@ -57,7 +56,6 @@ export function MapView() {
   const [baseMapReady, setBaseMapReady] = useState(false);
 
   useEffect(() => {
-    if (!isTelegramInAppBrowser) return;
     const id = window.setTimeout(() => setBaseMapReady(true), 1500);
     return () => window.clearTimeout(id);
   }, []);
