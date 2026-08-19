@@ -36,7 +36,7 @@ const query = (binding: string, sql: string, configPath?: string): D1Row[] => {
     const stdout = execFileSync(
         'npx',
         ['wrangler', 'd1', 'execute', binding, '--remote', '--json', '--command', sql, ...configArgs],
-        { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'inherit'], maxBuffer: 64 * 1024 * 1024 },
+        { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'inherit'], maxBuffer: 64 * 1024 * 1024 }
     )
     const resultSets = JSON.parse(stdout.slice(stdout.indexOf('['))) as Array<{ results?: D1Row[] } | undefined>
     return resultSets[0]?.results ?? []
@@ -44,9 +44,13 @@ const query = (binding: string, sql: string, configPath?: string): D1Row[] => {
 
 const executeFile = (binding: string, sqlPath: string, configPath?: string): void => {
     const configArgs = configPath !== undefined ? ['--config', configPath] : []
-    execFileSync('npx', ['wrangler', 'd1', 'execute', binding, '--remote', `--file=${sqlPath}`, '--yes', ...configArgs], {
-        stdio: 'inherit',
-    })
+    execFileSync(
+        'npx',
+        ['wrangler', 'd1', 'execute', binding, '--remote', `--file=${sqlPath}`, '--yes', ...configArgs],
+        {
+            stdio: 'inherit',
+        }
+    )
 }
 
 const loadJsonl = (path: string): ExtractRow[] => {
@@ -99,7 +103,7 @@ const importCity = (city: string, filePath: string, wipe: boolean, dryRun: boole
                 toSqlLiteral(row.directionId),
                 toSqlLiteral(ts),
                 toSqlLiteral('telegram'),
-            ].join(', ')});`,
+            ].join(', ')});`
         )
     }
 
@@ -115,8 +119,8 @@ const importCity = (city: string, filePath: string, wipe: boolean, dryRun: boole
                 dryRun,
             },
             null,
-            2,
-        ),
+            2
+        )
     )
 
     if (dryRun) {
@@ -153,5 +157,5 @@ importCity(
     parseFileArg(),
     process.argv.includes('--wipe-reports'),
     process.argv.includes('--dry-run'),
-    parseConfigArg(),
+    parseConfigArg()
 )
