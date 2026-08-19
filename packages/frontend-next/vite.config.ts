@@ -201,6 +201,7 @@ export default defineConfig({
   ],
   server: {
     port: 1871,
+    host: true,
   },
   preview: {
     // Deliberately a different port from `server`: `preview` ships the real service worker, and a

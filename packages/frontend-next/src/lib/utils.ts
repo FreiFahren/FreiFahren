@@ -15,7 +15,9 @@ export function optionalEnv(key: string): string | undefined {
 export const isPreviewBuild = optionalEnv('VITE_PREVIEW') !== undefined;
 
 export const isTelegramInAppBrowser =
-  typeof navigator !== 'undefined' && /Telegram/i.test(navigator.userAgent);
+  typeof navigator !== 'undefined' &&
+  (/Telegram/i.test(navigator.userAgent) ||
+    (typeof window !== 'undefined' && 'TelegramWebviewProxy' in window));
 
 export function requireEnv(key: string): string;
 export function requireEnv(key: string, as: 'number'): number;

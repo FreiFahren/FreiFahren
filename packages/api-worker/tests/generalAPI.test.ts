@@ -181,6 +181,20 @@ describe('CORS', () => {
         expect(response.headers.get('Access-Control-Allow-Origin')).toBe(PREVIEW_ORIGIN)
     })
 
+    it('grants a preflight from a private LAN origin', async () => {
+        const lanOrigin = 'http://192.168.0.176:1871'
+        const response = await appRequestWithRedirect('/reports', {
+            method: 'OPTIONS',
+            headers: {
+                Origin: lanOrigin,
+                'Access-Control-Request-Method': 'GET',
+            },
+        })
+
+        expect(response.status).toBe(204)
+        expect(response.headers.get('Access-Control-Allow-Origin')).toBe(lanOrigin)
+    })
+
     it.each([DISALLOWED_ORIGIN, MALFORMED_PREVIEW_ORIGIN])('does not grant a preflight from %s', async (origin) => {
         const response = await appRequestWithRedirect('/reports', {
             method: 'OPTIONS',

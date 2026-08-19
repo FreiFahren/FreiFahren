@@ -6,9 +6,8 @@ import { useEffect, useState } from 'react';
 import { currentCitySlug } from '@/lib/city';
 import { getTurnstileToken, TURNSTILE_TOKEN_HEADER } from '@/lib/turnstile';
 import { captureIssue, traceAction } from '@/lib/error-monitoring';
-import { requireEnv } from '@/lib/utils';
 
-import { fetchJson, type Line, useLines } from './transit';
+import { API_URL, fetchJson, type Line, useLines } from './transit';
 
 export type Report = {
   timestamp: string;
@@ -189,8 +188,6 @@ export const useStationReportCount = (stationId: string) => {
   const [options] = useState(() => stationReportCountQueryOptions(stationId));
   return useQuery({ ...options, select: (reports) => reports.length });
 };
-
-const API_URL = requireEnv('VITE_API_URL');
 
 export type SubmitReportInput = {
   stationId: string;
