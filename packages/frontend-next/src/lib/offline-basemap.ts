@@ -33,8 +33,16 @@ class BlobSource implements Source {
 
 // The immutable `/v<sha>/` segment makes each deploy's archive a stable cache key.
 function archiveKeyFor(archiveUrl: string): string {
-  const version = /\/v([^/]+)\//.exec(archiveUrl)?.[1];
-  return `${ARCHIVE_PREFIX}${version ?? archiveUrl}`;
+  return `${ARCHIVE_PREFIX}${archiveUrl}`;
+}
+
+function styleKeyFor(styleUrl: string): string {
+  return `${STYLE_KEY}:${styleUrl}`;
+}
+
+function archiveBasename(archiveUrl: string): string {
+  const parts = archiveUrl.split('/');
+  return parts[parts.length - 1] ?? archiveUrl;
 }
 
 function archiveUrlFromStyle(style: StyleSpecification): string | null {
@@ -59,13 +67,18 @@ async function fetchStyle(styleUrl: string): Promise<StyleSpecification | null> 
 }
 
 // Drop archives from older deploys so storage tracks only the current version.
-async function pruneOldArchives(keepKey: string): Promise<void> {
+async function pruneOldArchives(keepUrl: string): Promise<void> {
+  const keepKey = archiveKeyFor(keepUrl);
+  const keepName = archiveBasename(keepUrl);
   const all = await keys(store);
   await Promise.all(
     all
-      .filter(
-        (k): k is string => typeof k === 'string' && k.startsWith(ARCHIVE_PREFIX) && k !== keepKey,
-      )
+      .filter((k): k is string => {
+        if (typeof k !== 'string' || !k.startsWith(ARCHIVE_PREFIX) || k === keepKey) return false;
+        const rest = k.slice(ARCHIVE_PREFIX.length);
+        if (!rest.includes('/')) return true;
+        return archiveBasename(rest) === keepName;
+      })
       .map((k) => del(k, store)),
   );
 }
@@ -89,27 +102,32 @@ export async function prepareOfflineBasemap(
 ): Promise<string | StyleSpecification> {
   // Prefer the fresh style; fall back to the last persisted one (which always has its archive) offline.
   const fresh = await fetchStyle(styleUrl);
-  const style = fresh ?? (await get<StyleSpecification>(STYLE_KEY, store)) ?? null;
+  const style = fresh ?? (await get<StyleSpecification>(styleKeyFor(styleUrl), store)) ?? null;
   if (!style) return styleUrl;
+
+  const persistStyle = async (value: StyleSpecification) => {
+    await set(styleKeyFor(styleUrl), value, store);
+    await del(STYLE_KEY, store);
+  };
 
   const archiveUrl = archiveUrlFromStyle(style);
   if (!archiveUrl) {
-    if (fresh) await set(STYLE_KEY, fresh, store);
+    if (fresh) await persistStyle(fresh);
     return style;
   }
 
   const key = archiveKeyFor(archiveUrl);
   const cached = await get<Blob>(key, store);
   if (cached) {
-    if (fresh) await set(STYLE_KEY, fresh, store);
+    if (fresh) await persistStyle(fresh);
     protocol.add(new PMTiles(new BlobSource(cached, archiveUrl)));
   } else if (fresh && navigator.onLine) {
     // New deploy: its archive isn't downloaded yet. Persist the style only *after* its archive lands,
     // and prune older archives only then — so the persisted style always has a matching archive and an
     // interrupted download can never strand the next offline launch (the prior complete pair stays).
     void downloadArchive(archiveUrl, key)
-      .then(() => set(STYLE_KEY, fresh, store))
-      .then(() => pruneOldArchives(key))
+      .then(() => persistStyle(fresh))
+      .then(() => pruneOldArchives(archiveUrl))
       .catch(() => {});
   }
 
