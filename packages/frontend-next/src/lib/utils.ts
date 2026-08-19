@@ -24,8 +24,7 @@ export const isTelegramInAppBrowser =
   typeof navigator !== 'undefined' &&
   (/Telegram/i.test(navigator.userAgent) ||
     isIosInAppBrowser(navigator.userAgent) ||
-    (typeof window !== 'undefined' &&
-      ('TelegramWebviewProxy' in window || 'Telegram' in window)));
+    (typeof window !== 'undefined' && ('TelegramWebviewProxy' in window || 'Telegram' in window)));
 
 export function requireEnv(key: string): string;
 export function requireEnv(key: string, as: 'number'): number;
