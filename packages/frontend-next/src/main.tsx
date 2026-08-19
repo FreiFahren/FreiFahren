@@ -97,7 +97,11 @@ function withTimeout<T>(promise: Promise<T>, fallback: T): Promise<T> {
 const persister = createAsyncStoragePersister({
   key: 'freifahren-query-cache',
   storage: {
-    getItem: (k) => withTimeout(get<string>(k).then((v) => v ?? null), null),
+    getItem: (k) =>
+      withTimeout(
+        get<string>(k).then((v) => v ?? null),
+        null,
+      ),
     setItem: (k, v) => withTimeout(set(k, v), undefined),
     removeItem: (k) => withTimeout(del(k), undefined),
   },
