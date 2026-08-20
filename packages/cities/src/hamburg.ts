@@ -93,6 +93,6 @@ export const HAMBURG: CityConfig = {
         promptExamples,
     },
     community: {
-        telegramHandle: '@FreiFahren_HH',
+        reporterCount: { min: 4_000, max: 5_000 },
     },
 }
