@@ -38,7 +38,7 @@
         {
             "binding": "DB_HAMBURG",
             "database_name": "api-worker-db-hamburg",
-            // "database_id": "",
+            "database_id": "caa8cec3-3ac2-4288-a695-018cfbd22519",
             "migrations_dir": "drizzle",
         },
     ],
