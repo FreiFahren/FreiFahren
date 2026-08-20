@@ -96,9 +96,9 @@ const copyCity = (city: string, configPath: string, days: number): void => {
     // Intersected so a migration in flight — the target ahead of production — copies what both sides
     // Have instead of failing on a column only one of them knows about.
     const targetColumns = columnsOf(dbBinding, configPath)
-    let columns: string[]
+    let sourceColumns: string[]
     try {
-        columns = columnsOf(dbBinding).filter((column) => targetColumns.includes(column))
+        sourceColumns = columnsOf(dbBinding)
     } catch (error) {
         if (isUnprovisionedDatabaseError(error)) {
             logger.info({ city, binding: dbBinding }, 'Skipping report copy — production database is not provisioned')
@@ -106,6 +106,11 @@ const copyCity = (city: string, configPath: string, days: number): void => {
         }
         throw error
     }
+    if (sourceColumns.length === 0) {
+        logger.info({ city, binding: dbBinding }, 'Skipping report copy — production database has no reports table yet')
+        return
+    }
+    const columns = sourceColumns.filter((column) => targetColumns.includes(column))
     if (!columns.includes(TIME_WINDOW_COLUMN)) {
         throw new Error(
             `${TABLE} has no ${TIME_WINDOW_COLUMN} column in both databases — update TIME_WINDOW_COLUMN to the column the window should filter on`
