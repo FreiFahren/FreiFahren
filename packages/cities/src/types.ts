@@ -103,8 +103,8 @@ export interface CityTelegramProfile {
  * each) and stay as frontend constants.
  */
 export interface CityCommunity {
-    /** Telegram group handle reports are synced with (e.g. `@FreiFahren_BE`). */
-    telegramHandle: string
+    /** Telegram group handle reports are synced with (e.g. `@FreiFahren_BE`). Omit when the city has no group yet. */
+    telegramHandle?: string
     reporterCount?: { min: number; max: number }
 }
 

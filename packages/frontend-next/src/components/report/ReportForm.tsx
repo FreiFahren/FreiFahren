@@ -352,7 +352,10 @@ function DirectionPicker() {
 
 function TelegramFallbackNotice({ title, body }: { title: string; body: string }) {
   const { t } = useTranslation(NAMESPACE);
-  const telegramUrl = `https://t.me/${currentCity.community.telegramHandle.replace(/^@/, '')}`;
+  const telegramHandle = currentCity.community.telegramHandle;
+  const telegramUrl = telegramHandle
+    ? `https://t.me/${telegramHandle.replace(/^@/, '')}`
+    : undefined;
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
@@ -361,16 +364,18 @@ function TelegramFallbackNotice({ title, body }: { title: string; body: string }
         <p className="font-heading text-base font-semibold">{title}</p>
         <p className="text-muted-foreground text-sm">{body}</p>
       </div>
-      <Button
-        asChild
-        size="lg"
-        className="bg-accent-bright text-primary-foreground hover:bg-accent-press h-12 rounded-lg px-6 text-base font-semibold shadow-[0_6px_16px_rgba(214,59,59,0.28)]"
-      >
-        <a href={telegramUrl} target="_blank" rel="noopener noreferrer">
-          <Send data-icon="inline-start" />
-          {t('disabledTelegramCta')}
-        </a>
-      </Button>
+      {telegramUrl && (
+        <Button
+          asChild
+          size="lg"
+          className="bg-accent-bright text-primary-foreground hover:bg-accent-press h-12 rounded-lg px-6 text-base font-semibold shadow-[0_6px_16px_rgba(214,59,59,0.28)]"
+        >
+          <a href={telegramUrl} target="_blank" rel="noopener noreferrer">
+            <Send data-icon="inline-start" />
+            {t('disabledTelegramCta')}
+          </a>
+        </Button>
+      )}
     </div>
   );
 }

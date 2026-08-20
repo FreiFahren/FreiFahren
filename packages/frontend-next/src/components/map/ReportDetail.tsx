@@ -126,7 +126,7 @@ export function ReportDetail({ station, onClose }: ReportDetailProps) {
       <CardContent className="text-muted-foreground flex items-end justify-between gap-3 text-xs">
         <div className="space-y-0.5">
           <p>{t('inviteText')}</p>
-          <p>{t('syncText', { group: REPORTS_GROUP_HANDLE })}</p>
+          {REPORTS_GROUP_HANDLE && <p>{t('syncText', { group: REPORTS_GROUP_HANDLE })}</p>}
         </div>
         <SocialLinks appearance="inline" className="-mr-2 shrink-0" />
       </CardContent>

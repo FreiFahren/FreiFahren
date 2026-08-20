@@ -65,9 +65,11 @@ export function ReportSuccess({
       </div>
 
       <div className="border-border/60 bg-card flex shrink-0 flex-col items-center border-t px-6 pt-3 pb-6">
-        <p className="text-muted-foreground text-[0.6875rem]">
-          {t('syncText', { handle: currentCity.community.telegramHandle })}
-        </p>
+        {currentCity.community.telegramHandle && (
+          <p className="text-muted-foreground text-[0.6875rem]">
+            {t('syncText', { handle: currentCity.community.telegramHandle })}
+          </p>
+        )}
         <Button
           type="button"
           size="lg"
