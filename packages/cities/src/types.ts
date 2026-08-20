@@ -144,6 +144,7 @@ export interface CityConfig extends CityDatabaseConfig {
     subdomain: string
     /** Human-readable name shown in the UI. */
     displayName: string
+    listed?: boolean
     /** BCP-47 language tag for the city's primary language. */
     lang: string
     /** IANA timezone used to bucket reports into local service hours. */

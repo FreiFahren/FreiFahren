@@ -76,6 +76,24 @@ describe('handleReportForward', () => {
         expect(text).toContain('utm_medium=bot')
     })
 
+    it('skips a city that has no Telegram chat mapping', async () => {
+        const res = await handleReportForward(
+            new Request('https://worker.test/report?city=hamburg', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Password': 'password' },
+                body: JSON.stringify({
+                    stationId: picked.stationId,
+                    lineId: picked.lineId,
+                    directionId: picked.directionId,
+                }),
+            }),
+            testEnv,
+        )
+
+        expect(res.status).toBe(200)
+        expect(await res.json()).toEqual({ status: 'skipped' })
+    })
+
     it('skips writing to a disabled city without affecting request validation', async () => {
         const disabledEnv: Env = { ...testEnv, TELEGRAM_WRITING_DISABLED_CITIES: 'leipzig, berlin' }
 

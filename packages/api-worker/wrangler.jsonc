@@ -35,10 +35,16 @@
             "database_id": "e590b909-ce9e-4b32-8761-8e86f2e036d3",
             "migrations_dir": "drizzle",
         },
+        {
+            "binding": "DB_HAMBURG",
+            "database_name": "api-worker-db-hamburg",
+            "database_id": "caa8cec3-3ac2-4288-a695-018cfbd22519",
+            "migrations_dir": "drizzle",
+        },
     ],
     "vars": {
         "NODE_ENV": "production",
-        "CORS_ORIGINS": "https://freifahren.org,https://app.freifahren.org,https://www.freifahren.org,https://berlin.freifahren.org,https://leipzig.freifahren.org,http://localhost:1871,http://leipzig.localhost:1871,capacitor://localhost",
+        "CORS_ORIGINS": "https://freifahren.org,https://app.freifahren.org,https://www.freifahren.org,https://berlin.freifahren.org,https://hamburg.freifahren.org,https://leipzig.freifahren.org,http://localhost:1871,http://hamburg.localhost:1871,http://leipzig.localhost:1871,capacitor://localhost",
         // Scopes frontend preview CORS to `frontend-pr-<n>.freifahren.workers.dev` (our account only).
         "PREVIEW_WORKERS_SUBDOMAIN": "freifahren",
         "TELEGRAM_WORKER_URL": "https://telegram-worker.freifahren.workers.dev",

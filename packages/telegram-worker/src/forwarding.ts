@@ -127,12 +127,19 @@ export async function handleReportForward(request: Request, env: Env): Promise<R
     if (city === null || city === undefined) {
         return json({ error: 'bad_request', detail: 'unknown city' }, 400)
     }
-    const cfg = readConfigForCity(env, city.slug as CitySlug)
 
-    if (request.headers.get('X-Password') !== cfg.reportPassword) {
+    if (request.headers.get('X-Password') !== env.REPORT_PASSWORD) {
         console.warn('Report forward rejected: bad password')
         return json({ error: 'unauthorized' }, 401)
     }
+
+    const mappedChats = Object.entries(env.TELEGRAM_CHAT_CITIES).filter(([, slug]) => slug === city.slug)
+    if (mappedChats.length === 0) {
+        console.info('Skipped Telegram report forward: no chat mapped for city', { city: city.slug })
+        return json({ status: 'skipped' })
+    }
+
+    const cfg = readConfigForCity(env, city.slug as CitySlug)
 
     // Validate the body shape before fetching transit data so a malformed request
     // doesn't hit the backend.
