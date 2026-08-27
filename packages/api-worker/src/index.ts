@@ -16,6 +16,7 @@ import { getReports, getReportsByStation, postReport } from './modules/reports/'
 import { reportsCacheMiddleware, VERSIONED_REPORTS_CACHEABLE_PATHS } from './modules/reports/reports-cache-middleware'
 import { TURNSTILE_TOKEN_HEADER } from './modules/reports/turnstile'
 import { getRisk } from './modules/risk/risk-routes'
+import { postStripeWebhook } from './modules/stripe/stripe-webhook'
 import {
     transitCacheMiddleware,
     VERSIONED_TRANSIT_CACHEABLE_PATHS,
@@ -97,6 +98,8 @@ export const createApp = () => {
     )
 
     app.onError(handleError)
+
+    app.post('/webhooks/stripe', postStripeWebhook)
 
     registerVersionedRoutes(app, 'reports', 'v0', {
         v0: [getReports, postReport, getReportsByStation],

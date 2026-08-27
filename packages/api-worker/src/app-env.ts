@@ -52,6 +52,9 @@ export type Bindings = {
     // Events with a release so issues can be resolved in the next release. Absent locally.
     SENTRY_RELEASE?: string
     LOG_LEVEL?: LogLevel
+    STRIPE_WEBHOOK_SECRET?: string
+    POSTHOG_API_KEY?: string
+    POSTHOG_HOST?: string
 }
 
 export type AppConfig = {
@@ -245,6 +248,12 @@ export const registerContext = (app: Hono<Env>) => {
         c.set('logger', createLogger(c.env.LOG_LEVEL ?? 'info'))
 
         const config = resolveConfig(c.env)
+
+        if (new URL(c.req.url).pathname.startsWith('/webhooks/')) {
+            c.set('config', config)
+            await next()
+            return
+        }
 
         // Resolve the city first: it decides which DB this request talks to, and every
         // Downstream query goes through the services built from that one binding below.

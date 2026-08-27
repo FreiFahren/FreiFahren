@@ -22,6 +22,11 @@ const queue: PostHogOp[] = [];
 // Cap the buffer so a session that never loads the SDK (dev without a key) can't grow it unbounded.
 const MAX_QUEUED = 500;
 
+export function getDistinctId(): string | undefined {
+  const distinctId = instance?.get_distinct_id();
+  return typeof distinctId === 'string' && distinctId.length > 0 ? distinctId : undefined;
+}
+
 export function enqueuePostHog(op: PostHogOp): void {
   if (instance) {
     op(instance);
