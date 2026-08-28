@@ -24,10 +24,15 @@ import { ToastPill } from '@/components/ui/toast-pill';
 import { Toaster } from '@/components/ui/toaster';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useGeolocation } from '@/contexts/Geolocation.context';
-import { isContributeDismissed, openContributeModal } from '@/lib/contribute-modal';
 import { track } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';
+import {
+  markContributeShownAfterReport,
+  openContributeModal,
+  shouldOpenContributeAfterReport,
+} from '@/lib/contribute-modal';
 import { captureIssue } from '@/lib/error-monitoring';
+import { FEATURE_FLAGS, getFeatureFlagVariant } from '@/lib/feature-flags';
 import { distanceMeters } from '@/lib/geo';
 import { notifySuccess, selectionTap } from '@/lib/haptics';
 import { toast } from '@/lib/toast';
@@ -438,6 +443,7 @@ function SubmitFooter({
           setConsecutiveFailures(0);
           notifySuccess();
           recordSubmission();
+          getFeatureFlagVariant(FEATURE_FLAGS.contributeModalTiming);
           track('report_submitted', {
             stationId: result.stationId,
             lineId: result.lineId,
@@ -518,8 +524,10 @@ export function ReportForm() {
 
   const handleSuccessClose = () => {
     navigate({ to: '/' });
-    // Invite a contribution after a successful report, unless the user opted out.
-    if (!isContributeDismissed()) openContributeModal('report_success');
+    const variant = getFeatureFlagVariant(FEATURE_FLAGS.contributeModalTiming);
+    if (!shouldOpenContributeAfterReport(variant)) return;
+    openContributeModal('report_success');
+    markContributeShownAfterReport();
   };
 
   return (

@@ -80,4 +80,5 @@ the map. Two levers stay out of the deploy loop, as secrets that take effect in 
 ```bash
 wrangler secret put REPORTING_ENABLED     # true / false — the killswitch
 wrangler secret put MIN_STATION_TRUST     # trust a station needs before it shows
+wrangler secret put STRIPE_WEBHOOK_SECRET # signing secret from the Stripe webhook endpoint
 ```

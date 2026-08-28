@@ -34,6 +34,9 @@ export const testEnv = (): Bindings => ({
     TURNSTILE_ENFORCE: overrides.TURNSTILE_ENFORCE ?? workerEnv.TURNSTILE_ENFORCE,
     MIN_STATION_TRUST: overrides.MIN_STATION_TRUST ?? workerEnv.MIN_STATION_TRUST,
     LOG_LEVEL: (overrides.LOG_LEVEL ?? workerEnv.LOG_LEVEL) as Bindings['LOG_LEVEL'],
+    STRIPE_WEBHOOK_SECRET: overrides.STRIPE_WEBHOOK_SECRET ?? workerEnv.STRIPE_WEBHOOK_SECRET,
+    POSTHOG_API_KEY: overrides.POSTHOG_API_KEY ?? workerEnv.POSTHOG_API_KEY,
+    POSTHOG_HOST: overrides.POSTHOG_HOST ?? workerEnv.POSTHOG_HOST,
 })
 
 /**

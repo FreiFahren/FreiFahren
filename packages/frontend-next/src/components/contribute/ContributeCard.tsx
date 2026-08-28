@@ -13,6 +13,7 @@ import {
   getContributeSource,
   useContributeModalOpen,
 } from '@/lib/contribute-modal';
+import { getDistinctId } from '@/lib/posthog-client';
 import { optionalEnv } from '@/lib/utils';
 
 import { NAMESPACE } from './ContributeCard.i18n';
@@ -23,6 +24,14 @@ const BANK_BIC = 'GENODEF1SLR';
 
 const stripePaymentLink = optionalEnv('VITE_STRIPE_PAYMENT_LINK');
 const hasStripeConfig = Boolean(stripePaymentLink);
+
+function attributedStripeHref(base: string): string {
+  const distinctId = getDistinctId();
+  if (distinctId === undefined) return base;
+  const url = new URL(base);
+  url.searchParams.set('client_reference_id', distinctId.slice(0, 200));
+  return url.toString();
+}
 
 const DEFAULT_TAB = 'stripe';
 
@@ -112,7 +121,14 @@ function StripeTab() {
           href={stripePaymentLink}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => track('contribute_stripe_clicked', { source: getContributeSource() })}
+          onClick={(event) => {
+            track('contribute_stripe_clicked', { source: getContributeSource() });
+            if (!stripePaymentLink) return;
+            const href = attributedStripeHref(stripePaymentLink);
+            if (href === stripePaymentLink) return;
+            event.preventDefault();
+            window.open(href, '_blank', 'noopener,noreferrer');
+          }}
         >
           <HeartHandshake />
           {t('support')}

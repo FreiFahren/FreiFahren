@@ -16,5 +16,8 @@ declare module 'cloudflare:test' {
         MIN_STATION_TRUST: string
         TELEGRAM_WORKER_URL: string
         LOG_LEVEL: string
+        STRIPE_WEBHOOK_SECRET: string
+        POSTHOG_API_KEY: string
+        POSTHOG_HOST: string
     }
 }

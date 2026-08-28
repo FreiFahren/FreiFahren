@@ -54,5 +54,7 @@
         // volume would keep the failures and drop the denominator, which reads as "nothing wrong"
         // instead of as a gap.
         "LOG_LEVEL": "info",
+        "POSTHOG_API_KEY": "phc_rR635vqhSmp6st6GYqJG23uZVCmtESsDQT4Caijwv2N5",
+        "POSTHOG_HOST": "https://eu.i.posthog.com",
     },
 }
