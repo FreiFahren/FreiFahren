@@ -5,8 +5,7 @@ import type { TransitIndex } from '../src/types'
 /** Berlin profile for tests — mirrors the production CITY_NAME default. */
 export const berlinProfile = profileFor('Berlin')
 
-export const ALLOWED_CHAT_ID = '-1001'
-export const PUBLIC_APP_URL = 'https://app.example.test'
+export const ALLOWED_CHAT_ID = '-1001370021231'
 export const BACKEND_URL = 'https://backend.test'
 
 /**

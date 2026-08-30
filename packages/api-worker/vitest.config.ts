@@ -38,15 +38,6 @@ export default defineWorkersConfig(async () => {
                                 'http://localhost,http://localhost:1871,http://127.0.0.1:1871,capacitor://localhost',
                             PREVIEW_WORKERS_SUBDOMAIN: 'freifahren',
                             NODE_ENV: 'development',
-                            REPORT_PASSWORD: 'password',
-                            // Empty => Turnstile verification off by default; suites opt in via setTestEnv.
-                            TURNSTILE_SECRET_KEY: '',
-                            // Killswitch on by default, matching production; suites opt in via setTestEnv.
-                            REPORTING_ENABLED: '',
-                            TURNSTILE_ENFORCE: '',
-                            // Blank => the default of 1; suites that exercise suppression set it explicitly.
-                            MIN_STATION_TRUST: '',
-                            TELEGRAM_WORKER_URL: 'https://telegram-worker.test',
                             LOG_LEVEL: 'error',
                             STRIPE_WEBHOOK_SECRET: '',
                             POSTHOG_API_KEY: '',

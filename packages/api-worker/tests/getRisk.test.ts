@@ -3,7 +3,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { createApp } from '../src'
 import { db, lineStations, lines, reports, segments } from './test-db'
-import { appRequestWithRedirect, sendReportRequest } from './test-utils'
+import { appRequestWithRedirect, fakeReportGate, resetTestEnv, sendReportRequest } from './test-utils'
 
 type SegmentRisk = { color: string; risk: number }
 type RiskResponse = { segments_risk: Record<string, SegmentRisk> }
@@ -40,7 +40,16 @@ describe('GET /v0/risk response shape', () => {
     })
 
     afterEach(async () => {
+        resetTestEnv()
         await db.delete(reports)
+    })
+
+    it('fails closed when viewer context is unavailable', async () => {
+        fakeReportGate.unavailable = true
+
+        const response = await getRisk()
+
+        expect(response.status).toBe(503)
     })
 
     it('returns 200 with a segments_risk object', async () => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { app } from '../src/index'
-import { TURNSTILE_TOKEN_HEADER } from '../src/modules/reports/turnstile'
+import { TURNSTILE_TOKEN_HEADER } from '../src/modules/report-gate'
 import { appRequestWithRedirect, testEnv } from './test-utils'
 
 describe('Versioning', () => {

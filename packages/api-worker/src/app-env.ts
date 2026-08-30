@@ -6,6 +6,7 @@ import { AppError } from './common/errors'
 import { createLogger, Logger, LogLevel } from './common/logger'
 import { createD1Db, DbConnection } from './db'
 import { InsightsService } from './modules/insights'
+import type { PublicReportGate } from './modules/report-gate/report-gate-contract'
 import { ReportsService } from './modules/reports'
 import { RiskService } from './modules/risk'
 import type { CacheCtx } from './modules/transit/reference-cache'
@@ -16,37 +17,14 @@ export type Bindings = {
     DB?: D1Database
     DB_HAMBURG?: D1Database
     DB_LEIPZIG?: D1Database
-    // Trust-flag definitions as a JSON array, set by the deploy workflow from `trust-flags.enc`.
-    TRUST_FLAGS?: string
+    REPORT_GATE?: PublicReportGate
+    REPORT_GATE_MODE?: 'preview-open'
     CORS_ORIGINS?: string
     // This repo's Cloudflare account subdomain (e.g. `freifahren` for `*.freifahren.workers.dev`).
     // Scopes the frontend preview CORS allowance to our own account so another tenant can't claim
     // The `frontend-pr-<n>` name pattern and gain production API access. Unset => no previews.
     PREVIEW_WORKERS_SUBDOMAIN?: string
     NODE_ENV?: string
-    TELEGRAM_WORKER_URL?: string
-    REPORT_PASSWORD?: string
-    // Turnstile secret for the report widget. Unset disables verification entirely.
-    TURNSTILE_SECRET_KEY?: string
-    /*
-     * HMAC secret behind reports.client_hash. Unset stores no client attribution at all, so the
-     * deploy that introduces this collects nothing until the secret is set deliberately.
-     */
-    CLIENT_HASH_SECRET?: string
-    // "true" resumes app report submissions; anything else keeps the killswitch on.
-    REPORTING_ENABLED?: string
-    // "false" puts Turnstile in monitor mode: verify, log, allow through. Anything else enforces.
-    TURNSTILE_ENFORCE?: string
-    /*
-     * How much trust a station must accumulate before its reports are shown, as a number. 1 (the
-     * default) means a single honest report is enough, since an unflagged report scores 1. Raise it
-     * to 2 or 3 under attack to demand corroboration; 0 disables the check.
-     *
-     * Note this is the opposite direction from a killswitch: 0 is the *most* permissive setting.
-     * REPORTING_ENABLED is what closes the door, and keeping the two separate means neither dial
-     * has a value that means the reverse of everything either side of it.
-     */
-    MIN_STATION_TRUST?: string
     SENTRY_DSN?: string
     // Git SHA injected at deploy via `wrangler deploy --var SENTRY_RELEASE:<sha>`; tags Sentry
     // Events with a release so issues can be resolved in the next release. Absent locally.
@@ -60,26 +38,8 @@ export type Bindings = {
 export type AppConfig = {
     nodeEnv: string
     corsOrigins: string[]
-    telegramWorkerUrl?: string
-    reportPassword?: string
-    turnstileSecretKey?: string
-    clientHashSecret?: string
-    reportingEnabled: boolean
-    turnstileEnforce: boolean
-    minStationTrust: number
     // See PREVIEW_WORKERS_SUBDOMAIN on Bindings. Undefined disables preview-origin CORS entirely.
     previewWorkersSubdomain?: string
-}
-
-/*
- * Absent, blank or unparseable all fall back to the default rather than to 0. Switching the check
- * off is a decision worth typing a number for, not something a typo or a cleared variable should
- * do quietly.
- */
-const parseMinStationTrust = (raw: string | undefined): number => {
-    if (raw === undefined || raw.trim() === '') return 1
-    const parsed = Number(raw)
-    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 1
 }
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -126,11 +86,8 @@ export type Env = {
     Variables: Services & {
         logger: Logger
         config: AppConfig
-        // This request's city database, both ways round. The drizzle handle is what everything
-        // Should use; the raw binding exists for trust scoring, which runs operator-authored SQL
-        // And therefore needs real parameter binding rather than a query builder.
+        // This request's city database.
         db: DbConnection
-        d1: D1Database
         /*
          * Set when a reports response covers a station that fell below the trust threshold. Such a
          * response depends on who asked — including when it is empty — and the edge keys by URL,
@@ -153,19 +110,11 @@ export const resolveConfig = (env: Bindings): AppConfig => {
         throw new Error('CORS_ORIGINS must be set to a comma-separated list of allowed origins')
     }
 
-    // Default to development so outbound Telegram notifications and verbose error descriptions
-    // Only kick in when NODE_ENV=production is set explicitly.
+    // Default to development so verbose error descriptions are hidden only when production is
+    // Set explicitly.
     return {
         nodeEnv: env.NODE_ENV ?? 'development',
         corsOrigins,
-        telegramWorkerUrl: env.TELEGRAM_WORKER_URL,
-        reportPassword: env.REPORT_PASSWORD,
-        turnstileSecretKey: env.TURNSTILE_SECRET_KEY,
-        clientHashSecret: env.CLIENT_HASH_SECRET,
-        reportingEnabled: env.REPORTING_ENABLED === 'true',
-        // Defaults to enforcing: only an explicit "false" downgrades to monitor mode.
-        turnstileEnforce: env.TURNSTILE_ENFORCE !== 'false',
-        minStationTrust: parseMinStationTrust(env.MIN_STATION_TRUST),
         previewWorkersSubdomain: env.PREVIEW_WORKERS_SUBDOMAIN,
     }
 }
@@ -228,12 +177,7 @@ const applyServices = (c: Context<Env>, db: DbConnection, config: AppConfig) => 
     }
 
     const transitNetworkDataService = new TransitNetworkDataService(db, c.get('city').slug, cacheCtx)
-    const reportsService = new ReportsService(db, transitNetworkDataService, {
-        nodeEnv: config.nodeEnv,
-        city: c.get('city').slug,
-        telegramWorkerUrl: config.telegramWorkerUrl,
-        reportPassword: config.reportPassword,
-    })
+    const reportsService = new ReportsService(db, transitNetworkDataService)
 
     c.set('config', config)
     c.set('reportsService', reportsService)
@@ -271,7 +215,6 @@ export const registerContext = (app: Hono<Env>) => {
         }
         const db = createD1Db(binding)
         c.set('db', db)
-        c.set('d1', binding)
         applyServices(c, db, config)
 
         await next()

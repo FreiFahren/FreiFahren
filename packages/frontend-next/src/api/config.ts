@@ -1,9 +1,27 @@
 import { useQuery } from '@tanstack/react-query';
+import type { CityCommunity, CityConfig } from '@freifahren/cities';
 
 import { fetchJson } from './transit';
 
+type PublicCityConfig = Omit<
+  Pick<
+    CityConfig,
+    | 'slug'
+    | 'subdomain'
+    | 'displayName'
+    | 'publicAppUrl'
+    | 'listed'
+    | 'lang'
+    | 'timezone'
+    | 'map'
+    | 'community'
+  >,
+  'listed' | 'community'
+> & { listed: boolean; community: Omit<CityCommunity, 'telegramChatId'> };
+
 export type ApiConfig = {
   reporting: { enabled: boolean };
+  city: PublicCityConfig;
 };
 
 /*

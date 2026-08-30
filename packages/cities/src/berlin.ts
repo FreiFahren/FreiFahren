@@ -52,12 +52,17 @@ export const BERLIN: CityConfig = {
     slug: 'berlin',
     subdomain: 'berlin',
     displayName: 'Berlin',
+    publicAppUrl: 'https://app.freifahren.org',
     // D1 databases can't be renamed and we don't migrate data, so Berlin keeps
     // the existing database and its `DB` binding.
     dbName: CITY_DATABASES.berlin.dbName,
     dbBinding: CITY_DATABASES.berlin.dbBinding,
     lang: 'de',
     timezone: 'Europe/Berlin',
+    reporting: {
+        publicSubmissionsEnabled: true,
+        telegramForwardingEnabled: false,
+    },
     map: {
         center: [13.388, 52.5162],
         zoom: 11,
@@ -108,6 +113,7 @@ export const BERLIN: CityConfig = {
     },
     community: {
         telegramHandle: '@FreiFahren_BE',
+        telegramChatId: '-1001370021231',
         reporterCount: { min: 50_000, max: 60_000 },
     },
 }

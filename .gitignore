@@ -23,8 +23,5 @@ extract.*.jsonl
 # Agent worktrees are local scratch, not project state.
 .claude/worktrees/
 
-# The report-spam skill and its scripts describe how we tell coordinated submission from a busy
-# evening — the measurements, the thresholds, which defence the current actor has already beaten.
-# That is worth more to them than the flag predicates are, and this repo is meant to be public
-# again. Kept locally and shared out of band.
+# Agent-local security analysis is shared out of band.
 .claude/skills/report-spam/

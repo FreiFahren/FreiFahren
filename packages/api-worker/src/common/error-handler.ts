@@ -14,8 +14,8 @@ export const handleError = (err: Error, c: Context<Env>) => {
      * Keyed on the status, not on the error class: an AppError can carry a 500 too — a risk model
      * that failed, a station inference that hit an impossible clock — and those are bugs in exactly
      * the way an uncaught throw is. Capturing is what raises a Sentry issue; logs alone never did,
-     * which is why no 500 this API has served was visible there. 4xx stays out: Turnstile refusals
-     * and unknown stations are the caller's problem and would drown the signal.
+     * which is why no 500 this API has served was visible there. Caller errors stay out because
+     * they would drown the signal.
      */
     const statusCode = err instanceof AppError ? err.statusCode : 500
     if (statusCode >= 500) {
