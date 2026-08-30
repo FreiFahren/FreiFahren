@@ -68,7 +68,7 @@ test('shows the update prompt without navigating until the user confirms', async
   await expect(prompt.getByRole('button', { name: 'Refresh' })).toBeVisible();
   expect(page.url()).toContain('pwa-e2e=update-prompt');
 
-  await prompt.getByRole('button', { name: 'Dismiss update notice' }).click();
+  await prompt.getByRole('button', { name: 'Not now' }).click();
   await expect(prompt).toHaveCount(0);
   expect(page.url()).toContain('pwa-e2e=update-prompt');
 

@@ -1,4 +1,4 @@
-import { RefreshCw, X } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -32,9 +32,18 @@ export function PwaUpdatePrompt() {
             <p className="text-muted-foreground text-xs">{t('text')}</p>
           </div>
         </CardContent>
-        <CardFooter className="justify-between gap-2">
+        <CardFooter className="gap-2">
           <Button
-            size="xs"
+            variant="outline"
+            className="flex-1"
+            aria-label={t('dismiss')}
+            disabled={updating}
+            onClick={() => setDismissed(true)}
+          >
+            {t('dismiss')}
+          </Button>
+          <Button
+            className="bg-accent-bright text-primary-foreground hover:bg-accent-press flex-1"
             aria-label={t('refresh')}
             disabled={updating}
             onClick={() => {
@@ -43,16 +52,6 @@ export function PwaUpdatePrompt() {
             }}
           >
             {updating ? <RefreshCw className="animate-spin" /> : t('refresh')}
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label={t('dismiss')}
-            disabled={updating}
-            onClick={() => setDismissed(true)}
-          >
-            <X />
           </Button>
         </CardFooter>
       </PopupCard>
