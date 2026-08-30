@@ -1,7 +1,8 @@
 /// <reference types="@cloudflare/workers-types" />
-import { captureException, consoleLoggingIntegration, setTag, withSentry } from '@sentry/cloudflare'
+import { captureException, logger as sentryLogger, setTag, withSentry } from '@sentry/cloudflare'
 
 import { Bindings, setErrorReporter, setScopeTagger } from './app-env'
+import { setSentryLogSink } from './common/logger'
 import { normalizeTransactionName } from './common/normalize-transaction-name'
 
 import { app } from './index'
@@ -9,6 +10,9 @@ import { app } from './index'
 // Wired here, not in index.ts, so @sentry/cloudflare stays out of the test bundle.
 // AsyncLocalStorage (set up by withSentry) keeps captures inside a request's waitUntil on its scope.
 setErrorReporter((error, context) => captureException(error, context))
+
+// Native Sentry logs preserve attributes as queryable fields; the console integration is not used because it serializes the second console argument into the message and would duplicate logs.
+setSentryLogSink(sentryLogger)
 
 // Same reason: let app-env tag the request scope (e.g. the resolved city) without importing the SDK.
 setScopeTagger((key, value) => setTag(key, value))
@@ -20,7 +24,6 @@ export default withSentry(
         release: env.SENTRY_RELEASE,
         environment: env.NODE_ENV,
         enableLogs: true,
-        integrations: [consoleLoggingIntegration({ levels: ['info', 'warn', 'error'] })],
         tracesSampleRate: 1.0,
         beforeSendTransaction: (event) => {
             if (event.transaction === undefined) return event

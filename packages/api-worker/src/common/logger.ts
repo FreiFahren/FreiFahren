@@ -1,4 +1,4 @@
-// On Workers, Sentry's consoleLoggingIntegration forwards console.{info,warn,error} to Sentry Logs.
+// The Worker entry point injects Sentry's native logger at runtime; the optional sink keeps this module usable by tests and the seed CLI without pulling the Sentry SDK into those bundles.
 // Privacy: log structured fields and lengths, never raw report/message text.
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
@@ -8,6 +8,12 @@ export type Logger = {
     info: (objOrMsg: unknown, msg?: string) => void
     warn: (objOrMsg: unknown, msg?: string) => void
     error: (objOrMsg: unknown, msg?: string) => void
+}
+
+export type LogAttributes = Record<string, unknown>
+
+export type SentryLogSink = {
+    [level in LogLevel]: (message: string, attributes?: LogAttributes) => void
 }
 
 const LEVEL_ORDER: Record<LogLevel, number> = { debug: 10, info: 20, warn: 30, error: 40 }
@@ -20,15 +26,41 @@ const CONSOLE_METHOD: Record<LogLevel, 'log' | 'info' | 'warn' | 'error'> = {
     error: 'error',
 }
 
+let sentryLogSink: SentryLogSink | undefined
+
+// Injected by worker.ts so @sentry/cloudflare stays out of the test and CLI bundles.
+export const setSentryLogSink = (sink: SentryLogSink | undefined): void => {
+    sentryLogSink = sink
+}
+
+const serializeError = (error: Error): LogAttributes => ({
+    name: error.name,
+    message: error.message,
+    ...(error.stack === undefined ? {} : { stack: error.stack }),
+})
+
+const normalize = (objOrMsg: unknown, msg?: string): { message: string; attributes?: LogAttributes } => {
+    if (typeof objOrMsg === 'string') return { message: objOrMsg }
+    if (objOrMsg instanceof Error) {
+        return { message: msg ?? objOrMsg.message, attributes: { err: serializeError(objOrMsg) } }
+    }
+    if (typeof objOrMsg === 'object' && objOrMsg !== null && !Array.isArray(objOrMsg)) {
+        return { message: msg ?? '', attributes: objOrMsg as LogAttributes }
+    }
+    return { message: msg ?? '', attributes: { value: objOrMsg } }
+}
+
 const emit = (level: LogLevel, minLevel: LogLevel, objOrMsg: unknown, msg?: string): void => {
     if (LEVEL_ORDER[level] < LEVEL_ORDER[minLevel]) return
 
     const method = CONSOLE_METHOD[level]
-    if (typeof objOrMsg === 'string') {
-        console[method](objOrMsg)
-        return
+    const { message, attributes } = normalize(objOrMsg, msg)
+    if (attributes === undefined) {
+        console[method](message)
+    } else {
+        console[method](message, attributes)
     }
-    console[method](msg ?? '', objOrMsg)
+    sentryLogSink?.[level](message, attributes)
 }
 
 export const createLogger = (level: LogLevel = 'info'): Logger => ({
