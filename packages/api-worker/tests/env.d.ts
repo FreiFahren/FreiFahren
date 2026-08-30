@@ -8,13 +8,8 @@ declare module 'cloudflare:test' {
         DB_RECONCILE: D1Database
         TEST_MIGRATIONS: D1Migration[]
         CORS_ORIGINS: string
+        PREVIEW_WORKERS_SUBDOMAIN: string
         NODE_ENV: string
-        REPORT_PASSWORD: string
-        TURNSTILE_SECRET_KEY: string
-        REPORTING_ENABLED: string
-        TURNSTILE_ENFORCE: string
-        MIN_STATION_TRUST: string
-        TELEGRAM_WORKER_URL: string
         LOG_LEVEL: string
         STRIPE_WEBHOOK_SECRET: string
         POSTHOG_API_KEY: string

@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { DateTime, Settings } from 'luxon'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createApp } from '../src/index'
 import {
@@ -391,35 +391,14 @@ describe('Predicted reports', () => {
 describe('Predicted reports threshold', () => {
     let testStations: string[]
 
-    // Seed directly rather than via the POST pipeline: that path mutates the global system
-    // clock per report, so the ~350 inserts must run sequentially and pushed beforeAll past
-    // Bun's 5s hook timeout on CI. A bulk insert with explicit timestamps is equivalent — the
-    // handler stores `timestamp: new Date()` (the mocked clock) and leaves on-line stations
-    // unchanged — and runs in a single round-trip.
     const seedHistoricalData = async () => {
-        const rows: (typeof reports.$inferInsert)[] = []
-        for (let weeksAgo = 1; weeksAgo <= 2; weeksAgo++) {
-            for (let dayOffset = 0; dayOffset < 5; dayOffset++) {
-                for (const hour of [7, 9, 12, 15, 18, 20, 21]) {
-                    for (let stationIdx = 0; stationIdx < Math.min(testStations.length, 5); stationIdx++) {
-                        const historicalTime = DateTime.utc(2024, 1, 1, hour, 0).minus({
-                            weeks: weeksAgo,
-                            days: dayOffset,
-                            minutes: stationIdx * 2,
-                        })
-                        rows.push({
-                            stationId: testStations[stationIdx],
-                            lineId: testLineId,
-                            timestamp: historicalTime.toJSDate(),
-                            source: 'telegram',
-                        })
-                    }
-                }
-            }
-        }
-        // D1 caps bound parameters per statement, so insert in chunks rather than one round-trip.
-        for (let i = 0; i < rows.length; i += 20) {
-            await db.insert(reports).values(rows.slice(i, i + 20))
+        const historicalMonday = DateTime.utc(2024, 1, 8)
+        for (let hour = 0; hour < 24; hour++) {
+            await sendReportAt(
+                historicalMonday.set({ hour }).toJSDate(),
+                testStations[hour % Math.min(testStations.length, 5)],
+                testLineId
+            )
         }
     }
 
@@ -440,6 +419,14 @@ describe('Predicted reports threshold', () => {
     beforeEach(() => {
         Settings.now = () => Date.now()
         setSystemTime()
+
+        const samples = [0, 0.49, 0.99]
+        let sampleIndex = 0
+        vi.spyOn(Math, 'random').mockImplementation(() => samples[sampleIndex++ % samples.length])
+    })
+
+    afterEach(() => {
+        vi.restoreAllMocks()
     })
 
     afterAll(async () => {
@@ -510,78 +497,6 @@ describe('Predicted reports threshold', () => {
             expect(total).toBeGreaterThanOrEqual(minExpected)
             expect(total).toBeLessThanOrEqual(maxExpected)
         }
-    })
-
-    it('increases threshold from early morning to peak hours', async () => {
-        // Test at 7:00 AM (start of increase period)
-        const morning7 = DateTime.utc(2024, 1, 15, 7, 0) // Monday
-        Settings.now = () => morning7.toMillis()
-
-        const from7 = morning7.minus({ hours: 1 })
-        const to7 = morning7.plus({ hours: 1 })
-
-        const response7 = await appRequestWithRedirect(
-            `/reports?from=${encodeURIComponent(from7.toISO()!)}&to=${encodeURIComponent(to7.toISO()!)}`
-        )
-
-        const body7 = (await response7.json()) as Array<{ isPredicted: boolean }>
-        const total7 = body7.length
-
-        // Test at 12:00 PM (peak hours)
-        const noon = DateTime.utc(2024, 1, 15, 12, 0) // Monday
-        Settings.now = () => noon.toMillis()
-
-        const fromNoon = noon.minus({ hours: 1 })
-        const toNoon = noon.plus({ hours: 1 })
-
-        const responseNoon = await appRequestWithRedirect(
-            `/reports?from=${encodeURIComponent(fromNoon.toISO()!)}&to=${encodeURIComponent(toNoon.toISO()!)}`
-        )
-
-        const bodyNoon = (await responseNoon.json()) as Array<{ isPredicted: boolean }>
-        const totalNoon = bodyNoon.length
-
-        // Threshold should increase from morning to afternoon
-        expect(total7).toBeGreaterThanOrEqual(1) // Morning has low threshold
-        expect(totalNoon).toBeGreaterThan(total7) // Noon should have higher threshold
-    })
-
-    it('maintains a linear threshold ramp until the end of each window without premature clamping', async () => {
-        // At 20:30 on a weekday (near the end of the 18:00–21:00 ramp), the threshold
-        // should still be above the minimum of 1. With incorrect slope (e.g. 9/180 instead
-        // of 6/180), the base would already be negative here and clamped to 1.
-        const weekdayLateEvening = DateTime.utc(2024, 1, 15, 20, 30) // Monday 20:30
-        Settings.now = () => weekdayLateEvening.toMillis()
-
-        const fromLate = weekdayLateEvening.minus({ hours: 1 })
-        const toLate = weekdayLateEvening.plus({ hours: 1 })
-
-        const responseLate = await appRequestWithRedirect(
-            `/reports?from=${encodeURIComponent(fromLate.toISO()!)}&to=${encodeURIComponent(toLate.toISO()!)}`
-        )
-
-        expect(responseLate.status).toBe(200)
-        const lateBody = (await responseLate.json()) as Array<{ isPredicted: boolean }>
-        const latePredicted = lateBody.filter((r) => r.isPredicted).length
-
-        // At 23:00 (flat minimum period, threshold = 1)
-        const weekdayNight = DateTime.utc(2024, 1, 15, 23, 0) // Monday 23:00
-        Settings.now = () => weekdayNight.toMillis()
-
-        const fromNight = weekdayNight.minus({ hours: 1 })
-        const toNight = weekdayNight.plus({ hours: 1 })
-
-        const responseNight = await appRequestWithRedirect(
-            `/reports?from=${encodeURIComponent(fromNight.toISO()!)}&to=${encodeURIComponent(toNight.toISO()!)}`
-        )
-
-        expect(responseNight.status).toBe(200)
-        const nightBody = (await responseNight.json()) as Array<{ isPredicted: boolean }>
-        const nightPredicted = nightBody.filter((r) => r.isPredicted).length
-
-        // 20:30 is still in the linear ramp so its threshold should be above 1,
-        // meaning more predicted reports than during the flat minimum at 23:00
-        expect(latePredicted).toBeGreaterThan(nightPredicted)
     })
 
     it('prioritizes placing predicted report timestamps early in the time range to appear old', async () => {

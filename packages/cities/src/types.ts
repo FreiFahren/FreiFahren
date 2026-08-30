@@ -105,7 +105,17 @@ export interface CityTelegramProfile {
 export interface CityCommunity {
     /** Telegram group handle reports are synced with (e.g. `@FreiFahren_BE`). Omit when the city has no group yet. */
     telegramHandle?: string
+    /** Telegram chat receiving app-originated reports and supplying trusted bot reports. */
+    telegramChatId?: string
     reporterCount?: { min: number; max: number }
+}
+
+/** Operational report controls that intentionally vary by city. */
+export interface CityReportingConfig {
+    /** Accept reports from public clients. Trusted Telegram Service Binding reports bypass this switch. */
+    publicSubmissionsEnabled: boolean
+    /** Forward accepted app reports into the city's Telegram group. */
+    telegramForwardingEnabled: boolean
 }
 
 /**
@@ -144,11 +154,14 @@ export interface CityConfig extends CityDatabaseConfig {
     subdomain: string
     /** Human-readable name shown in the UI. */
     displayName: string
+    /** Canonical web app origin used in links for this city. */
+    publicAppUrl: string
     listed?: boolean
     /** BCP-47 language tag for the city's primary language. */
     lang: string
     /** IANA timezone used to bucket reports into local service hours. */
     timezone: string
+    reporting: CityReportingConfig
     map: CityMap
     /** Basemap tile-build inputs. Every city ships with a basemap. */
     tiles: CityTiles

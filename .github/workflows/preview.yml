@@ -21,7 +21,6 @@ jobs:
             pull-requests: read
         outputs:
             api: ${{ steps.filter.outputs.api }}
-            frontend: ${{ steps.filter.outputs.frontend }}
             subdomain: ${{ steps.subdomain.outputs.subdomain }}
         steps:
             - name: Detect what changed
@@ -48,17 +47,19 @@ jobs:
                       }
                       if (files === null) {
                         core.setOutput('api', 'true')
-                        core.setOutput('frontend', 'true')
                         return
                       }
                       const workflow = /^\.github\/workflows\/preview\.yml$/
                       const registry = /^packages\/cities\//
                       const touches = (...patterns) =>
                         files.some((file) => patterns.some((pattern) => pattern.test(file.filename)))
-                      core.setOutput('api', touches(/^packages\/api-worker\//, registry, workflow) ? 'true' : 'false')
+                      // A frontend preview always gets an isolated API. Pointing it at production
+                      // would make report submissions either fail Turnstile or touch live data.
                       core.setOutput(
-                        'frontend',
-                        touches(/^packages\/frontend-next\//, registry, workflow) ? 'true' : 'false'
+                        'api',
+                        touches(/^packages\/api-worker\//, /^packages\/frontend-next\//, registry, workflow)
+                          ? 'true'
+                          : 'false'
                       )
 
             # Resolved once and shared, so both deploys and the recorded deployment URL agree on the
@@ -139,24 +140,9 @@ jobs:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   workingDirectory: packages/api-worker
-                  # Cloudflare's documented always-pass Turnstile test secret, paired with the test
-                  # site key the preview frontend builds with. Lets a preview exercise the real
-                  # verification path without minting a widget or sharing the production secret.
-                  #
-                  # CLIENT_HASH_SECRET is a throwaway for the same reason: client attribution
-                  # short-circuits to nulls while it is unset, so without it a preview silently
-                  # skips that path and cannot show whether intake still records a client. The
-                  # value only has to be stable within one preview — the hashes it produces are
-                  # scoped to a database that is deleted with the PR.
-                  #
-                  # REPORTING_ENABLED is what makes a preview's report form appear at all: the
-                  # frontend asks this worker whether reporting is open, so a preview is clickable
-                  # through here even while production reporting is closed.
-                  command: >-
-                      deploy --config wrangler.preview.json
-                      --var REPORTING_ENABLED:true
-                      --var TURNSTILE_SECRET_KEY:1x0000000000000000000000000000000AA
-                      --var CLIENT_HASH_SECRET:preview-client-hash-not-a-real-secret
+                  # The generated config enables the open preview adapter and binds only the
+                  # temporary per-PR databases; it never references the production private gate.
+                  command: deploy --config wrangler.preview.json
 
             - name: Smoke test every city
               run: |
@@ -185,13 +171,12 @@ jobs:
 
     frontend:
         needs: [plan, api]
-        # Runs whenever either side changed, so a backend-only PR still gets a clickable app to review.
-        # `!cancelled()` is what lets it proceed when `api` was skipped rather than skipping with it.
+        # Runs whenever either side changed, so every preview is the clickable app backed by the
+        # isolated API that just completed.
         if: >-
-            !cancelled() &&
             github.event.action != 'closed' &&
-            needs.api.result != 'failure' &&
-            (needs.plan.outputs.api == 'true' || needs.plan.outputs.frontend == 'true') &&
+            needs.api.result == 'success' &&
+            needs.plan.outputs.api == 'true' &&
             github.event.pull_request.head.repo.full_name == github.repository
         runs-on: ubuntu-latest
         permissions:
@@ -205,9 +190,8 @@ jobs:
             CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
             PR_NUMBER: ${{ github.event.pull_request.number }}
             APP_URL: https://frontend-pr-${{ github.event.pull_request.number }}.${{ needs.plan.outputs.subdomain }}.workers.dev
-            # The preview API when this PR deployed one, production otherwise — a frontend-only PR has
-            # no preview API to point at.
-            API_URL: ${{ needs.plan.outputs.api == 'true' && format('https://api-pr-{0}.{1}.workers.dev', github.event.pull_request.number, needs.plan.outputs.subdomain) || 'https://api.freifahren.org' }}
+            # Every rendered preview has its own API and databases, including frontend-only PRs.
+            API_URL: https://api-pr-${{ github.event.pull_request.number }}.${{ needs.plan.outputs.subdomain }}.workers.dev
 
         steps:
             - name: Check out code
@@ -242,8 +226,6 @@ jobs:
             # marker to avoid piling up.
             - name: Record preview deployment
               uses: actions/github-script@v7
-              env:
-                  USES_PREVIEW_API: ${{ needs.plan.outputs.api == 'true' }}
               with:
                   script: |
                       const { owner, repo } = context.repo
@@ -272,10 +254,7 @@ jobs:
                         environment_url: process.env.APP_URL,
                         // Retires this PR's earlier previews, so only the current one reads as live.
                         auto_inactive: true,
-                        description:
-                          process.env.USES_PREVIEW_API === 'true'
-                            ? "This PR's own API and database; reports stay here."
-                            : 'Production API; only the frontend is previewed.',
+                        description: "This PR's own API and database; reports stay here.",
                       })
 
     cleanup:

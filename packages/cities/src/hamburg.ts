@@ -48,11 +48,16 @@ export const HAMBURG: CityConfig = {
     slug: 'hamburg',
     subdomain: 'hamburg',
     displayName: 'Hamburg',
+    publicAppUrl: 'https://hamburg.freifahren.org',
     listed: false,
     dbName: CITY_DATABASES.hamburg.dbName,
     dbBinding: CITY_DATABASES.hamburg.dbBinding,
     lang: 'de',
     timezone: 'Europe/Berlin',
+    reporting: {
+        publicSubmissionsEnabled: true,
+        telegramForwardingEnabled: false,
+    },
     map: {
         center: [9.9937, 53.5511],
         zoom: 11,
@@ -104,6 +109,7 @@ export const HAMBURG: CityConfig = {
         promptExamples,
     },
     community: {
+        telegramChatId: '-1202572205',
         reporterCount: { min: 4_000, max: 5_000 },
     },
 }

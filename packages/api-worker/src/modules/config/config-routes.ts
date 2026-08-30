@@ -1,5 +1,6 @@
 import type { Env } from '../../app-env'
 import { defineRoute } from '../../common/router'
+import { isOpenReportPreview } from '../report-gate/preview-report-gate'
 
 /*
  * Runtime-discoverable switches, so a client learns the current state instead of shipping a copy of
@@ -7,10 +8,8 @@ import { defineRoute } from '../../common/router'
  * bundle a user installed — which, for the Capacitor app, is unreachable without a release — and it
  * is a second source of truth that has to be flipped in the right order to stay consistent.
  *
- * Never cache this response, here or in the Workers Cache middleware. Being answered live is the
- * whole value of the switch: REPORTING_ENABLED is flipped with `wrangler deploy --var` and takes
- * effect on the next request. Any cache in front of this reintroduces exactly the staleness the
- * switch exists to avoid.
+ * Never cache this response, here or in the Workers Cache middleware. Being answered live is what
+ * lets a city-registry deployment close public intake for installed clients without an app release.
  */
 export const getConfig = defineRoute<Env>()({
     method: 'get',
@@ -18,6 +17,25 @@ export const getConfig = defineRoute<Env>()({
     handler: async (c) => {
         c.header('Cache-Control', 'no-store')
 
-        return c.json({ reporting: { enabled: c.get('config').reportingEnabled } })
+        const city = c.get('city')
+        const reportingEnabled = isOpenReportPreview(c) || city.reporting.publicSubmissionsEnabled
+
+        return c.json({
+            reporting: { enabled: reportingEnabled },
+            city: {
+                slug: city.slug,
+                subdomain: city.subdomain,
+                displayName: city.displayName,
+                publicAppUrl: city.publicAppUrl,
+                listed: city.listed ?? true,
+                lang: city.lang,
+                timezone: city.timezone,
+                map: city.map,
+                community: {
+                    telegramHandle: city.community.telegramHandle,
+                    reporterCount: city.community.reporterCount,
+                },
+            },
+        })
     },
 })

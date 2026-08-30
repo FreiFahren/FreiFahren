@@ -12,9 +12,9 @@ import {
     insightsCacheMiddleware,
     VERSIONED_INSIGHTS_CACHEABLE_PATHS,
 } from './modules/insights/insights-cache-middleware'
+import { TURNSTILE_TOKEN_HEADER } from './modules/report-gate'
 import { getReports, getReportsByStation, postReport } from './modules/reports/'
 import { reportsCacheMiddleware, VERSIONED_REPORTS_CACHEABLE_PATHS } from './modules/reports/reports-cache-middleware'
-import { TURNSTILE_TOKEN_HEADER } from './modules/reports/turnstile'
 import { getRisk } from './modules/risk/risk-routes'
 import { postStripeWebhook } from './modules/stripe/stripe-webhook'
 import {

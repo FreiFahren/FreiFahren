@@ -5,13 +5,10 @@ import { z } from 'zod'
 import { Env, reportError } from '../../app-env'
 import { defineRoute } from '../../common/router'
 import { insertReportSchema } from '../../db'
+import { assertPublicReportIntakeEnabled, submitToReportGate } from '../report-gate'
 
-import { ANONYMOUS_CLIENT, resolveClientIdentity } from './client-identity'
 import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from './constants'
 import { invalidateStationReportsCache } from './reports-cache-middleware'
-import { isTrustedWorkerCall, reportsDisabledMiddleware } from './reports-disabled-middleware'
-import { scoreReportInBackground } from './trust'
-import { turnstileMiddleware } from './turnstile'
 import { resolveViewer } from './viewer'
 
 const reportsQuerySchema = z
@@ -101,12 +98,11 @@ export const getReportsByStation = defineRoute<Env>()({
 export const postReport = defineRoute<Env>()({
     method: 'post',
     path: '/',
-    // Killswitch first: a 503 must not consume the caller's single-use Turnstile token.
-    middlewares: [reportsDisabledMiddleware, turnstileMiddleware],
     schemas: {
         json: insertReportSchema,
     },
     handler: async (c) => {
+        assertPublicReportIntakeEnabled(c)
         const reportsService = c.get('reportsService')
         const logger = c.get('logger')
 
@@ -117,18 +113,11 @@ export const postReport = defineRoute<Env>()({
             source: reportData.source ?? 'telegram',
         })
 
-        /*
-         * Telegram relays reach us server-to-server, so the cf data and User-Agent on that hop
-         * describe telegram-worker rather than anyone who reported anything — attributing it would
-         * be worse than storing nothing. Keyed off the authenticated shared-secret header and not
-         * off the body's `source`, which the caller picks and could set to 'telegram' precisely to
-         * shed attribution.
-         */
-        const client = isTrustedWorkerCall(c)
-            ? ANONYMOUS_CLIENT
-            : await resolveClientIdentity(c, { secret: c.get('config').clientHashSecret })
-
-        const report = await reportsService.createReport(postProcessedReportData, client)
+        const report = await submitToReportGate(c, {
+            ...postProcessedReportData,
+            lineId: postProcessedReportData.lineId ?? null,
+            directionId: postProcessedReportData.directionId ?? null,
+        })
 
         /*
          * Awaited, not deferred: the app invalidates and refetches this station's count as soon as
@@ -145,68 +134,6 @@ export const postReport = defineRoute<Env>()({
         } catch (error) {
             logger.warn({ stationId: report.stationId }, 'Failed to invalidate station reports cache')
             reportError(error, { tags: { task: 'reports-cache-invalidation' } })
-        }
-
-        /*
-         * Deferred: trust scoring runs one query per flag, and the number of flags is an operational
-         * dial someone will turn during an incident. On the write path that would make report
-         * submission slower exactly when it is under load. Nothing reads trust synchronously, so the
-         * row simply carries null for a moment.
-         */
-        const score = scoreReportInBackground(
-            c.get('db'),
-            c.get('d1'),
-            c.env.TRUST_FLAGS,
-            logger,
-            report.reportId,
-            c.get('city').slug
-        )
-            .then(async (trust) => {
-                // A report too weak to be shown on the map must not reach Telegram either.
-                if (trust === null || trust >= c.get('config').minStationTrust) {
-                    await reportsService.forwardReportToTelegram(postProcessedReportData).catch((error) => {
-                        reportError(error, {
-                            tags: { task: 'telegram-report-forward' },
-                            extra: {
-                                stationId: postProcessedReportData.stationId,
-                                lineId: postProcessedReportData.lineId,
-                                directionId: postProcessedReportData.directionId,
-                            },
-                        })
-                        logger.error(error, 'Failed to forward inspector report to Telegram')
-                    })
-                }
-
-                /*
-                 * Between the write and the score the row counts as unscored, which reads as fully
-                 * trusted — so the station may already have been served, and edge-cached, as
-                 * visible. Once a score lands below 1 that cached answer can be wrong for the whole
-                 * edge TTL, so drop the entry rather than wait it out.
-                 */
-                if (trust === null || trust >= 1) return
-                await invalidateStationReportsCache(
-                    c.req.url,
-                    c.req.header('Origin') ?? null,
-                    c.get('city').slug,
-                    report.stationId
-                )
-            })
-            .catch((error) => {
-                reportError(error, { tags: { task: 'report-trust-scoring' }, extra: { reportId: report.reportId } })
-                logger.error(error, 'Failed to score report trust')
-            })
-
-        // No Workers runtime under unit tests, so executionCtx is absent; await there instead.
-        let executionCtx: { waitUntil(promise: Promise<unknown>): void } | undefined
-        try {
-            executionCtx = c.executionCtx
-        } catch {
-            executionCtx = undefined
-        }
-        if (executionCtx !== undefined) {
-            executionCtx.waitUntil(score)
-        } else {
-            await score
         }
 
         return c.json(report)

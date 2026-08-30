@@ -1,13 +1,11 @@
 import { and, desc, eq, gte, lte } from 'drizzle-orm'
 import { DateTime } from 'luxon'
-import { z } from 'zod'
 
 import { AppError } from '../../common/errors'
 import { DbConnection, InsertReport, reports } from '../../db/'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
 import type { StationId } from '../transit/types'
 
-import { ANONYMOUS_CLIENT, type ClientIdentity } from './client-identity'
 import {
     assignLineIfSingleOption,
     clearStationReferenceIfNotOnLine,
@@ -75,12 +73,6 @@ export const calculatePredictedReportsThreshold = (currentTime: DateTime): numbe
     return Math.trunc(clamp(threshold, MIN_PREDICTED_REPORTS_THRESHOLD, MAX_PREDICTED_REPORTS_THRESHOLD))
 }
 
-type TelegramNotificationPayload = {
-    lineId: string | null
-    stationId: StationId
-    directionId: StationId | null
-}
-
 type RawReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'stationId' | 'directionId' | 'lineId'> & {
     isPredicted: boolean
 }
@@ -94,12 +86,6 @@ type RawReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'station
  */
 type ReportSummary = RawReportSummary & { expiresAt: Date | null }
 
-/*
- * Who is asking. `clientHash` is the requester's own signature, computed the same way intake
- * computes it, and it is what makes suppression invisible to the suppressed: a client always sees
- * its own reports whatever they scored. Somebody flooding the map watches their reports appear
- * exactly as before, learns nothing, and keeps using an approach that reaches nobody else.
- */
 export type ViewerContext = {
     minStationTrust: number
     clientHash?: string
@@ -107,10 +93,7 @@ export type ViewerContext = {
      * Called when any station in the result failed the threshold, whether or not the viewer owned
      * a report there. The station-scoped route uses it to skip edge caching.
      *
-     * It has to fire on the shared, empty answer too, not just on the owner's personalised one.
-     * The edge keys by URL, never by client: cache the empty list a non-owner gets and the owner's
-     * next request is served that same empty list without reaching the worker, which is precisely
-     * the moment they learn they have been suppressed.
+     * It fires for an empty result too because the edge cache is keyed by URL, not by viewer.
      */
     onSuppressed?: () => void
 }
@@ -124,16 +107,7 @@ type ScoredRow = {
     clientHash: string | null
 }
 
-/*
- * A station shows when the trust of its reports adds up to the configured threshold — so one
- * ordinary report (scoring 1) is enough at the default of 1, while several flagged ones are not.
- * That is the point: an attacker spreading one report per station to cover the most ground gets
- * nothing shown, and concentrating enough reports on a single station to clear the bar costs them
- * the spread that made it worth doing.
- *
- * An unscored report counts as 1. Scoring is asynchronous and can lag or fail, and treating "not
- * yet scored" as untrusted would empty the map every time the scorer hiccuped.
- */
+// Pending rows are owner-only. Legacy null values retain their historical neutral weight.
 /*
  * Trust values are fractions like 1/(1 + cost), which binary floating point cannot represent
  * exactly, so a sum that should land on the threshold arrives just under it — ten reports scoring
@@ -146,8 +120,6 @@ export const selectVisibleReports = (
     rows: ScoredRow[],
     viewer: ViewerContext
 ): { rows: ScoredRow[]; suppressed: boolean } => {
-    if (viewer.minStationTrust <= 0) return { rows, suppressed: false }
-
     const trustByStation = new Map<string, number>()
     for (const row of rows) {
         trustByStation.set(row.stationId, (trustByStation.get(row.stationId) ?? 0) + (row.trust ?? 1))
@@ -155,6 +127,12 @@ export const selectVisibleReports = (
 
     let suppressed = false
     const visible = rows.filter((row) => {
+        if (row.trust === 0) {
+            suppressed = true
+            return viewer.clientHash !== undefined && row.clientHash === viewer.clientHash
+        }
+
+        if (viewer.minStationTrust <= 0) return true
         if ((trustByStation.get(row.stationId) ?? 0) >= viewer.minStationTrust - TRUST_SUM_TOLERANCE) return true
 
         // This station did not clear the bar, so what we return for it depends on who is asking —
@@ -167,18 +145,10 @@ export const selectVisibleReports = (
     return { rows: visible, suppressed }
 }
 
-export type ReportsServiceConfig = {
-    nodeEnv: string
-    city: string
-    telegramWorkerUrl?: string
-    reportPassword?: string
-}
-
 export class ReportsService {
     constructor(
         private db: DbConnection,
-        private transitNetworkDataService: TransitNetworkDataService,
-        private config: ReportsServiceConfig
+        private transitNetworkDataService: TransitNetworkDataService
     ) {}
 
     async getRealReports({
@@ -213,11 +183,7 @@ export class ReportsService {
         const visible = selectVisibleReports(dbResults, viewer ?? { minStationTrust: 0 })
         if (visible.suppressed) viewer?.onSuppressed?.()
 
-        /*
-         * Trust and the client signature are dropped here and never reach a response body.
-         * Returning either would tell a suppressed client that it has been suppressed, which is the
-         * one thing this design cannot afford to leak.
-         */
+        // Internal visibility fields never belong in the public response DTO.
         return visible.rows.map((report) => ({
             timestamp: report.timestamp,
             stationId: report.stationId,
@@ -447,75 +413,6 @@ export class ReportsService {
         // Prediction is inherently best-effort: if we cannot infer enough unique stations from history,
         // We return the subset we managed to infer instead of failing the whole request.
         return results
-    }
-
-    /*
-     * `client` is a separate argument rather than part of `reportData` on purpose: `reportData` is
-     * what the request body validated into, so folding attribution in there would let a caller
-     * choose its own. Defaulting to ANONYMOUS_CLIENT keeps every other caller (seeds, tests,
-     * telegram relays) storing nulls without having to say so.
-     */
-    async createReport(
-        reportData: InsertReport,
-        client: ClientIdentity = ANONYMOUS_CLIENT
-    ): Promise<{
-        reportId: number
-        stationId: string
-        lineId: string | null
-        directionId: string | null
-        timestamp: Date
-    }> {
-        const [insertedReport] = await this.db
-            .insert(reports)
-            .values({ ...reportData, ...client, timestamp: new Date() })
-            .returning({
-                reportId: reports.reportId,
-                stationId: reports.stationId,
-                lineId: reports.lineId,
-                directionId: reports.directionId,
-                timestamp: reports.timestamp,
-            })
-        // Drizzle returns the inserted row for Postgres. If this ever becomes undefined, we want to surface it fast.
-        return insertedReport!
-    }
-
-    // Skips telegram-sourced reports (they already came from the group) and non-production.
-    forwardReportToTelegram(reportData: InsertReport): Promise<void> {
-        if (reportData.source === 'telegram' || this.config.nodeEnv !== 'production') {
-            return Promise.resolve()
-        }
-        return this.notifyTelegram(reportData)
-    }
-
-    private async notifyTelegram(reportData: InsertReport) {
-        const telegramWorkerUrl = z.string().min(1).parse(this.config.telegramWorkerUrl)
-        const reportPassword = z.string().min(1).parse(this.config.reportPassword)
-
-        const endpoint = new URL(`${telegramWorkerUrl.replace(/\/$/, '')}/report`)
-        endpoint.searchParams.set('city', this.config.city)
-        const payload = this.buildTelegramNotificationPayload(reportData)
-
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Password': reportPassword,
-            },
-            body: JSON.stringify(payload),
-        })
-
-        if (!response.ok) {
-            const errorDetail = await response.text().catch(() => 'No response body')
-            throw new Error(`Telegram bot notification failed with status ${response.status}: ${errorDetail}`)
-        }
-    }
-
-    private buildTelegramNotificationPayload(reportData: InsertReport): TelegramNotificationPayload {
-        return {
-            lineId: reportData.lineId ?? null,
-            stationId: reportData.stationId,
-            directionId: reportData.directionId ?? null,
-        }
     }
 
     async postProcessReport(reportData: RawReport): Promise<InsertReport> {

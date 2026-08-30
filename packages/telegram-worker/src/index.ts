@@ -1,7 +1,6 @@
 import { withSentry, consoleLoggingIntegration } from '@sentry/cloudflare'
 import type { Env } from './types'
 import { handleWebhook } from './webhook'
-import { handleReportForward } from './forwarding'
 import { redactTelegramBotTokenFromBreadcrumb, redactTelegramBotTokenFromSpan } from './observability'
 
 // withSentry wraps the handler: unhandled errors in fetch are captured automatically,
@@ -24,9 +23,6 @@ export default withSentry(
 
             if (request.method === 'POST' && url.pathname === '/telegram/webhook') {
                 return handleWebhook(request, env, ctx)
-            }
-            if (request.method === 'POST' && url.pathname === '/report') {
-                return handleReportForward(request, env)
             }
             if (request.method === 'GET' && url.pathname === '/health') {
                 return new Response('ok', { status: 200 })

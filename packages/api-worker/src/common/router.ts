@@ -47,7 +47,7 @@ export const defineRoute =
     }
 
 const registerRoutes = <E extends Env>(app: Hono<E>, routes: ReturnType<ReturnType<typeof defineRoute<E>>>[]) => {
-    routes.forEach((r) => app[r.method](r.path, ...r.middlewares, r.handler))
+    routes.forEach((r) => app.on([r.method.toUpperCase()], [r.path], ...r.middlewares, r.handler))
 }
 
 export const registerVersionedRoutes = <E extends Env>(
@@ -81,7 +81,7 @@ export const registerVersionedRoutes = <E extends Env>(
     const availableVersions = Object.keys(versions)
     const unknownVersion: Handler = async (c, next) => {
         const requestedVersion = c.req.param('version')
-        if (availableVersions.includes(requestedVersion)) {
+        if (requestedVersion !== undefined && availableVersions.includes(requestedVersion)) {
             return next()
         }
         return c.json(

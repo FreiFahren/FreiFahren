@@ -35,7 +35,7 @@ export function acceptUpdate(update: TelegramUpdate, env: Env): { text: string; 
         return null
     }
     const chat = message.chat
-    const city = chat ? cityForChat(env, String(chat.id)) : null
+    const city = chat ? cityForChat(String(chat.id)) : null
     if (!city) {
         return null
     }
@@ -58,7 +58,7 @@ export async function handleWebhook(
     request: Request,
     env: Env,
     ctx: WebhookContext,
-    process: Processor = processMessage,
+    process: Processor = processMessage
 ): Promise<Response> {
     if (request.headers.get(WEBHOOK_SECRET_HEADER) !== env.TELEGRAM_WEBHOOK_SECRET) {
         console.warn('Webhook rejected: bad secret token')
@@ -80,8 +80,8 @@ export async function handleWebhook(
             // Pass the length, not the text: the privacy policy promises we don't store message
             // content, and reportError persists to Sentry. Length still helps correlate failures.
             process(accepted.text, env, accepted.city).catch((err) =>
-                reportError('telegram pipeline failed', err, { length: accepted.text.length, city: accepted.city }),
-            ),
+                reportError('telegram pipeline failed', err, { length: accepted.text.length, city: accepted.city })
+            )
         )
     }
     return new Response('ok', { status: 200 })

@@ -45,10 +45,15 @@ export const LEIPZIG: CityConfig = {
     slug: 'leipzig',
     subdomain: 'leipzig',
     displayName: 'Leipzig',
+    publicAppUrl: 'https://leipzig.freifahren.org',
     dbName: CITY_DATABASES.leipzig.dbName,
     dbBinding: CITY_DATABASES.leipzig.dbBinding,
     lang: 'de',
     timezone: 'Europe/Berlin',
+    reporting: {
+        publicSubmissionsEnabled: true,
+        telegramForwardingEnabled: true,
+    },
     map: {
         center: [12.3731, 51.3397],
         zoom: 12,
@@ -107,6 +112,7 @@ export const LEIPZIG: CityConfig = {
     },
     community: {
         telegramHandle: '@freifahren_leipzig',
+        telegramChatId: '-1001138115617',
         reporterCount: { min: 7_000, max: 8_000 },
     },
 }

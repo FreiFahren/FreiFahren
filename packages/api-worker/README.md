@@ -62,23 +62,20 @@ city in `CITY_DATABASES` (with a drift guard that fails if the databases land on
 `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_D1_DATABASE_ID`, `CLOUDFLARE_API_TOKEN`). For quick queries,
 use `bunx wrangler d1 execute DB --local|--remote --command "..."`.
 
-## Trust flags
+## Report intake
 
-The flag definitions live in `trust-flags.json`, committed in plain text. Publishing the
-thresholds would publish how to stay under them, but the repo is private for now — if it goes
-public again, restore the age encryption this file carried before (`git log -- trust-flags.enc`).
-Changing flags is a pull request against the JSON; the deploy publishes it as the `TRUST_FLAGS`
-secret.
+The public API validates and normalizes reports, then sends them to the separately deployed private
+`report-gate` Worker through its public-intake Service Binding entrypoint. The gate owns persistence
+and abuse controls; the Telegram Worker uses a separate trusted entrypoint with no shared password.
+Per-city public intake and Telegram forwarding switches live in `@freifahren/cities`. For local
+development, run all three Worker configs together; only this API is exposed:
 
-```bash
-bun run flags:check                 # schema, duplicate ids, and the 5 KB secret ceiling
+```sh
+bun run dev:with-report-gate
 ```
 
-Flags are unset in dev, previews and tests, which leaves reports unscored and shows everything on
-the map. Two levers stay out of the deploy loop, as secrets that take effect in seconds:
+The Stripe webhook signing secret remains an API Worker secret:
 
-```bash
-wrangler secret put REPORTING_ENABLED     # true / false — the killswitch
-wrangler secret put MIN_STATION_TRUST     # trust a station needs before it shows
-wrangler secret put STRIPE_WEBHOOK_SECRET # signing secret from the Stripe webhook endpoint
+```sh
+wrangler secret put STRIPE_WEBHOOK_SECRET
 ```

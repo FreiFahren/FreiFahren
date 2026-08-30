@@ -4,6 +4,8 @@
         "module": "esnext",
         "moduleResolution": "bundler",
         "strict": true,
+        "skipLibCheck": true,
+        "types": ["@cloudflare/vitest-pool-workers", "bun"],
         "jsx": "react-jsx",
         "jsxImportSource": "hono/jsx",
         "esModuleInterop": true,
