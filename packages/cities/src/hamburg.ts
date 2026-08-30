@@ -1,17 +1,23 @@
 import type { CityConfig } from './types'
 import { CITY_DATABASES } from './databases'
 
-const promptExamples = `Message: "u3 hbf 2 kontrolleure richtung billstedt"
-{"stationName": "Hauptbahnhof", "directionName": "Billstedt"}
+const promptExamples = `Message: "2 gelbwesten jungfernstieg am gleis richtung altona"
+{"stationName": "Jungfernstieg", "directionName": "Altona"}
 
-Message: "s1 altona richtung pops 3k"
-{"stationName": "Altona", "directionName": "Poppenbüttel"}
+Message: "s3 hbf gerade losgefahren, 3 gelbwesten im ersten wagen richtung neugraben"
+{"stationName": "Hauptbahnhof", "directionName": "Neugraben"}
 
-Message: "jungfernstieg u1 2 mann in zivil"
+Message: "zivis am kontrollieren in der s1 richtung wedel, jetzt jungfernstieg"
+{"stationName": "Jungfernstieg", "directionName": "Wedel"}
+
+Message: "2 kontrolleure in zivil an der bus-halte jungfernstieg ausgestiegen"
 {"stationName": "Jungfernstieg", "directionName": null}
 
 Message: "landungsbrücken clean"
 {"stationName": "Landungsbrücken", "directionName": null}
+
+Message: "hochbahn wache gerade hallerstraße aus der u1 richtung hbf ausgestiegen"
+{"stationName": "Hallerstraße", "directionName": null}
 
 Message: "bus 5 hbf richtung palmaille kontrolle"
 {"stationName": "Hauptbahnhof", "directionName": "Palmaille"}
@@ -19,16 +25,16 @@ Message: "bus 5 hbf richtung palmaille kontrolle"
 Message: "u2 berliner tor richtung niendorf markt"
 {"stationName": "Berliner Tor", "directionName": "Niendorf Markt"}
 
-Message: "s3 hbf nach pinneberg, jetzt dammtor"
+Message: "s3 nach pinneberg, jetzt dammtor"
 {"stationName": "Dammtor", "directionName": "Pinneberg"}
 
-Message: "schlump 2k u2"
+Message: "schlump 2 gelbwesten u2"
 {"stationName": "Schlump", "directionName": null}
 
 Message: "hbf clean auf der s1"
 {"stationName": "Hauptbahnhof", "directionName": null}
 
-Message: "3k barmbek richtung ohlsdorf"
+Message: "gelbwesten barmbek richtung ohlsdorf"
 {"stationName": "Barmbek", "directionName": "Ohlsdorf"}
 
 Message: "weiß jemand ob die s4 fährt?"
@@ -74,8 +80,13 @@ export const HAMBURG: CityConfig = {
         defaultLineColor: '#000000',
     },
     telegram: {
+        // Chosen from ~12k Hamburg group messages: "Gelbweste(n)" (the yellow hi-vis
+        // vests HVV/Hochbahn inspectors wear) dominates by far, well ahead of "Zivil"/
+        // "Zivi" (plainclothes) and formal "Kontrolleur". "Hochbahn Wache" also shows up
+        // regularly; formal "Prüfer" is nearly unused. Unlike Berlin/Leipzig, the "Nk"
+        // count shorthand ("3k") is rare here — people spell out "X gelbwesten"/"X mann".
         inspectorKeywords:
-            'K (for example "3k" means three ticket inspectors), Kontrolleur, Kontrolleure, Kontrolle, Konti, Kontis, HVV-Kontrolle, Hochbahn-Kontrolle, Zivil, in Zivil, Prüfer, Fahrkartenkontrolle',
+            'Gelbweste, Gelbwesten, gelbe Weste (the most common term — Hamburg\'s uniformed inspectors wear yellow hi-vis vests), Zivil, in Zivil, Zivi, Zivis, Zivikontrolle, Kontrolleur, Kontrolleure, Kontrolle, Hochbahn Wache, Hochbahn-Kontrolle, HVV-Kontrolle, Konti, Kontis, Prüfer, Fahrkartenkontrolle',
         untrackedLinesNote:
             'Sightings on OTHER lines (three-digit bus lines, night buses, express X-lines, ' +
             'regional trains, replacement services) are still reports if a station name is mentioned — ' +
