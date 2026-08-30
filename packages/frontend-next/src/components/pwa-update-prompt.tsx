@@ -25,14 +25,14 @@ export function PwaUpdatePrompt() {
   return (
     <div role="status" aria-live="polite">
       <PopupCard cardClassName="gap-3 py-3">
-        <CardContent className="flex items-center gap-3">
+        <CardContent className="flex items-start gap-3">
           <RefreshCw className="text-accent-bright size-5 shrink-0" />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold">{t('title')}</p>
             <p className="text-muted-foreground text-xs">{t('text')}</p>
           </div>
         </CardContent>
-        <CardFooter className="gap-2">
+        <CardFooter className="justify-between gap-2">
           <Button
             size="xs"
             aria-label={t('refresh')}
