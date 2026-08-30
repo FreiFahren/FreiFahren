@@ -10,6 +10,7 @@ import { LegalDisclaimer } from '@/components/LegalDisclaimer';
 import { CityLocationPrompt } from '@/components/map/city-location-prompt';
 import { PersistentMapView } from '@/components/map/PersistentMapView';
 import { Onboarding } from '@/components/onboarding/Onboarding';
+import { PwaUpdatePrompt } from '@/components/pwa-update-prompt';
 import { ScreenshotBranding } from '@/components/ScreenshotBranding';
 import { GeolocationProvider } from '@/contexts/GeolocationProvider';
 import { ReportSimulationProvider } from '@/contexts/ReportSimulationProvider';
@@ -42,6 +43,7 @@ export const Route = createRootRoute({
         <Onboarding />
         <LegalDisclaimer />
         <CityLocationPrompt />
+        <PwaUpdatePrompt />
         <ContributeCard />
         <FeedbackCard />
         <ConsentBanner />

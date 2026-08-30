@@ -45,3 +45,32 @@ test('serves the cached shell offline and fetches a fresh shell when online', as
 
   await context.close();
 });
+
+test('shows the update prompt without navigating until the user confirms', async ({
+  browser,
+  baseURL,
+}) => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  await page.goto(`${baseURL}/?pwa-e2e=update-prompt`);
+  const onboarding = page.getByRole('dialog');
+  if (await onboarding.count()) await onboarding.getByRole('button').first().click();
+
+  const prompt = page.getByRole('status').filter({ hasText: 'New version available' });
+  await expect(prompt).toHaveCount(0);
+
+  await page.evaluate(() => {
+    window.dispatchEvent(new Event('freifahren:pwa-update-available'));
+  });
+
+  await expect(prompt).toContainText('New version available');
+  await expect(prompt.getByRole('button', { name: 'Refresh' })).toBeVisible();
+  expect(page.url()).toContain('pwa-e2e=update-prompt');
+
+  await prompt.getByRole('button', { name: 'Not now' }).click();
+  await expect(prompt).toHaveCount(0);
+  expect(page.url()).toContain('pwa-e2e=update-prompt');
+
+  await context.close();
+});
