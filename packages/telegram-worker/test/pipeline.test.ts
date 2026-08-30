@@ -54,20 +54,25 @@ afterEach(() => {
 })
 
 describe('processMessage', () => {
-    it('submits a full report (station + line + direction resolution)', async () => {
+    it('submits a line report with an explicit null direction', async () => {
         interceptTransit()
         interceptMistral('Rudow', null)
         const capture: { body?: Record<string, unknown> } = {}
 
         await processMessage('U7 Rudow 2x BOS', withReportGate(capture), 'berlin')
 
+        expect(capture.body?.report).toEqual({
+            stationId: 'U-rudow',
+            source: 'telegram',
+            lineId: 'U7-v',
+            directionId: null,
+        })
         expect(capture.body).toMatchObject({
             city: {
                 slug: 'berlin',
                 dbBinding: 'DB',
                 reporting: { publicSubmissionsEnabled: true, telegramForwardingEnabled: false },
             },
-            report: { stationId: 'U-rudow', source: 'telegram', lineId: 'U7-v' },
         })
     })
 
@@ -91,14 +96,19 @@ describe('processMessage', () => {
         await expect(processMessage('U7 Rudow 2x BOS', withReportGate(undefined, 500), 'berlin')).rejects.toThrow()
     })
 
-    it('submits station-only with no lineId/directionId', async () => {
+    it('submits station-only with explicit null line and direction', async () => {
         interceptTransit()
         interceptMistral('Rudow', null)
         const capture: { body?: Record<string, unknown> } = {}
 
         await processMessage('Rudow 2x bos', withReportGate(capture), 'berlin')
 
-        expect(capture.body).toMatchObject({ report: { stationId: 'U-rudow', source: 'telegram' } })
+        expect(capture.body?.report).toEqual({
+            stationId: 'U-rudow',
+            source: 'telegram',
+            lineId: null,
+            directionId: null,
+        })
     })
 
     it('submits a Leipzig message to the Leipzig city-scoped API', async () => {

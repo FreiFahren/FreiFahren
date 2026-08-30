@@ -12,8 +12,8 @@ export type TrustedReportIntake = {
     report: {
         stationId: string
         source: 'telegram'
-        lineId?: string
-        directionId?: string
+        lineId: string | null
+        directionId: string | null
     }
 }
 

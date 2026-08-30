@@ -8,8 +8,8 @@ import { resolveLineVariant } from './transit'
 export interface ReportPayload {
     stationId: string
     source: 'telegram'
-    lineId?: string
-    directionId?: string
+    lineId: string | null
+    directionId: string | null
 }
 
 export interface ReportIdentifiers {
@@ -19,14 +19,12 @@ export interface ReportIdentifiers {
 }
 
 export function buildReportPayload(ids: ReportIdentifiers): ReportPayload {
-    const payload: ReportPayload = { stationId: ids.stationId, source: 'telegram' }
-    if (ids.lineId !== null) {
-        payload.lineId = ids.lineId
+    return {
+        stationId: ids.stationId,
+        source: 'telegram',
+        lineId: ids.lineId,
+        directionId: ids.directionId,
     }
-    if (ids.directionId !== null) {
-        payload.directionId = ids.directionId
-    }
-    return payload
 }
 
 export function reportIdentifiers(index: TransitIndex, extraction: ExtractionResult): ReportIdentifiers | null {
