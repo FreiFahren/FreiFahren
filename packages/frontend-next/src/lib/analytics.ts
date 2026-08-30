@@ -65,6 +65,10 @@ type AnalyticsEvents = {
   app_removal_banner_clicked: Record<string, never>;
   app_removal_banner_dismissed: Record<string, never>;
   feedback_sentiment_selected: { sentiment: FeedbackSentiment };
+  city_location_prompt_shown: { from: string; to: string };
+  city_location_prompt_accepted: { from: string; to: string; remembered: boolean };
+  city_location_prompt_declined: { from: string; to: string; remembered: boolean };
+  city_location_auto_switched: { from: string; to: string };
 };
 
 export function track<E extends keyof AnalyticsEvents>(
