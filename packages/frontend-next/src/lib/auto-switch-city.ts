@@ -79,7 +79,11 @@ function consumeResetAutoSwitchCity(): void {
   if (fromName) window.name = '';
   if (fromQuery) {
     url.searchParams.delete(RESET_AUTO_SWITCH_PARAM);
-    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `${url.pathname}${url.search}${url.hash}`,
+    );
   }
   clearAutoSwitchCityPreference();
 }
