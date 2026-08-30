@@ -13,9 +13,7 @@ export const WEBSITE_URL = 'https://app.freifahren.org';
 // iOS-only warning that Apple may pull the app from the App Store, pointing users at the identical
 // web app instead. Deliberately not persisted anywhere: the dismissal only lives in this component's
 // state, so it reappears on every fresh launch (a new JS context) but can still be dismissed for the
-// current session. Reuses AppBanner's #app-banner id / --app-banner-offset wiring so top-anchored UI
-// shifts down the same way; the two banners are mutually exclusive (web-only vs. native-iOS-only), so
-// sharing the id is safe.
+// current session. Publishes its height so top-anchored UI shifts down while the warning is visible.
 export function AppRemovalBanner() {
   const { t } = useTranslation(NAMESPACE);
   const [dismissed, setDismissed] = useState(false);
@@ -28,15 +26,15 @@ export function AppRemovalBanner() {
   useEffect(() => {
     if (!show) return;
     const root = document.documentElement;
-    const el = document.getElementById('app-banner');
+    const el = document.getElementById('app-removal-banner');
     if (!el) return;
-    const apply = () => root.style.setProperty('--app-banner-offset', `${el.offsetHeight}px`);
+    const apply = () => root.style.setProperty('--top-banner-offset', `${el.offsetHeight}px`);
     apply();
     const observer = new ResizeObserver(apply);
     observer.observe(el);
     return () => {
       observer.disconnect();
-      root.style.removeProperty('--app-banner-offset');
+      root.style.removeProperty('--top-banner-offset');
     };
   }, [show]);
 
@@ -44,7 +42,7 @@ export function AppRemovalBanner() {
 
   return createPortal(
     <div
-      id="app-banner"
+      id="app-removal-banner"
       className="bg-destructive fixed inset-x-0 top-0 z-50 flex items-start gap-3 px-4 pt-[calc(1rem+env(safe-area-inset-top))] pb-4 text-white shadow-lg"
     >
       <TriangleAlert className="mt-0.5 size-6 shrink-0" />

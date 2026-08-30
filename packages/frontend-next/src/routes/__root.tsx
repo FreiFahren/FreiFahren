@@ -1,7 +1,6 @@
 import { createRootRoute, Outlet, useRouterState } from '@tanstack/react-router';
 import { useEffect } from 'react';
 
-import { AppBanner } from '@/components/AppBanner';
 import { AppRemovalBanner } from '@/components/AppRemovalBanner';
 import { ConsentBanner } from '@/components/ConsentBanner';
 import { ContributeCard } from '@/components/contribute/ContributeCard';
@@ -37,7 +36,6 @@ export const Route = createRootRoute({
       <ReportSimulationProvider>
         <NativeAppReady />
         <PersistentMapView />
-        <AppBanner />
         <AppRemovalBanner />
         <Outlet />
         <Onboarding />
