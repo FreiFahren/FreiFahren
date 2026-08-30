@@ -58,9 +58,6 @@ type AnalyticsEvents = {
   line_detail_cta_clicked: { line_id: string };
   line_hotspot_selected: { line_id: string; station_id: string };
   station_line_selected: { line_id: string };
-  app_banner_shown: Record<string, never>;
-  app_banner_store_clicked: Record<string, never>;
-  app_banner_dismissed: Record<string, never>;
   app_removal_banner_shown: Record<string, never>;
   app_removal_banner_clicked: Record<string, never>;
   app_removal_banner_dismissed: Record<string, never>;
