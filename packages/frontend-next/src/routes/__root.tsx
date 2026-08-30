@@ -9,6 +9,7 @@ import { FeedbackCard } from '@/components/feedback/FeedbackCard';
 import { LegalDisclaimer } from '@/components/LegalDisclaimer';
 import { Onboarding } from '@/components/onboarding/Onboarding';
 import { PersistentMapView } from '@/components/map/PersistentMapView';
+import { PwaUpdatePrompt } from '@/components/pwa-update-prompt';
 import { ScreenshotBranding } from '@/components/ScreenshotBranding';
 import { GeolocationProvider } from '@/contexts/GeolocationProvider';
 import { ReportSimulationProvider } from '@/contexts/ReportSimulationProvider';
@@ -40,6 +41,7 @@ export const Route = createRootRoute({
         <Outlet />
         <Onboarding />
         <LegalDisclaimer />
+        <PwaUpdatePrompt />
         <ContributeCard />
         <FeedbackCard />
         <ConsentBanner />
