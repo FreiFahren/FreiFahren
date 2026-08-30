@@ -1,9 +1,9 @@
-import { Capacitor } from '@capacitor/core';
 import { ChevronDown, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { currentCity, setCityPreference, urlForCity } from '@/lib/city';
+import { currentCity, navigateToCity } from '@/lib/city';
 import { selectableCities, useCitySwitchingEnabled } from '@/lib/city-switching';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,11 +40,7 @@ export function CitySwitcher() {
             if (slug === currentCity.slug) return;
             const city = selectableCities.find((c) => c.slug === slug);
             if (!city) return;
-            if (Capacitor.isNativePlatform()) {
-              setCityPreference(city.slug);
-            } else {
-              window.location.assign(urlForCity(city));
-            }
+            navigateToCity(city, { resetAutoSwitch: true });
           }}
         >
           {selectableCities.map((city) => (
