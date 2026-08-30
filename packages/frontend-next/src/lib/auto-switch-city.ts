@@ -11,27 +11,15 @@ function parse(value: string | null): AutoSwitchCityPreference | null {
   return value === 'always' || value === 'never' ? value : null;
 }
 
-function expireLegacyCookie(): void {
-  if (typeof document === 'undefined') return;
-  if (!document.cookie.split('; ').some((row) => row.startsWith(`${KEY}=`))) return;
-  document.cookie = `${KEY}=; Path=/; Max-Age=0`;
-  if (typeof window !== 'undefined' && window.location.hostname.endsWith('.freifahren.org')) {
-    document.cookie = `${KEY}=; Path=/; Max-Age=0; Domain=.freifahren.org`;
-  }
-}
-
 export function getAutoSwitchCityPreference(): AutoSwitchCityPreference | null {
-  expireLegacyCookie();
   return parse(safeLocalStorage.getItem(KEY));
 }
 
 export function setAutoSwitchCityPreference(value: AutoSwitchCityPreference): void {
-  expireLegacyCookie();
   void saveNativePreference(KEY, value);
 }
 
 export function clearAutoSwitchCityPreference(): void {
-  expireLegacyCookie();
   void removeNativePreference(KEY);
 }
 
