@@ -1,158 +1,10 @@
-import { createExecutionContext, fetchMock, waitOnExecutionContext } from 'cloudflare:test'
 import { and, desc, eq, sql } from 'drizzle-orm'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 
-import { app } from '../src/index'
-import { referenceCacheKey } from '../src/modules/transit/reference-cache'
 import { Stations } from '../src/modules/transit/types'
 import { TransitNetworkDataService } from '../src/modules/transit/transit-network-data-service'
 import { db, lineStations, reports, stations } from './test-db'
-import { resetTestEnv, sendReportRequest, setTestEnv, testEnv } from './test-utils'
-
-const TELEGRAM_ORIGIN = 'https://telegram-worker.test'
-
-type CapturedRequest = {
-    body: unknown
-    password: string | null
-}
-
-const capturedRequests: CapturedRequest[] = []
-let shouldFail = false
-
-// The report handler forwards non-telegram reports to the telegram-worker via outbound fetch when
-// NODE_ENV=production. Intercept that fetch with the Workers runtime's fetchMock so no real network
-// is touched: capture the payload and let the suite toggle a 500 to exercise the failure path.
-beforeAll(() => {
-    setTestEnv({ NODE_ENV: 'production', TELEGRAM_WORKER_URL: TELEGRAM_ORIGIN, REPORT_PASSWORD: 'test-password' })
-    fetchMock.activate()
-    fetchMock.disableNetConnect()
-    fetchMock
-        .get(TELEGRAM_ORIGIN)
-        .intercept({ path: '/report?city=berlin', method: 'POST' })
-        .reply((opts) => {
-            const { headers } = opts
-            const password = headers instanceof Headers ? headers.get('X-Password') : (headers['x-password'] ?? null)
-            capturedRequests.push({ body: JSON.parse(String(opts.body)), password })
-            return shouldFail
-                ? { statusCode: 500, data: { status: 'error' } }
-                : { statusCode: 200, data: { status: 'success' } }
-        })
-        .persist()
-})
-
-afterAll(() => {
-    resetTestEnv()
-    fetchMock.enableNetConnect()
-    fetchMock.deactivate()
-})
-
-describe('Telegram notification', () => {
-    beforeEach(() => {
-        capturedRequests.length = 0
-        shouldFail = false
-    })
-
-    it('sends a Telegram notification when source is not telegram and returns 200', async () => {
-        // Pick a station that sits on multiple lines so post-processing does not
-        // auto-fill lineId from a single-line station (which would defeat the
-        // `lineId` null assertion below).
-        const [station] = await db
-            .select({ id: lineStations.stationId })
-            .from(lineStations)
-            .groupBy(lineStations.stationId)
-            .having(sql`count(*) > 1`)
-            .orderBy(lineStations.stationId)
-            .limit(1)
-
-        const response = await sendReportRequest({
-            stationId: station.id,
-            source: 'web_app',
-        })
-
-        expect(response.status).toBe(200)
-        expect(capturedRequests.length).toBe(1)
-        expect(capturedRequests[0]?.password).toBe('test-password')
-
-        const body = capturedRequests[0]?.body as {
-            lineId: string | null
-            stationId: string
-            directionId: string | null
-        }
-
-        expect(Object.keys(body).sort()).toEqual(['directionId', 'lineId', 'stationId'])
-        expect(body.stationId).toBe(station.id)
-        expect(body.lineId).toBeNull()
-        expect(body.directionId).toBeNull()
-    })
-
-    it('does not send a Telegram notification when source is telegram', async () => {
-        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
-
-        const response = await sendReportRequest({
-            stationId: station.id,
-            source: 'telegram',
-        })
-
-        expect(response.status).toBe(200)
-        expect(capturedRequests.length).toBe(0)
-    })
-
-    it('still returns 200 when the Telegram notification fails (failure is logged, not surfaced)', async () => {
-        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
-
-        shouldFail = true
-
-        const response = await sendReportRequest({
-            stationId: station.id,
-            source: 'web_app',
-        })
-
-        expect(response.status).toBe(200)
-        expect(response.headers.get('X-Telegram-Notification-Status')).toBeNull()
-        // The forward was still attempted; only its failure is swallowed.
-        expect(capturedRequests.length).toBe(1)
-    })
-
-    it('forwards in the background via waitUntil when an ExecutionContext is present', async () => {
-        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
-
-        // A real ExecutionContext takes the waitUntil branch instead of awaiting inline; a
-        // failing forward must neither fail the response nor leak out of the background task.
-        shouldFail = true
-        const ctx = createExecutionContext()
-        const response = await app.request(
-            '/v0/reports',
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-Password': testEnv().REPORT_PASSWORD ?? '' },
-                body: JSON.stringify({ stationId: station.id, source: 'web_app' }),
-            },
-            testEnv(),
-            ctx
-        )
-
-        expect(response.status).toBe(200)
-        await waitOnExecutionContext(ctx)
-        expect(capturedRequests.length).toBe(1)
-
-        // The real ExecutionContext also let cachedReference warm the shared reference cache;
-        // drop those entries so later suites keep reading straight from D1.
-        const cache = (caches as unknown as { default: Cache }).default
-        for (const key of ['stations', 'lines', 'segments']) {
-            await cache.delete(new Request(referenceCacheKey('berlin', key)))
-        }
-    })
-
-    it('does not send a Telegram notification if database insertion fails', async () => {
-        const response = await sendReportRequest({
-            stationId: 'invalid_id', // Triggers FK violation
-            source: 'web_app',
-        })
-
-        expect(response.status).toBe(500)
-        expect(capturedRequests.length).toBe(0)
-    })
-})
+import { fakeReportGate, sendReportRequest } from './test-utils'
 
 describe('Report API contract', () => {
     it('rejects reports without station, line, and direction', async () => {
@@ -196,6 +48,33 @@ describe('Report API contract', () => {
         expect(createdReport.stationId).toBe(station.id)
         expect(createdReport).not.toHaveProperty('source')
         expect(createdReport.timestamp).toBeTruthy()
+    })
+
+    it('sends normalized reports with the centrally configured city descriptor', async () => {
+        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
+
+        const response = await sendReportRequest({ stationId: station.id, source: 'web_app' })
+
+        expect(response.status).toBe(200)
+        expect(fakeReportGate.lastIntake).toMatchObject({
+            city: {
+                slug: 'berlin',
+                publicAppUrl: 'https://app.freifahren.org',
+                dbBinding: 'DB',
+                telegramChatId: '-1001370021231',
+                reporting: {
+                    publicSubmissionsEnabled: true,
+                    telegramForwardingEnabled: false,
+                },
+            },
+            report: {
+                stationId: station.id,
+                directionId: null,
+                source: 'web_app',
+            },
+        })
+        expect(fakeReportGate.lastIntake).toHaveProperty('report.lineId')
+        expect(fakeReportGate.lastIntake).not.toHaveProperty('relayPassword')
     })
 
     it('guesses the station when a line is provided without a station', async () => {
@@ -395,6 +274,67 @@ describe('Report API contract', () => {
             source: 'NON_EXISTENT_SOURCE',
         })
         expect(response.status).toBe(400)
+    })
+
+    /*
+     * The id checks above only reach the schema's length-16 guard, so an unknown id short enough to
+     * pass it used to reach the insert and fail the reports->stations foreign key as a 500. That is
+     * what shipped when the report form sent a placeholder id for an unpicked station.
+     */
+    describe('unknown station ids that fit the schema', () => {
+        const UNKNOWN_ID = 'no-such-stn'
+
+        const countReports = async () => {
+            const [row] = await db.select({ count: sql<number>`count(*)` }).from(reports)
+            return Number(row.count)
+        }
+
+        it('rejects an unknown stationId with 422 rather than a 500 from the foreign key', async () => {
+            const before = await countReports()
+
+            const response = await sendReportRequest({
+                stationId: UNKNOWN_ID,
+                source: 'web_app',
+            })
+
+            expect(response.status).toBe(422)
+            const body = (await response.json()) as { details: { internal_code: string } }
+            expect(body.details.internal_code).toBe('VALIDATION_FAILED')
+            expect(await countReports()).toBe(before)
+        })
+
+        it('rejects an unknown stationId sent with a valid line instead of guessing a station', async () => {
+            const [lineStation] = await db
+                .select({ lineId: lineStations.lineId })
+                .from(lineStations)
+                .orderBy(lineStations.lineId)
+                .limit(1)
+
+            const before = await countReports()
+
+            const response = await sendReportRequest({
+                stationId: UNKNOWN_ID,
+                lineId: lineStation.lineId,
+                source: 'web_app',
+            })
+
+            expect(response.status).toBe(422)
+            // Without the check the unknown id is cleared as "not on this line" and post-processing
+            // substitutes the line's most frequent station, storing a report nobody filed.
+            expect(await countReports()).toBe(before)
+        })
+
+        it('rejects an unknown directionId with 422', async () => {
+            const [station] = await db.select({ id: stations.id }).from(stations).orderBy(stations.id).limit(1)
+
+            const response = await sendReportRequest({
+                stationId: station.id,
+                directionId: UNKNOWN_ID,
+                source: 'web_app',
+            })
+
+            expect(response.status).toBe(422)
+        })
     })
 })
 

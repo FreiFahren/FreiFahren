@@ -1,6 +1,5 @@
 import { and, desc, eq, gte, lte } from 'drizzle-orm'
 import { DateTime } from 'luxon'
-import { z } from 'zod'
 
 import { AppError } from '../../common/errors'
 import { DbConnection, InsertReport, reports } from '../../db/'
@@ -17,7 +16,9 @@ import {
     RawReport,
     clearDirectionIfStationAndDirectionAreTheSame,
     ifDirectionPresentWithoutLineClearDirection,
+    assertKnownStationReference,
 } from './post-process-report'
+import { annotateReportExpiry, isLive } from './report-decay'
 
 const MIN_PREDICTED_REPORTS_THRESHOLD = 1
 const MAX_PREDICTED_REPORTS_THRESHOLD = 7
@@ -72,45 +73,98 @@ export const calculatePredictedReportsThreshold = (currentTime: DateTime): numbe
     return Math.trunc(clamp(threshold, MIN_PREDICTED_REPORTS_THRESHOLD, MAX_PREDICTED_REPORTS_THRESHOLD))
 }
 
-type TelegramNotificationPayload = {
-    lineId: string | null
-    stationId: StationId
-    directionId: StationId | null
-}
-
-type ReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'stationId' | 'directionId' | 'lineId'> & {
+type RawReportSummary = Pick<typeof reports.$inferSelect, 'timestamp' | 'stationId' | 'directionId' | 'lineId'> & {
     isPredicted: boolean
 }
 
-export type ReportsServiceConfig = {
-    nodeEnv: string
-    city: string
-    telegramWorkerUrl?: string
-    reportPassword?: string
+/*
+ * `expiresAt` is when the report stops counting as live (see report-decay.ts), serialised as an ISO
+ * instant like `timestamp`. It can be in the past: a historical query returns reports that expired
+ * long ago, and whether that matters is the caller's business. `null` means the report never
+ * expires — only predicted reports, which stand in for missing data rather than describing an event
+ * that ages.
+ */
+type ReportSummary = RawReportSummary & { expiresAt: Date | null }
+
+export type ViewerContext = {
+    minStationTrust: number
+    clientHash?: string
+    /*
+     * Called when any station in the result failed the threshold, whether or not the viewer owned
+     * a report there. The station-scoped route uses it to skip edge caching.
+     *
+     * It fires for an empty result too because the edge cache is keyed by URL, not by viewer.
+     */
+    onSuppressed?: () => void
+}
+
+type ScoredRow = {
+    timestamp: Date
+    stationId: string
+    directionId: string | null
+    lineId: string | null
+    trust: number | null
+    clientHash: string | null
+}
+
+// Pending rows are owner-only. Legacy null values retain their historical neutral weight.
+// Avoid hiding a station when floating-point summation lands immediately below the threshold.
+const TRUST_SUM_TOLERANCE = 1e-9
+
+export const selectVisibleReports = (
+    rows: ScoredRow[],
+    viewer: ViewerContext
+): { rows: ScoredRow[]; suppressed: boolean } => {
+    const trustByStation = new Map<string, number>()
+    for (const row of rows) {
+        trustByStation.set(row.stationId, (trustByStation.get(row.stationId) ?? 0) + (row.trust ?? 1))
+    }
+
+    let suppressed = false
+    const visible = rows.filter((row) => {
+        if (row.trust === 0) {
+            suppressed = true
+            return viewer.clientHash !== undefined && row.clientHash === viewer.clientHash
+        }
+
+        if (viewer.minStationTrust <= 0) return true
+        if ((trustByStation.get(row.stationId) ?? 0) >= viewer.minStationTrust - TRUST_SUM_TOLERANCE) return true
+
+        // This station did not clear the bar, so what we return for it depends on who is asking —
+        // True even when the answer is an empty list, which is why this is set before the ownership
+        // Check rather than inside it.
+        suppressed = true
+        return viewer.clientHash !== undefined && row.clientHash === viewer.clientHash
+    })
+
+    return { rows: visible, suppressed }
 }
 
 export class ReportsService {
     constructor(
         private db: DbConnection,
-        private transitNetworkDataService: TransitNetworkDataService,
-        private config: ReportsServiceConfig
+        private transitNetworkDataService: TransitNetworkDataService
     ) {}
 
     async getRealReports({
         from,
         to,
         stationId,
+        viewer,
     }: {
         from: DateTime
         to: DateTime
         stationId?: StationId
-    }): Promise<ReportSummary[]> {
+        viewer?: ViewerContext
+    }): Promise<RawReportSummary[]> {
         const dbResults = await this.db
             .select({
                 timestamp: reports.timestamp,
                 stationId: reports.stationId,
                 directionId: reports.directionId,
                 lineId: reports.lineId,
+                trust: reports.trust,
+                clientHash: reports.clientHash,
             })
             .from(reports)
             .where(
@@ -121,7 +175,17 @@ export class ReportsService {
                 )
             )
 
-        return dbResults.map((report) => ({ ...report, isPredicted: false }))
+        const visible = selectVisibleReports(dbResults, viewer ?? { minStationTrust: 0 })
+        if (visible.suppressed) viewer?.onSuppressed?.()
+
+        // Internal visibility fields never belong in the public response DTO.
+        return visible.rows.map((report) => ({
+            timestamp: report.timestamp,
+            stationId: report.stationId,
+            directionId: report.directionId,
+            lineId: report.lineId,
+            isPredicted: false,
+        }))
     }
 
     async getReports({
@@ -129,15 +193,32 @@ export class ReportsService {
         to,
         stationId,
         currentTime,
+        viewer,
     }: {
         from: DateTime
         to: DateTime
         stationId?: StationId
         currentTime: DateTime
+        viewer?: ViewerContext
     }): Promise<ReportSummary[]> {
-        const result = await this.getRealReports({ from, to, stationId })
+        const result: ReportSummary[] = await this.getReportsWithExpiry({
+            from,
+            to,
+            stationId,
+            currentTime,
+            viewer,
+        })
 
-        // Predict reports if we don't have enough, so that users always see at least some data
+        /*
+         * Predict reports if we don't have enough, so that users always see at least some data.
+         *
+         * The threshold counts every report in range, not just the ones still live. An expired
+         * report is not a gap in the data to paper over — decay hiding a stale report is a
+         * deliberate statement that it is stale, and answering that with synthesised reports would
+         * replace "we hid something stale" with "here is something invented". It also keeps
+         * historical windows honest: a 24h range full of expired reports has plenty of data and
+         * must not be backfilled with predictions.
+         */
         const predictedReportsThreshold = calculatePredictedReportsThreshold(currentTime)
         if (result.length < predictedReportsThreshold) {
             const numberOfReportsToFetch = predictedReportsThreshold - result.length
@@ -150,7 +231,7 @@ export class ReportsService {
             // Them concurrently rather than as back-to-back D1 round-trips.
             const [allowedStationIds, candidateRows] = await Promise.all([
                 this.resolveAllowedStationIds(stationId, reportedStationIds),
-                this.loadPredictionCandidates(stationId),
+                this.loadPredictionCandidates(stationId, viewer),
             ])
             const historicReports = this.predictReports(
                 numberOfReportsToFetch,
@@ -159,10 +240,65 @@ export class ReportsService {
                 allowedStationIds,
                 candidateRows
             )
-            result.push(...historicReports)
+            // Predicted reports stand in for missing data rather than describing an event that
+            // ages, so they have no expiry — see the `ReportSummary` note.
+            result.push(...historicReports.map((report) => ({ ...report, expiresAt: null })))
         }
 
         return result
+    }
+
+    /**
+     * Real reports in range, each stamped with when it stops being live.
+     *
+     * Expiry is computed once per request from the whole batch, so every viewer looking at this
+     * station/timeframe right now agrees on it: one shared "now", one shared burst rate, one shared
+     * view of which reports overtook which. A client deriving it from its own slice would compute a
+     * different burst rate from a different set of reports.
+     */
+    private async getReportsWithExpiry({
+        from,
+        to,
+        stationId,
+        currentTime,
+        viewer,
+    }: {
+        from: DateTime
+        to: DateTime
+        stationId?: StationId
+        currentTime: DateTime
+        viewer?: ViewerContext
+    }): Promise<(RawReportSummary & { expiresAt: Date })[]> {
+        const [realReports, lines] = await Promise.all([
+            this.getRealReports({ from, to, stationId, viewer }),
+            this.transitNetworkDataService.getLines(),
+        ])
+        return annotateReportExpiry(realReports, lines, currentTime.toMillis())
+    }
+
+    /**
+     * Only the reports that are live right now — the set the map is showing.
+     *
+     * The risk model reads through here rather than through `getRealReports` so that risk and
+     * markers cannot disagree: a report that has expired off the map paints no risk, which is what
+     * makes "a coloured line with no marker on it" impossible by construction rather than by two
+     * decay models happening to agree.
+     */
+    async getLiveReports({
+        from,
+        to,
+        stationId,
+        currentTime,
+        viewer,
+    }: {
+        from: DateTime
+        to: DateTime
+        stationId?: StationId
+        currentTime: DateTime
+        viewer?: ViewerContext
+    }): Promise<RawReportSummary[]> {
+        const annotated = await this.getReportsWithExpiry({ from, to, stationId, currentTime, viewer })
+        return annotated.filter((report) => isLive(report, currentTime.toMillis()))
     }
 
     // Determines which stations the prediction algorithm may emit reports for.
@@ -182,13 +318,30 @@ export class ReportsService {
 
     // Recent reports used as the historic sample for prediction. Fetched separately
     // So getReports can run it concurrently with resolveAllowedStationIds.
-    private async loadPredictionCandidates(stationId?: StationId) {
-        return this.db
-            .select({ stationId: reports.stationId, timestamp: reports.timestamp })
+    private async loadPredictionCandidates(stationId?: StationId, viewer?: ViewerContext) {
+        const rows = await this.db
+            .select({
+                stationId: reports.stationId,
+                timestamp: reports.timestamp,
+                directionId: reports.directionId,
+                lineId: reports.lineId,
+                trust: reports.trust,
+                clientHash: reports.clientHash,
+            })
             .from(reports)
             .where(stationId !== undefined ? eq(reports.stationId, stationId) : undefined)
             .orderBy(desc(reports.timestamp))
             .limit(1000)
+
+        /*
+         * Filtered by the same rule as the reports themselves. Prediction infers where inspectors
+         * usually are from where they have recently been reported, so leaving suppressed traffic in
+         * here would let it shape the map anyway — hidden from the list, then handed straight back
+         * as a synthesised report. Nothing about the viewer applies to a historic sample, so this
+         * asks only about trust.
+         */
+        const visible = selectVisibleReports(rows, { minStationTrust: viewer?.minStationTrust ?? 0 })
+        return visible.rows.map((row) => ({ stationId: row.stationId, timestamp: row.timestamp }))
     }
 
     private predictReports(
@@ -197,7 +350,7 @@ export class ReportsService {
         to: DateTime,
         allowedStationIds: ReadonlySet<StationId>,
         candidateRows: Awaited<ReturnType<ReportsService['loadPredictionCandidates']>>
-    ): ReportSummary[] {
+    ): RawReportSummary[] {
         if (numberOfReportsToFetch <= 0) return []
         if (allowedStationIds.size === 0) return []
 
@@ -222,7 +375,7 @@ export class ReportsService {
         const usedStationIds = new Set<StationId>()
         const maxUniqueCount = Math.min(numberOfReportsToFetch, allowedStationIds.size)
 
-        const results: ReportSummary[] = []
+        const results: RawReportSummary[] = []
 
         // We only use `guessStation`. If we get a disallowed/duplicate/undefined guess, we broaden the timestamp window
         // (first quarter -> first half -> full range) and retry.
@@ -257,66 +410,6 @@ export class ReportsService {
         return results
     }
 
-    async createReport(reportData: InsertReport): Promise<{
-        reportId: number
-        stationId: string
-        lineId: string | null
-        directionId: string | null
-        timestamp: Date
-    }> {
-        const [insertedReport] = await this.db
-            .insert(reports)
-            .values({ ...reportData, timestamp: new Date() })
-            .returning({
-                reportId: reports.reportId,
-                stationId: reports.stationId,
-                lineId: reports.lineId,
-                directionId: reports.directionId,
-                timestamp: reports.timestamp,
-            })
-        // Drizzle returns the inserted row for Postgres. If this ever becomes undefined, we want to surface it fast.
-        return insertedReport!
-    }
-
-    // Skips telegram-sourced reports (they already came from the group) and non-production.
-    forwardReportToTelegram(reportData: InsertReport): Promise<void> {
-        if (reportData.source === 'telegram' || this.config.nodeEnv !== 'production') {
-            return Promise.resolve()
-        }
-        return this.notifyTelegram(reportData)
-    }
-
-    private async notifyTelegram(reportData: InsertReport) {
-        const telegramWorkerUrl = z.string().min(1).parse(this.config.telegramWorkerUrl)
-        const reportPassword = z.string().min(1).parse(this.config.reportPassword)
-
-        const endpoint = new URL(`${telegramWorkerUrl.replace(/\/$/, '')}/report`)
-        endpoint.searchParams.set('city', this.config.city)
-        const payload = this.buildTelegramNotificationPayload(reportData)
-
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Password': reportPassword,
-            },
-            body: JSON.stringify(payload),
-        })
-
-        if (!response.ok) {
-            const errorDetail = await response.text().catch(() => 'No response body')
-            throw new Error(`Telegram bot notification failed with status ${response.status}: ${errorDetail}`)
-        }
-    }
-
-    private buildTelegramNotificationPayload(reportData: InsertReport): TelegramNotificationPayload {
-        return {
-            lineId: reportData.lineId ?? null,
-            stationId: reportData.stationId,
-            directionId: reportData.directionId ?? null,
-        }
-    }
-
     async postProcessReport(reportData: RawReport): Promise<InsertReport> {
         // Independent reads — fetch concurrently instead of back-to-back round-trips.
         const [stations, lines] = await Promise.all([
@@ -325,6 +418,9 @@ export class ReportsService {
         ])
 
         const now = DateTime.utc()
+
+        assertKnownStationReference(stations, reportData, 'stationId')
+        assertKnownStationReference(stations, reportData, 'directionId')
 
         const processed = await pipeAsync(
             reportData,

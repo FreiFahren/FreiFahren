@@ -21,7 +21,7 @@ import { RhythmChart } from './RhythmChart';
 
 export type LineDetailLine = {
   name: string;
-  type: 'subway' | 'light_rail' | 'tram';
+  type: 'subway' | 'light_rail' | 'tram' | 'bus';
   isCircular: boolean;
   color: string;
   stations: string[];

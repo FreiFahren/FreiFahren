@@ -45,10 +45,15 @@ export const LEIPZIG: CityConfig = {
     slug: 'leipzig',
     subdomain: 'leipzig',
     displayName: 'Leipzig',
+    publicAppUrl: 'https://leipzig.freifahren.org',
     dbName: CITY_DATABASES.leipzig.dbName,
     dbBinding: CITY_DATABASES.leipzig.dbBinding,
     lang: 'de',
     timezone: 'Europe/Berlin',
+    reporting: {
+        publicSubmissionsEnabled: true,
+        telegramForwardingEnabled: true,
+    },
     map: {
         center: [12.3731, 51.3397],
         zoom: 12,
@@ -63,13 +68,24 @@ export const LEIPZIG: CityConfig = {
     },
     seed: {
         adminLevel: '^6$',
-        operators: ['Leipziger Verkehrsbetriebe', 'DB Regio Südost'],
+        // LVB only. S-Bahn ("DB Regio Südost") is intentionally dropped — a separate
+        // operator, routinely inspected anyway, and of little added value here.
+        operators: ['Leipziger Verkehrsbetriebe'],
         stationBounds: [12.18, 51.24, 12.56, 51.45],
-        routeTypePriority: ['tram', 'train', 'light_rail', 'subway'],
+        // LVB is a tram + bus network. Bus is last so that where a stop serves both,
+        // tram stays the station's representative type (and wins the proximate-merge pick).
+        routeTypePriority: ['tram', 'bus'],
         // Empty on purpose: keep each line's own OSM colour (official LVB per-line
         // colors) instead of forcing one shared color per vehicle type.
         colors: {},
         defaultLineColor: '#000000',
+        excludeLineRefPatterns: [
+            String.raw`^\+`,
+            String.raw`^SEV(\s|$)`,
+            String.raw`^N`,
+            String.raw`^Messe Transport$`,
+            String.raw`^108$`,
+        ],
     },
     telegram: {
         // Chosen from ~60k Leipzig group messages: the "3k" shorthand, "uniformiert" and
@@ -77,6 +93,11 @@ export const LEIPZIG: CityConfig = {
         // Police terms are intentionally excluded (police are not ticket inspectors).
         inspectorKeywords:
             'K (for example "3k" means three ticket inspectors), Kontrolleur, Kontrolleure, Kontrolle, Konti, Kontis, Kontrolletti, Kontrollettis, uniformiert, Uniform, Zivil, in Zivil, LVB-Kontrolle, Fahrkartenkontrolle',
+        // LVB's tram and bus network is seeded in full, so only the deliberately
+        // excluded S-Bahn/regional operators fall outside it.
+        untrackedLinesNote:
+            'Sightings on OTHER lines (S-Bahn, regional trains, replacement services) are ' +
+            'still reports if a station name is mentioned — extract the station.',
         circularLineAlias: '',
         circularLinePattern: '',
         abbreviations: [
@@ -91,5 +112,7 @@ export const LEIPZIG: CityConfig = {
     },
     community: {
         telegramHandle: '@freifahren_leipzig',
+        telegramChatId: '-1001138115617',
+        reporterCount: { min: 7_000, max: 8_000 },
     },
 }

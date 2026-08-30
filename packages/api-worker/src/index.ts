@@ -3,17 +3,20 @@ import { cors } from 'hono/cors'
 import { etag, RETAINED_304_HEADERS } from 'hono/etag'
 import { requestId } from 'hono/request-id'
 
-import { Env, isAllowedCorsOrigin, registerContext } from './app-env'
+import { corsAllowOrigin, Env, registerContext } from './app-env'
 import { handleError } from './common/error-handler'
 import { registerVersionedRoutes } from './common/router'
+import { getConfig } from './modules/config'
 import { getLineInsights, getStationInsights } from './modules/insights'
 import {
     insightsCacheMiddleware,
     VERSIONED_INSIGHTS_CACHEABLE_PATHS,
 } from './modules/insights/insights-cache-middleware'
+import { TURNSTILE_TOKEN_HEADER } from './modules/report-gate'
 import { getReports, getReportsByStation, postReport } from './modules/reports/'
 import { reportsCacheMiddleware, VERSIONED_REPORTS_CACHEABLE_PATHS } from './modules/reports/reports-cache-middleware'
 import { getRisk } from './modules/risk/risk-routes'
+import { postStripeWebhook } from './modules/stripe/stripe-webhook'
 import {
     transitCacheMiddleware,
     VERSIONED_TRANSIT_CACHEABLE_PATHS,
@@ -48,9 +51,22 @@ export const createApp = () => {
         cors({
             origin: (origin, c) => {
                 const config = (c as Context<Env>).get('config')
-                return isAllowedCorsOrigin(origin, config) ? origin : null
+                return corsAllowOrigin(origin, c.req.method, c.req.header('Access-Control-Request-Method'), config)
             },
-            allowHeaders: ['Accept', 'Content-Type', 'If-Modified-Since', 'If-None-Match', 'ff-platform'],
+            /*
+             * Every header the client attaches to a report has to be listed here, or the browser
+             * fails the preflight and the POST is never sent at all — the API sees nothing, and
+             * React Query swallows the resulting network error, so the failure is invisible on both
+             * sides. TURNSTILE_TOKEN_HEADER is the one that carries the challenge token.
+             */
+            allowHeaders: [
+                'Accept',
+                'Content-Type',
+                'If-Modified-Since',
+                'If-None-Match',
+                'ff-platform',
+                TURNSTILE_TOKEN_HEADER,
+            ],
             allowMethods: ['GET', 'POST', 'OPTIONS'],
             exposeHeaders: ['ETag', 'Last-Modified'],
         })
@@ -83,6 +99,8 @@ export const createApp = () => {
 
     app.onError(handleError)
 
+    app.post('/webhooks/stripe', postStripeWebhook)
+
     registerVersionedRoutes(app, 'reports', 'v0', {
         v0: [getReports, postReport, getReportsByStation],
     })
@@ -94,6 +112,10 @@ export const createApp = () => {
     })
     registerVersionedRoutes(app, 'insights', 'v0', {
         v0: [getStationInsights, getLineInsights],
+    })
+    // Deliberately absent from the Workers Cache middlewares above — see config-routes.
+    registerVersionedRoutes(app, 'config', 'v0', {
+        v0: [getConfig],
     })
 
     return app

@@ -5,7 +5,18 @@ import { currentCitySlug } from '@/lib/city';
 import { distanceMeters } from '@/lib/geo';
 import { requireEnv } from '@/lib/utils';
 
-const API_URL = requireEnv('VITE_API_URL');
+function resolveApiUrl(configured: string): string {
+  if (!import.meta.env.DEV || typeof window === 'undefined') return configured;
+  try {
+    const url = new URL(configured);
+    url.hostname = window.location.hostname;
+    return url.origin;
+  } catch {
+    return configured;
+  }
+}
+
+export const API_URL = resolveApiUrl(requireEnv('VITE_API_URL'));
 
 type StationId = string;
 
@@ -18,13 +29,14 @@ type StationResponse = {
 export type Station = StationResponse & { id: StationId };
 export type Stations = Record<StationId, Station>;
 
-export type LineType = 'subway' | 'light_rail' | 'tram';
+export type LineType = 'subway' | 'light_rail' | 'tram' | 'bus';
 
-// Display ordering for line types (U-Bahn → S-Bahn → Tram).
+// Display ordering for line types (U-Bahn → S-Bahn → Tram → Bus).
 export const LINE_TYPE_PRIORITY: Record<LineType, number> = {
   subway: 0,
   light_rail: 1,
   tram: 2,
+  bus: 3,
 };
 
 // Canonical display order: U-Bahn → S-Bahn → Tram, then ascending within a group (U1 before U9).

@@ -61,3 +61,21 @@ city in `CITY_DATABASES` (with a drift guard that fails if the databases land on
 `bun run db:studio` opens Drizzle Studio against the remote D1 over the Cloudflare API (set
 `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_D1_DATABASE_ID`, `CLOUDFLARE_API_TOKEN`). For quick queries,
 use `bunx wrangler d1 execute DB --local|--remote --command "..."`.
+
+## Report intake
+
+The public API validates and normalizes reports, then sends them to the separately deployed private
+`report-gate` Worker through its public-intake Service Binding entrypoint. The gate owns persistence
+and abuse controls; the Telegram Worker uses a separate trusted entrypoint with no shared password.
+Per-city public intake and Telegram forwarding switches live in `@freifahren/cities`. For local
+development, run all three Worker configs together; only this API is exposed:
+
+```sh
+bun run dev:with-report-gate
+```
+
+The Stripe webhook signing secret remains an API Worker secret:
+
+```sh
+wrangler secret put STRIPE_WEBHOOK_SECRET
+```

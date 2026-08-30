@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { get, set, del } from 'idb-keyval';
@@ -11,7 +12,9 @@ import { syncConsentToPostHog } from './lib/consent';
 import { loadPostHog } from './lib/posthog-client';
 import { initErrorMonitoring } from './lib/error-monitoring';
 import { initNativePlatform } from './lib/native';
+import { notifyPwaUpdateAvailable, setPwaUpdateServiceWorker } from './lib/pwa-update';
 import { safeSessionStorage } from './lib/safe-storage';
+import { isTelegramInAppBrowser } from './lib/utils';
 import './lib/i18n';
 import { routeTree } from './routeTree.gen';
 import './index.css';
@@ -22,46 +25,70 @@ initErrorMonitoring();
 
 void initNativePlatform();
 
-// vite-plugin-pwa's registration API catches failures (bots, crawlers, locked-down WebViews) and
-// reloads once when an auto-updated worker takes control. Recheck after the app returns online or
-// to the foreground so an installed PWA does not keep a suspended shell indefinitely.
+// vite-plugin-pwa's registration API catches failures (bots, crawlers, locked-down WebViews). Keep
+// checking after the app returns online or to the foreground so an installed PWA does not keep a
+// suspended shell indefinitely; an available update is surfaced by PwaUpdatePrompt instead of
+// navigating the user away from their current screen.
 if (!__CAPACITOR__ && 'serviceWorker' in navigator) {
-  registerSW({
-    onRegisteredSW: (_swUrl, registration) => {
-      if (!registration) return;
+  if (isTelegramInAppBrowser) {
+    const TELEGRAM_SW_CLEAR_MARK = 'ff-tg-sw-cleared';
+    void navigator.serviceWorker
+      .getRegistrations()
+      .then((registrations) =>
+        Promise.all(registrations.map((registration) => registration.unregister())),
+      )
+      .then(() => caches.keys())
+      .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
+      .then(() => {
+        if (!navigator.serviceWorker.controller) return;
+        if (window.name === TELEGRAM_SW_CLEAR_MARK) return;
+        window.name = TELEGRAM_SW_CLEAR_MARK;
+        window.location.reload();
+      })
+      .catch(() => {});
+  } else {
+    const updateServiceWorker = registerSW({
+      onNeedRefresh: notifyPwaUpdateAvailable,
+      onRegisteredSW: (_swUrl, registration) => {
+        if (!registration) return;
 
-      // The install page is not controlled yet, so its navigation cannot populate the runtime cache.
-      // Seed the shell once while online to retain the first offline cold start.
-      void navigator.serviceWorker.ready
-        .then(async () => {
-          const appShell = await caches.open('app-shell');
-          if (!(await appShell.match('/'))) await appShell.add('/');
-        })
-        .catch(() => {});
+        // The install page is not controlled yet, so its navigation cannot populate the runtime cache.
+        // Seed the shell once while online to retain the first offline cold start.
+        void navigator.serviceWorker.ready
+          .then(async () => {
+            const appShell = await caches.open('app-shell');
+            if (!(await appShell.match('/'))) await appShell.add('/');
+          })
+          .catch(() => {});
 
-      const update = () => {
-        void registration.update().catch(() => {});
-      };
+        const update = () => {
+          void registration.update().catch(() => {});
+        };
 
-      window.addEventListener('online', update);
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') update();
-      });
-    },
-    onRegisterError: () => {},
-  });
+        window.addEventListener('online', update);
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') update();
+        });
+      },
+      onRegisterError: () => {},
+    });
+    setPwaUpdateServiceWorker(updateServiceWorker);
+  }
 }
 
 // Vite's documented recovery for a failed lazy import: a deploy purges the old chunks, so reload to
 // fetch the fresh shell. Skip when offline — a reload can't fetch a new chunk and the SW already
 // serves the precached shell, so it'd only wipe UI state. The timestamp bounds repeated reloads.
+const PRELOAD_RELOAD_MARK = 'ff-preload-reload';
 window.addEventListener('vite:preloadError', (event) => {
   // Prevent Vite from rethrowing the underlying import failure whether recovery is possible or not.
   event.preventDefault();
   if (!navigator.onLine) return;
   const KEY = 'vite:preloadError:lastReload';
   if (Date.now() - Number(safeSessionStorage.getItem(KEY) ?? 0) < 10_000) return;
-  if (!safeSessionStorage.setItem(KEY, String(Date.now()))) return;
+  if (window.name === PRELOAD_RELOAD_MARK) return;
+  safeSessionStorage.setItem(KEY, String(Date.now()));
+  window.name = PRELOAD_RELOAD_MARK;
   window.location.reload();
 });
 
@@ -71,12 +98,34 @@ window.addEventListener('vite:preloadError', (event) => {
 // ~5 MB localStorage quota. A restore is not a fetch, so it never triggers the "Reports updated"
 // toast (see useReportsRefreshSignal); the background refetch fires it only when it actually
 // succeeds online.
+const IDB_TIMEOUT_MS = 1500;
+
+function withTimeout<T>(promise: Promise<T>, fallback: T): Promise<T> {
+  return new Promise((resolve) => {
+    const id = window.setTimeout(() => resolve(fallback), IDB_TIMEOUT_MS);
+    promise.then(
+      (value) => {
+        window.clearTimeout(id);
+        resolve(value);
+      },
+      () => {
+        window.clearTimeout(id);
+        resolve(fallback);
+      },
+    );
+  });
+}
+
 const persister = createAsyncStoragePersister({
   key: 'freifahren-query-cache',
   storage: {
-    getItem: (k) => get<string>(k).then((v) => v ?? null),
-    setItem: (k, v) => set(k, v),
-    removeItem: (k) => del(k),
+    getItem: (k) =>
+      withTimeout(
+        get<string>(k).then((v) => v ?? null),
+        null,
+      ),
+    setItem: (k, v) => withTimeout(set(k, v), undefined),
+    removeItem: (k) => withTimeout(del(k), undefined),
   },
 });
 
@@ -100,38 +149,48 @@ router.subscribe('onResolved', ({ toLocation }) => {
   capturePageview(toLocation.href);
 });
 
+const routes = <RouterProvider router={router} />;
+
+const persistedApp = (
+  <PersistQueryClientProvider
+    client={queryClient}
+    // On a PWA cold start the cache is rehydrated from IndexedDB with each query's original
+    // `dataUpdatedAt`, so a reload within `staleTime` would serve a stale snapshot with no
+    // network request. `onSuccess` fires after restore but while queries are still paused
+    // (`isRestoring`), so invalidating here only marks them stale — no fetch yet. When the
+    // queries unpause, the default staleness-gated `refetchOnMount` fires exactly one deduped
+    // refetch per key, regardless of how many observers mount. This is stale-while-revalidate
+    // without the per-observer fan-out that `refetchOnMount: 'always'` would cause.
+    onSuccess={() => {
+      void queryClient.invalidateQueries();
+    }}
+    persistOptions={{
+      persister,
+      // persisted cache from an older build so a changed query shape can't hydrate incompatibly.
+      maxAge: PERSISTED_CACHE_MAX_AGE,
+      buster: __BUILD_ID__,
+      dehydrateOptions: {
+        // Persist any query that holds data, not just status==='success' (the default). When a
+        // user is offline, the periodic refetch fails and React Query demotes the query to
+        // 'error' while keeping its last data in memory — the success-only default would then
+        // refuse to persist it and overwrite the good snapshot with an empty one, so the data
+        // would vanish after a couple of reloads. Keying on `data` keeps the last-known reports/
+        // risk/transit across cold starts; once back online the refetch succeeds and refreshes.
+        shouldDehydrateQuery: (query) => query.state.data !== undefined,
+      },
+    }}
+  >
+    {routes}
+  </PersistQueryClientProvider>
+);
+
 const app = (
   <StrictMode>
-    <PersistQueryClientProvider
-      client={queryClient}
-      // On a PWA cold start the cache is rehydrated from IndexedDB with each query's original
-      // `dataUpdatedAt`, so a reload within `staleTime` would serve a stale snapshot with no
-      // network request. `onSuccess` fires after restore but while queries are still paused
-      // (`isRestoring`), so invalidating here only marks them stale — no fetch yet. When the
-      // queries unpause, the default staleness-gated `refetchOnMount` fires exactly one deduped
-      // refetch per key, regardless of how many observers mount. This is stale-while-revalidate
-      // without the per-observer fan-out that `refetchOnMount: 'always'` would cause.
-      onSuccess={() => {
-        void queryClient.invalidateQueries();
-      }}
-      persistOptions={{
-        persister,
-        // persisted cache from an older build so a changed query shape can't hydrate incompatibly.
-        maxAge: PERSISTED_CACHE_MAX_AGE,
-        buster: __BUILD_ID__,
-        dehydrateOptions: {
-          // Persist any query that holds data, not just status==='success' (the default). When a
-          // user is offline, the periodic refetch fails and React Query demotes the query to
-          // 'error' while keeping its last data in memory — the success-only default would then
-          // refuse to persist it and overwrite the good snapshot with an empty one, so the data
-          // would vanish after a couple of reloads. Keying on `data` keeps the last-known reports/
-          // risk/transit across cold starts; once back online the refetch succeeds and refreshes.
-          shouldDehydrateQuery: (query) => query.state.data !== undefined,
-        },
-      }}
-    >
-      <RouterProvider router={router} />
-    </PersistQueryClientProvider>
+    {isTelegramInAppBrowser ? (
+      <QueryClientProvider client={queryClient}>{routes}</QueryClientProvider>
+    ) : (
+      persistedApp
+    )}
   </StrictMode>
 );
 
@@ -144,5 +203,6 @@ const onIdle = (cb: () => void) =>
     ? window.requestIdleCallback(cb)
     : window.setTimeout(cb, 1);
 onIdle(() => {
+  if (window.name === PRELOAD_RELOAD_MARK) window.name = '';
   void loadPostHog().then(syncConsentToPostHog);
 });

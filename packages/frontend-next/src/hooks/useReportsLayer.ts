@@ -1,18 +1,19 @@
 import { useRouter } from '@tanstack/react-router';
 import type { FeatureCollection, Point } from 'geojson';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import { HOUR_MS, type Report, useReports } from '@/api/reports';
 import { type Stations, useStations } from '@/api/transit';
+import { useReportSimulation } from '@/contexts/ReportSimulation.context';
+import { useNow } from '@/hooks/useNow';
+import { MIN_OPACITY, reportOpacity } from '@/lib/report-decay';
 import { useIsReportViewed } from '@/lib/viewed-reports';
 import { Route as ReportDetailRoute } from '@/routes/_map/reports/$stationId';
 
-// Fade opacity from 1 → MIN_OPACITY over the first hour, then drop the report.
-const FADE_DURATION_MS = 60 * 60 * 1000;
-const MIN_OPACITY = 0.4;
-// Pulse while a report is fresh and the user has not opened it yet.
 const PULSE_AGE_MS = 60 * 15 * 1000;
-const RECOMPUTE_INTERVAL_MS = 30 * 1000;
+
+/** How often anything showing live reports re-reads the clock to roll expiry and fade forward. */
+export const REPORT_RECOMPUTE_INTERVAL_MS = 30 * 1000;
 
 export const REPORTS_HIT_LAYER_ID = 'reports-hit';
 export const REPORTS_CIRCLE_LAYER_ID = 'reports-circle';
@@ -24,6 +25,12 @@ export type ReportPointProps = {
   pulse: boolean;
 };
 
+/*
+ * The map draws the reports that are still live, at the opacity they have run down to. Which ones
+ * those are is the API's call — it stamps every report with an `expiresAt` computed from the whole
+ * city's reports, which is also what the risk overlay and the report counter read, so the three
+ * cannot disagree about what is current. All that is left here is the fade.
+ */
 function reportsToGeoJSON(
   reports: Report[],
   stations: Stations,
@@ -33,10 +40,18 @@ function reportsToGeoJSON(
   const features = reports.flatMap((report) => {
     const station = stations[report.stationId];
     if (!station) return [];
+    const expiresAtMs = report.expiresAt === null ? null : new Date(report.expiresAt).getTime();
+    // Predictions have no expiry because they are a stand-in for missing data, not because they
+    // have the same confidence as a fresh sighting. Keep them visible but visually subordinate.
+    const opacity = report.isPredicted
+      ? MIN_OPACITY
+      : reportOpacity(new Date(report.timestamp).getTime(), expiresAtMs, nowMs);
+    if (opacity === null) return [];
     const age = nowMs - new Date(report.timestamp).getTime();
-    if (age >= FADE_DURATION_MS) return [];
-    const opacity = Math.max(MIN_OPACITY, 1 - age / FADE_DURATION_MS);
-    const pulse = age < PULSE_AGE_MS && !isViewed(report.stationId, report.timestamp);
+    // A report on its way out has stopped being news, so it stops pulsing before it stops showing.
+    const isFadingOut = opacity < MIN_OPACITY;
+    const pulse =
+      age < PULSE_AGE_MS && !isFadingOut && !isViewed(report.stationId, report.timestamp);
     return [
       {
         type: 'Feature' as const,
@@ -57,16 +72,16 @@ function reportsToGeoJSON(
  * stations have loaded.
  */
 export function useReportsLayer(): FeatureCollection<Point, ReportPointProps> | null {
-  const { data: reports } = useReports(HOUR_MS);
+  const { data: liveReports } = useReports(HOUR_MS);
   const { data: stations } = useStations();
   const isViewed = useIsReportViewed();
   const router = useRouter();
-  const [now, setNow] = useState(() => Date.now());
+  const simulation = useReportSimulation();
+  // The simulation drives its own clock, so the wall clock stops ticking while it is active.
+  const wallNow = useNow(simulation.nowMs !== null ? null : REPORT_RECOMPUTE_INTERVAL_MS);
 
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), RECOMPUTE_INTERVAL_MS);
-    return () => window.clearInterval(id);
-  }, []);
+  const reports = simulation.reports ?? liveReports;
+  const now = simulation.nowMs ?? wallNow;
 
   const data = reports && stations ? reportsToGeoJSON(reports, stations, isViewed, now) : null;
 

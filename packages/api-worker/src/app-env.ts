@@ -6,6 +6,7 @@ import { AppError } from './common/errors'
 import { createLogger, Logger, LogLevel } from './common/logger'
 import { createD1Db, DbConnection } from './db'
 import { InsightsService } from './modules/insights'
+import type { PublicReportGate } from './modules/report-gate/report-gate-contract'
 import { ReportsService } from './modules/reports'
 import { RiskService } from './modules/risk'
 import type { CacheCtx } from './modules/transit/reference-cache'
@@ -14,27 +15,29 @@ import { TransitNetworkDataService } from './modules/transit/transit-network-dat
 export type Bindings = {
     // Cloudflare D1 binding. Present on Workers and, in tests, provided by the Miniflare pool.
     DB?: D1Database
+    DB_HAMBURG?: D1Database
     DB_LEIPZIG?: D1Database
+    REPORT_GATE?: PublicReportGate
+    REPORT_GATE_MODE?: 'preview-open'
     CORS_ORIGINS?: string
     // This repo's Cloudflare account subdomain (e.g. `freifahren` for `*.freifahren.workers.dev`).
     // Scopes the frontend preview CORS allowance to our own account so another tenant can't claim
     // The `frontend-pr-<n>` name pattern and gain production API access. Unset => no previews.
     PREVIEW_WORKERS_SUBDOMAIN?: string
     NODE_ENV?: string
-    TELEGRAM_WORKER_URL?: string
-    REPORT_PASSWORD?: string
     SENTRY_DSN?: string
     // Git SHA injected at deploy via `wrangler deploy --var SENTRY_RELEASE:<sha>`; tags Sentry
     // Events with a release so issues can be resolved in the next release. Absent locally.
     SENTRY_RELEASE?: string
     LOG_LEVEL?: LogLevel
+    STRIPE_WEBHOOK_SECRET?: string
+    POSTHOG_API_KEY?: string
+    POSTHOG_HOST?: string
 }
 
 export type AppConfig = {
     nodeEnv: string
     corsOrigins: string[]
-    telegramWorkerUrl?: string
-    reportPassword?: string
     // See PREVIEW_WORKERS_SUBDOMAIN on Bindings. Undefined disables preview-origin CORS entirely.
     previewWorkersSubdomain?: string
 }
@@ -47,12 +50,28 @@ const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\
 const buildPreviewOriginPattern = (subdomain: string) =>
     new RegExp(`^https:\\/\\/frontend-pr-\\d+\\.${escapeRegExp(subdomain)}\\.workers\\.dev$`)
 
+const PRIVATE_HTTP_ORIGIN =
+    /^http:\/\/(?:localhost|127\.0\.0\.1|10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?::\d+)?$/
+
 export const isAllowedCorsOrigin = (origin: string, config: AppConfig) => {
-    if (config.corsOrigins.includes(origin)) {
+    if (config.corsOrigins.includes(origin) || PRIVATE_HTTP_ORIGIN.test(origin)) {
         return true
     }
     const { previewWorkersSubdomain } = config
     return previewWorkersSubdomain !== undefined && buildPreviewOriginPattern(previewWorkersSubdomain).test(origin)
+}
+
+export const corsAllowOrigin = (
+    origin: string,
+    method: string,
+    accessControlRequestMethod: string | undefined,
+    config: AppConfig
+): string | null => {
+    const effectiveMethod = method === 'OPTIONS' ? (accessControlRequestMethod ?? 'GET') : method
+    if (effectiveMethod === 'GET' || effectiveMethod === 'HEAD') {
+        return '*'
+    }
+    return isAllowedCorsOrigin(origin, config) ? origin : null
 }
 
 export type Services = {
@@ -67,6 +86,14 @@ export type Env = {
     Variables: Services & {
         logger: Logger
         config: AppConfig
+        // This request's city database.
+        db: DbConnection
+        /*
+         * Set when a reports response covers a station that fell below the trust threshold. Such a
+         * response depends on who asked — including when it is empty — and the edge keys by URL,
+         * so storing it would serve one client's answer to another.
+         */
+        reportsUncacheable?: boolean
         // The city resolved for this request (from `?city=`), the single source for
         // Which DB the request talks to and how downstream code scopes per-city work.
         city: CityConfig
@@ -83,13 +110,11 @@ export const resolveConfig = (env: Bindings): AppConfig => {
         throw new Error('CORS_ORIGINS must be set to a comma-separated list of allowed origins')
     }
 
-    // Default to development so outbound Telegram notifications and verbose error descriptions
-    // Only kick in when NODE_ENV=production is set explicitly.
+    // Default to development so verbose error descriptions are hidden only when production is
+    // Set explicitly.
     return {
         nodeEnv: env.NODE_ENV ?? 'development',
         corsOrigins,
-        telegramWorkerUrl: env.TELEGRAM_WORKER_URL,
-        reportPassword: env.REPORT_PASSWORD,
         previewWorkersSubdomain: env.PREVIEW_WORKERS_SUBDOMAIN,
     }
 }
@@ -152,12 +177,7 @@ const applyServices = (c: Context<Env>, db: DbConnection, config: AppConfig) => 
     }
 
     const transitNetworkDataService = new TransitNetworkDataService(db, c.get('city').slug, cacheCtx)
-    const reportsService = new ReportsService(db, transitNetworkDataService, {
-        nodeEnv: config.nodeEnv,
-        city: c.get('city').slug,
-        telegramWorkerUrl: config.telegramWorkerUrl,
-        reportPassword: config.reportPassword,
-    })
+    const reportsService = new ReportsService(db, transitNetworkDataService)
 
     c.set('config', config)
     c.set('reportsService', reportsService)
@@ -173,6 +193,12 @@ export const registerContext = (app: Hono<Env>) => {
 
         const config = resolveConfig(c.env)
 
+        if (new URL(c.req.url).pathname.startsWith('/webhooks/')) {
+            c.set('config', config)
+            await next()
+            return
+        }
+
         // Resolve the city first: it decides which DB this request talks to, and every
         // Downstream query goes through the services built from that one binding below.
         const city = resolveCity(c)
@@ -187,7 +213,9 @@ export const registerContext = (app: Hono<Env>) => {
         if (binding === undefined) {
             throw new Error(`No D1 binding "${city.dbBinding}" bound for city "${city.slug}"`)
         }
-        applyServices(c, createD1Db(binding), config)
+        const db = createD1Db(binding)
+        c.set('db', db)
+        applyServices(c, db, config)
 
         await next()
     })

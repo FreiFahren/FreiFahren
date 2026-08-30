@@ -1,16 +1,24 @@
-import { ContentfulStatusCode } from 'hono/utils/http-status'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
-export type InternalCode =
-    | 'TELEGRAM_NOTIFICATION_FAILED'
-    | 'UNKNOWN_ERROR'
-    | 'SPAM_REPORT_DETECTED'
-    | 'VALIDATION_FAILED'
-    | 'RISK_MODEL_FAILED'
-    | 'STATION_NOT_FOUND'
-    | 'LINE_NOT_FOUND'
-    | 'NO_PATH_FOUND'
-    | 'UNKNOWN_CITY'
-    | 'REPORTING_DISABLED'
+export const INTERNAL_CODES = [
+    'UNKNOWN_ERROR',
+    'VALIDATION_FAILED',
+    'RISK_MODEL_FAILED',
+    'STATION_NOT_FOUND',
+    'LINE_NOT_FOUND',
+    'NO_PATH_FOUND',
+    'UNKNOWN_CITY',
+    'REPORTING_DISABLED',
+    'TURNSTILE_FAILED',
+    'REPORT_GATE_UNAVAILABLE',
+] as const
+
+export type InternalCode = (typeof INTERNAL_CODES)[number]
+
+const internalCodes = new Set<string>(INTERNAL_CODES)
+
+export const normalizeInternalCode = (value: unknown): InternalCode =>
+    typeof value === 'string' && internalCodes.has(value) ? (value as InternalCode) : 'UNKNOWN_ERROR'
 export interface AppErrorDetails {
     internal_code: InternalCode
     description?: string

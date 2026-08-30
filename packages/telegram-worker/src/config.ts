@@ -1,4 +1,4 @@
-import { DEFAULT_CITY_SLUG, getCity, type CityConfig, type CitySlug } from '@freifahren/cities'
+import { CITIES, getCity, type CityConfig, type CitySlug } from '@freifahren/cities'
 
 import type { Env } from './types'
 
@@ -65,6 +65,7 @@ export interface CityProfile {
     /** null when the city has no circular line. */
     circularLineRegex: RegExp | null
     inspectorKeywords: string
+    untrackedLinesNote: string
     promptExamples: string
 }
 
@@ -81,13 +82,13 @@ export function profileFor(cityName: string): CityProfile {
         letterMap: GERMAN_LETTER_MAP,
         stationNamePrefixPattern: GERMAN_STATION_NAME_PREFIX_PATTERN,
         genericNonStationWords: GERMAN_GENERIC_NON_STATION_WORDS,
-        abbreviations: telegram.abbreviations.map(
-            ([pattern, replacement]): [RegExp, string] => [new RegExp(pattern, 'g'), replacement],
-        ),
-        circularLineRegex: telegram.circularLinePattern
-            ? new RegExp(telegram.circularLinePattern, 'i')
-            : null,
+        abbreviations: telegram.abbreviations.map(([pattern, replacement]): [RegExp, string] => [
+            new RegExp(pattern, 'g'),
+            replacement,
+        ]),
+        circularLineRegex: telegram.circularLinePattern ? new RegExp(telegram.circularLinePattern, 'i') : null,
         inspectorKeywords: telegram.inspectorKeywords,
+        untrackedLinesNote: telegram.untrackedLinesNote,
         promptExamples: telegram.promptExamples,
     }
 }
@@ -98,13 +99,9 @@ export function profileFor(cityName: string): CityProfile {
 
 export interface RuntimeConfig {
     backendUrl: string
-    publicAppUrl: string
     city: CityConfig
     mistralModel: string
-    telegramReportChatId: string
     mistralApiKey: string
-    telegramBotToken: string
-    reportPassword: string
     telegramWebhookSecret: string
 }
 
@@ -121,49 +118,22 @@ const stripTrailingSlash = (url: string): string => url.replace(/\/+$/, '')
 function cityForSlug(slug: string): CityConfig {
     const city = getCity(slug)
     if (!city) {
-        throw new Error(`Unknown city in TELEGRAM_CHAT_CITIES: ${slug}`)
+        throw new Error(`Unknown city: ${slug}`)
     }
     return city
 }
 
-function cityAppUrl(baseUrl: string, city: CityConfig): string {
-    const url = new URL(baseUrl)
-    if (city.slug !== DEFAULT_CITY_SLUG) {
-        const [, ...domain] = url.hostname.split('.')
-        url.hostname = `${city.subdomain}.${domain.join('.')}`
-    }
-    return stripTrailingSlash(url.toString())
-}
-
-export function cityForChat(env: Env, chatId: string): CityConfig | null {
-    const slug = env.TELEGRAM_CHAT_CITIES[chatId]
-    return slug === undefined ? null : cityForSlug(slug)
-}
-
-export function isTelegramWritingDisabled(env: Env, city: CityConfig): boolean {
-    return (env.TELEGRAM_WRITING_DISABLED_CITIES ?? '')
-        .split(',')
-        .map((slug) => slug.trim())
-        .includes(city.slug)
+export function cityForChat(chatId: string): CityConfig | null {
+    return Object.values(CITIES).find((city) => city.community.telegramChatId === chatId) ?? null
 }
 
 export function readConfigForCity(env: Env, citySlug: CitySlug): RuntimeConfig {
     const city = cityForSlug(citySlug)
-    const chatIds = Object.entries(env.TELEGRAM_CHAT_CITIES)
-        .filter(([, slug]) => slug === city.slug)
-        .map(([chatId]) => chatId)
-    if (chatIds.length !== 1) {
-        throw new Error(`Expected exactly one Telegram chat for city "${city.slug}"`)
-    }
     return {
         backendUrl: stripTrailingSlash(required(env, 'BACKEND_URL')),
-        publicAppUrl: cityAppUrl(env.PUBLIC_APP_URL || 'https://app.freifahren.org', city),
         city,
         mistralModel: env.MISTRAL_MODEL || 'mistral-small-latest',
-        telegramReportChatId: chatIds[0]!,
         mistralApiKey: required(env, 'MISTRAL_API_KEY'),
-        telegramBotToken: required(env, 'TELEGRAM_BOT_TOKEN'),
-        reportPassword: required(env, 'REPORT_PASSWORD'),
         telegramWebhookSecret: required(env, 'TELEGRAM_WEBHOOK_SECRET'),
     }
 }

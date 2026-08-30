@@ -1,14 +1,12 @@
 import { z } from 'zod'
 
-export interface Env {
-    // Vars (wrangler.jsonc)
+import type { TrustedReportGate } from './report-gate-contract'
+
+export type Env = Omit<Cloudflare.Env, 'NODE_ENV' | 'BACKEND_URL' | 'MISTRAL_MODEL' | 'SENTRY_DSN' | 'REPORT_GATE'> & {
     BACKEND_URL: string
-    PUBLIC_APP_URL: string
-    TELEGRAM_CHAT_CITIES: Record<string, string>
-    /** Comma-separated city slugs whose Telegram group notifications are paused. */
-    TELEGRAM_WRITING_DISABLED_CITIES?: string
     MISTRAL_MODEL: string
     SENTRY_DSN: string
+    REPORT_GATE: TrustedReportGate
     NODE_ENV?: string
     // Git SHA injected at deploy via `wrangler deploy --var SENTRY_RELEASE:<sha>`; tags Sentry
     // Events with a release so issues can be resolved in the next release. Absent locally.
@@ -16,8 +14,6 @@ export interface Env {
 
     // Secrets (wrangler secret put)
     MISTRAL_API_KEY: string
-    TELEGRAM_BOT_TOKEN: string
-    REPORT_PASSWORD: string
     TELEGRAM_WEBHOOK_SECRET: string
 }
 
@@ -56,8 +52,14 @@ export type TelegramUpdate = z.infer<typeof TelegramUpdate>
 export type TelegramMessage = z.infer<typeof TelegramMessage>
 
 export const StationNameExtraction = z.object({
-    stationName: z.string().nullish().transform((v) => v ?? null),
-    directionName: z.string().nullish().transform((v) => v ?? null),
+    stationName: z
+        .string()
+        .nullish()
+        .transform((v) => v ?? null),
+    directionName: z
+        .string()
+        .nullish()
+        .transform((v) => v ?? null),
 })
 
 export type StationNameExtraction = z.infer<typeof StationNameExtraction>
@@ -82,10 +84,4 @@ export interface TransitIndex {
     lineNames: string[]
     circularLineNames: string[]
     variants: IndexVariant[]
-}
-
-export interface ForwardedReport {
-    lineId: string | null
-    stationId: string
-    directionId: string | null
 }

@@ -1,12 +1,18 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
+import { BERLIN } from '@freifahren/cities'
 
 import { db, stations } from './test-db'
-import { appRequestWithRedirect, sendReportRequest, testEnv } from './test-utils'
+import { appRequestWithRedirect, fakeReportGate, resetTestEnv } from './test-utils'
 
-describe('POST /v0/reports killswitch', () => {
-    it('rejects unauthenticated requests with 503 while reporting is disabled', async () => {
+afterEach(() => {
+    BERLIN.reporting.publicSubmissionsEnabled = true
+    resetTestEnv()
+})
+
+describe.sequential('POST /v0/reports gate failures', () => {
+    it('stops public intake from the central city switch before calling the private gate', async () => {
+        BERLIN.reporting.publicSubmissionsEnabled = false
         const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
-
         const response = await appRequestWithRedirect('/reports', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -14,28 +20,27 @@ describe('POST /v0/reports killswitch', () => {
         })
 
         expect(response.status).toBe(503)
+        expect((await response.json()) as { details: { internal_code: string } }).toMatchObject({
+            details: { internal_code: 'REPORTING_DISABLED' },
+        })
+        expect(fakeReportGate.lastIntake).toBeUndefined()
 
-        const body = (await response.json()) as { details: { internal_code: string } }
-        expect(body.details.internal_code).toBe('REPORTING_DISABLED')
+        const read = await appRequestWithRedirect('/reports')
+        expect(read.status).toBe(200)
     })
 
-    it('still allows authenticated telegram-worker relays through', async () => {
+    it('fails closed without inserting when the gate is unavailable', async () => {
+        fakeReportGate.unavailable = true
         const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
-
-        const response = await sendReportRequest({ stationId: station.id, source: 'telegram' })
-
-        expect(response.status).toBe(200)
-    })
-
-    it('rejects a request with the wrong password', async () => {
-        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
-
         const response = await appRequestWithRedirect('/reports', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Password': `${testEnv().REPORT_PASSWORD}-wrong` },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ stationId: station.id, source: 'web_app' }),
         })
 
         expect(response.status).toBe(503)
+        expect((await response.json()) as { details: { internal_code: string } }).toMatchObject({
+            details: { internal_code: 'REPORT_GATE_UNAVAILABLE' },
+        })
     })
 })

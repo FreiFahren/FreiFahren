@@ -2,6 +2,7 @@ import { useStations } from '@/api/transit';
 import { useGeolocation } from '@/contexts/Geolocation.context';
 import { distanceMeters } from '@/lib/geo';
 import { safeLocalStorage } from '@/lib/safe-storage';
+import { isPreviewBuild } from '@/lib/utils';
 
 export type ReportRejection = 'too_soon' | 'too_far';
 
@@ -29,7 +30,7 @@ export function useReportVerification() {
   const { data: stations } = useStations();
 
   const verify = (stationId: string): ReportRejection | null => {
-    if (import.meta.env.DEV) return null;
+    if (import.meta.env.DEV || isPreviewBuild) return null;
 
     if (position) {
       const station = stations?.[stationId];

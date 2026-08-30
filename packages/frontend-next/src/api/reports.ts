@@ -4,10 +4,10 @@ import type { TFunction } from 'i18next';
 import { useEffect, useState } from 'react';
 
 import { currentCitySlug } from '@/lib/city';
-import { traceAction } from '@/lib/error-monitoring';
-import { requireEnv } from '@/lib/utils';
+import { getTurnstileToken, TURNSTILE_TOKEN_HEADER } from '@/lib/turnstile';
+import { captureIssue, traceAction } from '@/lib/error-monitoring';
 
-import { fetchJson, type Line, useLines } from './transit';
+import { API_URL, fetchJson, type Line, useLines } from './transit';
 
 export type Report = {
   timestamp: string;
@@ -15,7 +15,19 @@ export type Report = {
   directionId: string | null;
   lineId: string | null;
   isPredicted: boolean;
+  /*
+   * When this report stops counting as live — the API's call, since it takes the whole city's
+   * reports to spot a burst or a controller moving down a line. Everything that asks "is this
+   * current?" compares this one instant against the clock, so the map, the risk overlay and the
+   * counter cannot drift apart. It is often in the past: a 24h or 7d window is mostly reports that
+   * expired long ago, and they still happened. `null` means it never expires (predicted reports).
+   */
+  expiresAt: string | null;
 };
+
+/** Whether a report is still current, as opposed to something that merely happened in the window. */
+export const isReportLive = (report: Report, nowMs: number): boolean =>
+  report.expiresAt === null || new Date(report.expiresAt).getTime() > nowMs;
 
 /**
  * Human-readable "time since" for a report timestamp, using the caller's i18n `t`. The
@@ -177,8 +189,6 @@ export const useStationReportCount = (stationId: string) => {
   return useQuery({ ...options, select: (reports) => reports.length });
 };
 
-const API_URL = requireEnv('VITE_API_URL');
-
 export type SubmitReportInput = {
   stationId: string;
   lineName?: string | null;
@@ -192,6 +202,27 @@ export type SubmitReportResponse = {
   directionId: string | null;
   timestamp: string;
 };
+
+/*
+ * The API answers a rejected submission with a stable `details.internal_code` alongside the status.
+ * Carrying that code on the error is what lets the form tell "reporting is switched off" apart from
+ * any other failure — matching on the human-readable message instead would break the moment the
+ * wording changes, which it is free to do.
+ */
+export class SubmitReportError extends Error {
+  readonly status: number;
+  readonly internalCode: string | undefined;
+
+  constructor(status: number, internalCode: string | undefined) {
+    super(`Report submission failed: ${status}`);
+    this.name = 'SubmitReportError';
+    this.status = status;
+    this.internalCode = internalCode;
+  }
+}
+
+export const isReportingDisabledError = (error: unknown): boolean =>
+  error instanceof SubmitReportError && error.internalCode === 'REPORTING_DISABLED';
 
 /**
  * Pick the concrete `lines.id` variant to submit from the user's high-level selection.
@@ -239,11 +270,28 @@ export function useSubmitReport() {
         // report `source` — which the Reports dashboard splits on — must be derived at runtime.
         // `getPlatform()` is 'ios' | 'android' | 'web'; only 'web' is the browser build.
         const isNative = Capacitor.isNativePlatform();
+        /*
+         * Minted per submission: the API rejects a replayed token, so it cannot be cached. Resolves
+         * to undefined when no site key is configured (dev, previews) and the API skips the check.
+         *
+         * A failure here is reported and then swallowed, and the report is sent without a token, so
+         * the accept/reject decision stays solely with the API. Throwing instead would hide native
+         * challenge failures as generic submit errors, with nothing recorded anywhere.
+         */
+        let turnstileToken: string | undefined;
+        try {
+          turnstileToken = await getTurnstileToken();
+        } catch (error) {
+          captureIssue('Turnstile token could not be obtained', {
+            reason: error instanceof Error ? error.message : String(error),
+          });
+        }
         const response = await fetch(submitUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'ff-platform': Capacitor.getPlatform(),
+            ...(turnstileToken === undefined ? {} : { [TURNSTILE_TOKEN_HEADER]: turnstileToken }),
           },
           body: JSON.stringify({
             stationId: input.stationId,
@@ -252,7 +300,12 @@ export function useSubmitReport() {
             source: isNative ? 'mobile_app' : 'web_app',
           }),
         });
-        if (!response.ok) throw new Error(`Report submission failed: ${response.status}`);
+        if (!response.ok) {
+          const body = (await response.json().catch(() => undefined)) as
+            | { details?: { internal_code?: string } }
+            | undefined;
+          throw new SubmitReportError(response.status, body?.details?.internal_code);
+        }
         return response.json();
       }),
     // The backend commits the report and clears its reports/risk caches before

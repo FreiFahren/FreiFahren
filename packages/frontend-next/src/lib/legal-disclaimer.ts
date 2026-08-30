@@ -3,35 +3,46 @@ import { useSyncExternalStore } from 'react';
 import { restoreNativePreference, saveNativePreference } from '@/lib/native-preference';
 import { safeLocalStorage } from '@/lib/safe-storage';
 
-// Acceptance is re-asked every six months. localStorage has no native expiry, so
-// we store the acceptance timestamp and compare against this window on read.
-// (Note: on Safari/iOS, ITP may purge script-writable storage after ~7 days of
-// no interaction, which can surface the disclaimer sooner than six months for
-// infrequent visitors — acceptable here, since erring toward showing it is the
-// legally safe direction.)
+// localStorage has no native expiry, so keep the acceptance timestamp and expire it ourselves.
 const STORAGE_KEY = 'legalDisclaimerAcceptedAt';
-const SIX_MONTHS_MS = 1000 * 60 * 60 * 24 * 182;
+const ACCEPTANCE_WINDOW_MS = 1000 * 60 * 60 * 24;
 
-function isWithinWindow(now: number): boolean {
+function acceptedAt(): number | null {
   const raw = safeLocalStorage.getItem(STORAGE_KEY);
-  if (raw === null) return false;
-  const acceptedAt = new Date(raw).getTime();
-  if (Number.isNaN(acceptedAt)) return false;
-  return now - acceptedAt < SIX_MONTHS_MS;
+  if (raw === null) return null;
+  const timestamp = new Date(raw).getTime();
+  return Number.isNaN(timestamp) ? null : timestamp;
 }
 
-let accepted = isWithinWindow(Date.now());
+let accepted = false;
 // The disclaimer doubles as the Terms of Use, openable on demand even after acceptance.
 let reviewOpen = false;
 const listeners = new Set<() => void>();
+let expirationTimer: ReturnType<typeof setTimeout> | undefined;
 
 function notify(): void {
   for (const listener of listeners) listener();
 }
 
+function scheduleExpiration(timestamp: number): void {
+  clearTimeout(expirationTimer);
+  const elapsed = Date.now() - timestamp;
+  const remaining = ACCEPTANCE_WINDOW_MS - elapsed;
+  accepted = elapsed >= 0 && remaining > 0;
+  if (!accepted) return;
+  expirationTimer = setTimeout(() => {
+    accepted = false;
+    notify();
+  }, remaining);
+}
+
+const storedAcceptance = acceptedAt();
+if (storedAcceptance !== null) scheduleExpiration(storedAcceptance);
+
 export function acceptLegalDisclaimer(): void {
-  void saveNativePreference(STORAGE_KEY, new Date().toISOString());
-  accepted = true;
+  const now = Date.now();
+  void saveNativePreference(STORAGE_KEY, new Date(now).toISOString());
+  scheduleExpiration(now);
   notify();
 }
 

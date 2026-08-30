@@ -55,6 +55,11 @@ export function MapView() {
   const { visible: riskVisible } = useRiskLayer();
   const [baseMapReady, setBaseMapReady] = useState(false);
 
+  useEffect(() => {
+    const id = window.setTimeout(() => setBaseMapReady(true), 1500);
+    return () => window.clearTimeout(id);
+  }, []);
+
   // Fire once per session the first time the user zooms in far enough to reveal the secondary
   // (tram/bus) tier. The map is persistent, so this ref spans the whole session; sessions that
   // never fire it never surfaced those lines (see the discoverability analysis).
@@ -116,6 +121,7 @@ export function MapView() {
         // report markers, so that overlay setup doesn't compete with the heaviest part of map
         // init. The map is persistent, so this fires once per session.
         onLoad={() => setBaseMapReady(true)}
+        onIdle={() => setBaseMapReady(true)}
         // The style is baked and version-pinned by the tile-server, so re-validating its 89 layers
         // against the spec on every load is wasted main-thread work at the most contended moment
         // (and lets maplibre tree-shake the validator out). See maplibre MapOptions.validateStyle.

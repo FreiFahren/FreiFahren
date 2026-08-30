@@ -27,4 +27,6 @@ const city = getCity(slug) ?? CITIES[DEFAULT_CITY_SLUG]
 See `src/types.ts` for the full `CityConfig`. Each entry carries identity
 (`slug`, `subdomain`, `displayName`, `lang`), database mapping (`dbName`,
 `dbBinding`), `map` defaults, the `seed` pipeline inputs, the Telegram language
-`profile`, and public `community` channels.
+`profile`, public `community` channels, and the two operational report switches:
+`reporting.publicSubmissionsEnabled` and `reporting.telegramForwardingEnabled`.
+The Telegram group ID also lives once in `community.telegramChatId`.

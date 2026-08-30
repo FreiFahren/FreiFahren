@@ -1,6 +1,10 @@
-// Fabricated social-proof count — the app has no real user metric.
-export const MIN_REPORTERS = 50_000;
-export const MAX_REPORTERS = 60_000;
+import type { CityConfig } from '@freifahren/cities';
 
-export const pickReporterCount = () =>
-  Math.floor(Math.random() * (MAX_REPORTERS - MIN_REPORTERS + 1)) + MIN_REPORTERS;
+// Fabricated social-proof count — the app has no real user metric.
+export const pickReporterCount = (city: CityConfig): number | null => {
+  const range = city.community.reporterCount;
+  if (range === undefined) {
+    return null;
+  }
+  return Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+};

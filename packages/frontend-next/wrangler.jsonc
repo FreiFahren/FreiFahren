@@ -27,6 +27,7 @@
   "routes": [
     { "pattern": "app.freifahren.org", "custom_domain": true },
     { "pattern": "berlin.freifahren.org", "custom_domain": true },
+    { "pattern": "hamburg.freifahren.org", "custom_domain": true },
     { "pattern": "leipzig.freifahren.org", "custom_domain": true },
   ],
 }

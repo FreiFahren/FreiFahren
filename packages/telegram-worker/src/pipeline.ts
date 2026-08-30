@@ -47,5 +47,5 @@ export async function processMessage(text: string, env: Env, city: CitySlug): Pr
     }
 
     console.info('Submitting report:', extractionToLog(result))
-    await postReport(cfg.backendUrl, cfg.reportPassword, ids, cfg.city.slug)
+    await postReport(env.REPORT_GATE, ids, cfg.city)
 }

@@ -437,6 +437,7 @@ export function detectLineName(
 
 export function buildSystemPrompt(index: TransitIndex, profile: CityProfile): string {
     const tracked = [...index.lineNames].sort().join(', ')
+    const untrackedLines = profile.untrackedLinesNote.trim()
     const examples = profile.promptExamples.trim()
     return (
         `This is a ${profile.displayName} public-transit chat where users report ticket-inspector ` +
@@ -462,9 +463,7 @@ export function buildSystemPrompt(index: TransitIndex, profile: CityProfile): st
         '"->", "bis", "Ri.", or a line\'s well-known terminus mentioned alongside another ' +
         'station ("U7 Rudow ... Neukölln" -> direction Rudow, station Neukölln). NEVER repeat ' +
         'the current station here. Null if no direction is given.\n' +
-        `- We track these lines: ${tracked}. Sightings on OTHER lines (local buses M19/M29/M41, ` +
-        'X-lines, three-digit lines, etc.) are still reports if a station name is mentioned — ' +
-        'extract the station (bus stops are named after the nearby U/S station).\n' +
+        `- We track these lines: ${tracked}.${untrackedLines ? ` ${untrackedLines}` : ''}\n` +
         '- Never return generic words as a stationName (platform, station, vehicle types). If ' +
         'only generic words appear, set stationName=null.\n' +
         (examples ? `\nExamples:\n${examples}\n` : '')

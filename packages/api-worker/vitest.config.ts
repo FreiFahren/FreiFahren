@@ -28,16 +28,20 @@ export default defineWorkersConfig(async () => {
                         // @sentry/cloudflare: the flag swaps in workerd's real node:vm and breaks the
                         // vitest-pool-workers runner. The app under test (src/index.ts) has no Sentry
                         // and needs no node builtins, so omitting it is safe.
-                        d1Databases: ['DB'],
+                        // DB_RECONCILE is a scratch database: with isolatedStorage off, a suite that
+                        // rewrites whole tables would otherwise corrupt the shared seed for every
+                        // other suite.
+                        d1Databases: ['DB', 'DB_RECONCILE'],
                         bindings: {
                             TEST_MIGRATIONS: migrations,
                             CORS_ORIGINS:
                                 'http://localhost,http://localhost:1871,http://127.0.0.1:1871,capacitor://localhost',
                             PREVIEW_WORKERS_SUBDOMAIN: 'freifahren',
                             NODE_ENV: 'development',
-                            REPORT_PASSWORD: 'password',
-                            TELEGRAM_WORKER_URL: 'https://telegram-worker.test',
                             LOG_LEVEL: 'error',
+                            STRIPE_WEBHOOK_SECRET: '',
+                            POSTHOG_API_KEY: '',
+                            POSTHOG_HOST: 'https://eu.i.posthog.com',
                         },
                     },
                 },

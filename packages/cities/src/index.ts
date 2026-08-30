@@ -1,9 +1,11 @@
 import { BERLIN } from './berlin'
+import { HAMBURG } from './hamburg'
 import { LEIPZIG } from './leipzig'
 import type { CityConfig } from './types'
 
 export * from './types'
 export { BERLIN }
+export { HAMBURG }
 export { LEIPZIG }
 export { CITY_DATABASES, CITY_DATABASE_SLUGS, getCityDatabase } from './databases'
 export type { CityDatabaseSlug } from './databases'
@@ -15,6 +17,7 @@ export type { CityDatabaseSlug } from './databases'
  */
 export const CITIES = {
     berlin: BERLIN,
+    hamburg: HAMBURG,
     leipzig: LEIPZIG,
 } as const satisfies Record<string, CityConfig>
 
@@ -32,3 +35,11 @@ export const isCitySlug = (value: string): value is CitySlug => Object.prototype
 
 /** Look up a city by slug, or `undefined` if the slug is unknown. */
 export const getCity = (slug: string): CityConfig | undefined => (isCitySlug(slug) ? CITIES[slug] : undefined)
+
+export const isExcludedLineRef = (ref: string, patterns: readonly string[] | undefined): boolean => {
+    if (patterns === undefined) return false
+    for (const source of patterns) {
+        if (new RegExp(source).test(ref)) return true
+    }
+    return false
+}

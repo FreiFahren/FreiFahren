@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { DAY_MS, useReports } from '@/api/reports';
 import { ToastPill } from '@/components/ui/toast-pill';
+import { currentCity } from '@/lib/city';
 import { pickReporterCount } from '@/lib/reporters';
 import { toast } from '@/lib/toast';
 import { Route as ReportsSummaryRoute } from '@/routes/reports/index';
@@ -35,13 +36,15 @@ export function StatsPopUp() {
 
 function StatsCard({ toastId, reportCount }: { toastId: string | number; reportCount: number }) {
   const { t } = useTranslation(NAMESPACE);
-  const [reporters] = useState(pickReporterCount);
+  const [reporters] = useState(() => pickReporterCount(currentCity));
   const [phase, setPhase] = useState<'reports' | 'reporters'>('reports');
+  const city = currentCity.displayName;
 
   useEffect(() => {
+    if (reporters === null) return;
     const timer = setTimeout(() => setPhase('reporters'), REPORTERS_AT);
     return () => clearTimeout(timer);
-  }, []);
+  }, [reporters]);
 
   return (
     <ToastPill asChild>
@@ -55,12 +58,12 @@ function StatsCard({ toastId, reportCount }: { toastId: string | number; reportC
           key={phase}
           className="text-muted-foreground animate-in fade-in text-xs leading-snug duration-500"
         >
-          {phase === 'reports' ? (
+          {phase === 'reports' || reporters === null ? (
             <>
               <span className="text-foreground block text-sm font-semibold">
                 {reportCount} {t('reports')}
               </span>
-              {t('todayInBerlin')}
+              {t('todayInCity', { city })}
             </>
           ) : (
             <>
@@ -69,7 +72,7 @@ function StatsCard({ toastId, reportCount }: { toastId: string | number; reportC
                 {reporters.toLocaleString()} {t('reporters')}
               </span>
               <br />
-              {t('inBerlin')}
+              {t('inCity', { city })}
             </>
           )}
         </p>

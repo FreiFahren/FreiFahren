@@ -7,6 +7,10 @@ export const CITY_DATABASES = {
         dbName: 'api-worker-db-eu',
         dbBinding: 'DB',
     },
+    hamburg: {
+        dbName: 'api-worker-db-hamburg-eu',
+        dbBinding: 'DB_HAMBURG',
+    },
     leipzig: {
         dbName: 'api-worker-db-leipzig',
         dbBinding: 'DB_LEIPZIG',

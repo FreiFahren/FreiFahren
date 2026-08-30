@@ -3,7 +3,7 @@
 // Pipeline-global tuning below (Overpass endpoint, merge threshold, geometry
 // Tolerance) doesn't vary by city and stays here with the pipeline.
 
-import { getCity, type CityConfig, type RouteType } from '@freifahren/cities'
+import { getCity, isExcludedLineRef, type CityConfig, type RouteType } from '@freifahren/cities'
 
 // The seed pipeline runs as a single-city process. The city is selected via the
 // SEED_CITY env var (the seed entry points set it from their `--city` flag),
@@ -26,8 +26,24 @@ export const SEED_CITY = CITY.slug
 export type { RouteType }
 
 export const ROUTE_TYPE_PRIORITY = CITY.seed.routeTypePriority
+export const ROUTE_REF_PATTERNS: Partial<Record<RouteType, string>> = CITY.seed.routeRefPatterns ?? {}
 export const ROUTE_COLORS: Partial<Record<RouteType, string>> = CITY.seed.colors
 export const DEFAULT_LINE_COLOR = CITY.seed.defaultLineColor
+
+/*
+ * Two independent ref filters, both city config:
+ * - `excludeLineRefPatterns` blacklists refs regardless of route type (Leipzig
+ *   drops SEV, night and Messe services).
+ * - `routeRefPatterns` whitelists refs per route type (Berlin seeds only
+ *   MetroBus `^M\d+$` among buses). It has to be per type: a type-agnostic
+ *   blacklist can't express "numeric bus refs out, numeric tram refs in".
+ * `routeType` is optional so a caller with only a ref still gets the blacklist.
+ */
+export const isSeedLineRefIncluded = (ref: string, routeType?: string): boolean => {
+    if (isExcludedLineRef(ref, CITY.seed.excludeLineRefPatterns)) return false
+    const pattern = routeType !== undefined ? ROUTE_REF_PATTERNS[routeType as RouteType] : undefined
+    return pattern === undefined || new RegExp(pattern).test(ref)
+}
 
 // Resolves the canonical color for an OSM route relation: configured route-type
 // Color first, then the OSM colour/color tag, then the default. Color is a line

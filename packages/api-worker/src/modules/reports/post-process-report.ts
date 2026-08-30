@@ -221,6 +221,33 @@ const clearStationReferenceIfNotOnLine =
         return reportData
     }
 
+/*
+ * A station id the network doesn't know is the caller's mistake, so say so rather than letting it
+ * reach the insert, where the reports->stations foreign key turns it into a 500.
+ *
+ * This runs before the pipeline rather than as a step in it: the steps normalize a report the
+ * network can describe, and inferring anything from an id that does not exist is meaningless. It
+ * would also be actively wrong — `clearStationReferenceIfNotOnLine` drops an unknown id as "not on
+ * this line", after which `guessStation` substitutes whichever station that line sees most at this
+ * hour, storing a report the caller never described.
+ */
+const assertKnownStationReference = (
+    stations: Stations,
+    reportData: RawReport,
+    stationReferenceField: StationReferenceField
+): void => {
+    const stationId = reportData[stationReferenceField]
+    if (stationId === null || stationId === undefined) return
+    if (lookupStation(stations, stationId) !== undefined) return
+
+    throw new AppError({
+        message: `Unknown ${stationReferenceField}`,
+        statusCode: 422,
+        internalCode: 'VALIDATION_FAILED',
+        description: `No station with id "${stationId}"`,
+    })
+}
+
 const assignLineIfSingleOption =
     (stations: Stations) =>
     (reportData: RawReport): RawReport => {
@@ -244,6 +271,7 @@ const assignLineIfSingleOption =
     }
 
 export {
+    assertKnownStationReference,
     assignLineIfSingleOption,
     clearStationReferenceIfNotOnLine,
     determineLineBasedOnStationAndDirection,

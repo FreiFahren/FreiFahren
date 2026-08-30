@@ -6,19 +6,19 @@ import type { Env } from '../src/types'
 import { reportError } from '../src/observability'
 import { ALLOWED_CHAT_ID } from './fixtures'
 
+const LEIPZIG_CHAT_ID = '-1001138115617'
+const HAMBURG_CHAT_ID = '-1202572205'
+
 // Spy seam for the privacy assertions below; the real implementation writes to Sentry.
 vi.mock('../src/observability', () => ({ reportError: vi.fn() }))
 
 const testEnv: Env = {
     BACKEND_URL: 'https://backend.test',
-    PUBLIC_APP_URL: 'https://app.example.test',
-    TELEGRAM_CHAT_CITIES: { [ALLOWED_CHAT_ID]: 'berlin', '-1002': 'leipzig' },
     MISTRAL_MODEL: 'mistral-small-latest',
     SENTRY_DSN: 'https://example.invalid/1',
     MISTRAL_API_KEY: 'test-mistral-key',
-    TELEGRAM_BOT_TOKEN: '1:fake',
-    REPORT_PASSWORD: 'password',
     TELEGRAM_WEBHOOK_SECRET: 'webhook-secret',
+    REPORT_GATE: { intake: async () => ({ ok: true, data: {} }) },
 }
 
 function makeUpdate(opts: {
@@ -90,12 +90,7 @@ describe('handleWebhook', () => {
     it('rejects a wrong secret token with 401 and does not process', async () => {
         const process = vi.fn(async () => {})
         const { ctx, promises } = fakeCtx()
-        const res = await handleWebhook(
-            webhookRequest(makeUpdate({ text: 'U2 alex' }), 'wrong'),
-            testEnv,
-            ctx,
-            process
-        )
+        const res = await handleWebhook(webhookRequest(makeUpdate({ text: 'U2 alex' }), 'wrong'), testEnv, ctx, process)
         expect(res.status).toBe(401)
         expect(process).not.toHaveBeenCalled()
         expect(promises).toHaveLength(0)
@@ -104,32 +99,10 @@ describe('handleWebhook', () => {
     it('returns 200 and processes an accepted message in the background', async () => {
         const process = vi.fn(async () => {})
         const { ctx, promises } = fakeCtx()
-        const res = await handleWebhook(
-            webhookRequest(makeUpdate({ text: 'U2 alex 2x BOS' })),
-            testEnv,
-            ctx,
-            process
-        )
+        const res = await handleWebhook(webhookRequest(makeUpdate({ text: 'U2 alex 2x BOS' })), testEnv, ctx, process)
         expect(res.status).toBe(200)
         expect(process).toHaveBeenCalledExactlyOnceWith('U2 alex 2x BOS', expect.anything(), 'berlin')
         expect(promises).toHaveLength(1)
-        await Promise.all(promises)
-    })
-
-    it('continues reading messages from a city with writing disabled', async () => {
-        const process = vi.fn(async () => {})
-        const { ctx, promises } = fakeCtx()
-        const writingDisabledEnv: Env = { ...testEnv, TELEGRAM_WRITING_DISABLED_CITIES: 'leipzig' }
-
-        const res = await handleWebhook(
-            webhookRequest(makeUpdate({ text: '3k Hbf', chatId: -1002 })),
-            writingDisabledEnv,
-            ctx,
-            process,
-        )
-
-        expect(res.status).toBe(200)
-        expect(process).toHaveBeenCalledExactlyOnceWith('3k Hbf', expect.anything(), 'leipzig')
         await Promise.all(promises)
     })
 
@@ -152,12 +125,7 @@ describe('handleWebhook', () => {
         const process = vi.fn(async (text: string) => void processed.push(text))
         const ctx = createExecutionContext()
 
-        const res = await handleWebhook(
-            webhookRequest(makeUpdate({ text: 'U8 Hermannplatz' })),
-            testEnv,
-            ctx,
-            process
-        )
+        const res = await handleWebhook(webhookRequest(makeUpdate({ text: 'U8 Hermannplatz' })), testEnv, ctx, process)
         expect(res.status).toBe(200)
 
         // waitOnExecutionContext resolves only after the waitUntil promise settles, proving
@@ -200,24 +168,42 @@ describe('handleWebhook', () => {
         expect(process).not.toHaveBeenCalled()
     })
 
-    it('routes Berlin and Leipzig chats to their configured cities and ignores an unknown chat', async () => {
+    it('routes every configured city chat and ignores an unknown chat', async () => {
         const process = vi.fn(async () => {})
         const berlin = fakeCtx()
         const leipzig = fakeCtx()
+        const hamburg = fakeCtx()
         const unknown = fakeCtx()
 
-        await handleWebhook(webhookRequest(makeUpdate({ text: 'U2 Alex', chatId: -1001 })), testEnv, berlin.ctx, process)
         await handleWebhook(
-            webhookRequest(makeUpdate({ text: '3k Hbf', chatId: -1002 })),
+            webhookRequest(makeUpdate({ text: 'U2 Alex', chatId: ALLOWED_CHAT_ID })),
+            testEnv,
+            berlin.ctx,
+            process
+        )
+        await handleWebhook(
+            webhookRequest(makeUpdate({ text: '3k Hbf', chatId: LEIPZIG_CHAT_ID })),
             testEnv,
             leipzig.ctx,
             process
         )
-        await handleWebhook(webhookRequest(makeUpdate({ text: 'not allowed', chatId: -9999 })), testEnv, unknown.ctx, process)
+        await handleWebhook(
+            webhookRequest(makeUpdate({ text: 'Gelbwesten Jungfernstieg', chatId: HAMBURG_CHAT_ID })),
+            testEnv,
+            hamburg.ctx,
+            process
+        )
+        await handleWebhook(
+            webhookRequest(makeUpdate({ text: 'not allowed', chatId: -9999 })),
+            testEnv,
+            unknown.ctx,
+            process
+        )
 
-        await Promise.all([...berlin.promises, ...leipzig.promises, ...unknown.promises])
+        await Promise.all([...berlin.promises, ...leipzig.promises, ...hamburg.promises, ...unknown.promises])
         expect(process).toHaveBeenNthCalledWith(1, 'U2 Alex', expect.anything(), 'berlin')
         expect(process).toHaveBeenNthCalledWith(2, '3k Hbf', expect.anything(), 'leipzig')
-        expect(process).toHaveBeenCalledTimes(2)
+        expect(process).toHaveBeenNthCalledWith(3, 'Gelbwesten Jungfernstieg', expect.anything(), 'hamburg')
+        expect(process).toHaveBeenCalledTimes(3)
     })
 })

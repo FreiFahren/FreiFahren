@@ -6,7 +6,7 @@ import { enqueuePostHog } from '@/lib/posthog-client';
 // directly. Events stamp their own `timestamp` because PostHog is lazy-loaded and calls buffer
 // until it's ready — otherwise a startup burst would all collapse to the SDK's init time.
 
-export type LocationRequestTrigger = 'auto';
+export type LocationRequestTrigger = 'auto' | 'soft_prompt' | 'report';
 export type LineDetailSource = 'direct' | 'map' | 'report' | 'reports_list' | 'search' | 'station';
 type SuperProperties = {
   map_layer: 'RISK' | 'LINES';
@@ -34,6 +34,10 @@ type AnalyticsEvents = {
   contribute_stripe_clicked: { source: ContributeSource };
   contribute_dismissed: { source: ContributeSource };
   location_permission_evaluated: { state: GeolocationPermissionState };
+  location_permission_blocked_shown: { source: 'report' };
+  location_prompt_shown: { source: 'map' | 'report' };
+  location_prompt_allowed: { source: 'map' | 'report' };
+  location_prompt_dismissed: { source: 'map' | 'report' };
   location_request_started: { trigger: LocationRequestTrigger };
   location_acquired: { trigger: LocationRequestTrigger };
   location_failed: {
@@ -54,10 +58,14 @@ type AnalyticsEvents = {
   line_detail_cta_clicked: { line_id: string };
   line_hotspot_selected: { line_id: string; station_id: string };
   station_line_selected: { line_id: string };
-  app_banner_shown: Record<string, never>;
-  app_banner_store_clicked: Record<string, never>;
-  app_banner_dismissed: Record<string, never>;
+  app_removal_banner_shown: Record<string, never>;
+  app_removal_banner_clicked: Record<string, never>;
+  app_removal_banner_dismissed: Record<string, never>;
   feedback_sentiment_selected: { sentiment: FeedbackSentiment };
+  city_location_prompt_shown: { from: string; to: string };
+  city_location_prompt_accepted: { from: string; to: string; remembered: boolean };
+  city_location_prompt_declined: { from: string; to: string; remembered: boolean };
+  city_location_auto_switched: { from: string; to: string };
 };
 
 export function track<E extends keyof AnalyticsEvents>(

@@ -20,6 +20,21 @@ export function saveNativePreference(key: string, value: string): Promise<void> 
   return Capacitor.isNativePlatform() ? mirror(key, value) : Promise.resolve();
 }
 
+async function mirrorRemove(key: string): Promise<void> {
+  try {
+    const { Preferences } = await import('@capacitor/preferences');
+    await Preferences.remove({ key });
+  } catch {
+    /* best-effort mirror */
+  }
+}
+
+// Returns the mirror promise; await it before a reload so the durable copy is gone first.
+export function removeNativePreference(key: string): Promise<void> {
+  safeLocalStorage.removeItem(key);
+  return Capacitor.isNativePlatform() ? mirrorRemove(key) : Promise.resolve();
+}
+
 // Recovers a purged value from native Preferences into localStorage; true means the caller should
 // reload so boot-time readers pick it up.
 export async function restoreNativePreference(key: string): Promise<boolean> {

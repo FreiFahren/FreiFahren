@@ -4,9 +4,16 @@ import { ChevronRight, MapPin, Search, Send, TriangleAlert } from 'lucide-react'
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { type SubmitReportResponse, useSubmitReport } from '@/api/reports';
-import { type Station } from '@/api/transit';
+import { useReportingEnabled } from '@/api/config';
+import {
+  isReportingDisabledError,
+  SubmitReportError,
+  type SubmitReportResponse,
+  useSubmitReport,
+} from '@/api/reports';
+import { LINE_TYPE_PRIORITY, type LineType, type Station } from '@/api/transit';
 import { FeedbackButton } from '@/components/feedback/FeedbackButton';
+import { ReportLocationStep } from '@/components/map/UserLocationControl';
 import { PageHeader } from '@/components/templates/PageHeader';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
@@ -17,9 +24,15 @@ import { ToastPill } from '@/components/ui/toast-pill';
 import { Toaster } from '@/components/ui/toaster';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useGeolocation } from '@/contexts/Geolocation.context';
-import { isContributeDismissed, openContributeModal } from '@/lib/contribute-modal';
 import { track } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';
+import {
+  markContributeShownAfterReport,
+  openContributeModal,
+  shouldOpenContributeAfterReport,
+} from '@/lib/contribute-modal';
+import { captureIssue } from '@/lib/error-monitoring';
+import { FEATURE_FLAGS, getFeatureFlagVariant } from '@/lib/feature-flags';
 import { distanceMeters } from '@/lib/geo';
 import { notifySuccess, selectionTap } from '@/lib/haptics';
 import { toast } from '@/lib/toast';
@@ -33,7 +46,14 @@ import { type ReportRejection, useReportVerification } from './useReportVerifica
 
 const routeApi = getRouteApi('/report');
 
-const FILTERS: LineFilter[] = ['all', 'subway', 'light_rail', 'tram'];
+const LINE_TYPES = new Set<string>(Object.keys(LINE_TYPE_PRIORITY));
+
+const FILTERS: LineFilter[] = [
+  'all',
+  ...currentCity.seed.routeTypePriority
+    .filter((type): type is LineType => LINE_TYPES.has(type))
+    .sort((a, b) => LINE_TYPE_PRIORITY[a] - LINE_TYPE_PRIORITY[b]),
+];
 
 /** Diacritic-insensitive match so "moritzplatz" finds "Möritzplatz" and "strasse" finds "Straße". */
 function normalize(value: string): string {
@@ -45,10 +65,6 @@ function normalize(value: string): string {
 }
 
 const NEARBY_COUNT = 3;
-
-// Manual killswitch for reporting through the app. Reports posted directly in the Telegram group
-// still sync normally. Flip back to false once submissions should resume.
-const REPORTING_DISABLED = true;
 
 const REJECTION_MESSAGE: Record<ReportRejection, string> = {
   too_soon: 'errorTooSoon',
@@ -100,7 +116,9 @@ function LinePicker() {
 
   return (
     <section className="px-4">
-      <div className="mb-3 flex items-center justify-between">
+      {/* Stacked on phones: with enough route types (Berlin adds bus) the filters need ~420px
+          beside the heading, so sharing a row cuts off the last one. */}
+      <div className="mb-3 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
         <SectionHeading hint={t('optional')}>{t('line')}</SectionHeading>
         <ToggleGroup
           type="single"
@@ -109,7 +127,7 @@ function LinePicker() {
           onValueChange={(value) => {
             if (value) setLineFilter(value as LineFilter);
           }}
-          className="bg-surface-solid border-border border"
+          className="bg-surface-solid border-border max-w-full overflow-x-auto border"
         >
           {FILTERS.map((option) => (
             <ToggleGroupItem
@@ -337,48 +355,79 @@ function DirectionPicker() {
   );
 }
 
-function ReportingDisabledNotice() {
+function TelegramFallbackNotice({ title, body }: { title: string; body: string }) {
   const { t } = useTranslation(NAMESPACE);
-  const telegramUrl = `https://t.me/${currentCity.community.telegramHandle.replace(/^@/, '')}`;
+  const telegramHandle = currentCity.community.telegramHandle;
+  const telegramUrl = telegramHandle
+    ? `https://t.me/${telegramHandle.replace(/^@/, '')}`
+    : undefined;
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
       <TriangleAlert className="text-muted-foreground size-8" />
       <div className="space-y-2">
-        <p className="font-heading text-base font-semibold">{t('disabledTitle')}</p>
-        <p className="text-muted-foreground text-sm">{t('disabledBody')}</p>
+        <p className="font-heading text-base font-semibold">{title}</p>
+        <p className="text-muted-foreground text-sm">{body}</p>
       </div>
-      <Button
-        asChild
-        size="lg"
-        className="bg-accent-bright text-primary-foreground hover:bg-accent-press h-12 rounded-lg px-6 text-base font-semibold shadow-[0_6px_16px_rgba(214,59,59,0.28)]"
-      >
-        <a href={telegramUrl} target="_blank" rel="noopener noreferrer">
-          <Send data-icon="inline-start" />
-          {t('disabledTelegramCta')}
-        </a>
-      </Button>
+      {telegramUrl && (
+        <Button
+          asChild
+          size="lg"
+          className="bg-accent-bright text-primary-foreground hover:bg-accent-press h-12 rounded-lg px-6 text-base font-semibold shadow-[0_6px_16px_rgba(214,59,59,0.28)]"
+        >
+          <a href={telegramUrl} target="_blank" rel="noopener noreferrer">
+            <Send data-icon="inline-start" />
+            {t('disabledTelegramCta')}
+          </a>
+        </Button>
+      )}
     </div>
   );
 }
 
-function SubmitFooter({ onSubmitted }: { onSubmitted: (result: SubmitReportResponse) => void }) {
+const REPEATED_FAILURE_THRESHOLD = 3;
+
+function SubmitFooter({
+  onSubmitted,
+  onReportingDisabled,
+  onRepeatedFailure,
+}: {
+  onSubmitted: (result: SubmitReportResponse) => void;
+  onReportingDisabled: () => void;
+  onRepeatedFailure: () => void;
+}) {
   const { t } = useTranslation(NAMESPACE);
   const { stationId, lineName, directionStationId } = useReportSelection();
   const submitReport = useSubmitReport();
   const { verify, recordSubmission } = useReportVerification();
+  const [consecutiveFailures, setConsecutiveFailures] = useState(0);
 
   const canSubmit = stationId !== null;
-  const disabled = !canSubmit || submitReport.isPending;
 
   const handleSubmit = () => {
-    if (!stationId) return;
+    /*
+     * The button reads as disabled but stays clickable (aria-disabled, not disabled), because a
+     * truly disabled button swallows the tap and a user who has not noticed the station picker
+     * gets no feedback at all. Tell them what is missing instead.
+     */
+    if (stationId === null) {
+      toast.custom(
+        () => (
+          <ToastPill className="bg-destructive flex w-fit items-center gap-2 text-sm font-semibold text-white">
+            <TriangleAlert className="size-4" />
+            {t('errorNoStation')}
+          </ToastPill>
+        ),
+        { id: 'report-station-required' },
+      );
+      return;
+    }
     const rejection = verify(stationId);
     if (rejection) {
       track('report_rejected', { reason: rejection, stationId });
       toast.custom(
         () => (
-          <ToastPill className="text-destructive flex w-fit items-center gap-2 text-sm font-semibold">
+          <ToastPill className="bg-destructive flex w-fit items-center gap-2 text-sm font-semibold text-white">
             <TriangleAlert className="size-4" />
             {t(REJECTION_MESSAGE[rejection])}
           </ToastPill>
@@ -391,14 +440,52 @@ function SubmitFooter({ onSubmitted }: { onSubmitted: (result: SubmitReportRespo
       { stationId, lineName, directionStationId },
       {
         onSuccess: (result) => {
+          setConsecutiveFailures(0);
           notifySuccess();
           recordSubmission();
+          getFeatureFlagVariant(FEATURE_FLAGS.contributeModalTiming);
           track('report_submitted', {
             stationId: result.stationId,
             lineId: result.lineId,
             directionId: result.directionId,
           });
           onSubmitted(result);
+        },
+        onError: (error) => {
+          /*
+           * Backstop for the cases the probe cannot cover: the switch flipping between the probe
+           * and this submit, and a client whose probe never answered (offline, or an install that
+           * has not reached the API since). Without it the user fills in the whole form and gets a
+           * generic failure for a state the API told us about explicitly.
+           */
+          if (isReportingDisabledError(error)) {
+            onReportingDisabled();
+            return;
+          }
+          /*
+           * Every other failure (network error, an edge block before the token is even checked,
+           * an unexpected 5xx, …) must still tell the user something happened — otherwise the
+           * button just re-enables silently and a tap that produced no report reads as tapping
+           * nothing at all.
+           */
+          captureIssue('Report submit failed', {
+            status: error instanceof SubmitReportError ? error.status : undefined,
+          });
+          const failureCount = consecutiveFailures + 1;
+          setConsecutiveFailures(failureCount);
+          if (failureCount >= REPEATED_FAILURE_THRESHOLD) {
+            onRepeatedFailure();
+            return;
+          }
+          toast.custom(
+            () => (
+              <ToastPill className="bg-destructive flex w-fit items-center gap-2 text-sm font-semibold text-white">
+                <TriangleAlert className="size-4" />
+                {t('errorSubmitFailed')}
+              </ToastPill>
+            ),
+            { id: 'report-submit-error' },
+          );
         },
       },
     );
@@ -409,7 +496,8 @@ function SubmitFooter({ onSubmitted }: { onSubmitted: (result: SubmitReportRespo
       <Button
         type="button"
         size="lg"
-        disabled={disabled}
+        disabled={submitReport.isPending}
+        aria-disabled={!canSubmit}
         onClick={handleSubmit}
         className={cn(
           'h-12 w-full rounded-lg text-base font-semibold',
@@ -430,11 +518,16 @@ export function ReportForm() {
   const navigate = useNavigate();
   const { stationId: initialStationId, lineName: initialLineName } = routeApi.useSearch();
   const [result, setResult] = useState<SubmitReportResponse | null>(null);
+  const [refusedBySubmit, setRefusedBySubmit] = useState(false);
+  const [repeatedFailure, setRepeatedFailure] = useState(false);
+  const reportingEnabled = useReportingEnabled();
 
   const handleSuccessClose = () => {
     navigate({ to: '/' });
-    // Invite a contribution after a successful report, unless the user opted out.
-    if (!isContributeDismissed()) openContributeModal('report_success');
+    const variant = getFeatureFlagVariant(FEATURE_FLAGS.contributeModalTiming);
+    if (!shouldOpenContributeAfterReport(variant)) return;
+    openContributeModal('report_success');
+    markContributeShownAfterReport();
   };
 
   return (
@@ -456,15 +549,24 @@ export function ReportForm() {
                   />
                 }
               />
-              {REPORTING_DISABLED ? (
-                <ReportingDisabledNotice />
-              ) : (
-                <>
+              {reportingEnabled && !refusedBySubmit && !repeatedFailure ? (
+                <ReportLocationStep>
                   <LinePicker />
                   <StationPicker />
                   <DirectionPicker />
-                  <SubmitFooter onSubmitted={setResult} />
-                </>
+                  <SubmitFooter
+                    onSubmitted={setResult}
+                    onReportingDisabled={() => setRefusedBySubmit(true)}
+                    onRepeatedFailure={() => setRepeatedFailure(true)}
+                  />
+                </ReportLocationStep>
+              ) : repeatedFailure ? (
+                <TelegramFallbackNotice
+                  title={t('submitFailedTitle')}
+                  body={t('submitFailedBody')}
+                />
+              ) : (
+                <TelegramFallbackNotice title={t('disabledTitle')} body={t('disabledBody')} />
               )}
             </>
           )}

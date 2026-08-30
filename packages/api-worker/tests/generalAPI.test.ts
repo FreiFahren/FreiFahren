@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { app } from '../src/index'
+import { TURNSTILE_TOKEN_HEADER } from '../src/modules/report-gate'
 import { appRequestWithRedirect, testEnv } from './test-utils'
 
 describe('Versioning', () => {
@@ -88,7 +89,7 @@ describe('ETag 304 + CORS', () => {
             testEnv()
         )
         expect(initial.status).toBe(200)
-        expect(initial.headers.get('Access-Control-Allow-Origin')).toBe(ALLOWED_ORIGIN)
+        expect(initial.headers.get('Access-Control-Allow-Origin')).toBe('*')
 
         const etag = initial.headers.get('ETag')
         expect(etag).not.toBeNull()
@@ -108,7 +109,7 @@ describe('ETag 304 + CORS', () => {
         // Without this header the browser blocks the cross-origin 304 and the
         // frontend's localStorage cache path fails — that is the regression we
         // are guarding against.
-        expect(revalidated.headers.get('Access-Control-Allow-Origin')).toBe(ALLOWED_ORIGIN)
+        expect(revalidated.headers.get('Access-Control-Allow-Origin')).toBe('*')
         expect(revalidated.headers.get('ETag')).toBe(etag)
     })
 })
@@ -119,15 +120,18 @@ describe('CORS', () => {
     const DISALLOWED_ORIGIN = 'https://not-on-the-list.example'
     const MALFORMED_PREVIEW_ORIGIN = 'https://frontend-pr-not-a-number.freifahren.workers.dev'
 
-    it('does not echo a disallowed origin', async () => {
-        const response = await app.request(
+    it('allows GET from any origin including a missing Origin header', async () => {
+        const withOrigin = await app.request(
             '/v0/transit/stations',
             { headers: { Origin: DISALLOWED_ORIGIN } },
             testEnv()
         )
+        expect(withOrigin.status).toBe(200)
+        expect(withOrigin.headers.get('Access-Control-Allow-Origin')).toBe('*')
 
-        expect(response.status).toBe(200)
-        expect(response.headers.get('Access-Control-Allow-Origin')).toBeNull()
+        const withoutOrigin = await app.request('/v0/transit/stations', undefined, testEnv())
+        expect(withoutOrigin.status).toBe(200)
+        expect(withoutOrigin.headers.get('Access-Control-Allow-Origin')).toBe('*')
     })
 
     it('grants a preflight from an allowed origin', async () => {
@@ -146,6 +150,27 @@ describe('CORS', () => {
         expect(response.headers.get('Access-Control-Allow-Headers')).toContain('Content-Type')
     })
 
+    /*
+     * A missing entry here is invisible in production: the browser refuses the preflight, so the
+     * POST never reaches the API and there is nothing to see in the API's own telemetry.
+     */
+    it.each(['Content-Type', 'ff-platform', TURNSTILE_TOKEN_HEADER])(
+        'allows %s on a report preflight',
+        async (header) => {
+            const response = await appRequestWithRedirect('/reports', {
+                method: 'OPTIONS',
+                headers: {
+                    Origin: ALLOWED_ORIGIN,
+                    'Access-Control-Request-Method': 'POST',
+                    'Access-Control-Request-Headers': header,
+                },
+            })
+
+            expect(response.status).toBe(204)
+            expect(response.headers.get('Access-Control-Allow-Headers')?.toLowerCase()).toContain(header.toLowerCase())
+        }
+    )
+
     it('grants a preflight from a frontend preview origin', async () => {
         const response = await appRequestWithRedirect('/reports', {
             method: 'OPTIONS',
@@ -157,6 +182,20 @@ describe('CORS', () => {
 
         expect(response.status).toBe(204)
         expect(response.headers.get('Access-Control-Allow-Origin')).toBe(PREVIEW_ORIGIN)
+    })
+
+    it('grants a preflight from a private LAN origin', async () => {
+        const lanOrigin = 'http://192.168.0.176:1871'
+        const response = await appRequestWithRedirect('/reports', {
+            method: 'OPTIONS',
+            headers: {
+                Origin: lanOrigin,
+                'Access-Control-Request-Method': 'GET',
+            },
+        })
+
+        expect(response.status).toBe(204)
+        expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*')
     })
 
     it.each([DISALLOWED_ORIGIN, MALFORMED_PREVIEW_ORIGIN])('does not grant a preflight from %s', async (origin) => {

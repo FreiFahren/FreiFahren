@@ -1,5 +1,7 @@
 import { createContext, useContext } from 'react';
 
+import type { LocationRequestTrigger } from '@/lib/analytics';
+
 export type GeolocationStatus = 'idle' | 'loading' | 'tracking' | 'denied' | 'unavailable';
 
 export type UserPosition = { lng: number; lat: number };
@@ -13,7 +15,9 @@ export type GeolocationContextValue = {
   position: UserPosition | null;
   accuracy: number | null; // metres, from GeolocationCoordinates.accuracy
 
-  // Internal setters, driven by the Capacitor Geolocation watch (see UserLocationControl).
+  requestLocation: (trigger: LocationRequestTrigger) => Promise<GeolocationCoords | null>;
+
+  // Internal setters, driven by the shared request and the live map watch.
   notifyLoading: () => void;
   notifyPosition: (coords: GeolocationCoords) => void;
   notifyError: (code: number) => void; // GeolocationPositionError.code

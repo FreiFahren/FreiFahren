@@ -3,7 +3,7 @@
 // Worker bundles, and the seed scripts). Do not import runtime dependencies here.
 
 /** The transit route types the pipeline understands, in no particular order. */
-export const ROUTE_TYPES = ['subway', 'tram', 'light_rail', 'train'] as const
+export const ROUTE_TYPES = ['subway', 'tram', 'light_rail', 'train', 'bus'] as const
 
 export type RouteType = (typeof ROUTE_TYPES)[number]
 
@@ -43,6 +43,14 @@ export interface CitySeedConfig {
      */
     routeTypePriority: readonly [RouteType, ...RouteType[]]
     /**
+     * Optional per-route-type regex a line's `ref` must match to be seeded.
+     * Route types absent from this map include every ref. Used to scope bus
+     * coverage to a curated subset (e.g. Berlin MetroBus `^M\d+$`) — seeding
+     * every city bus line would multiply the network for lines that are rarely
+     * checked or reported.
+     */
+    routeRefPatterns?: Partial<Record<RouteType, string>>
+    /**
      * Route types listed here always get the configured color regardless of the
      * OSM relation tags (used to give all S-Bahn lines one shared green and all
      * tram lines one shared red). Route types absent from this map fall back to
@@ -54,6 +62,7 @@ export interface CitySeedConfig {
      * colour/color tag is available. Mirrors the DB default on `lines.color`.
      */
     defaultLineColor: string
+    excludeLineRefPatterns?: readonly string[]
 }
 
 /**
@@ -67,6 +76,14 @@ export interface CityTelegramProfile {
     circularLineAlias: string
     /** Regex source recognizing user shorthand for the circular line. Empty = no circular line. */
     circularLinePattern: string
+    /**
+     * Prompt sentence about lines OUTSIDE the seeded network, so the model still
+     * extracts a station from sightings on them instead of treating them as
+     * non-reports. Which lines these are depends entirely on what the city seeds
+     * (Berlin seeds MetroBus but not the ~280 other BVG bus lines), so the whole
+     * sentence lives here rather than in the extractor. Empty = omit it.
+     */
+    untrackedLinesNote: string
     /**
      * `[pattern, replacement]` regex-source pairs applied during normalization
      * so user-typed abbreviations match canonical names (e.g. "str." -> "strasse").
@@ -86,8 +103,19 @@ export interface CityTelegramProfile {
  * each) and stay as frontend constants.
  */
 export interface CityCommunity {
-    /** Telegram group handle reports are synced with (e.g. `@FreiFahren_BE`). */
-    telegramHandle: string
+    /** Telegram group handle reports are synced with (e.g. `@FreiFahren_BE`). Omit when the city has no group yet. */
+    telegramHandle?: string
+    /** Telegram chat receiving app-originated reports and supplying trusted bot reports. */
+    telegramChatId?: string
+    reporterCount?: { min: number; max: number }
+}
+
+/** Operational report controls that intentionally vary by city. */
+export interface CityReportingConfig {
+    /** Accept reports from public clients. Trusted Telegram Service Binding reports bypass this switch. */
+    publicSubmissionsEnabled: boolean
+    /** Forward accepted app reports into the city's Telegram group. */
+    telegramForwardingEnabled: boolean
 }
 
 /**
@@ -126,10 +154,14 @@ export interface CityConfig extends CityDatabaseConfig {
     subdomain: string
     /** Human-readable name shown in the UI. */
     displayName: string
+    /** Canonical web app origin used in links for this city. */
+    publicAppUrl: string
+    listed?: boolean
     /** BCP-47 language tag for the city's primary language. */
     lang: string
     /** IANA timezone used to bucket reports into local service hours. */
     timezone: string
+    reporting: CityReportingConfig
     map: CityMap
     /** Basemap tile-build inputs. Every city ships with a basemap. */
     tiles: CityTiles

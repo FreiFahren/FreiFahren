@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
 
@@ -24,6 +24,15 @@ export const reports = sqliteTable(
             .notNull()
             .default(sql`(unixepoch() * 1000)`),
         source: text({ enum: REPORT_SOURCES }).notNull(),
+        // Opaque intake metadata used by the private report gate.
+        asn: integer(),
+        asOrganization: text(),
+        uaFamily: text({ length: 32 }),
+        clientHash: text({ length: 32 }),
+        // 0 is pending; null preserves the legacy pre-gate meaning.
+        trust: real(),
+        // Private diagnostic detail written by the report gate and never returned by the API.
+        trustFlags: text(),
     },
     // Reads filter by a time window, often scoped to a station or line; the leading
     // Equality column lets the range predicate use an index seek instead of a full scan.
@@ -31,6 +40,7 @@ export const reports = sqliteTable(
         index('reports_station_ts_idx').on(table.stationId, table.timestamp),
         index('reports_ts_idx').on(table.timestamp),
         index('reports_line_ts_idx').on(table.lineId, table.timestamp),
+        index('reports_client_ts_idx').on(table.clientHash, table.timestamp),
     ]
 )
 

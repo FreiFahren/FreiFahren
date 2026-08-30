@@ -50,6 +50,12 @@ const parseDaysArg = (argv: string[] = process.argv): number => {
     return days
 }
 
+const isUnprovisionedDatabaseError = (error: unknown): boolean => {
+    const stdout = error !== null && typeof error === 'object' && 'stdout' in error ? String(error.stdout) : ''
+    const message = error instanceof Error ? error.message : String(error)
+    return /Couldn't find a D1 DB named/i.test(`${stdout}\n${message}`)
+}
+
 const query = (binding: string, sql: string, configPath?: string): D1Row[] => {
     const configArgs = configPath !== undefined ? ['--config', configPath] : []
     const stdout = execFileSync(
@@ -90,7 +96,21 @@ const copyCity = (city: string, configPath: string, days: number): void => {
     // Intersected so a migration in flight — the target ahead of production — copies what both sides
     // Have instead of failing on a column only one of them knows about.
     const targetColumns = columnsOf(dbBinding, configPath)
-    const columns = columnsOf(dbBinding).filter((column) => targetColumns.includes(column))
+    let sourceColumns: string[]
+    try {
+        sourceColumns = columnsOf(dbBinding)
+    } catch (error) {
+        if (isUnprovisionedDatabaseError(error)) {
+            logger.info({ city, binding: dbBinding }, 'Skipping report copy — production database is not provisioned')
+            return
+        }
+        throw error
+    }
+    if (sourceColumns.length === 0) {
+        logger.info({ city, binding: dbBinding }, 'Skipping report copy — production database has no reports table yet')
+        return
+    }
+    const columns = sourceColumns.filter((column) => targetColumns.includes(column))
     if (!columns.includes(TIME_WINDOW_COLUMN)) {
         throw new Error(
             `${TABLE} has no ${TIME_WINDOW_COLUMN} column in both databases — update TIME_WINDOW_COLUMN to the column the window should filter on`

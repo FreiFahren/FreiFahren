@@ -1,6 +1,11 @@
 import { Capacitor } from '@capacitor/core';
 import { CITIES, DEFAULT_CITY_SLUG, getCity, type CityConfig } from '@freifahren/cities';
 
+import {
+  RESET_AUTO_SWITCH_PARAM,
+  clearAutoSwitchCityPreference,
+  markResetAutoSwitchCity,
+} from '@/lib/auto-switch-city';
 import { restoreNativePreference, saveNativePreference } from '@/lib/native-preference';
 import { safeLocalStorage } from '@/lib/safe-storage';
 import { isPreviewBuild } from '@/lib/utils';
@@ -39,6 +44,9 @@ const resolvePreviewCity = (): CityConfig | undefined => {
   return stored ? getCity(stored) : undefined;
 };
 
+const isLocalhost = (hostname: string): boolean =>
+  hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.localhost');
+
 // Web: the subdomain selects the city (berlin.freifahren.org -> berlin). Unknown hosts
 // (freifahren.org, app./www., localhost) fall back to the default.
 const resolveWebCity = (hostname: string): CityConfig => {
@@ -48,6 +56,39 @@ const resolveWebCity = (hostname: string): CityConfig => {
   const label = hostname.split('.')[0];
   return Object.values(CITIES).find((city) => city.subdomain === label) ?? defaultCity();
 };
+
+export function hostForCity(hostname: string, city: CityConfig): string {
+  if (isLocalhost(hostname)) {
+    return city.slug === DEFAULT_CITY_SLUG ? 'localhost' : `${city.subdomain}.localhost`;
+  }
+
+  const labels = hostname.split('.');
+  if (labels.length < 2) return hostname;
+  return [city.subdomain, ...labels.slice(1)].join('.');
+}
+
+export function urlForCity(city: CityConfig, options?: { resetAutoSwitch?: boolean }): string {
+  const { protocol, hostname, port, pathname, search } = window.location;
+  const params = new URLSearchParams(search);
+  if (isPreviewBuild) params.set('city', city.slug);
+  if (options?.resetAutoSwitch) params.set(RESET_AUTO_SWITCH_PARAM, '1');
+  else params.delete(RESET_AUTO_SWITCH_PARAM);
+  const query = params.toString();
+  const host = isPreviewBuild ? hostname : hostForCity(hostname, city);
+  return `${protocol}//${host}${port ? `:${port}` : ''}${pathname}${query ? `?${query}` : ''}`;
+}
+
+export function navigateToCity(city: CityConfig, options?: { resetAutoSwitch?: boolean }): void {
+  if (options?.resetAutoSwitch) {
+    clearAutoSwitchCityPreference();
+    markResetAutoSwitchCity();
+  }
+  if (Capacitor.isNativePlatform()) {
+    setCityPreference(city.slug);
+    return;
+  }
+  window.location.assign(urlForCity(city, options));
+}
 
 // The active city for this session. The resolution source is pluggable (stored preference on
 // native, hostname on web); the resolved city is fixed once the app boots.

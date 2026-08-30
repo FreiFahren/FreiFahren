@@ -18,3 +18,10 @@ scripts/Pipfile
 scripts/Pipfile.lock
 messages.*.json
 eval_results.*.json
+extract.*.jsonl
+
+# Agent worktrees are local scratch, not project state.
+.claude/worktrees/
+
+# Agent-local security analysis is shared out of band.
+.claude/skills/report-spam/

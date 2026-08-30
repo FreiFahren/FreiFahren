@@ -1,15 +1,18 @@
 import { createRootRoute, Outlet, useRouterState } from '@tanstack/react-router';
 import { useEffect } from 'react';
 
-import { AppBanner } from '@/components/AppBanner';
+import { AppRemovalBanner } from '@/components/AppRemovalBanner';
 import { ConsentBanner } from '@/components/ConsentBanner';
 import { ContributeCard } from '@/components/contribute/ContributeCard';
 import { FeedbackCard } from '@/components/feedback/FeedbackCard';
 import { LegalDisclaimer } from '@/components/LegalDisclaimer';
-import { Onboarding } from '@/components/onboarding/Onboarding';
+import { CityLocationPrompt } from '@/components/map/city-location-prompt';
 import { PersistentMapView } from '@/components/map/PersistentMapView';
+import { Onboarding } from '@/components/onboarding/Onboarding';
+import { PwaUpdatePrompt } from '@/components/pwa-update-prompt';
 import { ScreenshotBranding } from '@/components/ScreenshotBranding';
 import { GeolocationProvider } from '@/contexts/GeolocationProvider';
+import { ReportSimulationProvider } from '@/contexts/ReportSimulationProvider';
 import { notifyNativeAppReady } from '@/lib/native';
 
 function NativeAppReady() {
@@ -30,16 +33,20 @@ export const Route = createRootRoute({
   staticData: { legalDisclaimer: false },
   component: () => (
     <GeolocationProvider>
-      <NativeAppReady />
-      <PersistentMapView />
-      <AppBanner />
-      <Outlet />
-      <Onboarding />
-      <LegalDisclaimer />
-      <ContributeCard />
-      <FeedbackCard />
-      <ConsentBanner />
-      <ScreenshotBranding />
+      <ReportSimulationProvider>
+        <NativeAppReady />
+        <PersistentMapView />
+        <AppRemovalBanner />
+        <Outlet />
+        <Onboarding />
+        <LegalDisclaimer />
+        <CityLocationPrompt />
+        <PwaUpdatePrompt />
+        <ContributeCard />
+        <FeedbackCard />
+        <ConsentBanner />
+        <ScreenshotBranding />
+      </ReportSimulationProvider>
     </GeolocationProvider>
   ),
 });

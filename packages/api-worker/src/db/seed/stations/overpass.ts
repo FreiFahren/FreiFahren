@@ -1,4 +1,4 @@
-import { SEED_CONFIG } from '../config'
+import { SEED_CONFIG, isSeedLineRefIncluded } from '../config'
 
 export interface OsmNode {
     type: 'node'
@@ -36,16 +36,28 @@ export interface OsmRelation {
 
 export type OsmElement = OsmNode | OsmRelation | OsmWay
 
-const OVERPASS_ENDPOINTS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter']
+const OVERPASS_ENDPOINTS = [
+    'https://overpass.private.coffee/api/interpreter',
+    'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+    'https://overpass-api.de/api/interpreter',
+]
 
 /* Overpass etiquette: identify the client. overpass-api.de's nginx returns 406
  * to requests with a generic or missing User-Agent. */
 const USER_AGENT = 'FreiFahren-Seed/1.0 (+https://github.com/FreiFahren/FreiFahren)'
 
 const BATCH_SIZE = 10
+const GEOMETRY_BATCH_SIZE = 4
 const BATCH_COOLDOWN_MS = 30_000
+const RATE_LIMIT_FALLBACK_MS = 60_000
 
-const escapeForRegex = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+const escapeForRegex = (value: string): string =>
+    value.replace(/[.*+?^${}()|[\]\\]/g, (ch) => {
+        if (ch === ']') return '[\\]]'
+        if (ch === '\\') return '[\\\\]'
+        if (ch === '^') return '[\\^]'
+        return `[${ch}]`
+    })
 
 const buildOperatorRegex = (operators: readonly string[]): string =>
     '^(' + operators.map(escapeForRegex).join('|') + ')$'
@@ -53,7 +65,7 @@ const buildOperatorRegex = (operators: readonly string[]): string =>
 const buildRouteTypeRegex = (routeTypes: readonly string[]): string =>
     '^(' + routeTypes.map(escapeForRegex).join('|') + ')$'
 
-const buildRefRegex = (refs: readonly string[]): string => '^(' + refs.map(escapeForRegex).join('|') + ')$'
+export const buildRefRegex = (refs: readonly string[]): string => '^(' + refs.map(escapeForRegex).join('|') + ')$'
 
 const chunk = <T>(items: readonly T[], size: number): T[][] => {
     const chunks: T[][] = []
@@ -182,6 +194,20 @@ const mergeServerWait = async (current: number | null, endpoint: string): Promis
     return Math.max(current ?? 0, wait)
 }
 
+const waitAfterRetryableStatus = async (
+    status: number,
+    endpoint: string,
+    currentWaitMs: number | null
+): Promise<number | null> => {
+    console.warn(`[seed:stations]   ${endpoint} returned ${status}`)
+    const serverSuggestedWaitMs = await mergeServerWait(currentWaitMs, endpoint)
+    if (status !== 429) return serverSuggestedWaitMs
+    const delay = serverSuggestedWaitMs ?? RATE_LIMIT_FALLBACK_MS
+    console.log(`[seed:stations]   Rate limited, waiting ${Math.round(delay / 1000)}s before next try...`)
+    await sleep(delay)
+    return serverSuggestedWaitMs
+}
+
 const fetchWithRetry = async (query: string, fetchTimeoutMs: number): Promise<OsmElement[]> => {
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         let serverSuggestedWaitMs: number | null = null
@@ -200,8 +226,11 @@ const fetchWithRetry = async (query: string, fetchTimeoutMs: number): Promise<Os
                 })
 
                 if (response.status === 429 || response.status === 504 || response.status === 406) {
-                    console.warn(`[seed:stations]   ${endpoint} returned ${response.status}`)
-                    serverSuggestedWaitMs = await mergeServerWait(serverSuggestedWaitMs, endpoint)
+                    serverSuggestedWaitMs = await waitAfterRetryableStatus(
+                        response.status,
+                        endpoint,
+                        serverSuggestedWaitMs
+                    )
                     continue
                 }
 
@@ -210,15 +239,20 @@ const fetchWithRetry = async (query: string, fetchTimeoutMs: number): Promise<Os
                     continue
                 }
 
-                const json = (await response.json()) as { elements: OsmElement[] }
-                return json.elements
+                const json = (await response.json()) as { elements?: OsmElement[] }
+                const elements = json.elements ?? []
+                if (elements.length === 0) {
+                    console.warn(`[seed:stations]   ${endpoint} returned 0 elements, trying next...`)
+                    continue
+                }
+                return elements
             } catch (err) {
                 console.warn(`[seed:stations]   ${endpoint} failed: ${err instanceof Error ? err.message : err}`)
             }
         }
 
         if (attempt < MAX_RETRIES) {
-            const delay = serverSuggestedWaitMs ?? FALLBACK_DELAY_MS * attempt
+            const delay = Math.max(serverSuggestedWaitMs ?? 0, FALLBACK_DELAY_MS * attempt)
             console.log(`[seed:stations]   All endpoints failed, retrying in ${Math.round(delay / 1000)}s...`)
             await sleep(delay)
         }
@@ -227,47 +261,33 @@ const fetchWithRetry = async (query: string, fetchTimeoutMs: number): Promise<Os
     throw new Error('All Overpass API endpoints failed after retries')
 }
 
-const fetchLineRefs = async (label: string): Promise<string[]> => {
+export const fetchLineRefs = async (): Promise<string[]> => {
     const { fetchTimeoutMs } = SEED_CONFIG.overpass
     console.log(
-        `[${label}] Discovering line refs for operators: ${SEED_CONFIG.operators.join(', ')} (route types: ${SEED_CONFIG.routeTypes.join(', ')})`
+        `[seed] Discovering line refs for operators: ${SEED_CONFIG.operators.join(', ')} (route types: ${SEED_CONFIG.routeTypes.join(', ')})`
     )
     const elements = await fetchWithRetry(buildLineRefsQuery(), fetchTimeoutMs)
     const refs = new Set<string>()
+    let filtered = 0
+    /* Filter during discovery, not just downstream: each surviving ref costs a
+     * batched query with a 30s cooldown, so discarding here is what keeps a
+     * curated subset (Berlin bus -> MetroBus) from fetching the whole network.
+     * The route type is only available per relation, hence the loop. */
     for (const el of elements) {
         if (el.type !== 'relation') continue
         const ref = el.tags?.ref
-        if (ref !== undefined && ref !== '') refs.add(ref)
+        if (ref === undefined || ref === '') continue
+        if (!isSeedLineRefIncluded(ref, el.tags?.route)) {
+            filtered++
+            continue
+        }
+        refs.add(ref)
     }
     const sorted = Array.from(refs).sort()
-    console.log(`[${label}] Found ${sorted.length} line refs: ${sorted.join(', ')}`)
+    console.log(
+        `[seed] Found ${sorted.length} line refs${filtered > 0 ? ` (${filtered} relations filtered by ref pattern)` : ''}: ${sorted.join(', ')}`
+    )
     return sorted
-}
-
-const fetchInBatches = async (
-    label: string,
-    refs: readonly string[],
-    buildQuery: (batch: readonly string[]) => string
-): Promise<OsmElement[]> => {
-    const { fetchTimeoutMs } = SEED_CONFIG.overpass
-    const batches = chunk(refs, BATCH_SIZE)
-    const all: OsmElement[] = []
-
-    for (let i = 0; i < batches.length; i++) {
-        if (i > 0) {
-            console.log(`[${label}] Waiting ${BATCH_COOLDOWN_MS / 1000}s for rate limit cooldown...`)
-            await sleep(BATCH_COOLDOWN_MS)
-        }
-
-        const batch = batches[i]
-        console.log(`[${label}] Batch ${i + 1}/${batches.length}: ${batch.join(', ')}`)
-        const elements = await fetchWithRetry(buildQuery(batch), fetchTimeoutMs)
-        console.log(`[${label}]   Got ${elements.length} elements`)
-        all.push(...elements)
-    }
-
-    console.log(`[${label}] Total: ${all.length} elements`)
-    return all
 }
 
 /* Given the line refs we set out to fetch, return those that have no route
@@ -287,6 +307,47 @@ export const findMissingRouteRefs = (expectedRefs: readonly string[], elements: 
     return expectedRefs.filter((ref) => !present.has(ref))
 }
 
+const fetchInBatches = async (
+    label: string,
+    refs: readonly string[],
+    buildQuery: (batch: readonly string[]) => string,
+    batchSize = BATCH_SIZE
+): Promise<OsmElement[]> => {
+    const { fetchTimeoutMs } = SEED_CONFIG.overpass
+    const batches = chunk(refs, batchSize)
+    const all: OsmElement[] = []
+
+    for (let i = 0; i < batches.length; i++) {
+        if (i > 0) {
+            console.log(`[${label}] Waiting ${BATCH_COOLDOWN_MS / 1000}s for rate limit cooldown...`)
+            await sleep(BATCH_COOLDOWN_MS)
+        }
+
+        const batch = batches[i]
+        console.log(`[${label}] Batch ${i + 1}/${batches.length}: ${batch.join(', ')}`)
+        let elements: OsmElement[] = []
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            elements = await fetchWithRetry(buildQuery(batch), fetchTimeoutMs)
+            const missing = findMissingRouteRefs(batch, elements)
+            if (missing.length === 0) break
+            console.warn(
+                `[${label}]   Incomplete batch (${missing.join(', ')} missing), retry ${attempt}/${MAX_RETRIES}...`
+            )
+            if (attempt === MAX_RETRIES) {
+                throw new Error(
+                    `[${label}] Incomplete Overpass response: ${missing.length}/${batch.length} line refs returned no route relation (${missing.join(', ')})`
+                )
+            }
+            await sleep(FALLBACK_DELAY_MS * attempt)
+        }
+        console.log(`[${label}]   Got ${elements.length} elements`)
+        all.push(...elements)
+    }
+
+    console.log(`[${label}] Total: ${all.length} elements`)
+    return all
+}
+
 /* Turn a silently-truncated Overpass response into a hard failure so the
  * snapshot is never written from incomplete data (which would drop whole
  * lines, e.g. a freshly added S15). */
@@ -300,16 +361,14 @@ const assertAllRefsPresent = (label: string, expectedRefs: readonly string[], el
     }
 }
 
-export const fetchStationElements = async (): Promise<OsmElement[]> => {
-    const refs = await fetchLineRefs('seed:stations')
+export const fetchStationElements = async (refs: readonly string[]): Promise<OsmElement[]> => {
     const elements = await fetchInBatches('seed:stations', refs, buildStationsQuery)
     assertAllRefsPresent('seed:stations', refs, elements)
     return elements
 }
 
-export const fetchRouteGeometryElements = async (): Promise<OsmElement[]> => {
-    const refs = await fetchLineRefs('seed:segments')
-    const elements = await fetchInBatches('seed:segments', refs, buildGeometryQuery)
+export const fetchRouteGeometryElements = async (refs: readonly string[]): Promise<OsmElement[]> => {
+    const elements = await fetchInBatches('seed:segments', refs, buildGeometryQuery, GEOMETRY_BATCH_SIZE)
     assertAllRefsPresent('seed:segments', refs, elements)
     return elements
 }

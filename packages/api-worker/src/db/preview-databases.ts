@@ -117,10 +117,10 @@ const provision = (pr: string, out: string) => {
         workers_dev: true,
         d1_databases: d1Databases,
         vars: {
-            // Production so a preview exercises the real code paths. TELEGRAM_WORKER_URL is absent
-            // Until a preview Telegram worker exists: the forward is fire-and-forget behind a catch,
-            // And with no URL a preview cannot reach the production bot.
+            // Keep production error formatting enabled. This deployment-only mode accepts reports.
+            // They go only into isolated per-PR databases, without private scoring or forwarding.
             NODE_ENV: 'production',
+            REPORT_GATE_MODE: 'preview-open',
             CORS_ORIGINS: `https://frontend-pr-${pr}.${WORKERS_SUBDOMAIN}.workers.dev`,
             PREVIEW_WORKERS_SUBDOMAIN: WORKERS_SUBDOMAIN,
             // No SENTRY_DSN: previews would otherwise report into the production issue stream.

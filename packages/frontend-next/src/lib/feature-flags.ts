@@ -10,11 +10,15 @@ import { isPreviewBuild } from '@/lib/utils';
 // gated feature stays hidden unless PostHog affirmatively turns it on.
 export const FEATURE_FLAGS = {
   citySwitcher: 'city-switcher',
+  contributeModalTiming: 'contribute-modal-timing',
 } as const;
 
 type FlagKey = (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS];
 
+export type ContributeModalTimingVariant = 'control' | 'test';
+
 const values = new Map<FlagKey, boolean>();
+const variants = new Map<FlagKey, string | boolean>();
 const listeners = new Set<() => void>();
 let subscribed = false;
 
@@ -33,8 +37,13 @@ function ensureSubscribed(): void {
       let changed = false;
       for (const key of Object.values(FEATURE_FLAGS)) {
         const next = posthog.isFeatureEnabled(key) ?? false;
+        const nextVariant = posthog.getFeatureFlag(key) ?? false;
         if (values.get(key) !== next) {
           values.set(key, next);
+          changed = true;
+        }
+        if (variants.get(key) !== nextVariant) {
+          variants.set(key, nextVariant);
           changed = true;
         }
       }
@@ -56,6 +65,15 @@ export function subscribeToFeatureFlags(listener: () => void): () => void {
 export function getFeatureFlag(flag: FlagKey): boolean {
   ensureSubscribed();
   return import.meta.env.DEV || isPreviewBuild ? true : (values.get(flag) ?? false);
+}
+
+export function getFeatureFlagVariant(
+  flag: typeof FEATURE_FLAGS.contributeModalTiming,
+): ContributeModalTimingVariant | false {
+  ensureSubscribed();
+  if (import.meta.env.DEV || isPreviewBuild) return 'control';
+  const value = variants.get(flag);
+  return value === 'control' || value === 'test' ? value : false;
 }
 
 export function useFeatureFlag(flag: FlagKey): boolean {

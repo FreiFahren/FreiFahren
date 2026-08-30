@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { ChevronRight, HeartHandshake, Mail, MessageSquarePlus } from 'lucide-react';
+import { ChevronRight, HeartHandshake, Mail, MessageSquarePlus, TicketCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import { Route as PrivacyRoute } from '@/routes/privacy';
 
 import { CitySwitcher } from './CitySwitcher';
 import { DetailCard } from './DetailCard';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { NAMESPACE } from './SettingsButton.i18n';
 import { SocialLinks } from './SocialLinks';
 
@@ -60,7 +61,15 @@ export function SettingsCard({ onClose }: SettingsCardProps) {
 
   return (
     <DetailCard title={t('title')} closeLabel={t('close')} onClose={onClose}>
+      <CardContent>
+        <div className="bg-muted/60 text-muted-foreground flex items-center gap-2 rounded-md px-3 py-2 text-xs">
+          <TicketCheck className="text-accent-bright size-4 shrink-0" />
+          <p>{t('ticketReminder')}</p>
+        </div>
+      </CardContent>
+
       <div className="flex flex-col px-2">
+        <LanguageSwitcher />
         <CitySwitcher />
         <a
           href={`${WEBSITE_URL}/contact`}

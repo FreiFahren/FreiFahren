@@ -98,11 +98,6 @@ jobs:
                   workingDirectory: packages/api-worker
                   # The commit SHA becomes the Sentry release the worker reports at runtime.
                   command: deploy --var SENTRY_RELEASE:${{ github.sha }}
-                  secrets: |
-                      REPORT_PASSWORD
-              env:
-                  REPORT_PASSWORD: ${{ secrets.REPORT_PASSWORD }}
-
             # Register the release in Sentry (named after the commit SHA the worker reports) so
             # issues can be resolved "in the next release". Commit association is best-effort:
             # the release is still created/finalized if set-commits can't resolve the range.
