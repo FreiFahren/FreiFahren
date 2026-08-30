@@ -41,7 +41,11 @@ function reportsToGeoJSON(
     const station = stations[report.stationId];
     if (!station) return [];
     const expiresAtMs = report.expiresAt === null ? null : new Date(report.expiresAt).getTime();
-    const opacity = reportOpacity(new Date(report.timestamp).getTime(), expiresAtMs, nowMs);
+    // Predictions have no expiry because they are a stand-in for missing data, not because they
+    // have the same confidence as a fresh sighting. Keep them visible but visually subordinate.
+    const opacity = report.isPredicted
+      ? MIN_OPACITY
+      : reportOpacity(new Date(report.timestamp).getTime(), expiresAtMs, nowMs);
     if (opacity === null) return [];
     const age = nowMs - new Date(report.timestamp).getTime();
     // A report on its way out has stopped being news, so it stops pulsing before it stops showing.
