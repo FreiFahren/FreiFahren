@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react';
 
-import { CITIES, type CityConfig } from '@freifahren/cities';
+import { PUBLIC_CITIES, type PublicCityConfig } from '@freifahren/cities/public';
 
 import { FEATURE_FLAGS, getFeatureFlag, subscribeToFeatureFlags } from '@/lib/feature-flags';
 import { isPreviewBuild } from '@/lib/utils';
@@ -11,7 +11,7 @@ import { isPreviewBuild } from '@/lib/utils';
 
 const includeUnlistedCities = import.meta.env.DEV || isPreviewBuild;
 
-export const selectableCities: CityConfig[] = Object.values(CITIES).filter(
+export const selectableCities: PublicCityConfig[] = Object.values(PUBLIC_CITIES).filter(
   (city) => city.listed !== false || includeUnlistedCities,
 );
 
