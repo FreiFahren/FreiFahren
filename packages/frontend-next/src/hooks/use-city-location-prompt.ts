@@ -7,6 +7,7 @@ import {
   setAutoSwitchCityPreference,
   type AutoSwitchCityPreference,
 } from '@/lib/auto-switch-city';
+import { CITY_EXPANSION_URL } from '@/lib/city-expansion-prompt';
 import { currentCitySlug, navigateToCity } from '@/lib/city';
 import { cityForPosition } from '@/lib/city-for-position';
 import { selectableCities, useCitySwitchingEnabled } from '@/lib/city-switching';
@@ -37,30 +38,31 @@ export function useCityLocationPrompt() {
   const switchedRef = useRef(false);
   const shownForRef = useRef<string | null>(null);
 
-  const blocked =
-    !enabled ||
-    !onboarded ||
-    sessionDismissed ||
-    locationPrompt !== null ||
-    contributeOpen ||
-    consentVisible;
+  const overlaysOpen = locationPrompt !== null || contributeOpen || consentVisible;
 
-  const locatedCity =
-    position === null || (accuracy !== null && accuracy > MAX_ACCURACY_METERS)
-      ? null
-      : cityForPosition(position.lng, position.lat, selectableCities);
+  const hasAccuratePosition =
+    position !== null && (accuracy === null || accuracy <= MAX_ACCURACY_METERS);
+
+  const locatedCity = hasAccuratePosition
+    ? cityForPosition(position.lng, position.lat, selectableCities)
+    : null;
 
   const mismatch =
     locatedCity !== null && locatedCity.slug !== currentCitySlug ? locatedCity : null;
 
-  const promptCity = blocked || mismatch === null || preference !== null ? null : mismatch;
+  const switchBlocked = !enabled || !onboarded || sessionDismissed || overlaysOpen;
+  const promptCity = switchBlocked || mismatch === null || preference !== null ? null : mismatch;
+
+  const expansionBlocked = !onboarded || sessionDismissed || overlaysOpen || promptCity !== null;
+  const showExpansion = !expansionBlocked && hasAccuratePosition && locatedCity === null;
 
   useEffect(() => {
-    if (blocked || mismatch === null || preference !== 'always' || switchedRef.current) return;
+    if (switchBlocked || mismatch === null || preference !== 'always' || switchedRef.current)
+      return;
     switchedRef.current = true;
     track('city_location_auto_switched', { from: currentCitySlug, to: mismatch.slug });
     navigateToCity(mismatch);
-  }, [blocked, mismatch, preference]);
+  }, [switchBlocked, mismatch, preference]);
 
   useEffect(() => {
     if (promptCity === null || shownForRef.current === promptCity.slug) return;
@@ -68,7 +70,19 @@ export function useCityLocationPrompt() {
     track('city_location_prompt_shown', { from: currentCitySlug, to: promptCity.slug });
   }, [promptCity]);
 
+  useEffect(() => {
+    if (!showExpansion || shownForRef.current === 'expansion') return;
+    shownForRef.current = 'expansion';
+    track('city_expansion_prompt_shown', { from: currentCitySlug });
+  }, [showExpansion]);
+
   const accept = (remember: boolean) => {
+    if (showExpansion) {
+      track('city_expansion_prompt_accepted', { from: currentCitySlug });
+      window.open(CITY_EXPANSION_URL, '_blank', 'noopener,noreferrer');
+      setSessionDismissed(true);
+      return;
+    }
     if (promptCity === null) return;
     track('city_location_prompt_accepted', {
       from: currentCitySlug,
@@ -84,6 +98,11 @@ export function useCityLocationPrompt() {
   };
 
   const decline = (remember: boolean) => {
+    if (showExpansion) {
+      track('city_expansion_prompt_declined', { from: currentCitySlug });
+      setSessionDismissed(true);
+      return;
+    }
     if (promptCity === null) return;
     track('city_location_prompt_declined', {
       from: currentCitySlug,
@@ -98,5 +117,5 @@ export function useCityLocationPrompt() {
     setSessionDismissed(true);
   };
 
-  return { promptCity, accept, decline };
+  return { promptCity, showExpansion, accept, decline };
 }

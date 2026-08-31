@@ -66,6 +66,9 @@ type AnalyticsEvents = {
   city_location_prompt_accepted: { from: string; to: string; remembered: boolean };
   city_location_prompt_declined: { from: string; to: string; remembered: boolean };
   city_location_auto_switched: { from: string; to: string };
+  city_expansion_prompt_shown: { from: string };
+  city_expansion_prompt_accepted: { from: string };
+  city_expansion_prompt_declined: { from: string };
 };
 
 export function track<E extends keyof AnalyticsEvents>(
