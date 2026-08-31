@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "feedback-notifier",
+  "account_id": "ae6f873c58d6fe369c686705f29417a4",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-31",
+  "observability": {
+    "enabled": true,
+    "logs": { "head_sampling_rate": 1 }
+  },
+  "vars": {
+    "RESEND_FROM": "FreiFahren Feedback <feedback@freifahren.org>"
+  },
+  "secrets": {
+    "required": ["RESEND_API_KEY", "POSTHOG_WEBHOOK_SECRET"]
+  }
+}

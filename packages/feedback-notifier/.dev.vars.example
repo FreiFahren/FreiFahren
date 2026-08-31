@@ -1,0 +1,3 @@
+# Copy to .dev.vars only for local testing. Production values belong in Worker secrets.
+RESEND_API_KEY=
+POSTHOG_WEBHOOK_SECRET=

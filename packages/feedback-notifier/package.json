@@ -1,0 +1,20 @@
+{
+  "name": "feedback-notifier",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:dry-run": "wrangler deploy --dry-run",
+    "types": "wrangler types --env-file /dev/null",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.9.0",
+    "@cloudflare/workers-types": "^4.20260702.1",
+    "typescript": "~6.0.2",
+    "vitest": "~3.2.0",
+    "wrangler": "^4.103.0"
+  }
+}
