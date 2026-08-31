@@ -5,7 +5,8 @@
   "description": "Shared, dependency-free city registry consumed by every FreiFahren toolchain.",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./public": "./src/public.ts"
   },
   "types": "./src/index.ts"
 }

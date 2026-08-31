@@ -278,7 +278,11 @@ async function extractWithRetry(
         } catch (exc) {
             last = exc
             const msg = exc instanceof Error ? exc.message : String(exc)
-            if (!/\b429\b|\b5\d\d\b|timeout|timed out|fetch failed|network|ECONNRESET/i.test(msg)) {
+            if (
+                !/\b429\b|\b5\d\d\b|timeout|timed out|fetch failed|network|ECONNRESET|ENOTFOUND|getaddrinfo|EAI_AGAIN/i.test(
+                    msg
+                )
+            ) {
                 throw exc
             }
             await sleep(Math.min(20000, 1000 * 2 ** i) + Math.floor(Math.random() * 400))
