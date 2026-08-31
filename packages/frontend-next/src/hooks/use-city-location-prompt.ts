@@ -53,10 +53,8 @@ export function useCityLocationPrompt() {
   const switchBlocked = !enabled || !onboarded || sessionDismissed || overlaysOpen;
   const promptCity = switchBlocked || mismatch === null || preference !== null ? null : mismatch;
 
-  const expansionBlocked =
-    !onboarded || sessionDismissed || overlaysOpen || promptCity !== null;
-  const showExpansion =
-    !expansionBlocked && hasAccuratePosition && locatedCity === null;
+  const expansionBlocked = !onboarded || sessionDismissed || overlaysOpen || promptCity !== null;
+  const showExpansion = !expansionBlocked && hasAccuratePosition && locatedCity === null;
 
   useEffect(() => {
     if (switchBlocked || mismatch === null || preference !== 'always' || switchedRef.current)

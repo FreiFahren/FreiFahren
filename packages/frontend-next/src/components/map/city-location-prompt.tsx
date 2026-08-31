@@ -17,9 +17,7 @@ export function CityLocationPrompt() {
 
   if (!showExpansion && promptCity === null) return null;
 
-  const title = showExpansion
-    ? t('expansionTitle')
-    : t('title', { city: promptCity?.displayName });
+  const title = showExpansion ? t('expansionTitle') : t('title', { city: promptCity?.displayName });
   const description = showExpansion
     ? t('expansionDescription')
     : t('description', { city: promptCity?.displayName });
