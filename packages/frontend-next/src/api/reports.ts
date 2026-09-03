@@ -1,5 +1,11 @@
 import { Capacitor } from '@capacitor/core';
-import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  type QueryClient,
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import type { TFunction } from 'i18next';
 import { useEffect, useState } from 'react';
 
@@ -15,6 +21,8 @@ export type Report = {
   directionId: string | null;
   lineId: string | null;
   isPredicted: boolean;
+  /** Present only while a locally submitted report is waiting for the API response. */
+  optimisticId?: string;
   /*
    * When this report stops counting as live — the API's call, since it takes the whole city's
    * reports to spot a burst or a controller moving down a line. Everything that asks "is this
@@ -24,6 +32,98 @@ export type Report = {
    */
   expiresAt: string | null;
 };
+
+type OptimisticReport = Report & { optimisticId: string };
+
+const pendingOptimisticReports = new Map<string, OptimisticReport>();
+
+function isInRange(report: Report, fromMs: number, toMs: number): boolean {
+  const timestamp = new Date(report.timestamp).getTime();
+  return timestamp >= fromMs && timestamp <= toMs;
+}
+
+function isServerEquivalent(report: Report, optimisticReport: OptimisticReport): boolean {
+  return (
+    !report.optimisticId &&
+    report.stationId === optimisticReport.stationId &&
+    report.lineId === optimisticReport.lineId &&
+    report.directionId === optimisticReport.directionId &&
+    Math.abs(
+      new Date(report.timestamp).getTime() - new Date(optimisticReport.timestamp).getTime(),
+    ) < 10_000
+  );
+}
+
+function withPendingOptimisticReports(
+  reports: Report[],
+  fromMs: number,
+  toMs: number,
+  stationId?: string,
+): Report[] {
+  const pending = [...pendingOptimisticReports.values()].filter(
+    (report) =>
+      isInRange(report, fromMs, toMs) &&
+      (stationId === undefined || report.stationId === stationId) &&
+      !reports.some((item) => isServerEquivalent(item, report)),
+  );
+  return [...pending, ...reports];
+}
+
+function isReportListQuery(queryKey: readonly unknown[]): queryKey is ['reports', number, number] {
+  return (
+    queryKey[0] === 'reports' && typeof queryKey[1] === 'number' && typeof queryKey[2] === 'number'
+  );
+}
+
+function isStationReportsQuery(
+  queryKey: readonly unknown[],
+): queryKey is ['reports', string, string, string] {
+  return (
+    queryKey[0] === 'reports' &&
+    typeof queryKey[1] === 'string' &&
+    typeof queryKey[2] === 'string' &&
+    typeof queryKey[3] === 'string'
+  );
+}
+
+function reportsCacheRange(queryKey: readonly unknown[]): [number, number] | null {
+  if (isReportListQuery(queryKey)) {
+    const now = Date.now();
+    return [now - queryKey[1], now - queryKey[2]];
+  }
+  if (isStationReportsQuery(queryKey)) {
+    return [new Date(queryKey[2]).getTime(), new Date(queryKey[3]).getTime()];
+  }
+  return null;
+}
+
+function reportsCacheStationId(queryKey: readonly unknown[]): string | undefined {
+  return isStationReportsQuery(queryKey) ? queryKey[1] : undefined;
+}
+
+function updateOptimisticReportsInCache(queryClient: QueryClient) {
+  for (const query of queryClient.getQueryCache().findAll({
+    predicate: (query) => reportsCacheRange(query.queryKey) !== null,
+  })) {
+    const range = reportsCacheRange(query.queryKey);
+    if (!range) continue;
+    queryClient.setQueryData<Report[]>(query.queryKey, (reports) =>
+      reports === undefined
+        ? reports
+        : withPendingOptimisticReports(reports, ...range, reportsCacheStationId(query.queryKey)),
+    );
+  }
+}
+
+function removeOptimisticReportFromCache(queryClient: QueryClient, optimisticId: string) {
+  for (const query of queryClient.getQueryCache().findAll({
+    predicate: (query) => reportsCacheRange(query.queryKey) !== null,
+  })) {
+    queryClient.setQueryData<Report[]>(query.queryKey, (reports) =>
+      reports?.filter((report) => report.optimisticId !== optimisticId),
+    );
+  }
+}
 
 /** Whether a report is still current, as opposed to something that merely happened in the window. */
 export const isReportLive = (report: Report, nowMs: number): boolean =>
@@ -114,13 +214,14 @@ export const reportsSliceQueryOptions = (fromAgo: number, toAgo: number) => {
   const isLiveSlice = toAgo === 0;
   return {
     queryKey: ['reports', fromAgo, toAgo] as const,
-    queryFn: () => {
+    queryFn: async () => {
       const now = Date.now();
       const params = new URLSearchParams({
         from: new Date(now - fromAgo).toISOString(),
         to: new Date(now - toAgo).toISOString(),
       });
-      return fetchJson<Report[]>(`/v0/reports?${params.toString()}`);
+      const reports = await fetchJson<Report[]>(`/v0/reports?${params.toString()}`);
+      return withPendingOptimisticReports(reports, now - fromAgo, now - toAgo);
     },
     ...(isLiveSlice ? LIVE_SLICE_POLLING : OLDER_SLICE_POLLING),
   };
@@ -175,9 +276,15 @@ export const stationReportCountQueryOptions = (stationId: string) => {
   const to = new Date(toMs).toISOString();
   return {
     queryKey: ['reports', stationId, from, to] as const,
-    queryFn: () => {
+    queryFn: async () => {
       const params = new URLSearchParams({ from, to });
-      return fetchJson<Report[]>(`/v0/reports/${stationId}?${params.toString()}`);
+      const reports = await fetchJson<Report[]>(`/v0/reports/${stationId}?${params.toString()}`);
+      return withPendingOptimisticReports(
+        reports,
+        new Date(from).getTime(),
+        new Date(to).getTime(),
+        stationId,
+      );
     },
     staleTime: HOUR_MS,
   };
@@ -201,6 +308,11 @@ export type SubmitReportResponse = {
   lineId: string | null;
   directionId: string | null;
   timestamp: string;
+};
+
+type SubmitReportMutationInput = SubmitReportInput & {
+  onOptimistic: (report: SubmitReportResponse) => void;
+  onSubmissionError: (error: unknown) => void;
 };
 
 /*
@@ -261,7 +373,7 @@ export function useSubmitReport() {
   const { data: lines } = useLines();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: SubmitReportInput): Promise<SubmitReportResponse> =>
+    mutationFn: (input: SubmitReportMutationInput): Promise<SubmitReportResponse> =>
       traceAction('Submit Report', async () => {
         const lineId = resolveLineId(input, lines);
         const submitUrl = new URL(`${API_URL}/v0/reports`);
@@ -308,13 +420,47 @@ export function useSubmitReport() {
         }
         return response.json();
       }),
-    // The backend commits the report and clears its reports/risk caches before
-    // returning 200, so by the time we get here the new data is already live —
-    // no wait/race-condition guard is needed. Refetch both so the map and risk
-    // overlay reflect the report immediately instead of waiting for the poll.
-    onSuccess: () => {
+    onMutate: async (input) => {
+      const timestamp = new Date().toISOString();
+      const optimisticReport: OptimisticReport = {
+        optimisticId: crypto.randomUUID(),
+        timestamp,
+        stationId: input.stationId,
+        lineId: resolveLineId(input, lines),
+        directionId: input.directionStationId ?? null,
+        isPredicted: false,
+        // The server recalculates expiry based on all reports. This temporary value only keeps
+        // the pending item visible until its authoritative replacement is fetched.
+        expiresAt: new Date(Date.now() + HOUR_MS).toISOString(),
+      };
+
+      pendingOptimisticReports.set(optimisticReport.optimisticId, optimisticReport);
+      // An in-flight or interval refetch must not overwrite a report that is still pending.
+      await queryClient.cancelQueries({ queryKey: ['reports'] });
+      updateOptimisticReportsInCache(queryClient);
+      input.onOptimistic({
+        reportId: -1,
+        stationId: optimisticReport.stationId,
+        lineId: optimisticReport.lineId,
+        directionId: optimisticReport.directionId,
+        timestamp,
+      });
+      return optimisticReport;
+    },
+    // Remove the pending entry before invalidating. A refetch then supplies the server's report
+    // without leaving a duplicate behind, even if a cache observer was active during submission.
+    onSuccess: (_result, _input, optimisticReport) => {
+      pendingOptimisticReports.delete(optimisticReport.optimisticId);
+      removeOptimisticReportFromCache(queryClient, optimisticReport.optimisticId);
       void queryClient.invalidateQueries({ queryKey: ['reports'] });
       void queryClient.invalidateQueries({ queryKey: ['risk'] });
+    },
+    onError: (error, input, optimisticReport) => {
+      if (optimisticReport) {
+        pendingOptimisticReports.delete(optimisticReport.optimisticId);
+        removeOptimisticReportFromCache(queryClient, optimisticReport.optimisticId);
+      }
+      input.onSubmissionError(error);
     },
   });
 }
