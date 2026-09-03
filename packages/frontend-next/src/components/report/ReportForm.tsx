@@ -389,10 +389,12 @@ const REPEATED_FAILURE_THRESHOLD = 3;
 
 function SubmitFooter({
   onSubmitted,
+  onSubmissionError,
   onReportingDisabled,
   onRepeatedFailure,
 }: {
   onSubmitted: (result: SubmitReportResponse) => void;
+  onSubmissionError: () => void;
   onReportingDisabled: () => void;
   onRepeatedFailure: () => void;
 }) {
@@ -436,59 +438,60 @@ function SubmitFooter({
       );
       return;
     }
-    submitReport.mutate(
-      { stationId, lineName, directionStationId },
-      {
-        onSuccess: (result) => {
-          setConsecutiveFailures(0);
-          notifySuccess();
-          recordSubmission();
-          getFeatureFlagVariant(FEATURE_FLAGS.contributeModalTiming);
-          track('report_submitted', {
-            stationId: result.stationId,
-            lineId: result.lineId,
-            directionId: result.directionId,
-          });
-          onSubmitted(result);
-        },
-        onError: (error) => {
-          /*
-           * Backstop for the cases the probe cannot cover: the switch flipping between the probe
-           * and this submit, and a client whose probe never answered (offline, or an install that
-           * has not reached the API since). Without it the user fills in the whole form and gets a
-           * generic failure for a state the API told us about explicitly.
-           */
-          if (isReportingDisabledError(error)) {
-            onReportingDisabled();
-            return;
-          }
-          /*
-           * Every other failure (network error, an edge block before the token is even checked,
-           * an unexpected 5xx, …) must still tell the user something happened — otherwise the
-           * button just re-enables silently and a tap that produced no report reads as tapping
-           * nothing at all.
-           */
-          captureIssue('Report submit failed', {
-            status: error instanceof SubmitReportError ? error.status : undefined,
-          });
-          const failureCount = consecutiveFailures + 1;
-          setConsecutiveFailures(failureCount);
-          if (failureCount >= REPEATED_FAILURE_THRESHOLD) {
-            onRepeatedFailure();
-            return;
-          }
-          toast.custom(
-            () => (
-              <ToastPill className="bg-destructive flex w-fit items-center gap-2 text-sm font-semibold text-white">
-                <TriangleAlert className="size-4" />
-                {t('errorSubmitFailed')}
-              </ToastPill>
-            ),
-            { id: 'report-submit-error' },
-          );
-        },
+    submitReport.mutate({
+      stationId,
+      lineName,
+      directionStationId,
+      onOptimistic: (result) => {
+        setConsecutiveFailures(0);
+        notifySuccess();
+        recordSubmission();
+        getFeatureFlagVariant(FEATURE_FLAGS.contributeModalTiming);
+        track('report_submitted', {
+          stationId: result.stationId,
+          lineId: result.lineId,
+          directionId: result.directionId,
+        });
+        onSubmitted(result);
       },
-    );
+      onSubmissionError: (error) => {
+        onSubmissionError();
+        /*
+         * Backstop for the cases the probe cannot cover: the switch flipping between the probe
+         * and this submit, and a client whose probe never answered (offline, or an install that
+         * has not reached the API since). Without it the user fills in the whole form and gets a
+         * generic failure for a state the API told us about explicitly.
+         */
+        if (isReportingDisabledError(error)) {
+          onReportingDisabled();
+          return;
+        }
+        /*
+         * Every other failure (network error, an edge block before the token is even checked,
+         * an unexpected 5xx, …) must still tell the user something happened — otherwise the
+         * button just re-enables silently and a tap that produced no report reads as tapping
+         * nothing at all.
+         */
+        captureIssue('Report submit failed', {
+          status: error instanceof SubmitReportError ? error.status : undefined,
+        });
+        const failureCount = consecutiveFailures + 1;
+        setConsecutiveFailures(failureCount);
+        if (failureCount >= REPEATED_FAILURE_THRESHOLD) {
+          onRepeatedFailure();
+          return;
+        }
+        toast.custom(
+          () => (
+            <ToastPill className="bg-destructive flex w-fit items-center gap-2 text-sm font-semibold text-white">
+              <TriangleAlert className="size-4" />
+              {t('errorSubmitFailed')}
+            </ToastPill>
+          ),
+          { id: 'report-submit-error' },
+        );
+      },
+    });
   };
 
   return (
@@ -556,6 +559,7 @@ export function ReportForm() {
                   <DirectionPicker />
                   <SubmitFooter
                     onSubmitted={setResult}
+                    onSubmissionError={() => setResult(null)}
                     onReportingDisabled={() => setRefusedBySubmit(true)}
                     onRepeatedFailure={() => setRepeatedFailure(true)}
                   />
