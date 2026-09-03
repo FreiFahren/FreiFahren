@@ -125,6 +125,33 @@ function removeOptimisticReportFromCache(queryClient: QueryClient, optimisticId:
   }
 }
 
+function replaceOptimisticReportInCache(
+  queryClient: QueryClient,
+  optimisticId: string,
+  result: SubmitReportResponse,
+) {
+  for (const query of queryClient.getQueryCache().findAll({
+    predicate: (query) => reportsCacheRange(query.queryKey) !== null,
+  })) {
+    queryClient.setQueryData<Report[]>(query.queryKey, (reports) =>
+      reports?.map((report) =>
+        report.optimisticId === optimisticId
+          ? {
+              timestamp: result.timestamp,
+              stationId: result.stationId,
+              lineId: result.lineId,
+              directionId: result.directionId,
+              isPredicted: false,
+              // The following refetch supplies the server-calculated expiry. Keeping this
+              // temporary value avoids a visible gap between the optimistic and server records.
+              expiresAt: report.expiresAt,
+            }
+          : report,
+      ),
+    );
+  }
+}
+
 /** Whether a report is still current, as opposed to something that merely happened in the window. */
 export const isReportLive = (report: Report, nowMs: number): boolean =>
   report.expiresAt === null || new Date(report.expiresAt).getTime() > nowMs;
@@ -447,11 +474,11 @@ export function useSubmitReport() {
       });
       return optimisticReport;
     },
-    // Remove the pending entry before invalidating. A refetch then supplies the server's report
-    // without leaving a duplicate behind, even if a cache observer was active during submission.
-    onSuccess: (_result, _input, optimisticReport) => {
+    // Replace in place before invalidating. The active view keeps a record during the refetch,
+    // then receives the server's calculated expiry without a blank or duplicate state.
+    onSuccess: (result, _input, optimisticReport) => {
       pendingOptimisticReports.delete(optimisticReport.optimisticId);
-      removeOptimisticReportFromCache(queryClient, optimisticReport.optimisticId);
+      replaceOptimisticReportInCache(queryClient, optimisticReport.optimisticId, result);
       void queryClient.invalidateQueries({ queryKey: ['reports'] });
       void queryClient.invalidateQueries({ queryKey: ['risk'] });
     },
