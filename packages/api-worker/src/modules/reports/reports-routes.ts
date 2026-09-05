@@ -2,13 +2,12 @@ import { isNil } from 'lodash'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
 
-import { Env, reportError } from '../../app-env'
+import { Env } from '../../app-env'
 import { defineRoute } from '../../common/router'
 import { insertReportSchema } from '../../db'
 import { assertPublicReportIntakeEnabled, submitToReportGate } from '../report-gate'
 
 import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from './constants'
-import { invalidateStationReportsCache } from './reports-cache-middleware'
 import { resolveViewer } from './viewer'
 
 const reportsQuerySchema = z
@@ -103,38 +102,10 @@ export const postReport = defineRoute<Env>()({
     },
     handler: async (c) => {
         assertPublicReportIntakeEnabled(c)
-        const reportsService = c.get('reportsService')
-        const logger = c.get('logger')
-
-        const reportData = c.req.valid('json')
-
-        const postProcessedReportData = await reportsService.postProcessReport({
-            ...reportData,
-            source: reportData.source ?? 'telegram',
-        })
-
-        const report = await submitToReportGate(c, {
-            ...postProcessedReportData,
-            lineId: postProcessedReportData.lineId ?? null,
-            directionId: postProcessedReportData.directionId ?? null,
-        })
-
-        /*
-         * Awaited, not deferred: the app invalidates and refetches this station's count as soon as
-         * it sees the 200, so the entry has to be gone before we send it. A colo-local delete is
-         * cheap, and a cache miss must never fail a report that is already committed.
-         */
-        try {
-            await invalidateStationReportsCache(
-                c.req.url,
-                c.req.header('Origin') ?? null,
-                c.get('city').slug,
-                report.stationId
-            )
-        } catch (error) {
-            logger.warn({ stationId: report.stationId }, 'Failed to invalidate station reports cache')
-            reportError(error, { tags: { task: 'reports-cache-invalidation' } })
-        }
+        const input = c.req.valid('json')
+        const report = await c
+            .get('reportSubmissionService')
+            .submitPublicReport(input, (normalized) => submitToReportGate(c, normalized))
 
         return c.json(report)
     },

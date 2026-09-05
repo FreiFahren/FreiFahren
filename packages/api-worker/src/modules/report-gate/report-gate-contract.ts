@@ -64,3 +64,12 @@ export type PublicReportGate = {
     intake(request: ReportGateIntakeRequest): Promise<ReportGateResult<CreatedReport>>
     viewer(request: ReportGateViewerRequest): Promise<ReportGateResult<ReportViewer>>
 }
+
+export type TrustedReportGateIntakeRequest = {
+    city: CityDescriptor
+    report: NormalizedReport & { source: 'telegram' }
+}
+
+export type TrustedReportGate = {
+    intake(request: TrustedReportGateIntakeRequest): Promise<ReportGateResult<CreatedReport>>
+}

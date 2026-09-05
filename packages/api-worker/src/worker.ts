@@ -4,6 +4,7 @@ import { captureException, logger as sentryLogger, setTag, withSentry } from '@s
 import { Bindings, setErrorReporter, setScopeTagger } from './app-env'
 import { setSentryLogSink } from './common/logger'
 import { normalizeTransactionName } from './common/normalize-transaction-name'
+import { TelegramReportsEntrypoint } from './modules/reports/telegram-reports-entrypoint'
 
 import { app } from './index'
 
@@ -43,4 +44,15 @@ export default withSentry(
             return app.fetch(request, env, ctx)
         },
     } satisfies ExportedHandler<Bindings>
+)
+
+export const TrustedTelegramReportsEntrypoint = withSentry(
+    (env: Bindings) => ({
+        dsn: env.SENTRY_DSN,
+        release: env.SENTRY_RELEASE,
+        environment: env.NODE_ENV,
+        enableLogs: true,
+        tracesSampleRate: 1.0,
+    }),
+    TelegramReportsEntrypoint
 )

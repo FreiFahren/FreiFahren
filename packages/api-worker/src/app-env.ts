@@ -6,8 +6,10 @@ import { AppError } from './common/errors'
 import { createLogger, Logger, LogLevel } from './common/logger'
 import { createD1Db, DbConnection } from './db'
 import { InsightsService } from './modules/insights'
-import type { PublicReportGate } from './modules/report-gate/report-gate-contract'
+import type { PublicReportGate, TrustedReportGate } from './modules/report-gate/report-gate-contract'
 import { ReportsService } from './modules/reports'
+import { ReportSubmissionService } from './modules/reports/report-submission-service'
+import { invalidateStationReportsCache } from './modules/reports/reports-cache-middleware'
 import { RiskService } from './modules/risk'
 import type { CacheCtx } from './modules/transit/reference-cache'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
@@ -17,6 +19,7 @@ export type Bindings = {
     DB?: D1Database
     DB_HAMBURG?: D1Database
     DB_LEIPZIG?: D1Database
+    TRUSTED_REPORT_GATE?: TrustedReportGate
     REPORT_GATE?: PublicReportGate
     REPORT_GATE_MODE?: 'preview-open'
     CORS_ORIGINS?: string
@@ -84,6 +87,7 @@ export type Services = {
 export type Env = {
     Bindings: Bindings
     Variables: Services & {
+        reportSubmissionService: ReportSubmissionService
         logger: Logger
         config: AppConfig
         // This request's city database.
@@ -144,11 +148,7 @@ export const setScopeTagger = (tagger: ScopeTagger) => {
     scopeTagger = tagger
 }
 
-// Resolve the request's city from the explicit `?city=` query parameter. It is a
-// Query param, not a header, because Workers Cache keys requests by URL, preventing one city's cached responses from serving another. A missing param defaults to Berlin (legacy clients: the Capacitor app and old PWA shells); an unknown
-// City is a 400 rather than a silent fallback.
-const resolveCity = (c: Context<Env>): CityConfig => {
-    const requested = c.req.query('city') ?? DEFAULT_CITY_SLUG
+export const resolveCityBySlug = (requested: string): CityConfig => {
     const city = getCity(requested)
     if (city === undefined) {
         throw new AppError({
@@ -166,6 +166,25 @@ const resolveCity = (c: Context<Env>): CityConfig => {
 const cityDbBinding = (env: Bindings, dbBinding: string): D1Database | undefined =>
     (env as unknown as Record<string, D1Database | undefined>)[dbBinding]
 
+export const createCityDatabase = (env: Bindings, city: CityConfig): DbConnection => {
+    const binding = cityDbBinding(env, city.dbBinding)
+    if (binding === undefined) {
+        throw new AppError({ message: 'City database unavailable', statusCode: 503 })
+    }
+    return createD1Db(binding)
+}
+
+export const createCityServices = (db: DbConnection, city: CityConfig, cacheCtx: CacheCtx): Services => {
+    const transitNetworkDataService = new TransitNetworkDataService(db, city.slug, cacheCtx)
+    const reportsService = new ReportsService(db, transitNetworkDataService)
+    return {
+        transitNetworkDataService,
+        reportsService,
+        insightsService: new InsightsService(db, transitNetworkDataService, city.timezone),
+        riskService: new RiskService(reportsService, transitNetworkDataService),
+    }
+}
+
 const applyServices = (c: Context<Env>, db: DbConnection, config: AppConfig) => {
     // The executionCtx powers the cache write in cachedReference (waitUntil). It throws off
     // Workers (tests, seed CLI), where the cache is absent anyway, so fall back to undefined.
@@ -176,14 +195,22 @@ const applyServices = (c: Context<Env>, db: DbConnection, config: AppConfig) => 
         cacheCtx = undefined
     }
 
-    const transitNetworkDataService = new TransitNetworkDataService(db, c.get('city').slug, cacheCtx)
-    const reportsService = new ReportsService(db, transitNetworkDataService)
-
+    const services = createCityServices(db, c.get('city'), cacheCtx)
     c.set('config', config)
-    c.set('reportsService', reportsService)
-    c.set('insightsService', new InsightsService(db, transitNetworkDataService, c.get('city').timezone))
-    c.set('riskService', new RiskService(reportsService, transitNetworkDataService))
-    c.set('transitNetworkDataService', transitNetworkDataService)
+    c.set('reportsService', services.reportsService)
+    c.set(
+        'reportSubmissionService',
+        new ReportSubmissionService({
+            city: c.get('city'),
+            reportsService: services.reportsService,
+            logger: c.get('logger'),
+            invalidate: (stationId) =>
+                invalidateStationReportsCache(c.req.url, c.req.header('Origin') ?? null, c.get('city').slug, stationId),
+        })
+    )
+    c.set('insightsService', services.insightsService)
+    c.set('riskService', services.riskService)
+    c.set('transitNetworkDataService', services.transitNetworkDataService)
 }
 
 export const registerContext = (app: Hono<Env>) => {
@@ -201,7 +228,7 @@ export const registerContext = (app: Hono<Env>) => {
 
         // Resolve the city first: it decides which DB this request talks to, and every
         // Downstream query goes through the services built from that one binding below.
-        const city = resolveCity(c)
+        const city = resolveCityBySlug(c.req.query('city') ?? DEFAULT_CITY_SLUG)
         c.set('city', city)
         // Tag the Sentry request scope so every event/transaction is filterable by city.
         scopeTagger('city', city.slug)
@@ -209,11 +236,7 @@ export const registerContext = (app: Hono<Env>) => {
         // The city's D1 binding is the connection — no per-request lifecycle to manage. It is
         // Present on Workers and provided by the Miniflare pool in tests; the seed CLI reaches the
         // Same D1 through getPlatformProxy rather than this request path.
-        const binding = cityDbBinding(c.env, city.dbBinding)
-        if (binding === undefined) {
-            throw new Error(`No D1 binding "${city.dbBinding}" bound for city "${city.slug}"`)
-        }
-        const db = createD1Db(binding)
+        const db = createCityDatabase(c.env, city)
         c.set('db', db)
         applyServices(c, db, config)
 

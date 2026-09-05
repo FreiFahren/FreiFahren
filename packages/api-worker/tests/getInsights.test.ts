@@ -16,7 +16,7 @@ let variantStationIds: string[]
 
 const sendReportAt = async (timestamp: Date) => {
     setSystemTime(timestamp)
-    expect((await sendReportRequest({ stationId, source: 'telegram' })).status).toBe(200)
+    expect((await sendReportRequest({ stationId, source: 'web_app' })).status).toBe(200)
 }
 
 beforeAll(async () => {
@@ -122,9 +122,9 @@ describe('GET /insights/lines/:lineName', () => {
         const previousMonday = new Date('2026-07-06T12:15:00.000Z')
         const now = new Date('2026-07-13T12:00:00.000Z')
         setSystemTime(previousMonday)
-        expect((await sendReportRequest({ stationId, lineId, source: 'telegram' })).status).toBe(200)
+        expect((await sendReportRequest({ stationId, lineId, source: 'web_app' })).status).toBe(200)
         setSystemTime(new Date('2026-07-13T09:30:00.000Z'))
-        expect((await sendReportRequest({ stationId, lineId, source: 'telegram' })).status).toBe(200)
+        expect((await sendReportRequest({ stationId, lineId, source: 'web_app' })).status).toBe(200)
         setSystemTime(now)
 
         const response = await appRequestWithRedirect(`/insights/lines/${encodeURIComponent(lineName)}`)
@@ -176,7 +176,7 @@ describe('GET /insights/lines/:lineName', () => {
                     await sendReportRequest({
                         stationId: variantStationIds[index]!,
                         lineId: variantLineId,
-                        source: 'telegram',
+                        source: 'web_app',
                     })
                 ).status
             ).toBe(200)

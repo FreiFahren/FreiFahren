@@ -3,7 +3,11 @@ import { vi } from 'vitest'
 
 import type { Bindings } from '../src/app-env'
 import { app } from '../src/index'
-import type { PublicReportGate, ReportGateIntakeRequest } from '../src/modules/report-gate/report-gate-contract'
+import type {
+    PublicReportGate,
+    ReportGateIntakeRequest,
+    TrustedReportGate,
+} from '../src/modules/report-gate/report-gate-contract'
 
 const overrides: Partial<Bindings> = {}
 
@@ -50,45 +54,68 @@ const reportGateBinding: PublicReportGate = {
             } as const
         }
 
-        const cityDb = (workerEnv as unknown as Record<string, D1Database | undefined>)[body.city.dbBinding]
-        if (cityDb === undefined) throw new Error('Unknown database binding')
+        return persistFakeReport(body)
+    },
+}
 
-        const now = Date.now()
-        const row = await cityDb
-            .prepare(
-                `INSERT INTO reports
+const persistFakeReport = async (
+    body: ReportGateIntakeRequest,
+    trust = fakeReportGate.intakeTrust,
+    clientHash: string | null = hashFor(body.request)
+) => {
+    const cityDb = (workerEnv as unknown as Record<string, D1Database | undefined>)[body.city.dbBinding]
+    if (cityDb === undefined) throw new Error('Unknown database binding')
+
+    const now = Date.now()
+    const row = await cityDb
+        .prepare(
+            `INSERT INTO reports
              (station_id, line_id, direction_id, timestamp, source, client_hash, trust)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
              RETURNING report_id, station_id, line_id, direction_id, timestamp`
-            )
-            .bind(
-                body.report.stationId,
-                body.report.lineId,
-                body.report.directionId,
-                now,
-                body.report.source,
-                hashFor(body.request),
-                fakeReportGate.intakeTrust
-            )
-            .first<{
-                report_id: number
-                station_id: string
-                line_id: string | null
-                direction_id: string | null
-                timestamp: number
-            }>()
+        )
+        .bind(
+            body.report.stationId,
+            body.report.lineId,
+            body.report.directionId,
+            now,
+            body.report.source,
+            clientHash,
+            trust
+        )
+        .first<{
+            report_id: number
+            station_id: string
+            line_id: string | null
+            direction_id: string | null
+            timestamp: number
+        }>()
 
-        if (row === null) throw new Error('Insert failed')
-        return {
-            ok: true,
-            data: {
-                reportId: row.report_id,
-                stationId: row.station_id,
-                lineId: row.line_id,
-                directionId: row.direction_id,
-                timestamp: new Date(row.timestamp).toISOString(),
+    if (row === null) throw new Error('Insert failed')
+    return {
+        ok: true,
+        data: {
+            reportId: row.report_id,
+            stationId: row.station_id,
+            lineId: row.line_id,
+            directionId: row.direction_id,
+            timestamp: new Date(row.timestamp).toISOString(),
+        },
+    } as const
+}
+
+export const trustedReportGateBinding: TrustedReportGate = {
+    async intake(body) {
+        if (fakeReportGate.unavailable) throw new Error('Fake report gate unavailable')
+        fakeReportGate.lastIntake = body as unknown as Record<string, unknown>
+        return persistFakeReport(
+            {
+                ...body,
+                request: { ip: '', userAgent: '', asn: null, asOrganization: null, platform: 'telegram' },
             },
-        } as const
+            1,
+            null
+        )
     },
 }
 
@@ -114,6 +141,7 @@ export const testEnv = (): Bindings => ({
     POSTHOG_API_KEY: overrides.POSTHOG_API_KEY ?? workerEnv.POSTHOG_API_KEY,
     POSTHOG_HOST: overrides.POSTHOG_HOST ?? workerEnv.POSTHOG_HOST,
     REPORT_GATE: overrides.REPORT_GATE ?? reportGateBinding,
+    TRUSTED_REPORT_GATE: overrides.TRUSTED_REPORT_GATE ?? trustedReportGateBinding,
 })
 
 export const setSystemTime = (date?: Date) => {
