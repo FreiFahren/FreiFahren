@@ -374,7 +374,7 @@ async function main(): Promise<void> {
     const rows = args.smoke ? sample(dataset, args.n, args.seed) : dataset
 
     const profile = profileFor(cityName)
-    const index = await getTransitIndex(backendUrl, profile, cityName.toLowerCase())
+    const index = await getTransitIndex(backendUrl, profile, cityName.toLowerCase(), { fetch })
     const linePattern = buildLinePattern(index.lineNames)
     const systemPrompt = buildSystemPrompt(index, profile)
 

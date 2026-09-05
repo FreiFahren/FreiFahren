@@ -54,13 +54,13 @@ export function buildIndex(
 }
 
 // Notification bursts reuse transit responses locally as well as the API's edge cache.
-async function fetchTransit(url: string, ctx?: ExecutionContext): Promise<Response> {
-    if (!ctx) return fetch(url)
+async function fetchTransit(api: Pick<Fetcher, 'fetch'>, url: string, ctx?: ExecutionContext): Promise<Response> {
+    if (!ctx) return api.fetch(url)
     const cache = (caches as CacheStorage & { default: Cache }).default
     const key = new Request(url)
     const cached = await cache.match(key).catch(() => undefined)
     if (cached) return cached
-    const response = await fetch(url)
+    const response = await api.fetch(url)
     if (response.ok) {
         const stored = new Response(response.clone().body, response)
         stored.headers.set('Cache-Control', 'public, max-age=3600')
@@ -78,11 +78,12 @@ export async function getTransitIndex(
     backendUrl: string,
     profile: CityProfile,
     city: string,
+    api: Pick<Fetcher, 'fetch'>,
     ctx?: ExecutionContext
 ): Promise<TransitIndex> {
     const [stationsResp, linesResp] = await Promise.all([
-        fetchTransit(cityUrl(backendUrl, '/v0/transit/stations', city), ctx),
-        fetchTransit(cityUrl(backendUrl, '/v0/transit/lines', city), ctx),
+        fetchTransit(api, cityUrl(backendUrl, '/v0/transit/stations', city), ctx),
+        fetchTransit(api, cityUrl(backendUrl, '/v0/transit/lines', city), ctx),
     ])
     if (!stationsResp.ok) {
         throw new Error(`GET /v0/transit/stations failed: ${stationsResp.status}`)

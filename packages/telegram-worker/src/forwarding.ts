@@ -42,7 +42,7 @@ function formatForwardedReport(
 
 export async function forwardReport(
     { city: slug, report }: AcceptedReportNotification,
-    env: Pick<Env, 'NODE_ENV' | 'BACKEND_URL' | 'TELEGRAM_BOT_TOKEN'>,
+    env: Pick<Env, 'NODE_ENV' | 'BACKEND_URL' | 'TELEGRAM_BOT_TOKEN' | 'TRANSIT_API'>,
     ctx: ExecutionContext
 ): Promise<void> {
     const city = getCity(slug)
@@ -57,7 +57,7 @@ export async function forwardReport(
 
     try {
         if (!env.TELEGRAM_BOT_TOKEN) throw new Error('Telegram bot token is not configured')
-        const index = await getTransitIndex(env.BACKEND_URL, profileFor(slug), slug, ctx)
+        const index = await getTransitIndex(env.BACKEND_URL, profileFor(slug), slug, env.TRANSIT_API, ctx)
         if (
             !index.stations[report.stationId] ||
             (report.directionId !== null && !index.stations[report.directionId]) ||

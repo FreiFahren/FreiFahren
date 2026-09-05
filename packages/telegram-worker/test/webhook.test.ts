@@ -18,6 +18,12 @@ const testEnv: Env = {
     SENTRY_DSN: 'https://example.invalid/1',
     MISTRAL_API_KEY: 'test-mistral-key',
     TELEGRAM_WEBHOOK_SECRET: 'webhook-secret',
+    TRANSIT_API: {
+        fetch: async () => new Response(null, { status: 522 }),
+        connect: () => {
+            throw new Error('Unused')
+        },
+    },
     REPORT_API: { intake: async () => ({ ok: true, data: {} }) },
 }
 

@@ -28,7 +28,7 @@ export async function processMessage(text: string, env: Env, city: CitySlug): Pr
 
     const cfg = readConfigForCity(env, city)
     const profile = profileFor(cfg.city.slug)
-    const index = await getTransitIndex(cfg.backendUrl, profile, cfg.city.slug)
+    const index = await getTransitIndex(cfg.backendUrl, profile, cfg.city.slug, env.TRANSIT_API)
 
     const linePattern = buildLinePattern(index.lineNames)
     const detectedLine = detectLineName(text, index.lineNames, linePattern, index.circularLineNames, profile)

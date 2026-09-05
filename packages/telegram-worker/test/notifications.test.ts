@@ -24,6 +24,21 @@ const bindings: Env = {
     MISTRAL_API_KEY: 'unused',
     TELEGRAM_WEBHOOK_SECRET: 'unused',
     TELEGRAM_BOT_TOKEN: '1:test-secret',
+    TRANSIT_API: {
+        async fetch(input) {
+            transitReads++
+            const url = new URL(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url)
+            expect(url.searchParams.get('city')).toBe('leipzig')
+            if (url.pathname === '/v0/transit/stations')
+                return Response.json({ 'station-a': { name: 'A & <B>' }, 'station-b': { name: 'C' } })
+            if (url.pathname === '/v0/transit/lines')
+                return Response.json([{ id: 'line-a', name: 'L<1>', stations: ['station-a', 'station-b'] }])
+            throw new Error('Unexpected transit request')
+        },
+        connect() {
+            throw new Error('Unused')
+        },
+    },
     REPORT_API: { intake: async () => ({ ok: true, data: {} }) },
 }
 let messages: Record<string, unknown>[] = []
@@ -52,22 +67,8 @@ const deliver = async (input: unknown = notification, overrides: Partial<Env> = 
 beforeAll(() => {
     fetchMock.activate()
     fetchMock.disableNetConnect()
-    fetchMock
-        .get(bindings.BACKEND_URL)
-        .intercept({ path: '/v0/transit/stations?city=leipzig' })
-        .reply(() => {
-            transitReads++
-            return { statusCode: 200, data: { 'station-a': { name: 'A & <B>' }, 'station-b': { name: 'C' } } }
-        })
-        .persist()
-    fetchMock
-        .get(bindings.BACKEND_URL)
-        .intercept({ path: '/v0/transit/lines?city=leipzig' })
-        .reply(() => {
-            transitReads++
-            return { statusCode: 200, data: [{ id: 'line-a', name: 'L<1>', stations: ['station-a', 'station-b'] }] }
-        })
-        .persist()
+    // Public API fetches reproduce the production same-zone failure.
+    fetchMock.get(bindings.BACKEND_URL).intercept({ path: /./ }).reply(522).persist()
     fetchMock
         .get('https://api.telegram.org')
         .intercept({ path: '/bot1:test-secret/sendMessage', method: 'POST' })
@@ -93,7 +94,7 @@ beforeEach(async () => {
 })
 
 describe('accepted report notifications', () => {
-    it('resolves the destination, names and HTML in the Telegram worker and caches transit reads', async () => {
+    it('delivers through the transit binding despite public API 522s and caches transit reads', async () => {
         await deliver()
         expect(messages).toHaveLength(1)
         expect(messages[0]).toMatchObject({ chat_id: CITIES.leipzig.community.telegramChatId, parse_mode: 'HTML' })
@@ -103,6 +104,19 @@ describe('accepted report notifications', () => {
         await deliver({ ...notification, report: { ...notification.report, reportId: 2 } })
         expect(messages).toHaveLength(2)
         expect(transitReads).toBe(2)
+    })
+    it('surfaces a transit binding failure without attempting Telegram delivery', async () => {
+        await expect(
+            deliver(notification, {
+                TRANSIT_API: {
+                    fetch: async () => new Response(null, { status: 503 }),
+                    connect() {
+                        throw new Error('Unused')
+                    },
+                },
+            })
+        ).rejects.toBeInstanceOf(Error)
+        expect(messages).toHaveLength(0)
     })
     it('skips disabled cities, Telegram echoes and non-production delivery before doing any I/O', async () => {
         await deliver({ ...notification, city: 'berlin' })
