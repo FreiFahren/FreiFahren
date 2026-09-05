@@ -3,10 +3,11 @@ import type { FeatureCollection, Point } from 'geojson';
 import { useEffect } from 'react';
 
 import { HOUR_MS, type Report, useReports } from '@/api/reports';
-import { type Stations, useStations } from '@/api/transit';
+import { type Line, type Stations, useLines, useStations } from '@/api/transit';
 import { useReportSimulation } from '@/contexts/ReportSimulation.context';
 import { useNow } from '@/hooks/useNow';
 import { MIN_OPACITY, reportOpacity } from '@/lib/report-decay';
+import { reportDirectionBearing } from '@/lib/report-direction';
 import { useIsReportViewed } from '@/lib/viewed-reports';
 import { Route as ReportDetailRoute } from '@/routes/_map/reports/$stationId';
 
@@ -23,6 +24,7 @@ export type ReportPointProps = {
   timestamp: string;
   opacity: number;
   pulse: boolean;
+  bearing: number | null;
 };
 
 /*
@@ -36,6 +38,7 @@ function reportsToGeoJSON(
   stations: Stations,
   isViewed: (stationId: string, timestamp: string) => boolean,
   nowMs: number,
+  lines: Line[],
 ): FeatureCollection<Point, ReportPointProps> {
   const features = reports.flatMap((report) => {
     const station = stations[report.stationId];
@@ -59,7 +62,13 @@ function reportsToGeoJSON(
           type: 'Point' as const,
           coordinates: [station.coordinates.longitude, station.coordinates.latitude],
         },
-        properties: { stationId: report.stationId, timestamp: report.timestamp, opacity, pulse },
+        properties: {
+          stationId: report.stationId,
+          timestamp: report.timestamp,
+          opacity,
+          pulse,
+          bearing: reportDirectionBearing(report, lines, stations),
+        },
       },
     ];
   });
@@ -74,6 +83,7 @@ function reportsToGeoJSON(
 export function useReportsLayer(): FeatureCollection<Point, ReportPointProps> | null {
   const { data: liveReports } = useReports(HOUR_MS);
   const { data: stations } = useStations();
+  const { data: lines } = useLines();
   const isViewed = useIsReportViewed();
   const router = useRouter();
   const simulation = useReportSimulation();
@@ -83,7 +93,8 @@ export function useReportsLayer(): FeatureCollection<Point, ReportPointProps> | 
   const reports = simulation.reports ?? liveReports;
   const now = simulation.nowMs ?? wallNow;
 
-  const data = reports && stations ? reportsToGeoJSON(reports, stations, isViewed, now) : null;
+  const data =
+    reports && stations ? reportsToGeoJSON(reports, stations, isViewed, now, lines ?? []) : null;
 
   // Warm the report-detail route for every visible report. Reports navigate imperatively, so the
   // router's viewport preloading never sees them. Keyed on the station-id set so it only re-runs
