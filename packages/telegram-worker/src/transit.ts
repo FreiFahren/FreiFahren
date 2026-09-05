@@ -20,7 +20,7 @@ interface RawLine {
 export function buildIndex(
     rawStations: Record<string, RawStation>,
     rawLines: RawLine[],
-    profile: CityProfile,
+    profile: CityProfile
 ): TransitIndex {
     const variants: IndexVariant[] = rawLines.map((line) => ({
         id: line.id,
@@ -48,24 +48,41 @@ export function buildIndex(
     }
 
     const lineNames = [...new Set(variants.map((v) => v.name))].sort()
-    const circularLineNames = [
-        ...new Set(rawLines.filter((l) => l.isCircular).map((l) => l.name)),
-    ].sort()
+    const circularLineNames = [...new Set(rawLines.filter((l) => l.isCircular).map((l) => l.name))].sort()
 
     return { stations, byNorm, linesByStation, lineNames, circularLineNames, variants }
 }
 
-// No caching here; the api-worker serves these from its edge cache.
+// Notification bursts reuse transit responses locally as well as the API's edge cache.
+async function fetchTransit(url: string, ctx?: ExecutionContext): Promise<Response> {
+    if (!ctx) return fetch(url)
+    const cache = (caches as CacheStorage & { default: Cache }).default
+    const key = new Request(url)
+    const cached = await cache.match(key).catch(() => undefined)
+    if (cached) return cached
+    const response = await fetch(url)
+    if (response.ok) {
+        const stored = new Response(response.clone().body, response)
+        stored.headers.set('Cache-Control', 'public, max-age=3600')
+        ctx.waitUntil(cache.put(key, stored).catch(() => undefined))
+    }
+    return response
+}
 const cityUrl = (backendUrl: string, path: string, city: string): string => {
     const url = new URL(path, `${backendUrl}/`)
     url.searchParams.set('city', city)
     return url.toString()
 }
 
-export async function getTransitIndex(backendUrl: string, profile: CityProfile, city: string): Promise<TransitIndex> {
+export async function getTransitIndex(
+    backendUrl: string,
+    profile: CityProfile,
+    city: string,
+    ctx?: ExecutionContext
+): Promise<TransitIndex> {
     const [stationsResp, linesResp] = await Promise.all([
-        fetch(cityUrl(backendUrl, '/v0/transit/stations', city)),
-        fetch(cityUrl(backendUrl, '/v0/transit/lines', city)),
+        fetchTransit(cityUrl(backendUrl, '/v0/transit/stations', city), ctx),
+        fetchTransit(cityUrl(backendUrl, '/v0/transit/lines', city), ctx),
     ])
     if (!stationsResp.ok) {
         throw new Error(`GET /v0/transit/stations failed: ${stationsResp.status}`)
@@ -93,11 +110,7 @@ export function lineNameForId(index: TransitIndex, lineId: string): string | nul
 
 // Mirrors the frontend's longest-variant fallback: of the variants whose name matches (and
 // which contain the station, if given), return the id of the one with the most stations.
-export function resolveLineVariant(
-    index: TransitIndex,
-    lineName: string,
-    stationId: string | null,
-): string | null {
+export function resolveLineVariant(index: TransitIndex, lineName: string, stationId: string | null): string | null {
     let candidates = index.variants.filter((v) => v.name === lineName)
     if (candidates.length === 0) {
         return null
