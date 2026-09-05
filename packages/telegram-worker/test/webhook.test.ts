@@ -18,7 +18,7 @@ const testEnv: Env = {
     SENTRY_DSN: 'https://example.invalid/1',
     MISTRAL_API_KEY: 'test-mistral-key',
     TELEGRAM_WEBHOOK_SECRET: 'webhook-secret',
-    REPORT_GATE: { intake: async () => ({ ok: true, data: {} }) },
+    REPORT_API: { intake: async () => ({ ok: true, data: {} }) },
 }
 
 function makeUpdate(opts: {

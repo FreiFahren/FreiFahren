@@ -2,7 +2,7 @@
 
 TypeScript Cloudflare Worker for the FreiFahren Telegram bot. Telegram POSTs
 inspector-sighting messages to `/telegram/webhook`; the worker extracts a station/line/direction
-with Mistral and submits it through the report gate's trusted Service Binding. Allowed group IDs
+with Mistral and submits it through the API's trusted Service Binding for normalization before report-gate intake. Allowed group IDs
 come from each city's `community.telegramChatId` in `@freifahren/cities`.
 
 ## Develop

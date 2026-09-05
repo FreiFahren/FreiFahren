@@ -7,14 +7,14 @@
     "compatibility_flags": ["nodejs_compat"],
     "services": [
         {
-            "binding": "REPORT_GATE",
-            "service": "report-gate",
+            "binding": "REPORT_API",
+            "service": "api-worker",
             "entrypoint": "TrustedTelegramReportsEntrypoint",
         },
     ],
     "vars": {
         "NODE_ENV": "production",
-        // Public backend used only for transit reads; report writes use REPORT_GATE.
+        // Public backend used only for transit reads; report writes use REPORT_API.
         "BACKEND_URL": "https://api.freifahren.org",
         "MISTRAL_MODEL": "mistral-small-latest",
         "SENTRY_DSN": "https://9d9ac700f1213d4db367b557167a0594@o4508609338867712.ingest.de.sentry.io/4511633367564368",
