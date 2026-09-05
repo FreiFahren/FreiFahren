@@ -15,6 +15,7 @@ export type Env = Omit<Cloudflare.Env, 'NODE_ENV' | 'BACKEND_URL' | 'MISTRAL_MOD
     // Secrets (wrangler secret put)
     MISTRAL_API_KEY: string
     TELEGRAM_WEBHOOK_SECRET: string
+    TELEGRAM_BOT_TOKEN?: string
 }
 
 // Telegram update — only the fields we read.
@@ -85,3 +86,21 @@ export interface TransitIndex {
     circularLineNames: string[]
     variants: IndexVariant[]
 }
+
+export const AcceptedReportNotification = z
+    .object({
+        city: z.string().min(1).max(64),
+        report: z
+            .object({
+                reportId: z.number().int().positive(),
+                stationId: z.string().min(1).max(16),
+                lineId: z.string().min(1).max(16).nullable(),
+                directionId: z.string().min(1).max(16).nullable(),
+                timestamp: z.string().datetime(),
+                source: z.enum(['web_app', 'mini_app', 'mobile_app', 'telegram']),
+            })
+            .strict(),
+    })
+    .strict()
+
+export type AcceptedReportNotification = z.infer<typeof AcceptedReportNotification>

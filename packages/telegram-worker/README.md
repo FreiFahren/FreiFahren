@@ -39,7 +39,7 @@ CITY_NAME=Leipzig bun run eval --parallel 8
 
 ## Deploy
 
-Set secrets (`MISTRAL_API_KEY`, `TELEGRAM_WEBHOOK_SECRET`) with `wrangler secret put <NAME>`, then
+Set secrets (`MISTRAL_API_KEY`, `TELEGRAM_WEBHOOK_SECRET`, `TELEGRAM_BOT_TOKEN`) with `wrangler secret put <NAME>`, then
 `bun run deploy`. Add the existing bot to each configured city group and register its webhook once:
 
 ```sh
