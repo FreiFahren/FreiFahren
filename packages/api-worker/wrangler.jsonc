@@ -24,6 +24,11 @@
     ],
     "services": [
         {
+            "binding": "TRUSTED_REPORT_GATE",
+            "service": "report-gate",
+            "entrypoint": "TrustedTelegramReportsEntrypoint",
+        },
+        {
             "binding": "REPORT_GATE",
             "service": "report-gate",
             "entrypoint": "PublicReportsEntrypoint",

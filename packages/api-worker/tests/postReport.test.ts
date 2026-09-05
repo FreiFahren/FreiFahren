@@ -182,7 +182,7 @@ describe('Report API contract', () => {
         expect(body.stationId).toBe(sorted1)
     })
 
-    it('defaults to telegram source when source is missing in request', async () => {
+    it('defaults to web_app source when source is missing in request', async () => {
         const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
 
         const response = await sendReportRequest({
@@ -198,7 +198,7 @@ describe('Report API contract', () => {
             .orderBy(desc(reports.timestamp))
             .limit(1)
 
-        expect(report.source).toBe('telegram')
+        expect(report.source).toBe('web_app')
     })
 
     it('can submit a report with a direction', async () => {

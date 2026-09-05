@@ -34,7 +34,7 @@ describe('risk keys and segment ids', () => {
             .from(lineStations)
             .where(eq(lineStations.lineId, line.id))
             .limit(1)
-        await sendReportRequest({ stationId: station.stationId, lineId: line.id, source: 'telegram' }, app)
+        await sendReportRequest({ stationId: station.stationId, lineId: line.id, source: 'web_app' }, app)
 
         const [risk, collection] = await Promise.all([
             getJson<RiskResponse>('/risk'),

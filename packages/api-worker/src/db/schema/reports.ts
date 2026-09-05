@@ -52,12 +52,12 @@ const insertReportDbSchema = createInsertSchema(reports).pick({
 })
 
 // API input schema:
-// - Allows missing stationId (bot sometimes cannot detect it)
-// - Allows missing source (we default to telegram)
+// - Allows missing stationId so normalization can infer it
+// - Defaults public submissions to web_app; Telegram uses private RPC
 // - Requires at least one of stationId, lineId, or directionId
 export const insertReportSchema = insertReportDbSchema
     .extend({
-        source: insertReportDbSchema.shape.source.optional(),
+        source: z.enum(['mini_app', 'web_app', 'mobile_app']).default('web_app'),
         stationId: insertReportDbSchema.shape.stationId.optional(),
     })
     .superRefine((data, ctx) => {

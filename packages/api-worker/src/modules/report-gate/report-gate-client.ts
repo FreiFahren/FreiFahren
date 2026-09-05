@@ -6,7 +6,12 @@ import type { Env } from '../../app-env'
 import { AppError, normalizeInternalCode } from '../../common/errors'
 
 import { isOpenReportPreview, submitOpenPreviewReport } from './preview-report-gate'
-import type { NormalizedReport, PublicReportGate, ReportGateResult } from './report-gate-contract'
+import type {
+    NormalizedReport,
+    ReportGateResult,
+    TrustedReportGate,
+    TrustedReportGateIntakeRequest,
+} from './report-gate-contract'
 
 export type { NormalizedReport } from './report-gate-contract'
 
@@ -76,18 +81,16 @@ const reportGateUnavailable = (error?: unknown) =>
         description: error === undefined ? undefined : error instanceof Error ? error.message : String(error),
     })
 
-const callGate = async <T extends z.ZodType>(
-    c: Context<Env>,
-    call: (gate: PublicReportGate) => Promise<ReportGateResult<unknown>>,
-    dataSchema: T
-): Promise<z.output<T>> => {
-    if (c.env.REPORT_GATE === undefined) {
-        throw reportGateUnavailable()
-    }
+const callGate = async <Gate, Data>(
+    gate: Gate | undefined,
+    call: (gate: Gate) => Promise<ReportGateResult<unknown>>,
+    dataSchema: z.ZodType<Data>
+): Promise<Data> => {
+    if (gate === undefined) throw reportGateUnavailable()
 
-    let result: z.infer<typeof gateResultSchema>
+    let result: ReportGateResult<unknown>
     try {
-        result = gateResultSchema.parse(await call(c.env.REPORT_GATE))
+        result = gateResultSchema.parse(await call(gate))
     } catch (error) {
         throw reportGateUnavailable(error)
     }
@@ -111,7 +114,7 @@ export const submitToReportGate = async (c: Context<Env>, report: NormalizedRepo
     assertPublicReportIntakeEnabled(c)
 
     return callGate(
-        c,
+        c.env.REPORT_GATE,
         (gate) =>
             gate.intake({
                 city: cityDescriptor(c),
@@ -126,5 +129,12 @@ export const submitToReportGate = async (c: Context<Env>, report: NormalizedRepo
 export const resolveReportViewer = async (c: Context<Env>) => {
     if (isOpenReportPreview(c)) return { clientHash: null, minStationTrust: 0 }
 
-    return callGate(c, (gate) => gate.viewer({ city: cityDescriptor(c), request: requestMetadata(c) }), viewerSchema)
+    return callGate(
+        c.env.REPORT_GATE,
+        (gate) => gate.viewer({ city: cityDescriptor(c), request: requestMetadata(c) }),
+        viewerSchema
+    )
 }
+
+export const submitTrustedReportToGate = (gate: TrustedReportGate | undefined, input: TrustedReportGateIntakeRequest) =>
+    callGate(gate, (gate) => gate.intake(input), createdReportSchema)

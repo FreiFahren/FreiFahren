@@ -104,7 +104,7 @@ describe('station reports cache invalidation', () => {
         const key = await seedCacheEntry(stationA)
         expect(await cache.match(key)).toBeDefined()
 
-        expect((await sendReportRequest({ stationId: stationA, source: 'telegram' })).status).toBe(200)
+        expect((await sendReportRequest({ stationId: stationA, source: 'web_app' })).status).toBe(200)
 
         expect(await cache.match(key)).toBeUndefined()
     })
@@ -114,7 +114,7 @@ describe('station reports cache invalidation', () => {
         const keyA = await seedCacheEntry(stationA)
         const keyB = await seedCacheEntry(stationB)
 
-        expect((await sendReportRequest({ stationId: stationA, source: 'telegram' })).status).toBe(200)
+        expect((await sendReportRequest({ stationId: stationA, source: 'web_app' })).status).toBe(200)
 
         expect(await cache.match(keyA)).toBeUndefined()
         expect(await cache.match(keyB)).toBeDefined()

@@ -16,7 +16,7 @@ let testLineId: string
 
 const sendReportAt = async (timestamp: Date, stationId: string = testStationId, lineId: string = testLineId) => {
     setSystemTime(timestamp)
-    expect((await sendReportRequest({ stationId, lineId, source: 'telegram' })).status).toBe(200)
+    expect((await sendReportRequest({ stationId, lineId, source: 'web_app' })).status).toBe(200)
 }
 
 const toIsoSeconds = (value: DateTime) => value.toUTC().toISO({ suppressMilliseconds: true })!
@@ -43,7 +43,7 @@ const getValidReportPayload = async () => {
         stationId: stationOnLine.stationId,
         lineId: testLineId,
         directionId: stationOnLine.stationId,
-        source: 'telegram' as const,
+        source: 'web_app' as const,
     }
 }
 
@@ -180,7 +180,7 @@ describe('Predicted reports', () => {
         const realStationIds = [allStationIds[0], allStationIds[1]]
 
         for (const stationId of realStationIds) {
-            await sendReportRequest({ stationId, lineId: testLineId, directionId: stationId, source: 'telegram' })
+            await sendReportRequest({ stationId, lineId: testLineId, directionId: stationId, source: 'web_app' })
         }
 
         // Set 'to' after creating reports to ensure they're captured
@@ -220,7 +220,7 @@ describe('Predicted reports', () => {
         const stationId = allStationIds[0]
 
         for (let i = 0; i < 3; i++) {
-            await sendReportRequest({ stationId, lineId: testLineId, directionId: stationId, source: 'telegram' })
+            await sendReportRequest({ stationId, lineId: testLineId, directionId: stationId, source: 'web_app' })
         }
 
         // Set 'to' after creating reports to ensure they're captured
@@ -258,7 +258,7 @@ describe('Predicted reports', () => {
             stationId: realStationId,
             lineId: testLineId,
             directionId: realStationId,
-            source: 'telegram',
+            source: 'web_app',
         })
 
         // Set 'to' after creating reports to ensure they're captured
