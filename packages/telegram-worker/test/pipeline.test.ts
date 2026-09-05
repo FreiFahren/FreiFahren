@@ -1,13 +1,21 @@
 import { env, fetchMock } from 'cloudflare:test'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { processMessage } from '../src/pipeline'
 import type { Env } from '../src/types'
 import { rawTransit } from './fixtures'
+
+const transitFetch = vi.fn<Fetcher['fetch']>()
 
 const testEnv = env as unknown as Env
 
 const withReportApi = (capture?: { body?: Record<string, unknown> }, status = 200): Env => ({
     ...testEnv,
+    TRANSIT_API: {
+        fetch: transitFetch,
+        connect() {
+            throw new Error('Unused')
+        },
+    },
     REPORT_API: {
         async intake(body) {
             if (capture !== undefined) capture.body = body as unknown as Record<string, unknown>
@@ -24,14 +32,13 @@ const withReportApi = (capture?: { body?: Record<string, unknown> }, status = 20
 
 function interceptTransit(city = 'berlin') {
     const { rawStations, rawLines } = rawTransit()
-    fetchMock
-        .get('https://backend.test')
-        .intercept({ path: `/v0/transit/stations?city=${city}`, method: 'GET' })
-        .reply(200, JSON.stringify(rawStations), { headers: { 'content-type': 'application/json' } })
-    fetchMock
-        .get('https://backend.test')
-        .intercept({ path: `/v0/transit/lines?city=${city}`, method: 'GET' })
-        .reply(200, JSON.stringify(rawLines), { headers: { 'content-type': 'application/json' } })
+    transitFetch.mockImplementation(async (input) => {
+        const url = new URL(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url)
+        expect(url.searchParams.get('city')).toBe(city)
+        if (url.pathname === '/v0/transit/stations') return Response.json(rawStations)
+        if (url.pathname === '/v0/transit/lines') return Response.json(rawLines)
+        throw new Error('Unexpected transit request')
+    })
 }
 
 function interceptMistral(stationName: string | null, directionName: string | null) {
@@ -45,6 +52,7 @@ function interceptMistral(stationName: string | null, directionName: string | nu
 }
 
 beforeEach(() => {
+    transitFetch.mockReset().mockRejectedValue(new Error('Unexpected transit read'))
     fetchMock.activate()
     fetchMock.disableNetConnect()
 })
