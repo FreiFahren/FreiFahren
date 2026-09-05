@@ -59,12 +59,9 @@ describe('Report API contract', () => {
         expect(fakeReportGate.lastIntake).toMatchObject({
             city: {
                 slug: 'berlin',
-                publicAppUrl: 'https://app.freifahren.org',
                 dbBinding: 'DB',
-                telegramChatId: '-1001370021231',
                 reporting: {
                     publicSubmissionsEnabled: true,
-                    telegramForwardingEnabled: false,
                 },
             },
             report: {
@@ -72,6 +69,11 @@ describe('Report API contract', () => {
                 directionId: null,
                 source: 'web_app',
             },
+        })
+        expect(fakeReportGate.lastIntake?.city).toEqual({
+            slug: 'berlin',
+            dbBinding: 'DB',
+            reporting: { publicSubmissionsEnabled: true },
         })
         expect(fakeReportGate.lastIntake).toHaveProperty('report.lineId')
         expect(fakeReportGate.lastIntake).not.toHaveProperty('relayPassword')

@@ -1,11 +1,8 @@
 export type CityDescriptor = {
     slug: string
-    publicAppUrl: string
     dbBinding: string
-    telegramChatId: string | null
     reporting: {
         publicSubmissionsEnabled: boolean
-        telegramForwardingEnabled: boolean
     }
 }
 
