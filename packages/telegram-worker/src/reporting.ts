@@ -1,13 +1,12 @@
 import type { CityConfig } from '@freifahren/cities'
 
-import type { TrustedReportGate } from './report-gate-contract'
+import type { TelegramReportsApi } from './report-api-contract'
 import type { TransitIndex } from './types'
 import { type ExtractionResult, extractionToLog, isEmpty } from './extractor'
 import { resolveLineVariant } from './transit'
 
 export interface ReportPayload {
     stationId: string
-    source: 'telegram'
     lineId: string | null
     directionId: string | null
 }
@@ -21,7 +20,6 @@ export interface ReportIdentifiers {
 export function buildReportPayload(ids: ReportIdentifiers): ReportPayload {
     return {
         stationId: ids.stationId,
-        source: 'telegram',
         lineId: ids.lineId,
         directionId: ids.directionId,
     }
@@ -46,18 +44,12 @@ export function reportIdentifiers(index: TransitIndex, extraction: ExtractionRes
 
 // Throws on a rejected RPC result; the caller reports it (no retry).
 export async function postReport(
-    reportGate: TrustedReportGate,
+    reportApi: TelegramReportsApi,
     ids: ReportIdentifiers,
     city: CityConfig
 ): Promise<void> {
-    const result = await reportGate.intake({
-        city: {
-            slug: city.slug,
-            publicAppUrl: city.publicAppUrl,
-            dbBinding: city.dbBinding,
-            telegramChatId: city.community.telegramChatId ?? null,
-            reporting: city.reporting,
-        },
+    const result = await reportApi.intake({
+        city: city.slug,
         report: buildReportPayload(ids),
     })
     if (!result.ok) {
