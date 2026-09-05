@@ -7,6 +7,7 @@ import {
 } from '@/hooks/useReportsLayer';
 
 import { ReportPulseMarker } from './ReportPulseMarker';
+import { ReportDirectionMarker } from './report-direction-marker';
 
 const DOT_RADIUS = 8;
 const DOT_STROKE_WIDTH = 2;
@@ -38,9 +39,24 @@ export function ReportsLayer() {
         <Layer
           id={REPORTS_HIT_LAYER_ID}
           type="circle"
-          paint={{ 'circle-radius': 14, 'circle-color': '#000000', 'circle-opacity': 0 }}
+          paint={{
+            'circle-radius': ['case', ['!=', ['get', 'bearing'], null], 24, 14],
+            'circle-color': '#000000',
+            'circle-opacity': 0,
+          }}
         />
       </Source>
+      {data.features.map((feature, index) =>
+        feature.properties.bearing === null ? null : (
+          <ReportDirectionMarker
+            key={`${feature.properties.stationId}-${feature.properties.timestamp}-${index}`}
+            longitude={feature.geometry.coordinates[0]}
+            latitude={feature.geometry.coordinates[1]}
+            bearing={feature.properties.bearing}
+            opacity={feature.properties.opacity}
+          />
+        ),
+      )}
       {data.features
         .filter((feature) => feature.properties.pulse)
         .map((feature) => (
