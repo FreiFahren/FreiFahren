@@ -21,6 +21,7 @@ for (const viewport of [
     await page.goto('/line/U7?city=berlin');
     const chart = page.getByRole('img', { name: /Reports by hour/ });
     await expect(chart).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Current activity' })).toBeVisible();
     for (const hour of [0, 6, 12, 18, 24]) {
       await expect(chart.getByText(`${hour}h`, { exact: true })).toBeVisible();
     }
