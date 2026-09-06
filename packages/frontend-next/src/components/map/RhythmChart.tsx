@@ -11,7 +11,7 @@ export function RhythmChart({ hours, currentHour, label }: RhythmChartProps) {
 
   return (
     <div className="h-24" role="img" aria-label={label}>
-      <div className="relative flex h-20 items-end gap-px border-b border-white/15 px-1">
+      <div className="relative flex h-20 items-end gap-px border-b border-white/15">
         {hours.map(({ hour, value }) => (
           <div key={hour} className="flex h-full min-w-0 flex-1 items-end">
             <div
@@ -26,11 +26,19 @@ export function RhythmChart({ hours, currentHour, label }: RhythmChartProps) {
           style={{ left: `${((currentHour + 0.5) / 24) * 100}%` }}
         />
       </div>
-      <div className="text-text-4 mt-1 flex justify-between px-1 text-[10px]">
-        <span>0h</span>
-        <span>6h</span>
-        <span>12h</span>
-        <span>18h</span>
+      <div className="text-text-4 relative mt-1 text-[10px]">
+        {[0, 6, 12, 18, 24].map((hour) => (
+          <span
+            key={hour}
+            className="absolute"
+            style={{
+              left: `${(hour / 24) * 100}%`,
+              transform: `translateX(${hour === 0 ? 0 : hour === 24 ? -100 : -50}%)`,
+            }}
+          >
+            {hour}h
+          </span>
+        ))}
       </div>
     </div>
   );

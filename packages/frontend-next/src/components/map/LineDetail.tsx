@@ -101,23 +101,20 @@ export function LineDetail({ line, onClose, source }: LineDetailProps) {
       }
       closeLabel={t('close')}
       onClose={onClose}
-      cardClassName="h-[min(38rem,calc(100dvh-3rem))] overflow-hidden"
+      cardClassName="h-[min(32rem,calc(100dvh-3rem))] overflow-hidden"
     >
-      <div
-        className={cn(
-          'flex min-h-0 flex-1 flex-col overflow-hidden',
-          !insights && 'min-h-[23.5rem]',
-        )}
-        aria-busy={!insights}
-      >
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden" aria-busy={!insights}>
+        <div
+          className={cn('shrink-0', !hasLiveReports && 'invisible')}
+          aria-hidden={!hasLiveReports}
+        >
+          <LineCurrentActivity
+            reportsInLast24Hours={recentReportCount}
+            reportsInLastHour={lastHourReportCount}
+          />
+        </div>
         {insights && (
           <>
-            {hasLiveReports && (
-              <LineCurrentActivity
-                reportsInLast24Hours={recentReportCount}
-                reportsInLastHour={lastHourReportCount}
-              />
-            )}
             <section aria-labelledby="line-typical-activity-heading" className="shrink-0">
               <CardContent className="shrink-0 space-y-3 pt-1">
                 <h3
