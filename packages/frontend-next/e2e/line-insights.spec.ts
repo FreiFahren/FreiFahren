@@ -53,22 +53,14 @@ for (const viewport of [
     }));
     expect(dimensions.height).toBeGreaterThan(0);
     expect(dimensions.content - dimensions.height).toBeGreaterThanOrEqual(0);
-    // A collapsed list should leave no unused space before the report button.
-    if (viewport.height >= 844) {
-      expect(initialHeight).toBeLessThan(608);
-      const gap = await scroller.evaluate(
-        (element) =>
-          element.clientHeight - element.firstElementChild!.getBoundingClientRect().height,
-      );
-      expect(gap).toBeLessThan(8);
-    }
+    expect(initialHeight).toBeCloseTo(Math.min(512, viewport.height - 48), 0);
     await page.screenshot({ path: testInfo.outputPath('collapsed.png') });
     const groups = hotspots.getByRole('button', { expanded: false });
     const count = await groups.count();
     for (let index = 0; index < count; index++) await groups.first().click();
     await expect(cta).toBeInViewport();
     expect((await card.boundingBox())!.height).toBeLessThanOrEqual(
-      Math.min(608, viewport.height - 48) + 1,
+      Math.min(512, viewport.height - 48) + 1,
     );
     if (count) {
       await scroller.evaluate((element) => {
@@ -92,3 +84,48 @@ for (const viewport of [
     await expect(page).toHaveURL(/\/report\?.*lineName=U7/);
   });
 }
+
+test('keeps the modal and chart stable while insights and activity arrive separately', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  let releaseInsights!: () => void;
+  let releaseReports!: () => void;
+  const insightsReady = new Promise<void>((resolve) => {
+    releaseInsights = resolve;
+  });
+  const reportsReady = new Promise<void>((resolve) => {
+    releaseReports = resolve;
+  });
+  await page.route('**/insights/lines/U7?*', async (route) => {
+    await insightsReady;
+    await route.continue();
+  });
+  await page.route('**/reports?*', async (route) => {
+    await reportsReady;
+    await route.continue();
+  });
+  await page.goto('/line/U7?city=berlin');
+  const cta = page.getByRole('link', { name: 'Report sighting on the U7' });
+  await expect(cta).toBeVisible();
+  const card = page.locator('[data-slot="card"]').filter({ has: cta });
+  // Disable only the entrance animation so measurements isolate data-driven movement.
+  await card.evaluate((element) => {
+    element.style.animation = 'none';
+  });
+  const initialCard = await card.boundingBox();
+  const initialCta = await cta.boundingBox();
+  const chart = page.getByRole('img', { name: /Reports by hour/ });
+  await expect(chart).toHaveCount(0);
+  releaseInsights();
+  await expect(chart).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Current activity' })).toBeHidden();
+  const chartBeforeActivity = await chart.boundingBox();
+  expect(await card.boundingBox()).toEqual(initialCard);
+  expect(await cta.boundingBox()).toEqual(initialCta);
+  releaseReports();
+  await expect(page.getByRole('heading', { name: 'Current activity' })).toBeVisible();
+  expect(await card.boundingBox()).toEqual(initialCard);
+  expect(await cta.boundingBox()).toEqual(initialCta);
+  expect(await chart.boundingBox()).toEqual(chartBeforeActivity);
+});
