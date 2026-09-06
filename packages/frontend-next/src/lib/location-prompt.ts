@@ -2,8 +2,10 @@ import { Capacitor } from '@capacitor/core';
 
 import { useSyncExternalStore } from 'react';
 
-// Let users orient themselves before the in-app explanation appears. The browser/OS prompt still
-// requires a later explicit tap on "Use location".
+import { track } from '@/lib/analytics';
+import { safeLocalStorage } from '@/lib/safe-storage';
+
+// Let first-time users orient themselves before the in-app explanation appears.
 export const LOCATION_PROMPT_DELAY_MS = 10_000;
 
 export type GeolocationPermissionState = 'granted' | 'denied' | 'prompt' | 'unsupported';
@@ -31,6 +33,34 @@ export async function queryGeolocationPermission(): Promise<GeolocationPermissio
   } catch {
     return 'unsupported';
   }
+}
+
+const PREVIOUS_SUCCESS_KEY = 'locationPreviouslySucceeded';
+
+export function rememberLocationSuccess(): void {
+  safeLocalStorage.setItem(PREVIOUS_SUCCESS_KEY, 'true');
+}
+
+export function forgetLocationSuccess(): void {
+  safeLocalStorage.removeItem(PREVIOUS_SUCCESS_KEY);
+}
+
+export async function getLocationSharingAction(): Promise<'request' | 'denied' | 'prompt'> {
+  const permission = await queryGeolocationPermission();
+  track('location_permission_evaluated', { state: permission });
+  if (permission === 'denied') {
+    forgetLocationSuccess();
+    return 'denied';
+  }
+  if (permission === 'granted') return 'request';
+
+  // Safari can report "prompt" until geolocation is used on this page, even with an existing
+  // grant. Previous success lets returning web users skip our explanation; an expired grant
+  // may still cause Safari to show its own prompt. Native permission checks remain authoritative.
+  if (!Capacitor.isNativePlatform() && safeLocalStorage.getItem(PREVIOUS_SUCCESS_KEY) === 'true') {
+    return 'request';
+  }
+  return 'prompt';
 }
 
 // Surfaces the OS location dialog on native and resolves to the resulting state. On the web this is

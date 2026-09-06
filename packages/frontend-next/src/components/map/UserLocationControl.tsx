@@ -103,8 +103,7 @@ export function ReportLocationStep({ children }: { children: ReactNode }) {
 }
 
 /**
- * Acquires an already-granted location silently. Otherwise it shows one in-app explanation before
- * the browser or OS prompt, so permission is only requested from a user gesture.
+ * Restores location for returning users and explains location sharing to first-time users.
  */
 export function UserLocationControl() {
   const { current: map } = useMap();
