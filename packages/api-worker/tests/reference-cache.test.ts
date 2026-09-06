@@ -61,6 +61,16 @@ describe('cachedReference (real Cache API)', () => {
         expect(entry!.headers.get('Cache-Control')).toBe(REFERENCE_CACHE_CONTROL)
     })
 
+    it('honors a shorter lifetime for date-scoped insights', async () => {
+        const key = internalKey('berlin', 'spec-city-profile')
+        await withCtx((ctx) =>
+            cachedReference('berlin', 'spec-city-profile', async () => ({ hours: [] }), ctx, 'public, max-age=30')
+        )
+        const entry = await cache.match(key)
+        expect(entry?.headers.get('Cache-Control')).toBe('public, max-age=30')
+        expect(entry?.headers.get('Cache-Tag')).toBe(transitCacheTag('berlin'))
+    })
+
     it('namespaces cached values by resource key', async () => {
         internalKey('berlin', 'stations')
         internalKey('berlin', 'lines')

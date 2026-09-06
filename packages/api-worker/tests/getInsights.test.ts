@@ -195,6 +195,86 @@ describe('GET /insights/lines/:lineName', () => {
         )
     })
 
+    it('batches distinct line names with the same payloads as individual requests', async () => {
+        setSystemTime(new Date('2026-07-13T09:00:00.000Z'))
+        for (const [index, variantLineId] of variantLineIds.entries()) {
+            expect(
+                (
+                    await sendReportRequest({
+                        stationId: variantStationIds[index]!,
+                        lineId: variantLineId,
+                        source: 'web_app',
+                    })
+                ).status
+            ).toBe(200)
+        }
+        const names = [...new Set([lineName, multiVariantLineName])]
+        const response = await appRequestWithRedirect(
+            `/insights/lines?names=${encodeURIComponent([...names, names[0]].join(','))}`
+        )
+        expect(response.status).toBe(200)
+        expect(response.headers.get('Cloudflare-CDN-Cache-Control')).toBe('public, max-age=46800')
+        const batch = await response.json()
+        const individual = await Promise.all(
+            names.map(async (name) => {
+                const response = await appRequestWithRedirect(`/insights/lines/${encodeURIComponent(name)}`)
+                return response.json()
+            })
+        )
+        expect(batch).toEqual(individual)
+    })
+
+    it.each(['', '?names=', '?names=UNKNOWN_LINE', '?names=' + Array(51).fill('U8').join(',')])(
+        'rejects invalid batches: %s',
+        async (query) => {
+            const response = await appRequestWithRedirect(`/insights/lines${query}`)
+            expect(response.status).toBe(query.includes('UNKNOWN_LINE') ? 404 : 400)
+            expect(response.headers.get('Cloudflare-CDN-Cache-Control')).toBeNull()
+        }
+    )
+
+    it('preserves city-local weekdays, repeated DST hours, and the exact oldest timestamp', async () => {
+        const timestamps = [
+            '2026-10-24T21:59:59.000Z',
+            '2026-10-24T22:00:01.000Z',
+            '2026-10-25T00:05:00.000Z',
+            '2026-10-25T00:06:00.000Z',
+            '2026-10-25T01:05:00.000Z',
+        ]
+        for (const timestamp of timestamps) await sendReportAt(new Date(timestamp))
+        setSystemTime(new Date('2026-10-25T12:00:00.000Z'))
+        const response = await appRequestWithRedirect(`/insights/lines?names=${encodeURIComponent(lineName)}`)
+        const [insight] = lineInsightsSchema.array().parse(await response.json())
+        expect(insight.profile.source).toBe('city_reports')
+        expect(insight.profile.metric.range.start).toBe(timestamps[0])
+        expect(insight.profile.weekday).toBe(7)
+        expect(insight.profile.hours.filter((hour: { value: number }) => hour.value > 0)).toEqual([
+            { hour: 0, value: 1 },
+            { hour: 2, value: 3 },
+        ])
+        expect(insight.hotspots.stations).toEqual([])
+    })
+
+    it('retains the line-specific threshold and excludes other weekdays and city reports', async () => {
+        const first = new Date('2026-01-05T12:00:00.000Z')
+        for (let week = 0; week < 24; week++) {
+            setSystemTime(new Date(first.getTime() + week * 7 * 86400000))
+            for (let report = 0; report < 4; report++) {
+                expect((await sendReportRequest({ stationId, lineId, source: 'web_app' })).status).toBe(200)
+            }
+        }
+        await sendReportAt(new Date('2026-06-22T08:00:00.000Z'))
+        setSystemTime(new Date('2026-06-23T08:00:00.000Z'))
+        expect((await sendReportRequest({ stationId, lineId, source: 'web_app' })).status).toBe(200)
+        setSystemTime(new Date('2026-06-29T12:00:00.000Z'))
+        const response = await appRequestWithRedirect(`/insights/lines?names=${encodeURIComponent(lineName)}`)
+        const [insight] = lineInsightsSchema.array().parse(await response.json())
+        expect(insight.profile.source).toBe('line_reports')
+        expect(insight.profile.metric.range.start).toBe(first.toISOString())
+        expect(insight.profile.hours.reduce((sum: number, hour: { value: number }) => sum + hour.value, 0)).toBe(96)
+        expect(insight.hotspots.stations).toEqual([{ stationId, name: expect.any(String), value: 97, share: 1 }])
+    })
+
     it('returns the standard line-not-found error', async () => {
         const response = await appRequestWithRedirect('/insights/lines/UNKNOWN_LINE')
 

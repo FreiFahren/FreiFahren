@@ -31,7 +31,8 @@ export const cachedReference = async <T>(
     citySlug: string,
     key: string,
     loader: () => Promise<T>,
-    ctx: CacheCtx
+    ctx: CacheCtx,
+    cacheControl: string = REFERENCE_CACHE_CONTROL
 ): Promise<T> => {
     const cache = typeof caches !== 'undefined' ? (caches as unknown as { default: EdgeCache }).default : undefined
     if (cache === undefined) {
@@ -48,7 +49,7 @@ export const cachedReference = async <T>(
     const entry = new Response(JSON.stringify(value), {
         headers: {
             'Content-Type': 'application/json',
-            'Cache-Control': REFERENCE_CACHE_CONTROL,
+            'Cache-Control': cacheControl,
             'Cache-Tag': transitCacheTag(citySlug),
         },
     })

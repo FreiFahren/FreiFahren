@@ -1,11 +1,12 @@
-import { asc, count, desc, eq, gte, inArray } from 'drizzle-orm'
+import { asc, count, gte, inArray, sql } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
 
 import { AppError } from '../../common/errors'
-import { DbConnection, lines, reports, stations } from '../../db'
+import { DbConnection, reports } from '../../db'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
-import type { StationId } from '../transit/types'
+import { cachedReference, type CacheCtx } from '../transit/reference-cache'
+import type { StationId, Stations } from '../transit/types'
 
 const THIRTY_DAYS_IN_MS = 30 * 24 * 60 * 60 * 1000
 const MIN_PROFILE_REPORTS = 80
@@ -66,13 +67,17 @@ export const lineInsightsSchema = z.object({
 
 export type LineInsights = z.infer<typeof lineInsightsSchema>
 
+type CityProfile = { start: string | null; hours: Array<{ hour: number; value: number }> }
+
 const toIso = (date: Date) => date.toISOString()
 
 export class InsightsService {
     constructor(
         private db: DbConnection,
         private transitNetworkDataService: TransitNetworkDataService,
-        private timezone: string = 'UTC'
+        private timezone: string = 'UTC',
+        private citySlug: string = 'unknown',
+        private cacheCtx: CacheCtx = undefined
     ) {}
 
     async getStationInsights(stationId: StationId, now: Date = new Date()): Promise<StationInsights> {
@@ -108,25 +113,99 @@ export class InsightsService {
     }
 
     async getLineInsights(lineName: string, now: Date = new Date()): Promise<LineInsights> {
-        const matchingLines = await this.db.select({ id: lines.id }).from(lines).where(eq(lines.name, lineName))
-        if (matchingLines.length === 0) {
-            throw new AppError({
-                message: 'Line not found',
-                statusCode: 404,
-                internalCode: 'LINE_NOT_FOUND',
-                description: `lineName=${lineName}`,
-            })
+        const [insights] = await this.getLinesInsights([lineName], now)
+        return insights!
+    }
+
+    async getLinesInsights(lineNames: string[], now: Date = new Date()): Promise<LineInsights[]> {
+        const allLines = await this.transitNetworkDataService.getLines()
+        const names = [...new Set(lineNames)]
+        const variantsByName = new Map(names.map((name) => [name, allLines.filter((line) => line.name === name)]))
+        for (const [name, variants] of variantsByName) {
+            if (variants.length === 0) {
+                throw new AppError({
+                    message: 'Line not found',
+                    statusCode: 404,
+                    internalCode: 'LINE_NOT_FOUND',
+                    description: `lineName=${name}`,
+                })
+            }
         }
-        const variantIds = matchingLines.map((line) => line.id)
+        const selectedLines = [...variantsByName.values()].flat()
+        // Read history once for the entire preload; live predictions never enter these insights.
+        const [historicalReports, stationNames] = await Promise.all([
+            this.db
+                .select({ lineId: reports.lineId, timestamp: reports.timestamp, stationId: reports.stationId })
+                .from(reports)
+                .where(
+                    inArray(
+                        reports.lineId,
+                        selectedLines.map((line) => line.id)
+                    )
+                )
+                .orderBy(asc(reports.timestamp)),
+            this.transitNetworkDataService.getStations(),
+        ])
+        const nameById = new Map(selectedLines.map((line) => [line.id, line.name]))
+        const historyByName = new Map(names.map((name) => [name, [] as typeof historicalReports]))
+        for (const report of historicalReports) {
+            const name = report.lineId === null ? undefined : nameById.get(report.lineId)
+            if (name !== undefined) historyByName.get(name)!.push(report)
+        }
+        let cityProfile: Promise<CityProfile> | undefined
+        return Promise.all(
+            names.map((name) =>
+                this.buildLineInsights(
+                    name,
+                    variantsByName.get(name)!.length,
+                    historyByName.get(name)!,
+                    stationNames,
+                    now,
+                    () => (cityProfile ??= this.getCityProfile(now))
+                )
+            )
+        )
+    }
 
-        // Historical insights read the reports table directly. Predictions belong only to the live
-        // Reports service and must never enter this cacheable response.
-        const historicalReports = await this.db
-            .select({ timestamp: reports.timestamp, stationId: reports.stationId })
-            .from(reports)
-            .where(inArray(reports.lineId, variantIds))
-            .orderBy(asc(reports.timestamp))
+    private async getCityProfile(now: Date): Promise<CityProfile> {
+        const localNow = DateTime.fromJSDate(now, { zone: this.timezone })
+        const ttl = Math.max(1, Math.ceil(localNow.plus({ days: 1 }).startOf('day').diff(localNow, 'seconds').seconds))
+        return cachedReference(
+            this.citySlug,
+            `city-profile-v1/${this.timezone}/${localNow.toISODate()}`,
+            async () => {
+                // UTC quarter-hours preserve local hour/weekday boundaries, including DST and fractional offsets.
+                const bucket = sql<number>`cast(${reports.timestamp} / 900000 as integer)`
+                const rows = await this.db
+                    .select({
+                        bucket,
+                        first: sql<number>`min(${reports.timestamp})`,
+                        value: count(),
+                    })
+                    .from(reports)
+                    .groupBy(bucket)
+                const hours = Array.from({ length: 24 }, (_, hour) => ({ hour, value: 0 }))
+                let first: number | undefined
+                for (const row of rows) {
+                    first = first === undefined ? row.first : Math.min(first, row.first)
+                    const time = DateTime.fromMillis(row.bucket * 900000, { zone: this.timezone })
+                    if (time.weekday === localNow.weekday) hours[time.hour]!.value += row.value
+                }
+                return { start: first === undefined ? null : new Date(first).toISOString(), hours }
+            },
+            this.cacheCtx,
+            `public, max-age=${ttl}`
+        )
+    }
 
+    private async buildLineInsights(
+        lineName: string,
+        variantCount: number,
+        historicalReports: Array<{ timestamp: Date; stationId: string }>,
+        stationNames: Stations,
+        now: Date,
+        loadCityProfile: () => Promise<CityProfile>
+    ): Promise<LineInsights> {
         const weekday = DateTime.fromJSDate(now, { zone: this.timezone }).weekday
         const lineProfileReports = historicalReports.filter(
             (report) => DateTime.fromJSDate(report.timestamp, { zone: this.timezone }).weekday === weekday
@@ -139,32 +218,36 @@ export class InsightsService {
         )
         const profileUsesCityFallback =
             lineProfileReports.length < MIN_PROFILE_REPORTS || profileWeeks.size < MIN_PROFILE_WEEKS
-        const profileReports = profileUsesCityFallback
-            ? await this.db.select({ timestamp: reports.timestamp }).from(reports).orderBy(asc(reports.timestamp))
-            : lineProfileReports
-        const profileRange = { start: toIso(profileReports[0]?.timestamp ?? now), end: toIso(now) }
+        const cityProfile = profileUsesCityFallback ? await loadCityProfile() : undefined
+        const profileRange = {
+            start: cityProfile ? (cityProfile.start ?? toIso(now)) : toIso(lineProfileReports[0]?.timestamp ?? now),
+            end: toIso(now),
+        }
         const observedRange = { start: toIso(historicalReports[0]?.timestamp ?? now), end: toIso(now) }
-        const hours = Array.from({ length: 24 }, (_, hour) => ({ hour, value: 0 }))
+        const hours = cityProfile?.hours ?? Array.from({ length: 24 }, (_, hour) => ({ hour, value: 0 }))
         const totalsByStation = new Map<string, number>()
-        for (const report of profileReports) {
-            const time = DateTime.fromJSDate(report.timestamp, { zone: this.timezone })
-            if (time.weekday === weekday) hours[time.hour]!.value += 1
+        if (!cityProfile) {
+            for (const report of lineProfileReports) {
+                const time = DateTime.fromJSDate(report.timestamp, { zone: this.timezone })
+                hours[time.hour]!.value += 1
+            }
         }
         for (const report of historicalReports) {
             totalsByStation.set(report.stationId, (totalsByStation.get(report.stationId) ?? 0) + 1)
         }
 
-        const hotspotRows = await this.db
-            .select({ stationId: stations.id, name: stations.name, value: count() })
-            .from(reports)
-            .innerJoin(stations, eq(stations.id, reports.stationId))
-            .where(inArray(reports.lineId, variantIds))
-            .groupBy(stations.id, stations.name)
-            .orderBy(desc(count()))
+        const hotspotRows = [...totalsByStation]
+            .filter(([stationId]) => Object.hasOwn(stationNames, stationId))
+            .map(([stationId, value]) => ({ stationId, name: stationNames[stationId]!.name, value }))
+            .sort((a, b) => {
+                if (a.value !== b.value) return b.value - a.value
+                if (a.stationId === b.stationId) return 0
+                return a.stationId < b.stationId ? -1 : 1
+            })
 
         const total = historicalReports.length
         return lineInsightsSchema.parse({
-            line: { name: lineName, variantCount: variantIds.length },
+            line: { name: lineName, variantCount },
             profile: {
                 source: profileUsesCityFallback ? 'city_reports' : 'line_reports',
                 metric: { name: 'report_count', range: profileRange },
