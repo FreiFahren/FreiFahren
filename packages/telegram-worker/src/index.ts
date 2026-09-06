@@ -1,8 +1,9 @@
-import { withSentry } from '@sentry/cloudflare'
+import { withSentry, instrumentDurableObjectWithSentry } from '@sentry/cloudflare'
 import type { Env } from './types'
 import { handleWebhook } from './webhook'
 import { sentryOptions } from './observability'
 import { TelegramNotifications } from './notifications'
+import { CityDelivery as CityDeliveryObject } from './city-delivery'
 
 // withSentry wraps the handler: unhandled errors in fetch are captured automatically,
 // console.* is forwarded to Sentry Logs, and Sentry.captureException works inside
@@ -23,3 +24,8 @@ export default withSentry((env: Env) => sentryOptions(env), {
 } satisfies ExportedHandler<Env>)
 
 export const TelegramNotificationsEntrypoint = withSentry(sentryOptions, TelegramNotifications)
+
+export const CityDelivery = instrumentDurableObjectWithSentry(
+    (env: Cloudflare.Env) => sentryOptions(env),
+    CityDeliveryObject
+)
