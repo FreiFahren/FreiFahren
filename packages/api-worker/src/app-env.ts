@@ -180,7 +180,7 @@ export const createCityServices = (db: DbConnection, city: CityConfig, cacheCtx:
     return {
         transitNetworkDataService,
         reportsService,
-        insightsService: new InsightsService(db, transitNetworkDataService, city.timezone),
+        insightsService: new InsightsService(db, transitNetworkDataService, city.timezone, city.slug, cacheCtx),
         riskService: new RiskService(reportsService, transitNetworkDataService),
     }
 }

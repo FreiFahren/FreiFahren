@@ -26,3 +26,20 @@ export const getLineInsights = defineRoute<Env>()({
         return c.json(await c.get('insightsService').getLineInsights(lineName))
     },
 })
+
+export const getLinesInsights = defineRoute<Env>()({
+    method: 'get',
+    path: '/lines',
+    schemas: {
+        query: z.object({
+            names: z
+                .string()
+                .transform((value) => value.split(','))
+                .pipe(z.array(z.string().min(1).max(100)).min(1).max(50)),
+        }),
+    },
+    handler: async (c) => {
+        const { names } = c.req.valid('query')
+        return c.json(await c.get('insightsService').getLinesInsights(names))
+    },
+})
