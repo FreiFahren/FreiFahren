@@ -21,7 +21,17 @@ await run('bun', ['run', 'seed', '--city', 'berlin', '--persist-to', persistence
 
 const worker = spawn(
   'bunx',
-  ['wrangler', 'dev', '--local', '--port', '8787', '--persist-to', persistencePath],
+  [
+    'wrangler',
+    'dev',
+    '--local',
+    '--var',
+    'REPORT_GATE_MODE:preview-open',
+    '--port',
+    '8787',
+    '--persist-to',
+    persistencePath,
+  ],
   { cwd: apiWorkerDir, stdio: 'inherit' },
 );
 
