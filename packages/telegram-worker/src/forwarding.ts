@@ -3,8 +3,7 @@ import type { Env, TransitIndex } from './types'
 import type { AcceptedReportNotification } from './types'
 import { profileFor } from './config'
 import { getTransitIndex, lineNameForId } from './transit'
-import { reportError } from './observability'
-import { sendTelegramMessage } from './telegram-client'
+import { DELIVERY_POLICY } from './delivery-policy'
 
 function escapeHtml(s: string): string {
     return s
@@ -40,24 +39,26 @@ function formatForwardedReport(
     return lines.join('\n')
 }
 
-export async function forwardReport(
-    { city: slug, report }: AcceptedReportNotification,
-    env: Pick<Env, 'NODE_ENV' | 'BACKEND_URL' | 'TELEGRAM_BOT_TOKEN' | 'TRANSIT_API'>,
-    ctx: ExecutionContext
-): Promise<void> {
+export function notificationCity(slug: string) {
     const city = getCity(slug)
     if (!city) throw new Error('Unknown notification city')
-    if (
-        env.NODE_ENV !== 'production' ||
-        report.source === 'telegram' ||
-        !city.reporting.telegramForwardingEnabled ||
-        !city.community.telegramChatId
-    )
-        return
+    return city
+}
 
-    try {
-        if (!env.TELEGRAM_BOT_TOKEN) throw new Error('Telegram bot token is not configured')
-        const index = await getTransitIndex(env.BACKEND_URL, profileFor(slug), slug, env.TRANSIT_API, ctx)
+export function deliveryEnabled(city: ReturnType<typeof notificationCity>, env: Pick<Env, 'NODE_ENV'>): boolean {
+    return env.NODE_ENV === 'production' && city.reporting.telegramForwardingEnabled && !!city.community.telegramChatId
+}
+
+export async function renderDelivery(
+    slug: string,
+    reports: AcceptedReportNotification['report'][],
+    mode: 'individual' | 'digest',
+    env: Pick<Env, 'BACKEND_URL' | 'TRANSIT_API'>,
+    ctx: Pick<ExecutionContext, 'waitUntil'>
+): Promise<string> {
+    const city = notificationCity(slug)
+    const index = await getTransitIndex(env.BACKEND_URL, profileFor(slug), slug, env.TRANSIT_API, ctx)
+    for (const report of reports) {
         if (
             !index.stations[report.stationId] ||
             (report.directionId !== null && !index.stations[report.directionId]) ||
@@ -65,13 +66,45 @@ export async function forwardReport(
         ) {
             throw new Error('Notification references unknown transit data')
         }
-        await sendTelegramMessage(
-            env.TELEGRAM_BOT_TOKEN,
-            city.community.telegramChatId,
-            formatForwardedReport(index, report, city.publicAppUrl)
-        )
-    } catch (error) {
-        reportError('Failed to forward app report to Telegram', error, { city: slug, reportId: report.reportId })
-        throw error
     }
+    if (mode === 'individual') return formatForwardedReport(index, reports[0], city.publicAppUrl)
+    const time = (timestamp: string) =>
+        new Intl.DateTimeFormat(city.lang, {
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: city.timezone,
+        }).format(new Date(timestamp))
+    const stations = new Map<string, { count: number; latest: string; lines: Set<string> }>()
+    for (const report of reports) {
+        const station = stations.get(report.stationId) ?? {
+            count: 0,
+            latest: report.timestamp,
+            lines: new Set<string>(),
+        }
+        station.count++
+        if (report.timestamp > station.latest) station.latest = report.timestamp
+        const line = report.lineId === null ? null : lineNameForId(index, report.lineId)
+        if (line) station.lines.add(line)
+        stations.set(report.stationId, station)
+    }
+    const timestamps = reports.map((report) => report.timestamp).sort()
+    const lines = [
+        `<b>${escapeHtml(city.displayName)} · App-Meldungen ${time(timestamps[0])}–${time(timestamps[timestamps.length - 1])}</b>`,
+        `${reports.length} ${reports.length === 1 ? 'neue Meldung' : 'neue Meldungen'} an ${stations.size} ${stations.size === 1 ? 'Station' : 'Stationen'}`,
+        '',
+    ]
+    const ranked = [...stations].sort(
+        (a, b) => b[1].count - a[1].count || b[1].latest.localeCompare(a[1].latest) || a[0].localeCompare(b[0])
+    )
+    for (const [id, station] of ranked.slice(0, DELIVERY_POLICY.maxDigestStations)) {
+        const lineNames = [...station.lines].sort().slice(0, 3).map(escapeHtml).join(', ')
+        const item = `<b>${escapeHtml(index.stations[id].name)}</b> · ${station.count} ${station.count === 1 ? 'Meldung' : 'Meldungen'} · zuletzt ${time(station.latest)}${lineNames ? ` · ${lineNames}` : ''}`
+        if (lines.join('\n').length + item.length > 3000) break
+        lines.push(item)
+    }
+    lines.push(
+        '',
+        `<a href="${escapeHtml(city.publicAppUrl)}?utm_source=telegram&amp;utm_medium=bot">Alle Meldungen auf der Karte</a>`
+    )
+    return lines.join('\n')
 }

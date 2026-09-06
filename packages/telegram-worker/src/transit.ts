@@ -54,7 +54,7 @@ export function buildIndex(
 }
 
 // Notification bursts reuse transit responses locally as well as the API's edge cache.
-async function fetchTransit(api: Pick<Fetcher, 'fetch'>, url: string, ctx?: ExecutionContext): Promise<Response> {
+async function fetchTransit(api: Pick<Fetcher, 'fetch'>, url: string, ctx?: Pick<ExecutionContext, 'waitUntil'>): Promise<Response> {
     if (!ctx) return api.fetch(url)
     const cache = (caches as CacheStorage & { default: Cache }).default
     const key = new Request(url)
@@ -79,7 +79,7 @@ export async function getTransitIndex(
     profile: CityProfile,
     city: string,
     api: Pick<Fetcher, 'fetch'>,
-    ctx?: ExecutionContext
+    ctx?: Pick<ExecutionContext, 'waitUntil'>
 ): Promise<TransitIndex> {
     const [stationsResp, linesResp] = await Promise.all([
         fetchTransit(api, cityUrl(backendUrl, '/v0/transit/stations', city), ctx),

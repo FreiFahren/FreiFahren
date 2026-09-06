@@ -13,6 +13,8 @@
             "entrypoint": "TrustedTelegramReportsEntrypoint",
         },
     ],
+    "durable_objects": { "bindings": [{ "name": "CITY_DELIVERY", "class_name": "CityDelivery" }] },
+    "migrations": [{ "tag": "v1-city-delivery", "new_sqlite_classes": ["CityDelivery"] }],
     "vars": {
         "NODE_ENV": "production",
         // URL identity for transit requests/cache keys; transport uses TRANSIT_API.
@@ -20,9 +22,9 @@
         "MISTRAL_MODEL": "mistral-small-latest",
         "SENTRY_DSN": "https://9d9ac700f1213d4db367b557167a0594@o4508609338867712.ingest.de.sentry.io/4511633367564368",
     },
-    // Messages are processed in the background (ctx.waitUntil) with no queue/retry; failed
-    // runs are dropped but captured in Sentry (see src/observability.ts) — alert on the
-    // error rate there. Transit reads use TRANSIT_API; notifications cache responses locally
-    // for one hour. Secrets (set via `wrangler secret put`):
+    // Incoming webhook messages run in waitUntil without retries. Outgoing notifications
+    // are persisted by CITY_DELIVERY, which schedules individual messages or digests.
+    // Transit reads use TRANSIT_API; notifications cache responses locally for one hour.
+    // Secrets (set via `wrangler secret put`):
     // MISTRAL_API_KEY and TELEGRAM_WEBHOOK_SECRET.
 }
