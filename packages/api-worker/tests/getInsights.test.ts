@@ -1,3 +1,4 @@
+import { createExecutionContext, waitOnExecutionContext } from 'cloudflare:test'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { eq } from 'drizzle-orm'
 
@@ -5,6 +6,7 @@ import { lines, lineStations, reports } from '../src/db'
 import { lineInsightsSchema, stationInsightsSchema } from '../src/modules/insights'
 import { appRequestWithRedirect, sendReportRequest, setSystemTime } from './test-utils'
 import { db } from './test-db'
+import { referenceCacheKey } from '../src/modules/transit/reference-cache'
 
 let stationId: string
 let lineId: string
@@ -273,6 +275,45 @@ describe('GET /insights/lines/:lineName', () => {
         expect(insight.profile.metric.range.start).toBe(first.toISOString())
         expect(insight.profile.hours.reduce((sum: number, hour: { value: number }) => sum + hour.value, 0)).toBe(96)
         expect(insight.hotspots.stations).toEqual([{ stationId, name: expect.any(String), value: 97, share: 1 }])
+    })
+
+    it('shares the cached city fallback across lines and refreshes on a new local date', async () => {
+        const cache = (caches as unknown as { default: Cache }).default
+        const keys = [
+            'lines',
+            'stations',
+            'city-profile-v1/Europe/Berlin/2027-01-04',
+            'city-profile-v1/Europe/Berlin/2027-01-05',
+        ].map((key) => new Request(referenceCacheKey('berlin', key)))
+        const getCached = async (name: string) => {
+            const ctx = createExecutionContext()
+            const response = await appRequestWithRedirect(
+                `/insights/lines/${encodeURIComponent(name)}`,
+                undefined,
+                undefined,
+                ctx
+            )
+            await waitOnExecutionContext(ctx)
+            expect(response.status).toBe(200)
+            return lineInsightsSchema.parse(await response.json())
+        }
+        try {
+            await sendReportAt(new Date('2027-01-04T09:00:00.000Z'))
+            const first = await getCached(lineName)
+            expect(first.profile.hours[10]!.value).toBe(1)
+            await sendReportAt(new Date('2027-01-04T10:00:00.000Z'))
+            const otherLine = await getCached(multiVariantLineName)
+            expect(otherLine.profile.hours).toEqual(first.profile.hours)
+            const entry = await cache.match(keys[2]!)
+            expect(entry?.headers.get('Cache-Control')).toBe('public, max-age=50400')
+            await sendReportAt(new Date('2027-01-05T11:00:00.000Z'))
+            const nextDay = await getCached(lineName)
+            expect(nextDay.profile.weekday).toBe(2)
+            expect(nextDay.profile.hours.filter((hour) => hour.value > 0)).toEqual([{ hour: 12, value: 1 }])
+            expect(nextDay.profile.metric.range.start).toBe(first.profile.metric.range.start)
+        } finally {
+            await Promise.all(keys.map((key) => cache.delete(key)))
+        }
     })
 
     it('returns the standard line-not-found error', async () => {

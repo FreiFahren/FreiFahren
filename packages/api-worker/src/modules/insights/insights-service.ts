@@ -75,8 +75,8 @@ export class InsightsService {
     constructor(
         private db: DbConnection,
         private transitNetworkDataService: TransitNetworkDataService,
-        private timezone: string = 'UTC',
-        private citySlug: string = 'unknown',
+        private timezone: string,
+        private citySlug: string,
         private cacheCtx: CacheCtx = undefined
     ) {}
 
