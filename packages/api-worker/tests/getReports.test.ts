@@ -8,6 +8,7 @@ import {
     getDefaultReportsRange,
     MAX_REPORTS_TIMEFRAME,
 } from '../src/modules/reports/constants'
+import { calculatePredictedReportsThreshold, ReportsService } from '../src/modules/reports/reports-service'
 import { db, lineStations, lines, reports } from './test-db'
 import { appRequestWithRedirect, sendReportRequest, setSystemTime } from './test-utils'
 
@@ -389,6 +390,7 @@ describe('Predicted reports', () => {
 })
 
 describe('Predicted reports threshold', () => {
+    const originalZone = Settings.defaultZone
     let testStations: string[]
 
     const seedHistoricalData = async () => {
@@ -427,12 +429,55 @@ describe('Predicted reports threshold', () => {
 
     afterEach(() => {
         vi.restoreAllMocks()
+        Settings.defaultZone = originalZone
+        Settings.now = () => Date.now()
+        setSystemTime()
     })
 
     afterAll(async () => {
         await db.delete(reports)
         Settings.now = () => Date.now()
         setSystemTime()
+    })
+
+    it.each([
+        ['2024-01-15T07:00:00Z', 8, 1, 4],
+        ['2024-07-15T06:00:00Z', 8, 1, 4],
+        ['2024-07-15T18:00:00Z', 20, 1, 3],
+        ['2024-07-15T19:00:00Z', 21, 1, 1],
+        ['2024-07-13T22:30:00Z', 0, 7, 1],
+        ['2024-03-31T00:30:00Z', 1, 7, 1],
+        ['2024-03-31T01:30:00Z', 3, 7, 1],
+        ['2024-10-27T00:30:00Z', 2, 7, 1],
+        ['2024-10-27T01:30:00Z', 2, 7, 1],
+    ])('uses city service hours at %s in both reports endpoints', async (instant, hour, weekday, threshold) => {
+        const now = DateTime.fromISO(instant, { zone: 'utc' })
+        setSystemTime(now.toJSDate())
+        const getReports = vi.spyOn(ReportsService.prototype, 'getReports')
+
+        // Force an unrelated ambient zone even when workerd ignores the host's TZ.
+        for (const processZone of ['UTC', 'Europe/Berlin', 'America/Los_Angeles']) {
+            Settings.defaultZone = processZone
+            for (const city of ['berlin', 'hamburg', 'leipzig']) {
+                for (const path of ['/reports', `/reports/${testStations[0]}`]) {
+                    const response = await appRequestWithRedirect(`${path}?city=${city}`)
+                    expect(response.status).toBe(200)
+                    const currentTime = getReports.mock.lastCall![0].currentTime
+                    expect(currentTime.zoneName).toBe('Europe/Berlin')
+                    expect(currentTime.toMillis()).toBe(now.toMillis())
+                    expect(currentTime.hour).toBe(hour)
+                    expect(currentTime.weekday).toBe(weekday)
+                    expect(calculatePredictedReportsThreshold(currentTime)).toBe(threshold)
+                    const body = (await response.json()) as Array<{ isPredicted: boolean; stationId: string }>
+                    expect(body.length).toBeGreaterThan(0)
+                    expect(body.length).toBeLessThanOrEqual(threshold)
+                    expect(body.every((report) => report.isPredicted)).toBe(true)
+                    if (path !== '/reports') {
+                        expect(body.every((report) => report.stationId === testStations[0])).toBe(true)
+                    }
+                }
+            }
+        }
     })
 
     it('returns more predicted reports during peak hours than night hours', async () => {
