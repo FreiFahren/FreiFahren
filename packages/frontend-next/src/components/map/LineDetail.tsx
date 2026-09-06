@@ -101,11 +101,11 @@ export function LineDetail({ line, onClose, source }: LineDetailProps) {
       }
       closeLabel={t('close')}
       onClose={onClose}
-      cardClassName="h-[min(38rem,calc(100dvh-3rem))] overflow-hidden"
+      cardClassName="max-h-[min(38rem,calc(100dvh-3rem))] overflow-hidden"
     >
       <div
         className={cn(
-          'flex min-h-0 flex-1 flex-col overflow-hidden',
+          'flex min-h-0 flex-auto flex-col overflow-hidden',
           !insights && 'min-h-[23.5rem]',
         )}
         aria-busy={!insights}
@@ -141,16 +141,16 @@ export function LineDetail({ line, onClose, source }: LineDetailProps) {
             </section>
             <section
               aria-labelledby="line-hotspots-heading"
-              className="flex min-h-0 flex-1 flex-col"
+              className="flex min-h-0 flex-auto flex-col"
             >
-              <CardContent className="flex min-h-0 flex-1 flex-col space-y-3 pt-1">
+              <CardContent className="flex min-h-0 flex-auto flex-col space-y-3 pt-1">
                 <h3
                   id="line-hotspots-heading"
                   className="text-text-3 text-[11px] font-semibold tracking-widest uppercase"
                 >
                   {t('usualHotspots')}
                 </h3>
-                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+                <div className="min-h-0 flex-auto overflow-y-auto overscroll-contain">
                   <HotspotList
                     lineName={line.name}
                     color={line.color}
