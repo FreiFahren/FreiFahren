@@ -32,14 +32,17 @@ async function stationFixture(request: APIRequestContext, city: string) {
   return candidates[0];
 }
 
-// Response timestamps can differ between separately cached requests; their historical data must agree.
+// Empty ranges use request time for both bounds; only historical timestamps must agree.
 function historicalData(insight: Record<string, unknown>) {
   const data = structuredClone(insight) as {
-    profile: { metric: { range: { end?: string } } };
-    hotspots: { metric: { range: { end?: string } } };
+    profile: { metric: { range: { start?: string; end?: string } } };
+    hotspots: { metric: { range: { start?: string; end?: string } } };
   };
-  delete data.profile.metric.range.end;
-  delete data.hotspots.metric.range.end;
+  for (const section of [data.profile, data.hotspots]) {
+    const { range } = section.metric;
+    if (range.start === range.end) delete range.start;
+    delete range.end;
+  }
   return data;
 }
 
@@ -50,7 +53,7 @@ for (const city of ['berlin', 'hamburg', 'leipzig']) {
       `${api}/v0/insights/lines?names=${encodeURIComponent(station.names.sort().join(','))}&city=${city}`,
     );
     expect(batch.ok()).toBe(true);
-    expect(batch.headers()['cloudflare-cdn-cache-control']).toMatch(/max-age=\d+/);
+    expect(batch.headers()['cache-control']).toBe('public, max-age=0, must-revalidate');
     const insights = await batch.json();
     expect(insights).toHaveLength(station.names.length);
     for (const insight of insights) {

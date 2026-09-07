@@ -14,9 +14,10 @@ interface EdgeCache {
 const INTERNAL_ORIGIN = 'https://transit-reference.internal'
 
 // City-scoped internal cache key, so one city's reference data never serves another's.
-export const referenceCacheKey = (citySlug: string, key: string): string => `${INTERNAL_ORIGIN}/${citySlug}/${key}`
+export const referenceCacheKey = (citySlug: string, key: string, version?: string): string =>
+    `${INTERNAL_ORIGIN}/${version !== undefined ? `${encodeURIComponent(version)}/` : ''}${citySlug}/${key}`
 
-export type CacheCtx = { waitUntil(promise: Promise<unknown>): void } | undefined
+export type CacheCtx = { version?: string; waitUntil(promise: Promise<unknown>): void } | undefined
 
 /*
  * Read-through cache for static transit reference data (stations, lines, segments,
@@ -39,7 +40,7 @@ export const cachedReference = async <T>(
         return loader()
     }
 
-    const cacheKey = new Request(referenceCacheKey(citySlug, key))
+    const cacheKey = new Request(referenceCacheKey(citySlug, key, ctx?.version))
     const cached = await cache.match(cacheKey)
     if (cached !== undefined) {
         return (await cached.json()) as T

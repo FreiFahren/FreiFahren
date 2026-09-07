@@ -1,4 +1,4 @@
-import type { D1Database } from '@cloudflare/workers-types'
+import type { D1Database, WorkerVersionMetadata } from '@cloudflare/workers-types'
 import { CITY_SLUGS, type CityConfig, DEFAULT_CITY_SLUG, getCity } from '@freifahren/cities'
 import { Context, Hono } from 'hono'
 
@@ -15,6 +15,7 @@ import type { CacheCtx } from './modules/transit/reference-cache'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
 
 export type Bindings = {
+    CF_VERSION_METADATA?: WorkerVersionMetadata
     // Cloudflare D1 binding. Present on Workers and, in tests, provided by the Miniflare pool.
     DB?: D1Database
     DB_HAMBURG?: D1Database
@@ -174,7 +175,9 @@ export const createCityDatabase = (env: Bindings, city: CityConfig): DbConnectio
     return createD1Db(binding)
 }
 
-export const createCityServices = (db: DbConnection, city: CityConfig, cacheCtx: CacheCtx): Services => {
+export const createCityServices = (db: DbConnection, city: CityConfig, ctx: CacheCtx, version?: string): Services => {
+    // Cache API entries outlive deploys, while preview deploys can replace the underlying transit seed.
+    const cacheCtx: CacheCtx = ctx ? { version, waitUntil: (promise) => ctx.waitUntil(promise) } : undefined
     const transitNetworkDataService = new TransitNetworkDataService(db, city.slug, cacheCtx)
     const reportsService = new ReportsService(db, transitNetworkDataService)
     return {
@@ -195,7 +198,7 @@ const applyServices = (c: Context<Env>, db: DbConnection, config: AppConfig) => 
         cacheCtx = undefined
     }
 
-    const services = createCityServices(db, c.get('city'), cacheCtx)
+    const services = createCityServices(db, c.get('city'), cacheCtx, c.env.CF_VERSION_METADATA?.id)
     c.set('config', config)
     c.set('reportsService', services.reportsService)
     c.set(

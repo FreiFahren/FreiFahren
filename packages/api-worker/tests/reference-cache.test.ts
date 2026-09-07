@@ -19,8 +19,8 @@ const cache = (
 // deleted again so no other suite reads this file's fabricated reference data.
 const usedKeys: Request[] = []
 
-const internalKey = (citySlug: string, key: string): Request => {
-    const request = new Request(referenceCacheKey(citySlug, key))
+const internalKey = (citySlug: string, key: string, version?: string): Request => {
+    const request = new Request(referenceCacheKey(citySlug, key, version))
     usedKeys.push(request)
     return request
 }
@@ -39,6 +39,24 @@ const withCtx = async <T>(run: (ctx: ExecutionContext) => Promise<T>): Promise<T
 }
 
 describe('cachedReference (real Cache API)', () => {
+    it('reuses data within a deployment without reading another deployment or city', async () => {
+        const key = 'spec-versioned'
+        const load = (city: string, version: string, value: number) => {
+            internalKey(city, key, version)
+            return withCtx((ctx) =>
+                cachedReference(city, key, async () => value, {
+                    version,
+                    waitUntil: (promise) => ctx.waitUntil(promise),
+                })
+            )
+        }
+
+        expect(await load('berlin', 'old-version', 1)).toBe(1)
+        expect(await load('berlin', 'new-version', 2)).toBe(2)
+        expect(await load('berlin', 'new-version', 3)).toBe(2)
+        expect(await load('hamburg', 'new-version', 4)).toBe(4)
+    })
+
     it('invokes the loader once on a miss and serves the second call from the cache', async () => {
         internalKey('berlin', 'spec-read-through')
         const loader = vi.fn(async () => ({ answer: 42 }))

@@ -38,7 +38,7 @@ export class TelegramReportsEntrypoint extends WorkerEntrypoint<Bindings> {
             }
             const city = resolveCityBySlug(parsed.data.city)
             const db = createCityDatabase(this.env, city)
-            const { reportsService } = createCityServices(db, city, this.ctx)
+            const { reportsService } = createCityServices(db, city, this.ctx, this.env.CF_VERSION_METADATA?.id)
             const service = new ReportSubmissionService({
                 city,
                 reportsService,
