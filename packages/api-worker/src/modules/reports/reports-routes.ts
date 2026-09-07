@@ -51,7 +51,7 @@ export const getReports = defineRoute<Env>()({
     handler: async (c) => {
         const reportsService = c.get('reportsService')
         const query = c.req.valid('query')
-        const now = DateTime.now()
+        const now = DateTime.now().setZone(c.get('city').timezone)
 
         c.header('Cache-Control', 'no-store')
 
@@ -63,7 +63,7 @@ export const getReports = defineRoute<Env>()({
                 currentTime: now,
                 viewer: await resolveViewer(c),
             })
-        ) // Intentionally pass in local time
+        )
     },
 })
 
@@ -87,10 +87,10 @@ export const getReportsByStation = defineRoute<Env>()({
                 from: query.from,
                 to: query.to,
                 stationId,
-                currentTime: DateTime.now(),
+                currentTime: DateTime.now().setZone(c.get('city').timezone),
                 viewer: await resolveViewer(c),
             })
-        ) // Intentionally pass in local time
+        )
     },
 })
 
