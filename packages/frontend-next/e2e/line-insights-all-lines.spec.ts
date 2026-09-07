@@ -98,6 +98,7 @@ for (const city of CITY_SLUGS) {
           await expect(
             page.getByRole('heading', { name: 'Report sighting', exact: true }),
           ).toBeVisible();
+          await page.waitForLoadState('networkidle');
         });
       }
       expect(errors).toEqual([]);

@@ -161,6 +161,7 @@ test('reveals quieter stations to fill the available space and refits on resize'
   );
   const cta = page.getByRole('link', { name: 'Report sighting on the S42' });
   const card = page.locator('[data-slot="card"]').filter({ has: cta });
+  await expect(scroller).toBeVisible({ timeout: 15_000 });
   await expect.poll(() => scroller.locator('a').count()).toBeGreaterThan(1);
   const assertFilled = async () => {
     await expect
