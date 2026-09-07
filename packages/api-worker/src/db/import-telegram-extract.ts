@@ -148,8 +148,9 @@ if (cities.length !== 1) {
     throw new Error('--city <slug> is required (one city)')
 }
 const city = cities[0]
-if (city !== 'leipzig') {
-    throw new Error('telegram extract import is Leipzig-only')
+const SUPPORTED_CITIES = new Set(['leipzig', 'hamburg'])
+if (!SUPPORTED_CITIES.has(city)) {
+    throw new Error(`telegram extract import is only supported for: ${[...SUPPORTED_CITIES].join(', ')}`)
 }
 
 importCity(

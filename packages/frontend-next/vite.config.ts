@@ -214,8 +214,15 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      // Shared city registry (small static data), bundled into the client. Vite does not
-      // read tsconfig `paths`, so the alias is declared here too.
+      // Frontend-safe city registry subset (no `telegram` prompt data — see the warning on
+      // `PublicCityConfig` in packages/cities/src/types.ts). Declared BEFORE the plain
+      // '@freifahren/cities' alias below: alias matching is prefix-based and first-match-wins,
+      // so the more specific path must come first or it would resolve through the full-config
+      // alias instead (`.../index.ts/public`, which doesn't exist). Vite does not read tsconfig
+      // `paths`, so the alias is declared here too.
+      '@freifahren/cities/public': path.resolve(__dirname, '../cities/src/public.ts'),
+      // Full city registry incl. `telegram`. BACKEND ONLY — must never be imported from
+      // frontend-next source; import '@freifahren/cities/public' instead.
       '@freifahren/cities': path.resolve(__dirname, '../cities/src/index.ts'),
     },
   },

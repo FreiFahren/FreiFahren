@@ -452,6 +452,9 @@ export function buildSystemPrompt(index: TransitIndex, profile: CityProfile): st
         'are reports. Typos, slang, and language mixing are normal.\n' +
         '- For clear non-reports (spam/ads, questions, ticket sales, social chitchat with no ' +
         'location, off-topic banter), set both fields to null.\n' +
+        '- General police presence, traffic stops, protests, demos, or political content are NOT ' +
+        'ticket-inspector sightings even if a station or words like "Bullen"/"Wannen"/"Cops" appear — ' +
+        'set both fields to null unless a fare-inspection cue is also present.\n' +
         '- stationName: the station the user is currently at. Copy it as written, including typos. ' +
         'If the user gives a CURRENT station and a DIRECTION ("U7 Rathaus Spandau Richtung Rudow ' +
         'höhe Neukölln" / "u8 wittenau höhe osloer"), the CURRENT station is the one near a word ' +

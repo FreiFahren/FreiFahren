@@ -170,6 +170,16 @@ export interface CityConfig extends CityDatabaseConfig {
     community: CityCommunity
 }
 
+/**
+ * Everything about a city EXCEPT `telegram`. `telegram` carries report-extraction prompt
+ * engineering (inspector keywords, few-shot examples) that must never reach a browser — a
+ * bundler can't tree-shake individual properties off an object literal that's otherwise used,
+ * so any frontend import of the full `CityConfig` embeds it verbatim in the shipped JS.
+ * Frontend code must only ever import this type (and the `PUBLIC_CITIES`/`getPublicCity`
+ * values in ./public.ts), never `CityConfig`/`CITIES`/`getCity`/`BERLIN`/`HAMBURG`/`LEIPZIG`.
+ */
+export type PublicCityConfig = Omit<CityConfig, 'telegram'>
+
 /** The D1 resources provisioned for each city. */
 export interface CityDatabaseConfig {
     /** D1 database name. */

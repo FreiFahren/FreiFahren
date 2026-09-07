@@ -4,7 +4,8 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
-      "@freifahren/cities": ["../cities/src/index.ts"]
+      "@freifahren/cities": ["../cities/src/index.ts"],
+      "@freifahren/cities/public": ["../cities/src/public.ts"]
     }
   }
 }

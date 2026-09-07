@@ -49,6 +49,10 @@ const GERMAN_GENERIC_NON_STATION_WORDS: ReadonlySet<string> = new Set([
     'sueden',
     'osten',
     'westen',
+    // English loanword for "downtown" (seen in Hamburg chats as "Richtung City") — without
+    // this it fuzzy-matches into any station whose name happens to contain "City"
+    // (e.g. Hamburg's "Rübenkamp (City Nord)").
+    'city',
 ])
 
 /**
