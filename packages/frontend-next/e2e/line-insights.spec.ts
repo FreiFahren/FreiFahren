@@ -129,3 +129,64 @@ test('keeps the modal and chart stable while insights and activity arrive separa
   expect(await cta.boundingBox()).toEqual(initialCta);
   expect(await chart.boundingBox()).toEqual(chartBeforeActivity);
 });
+
+test('reveals quieter stations to fill the available space and refits on resize', async ({
+  page,
+  request,
+}) => {
+  const api = process.env.E2E_API_URL ?? 'http://localhost:8787';
+  const response = await request.get(`${api}/v0/transit/lines?city=berlin`);
+  expect(response.ok()).toBe(true);
+  const lines = (await response.json()) as Array<{ name: string; stations: string[] }>;
+  const stationIds = [
+    ...new Set(lines.filter((line) => line.name === 'S42').flatMap((line) => line.stations)),
+  ];
+  expect(stationIds.length).toBeGreaterThan(10);
+  const peak = Math.floor(stationIds.length / 2);
+  await page.route('**/insights/lines/S42?*', async (route) => {
+    const original = await route.fetch();
+    const insights = await original.json();
+    insights.hotspots.stations = stationIds.map((stationId, index) => ({
+      stationId,
+      name: stationId,
+      value: index === peak ? 100 : 1,
+      share: (index === peak ? 100 : 1) / (stationIds.length + 99),
+    }));
+    await route.fulfill({ response: original, json: insights });
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/line/S42?city=berlin');
+  const scroller = page.locator(
+    'section[aria-labelledby="line-hotspots-heading"] .overflow-y-auto',
+  );
+  const cta = page.getByRole('link', { name: 'Report sighting on the S42' });
+  const card = page.locator('[data-slot="card"]').filter({ has: cta });
+  await expect.poll(() => scroller.locator('a').count()).toBeGreaterThan(1);
+  const assertFilled = async () => {
+    await expect
+      .poll(() =>
+        scroller.evaluate(
+          (el) => el.clientHeight - el.firstElementChild!.getBoundingClientRect().height,
+        ),
+      )
+      .toBeLessThan(32);
+    await expect
+      .poll(() => scroller.evaluate((el) => el.scrollHeight - el.clientHeight))
+      .toBeLessThanOrEqual(1);
+    await expect(cta).toBeInViewport();
+  };
+  await assertFilled();
+  const tallRows = await scroller.locator(':scope > ol > li').count();
+  for (const height of [568, 844]) {
+    await page.setViewportSize({ width: 390, height });
+    await expect
+      .poll(async () => (await card.boundingBox())!.height)
+      .toBeCloseTo(Math.min(608, height - 48), 0);
+    await assertFilled();
+    if (height === 568) {
+      expect(await scroller.locator(':scope > ol > li').count()).toBeLessThan(tallRows);
+    } else {
+      await expect(scroller.locator(':scope > ol > li')).toHaveCount(tallRows);
+    }
+  }
+});

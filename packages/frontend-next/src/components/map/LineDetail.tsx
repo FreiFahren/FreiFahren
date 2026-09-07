@@ -147,16 +147,14 @@ export function LineDetail({ line, onClose, source }: LineDetailProps) {
                 >
                   {t('usualHotspots')}
                 </h3>
-                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-                  <HotspotList
-                    lineName={line.name}
-                    color={line.color}
-                    hotspots={insights.hotspots.stations}
-                    stationOrder={line.stations}
-                    stationData={stations}
-                    emptyLabel={t('noHotspots')}
-                  />
-                </div>
+                <HotspotList
+                  lineName={line.name}
+                  color={line.color}
+                  hotspots={insights.hotspots.stations}
+                  stationOrder={line.stations}
+                  stationData={stations}
+                  emptyLabel={t('noHotspots')}
+                />
               </CardContent>
             </section>
           </>
