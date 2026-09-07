@@ -101,7 +101,7 @@ export function LineDetail({ line, onClose, source }: LineDetailProps) {
       }
       closeLabel={t('close')}
       onClose={onClose}
-      cardClassName="h-[min(32rem,calc(100dvh-3rem))] overflow-hidden"
+      cardClassName="h-[min(38rem,calc(100dvh-3rem))] overflow-hidden"
     >
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden" aria-busy={!insights}>
         <div

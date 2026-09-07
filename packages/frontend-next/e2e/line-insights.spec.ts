@@ -53,14 +53,14 @@ for (const viewport of [
     }));
     expect(dimensions.height).toBeGreaterThan(0);
     expect(dimensions.content - dimensions.height).toBeGreaterThanOrEqual(0);
-    expect(initialHeight).toBeCloseTo(Math.min(512, viewport.height - 48), 0);
+    expect(initialHeight).toBeCloseTo(Math.min(608, viewport.height - 48), 0);
     await page.screenshot({ path: testInfo.outputPath('collapsed.png') });
     const groups = hotspots.getByRole('button', { expanded: false });
     const count = await groups.count();
     for (let index = 0; index < count; index++) await groups.first().click();
     await expect(cta).toBeInViewport();
     expect((await card.boundingBox())!.height).toBeLessThanOrEqual(
-      Math.min(512, viewport.height - 48) + 1,
+      Math.min(608, viewport.height - 48) + 1,
     );
     if (count) {
       await scroller.evaluate((element) => {
