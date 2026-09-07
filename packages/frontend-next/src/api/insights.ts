@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { type QueryClient, useQuery } from '@tanstack/react-query';
 
 import { DAY_MS } from './reports';
 import { fetchJson } from './transit';
@@ -47,3 +47,28 @@ export const lineInsightsQueryOptions = (lineName: string) => ({
 });
 
 export const useLineInsights = (lineName: string) => useQuery(lineInsightsQueryOptions(lineName));
+
+export function prefetchLineInsights(queryClient: QueryClient, lineNames: string[]) {
+  const pending: string[] = [];
+  let batch: Promise<LineInsights[]> | undefined;
+  for (const lineName of new Set(lineNames)) {
+    void queryClient.prefetchQuery({
+      ...lineInsightsQueryOptions(lineName),
+      queryFn: () => {
+        if (pending.includes(lineName)) return lineInsightsQueryOptions(lineName).queryFn();
+        pending.push(lineName);
+        // Keep the individual cache keys (including in-flight deduplication) while sharing one request.
+        batch ??= Promise.resolve().then(() =>
+          fetchJson<LineInsights[]>(
+            `/v0/insights/lines?names=${encodeURIComponent(pending.sort().join(','))}`,
+          ),
+        );
+        return batch.then((insights) => {
+          const insight = insights.find((entry) => entry.line.name === lineName);
+          if (!insight) throw new Error('Missing line insights');
+          return insight;
+        });
+      },
+    });
+  }
+}

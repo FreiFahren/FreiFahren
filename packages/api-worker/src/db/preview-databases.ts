@@ -113,6 +113,7 @@ const provision = (pr: string, out: string) => {
         compatibility_date: COMPATIBILITY_DATE,
         compatibility_flags: COMPATIBILITY_FLAGS,
         cache: { enabled: true },
+        version_metadata: { binding: 'CF_VERSION_METADATA' },
         // No `routes`, so a preview can never take traffic on the production hostname.
         workers_dev: true,
         d1_databases: d1Databases,
