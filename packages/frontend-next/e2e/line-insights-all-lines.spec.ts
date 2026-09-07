@@ -35,6 +35,7 @@ for (const city of CITY_SLUGS) {
           await page.goto(`/line/${encodeURIComponent(name)}?city=${city}`);
           const chart = page.getByRole('img', { name: /Reports by hour/ });
           await expect(chart).toBeVisible();
+          await page.waitForLoadState('networkidle');
           const cta = page.getByRole('link', {
             name: `Report sighting on the ${name}`,
             exact: true,
@@ -90,9 +91,13 @@ for (const city of CITY_SLUGS) {
             await expect(page.getByRole('link', { name: /Report sighting/ })).toBeVisible();
             await page.goBack();
             await expect(chart).toBeVisible();
+            await page.waitForLoadState('networkidle');
           }
           await cta.click();
           await expect(page).toHaveURL(/\/report\?/);
+          await expect(
+            page.getByRole('heading', { name: 'Report sighting', exact: true }),
+          ).toBeVisible();
         });
       }
       expect(errors).toEqual([]);

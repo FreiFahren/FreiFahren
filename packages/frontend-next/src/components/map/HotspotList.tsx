@@ -119,7 +119,7 @@ function StationActivity({
           style={{ width: `${Math.max(4, station.share * 100)}%` }}
         />
       </span>
-      <span className="text-muted-foreground w-8 text-right text-sm font-semibold">
+      <span className="text-muted-foreground w-10 shrink-0 text-right text-sm font-semibold">
         {percentage}
       </span>
     </>

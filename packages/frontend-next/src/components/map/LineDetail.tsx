@@ -91,12 +91,19 @@ export function LineDetail({ line, onClose, source }: LineDetailProps) {
       title={
         <div className="flex items-center gap-3 pr-2">
           <span
-            className="rounded-sm px-3 py-1 text-sm font-semibold text-white"
+            className="shrink-0 rounded-sm px-3 py-1 text-sm font-semibold text-white"
             style={{ backgroundColor: line.color }}
           >
             {line.name}
           </span>
-          {!line.isCircular && <span>{start && end ? `${start} ↔ ${end}` : line.name}</span>}
+          {!line.isCircular && (
+            <span
+              className="line-clamp-2 min-w-0 break-words"
+              title={start && end ? `${start} ↔ ${end}` : line.name}
+            >
+              {start && end ? `${start} ↔ ${end}` : line.name}
+            </span>
+          )}
         </div>
       }
       closeLabel={t('close')}
