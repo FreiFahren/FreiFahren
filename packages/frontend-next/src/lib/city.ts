@@ -1,5 +1,10 @@
 import { Capacitor } from '@capacitor/core';
-import { DEFAULT_CITY_SLUG, PUBLIC_CITIES, getPublicCity, type PublicCityConfig } from '@freifahren/cities/public';
+import {
+  DEFAULT_CITY_SLUG,
+  PUBLIC_CITIES,
+  getPublicCity,
+  type PublicCityConfig,
+} from '@freifahren/cities/public';
 
 import {
   RESET_AUTO_SWITCH_PARAM,
@@ -67,7 +72,10 @@ export function hostForCity(hostname: string, city: PublicCityConfig): string {
   return [city.subdomain, ...labels.slice(1)].join('.');
 }
 
-export function urlForCity(city: PublicCityConfig, options?: { resetAutoSwitch?: boolean }): string {
+export function urlForCity(
+  city: PublicCityConfig,
+  options?: { resetAutoSwitch?: boolean },
+): string {
   const { protocol, hostname, port, pathname, search } = window.location;
   const params = new URLSearchParams(search);
   if (isPreviewBuild) params.set('city', city.slug);
@@ -78,7 +86,10 @@ export function urlForCity(city: PublicCityConfig, options?: { resetAutoSwitch?:
   return `${protocol}//${host}${port ? `:${port}` : ''}${pathname}${query ? `?${query}` : ''}`;
 }
 
-export function navigateToCity(city: PublicCityConfig, options?: { resetAutoSwitch?: boolean }): void {
+export function navigateToCity(
+  city: PublicCityConfig,
+  options?: { resetAutoSwitch?: boolean },
+): void {
   if (options?.resetAutoSwitch) {
     clearAutoSwitchCityPreference();
     markResetAutoSwitchCity();
