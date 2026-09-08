@@ -1,4 +1,4 @@
-import type { CityRoutingConfig } from '@freifahren/cities'
+import type { CityRoutingConfig, RouteType } from '@freifahren/cities'
 import { describe, expect, it } from 'vitest'
 
 import { NoPathFoundError, StationNotFoundError } from '../src/common/errors'
@@ -21,7 +21,7 @@ const routing: CityRoutingConfig = {
     maxSpeedMetersPerSecond: 22,
 }
 
-const line = (id: string, type: 'subway' | 'tram') => ({ id, isCircular: false, type })
+const line = (id: string, type: RouteType) => ({ id, isCircular: false, type })
 
 describe('buildGraph', () => {
     it('carries the route type of each line', () => {
@@ -79,10 +79,15 @@ describe('findRoute', () => {
     })
 
     it('prefers the slower-per-hop line when it avoids a transfer', () => {
-        // Direct tram A->B->C costs 180; the subway pair costs 100 + 240 + 100.
+        /*
+         * The direct train costs 2 x 150 = 300; the subway pair costs 100 + 240 + 100.
+         * The per-hop rates are deliberately the wrong way round: without the transfer
+         * cost the subway pair would win at 200, so only the transfer can produce this
+         * result. A cheaper-per-hop direct line would pass even with free transfers.
+         */
         const graph = buildGraph(
             threeStations,
-            [line('T1', 'tram'), line('L1', 'subway'), line('L2', 'subway')],
+            [line('T1', 'train'), line('L1', 'subway'), line('L2', 'subway')],
             [
                 { lineId: 'T1', stationId: 'A', order: 0 },
                 { lineId: 'T1', stationId: 'B', order: 1 },
