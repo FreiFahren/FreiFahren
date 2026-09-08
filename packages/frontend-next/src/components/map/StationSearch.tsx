@@ -6,29 +6,13 @@ import { useTranslation } from 'react-i18next';
 import { type Station, useStations } from '@/api/transit';
 import { track } from '@/lib/analytics';
 import { selectionTap } from '@/lib/haptics';
-import { StationListItem } from '@/components/transit/StationListItem';
+import { StationPicker } from '@/components/transit/station-picker';
 import { Backdrop } from '@/components/ui/backdrop';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Route as StationDetailRoute } from '@/routes/_map/station/$stationId';
 
 import { NAMESPACE } from './StationSearch.i18n';
-
-const MAX_RESULTS = 8;
-
-function matchStations(stations: Station[], query: string): Station[] {
-  const needle = query.trim().toLowerCase();
-  if (!needle) return [];
-  const results: Station[] = [];
-  for (const station of stations) {
-    if (station.name.toLowerCase().includes(needle)) {
-      results.push(station);
-      if (results.length === MAX_RESULTS) break;
-    }
-  }
-  return results;
-}
 
 export function StationSearch() {
   const { t } = useTranslation(NAMESPACE);
@@ -39,7 +23,6 @@ export function StationSearch() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const stationList = stations ? Object.values(stations) : [];
-  const results = matchStations(stationList, query);
   const hasQuery = query.length > 0;
   const showResults = query.trim().length > 0;
   const isActive = isFocused || hasQuery;
@@ -105,19 +88,12 @@ export function StationSearch() {
             )}
           </div>
           {showResults && (
-            <Card className="animate-in fade-in slide-in-from-top-2 mt-2 max-h-[60vh] gap-0 overflow-auto p-1 duration-150">
-              {results.length === 0 ? (
-                <div className="text-muted-foreground px-3 py-4 text-sm">{t('noResults')}</div>
-              ) : (
-                results.map((station) => (
-                  <StationListItem
-                    key={station.id}
-                    station={station}
-                    onClick={() => selectStation(station)}
-                  />
-                ))
-              )}
-            </Card>
+            <StationPicker
+              stations={stationList}
+              query={query}
+              onSelect={selectStation}
+              emptyLabel={t('noResults')}
+            />
           )}
         </div>
       </div>

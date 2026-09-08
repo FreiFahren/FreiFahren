@@ -5,6 +5,7 @@ import { ReportButton } from '@/components/map/ReportButton';
 import { ReportsOverviewButton } from '@/components/map/ReportsOverviewButton';
 import { SettingsButton } from '@/components/map/SettingsButton';
 import { StationSearch } from '@/components/map/StationSearch';
+import { RoutePlanner } from '@/components/route/route-planner';
 import { StatsPopUp } from '@/components/map/StatsPopUp';
 import { RefreshNotification } from '@/components/RefreshNotification';
 import { Toaster } from '@/components/ui/toaster';
@@ -17,6 +18,7 @@ export const Route = createFileRoute('/_map')({
   component: () => (
     <>
       <StationSearch />
+      <RoutePlanner />
       <StatsPopUp />
       <RefreshNotification />
       <SettingsButton />

@@ -18,6 +18,7 @@ import { useSegments } from '@/api/transit';
 import { track } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';
 
+import { JourneyLayer } from './JourneyLayer';
 import { LineLayer } from './LineLayer';
 import { SECONDARY_REVEAL_ZOOM } from './line-style';
 import { MapCameraController } from './MapCameraController';
@@ -133,6 +134,7 @@ export function MapView() {
           <>
             <StationsLayer selectedStation={selectedStation} />
             {riskVisible ? <RiskLayer /> : <LineLayer />}
+            <JourneyLayer />
             <ReportsLayer />
             <UserLocationControl />
             <MapCameraController />
