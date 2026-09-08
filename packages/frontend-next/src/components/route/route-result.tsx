@@ -1,3 +1,5 @@
+import { ChevronDown } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { RISK_COLORS, riskLevel, type RiskLevel } from '@/api/risk';
@@ -7,6 +9,7 @@ import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
 import { DetailCard } from '@/components/map/DetailCard';
+import { groupQuietSegments } from '@/lib/journey-segments';
 
 import { NAMESPACE } from './route.i18n';
 
@@ -55,6 +58,43 @@ function SegmentRow({ segment, stations }: { segment: RouteLegSegment; stations:
   );
 }
 
+function QuietRun({ segments, stations }: { segments: RouteLegSegment[]; stations: Stations }) {
+  const { t } = useTranslation(NAMESPACE);
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={() => setExpanded((open) => !open)}
+        aria-expanded={expanded}
+        aria-label={expanded ? t('hideStops') : t('showStops')}
+        className="hover:bg-muted/50 flex w-full items-center gap-2 rounded-md py-1 text-left"
+      >
+        <RiskDot risk={0} />
+        <span className="text-muted-foreground min-w-0 flex-1 truncate text-sm">
+          {t('quietStops', { count: segments.length })}
+        </span>
+        <ChevronDown
+          aria-hidden
+          className={`text-muted-foreground size-4 shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`}
+        />
+      </button>
+      {expanded && (
+        <ul className="ml-4">
+          {segments.map((segment) => (
+            <SegmentRow
+              key={`${segment.fromStationId}-${segment.toStationId}`}
+              segment={segment}
+              stations={stations}
+            />
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
+
 function Leg({ leg, stations }: { leg: RouteLeg; stations: Stations }) {
   return (
     <div className="border-border/60 border-t pt-3 first:border-t-0 first:pt-0">
@@ -65,13 +105,21 @@ function Leg({ leg, stations }: { leg: RouteLeg; stations: Stations }) {
         </span>
       </div>
       <ul className="mt-1 ml-1">
-        {leg.segments.map((segment) => (
-          <SegmentRow
-            key={`${segment.fromStationId}-${segment.toStationId}`}
-            segment={segment}
-            stations={stations}
-          />
-        ))}
+        {groupQuietSegments(leg.segments).map((group) =>
+          group.kind === 'quiet' ? (
+            <QuietRun
+              key={`quiet-${group.segments[0].fromStationId}`}
+              segments={group.segments}
+              stations={stations}
+            />
+          ) : (
+            <SegmentRow
+              key={`${group.segments[0].fromStationId}-${group.segments[0].toStationId}`}
+              segment={group.segments[0]}
+              stations={stations}
+            />
+          ),
+        )}
       </ul>
     </div>
   );
@@ -80,6 +128,40 @@ function Leg({ leg, stations }: { leg: RouteLeg; stations: Stations }) {
 export function RouteResult({ fromId, toId, stations, onClose }: RouteResultProps) {
   const { t } = useTranslation(NAMESPACE);
   const { data: plan, isPending, isError, refetch } = useRoute(fromId, toId);
+  const listRef = useRef<HTMLDivElement>(null);
+  const [moreBelow, setMoreBelow] = useState(false);
+
+  // Escape closes the card, matching the backdrop and the close button.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
+
+  /*
+   * Touch and macOS hide their scrollbars, so a list that continues below the fold reads as
+   * truncated. This drives a fade at the bottom edge — the only cue that there is more.
+   */
+  const syncOverflow = () => {
+    const el = listRef.current;
+    if (!el) return;
+    setMoreBelow(el.scrollHeight - el.scrollTop - el.clientHeight > 4);
+  };
+  /*
+   * Watch the rendered legs rather than the data: expanding a collapsed run changes the
+   * height without changing `plan`, so a data-keyed effect would miss exactly the case
+   * that creates the overflow.
+   */
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(syncOverflow);
+    for (const child of el.children) observer.observe(child);
+    syncOverflow();
+    return () => observer.disconnect();
+  }, [plan]);
 
   const title = `${stationName(stations, fromId)} → ${stationName(stations, toId)}`;
   const level: RiskLevel | null = plan ? riskLevel(plan.risk.overall) : null;
@@ -126,11 +208,23 @@ export function RouteResult({ fromId, toId, stations, onClose }: RouteResultProp
             )}
           </CardContent>
 
-          <CardContent className="min-h-0 flex-1 space-y-3 overflow-auto">
-            {plan.legs.map((leg) => (
-              <Leg key={`${leg.lineId}-${leg.fromStationId}`} leg={leg} stations={stations} />
-            ))}
-          </CardContent>
+          <div className="relative min-h-0 flex-1">
+            <CardContent
+              ref={listRef}
+              onScroll={syncOverflow}
+              className="h-full space-y-3 overflow-auto"
+            >
+              {plan.legs.map((leg) => (
+                <Leg key={`${leg.lineId}-${leg.fromStationId}`} leg={leg} stations={stations} />
+              ))}
+            </CardContent>
+            {moreBelow && (
+              <div
+                aria-hidden
+                className="from-card pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t to-transparent"
+              />
+            )}
+          </div>
 
           <CardContent className="shrink-0">
             <p className="text-muted-foreground text-xs">{t('estimateNote')}</p>
