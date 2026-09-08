@@ -134,7 +134,7 @@ export class TransitNetworkDataService {
     }
 
     async getDistance(from: StationId, to: StationId): Promise<number> {
-        const graph = await this.loadGraph()
+        const graph = await this.getGraph()
 
         this.assertStationExists(graph, from, 'from')
         this.assertStationExists(graph, to, 'to')
@@ -169,7 +169,7 @@ export class TransitNetworkDataService {
         }
     }
 
-    private async loadGraph(): Promise<Graph> {
+    async getGraph(): Promise<Graph> {
         // Cache the raw rows rather than the built Graph — Graph holds Maps, which
         // Don't survive the JSON round-trip; rebuilding from rows is cheap in-process.
         const inputs = await cachedReference(this.citySlug, 'graph-inputs', () => this.loadGraphInputs(), this.cacheCtx)
