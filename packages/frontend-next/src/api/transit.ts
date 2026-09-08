@@ -140,7 +140,7 @@ export const useLines = () => useQuery(linesQueryOptions());
 
 export const useSegments = () => useQuery(segmentsQueryOptions());
 
-function closestStationId(
+export function closestStationId(
   stations: Stations,
   position: { lat: number; lng: number },
 ): string | null {
