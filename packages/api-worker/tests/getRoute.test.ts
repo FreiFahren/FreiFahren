@@ -1,4 +1,4 @@
-import { asc, eq, inArray } from 'drizzle-orm'
+import { and, asc, eq, inArray } from 'drizzle-orm'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { createApp } from '../src'
@@ -211,6 +211,21 @@ describe('GET /v0/transit/route — risk over time', () => {
         expect(response.status).toBe(200)
         return (await response.json()) as RouteResponse
     }
+
+    it('reports a hop with no segment as unrated rather than risk-free', async () => {
+        // line_stations and segments are separate tables, so a hop can exist with no
+        // segment behind it. Reporting that as 0 would present an unscored stretch as
+        // safe, which is the one failure this feature must not have.
+        await db.delete(segments).where(and(eq(segments.lineId, LINE_ID), eq(segments.fromStationId, 'TEST_T1')))
+        isolatedApp = createApp()
+
+        const body = await isolatedRoute('TEST_T0', 'TEST_T3')
+        const gap = allSegments(body).find((segment) => segment.fromStationId === 'TEST_T1')
+
+        expect(gap?.segmentId).toBeNull()
+        expect(gap?.risk).toBeNull()
+        expect(body.risk.unratedSegments).toBe(1)
+    })
 
     it('scores the same segment lower when it is reached later in the journey', async () => {
         // Reported at the far end of the line, so the shared segments sit far enough away
