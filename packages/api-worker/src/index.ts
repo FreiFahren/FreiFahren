@@ -22,7 +22,7 @@ import {
     VERSIONED_TRANSIT_CACHEABLE_PATHS,
     VERSIONED_TRANSIT_PATH,
 } from './modules/transit/transit-cache-middleware'
-import { getDistance, getLines, getSegments, getStations } from './modules/transit/transit-routes'
+import { getDistance, getLines, getRoute, getSegments, getStations } from './modules/transit/transit-routes'
 
 export const createApp = () => {
     const app = new Hono<Env>()
@@ -105,7 +105,7 @@ export const createApp = () => {
         v0: [getReports, postReport, getReportsByStation],
     })
     registerVersionedRoutes(app, 'transit', 'v0', {
-        v0: [getStations, getLines, getSegments, getDistance],
+        v0: [getStations, getLines, getSegments, getDistance, getRoute],
     })
     registerVersionedRoutes(app, 'risk', 'v0', {
         v0: [getRisk],
