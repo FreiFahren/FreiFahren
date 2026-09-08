@@ -28,6 +28,7 @@ FreiFahren crowdsources real-time sightings of ticket inspectors across the Berl
 1. **Report**: community members spot a ticket inspector and submit the station, line and direction via the web app or the [Telegram group](https://t.me/freifahren_BE)
 2. **Process**: the backend validates the report and writes it to the database
 3. **Display**: the live map updates in real-time so everyone can see where inspectors are right now
+4. **Plan**: enter a destination and see whether inspections are likely on the way there, leg by leg
 
 ## Contact
 
