@@ -2,6 +2,7 @@ import type { CityRoutingConfig, RouteType } from '@freifahren/cities'
 import { describe, expect, it } from 'vitest'
 
 import { NoPathFoundError, StationNotFoundError } from '../src/common/errors'
+import { predictRouteRisk, predictSegmentRisk } from '../src/modules/risk/risk-model'
 import { buildGraph, findRoute } from '../src/modules/transit/pathfinding'
 
 const stations = [
@@ -152,5 +153,66 @@ describe('findRoute', () => {
         )
 
         expect(() => findRoute(graph, 'A', 'NOPE', routing)).toThrow(StationNotFoundError)
+    })
+})
+
+describe('predictRouteRisk', () => {
+    const segments = [
+        { sid: '1', lineId: 'L1', fromStationId: 'A', toStationId: 'B' },
+        { sid: '2', lineId: 'L1', fromStationId: 'B', toStationId: 'C' },
+    ]
+    const now = new Date('2026-09-08T12:00:00Z')
+    const reports = [{ stationId: 'A', lines: ['L1'], directionId: null, timestamp: now }]
+
+    it('scores a segment the rider enters right away', () => {
+        const result = predictRouteRisk(segments, reports, [{ sid: '1', at: now }])
+
+        expect(result['1'].risk).toBeGreaterThan(0)
+    })
+
+    it('scores the same segment lower the later it is entered', () => {
+        const immediately = predictRouteRisk(segments, reports, [{ sid: '1', at: now }])
+        const inHalfAnHour = predictRouteRisk(segments, reports, [
+            { sid: '1', at: new Date(now.getTime() + 30 * 60_000) },
+        ])
+
+        expect(inHalfAnHour['1'].risk).toBeLessThan(immediately['1'].risk)
+    })
+
+    it('returns an entry for every target, including risk-free ones', () => {
+        /*
+         * predictSegmentRisk drops green segments because the map only paints the rest.
+         * A journey must report every leg it was asked about: a missing entry would be
+         * indistinguishable from a leg whose risk could not be determined.
+         */
+        const result = predictRouteRisk(
+            segments,
+            [],
+            [
+                { sid: '1', at: now },
+                { sid: '2', at: now },
+            ]
+        )
+
+        expect(Object.keys(result).sort()).toEqual(['1', '2'])
+        expect(result['1'].risk).toBe(0)
+    })
+
+    it('matches predictSegmentRisk when the target is evaluated at now', () => {
+        const viaMap = predictSegmentRisk(segments, reports, now)
+        const viaRoute = predictRouteRisk(segments, reports, [{ sid: '1', at: now }])
+
+        expect(viaRoute['1'].risk).toBeCloseTo(viaMap['1'].risk, 10)
+    })
+
+    it('inherits risk from a parallel line over the same station pair', () => {
+        // The map propagates risk across segments sharing a station pair; a journey has
+        // to agree with what the user sees on it.
+        const overlapping = [...segments, { sid: '3', lineId: 'L2', fromStationId: 'A', toStationId: 'B' }]
+        const onOtherLine = [{ stationId: 'A', lines: ['L2'], directionId: null, timestamp: now }]
+
+        const result = predictRouteRisk(overlapping, onOtherLine, [{ sid: '1', at: now }])
+
+        expect(result['1'].risk).toBeGreaterThan(0)
     })
 })
