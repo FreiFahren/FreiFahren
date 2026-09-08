@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import { useRoute } from '@/api/route';
-import { clearJourneyHighlight, setJourneyHighlight } from '@/hooks/use-journey-highlight';
+import { clearJourneyHighlight, setJourneyHighlight } from '@/lib/journey-highlight';
 
 type RouteLayerProps = {
   fromId: string;

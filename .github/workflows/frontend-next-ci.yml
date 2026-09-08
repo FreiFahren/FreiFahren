@@ -37,6 +37,12 @@ jobs:
             - name: Run ESLint
               run: bun run lint
 
+            # Fast, browserless checks on the app's pure logic. Placed before the build so a
+            # broken invariant fails in seconds rather than after a full bundle and a browser
+            # download.
+            - name: Run unit tests
+              run: bun run test:unit
+
             # `bun run build` runs `tsc -b` then `vite build`, so this gates both type errors and
             # build failures — neither of which the lint/format steps above catch.
             - name: Run build

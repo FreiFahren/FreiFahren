@@ -1,21 +1,7 @@
 import { type Station } from '@/api/transit';
 import { StationListItem } from '@/components/transit/StationListItem';
+import { matchStations } from '@/lib/match-stations';
 import { Card } from '@/components/ui/card';
-
-const MAX_RESULTS = 8;
-
-function matchStations(stations: Station[], query: string): Station[] {
-  const needle = query.trim().toLowerCase();
-  if (!needle) return [];
-  const results: Station[] = [];
-  for (const station of stations) {
-    if (station.name.toLowerCase().includes(needle)) {
-      results.push(station);
-      if (results.length === MAX_RESULTS) break;
-    }
-  }
-  return results;
-}
 
 type StationPickerProps = {
   stations: Station[] | undefined;
