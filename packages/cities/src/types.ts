@@ -143,6 +143,21 @@ export interface CityMap {
 }
 
 /**
+ * Travel-time estimates for journey planning. The network data carries no
+ * timetable — no departures, headways or service hours — so these constants are
+ * the only source of duration. They drive two things: which route the planner
+ * prefers, and how far a report has aged by the time the rider reaches a leg.
+ */
+export interface CityRoutingConfig {
+    /** Seconds for one stop-to-stop hop, by route type. Includes dwell time. */
+    secondsPerHop: Record<RouteType, number>
+    /** Seconds added when changing lines: walking plus expected wait. */
+    transferSeconds: number
+    /** Upper bound on travel speed in m/s. Only used to keep the A* heuristic admissible. */
+    maxSpeedMetersPerSecond: number
+}
+
+/**
  * A single city's complete configuration. City is a runtime dimension resolved
  * from the hostname (or an explicit `?city=` param on the API); this registry is
  * the single source of truth for everything that differs between cities.
@@ -163,6 +178,7 @@ export interface CityConfig extends CityDatabaseConfig {
     timezone: string
     reporting: CityReportingConfig
     map: CityMap
+    routing: CityRoutingConfig
     /** Basemap tile-build inputs. Every city ships with a basemap. */
     tiles: CityTiles
     seed: CitySeedConfig

@@ -64,6 +64,11 @@ export const HAMBURG: CityConfig = {
         bounds: [9.727, 53.369, 10.348, 53.733],
         styleUrl: 'https://tiles.freifahren.org/styles/hamburg.json',
     },
+    routing: {
+        secondsPerHop: { subway: 100, light_rail: 120, tram: 90, bus: 95, train: 150 },
+        transferSeconds: 240,
+        maxSpeedMetersPerSecond: 22,
+    },
     tiles: {
         osmUrl: 'https://download.geofabrik.de/europe/germany/hamburg-latest.osm.pbf',
     },

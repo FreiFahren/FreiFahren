@@ -60,6 +60,11 @@ export const LEIPZIG: CityConfig = {
         bounds: [12.18, 51.24, 12.56, 51.45],
         styleUrl: 'https://tiles.freifahren.org/styles/leipzig.json',
     },
+    routing: {
+        secondsPerHop: { subway: 100, light_rail: 120, tram: 90, bus: 95, train: 150 },
+        transferSeconds: 240,
+        maxSpeedMetersPerSecond: 22,
+    },
     tiles: {
         // No Leipzig-only Geofabrik extract exists, so the whole Saxony extract is used
         // and cropped to the city bounds (clipToMapBounds).
