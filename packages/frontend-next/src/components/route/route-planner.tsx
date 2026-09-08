@@ -1,4 +1,4 @@
-import { useNavigate } from '@tanstack/react-router';
+import { useMatchRoute, useNavigate } from '@tanstack/react-router';
 import { ArrowDown, Crosshair, Route as RouteIcon, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +20,7 @@ type Field = 'from' | 'to';
 export function RoutePlanner() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
+  const matchRoute = useMatchRoute();
   const { data: stations } = useStations();
   const { position, status, requestLocation } = useGeolocation();
 
@@ -92,6 +93,13 @@ export function RoutePlanner() {
     const station = field === 'from' ? from : to;
     return station?.name ?? '';
   };
+
+  /*
+   * While a journey is on screen its card and backdrop cover this button completely, so
+   * leaving it mounted only puts a dead control under them. Closing the card returns to
+   * the map, where it belongs.
+   */
+  if (matchRoute({ to: JourneyRoute.to })) return null;
 
   if (!open) {
     return (
