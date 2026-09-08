@@ -1,3 +1,5 @@
+import type { RouteType } from '@freifahren/cities'
+
 import { NoPathFoundError, StationNotFoundError } from '../../common/errors'
 
 export type StationId = string
@@ -18,7 +20,7 @@ export type Neighbor = {
 export type Graph = {
     stations: Map<StationId, StationWithCoords>
     neighbors: Map<StationId, Neighbor[]>
-    lineInfo: Map<LineId, { isCircular: boolean }>
+    lineInfo: Map<LineId, { isCircular: boolean; type: RouteType }>
 }
 
 type AStarState = {
@@ -30,6 +32,7 @@ type AStarState = {
 type LineRow = {
     id: LineId
     isCircular: boolean
+    type: RouteType
 }
 
 type LineStationRow = {
@@ -114,9 +117,9 @@ export const buildGraph = (stations: StationWithCoords[], lines: LineRow[], line
         stationMap.set(station.id, station)
     }
 
-    const lineInfoMap = new Map<LineId, { isCircular: boolean }>()
+    const lineInfoMap = new Map<LineId, { isCircular: boolean; type: RouteType }>()
     for (const line of lines) {
-        lineInfoMap.set(line.id, { isCircular: line.isCircular })
+        lineInfoMap.set(line.id, { isCircular: line.isCircular, type: line.type })
     }
 
     const neighborsMap = new Map<StationId, Neighbor[]>()
