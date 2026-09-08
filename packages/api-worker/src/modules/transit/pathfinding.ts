@@ -1,4 +1,4 @@
-import type { RouteType } from '@freifahren/cities'
+import type { CityRoutingConfig, RouteType } from '@freifahren/cities'
 
 import { NoPathFoundError, StationNotFoundError } from '../../common/errors'
 
@@ -41,8 +41,12 @@ type LineStationRow = {
     order: number
 }
 
-class MinHeap {
-    private heap: AStarState[] = []
+/*
+ * Generic over the state type so both the hop-count search and the journey search
+ * can use it; ordering only ever looks at fCost.
+ */
+class MinHeap<T extends { fCost: number }> {
+    private heap: T[] = []
 
     private getParentIndex(index: number): number {
         return Math.floor((index - 1) / 2)
@@ -91,12 +95,12 @@ class MinHeap {
         }
     }
 
-    insert(item: AStarState): void {
+    insert(item: T): void {
         this.heap.push(item)
         this.heapifyUp(this.heap.length - 1)
     }
 
-    extractMin(): AStarState | undefined {
+    extractMin(): T | undefined {
         if (this.heap.length === 0) return undefined
         if (this.heap.length === 1) return this.heap.pop()!
 
@@ -202,7 +206,7 @@ export const findPathWithAStar = (graph: Graph, from: StationId, to: StationId):
         throw new StationNotFoundError(to)
     }
 
-    const openSet = new MinHeap()
+    const openSet = new MinHeap<AStarState>()
     openSet.insert({
         stationId: from,
         gCost: 0,
@@ -250,4 +254,138 @@ export const findPathWithAStar = (graph: Graph, from: StationId, to: StationId):
     }
 
     return goalState.gCost
+}
+
+export type RouteEdge = {
+    fromStationId: StationId
+    toStationId: StationId
+    lineId: LineId
+    /** Seconds from journey start until entering this edge. */
+    offsetSeconds: number
+    rideSeconds: number
+}
+
+type RouteState = {
+    stationId: StationId
+    /** Line currently ridden; null only at the origin, so boarding costs no transfer. */
+    lineId: LineId | null
+    gCost: number
+    fCost: number
+}
+
+const stateKey = (stationId: StationId, lineId: LineId | null): string => `${stationId}|${lineId ?? ''}`
+
+const EARTH_RADIUS_METERS = 6_371_000
+
+/*
+ * Local rather than imported from the seed pipeline's helper: that module belongs to
+ * the Node-only seed path and must not be pulled into the Worker bundle.
+ */
+const metersBetween = (a: StationWithCoords, b: StationWithCoords): number => {
+    const toRadians = (degrees: number) => (degrees * Math.PI) / 180
+    const deltaLat = toRadians(b.lat - a.lat)
+    const deltaLng = toRadians(b.lng - a.lng)
+    const chord =
+        Math.sin(deltaLat / 2) ** 2 +
+        Math.sin(deltaLng / 2) ** 2 * Math.cos(toRadians(a.lat)) * Math.cos(toRadians(b.lat))
+    return 2 * EARTH_RADIUS_METERS * Math.asin(Math.min(1, Math.sqrt(chord)))
+}
+
+/**
+ * Shortest journey by estimated travel time, as the edges actually ridden.
+ *
+ * Unlike findPathWithAStar, which counts hops, the search state carries the line
+ * being ridden. That makes a line change an ordinary edge with a cost instead of a
+ * special case, and it is why a slower direct line can beat a faster one that needs
+ * a transfer. Costs are seconds, so the heuristic is expressed in seconds too and
+ * stays admissible.
+ */
+export const findRoute = (graph: Graph, from: StationId, to: StationId, routing: CityRoutingConfig): RouteEdge[] => {
+    const fromStation = graph.stations.get(from)
+    const toStation = graph.stations.get(to)
+
+    if (!fromStation) {
+        throw new StationNotFoundError(from)
+    }
+    if (!toStation) {
+        throw new StationNotFoundError(to)
+    }
+    if (from === to) {
+        return []
+    }
+
+    const heuristic = (station: StationWithCoords): number =>
+        metersBetween(station, toStation) / routing.maxSpeedMetersPerSecond
+
+    const openSet = new MinHeap<RouteState>()
+    openSet.insert({ stationId: from, lineId: null, gCost: 0, fCost: heuristic(fromStation) })
+
+    const bestCost = new Map<string, number>()
+    const cameFrom = new Map<string, { state: RouteState; edge: RouteEdge }>()
+    let goalState: RouteState | null = null
+
+    while (!openSet.isEmpty()) {
+        const current = openSet.extractMin()!
+        const currentKey = stateKey(current.stationId, current.lineId)
+
+        const settled = bestCost.get(currentKey)
+        if (settled !== undefined && settled < current.gCost) {
+            continue
+        }
+        bestCost.set(currentKey, current.gCost)
+
+        if (current.stationId === to) {
+            goalState = current
+            break
+        }
+
+        for (const neighbor of graph.neighbors.get(current.stationId) ?? []) {
+            const lineType = graph.lineInfo.get(neighbor.lineId)?.type
+            if (lineType === undefined) {
+                continue
+            }
+
+            const rideSeconds = routing.secondsPerHop[lineType]
+            const transferSeconds =
+                current.lineId !== null && current.lineId !== neighbor.lineId ? routing.transferSeconds : 0
+            const gCost = current.gCost + transferSeconds + rideSeconds
+
+            const neighborKey = stateKey(neighbor.stationId, neighbor.lineId)
+            const known = bestCost.get(neighborKey)
+            if (known !== undefined && known <= gCost) {
+                continue
+            }
+            bestCost.set(neighborKey, gCost)
+
+            cameFrom.set(neighborKey, {
+                state: current,
+                edge: {
+                    fromStationId: current.stationId,
+                    toStationId: neighbor.stationId,
+                    lineId: neighbor.lineId,
+                    offsetSeconds: current.gCost + transferSeconds,
+                    rideSeconds,
+                },
+            })
+
+            openSet.insert({
+                stationId: neighbor.stationId,
+                lineId: neighbor.lineId,
+                gCost,
+                fCost: gCost + heuristic(graph.stations.get(neighbor.stationId)!),
+            })
+        }
+    }
+
+    if (!goalState) {
+        throw new NoPathFoundError(from, to)
+    }
+
+    const edges: RouteEdge[] = []
+    let step = cameFrom.get(stateKey(goalState.stationId, goalState.lineId))
+    while (step !== undefined) {
+        edges.push(step.edge)
+        step = cameFrom.get(stateKey(step.state.stationId, step.state.lineId))
+    }
+    return edges.reverse()
 }
