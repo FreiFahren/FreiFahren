@@ -27,10 +27,11 @@ export function RhythmChart({ hours, currentHour, label }: RhythmChartProps) {
         />
       </div>
       <div className="text-text-4 mt-1 flex justify-between px-1 text-[10px]">
-        <span>0h</span>
-        <span>6h</span>
+        <span>00h</span>
+        <span>06h</span>
         <span>12h</span>
         <span>18h</span>
+        <span>23h</span>
       </div>
     </div>
   );
