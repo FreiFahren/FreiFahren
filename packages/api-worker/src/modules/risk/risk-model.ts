@@ -302,3 +302,105 @@ export const predictSegmentRisk = (
 
     return Object.fromEntries(segmentColors)
 }
+
+export type RouteRiskTarget = { sid: string; at: Date }
+
+/**
+ * Risk for the segments of one journey, each evaluated at the moment the rider
+ * enters it rather than at a single `now`.
+ *
+ * Same components, decay tables and overlap behaviour as predictSegmentRisk; the
+ * differences are deliberate and both follow from what a journey needs:
+ *  - a per-segment clock, because the temporal decay runs on the same timescale as
+ *    a trip (direct risk halves in ~17 minutes) and the last leg is not reached now;
+ *  - every requested segment is returned, zeros included, because a journey must be
+ *    able to tell "no inspections expected" apart from "could not be determined".
+ *
+ * Only the requested segments are scored, so this costs O(targets x reports)
+ * instead of a pass over the whole network.
+ */
+export const predictRouteRisk = (
+    segments: RiskModelSegment[],
+    reports: RiskModelReport[],
+    targets: RouteRiskTarget[],
+    circularLineIds: ReadonlySet<string> = new Set()
+): Record<string, SegmentRisk> => {
+    const lineIndexes = buildLineIndexes(segments)
+    const sidToSegment = new Map(segments.map((segment) => [segment.sid, segment]))
+    const rankBySid = new Map<string, number>()
+    for (const lineIndex of lineIndexes.values()) {
+        for (const segment of lineIndex.segments) {
+            rankBySid.set(segment.sid, segment.rank)
+        }
+    }
+
+    const segmentsByStationPair = new Map<string, RiskModelSegment[]>()
+    for (const segment of segments) {
+        const pairKey = sortedPairKey(segment.fromStationId, segment.toStationId)
+        const overlapping = segmentsByStationPair.get(pairKey)
+        if (overlapping) {
+            overlapping.push(segment)
+        } else {
+            segmentsByStationPair.set(pairKey, [segment])
+        }
+    }
+
+    const result: Record<string, SegmentRisk> = {}
+
+    for (const target of targets) {
+        const targetSegment = sidToSegment.get(target.sid)
+        if (targetSegment === undefined) continue
+
+        /*
+         * A report on a line that shares this station pair counts too: the map
+         * propagates risk across overlapping segments, and taking the strongest of
+         * them keeps a journey from reading safer than the map it is drawn on.
+         */
+        const overlapping =
+            segmentsByStationPair.get(sortedPairKey(targetSegment.fromStationId, targetSegment.toStationId)) ?? []
+
+        let highestRisk = 0
+        for (const segment of overlapping) {
+            const lineIndex = lineIndexes.get(segment.lineId)
+            const rank = rankBySid.get(segment.sid)
+            if (lineIndex === undefined || rank === undefined) continue
+
+            const lineRingSize = ringSize(lineIndex, circularLineIds.has(segment.lineId))
+
+            let direct = 0
+            let bidirect = 0
+            let line = 0
+
+            for (const report of reports) {
+                if (!report.lines.includes(segment.lineId)) continue
+
+                const timeDiffSeconds = (target.at.getTime() - report.timestamp.getTime()) / 1000
+
+                if (!report.stationId) {
+                    line = Math.min(1, line + lineRisk(report, timeDiffSeconds))
+                    continue
+                }
+
+                const stationRank = lineIndex.stationRank.get(report.stationId)
+                if (stationRank === undefined) continue
+
+                const linearDistance = Math.abs(rank - stationRank)
+                const distance =
+                    lineRingSize === null ? linearDistance : Math.min(linearDistance, lineRingSize - linearDistance)
+
+                direct = Math.min(1, direct + directRisk(report, timeDiffSeconds) * spatialDecay(distance, 'direct'))
+                bidirect = Math.min(
+                    1,
+                    bidirect + bidirectRisk(report, timeDiffSeconds) * spatialDecay(distance, 'bidirect')
+                )
+                line = Math.min(1, line + lineRisk(report, timeDiffSeconds) * spatialDecay(distance, 'line'))
+            }
+
+            highestRisk = Math.max(highestRisk, Math.min(1, direct + bidirect + line))
+        }
+
+        result[target.sid] = { color: riskToColor(highestRisk), risk: Math.round(highestRisk * 1000) / 1000 }
+    }
+
+    return result
+}

@@ -12,6 +12,7 @@ import { ReportSubmissionService } from './modules/reports/report-submission-ser
 import { invalidateStationReportsCache } from './modules/reports/reports-cache-middleware'
 import { RiskService } from './modules/risk'
 import type { CacheCtx } from './modules/transit/reference-cache'
+import { RouteService } from './modules/transit/route-service'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
 
 export type Bindings = {
@@ -82,6 +83,7 @@ export type Services = {
     insightsService: InsightsService
     riskService: RiskService
     transitNetworkDataService: TransitNetworkDataService
+    routeService: RouteService
 }
 
 export type Env = {
@@ -182,6 +184,7 @@ export const createCityServices = (db: DbConnection, city: CityConfig, cacheCtx:
         reportsService,
         insightsService: new InsightsService(db, transitNetworkDataService, city.timezone),
         riskService: new RiskService(reportsService, transitNetworkDataService),
+        routeService: new RouteService(transitNetworkDataService, reportsService, city.routing),
     }
 }
 
@@ -211,6 +214,7 @@ const applyServices = (c: Context<Env>, db: DbConnection, config: AppConfig) => 
     c.set('insightsService', services.insightsService)
     c.set('riskService', services.riskService)
     c.set('transitNetworkDataService', services.transitNetworkDataService)
+    c.set('routeService', services.routeService)
 }
 
 export const registerContext = (app: Hono<Env>) => {

@@ -70,6 +70,14 @@ export const BERLIN: CityConfig = {
         bounds: [13.088, 52.338, 13.761, 52.675],
         styleUrl: 'https://tiles.freifahren.org/styles/berlin.json',
     },
+    // Order-of-magnitude values derived from typical stop spacing and travel speeds,
+    // not measurements. Precision matters less than the relative ageing they produce:
+    // they decide how stale a report is by the time the rider reaches a leg.
+    routing: {
+        secondsPerHop: { subway: 100, light_rail: 120, tram: 90, bus: 95, train: 150 },
+        transferSeconds: 240,
+        maxSpeedMetersPerSecond: 22,
+    },
     tiles: {
         osmUrl: 'https://download.geofabrik.de/europe/germany/berlin-latest.osm.pbf',
     },

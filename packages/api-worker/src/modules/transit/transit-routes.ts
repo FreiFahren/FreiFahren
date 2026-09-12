@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import { Env } from '../../app-env'
 import { defineRoute } from '../../common/router'
+import { resolveViewer } from '../reports/viewer'
 
 export const getStations = defineRoute<Env>()({
     method: 'get' as const,
@@ -60,5 +61,29 @@ export const getDistance = defineRoute<Env>()({
         const distance = await transitNetworkDataService.getDistance(query.from, query.to)
         c.header('Cache-Control', 'no-store')
         return c.json({ distance })
+    },
+})
+
+export const getRoute = defineRoute<Env>()({
+    method: 'get' as const,
+    path: '/route',
+    schemas: {
+        query: z
+            .object({
+                from: z.string().min(1),
+                to: z.string().min(1),
+            })
+            .refine((query) => query.from !== query.to, {
+                message: 'from and to must be different stations',
+                path: ['to'],
+            }),
+    },
+    handler: async (c) => {
+        const routeService = c.get('routeService')
+        const { from, to } = c.req.valid('query')
+        const plan = await routeService.getRoute({ from, to, viewer: await resolveViewer(c) })
+        // Depends on the viewer and on the current time, so it must not be stored at the edge.
+        c.header('Cache-Control', 'no-store')
+        return c.json(plan)
     },
 })

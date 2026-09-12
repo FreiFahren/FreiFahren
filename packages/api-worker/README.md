@@ -74,6 +74,15 @@ development, run all three Worker configs together; only this API is exposed:
 bun run dev:with-report-gate
 ```
 
+The `report-gate` Worker lives outside this repository, so that command only works with access to
+it. Without it, every route that resolves a viewer — `/reports`, `/risk`, `/transit/route` — answers
+`503 REPORT_GATE_UNAVAILABLE`. To work on those paths locally, put the switch that PR previews use
+into `.dev.vars` and run the plain `bun run dev`:
+
+```sh
+echo 'REPORT_GATE_MODE=preview-open' >> .dev.vars
+```
+
 The Stripe webhook signing secret remains an API Worker secret:
 
 ```sh
