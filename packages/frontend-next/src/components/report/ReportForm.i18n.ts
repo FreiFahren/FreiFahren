@@ -28,10 +28,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   submitFailedTitle: "Reports aren't going through",
   submitFailedBody:
     "Something's blocking your reports right now. It may clear up on its own, but you can report sightings in the Telegram group instead, and they'll show up here as usual.",
-  disabledTitle: 'Reporting is currently off',
-  disabledBody:
-    "Reporting in the app is paused for now. You can still report sightings in the Telegram group, and they'll show up here as usual.",
-  disabledTelegramCta: 'Open Telegram group',
+  telegramFallbackCta: 'Open Telegram group',
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
@@ -60,8 +57,5 @@ i18n.addResourceBundle('de', NAMESPACE, {
   submitFailedTitle: 'Melden klappt gerade nicht',
   submitFailedBody:
     'Deine Meldungen kommen momentan nicht durch. Das kann sich von selbst wieder lösen, du kannst Sichtungen aber auch stattdessen in der Telegram-Gruppe melden, sie werden wie gewohnt hier angezeigt.',
-  disabledTitle: 'Melden ist aktuell aus',
-  disabledBody:
-    'Melden in der App ist vorübergehend pausiert. In der Telegram-Gruppe kannst du weiterhin Sichtungen melden, sie werden wie gewohnt hier angezeigt.',
-  disabledTelegramCta: 'Telegram-Gruppe öffnen',
+  telegramFallbackCta: 'Telegram-Gruppe öffnen',
 });

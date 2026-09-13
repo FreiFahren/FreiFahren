@@ -1,4 +1,4 @@
-import { asc, count, gte, inArray, sql } from 'drizzle-orm'
+import { and, asc, count, gte, inArray, sql } from 'drizzle-orm'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
 
@@ -7,6 +7,8 @@ import { DbConnection, reports } from '../../db'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
 import { cachedReference, type CacheCtx } from '../transit/reference-cache'
 import type { StationId, Stations } from '../transit/types'
+
+const notQuarantined = sql`${reports.trust} IS NOT 0`
 
 const THIRTY_DAYS_IN_MS = 30 * 24 * 60 * 60 * 1000
 const MIN_PROFILE_REPORTS = 80
@@ -95,7 +97,7 @@ export class InsightsService {
         const recentReportsByStation = await this.db
             .select({ stationId: reports.stationId, value: count() })
             .from(reports)
-            .where(gte(reports.timestamp, countRangeStart))
+            .where(and(gte(reports.timestamp, countRangeStart), notQuarantined))
             .groupBy(reports.stationId)
 
         const reportCount = recentReportsByStation.find((row) => row.stationId === stationId)?.value ?? 0
@@ -138,9 +140,12 @@ export class InsightsService {
                 .select({ lineId: reports.lineId, timestamp: reports.timestamp, stationId: reports.stationId })
                 .from(reports)
                 .where(
-                    inArray(
-                        reports.lineId,
-                        selectedLines.map((line) => line.id)
+                    and(
+                        inArray(
+                            reports.lineId,
+                            selectedLines.map((line) => line.id)
+                        ),
+                        notQuarantined
                     )
                 )
                 .orderBy(asc(reports.timestamp)),
@@ -183,6 +188,7 @@ export class InsightsService {
                         value: count(),
                     })
                     .from(reports)
+                    .where(notQuarantined)
                     .groupBy(bucket)
                 const hours = Array.from({ length: 24 }, (_, hour) => ({ hour, value: 0 }))
                 let first: number | undefined

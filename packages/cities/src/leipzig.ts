@@ -51,7 +51,6 @@ export const LEIPZIG: CityConfig = {
     lang: 'de',
     timezone: 'Europe/Berlin',
     reporting: {
-        publicSubmissionsEnabled: true,
         telegramForwardingEnabled: true,
     },
     map: {

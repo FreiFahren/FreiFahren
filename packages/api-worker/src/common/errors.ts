@@ -11,6 +11,9 @@ export const INTERNAL_CODES = [
     'REPORTING_DISABLED',
     'TURNSTILE_FAILED',
     'REPORT_GATE_UNAVAILABLE',
+    'ADMIN_UNAUTHORIZED',
+    'ADMIN_UNAVAILABLE',
+    'ADMIN_RANGE_TOO_LARGE',
 ] as const
 
 export type InternalCode = (typeof INTERNAL_CODES)[number]

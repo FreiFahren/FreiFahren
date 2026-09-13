@@ -350,18 +350,13 @@ type SubmitReportMutationInput = SubmitReportInput & {
  */
 export class SubmitReportError extends Error {
   readonly status: number;
-  readonly internalCode: string | undefined;
 
-  constructor(status: number, internalCode: string | undefined) {
+  constructor(status: number) {
     super(`Report submission failed: ${status}`);
     this.name = 'SubmitReportError';
     this.status = status;
-    this.internalCode = internalCode;
   }
 }
-
-export const isReportingDisabledError = (error: unknown): boolean =>
-  error instanceof SubmitReportError && error.internalCode === 'REPORTING_DISABLED';
 
 /**
  * Pick the concrete `lines.id` variant to submit from the user's high-level selection.
@@ -440,10 +435,7 @@ export function useSubmitReport() {
           }),
         });
         if (!response.ok) {
-          const body = (await response.json().catch(() => undefined)) as
-            | { details?: { internal_code?: string } }
-            | undefined;
-          throw new SubmitReportError(response.status, body?.details?.internal_code);
+          throw new SubmitReportError(response.status);
         }
         return response.json();
       }),

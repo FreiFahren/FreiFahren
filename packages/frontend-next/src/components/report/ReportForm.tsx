@@ -4,13 +4,7 @@ import { ChevronRight, MapPin, Search, Send, TriangleAlert } from 'lucide-react'
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useReportingEnabled } from '@/api/config';
-import {
-  isReportingDisabledError,
-  SubmitReportError,
-  type SubmitReportResponse,
-  useSubmitReport,
-} from '@/api/reports';
+import { SubmitReportError, type SubmitReportResponse, useSubmitReport } from '@/api/reports';
 import { LINE_TYPE_PRIORITY, type LineType, type Station } from '@/api/transit';
 import { FeedbackButton } from '@/components/feedback/FeedbackButton';
 import { ReportLocationStep } from '@/components/map/UserLocationControl';
@@ -355,7 +349,7 @@ function DirectionPicker() {
   );
 }
 
-function TelegramFallbackNotice({ title, body }: { title: string; body: string }) {
+function SubmitFailureNotice({ title, body }: { title: string; body: string }) {
   const { t } = useTranslation(NAMESPACE);
   const telegramHandle = currentCity.community.telegramHandle;
   const telegramUrl = telegramHandle
@@ -377,7 +371,7 @@ function TelegramFallbackNotice({ title, body }: { title: string; body: string }
         >
           <a href={telegramUrl} target="_blank" rel="noopener noreferrer">
             <Send data-icon="inline-start" />
-            {t('disabledTelegramCta')}
+            {t('telegramFallbackCta')}
           </a>
         </Button>
       )}
@@ -390,12 +384,10 @@ const REPEATED_FAILURE_THRESHOLD = 3;
 function SubmitFooter({
   onSubmitted,
   onSubmissionError,
-  onReportingDisabled,
   onRepeatedFailure,
 }: {
   onSubmitted: (result: SubmitReportResponse) => void;
   onSubmissionError: () => void;
-  onReportingDisabled: () => void;
   onRepeatedFailure: () => void;
 }) {
   const { t } = useTranslation(NAMESPACE);
@@ -457,16 +449,6 @@ function SubmitFooter({
       onSubmissionError: (error) => {
         onSubmissionError();
         /*
-         * Backstop for the cases the probe cannot cover: the switch flipping between the probe
-         * and this submit, and a client whose probe never answered (offline, or an install that
-         * has not reached the API since). Without it the user fills in the whole form and gets a
-         * generic failure for a state the API told us about explicitly.
-         */
-        if (isReportingDisabledError(error)) {
-          onReportingDisabled();
-          return;
-        }
-        /*
          * Every other failure (network error, an edge block before the token is even checked,
          * an unexpected 5xx, …) must still tell the user something happened — otherwise the
          * button just re-enables silently and a tap that produced no report reads as tapping
@@ -521,9 +503,7 @@ export function ReportForm() {
   const navigate = useNavigate();
   const { stationId: initialStationId, lineName: initialLineName } = routeApi.useSearch();
   const [result, setResult] = useState<SubmitReportResponse | null>(null);
-  const [refusedBySubmit, setRefusedBySubmit] = useState(false);
   const [repeatedFailure, setRepeatedFailure] = useState(false);
-  const reportingEnabled = useReportingEnabled();
 
   const handleSuccessClose = () => {
     navigate({ to: '/' });
@@ -552,7 +532,7 @@ export function ReportForm() {
                   />
                 }
               />
-              {reportingEnabled && !refusedBySubmit && !repeatedFailure ? (
+              {!repeatedFailure ? (
                 <ReportLocationStep>
                   <LinePicker />
                   <StationPicker />
@@ -560,17 +540,11 @@ export function ReportForm() {
                   <SubmitFooter
                     onSubmitted={setResult}
                     onSubmissionError={() => setResult(null)}
-                    onReportingDisabled={() => setRefusedBySubmit(true)}
                     onRepeatedFailure={() => setRepeatedFailure(true)}
                   />
                 </ReportLocationStep>
-              ) : repeatedFailure ? (
-                <TelegramFallbackNotice
-                  title={t('submitFailedTitle')}
-                  body={t('submitFailedBody')}
-                />
               ) : (
-                <TelegramFallbackNotice title={t('disabledTitle')} body={t('disabledBody')} />
+                <SubmitFailureNotice title={t('submitFailedTitle')} body={t('submitFailedBody')} />
               )}
             </>
           )}

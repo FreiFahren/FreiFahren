@@ -1,6 +1,8 @@
 export type CityDescriptor = {
     slug: string
     dbBinding: string
+    // Kept as a protocol compatibility field for the deployed gate. Intake is always enabled;
+    // emergency blocking is controlled by D1 quarantine state in the API databases.
     reporting: {
         publicSubmissionsEnabled: boolean
     }
