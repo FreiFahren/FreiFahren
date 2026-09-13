@@ -3,9 +3,9 @@ import { createFileRoute, Outlet } from '@tanstack/react-router';
 import { LayerToggleButton } from '@/components/map/LayerToggleButton';
 import { ReportButton } from '@/components/map/ReportButton';
 import { ReportsOverviewButton } from '@/components/map/ReportsOverviewButton';
-import { SettingsButton } from '@/components/map/SettingsButton';
 import { StationSearch } from '@/components/map/StationSearch';
 import { StatsPopUp } from '@/components/map/StatsPopUp';
+import { TopLeftControls } from '@/components/map/top-left-controls';
 import { RefreshNotification } from '@/components/RefreshNotification';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -19,7 +19,7 @@ export const Route = createFileRoute('/_map')({
       <StationSearch />
       <StatsPopUp />
       <RefreshNotification />
-      <SettingsButton />
+      <TopLeftControls />
       <LayerToggleButton />
       <ReportsOverviewButton />
       <ReportButton />

@@ -76,7 +76,7 @@ export function StationSearch() {
         />
       )}
       <div className="pt-safe-3 pointer-events-none fixed inset-x-0 top-0 z-30 px-3 pb-3">
-        <div className="pointer-events-auto mx-auto w-full sm:max-w-md">
+        <div className="pointer-events-auto mx-auto w-full md:max-w-md">
           <div className="bg-card text-card-foreground flex h-11 items-center gap-1.5 rounded-lg pr-1 pl-3">
             <Search className="text-muted-foreground size-4 shrink-0" />
             <Input

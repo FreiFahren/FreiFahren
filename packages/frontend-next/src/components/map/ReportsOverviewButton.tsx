@@ -5,6 +5,7 @@ import { HOUR_MS, isReportLive, useReports } from '@/api/reports';
 import { useLines, useStations } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
+import { PulseDot } from '@/components/ui/pulse-dot';
 import { useNow } from '@/hooks/useNow';
 import { REPORT_RECOMPUTE_INTERVAL_MS } from '@/hooks/useReportsLayer';
 import { markReportViewed, useReportViewed } from '@/lib/viewed-reports';
@@ -60,12 +61,7 @@ export function ReportsOverviewButton() {
           <div className="flex items-center gap-2">
             {lineName && <LineBadge name={lineName} />}
             <span className="flex-1 truncate text-sm font-semibold">{stationName}</span>
-            {!latestViewed && (
-              <span className="relative ml-auto block size-2 shrink-0">
-                <span className="bg-destructive absolute inset-0 animate-ping rounded-full opacity-75" />
-                <span className="bg-destructive relative block size-2 rounded-full" />
-              </span>
-            )}
+            {!latestViewed && <PulseDot className="ml-auto" />}
           </div>
         </Link>
       </Button>

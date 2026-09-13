@@ -1,0 +1,36 @@
+/* A short shake at the end of each cycle, so the bell nudges occasionally rather than jittering.
+   The pause is in the keyframe rather than a JS timer, keeping it on the compositor.
+   Percentage-based, so the caller sets `animation-duration`. */
+@keyframes bell-ring {
+  0%,
+  85%,
+  100% {
+    transform: rotate(0deg);
+  }
+  87% {
+    transform: rotate(14deg);
+  }
+  90% {
+    transform: rotate(-12deg);
+  }
+  93% {
+    transform: rotate(9deg);
+  }
+  96% {
+    transform: rotate(-6deg);
+  }
+  98% {
+    transform: rotate(3deg);
+  }
+}
+
+.bell-ring {
+  transform-origin: top center;
+  animation: bell-ring 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bell-ring {
+    animation: none;
+  }
+}

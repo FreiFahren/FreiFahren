@@ -6,6 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
+import { marked } from 'marked';
 
 // Stamped into the bundle so the React Query cache persister can `buster` (drop) a persisted
 // cache whose query shapes predate this build, rather than hydrating an incompatible snapshot.
@@ -57,6 +58,69 @@ function preloadPrimaryFont(): Plugin {
   };
 }
 
+// External links follow the rest of the codebase: new tab, noopener.
+marked.use({
+  renderer: {
+    link(token) {
+      const text = this.parser.parseInline(token.tokens);
+      return `<a href="${token.href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+    },
+  },
+});
+
+// Compiles src/content/announcements/*.md at build time, so no markdown parser reaches the client.
+// Each file yields two modules, kept apart so a growing changelog can't grow the entry chunk:
+//   `<file>.md?meta` -> frontmatter, imported eagerly for the unread badge
+//   `<file>.md`      -> the rendered HTML body, imported lazily by the article view
+function announcementsMarkdown(): Plugin {
+  return {
+    name: 'announcements-markdown',
+    enforce: 'pre',
+    transform(code, id) {
+      const [file, query] = id.split('?');
+      if (!file?.endsWith('.md') || !file.includes('/src/content/')) return null;
+      // Parsed, not compared: dev appends its own params, so this arrives as `?import&meta`.
+      const isMeta = new URLSearchParams(query).has('meta');
+
+      const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/.exec(code);
+      const body = match ? code.slice(match[0].length).trim() : code.trim();
+
+      if (!isMeta) {
+        return {
+          code: `export default ${JSON.stringify(body ? marked.parse(body, { async: false }) : '')}`,
+          map: null,
+        };
+      }
+
+      // Flat `key: value` scalars only, hence no YAML dependency.
+      const frontmatter: Record<string, string> = {};
+      for (const line of match?.[1].split('\n') ?? []) {
+        const separator = line.indexOf(':');
+        if (separator === -1) continue;
+        frontmatter[line.slice(0, separator).trim()] = line
+          .slice(separator + 1)
+          .trim()
+          .replace(/^['"]|['"]$/g, '');
+      }
+
+      // `<slug>.<lang>.md`, split on the final dot so a slug may contain dots.
+      const [slug, lang] = path.basename(file, '.md').split(/\.(?=[^.]+$)/);
+
+      return {
+        code: `export default ${JSON.stringify({
+          slug,
+          lang,
+          title: frontmatter.title ?? '',
+          description: frontmatter.description ?? '',
+          date: frontmatter.date ?? '',
+          hasBody: body.length > 0,
+        })}`,
+        map: null,
+      };
+    },
+  };
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   define: {
@@ -69,6 +133,7 @@ export default defineConfig({
   // never referenced by (or served to) clients; the Sentry plugin deletes them after upload.
   build: { sourcemap: sentryAuthToken ? 'hidden' : false },
   plugins: [
+    announcementsMarkdown(),
     tanstackRouter({ target: 'react', autoCodeSplitting: true }),
     react(),
     babel({ presets: [reactCompilerPreset({ target: '19' })] }),
