@@ -2,7 +2,11 @@ import { Capacitor } from '@capacitor/core';
 import { type ReactNode, useRef, useState } from 'react';
 
 import { type LocationRequestTrigger, track } from '@/lib/analytics';
-import { requestGeolocationPermission } from '@/lib/location-prompt';
+import {
+  forgetLocationSuccess,
+  rememberLocationSuccess,
+  requestGeolocationPermission,
+} from '@/lib/location-prompt';
 
 import {
   GeolocationContext,
@@ -22,6 +26,7 @@ export function GeolocationProvider({ children }: { children: ReactNode }) {
   const notifyLoading = () => setStatus('loading');
 
   const notifyPosition = (coords: GeolocationCoords) => {
+    rememberLocationSuccess();
     setPosition({ lng: coords.longitude, lat: coords.latitude });
     setAccuracy(coords.accuracy);
     setStatus('tracking');
@@ -29,6 +34,7 @@ export function GeolocationProvider({ children }: { children: ReactNode }) {
 
   const notifyError = (code: number) => {
     // GeolocationPositionError: 1 = PERMISSION_DENIED, 2 = POSITION_UNAVAILABLE, 3 = TIMEOUT.
+    if (code === 1) forgetLocationSuccess();
     setStatus(code === 1 ? 'denied' : 'unavailable');
   };
 

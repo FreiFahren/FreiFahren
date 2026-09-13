@@ -8,8 +8,7 @@ import {
   isMapLocationPromptDismissed,
   LOCATION_PROMPT_DELAY_MS,
   openLocationPrompt,
-  queryGeolocationPermission,
-  type GeolocationPermissionState,
+  getLocationSharingAction,
 } from '@/lib/location-prompt';
 
 function useMountedRef() {
@@ -32,7 +31,9 @@ export function useMapLocationSharing({
 }) {
   const { position, requestLocation, status } = useGeolocation();
   const [showPrompt, setShowPrompt] = useState(false);
-  const [permission, setPermission] = useState<GeolocationPermissionState | null>(null);
+  const [action, setAction] = useState<Awaited<ReturnType<typeof getLocationSharingAction>> | null>(
+    null,
+  );
   const promptTrackedRef = useRef(false);
   const requestLocationRef = useRef(requestLocation);
   const hasLocation = position !== null || status === 'tracking';
@@ -48,34 +49,33 @@ export function useMapLocationSharing({
   }, [hasLocation]);
 
   useEffect(() => {
-    if (!enabled || hasLocation || permission !== null) return;
+    if (!enabled || hasLocation || action !== null) return;
 
     let cancelled = false;
-    void queryGeolocationPermission().then((result) => {
+    void getLocationSharingAction().then((result) => {
       if (cancelled) return;
-      track('location_permission_evaluated', { state: result });
-      setPermission(result);
+      setAction(result);
     });
     return () => {
       cancelled = true;
     };
-  }, [enabled, hasLocation, permission]);
+  }, [enabled, hasLocation, action]);
 
   useEffect(() => {
-    if (!enabled || hasLocation || permission === null) return;
+    if (!enabled || hasLocation || action === null) return;
 
-    if (permission === 'granted') {
+    if (action === 'request') {
       void requestLocationRef.current('auto');
       return;
     }
 
-    if (permission === 'denied') return;
+    if (action === 'denied') return;
 
     const timer = window.setTimeout(() => {
       if (!isMapLocationPromptDismissed()) setShowPrompt(true);
     }, LOCATION_PROMPT_DELAY_MS);
     return () => window.clearTimeout(timer);
-  }, [enabled, hasLocation, permission]);
+  }, [enabled, hasLocation, action]);
 
   const visible = showPrompt && canDisplay && !hasLocation;
   useEffect(() => {
@@ -125,19 +125,16 @@ export function useReportLocationSharing() {
     const prepare = async () => {
       if (initialPositionRef.current) return;
 
-      const permission = await queryGeolocationPermission();
+      const action = await getLocationSharingAction();
       if (cancelled) return;
-      track('location_permission_evaluated', { state: permission });
-      if (permission === 'granted') {
-        const coords = await requestLocationRef.current('report');
+      if (action === 'request') {
+        await requestLocationRef.current('report');
         if (cancelled) return;
-        if (coords) {
-          setPhase('complete');
-          return;
-        }
+        setPhase('complete');
+        return;
       }
 
-      if (permission === 'denied') {
+      if (action === 'denied') {
         setPhase('denied');
         openLocationPrompt('report');
         track('location_permission_blocked_shown', { source: 'report' });
