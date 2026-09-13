@@ -29,6 +29,13 @@
       "when": 1786131797259,
       "tag": "0003_add_reports_trust_score",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1788811664183,
+      "tag": "0004_add_report_emergency_quarantine",
+      "breakpoints": true
     }
   ]
 }

@@ -30,21 +30,12 @@ const viewerSchema = z.object({
     minStationTrust: z.number().nonnegative(),
 })
 
-export const assertPublicReportIntakeEnabled = (c: Context<Env>): void => {
-    if (isOpenReportPreview(c) || c.get('city').reporting.publicSubmissionsEnabled) return
-    throw new AppError({
-        message: 'Reporting is temporarily disabled',
-        statusCode: 503,
-        internalCode: 'REPORTING_DISABLED',
-    })
-}
-
 const cityDescriptor = (c: Context<Env>) => {
     const city = c.get('city')
     return {
         slug: city.slug,
         dbBinding: city.dbBinding,
-        reporting: { publicSubmissionsEnabled: city.reporting.publicSubmissionsEnabled },
+        reporting: { publicSubmissionsEnabled: true },
     }
 }
 
@@ -109,8 +100,6 @@ const callGate = async <Gate, Data>(
 
 export const submitToReportGate = async (c: Context<Env>, report: NormalizedReport) => {
     if (isOpenReportPreview(c)) return submitOpenPreviewReport(c, report)
-    assertPublicReportIntakeEnabled(c)
-
     return callGate(
         c.env.REPORT_GATE,
         (gate) =>

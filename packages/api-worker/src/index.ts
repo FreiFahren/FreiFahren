@@ -6,6 +6,8 @@ import { requestId } from 'hono/request-id'
 import { corsAllowOrigin, Env, registerContext } from './app-env'
 import { handleError } from './common/error-handler'
 import { registerVersionedRoutes } from './common/router'
+import { ADMIN_API_PATH } from './modules/admin/admin-contract'
+import { adminRoutes } from './modules/admin/admin-routes'
 import { getConfig } from './modules/config'
 import { getLineInsights, getLinesInsights, getStationInsights } from './modules/insights'
 import {
@@ -100,6 +102,7 @@ export const createApp = () => {
     app.onError(handleError)
 
     app.post('/webhooks/stripe', postStripeWebhook)
+    app.route(ADMIN_API_PATH, adminRoutes)
 
     registerVersionedRoutes(app, 'reports', 'v0', {
         v0: [getReports, postReport, getReportsByStation],

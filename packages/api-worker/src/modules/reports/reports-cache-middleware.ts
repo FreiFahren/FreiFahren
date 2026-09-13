@@ -46,7 +46,9 @@ export const reportsCacheMiddleware: MiddlewareHandler<Env> = async (c, next) =>
      * Only stations that are actually below the threshold skip the cache. Everything else still
      * shares one entry per station per hour.
      */
-    if (c.get('reportsUncacheable') === true) {
+    // An enabled admin console needs emergency actions to be reflected on the next read.
+    if (c.env.PUBLIC_EDGE_CACHE_DISABLED === 'true' || c.get('reportsUncacheable') === true) {
+        c.header('Cloudflare-CDN-Cache-Control', 'no-store')
         c.header('Cache-Control', 'no-store')
         return
     }

@@ -14,6 +14,7 @@ const overrides: Partial<Bindings> = {}
 export const fakeReportGate = {
     minStationTrust: 1,
     intakeTrust: 1 as number | null,
+    intakeFlags: null as string | null,
     unavailable: false,
     lastIntake: undefined as Record<string, unknown> | undefined,
 }
@@ -21,6 +22,7 @@ export const fakeReportGate = {
 export const resetFakeReportGate = () => {
     fakeReportGate.minStationTrust = 1
     fakeReportGate.intakeTrust = 1
+    fakeReportGate.intakeFlags = null
     fakeReportGate.unavailable = false
     fakeReportGate.lastIntake = undefined
 }
@@ -43,17 +45,6 @@ const reportGateBinding: PublicReportGate = {
         if (fakeReportGate.unavailable) throw new Error('Fake report gate unavailable')
 
         fakeReportGate.lastIntake = body as unknown as Record<string, unknown>
-        if (!body.city.reporting.publicSubmissionsEnabled) {
-            return {
-                ok: false,
-                error: {
-                    message: 'Reporting is temporarily disabled',
-                    statusCode: 503,
-                    internalCode: 'REPORTING_DISABLED',
-                },
-            } as const
-        }
-
         return persistFakeReport(body)
     },
 }
@@ -70,8 +61,8 @@ const persistFakeReport = async (
     const row = await cityDb
         .prepare(
             `INSERT INTO reports
-             (station_id, line_id, direction_id, timestamp, source, client_hash, trust)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+             (station_id, line_id, direction_id, timestamp, source, client_hash, trust, trust_flags)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
              RETURNING report_id, station_id, line_id, direction_id, timestamp`
         )
         .bind(
@@ -81,7 +72,8 @@ const persistFakeReport = async (
             now,
             body.report.source,
             clientHash,
-            trust
+            trust,
+            fakeReportGate.intakeFlags
         )
         .first<{
             report_id: number
@@ -129,6 +121,8 @@ export const resetTestEnv = () => {
 }
 
 export const testEnv = (): Bindings => ({
+    PUBLIC_EDGE_CACHE_DISABLED: overrides.PUBLIC_EDGE_CACHE_DISABLED,
+    ADMIN_DATA_SNAPSHOT_AT: overrides.ADMIN_DATA_SNAPSHOT_AT,
     DB: workerEnv.DB,
     DB_HAMBURG: workerEnv.DB,
     DB_LEIPZIG: workerEnv.DB,
@@ -142,6 +136,7 @@ export const testEnv = (): Bindings => ({
     POSTHOG_HOST: overrides.POSTHOG_HOST ?? workerEnv.POSTHOG_HOST,
     REPORT_GATE: overrides.REPORT_GATE ?? reportGateBinding,
     TRUSTED_REPORT_GATE: overrides.TRUSTED_REPORT_GATE ?? trustedReportGateBinding,
+    ...overrides,
 })
 
 export const setSystemTime = (date?: Date) => {

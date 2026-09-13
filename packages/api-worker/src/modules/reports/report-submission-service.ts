@@ -32,7 +32,7 @@ export class ReportSubmissionService {
                 city: {
                     slug: city.slug,
                     dbBinding: city.dbBinding,
-                    reporting: { publicSubmissionsEnabled: city.reporting.publicSubmissionsEnabled },
+                    reporting: { publicSubmissionsEnabled: true },
                 },
                 report: { ...report, source: 'telegram' },
             })

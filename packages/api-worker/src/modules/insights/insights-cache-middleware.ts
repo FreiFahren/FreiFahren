@@ -24,6 +24,12 @@ export const insightsCacheMiddleware: MiddlewareHandler<Env> = async (c, next) =
 
     if (c.req.method !== 'GET' || c.res.status >= 400) return
 
+    if (c.env.PUBLIC_EDGE_CACHE_DISABLED === 'true') {
+        c.header('Cache-Control', 'no-store')
+        c.header('Cloudflare-CDN-Cache-Control', 'no-store')
+        return
+    }
+
     c.header('Cache-Control', INSIGHTS_CACHE_CONTROL)
     const isLineInsights = c.req.path.includes('/insights/lines')
     c.header(
