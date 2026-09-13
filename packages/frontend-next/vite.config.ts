@@ -78,9 +78,9 @@ export default defineConfig({
       // Keep the virtual registration module resolvable for native builds without emitting a
       // service worker there. The call site itself is compile-time gated by __CAPACITOR__.
       disable: isCapacitor,
-      // Keep the current screen stable while a new worker waits; PwaUpdatePrompt lets the user
-      // choose when the shell reloads instead of losing an in-progress report or navigation.
-      registerType: 'prompt',
+      // Activate an available update immediately so long-lived tabs do not remain on an old
+      // release. vite-plugin-pwa reloads once after the new worker takes control.
+      registerType: 'autoUpdate',
       // Register the SW ourselves in main.tsx instead of letting the plugin inject registerSW.js.
       // That generated snippet calls navigator.serviceWorker.register() with no .catch, so a
       // rejection (common in bots/crawlers and locked-down WebViews) surfaces as an unhandled
@@ -113,9 +113,8 @@ export default defineConfig({
       },
       workbox: {
         // injectRegister is disabled, so configure the update lifecycle explicitly rather than
-        // relying on vite-plugin-pwa's injected registration snippet to do it for us. Leaving the
-        // worker waiting is what makes the user-controlled prompt possible.
-        skipWaiting: false,
+        // relying on vite-plugin-pwa's injected registration snippet to do it for us.
+        skipWaiting: true,
         clientsClaim: true,
         // Precache the immutable, content-hashed assets: JS/CSS, the IBM Plex woff2 files, and the
         // lazy maplibre chunk (~1 MB, under the 2 MB default cap) so the map engine paints offline

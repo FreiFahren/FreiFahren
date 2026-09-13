@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { LineInsights } from '@/api/insights';
@@ -47,7 +47,7 @@ function formatShare(share: number): string {
   return `${Math.round(share * 100)}%`;
 }
 
-function routeEntries(stations: HotspotStation[]): ListEntry[] {
+function routeEntries(stations: HotspotStation[], revealed: Set<string>): ListEntry[] {
   if (stations.length === 0) return [];
   const largest = Math.max(...stations.map((station) => station.share));
   const threshold = Math.max(MIN_HOTSPOT_SHARE, (1 / stations.length) * ABOVE_UNIFORM_FACTOR);
@@ -68,7 +68,8 @@ function routeEntries(stations: HotspotStation[]): ListEntry[] {
 
   for (const station of stations) {
     const isHotspot =
-      station.share > 0 && (station.share === largest || station.share >= threshold);
+      revealed.has(station.stationId) ||
+      (station.share > 0 && (station.share === largest || station.share >= threshold));
     if (!isHotspot) {
       quietStations.push(station);
       continue;
@@ -77,6 +78,19 @@ function routeEntries(stations: HotspotStation[]): ListEntry[] {
     entries.push({ kind: 'hotspot', station });
   }
   flushQuietStations();
+  return entries;
+}
+
+function fittedEntries(stations: HotspotStation[], rowBudget: number): ListEntry[] {
+  const revealed = new Set<string>();
+  let entries = routeEntries(stations, revealed);
+  for (const station of [...stations].sort((a, b) => b.share - a.share)) {
+    revealed.add(station.stationId);
+    const candidate = routeEntries(stations, revealed);
+    // Revealing a station can split a quiet group into three rows; include it only if they fit.
+    if (candidate.length <= Math.max(rowBudget, entries.length)) entries = candidate;
+    else revealed.delete(station.stationId);
+  }
   return entries;
 }
 
@@ -105,7 +119,7 @@ function StationActivity({
           style={{ width: `${Math.max(4, station.share * 100)}%` }}
         />
       </span>
-      <span className="text-muted-foreground w-8 text-right text-sm font-semibold">
+      <span className="text-muted-foreground w-10 shrink-0 text-right text-sm font-semibold">
         {percentage}
       </span>
     </>
@@ -146,10 +160,28 @@ export function HotspotList({
   emptyLabel,
 }: HotspotListProps) {
   const { t } = useTranslation(NAMESPACE);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [rowBudget, setRowBudget] = useState(0);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => new Set());
   const stations = orderedStations(stationOrder, stationData, hotspots);
-  if (stations.length === 0) return <p className="text-muted-foreground text-sm">{emptyLabel}</p>;
-  const entries = routeEntries(stations);
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const measure = () => {
+      const list = viewport.querySelector('ol');
+      const row = list?.querySelector('a, button');
+      if (!list || !row) return;
+      const gap = parseFloat(getComputedStyle(list).rowGap);
+      setRowBudget(
+        Math.floor((viewport.clientHeight + gap) / (row.getBoundingClientRect().height + gap)),
+      );
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, [stations.length]);
+  const entries = fittedEntries(stations, rowBudget);
   const largestShare = Math.max(...stations.map((station) => station.share));
 
   const toggleGroup = (groupId: string) => {
@@ -162,78 +194,87 @@ export function HotspotList({
   };
 
   return (
-    <ol className="relative space-y-1">
-      <div
-        aria-hidden="true"
-        className="absolute top-3 bottom-3 left-[5px] w-0.5 rounded-full"
-        style={{ backgroundColor: color }}
-      />
-      {entries.map((entry) => {
-        if (entry.kind === 'hotspot') {
-          return (
-            <li
-              key={entry.station.stationId}
-              className="relative grid grid-cols-[12px_minmax(0,1fr)] gap-3"
-            >
-              <span
-                aria-hidden="true"
-                className="border-card z-10 mt-2 size-3 rounded-full border-[3px]"
-                style={{ backgroundColor: color }}
-              />
-              <StationLink
-                lineName={lineName}
-                station={entry.station}
-                largestShare={largestShare}
-              />
-            </li>
-          );
-        }
+    <div ref={viewportRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      {stations.length === 0 ? (
+        <p className="text-muted-foreground text-sm">{emptyLabel}</p>
+      ) : (
+        <ol className="relative flex flex-col gap-1">
+          <div
+            aria-hidden="true"
+            className="absolute top-3 bottom-3 left-[5px] w-0.5 rounded-full"
+            style={{ backgroundColor: color }}
+          />
+          {entries.map((entry) => {
+            if (entry.kind === 'hotspot') {
+              return (
+                <li
+                  key={entry.station.stationId}
+                  className="relative grid grid-cols-[12px_minmax(0,1fr)] gap-3"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="border-card z-10 mt-2 size-3 rounded-full border-[3px]"
+                    style={{ backgroundColor: color }}
+                  />
+                  <StationLink
+                    lineName={lineName}
+                    station={entry.station}
+                    largestShare={largestShare}
+                  />
+                </li>
+              );
+            }
 
-        const { group } = entry;
-        const isExpanded = expandedGroups.has(group.id);
-        const groupShare = formatShare(
-          group.stations.reduce((sum, station) => sum + station.share, 0),
-        );
-        return (
-          <li key={group.id} className="relative">
-            <div className="grid grid-cols-[12px_minmax(0,1fr)] gap-3">
-              <span
-                aria-hidden="true"
-                className="border-card z-10 mt-2 size-3 rounded-full border-[3px] opacity-70"
-                style={{ backgroundColor: color }}
-              />
-              <button
-                type="button"
-                aria-expanded={isExpanded}
-                onClick={() => toggleGroup(group.id)}
-                className="hover:bg-muted/70 focus-visible:ring-ring text-muted-foreground flex min-w-0 items-center gap-2 rounded-sm py-1 text-left text-sm outline-none focus-visible:ring-2"
-              >
-                <span className="min-w-0 flex-1 truncate">
-                  {t('quieterStations', { count: group.stations.length })}
-                </span>
-                <span className="text-xs font-semibold">{groupShare}</span>
-                <ChevronDown
-                  className={cn('size-4 shrink-0 transition-transform', isExpanded && 'rotate-180')}
-                />
-              </button>
-            </div>
-            {isExpanded && (
-              <ol className="border-border-soft mt-1 ml-6 space-y-1 border-l pl-3">
-                {group.stations.map((station) => (
-                  <li key={station.stationId}>
-                    <StationLink
-                      lineName={lineName}
-                      station={station}
-                      largestShare={largestShare}
-                      compact
+            const { group } = entry;
+            const isExpanded = expandedGroups.has(group.id);
+            const groupShare = formatShare(
+              group.stations.reduce((sum, station) => sum + station.share, 0),
+            );
+            return (
+              <li key={group.id} className="relative">
+                <div className="grid grid-cols-[12px_minmax(0,1fr)] gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="border-card z-10 mt-2 size-3 rounded-full border-[3px] opacity-70"
+                    style={{ backgroundColor: color }}
+                  />
+                  <button
+                    type="button"
+                    aria-expanded={isExpanded}
+                    onClick={() => toggleGroup(group.id)}
+                    className="hover:bg-muted/70 focus-visible:ring-ring text-muted-foreground flex min-w-0 items-center gap-2 rounded-sm py-1 text-left text-sm outline-none focus-visible:ring-2"
+                  >
+                    <span className="min-w-0 flex-1 truncate">
+                      {t('quieterStations', { count: group.stations.length })}
+                    </span>
+                    <span className="text-xs font-semibold">{groupShare}</span>
+                    <ChevronDown
+                      className={cn(
+                        'size-4 shrink-0 transition-transform',
+                        isExpanded && 'rotate-180',
+                      )}
                     />
-                  </li>
-                ))}
-              </ol>
-            )}
-          </li>
-        );
-      })}
-    </ol>
+                  </button>
+                </div>
+                {isExpanded && (
+                  <ol className="border-border-soft mt-1 ml-6 space-y-1 border-l pl-3">
+                    {group.stations.map((station) => (
+                      <li key={station.stationId}>
+                        <StationLink
+                          lineName={lineName}
+                          station={station}
+                          largestShare={largestShare}
+                          compact
+                        />
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </div>
   );
 }

@@ -91,33 +91,37 @@ export function LineDetail({ line, onClose, source }: LineDetailProps) {
       title={
         <div className="flex items-center gap-3 pr-2">
           <span
-            className="rounded-sm px-3 py-1 text-sm font-semibold text-white"
+            className="shrink-0 rounded-sm px-3 py-1 text-sm font-semibold text-white"
             style={{ backgroundColor: line.color }}
           >
             {line.name}
           </span>
-          {!line.isCircular && <span>{start && end ? `${start} ↔ ${end}` : line.name}</span>}
+          {!line.isCircular && (
+            <span
+              className="line-clamp-2 min-w-0 break-words"
+              title={start && end ? `${start} ↔ ${end}` : line.name}
+            >
+              {start && end ? `${start} ↔ ${end}` : line.name}
+            </span>
+          )}
         </div>
       }
       closeLabel={t('close')}
       onClose={onClose}
       cardClassName="h-[min(38rem,calc(100dvh-3rem))] overflow-hidden"
     >
-      <div
-        className={cn(
-          'flex min-h-0 flex-1 flex-col overflow-hidden',
-          !insights && 'min-h-[23.5rem]',
-        )}
-        aria-busy={!insights}
-      >
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden" aria-busy={!insights}>
+        <div
+          className={cn('shrink-0', !hasLiveReports && 'invisible')}
+          aria-hidden={!hasLiveReports}
+        >
+          <LineCurrentActivity
+            reportsInLast24Hours={recentReportCount}
+            reportsInLastHour={lastHourReportCount}
+          />
+        </div>
         {insights && (
           <>
-            {hasLiveReports && (
-              <LineCurrentActivity
-                reportsInLast24Hours={recentReportCount}
-                reportsInLastHour={lastHourReportCount}
-              />
-            )}
             <section aria-labelledby="line-typical-activity-heading" className="shrink-0">
               <CardContent className="shrink-0 space-y-3 pt-1">
                 <h3
@@ -150,16 +154,14 @@ export function LineDetail({ line, onClose, source }: LineDetailProps) {
                 >
                   {t('usualHotspots')}
                 </h3>
-                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-                  <HotspotList
-                    lineName={line.name}
-                    color={line.color}
-                    hotspots={insights.hotspots.stations}
-                    stationOrder={line.stations}
-                    stationData={stations}
-                    emptyLabel={t('noHotspots')}
-                  />
-                </div>
+                <HotspotList
+                  lineName={line.name}
+                  color={line.color}
+                  hotspots={insights.hotspots.stations}
+                  stationOrder={line.stations}
+                  stationData={stations}
+                  emptyLabel={t('noHotspots')}
+                />
               </CardContent>
             </section>
           </>

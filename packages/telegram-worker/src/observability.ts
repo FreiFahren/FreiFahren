@@ -1,4 +1,10 @@
-import { captureException, type Breadcrumb, type CloudflareOptions } from '@sentry/cloudflare'
+import type { Env } from './types'
+import {
+    consoleLoggingIntegration,
+    captureException,
+    type Breadcrumb,
+    type CloudflareOptions,
+} from '@sentry/cloudflare'
 
 const TELEGRAM_BOT_API_TOKEN = /(https:\/\/api\.telegram\.org\/bot)[^/\s?#]+/gi
 
@@ -41,10 +47,7 @@ export function redactTelegramBotTokenFromSpan(span: SentrySpan): SentrySpan {
     }
 }
 
-// Single seam for error reporting. With no queue/retry, a failed pipeline run drops the
-// message, so we capture it as a Sentry issue (alert on the error rate) and also log to
-// the live tail. captureException works here even under ctx.waitUntil — withSentry binds
-// the client via AsyncLocalStorage.
+// Call within an instrumented handler so captureException has the request's Sentry scope.
 export function reportError(message: string, err: unknown, extra?: Record<string, unknown>): void {
     captureException(err, { extra: { message, ...extra } })
     console.error(message, {
@@ -52,3 +55,14 @@ export function reportError(message: string, err: unknown, extra?: Record<string
         ...extra,
     })
 }
+
+export const sentryOptions = (env: Pick<Env, 'SENTRY_DSN' | 'SENTRY_RELEASE' | 'NODE_ENV'>): CloudflareOptions => ({
+    dsn: env.SENTRY_DSN,
+    release: env.SENTRY_RELEASE,
+    environment: env.NODE_ENV,
+    enableLogs: true,
+    integrations: [consoleLoggingIntegration({ levels: ['info', 'warn', 'error'] })],
+    tracesSampleRate: 1.0,
+    beforeBreadcrumb: redactTelegramBotTokenFromBreadcrumb,
+    beforeSendSpan: redactTelegramBotTokenFromSpan,
+})

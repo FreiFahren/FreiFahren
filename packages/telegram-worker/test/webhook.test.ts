@@ -1,4 +1,4 @@
-import { createExecutionContext, waitOnExecutionContext } from 'cloudflare:test'
+import { env, createExecutionContext, waitOnExecutionContext } from 'cloudflare:test'
 import { describe, expect, it, vi } from 'vitest'
 import { WEBHOOK_SECRET_HEADER, acceptUpdate, handleWebhook } from '../src/webhook'
 import { TelegramUpdate } from '../src/types'
@@ -10,14 +10,24 @@ const LEIPZIG_CHAT_ID = '-1001138115617'
 const HAMBURG_CHAT_ID = '-1202572205'
 
 // Spy seam for the privacy assertions below; the real implementation writes to Sentry.
-vi.mock('../src/observability', () => ({ reportError: vi.fn() }))
+vi.mock('../src/observability', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('../src/observability')>()),
+    reportError: vi.fn(),
+}))
 
 const testEnv: Env = {
+    CITY_DELIVERY: env.CITY_DELIVERY,
     BACKEND_URL: 'https://backend.test',
     MISTRAL_MODEL: 'mistral-small-latest',
     SENTRY_DSN: 'https://example.invalid/1',
     MISTRAL_API_KEY: 'test-mistral-key',
     TELEGRAM_WEBHOOK_SECRET: 'webhook-secret',
+    TRANSIT_API: {
+        fetch: async () => new Response(null, { status: 522 }),
+        connect: () => {
+            throw new Error('Unused')
+        },
+    },
     REPORT_API: { intake: async () => ({ ok: true, data: {} }) },
 }
 

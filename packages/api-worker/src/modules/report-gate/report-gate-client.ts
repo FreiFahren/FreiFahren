@@ -43,10 +43,8 @@ const cityDescriptor = (c: Context<Env>) => {
     const city = c.get('city')
     return {
         slug: city.slug,
-        publicAppUrl: city.publicAppUrl,
         dbBinding: city.dbBinding,
-        telegramChatId: city.community.telegramChatId ?? null,
-        reporting: city.reporting,
+        reporting: { publicSubmissionsEnabled: city.reporting.publicSubmissionsEnabled },
     }
 }
 

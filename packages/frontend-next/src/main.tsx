@@ -12,7 +12,6 @@ import { syncConsentToPostHog } from './lib/consent';
 import { loadPostHog } from './lib/posthog-client';
 import { initErrorMonitoring } from './lib/error-monitoring';
 import { initNativePlatform } from './lib/native';
-import { notifyPwaUpdateAvailable, setPwaUpdateServiceWorker } from './lib/pwa-update';
 import { safeSessionStorage } from './lib/safe-storage';
 import { isTelegramInAppBrowser } from './lib/utils';
 import './lib/i18n';
@@ -27,8 +26,8 @@ void initNativePlatform();
 
 // vite-plugin-pwa's registration API catches failures (bots, crawlers, locked-down WebViews). Keep
 // checking after the app returns online or to the foreground so an installed PWA does not keep a
-// suspended shell indefinitely; an available update is surfaced by PwaUpdatePrompt instead of
-// navigating the user away from their current screen.
+// suspended shell indefinitely. A new worker activates and reloads once so returning users do not
+// remain on an old release after a deployment.
 if (!__CAPACITOR__ && 'serviceWorker' in navigator) {
   if (isTelegramInAppBrowser) {
     const TELEGRAM_SW_CLEAR_MARK = 'ff-tg-sw-cleared';
@@ -47,8 +46,7 @@ if (!__CAPACITOR__ && 'serviceWorker' in navigator) {
       })
       .catch(() => {});
   } else {
-    const updateServiceWorker = registerSW({
-      onNeedRefresh: notifyPwaUpdateAvailable,
+    registerSW({
       onRegisteredSW: (_swUrl, registration) => {
         if (!registration) return;
 
@@ -72,7 +70,6 @@ if (!__CAPACITOR__ && 'serviceWorker' in navigator) {
       },
       onRegisterError: () => {},
     });
-    setPwaUpdateServiceWorker(updateServiceWorker);
   }
 }
 

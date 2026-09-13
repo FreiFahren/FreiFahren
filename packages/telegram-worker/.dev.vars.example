@@ -3,3 +3,6 @@
 MISTRAL_API_KEY=
 # The secret_token you pass to Telegram setWebhook; the worker checks it on every webhook.
 TELEGRAM_WEBHOOK_SECRET=
+
+# Sole runtime owner of outgoing Telegram requests
+TELEGRAM_BOT_TOKEN=

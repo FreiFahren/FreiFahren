@@ -6,15 +6,23 @@ name: Preview
 on:
     pull_request:
         types: [opened, reopened, ready_for_review, synchronize, closed]
+    schedule:
+        - cron: '23 4 * * *'
+    workflow_dispatch:
+        inputs:
+            dry_run:
+                description: 'List orphaned previews without deleting them'
+                type: boolean
+                default: true
 
 # Never cancelled: a cancelled migration or report load would leave a half-provisioned database.
 concurrency:
-    group: preview-${{ github.event.pull_request.number }}
+    group: preview-${{ github.event.pull_request.number || github.run_id }}
     cancel-in-progress: false
 
 jobs:
     plan:
-        if: github.event.action != 'closed'
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
         runs-on: ubuntu-latest
         permissions:
             contents: read
@@ -258,91 +266,31 @@ jobs:
                       })
 
     cleanup:
-        # No path gate, so a preview can never outlive its PR even if the changes were reverted before
-        # closing. Every delete is idempotent.
         if: >-
-            github.event.action == 'closed' &&
-            github.event.pull_request.head.repo.full_name == github.repository
+            github.event_name == 'schedule' ||
+            github.event_name == 'workflow_dispatch' ||
+            (github.event.action == 'closed' &&
+             github.event.pull_request.head.repo.full_name == github.repository)
         runs-on: ubuntu-latest
+        concurrency:
+            group: preview-cleanup
+            cancel-in-progress: false
         permissions:
             contents: read
+            pull-requests: read
             deployments: write
-        defaults:
-            run:
-                working-directory: packages/api-worker
         env:
             CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
             CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+            GITHUB_TOKEN: ${{ github.token }}
             PR_NUMBER: ${{ github.event.pull_request.number }}
-
+            DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
         steps:
             - name: Check out code
               uses: actions/checkout@v4
-
-            - name: Set up Bun
-              uses: oven-sh/setup-bun@v2
+            - name: Set up Node
+              uses: actions/setup-node@v4
               with:
-                  bun-version: latest
-
-            - name: Install dependencies
-              run: bun install --frozen-lockfile
-
-            - name: Delete preview workers
-              run: |
-                  set -uo pipefail
-                  # GitHub runs this as `bash -e`, which `set -uo pipefail` does not clear. Under
-                  # errexit the capture below aborts the whole step the moment wrangler exits
-                  # non-zero — before $? is read — so the script never reaches the branches that
-                  # decide whether that exit was expected. Turning it off is what makes the
-                  # not-found case below reachable at all; real failures still exit explicitly.
-                  set +e
-                  for worker_name in "api-pr-${PR_NUMBER}" "frontend-pr-${PR_NUMBER}"; do
-                    output=$(npx wrangler delete --name "$worker_name" --force 2>&1)
-                    status=$?
-                    echo "$output"
-                    if [ "$status" -eq 0 ]; then
-                      echo "Deleted preview worker $worker_name."
-                      continue
-                    fi
-                    # A PR that never deployed this preview (or was already cleaned up) has no Worker
-                    # to delete. That is expected, not a failure; any other error (auth, network) must
-                    # fail loudly so a real leak is noticed.
-                    #
-                    # Which code says "no such Worker" has already changed once: wrangler 4.105 returns
-                    # 10090 "This Worker does not exist on this account", not the 10007 script_not_found
-                    # this originally matched. Since that moves under us, the human-readable sentence is
-                    # matched too — belt and braces, because the cost of missing it is a failed cleanup
-                    # that strands Workers and skips the database teardown entirely.
-                    if echo "$output" | grep -qiE 'code: *(10007|10090)|script_not_found|workers\.api\.error\.not_found|Worker does not exist'; then
-                      echo "No preview worker named $worker_name exists; nothing to clean up."
-                      continue
-                    fi
-                    echo "Failed to delete preview worker $worker_name (exit $status)." >&2
-                    exit "$status"
-                  done
-
-            - name: Delete preview databases
-              run: bun run preview:databases --pr "$PR_NUMBER" --destroy
-
-            # Last, so the link stays live exactly as long as the Worker behind it does: if a delete
-            # above fails, the job stops here and the deployment correctly still reads as active.
-            # Marking it inactive drops the environment from the PR; the record stays as history.
-            - name: Retire preview deployment
-              uses: actions/github-script@v7
-              with:
-                  script: |
-                      const { owner, repo } = context.repo
-                      const deployments = await github.paginate(github.rest.repos.listDeployments, {
-                        owner,
-                        repo,
-                        environment: `pr-${process.env.PR_NUMBER}`,
-                        per_page: 100,
-                      })
-                      for (const deployment of deployments) {
-                        await github.rest.repos.createDeploymentStatus({
-                          owner,
-                          repo,
-                          deployment_id: deployment.id,
-                          state: 'inactive',
-                        })
-                      }
+                  node-version: '22'
+            - name: Clean closed PR and orphaned previews
+              run: node .github/scripts/cleanup-previews.mjs

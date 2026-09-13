@@ -31,10 +31,8 @@ export class ReportSubmissionService {
             submitTrustedReportToGate(gate, {
                 city: {
                     slug: city.slug,
-                    publicAppUrl: city.publicAppUrl,
                     dbBinding: city.dbBinding,
-                    telegramChatId: city.community.telegramChatId ?? null,
-                    reporting: city.reporting,
+                    reporting: { publicSubmissionsEnabled: city.reporting.publicSubmissionsEnabled },
                 },
                 report: { ...report, source: 'telegram' },
             })
