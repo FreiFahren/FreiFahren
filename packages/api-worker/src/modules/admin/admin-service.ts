@@ -1,6 +1,7 @@
 import { CITY_DATABASES, CITY_DATABASE_SLUGS, getCity } from '@freifahren/cities'
 import { and, asc, count as countRows, desc, eq, gte, isNull, lt, min, ne, sql } from 'drizzle-orm'
 import type { BatchItem } from 'drizzle-orm/batch'
+import { DateTime } from 'luxon'
 
 import type { Bindings } from '../../app-env'
 import { AppError } from '../../common/errors'
@@ -428,39 +429,68 @@ const summarizeReports = (selected: AdminReport[], knownFlags: Set<string>) => {
     return finalizeSummary(summary)
 }
 
-type TimelineBucket = ReportCounts & { sources: Record<string, number> }
+type TimelineBucket = ReportCounts & { sources: Record<string, number>; flags: Record<string, number> }
 
-const emptyTimelineBucket = (): TimelineBucket => ({ ...emptyCounts(), sources: {} })
+const emptyTimelineBucket = (): TimelineBucket => ({ ...emptyCounts(), sources: {}, flags: {} })
 
-const bucketReports = (rows: AdminReport[], from: number, interval: number) => {
+const bucketStart = (timestamp: number, interval: number, timezone: string) => {
+    const local = DateTime.fromMillis(timestamp, { zone: timezone })
+    const startOfDay = local.startOf('day')
+    if (interval === DAY) return startOfDay.toMillis()
+    const elapsed = timestamp - startOfDay.toMillis()
+    return startOfDay.plus({ milliseconds: Math.floor(elapsed / interval) * interval }).toMillis()
+}
+
+const nextBucketStart = (timestamp: number, interval: number, timezone: string) => {
+    const local = DateTime.fromMillis(timestamp, { zone: timezone })
+    if (interval === DAY) return local.plus({ days: 1 }).startOf('day').toMillis()
+    const startOfDay = local.startOf('day')
+    const elapsed = timestamp - startOfDay.toMillis()
+    return startOfDay.plus({ milliseconds: (Math.floor(elapsed / interval) + 1) * interval }).toMillis()
+}
+
+const previousDayBucket = (timestamp: number, day: number, timezone: string) =>
+    DateTime.fromMillis(timestamp, { zone: timezone }).minus({ days: day }).toMillis()
+
+const bucketReports = (rows: AdminReport[], from: number, interval: number, timezone: string) => {
     const byBucket = new Map<number, TimelineBucket>()
-    const firstBucket = Math.floor(from / interval) * interval
+    const firstBucket = bucketStart(from, interval, timezone)
     for (const row of rows) {
-        const timestamp = Math.floor(row.timestamp / interval) * interval
+        const timestamp = bucketStart(row.timestamp, interval, timezone)
         const bucket = byBucket.get(timestamp) ?? emptyTimelineBucket()
         // The first visible bucket may start mid-interval; don't include its out-of-range reports.
         if (timestamp < firstBucket || row.timestamp >= from) {
             count(bucket, row)
             bucket.sources[row.source] = (bucket.sources[row.source] ?? 0) + 1
+            for (const flag of row.flags) bucket.flags[flag] = (bucket.flags[flag] ?? 0) + 1
         }
         byBucket.set(timestamp, bucket)
     }
     return byBucket
 }
 
-const expectedForBucket = (byBucket: Map<number, TimelineBucket>, timestamp: number, coverageStart: number) => {
+const expectedForBucket = (
+    byBucket: Map<number, TimelineBucket>,
+    timestamp: number,
+    coverageStart: number,
+    timezone: string
+) => {
     const expected = emptyCounts()
+    const sources: Record<string, number> = {}
+    const flags: Record<string, number> = {}
     let samples = 0
     let scoredSamples = 0
     for (let day = 1; day <= 7; day++) {
-        const previous = timestamp - day * DAY
+        const previous = previousDayBucket(timestamp, day, timezone)
         if (previous < coverageStart) continue
         const sample = byBucket.get(previous) ?? emptyTimelineBucket()
         for (const key of countKeys) expected[key] += sample[key]
+        for (const [source, value] of Object.entries(sample.sources)) sources[source] = (sources[source] ?? 0) + value
+        for (const [flag, value] of Object.entries(sample.flags)) flags[flag] = (flags[flag] ?? 0) + value
         samples++
         if (sample.positive + sample.zero > 0) scoredSamples++
     }
-    return { expected, samples, scoredSamples }
+    return { expected, sources, flags, samples, scoredSamples }
 }
 
 const buildTimelineBucket = (
@@ -469,34 +499,70 @@ const buildTimelineBucket = (
     to: number,
     from: number,
     interval: number,
-    coverageStart: number
+    coverageStart: number,
+    timezone: string
 ): AdminDashboard['series'][number] => {
     const current = byBucket.get(timestamp) ?? emptyTimelineBucket()
-    const { expected, samples, scoredSamples } = expectedForBucket(byBucket, timestamp, coverageStart)
-    const fraction = (Math.min(to, timestamp + interval) - Math.max(from, timestamp)) / interval
+    const { expected, sources, flags, samples, scoredSamples } = expectedForBucket(
+        byBucket,
+        timestamp,
+        coverageStart,
+        timezone
+    )
+    const end = nextBucketStart(timestamp, interval, timezone)
+    const duration = end - timestamp
+    const fraction = (Math.min(to, end) - Math.max(from, timestamp)) / duration
     for (const key of countKeys) expected[key] = samples > 0 ? (expected[key] / samples) * fraction : 0
+    const expectedSources = Object.fromEntries(
+        Object.entries(sources).map(([name, value]) => [name, samples > 0 ? (value / samples) * fraction : 0])
+    )
+    const expectedFlags = Object.fromEntries(
+        Object.entries(flags).map(([name, value]) => [name, samples > 0 ? (value / samples) * fraction : 0])
+    )
     // Legacy intervals are missing scoring history, not zero positive traffic.
     const positiveBaseline = scoredSamples > 0 ? (expected.positive * samples) / scoredSamples : 0
+    const sourceAnomalies = Object.entries(current.sources)
+        .filter(([name, value]) => value >= Math.max(3, (expectedSources[name] ?? 0) * 3))
+        .map(([name]) => name)
+        .sort()
+    const flagAnomalies = Object.entries(current.flags)
+        .filter(([name, value]) => value >= Math.max(3, (expectedFlags[name] ?? 0) * 3))
+        .map(([name]) => name)
+        .sort()
     const spike =
         samples >= 3 &&
         (current.total >= Math.max(10, expected.total * 3) ||
-            (scoredSamples >= 3 && current.positive >= Math.max(10, positiveBaseline * 3)))
+            (scoredSamples >= 3 && current.positive >= Math.max(10, positiveBaseline * 3)) ||
+            sourceAnomalies.length > 0 ||
+            flagAnomalies.length > 0)
     return {
         ...current,
         timestamp,
         expected: samples >= 3 ? expected : null,
         partial: fraction < 0.999,
         spike,
+        anomalies: { sources: sourceAnomalies, flags: flagAnomalies },
     }
 }
 
-const buildTimeline = (rows: AdminReport[], from: number, to: number, interval: number, coverageStart: number) => {
-    const byBucket = bucketReports(rows, from, interval)
+const buildTimeline = (
+    rows: AdminReport[],
+    from: number,
+    to: number,
+    interval: number,
+    coverageStart: number,
+    timezone: string
+) => {
+    const byBucket = bucketReports(rows, from, interval, timezone)
     const series: AdminDashboard['series'] = []
     // A baseline uses only preceding days, including zero-report intervals. Replaying
     // An incident therefore cannot learn from traffic that hadn't happened yet.
-    for (let timestamp = Math.floor(from / interval) * interval; timestamp < to; timestamp += interval) {
-        series.push(buildTimelineBucket(byBucket, timestamp, to, from, interval, coverageStart))
+    for (
+        let timestamp = bucketStart(from, interval, timezone);
+        timestamp < to;
+        timestamp = nextBucketStart(timestamp, interval, timezone)
+    ) {
+        series.push(buildTimelineBucket(byBucket, timestamp, to, from, interval, coverageStart, timezone))
     }
     return series
 }
@@ -514,6 +580,10 @@ export const getDashboard = async (env: Bindings, query: DashboardQuery): Promis
     const knownSources = new Set(results.flatMap((result) => result.flags.map((row) => row.source)))
     const rows = results.flatMap((result) => result.rows).filter((row) => matchesFilters(row, query))
     const selected = rows.filter((row) => row.timestamp >= from)
+    const timezones = citySlugs
+        .map((city) => getCity(city)?.timezone)
+        .filter((timezone): timezone is string => timezone !== undefined)
+    const timelineTimezone = new Set(timezones).size === 1 ? timezones[0]! : 'UTC'
     return {
         generatedAt: Date.now(),
         snapshotAt: env.ADMIN_DATA_SNAPSHOT_AT ?? null,
@@ -521,7 +591,14 @@ export const getDashboard = async (env: Bindings, query: DashboardQuery): Promis
         to,
         bucketMinutes: query.bucket,
         ...summarizeReports(selected, knownFlags),
-        series: buildTimeline(rows, from, to, interval, earliest.length > 0 ? Math.max(...earliest) : Infinity),
+        series: buildTimeline(
+            rows,
+            from,
+            to,
+            interval,
+            earliest.length > 0 ? Math.max(...earliest) : Infinity,
+            timelineTimezone
+        ),
         reports: selected
             .sort((a, b) => (a.timestamp !== b.timestamp ? b.timestamp - a.timestamp : b.id - a.id))
             .slice(query.offset, query.offset + 50),

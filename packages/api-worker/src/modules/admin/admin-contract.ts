@@ -54,6 +54,7 @@ export type AdminDashboard = {
         partial: boolean
         sources: Record<string, number>
         spike: boolean
+        anomalies: { sources: string[]; flags: string[] }
     })[]
     sources: (ReportCounts & { name: string })[]
     flags: (ReportCounts & { name: string })[]

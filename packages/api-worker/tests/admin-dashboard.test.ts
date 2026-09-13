@@ -195,6 +195,35 @@ describe('private report monitoring', () => {
         expect((await dashboard()).series[12]).toMatchObject({ total: 15, positive: 15, spike: false })
     })
 
+    it('uses city-local day boundaries and surfaces source and flag composition anomalies', async () => {
+        for (let day = 1; day <= 3; day++) {
+            setSystemTime(new Date(`2026-08-0${day}T12:00:00Z`))
+            fakeReportGate.intakeTrust = 1
+            fakeReportGate.intakeFlags = null
+            for (let i = 0; i < 5; i++) await submit()
+        }
+        setSystemTime(new Date('2026-08-08T12:00:00Z'))
+        fakeReportGate.intakeFlags = 'new-rule'
+        for (let i = 0; i < 5; i++) await submit('mobile_app')
+        const data = await dashboard()
+        expect(data.series[12]).toMatchObject({
+            total: 5,
+            spike: true,
+            anomalies: { sources: ['mobile_app'], flags: ['new-rule'] },
+        })
+
+        setSystemTime(new Date('2026-08-08T23:30:00Z'))
+        await submit('web_app')
+        const localDay = await appRequestWithRedirect(
+            '/admin/v1/dashboard?scope=berlin&from=2026-08-08T22:00:00Z&to=2026-08-09T22:00:00Z&bucket=1440',
+            { headers }
+        )
+        expect(localDay.status).toBe(200)
+        const localDayData = (await localDay.json()) as AdminDashboard
+        expect(localDayData.series).toHaveLength(1)
+        expect(localDayData.series[0]).toMatchObject({ timestamp: Date.parse('2026-08-08T22:00:00Z'), total: 1 })
+    })
+
     it('keeps gate details out of public report responses', async () => {
         fakeReportGate.intakeFlags = 'private-rule'
         await submit()
