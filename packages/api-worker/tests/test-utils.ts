@@ -153,13 +153,18 @@ export const setSystemTime = (date?: Date) => {
     vi.setSystemTime(date)
 }
 
-export const appRequestWithRedirect = async (path: string, init?: RequestInit, targetApp = app) => {
-    const response = await targetApp.request(path, init, testEnv())
+export const appRequestWithRedirect = async (
+    path: string,
+    init?: RequestInit,
+    targetApp = app,
+    executionCtx?: ExecutionContext
+) => {
+    const response = await targetApp.request(path, init, testEnv(), executionCtx)
     if (response.status === 307) {
         const location = response.headers.get('Location')
         if (location) {
             const url = new URL(location, 'http://localhost')
-            return targetApp.request(url.pathname + url.search, init, testEnv())
+            return targetApp.request(url.pathname + url.search, init, testEnv(), executionCtx)
         }
     }
     return response

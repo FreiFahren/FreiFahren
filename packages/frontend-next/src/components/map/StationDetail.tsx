@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { lineInsightsQueryOptions } from '@/api/insights';
+import { prefetchLineInsights } from '@/api/insights';
 import { DAY_MS, useReports } from '@/api/reports';
 import { resolveStationLineNames, type Station, useLines } from '@/api/transit';
 import { Button } from '@/components/ui/button';
@@ -32,9 +32,7 @@ export function StationDetail({ station, onClose }: StationDetailProps) {
 
   useEffect(() => {
     if (!lines) return;
-    for (const lineName of resolveStationLineNames(station.lines, lines)) {
-      void queryClient.prefetchQuery(lineInsightsQueryOptions(lineName));
-    }
+    prefetchLineInsights(queryClient, resolveStationLineNames(station.lines, lines));
   }, [lines, queryClient, station.lines]);
 
   return (

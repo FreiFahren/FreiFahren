@@ -7,7 +7,7 @@ import { corsAllowOrigin, Env, registerContext } from './app-env'
 import { handleError } from './common/error-handler'
 import { registerVersionedRoutes } from './common/router'
 import { getConfig } from './modules/config'
-import { getLineInsights, getStationInsights } from './modules/insights'
+import { getLineInsights, getLinesInsights, getStationInsights } from './modules/insights'
 import {
     insightsCacheMiddleware,
     VERSIONED_INSIGHTS_CACHEABLE_PATHS,
@@ -111,7 +111,7 @@ export const createApp = () => {
         v0: [getRisk],
     })
     registerVersionedRoutes(app, 'insights', 'v0', {
-        v0: [getStationInsights, getLineInsights],
+        v0: [getStationInsights, getLinesInsights, getLineInsights],
     })
     // Deliberately absent from the Workers Cache middlewares above — see config-routes.
     registerVersionedRoutes(app, 'config', 'v0', {
