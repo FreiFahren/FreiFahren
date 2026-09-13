@@ -4,6 +4,7 @@ import { queryClient } from '@/api/queryClient';
 import { type Line, linesQueryOptions, stationsQueryOptions } from '@/api/transit';
 import { LineDetail, type LineDetailLine } from '@/components/map/LineDetail';
 import type { LineDetailSource } from '@/lib/analytics';
+import { Route as ReportsStationsRoute } from '@/routes/reports/stations';
 
 const lineDetailSources = new Set<LineDetailSource>([
   'direct',
@@ -73,5 +74,15 @@ function LineRoute() {
   const { line } = Route.useLoaderData();
   const { source } = Route.useSearch();
   const navigate = useNavigate();
-  return <LineDetail line={line} source={source} onClose={() => navigate({ to: '/' })} />;
+  return (
+    <LineDetail
+      line={line}
+      source={source}
+      onClose={() =>
+        source === 'reports_list'
+          ? navigate({ to: ReportsStationsRoute.to, search: { lineName: line.name } })
+          : navigate({ to: '/' })
+      }
+    />
+  );
 }

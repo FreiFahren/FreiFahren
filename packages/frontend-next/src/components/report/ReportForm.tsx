@@ -11,18 +11,16 @@ import {
   type SubmitReportResponse,
   useSubmitReport,
 } from '@/api/reports';
-import { LINE_TYPE_PRIORITY, type LineType, type Station } from '@/api/transit';
+import { type Station } from '@/api/transit';
 import { FeedbackButton } from '@/components/feedback/FeedbackButton';
 import { ReportLocationStep } from '@/components/map/UserLocationControl';
 import { PageHeader } from '@/components/templates/PageHeader';
-import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { Separator } from '@/components/ui/separator';
 import { ToastPill } from '@/components/ui/toast-pill';
 import { Toaster } from '@/components/ui/toaster';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useGeolocation } from '@/contexts/Geolocation.context';
 import { track } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';
@@ -39,21 +37,13 @@ import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 
 import { NAMESPACE } from './ReportForm.i18n';
-import { type LineFilter, useReportSelection } from './ReportSelection.context';
+import { useReportSelection } from './ReportSelection.context';
 import { ReportSelectionProvider } from './ReportSelectionProvider';
 import { ReportSuccess } from './ReportSuccess';
+import { ClearSelectionButton, LineBadgePicker, LineTypeTabs } from './line-picker-controls';
 import { type ReportRejection, useReportVerification } from './useReportVerification';
 
 const routeApi = getRouteApi('/report');
-
-const LINE_TYPES = new Set<string>(Object.keys(LINE_TYPE_PRIORITY));
-
-const FILTERS: LineFilter[] = [
-  'all',
-  ...currentCity.seed.routeTypePriority
-    .filter((type): type is LineType => LINE_TYPES.has(type))
-    .sort((a, b) => LINE_TYPE_PRIORITY[a] - LINE_TYPE_PRIORITY[b]),
-];
 
 /** Diacritic-insensitive match so "moritzplatz" finds "Möritzplatz" and "strasse" finds "Straße". */
 function normalize(value: string): string {
@@ -71,48 +61,10 @@ const REJECTION_MESSAGE: Record<ReportRejection, string> = {
   too_far: 'errorTooFar',
 };
 
-function ClearSelectionButton({ onClick, className }: { onClick: () => void; className?: string }) {
-  const { t } = useTranslation(NAMESPACE);
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'text-muted-foreground hover:text-foreground py-1 text-sm outline-none focus-visible:underline',
-        className,
-      )}
-    >
-      {t('clearSelection')}
-    </button>
-  );
-}
-
 function LinePicker() {
   const { t } = useTranslation(NAMESPACE);
   const { lineName, lineFilter, setLineFilter, selectLine, visibleLines, stationId } =
     useReportSelection();
-
-  const chips = visibleLines.map((line) => {
-    const isSelected = lineName === line.name;
-    return (
-      <button
-        key={line.name}
-        type="button"
-        aria-pressed={isSelected}
-        onClick={() => {
-          selectionTap();
-          selectLine(isSelected ? null : line.name);
-        }}
-        className={cn(
-          'shrink-0 rounded-sm transition-all outline-none focus-visible:ring-2 focus-visible:ring-white/50',
-          isSelected && 'ring-2 ring-white',
-          lineName && !isSelected && 'opacity-40',
-        )}
-      >
-        <LineBadge name={line.name} />
-      </button>
-    );
-  });
 
   return (
     <section className="px-4">
@@ -120,42 +72,21 @@ function LinePicker() {
           beside the heading, so sharing a row cuts off the last one. */}
       <div className="mb-3 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
         <SectionHeading hint={t('optional')}>{t('line')}</SectionHeading>
-        <ToggleGroup
-          type="single"
-          size="sm"
-          value={lineFilter}
-          onValueChange={(value) => {
-            if (value) setLineFilter(value as LineFilter);
-          }}
-          className="bg-surface-solid border-border max-w-full overflow-x-auto border"
-        >
-          {FILTERS.map((option) => (
-            <ToggleGroupItem
-              key={option}
-              value={option}
-              className="text-muted-foreground data-[state=on]:bg-surface-elev data-[state=on]:text-foreground font-semibold tracking-wide uppercase"
-            >
-              {t(option)}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+        <LineTypeTabs value={lineFilter} onChange={setLineFilter} />
       </div>
 
-      {/* Always render the row so reserving the clear button's height avoids layout shift. */}
-      <div className="mb-1 flex justify-end">
-        <ClearSelectionButton
-          onClick={() => selectLine(null)}
-          className={cn(!lineName && 'invisible')}
-        />
-      </div>
-
-      {stationId ? (
-        <div className="flex flex-wrap gap-2">{chips}</div>
-      ) : (
-        <div className="-mx-4 overflow-x-auto px-4 py-1.5">
-          <div className="flex w-max gap-2">{chips}</div>
+      {lineName && (
+        <div className="mb-1 flex justify-end">
+          <ClearSelectionButton onClick={() => selectLine(null)} />
         </div>
       )}
+
+      <LineBadgePicker
+        lines={visibleLines}
+        selectedLine={lineName}
+        onSelect={selectLine}
+        wrap={Boolean(stationId)}
+      />
     </section>
   );
 }

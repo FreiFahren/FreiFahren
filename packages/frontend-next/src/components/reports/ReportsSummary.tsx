@@ -33,13 +33,13 @@ export function ReportsSummary() {
     <div className="pb-6">
       {topLines.length > 0 && (
         <section>
-          <SectionHeading className="px-4 py-3">{t('sectionTopLines')}</SectionHeading>
+          <SectionHeading className="px-4 pt-3">{t('sectionTopLines')}</SectionHeading>
           <LineScoreList scores={topLines} total={totalLineScore} />
         </section>
       )}
 
       <section>
-        <SectionHeading className="px-4 py-3">{t('sectionRecent')}</SectionHeading>
+        <SectionHeading className="px-4 pt-3">{t('sectionRecent')}</SectionHeading>
         {recent.length === 0 ? (
           <p className="text-muted-foreground px-4 py-6 text-sm">{t('emptyRecent')}</p>
         ) : (
