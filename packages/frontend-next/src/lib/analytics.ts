@@ -54,6 +54,8 @@ type AnalyticsEvents = {
   reports_tab_selected: { tab: 'summary' | 'lines' | 'reports' };
   report_row_selected: { report_age_minutes: number; has_line: boolean; has_direction: boolean };
   detail_modal_closed: { modal: 'station' | 'line' | 'report'; duration_ms: number };
+  announcements_opened: { unread_count: number };
+  announcement_viewed: { slug: string };
   line_detail_opened: { line_id: string; source: LineDetailSource };
   line_detail_cta_clicked: { line_id: string };
   line_hotspot_selected: { line_id: string; station_id: string };

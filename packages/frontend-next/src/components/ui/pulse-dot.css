@@ -1,0 +1,26 @@
+/* One expand-and-fade per cycle. Percentage-based, so the caller sets `animation-duration`. */
+@keyframes pulse-dot-cycle {
+  0%,
+  84% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  86% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.pulse-dot-ring-cycle {
+  animation: pulse-dot-cycle 5s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-dot-ring-cycle {
+    animation: none;
+  }
+}

@@ -11,18 +11,16 @@ export function SettingsButton() {
   const { t } = useTranslation(NAMESPACE);
 
   return (
-    <div className="top-safe-14 pointer-events-none fixed left-0 z-20 p-3 sm:top-0">
-      <Button
-        asChild
-        variant="secondary"
-        size="icon"
-        aria-label={t('open')}
-        className="bg-card text-foreground hover:bg-card/80 pointer-events-auto size-11 rounded-lg shadow-[0_6px_16px_rgba(0,0,0,0.28)]"
-      >
-        <Link to={SettingsRoute.to}>
-          <Settings className="size-5" />
-        </Link>
-      </Button>
-    </div>
+    <Button
+      asChild
+      variant="secondary"
+      size="icon"
+      aria-label={t('open')}
+      className="bg-card text-foreground hover:bg-card/80 pointer-events-auto size-11 rounded-lg shadow-[0_6px_16px_rgba(0,0,0,0.28)]"
+    >
+      <Link to={SettingsRoute.to}>
+        <Settings className="size-5" />
+      </Link>
+    </Button>
   );
 }

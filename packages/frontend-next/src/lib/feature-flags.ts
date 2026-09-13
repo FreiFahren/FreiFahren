@@ -9,6 +9,7 @@ import { isPreviewBuild } from '@/lib/utils';
 // disabled (no key, or a 'denied'/DNT session that never initializes the SDK). Fail-closed: a
 // gated feature stays hidden unless PostHog affirmatively turns it on.
 export const FEATURE_FLAGS = {
+  announcements: 'announcements',
   citySwitcher: 'city-switcher',
   contributeModalTiming: 'contribute-modal-timing',
 } as const;
