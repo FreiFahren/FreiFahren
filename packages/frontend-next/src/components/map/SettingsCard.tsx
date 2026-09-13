@@ -1,5 +1,12 @@
 import { Link } from '@tanstack/react-router';
-import { ChevronRight, HeartHandshake, Mail, MessageSquarePlus, TicketCheck } from 'lucide-react';
+import {
+  ChevronRight,
+  HeartHandshake,
+  Mail,
+  MessageSquarePlus,
+  ShoppingBag,
+  TicketCheck,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -20,6 +27,7 @@ import { NAMESPACE } from './SettingsButton.i18n';
 import { SocialLinks } from './SocialLinks';
 
 const WEBSITE_URL = 'https://freifahren.org';
+const SHOP_URL = 'https://freifahren.myspreadshop.de/';
 
 function LegalLink({
   to,
@@ -71,6 +79,16 @@ export function SettingsCard({ onClose }: SettingsCardProps) {
       <div className="flex flex-col px-2">
         <LanguageSwitcher />
         <CitySwitcher />
+        <a
+          href={SHOP_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:bg-muted focus-visible:bg-muted flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm transition-colors outline-none"
+        >
+          <ShoppingBag className="text-muted-foreground size-4" />
+          <span>{t('merch')}</span>
+          <ChevronRight className="text-muted-foreground ml-auto size-4" />
+        </a>
         <a
           href={`${WEBSITE_URL}/contact`}
           className="hover:bg-muted focus-visible:bg-muted flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm transition-colors outline-none"

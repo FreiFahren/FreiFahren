@@ -9,6 +9,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   // hub menu
   contact: 'Contact us',
   feedback: 'Send feedback',
+  merch: 'Merch',
   contribute: 'Contribute',
   follow: 'Follow',
   // legal
@@ -27,6 +28,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
   // hub menu
   contact: 'Kontaktiere uns',
   feedback: 'Feedback geben',
+  merch: 'Merch',
   contribute: 'Beitrag leisten',
   follow: 'Folgen',
   // legal
