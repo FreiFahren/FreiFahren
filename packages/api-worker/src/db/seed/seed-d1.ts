@@ -26,12 +26,7 @@ import { REFERENCE_TABLE_NAMES, dumpReferenceTables } from './dump-reference-tab
 // Seed imports the @freifahren/cities alias, so this entry runs under tsx rather than bun (see package.json).
 
 // Tables holding user data rather than reference data, so the seed deliberately leaves them alone.
-const NON_REFERENCE_TABLES = [
-    'reports',
-    'report_moderation',
-    'report_moderation_events',
-    'report_quarantines',
-] as const
+const NON_REFERENCE_TABLES = ['reports', 'report_moderation', 'report_moderation_events', 'report_quarantines'] as const
 
 // A new table is a decision — reference data to seed, or user data to leave alone — so an unlisted one
 // Fails here instead of being silently left out of every seeded database.
