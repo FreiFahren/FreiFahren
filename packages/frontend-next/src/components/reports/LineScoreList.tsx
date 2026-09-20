@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { ChevronRight } from 'lucide-react';
 
 import { LineBadge } from '@/components/transit/LineBadge';
+import { track } from '@/lib/analytics';
 import { Route as StationsRoute } from '@/routes/reports/stations';
 
 import type { LineScore } from './lineScores';
@@ -30,6 +31,13 @@ export function LineScoreList({ scores, total }: LineScoreListProps) {
             <Link
               to={StationsRoute.to}
               search={{ lineName: entry.name }}
+              onClick={() => {
+                track('reports_line_filter_used', {
+                  action: 'selected',
+                  line_id: entry.name,
+                  line_type: entry.type,
+                });
+              }}
               className="hover:bg-muted/70 focus-visible:ring-ring flex h-14 items-center gap-3 px-4 outline-none focus-visible:ring-2"
             >
               <LineBadge name={entry.name} />

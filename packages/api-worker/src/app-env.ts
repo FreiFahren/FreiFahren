@@ -16,6 +16,13 @@ import { TransitNetworkDataService } from './modules/transit/transit-network-dat
 
 export type Bindings = {
     CF_VERSION_METADATA?: WorkerVersionMetadata
+    ADMIN_AUTH_DISABLED?: string
+    // Cloudflare Access JWT validation for the private report-admin Worker.
+    CF_ACCESS_TEAM_DOMAIN?: string
+    CF_ACCESS_AUD?: string
+    // Keep public report and insight responses out of edge cache while moderation can change quickly.
+    PUBLIC_EDGE_CACHE_DISABLED?: string
+    ADMIN_DATA_SNAPSHOT_AT?: string
     // Cloudflare D1 binding. Present on Workers and, in tests, provided by the Miniflare pool.
     DB?: D1Database
     DB_HAMBURG?: D1Database
@@ -223,7 +230,8 @@ export const registerContext = (app: Hono<Env>) => {
 
         const config = resolveConfig(c.env)
 
-        if (new URL(c.req.url).pathname.startsWith('/webhooks/')) {
+        const pathname = new URL(c.req.url).pathname
+        if (pathname.startsWith('/webhooks/') || pathname.startsWith('/admin/')) {
             c.set('config', config)
             await next()
             return

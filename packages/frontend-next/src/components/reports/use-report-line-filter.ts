@@ -31,7 +31,8 @@ export function useReportLineFilter(reports: Report[] | undefined) {
   }
   const selectableLines = getSelectableReportLines(lines);
   const visibleLines = getReportLinesByType(selectableLines, lineFilter);
-  const filteredReports = filterReportsByLine(reports ?? [], lines, lineName);
+  // Ignore stale or cross-city deep links once the current city's lines have loaded.
+  const filteredReports = filterReportsByLine(reports ?? [], lines, activeLine?.name);
 
   const setLineFilter = (value: LineFilter) => {
     setLineFilterOverride({ lineName, value });

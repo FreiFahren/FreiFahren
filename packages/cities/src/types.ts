@@ -112,8 +112,6 @@ export interface CityCommunity {
 
 /** Operational report controls that intentionally vary by city. */
 export interface CityReportingConfig {
-    /** Accept reports from public clients. Trusted Telegram Service Binding reports bypass this switch. */
-    publicSubmissionsEnabled: boolean
     /** Forward accepted app reports into the city's Telegram group. */
     telegramForwardingEnabled: boolean
 }

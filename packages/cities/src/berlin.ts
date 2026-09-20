@@ -60,7 +60,6 @@ export const BERLIN: CityConfig = {
     lang: 'de',
     timezone: 'Europe/Berlin',
     reporting: {
-        publicSubmissionsEnabled: true,
         telegramForwardingEnabled: true,
     },
     map: {

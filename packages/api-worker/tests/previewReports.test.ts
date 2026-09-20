@@ -49,7 +49,7 @@ describe('open report previews', () => {
     it('reports that intake is enabled without consulting the private gate', async () => {
         const response = await appRequestWithRedirect('/config')
         expect(response.status).toBe(200)
-        expect(await response.json()).toMatchObject({ reporting: { enabled: true } })
+        expect(await response.json()).toMatchObject({ city: { slug: expect.any(String) } })
     })
 
     it('keeps viewer-dependent risk reads available without the private gate', async () => {

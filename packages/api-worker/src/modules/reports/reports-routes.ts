@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { Env } from '../../app-env'
 import { defineRoute } from '../../common/router'
 import { insertReportSchema } from '../../db'
-import { assertPublicReportIntakeEnabled, submitToReportGate } from '../report-gate'
+import { submitToReportGate } from '../report-gate'
 
 import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from './constants'
 import { resolveViewer } from './viewer'
@@ -101,7 +101,6 @@ export const postReport = defineRoute<Env>()({
         json: insertReportSchema,
     },
     handler: async (c) => {
-        assertPublicReportIntakeEnabled(c)
         const input = c.req.valid('json')
         const report = await c
             .get('reportSubmissionService')
