@@ -51,6 +51,11 @@ type AnalyticsEvents = {
   station_selected: { source: 'map' | 'search' | 'report' | 'reports_list' };
   report_marker_selected: { report_age_minutes: number };
   reports_overview_opened: { report_count: number };
+  reports_line_filter_used: {
+    action: 'opened' | 'selected' | 'cleared';
+    line_id: string | null;
+    line_type: 'subway' | 'light_rail' | 'tram' | 'bus' | null;
+  };
   reports_tab_selected: { tab: 'summary' | 'lines' | 'reports' };
   report_row_selected: { report_age_minutes: number; has_line: boolean; has_direction: boolean };
   detail_modal_closed: { modal: 'station' | 'line' | 'report'; duration_ms: number };

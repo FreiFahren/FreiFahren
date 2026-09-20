@@ -22,7 +22,7 @@ export function LinesChart() {
 
   return (
     <div>
-      <SectionHeading className="px-4 py-3">{t('sectionLines')}</SectionHeading>
+      <SectionHeading className="px-4 pt-3">{t('sectionLines')}</SectionHeading>
       <LineScoreList scores={data} />
     </div>
   );

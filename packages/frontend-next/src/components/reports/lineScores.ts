@@ -1,7 +1,13 @@
 import type { Report } from '@/api/reports';
-import { compareLineOrder, type Line, resolveStationLineNames, type Stations } from '@/api/transit';
+import {
+  compareLineOrder,
+  type Line,
+  resolveStationLineNames,
+  type LineType,
+  type Stations,
+} from '@/api/transit';
 
-export type LineScore = { name: string; score: number; fill: string };
+export type LineScore = { name: string; type: LineType; score: number; fill: string };
 
 /**
  * A report that names a line counts as a full point for that line. A report without a line
@@ -41,7 +47,7 @@ export function computeLineScores(
   return [...scores.entries()]
     .flatMap(([name, score]) => {
       const line = lineByName.get(name);
-      return line ? [{ name, score, fill: line.color }] : [];
+      return line ? [{ name, type: line.type, score, fill: line.color }] : [];
     })
     .sort((a, b) => b.score - a.score || compareLineOrder(a, b));
 }
