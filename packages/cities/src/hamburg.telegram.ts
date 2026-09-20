@@ -55,7 +55,7 @@ export const HAMBURG_TELEGRAM: CityTelegramProfile = {
     // regularly; formal "Prüfer" is nearly unused. Unlike Berlin/Leipzig, the "Nk"
     // count shorthand ("3k") is rare here — people spell out "X gelbwesten"/"X mann".
     inspectorKeywords:
-        'Gelbweste, Gelbwesten, gelbe Weste (the most common term — Hamburg\'s uniformed inspectors wear yellow hi-vis vests), Zivil, in Zivil, Zivi, Zivis, Zivikontrolle, Kontrolleur, Kontrolleure, Kontrolle, Hochbahn Wache, Hochbahn-Kontrolle, HVV-Kontrolle, Konti, Kontis, Prüfer, Fahrkartenkontrolle',
+        "Gelbweste, Gelbwesten, gelbe Weste (the most common term — Hamburg's uniformed inspectors wear yellow hi-vis vests), Zivil, in Zivil, Zivi, Zivis, Zivikontrolle, Kontrolleur, Kontrolleure, Kontrolle, Hochbahn Wache, Hochbahn-Kontrolle, HVV-Kontrolle, Konti, Kontis, Prüfer, Fahrkartenkontrolle",
     untrackedLinesNote:
         'Sightings on OTHER lines (three-digit bus lines, night buses, express X-lines, ' +
         'regional trains, replacement services) are still reports if a station name is mentioned — ' +
