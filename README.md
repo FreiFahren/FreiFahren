@@ -1,5 +1,10 @@
 <div align="center">
-  <img src="packages/frontend-next/public/logo-with-text.png" alt="FreiFahren" width="480" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme_assets/logo-white.png" />
+    <img src="docs/readme_assets/logo-dark.png" alt="FreiFahren icon" width="96" />
+  </picture>
+
+  <h1>FreiFahren</h1>
 
   <p>Die Blitzer-App für Öffis. Die Live-Karte der Ticketkontrolleure im Berliner Nahverkehr</p>
 
