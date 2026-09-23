@@ -1,12 +1,18 @@
 <div align="center">
-  <img src="packages/frontend-next/public/logo-with-text.png" alt="FreiFahren" width="480" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme_assets/logo-white.png" />
+    <img src="docs/readme_assets/logo-dark.png" alt="FreiFahren icon" width="96" />
+  </picture>
+
+  <h1>FreiFahren</h1>
 
   <p>Die Blitzer-App für Öffis. Die Live-Karte der Ticketkontrolleure im Berliner Nahverkehr</p>
 
   [![Telegram](https://img.shields.io/badge/Telegram-Community-26A5E4?logo=telegram&logoColor=white)](https://t.me/freifahren_BE)
-  [![License](https://img.shields.io/github/license/brandesdavid/FreiFahren)](LICENSE)
-  [![Frontend CI](https://github.com/brandesdavid/FreiFahren/actions/workflows/frontend-next-ci.yml/badge.svg)](https://github.com/brandesdavid/FreiFahren/actions/workflows/frontend-next-ci.yml)
-  [![Backend CI](https://github.com/brandesdavid/FreiFahren/actions/workflows/run-backend-ci.yml/badge.svg)](https://github.com/brandesdavid/FreiFahren/actions/workflows/run-backend-ci.yml)
+  [![License](https://img.shields.io/github/license/FreiFahren/FreiFahren)](LICENSE)
+  [![Frontend CI](https://github.com/FreiFahren/FreiFahren/actions/workflows/frontend-next-ci.yml/badge.svg)](https://github.com/FreiFahren/FreiFahren/actions/workflows/frontend-next-ci.yml)
+  [![API Worker CI](https://github.com/FreiFahren/FreiFahren/actions/workflows/api-worker-ci.yml/badge.svg)](https://github.com/FreiFahren/FreiFahren/actions/workflows/api-worker-ci.yml)
+  [![Telegram Worker CI](https://github.com/FreiFahren/FreiFahren/actions/workflows/telegram-worker-ci.yml/badge.svg)](https://github.com/FreiFahren/FreiFahren/actions/workflows/telegram-worker-ci.yml)
 </div>
 
 ---
