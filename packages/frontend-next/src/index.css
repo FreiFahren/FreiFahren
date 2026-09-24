@@ -163,3 +163,70 @@
 @utility top-safe-* {
   top: calc(var(--spacing) * --value(integer) + env(safe-area-inset-top));
 }
+
+/* Bell wobble for unread announcements: rings during the first part of each cycle, then rests, so it
+   reads as a nudge rather than constant motion. The cycle length is set per element (--ring-cycle)
+   so it can match the badge's ping. */
+@keyframes bell-ring {
+  0% {
+    transform: rotate(0);
+  }
+  5% {
+    transform: rotate(16deg);
+  }
+  10% {
+    transform: rotate(-14deg);
+  }
+  15% {
+    transform: rotate(10deg);
+  }
+  20% {
+    transform: rotate(-6deg);
+  }
+  25% {
+    transform: rotate(3deg);
+  }
+  30%,
+  100% {
+    transform: rotate(0);
+  }
+}
+@utility animate-bell-ring {
+  animation: bell-ring var(--ring-cycle, 2s) ease-in-out infinite;
+  transform-origin: 50% 10%;
+}
+
+/* Announcement bodies are Markdown rendered to HTML at API build time; these few rules stand in for
+   a typography plugin, which would cost far more CSS than the handful of elements used here. */
+.announcement-body {
+  @apply text-sm leading-relaxed;
+  & > * + * {
+    @apply mt-3;
+  }
+  & h1,
+  & h2,
+  & h3 {
+    @apply font-heading mt-5 text-base font-semibold;
+  }
+  & ul {
+    @apply list-disc pl-5;
+  }
+  & ol {
+    @apply list-decimal pl-5;
+  }
+  & li + li {
+    @apply mt-1;
+  }
+  & a {
+    @apply text-accent-bright underline underline-offset-2;
+  }
+  & strong {
+    @apply font-semibold;
+  }
+  & code {
+    @apply bg-muted rounded px-1 font-mono text-xs;
+  }
+  & img {
+    @apply max-w-full rounded-lg;
+  }
+}

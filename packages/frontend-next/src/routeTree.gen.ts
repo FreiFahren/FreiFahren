@@ -13,11 +13,14 @@ import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ImpressumRouteImport } from './routes/impressum'
+import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as MapRouteImport } from './routes/_map'
 import { Route as ReportsIndexRouteImport } from './routes/reports/index'
+import { Route as AnnouncementsIndexRouteImport } from './routes/announcements/index'
 import { Route as MapIndexRouteImport } from './routes/_map/index'
 import { Route as ReportsStationsRouteImport } from './routes/reports/stations'
 import { Route as ReportsLinesRouteImport } from './routes/reports/lines'
+import { Route as AnnouncementsAnnouncementIdRouteImport } from './routes/announcements/$announcementId'
 import { Route as MapSettingsIndexRouteImport } from './routes/_map/settings/index'
 import { Route as MapStationStationIdRouteImport } from './routes/_map/station/$stationId'
 import { Route as MapReportsStationIdRouteImport } from './routes/_map/reports/$stationId'
@@ -44,6 +47,11 @@ const ImpressumRoute = ImpressumRouteImport.update({
   path: '/impressum',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AnnouncementsRoute = AnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MapRoute = MapRouteImport.update({
   id: '/_map',
   getParentRoute: () => rootRouteImport,
@@ -52,6 +60,11 @@ const ReportsIndexRoute = ReportsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ReportsRoute,
+} as any)
+const AnnouncementsIndexRoute = AnnouncementsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AnnouncementsRoute,
 } as any)
 const MapIndexRoute = MapIndexRouteImport.update({
   id: '/',
@@ -68,6 +81,12 @@ const ReportsLinesRoute = ReportsLinesRouteImport.update({
   path: '/lines',
   getParentRoute: () => ReportsRoute,
 } as any)
+const AnnouncementsAnnouncementIdRoute =
+  AnnouncementsAnnouncementIdRouteImport.update({
+    id: '/$announcementId',
+    path: '/$announcementId',
+    getParentRoute: () => AnnouncementsRoute,
+  } as any)
 const MapSettingsIndexRoute = MapSettingsIndexRouteImport.update({
   id: '/settings/',
   path: '/settings/',
@@ -96,12 +115,15 @@ const MapDebugReportDecayRoute = MapDebugReportDecayRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof MapIndexRoute
+  '/announcements': typeof AnnouncementsRouteWithChildren
   '/impressum': typeof ImpressumRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reports': typeof ReportsRouteWithChildren
+  '/announcements/$announcementId': typeof AnnouncementsAnnouncementIdRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
+  '/announcements/': typeof AnnouncementsIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/debug/report-decay': typeof MapDebugReportDecayRoute
   '/line/$lineName': typeof MapLineLineNameRoute
@@ -113,9 +135,11 @@ export interface FileRoutesByTo {
   '/impressum': typeof ImpressumRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
+  '/announcements/$announcementId': typeof AnnouncementsAnnouncementIdRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/': typeof MapIndexRoute
+  '/announcements': typeof AnnouncementsIndexRoute
   '/reports': typeof ReportsIndexRoute
   '/debug/report-decay': typeof MapDebugReportDecayRoute
   '/line/$lineName': typeof MapLineLineNameRoute
@@ -126,13 +150,16 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_map': typeof MapRouteWithChildren
+  '/announcements': typeof AnnouncementsRouteWithChildren
   '/impressum': typeof ImpressumRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reports': typeof ReportsRouteWithChildren
+  '/announcements/$announcementId': typeof AnnouncementsAnnouncementIdRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/_map/': typeof MapIndexRoute
+  '/announcements/': typeof AnnouncementsIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/_map/debug/report-decay': typeof MapDebugReportDecayRoute
   '/_map/line/$lineName': typeof MapLineLineNameRoute
@@ -144,12 +171,15 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/announcements'
     | '/impressum'
     | '/privacy'
     | '/report'
     | '/reports'
+    | '/announcements/$announcementId'
     | '/reports/lines'
     | '/reports/stations'
+    | '/announcements/'
     | '/reports/'
     | '/debug/report-decay'
     | '/line/$lineName'
@@ -161,9 +191,11 @@ export interface FileRouteTypes {
     | '/impressum'
     | '/privacy'
     | '/report'
+    | '/announcements/$announcementId'
     | '/reports/lines'
     | '/reports/stations'
     | '/'
+    | '/announcements'
     | '/reports'
     | '/debug/report-decay'
     | '/line/$lineName'
@@ -173,13 +205,16 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_map'
+    | '/announcements'
     | '/impressum'
     | '/privacy'
     | '/report'
     | '/reports'
+    | '/announcements/$announcementId'
     | '/reports/lines'
     | '/reports/stations'
     | '/_map/'
+    | '/announcements/'
     | '/reports/'
     | '/_map/debug/report-decay'
     | '/_map/line/$lineName'
@@ -190,6 +225,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   MapRoute: typeof MapRouteWithChildren
+  AnnouncementsRoute: typeof AnnouncementsRouteWithChildren
   ImpressumRoute: typeof ImpressumRoute
   PrivacyRoute: typeof PrivacyRoute
   ReportRoute: typeof ReportRoute
@@ -226,6 +262,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImpressumRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/announcements': {
+      id: '/announcements'
+      path: '/announcements'
+      fullPath: '/announcements'
+      preLoaderRoute: typeof AnnouncementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_map': {
       id: '/_map'
       path: ''
@@ -239,6 +282,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/reports/'
       preLoaderRoute: typeof ReportsIndexRouteImport
       parentRoute: typeof ReportsRoute
+    }
+    '/announcements/': {
+      id: '/announcements/'
+      path: '/'
+      fullPath: '/announcements/'
+      preLoaderRoute: typeof AnnouncementsIndexRouteImport
+      parentRoute: typeof AnnouncementsRoute
     }
     '/_map/': {
       id: '/_map/'
@@ -260,6 +310,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/reports/lines'
       preLoaderRoute: typeof ReportsLinesRouteImport
       parentRoute: typeof ReportsRoute
+    }
+    '/announcements/$announcementId': {
+      id: '/announcements/$announcementId'
+      path: '/$announcementId'
+      fullPath: '/announcements/$announcementId'
+      preLoaderRoute: typeof AnnouncementsAnnouncementIdRouteImport
+      parentRoute: typeof AnnouncementsRoute
     }
     '/_map/settings/': {
       id: '/_map/settings/'
@@ -319,6 +376,20 @@ const MapRouteChildren: MapRouteChildren = {
 
 const MapRouteWithChildren = MapRoute._addFileChildren(MapRouteChildren)
 
+interface AnnouncementsRouteChildren {
+  AnnouncementsAnnouncementIdRoute: typeof AnnouncementsAnnouncementIdRoute
+  AnnouncementsIndexRoute: typeof AnnouncementsIndexRoute
+}
+
+const AnnouncementsRouteChildren: AnnouncementsRouteChildren = {
+  AnnouncementsAnnouncementIdRoute: AnnouncementsAnnouncementIdRoute,
+  AnnouncementsIndexRoute: AnnouncementsIndexRoute,
+}
+
+const AnnouncementsRouteWithChildren = AnnouncementsRoute._addFileChildren(
+  AnnouncementsRouteChildren,
+)
+
 interface ReportsRouteChildren {
   ReportsLinesRoute: typeof ReportsLinesRoute
   ReportsStationsRoute: typeof ReportsStationsRoute
@@ -336,6 +407,7 @@ const ReportsRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   MapRoute: MapRouteWithChildren,
+  AnnouncementsRoute: AnnouncementsRouteWithChildren,
   ImpressumRoute: ImpressumRoute,
   PrivacyRoute: PrivacyRoute,
   ReportRoute: ReportRoute,
