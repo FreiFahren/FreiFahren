@@ -12,12 +12,15 @@ import { PulseDot } from '@/components/ui/pulse-dot';
 import { FEATURE_FLAGS, useFeatureFlag } from '@/lib/feature-flags';
 import { Route as AnnouncementsRoute } from '@/routes/announcements/index';
 
+// Only the entry point is flagged: the routes stay reachable, so a shared link works for everyone.
 export function AnnouncementsButton() {
-  const { t } = useTranslation(NAMESPACE);
-  const enabled = useFeatureFlag(FEATURE_FLAGS.announcements);
-  const unread = useHasUnreadAnnouncements();
+  return useFeatureFlag(FEATURE_FLAGS.announcements) ? <BellButton /> : null;
+}
 
-  if (!enabled) return null;
+// Separate so the list is only fetched once the flag is on.
+function BellButton() {
+  const { t } = useTranslation(NAMESPACE);
+  const unread = useHasUnreadAnnouncements();
 
   return (
     <Button

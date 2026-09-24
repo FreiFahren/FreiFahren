@@ -196,7 +196,7 @@
   transform-origin: 50% 10%;
 }
 
-/* Announcement bodies are Markdown rendered to HTML at API build time; these few rules stand in for
+/* Announcement bodies are basic HTML written in the API source; these few rules stand in for
    a typography plugin, which would cost far more CSS than the handful of elements used here. */
 .announcement-body {
   @apply text-sm leading-relaxed;

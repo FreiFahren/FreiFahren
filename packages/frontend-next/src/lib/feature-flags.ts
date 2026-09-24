@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react';
 
-import { enqueuePostHog, postHogDisabled } from '@/lib/posthog-client';
+import { enqueuePostHog } from '@/lib/posthog-client';
 import { isPreviewBuild } from '@/lib/utils';
 
 // PostHog feature flags read through the same lazy-loaded client as analytics, so components never
@@ -22,9 +22,6 @@ const values = new Map<FlagKey, boolean>();
 const variants = new Map<FlagKey, string | boolean>();
 const listeners = new Set<() => void>();
 let subscribed = false;
-// Whether PostHog has delivered flags from the network at least once. Until then a false flag may
-// only mean "not known yet" (persisted flags are read by the first sync, but only when present).
-let resolved = false;
 
 function notify(): void {
   for (const listener of listeners) listener();
@@ -53,11 +50,7 @@ function ensureSubscribed(): void {
       }
       if (changed) notify();
     };
-    posthog.onFeatureFlags(() => {
-      resolved = true;
-      sync();
-      notify();
-    });
+    posthog.onFeatureFlags(sync);
     sync();
   });
 }
@@ -82,30 +75,6 @@ export function getFeatureFlagVariant(
   if (import.meta.env.DEV || isPreviewBuild) return 'control';
   const value = variants.get(flag);
   return value === 'control' || value === 'test' ? value : false;
-}
-
-/*
- * For decisions that can't be revised once the real value arrives — a route guard redirecting a
- * deep link away. Settles as soon as the flag reads on (including from PostHog's persisted copy,
- * so returning users don't wait for the network), PostHog has delivered flags, PostHog turns out
- * to be disabled, or the timeout passes (a slow or blocked flags request fails closed rather than
- * leaving the user on a blank screen).
- */
-export function waitForFeatureFlag(flag: FlagKey, timeoutMs = 4000): Promise<boolean> {
-  return new Promise((resolve) => {
-    const settled = () => resolved || getFeatureFlag(flag);
-    const finish = () => {
-      unsubscribe();
-      clearTimeout(timer);
-      resolve(getFeatureFlag(flag));
-    };
-    const unsubscribe = subscribeToFeatureFlags(() => {
-      if (settled()) finish();
-    });
-    const timer = setTimeout(finish, timeoutMs);
-    void postHogDisabled.then(finish);
-    if (settled()) finish();
-  });
 }
 
 export function useFeatureFlag(flag: FlagKey): boolean {

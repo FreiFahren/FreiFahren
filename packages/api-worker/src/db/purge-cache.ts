@@ -1,7 +1,7 @@
 import { logger } from '../common/logger'
 
-import { purgeTransitCache } from './purge-cache-tags'
 import { parseCityArg } from './seed/city-arg'
+import { purgeTransitCache } from './seed/purge-transit-cache'
 
 // Purges one city's cache.default entries by tag. Run after `db:seed` in the deployment pipeline.
 // City comes from `--city <slug>` (defaults to berlin).

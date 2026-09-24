@@ -6,7 +6,6 @@ import {
   announcementsQueryOptions,
   toAnnouncementLanguage,
 } from '@/api/announcements';
-import { FEATURE_FLAGS, useFeatureFlag } from '@/lib/feature-flags';
 import { useIsAnnouncementRead } from '@/lib/read-announcements';
 
 // One cycle for every "unread" cue — the badge's ping and the bell's ring beat in time.
@@ -18,8 +17,7 @@ export function useAnnouncementLanguage() {
 }
 
 export function useAnnouncements() {
-  const enabled = useFeatureFlag(FEATURE_FLAGS.announcements);
-  return useQuery({ ...announcementsQueryOptions(useAnnouncementLanguage()), enabled });
+  return useQuery(announcementsQueryOptions(useAnnouncementLanguage()));
 }
 
 export function useAnnouncement(id: string) {

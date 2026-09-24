@@ -31,6 +31,9 @@ export function AnnouncementDetail({ id }: { id: string }) {
       <PageHeader title={t('title')} onBack={() => navigate({ to: AnnouncementsRoute.to })} />
       <div className="pb-safe-6 min-h-0 flex-1 overflow-y-auto">
         {isError && !announcement && <LoadError onRetry={() => void refetch()} />}
+        {announcement === null && (
+          <p className="text-muted-foreground px-4 py-10 text-center text-sm">{t('notFound')}</p>
+        )}
         {announcement && (
           <article className="flex flex-col gap-3 px-4 pt-2">
             <span className="text-muted-foreground text-xs">

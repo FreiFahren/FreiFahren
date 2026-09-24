@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
 
-import { fetchJson } from './transit';
+import { fetchJson, HttpError } from './transit';
 
 export type AnnouncementLanguage = 'en' | 'de';
 
@@ -34,8 +34,12 @@ export const announcementsQueryOptions = (lang: AnnouncementLanguage) =>
 export const announcementQueryOptions = (id: string, lang: AnnouncementLanguage) =>
   queryOptions({
     queryKey: ['announcements', 'detail', id, lang] as const,
+    // Null for an unknown id (e.g. a stale shared link): a settled answer, not an error to retry.
     queryFn: () =>
       fetchJson<AnnouncementDetail>(
         `/v0/announcements/${encodeURIComponent(id)}?${new URLSearchParams({ lang }).toString()}`,
-      ),
+      ).catch((error: unknown) => {
+        if (error instanceof HttpError && error.status === 404) return null;
+        throw error;
+      }),
   });

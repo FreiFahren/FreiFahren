@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from 'vitest'
 
 import {
     ANNOUNCEMENTS_CACHE_CONTROL,
-    ANNOUNCEMENTS_CACHE_TAG,
     ANNOUNCEMENTS_WORKERS_CACHE_CONTROL,
 } from '../src/modules/announcements/announcements-cache-middleware'
 import type { Announcement } from '../src/modules/announcements/announcements-types'
@@ -14,7 +13,7 @@ vi.mock('../src/modules/announcements/announcements', () => {
     const announcement = (id: string, publishedAt: string, extra: Partial<Announcement> = {}): Announcement => ({
         id,
         publishedAt,
-        en: { title: `${id} en`, description: 'd', body: id },
+        en: { title: `${id} en`, description: 'd', bodyHtml: `<p>${id}</p>` },
         de: { title: `${id} de`, description: 'd' },
         ...extra,
     })
@@ -47,7 +46,6 @@ describe('GET /v0/announcements', () => {
         const first = await appRequestWithRedirect('/announcements?lang=en')
         expect(first.headers.get('Cache-Control')).toBe(ANNOUNCEMENTS_CACHE_CONTROL)
         expect(first.headers.get('Cloudflare-CDN-Cache-Control')).toBe(ANNOUNCEMENTS_WORKERS_CACHE_CONTROL)
-        expect(first.headers.get('Cache-Tag')).toBe(ANNOUNCEMENTS_CACHE_TAG)
         const etag = first.headers.get('ETag')
         expect(etag).not.toBeNull()
 

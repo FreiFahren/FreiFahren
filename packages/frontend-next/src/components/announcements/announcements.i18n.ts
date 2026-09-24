@@ -10,6 +10,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   markRead: 'Mark as read',
   unread: 'Unread',
   empty: 'No news yet.',
+  notFound: 'This announcement is no longer available.',
   error: "Couldn't load news.",
   retry: 'Try again',
 });
@@ -22,6 +23,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
   markRead: 'Als gelesen markieren',
   unread: 'Ungelesen',
   empty: 'Noch keine Neuigkeiten.',
+  notFound: 'Diese Ankündigung ist nicht mehr verfügbar.',
   error: 'Neuigkeiten konnten nicht geladen werden.',
   retry: 'Erneut versuchen',
 });

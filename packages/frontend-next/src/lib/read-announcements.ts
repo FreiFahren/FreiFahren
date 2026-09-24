@@ -1,17 +1,14 @@
 import { useSyncExternalStore } from 'react';
 
+import { restoreNativePreference, saveNativePreference } from '@/lib/native-preference';
 import { safeLocalStorage } from '@/lib/safe-storage';
 
 // Ids of the announcements the user has read. A tiny module store + useSyncExternalStore (like
-// viewed-reports) so the bell badge and the list update together without a provider.
+// viewed-reports) so the bell badge and the list update together without a provider. Mirrored to
+// native Preferences so a WebView storage purge doesn't bring every announcement back as unread.
 const STORAGE_KEY = 'readAnnouncements';
 
-// TODO: enable before launch. While the feature is being tested, read state lives in memory only, so
-// every reload shows the announcements as unread again.
-const PERSIST_READ_STATE = false;
-
 function readInitial(): ReadonlySet<string> {
-  if (!PERSIST_READ_STATE) return new Set();
   try {
     const parsed: unknown = JSON.parse(safeLocalStorage.getItem(STORAGE_KEY) ?? '[]');
     return new Set(
@@ -25,6 +22,17 @@ function readInitial(): ReadonlySet<string> {
 let readIds = readInitial();
 const listeners = new Set<() => void>();
 
+function notify(): void {
+  for (const listener of listeners) listener();
+}
+
+// The store is reactive, so a purged copy is recovered in place rather than with a reload.
+void restoreNativePreference(STORAGE_KEY).then((restored) => {
+  if (!restored) return;
+  readIds = readInitial();
+  notify();
+});
+
 function subscribe(listener: () => void): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
@@ -34,8 +42,8 @@ export function markAllAnnouncementsRead(announcements: readonly { id: string }[
   const unread = announcements.filter(({ id }) => !readIds.has(id));
   if (unread.length === 0) return;
   readIds = new Set([...readIds, ...unread.map(({ id }) => id)]);
-  if (PERSIST_READ_STATE) safeLocalStorage.setItem(STORAGE_KEY, JSON.stringify([...readIds]));
-  for (const listener of listeners) listener();
+  void saveNativePreference(STORAGE_KEY, JSON.stringify([...readIds]));
+  notify();
 }
 
 export function markAnnouncementRead(announcement: { id: string }): void {

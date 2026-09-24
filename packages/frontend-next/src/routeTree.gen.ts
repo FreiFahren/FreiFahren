@@ -13,7 +13,6 @@ import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ImpressumRouteImport } from './routes/impressum'
-import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as MapRouteImport } from './routes/_map'
 import { Route as ReportsIndexRouteImport } from './routes/reports/index'
 import { Route as AnnouncementsIndexRouteImport } from './routes/announcements/index'
@@ -47,11 +46,6 @@ const ImpressumRoute = ImpressumRouteImport.update({
   path: '/impressum',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AnnouncementsRoute = AnnouncementsRouteImport.update({
-  id: '/announcements',
-  path: '/announcements',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MapRoute = MapRouteImport.update({
   id: '/_map',
   getParentRoute: () => rootRouteImport,
@@ -62,9 +56,9 @@ const ReportsIndexRoute = ReportsIndexRouteImport.update({
   getParentRoute: () => ReportsRoute,
 } as any)
 const AnnouncementsIndexRoute = AnnouncementsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AnnouncementsRoute,
+  id: '/announcements/',
+  path: '/announcements/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const MapIndexRoute = MapIndexRouteImport.update({
   id: '/',
@@ -83,9 +77,9 @@ const ReportsLinesRoute = ReportsLinesRouteImport.update({
 } as any)
 const AnnouncementsAnnouncementIdRoute =
   AnnouncementsAnnouncementIdRouteImport.update({
-    id: '/$announcementId',
-    path: '/$announcementId',
-    getParentRoute: () => AnnouncementsRoute,
+    id: '/announcements/$announcementId',
+    path: '/announcements/$announcementId',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const MapSettingsIndexRoute = MapSettingsIndexRouteImport.update({
   id: '/settings/',
@@ -115,7 +109,6 @@ const MapDebugReportDecayRoute = MapDebugReportDecayRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof MapIndexRoute
-  '/announcements': typeof AnnouncementsRouteWithChildren
   '/impressum': typeof ImpressumRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
@@ -150,7 +143,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_map': typeof MapRouteWithChildren
-  '/announcements': typeof AnnouncementsRouteWithChildren
   '/impressum': typeof ImpressumRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
@@ -171,7 +163,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/announcements'
     | '/impressum'
     | '/privacy'
     | '/report'
@@ -205,7 +196,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_map'
-    | '/announcements'
     | '/impressum'
     | '/privacy'
     | '/report'
@@ -225,11 +215,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   MapRoute: typeof MapRouteWithChildren
-  AnnouncementsRoute: typeof AnnouncementsRouteWithChildren
   ImpressumRoute: typeof ImpressumRoute
   PrivacyRoute: typeof PrivacyRoute
   ReportRoute: typeof ReportRoute
   ReportsRoute: typeof ReportsRouteWithChildren
+  AnnouncementsAnnouncementIdRoute: typeof AnnouncementsAnnouncementIdRoute
+  AnnouncementsIndexRoute: typeof AnnouncementsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -262,13 +253,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImpressumRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/announcements': {
-      id: '/announcements'
-      path: '/announcements'
-      fullPath: '/announcements'
-      preLoaderRoute: typeof AnnouncementsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_map': {
       id: '/_map'
       path: ''
@@ -285,10 +269,10 @@ declare module '@tanstack/react-router' {
     }
     '/announcements/': {
       id: '/announcements/'
-      path: '/'
+      path: '/announcements'
       fullPath: '/announcements/'
       preLoaderRoute: typeof AnnouncementsIndexRouteImport
-      parentRoute: typeof AnnouncementsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_map/': {
       id: '/_map/'
@@ -313,10 +297,10 @@ declare module '@tanstack/react-router' {
     }
     '/announcements/$announcementId': {
       id: '/announcements/$announcementId'
-      path: '/$announcementId'
+      path: '/announcements/$announcementId'
       fullPath: '/announcements/$announcementId'
       preLoaderRoute: typeof AnnouncementsAnnouncementIdRouteImport
-      parentRoute: typeof AnnouncementsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_map/settings/': {
       id: '/_map/settings/'
@@ -376,20 +360,6 @@ const MapRouteChildren: MapRouteChildren = {
 
 const MapRouteWithChildren = MapRoute._addFileChildren(MapRouteChildren)
 
-interface AnnouncementsRouteChildren {
-  AnnouncementsAnnouncementIdRoute: typeof AnnouncementsAnnouncementIdRoute
-  AnnouncementsIndexRoute: typeof AnnouncementsIndexRoute
-}
-
-const AnnouncementsRouteChildren: AnnouncementsRouteChildren = {
-  AnnouncementsAnnouncementIdRoute: AnnouncementsAnnouncementIdRoute,
-  AnnouncementsIndexRoute: AnnouncementsIndexRoute,
-}
-
-const AnnouncementsRouteWithChildren = AnnouncementsRoute._addFileChildren(
-  AnnouncementsRouteChildren,
-)
-
 interface ReportsRouteChildren {
   ReportsLinesRoute: typeof ReportsLinesRoute
   ReportsStationsRoute: typeof ReportsStationsRoute
@@ -407,11 +377,12 @@ const ReportsRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   MapRoute: MapRouteWithChildren,
-  AnnouncementsRoute: AnnouncementsRouteWithChildren,
   ImpressumRoute: ImpressumRoute,
   PrivacyRoute: PrivacyRoute,
   ReportRoute: ReportRoute,
   ReportsRoute: ReportsRouteWithChildren,
+  AnnouncementsAnnouncementIdRoute: AnnouncementsAnnouncementIdRoute,
+  AnnouncementsIndexRoute: AnnouncementsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

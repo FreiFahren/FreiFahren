@@ -6,8 +6,8 @@ export type AnnouncementLanguage = (typeof ANNOUNCEMENT_LANGUAGES)[number]
 export type AnnouncementContent = {
     title: string
     description: string
-    /** Optional Markdown, rendered to HTML once when the worker loads. */
-    body?: string
+    /** Optional basic HTML (p, h2, ul, a, strong…), shown on the detail page as is. */
+    bodyHtml?: string
 }
 
 export type Announcement = {

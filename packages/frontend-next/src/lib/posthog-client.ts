@@ -22,21 +22,6 @@ const queue: PostHogOp[] = [];
 // Cap the buffer so a session that never loads the SDK (dev without a key) can't grow it unbounded.
 const MAX_QUEUED = 500;
 
-let resolveDisabled: () => void = () => undefined;
-// Settles once it's certain the SDK will never load (no key, or the import failed), so callers
-// waiting on it (feature flags) can stop waiting instead of running into a timeout.
-export const postHogDisabled = new Promise<void>((resolve) => {
-  resolveDisabled = resolve;
-});
-
-function disable(): void {
-  // A queued op throwing after init lands in the same catch; the SDK is still live then.
-  if (instance) return;
-  disabled = true;
-  queue.length = 0;
-  resolveDisabled();
-}
-
 export function getDistinctId(): string | undefined {
   const distinctId = instance?.get_distinct_id();
   return typeof distinctId === 'string' && distinctId.length > 0 ? distinctId : undefined;
@@ -72,7 +57,8 @@ export function loadPostHog(): Promise<void> {
 
   const apiKey = optionalEnv('VITE_POSTHOG_KEY');
   if (!apiKey) {
-    disable();
+    disabled = true;
+    queue.length = 0;
     loadPromise = Promise.resolve();
     return loadPromise;
   }
@@ -122,6 +108,9 @@ export function loadPostHog(): Promise<void> {
   // Analytics is non-critical: a content blocker or a stale chunk can make the dynamic import
   // resolve empty (destructuring `default` then throws) or reject outright. Swallow it and disable
   // capture so it doesn't surface as an unhandled rejection.
-  loadPromise = loadPromise.catch(disable);
+  loadPromise = loadPromise.catch(() => {
+    disabled = true;
+    queue.length = 0;
+  });
   return loadPromise;
 }

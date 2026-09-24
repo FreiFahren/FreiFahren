@@ -21,7 +21,6 @@
     "db:seed:refresh": "bun run src/db/seed/seed-refresh.ts",
     "db:import-telegram": "bun run src/db/import-telegram-extract.ts",
     "db:purge-cache": "bun run src/db/purge-cache.ts",
-    "db:purge-announcements-cache": "bun run src/db/purge-announcements-cache.ts",
     "db:copy-reports": "bun run src/db/copy-reports.ts",
     "preview:databases": "bun run src/db/preview-databases.ts"
   },
@@ -32,7 +31,6 @@
     "drizzle-orm": "^0.44.7",
     "drizzle-zod": "^0.8.3",
     "hono": "^4.10.7",
-    "marked": "^18.0.14",
     "lodash": "^4.17.21",
     "luxon": "^3.7.2",
     "typescript": "^5.9.3",
