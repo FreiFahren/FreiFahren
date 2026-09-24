@@ -88,13 +88,23 @@ export function resolveStationLineNames(
   return names;
 }
 
+export class HttpError extends Error {
+  readonly status: number;
+
+  constructor(path: string, status: number) {
+    super(`Request to ${path} failed: ${status}`);
+    this.name = 'HttpError';
+    this.status = status;
+  }
+}
+
 export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   // Every API call carries the resolved city so the worker scopes it to the right DB/cache.
   const url = new URL(`${API_URL}${path}`);
   url.searchParams.set('city', currentCitySlug);
   const response = await fetch(url, init);
   if (!response.ok) {
-    throw new Error(`Request to ${path} failed: ${response.status}`);
+    throw new HttpError(path, response.status);
   }
   return response.json();
 }

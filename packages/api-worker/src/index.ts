@@ -8,6 +8,11 @@ import { handleError } from './common/error-handler'
 import { registerVersionedRoutes } from './common/router'
 import { ADMIN_API_PATH } from './modules/admin/admin-contract'
 import { adminRoutes } from './modules/admin/admin-routes'
+import { getAnnouncementById, getAnnouncements } from './modules/announcements'
+import {
+    announcementsCacheMiddleware,
+    VERSIONED_ANNOUNCEMENTS_PATH,
+} from './modules/announcements/announcements-cache-middleware'
 import { getConfig } from './modules/config'
 import { getLineInsights, getLinesInsights, getStationInsights } from './modules/insights'
 import {
@@ -83,21 +88,21 @@ export const createApp = () => {
     for (const path of VERSIONED_REPORTS_CACHEABLE_PATHS) {
         app.use(path, reportsCacheMiddleware)
     }
+    app.use(VERSIONED_ANNOUNCEMENTS_PATH, announcementsCacheMiddleware)
     app.use('*', async (c, next) => {
         await next()
         c.header('Cache-Control', 'no-store')
     })
-    app.use(
-        VERSIONED_TRANSIT_PATH,
-        etag({
-            retainedHeaders: [
-                ...RETAINED_304_HEADERS,
-                'access-control-allow-origin',
-                'access-control-allow-credentials',
-                'access-control-expose-headers',
-            ],
-        })
-    )
+    const corsSafeEtag = etag({
+        retainedHeaders: [
+            ...RETAINED_304_HEADERS,
+            'access-control-allow-origin',
+            'access-control-allow-credentials',
+            'access-control-expose-headers',
+        ],
+    })
+    app.use(VERSIONED_TRANSIT_PATH, corsSafeEtag)
+    app.use(VERSIONED_ANNOUNCEMENTS_PATH, corsSafeEtag)
 
     app.onError(handleError)
 
@@ -115,6 +120,9 @@ export const createApp = () => {
     })
     registerVersionedRoutes(app, 'insights', 'v0', {
         v0: [getStationInsights, getLinesInsights, getLineInsights],
+    })
+    registerVersionedRoutes(app, 'announcements', 'v0', {
+        v0: [getAnnouncements, getAnnouncementById],
     })
     // Deliberately absent from the Workers Cache middlewares above — see config-routes.
     registerVersionedRoutes(app, 'config', 'v0', {

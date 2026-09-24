@@ -8,6 +8,7 @@ import { SubmitReportError, type SubmitReportResponse, useSubmitReport } from '@
 import { type Station } from '@/api/transit';
 import { FeedbackButton } from '@/components/feedback/FeedbackButton';
 import { ReportLocationStep } from '@/components/map/UserLocationControl';
+import { FullScreenPage } from '@/components/templates/full-screen-page';
 import { PageHeader } from '@/components/templates/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -446,43 +447,41 @@ export function ReportForm() {
 
   return (
     <ReportSelectionProvider initialStationId={initialStationId} initialLineName={initialLineName}>
-      <div className="bg-card animate-in fade-in fixed inset-0 z-30 duration-150">
-        <div className="mx-auto flex h-full w-full max-w-md flex-col">
-          {result ? (
-            <ReportSuccess result={result} onClose={handleSuccessClose} />
-          ) : (
-            <>
-              <PageHeader
-                title={t('title')}
-                onBack={() => navigate({ to: '/' })}
-                action={
-                  <FeedbackButton
-                    source="report_form"
-                    size="xs"
-                    className="text-muted-foreground hover:text-foreground"
-                  />
-                }
-              />
-              {!repeatedFailure ? (
-                <ReportLocationStep>
-                  <LinePicker />
-                  <StationPicker />
-                  <DirectionPicker />
-                  <SubmitFooter
-                    onSubmitted={setResult}
-                    onSubmissionError={() => setResult(null)}
-                    onRepeatedFailure={() => setRepeatedFailure(true)}
-                  />
-                </ReportLocationStep>
-              ) : (
-                <SubmitFailureNotice title={t('submitFailedTitle')} body={t('submitFailedBody')} />
-              )}
-            </>
-          )}
-        </div>
+      <FullScreenPage>
+        {result ? (
+          <ReportSuccess result={result} onClose={handleSuccessClose} />
+        ) : (
+          <>
+            <PageHeader
+              title={t('title')}
+              onBack={() => navigate({ to: '/' })}
+              action={
+                <FeedbackButton
+                  source="report_form"
+                  size="xs"
+                  className="text-muted-foreground hover:text-foreground"
+                />
+              }
+            />
+            {!repeatedFailure ? (
+              <ReportLocationStep>
+                <LinePicker />
+                <StationPicker />
+                <DirectionPicker />
+                <SubmitFooter
+                  onSubmitted={setResult}
+                  onSubmissionError={() => setResult(null)}
+                  onRepeatedFailure={() => setRepeatedFailure(true)}
+                />
+              </ReportLocationStep>
+            ) : (
+              <SubmitFailureNotice title={t('submitFailedTitle')} body={t('submitFailedBody')} />
+            )}
+          </>
+        )}
         {/* /report is outside the _map layout that hosts the app's Toaster, so mount one here. */}
         <Toaster />
-      </div>
+      </FullScreenPage>
     </ReportSelectionProvider>
   );
 }
