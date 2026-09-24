@@ -98,6 +98,16 @@ jobs:
                   workingDirectory: packages/api-worker
                   # The commit SHA becomes the Sentry release the worker reports at runtime.
                   command: deploy --var SENTRY_RELEASE:${{ github.sha }}
+            # After the deploy, never before: the previous worker would otherwise refill the edge with
+            # the old list. The wait covers the few seconds the new version takes to reach every
+            # location, during which the old one can still refill it.
+            - name: Purge announcements cache
+              env:
+                  CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+              run: |
+                  sleep 60
+                  bun run db:purge-announcements-cache
             # Register the release in Sentry (named after the commit SHA the worker reports) so
             # issues can be resolved "in the next release". Commit association is best-effort:
             # the release is still created/finalized if set-commits can't resolve the range.

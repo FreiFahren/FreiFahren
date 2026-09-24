@@ -1,7 +1,7 @@
 import { fetchMock } from 'cloudflare:test'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { purgeTransitCache } from '../src/db/seed/purge-transit-cache'
+import { purgeTransitCache } from '../src/db/purge-cache-tags'
 import { referenceCacheKey } from '../src/modules/transit/reference-cache'
 import { transitCacheTag } from '../src/modules/transit/transit-cache-middleware'
 

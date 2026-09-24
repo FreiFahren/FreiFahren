@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import {
     ANNOUNCEMENTS_CACHE_CONTROL,
-    ANNOUNCEMENTS_WORKERS_CACHE_CONTROL,
+    ANNOUNCEMENTS_CACHE_TAG,
 } from '../src/modules/announcements/announcements-cache-middleware'
 import type { Announcement } from '../src/modules/announcements/announcements-types'
 
@@ -23,6 +23,7 @@ vi.mock('../src/modules/announcements/announcements', () => {
         announcement('c', '2026-03-01T00:00:00Z'),
         announcement('hamburg-only', '2026-02-15T00:00:00Z', { cities: ['hamburg'] }),
         announcement('b', '2026-02-01T00:00:00+01:00', { en: { title: 'b en', description: 'd' }, de: undefined }),
+        announcement('scheduled', new Date(Date.now() + 60 * 60 * 1000).toISOString()),
     ]
     return { ANNOUNCEMENTS }
 })
@@ -45,7 +46,7 @@ describe('GET /v0/announcements', () => {
     it('is revalidated with a 304 while unchanged', async () => {
         const first = await appRequestWithRedirect('/announcements?lang=en')
         expect(first.headers.get('Cache-Control')).toBe(ANNOUNCEMENTS_CACHE_CONTROL)
-        expect(first.headers.get('Cloudflare-CDN-Cache-Control')).toBe(ANNOUNCEMENTS_WORKERS_CACHE_CONTROL)
+        expect(first.headers.get('Cache-Tag')).toBe(ANNOUNCEMENTS_CACHE_TAG)
         const etag = first.headers.get('ETag')
         expect(etag).not.toBeNull()
 
@@ -54,6 +55,13 @@ describe('GET /v0/announcements', () => {
         })
         expect(revalidated.status).toBe(304)
         expect(revalidated.headers.get('Cache-Control')).toBe(ANNOUNCEMENTS_CACHE_CONTROL)
+    })
+
+    it('expires the edge copy when the next scheduled announcement goes live', async () => {
+        const response = await appRequestWithRedirect('/announcements')
+        const maxAge = Number(/max-age=(\d+)/.exec(response.headers.get('Cloudflare-CDN-Cache-Control') ?? '')?.[1])
+        expect(maxAge).toBeGreaterThan(0)
+        expect(maxAge).toBeLessThanOrEqual(60 * 60)
     })
 
     it('limits city-scoped announcements to their cities', async () => {
@@ -79,8 +87,9 @@ describe('GET /v0/announcements/:id', () => {
         expect(await response.json()).toMatchObject({ id: 'b', bodyHtml: null })
     })
 
-    it('returns 404 for an unknown id or one scoped to another city', async () => {
+    it('returns 404 for an unknown, scheduled or other-city id', async () => {
         expect((await appRequestWithRedirect('/announcements/does-not-exist')).status).toBe(404)
+        expect((await appRequestWithRedirect('/announcements/scheduled')).status).toBe(404)
         expect((await appRequestWithRedirect('/announcements/hamburg-only?city=berlin')).status).toBe(404)
     })
 })

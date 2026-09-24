@@ -33,8 +33,19 @@ const ANNOUNCEMENTS_BY_ID = new Map(
     ])
 )
 
+const publishTimes = ANNOUNCEMENTS.map((announcement) => Date.parse(announcement.publishedAt))
+
+// Scheduled announcements stay hidden until their publishedAt has passed.
 const visibleIn = (announcement: LocalizedAnnouncement, citySlug: string) =>
-    announcement.cities?.some((city) => city === citySlug) ?? true
+    Date.parse(announcement.en.publishedAt) <= Date.now() &&
+    (announcement.cities?.some((city) => city === citySlug) ?? true)
+
+// Milliseconds until the next scheduled announcement goes live, or null when none is pending.
+export const msUntilNextPublish = (): number | null => {
+    const now = Date.now()
+    const pending = publishTimes.filter((time) => time > now)
+    return pending.length === 0 ? null : Math.min(...pending) - now
+}
 
 export const listAnnouncements = (citySlug: string, lang: AnnouncementLanguage) =>
     [...ANNOUNCEMENTS_BY_ID.values()]
