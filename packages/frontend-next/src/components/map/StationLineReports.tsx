@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { ChevronRight } from 'lucide-react';
+import type { Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { LineBadge } from '@/components/transit/LineBadge';
@@ -14,21 +15,30 @@ type StationLineReportsProps = {
   lineReports: StationLineReports[];
 };
 
-function LineReportRow({ line }: { line: StationLineReports }) {
-  const { t } = useTranslation(NAMESPACE);
-  const hasRecentReports = line.reportsInLastHour > 0;
+type LineReportRowProps = {
+  line: StationLineReports;
+  onSelect?: () => void;
+  buttonRef?: Ref<HTMLButtonElement>;
+  reportsLoaded?: boolean;
+};
 
-  return (
-    <Link
-      to={LineDetailRoute.to}
-      params={{ lineName: line.name }}
-      search={{ source: 'station' }}
-      onClick={() => track('station_line_selected', { line_id: line.name })}
-      className="hover:bg-muted/70 focus-visible:ring-ring flex items-center gap-3 px-3 py-2.5 outline-none focus-visible:ring-2"
-    >
+export function LineReportRow({
+  line,
+  onSelect,
+  buttonRef,
+  reportsLoaded = true,
+}: LineReportRowProps) {
+  const { t } = useTranslation(NAMESPACE);
+  const hasRecentReports = reportsLoaded && line.reportsInLastHour > 0;
+  const content = (
+    <>
       <LineBadge name={line.name} />
-      <div className="text-muted-foreground text-sm">
-        <p>{t('lineReportsLast24Hours', { count: line.reportsInLast24Hours })}</p>
+      <div className="text-muted-foreground flex-1 text-sm">
+        <p>
+          {reportsLoaded
+            ? t('lineReportsLast24Hours', { count: line.reportsInLast24Hours })
+            : t('lineReportsLoading')}
+        </p>
         {hasRecentReports && (
           <p className="text-muted-foreground text-xs">
             {t('inLastHour', { count: line.reportsInLastHour })}
@@ -36,6 +46,28 @@ function LineReportRow({ line }: { line: StationLineReports }) {
         )}
       </div>
       <ChevronRight className="text-muted-foreground size-4 shrink-0" aria-hidden />
+    </>
+  );
+  const className =
+    'hover:bg-muted/70 focus-visible:ring-ring flex min-h-12 w-full items-center gap-3 px-3 py-2.5 text-left outline-none focus-visible:ring-2';
+
+  if (onSelect) {
+    return (
+      <button type="button" ref={buttonRef} onClick={onSelect} className={className}>
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <Link
+      to={LineDetailRoute.to}
+      params={{ lineName: line.name }}
+      search={{ source: 'station' }}
+      onClick={() => track('station_line_selected', { line_id: line.name })}
+      className={className}
+    >
+      {content}
     </Link>
   );
 }

@@ -12,10 +12,10 @@ export type StationLiveData = {
   lineReports: StationLineReports[];
 };
 
-function stationLinesByName(station: Station, lines: Line[] | undefined): StationLine[] {
+function linesByName(lineIds: Iterable<string>, lines: Line[] | undefined): StationLine[] {
   const linesByName = new Map<string, StationLine>();
 
-  for (const lineId of station.lines) {
+  for (const lineId of lineIds) {
     const line = lines?.find((candidate) => candidate.id === lineId);
     if (!line) continue;
 
@@ -27,13 +27,13 @@ function stationLinesByName(station: Station, lines: Line[] | undefined): Statio
   return [...linesByName.values()].sort(compareLineOrder);
 }
 
-export function stationLiveData(
-  station: Station,
+export function lineReportsForIds(
+  lineIds: Iterable<string>,
   lines: Line[] | undefined,
   reports: Report[] | undefined,
   now = Date.now(),
-): StationLiveData {
-  const lineReports = stationLinesByName(station, lines).map((line) => ({
+): StationLineReports[] {
+  const lineReports = linesByName(lineIds, lines).map((line) => ({
     ...line,
     reportsInLast24Hours: 0,
     reportsInLastHour: 0,
@@ -51,7 +51,16 @@ export function stationLiveData(
     if (new Date(report.timestamp).getTime() >= lastHourStart) line.reportsInLastHour += 1;
   }
 
-  return { lineReports };
+  return lineReports;
+}
+
+export function stationLiveData(
+  station: Station,
+  lines: Line[] | undefined,
+  reports: Report[] | undefined,
+  now = Date.now(),
+): StationLiveData {
+  return { lineReports: lineReportsForIds(station.lines, lines, reports, now) };
 }
 
 export function sortStationLineReports(lineReports: StationLineReports[]): StationLineReports[] {

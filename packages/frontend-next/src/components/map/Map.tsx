@@ -15,19 +15,20 @@ maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile);
 
 import { useRisk } from '@/api/risk';
 import { useSegments } from '@/api/transit';
+import { REPORTS_HIT_LAYER_ID } from '@/hooks/useReportsLayer';
+import { useRiskLayer } from '@/hooks/useRiskLayer';
+import { useMapSelection } from '@/hooks/use-map-selection';
 import { track } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';
 
-import { LineLayer } from './LineLayer';
+import { LINES_HIT_LAYER_ID, LineLayer } from './LineLayer';
+import { LineChooser } from './line-chooser';
 import { SECONDARY_REVEAL_ZOOM } from './line-style';
 import { MapCameraController } from './MapCameraController';
 import { ReportsLayer } from './ReportsLayer';
-import { RiskLayer } from './RiskLayer';
+import { RISK_HIT_LAYER_ID, RiskLayer } from './RiskLayer';
 import { STATIONS_LAYER_ID, StationsLayer } from './StationsLayer';
 import { UserLocationControl } from './UserLocationControl';
-import { REPORTS_HIT_LAYER_ID } from '../../hooks/useReportsLayer';
-import { useRiskLayer } from '../../hooks/useRiskLayer';
-import { useStationSelection } from '../../hooks/useStationSelection';
 
 const MAP_STYLE_URL = import.meta.env.VITE_TILES_BASE_URL
   ? `${import.meta.env.VITE_TILES_BASE_URL}/styles/${currentCity.slug}.json`
@@ -51,7 +52,8 @@ const PIXEL_RATIO = Math.min(
 );
 
 export function MapView() {
-  const { selectedStation, handleMapClick } = useStationSelection();
+  const { selectedStation, lineChoices, closeLineChoices, selectLine, handleMapClick } =
+    useMapSelection();
   const { visible: riskVisible } = useRiskLayer();
   const [baseMapReady, setBaseMapReady] = useState(false);
 
@@ -95,7 +97,7 @@ export function MapView() {
   // Fetch the overlay data now — in parallel with the base-map style and tiles — even though we
   // hold off *rendering* the overlays until the base map has painted (below). The fetches must
   // not wait for the layers to mount, or the lines/reports would visibly lag the map. (Stations
-  // and reports are already warmed by useStationSelection; this covers the segments/risk data.)
+  // and reports are already warmed by useMapSelection; this covers the segments/risk data.)
   useSegments();
   useRisk();
 
@@ -114,7 +116,11 @@ export function MapView() {
         // pan/zoom and tile load — needless CPU churn on a dense transit map.
         fadeDuration={0}
         attributionControl={{ compact: true }}
-        interactiveLayerIds={[REPORTS_HIT_LAYER_ID, STATIONS_LAYER_ID]}
+        interactiveLayerIds={[
+          REPORTS_HIT_LAYER_ID,
+          STATIONS_LAYER_ID,
+          riskVisible ? RISK_HIT_LAYER_ID : LINES_HIT_LAYER_ID,
+        ]}
         onClick={handleMapClick}
         onZoomEnd={trackSecondaryReveal}
         // Let the base map render its first frame before we add the GeoJSON sources and the
@@ -139,6 +145,9 @@ export function MapView() {
           </>
         )}
       </MapGL>
+      {lineChoices.length > 0 && (
+        <LineChooser lines={lineChoices} onSelect={selectLine} onClose={closeLineChoices} />
+      )}
     </div>
   );
 }
