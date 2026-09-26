@@ -13,6 +13,8 @@ import {
 
 type RiskSegmentProperties = TypedSegmentProperties & { line_color: string };
 
+export const RISK_HIT_LAYER_ID = 'risk-segments-hit';
+
 export function RiskLayer() {
   const segments = useTypedSegments();
   const { data: risk } = useRisk();
@@ -43,6 +45,13 @@ export function RiskLayer() {
           'line-width': LINE_WIDTH,
           'line-opacity': LINE_OPACITY,
         }}
+      />
+      <Layer
+        id={RISK_HIT_LAYER_ID}
+        type="line"
+        beforeId={STATIONS_BASE_LAYER_ID}
+        layout={{ 'line-join': 'round', 'line-cap': 'round' }}
+        paint={{ 'line-width': 14, 'line-color': '#000000', 'line-opacity': 0 }}
       />
     </Source>
   );
