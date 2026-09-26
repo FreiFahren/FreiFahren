@@ -1,5 +1,5 @@
-import { useMatch, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useMatch, useNavigate, useRouter } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
 import type { MapLayerMouseEvent } from 'react-map-gl/maplibre';
 
 import { compareLineOrder, type Line, type Station, useLines, useStations } from '@/api/transit';
@@ -29,9 +29,18 @@ export function useMapSelection(): UseMapSelectionResult {
   const { data: lines } = useLines();
   const [lineChoices, setLineChoices] = useState<Line[]>([]);
   const navigate = useNavigate();
+  const router = useRouter();
   const match = useMatch({ from: StationDetailRoute.id, shouldThrow: false });
   const selectedStationId = match?.params.stationId;
   const selectedStation = selectedStationId ? stations?.[selectedStationId] : undefined;
+
+  useEffect(
+    () =>
+      router.subscribe('onBeforeNavigate', ({ hrefChanged }) => {
+        if (hrefChanged) setLineChoices((choices) => (choices.length ? [] : choices));
+      }),
+    [router],
+  );
 
   const selectLine = (name: string) => {
     setLineChoices([]);
