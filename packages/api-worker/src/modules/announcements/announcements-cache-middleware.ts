@@ -6,17 +6,14 @@ import { msUntilNextPublish } from './announcements-service'
 
 export const VERSIONED_ANNOUNCEMENTS_PATH = '/:version{v\\d+}/announcements/*'
 
-// One tag for every city and language: announcements only change with a deploy, which purges it.
-export const ANNOUNCEMENTS_CACHE_TAG = 'announcements'
-
 /*
- * Split TTL, as in the transit module: the edge holds the response until the post-deploy purge,
- * while browsers revalidate with their ETag on every use.
+ * Split TTL, as in the transit module: browsers revalidate with their ETag on every use, while the
+ * edge holds the response for an hour. No purge: a deployed announcement shows within that hour.
  */
 export const ANNOUNCEMENTS_CACHE_CONTROL = 'public, max-age=0, must-revalidate'
-export const ANNOUNCEMENTS_EDGE_TTL_SECONDS = 2592000
+export const ANNOUNCEMENTS_EDGE_TTL_SECONDS = 60 * 60
 
-// A scheduled announcement goes live without a deploy, so the edge copy must expire by then.
+// A scheduled announcement goes live on its own, so the edge copy must expire by then.
 const edgeTtlSeconds = () => {
     const pending = msUntilNextPublish()
     return pending === null
@@ -29,5 +26,4 @@ export const announcementsCacheMiddleware: MiddlewareHandler<Env> = async (c, ne
     if (c.req.method !== 'GET' || c.res.status >= 400) return
     c.header('Cache-Control', ANNOUNCEMENTS_CACHE_CONTROL)
     c.header('Cloudflare-CDN-Cache-Control', `public, max-age=${edgeTtlSeconds()}`)
-    c.header('Cache-Tag', ANNOUNCEMENTS_CACHE_TAG)
 }

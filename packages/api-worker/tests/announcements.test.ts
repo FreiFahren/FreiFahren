@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import {
-    ANNOUNCEMENTS_CACHE_CONTROL,
-    ANNOUNCEMENTS_CACHE_TAG,
-} from '../src/modules/announcements/announcements-cache-middleware'
+import { ANNOUNCEMENTS_CACHE_CONTROL } from '../src/modules/announcements/announcements-cache-middleware'
 import type { Announcement } from '../src/modules/announcements/announcements-types'
 
 import { appRequestWithRedirect } from './test-utils'
@@ -23,7 +20,7 @@ vi.mock('../src/modules/announcements/announcements', () => {
         announcement('c', '2026-03-01T00:00:00Z'),
         announcement('hamburg-only', '2026-02-15T00:00:00Z', { cities: ['hamburg'] }),
         announcement('b', '2026-02-01T00:00:00+01:00', { en: { title: 'b en', description: 'd' }, de: undefined }),
-        announcement('scheduled', new Date(Date.now() + 60 * 60 * 1000).toISOString()),
+        announcement('scheduled', new Date(Date.now() + 10 * 60 * 1000).toISOString()),
     ]
     return { ANNOUNCEMENTS }
 })
@@ -46,7 +43,6 @@ describe('GET /v0/announcements', () => {
     it('is revalidated with a 304 while unchanged', async () => {
         const first = await appRequestWithRedirect('/announcements?lang=en')
         expect(first.headers.get('Cache-Control')).toBe(ANNOUNCEMENTS_CACHE_CONTROL)
-        expect(first.headers.get('Cache-Tag')).toBe(ANNOUNCEMENTS_CACHE_TAG)
         const etag = first.headers.get('ETag')
         expect(etag).not.toBeNull()
 
@@ -61,7 +57,7 @@ describe('GET /v0/announcements', () => {
         const response = await appRequestWithRedirect('/announcements')
         const maxAge = Number(/max-age=(\d+)/.exec(response.headers.get('Cloudflare-CDN-Cache-Control') ?? '')?.[1])
         expect(maxAge).toBeGreaterThan(0)
-        expect(maxAge).toBeLessThanOrEqual(60 * 60)
+        expect(maxAge).toBeLessThanOrEqual(10 * 60)
     })
 
     it('limits city-scoped announcements to their cities', async () => {
