@@ -11,22 +11,24 @@ import { useIsAnnouncementRead } from '@/lib/read-announcements';
 
 // One cycle for every "unread" cue — the badge's ping and the bell's ring beat in time.
 export const ANNOUNCEMENT_PULSE_MS = 2000;
-// Something can stay unread for days, so the cue plays as one short burst a minute, not nonstop.
-const ANNOUNCEMENT_BURST_EVERY_MS = 60_000;
+// Something can stay unread for days, so the cue plays as one short burst at a time, not nonstop.
+const ANNOUNCEMENT_BURST_EVERY_MS = 30_000;
+// The first burst waits out the app's startup, when the map and any dialogs would hide it.
+const ANNOUNCEMENT_FIRST_BURST_DELAY_MS = 1500;
 
-/** True for one pulse cycle right away, then again every minute. */
+/** True for one pulse cycle shortly after mounting, then again after every pause. */
 export function useAnnouncementBurst(): boolean {
-  const [bursting, setBursting] = useState(true);
+  const [bursting, setBursting] = useState(false);
   useEffect(() => {
-    let stop = setTimeout(() => setBursting(false), ANNOUNCEMENT_PULSE_MS);
-    const every = setInterval(() => {
+    const burst = () => {
       setBursting(true);
-      stop = setTimeout(() => setBursting(false), ANNOUNCEMENT_PULSE_MS);
-    }, ANNOUNCEMENT_BURST_EVERY_MS);
-    return () => {
-      clearInterval(every);
-      clearTimeout(stop);
+      timer = setTimeout(() => {
+        setBursting(false);
+        timer = setTimeout(burst, ANNOUNCEMENT_BURST_EVERY_MS - ANNOUNCEMENT_PULSE_MS);
+      }, ANNOUNCEMENT_PULSE_MS);
     };
+    let timer = setTimeout(burst, ANNOUNCEMENT_FIRST_BURST_DELAY_MS);
+    return () => clearTimeout(timer);
   }, []);
   return bursting;
 }
