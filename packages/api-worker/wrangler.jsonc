@@ -4,7 +4,7 @@
     "main": "src/worker.ts",
     "compatibility_date": "2025-10-11",
     "compatibility_flags": ["nodejs_compat"],
-    // Announcement bodies are Markdown files imported as strings (vitest.config.ts mirrors this).
+    // Announcement bodies are Markdown imported as text (mirrored in vitest.config.ts and preview-databases.ts).
     "rules": [{ "type": "Text", "globs": ["**/*.md"], "fallthrough": true }],
     "cache": {
         "enabled": true,
