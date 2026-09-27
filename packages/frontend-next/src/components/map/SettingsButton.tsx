@@ -5,13 +5,14 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Route as SettingsRoute } from '@/routes/_map/settings/index';
 
+import { AnnouncementsButton } from './announcements-button';
 import { NAMESPACE } from './SettingsButton.i18n';
 
 export function SettingsButton() {
   const { t } = useTranslation(NAMESPACE);
 
   return (
-    <div className="top-safe-14 pointer-events-none fixed left-0 z-20 p-3 sm:top-0">
+    <div className="top-safe-14 pointer-events-none fixed left-0 z-20 flex flex-col gap-2 p-3 sm:top-0">
       <Button
         asChild
         variant="secondary"
@@ -23,6 +24,7 @@ export function SettingsButton() {
           <Settings className="size-5" />
         </Link>
       </Button>
+      <AnnouncementsButton />
     </div>
   );
 }

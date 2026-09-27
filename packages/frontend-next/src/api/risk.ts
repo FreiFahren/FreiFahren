@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { fetchJson } from './transit';
+import { fetchJson } from './client';
 
 export type SegmentRisk = { risk: number };
 export type RiskData = { segments_risk: Record<string, SegmentRisk> };

@@ -1,6 +1,6 @@
 import type { CityCommunity, CityConfig } from '@freifahren/cities';
 
-import { fetchJson } from './transit';
+import { fetchJson } from './client';
 
 type PublicCityConfig = Omit<
   Pick<
