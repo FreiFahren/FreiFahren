@@ -28,7 +28,10 @@ export function PopupCard({ onClose, closeLabel, cardClassName, children }: Popu
           className="animate-in fade-in z-40 duration-150"
         />
       )}
-      <div className="pb-safe-3 pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pt-3">
+      {/* Offset the wrapper itself rather than padding it: iOS 26 Safari treats a wide fixed box
+          that reaches within ~12px of the viewport bottom as a toolbar and stops drawing the map
+          under its own toolbar. */}
+      <div className="bottom-safe-6 pointer-events-none fixed inset-x-3 z-40 flex justify-center">
         <Card
           className={cn(
             'animate-in slide-in-from-bottom-4 fade-in pointer-events-auto w-full max-w-md gap-1 py-4 duration-200 ease-out',
