@@ -6,8 +6,8 @@ export type AnnouncementLanguage = (typeof ANNOUNCEMENT_LANGUAGES)[number]
 export type AnnouncementContent = {
     title: string
     description: string
-    /** Optional basic HTML (p, h2, ul, a, strong…), shown on the detail page as is. */
-    bodyHtml?: string
+    /** Optional Markdown (imported from content/<id>/<lang>.md), rendered once per isolate. */
+    body?: string
 }
 
 export type Announcement = {

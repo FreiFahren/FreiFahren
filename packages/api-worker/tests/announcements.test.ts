@@ -10,7 +10,7 @@ vi.mock('../src/modules/announcements/announcements', () => {
     const announcement = (id: string, publishedAt: string, extra: Partial<Announcement> = {}): Announcement => ({
         id,
         publishedAt,
-        en: { title: `${id} en`, description: 'd', bodyHtml: `<p>${id}</p>` },
+        en: { title: `${id} en`, description: 'd', body: id },
         de: { title: `${id} de`, description: 'd' },
         ...extra,
     })

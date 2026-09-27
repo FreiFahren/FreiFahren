@@ -1,3 +1,5 @@
+import { marked } from 'marked'
+
 import { AppError } from '../../common/errors'
 
 import { ANNOUNCEMENTS } from './announcements'
@@ -14,18 +16,18 @@ export type AnnouncementView = {
 type LocalizedAnnouncement = Pick<Announcement, 'cities'> & Record<AnnouncementLanguage, AnnouncementView>
 
 const localize = ({ id, publishedAt, cities, en, de }: Announcement): LocalizedAnnouncement => {
-    const view = ({ title, description, bodyHtml }: AnnouncementContent): AnnouncementView => ({
+    const view = ({ title, description, body }: AnnouncementContent): AnnouncementView => ({
         id,
         publishedAt,
         title,
         description,
-        bodyHtml: bodyHtml?.trim() ?? null,
+        bodyHtml: body === undefined ? null : marked.parse(body, { async: false }).trim(),
     })
     const english = view(en)
     return { cities, en: english, de: de === undefined ? english : view(de) }
 }
 
-// Built once per isolate. Insertion order keeps iteration newest first for the list.
+// Rendered once per isolate. Insertion order keeps iteration newest first for the list.
 const ANNOUNCEMENTS_BY_ID = new Map(
     ANNOUNCEMENTS.toSorted((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt)).map((announcement) => [
         announcement.id,
