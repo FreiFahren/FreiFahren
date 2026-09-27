@@ -23,9 +23,10 @@ Custom CSS Overwrite to avoid CLS
 }
 
 /* Clear the attribution control off the floating Report button: button footprint
-   (h-14 + pb-safe-3 + inset) plus a gap-1.5 to match the opposite corner. */
+   (h-14 + pb-safe-3 + inset) plus a gap-1.5 to match the opposite corner. The map overshoots
+   the viewport bottom by --map-bleed, so lift it by that too. */
 .maplibregl-ctrl-bottom-right {
-  bottom: calc(3.5rem + 0.75rem + 0.375rem + env(safe-area-inset-bottom));
+  bottom: calc(3.5rem + 0.75rem + 0.375rem + env(safe-area-inset-bottom) + var(--map-bleed));
 }
 
 /* Zero MapLibre's default bottom margin (else the gap is 10px too large) and match px-3. */

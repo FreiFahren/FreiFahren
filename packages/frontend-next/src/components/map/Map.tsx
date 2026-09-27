@@ -101,10 +101,11 @@ export function MapView() {
 
   // Capacitor only: the offline basemap resolves async, so hold the container until it's ready. On
   // web mapStyle is the URL synchronously, so this branch never runs.
-  if (!mapStyle) return <div className="fixed inset-0" />;
+  if (!mapStyle) return <div className="map-bleed" />;
 
   return (
-    <div className="fixed inset-0">
+    <div className="map-bleed">
+      <div className="map-bleed-anchor" />
       <MapGL
         initialViewState={INITIAL_VIEW}
         minZoom={MIN_ZOOM}

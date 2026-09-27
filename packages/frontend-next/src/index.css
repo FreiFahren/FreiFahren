@@ -129,14 +129,23 @@
   --accent-dim: rgba(240, 72, 72, 0.16);
   --ok: #3fb27f;
   --warn: #d7a008;
+
+  /* The basemap's background layer. Keep in sync with tile-server/source/freifahren-style.json. */
+  --map-base: #212e41;
+
+  /* How far the map extends past the layout viewport on each side (see .map-bleed). Must cover the
+     tallest browser bar Safari draws over the page. */
+  --map-bleed: 160px;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  /* Shown in Safari's bars whenever the map can't bleed under them (before it mounts, while an
+     input is focused), so they blend with the map instead of showing as black bars. */
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground bg-(--map-base);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -148,7 +157,40 @@
   html,
   body {
     overscroll-behavior: none;
+    overflow: hidden;
   }
+  /* Rests the document scrolled down by --map-bleed; the anchor lives in the map (.map-bleed). */
+  html {
+    scroll-snap-type: y mandatory;
+  }
+}
+
+/* iOS 26 Safari lays the page out between its status bar and floating toolbar and only draws
+   in-flow (non-fixed) document content under them — and under the status bar only once the page
+   is scrolled away from the top. So instead of a position:fixed layer, the map is an absolute layer
+   overshooting the viewport by --map-bleed on both sides, and a snap anchor keeps the document
+   scrolled by that amount. The overshoot is symmetric, so the map's visual center (and camera
+   padding) is unchanged. */
+.map-bleed {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: calc(100svh + 2 * var(--map-bleed));
+}
+.map-bleed-anchor {
+  position: absolute;
+  top: var(--map-bleed);
+  height: 100svh;
+  width: 1px;
+  pointer-events: none;
+  scroll-snap-align: start;
+}
+/* With the keyboard open, Safari anchors position:fixed UI to the top of a scrolled document,
+   pushing the search input off-screen. Shifting the map (and with it the anchor) up by the bleed
+   snaps the document back to the top while typing, without the map visibly moving. The status bar
+   area shows the page background until the input is blurred. */
+html:has(:is(input, textarea, [contenteditable]):focus) .map-bleed {
+  top: calc(-1 * var(--map-bleed));
 }
 
 /* Spacing utilities that add the iOS safe-area inset on top of a normal spacing step, so anchored
@@ -162,4 +204,7 @@
 }
 @utility top-safe-* {
   top: calc(var(--spacing) * --value(integer) + env(safe-area-inset-top));
+}
+@utility bottom-safe-* {
+  bottom: calc(var(--spacing) * --value(integer) + env(safe-area-inset-bottom));
 }
