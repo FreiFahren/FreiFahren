@@ -71,6 +71,9 @@ type AnalyticsEvents = {
   city_expansion_prompt_shown: { from: string };
   city_expansion_prompt_accepted: { from: string };
   city_expansion_prompt_declined: { from: string };
+  // List visits come from pageviews; these show whether the bell leads to actually reading one.
+  announcements_bell_clicked: { has_unread: boolean };
+  announcement_viewed: { announcement_id: string };
 };
 
 export function track<E extends keyof AnalyticsEvents>(

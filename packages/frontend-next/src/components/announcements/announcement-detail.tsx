@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { FullScreenPage } from '@/components/templates/full-screen-page';
 import { PageHeader } from '@/components/templates/PageHeader';
+import { track } from '@/lib/analytics';
 import { markAnnouncementRead } from '@/lib/read-announcements';
 import { Route as AnnouncementsRoute } from '@/routes/announcements/index';
 
@@ -21,10 +22,13 @@ export function AnnouncementDetail({ id }: { id: string }) {
   const language = useAnnouncementLanguage();
   const { data: announcement, isError, refetch } = useAnnouncement(id);
 
+  const loadedId = announcement?.id;
   // Opening an announcement reads it — whether from the list or a shared deep link.
   useEffect(() => {
-    if (announcement) markAnnouncementRead(announcement);
-  }, [announcement]);
+    if (loadedId === undefined) return;
+    markAnnouncementRead({ id: loadedId });
+    track('announcement_viewed', { announcement_id: loadedId });
+  }, [loadedId]);
 
   return (
     <FullScreenPage>

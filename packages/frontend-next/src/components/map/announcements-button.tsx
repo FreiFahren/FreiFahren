@@ -5,10 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '@/components/announcements/announcements.i18n';
 import {
   ANNOUNCEMENT_PULSE_MS,
+  useAnnouncementBurst,
   useHasUnreadAnnouncements,
 } from '@/components/announcements/use-announcements';
 import { Button } from '@/components/ui/button';
 import { PulseDot } from '@/components/ui/pulse-dot';
+import { track } from '@/lib/analytics';
 import { FEATURE_FLAGS, useFeatureFlag } from '@/lib/feature-flags';
 import { Route as AnnouncementsRoute } from '@/routes/announcements/index';
 
@@ -30,15 +32,30 @@ function BellButton() {
       aria-label={unread ? t('openUnread') : t('open')}
       className="bg-card text-foreground hover:bg-card/80 pointer-events-auto relative size-11 rounded-lg shadow-[0_6px_16px_rgba(0,0,0,0.28)]"
     >
-      <Link to={AnnouncementsRoute.to}>
-        <Bell
-          className={unread ? 'motion-safe:animate-bell-ring size-5' : 'size-5'}
-          style={{ '--ring-cycle': `${ANNOUNCEMENT_PULSE_MS}ms` } as React.CSSProperties}
-        />
-        {unread && (
-          <PulseDot cycleMs={ANNOUNCEMENT_PULSE_MS} className="absolute top-2 right-2 size-2.5" />
-        )}
+      <Link
+        to={AnnouncementsRoute.to}
+        onClick={() => track('announcements_bell_clicked', { has_unread: unread })}
+      >
+        {unread ? <UnreadBellIcon /> : <Bell className="size-5" />}
       </Link>
     </Button>
+  );
+}
+
+// Mounted only while something is unread, so the first burst plays as soon as the unread state arrives.
+function UnreadBellIcon() {
+  const ringing = useAnnouncementBurst();
+  return (
+    <>
+      <Bell
+        className={ringing ? 'motion-safe:animate-bell-ring size-5' : 'size-5'}
+        style={{ '--ring-cycle': `${ANNOUNCEMENT_PULSE_MS}ms` } as React.CSSProperties}
+      />
+      <PulseDot
+        cycleMs={ANNOUNCEMENT_PULSE_MS}
+        pulse={ringing}
+        className="absolute top-2 right-2 size-2.5"
+      />
+    </>
   );
 }

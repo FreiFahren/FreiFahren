@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -10,6 +11,25 @@ import { useIsAnnouncementRead } from '@/lib/read-announcements';
 
 // One cycle for every "unread" cue — the badge's ping and the bell's ring beat in time.
 export const ANNOUNCEMENT_PULSE_MS = 2000;
+// Something can stay unread for days, so the cue plays as one short burst a minute, not nonstop.
+const ANNOUNCEMENT_BURST_EVERY_MS = 60_000;
+
+/** True for one pulse cycle right away, then again every minute. */
+export function useAnnouncementBurst(): boolean {
+  const [bursting, setBursting] = useState(true);
+  useEffect(() => {
+    let stop = setTimeout(() => setBursting(false), ANNOUNCEMENT_PULSE_MS);
+    const every = setInterval(() => {
+      setBursting(true);
+      stop = setTimeout(() => setBursting(false), ANNOUNCEMENT_PULSE_MS);
+    }, ANNOUNCEMENT_BURST_EVERY_MS);
+    return () => {
+      clearInterval(every);
+      clearTimeout(stop);
+    };
+  }, []);
+  return bursting;
+}
 
 export function useAnnouncementLanguage() {
   const { i18n } = useTranslation();

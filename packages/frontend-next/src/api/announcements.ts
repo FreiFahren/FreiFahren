@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
 
-import { fetchJson, HttpError } from './transit';
+import { fetchJson, HttpError } from './client';
 
 export type AnnouncementLanguage = 'en' | 'de';
 

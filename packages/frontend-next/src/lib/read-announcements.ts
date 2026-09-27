@@ -46,6 +46,11 @@ export function markAllAnnouncementsRead(announcements: readonly { id: string }[
   notify();
 }
 
+/** Non-reactive snapshot of the read set, e.g. to remember what was new when a page opened. */
+export function getReadAnnouncementIds(): ReadonlySet<string> {
+  return readIds;
+}
+
 export function markAnnouncementRead(announcement: { id: string }): void {
   markAllAnnouncementsRead([announcement]);
 }
