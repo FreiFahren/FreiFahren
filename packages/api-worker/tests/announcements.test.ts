@@ -16,7 +16,9 @@ vi.mock('../src/modules/announcements/announcements', () => {
     })
     // Deliberately out of order: the service sorts newest first.
     const ANNOUNCEMENTS: Announcement[] = [
-        announcement('a', '2026-01-01T00:00:00Z'),
+        announcement('a', '2026-01-01T00:00:00Z', {
+            en: { title: 'a en', description: 'd', body: '[a](https://example.org)' },
+        }),
         announcement('c', '2026-03-01T00:00:00Z'),
         announcement('hamburg-only', '2026-02-15T00:00:00Z', { cities: ['hamburg'] }),
         announcement('b', '2026-02-01T00:00:00+01:00', { en: { title: 'b en', description: 'd' }, de: undefined }),
@@ -76,6 +78,13 @@ describe('GET /v0/announcements/:id', () => {
         const response = await appRequestWithRedirect('/announcements/c?lang=en')
         expect(response.status).toBe(200)
         expect(await response.json()).toMatchObject({ id: 'c', title: 'c en', bodyHtml: '<p>c</p>' })
+    })
+
+    it('opens body links in a new tab', async () => {
+        const response = await appRequestWithRedirect('/announcements/a?lang=en')
+        expect(await response.json()).toMatchObject({
+            bodyHtml: '<p><a target="_blank" rel="noopener noreferrer" href="https://example.org">a</a></p>',
+        })
     })
 
     it('returns a null body for an announcement without one', async () => {

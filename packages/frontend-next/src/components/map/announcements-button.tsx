@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { PulseDot } from '@/components/ui/pulse-dot';
 import { track } from '@/lib/analytics';
 import { FEATURE_FLAGS, useFeatureFlag } from '@/lib/feature-flags';
+import { useOnboardingComplete } from '@/lib/onboarding';
 import { Route as AnnouncementsRoute } from '@/routes/announcements/index';
 
 // Only the entry point is flagged: the routes stay reachable, so a shared link works for everyone.
@@ -44,7 +45,7 @@ function BellButton() {
 
 // Mounted only while something is unread, so the first burst plays as soon as the unread state arrives.
 function UnreadBellIcon() {
-  const ringing = useAnnouncementBurst();
+  const ringing = useAnnouncementBurst(useOnboardingComplete());
   return (
     <>
       <Bell

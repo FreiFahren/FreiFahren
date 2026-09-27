@@ -1,4 +1,4 @@
-import { marked } from 'marked'
+import { Marked, Renderer } from 'marked'
 
 import { AppError } from '../../common/errors'
 
@@ -15,13 +15,24 @@ export type AnnouncementView = {
 
 type LocalizedAnnouncement = Pick<Announcement, 'cities'> & Record<AnnouncementLanguage, AnnouncementView>
 
+// Links open in a new tab like every other external link in the app (and in Safari from the iOS app).
+const markdown = new Marked({
+    renderer: {
+        link(token) {
+            return Renderer.prototype.link
+                .call(this, token)
+                .replace('<a ', '<a target="_blank" rel="noopener noreferrer" ')
+        },
+    },
+})
+
 const localize = ({ id, publishedAt, cities, en, de }: Announcement): LocalizedAnnouncement => {
     const view = ({ title, description, body }: AnnouncementContent): AnnouncementView => ({
         id,
         publishedAt,
         title,
         description,
-        bodyHtml: body === undefined ? null : marked.parse(body, { async: false }).trim(),
+        bodyHtml: body === undefined ? null : markdown.parse(body, { async: false }).trim(),
     })
     const english = view(en)
     return { cities, en: english, de: de === undefined ? english : view(de) }

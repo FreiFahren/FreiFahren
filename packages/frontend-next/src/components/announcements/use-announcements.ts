@@ -13,13 +13,17 @@ import { useIsAnnouncementRead } from '@/lib/read-announcements';
 export const ANNOUNCEMENT_PULSE_MS = 2000;
 // Something can stay unread for days, so the cue plays as one short burst at a time, not nonstop.
 const ANNOUNCEMENT_BURST_EVERY_MS = 30_000;
-// The first burst waits out the app's startup, when the map and any dialogs would hide it.
+// The first burst waits out the app's startup, when the map is still settling in.
 const ANNOUNCEMENT_FIRST_BURST_DELAY_MS = 1500;
 
-/** True for one pulse cycle shortly after mounting, then again after every pause. */
-export function useAnnouncementBurst(): boolean {
+/**
+ * True for one pulse cycle shortly after `enabled` turns on, then again after every pause. Off
+ * while first-launch dialogs cover the map, so the first burst isn't spent behind them.
+ */
+export function useAnnouncementBurst(enabled: boolean): boolean {
   const [bursting, setBursting] = useState(false);
   useEffect(() => {
+    if (!enabled) return;
     const burst = () => {
       setBursting(true);
       timer = setTimeout(() => {
@@ -28,8 +32,11 @@ export function useAnnouncementBurst(): boolean {
       }, ANNOUNCEMENT_PULSE_MS);
     };
     let timer = setTimeout(burst, ANNOUNCEMENT_FIRST_BURST_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, []);
+    return () => {
+      clearTimeout(timer);
+      setBursting(false);
+    };
+  }, [enabled]);
   return bursting;
 }
 
