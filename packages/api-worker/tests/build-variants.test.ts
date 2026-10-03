@@ -4,8 +4,9 @@ import { buildLineVariants } from '../src/db/seed/lines/build-variants'
 import type { OsmRelation } from '../src/db/seed/stations/overpass'
 
 // The suite runs with the default seed city (Berlin), whose profile scopes bus to
-// MetroBus (`^M\d+$`) via routeRefPatterns and leaves every other route type
-// unscoped. Berlin sets no excludeLineRefPatterns, so the blacklist is inert here.
+// MetroBus and the X-lines (`^[MX]\d+$`) via routeRefPatterns and leaves every
+// other route type unscoped. Berlin sets no excludeLineRefPatterns, so the
+// blacklist is inert here.
 const nodeIdToStationId = new Map([
     [1, 'station-a'],
     [2, 'station-b'],
@@ -25,11 +26,11 @@ const refsOf = (relations: OsmRelation[]): string[] =>
     buildLineVariants(relations, nodeIdToStationId).map((variant) => variant.ref)
 
 describe('buildLineVariants — route ref patterns', () => {
-    it('keeps a bus ref matching the configured pattern', () => {
-        expect(refsOf([routeRelation(1, 'bus', 'M41')])).toEqual(['M41'])
+    it.each(['M41', 'X11'])('keeps a bus ref matching the configured pattern', (ref) => {
+        expect(refsOf([routeRelation(1, 'bus', ref)])).toEqual([ref])
     })
 
-    it.each(['184', 'X11', 'N8', 'M41E'])('drops the out-of-scope bus ref %s', (ref) => {
+    it.each(['184', 'N8', 'M41E'])('drops the out-of-scope bus ref %s', (ref) => {
         expect(refsOf([routeRelation(1, 'bus', ref)])).toEqual([])
     })
 
