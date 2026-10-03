@@ -343,18 +343,67 @@ describe('automatic city delivery through notification RPC and durable storage',
         expect(await alarmTime()).toBe(start + 3_600_001)
     })
 
-    it('keeps a digest to the top five stations and escapes transit names', async () => {
-        for (let id = 1; id <= 7; id++) {
+    it.each([11, 12])('accounts for reports omitted by the station limit (%s stations)', async (stationCount) => {
+        for (let id = 1; id <= stationCount; id++) {
             await accept({
                 ...report(id),
                 report: { ...report(id).report, stationId: `station-${id}`, lineId: null, directionId: null },
             })
         }
+        for (let id = stationCount + 1; id <= stationCount + 2; id++) {
+            await accept({
+                ...report(id),
+                report: { ...report(id).report, stationId: 'station-1', lineId: null, directionId: null },
+            })
+        }
         await tick(start + policy.creditRefillMs)
         expect(messages).toHaveLength(1)
-        expect(messages[0].text).toContain('7 neue Meldungen an 7 Stationen')
+        expect(messages[0].text).toContain(`${stationCount + 2} neue Meldungen an ${stationCount} Stationen`)
+        expect(messages[0].text).toContain('<b>Stop &amp; &lt;1&gt;</b> · 3 Meldungen')
         expect(messages[0].text).toContain('Stop &amp; &lt;1&gt;')
-        expect(messages[0].text).not.toContain('Stop &amp; &lt;6&gt;')
+        expect(String(messages[0].text).match(/<b>Stop /g)).toHaveLength(policy.maxDigestStations)
+        expect(messages[0].text).toContain(
+            stationCount === 11
+                ? 'Weitere 1 Meldung an 1 weiterer Station auf der Karte.'
+                : 'Weitere 2 Meldungen an 2 weiteren Stationen auf der Karte.'
+        )
+        expect(String(messages[0].text).length).toBeLessThan(4096)
+    })
+
+    it('accounts for reports omitted by the message length limit', async () => {
+        for (let id = 1; id <= 5; id++) {
+            await accept({
+                ...report(id),
+                report: {
+                    ...report(id).report,
+                    stationId: `long-station-${id === 5 ? 1 : id}`,
+                    lineId: null,
+                    directionId: null,
+                },
+            })
+        }
+        await tick(start + policy.creditRefillMs)
+        expect(messages).toHaveLength(1)
+        expect(messages[0].text).toContain('5 neue Meldungen an 4 Stationen')
+        expect(String(messages[0].text).match(/<b>Long stop /g)).toHaveLength(3)
+        expect(messages[0].text).toContain('Weitere 1 Meldung an 1 weiterer Station auf der Karte.')
+        expect(messages[0].text).toContain('Alle Meldungen auf der Karte</a>')
+        expect(String(messages[0].text).length).toBeGreaterThan(3000)
+        expect(String(messages[0].text).length).toBeLessThan(4096)
+    })
+
+    it.each([3, 10])('shows all %s stations without an omission notice when every station fits', async (stationCount) => {
+        for (let id = 1; id <= stationCount * 3; id++) {
+            await accept({
+                ...report(id),
+                report: { ...report(id).report, stationId: `station-${Math.ceil(id / 3)}`, lineId: null, directionId: null },
+            })
+        }
+        await tick(start + policy.creditRefillMs)
+        expect(messages).toHaveLength(1)
+        expect(messages[0].text).toContain(`${stationCount * 3} neue Meldungen an ${stationCount} Stationen`)
+        expect(String(messages[0].text).match(/· 3 Meldungen/g)).toHaveLength(stationCount)
+        expect(messages[0].text).not.toContain('Weitere')
         expect(String(messages[0].text).length).toBeLessThan(4096)
     })
 

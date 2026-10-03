@@ -3,7 +3,8 @@ export const transitFixture = `export default {
         const url = new URL(request.url);
         if (!['berlin', 'leipzig', 'hamburg'].includes(url.searchParams.get('city'))) return new Response(null, {status: 400});
         if (url.pathname === '/v0/transit/stations') return Response.json({
-            ...Object.fromEntries(Array.from({length:7},(_,i)=>['station-'+(i+1),{name:'Stop & <'+(i+1)+'>'}])),
+            ...Object.fromEntries(Array.from({length:12},(_,i)=>['station-'+(i+1),{name:'Stop & <'+(i+1)+'>'}])),
+            ...Object.fromEntries(Array.from({length:4},(_,i)=>['long-station-'+(i+1),{name:'Long stop '+(i+1)+' '+ 'x'.repeat(930)}])),
             'station-a': {name: 'A & <B>'}, 'station-b': {name: 'C'}
         });
         if (url.pathname === '/v0/transit/lines') return Response.json([

@@ -8,5 +8,6 @@ export const DELIVERY_POLICY = {
     retentionMs: 24 * 60 * MINUTE,
     retryDelayMs: 30_000,
     maxAttempts: 3,
-    maxDigestStations: 5,
+    maxDigestStations: 10,
+    maxDigestMessageLength: 4096,
 } as const
