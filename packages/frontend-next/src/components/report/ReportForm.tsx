@@ -447,7 +447,7 @@ export function ReportForm() {
   return (
     <ReportSelectionProvider initialStationId={initialStationId} initialLineName={initialLineName}>
       <div className="bg-card animate-in fade-in fixed inset-0 z-30 duration-150">
-        <div className="mx-auto flex h-full w-full max-w-md flex-col">
+        <div className="mx-auto flex h-full w-full max-w-md flex-col pb-(--keyboard-inset)">
           {result ? (
             <ReportSuccess result={result} onClose={handleSuccessClose} />
           ) : (
