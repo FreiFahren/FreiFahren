@@ -16,6 +16,13 @@ export async function initNativePlatform(): Promise<void> {
     // reads as a stray dialog.
     const { Keyboard } = await import('@capacitor/keyboard');
     await Keyboard.setAccessoryBarVisible({ isVisible: false });
+    const setKeyboardInset = (height: number) => {
+      document.documentElement.style.setProperty('--keyboard-inset', `${height}px`);
+    };
+    await Keyboard.addListener('keyboardWillShow', (info) => setKeyboardInset(info.keyboardHeight));
+    await Keyboard.addListener('keyboardDidShow', (info) => setKeyboardInset(info.keyboardHeight));
+    await Keyboard.addListener('keyboardWillHide', () => setKeyboardInset(0));
+    await Keyboard.addListener('keyboardDidHide', () => setKeyboardInset(0));
   } catch {
     /* ignore */
   }
