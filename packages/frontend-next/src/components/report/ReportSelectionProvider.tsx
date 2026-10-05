@@ -11,6 +11,7 @@ import {
 
 import {
   type LineFilter,
+  normalizeStationQuery,
   ReportSelectionContext,
   type ReportSelectionContextValue,
 } from './ReportSelection.context';
@@ -27,6 +28,7 @@ export function ReportSelectionProvider({
   const [lineName, setLineName] = useState<string | null>(null);
   const [lineFilter, setLineFilter] = useState<LineFilter>('all');
   const [stationId, setStationId] = useState<string | null>(initialStationId);
+  const [stationQuery, setStationQuery] = useState('');
   const [directionStationId, setDirectionStationId] = useState<string | null>(null);
 
   const { data: lines } = useLines();
@@ -162,15 +164,36 @@ export function ReportSelectionProvider({
     }
   }
 
+  const stationForSubmit = () => {
+    if (stationId) return { stationId, lineName, directionStationId };
+    const needle = normalizeStationQuery(stationQuery.trim());
+    if (!needle) return null;
+    const matches = visibleStations.filter((station) =>
+      normalizeStationQuery(station.name).includes(needle),
+    );
+    if (matches.length !== 1) return null;
+    const id = matches[0].id;
+    const names = resolveStationLineNames(stations?.[id]?.lines ?? [], lines);
+    selectStation(id);
+    return {
+      stationId: id,
+      lineName: lineName ?? (names.length === 1 ? names[0] : null),
+      directionStationId: null,
+    };
+  };
+
   const value: ReportSelectionContextValue = {
     lineName,
     lineFilter,
     stationId,
+    stationQuery,
     directionStationId,
     selectLine,
     setLineFilter,
     selectStation,
+    setStationQuery,
     selectDirection,
+    stationForSubmit,
     visibleLines,
     visibleStations,
     directionOptions,

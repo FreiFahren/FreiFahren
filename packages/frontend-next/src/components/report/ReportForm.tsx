@@ -31,22 +31,13 @@ import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 
 import { NAMESPACE } from './ReportForm.i18n';
-import { useReportSelection } from './ReportSelection.context';
+import { normalizeStationQuery, useReportSelection } from './ReportSelection.context';
 import { ReportSelectionProvider } from './ReportSelectionProvider';
 import { ReportSuccess } from './ReportSuccess';
 import { ClearSelectionButton, LineBadgePicker, LineTypeTabs } from './line-picker-controls';
 import { type ReportRejection, useReportVerification } from './useReportVerification';
 
 const routeApi = getRouteApi('/report');
-
-/** Diacritic-insensitive match so "moritzplatz" finds "Möritzplatz" and "strasse" finds "Straße". */
-function normalize(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/ß/g, 'ss')
-    .toLowerCase();
-}
 
 const NEARBY_COUNT = 3;
 
@@ -87,13 +78,13 @@ function LinePicker() {
 
 function StationPicker() {
   const { t } = useTranslation(NAMESPACE);
-  const { stationId, lineName, selectStation, visibleStations } = useReportSelection();
+  const { stationId, stationQuery, setStationQuery, lineName, selectStation, visibleStations } =
+    useReportSelection();
   const { position } = useGeolocation();
-  const [query, setQuery] = useState('');
 
-  const needle = normalize(query.trim());
+  const needle = normalizeStationQuery(stationQuery.trim());
   const filtered = needle
-    ? visibleStations.filter((s) => normalize(s.name).includes(needle))
+    ? visibleStations.filter((s) => normalizeStationQuery(s.name).includes(needle))
     : visibleStations;
 
   // Closest stations, only while sharing location, not searching, and not browsing a line.
@@ -146,13 +137,13 @@ function StationPicker() {
 
   const clear = () => {
     selectStation(null);
-    setQuery('');
+    setStationQuery('');
   };
 
   return (
     <section className={cn('mt-6 flex flex-col px-4', !stationId && 'min-h-0 flex-1')}>
       <div className="mb-3 flex items-center justify-between">
-        <SectionHeading hint={t('required')} hintTone="destructive">
+        <SectionHeading hint={stationId ? undefined : t('required')} hintTone="destructive">
           {t('station')}
         </SectionHeading>
         {stationId && <ClearSelectionButton onClick={clear} />}
@@ -167,8 +158,8 @@ function StationPicker() {
           <div className="relative mb-2">
             <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
             <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              value={stationQuery}
+              onChange={(e) => setStationQuery(e.target.value)}
               placeholder={t('searchStation')}
               className="h-10 pl-9 text-base"
               autoComplete="off"
@@ -190,7 +181,7 @@ function StationPicker() {
             )}
             {needle && filtered.length === 0 ? (
               <p className="text-muted-foreground px-3 py-6 text-center text-sm">
-                {t('noMatch', { query })}
+                {t('noMatch', { query: stationQuery })}
               </p>
             ) : (
               <ul
@@ -322,12 +313,12 @@ function SubmitFooter({
   onRepeatedFailure: () => void;
 }) {
   const { t } = useTranslation(NAMESPACE);
-  const { stationId, lineName, directionStationId } = useReportSelection();
+  const { stationId, stationQuery, stationForSubmit } = useReportSelection();
   const submitReport = useSubmitReport();
   const { verify, recordSubmission } = useReportVerification();
   const [consecutiveFailures, setConsecutiveFailures] = useState(0);
 
-  const canSubmit = stationId !== null;
+  const canSubmit = stationId !== null || normalizeStationQuery(stationQuery.trim()) !== '';
 
   const handleSubmit = () => {
     /*
@@ -335,7 +326,8 @@ function SubmitFooter({
      * truly disabled button swallows the tap and a user who has not noticed the station picker
      * gets no feedback at all. Tell them what is missing instead.
      */
-    if (stationId === null) {
+    const selection = stationForSubmit();
+    if (selection === null) {
       toast.custom(
         () => (
           <ToastPill className="bg-destructive flex w-fit items-center gap-2 text-sm font-semibold text-white">
@@ -347,9 +339,9 @@ function SubmitFooter({
       );
       return;
     }
-    const rejection = verify(stationId);
+    const rejection = verify(selection.stationId);
     if (rejection) {
-      track('report_rejected', { reason: rejection, stationId });
+      track('report_rejected', { reason: rejection, stationId: selection.stationId });
       toast.custom(
         () => (
           <ToastPill className="bg-destructive flex w-fit items-center gap-2 text-sm font-semibold text-white">
@@ -362,13 +354,13 @@ function SubmitFooter({
       return;
     }
     submitReport.mutate({
-      stationId,
-      lineName,
-      directionStationId,
+      stationId: selection.stationId,
+      lineName: selection.lineName,
+      directionStationId: selection.directionStationId,
       onOptimistic: (result) => {
         setConsecutiveFailures(0);
         notifySuccess();
-        recordSubmission();
+        recordSubmission(result.stationId);
         getFeatureFlagVariant(FEATURE_FLAGS.contributeModalTiming);
         track('report_submitted', {
           stationId: result.stationId,
