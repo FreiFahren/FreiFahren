@@ -48,8 +48,15 @@ const REJECTION_MESSAGE: Record<ReportRejection, string> = {
 
 function LinePicker() {
   const { t } = useTranslation(NAMESPACE);
-  const { lineName, lineFilter, setLineFilter, selectLine, visibleLines, stationId } =
-    useReportSelection();
+  const {
+    lineName,
+    lineFilter,
+    setLineFilter,
+    selectLine,
+    visibleLines,
+    stationId,
+    previewStationId,
+  } = useReportSelection();
 
   return (
     <section className="px-4">
@@ -70,7 +77,7 @@ function LinePicker() {
         lines={visibleLines}
         selectedLine={lineName}
         onSelect={selectLine}
-        wrap={Boolean(stationId)}
+        wrap={Boolean(stationId || previewStationId)}
       />
     </section>
   );

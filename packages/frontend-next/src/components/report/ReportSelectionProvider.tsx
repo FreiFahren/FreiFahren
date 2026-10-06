@@ -28,7 +28,7 @@ export function ReportSelectionProvider({
   const [lineName, setLineName] = useState<string | null>(null);
   const [lineFilter, setLineFilter] = useState<LineFilter>('all');
   const [stationId, setStationId] = useState<string | null>(initialStationId);
-  const [stationQuery, setStationQuery] = useState('');
+  const [stationQuery, setStationQueryState] = useState('');
   const [directionStationId, setDirectionStationId] = useState<string | null>(null);
 
   const { data: lines } = useLines();
@@ -98,12 +98,6 @@ export function ReportSelectionProvider({
   const allLines = [...typeByName].map(([name, type]) => ({ name, type })).sort(compareLineOrder);
 
   const selectedStation = stationId ? stations?.[stationId] : undefined;
-  const stationLineNames = selectedStation
-    ? new Set(resolveStationLineNames(selectedStation.lines, lines))
-    : null;
-  const visibleLines = allLines
-    .filter((l) => lineFilter === 'all' || l.type === lineFilter)
-    .filter((l) => !stationLineNames || stationLineNames.has(l.name));
 
   const stationsAlongLine = () => {
     // Walk every variant of the selected line and emit stations in their stored order,
@@ -136,10 +130,37 @@ export function ReportSelectionProvider({
   else if (lineName) visibleStations = stationsAlongLine();
   else visibleStations = stationsByType();
 
+  const stationMatchingQuery = (query: string): Station | undefined => {
+    const needle = normalizeStationQuery(query.trim());
+    if (!needle) return undefined;
+    const matches = visibleStations.filter((station) =>
+      normalizeStationQuery(station.name).includes(needle),
+    );
+    return matches.length === 1 ? matches[0] : undefined;
+  };
+
+  const previewStation = selectedStation ?? stationMatchingQuery(stationQuery);
+  const previewLineNames = previewStation
+    ? resolveStationLineNames(previewStation.lines, lines)
+    : null;
+  const stationLineNames = previewLineNames ? new Set(previewLineNames) : null;
+  const visibleLines = allLines
+    .filter((l) => lineFilter === 'all' || l.type === lineFilter)
+    .filter((l) => !stationLineNames || stationLineNames.has(l.name));
+  const activeLineName = lineName ?? (previewLineNames?.length === 1 ? previewLineNames[0] : null);
+
+  const setStationQuery = (query: string) => {
+    setStationQueryState(query);
+    if (stationId) return;
+    const nextId = stationMatchingQuery(query)?.id ?? null;
+    const currentId = selectedStation ? null : (stationMatchingQuery(stationQuery)?.id ?? null);
+    if (nextId !== currentId) setDirectionStationId(null);
+  };
+
   // Circular lines (e.g. the Ringbahn) loop back on themselves, so picking a terminus as a
   // "direction" is meaningless — leave directionOptions empty so the picker is skipped entirely.
   const selectedLineIsCircular =
-    lineName !== null && (lines ?? []).some((l) => l.name === lineName && l.isCircular);
+    activeLineName !== null && (lines ?? []).some((l) => l.name === activeLineName && l.isCircular);
 
   // Direction picker exposes every endpoint reachable from the selected station along the
   // chosen line. If the station sits on a single variant we get the two termini of that variant;
@@ -147,11 +168,11 @@ export function ReportSelectionProvider({
   // those variants, deduplicated. The variant a chosen endpoint belongs to can be resolved at
   // submit time from (lineName, stationId, directionStationId).
   const directionOptions: Station[] = [];
-  if (lineName && selectedStation && !selectedLineIsCircular) {
+  if (activeLineName && previewStation && !selectedLineIsCircular) {
     const seen = new Set<string>();
     for (const variant of lines ?? []) {
-      if (variant.name !== lineName) continue;
-      if (!variant.stations.includes(selectedStation.id)) continue;
+      if (variant.name !== activeLineName) continue;
+      if (!variant.stations.includes(previewStation.id)) continue;
       if (variant.stations.length < 2) continue;
       const endpointIds = [variant.stations[0], variant.stations[variant.stations.length - 1]];
       for (const id of endpointIds) {
@@ -165,20 +186,17 @@ export function ReportSelectionProvider({
   }
 
   const stationForSubmit = () => {
-    if (stationId) return { stationId, lineName, directionStationId };
-    const needle = normalizeStationQuery(stationQuery.trim());
-    if (!needle) return null;
-    const matches = visibleStations.filter((station) =>
-      normalizeStationQuery(station.name).includes(needle),
-    );
-    if (matches.length !== 1) return null;
-    const id = matches[0].id;
-    const names = resolveStationLineNames(stations?.[id]?.lines ?? [], lines);
-    selectStation(id);
+    if (stationId) return { stationId, lineName: activeLineName, directionStationId };
+    const match = stationMatchingQuery(stationQuery);
+    if (!match) return null;
+    const names = resolveStationLineNames(stations?.[match.id]?.lines ?? [], lines);
+    const submittedLine = lineName ?? (names.length === 1 ? names[0] : null);
+    const submittedDirection = directionStationId;
+    selectStation(match.id);
     return {
-      stationId: id,
-      lineName: lineName ?? (names.length === 1 ? names[0] : null),
-      directionStationId: null,
+      stationId: match.id,
+      lineName: submittedLine,
+      directionStationId: submittedDirection,
     };
   };
 
@@ -197,6 +215,7 @@ export function ReportSelectionProvider({
     visibleLines,
     visibleStations,
     directionOptions,
+    previewStationId: stationId ? null : (previewStation?.id ?? null),
   };
 
   return <ReportSelectionContext value={value}>{children}</ReportSelectionContext>;

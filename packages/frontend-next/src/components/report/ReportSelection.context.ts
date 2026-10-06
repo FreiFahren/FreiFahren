@@ -34,6 +34,7 @@ export type ReportSelectionContextValue = {
   visibleLines: { name: string; type: LineType }[];
   visibleStations: Station[];
   directionOptions: Station[];
+  previewStationId: string | null;
 };
 
 export const ReportSelectionContext = createContext<ReportSelectionContextValue | null>(null);
