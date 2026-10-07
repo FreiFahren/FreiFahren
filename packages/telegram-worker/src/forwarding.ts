@@ -96,15 +96,35 @@ export async function renderDelivery(
     const ranked = [...stations].sort(
         (a, b) => b[1].count - a[1].count || b[1].latest.localeCompare(a[1].latest) || a[0].localeCompare(b[0])
     )
+    const mapLink = `<a href="${escapeHtml(city.publicAppUrl)}?utm_source=telegram&amp;utm_medium=bot">Alle Meldungen auf der Karte</a>`
+    const omissionNotice = (displayedReports: number, displayedStations: number): string[] => {
+        const omittedStations = stations.size - displayedStations
+        const omittedReports = reports.length - displayedReports
+        return omittedStations > 0
+            ? [
+                  '',
+                  `Weitere ${omittedReports} ${omittedReports === 1 ? 'Meldung' : 'Meldungen'} an ${omittedStations} ${omittedStations === 1 ? 'weiterer Station' : 'weiteren Stationen'} auf der Karte.`,
+              ]
+            : []
+    }
+    let displayedStations = 0
+    let displayedReports = 0
     for (const [id, station] of ranked.slice(0, DELIVERY_POLICY.maxDigestStations)) {
         const lineNames = [...station.lines].sort().slice(0, 3).map(escapeHtml).join(', ')
         const item = `<b>${escapeHtml(index.stations[id].name)}</b> · ${station.count} ${station.count === 1 ? 'Meldung' : 'Meldungen'} · zuletzt ${time(station.latest)}${lineNames ? ` · ${lineNames}` : ''}`
-        if (lines.join('\n').length + item.length > 3000) break
+        // Reserve space for the omission notice and map link within Telegram's limit.
+        const candidate = [
+            ...lines,
+            item,
+            ...omissionNotice(displayedReports + station.count, displayedStations + 1),
+            '',
+            mapLink,
+        ].join('\n')
+        if (candidate.length > DELIVERY_POLICY.maxDigestMessageLength) break
         lines.push(item)
+        displayedStations++
+        displayedReports += station.count
     }
-    lines.push(
-        '',
-        `<a href="${escapeHtml(city.publicAppUrl)}?utm_source=telegram&amp;utm_medium=bot">Alle Meldungen auf der Karte</a>`
-    )
+    lines.push(...omissionNotice(displayedReports, displayedStations), '', mapLink)
     return lines.join('\n')
 }
