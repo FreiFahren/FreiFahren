@@ -6,7 +6,7 @@
 
   <h1>FreiFahren</h1>
 
-  <p>Die Blitzer-App für Öffis. Die Live-Karte der Ticketkontrolleure im Berliner Nahverkehr</p>
+  <p>Die Live-Karte der Ticketkontrolleure im Berliner Nahverkehr</p>
 
   [![Telegram](https://img.shields.io/badge/Telegram-Community-26A5E4?logo=telegram&logoColor=white)](https://t.me/freifahren_BE)
   [![License](https://img.shields.io/github/license/FreiFahren/FreiFahren)](LICENSE)
