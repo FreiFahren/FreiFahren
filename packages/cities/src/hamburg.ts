@@ -49,7 +49,7 @@ export const HAMBURG: CityConfig = {
     subdomain: 'hamburg',
     displayName: 'Hamburg',
     publicAppUrl: 'https://hamburg.freifahren.org',
-    listed: true,
+    listed: false,
     dbName: CITY_DATABASES.hamburg.dbName,
     dbBinding: CITY_DATABASES.hamburg.dbBinding,
     lang: 'de',
