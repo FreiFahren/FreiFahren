@@ -98,7 +98,9 @@ export class InsightsService {
             .select({ stationId: reports.stationId, value: count() })
             .from(reports)
             .where(and(gte(reports.timestamp, countRangeStart), notQuarantined))
-            .groupBy(reports.stationId)
+            // The unary `+` keeps the planner off reports_station_ts_idx (D1 has no sqlite_stat1, so it
+            // would pick that index for the GROUP BY and scan the whole table) and onto reports_ts_idx.
+            .groupBy(sql`+${reports.stationId}`)
 
         const reportCount = recentReportsByStation.find((row) => row.stationId === stationId)?.value ?? 0
         const population = Object.keys(stations).length
