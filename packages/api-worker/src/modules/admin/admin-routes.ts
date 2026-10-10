@@ -116,7 +116,12 @@ adminRoutes.get('/dashboard', async (c) => {
 adminRoutes.post('/quarantine', async (c) => {
     const input: unknown = await c.req.json().catch(() => null)
     const parsed = z
-        .object({ enabled: z.boolean(), confirmation: z.literal(QUARANTINE_CONFIRMATION) })
+        .object({
+            enabled: z.boolean(),
+            confirmation: z.literal(QUARANTINE_CONFIRMATION),
+            // Omitted means every city, so an emergency still needs a single action.
+            cities: z.array(z.enum(CITY_DATABASE_SLUGS)).min(1).optional(),
+        })
         .strict()
         .safeParse(input)
     if (!parsed.success)
@@ -125,10 +130,12 @@ adminRoutes.post('/quarantine', async (c) => {
             statusCode: 400,
             internalCode: 'VALIDATION_FAILED',
         })
-    const result = await setQuarantine(c.env, parsed.data.enabled)
+    const targets = parsed.data.cities === undefined ? CITY_DATABASE_SLUGS : [...new Set(parsed.data.cities)]
+    const result = await setQuarantine(c.env, parsed.data.enabled, targets)
     c.get('logger').warn(
         {
             enabled: parsed.data.enabled,
+            targets,
             complete: result.complete,
             cities: result.cities.map(({ city, enabled, error }) => ({ city, enabled, error })),
         },
