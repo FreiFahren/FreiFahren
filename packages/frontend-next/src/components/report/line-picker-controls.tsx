@@ -2,12 +2,12 @@ import { useTranslation } from 'react-i18next';
 
 import { LineBadge } from '@/components/transit/LineBadge';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { selectionTap } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
 
 import { NAMESPACE } from './ReportForm.i18n';
 import { type LineFilter } from './ReportSelection.context';
 import { LINE_FILTERS } from './line-picker-config';
+import { SelectionButton } from './selection-button';
 
 export function ClearSelectionButton({
   onClick,
@@ -77,27 +77,17 @@ export function LineBadgePicker({
   onSelect: (lineName: string | null) => void;
   wrap?: boolean;
 }) {
-  const chips = lines.map((line) => {
-    const isSelected = selectedLine === line.name;
-    return (
-      <button
-        key={line.name}
-        type="button"
-        aria-pressed={isSelected}
-        onClick={() => {
-          selectionTap();
-          onSelect(isSelected ? null : line.name);
-        }}
-        className={cn(
-          'shrink-0 rounded-sm transition-all outline-none focus-visible:ring-2 focus-visible:ring-white/50',
-          isSelected && 'ring-2 ring-white',
-          selectedLine && !isSelected && 'opacity-40',
-        )}
-      >
-        <LineBadge name={line.name} />
-      </button>
-    );
-  });
+  const chips = lines.map((line) => (
+    <SelectionButton
+      key={line.name}
+      value={line.name}
+      selectedValue={selectedLine}
+      onSelect={onSelect}
+      className="shrink-0 rounded-sm transition-all focus-visible:ring-2 focus-visible:ring-white/50"
+    >
+      <LineBadge name={line.name} />
+    </SelectionButton>
+  ));
 
   return wrap ? (
     <div className="flex flex-wrap gap-2">{chips}</div>
