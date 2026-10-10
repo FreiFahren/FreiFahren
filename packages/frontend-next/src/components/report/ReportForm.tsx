@@ -26,7 +26,7 @@ import {
 import { captureIssue } from '@/lib/error-monitoring';
 import { FEATURE_FLAGS, getFeatureFlagVariant } from '@/lib/feature-flags';
 import { distanceMeters } from '@/lib/geo';
-import { notifySuccess, selectionTap } from '@/lib/haptics';
+import { notifySuccess } from '@/lib/haptics';
 import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 
@@ -35,6 +35,7 @@ import { useReportSelection } from './ReportSelection.context';
 import { ReportSelectionProvider } from './ReportSelectionProvider';
 import { ReportSuccess } from './ReportSuccess';
 import { ClearSelectionButton, LineBadgePicker, LineTypeTabs } from './line-picker-controls';
+import { SelectionButton } from './selection-button';
 import { type ReportRejection, useReportVerification } from './useReportVerification';
 
 const routeApi = getRouteApi('/report');
@@ -129,25 +130,28 @@ function StationPicker() {
     scrollMargin: listRef.current?.offsetTop ?? 0,
   });
 
-  const renderStation = (station: Station) => (
-    <li key={station.id} className="border-border/60 border-b last:border-b-0">
-      <button
-        type="button"
-        onClick={() => {
-          selectionTap();
-          selectStation(station.id);
-        }}
-        className="hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-3 py-2.5 text-left text-sm outline-none"
-      >
-        <span className="truncate">{station.name}</span>
-      </button>
-    </li>
-  );
-
   const clear = () => {
     selectStation(null);
     setQuery('');
   };
+
+  const renderStationButton = (id: string, name?: string) => (
+    <SelectionButton
+      value={id}
+      selectedValue={stationId}
+      onSelect={(nextId) => (nextId === null ? clear() : selectStation(nextId))}
+      className="hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-3 py-2.5 text-left text-sm"
+      selectedClassName="bg-muted"
+    >
+      <span className="truncate">{name}</span>
+    </SelectionButton>
+  );
+
+  const renderStation = (station: Station) => (
+    <li key={station.id} className="border-border/60 border-b last:border-b-0">
+      {renderStationButton(station.id, station.name)}
+    </li>
+  );
 
   return (
     <section className={cn('mt-6 flex flex-col px-4', !stationId && 'min-h-0 flex-1')}>
@@ -159,9 +163,7 @@ function StationPicker() {
       </div>
 
       {stationId ? (
-        <div className="bg-muted flex items-center rounded-md px-3 py-2.5 text-sm ring-2 ring-white">
-          {visibleStations[0]?.name}
-        </div>
+        renderStationButton(stationId, visibleStations[0]?.name)
       ) : (
         <>
           <div className="relative mb-2">
@@ -213,16 +215,7 @@ function StationPicker() {
                       }}
                       className="border-border/60 border-b"
                     >
-                      <button
-                        type="button"
-                        onClick={() => {
-                          selectionTap();
-                          selectStation(station.id);
-                        }}
-                        className="hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-3 py-2.5 text-left text-sm outline-none"
-                      >
-                        <span className="truncate">{station.name}</span>
-                      </button>
+                      {renderStationButton(station.id, station.name)}
                     </li>
                   );
                 })}
@@ -252,29 +245,20 @@ function DirectionPicker() {
         />
       </div>
       <ul>
-        {directionOptions.map((station) => {
-          const isSelected = directionStationId === station.id;
-          return (
-            <li key={station.id} className="border-border/60 border-b last:border-b-0">
-              <button
-                type="button"
-                aria-pressed={isSelected}
-                onClick={() => {
-                  selectionTap();
-                  selectDirection(isSelected ? null : station.id);
-                }}
-                className={cn(
-                  'hover:bg-muted focus-visible:bg-muted flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm transition-opacity outline-none',
-                  isSelected && 'bg-muted ring-2 ring-white',
-                  directionStationId && !isSelected && 'opacity-40',
-                )}
-              >
-                <ChevronRight className="text-muted-foreground size-5 shrink-0" />
-                <span className="truncate">{station.name}</span>
-              </button>
-            </li>
-          );
-        })}
+        {directionOptions.map((station) => (
+          <li key={station.id} className="border-border/60 border-b last:border-b-0">
+            <SelectionButton
+              value={station.id}
+              selectedValue={directionStationId}
+              onSelect={selectDirection}
+              className="hover:bg-muted focus-visible:bg-muted flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm transition-opacity"
+              selectedClassName="bg-muted"
+            >
+              <ChevronRight className="text-muted-foreground size-5 shrink-0" />
+              <span className="truncate">{station.name}</span>
+            </SelectionButton>
+          </li>
+        ))}
       </ul>
     </section>
   );
