@@ -1,4 +1,4 @@
-import { CITY_DATABASES, CITY_DATABASE_SLUGS, getCity } from '@freifahren/cities'
+import { CITY_DATABASES, CITY_DATABASE_SLUGS, type CityDatabaseSlug, getCity } from '@freifahren/cities'
 import { and, asc, count as countRows, desc, eq, gte, lt, min } from 'drizzle-orm'
 import type { BatchItem } from 'drizzle-orm/batch'
 import { DateTime } from 'luxon'
@@ -124,12 +124,16 @@ const setCityQuarantine = async (env: Bindings, city: string, enabled: boolean, 
     await runBatch(db, moderationStateStatements(db, state, enabled, now))
 }
 
-export const setQuarantine = async (env: Bindings, enabled: boolean) => {
+export const setQuarantine = async (
+    env: Bindings,
+    enabled: boolean,
+    targets: readonly CityDatabaseSlug[] = CITY_DATABASE_SLUGS
+) => {
     const now = Date.now()
     // Keep writes ordered because local development maps every city binding to one D1 database.
     // Serial writes are also easier to retry safely when an individual city is unavailable.
     const results: PromiseSettledResult<void>[] = []
-    for (const city of CITY_DATABASE_SLUGS) {
+    for (const city of targets) {
         try {
             await setCityQuarantine(env, city, enabled, now)
             results.push({ status: 'fulfilled', value: undefined })
@@ -139,7 +143,10 @@ export const setQuarantine = async (env: Bindings, enabled: boolean) => {
     }
     const cities = await moderationStatus(env)
     const complete =
-        results.every((result) => result.status === 'fulfilled') && cities.every((city) => city.enabled === enabled)
+        results.every((result) => result.status === 'fulfilled') &&
+        cities
+            .filter((city) => targets.includes(city.city as CityDatabaseSlug))
+            .every((city) => city.enabled === enabled)
     return { complete, cities }
 }
 

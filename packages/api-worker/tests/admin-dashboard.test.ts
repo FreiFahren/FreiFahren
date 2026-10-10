@@ -58,11 +58,11 @@ const dashboard = async (extra = '') => {
     expect(response.headers.get('Cache-Control')).toContain('no-store')
     return (await response.json()) as AdminDashboard
 }
-const quarantine = (enabled: boolean) =>
+const quarantine = (enabled: boolean, cities?: unknown) =>
     appRequestWithRedirect('/admin/v1/quarantine', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ enabled, confirmation: QUARANTINE_CONFIRMATION }),
+        body: JSON.stringify({ enabled, confirmation: QUARANTINE_CONFIRMATION, cities }),
     })
 
 describe('private report monitoring', () => {
@@ -291,6 +291,21 @@ describe('emergency quarantine', () => {
         const fresh = await submit()
         expect((await db.select().from(reports).where(eq(reports.reportId, reportId)))[0].trust).toBe(0)
         expect((await db.select().from(reports).where(eq(reports.reportId, fresh.reportId)))[0].trust).toBe(1)
+    })
+
+    it('switches only the requested cities and rejects unknown ones', async () => {
+        // Tests share one D1 for every city, so an unavailable Leipzig shows which cities were written.
+        setTestEnv({ DB_LEIPZIG: undefined })
+        const hamburg = (await (await quarantine(true, ['hamburg'])).json()) as {
+            complete: boolean
+            cities: ModerationStatus[]
+        }
+        expect(hamburg.complete).toBe(true)
+        expect(hamburg.cities.find((city) => city.city === 'hamburg')).toMatchObject({ enabled: true })
+        expect(hamburg.cities.find((city) => city.city === 'leipzig')).toMatchObject({ enabled: null })
+        expect(((await (await quarantine(true, ['leipzig'])).json()) as { complete: boolean }).complete).toBe(false)
+        expect((await quarantine(true, ['atlantis'])).status).toBe(400)
+        expect((await quarantine(true, [])).status).toBe(400)
     })
 
     it('is idempotent and exposes partial city failures so the operator can retry', async () => {
