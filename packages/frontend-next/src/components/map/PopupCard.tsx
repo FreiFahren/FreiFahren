@@ -31,7 +31,7 @@ export function PopupCard({ onClose, closeLabel, cardClassName, children }: Popu
       <div className="pointer-events-none fixed inset-x-0 bottom-(--keyboard-inset) z-40 flex justify-center pt-3 transition-[bottom] duration-200 ease-out">
         <Card
           className={cn(
-            'pb-safe-4 animate-in slide-in-from-bottom-4 fade-in pointer-events-auto max-h-[calc(100dvh-var(--keyboard-inset)-0.75rem)] w-full gap-1 overflow-y-auto rounded-t-xl rounded-b-none pt-3 duration-200 ease-out sm:max-w-md',
+            'pb-safe-4 animate-in slide-in-from-bottom-4 fade-in pointer-events-auto max-h-[calc(100dvh-var(--keyboard-inset)-env(safe-area-inset-top)-0.75rem)] w-full gap-1 overflow-y-auto rounded-t-xl rounded-b-none pt-3 duration-200 ease-out sm:max-w-md',
             cardClassName,
           )}
         >
