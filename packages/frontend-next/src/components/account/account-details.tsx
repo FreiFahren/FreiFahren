@@ -13,8 +13,9 @@ import { Route as DeleteAccountRoute } from '@/routes/account/delete';
 
 import { BUTTON_SHAPE, DevEmailHint, INPUT, SECONDARY_BUTTON } from './account-layout';
 import { NAMESPACE } from './account.i18n';
+import { UsernameForm } from './username-form';
 
-type User = { email: string; createdAt: Date | string };
+type User = { name: string; email: string; createdAt: Date | string };
 
 // The emailed link has to open a web page: a native app's own origin (capacitor://localhost) means
 // nothing in a mail client, so native apps send their city's public web app instead.
@@ -46,8 +47,17 @@ export function AccountDetails({ user }: { user: User }) {
         <div className="bg-muted text-muted-foreground flex size-20 items-center justify-center rounded-full">
           <UserRound className="size-10" />
         </div>
-        <p className="text-muted-foreground text-sm">{t('memberSince', { date: memberSince })}</p>
+        <div className="flex flex-col gap-0.5">
+          <p className="font-heading text-lg font-semibold">{user.name}</p>
+          <p className="text-muted-foreground text-sm">{t('memberSince', { date: memberSince })}</p>
+        </div>
       </div>
+
+      <UsernameForm
+        initial={user.name}
+        submitLabel={t('save')}
+        submitClassName={SECONDARY_BUTTON}
+      />
 
       <div className="flex flex-col gap-2">
         <label htmlFor={emailId} className="text-sm font-semibold">
