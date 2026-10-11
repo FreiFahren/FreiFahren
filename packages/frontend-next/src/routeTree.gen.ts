@@ -15,9 +15,11 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ImpressumRouteImport } from './routes/impressum'
 import { Route as MapRouteImport } from './routes/_map'
 import { Route as ReportsIndexRouteImport } from './routes/reports/index'
+import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as MapIndexRouteImport } from './routes/_map/index'
 import { Route as ReportsStationsRouteImport } from './routes/reports/stations'
 import { Route as ReportsLinesRouteImport } from './routes/reports/lines'
+import { Route as AccountDeleteRouteImport } from './routes/account/delete'
 import { Route as MapSettingsIndexRouteImport } from './routes/_map/settings/index'
 import { Route as MapStationStationIdRouteImport } from './routes/_map/station/$stationId'
 import { Route as MapReportsStationIdRouteImport } from './routes/_map/reports/$stationId'
@@ -53,6 +55,11 @@ const ReportsIndexRoute = ReportsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ReportsRoute,
 } as any)
+const AccountIndexRoute = AccountIndexRouteImport.update({
+  id: '/account/',
+  path: '/account/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MapIndexRoute = MapIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -67,6 +74,11 @@ const ReportsLinesRoute = ReportsLinesRouteImport.update({
   id: '/lines',
   path: '/lines',
   getParentRoute: () => ReportsRoute,
+} as any)
+const AccountDeleteRoute = AccountDeleteRouteImport.update({
+  id: '/account/delete',
+  path: '/account/delete',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const MapSettingsIndexRoute = MapSettingsIndexRouteImport.update({
   id: '/settings/',
@@ -100,8 +112,10 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reports': typeof ReportsRouteWithChildren
+  '/account/delete': typeof AccountDeleteRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
+  '/account/': typeof AccountIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/debug/report-decay': typeof MapDebugReportDecayRoute
   '/line/$lineName': typeof MapLineLineNameRoute
@@ -113,9 +127,11 @@ export interface FileRoutesByTo {
   '/impressum': typeof ImpressumRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
+  '/account/delete': typeof AccountDeleteRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/': typeof MapIndexRoute
+  '/account': typeof AccountIndexRoute
   '/reports': typeof ReportsIndexRoute
   '/debug/report-decay': typeof MapDebugReportDecayRoute
   '/line/$lineName': typeof MapLineLineNameRoute
@@ -130,9 +146,11 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reports': typeof ReportsRouteWithChildren
+  '/account/delete': typeof AccountDeleteRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/_map/': typeof MapIndexRoute
+  '/account/': typeof AccountIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/_map/debug/report-decay': typeof MapDebugReportDecayRoute
   '/_map/line/$lineName': typeof MapLineLineNameRoute
@@ -148,8 +166,10 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/report'
     | '/reports'
+    | '/account/delete'
     | '/reports/lines'
     | '/reports/stations'
+    | '/account/'
     | '/reports/'
     | '/debug/report-decay'
     | '/line/$lineName'
@@ -161,9 +181,11 @@ export interface FileRouteTypes {
     | '/impressum'
     | '/privacy'
     | '/report'
+    | '/account/delete'
     | '/reports/lines'
     | '/reports/stations'
     | '/'
+    | '/account'
     | '/reports'
     | '/debug/report-decay'
     | '/line/$lineName'
@@ -177,9 +199,11 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/report'
     | '/reports'
+    | '/account/delete'
     | '/reports/lines'
     | '/reports/stations'
     | '/_map/'
+    | '/account/'
     | '/reports/'
     | '/_map/debug/report-decay'
     | '/_map/line/$lineName'
@@ -194,6 +218,8 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ReportRoute: typeof ReportRoute
   ReportsRoute: typeof ReportsRouteWithChildren
+  AccountDeleteRoute: typeof AccountDeleteRoute
+  AccountIndexRoute: typeof AccountIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -240,6 +266,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsIndexRouteImport
       parentRoute: typeof ReportsRoute
     }
+    '/account/': {
+      id: '/account/'
+      path: '/account'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AccountIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_map/': {
       id: '/_map/'
       path: '/'
@@ -260,6 +293,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/reports/lines'
       preLoaderRoute: typeof ReportsLinesRouteImport
       parentRoute: typeof ReportsRoute
+    }
+    '/account/delete': {
+      id: '/account/delete'
+      path: '/account/delete'
+      fullPath: '/account/delete'
+      preLoaderRoute: typeof AccountDeleteRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_map/settings/': {
       id: '/_map/settings/'
@@ -340,6 +380,8 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ReportRoute: ReportRoute,
   ReportsRoute: ReportsRouteWithChildren,
+  AccountDeleteRoute: AccountDeleteRoute,
+  AccountIndexRoute: AccountIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

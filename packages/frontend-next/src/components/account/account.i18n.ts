@@ -1,0 +1,69 @@
+import { i18n } from '@/lib/i18n';
+
+export const NAMESPACE = 'account';
+
+i18n.addResourceBundle('en', NAMESPACE, {
+  open: 'Open account',
+  title: 'Account',
+  emailIntro: "Sign in with your email address. We'll send you a 6-digit code.",
+  emailLabel: 'Email address',
+  sendCode: 'Send code',
+  codeIntro: 'Enter the code we sent to {{email}}.',
+  codeLabel: 'Sign-in code',
+  signIn: 'Sign in',
+  changeEmail: 'Use a different email',
+  resendCode: 'Send a new code',
+  codeResent: 'We sent you a new code. Codes you got before no longer work.',
+  signOut: 'Sign out',
+  memberSince: 'Member since {{date}}',
+  deleteTitle: 'Delete account',
+  deleteIntro:
+    "We'll email you a link to confirm. Your account is only deleted once you open it and confirm.",
+  deleteRequest: 'Delete account',
+  deleteLinkSent: 'Check {{email}} for a link to confirm. It expires in 1 hour.',
+  deleteConfirmIntro: 'This permanently deletes your FreiFahren account. It cannot be undone.',
+  deleteConfirm: 'Delete my account',
+  deleteDone: 'Your account has been deleted.',
+  deleteLinkInvalid:
+    'This link is invalid or has expired. Request a new one from your account page.',
+  backToMap: 'Back to the map',
+  support: 'Problems or questions? Email us at',
+  invalidCode: "That code didn't work. Check it and try again.",
+  expiredCode: 'That code has expired. Request a new one.',
+  tooManyRequests: 'Too many attempts. Please wait a while and try again.',
+  genericError: 'Something went wrong. Please try again.',
+});
+
+i18n.addResourceBundle('de', NAMESPACE, {
+  open: 'Konto öffnen',
+  title: 'Konto',
+  emailIntro: 'Melde dich mit deiner E-Mail-Adresse an. Wir schicken dir einen 6-stelligen Code.',
+  emailLabel: 'E-Mail-Adresse',
+  sendCode: 'Code senden',
+  codeIntro: 'Gib den Code ein, den wir an {{email}} geschickt haben.',
+  codeLabel: 'Anmeldecode',
+  signIn: 'Anmelden',
+  changeEmail: 'Andere E-Mail-Adresse verwenden',
+  resendCode: 'Neuen Code senden',
+  codeResent: 'Wir haben dir einen neuen Code geschickt. Ältere Codes gelten nicht mehr.',
+  signOut: 'Abmelden',
+  memberSince: 'Dabei seit {{date}}',
+  deleteTitle: 'Konto löschen',
+  deleteIntro:
+    'Wir schicken dir einen Link zur Bestätigung. Dein Konto wird erst gelöscht, wenn du ihn öffnest und bestätigst.',
+  deleteRequest: 'Konto löschen',
+  deleteLinkSent:
+    'Wir haben einen Bestätigungslink an {{email}} geschickt. Er ist 1 Stunde gültig.',
+  deleteConfirmIntro:
+    'Damit wird dein FreiFahren-Konto endgültig gelöscht. Das lässt sich nicht rückgängig machen.',
+  deleteConfirm: 'Mein Konto löschen',
+  deleteDone: 'Dein Konto wurde gelöscht.',
+  deleteLinkInvalid:
+    'Dieser Link ist ungültig oder abgelaufen. Fordere auf deiner Kontoseite einen neuen an.',
+  backToMap: 'Zurück zur Karte',
+  support: 'Probleme oder Fragen? Schreib uns an',
+  invalidCode: 'Der Code hat nicht gepasst. Prüfe ihn und versuche es erneut.',
+  expiredCode: 'Der Code ist abgelaufen. Fordere einen neuen an.',
+  tooManyRequests: 'Zu viele Versuche. Bitte warte etwas und versuche es dann erneut.',
+  genericError: 'Etwas ist schiefgelaufen. Bitte versuche es erneut.',
+});

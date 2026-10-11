@@ -1,3 +1,5 @@
+// First, so a deletion token in the address is gone before anything records the URL.
+import './lib/deletion-link';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
