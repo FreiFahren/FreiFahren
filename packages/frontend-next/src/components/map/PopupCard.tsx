@@ -28,13 +28,17 @@ export function PopupCard({ onClose, closeLabel, cardClassName, children }: Popu
           className="animate-in fade-in z-40 duration-150"
         />
       )}
-      <div className="pb-safe-3 pointer-events-none fixed inset-x-0 bottom-(--keyboard-inset) z-40 flex justify-center px-3 pt-3 transition-[bottom] duration-200 ease-out">
+      <div className="pointer-events-none fixed inset-x-0 bottom-(--keyboard-inset) z-40 flex justify-center pt-3 transition-[bottom] duration-200 ease-out">
         <Card
           className={cn(
-            'animate-in slide-in-from-bottom-4 fade-in pointer-events-auto max-h-[calc(100dvh-var(--keyboard-inset)-env(safe-area-inset-bottom)-1.5rem)] w-full max-w-md gap-1 overflow-y-auto py-4 duration-200 ease-out',
+            'pb-safe-4 animate-in slide-in-from-bottom-4 fade-in pointer-events-auto max-h-[calc(100dvh-var(--keyboard-inset)-0.75rem)] w-full gap-1 overflow-y-auto rounded-t-xl rounded-b-none pt-3 duration-200 ease-out sm:max-w-md',
             cardClassName,
           )}
         >
+          <div
+            aria-hidden="true"
+            className="bg-muted-foreground/40 mx-auto mb-2 h-1 w-10 shrink-0 rounded-full"
+          />
           {children}
         </Card>
       </div>
