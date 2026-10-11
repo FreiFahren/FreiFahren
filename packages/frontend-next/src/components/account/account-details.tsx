@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { useNavigate } from '@tanstack/react-router';
 import { UserRound } from 'lucide-react';
 import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { authClient } from '@/lib/auth-client';
 import { currentCity } from '@/lib/city';
 import { clearSessionToken } from '@/lib/session';
+import { Route as MapIndexRoute } from '@/routes/_map/index';
 import { Route as DeleteAccountRoute } from '@/routes/account/delete';
 
 import { BUTTON_SHAPE, DevEmailHint, INPUT, SECONDARY_BUTTON } from './account-layout';
@@ -27,6 +29,7 @@ function deletePageUrl(): string {
 export function AccountDetails({ user }: { user: User }) {
   const { t, i18n } = useTranslation(NAMESPACE);
   const emailId = useId();
+  const navigate = useNavigate();
   const [signingOut, setSigningOut] = useState(false);
   const memberSince = new Intl.DateTimeFormat(i18n.language, {
     month: 'long',
@@ -38,7 +41,7 @@ export function AccountDetails({ user }: { user: User }) {
     // The token goes either way: a failed sign-out must not leave this device signed in.
     await authClient.signOut().catch(() => undefined);
     await clearSessionToken();
-    setSigningOut(false);
+    void navigate({ to: MapIndexRoute.to });
   };
 
   return (
