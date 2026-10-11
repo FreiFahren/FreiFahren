@@ -35,10 +35,6 @@ export function PopupCard({ onClose, closeLabel, cardClassName, children }: Popu
             cardClassName,
           )}
         >
-          <div
-            aria-hidden="true"
-            className="bg-muted-foreground/40 mx-auto mb-2 h-1 w-10 shrink-0 rounded-full"
-          />
           {children}
         </Card>
       </div>
