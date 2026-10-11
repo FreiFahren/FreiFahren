@@ -36,6 +36,11 @@
             "service": "report-gate",
             "entrypoint": "PublicReportsEntrypoint",
         },
+        {
+            "binding": "AUTH",
+            "service": "auth-worker",
+            "entrypoint": "SessionsEntrypoint",
+        },
     ],
     "d1_databases": [
         {

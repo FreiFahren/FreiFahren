@@ -68,6 +68,9 @@ export const createApp = () => {
                 'If-None-Match',
                 'ff-platform',
                 TURNSTILE_TOKEN_HEADER,
+                // Signed-in clients send their auth-worker session as a bearer token, never a cookie, so
+                // Signed-in reads can stay on the public `*` origin.
+                'Authorization',
             ],
             allowMethods: ['GET', 'POST', 'OPTIONS'],
             exposeHeaders: ['ETag', 'Last-Modified'],
