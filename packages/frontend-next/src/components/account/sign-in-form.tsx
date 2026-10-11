@@ -3,19 +3,11 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { authClient } from '@/lib/auth-client';
+import { authClient, sendSignInCode } from '@/lib/auth-client';
 
 import { DevEmailHint, INPUT, PRIMARY_BUTTON } from './account-layout';
 import { NAMESPACE } from './account.i18n';
-
-type AuthError = { status: number; code?: string } | null;
-
-function errorKey(error: NonNullable<AuthError>) {
-  if (error.status === 429 || error.code === 'TOO_MANY_ATTEMPTS') return 'tooManyRequests';
-  if (error.code === 'INVALID_OTP') return 'invalidCode';
-  if (error.code === 'OTP_EXPIRED') return 'expiredCode';
-  return 'genericError';
-}
+import { type AuthError, AuthErrorMessage, CodeField } from './code-field';
 
 export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
   const { t } = useTranslation(NAMESPACE);
@@ -28,10 +20,7 @@ export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
 
   const requestCode = async () => {
     setPending(true);
-    const { error } = await authClient.emailOtp.sendVerificationOtp({
-      email: email.trim(),
-      type: 'sign-in',
-    });
+    const { error } = await sendSignInCode(email.trim());
     setPending(false);
     setError(error);
     return !error;
@@ -57,11 +46,7 @@ export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
     if (!error) onSignedIn();
   };
 
-  const errorMessage = error && (
-    <p role="alert" className="text-destructive text-sm">
-      {t(errorKey(error))}
-    </p>
-  );
+  const errorMessage = <AuthErrorMessage error={error} />;
 
   if (step === 'email') {
     return (
@@ -89,18 +74,7 @@ export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
     <form onSubmit={(event) => void signIn(event)} className="flex flex-col gap-4">
       <p className="text-muted-foreground text-sm">{t('codeIntro', { email: email.trim() })}</p>
       <DevEmailHint />
-      <Input
-        className={`${INPUT} tracking-widest`}
-        required
-        inputMode="numeric"
-        autoComplete="one-time-code"
-        pattern="[0-9]{6}"
-        maxLength={6}
-        aria-label={t('codeLabel')}
-        placeholder={t('codeLabel')}
-        value={code}
-        onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))}
-      />
+      <CodeField value={code} onChange={setCode} />
       {errorMessage}
       {resent && !error && (
         <p role="status" className="text-muted-foreground text-sm">

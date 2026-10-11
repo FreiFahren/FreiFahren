@@ -19,7 +19,6 @@ import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as MapIndexRouteImport } from './routes/_map/index'
 import { Route as ReportsStationsRouteImport } from './routes/reports/stations'
 import { Route as ReportsLinesRouteImport } from './routes/reports/lines'
-import { Route as AccountDeleteRouteImport } from './routes/account/delete'
 import { Route as MapSettingsIndexRouteImport } from './routes/_map/settings/index'
 import { Route as MapStationStationIdRouteImport } from './routes/_map/station/$stationId'
 import { Route as MapReportsStationIdRouteImport } from './routes/_map/reports/$stationId'
@@ -75,11 +74,6 @@ const ReportsLinesRoute = ReportsLinesRouteImport.update({
   path: '/lines',
   getParentRoute: () => ReportsRoute,
 } as any)
-const AccountDeleteRoute = AccountDeleteRouteImport.update({
-  id: '/account/delete',
-  path: '/account/delete',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MapSettingsIndexRoute = MapSettingsIndexRouteImport.update({
   id: '/settings/',
   path: '/settings/',
@@ -112,7 +106,6 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reports': typeof ReportsRouteWithChildren
-  '/account/delete': typeof AccountDeleteRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/account/': typeof AccountIndexRoute
@@ -127,7 +120,6 @@ export interface FileRoutesByTo {
   '/impressum': typeof ImpressumRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
-  '/account/delete': typeof AccountDeleteRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/': typeof MapIndexRoute
@@ -146,7 +138,6 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reports': typeof ReportsRouteWithChildren
-  '/account/delete': typeof AccountDeleteRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/_map/': typeof MapIndexRoute
@@ -166,7 +157,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/report'
     | '/reports'
-    | '/account/delete'
     | '/reports/lines'
     | '/reports/stations'
     | '/account/'
@@ -181,7 +171,6 @@ export interface FileRouteTypes {
     | '/impressum'
     | '/privacy'
     | '/report'
-    | '/account/delete'
     | '/reports/lines'
     | '/reports/stations'
     | '/'
@@ -199,7 +188,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/report'
     | '/reports'
-    | '/account/delete'
     | '/reports/lines'
     | '/reports/stations'
     | '/_map/'
@@ -218,7 +206,6 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ReportRoute: typeof ReportRoute
   ReportsRoute: typeof ReportsRouteWithChildren
-  AccountDeleteRoute: typeof AccountDeleteRoute
   AccountIndexRoute: typeof AccountIndexRoute
 }
 
@@ -293,13 +280,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/reports/lines'
       preLoaderRoute: typeof ReportsLinesRouteImport
       parentRoute: typeof ReportsRoute
-    }
-    '/account/delete': {
-      id: '/account/delete'
-      path: '/account/delete'
-      fullPath: '/account/delete'
-      preLoaderRoute: typeof AccountDeleteRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/_map/settings/': {
       id: '/_map/settings/'
@@ -380,7 +360,6 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ReportRoute: ReportRoute,
   ReportsRoute: ReportsRouteWithChildren,
-  AccountDeleteRoute: AccountDeleteRoute,
   AccountIndexRoute: AccountIndexRoute,
 }
 export const routeTree = rootRouteImport

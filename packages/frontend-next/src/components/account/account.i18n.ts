@@ -24,16 +24,14 @@ i18n.addResourceBundle('en', NAMESPACE, {
   signOut: 'Sign out',
   memberSince: 'Member since {{date}}',
   deleteTitle: 'Delete account',
-  deleteIntro:
-    "We'll email you a link to confirm. Your account is only deleted once you open it and confirm.",
+  deleteIntro: "We'll email you a code to confirm. Your account is only deleted once you enter it.",
   deleteRequest: 'Delete account',
-  deleteLinkSent: 'Check {{email}} for a link to confirm. It expires in 1 hour.',
-  deleteConfirmIntro: 'This permanently deletes your FreiFahren account. It cannot be undone.',
+  deleteConfirmIntro:
+    'Enter the code we sent to {{email}}. This permanently deletes your FreiFahren account and cannot be undone.',
   deleteConfirm: 'Delete my account',
   deleteDone: 'Your account has been deleted.',
-  deleteLinkInvalid:
-    'This link is invalid or has expired. Request a new one from your account page.',
-  backToMap: 'Back to the map',
+  cancel: 'Cancel',
+  verificationFailed: "We couldn't verify this request. Please try again.",
   support: 'Problems or questions? Email us at',
   invalidCode: "That code didn't work. Check it and try again.",
   expiredCode: 'That code has expired. Request a new one.',
@@ -64,17 +62,14 @@ i18n.addResourceBundle('de', NAMESPACE, {
   memberSince: 'Dabei seit {{date}}',
   deleteTitle: 'Konto löschen',
   deleteIntro:
-    'Wir schicken dir einen Link zur Bestätigung. Dein Konto wird erst gelöscht, wenn du ihn öffnest und bestätigst.',
+    'Wir schicken dir einen Code zur Bestätigung. Dein Konto wird erst gelöscht, wenn du ihn eingibst.',
   deleteRequest: 'Konto löschen',
-  deleteLinkSent:
-    'Wir haben einen Bestätigungslink an {{email}} geschickt. Er ist 1 Stunde gültig.',
   deleteConfirmIntro:
-    'Damit wird dein FreiFahren-Konto endgültig gelöscht. Das lässt sich nicht rückgängig machen.',
+    'Gib den Code ein, den wir an {{email}} geschickt haben. Damit wird dein FreiFahren-Konto endgültig gelöscht. Das lässt sich nicht rückgängig machen.',
   deleteConfirm: 'Mein Konto löschen',
   deleteDone: 'Dein Konto wurde gelöscht.',
-  deleteLinkInvalid:
-    'Dieser Link ist ungültig oder abgelaufen. Fordere auf deiner Kontoseite einen neuen an.',
-  backToMap: 'Zurück zur Karte',
+  cancel: 'Abbrechen',
+  verificationFailed: 'Wir konnten die Anfrage nicht bestätigen. Bitte versuche es erneut.',
   support: 'Probleme oder Fragen? Schreib uns an',
   invalidCode: 'Der Code hat nicht gepasst. Prüfe ihn und versuche es erneut.',
   expiredCode: 'Der Code ist abgelaufen. Fordere einen neuen an.',

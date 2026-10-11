@@ -1,4 +1,3 @@
-import { Capacitor } from '@capacitor/core';
 import { useNavigate } from '@tanstack/react-router';
 import { UserRound } from 'lucide-react';
 import { useId, useState } from 'react';
@@ -8,23 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { authClient } from '@/lib/auth-client';
-import { currentCity } from '@/lib/city';
 import { clearSessionToken } from '@/lib/session';
 import { Route as MapIndexRoute } from '@/routes/_map/index';
-import { Route as DeleteAccountRoute } from '@/routes/account/delete';
 
-import { BUTTON_SHAPE, DevEmailHint, INPUT, SECONDARY_BUTTON } from './account-layout';
+import { INPUT, SECONDARY_BUTTON } from './account-layout';
 import { NAMESPACE } from './account.i18n';
+import { DeleteAccount } from './delete-account';
 import { UsernameForm } from './username-form';
 
 type User = { name: string; email: string; createdAt: Date | string };
-
-// The emailed link has to open a web page: a native app's own origin (capacitor://localhost) means
-// nothing in a mail client, so native apps send their city's public web app instead.
-function deletePageUrl(): string {
-  const origin = Capacitor.isNativePlatform() ? currentCity.publicAppUrl : window.location.origin;
-  return new URL(DeleteAccountRoute.to, origin).toString();
-}
 
 export function AccountDetails({ user }: { user: User }) {
   const { t, i18n } = useTranslation(NAMESPACE);
@@ -81,50 +72,7 @@ export function AccountDetails({ user }: { user: User }) {
 
       <Separator />
 
-      <DeleteAccountRequest email={user.email} />
+      <DeleteAccount email={user.email} />
     </>
-  );
-}
-
-function DeleteAccountRequest({ email }: { email: string }) {
-  const { t } = useTranslation(NAMESPACE);
-  const [state, setState] = useState<'idle' | 'pending' | 'sent' | 'error'>('idle');
-
-  const requestDeletion = async () => {
-    setState('pending');
-    const { error } = await authClient.deleteUser({ callbackURL: deletePageUrl() });
-    setState(error ? 'error' : 'sent');
-  };
-
-  return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-sm font-semibold">{t('deleteTitle')}</h2>
-      {state === 'sent' ? (
-        <>
-          <p role="status" className="text-sm">
-            {t('deleteLinkSent', { email })}
-          </p>
-          <DevEmailHint />
-        </>
-      ) : (
-        <>
-          <p className="text-muted-foreground text-sm">{t('deleteIntro')}</p>
-          {state === 'error' && (
-            <p role="alert" className="text-destructive text-sm">
-              {t('genericError')}
-            </p>
-          )}
-          <Button
-            variant="destructive"
-            size="lg"
-            disabled={state === 'pending'}
-            onClick={() => void requestDeletion()}
-            className={BUTTON_SHAPE}
-          >
-            {t('deleteRequest')}
-          </Button>
-        </>
-      )}
-    </section>
   );
 }
