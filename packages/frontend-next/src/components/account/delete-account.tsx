@@ -25,6 +25,8 @@ export function DeleteAccount({ email }: { email: string }) {
   const [code, setCode] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<AuthError>(null);
+  // The code is spent once it signs in, so a deletion that fails afterwards is retried without it.
+  const [signedIn, setSignedIn] = useState(false);
 
   const requestCode = async () => {
     setPending(true);
@@ -37,11 +39,25 @@ export function DeleteAccount({ email }: { email: string }) {
   const deleteAccount = async (event: React.FormEvent) => {
     event.preventDefault();
     setPending(true);
-    const signedIn = await authClient.signIn.emailOtp({ email, otp: code });
-    const deleted = signedIn.error ? signedIn : await authClient.deleteUser();
-    if (deleted.error) {
+    if (!signedIn) {
+      const { error } = await authClient.signIn.emailOtp({ email, otp: code });
+      if (error) {
+        setPending(false);
+        setError(error);
+        return;
+      }
+      setSignedIn(true);
+    }
+    const { error } = await authClient.deleteUser();
+    if (error) {
       setPending(false);
-      setError(deleted.error);
+      setError(error);
+      // Too long since that sign-in to delete with it: start over with a new code.
+      if (error.code === 'SESSION_EXPIRED') {
+        setSignedIn(false);
+        setCode('');
+        setStep('start');
+      }
       return;
     }
     await clearSessionToken();
@@ -71,7 +87,7 @@ export function DeleteAccount({ email }: { email: string }) {
         <form onSubmit={(event) => void deleteAccount(event)} className="flex flex-col gap-3">
           <p className="text-sm">{t('deleteConfirmIntro', { email })}</p>
           <DevEmailHint />
-          <CodeField value={code} onChange={setCode} />
+          {!signedIn && <CodeField value={code} onChange={setCode} />}
           <AuthErrorMessage error={error} />
           <Button
             type="submit"
@@ -89,6 +105,7 @@ export function DeleteAccount({ email }: { email: string }) {
               setStep('start');
               setCode('');
               setError(null);
+              setSignedIn(false);
             }}
           >
             {t('cancel')}

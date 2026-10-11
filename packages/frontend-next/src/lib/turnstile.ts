@@ -82,7 +82,7 @@ function loadTurnstile(): Promise<TurnstileApi> {
  * Rejects if the challenge fails or takes too long, so the caller can surface a normal submission
  * error instead of posting a report the API will refuse.
  */
-export async function getTurnstileToken(): Promise<string | undefined> {
+export async function getTurnstileToken(action = TURNSTILE_ACTION): Promise<string | undefined> {
   const key = siteKey();
   if (key === undefined) return undefined;
 
@@ -113,7 +113,7 @@ export async function getTurnstileToken(): Promise<string | undefined> {
       };
       widgetId = turnstile.render(container, {
         sitekey: key,
-        action: TURNSTILE_ACTION,
+        action,
         // Stay invisible unless the challenge actually needs the user.
         appearance: 'interaction-only',
         callback: (token) => settle(() => resolve(token)),
