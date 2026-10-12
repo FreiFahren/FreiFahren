@@ -1,20 +1,24 @@
 /*
- * Cloudflare Turnstile, loaded only when a report is actually being submitted.
+ * Cloudflare Turnstile, loaded only when something is about to need a token: a report submission,
+ * or a sign-in code from the auth-worker.
  *
  * The widget renders in managed mode, which is invisible for almost every client and only escalates
  * to something the user has to touch when the request looks suspicious. Reporting an inspector is
  * time-critical, so the cost has to stay at one round trip rather than a puzzle.
  *
  * Every call mints a fresh token: Cloudflare rejects a replayed one, so a token cannot be cached
- * and reused across submissions. That single-use property is the whole point — it prices the
- * attack per report instead of per IP address, which is the axis address rotation cannot beat.
+ * and reused across requests. That single-use property is the whole point — it prices the attack
+ * per request instead of per IP address, which is the axis address rotation cannot beat.
  */
 
 const SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 const TOKEN_TIMEOUT_MS = 20_000;
 
-// Bound here and checked by the API, so a token minted elsewhere cannot be redeemed for a report.
-export const TURNSTILE_ACTION = 'submit-report';
+/*
+ * Each use binds its own action into the token. The API checks for 'submit-report', so a token
+ * minted for anything else cannot be redeemed for a report.
+ */
+export type TurnstileAction = 'submit-report' | 'sign-in';
 export const TURNSTILE_TOKEN_HEADER = 'cf-turnstile-response';
 
 type TurnstileApi = {
@@ -75,14 +79,19 @@ function loadTurnstile(): Promise<TurnstileApi> {
   return scriptPromise;
 }
 
+/** Start loading the script ahead of a likely `getTurnstileToken`, so it isn't on the click path. */
+export function preloadTurnstile(): void {
+  if (siteKey() !== undefined) loadTurnstile().catch(() => {});
+}
+
 /**
  * Mint a single-use Turnstile token, or `undefined` when no site key is configured (local dev and
  * PR previews, where the API has no secret either and skips verification).
  *
- * Rejects if the challenge fails or takes too long, so the caller can surface a normal submission
- * error instead of posting a report the API will refuse.
+ * Rejects if the challenge fails or takes too long, so the caller can surface a normal error
+ * instead of sending a request the server will refuse.
  */
-export async function getTurnstileToken(action = TURNSTILE_ACTION): Promise<string | undefined> {
+export async function getTurnstileToken(action: TurnstileAction): Promise<string | undefined> {
   const key = siteKey();
   if (key === undefined) return undefined;
 

@@ -21,43 +21,49 @@ import { type AuthError, AuthErrorMessage, CodeField } from './code-field';
 export function DeleteAccount({ email }: { email: string }) {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
-  const [step, setStep] = useState<'start' | 'confirm'>('start');
+  // The code is spent once it signs in, so a deletion that fails afterwards is retried without it.
+  const [step, setStep] = useState<'start' | 'code' | 'signed-in'>('start');
   const [code, setCode] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<AuthError>(null);
-  // The code is spent once it signs in, so a deletion that fails afterwards is retried without it.
-  const [signedIn, setSignedIn] = useState(false);
+
+  const restart = (reason: AuthError = null) => {
+    setStep('start');
+    setCode('');
+    setError(reason);
+  };
 
   const requestCode = async () => {
     setPending(true);
     const { error } = await sendSignInCode(email);
     setPending(false);
     setError(error);
-    if (!error) setStep('confirm');
+    if (!error) setStep('code');
   };
 
   const deleteAccount = async (event: React.FormEvent) => {
     event.preventDefault();
     setPending(true);
-    if (!signedIn) {
-      const { error } = await authClient.signIn.emailOtp({ email, otp: code });
+    if (step === 'code') {
+      // deleteUser refreshes the session right after, so this sign-in skips its own refresh.
+      const { error } = await authClient.signIn.emailOtp({
+        email,
+        otp: code,
+        fetchOptions: { disableSignal: true },
+      });
       if (error) {
         setPending(false);
         setError(error);
         return;
       }
-      setSignedIn(true);
+      setStep('signed-in');
     }
     const { error } = await authClient.deleteUser();
     if (error) {
       setPending(false);
-      setError(error);
       // Too long since that sign-in to delete with it: start over with a new code.
-      if (error.code === 'SESSION_EXPIRED') {
-        setSignedIn(false);
-        setCode('');
-        setStep('start');
-      }
+      if (error.code === 'SESSION_EXPIRED') restart(error);
+      else setError(error);
       return;
     }
     await clearSessionToken();
@@ -87,7 +93,7 @@ export function DeleteAccount({ email }: { email: string }) {
         <form onSubmit={(event) => void deleteAccount(event)} className="flex flex-col gap-3">
           <p className="text-sm">{t('deleteConfirmIntro', { email })}</p>
           <DevEmailHint />
-          {!signedIn && <CodeField value={code} onChange={setCode} />}
+          {step === 'code' && <CodeField value={code} onChange={setCode} />}
           <AuthErrorMessage error={error} />
           <Button
             type="submit"
@@ -98,16 +104,7 @@ export function DeleteAccount({ email }: { email: string }) {
           >
             {t('deleteConfirm')}
           </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => {
-              setStep('start');
-              setCode('');
-              setError(null);
-              setSignedIn(false);
-            }}
-          >
+          <Button type="button" variant="ghost" onClick={() => restart()}>
             {t('cancel')}
           </Button>
         </form>

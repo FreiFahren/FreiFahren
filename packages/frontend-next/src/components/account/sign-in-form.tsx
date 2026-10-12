@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { authClient, sendSignInCode } from '@/lib/auth-client';
+import { preloadTurnstile } from '@/lib/turnstile';
 
 import { DevEmailHint, INPUT, PRIMARY_BUTTON } from './account-layout';
 import { NAMESPACE } from './account.i18n';
@@ -17,6 +18,9 @@ export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<AuthError>(null);
   const [resent, setResent] = useState(false);
+
+  // Sending a code needs a Turnstile token, so the script loads while the email is typed.
+  useEffect(preloadTurnstile, []);
 
   const requestCode = async () => {
     setPending(true);
