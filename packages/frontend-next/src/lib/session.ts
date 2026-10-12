@@ -10,11 +10,7 @@ import { optionalEnv } from '@/lib/utils';
 // Unset where no auth-worker is reachable; sign-in is then hidden rather than broken.
 export const AUTH_URL = optionalEnv('VITE_AUTH_URL');
 
-/*
- * Accounts are still rolling out behind a flag, which hides the entry button and the account page.
- * The deletion page stays open: its emailed link often opens in another browser, where PostHog
- * knows a different person and the flag would read as off.
- */
+// Accounts are still rolling out behind a flag, which hides the entry button and the account page.
 export function useAccountsEnabled(): boolean {
   return useFeatureFlag(FEATURE_FLAGS.accounts) && AUTH_URL !== undefined;
 }

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { authClient } from '@/lib/auth-client';
@@ -21,6 +22,12 @@ export function AccountPage() {
 function AccountContent() {
   const { t } = useTranslation(NAMESPACE);
   const session = authClient.useSession();
+  // Better Auth marks every fetch as pending while there's no session, including the refetch on each
+  // window focus, so only whether one has finished tells the first load apart. Until then nothing
+  // shows, rather than a sign-in form that flashes for signed-in users; after it, the form stays, so
+  // refocusing doesn't reset a half-done sign-in.
+  const [loaded, setLoaded] = useState(false);
+  if (!loaded && !session.isPending) setLoaded(true);
 
   return (
     <>
@@ -40,9 +47,7 @@ function AccountContent() {
         </>
       ) : session.data ? (
         <AccountDetails user={session.data.user} />
-      ) : session.isPending && !session.isRefetching ? null : (
-        // A signed-out session reads as pending again on every focus refetch; only the first
-        // load may hide the form, or refocusing the window would reset a half-done sign-in.
+      ) : !loaded ? null : (
         <SignInForm onSignedIn={() => void session.refetch()} />
       )}
     </>
