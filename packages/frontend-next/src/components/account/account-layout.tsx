@@ -8,7 +8,7 @@ import { NAMESPACE } from './account.i18n';
 
 export const SUPPORT_EMAIL = 'support@freifahren.org';
 
-// Matches the report form's submit button. Inputs use text-base so iOS doesn't zoom in on focus.
+// Inputs use text-base so iOS doesn't zoom in on focus.
 export const BUTTON_SHAPE = 'h-12 w-full rounded-lg text-base font-semibold';
 export const PRIMARY_BUTTON = `bg-accent-bright text-primary-foreground hover:bg-accent-press ${BUTTON_SHAPE}`;
 export const SECONDARY_BUTTON = `bg-muted hover:bg-muted/80 ${BUTTON_SHAPE}`;

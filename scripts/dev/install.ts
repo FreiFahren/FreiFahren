@@ -3,7 +3,6 @@ import { join } from 'node:path'
 
 import { AUTH_WORKER, exists, REPORT_GATE, ROOT, run, show } from './paths'
 
-// Every package that has its own lockfile, public or private.
 export async function install() {
     const publicPackages = readdirSync(join(ROOT, 'packages')).map((name) => join(ROOT, 'packages', name))
 

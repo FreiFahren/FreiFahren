@@ -8,14 +8,13 @@ import { authClient } from '@/lib/auth-client';
 import { INPUT } from './account-layout';
 import { NAMESPACE } from './account.i18n';
 
-// Mirrors the auth-worker's rules (src/username.ts in FreiFahren/internal), which have the final say.
+// Mirrors the auth-worker's rules, which have the final say.
 const USERNAME_MIN_LENGTH = 2;
 const USERNAME_MAX_LENGTH = 32;
 
 type UsernameFormProps = {
   initial: string;
   submitLabel: string;
-  // PRIMARY_BUTTON or SECONDARY_BUTTON from account-layout.
   submitClassName: string;
   onSaved?: () => void;
 };

@@ -13,15 +13,10 @@ import { BUTTON_SHAPE, DevEmailHint } from './account-layout';
 import { NAMESPACE } from './account.i18n';
 import { type AuthError, AuthErrorMessage, CodeField } from './code-field';
 
-/*
- * The auth-worker only deletes for a sign-in from the last few minutes, so deleting starts with a
- * fresh code to the account's inbox. Signing in with it right before deleting proves both the inbox
- * and the device, whatever the age of the session this page started with.
- */
+// The auth-worker only deletes within minutes of a sign-in, so this signs in again with a new code.
 export function DeleteAccount({ email }: { email: string }) {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
-  // The code is spent once it signs in, so a deletion that fails afterwards is retried without it.
   const [step, setStep] = useState<'start' | 'code' | 'signed-in'>('start');
   const [code, setCode] = useState('');
   const [pending, setPending] = useState(false);
@@ -45,7 +40,7 @@ export function DeleteAccount({ email }: { email: string }) {
     event.preventDefault();
     setPending(true);
     if (step === 'code') {
-      // deleteUser refreshes the session right after, so this sign-in skips its own refresh.
+      // deleteUser refreshes the session anyway.
       const { error } = await authClient.signIn.emailOtp({
         email,
         otp: code,
@@ -61,13 +56,12 @@ export function DeleteAccount({ email }: { email: string }) {
     const { error } = await authClient.deleteUser();
     if (error) {
       setPending(false);
-      // Too long since that sign-in to delete with it: start over with a new code.
       if (error.code === 'SESSION_EXPIRED') restart(error);
       else setError(error);
       return;
     }
     await clearSessionToken();
-    // Toasts only render on the map, so it goes up once the map is showing.
+    // Toasts only render on the map.
     await navigate({ to: MapIndexRoute.to });
     toast.custom(() => <ToastPill className="text-sm">{t('deleteDone')}</ToastPill>);
   };

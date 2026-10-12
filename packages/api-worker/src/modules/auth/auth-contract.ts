@@ -1,5 +1,4 @@
-// Mirrors the private auth-worker's `SessionsEntrypoint` (its src/contracts.ts). Only the
-// Authorization header is forwarded, never the whole request.
+// Mirrors the private auth-worker's `SessionsEntrypoint` (its src/contracts.ts).
 export type SessionRequest = {
     authorization: string
 }

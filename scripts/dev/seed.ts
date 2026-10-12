@@ -2,7 +2,6 @@ import { CITY_SLUGS } from '../../packages/cities/src/index.ts'
 
 import { API, run } from './paths'
 
-// Seeds the local API database for one city, or for every city in the registry.
 export async function seed(city?: string) {
     for (const slug of city ? [city] : CITY_SLUGS) {
         await run(API, ['bun', 'run', 'seed', '--city', slug])

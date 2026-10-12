@@ -6,11 +6,9 @@ import { exists, FRONTEND, show, WORKERS } from './paths'
 const LOCAL_ONLY = 'SENTRY_DSN=\nNODE_ENV=development\n'
 
 /*
- * Creates the local env files that don't exist yet; existing ones are left alone.
- *
- * Worker configs carry production values (Sentry DSNs, NODE_ENV=production) as vars, and
- * `wrangler dev` only overrides them from .dev.vars. Without one, local errors would be reported to
- * the production Sentry projects, so new files always blank the DSN.
+ * Worker configs carry production vars (Sentry DSNs, NODE_ENV=production) that `wrangler dev` only
+ * overrides from .dev.vars. Without one, local errors reach production Sentry, so new files always
+ * blank the DSN.
  */
 export function env() {
     for (const dir of WORKERS) {
@@ -28,7 +26,6 @@ export function env() {
     }
 }
 
-// Existing files are the developer's to manage, so this only warns.
 export function warnAboutSentry() {
     for (const dir of WORKERS) {
         const devVars = join(dir, '.dev.vars')

@@ -1,6 +1,5 @@
 /*
- * Cloudflare Turnstile, loaded only when something is about to need a token: a report submission,
- * or a sign-in code from the auth-worker.
+ * Cloudflare Turnstile, loaded on first use.
  *
  * The widget renders in managed mode, which is invisible for almost every client and only escalates
  * to something the user has to touch when the request looks suspicious. Reporting an inspector is
@@ -14,10 +13,7 @@
 const SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 const TOKEN_TIMEOUT_MS = 20_000;
 
-/*
- * Each use binds its own action into the token. The API checks for 'submit-report', so a token
- * minted for anything else cannot be redeemed for a report.
- */
+// Bound into the token; the API only accepts 'submit-report' tokens for reports.
 export type TurnstileAction = 'submit-report' | 'sign-in';
 export const TURNSTILE_TOKEN_HEADER = 'cf-turnstile-response';
 
@@ -79,7 +75,7 @@ function loadTurnstile(): Promise<TurnstileApi> {
   return scriptPromise;
 }
 
-/** Start loading the script ahead of a likely `getTurnstileToken`, so it isn't on the click path. */
+/** Loads the script ahead of a likely `getTurnstileToken`. */
 export function preloadTurnstile(): void {
   if (siteKey() !== undefined) loadTurnstile().catch(() => {});
 }

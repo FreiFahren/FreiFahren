@@ -19,7 +19,6 @@ export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
   const [error, setError] = useState<AuthError>(null);
   const [resent, setResent] = useState(false);
 
-  // Sending a code needs a Turnstile token, so the script loads while the email is typed.
   useEffect(preloadTurnstile, []);
 
   const requestCode = async () => {

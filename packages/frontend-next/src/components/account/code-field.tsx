@@ -11,7 +11,7 @@ const MESSAGE_FOR_CODE: Record<string, string> = {
   TOO_MANY_ATTEMPTS: 'tooManyRequests',
   INVALID_OTP: 'invalidCode',
   OTP_EXPIRED: 'expiredCode',
-  // Turnstile didn't pass, in the browser or at the auth-worker.
+  // Turnstile
   CAPTCHA_FAILED: 'verificationFailed',
   MISSING_RESPONSE: 'verificationFailed',
   VERIFICATION_FAILED: 'verificationFailed',
@@ -31,7 +31,6 @@ export function AuthErrorMessage({ error }: { error: AuthError }) {
   );
 }
 
-// The six-digit code from a sign-in email, which phones can fill in from the message.
 export function CodeField({
   value,
   onChange,

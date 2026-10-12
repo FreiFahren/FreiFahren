@@ -49,7 +49,6 @@ describe('requireSession', () => {
             expect(response.status).toBe(401)
             expect(await internalCode(response)).toBe('UNAUTHENTICATED')
         }
-        // Only the plausible token reached the auth-worker.
         expect(auth.getSession).toHaveBeenCalledTimes(1)
     })
 

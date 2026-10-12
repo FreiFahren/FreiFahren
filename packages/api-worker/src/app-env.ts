@@ -31,8 +31,7 @@ export type Bindings = {
     TRUSTED_REPORT_GATE?: TrustedReportGate
     REPORT_GATE?: PublicReportGate
     REPORT_GATE_MODE?: 'preview-open'
-    // Private auth-worker's SessionsEntrypoint (`auth-worker-preview` in PR previews). Locally it
-    // Connects to a running auth-worker `wrangler dev`; without one, signed-in routes answer 503.
+    // The private auth-worker. Without it (e.g. locally without its `wrangler dev`), signed-in routes answer 503.
     AUTH?: SessionsService
     CORS_ORIGINS?: string
     // This repo's Cloudflare account subdomain (e.g. `freifahren` for `*.freifahren.workers.dev`).

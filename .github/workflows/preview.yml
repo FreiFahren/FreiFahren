@@ -220,7 +220,6 @@ jobs:
               run: bun run build
               env:
                   VITE_API_URL: ${{ env.API_URL }}
-                  # The shared preview auth-worker, which the api-pr-<n> Worker is bound to as well.
                   VITE_AUTH_URL: https://auth-worker-preview.freifahren.workers.dev
                   VITE_PREVIEW: 'true'
                   VITE_POSTHOG_KEY: ''

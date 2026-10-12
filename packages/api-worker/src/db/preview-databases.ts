@@ -117,8 +117,7 @@ const provision = (pr: string, out: string) => {
         // No `routes`, so a preview can never take traffic on the production hostname.
         workers_dev: true,
         d1_databases: d1Databases,
-        // The shared preview auth-worker, with its own accounts, so unreviewed PR code never
-        // Handles a production session.
+        // Its own accounts, so unreviewed PR code never sees a production session.
         services: [{ binding: 'AUTH', service: 'auth-worker-preview', entrypoint: 'SessionsEntrypoint' }],
         vars: {
             // Keep production error formatting enabled. This deployment-only mode accepts reports.
