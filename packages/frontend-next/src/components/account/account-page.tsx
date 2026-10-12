@@ -1,3 +1,4 @@
+import { LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -5,7 +6,9 @@ import { authClient } from '@/lib/auth-client';
 import { useAccountsEnabled } from '@/lib/session';
 
 import { AccountDetails } from './account-details';
-import { AccountLayout, PRIMARY_BUTTON } from './account-layout';
+import { Button } from '@/components/ui/button';
+
+import { AccountLayout, PRIMARY_BUTTON, SECONDARY_BUTTON } from './account-layout';
 import { NAMESPACE } from './account.i18n';
 import { SignInForm } from './sign-in-form';
 import { UsernameForm } from './username-form';
@@ -22,12 +25,15 @@ export function AccountPage() {
 function AccountContent() {
   const { t } = useTranslation(NAMESPACE);
   const session = authClient.useSession();
+  // A 401 means signed out. Anything else (offline, the auth-worker down) says nothing about whether
+  // this device is signed in, so it must not lead to the sign-in form.
+  const failed = !session.data && session.error !== null && session.error.status !== 401;
   // Better Auth marks every fetch as pending while there's no session, including the refetch on each
-  // window focus, so only whether one has finished tells the first load apart. Until then nothing
+  // window focus, so only whether one has succeeded tells the first load apart. Until then a spinner
   // shows, rather than a sign-in form that flashes for signed-in users; after it, the form stays, so
   // refocusing doesn't reset a half-done sign-in.
   const [loaded, setLoaded] = useState(false);
-  if (!loaded && !session.isPending) setLoaded(true);
+  if (!loaded && !session.isPending && !failed) setLoaded(true);
 
   return (
     <>
@@ -47,8 +53,29 @@ function AccountContent() {
         </>
       ) : session.data ? (
         <AccountDetails user={session.data.user} />
-      ) : !loaded ? null : (
+      ) : loaded ? (
         <SignInForm onSignedIn={() => void session.refetch()} />
+      ) : failed ? (
+        <>
+          <p role="alert" className="text-destructive text-sm">
+            {t('sessionLoadFailed')}
+          </p>
+          <Button
+            variant="secondary"
+            size="lg"
+            disabled={session.isPending}
+            onClick={() => void session.refetch()}
+            className={SECONDARY_BUTTON}
+          >
+            {t('retry')}
+          </Button>
+        </>
+      ) : (
+        <LoaderCircle
+          role="status"
+          aria-label={t('loading')}
+          className="text-muted-foreground mx-auto size-6 animate-spin"
+        />
       )}
     </>
   );

@@ -37,6 +37,9 @@ i18n.addResourceBundle('en', NAMESPACE, {
   expiredCode: 'That code has expired. Request a new one.',
   tooManyRequests: 'Too many attempts. Please wait a while and try again.',
   genericError: 'Something went wrong. Please try again.',
+  sessionLoadFailed: "Your account couldn't be loaded. Check your connection and try again.",
+  retry: 'Try again',
+  loading: 'Loading',
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
@@ -75,4 +78,8 @@ i18n.addResourceBundle('de', NAMESPACE, {
   expiredCode: 'Der Code ist abgelaufen. Fordere einen neuen an.',
   tooManyRequests: 'Zu viele Versuche. Bitte warte etwas und versuche es dann erneut.',
   genericError: 'Etwas ist schiefgelaufen. Bitte versuche es erneut.',
+  sessionLoadFailed:
+    'Dein Konto konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.',
+  retry: 'Erneut versuchen',
+  loading: 'Wird geladen',
 });
