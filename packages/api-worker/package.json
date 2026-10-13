@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "wrangler dev --ip 0.0.0.0",
-    "dev:with-report-gate": "wrangler dev -c wrangler.jsonc -c ../../../internal/packages/report-gate/wrangler.jsonc -c ../telegram-worker/wrangler.jsonc",
+    "dev:with-report-gate": "wrangler dev -c wrangler.jsonc -c ../report-gate/wrangler.jsonc -c ../telegram-worker/wrangler.jsonc",
     "seed": "tsx src/db/seed/seed-d1.ts",
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
