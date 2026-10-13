@@ -13,6 +13,8 @@ import { type AuthError, AuthErrorMessage, CodeField } from './code-field';
 export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
   const { t } = useTranslation(NAMESPACE);
   const [email, setEmail] = useState('');
+  // The address the code went to, which later edits to the field can't change.
+  const [submittedEmail, setSubmittedEmail] = useState('');
   const [code, setCode] = useState('');
   const [step, setStep] = useState<'email' | 'code'>('email');
   const [pending, setPending] = useState(false);
@@ -21,9 +23,9 @@ export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
 
   useEffect(preloadTurnstile, []);
 
-  const requestCode = async () => {
+  const requestCode = async (to: string) => {
     setPending(true);
-    const { error } = await sendSignInCode(email.trim());
+    const { error } = await sendSignInCode(to);
     setPending(false);
     setError(error);
     return !error;
@@ -31,19 +33,22 @@ export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
 
   const sendCode = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (await requestCode()) setStep('code');
+    const to = email.trim();
+    if (!(await requestCode(to))) return;
+    setSubmittedEmail(to);
+    setStep('code');
   };
 
   const resendCode = async () => {
     setCode('');
-    setResent(await requestCode());
+    setResent(await requestCode(submittedEmail));
   };
 
   const signIn = async (event: React.FormEvent) => {
     event.preventDefault();
     setResent(false);
     setPending(true);
-    const { error } = await authClient.signIn.emailOtp({ email: email.trim(), otp: code });
+    const { error } = await authClient.signIn.emailOtp({ email: submittedEmail, otp: code });
     setPending(false);
     setError(error);
     if (!error) onSignedIn();
@@ -60,6 +65,7 @@ export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
           type="email"
           required
           autoComplete="email"
+          disabled={pending}
           aria-label={t('emailLabel')}
           placeholder={t('emailLabel')}
           value={email}
@@ -75,7 +81,7 @@ export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
 
   return (
     <form onSubmit={(event) => void signIn(event)} className="flex flex-col gap-4">
-      <p className="text-muted-foreground text-sm">{t('codeIntro', { email: email.trim() })}</p>
+      <p className="text-muted-foreground text-sm">{t('codeIntro', { email: submittedEmail })}</p>
       <DevEmailHint />
       <CodeField value={code} onChange={setCode} />
       {errorMessage}
@@ -94,6 +100,7 @@ export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
         <Button
           type="button"
           variant="ghost"
+          disabled={pending}
           onClick={() => {
             setStep('email');
             setCode('');

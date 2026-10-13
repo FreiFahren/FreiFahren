@@ -43,7 +43,7 @@ describe('requireSession', () => {
 
         const missing = await probe({}, { AUTH: auth })
         const unknown = await probe({ Authorization: 'Bearer expired' }, { AUTH: auth })
-        const oversized = await probe({ Authorization: `Bearer ${'x'.repeat(5000)}` }, { AUTH: auth })
+        const oversized = await probe({ Authorization: 'x'.repeat(4097) }, { AUTH: auth })
 
         for (const response of [missing, unknown, oversized]) {
             expect(response.status).toBe(401)
@@ -59,12 +59,33 @@ describe('requireSession', () => {
         expect(await internalCode(response)).toBe('AUTH_UNAVAILABLE')
     })
 
-    it('answers 503 rather than trusting an unexpected response shape', async () => {
+    it('forwards a header of exactly the maximum length', async () => {
+        const auth = fakeAuth()
+        await probe({ Authorization: 'x'.repeat(4096) }, { AUTH: auth })
+
+        expect(auth.getSession).toHaveBeenCalledOnce()
+    })
+
+    it('answers 503 when the auth service rejects', async () => {
         const response = await probe(
             { Authorization: 'Bearer valid' },
-            { AUTH: { getSession: async () => ({ user: {} }) as never } }
+            { AUTH: { getSession: () => Promise.reject(new Error('Network connection lost')) } }
         )
 
         expect(response.status).toBe(503)
+        expect(await internalCode(response)).toBe('AUTH_UNAVAILABLE')
+    })
+
+    it.each([
+        ['an unexpected shape', { user: {} }],
+        ['an invalid expiry', { ...SESSION, session: { ...SESSION.session, expiresAt: 'banana' } }],
+        ['undefined', undefined],
+    ])('answers 500 rather than trusting %s', async (_, result) => {
+        const response = await probe(
+            { Authorization: 'Bearer valid' },
+            { AUTH: { getSession: async () => result as never } }
+        )
+
+        expect(response.status).toBe(500)
     })
 })

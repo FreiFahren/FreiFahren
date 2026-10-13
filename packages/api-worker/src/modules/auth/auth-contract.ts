@@ -1,4 +1,3 @@
-// Mirrors the private auth-worker's `SessionsEntrypoint` (its src/contracts.ts).
 export type SessionRequest = {
     authorization: string
 }

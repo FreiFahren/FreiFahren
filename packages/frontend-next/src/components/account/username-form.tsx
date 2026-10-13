@@ -27,6 +27,7 @@ export function UsernameForm({
 }: UsernameFormProps) {
   const { t } = useTranslation(NAMESPACE);
   const inputId = useId();
+  const errorId = useId();
   const [name, setName] = useState(initial);
   const [state, setState] = useState<'idle' | 'pending' | 'saved' | 'invalid' | 'error'>('idle');
   const unchanged = name.trim() === initial;
@@ -55,6 +56,8 @@ export function UsernameForm({
         minLength={USERNAME_MIN_LENGTH}
         maxLength={USERNAME_MAX_LENGTH}
         autoComplete="nickname"
+        aria-invalid={state === 'invalid'}
+        aria-describedby={state === 'invalid' || state === 'error' ? errorId : undefined}
         value={name}
         onChange={(event) => {
           setName(event.target.value);
@@ -62,12 +65,12 @@ export function UsernameForm({
         }}
       />
       {state === 'invalid' && (
-        <p role="alert" className="text-destructive text-sm">
+        <p id={errorId} role="alert" className="text-destructive text-sm">
           {t('usernameInvalid', { min: USERNAME_MIN_LENGTH, max: USERNAME_MAX_LENGTH })}
         </p>
       )}
       {state === 'error' && (
-        <p role="alert" className="text-destructive text-sm">
+        <p id={errorId} role="alert" className="text-destructive text-sm">
           {t('genericError')}
         </p>
       )}

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@/components/ui/input';
@@ -39,8 +40,12 @@ export function CodeField({
   onChange: (code: string) => void;
 }) {
   const { t } = useTranslation(NAMESPACE);
+  const input = useRef<HTMLInputElement>(null);
+  // It appears when its step opens, which is where the user goes next.
+  useEffect(() => input.current?.focus(), []);
   return (
     <Input
+      ref={input}
       className={`${INPUT} tracking-widest`}
       required
       inputMode="numeric"

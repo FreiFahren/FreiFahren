@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth-client';
 import { useAccountsEnabled } from '@/lib/session';
 
-import { AccountDetails } from './account-details';
+import { AccountActions, AccountDetails } from './account-details';
 import { AccountLayout, PRIMARY_BUTTON, SECONDARY_BUTTON } from './account-layout';
 import { NAMESPACE } from './account.i18n';
 import { SignInForm } from './sign-in-form';
@@ -29,10 +29,13 @@ function AccountContent() {
   const [loaded, setLoaded] = useState(false);
   if (!loaded && !session.isPending && !failed) setLoaded(true);
 
-  return (
-    <>
-      {session.data && !session.data.user.name ? (
-        // New accounts have no username yet.
+  const refetch = () => void session.refetch();
+
+  if (session.data) {
+    const { user } = session.data;
+    // New accounts have no username yet.
+    if (!user.name) {
+      return (
         <>
           <div className="flex flex-col gap-1">
             <h2 className="font-heading text-lg font-semibold">{t('chooseUsernameTitle')}</h2>
@@ -42,35 +45,41 @@ function AccountContent() {
             initial=""
             submitLabel={t('continue')}
             submitClassName={PRIMARY_BUTTON}
-            onSaved={() => void session.refetch()}
+            onSaved={refetch}
           />
+          <AccountActions email={user.email} />
         </>
-      ) : session.data ? (
-        <AccountDetails user={session.data.user} />
-      ) : loaded ? (
-        <SignInForm onSignedIn={() => void session.refetch()} />
-      ) : failed ? (
-        <>
-          <p role="alert" className="text-destructive text-sm">
-            {t('sessionLoadFailed')}
-          </p>
-          <Button
-            variant="secondary"
-            size="lg"
-            disabled={session.isPending}
-            onClick={() => void session.refetch()}
-            className={SECONDARY_BUTTON}
-          >
-            {t('retry')}
-          </Button>
-        </>
-      ) : (
-        <LoaderCircle
-          role="status"
-          aria-label={t('loading')}
-          className="text-muted-foreground mx-auto size-6 animate-spin"
-        />
-      )}
-    </>
+      );
+    }
+    return <AccountDetails user={user} />;
+  }
+
+  if (loaded) return <SignInForm onSignedIn={refetch} />;
+
+  if (failed) {
+    return (
+      <>
+        <p role="alert" className="text-destructive text-sm">
+          {t('sessionLoadFailed')}
+        </p>
+        <Button
+          variant="secondary"
+          size="lg"
+          disabled={session.isPending}
+          onClick={refetch}
+          className={SECONDARY_BUTTON}
+        >
+          {t('retry')}
+        </Button>
+      </>
+    );
+  }
+
+  return (
+    <LoaderCircle
+      role="status"
+      aria-label={t('loading')}
+      className="text-muted-foreground mx-auto size-6 animate-spin"
+    />
   );
 }

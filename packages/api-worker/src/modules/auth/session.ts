@@ -9,7 +9,7 @@ import type { AuthSession } from './auth-contract'
 const authSessionSchema = z
     .object({
         user: z.object({ id: z.string(), email: z.string(), name: z.string().nullable() }),
-        session: z.object({ id: z.string(), expiresAt: z.string() }),
+        session: z.object({ id: z.string(), expiresAt: z.iso.datetime() }),
     })
     .nullable()
 
@@ -29,11 +29,14 @@ export const resolveSession = async (c: Context<Env>): Promise<AuthSession | nul
     if (authorization === undefined || authorization.length > MAX_AUTHORIZATION_LENGTH) return null
     if (c.env.AUTH === undefined) throw authUnavailable()
 
+    let result: unknown
     try {
-        return authSessionSchema.parse(await c.env.AUTH.getSession({ authorization }))
+        result = await c.env.AUTH.getSession({ authorization })
     } catch (error) {
         throw authUnavailable(error)
     }
+    // A response that doesn't match is a contract bug, not an outage: it surfaces as a 500.
+    return authSessionSchema.parse(result)
 }
 
 export const requireSession = async (c: Context<Env>): Promise<AuthSession> => {

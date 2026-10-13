@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,14 @@ export function DeleteAccount({ email }: { email: string }) {
   const [code, setCode] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<AuthError>(null);
+  // Leaving the page while the code is checked must not delete afterwards.
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   const restart = (reason: AuthError = null) => {
     setStep('start');
@@ -53,6 +61,7 @@ export function DeleteAccount({ email }: { email: string }) {
       }
       setStep('signed-in');
     }
+    if (!mounted.current) return;
     const { error } = await authClient.deleteUser();
     if (error) {
       setPending(false);
@@ -98,7 +107,7 @@ export function DeleteAccount({ email }: { email: string }) {
           >
             {t('deleteConfirm')}
           </Button>
-          <Button type="button" variant="ghost" onClick={() => restart()}>
+          <Button type="button" variant="ghost" disabled={pending} onClick={() => restart()}>
             {t('cancel')}
           </Button>
         </form>
