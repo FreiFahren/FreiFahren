@@ -1,23 +1,27 @@
 import { useNavigate } from '@tanstack/react-router';
-import { UserRound } from 'lucide-react';
+import { LogOut, Mail, Pencil, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { authClient } from '@/lib/auth-client';
 import { clearSessionToken } from '@/lib/session';
 import { Route as MapIndexRoute } from '@/routes/_map/index';
 
-import { SECONDARY_BUTTON } from './account-layout';
+import { PRIMARY_BUTTON } from './account-layout';
 import { NAMESPACE } from './account.i18n';
 import { DeleteAccount } from './delete-account';
 import { UsernameForm } from './username-form';
 
 type User = { name: string; email: string; createdAt: Date | string };
 
+// The settings card's rows.
+const ROW =
+  'flex w-full min-w-0 items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm transition-colors outline-none';
+const ACTION_ROW = `${ROW} hover:bg-muted focus-visible:bg-muted`;
+
 export function AccountDetails({ user }: { user: User }) {
   const { t, i18n } = useTranslation(NAMESPACE);
+  const [editingName, setEditingName] = useState(false);
   const created = new Intl.DateTimeFormat(i18n.language, {
     month: 'long',
     year: 'numeric',
@@ -25,34 +29,53 @@ export function AccountDetails({ user }: { user: User }) {
 
   return (
     <>
-      <div className="flex flex-col items-center gap-3 pt-4 text-center">
-        <div className="bg-muted text-muted-foreground flex size-20 items-center justify-center rounded-full">
-          <UserRound className="size-10" />
+      <div className="flex items-center gap-3 pt-2">
+        <div className="bg-muted text-muted-foreground flex size-12 shrink-0 items-center justify-center rounded-full">
+          <UserRound className="size-6" />
         </div>
-        <div className="flex w-full flex-col gap-0.5">
-          <p className="font-heading text-lg font-semibold break-words">{user.name}</p>
-          <p className="text-muted-foreground text-sm">{t('accountCreated', { date: created })}</p>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <p className="font-heading font-semibold break-words">{user.name}</p>
+          <p className="text-muted-foreground text-xs">{t('accountCreated', { date: created })}</p>
         </div>
+        {!editingName && (
+          <button
+            type="button"
+            onClick={() => setEditingName(true)}
+            aria-label={t('editUsername')}
+            className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:bg-muted rounded-md p-2 transition-colors outline-none"
+          >
+            <Pencil className="size-4" />
+          </button>
+        )}
       </div>
 
-      <UsernameForm
-        initial={user.name}
-        submitLabel={t('save')}
-        submitClassName={SECONDARY_BUTTON}
-      />
+      {editingName && (
+        <UsernameForm
+          initial={user.name}
+          submitLabel={t('save')}
+          submitClassName={PRIMARY_BUTTON}
+          onSaved={() => setEditingName(false)}
+          onCancel={() => setEditingName(false)}
+        />
+      )}
 
-      <div className="flex flex-col gap-1">
-        <p className="text-sm font-semibold">{t('emailLabel')}</p>
-        <p className="text-muted-foreground text-sm break-all">{user.email}</p>
+      <div className="-mx-3 flex flex-col">
+        <div className={ROW}>
+          <Mail className="text-muted-foreground size-4 shrink-0" />
+          <span className="min-w-0 flex-1">
+            <span className="text-muted-foreground block text-xs">{t('emailLabel')}</span>
+            <span className="block break-all">{user.email}</span>
+          </span>
+        </div>
+        <SignOutRow />
       </div>
 
-      <AccountActions email={user.email} />
+      <DeleteAccount email={user.email} />
     </>
   );
 }
 
-// Also offered before a new account has a username.
-export function AccountActions({ email }: { email: string }) {
+function SignOutRow() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
   const [signingOut, setSigningOut] = useState(false);
@@ -66,19 +89,25 @@ export function AccountActions({ email }: { email: string }) {
   };
 
   return (
+    <button
+      type="button"
+      disabled={signingOut}
+      onClick={() => void signOut()}
+      className={ACTION_ROW}
+    >
+      <LogOut className="text-muted-foreground size-4 shrink-0" />
+      <span>{t('signOut')}</span>
+    </button>
+  );
+}
+
+// Before a new account has a username.
+export function AccountActions({ email }: { email: string }) {
+  return (
     <>
-      <Button
-        variant="secondary"
-        size="lg"
-        disabled={signingOut}
-        onClick={() => void signOut()}
-        className={SECONDARY_BUTTON}
-      >
-        {t('signOut')}
-      </Button>
-
-      <Separator />
-
+      <div className="-mx-3 flex flex-col">
+        <SignOutRow />
+      </div>
       <DeleteAccount email={email} />
     </>
   );

@@ -17,6 +17,7 @@ type UsernameFormProps = {
   submitLabel: string;
   submitClassName: string;
   onSaved?: () => void;
+  onCancel?: () => void;
 };
 
 export function UsernameForm({
@@ -24,6 +25,7 @@ export function UsernameForm({
   submitLabel,
   submitClassName,
   onSaved,
+  onCancel,
 }: UsernameFormProps) {
   const { t } = useTranslation(NAMESPACE);
   const inputId = useId();
@@ -87,6 +89,11 @@ export function UsernameForm({
       >
         {submitLabel}
       </Button>
+      {onCancel && (
+        <Button type="button" variant="ghost" onClick={onCancel}>
+          {t('cancel')}
+        </Button>
+      )}
     </form>
   );
 }

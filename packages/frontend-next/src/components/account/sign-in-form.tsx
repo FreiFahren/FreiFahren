@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { track } from '@/lib/analytics';
 import { authClient, sendSignInCode } from '@/lib/auth-client';
 import { preloadTurnstile } from '@/lib/turnstile';
 
@@ -21,27 +22,31 @@ export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
   const [error, setError] = useState<AuthError>(null);
   const [resent, setResent] = useState(false);
 
-  useEffect(preloadTurnstile, []);
+  useEffect(() => {
+    preloadTurnstile();
+    track('sign_in_viewed', {});
+  }, []);
 
-  const requestCode = async (to: string) => {
+  const requestCode = async (to: string, resend: boolean) => {
     setPending(true);
     const { error } = await sendSignInCode(to);
     setPending(false);
     setError(error);
+    if (!error) track('sign_in_code_requested', { resend });
     return !error;
   };
 
   const sendCode = async (event: React.FormEvent) => {
     event.preventDefault();
     const to = email.trim();
-    if (!(await requestCode(to))) return;
+    if (!(await requestCode(to, false))) return;
     setSubmittedEmail(to);
     setStep('code');
   };
 
   const resendCode = async () => {
     setCode('');
-    setResent(await requestCode(submittedEmail));
+    setResent(await requestCode(submittedEmail, true));
   };
 
   const signIn = async (event: React.FormEvent) => {
@@ -51,7 +56,9 @@ export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
     const { error } = await authClient.signIn.emailOtp({ email: submittedEmail, otp: code });
     setPending(false);
     setError(error);
-    if (!error) onSignedIn();
+    if (error) return;
+    track('sign_in_completed', {});
+    onSignedIn();
   };
 
   const errorMessage = <AuthErrorMessage error={error} />;

@@ -17,7 +17,7 @@ import { type AuthError, AuthErrorMessage, CodeField } from './code-field';
 export function DeleteAccount({ email }: { email: string }) {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
-  const [step, setStep] = useState<'start' | 'code' | 'signed-in'>('start');
+  const [step, setStep] = useState<'closed' | 'start' | 'code' | 'signed-in'>('closed');
   const [code, setCode] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<AuthError>(null);
@@ -30,8 +30,9 @@ export function DeleteAccount({ email }: { email: string }) {
     };
   }, []);
 
+  // With a reason, back to requesting a code; without, closed again.
   const restart = (reason: AuthError = null) => {
-    setStep('start');
+    setStep(reason ? 'start' : 'closed');
     setCode('');
     setError(reason);
   };
@@ -75,6 +76,18 @@ export function DeleteAccount({ email }: { email: string }) {
     toast.custom(() => <ToastPill className="text-sm">{t('deleteDone')}</ToastPill>);
   };
 
+  if (step === 'closed') {
+    return (
+      <button
+        type="button"
+        onClick={() => setStep('start')}
+        className="text-muted-foreground hover:text-destructive self-center text-sm underline-offset-4 hover:underline"
+      >
+        {t('deleteTitle')}
+      </button>
+    );
+  }
+
   return (
     <section className="flex flex-col gap-3">
       <h2 className="text-sm font-semibold">{t('deleteTitle')}</h2>
@@ -90,6 +103,9 @@ export function DeleteAccount({ email }: { email: string }) {
             className={BUTTON_SHAPE}
           >
             {t('deleteRequest')}
+          </Button>
+          <Button type="button" variant="ghost" disabled={pending} onClick={() => restart()}>
+            {t('cancel')}
           </Button>
         </>
       ) : (
