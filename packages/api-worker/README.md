@@ -68,7 +68,8 @@ The public API validates and normalizes reports, then sends them to the separate
 `report-gate` Worker through its public-intake Service Binding entrypoint. The gate owns persistence
 and abuse controls; the Telegram Worker uses a separate trusted entrypoint with no shared password.
 Per-city public intake and Telegram forwarding switches live in `@freifahren/cities`. For local
-development, run all three Worker configs together; only this API is exposed:
+development, run all three Worker configs together (report-gate comes from FreiFahren/internal,
+cloned next to this repository; `just dev` does this too); only this API is exposed:
 
 ```sh
 bun run dev:with-report-gate
