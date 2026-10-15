@@ -7,6 +7,7 @@ import { Route as SettingsRoute } from '@/routes/_map/settings/index';
 
 import { AccountButton } from './account-button';
 import { AnnouncementsButton } from './announcements-button';
+import { FundButton } from './fund-button';
 import { NAMESPACE } from './SettingsButton.i18n';
 
 export function SettingsButton() {
@@ -27,6 +28,7 @@ export function SettingsButton() {
       </Button>
       <AnnouncementsButton />
       <AccountButton />
+      <FundButton />
     </div>
   );
 }

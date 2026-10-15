@@ -13,6 +13,7 @@ export const FEATURE_FLAGS = {
   contributeModalTiming: 'contribute-modal-timing',
   announcements: 'announcements',
   accounts: 'accounts',
+  fund: 'fund',
 } as const;
 
 type FlagKey = (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS];
