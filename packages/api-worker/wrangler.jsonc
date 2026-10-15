@@ -20,6 +20,8 @@
             "head_sampling_rate": 0.1,
         },
     },
+    // Report metadata retention, see report-metadata-retention.ts.
+    "triggers": { "crons": ["23 3 * * *"] },
     "workers_dev": true,
     "routes": [
         {
