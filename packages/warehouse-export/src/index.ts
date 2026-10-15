@@ -2,6 +2,8 @@
 // source (it has no D1 connector). Tables and columns are discovered at runtime, so a schema change
 // in api-worker needs no edit here — the export just picks it up on the next run.
 
+import { PRIVATE_REPORT_COLUMNS } from '@freifahren/report-privacy';
+
 interface Env {
   DB: D1Database;
   WAREHOUSE: R2Bucket;
@@ -10,6 +12,10 @@ interface Env {
 }
 
 const PREFIX = 'd1';
+
+const EXCLUDED_COLUMNS: Record<string, ReadonlySet<string>> = {
+  reports: PRIVATE_REPORT_COLUMNS,
+};
 const PAGE_SIZE = 10_000;
 
 function csvCell(value: unknown): string {
@@ -35,7 +41,8 @@ async function columnsOf(env: Env, table: string): Promise<string[]> {
   const { results } = await env.DB.prepare(
     `SELECT name FROM pragma_table_info('${table.replace(/'/g, "''")}')`,
   ).all<{ name: string }>();
-  return results.map((r) => r.name);
+  const excluded = EXCLUDED_COLUMNS[table];
+  return results.map((r) => r.name).filter((name) => !excluded?.has(name));
 }
 
 // Keyset-paginated over rowid so the export stays bounded however large a table grows.

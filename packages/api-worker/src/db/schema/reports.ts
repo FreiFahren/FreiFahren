@@ -1,3 +1,4 @@
+import { PRIVATE_REPORT_COLUMNS } from '@freifahren/report-privacy'
 import { sql } from 'drizzle-orm'
 import { index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { createInsertSchema } from 'drizzle-zod'
@@ -5,6 +6,10 @@ import { z } from 'zod'
 
 import { lines } from './lines'
 import { stations } from './stations'
+
+// Re-exported so the schema (camelCase fields) and the DB-level column names used outside
+// drizzle (preview copy, warehouse export) stay next to each other and can't drift apart.
+export { PRIVATE_REPORT_COLUMNS }
 
 export const REPORT_SOURCES = ['mini_app', 'web_app', 'mobile_app', 'telegram'] as const
 

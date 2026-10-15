@@ -7,7 +7,10 @@
     "types": ["@cloudflare/workers-types"],
     "strict": true,
     "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@freifahren/report-privacy": ["../report-privacy/src/index.ts"]
+    }
   },
   "include": ["src"]
 }

@@ -9,7 +9,7 @@ import { getTableName } from 'drizzle-orm'
 import { logger } from '../common/logger'
 
 import { parseCityDatabasesArg, parseConfigArg } from './cli-args'
-import { reports } from './schema/reports'
+import { PRIVATE_REPORT_COLUMNS, reports } from './schema/reports'
 import { toSqlLiteral } from './sql-literal'
 
 //   Usage:  bun run db:copy-reports --config wrangler.preview.json [--city berlin] [--days 30]
@@ -110,7 +110,9 @@ const copyCity = (city: string, configPath: string, days: number): void => {
         logger.info({ city, binding: dbBinding }, 'Skipping report copy — production database has no reports table yet')
         return
     }
-    const columns = sourceColumns.filter((column) => targetColumns.includes(column))
+    const columns = sourceColumns.filter(
+        (column) => targetColumns.includes(column) && !PRIVATE_REPORT_COLUMNS.has(column)
+    )
     if (!columns.includes(TIME_WINDOW_COLUMN)) {
         throw new Error(
             `${TABLE} has no ${TIME_WINDOW_COLUMN} column in both databases — update TIME_WINDOW_COLUMN to the column the window should filter on`
