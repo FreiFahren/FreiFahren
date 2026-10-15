@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -6,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { track } from '@/lib/analytics';
 import { authClient, sendSignInCode } from '@/lib/auth-client';
 import { preloadTurnstile } from '@/lib/turnstile';
+import { Route as PrivacyRoute } from '@/routes/privacy';
 
 import { DevEmailHint, INPUT, PRIMARY_BUTTON } from './account-layout';
 import { NAMESPACE } from './account.i18n';
@@ -82,6 +84,12 @@ export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
         <Button type="submit" size="lg" disabled={pending} className={PRIMARY_BUTTON}>
           {t('sendCode')}
         </Button>
+        <p className="text-muted-foreground text-xs">
+          {t('privacyNotice')}{' '}
+          <Link to={PrivacyRoute.to} className="text-foreground underline">
+            {t('privacyLink')}
+          </Link>
+        </p>
       </form>
     );
   }

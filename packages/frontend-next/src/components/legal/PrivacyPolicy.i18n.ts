@@ -21,12 +21,14 @@ i18n.addResourceBundle('en', NAMESPACE, {
         'The processing of personal data in our App is based on the following legal grounds in accordance with the General Data Protection Regulation (GDPR):',
       consent:
         'Consent (Art. 6(1)(a) GDPR): Users of our App provide their explicit consent for the processing of their personal data for specific purposes. This consent can be withdrawn at any time with effect for the future, whereby the withdrawal does not affect the lawfulness of the processing carried out up to that point.',
+      contract:
+        'Performance of a contract (Art. 6(1)(b) GDPR): Processing is necessary to provide a service you have requested, in particular your optional user account (see Section 4) and the handling of voluntary contributions.',
       legitimateInterest:
         'Legitimate interests (Art. 6(1)(f) GDPR): Processing is necessary to protect the legitimate interests of the controller or a third party, provided these interests are not overridden by the interests or fundamental rights and freedoms of the data subject. Our legitimate interests include in particular ensuring the functionality and security of the service, improving the App, and preventing abuse.',
     },
     dataUsage: {
       title: '4. Data Collection and Usage',
-      content: 'The App collects data in three different contexts:',
+      content: 'The App collects data in the following contexts:',
       reportFormTitle: 'When creating a report:',
       dataPoints: [
         'Line (optional)',
@@ -47,16 +49,25 @@ i18n.addResourceBundle('en', NAMESPACE, {
       ],
       paymentPurpose:
         "Payment processing is handled via a Stripe-hosted payment link. The contracting party is Stripe Payments Europe, Ltd. (1 Grand Canal Street Lower, Grand Canal Dock, Dublin, Ireland); within its corporate group, transfers to its US parent company Stripe, Inc. may occur (see Section 14). Payment data is entered directly on the page operated by Stripe; card data is processed exclusively by Stripe and is not transmitted to us. As part of the process, Stripe transmits transaction data to FreiFahren e.V., which may include the payer's name and email address depending on the information provided. Processing is based on Art. 6(1)(b) GDPR (handling of the voluntary contribution). For information on the related international data transfer, please refer to Section 14.",
+      accountFormTitle: 'When using an optional user account:',
+      accountDataPoints: [
+        'Email address',
+        'Username (a freely chosen display name, not necessarily your real name)',
+        'Time the account was created',
+        'Sign-in sessions (time of creation and expiry; no IP address or device information)',
+      ],
+      accountPurpose:
+        'An account is optional; the App can be used in full without one. To sign in, we send a one-time code to your email address. Codes are stored only in hashed form and expire after 5 minutes. The emails are delivered by Resend (Plus Five Five, Inc., 2261 Market Street #5039, San Francisco, CA 94114, USA), which acts as our processor pursuant to Art. 28 GDPR (see Sections 14 and 15). To protect against abuse, requesting a code requires a Cloudflare Turnstile check, and the number of codes is limited per network address and per email address: for this, the IP address and a hashed (non-reversible) form of the email address are kept for at most one day. So that you stay signed in, a session token is stored on your device; this is strictly necessary for the service you requested (Section 25(2) no. 2 TDDDG). A session ends when you sign out or 30 days after you last used the App. Account data is stored in a separate Cloudflare D1 database pinned to the EU jurisdiction and kept until you delete your account, which you can do yourself at any time in the App; the account and all its sessions are then erased immediately. Processing is based on Art. 6(1)(b) GDPR (providing the account) and, for abuse protection, on Art. 6(1)(f) GDPR.',
     },
     anonymity: {
       title: '5. Anonymity',
       content:
-        'No permanently personal data of users is stored. The IP address is considered personal data, but is not stored persistently by FreiFahren and is not reconstructable. For reports originating from the publicly accessible FreiFahren_BE Telegram group, an indirect link to the respective Telegram account could theoretically be established through correlation of timestamps. We recommend users with a heightened privacy interest to submit reports directly via the app.',
+        'Apart from the optional user account (see Section 4), no personal data of users is stored permanently. The IP address is considered personal data, but is not stored persistently by FreiFahren and is not reconstructable. For reports originating from the publicly accessible FreiFahren_BE Telegram group, an indirect link to the respective Telegram account could theoretically be established through correlation of timestamps. We recommend users with a heightened privacy interest to submit reports directly via the app.',
     },
     storageAndAccess: {
       title: '6. Storage and Access',
       content:
-        'Collected report data (line, station, direction, and rounded timestamp; no IP addresses) is stored in a Cloudflare D1 database operated by Cloudflare, Inc. on our behalf. This database is pinned to the EU jurisdiction - a contractual guarantee set at creation - so the report data is stored exclusively within the European Union. Cloudflare acts as our processor in this respect (see Section 15). Access is strictly limited to authorized association members.',
+        'Collected report data (line, station, direction, and rounded timestamp; no IP addresses) is stored in a Cloudflare D1 database operated by Cloudflare, Inc. on our behalf. This database is pinned to the EU jurisdiction - a contractual guarantee set at creation - so the report data is stored exclusively within the European Union. Cloudflare acts as our processor in this respect (see Section 15). Access is strictly limited to authorized association members. The data of optional user accounts is kept in a separate D1 database, likewise pinned to the EU jurisdiction (see Section 4).',
     },
     userRights: {
       title: '7. User Rights',
@@ -68,7 +79,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
         rectification:
           'Right to rectification (Art. 16 GDPR): You may request the rectification of inaccurate data or the completion of incomplete data.',
         erasure:
-          'Right to erasure (Art. 17 GDPR): You may request the deletion of your personal data, provided the legal requirements are met.',
+          'Right to erasure (Art. 17 GDPR): You may request the deletion of your personal data, provided the legal requirements are met. You can delete a user account yourself at any time in the App.',
         restriction:
           'Right to restriction of processing (Art. 18 GDPR): Under certain conditions, you may request that the processing of your data be restricted.',
         portability:
@@ -86,7 +97,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
     consent: {
       title: '8. Consent to the Privacy Policy',
       content:
-        'No separate consent is required for general use of the App or for submitting reports. No separate consent is required for voluntary contributions via Stripe either; the transaction data is processed in order to handle the contribution (Art. 6(1)(b) GDPR). The web analytics described in Section 16 is based on our legitimate interest and likewise requires no consent; you can object to it at any time (see Section 16).',
+        'No separate consent is required for general use of the App or for submitting reports. No separate consent is required for an optional user account either; its data is processed to provide the account (Art. 6(1)(b) GDPR). No separate consent is required for voluntary contributions via Stripe either; the transaction data is processed in order to handle the contribution (Art. 6(1)(b) GDPR). The web analytics described in Section 16 is based on our legitimate interest and likewise requires no consent; you can object to it at any time (see Section 16).',
     },
     dataProtectionOfficer: {
       title: '9. Data Protection Contact',
@@ -129,7 +140,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
         'In the context of the processing activities described above, data may be transferred to countries outside the European Economic Area (EEA) that do not provide a level of data protection equivalent to that under European law ("third countries"). This concerns in particular the following services:',
       transfers: {
         cloudflare:
-          'Cloudflare, Inc. (USA): Hosts the application (Cloudflare Workers), stores the report database (Cloudflare D1, pinned to the EU jurisdiction) and assets such as map tiles and update packages (Cloudflare R2), and provides protection against spam and abuse. The report database is pinned to the EU jurisdiction and is therefore stored within the European Union; as Cloudflare is a US company, administrative or support access from a third country cannot be entirely excluded. Such transfers are based on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) and - where applicable - on the EU-US Data Privacy Framework (adequacy decision of the EU Commission of 10 July 2023, Art. 45 GDPR).',
+          'Cloudflare, Inc. (USA): Hosts the application (Cloudflare Workers), stores the report and account databases (Cloudflare D1, pinned to the EU jurisdiction) and assets such as map tiles and update packages (Cloudflare R2), and provides protection against spam and abuse. The report database is pinned to the EU jurisdiction and is therefore stored within the European Union; as Cloudflare is a US company, administrative or support access from a third country cannot be entirely excluded. Such transfers are based on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) and - where applicable - on the EU-US Data Privacy Framework (adequacy decision of the EU Commission of 10 July 2023, Art. 45 GDPR).',
         sentry:
           'Functional Software, Inc. / Sentry (USA): Used for error monitoring. Processing primarily takes place in the EU region; any transfers to the United States are based on the EU Standard Contractual Clauses and - where applicable - on the EU-US Data Privacy Framework.',
         telegram:
@@ -138,6 +149,8 @@ i18n.addResourceBundle('en', NAMESPACE, {
           "Stripe Payments Europe, Ltd. (Ireland) / Stripe, Inc. (USA): Used for processing voluntary contributions. The contracting party is Stripe Payments Europe, Ltd., based in Ireland; within its corporate group, transfers to its US parent company Stripe, Inc. may occur. Stripe processes payment data (e.g. card details) under its own data protection responsibility. Any transfers to the US are safeguarded on the basis of the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) and - where applicable - the EU-US Data Privacy Framework (Stripe is DPF-certified). Stripe's privacy policy is available at https://stripe.com/privacy.",
         posthog:
           "PostHog, Inc. (USA): Used for web analytics (see Section 16). Processing takes place in PostHog's EU Cloud, hosted in Frankfurt, Germany; any transfers to the United States are based on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) and - where applicable - the EU-US Data Privacy Framework (PostHog is DPF-certified).",
+        resend:
+          "Plus Five Five, Inc. / Resend (USA): Used to deliver sign-in codes for optional user accounts (see Section 4). The email address and the email content are processed primarily in the United States. Transfers are based on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) contained in Resend's data processing agreement and on the EU-US Data Privacy Framework (Resend is DPF-certified).",
       },
       rights:
         'You may request a copy of the relevant safeguards (in particular the EU Standard Contractual Clauses) from us at contact@freifahren.org.',
@@ -145,7 +158,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
     dataProcessing: {
       title: '15. Data Processing by Service Providers',
       content:
-        'Where external service providers are used in the context of data processing, they act as processors within the meaning of Art. 28 GDPR. Data Processing Agreements (Data Processing Addenda) are in place with Sentry (Functional Software, Inc.) and Cloudflare, Inc. Cloudflare, Inc. hosts the application and stores the report database and assets on our behalf and acts predominantly as a processor in this respect; for measures to prevent attacks and abuse, Cloudflare acts as an independent controller. A Data Processing Agreement (Data Processing Addendum) with Mistral AI SAS is in place as part of the subscription agreement. A Data Processing Agreement with PostHog, Inc. is in place. The contracting party for payment processing is Stripe Payments Europe, Ltd.; the Data Processing Agreement between the parties forms part of the Stripe Services Agreement. Insofar as Stripe processes payment data for its own purposes (in particular fraud prevention and compliance with regulatory obligations), Stripe acts as an independent controller in that respect.',
+        'Where external service providers are used in the context of data processing, they act as processors within the meaning of Art. 28 GDPR. Data Processing Agreements (Data Processing Addenda) are in place with Sentry (Functional Software, Inc.) and Cloudflare, Inc. Cloudflare, Inc. hosts the application and stores the report database and assets on our behalf and acts predominantly as a processor in this respect; for measures to prevent attacks and abuse, Cloudflare acts as an independent controller. A Data Processing Agreement (Data Processing Addendum) with Mistral AI SAS is in place as part of the subscription agreement. A Data Processing Agreement with PostHog, Inc. is in place. A Data Processing Addendum with Plus Five Five, Inc. (Resend) is in place as part of its Terms of Service. The contracting party for payment processing is Stripe Payments Europe, Ltd.; the Data Processing Agreement between the parties forms part of the Stripe Services Agreement. Insofar as Stripe processes payment data for its own purposes (in particular fraud prevention and compliance with regulatory obligations), Stripe acts as an independent controller in that respect.',
     },
     webAnalytics: {
       title: '16. Web Analytics',
@@ -184,12 +197,14 @@ i18n.addResourceBundle('de', NAMESPACE, {
         'Die Verarbeitung personenbezogener Daten in unserer App erfolgt auf Basis der folgenden Rechtsgrundlagen gemäß der Datenschutz-Grundverordnung (DSGVO):',
       consent:
         'Einwilligung (Art. 6 Abs. 1 lit. a DSGVO): Die Nutzer unserer App geben ihre ausdrückliche Einwilligung zur Verarbeitung ihrer personenbezogenen Daten für spezifische Zwecke. Diese Einwilligung kann jederzeit mit Wirkung für die Zukunft widerrufen werden, wobei der Widerruf die Rechtmäßigkeit der bis zum Widerruf erfolgten Verarbeitung nicht berührt.',
+      contract:
+        'Vertragserfüllung (Art. 6 Abs. 1 lit. b DSGVO): Die Verarbeitung ist erforderlich, um einen von Ihnen gewünschten Dienst bereitzustellen, insbesondere Ihr optionales Nutzerkonto (siehe Abschnitt 4) sowie die Abwicklung freiwilliger Beiträge.',
       legitimateInterest:
         'Berechtigte Interessen (Art. 6 Abs. 1 lit. f DSGVO): Die Verarbeitung ist zur Wahrung der berechtigten Interessen des Verantwortlichen oder eines Dritten erforderlich, sofern nicht die Interessen oder Grundrechte und Grundfreiheiten der betroffenen Person überwiegen. Die berechtigten Interessen umfassen insbesondere die Sicherstellung der Funktionsfähigkeit und Sicherheit des Dienstes, die Verbesserung der App sowie die Missbrauchsprävention.',
     },
     dataUsage: {
       title: '4. Erhebung und Nutzung von Daten',
-      content: 'Die App erhebt Daten in drei verschiedenen Kontexten:',
+      content: 'Die App erhebt Daten in den folgenden Kontexten:',
       reportFormTitle: 'Bei der Erstellung einer Meldung:',
       dataPoints: [
         'Linie (optional)',
@@ -210,16 +225,25 @@ i18n.addResourceBundle('de', NAMESPACE, {
       ],
       paymentPurpose:
         'Die Zahlungsabwicklung erfolgt über einen von Stripe gehosteten Payment-Link. Vertragspartner ist die Stripe Payments Europe, Ltd. (1 Grand Canal Street Lower, Grand Canal Dock, Dublin, Irland); im Konzernverbund kann es zu Übermittlungen an die US-Muttergesellschaft Stripe, Inc. kommen (siehe Abschnitt 14). Die Zahlungsdaten werden direkt auf der von Stripe betriebenen Seite eingegeben; Kartendaten werden ausschließlich von Stripe verarbeitet und nicht an uns übermittelt. Im Rahmen der Abwicklung übermittelt Stripe an FreiFahren e.V. Transaktionsdaten, die je nach Eingabe den Namen und die E-Mail-Adresse des Zahlenden enthalten können. Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO (Abwicklung des freiwilligen Beitrags). Hinweise zum damit verbundenen Drittlandtransfer finden Sie in Abschnitt 14.',
+      accountFormTitle: 'Bei Nutzung eines optionalen Nutzerkontos:',
+      accountDataPoints: [
+        'E-Mail-Adresse',
+        'Benutzername (ein frei gewählter Anzeigename, nicht zwingend Ihr echter Name)',
+        'Zeitpunkt der Kontoerstellung',
+        'Anmeldesitzungen (Zeitpunkt der Erstellung und des Ablaufs; keine IP-Adresse und keine Geräteinformationen)',
+      ],
+      accountPurpose:
+        'Ein Konto ist optional; die App kann vollständig ohne Konto genutzt werden. Zur Anmeldung senden wir einen Einmalcode an Ihre E-Mail-Adresse. Codes werden nur gehasht gespeichert und verfallen nach 5 Minuten. Die E-Mails werden über Resend (Plus Five Five, Inc., 2261 Market Street #5039, San Francisco, CA 94114, USA) zugestellt, das als unser Auftragsverarbeiter nach Art. 28 DSGVO tätig wird (siehe Abschnitte 14 und 15). Zum Schutz vor Missbrauch erfordert das Anfordern eines Codes eine Prüfung durch Cloudflare Turnstile, und die Zahl der Codes ist je Netzwerkadresse und je E-Mail-Adresse begrenzt: Dafür werden die IP-Adresse und eine gehashte (nicht umkehrbare) Form der E-Mail-Adresse höchstens einen Tag lang vorgehalten. Damit Sie angemeldet bleiben, wird ein Sitzungstoken auf Ihrem Endgerät gespeichert; dies ist für den von Ihnen gewünschten Dienst unbedingt erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG). Eine Sitzung endet mit der Abmeldung oder 30 Tage nach Ihrer letzten Nutzung der App. Die Kontodaten werden in einer gesonderten, auf die EU-Jurisdiktion festgelegten Cloudflare-D1-Datenbank gespeichert und bis zur Löschung Ihres Kontos aufbewahrt, die Sie jederzeit selbst in der App vornehmen können; das Konto und alle zugehörigen Sitzungen werden dann sofort gelöscht. Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO (Bereitstellung des Kontos) und zum Schutz vor Missbrauch auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO.',
     },
     anonymity: {
       title: '5. Anonymität',
       content:
-        'Es werden keine dauerhaft personenbezogenen Daten der Nutzer gespeichert. IP-Adressen gelten als personenbezogene Daten, werden durch FreiFahren jedoch nicht persistent gespeichert und sind nicht rekonstruierbar. Bei Meldungen, die ihren Ursprung in der öffentlich zugänglichen FreiFahren_BE-Telegram-Gruppe haben, kann theoretisch durch Korrelation der Zeitstempel ein indirekter Bezug zum jeweiligen Telegram-Account hergestellt werden. Wir empfehlen Nutzern, die ein erhöhtes Schutzinteresse haben, Meldungen direkt über die App zu senden.',
+        'Abgesehen vom optionalen Nutzerkonto (siehe Abschnitt 4) werden keine personenbezogenen Daten der Nutzer dauerhaft gespeichert. IP-Adressen gelten als personenbezogene Daten, werden durch FreiFahren jedoch nicht persistent gespeichert und sind nicht rekonstruierbar. Bei Meldungen, die ihren Ursprung in der öffentlich zugänglichen FreiFahren_BE-Telegram-Gruppe haben, kann theoretisch durch Korrelation der Zeitstempel ein indirekter Bezug zum jeweiligen Telegram-Account hergestellt werden. Wir empfehlen Nutzern, die ein erhöhtes Schutzinteresse haben, Meldungen direkt über die App zu senden.',
     },
     storageAndAccess: {
       title: '6. Speicherung und Zugriff',
       content:
-        'Die erhobenen Meldedaten (Linie, Station, Richtung und abgerundete Uhrzeit; keine IP-Adressen) werden in einer Cloudflare-D1-Datenbank gespeichert, die von Cloudflare, Inc. in unserem Auftrag betrieben wird. Diese Datenbank ist auf die EU-Jurisdiktion festgelegt - eine bei der Erstellung gesetzte vertragliche Garantie -, sodass die Meldedaten ausschließlich innerhalb der Europäischen Union gespeichert werden. Cloudflare wird insoweit als unser Auftragsverarbeiter tätig (siehe Abschnitt 15). Der Zugriff ist strikt auf autorisierte Vereinsmitglieder beschränkt.',
+        'Die erhobenen Meldedaten (Linie, Station, Richtung und abgerundete Uhrzeit; keine IP-Adressen) werden in einer Cloudflare-D1-Datenbank gespeichert, die von Cloudflare, Inc. in unserem Auftrag betrieben wird. Diese Datenbank ist auf die EU-Jurisdiktion festgelegt - eine bei der Erstellung gesetzte vertragliche Garantie -, sodass die Meldedaten ausschließlich innerhalb der Europäischen Union gespeichert werden. Cloudflare wird insoweit als unser Auftragsverarbeiter tätig (siehe Abschnitt 15). Der Zugriff ist strikt auf autorisierte Vereinsmitglieder beschränkt. Die Daten optionaler Nutzerkonten liegen in einer gesonderten, ebenfalls auf die EU-Jurisdiktion festgelegten D1-Datenbank (siehe Abschnitt 4).',
     },
     userRights: {
       title: '7. Rechte der Nutzer',
@@ -231,7 +255,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
         rectification:
           'Recht auf Berichtigung (Art. 16 DSGVO): Sie können die Berichtigung unrichtiger oder die Vervollständigung unvollständiger Daten verlangen.',
         erasure:
-          'Recht auf Löschung (Art. 17 DSGVO): Sie können die Löschung Ihrer personenbezogenen Daten verlangen, sofern die gesetzlichen Voraussetzungen vorliegen.',
+          'Recht auf Löschung (Art. 17 DSGVO): Sie können die Löschung Ihrer personenbezogenen Daten verlangen, sofern die gesetzlichen Voraussetzungen vorliegen. Ein Nutzerkonto können Sie jederzeit selbst in der App löschen.',
         restriction:
           'Recht auf Einschränkung der Verarbeitung (Art. 18 DSGVO): Sie können unter bestimmten Voraussetzungen die Einschränkung der Verarbeitung Ihrer Daten verlangen.',
         portability:
@@ -249,7 +273,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
     consent: {
       title: '8. Einwilligung zur Datenschutzerklärung',
       content:
-        'Für die Nutzung der App sowie für das Absenden von Meldungen ist keine gesonderte Einwilligung erforderlich. Auch für die freiwillige Beitragszahlung über Stripe ist keine gesonderte Einwilligung erforderlich; die Verarbeitung der Transaktionsdaten erfolgt zur Abwicklung des Beitrags (Art. 6 Abs. 1 lit. b DSGVO). Die in Abschnitt 16 beschriebene Reichweitenmessung erfolgt auf Grundlage unseres berechtigten Interesses und erfordert ebenfalls keine gesonderte Einwilligung; Sie können ihr jederzeit widersprechen (siehe Abschnitt 16).',
+        'Für die Nutzung der App sowie für das Absenden von Meldungen ist keine gesonderte Einwilligung erforderlich. Auch für ein optionales Nutzerkonto ist keine gesonderte Einwilligung erforderlich; seine Daten werden zur Bereitstellung des Kontos verarbeitet (Art. 6 Abs. 1 lit. b DSGVO). Auch für die freiwillige Beitragszahlung über Stripe ist keine gesonderte Einwilligung erforderlich; die Verarbeitung der Transaktionsdaten erfolgt zur Abwicklung des Beitrags (Art. 6 Abs. 1 lit. b DSGVO). Die in Abschnitt 16 beschriebene Reichweitenmessung erfolgt auf Grundlage unseres berechtigten Interesses und erfordert ebenfalls keine gesonderte Einwilligung; Sie können ihr jederzeit widersprechen (siehe Abschnitt 16).',
     },
     dataProtectionOfficer: {
       title: '9. Datenschutzkontakt',
@@ -291,7 +315,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
         'Im Rahmen der oben beschriebenen Verarbeitungen kann es zu Datenübermittlungen in Länder außerhalb des Europäischen Wirtschaftsraums (EWR) kommen, in denen kein dem europäischen Recht vergleichbares Datenschutzniveau besteht ("Drittländer"). Dies betrifft insbesondere folgende Dienste:',
       transfers: {
         cloudflare:
-          'Cloudflare, Inc. (USA): Hostet die Anwendung (Cloudflare Workers), speichert die Meldedatenbank (Cloudflare D1, festgelegt auf die EU-Jurisdiktion) sowie Assets wie Kartenkacheln und Update-Pakete (Cloudflare R2) und dient der Abwehr von Spam und Missbrauch. Die Meldedatenbank ist auf die EU-Jurisdiktion festgelegt und wird daher innerhalb der Europäischen Union gespeichert; da Cloudflare ein US-Unternehmen ist, kann ein administrativer oder unterstützender Zugriff aus einem Drittland nicht vollständig ausgeschlossen werden. Etwaige Übermittlungen erfolgen auf Grundlage der EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) sowie - soweit anwendbar - auf Grundlage des EU-US Data Privacy Framework (Angemessenheitsbeschluss der EU-Kommission vom 10.07.2023, Art. 45 DSGVO).',
+          'Cloudflare, Inc. (USA): Hostet die Anwendung (Cloudflare Workers), speichert die Melde- und die Kontodatenbank (Cloudflare D1, festgelegt auf die EU-Jurisdiktion) sowie Assets wie Kartenkacheln und Update-Pakete (Cloudflare R2) und dient der Abwehr von Spam und Missbrauch. Die Meldedatenbank ist auf die EU-Jurisdiktion festgelegt und wird daher innerhalb der Europäischen Union gespeichert; da Cloudflare ein US-Unternehmen ist, kann ein administrativer oder unterstützender Zugriff aus einem Drittland nicht vollständig ausgeschlossen werden. Etwaige Übermittlungen erfolgen auf Grundlage der EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) sowie - soweit anwendbar - auf Grundlage des EU-US Data Privacy Framework (Angemessenheitsbeschluss der EU-Kommission vom 10.07.2023, Art. 45 DSGVO).',
         sentry:
           'Functional Software, Inc. / Sentry (USA): Eingesetzt zur Fehlererkennung. Die Verarbeitung erfolgt primär in der EU-Region; etwaige Übermittlungen in die USA erfolgen auf Grundlage der EU-Standardvertragsklauseln und - soweit anwendbar - des EU-US Data Privacy Framework.',
         telegram:
@@ -300,6 +324,8 @@ i18n.addResourceBundle('de', NAMESPACE, {
           'Stripe Payments Europe, Ltd. (Irland) / Stripe, Inc. (USA): Eingesetzt zur Abwicklung freiwilliger Beiträge. Vertragspartner ist die in Irland ansässige Stripe Payments Europe, Ltd.; im Rahmen des Konzernverbunds kann es zu Übermittlungen an die US-Muttergesellschaft Stripe, Inc. kommen. Stripe verarbeitet Zahlungsdaten (z. B. Kartendaten) in eigener datenschutzrechtlicher Verantwortung. Für etwaige Übermittlungen in die USA erfolgt die Absicherung auf Grundlage der EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) sowie - soweit anwendbar - des EU-US Data Privacy Framework (Stripe ist DPF-zertifiziert). Die Datenschutzhinweise von Stripe sind unter https://stripe.com/de/privacy abrufbar.',
         posthog:
           'PostHog, Inc. (USA): Eingesetzt zur Reichweitenmessung (siehe Abschnitt 16). Die Verarbeitung erfolgt in der EU-Cloud von PostHog, gehostet in Frankfurt am Main (Deutschland); etwaige Übermittlungen in die USA erfolgen auf Grundlage der EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) sowie - soweit anwendbar - des EU-US Data Privacy Framework (PostHog ist DPF-zertifiziert).',
+        resend:
+          'Plus Five Five, Inc. / Resend (USA): Eingesetzt zur Zustellung von Anmeldecodes für optionale Nutzerkonten (siehe Abschnitt 4). E-Mail-Adresse und E-Mail-Inhalt werden primär in den USA verarbeitet. Die Übermittlungen erfolgen auf Grundlage der im Auftragsverarbeitungsvertrag von Resend enthaltenen EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) sowie des EU-US Data Privacy Framework (Resend ist DPF-zertifiziert).',
       },
       rights:
         'Eine Kopie der jeweils einschlägigen Garantien (insbesondere der EU-Standardvertragsklauseln) können Sie bei uns unter contact@freifahren.org anfordern.',
@@ -307,7 +333,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
     dataProcessing: {
       title: '15. Auftragsverarbeitung',
       content:
-        'Soweit externe Dienstleister im Rahmen der Datenverarbeitung eingesetzt werden, handelt es sich um Auftragsverarbeiter im Sinne des Art. 28 DSGVO. Mit Sentry (Functional Software, Inc.) und Cloudflare, Inc. bestehen entsprechende Auftragsverarbeitungsverträge (Data Processing Addenda). Cloudflare, Inc. hostet die Anwendung und speichert die Meldedatenbank sowie Assets in unserem Auftrag und wird insoweit überwiegend als Auftragsverarbeiter tätig; für Maßnahmen der Angriffs- und Missbrauchsabwehr handelt Cloudflare als eigenständig Verantwortlicher. Mit Mistral AI SAS besteht ein Auftragsverarbeitungsvertrag (Data Processing Addendum), der als Bestandteil des Nutzungsvertrags gilt. Mit PostHog, Inc. besteht ein Auftragsverarbeitungsvertrag. Vertragspartner für die Zahlungsabwicklung ist die Stripe Payments Europe, Ltd.; die zwischen den Parteien geltende Data Processing Agreement ist Bestandteil des Stripe-Nutzungsvertrags. Soweit Stripe Zahlungsdaten zu eigenen Zwecken (insbesondere Betrugsprävention sowie zur Erfüllung regulatorischer Pflichten) verarbeitet, handelt Stripe insoweit als eigenständig Verantwortlicher.',
+        'Soweit externe Dienstleister im Rahmen der Datenverarbeitung eingesetzt werden, handelt es sich um Auftragsverarbeiter im Sinne des Art. 28 DSGVO. Mit Sentry (Functional Software, Inc.) und Cloudflare, Inc. bestehen entsprechende Auftragsverarbeitungsverträge (Data Processing Addenda). Cloudflare, Inc. hostet die Anwendung und speichert die Meldedatenbank sowie Assets in unserem Auftrag und wird insoweit überwiegend als Auftragsverarbeiter tätig; für Maßnahmen der Angriffs- und Missbrauchsabwehr handelt Cloudflare als eigenständig Verantwortlicher. Mit Mistral AI SAS besteht ein Auftragsverarbeitungsvertrag (Data Processing Addendum), der als Bestandteil des Nutzungsvertrags gilt. Mit PostHog, Inc. besteht ein Auftragsverarbeitungsvertrag. Mit Plus Five Five, Inc. (Resend) besteht ein Auftragsverarbeitungsvertrag (Data Processing Addendum) als Bestandteil der Nutzungsbedingungen. Vertragspartner für die Zahlungsabwicklung ist die Stripe Payments Europe, Ltd.; die zwischen den Parteien geltende Data Processing Agreement ist Bestandteil des Stripe-Nutzungsvertrags. Soweit Stripe Zahlungsdaten zu eigenen Zwecken (insbesondere Betrugsprävention sowie zur Erfüllung regulatorischer Pflichten) verarbeitet, handelt Stripe insoweit als eigenständig Verantwortlicher.',
     },
     webAnalytics: {
       title: '16. Reichweitenmessung',
