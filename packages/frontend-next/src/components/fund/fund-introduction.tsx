@@ -16,17 +16,17 @@ export function FundIntroduction({ children }: { children: ReactNode }) {
   const { t } = useTranslation(NAMESPACE);
 
   return (
-    <div className="flex flex-col gap-7 pb-4">
-      <h2 className="font-heading text-3xl leading-tight font-semibold text-balance">
+    <div className="flex flex-col gap-5 pb-2">
+      <h2 className="font-heading text-xl leading-snug font-semibold text-balance">
         {t('headline')}
       </h2>
-      <ul className="flex flex-col gap-5">
+      <ul className="flex flex-col gap-3">
         {STEPS.map(({ icon: Icon, title }) => (
-          <li key={title} className="flex items-center gap-4">
-            <div className="bg-muted flex size-12 shrink-0 items-center justify-center rounded-xl">
-              <Icon aria-hidden="true" className="size-6" />
+          <li key={title} className="flex items-center gap-3">
+            <div className="bg-muted flex size-8 shrink-0 items-center justify-center rounded-lg">
+              <Icon aria-hidden="true" className="size-4" />
             </div>
-            <h3 className="font-heading min-w-0 text-base font-semibold">{t(title)}</h3>
+            <h3 className="font-heading min-w-0 text-sm font-semibold">{t(title)}</h3>
           </li>
         ))}
       </ul>

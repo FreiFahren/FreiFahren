@@ -10,7 +10,7 @@ export function FundSignIn({ onSignedIn }: { onSignedIn: () => void }) {
   return (
     <FundIntroduction>
       <section aria-labelledby="fund-sign-in-title">
-        <h3 id="fund-sign-in-title" className="font-heading mb-4 text-lg font-semibold">
+        <h3 id="fund-sign-in-title" className="font-heading mb-3 text-base font-semibold">
           {t('signInTitle')}
         </h3>
         <SignInForm onSignedIn={onSignedIn} />
