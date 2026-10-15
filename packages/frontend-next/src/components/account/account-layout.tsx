@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
+import { FullScreenPage } from '@/components/templates/full-screen-page';
 import { PageHeader } from '@/components/templates/PageHeader';
 import { Route as MapIndexRoute } from '@/routes/_map/index';
 
@@ -18,15 +19,13 @@ export function AccountLayout({ title, children }: { title: string; children: Re
   const navigate = useNavigate();
 
   return (
-    <div className="bg-card animate-in fade-in fixed inset-0 z-30 duration-150">
-      <div className="mx-auto flex h-full w-full max-w-md flex-col">
-        <PageHeader title={title} onBack={() => navigate({ to: MapIndexRoute.to })} />
-        <div className="pb-safe-6 flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-4 pt-2">
-          {children}
-          <SupportHint />
-        </div>
+    <FullScreenPage>
+      <PageHeader title={title} onBack={() => navigate({ to: MapIndexRoute.to })} />
+      <div className="pb-safe-6 flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-4 pt-2">
+        {children}
+        <SupportHint />
       </div>
-    </div>
+    </FullScreenPage>
   );
 }
 

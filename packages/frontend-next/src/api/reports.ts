@@ -13,7 +13,8 @@ import { currentCitySlug } from '@/lib/city';
 import { getTurnstileToken, TURNSTILE_TOKEN_HEADER } from '@/lib/turnstile';
 import { captureIssue, traceAction } from '@/lib/error-monitoring';
 
-import { API_URL, fetchJson, type Line, useLines } from './transit';
+import { API_URL, fetchJson } from './client';
+import { type Line, useLines } from './transit';
 
 export type Report = {
   timestamp: string;

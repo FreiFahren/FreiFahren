@@ -11,6 +11,7 @@ import { isPreviewBuild } from '@/lib/utils';
 export const FEATURE_FLAGS = {
   citySwitcher: 'city-switcher',
   contributeModalTiming: 'contribute-modal-timing',
+  announcements: 'announcements',
   accounts: 'accounts',
 } as const;
 

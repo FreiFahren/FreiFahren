@@ -113,6 +113,8 @@ const provision = (pr: string, out: string) => {
         compatibility_date: COMPATIBILITY_DATE,
         compatibility_flags: COMPATIBILITY_FLAGS,
         cache: { enabled: true },
+        // Must match wrangler.jsonc: announcement bodies are Markdown imported as text.
+        rules: [{ type: 'Text', globs: ['**/*.md'], fallthrough: true }],
         version_metadata: { binding: 'CF_VERSION_METADATA' },
         // No `routes`, so a preview can never take traffic on the production hostname.
         workers_dev: true,

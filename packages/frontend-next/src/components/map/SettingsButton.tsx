@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Route as SettingsRoute } from '@/routes/_map/settings/index';
 
 import { AccountButton } from './account-button';
+import { AnnouncementsButton } from './announcements-button';
 import { NAMESPACE } from './SettingsButton.i18n';
 
 export function SettingsButton() {
@@ -24,6 +25,7 @@ export function SettingsButton() {
           <Settings className="size-5" />
         </Link>
       </Button>
+      <AnnouncementsButton />
       <AccountButton />
     </div>
   );
