@@ -28,6 +28,9 @@ The seed runs the shared pipeline directly against the local Miniflare D1 (obtai
 Because Miniflare/workerd and `getPlatformProxy` only run under Node, the seed CLI runs under `tsx`
 (the `seed` script does this for you) rather than Bun.
 
+Signed-in routes (`requireSession` in `modules/auth`) call the private auth-worker (in
+FreiFahren/internal) over the `AUTH` service binding; without it, those routes answer 503.
+
 Put local secrets/vars in `.dev.vars` (see `.dev.vars.example`).
 
 ## DB Migrations

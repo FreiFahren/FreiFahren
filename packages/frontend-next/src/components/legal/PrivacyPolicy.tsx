@@ -26,6 +26,7 @@ export function PrivacyPolicy() {
         <p>{t('sections.legalBasis.content')}</p>
         <ul>
           <li>{t('sections.legalBasis.consent')}</li>
+          <li>{t('sections.legalBasis.contract')}</li>
           <li>{t('sections.legalBasis.legitimateInterest')}</li>
         </ul>
       </section>
@@ -50,6 +51,14 @@ export function PrivacyPolicy() {
           ))}
         </ul>
         <p>{t('sections.dataUsage.paymentPurpose')}</p>
+
+        <h3>{t('sections.dataUsage.accountFormTitle')}</h3>
+        <ul>
+          {toArray('sections.dataUsage.accountDataPoints').map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+        <p>{t('sections.dataUsage.accountPurpose')}</p>
       </section>
 
       <section>
