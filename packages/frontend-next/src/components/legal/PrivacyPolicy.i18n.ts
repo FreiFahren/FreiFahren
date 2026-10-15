@@ -150,7 +150,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
         posthog:
           "PostHog, Inc. (USA): Used for web analytics (see Section 16). Processing takes place in PostHog's EU Cloud, hosted in Frankfurt, Germany; any transfers to the United States are based on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) and - where applicable - the EU-US Data Privacy Framework (PostHog is DPF-certified).",
         resend:
-          "Plus Five Five, Inc. / Resend (USA): Used to deliver sign-in codes for optional user accounts (see Section 4). The emails are sent from Resend\'s EU region (Ireland), without open or click tracking; as Resend is a US company that processes data such as sending logs primarily in the United States, transfers to the US take place. They are based on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) contained in Resend's data processing agreement and on the EU-US Data Privacy Framework (Resend is DPF-certified).",
+          "Plus Five Five, Inc. / Resend (USA): Used to deliver sign-in codes for optional user accounts (see Section 4). The emails are sent from Resend's EU region (Ireland), without open or click tracking; as Resend is a US company that processes data such as sending logs primarily in the United States, transfers to the US take place. They are based on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) contained in Resend's data processing agreement and on the EU-US Data Privacy Framework (Resend is DPF-certified).",
       },
       rights:
         'You may request a copy of the relevant safeguards (in particular the EU Standard Contractual Clauses) from us at contact@freifahren.org.',
