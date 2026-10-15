@@ -105,7 +105,6 @@ export function MapView() {
 
   return (
     <div className="map-bleed">
-      <div className="map-bleed-anchor" />
       <MapGL
         initialViewState={INITIAL_VIEW}
         minZoom={MIN_ZOOM}
