@@ -1,5 +1,5 @@
-import { CITY_DATABASES, CITY_DATABASE_SLUGS, getCity } from '@freifahren/cities'
-import { and, asc, count as countRows, desc, eq, gte, isNull, lt, min, ne, sql } from 'drizzle-orm'
+import { CITY_DATABASES, CITY_DATABASE_SLUGS, type CityDatabaseSlug, getCity } from '@freifahren/cities'
+import { and, asc, count as countRows, desc, eq, gte, lt, min } from 'drizzle-orm'
 import type { BatchItem } from 'drizzle-orm/batch'
 import { DateTime } from 'luxon'
 
@@ -46,16 +46,9 @@ const loadModerationState = async (db: DbConnection) => {
     return state ?? null
 }
 
-const loadModerationCounts = async (db: DbConnection) => {
-    const [heldResult, eligibleResult] = await Promise.all([
-        db.select({ value: countRows() }).from(reportQuarantines),
-        db
-            .select({ value: countRows() })
-            .from(reports)
-            .leftJoin(reportQuarantines, eq(reportQuarantines.reportId, reports.reportId))
-            .where(and(ne(reports.source, 'telegram'), isNull(reportQuarantines.reportId))),
-    ])
-    return { held: heldResult[0]?.value ?? 0, eligible: eligibleResult[0]?.value ?? 0 }
+const loadHeldCount = async (db: DbConnection) => {
+    const [result] = await db.select({ value: countRows() }).from(reportQuarantines)
+    return result?.value ?? 0
 }
 
 const loadModerationEvents = async (db: DbConnection) =>
@@ -68,16 +61,16 @@ const loadModerationEvents = async (db: DbConnection) =>
 const loadCityModerationStatus = async (env: Bindings, city: string): Promise<ModerationStatus> => {
     try {
         const db = database(env, city)
-        const [state, counts, events] = await Promise.all([
+        const [state, held, events] = await Promise.all([
             loadModerationState(db),
-            loadModerationCounts(db),
+            loadHeldCount(db),
             loadModerationEvents(db),
         ])
         return {
             ...cityMetadata(city),
             enabled: state?.enabled ?? false,
             changedAt: state?.changedAt ?? null,
-            ...counts,
+            held,
             error: null,
             events,
         }
@@ -87,7 +80,6 @@ const loadCityModerationStatus = async (env: Bindings, city: string): Promise<Mo
             enabled: null,
             changedAt: null,
             held: 0,
-            eligible: 0,
             events: [],
             error: 'Database unavailable; emergency state unknown',
         }
@@ -117,49 +109,31 @@ const moderationStateStatements = (
     ]
 }
 
-const quarantineStatements = (db: DbConnection, enabled: boolean, now: number): BatchStatement[] => {
-    if (!enabled) return []
-
-    return [
-        db
-            .insert(reportQuarantines)
-            .select(
-                db
-                    .select({
-                        reportId: reports.reportId,
-                        originalTrust: reports.trust,
-                        // D1 requires a value for every destination column in an insert-select.
-                        quarantinedAt: sql<number>`${now}`.as('quarantinedAt'),
-                    })
-                    .from(reports)
-                    .where(ne(reports.source, 'telegram'))
-            )
-            .onConflictDoNothing(),
-        db.update(reports).set({ trust: 0 }).where(ne(reports.source, 'telegram')),
-    ]
-}
-
 const runBatch = async (db: DbConnection, statements: BatchStatement[]) => {
     if (statements.length === 0) return
     await db.batch(statements as [BatchStatement, ...BatchStatement[]])
 }
 
+/*
+ * Only the switch state is written: the quarantine_incoming_reports trigger holds reports created
+ * while it is on, so enabling never touches history and cached public aggregates stay correct.
+ */
 const setCityQuarantine = async (env: Bindings, city: string, enabled: boolean, now: number) => {
     const db = database(env, city)
     const state = await loadModerationState(db)
-    const statements = [
-        ...moderationStateStatements(db, state, enabled, now),
-        ...quarantineStatements(db, enabled, now),
-    ]
-    await runBatch(db, statements)
+    await runBatch(db, moderationStateStatements(db, state, enabled, now))
 }
 
-export const setQuarantine = async (env: Bindings, enabled: boolean) => {
+export const setQuarantine = async (
+    env: Bindings,
+    enabled: boolean,
+    targets: readonly CityDatabaseSlug[] = CITY_DATABASE_SLUGS
+) => {
     const now = Date.now()
     // Keep writes ordered because local development maps every city binding to one D1 database.
     // Serial writes are also easier to retry safely when an individual city is unavailable.
     const results: PromiseSettledResult<void>[] = []
-    for (const city of CITY_DATABASE_SLUGS) {
+    for (const city of targets) {
         try {
             await setCityQuarantine(env, city, enabled, now)
             results.push({ status: 'fulfilled', value: undefined })
@@ -169,7 +143,10 @@ export const setQuarantine = async (env: Bindings, enabled: boolean) => {
     }
     const cities = await moderationStatus(env)
     const complete =
-        results.every((result) => result.status === 'fulfilled') && cities.every((city) => city.enabled === enabled)
+        results.every((result) => result.status === 'fulfilled') &&
+        cities
+            .filter((city) => targets.includes(city.city as CityDatabaseSlug))
+            .every((city) => city.enabled === enabled)
     return { complete, cities }
 }
 

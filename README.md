@@ -6,7 +6,7 @@
 
   <h1>FreiFahren</h1>
 
-  <p>Die Blitzer-App für Öffis. Die Live-Karte der Ticketkontrolleure im Berliner Nahverkehr</p>
+  <p>Die Live-Karte der Ticketkontrolleure im Berliner Nahverkehr</p>
 
   [![Telegram](https://img.shields.io/badge/Telegram-Community-26A5E4?logo=telegram&logoColor=white)](https://t.me/freifahren_BE)
   [![License](https://img.shields.io/github/license/FreiFahren/FreiFahren)](LICENSE)
@@ -34,6 +34,19 @@ FreiFahren crowdsources real-time sightings of ticket inspectors across the Berl
 1. **Report**: community members spot a ticket inspector and submit the station, line and direction via the web app or the [Telegram group](https://t.me/freifahren_BE)
 2. **Process**: the backend validates the report and writes it to the database
 3. **Display**: the live map updates in real-time so everyone can see where inspectors are right now
+
+## Development
+
+With [Bun](https://bun.sh) and [just](https://just.systems) installed:
+
+```sh
+just setup   # dependencies, local env files, seeded local databases
+just dev     # API on :8787, frontend on :1871
+```
+
+With access to the private [FreiFahren/internal](https://github.com/FreiFahren/internal) repository
+cloned next to this one (or `FREIFAHREN_INTERNAL` pointing at it), `just dev` also runs the
+auth-worker on :8788 and report-gate, wired to the API.
 
 ## Contact
 

@@ -16,6 +16,7 @@ import { Route as ImpressumRouteImport } from './routes/impressum'
 import { Route as MapRouteImport } from './routes/_map'
 import { Route as ReportsIndexRouteImport } from './routes/reports/index'
 import { Route as AnnouncementsIndexRouteImport } from './routes/announcements/index'
+import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as MapIndexRouteImport } from './routes/_map/index'
 import { Route as ReportsStationsRouteImport } from './routes/reports/stations'
 import { Route as ReportsLinesRouteImport } from './routes/reports/lines'
@@ -58,6 +59,11 @@ const ReportsIndexRoute = ReportsIndexRouteImport.update({
 const AnnouncementsIndexRoute = AnnouncementsIndexRouteImport.update({
   id: '/announcements/',
   path: '/announcements/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountIndexRoute = AccountIndexRouteImport.update({
+  id: '/account/',
+  path: '/account/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MapIndexRoute = MapIndexRouteImport.update({
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/announcements/$announcementId': typeof AnnouncementsAnnouncementIdRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
+  '/account/': typeof AccountIndexRoute
   '/announcements/': typeof AnnouncementsIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/debug/report-decay': typeof MapDebugReportDecayRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/': typeof MapIndexRoute
+  '/account': typeof AccountIndexRoute
   '/announcements': typeof AnnouncementsIndexRoute
   '/reports': typeof ReportsIndexRoute
   '/debug/report-decay': typeof MapDebugReportDecayRoute
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/_map/': typeof MapIndexRoute
+  '/account/': typeof AccountIndexRoute
   '/announcements/': typeof AnnouncementsIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/_map/debug/report-decay': typeof MapDebugReportDecayRoute
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/announcements/$announcementId'
     | '/reports/lines'
     | '/reports/stations'
+    | '/account/'
     | '/announcements/'
     | '/reports/'
     | '/debug/report-decay'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/reports/lines'
     | '/reports/stations'
     | '/'
+    | '/account'
     | '/announcements'
     | '/reports'
     | '/debug/report-decay'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/reports/lines'
     | '/reports/stations'
     | '/_map/'
+    | '/account/'
     | '/announcements/'
     | '/reports/'
     | '/_map/debug/report-decay'
@@ -220,6 +232,7 @@ export interface RootRouteChildren {
   ReportRoute: typeof ReportRoute
   ReportsRoute: typeof ReportsRouteWithChildren
   AnnouncementsAnnouncementIdRoute: typeof AnnouncementsAnnouncementIdRoute
+  AccountIndexRoute: typeof AccountIndexRoute
   AnnouncementsIndexRoute: typeof AnnouncementsIndexRoute
 }
 
@@ -272,6 +285,13 @@ declare module '@tanstack/react-router' {
       path: '/announcements'
       fullPath: '/announcements/'
       preLoaderRoute: typeof AnnouncementsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account/': {
+      id: '/account/'
+      path: '/account'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_map/': {
@@ -382,6 +402,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportRoute: ReportRoute,
   ReportsRoute: ReportsRouteWithChildren,
   AnnouncementsAnnouncementIdRoute: AnnouncementsAnnouncementIdRoute,
+  AccountIndexRoute: AccountIndexRoute,
   AnnouncementsIndexRoute: AnnouncementsIndexRoute,
 }
 export const routeTree = rootRouteImport

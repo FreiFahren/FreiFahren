@@ -58,11 +58,11 @@ const dashboard = async (extra = '') => {
     expect(response.headers.get('Cache-Control')).toContain('no-store')
     return (await response.json()) as AdminDashboard
 }
-const quarantine = (enabled: boolean) =>
+const quarantine = (enabled: boolean, cities?: unknown) =>
     appRequestWithRedirect('/admin/v1/quarantine', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ enabled, confirmation: QUARANTINE_CONFIRMATION }),
+        body: JSON.stringify({ enabled, confirmation: QUARANTINE_CONFIRMATION, cities }),
     })
 
 describe('private report monitoring', () => {
@@ -238,25 +238,26 @@ describe('private report monitoring', () => {
 })
 
 describe('emergency quarantine', () => {
-    it('quarantines all history, keeps Telegram unchanged, and preserves diagnostics', async () => {
-        setSystemTime(new Date('2026-07-01T12:00:00Z'))
-        fakeReportGate.intakeTrust = null
-        await submit()
+    it('holds only reports created while active, leaving history and Telegram unchanged', async () => {
+        setSystemTime(new Date('2026-08-08T11:50:00Z'))
+        const existing = await submit()
         setSystemTime(new Date('2026-08-08T12:00:00Z'))
-        fakeReportGate.intakeTrust = 0.25
-        fakeReportGate.intakeFlags = 'future-rule'
-        await submit('mobile_app')
-        fakeReportGate.intakeFlags = null
-        await telegram()
         const response = await quarantine(true)
         expect(response.status).toBe(200)
         expect((await response.json()) as object).toMatchObject({ complete: true })
+        fakeReportGate.intakeTrust = 0.25
+        fakeReportGate.intakeFlags = 'future-rule'
+        const incoming = await submit('mobile_app')
+        fakeReportGate.intakeFlags = null
+        await telegram()
         const rows = await db.select().from(reports)
-        expect(rows.filter((row) => row.source !== 'telegram').every((row) => row.trust === 0)).toBe(true)
+        expect(rows.find((row) => row.reportId === existing.reportId)?.trust).toBe(1)
+        expect(rows.find((row) => row.reportId === incoming.reportId)?.trust).toBe(0)
         expect(rows.find((row) => row.source === 'telegram')?.trust).toBe(1)
         const data = await dashboard()
-        expect(data.totals).toMatchObject({ total: 2, positive: 2, held: 1, effectivePositive: 1, quarantined: 1 })
-        expect(data.reports.find((row) => row.source === 'mobile_app')).toMatchObject({
+        expect(data.totals).toMatchObject({ total: 3, positive: 3, held: 1, effectivePositive: 2, quarantined: 1 })
+        expect(data.reports.find((row) => row.id === existing.reportId)).toMatchObject({ trust: 1, held: false })
+        expect(data.reports.find((row) => row.id === incoming.reportId)).toMatchObject({
             gateTrust: 0.25,
             trust: 0,
             flags: ['future-rule'],
@@ -267,10 +268,10 @@ describe('emergency quarantine', () => {
         })
         expect(
             ((await publicResponse.json()) as { isPredicted: boolean }[]).filter((row) => !row.isPredicted)
-        ).toHaveLength(1)
+        ).toHaveLength(2)
         const insights = await appRequestWithRedirect(`/insights/station/${stationId}`)
         expect(insights.status).toBe(200)
-        expect(await insights.json()).toMatchObject({ reportCount: { value: 1 } })
+        expect(await insights.json()).toMatchObject({ reportCount: { value: 2 } })
         expect(insights.headers.get('Cache-Control')).toBe('no-store')
     })
 
@@ -292,6 +293,21 @@ describe('emergency quarantine', () => {
         expect((await db.select().from(reports).where(eq(reports.reportId, fresh.reportId)))[0].trust).toBe(1)
     })
 
+    it('switches only the requested cities and rejects unknown ones', async () => {
+        // Tests share one D1 for every city, so an unavailable Leipzig shows which cities were written.
+        setTestEnv({ DB_LEIPZIG: undefined })
+        const hamburg = (await (await quarantine(true, ['hamburg'])).json()) as {
+            complete: boolean
+            cities: ModerationStatus[]
+        }
+        expect(hamburg.complete).toBe(true)
+        expect(hamburg.cities.find((city) => city.city === 'hamburg')).toMatchObject({ enabled: true })
+        expect(hamburg.cities.find((city) => city.city === 'leipzig')).toMatchObject({ enabled: null })
+        expect(((await (await quarantine(true, ['leipzig'])).json()) as { complete: boolean }).complete).toBe(false)
+        expect((await quarantine(true, ['atlantis'])).status).toBe(400)
+        expect((await quarantine(true, [])).status).toBe(400)
+    })
+
     it('is idempotent and exposes partial city failures so the operator can retry', async () => {
         await submit()
         setTestEnv({ DB_LEIPZIG: undefined })
@@ -304,7 +320,7 @@ describe('emergency quarantine', () => {
         setTestEnv({ ADMIN_AUTH_DISABLED: 'true', PUBLIC_EDGE_CACHE_DISABLED: 'true' })
         expect((await (await quarantine(true)).json()) as object).toMatchObject({ complete: true })
         const data = await dashboard()
-        expect(data.reports[0]).toMatchObject({ trust: 0, gateTrust: 1 })
+        expect(data.reports[0]).toMatchObject({ trust: 1, gateTrust: 1, held: false })
         const events = await db.all<{ count: number }>(sql`SELECT count(*) AS count FROM report_moderation_events`)
         expect(events[0].count).toBe(1)
     })

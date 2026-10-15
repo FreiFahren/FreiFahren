@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 
+import { FullScreenPage } from '@/components/templates/full-screen-page';
 import { PageHeader } from '@/components/templates/PageHeader';
 
 // Shared chrome + typographic styling for the legal documents. Child selectors style the plain
@@ -24,11 +25,9 @@ export function LegalPage({ title, children }: LegalPageProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-card animate-in fade-in fixed inset-0 z-30 duration-150">
-      <div className="mx-auto flex h-full w-full max-w-md flex-col">
-        <PageHeader title={title} onBack={() => navigate({ to: '/' })} />
-        <article className={ARTICLE_CLASS}>{children}</article>
-      </div>
-    </div>
+    <FullScreenPage>
+      <PageHeader title={title} onBack={() => navigate({ to: '/' })} />
+      <article className={ARTICLE_CLASS}>{children}</article>
+    </FullScreenPage>
   );
 }

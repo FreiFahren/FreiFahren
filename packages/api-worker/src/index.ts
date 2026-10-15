@@ -73,6 +73,8 @@ export const createApp = () => {
                 'If-None-Match',
                 'ff-platform',
                 TURNSTILE_TOKEN_HEADER,
+                // Sessions are bearer tokens, not cookies, so the public `*` origin still works.
+                'Authorization',
             ],
             allowMethods: ['GET', 'POST', 'OPTIONS'],
             exposeHeaders: ['ETag', 'Last-Modified'],

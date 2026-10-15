@@ -415,7 +415,7 @@ export function useSubmitReport() {
          */
         let turnstileToken: string | undefined;
         try {
-          turnstileToken = await getTurnstileToken();
+          turnstileToken = await getTurnstileToken('submit-report');
         } catch (error) {
           captureIssue('Turnstile token could not be obtained', {
             reason: error instanceof Error ? error.message : String(error),
