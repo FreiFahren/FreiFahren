@@ -150,7 +150,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
         posthog:
           "PostHog, Inc. (USA): Used for web analytics (see Section 16). Processing takes place in PostHog's EU Cloud, hosted in Frankfurt, Germany; any transfers to the United States are based on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) and - where applicable - the EU-US Data Privacy Framework (PostHog is DPF-certified).",
         resend:
-          "Plus Five Five, Inc. / Resend (USA): Used to deliver sign-in codes for optional user accounts (see Section 4). The email address and the email content are processed primarily in the United States. Transfers are based on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) contained in Resend's data processing agreement and on the EU-US Data Privacy Framework (Resend is DPF-certified).",
+          "Plus Five Five, Inc. / Resend (USA): Used to deliver sign-in codes for optional user accounts (see Section 4). The emails are sent from Resend\'s EU region (Ireland), without open or click tracking; as Resend is a US company that processes data such as sending logs primarily in the United States, transfers to the US take place. They are based on the EU Standard Contractual Clauses (Art. 46(2)(c) GDPR) contained in Resend's data processing agreement and on the EU-US Data Privacy Framework (Resend is DPF-certified).",
       },
       rights:
         'You may request a copy of the relevant safeguards (in particular the EU Standard Contractual Clauses) from us at contact@freifahren.org.',
@@ -325,7 +325,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
         posthog:
           'PostHog, Inc. (USA): Eingesetzt zur Reichweitenmessung (siehe Abschnitt 16). Die Verarbeitung erfolgt in der EU-Cloud von PostHog, gehostet in Frankfurt am Main (Deutschland); etwaige Übermittlungen in die USA erfolgen auf Grundlage der EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) sowie - soweit anwendbar - des EU-US Data Privacy Framework (PostHog ist DPF-zertifiziert).',
         resend:
-          'Plus Five Five, Inc. / Resend (USA): Eingesetzt zur Zustellung von Anmeldecodes für optionale Nutzerkonten (siehe Abschnitt 4). E-Mail-Adresse und E-Mail-Inhalt werden primär in den USA verarbeitet. Die Übermittlungen erfolgen auf Grundlage der im Auftragsverarbeitungsvertrag von Resend enthaltenen EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) sowie des EU-US Data Privacy Framework (Resend ist DPF-zertifiziert).',
+          'Plus Five Five, Inc. / Resend (USA): Eingesetzt zur Zustellung von Anmeldecodes für optionale Nutzerkonten (siehe Abschnitt 4). Die E-Mails werden aus der EU-Region von Resend (Irland) versendet, ohne Öffnungs- oder Klick-Tracking; da Resend ein US-Unternehmen ist, das Daten wie Versandprotokolle primär in den USA verarbeitet, finden Übermittlungen in die USA statt. Diese erfolgen auf Grundlage der im Auftragsverarbeitungsvertrag von Resend enthaltenen EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO) sowie des EU-US Data Privacy Framework (Resend ist DPF-zertifiziert).',
       },
       rights:
         'Eine Kopie der jeweils einschlägigen Garantien (insbesondere der EU-Standardvertragsklauseln) können Sie bei uns unter contact@freifahren.org anfordern.',
