@@ -1,11 +1,12 @@
-import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
+
+import { privacyPolicyUrl } from '@/lib/privacy-policy';
 
 import { LegalPage } from './LegalPage';
 import { NAMESPACE } from './Impressum.i18n';
 
 export function Impressum() {
-  const { t } = useTranslation(NAMESPACE);
+  const { t, i18n } = useTranslation(NAMESPACE);
 
   return (
     <LegalPage title={t('title')}>
@@ -47,9 +48,9 @@ export function Impressum() {
       </section>
 
       <section>
-        <Link to="/privacy" preload={false}>
+        <a href={privacyPolicyUrl(i18n.resolvedLanguage)} target="_blank" rel="noopener noreferrer">
           {t('links.privacy')}
-        </Link>
+        </a>
       </section>
     </LegalPage>
   );

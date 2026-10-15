@@ -17,8 +17,8 @@ import { openConsentSettings } from '@/lib/consent';
 import { openContributeModal } from '@/lib/contribute-modal';
 import { openFeedbackModal } from '@/lib/feedback-modal';
 import { openLegalDisclaimer } from '@/lib/legal-disclaimer';
+import { privacyPolicyUrl } from '@/lib/privacy-policy';
 import { Route as ImpressumRoute } from '@/routes/impressum';
-import { Route as PrivacyRoute } from '@/routes/privacy';
 
 import { CitySwitcher } from './CitySwitcher';
 import { DetailCard } from './DetailCard';
@@ -31,13 +31,27 @@ const SHOP_URL = 'https://freifahren.myspreadshop.de/';
 
 function LegalLink({
   to,
+  href,
   onClick,
   children,
 }: {
-  to?: typeof ImpressumRoute.to | typeof PrivacyRoute.to;
+  to?: typeof ImpressumRoute.to;
+  href?: string;
   onClick?: () => void;
   children: React.ReactNode;
 }) {
+  if (href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-muted-foreground hover:text-foreground text-xs underline"
+      >
+        {children}
+      </a>
+    );
+  }
   if (to) {
     return (
       <Link
@@ -65,7 +79,7 @@ type SettingsCardProps = {
 };
 
 export function SettingsCard({ onClose }: SettingsCardProps) {
-  const { t } = useTranslation(NAMESPACE);
+  const { t, i18n } = useTranslation(NAMESPACE);
 
   return (
     <DetailCard title={t('title')} closeLabel={t('close')} onClose={onClose}>
@@ -138,7 +152,7 @@ export function SettingsCard({ onClose }: SettingsCardProps) {
           {t('association')}
         </a>
         <LegalLink to={ImpressumRoute.to}>{t('imprint')}</LegalLink>
-        <LegalLink to={PrivacyRoute.to}>{t('privacy')}</LegalLink>
+        <LegalLink href={privacyPolicyUrl(i18n.resolvedLanguage)}>{t('privacy')}</LegalLink>
         <LegalLink onClick={openLegalDisclaimer}>{t('terms')}</LegalLink>
         <LegalLink onClick={openConsentSettings}>{t('analytics')}</LegalLink>
       </CardContent>
