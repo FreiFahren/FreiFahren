@@ -35,6 +35,19 @@ FreiFahren crowdsources real-time sightings of ticket inspectors across the Berl
 2. **Process**: the backend validates the report and writes it to the database
 3. **Display**: the live map updates in real-time so everyone can see where inspectors are right now
 
+## Development
+
+With [Bun](https://bun.sh) and [just](https://just.systems) installed:
+
+```sh
+just setup   # dependencies, local env files, seeded local databases
+just dev     # API on :8787, frontend on :1871
+```
+
+With access to the private [FreiFahren/internal](https://github.com/FreiFahren/internal) repository
+cloned next to this one (or `FREIFAHREN_INTERNAL` pointing at it), `just dev` also runs the
+auth-worker on :8788 and report-gate, wired to the API.
+
 ## Contact
 
 Questions or feedback? Reach us at [contact@freifahren.org](mailto:contact@freifahren.org).
