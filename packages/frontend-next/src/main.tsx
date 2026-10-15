@@ -8,7 +8,7 @@ import { get, set, del } from 'idb-keyval';
 import { registerSW } from 'virtual:pwa-register';
 import { queryClient, PERSISTED_CACHE_MAX_AGE } from './api/queryClient';
 import { capturePageview } from './lib/analytics';
-import { syncConsentToPostHog } from './lib/consent';
+import { getConsent, syncConsentToPostHog } from './lib/consent';
 import { loadPostHog } from './lib/posthog-client';
 import { initErrorMonitoring } from './lib/error-monitoring';
 import { initNativePlatform } from './lib/native';
@@ -201,5 +201,5 @@ const onIdle = (cb: () => void) =>
     : window.setTimeout(cb, 1);
 onIdle(() => {
   if (window.name === PRELOAD_RELOAD_MARK) window.name = '';
-  void loadPostHog().then(syncConsentToPostHog);
+  void loadPostHog(getConsent() === 'granted').then(syncConsentToPostHog);
 });

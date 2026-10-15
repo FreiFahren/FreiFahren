@@ -2,6 +2,7 @@ import { Capacitor } from '@capacitor/core';
 import type { PostHog } from 'posthog-js';
 
 import { currentCitySlug } from './city';
+import { safeLocalStorage } from './safe-storage';
 import { optionalEnv } from './utils';
 
 // Web uses a cookie, not localStorage: localStorage is per-origin, so a visitor crossing city
@@ -52,7 +53,22 @@ async function registerVersion(posthog: PostHog): Promise<void> {
   }
 }
 
-export function loadPostHog(): Promise<void> {
+// Ids stored before the user declined, or by builds that persisted before any choice was made.
+// Without consent nothing may stay on the device (§ 25 TDDDG), so they are dropped before init.
+function clearPersistedPostHog(apiKey: string): void {
+  const labels = window.location.hostname.split('.');
+  // cross_subdomain_cookie scopes the cookie to the registrable domain, e.g. .freifahren.org.
+  const parentDomain = labels.length > 2 ? `; domain=.${labels.slice(-2).join('.')}` : '';
+  for (const name of [`ph_${apiKey}_posthog`, `__ph_opt_in_out_${apiKey}`]) {
+    safeLocalStorage.removeItem(name);
+    document.cookie = `${name}=; Max-Age=0; path=/`;
+    if (parentDomain) document.cookie = `${name}=; Max-Age=0; path=/${parentDomain}`;
+  }
+}
+
+// `persistent` is true only once the user has allowed cookies; until then PostHog keeps its id in
+// memory, so a visit that hasn't decided yet leaves nothing on the device.
+export function loadPostHog(persistent: boolean): Promise<void> {
   if (loadPromise) return loadPromise;
 
   const apiKey = optionalEnv('VITE_POSTHOG_KEY');
@@ -65,6 +81,7 @@ export function loadPostHog(): Promise<void> {
   const apiHost = optionalEnv('VITE_POSTHOG_HOST') ?? 'https://eu.i.posthog.com';
 
   loadPromise = import('posthog-js').then(async ({ default: posthog }) => {
+    if (!persistent) clearPersistedPostHog(apiKey);
     posthog.init(apiKey, {
       api_host: apiHost,
       // api_host is our reverse proxy in prod; keep PostHog UI/toolbar links on the real app.
@@ -74,10 +91,10 @@ export function loadPostHog(): Promise<void> {
       // mode PostHog ingests every event personless and builds no person profiles at all — which
       // leaves lifecycle, retention, and stickiness permanently empty. 'always' lets the persistent
       // anonymous distinct_id form a person profile so returning visits are measurable. Consent still
-      // governs persistence: a 'denied' choice switches to memory + reset() in consent.ts, so declined
-      // users stay un-retained by design, and respect_dnt keeps DNT users out entirely.
+      // governs persistence: the id is only persisted once cookies are allowed (see consent.ts), so
+      // undecided and declined users stay un-retained by design, and respect_dnt keeps DNT users out.
       person_profiles: 'always',
-      persistence: PERSISTENT_PERSISTENCE,
+      persistence: persistent ? PERSISTENT_PERSISTENCE : 'memory',
       // Explicit so the cross-subdomain intent can't be silently flipped to per-host. posthog-js
       // also derives this for registrable domains; it stays host-only on single-label hosts.
       cross_subdomain_cookie: true,
