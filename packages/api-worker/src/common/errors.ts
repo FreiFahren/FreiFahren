@@ -6,6 +6,7 @@ export const INTERNAL_CODES = [
     'RISK_MODEL_FAILED',
     'STATION_NOT_FOUND',
     'LINE_NOT_FOUND',
+    'ANNOUNCEMENT_NOT_FOUND',
     'NO_PATH_FOUND',
     'UNKNOWN_CITY',
     'REPORTING_DISABLED',
@@ -14,6 +15,8 @@ export const INTERNAL_CODES = [
     'ADMIN_UNAUTHORIZED',
     'ADMIN_UNAVAILABLE',
     'ADMIN_RANGE_TOO_LARGE',
+    'UNAUTHENTICATED',
+    'AUTH_UNAVAILABLE',
 ] as const
 
 export type InternalCode = (typeof INTERNAL_CODES)[number]

@@ -35,8 +35,9 @@ export const DEFAULT_LINE_COLOR = CITY.seed.defaultLineColor
  * - `excludeLineRefPatterns` blacklists refs regardless of route type (Leipzig
  *   drops SEV, night and Messe services).
  * - `routeRefPatterns` whitelists refs per route type (Berlin seeds only
- *   MetroBus `^M\d+$` among buses). It has to be per type: a type-agnostic
- *   blacklist can't express "numeric bus refs out, numeric tram refs in".
+ *   MetroBus and X-lines `^[MX]\d+$` among buses). It has to be per type: a
+ *   type-agnostic blacklist can't express "numeric bus refs out, numeric tram
+ *   refs in".
  * `routeType` is optional so a caller with only a ref still gets the blacklist.
  */
 export const isSeedLineRefIncluded = (ref: string, routeType?: string): boolean => {

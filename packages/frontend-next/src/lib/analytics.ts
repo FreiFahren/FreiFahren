@@ -71,6 +71,13 @@ type AnalyticsEvents = {
   city_expansion_prompt_shown: { from: string };
   city_expansion_prompt_accepted: { from: string };
   city_expansion_prompt_declined: { from: string };
+  // List visits come from pageviews; these show whether the bell leads to actually reading one.
+  announcements_bell_clicked: { has_unread: boolean };
+  announcement_viewed: { announcement_id: string };
+  // The sign-in funnel: form shown, code sent, signed in. No addresses, codes or tokens.
+  sign_in_viewed: Record<string, never>;
+  sign_in_code_requested: { resend: boolean };
+  sign_in_completed: Record<string, never>;
 };
 
 export function track<E extends keyof AnalyticsEvents>(

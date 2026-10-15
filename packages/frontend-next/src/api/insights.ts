@@ -1,7 +1,7 @@
 import { type QueryClient, useQuery } from '@tanstack/react-query';
 
 import { DAY_MS } from './reports';
-import { fetchJson } from './transit';
+import { fetchJson } from './client';
 
 export type StationInsights = {
   reportCount: { value: number; range: { start: string; end: string } };

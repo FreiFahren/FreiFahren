@@ -113,10 +113,14 @@ const provision = (pr: string, out: string) => {
         compatibility_date: COMPATIBILITY_DATE,
         compatibility_flags: COMPATIBILITY_FLAGS,
         cache: { enabled: true },
+        // Must match wrangler.jsonc: announcement bodies are Markdown imported as text.
+        rules: [{ type: 'Text', globs: ['**/*.md'], fallthrough: true }],
         version_metadata: { binding: 'CF_VERSION_METADATA' },
         // No `routes`, so a preview can never take traffic on the production hostname.
         workers_dev: true,
         d1_databases: d1Databases,
+        // Its own accounts, so unreviewed PR code never sees a production session.
+        services: [{ binding: 'AUTH', service: 'auth-worker-preview', entrypoint: 'SessionsEntrypoint' }],
         vars: {
             // Keep production error formatting enabled. This deployment-only mode accepts reports.
             // They go only into isolated per-PR databases, without private scoring or forwarding.

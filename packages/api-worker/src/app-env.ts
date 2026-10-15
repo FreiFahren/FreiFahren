@@ -5,6 +5,7 @@ import { Context, Hono } from 'hono'
 import { AppError } from './common/errors'
 import { createLogger, Logger, LogLevel } from './common/logger'
 import { createD1Db, DbConnection } from './db'
+import type { SessionsService } from './modules/auth/auth-contract'
 import { InsightsService } from './modules/insights'
 import type { PublicReportGate, TrustedReportGate } from './modules/report-gate/report-gate-contract'
 import { ReportsService } from './modules/reports'
@@ -30,6 +31,8 @@ export type Bindings = {
     TRUSTED_REPORT_GATE?: TrustedReportGate
     REPORT_GATE?: PublicReportGate
     REPORT_GATE_MODE?: 'preview-open'
+    // The private auth-worker. Without it (e.g. locally without its `wrangler dev`), signed-in routes answer 503.
+    AUTH?: SessionsService
     CORS_ORIGINS?: string
     // This repo's Cloudflare account subdomain (e.g. `freifahren` for `*.freifahren.workers.dev`).
     // Scopes the frontend preview CORS allowance to our own account so another tenant can't claim

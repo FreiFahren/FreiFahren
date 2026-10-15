@@ -13,7 +13,8 @@ import { currentCitySlug } from '@/lib/city';
 import { getTurnstileToken, TURNSTILE_TOKEN_HEADER } from '@/lib/turnstile';
 import { captureIssue, traceAction } from '@/lib/error-monitoring';
 
-import { API_URL, fetchJson, type Line, useLines } from './transit';
+import { API_URL, fetchJson } from './client';
+import { type Line, useLines } from './transit';
 
 export type Report = {
   timestamp: string;
@@ -414,7 +415,7 @@ export function useSubmitReport() {
          */
         let turnstileToken: string | undefined;
         try {
-          turnstileToken = await getTurnstileToken();
+          turnstileToken = await getTurnstileToken('submit-report');
         } catch (error) {
           captureIssue('Turnstile token could not be obtained', {
             reason: error instanceof Error ? error.message : String(error),

@@ -31,7 +31,6 @@ export type ModerationStatus = {
     enabled: boolean | null
     changedAt: number | null
     held: number
-    eligible: number
     error: string | null
     events: { enabled: boolean; timestamp: number }[]
 }

@@ -78,11 +78,12 @@ export const BERLIN: CityConfig = {
         // Bus is last: when a stop serves rail and bus, the rail type stays the
         // station's representative type (and wins the proximate-merge pick).
         routeTypePriority: ['subway', 'tram', 'light_rail', 'train', 'bus'],
-        // MetroBus (M11–M85) only: BVG runs ~300 bus lines, but only the Metro
-        // network runs frequently enough to be checked and reported in practice.
-        // Berlin's Metrotram refs (M1–M17) are disjoint from the MetroBus refs,
-        // so scoping bus this way can't collide with a tram of the same name.
-        routeRefPatterns: { bus: String.raw`^M\d+$` },
+        // MetroBus (M11–M85) and the express X-lines only: BVG runs ~300 bus
+        // lines, but only these run frequently enough to be checked and
+        // reported in practice. Berlin's Metrotram refs (M1–M17) are disjoint
+        // from the MetroBus refs, so scoping bus this way can't collide with a
+        // tram of the same name.
+        routeRefPatterns: { bus: String.raw`^[MX]\d+$` },
         colors: {
             tram: '#be1414', // Classic Berlin tram red (tram and metro tram M* lines).
             light_rail: '#007734', // Berlin S-Bahn green (S2), applied to all S-Bahn lines.
@@ -92,10 +93,11 @@ export const BERLIN: CityConfig = {
     },
     telegram: {
         inspectorKeywords: 'Kontrolleur, BVG-Kontrolle, BOS, BW, Blauwesten, Zivilkontrolle, blaue Westen',
-        // MetroBus (M11-M85) IS tracked, so it must not be listed here; what stays
-        // outside the network is the rest of the BVG bus system.
+        // MetroBus (M11-M85) and the X-lines ARE tracked, so neither must be
+        // listed here; what stays outside the network is the rest of the BVG bus
+        // system.
         untrackedLinesNote:
-            'Sightings on OTHER lines (X-lines, three-digit bus lines, night buses, ' +
+            'Sightings on OTHER lines (three-digit bus lines, night buses, ' +
             'replacement services) are still reports if a station name is mentioned — ' +
             'extract the station (bus stops are named after the nearby U/S station).',
         circularLineAlias: 'Ringbahn',

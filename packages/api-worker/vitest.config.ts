@@ -6,6 +6,14 @@ export default defineWorkersConfig(async () => {
     const migrations = await readD1Migrations(fileURLToPath(new URL('drizzle', import.meta.url)))
 
     return {
+        // Mirrors the Text rule in wrangler.jsonc, which the test pool doesn't read.
+        plugins: [
+            {
+                name: 'markdown-as-text',
+                transform: (code: string, id: string) =>
+                    id.endsWith('.md') ? `export default ${JSON.stringify(code)}` : undefined,
+            },
+        ],
         resolve: {
             alias: {
                 '@freifahren/cities': new URL('../cities/src/index.ts', import.meta.url).pathname,

@@ -15,9 +15,12 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ImpressumRouteImport } from './routes/impressum'
 import { Route as MapRouteImport } from './routes/_map'
 import { Route as ReportsIndexRouteImport } from './routes/reports/index'
+import { Route as AnnouncementsIndexRouteImport } from './routes/announcements/index'
+import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as MapIndexRouteImport } from './routes/_map/index'
 import { Route as ReportsStationsRouteImport } from './routes/reports/stations'
 import { Route as ReportsLinesRouteImport } from './routes/reports/lines'
+import { Route as AnnouncementsAnnouncementIdRouteImport } from './routes/announcements/$announcementId'
 import { Route as MapSettingsIndexRouteImport } from './routes/_map/settings/index'
 import { Route as MapStationStationIdRouteImport } from './routes/_map/station/$stationId'
 import { Route as MapReportsStationIdRouteImport } from './routes/_map/reports/$stationId'
@@ -53,6 +56,16 @@ const ReportsIndexRoute = ReportsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ReportsRoute,
 } as any)
+const AnnouncementsIndexRoute = AnnouncementsIndexRouteImport.update({
+  id: '/announcements/',
+  path: '/announcements/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountIndexRoute = AccountIndexRouteImport.update({
+  id: '/account/',
+  path: '/account/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MapIndexRoute = MapIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -68,6 +81,12 @@ const ReportsLinesRoute = ReportsLinesRouteImport.update({
   path: '/lines',
   getParentRoute: () => ReportsRoute,
 } as any)
+const AnnouncementsAnnouncementIdRoute =
+  AnnouncementsAnnouncementIdRouteImport.update({
+    id: '/announcements/$announcementId',
+    path: '/announcements/$announcementId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const MapSettingsIndexRoute = MapSettingsIndexRouteImport.update({
   id: '/settings/',
   path: '/settings/',
@@ -100,8 +119,11 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reports': typeof ReportsRouteWithChildren
+  '/announcements/$announcementId': typeof AnnouncementsAnnouncementIdRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
+  '/account/': typeof AccountIndexRoute
+  '/announcements/': typeof AnnouncementsIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/debug/report-decay': typeof MapDebugReportDecayRoute
   '/line/$lineName': typeof MapLineLineNameRoute
@@ -113,9 +135,12 @@ export interface FileRoutesByTo {
   '/impressum': typeof ImpressumRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
+  '/announcements/$announcementId': typeof AnnouncementsAnnouncementIdRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/': typeof MapIndexRoute
+  '/account': typeof AccountIndexRoute
+  '/announcements': typeof AnnouncementsIndexRoute
   '/reports': typeof ReportsIndexRoute
   '/debug/report-decay': typeof MapDebugReportDecayRoute
   '/line/$lineName': typeof MapLineLineNameRoute
@@ -130,9 +155,12 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reports': typeof ReportsRouteWithChildren
+  '/announcements/$announcementId': typeof AnnouncementsAnnouncementIdRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/_map/': typeof MapIndexRoute
+  '/account/': typeof AccountIndexRoute
+  '/announcements/': typeof AnnouncementsIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/_map/debug/report-decay': typeof MapDebugReportDecayRoute
   '/_map/line/$lineName': typeof MapLineLineNameRoute
@@ -148,8 +176,11 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/report'
     | '/reports'
+    | '/announcements/$announcementId'
     | '/reports/lines'
     | '/reports/stations'
+    | '/account/'
+    | '/announcements/'
     | '/reports/'
     | '/debug/report-decay'
     | '/line/$lineName'
@@ -161,9 +192,12 @@ export interface FileRouteTypes {
     | '/impressum'
     | '/privacy'
     | '/report'
+    | '/announcements/$announcementId'
     | '/reports/lines'
     | '/reports/stations'
     | '/'
+    | '/account'
+    | '/announcements'
     | '/reports'
     | '/debug/report-decay'
     | '/line/$lineName'
@@ -177,9 +211,12 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/report'
     | '/reports'
+    | '/announcements/$announcementId'
     | '/reports/lines'
     | '/reports/stations'
     | '/_map/'
+    | '/account/'
+    | '/announcements/'
     | '/reports/'
     | '/_map/debug/report-decay'
     | '/_map/line/$lineName'
@@ -194,6 +231,9 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ReportRoute: typeof ReportRoute
   ReportsRoute: typeof ReportsRouteWithChildren
+  AnnouncementsAnnouncementIdRoute: typeof AnnouncementsAnnouncementIdRoute
+  AccountIndexRoute: typeof AccountIndexRoute
+  AnnouncementsIndexRoute: typeof AnnouncementsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -240,6 +280,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsIndexRouteImport
       parentRoute: typeof ReportsRoute
     }
+    '/announcements/': {
+      id: '/announcements/'
+      path: '/announcements'
+      fullPath: '/announcements/'
+      preLoaderRoute: typeof AnnouncementsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account/': {
+      id: '/account/'
+      path: '/account'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AccountIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_map/': {
       id: '/_map/'
       path: '/'
@@ -260,6 +314,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/reports/lines'
       preLoaderRoute: typeof ReportsLinesRouteImport
       parentRoute: typeof ReportsRoute
+    }
+    '/announcements/$announcementId': {
+      id: '/announcements/$announcementId'
+      path: '/announcements/$announcementId'
+      fullPath: '/announcements/$announcementId'
+      preLoaderRoute: typeof AnnouncementsAnnouncementIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_map/settings/': {
       id: '/_map/settings/'
@@ -340,6 +401,9 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ReportRoute: ReportRoute,
   ReportsRoute: ReportsRouteWithChildren,
+  AnnouncementsAnnouncementIdRoute: AnnouncementsAnnouncementIdRoute,
+  AccountIndexRoute: AccountIndexRoute,
+  AnnouncementsIndexRoute: AnnouncementsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
