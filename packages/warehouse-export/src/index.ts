@@ -10,6 +10,10 @@ interface Env {
 }
 
 const PREFIX = 'd1';
+
+const EXCLUDED_COLUMNS: Record<string, ReadonlySet<string>> = {
+  reports: new Set(['client_hash', 'asn', 'as_organization', 'ua_family', 'trust_flags']),
+};
 const PAGE_SIZE = 10_000;
 
 function csvCell(value: unknown): string {
@@ -35,7 +39,8 @@ async function columnsOf(env: Env, table: string): Promise<string[]> {
   const { results } = await env.DB.prepare(
     `SELECT name FROM pragma_table_info('${table.replace(/'/g, "''")}')`,
   ).all<{ name: string }>();
-  return results.map((r) => r.name);
+  const excluded = EXCLUDED_COLUMNS[table];
+  return results.map((r) => r.name).filter((name) => !excluded?.has(name));
 }
 
 // Keyset-paginated over rowid so the export stays bounded however large a table grows.
