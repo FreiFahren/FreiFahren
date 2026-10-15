@@ -13,9 +13,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { closeLegalDisclaimer, useLegalDisclaimerReview } from '@/lib/legal-disclaimer';
+import { privacyPolicyUrl } from '@/lib/privacy-policy';
 import { cn } from '@/lib/utils';
 import { Route as ImpressumRoute } from '@/routes/impressum';
-import { Route as PrivacyRoute } from '@/routes/privacy';
 
 import { NAMESPACE } from './LegalDisclaimer.i18n';
 
@@ -45,7 +45,7 @@ export function LegalLinks({
   className?: string;
   onNavigate?: () => void;
 }) {
-  const { t } = useTranslation(NAMESPACE);
+  const { t, i18n } = useTranslation(NAMESPACE);
 
   return (
     <div className={cn('flex gap-4', className)}>
@@ -57,14 +57,15 @@ export function LegalLinks({
       >
         {t('imprint')}
       </Link>
-      <Link
-        to={PrivacyRoute.to}
-        preload={false}
+      <a
+        href={privacyPolicyUrl(i18n.resolvedLanguage)}
+        target="_blank"
+        rel="noopener noreferrer"
         onClick={onNavigate}
         className="text-muted-foreground hover:text-foreground text-xs underline"
       >
         {t('privacy')}
-      </Link>
+      </a>
     </div>
   );
 }

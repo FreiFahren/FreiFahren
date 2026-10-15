@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { notifyNativeAppReady } from '@/lib/native';
 
 // Load the map + maplibre-gl in parallel only once the map first mounts, keeping the
-// heavy bundle out of the shell and off map-less routes (/report, /privacy, /impressum).
+// heavy bundle out of the shell and off map-less routes (/report, /impressum).
 const stalledMapImport = new Promise<never>(() => {});
 const importMap = () =>
   Promise.all([import('@/components/map/Map'), import('maplibre-gl')]).then(
