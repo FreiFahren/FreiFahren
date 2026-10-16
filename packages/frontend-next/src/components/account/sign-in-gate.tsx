@@ -10,31 +10,30 @@ import { SignInForm } from './sign-in-form';
 
 type SignInGateProps = {
   children: (session: AuthSession, refetch: () => void) => ReactNode;
-  signedOut?: (signIn: ReactNode) => ReactNode;
+  signedOut?: (onSignedIn: () => void) => ReactNode;
+  loading?: ReactNode;
 };
 
-export function SignInGate({ children, signedOut }: SignInGateProps) {
+export function SignInGate({ children, signedOut, loading }: SignInGateProps) {
   const { t } = useTranslation(NAMESPACE);
   const state = useAuthSession();
-  if (state.status === 'signed-in') return children(state.session, state.refetch);
 
-  let content: ReactNode;
   switch (state.status) {
+    case 'signed-in':
+      return children(state.session, state.refetch);
     case 'signed-out':
-      content = <SignInForm onSignedIn={state.refetch} />;
-      break;
+      return signedOut ? signedOut(state.refetch) : <SignInForm onSignedIn={state.refetch} />;
     case 'error':
-      content = <SessionLoadError onRetry={state.retry} />;
-      break;
+      return <SessionLoadError onRetry={state.refetch} />;
     case 'loading':
-      content = (
+      return loading !== undefined ? (
+        loading
+      ) : (
         <LoaderCircle
           role="status"
           aria-label={t('loading')}
           className="text-muted-foreground mx-auto size-6 animate-spin"
         />
       );
-      break;
   }
-  return signedOut ? signedOut(content) : content;
 }

@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '@/components/fund/fund.i18n';
 import { Button } from '@/components/ui/button';
-import { FEATURE_FLAGS, useFeatureFlag } from '@/lib/feature-flags';
+import { useFundEnabled } from '@/hooks/use-fund-enabled';
 import { Route as FundRoute } from '@/routes/fund/index';
 
 export function FundButton() {
   const { t } = useTranslation(NAMESPACE);
-  const enabled = useFeatureFlag(FEATURE_FLAGS.fund);
+  const enabled = useFundEnabled();
   if (!enabled) return null;
 
   return (

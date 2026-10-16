@@ -15,9 +15,9 @@ i18n.addResourceBundle('en', NAMESPACE, {
 
 i18n.addResourceBundle('de', NAMESPACE, {
   open: 'Solidaritätsfonds öffnen',
-  title: 'FreiFahren Fund',
+  title: 'FreiFahren Fonds',
   intro: 'Deine Uploads und Beiträge.',
-  headline: 'Knölchen bekommen? Lade es hoch, der Fund zahlt.',
+  headline: 'Knöllchen bekommen? Lade es hoch, der Fonds zahlt.',
   photoTitle: 'Fotografiere dein Knölchen',
   paymentTitle: 'Wir kümmern uns um die Zahlung',
   freeTitle: 'Halte FreiFahren kostenlos',
