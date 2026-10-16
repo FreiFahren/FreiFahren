@@ -34,6 +34,9 @@ const TABLE = getTableName(reports)
 // "recent" reports. Asserted against the live schema so a rename fails loudly instead of silently.
 const TIME_WINDOW_COLUMN = 'timestamp'
 
+// Previews are public, so per-client columns stay in production.
+const PRIVATE_COLUMNS = new Set(['client_hash', 'asn', 'as_organization', 'ua_family', 'trust_flags'])
+
 type D1Row = Record<string, unknown>
 type ForeignKey = { table: string; from: string; to: string }
 
@@ -110,7 +113,7 @@ const copyCity = (city: string, configPath: string, days: number): void => {
         logger.info({ city, binding: dbBinding }, 'Skipping report copy — production database has no reports table yet')
         return
     }
-    const columns = sourceColumns.filter((column) => targetColumns.includes(column))
+    const columns = sourceColumns.filter((column) => targetColumns.includes(column) && !PRIVATE_COLUMNS.has(column))
     if (!columns.includes(TIME_WINDOW_COLUMN)) {
         throw new Error(
             `${TABLE} has no ${TIME_WINDOW_COLUMN} column in both databases — update TIME_WINDOW_COLUMN to the column the window should filter on`

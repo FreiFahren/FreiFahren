@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +6,6 @@ import { PopupCard } from '@/components/map/PopupCard';
 import { Button } from '@/components/ui/button';
 import { CardContent, CardFooter } from '@/components/ui/card';
 import {
-  closeConsentSettings,
   setConsent,
   syncConsentToPostHog,
   useConsentPrompt,
@@ -15,8 +13,8 @@ import {
 } from '@/lib/consent';
 import { useOnboardingComplete } from '@/lib/onboarding';
 import { useActiveLocationPrompt } from '@/lib/location-prompt';
+import { privacyPolicyUrl } from '@/lib/privacy-policy';
 import { optionalEnv } from '@/lib/utils';
-import { Route as PrivacyRoute } from '@/routes/privacy';
 
 import { NAMESPACE } from './ConsentBanner.i18n';
 
@@ -30,7 +28,7 @@ const analyticsEnabled = optionalEnv('VITE_POSTHOG_KEY') != null;
  * waits until onboarding is done so the prompts never stack.
  */
 export function ConsentBanner() {
-  const { t } = useTranslation(NAMESPACE);
+  const { t, i18n } = useTranslation(NAMESPACE);
   const showPrompt = useConsentPrompt();
   const reviewOpen = useConsentReview();
   const onboarded = useOnboardingComplete();
@@ -52,14 +50,14 @@ export function ConsentBanner() {
       <CardContent className="flex flex-col gap-1">
         <h2 className="font-heading flex items-center gap-2 text-lg font-semibold">{t('title')}</h2>
         <p className="text-muted-foreground text-sm">{t('text')}</p>
-        <Link
-          to={PrivacyRoute.to}
-          preload={false}
-          onClick={reviewOpen ? closeConsentSettings : undefined}
+        <a
+          href={privacyPolicyUrl(i18n.resolvedLanguage)}
+          target="_blank"
+          rel="noopener noreferrer"
           className="text-muted-foreground hover:text-foreground mt-1 inline-block text-xs underline"
         >
           {t('privacy')}
-        </Link>
+        </a>
       </CardContent>
       <CardFooter className="gap-2">
         <Button variant="outline" className="flex-1" onClick={() => setConsent('denied')}>

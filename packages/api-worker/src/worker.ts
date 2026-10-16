@@ -4,6 +4,7 @@ import { captureException, logger as sentryLogger, setTag, withSentry } from '@s
 import { Bindings, setErrorReporter, setScopeTagger } from './app-env'
 import { setSentryLogSink } from './common/logger'
 import { normalizeTransactionName } from './common/normalize-transaction-name'
+import { clearExpiredReportMetadataForAllCities } from './modules/reports/report-metadata-retention'
 import { TelegramReportsEntrypoint } from './modules/reports/telegram-reports-entrypoint'
 
 import { app } from './index'
@@ -42,6 +43,10 @@ export default withSentry(
             const rayId = request.headers.get('cf-ray')
             if (rayId !== null) setTag('cloudflare.ray_id', rayId)
             return app.fetch(request, env, ctx)
+        },
+        // Awaited rather than handed to waitUntil so withSentry sees a failure.
+        scheduled: async (_controller, env) => {
+            await clearExpiredReportMetadataForAllCities(env)
         },
     } satisfies ExportedHandler<Bindings>
 )

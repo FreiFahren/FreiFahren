@@ -89,7 +89,7 @@ const provision = (pr: string, out: string) => {
     }))
     for (const { name } of wanted) {
         logger.info({ database: name }, 'Creating preview database...')
-        execFileSync('npx', ['wrangler', 'd1', 'create', name], { stdio: 'inherit' })
+        execFileSync('npx', ['wrangler', 'd1', 'create', name, '--jurisdiction', 'eu'], { stdio: 'inherit' })
     }
 
     const existing = listDatabases()
