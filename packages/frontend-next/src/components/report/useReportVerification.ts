@@ -10,14 +10,36 @@ const MAX_REPORT_DISTANCE_M = 2000;
 const MIN_REPORT_INTERVAL_MS = 15 * 60 * 1000;
 const STORAGE_KEY = 'lastReportAt';
 
-function readLastReportAt(): number | null {
+type LastReport = { at: number; stationId: string };
+
+function readLastReport(): LastReport | null {
   const raw = safeLocalStorage.getItem(STORAGE_KEY);
-  const value = raw ? Number(raw) : NaN;
-  return Number.isFinite(value) ? value : null;
+  if (!raw) return null;
+  if (raw.startsWith('{')) {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (
+        typeof parsed === 'object' &&
+        parsed !== null &&
+        'at' in parsed &&
+        'stationId' in parsed &&
+        typeof parsed.at === 'number' &&
+        Number.isFinite(parsed.at) &&
+        typeof parsed.stationId === 'string'
+      ) {
+        return { at: parsed.at, stationId: parsed.stationId };
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  }
+  const value = Number(raw);
+  return Number.isFinite(value) ? { at: value, stationId: '' } : null;
 }
 
-function writeLastReportAt(timestamp: number): void {
-  safeLocalStorage.setItem(STORAGE_KEY, String(timestamp));
+function writeLastReport(report: LastReport): void {
+  safeLocalStorage.setItem(STORAGE_KEY, JSON.stringify(report));
 }
 
 /**
@@ -45,15 +67,20 @@ export function useReportVerification() {
       }
     }
 
-    const lastReportAt = readLastReportAt();
-    if (lastReportAt !== null && Date.now() - lastReportAt < MIN_REPORT_INTERVAL_MS) {
+    const lastReport = readLastReport();
+    if (
+      lastReport !== null &&
+      Date.now() - lastReport.at < MIN_REPORT_INTERVAL_MS &&
+      (lastReport.stationId === '' || lastReport.stationId === stationId)
+    ) {
       return 'too_soon';
     }
 
     return null;
   };
 
-  const recordSubmission = () => writeLastReportAt(Date.now());
+  const recordSubmission = (reportedStationId: string) =>
+    writeLastReport({ at: Date.now(), stationId: reportedStationId });
 
   return { verify, recordSubmission };
 }
