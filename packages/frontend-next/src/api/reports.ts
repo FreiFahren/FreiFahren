@@ -1,6 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import {
   type QueryClient,
+  useIsMutating,
   useMutation,
   useQueries,
   useQuery,
@@ -340,8 +341,11 @@ export type SubmitReportResponse = {
 
 type SubmitReportMutationInput = SubmitReportInput & {
   onOptimistic: (report: SubmitReportResponse) => void;
+  onSubmissionSuccess: () => void;
   onSubmissionError: (error: unknown) => void;
 };
+
+export const SUBMIT_REPORT_MUTATION_KEY = ['submit-report'] as const;
 
 /*
  * The API answers a rejected submission with a stable `details.internal_code` alongside the status.
@@ -395,7 +399,9 @@ function resolveLineId(input: SubmitReportInput, lines: Line[] | undefined): str
 export function useSubmitReport() {
   const { data: lines } = useLines();
   const queryClient = useQueryClient();
-  return useMutation({
+  const isPending = useIsMutating({ mutationKey: SUBMIT_REPORT_MUTATION_KEY }) > 0;
+  const mutation = useMutation({
+    mutationKey: SUBMIT_REPORT_MUTATION_KEY,
     mutationFn: (input: SubmitReportMutationInput): Promise<SubmitReportResponse> =>
       traceAction('Submit Report', async () => {
         const lineId = resolveLineId(input, lines);
@@ -469,7 +475,10 @@ export function useSubmitReport() {
     },
     // Replace in place before invalidating. The active view keeps a record during the refetch,
     // then receives the server's calculated expiry without a blank or duplicate state.
-    onSuccess: (result, _input, optimisticReport) => {
+    onSuccess: (result, input, optimisticReport) => {
+      // The optimistic success screen unmounts the form before the request finishes.
+      // Keep confirmed-success effects here rather than in mutate's observer callbacks.
+      input.onSubmissionSuccess();
       pendingOptimisticReports.delete(optimisticReport.optimisticId);
       replaceOptimisticReportInCache(queryClient, optimisticReport.optimisticId, result);
       void queryClient.invalidateQueries({ queryKey: ['reports'] });
@@ -483,4 +492,13 @@ export function useSubmitReport() {
       input.onSubmissionError(error);
     },
   });
+
+  return {
+    isPending,
+    mutate: (input: SubmitReportMutationInput) => {
+      // Also covers same-tick taps and reopening the form while the old request is pending.
+      if (queryClient.isMutating({ mutationKey: SUBMIT_REPORT_MUTATION_KEY }) > 0) return;
+      mutation.mutate(input);
+    },
+  };
 }

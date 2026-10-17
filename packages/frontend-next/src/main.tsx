@@ -1,12 +1,13 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { defaultShouldDehydrateMutation, QueryClientProvider } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { get, set, del } from 'idb-keyval';
 import { registerSW } from 'virtual:pwa-register';
 import { queryClient, PERSISTED_CACHE_MAX_AGE } from './api/queryClient';
+import { SUBMIT_REPORT_MUTATION_KEY } from './api/reports';
 import { capturePageview } from './lib/analytics';
 import { syncConsentToPostHog } from './lib/consent';
 import { loadPostHog } from './lib/posthog-client';
@@ -167,6 +168,11 @@ const persistedApp = (
       maxAge: PERSISTED_CACHE_MAX_AGE,
       buster: __BUILD_ID__,
       dehydrateOptions: {
+        // Report mutations contain callbacks and cannot resume after a reload. Persisting a
+        // paused request would leave the shared submission guard waiting for a lost mutation.
+        shouldDehydrateMutation: (mutation) =>
+          mutation.options.mutationKey?.[0] !== SUBMIT_REPORT_MUTATION_KEY[0] &&
+          defaultShouldDehydrateMutation(mutation),
         // Persist any query that holds data, not just status==='success' (the default). When a
         // user is offline, the periodic refetch fails and React Query demotes the query to
         // 'error' while keeping its last data in memory — the success-only default would then
