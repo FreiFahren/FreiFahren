@@ -315,6 +315,7 @@ function SubmitFooter({
   const canSubmit = stationId !== null;
 
   const handleSubmit = () => {
+    if (submitReport.isPending) return;
     /*
      * The button reads as disabled but stays clickable (aria-disabled, not disabled), because a
      * truly disabled button swallows the tap and a user who has not noticed the station picker
@@ -353,7 +354,6 @@ function SubmitFooter({
       onOptimistic: (result) => {
         setConsecutiveFailures(0);
         notifySuccess();
-        recordSubmission();
         getFeatureFlagVariant(FEATURE_FLAGS.contributeModalTiming);
         track('report_submitted', {
           stationId: result.stationId,
@@ -362,6 +362,7 @@ function SubmitFooter({
         });
         onSubmitted(result);
       },
+      onSubmissionSuccess: recordSubmission,
       onSubmissionError: (error) => {
         onSubmissionError();
         /*

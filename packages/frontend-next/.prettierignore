@@ -1,5 +1,7 @@
 dist
 ios
 node_modules
+test-results
+playwright-report
 src/routeTree.gen.ts
 .json
