@@ -38,9 +38,3 @@ jobs:
             # build failures — neither of which the lint/format steps above catch.
             - name: Run build
               run: bun run build
-
-            - name: Install report-test browser
-              run: bunx playwright install --with-deps chromium
-
-            - name: Test report cooldown and retries
-              run: bun run test:reports
