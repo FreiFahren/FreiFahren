@@ -1,8 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 
-import { Impressum } from '@/components/legal/Impressum';
+import { imprintUrl } from '@/lib/privacy-policy';
 
+// Kept so links to the old in-app page (store listings, shared links) still land on the legal notice.
 export const Route = createFileRoute('/impressum')({
   staticData: { legalDisclaimer: false },
-  component: Impressum,
+  beforeLoad: () => {
+    throw redirect({ href: imprintUrl(), replace: true });
+  },
 });

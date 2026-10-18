@@ -3,13 +3,14 @@ import { useSyncExternalStore } from 'react';
 import { enqueuePostHog, PERSISTENT_PERSISTENCE } from '@/lib/posthog-client';
 import { safeLocalStorage } from '@/lib/safe-storage';
 
-// Capture is ON by default (see main.tsx). The banner asks for cookie consent specifically; either
-// choice keeps analytics running, but at different privacy levels:
-// - null (undecided): init default — persistent capture (cookie/localStorage), full retention/funnels.
+// Capture is ON by default (see main.tsx). The banner asks for cookie consent specifically; every
+// state keeps analytics running, but only consent lets PostHog store anything on the device
+// (§ 25 TDDDG, as the privacy policy promises):
+// - null (undecided): cookieless (in-memory) capture until the user decides.
 // - 'granted': allow cookies — persistent capture, recognizes returning visits.
-// - 'denied': decline cookies — switch to cookieless (in-memory) capture. Anonymous events still
-//   flow, but nothing is stored on the device and each session looks new. A full opt-out (no events
-//   at all) is available via the browser's Do Not Track signal (respect_dnt in main.tsx).
+// - 'denied': decline cookies, so capture is cookieless (in-memory). Events still flow, but nothing is
+//   stored on the device and each session looks new. A full opt-out (no events at all) is available
+//   via the browser's Do Not Track signal (respect_dnt in posthog-client.ts).
 export type ConsentChoice = 'granted' | 'denied';
 
 const STORAGE_KEY = 'analyticsConsent';
@@ -78,7 +79,7 @@ function applyToPostHog(value: ConsentChoice | null): void {
   // Ops buffer until the lazily-loaded SDK is ready.
   if (value === 'denied') {
     // Cookieless: keep capturing but store nothing on the device. reset() clears any id/cookie set
-    // earlier (e.g. while undecided) so declining cookies genuinely leaves no device storage.
+    // earlier (e.g. cookies allowed earlier in this session) so declining genuinely leaves no device storage.
     enqueuePostHog((posthog) => {
       posthog.reset();
       posthog.set_config({ persistence: 'memory' });
@@ -92,9 +93,9 @@ function applyToPostHog(value: ConsentChoice | null): void {
       posthog.register({ cookie_consent: 'granted', persistence_mode: PERSISTENT_PERSISTENCE });
     });
   } else {
-    // null: leave PostHog in its init default (persistent capture), just label the slice.
+    // null: loadPostHog already started in memory for anyone who hasn't allowed cookies.
     enqueuePostHog((posthog) => {
-      posthog.register({ cookie_consent: 'undecided', persistence_mode: PERSISTENT_PERSISTENCE });
+      posthog.register({ cookie_consent: 'undecided', persistence_mode: 'memory' });
     });
   }
 }

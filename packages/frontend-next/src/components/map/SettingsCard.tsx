@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router';
 import {
   ChevronRight,
   HeartHandshake,
@@ -17,8 +16,7 @@ import { openConsentSettings } from '@/lib/consent';
 import { openContributeModal } from '@/lib/contribute-modal';
 import { openFeedbackModal } from '@/lib/feedback-modal';
 import { openLegalDisclaimer } from '@/lib/legal-disclaimer';
-import { Route as ImpressumRoute } from '@/routes/impressum';
-import { Route as PrivacyRoute } from '@/routes/privacy';
+import { imprintUrl, privacyPolicyUrl } from '@/lib/privacy-policy';
 
 import { CitySwitcher } from './CitySwitcher';
 import { DetailCard } from './DetailCard';
@@ -30,23 +28,24 @@ const WEBSITE_URL = 'https://freifahren.org';
 const SHOP_URL = 'https://freifahren.myspreadshop.de/';
 
 function LegalLink({
-  to,
+  href,
   onClick,
   children,
 }: {
-  to?: typeof ImpressumRoute.to | typeof PrivacyRoute.to;
+  href?: string;
   onClick?: () => void;
   children: React.ReactNode;
 }) {
-  if (to) {
+  if (href) {
     return (
-      <Link
-        to={to}
-        preload={false}
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
         className="text-muted-foreground hover:text-foreground text-xs underline"
       >
         {children}
-      </Link>
+      </a>
     );
   }
   return (
@@ -65,7 +64,7 @@ type SettingsCardProps = {
 };
 
 export function SettingsCard({ onClose }: SettingsCardProps) {
-  const { t } = useTranslation(NAMESPACE);
+  const { t, i18n } = useTranslation(NAMESPACE);
 
   return (
     <DetailCard title={t('title')} closeLabel={t('close')} onClose={onClose}>
@@ -137,8 +136,8 @@ export function SettingsCard({ onClose }: SettingsCardProps) {
         >
           {t('association')}
         </a>
-        <LegalLink to={ImpressumRoute.to}>{t('imprint')}</LegalLink>
-        <LegalLink to={PrivacyRoute.to}>{t('privacy')}</LegalLink>
+        <LegalLink href={imprintUrl(i18n.resolvedLanguage)}>{t('imprint')}</LegalLink>
+        <LegalLink href={privacyPolicyUrl(i18n.resolvedLanguage)}>{t('privacy')}</LegalLink>
         <LegalLink onClick={openLegalDisclaimer}>{t('terms')}</LegalLink>
         <LegalLink onClick={openConsentSettings}>{t('analytics')}</LegalLink>
       </CardContent>

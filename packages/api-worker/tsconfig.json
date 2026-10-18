@@ -10,7 +10,8 @@
         "jsxImportSource": "hono/jsx",
         "esModuleInterop": true,
         "paths": {
-            "@freifahren/cities": ["../cities/src/index.ts"]
+            "@freifahren/cities": ["../cities/src/index.ts"],
+            "@freifahren/report-privacy": ["../report-privacy/src/index.ts"]
         }
     }
 }

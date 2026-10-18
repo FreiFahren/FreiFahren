@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -6,15 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { track } from '@/lib/analytics';
 import { authClient, sendSignInCode } from '@/lib/auth-client';
+import { privacyPolicyUrl } from '@/lib/privacy-policy';
 import { preloadTurnstile } from '@/lib/turnstile';
-import { Route as PrivacyRoute } from '@/routes/privacy';
 
 import { DevEmailHint, INPUT, PRIMARY_BUTTON } from './account-layout';
 import { NAMESPACE } from './account.i18n';
 import { type AuthError, AuthErrorMessage, CodeField } from './code-field';
 
 export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
-  const { t } = useTranslation(NAMESPACE);
+  const { t, i18n } = useTranslation(NAMESPACE);
   const [email, setEmail] = useState('');
   // The address the code went to, which later edits to the field can't change.
   const [submittedEmail, setSubmittedEmail] = useState('');
@@ -86,9 +85,14 @@ export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
         </Button>
         <p className="text-muted-foreground text-xs">
           {t('privacyNotice')}{' '}
-          <Link to={PrivacyRoute.to} className="text-foreground underline">
+          <a
+            href={privacyPolicyUrl(i18n.resolvedLanguage)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-foreground underline"
+          >
             {t('privacyLink')}
-          </Link>
+          </a>
         </p>
       </form>
     );

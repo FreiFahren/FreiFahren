@@ -17,6 +17,7 @@ export default defineWorkersConfig(async () => {
         resolve: {
             alias: {
                 '@freifahren/cities': new URL('../cities/src/index.ts', import.meta.url).pathname,
+                '@freifahren/report-privacy': new URL('../report-privacy/src/index.ts', import.meta.url).pathname,
             },
         },
         test: {
