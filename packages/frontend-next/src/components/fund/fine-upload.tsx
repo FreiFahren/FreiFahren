@@ -8,20 +8,13 @@ import { FundRequestError } from '@/lib/fund-api';
 
 import { NAMESPACE } from './fund.i18n';
 
-const UPLOAD_ERRORS: Record<
-  number,
-  | 'uploadEmpty'
-  | 'uploadSessionExpired'
-  | 'uploadTooLarge'
-  | 'uploadWrongType'
-  | 'uploadUnavailable'
-> = {
+const UPLOAD_ERRORS = {
   400: 'uploadEmpty',
   401: 'uploadSessionExpired',
   413: 'uploadTooLarge',
   415: 'uploadWrongType',
   503: 'uploadUnavailable',
-};
+} as const;
 
 type FineUploadProps = {
   userId: string;
@@ -44,7 +37,8 @@ export function FineUpload({ userId, sessionId, onSignIn }: FineUploadProps) {
   let needsSignIn = false;
   let canRetry = upload.isError;
   if (upload.error instanceof FundRequestError) {
-    errorKey = UPLOAD_ERRORS[upload.error.status] ?? 'uploadInterrupted';
+    errorKey =
+      UPLOAD_ERRORS[upload.error.status as keyof typeof UPLOAD_ERRORS] ?? 'uploadInterrupted';
     needsSignIn = upload.error.status === 401;
     canRetry = upload.error.status >= 500;
   }
