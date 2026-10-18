@@ -1,39 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { HttpError } from '@/api/client';
-import { getSessionToken } from '@/lib/session';
-import { optionalEnv } from '@/lib/utils';
+import { fetchFund, type Fine } from '@/lib/fund-api';
 
-export type Fine = {
-  id: string;
-  status: 'in_review' | 'paid' | 'declined';
-  createdAt: string;
-};
+export type { Fine } from '@/lib/fund-api';
 
-export async function fetchFund(path: string, init: RequestInit = {}): Promise<Response> {
-  const baseUrl = optionalEnv('VITE_FUND_URL');
-  const token = await getSessionToken();
-  if (!baseUrl || !token) throw new Error('Fund unavailable');
-  const { signal } = init;
-  const response = await fetch(`${baseUrl.replace(/\/$/, '')}${path}`, {
-    ...init,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...(init.body === undefined ? {} : { 'Content-Type': 'application/json' }),
-    },
-    credentials: 'omit',
-    cache: 'no-store',
-    signal: signal
-      ? AbortSignal.any([signal, AbortSignal.timeout(15_000)])
-      : AbortSignal.timeout(15_000),
-  });
-  if (!response.ok) throw new HttpError(path, response.status);
-  return response;
-}
+export const fundHistoryKey = (userId: string, sessionId: string) =>
+  ['fund', userId, sessionId, 'fines'] as const;
 
 export function useFundHistory(userId: string, sessionId: string) {
   return useQuery({
-    queryKey: ['fund', userId, sessionId, 'fines'],
+    queryKey: fundHistoryKey(userId, sessionId),
     queryFn: async ({ signal }): Promise<Fine[]> => (await fetchFund('/fines', { signal })).json(),
     // Upload dates and statuses are private member data. Keep them out of
     // the shared IndexedDB cache so they are not retained after sign-out or browser restarts.

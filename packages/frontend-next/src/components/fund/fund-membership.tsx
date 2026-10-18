@@ -2,10 +2,10 @@ import { LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { HttpError } from '@/api/client';
 import { PRIMARY_BUTTON, SECONDARY_BUTTON } from '@/components/account/account-layout';
 import { Button } from '@/components/ui/button';
 import { type Membership, openStripe, useMembership } from '@/hooks/use-membership';
+import { FundRequestError } from '@/lib/fund-api';
 
 import { FundIntroduction } from './fund-introduction';
 import { FundOverview } from './fund-overview';
@@ -17,7 +17,15 @@ import { NAMESPACE } from './fund.i18n';
 const MIN_EUR = 9;
 const MAX_EUR = 30;
 
-export function FundMembership({ userId, sessionId }: { userId: string; sessionId: string }) {
+export function FundMembership({
+  userId,
+  sessionId,
+  onSignIn,
+}: {
+  userId: string;
+  sessionId: string;
+  onSignIn: () => void;
+}) {
   const { t } = useTranslation(NAMESPACE);
   const membership = useMembership(userId);
 
@@ -41,7 +49,7 @@ export function FundMembership({ userId, sessionId }: { userId: string; sessionI
       <div className="flex flex-col gap-6">
         <MemberStatus membership={membership.data} />
         <FundRules />
-        <FundOverview userId={userId} sessionId={sessionId} />
+        <FundOverview userId={userId} sessionId={sessionId} onSignIn={onSignIn} />
       </div>
     );
   }
@@ -67,7 +75,8 @@ function useOpenStripe(onAlreadyMember?: () => void) {
       await openStripe(...args);
       setState('idle');
     } catch (err) {
-      if (err instanceof HttpError && err.status === 409 && onAlreadyMember) onAlreadyMember();
+      if (err instanceof FundRequestError && err.status === 409 && onAlreadyMember)
+        onAlreadyMember();
       setState('failed');
     }
   };

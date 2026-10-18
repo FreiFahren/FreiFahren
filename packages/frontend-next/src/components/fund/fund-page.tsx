@@ -36,11 +36,12 @@ function FundAccessFlow() {
   // An account isn't a membership: signed-in users join or manage it through Stripe's hosted pages.
   return (
     <SignInGate signedOut={(onSignedIn) => <FundSignIn onSignedIn={onSignedIn} />}>
-      {(session) => (
+      {(session, refetch) => (
         <FundMembership
           key={session.session.id}
           userId={session.user.id}
           sessionId={session.session.id}
+          onSignIn={refetch}
         />
       )}
     </SignInGate>

@@ -1,7 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import { useQuery } from '@tanstack/react-query';
 
-import { fetchFund } from './use-fund-history';
+import { fetchFund } from '@/lib/fund-api';
 
 export type Membership = {
   status: 'none' | 'pending' | 'active' | 'past_due' | 'canceled';
@@ -33,6 +33,7 @@ export async function openStripe(
 ) {
   const response = await fetchFund(path, {
     method: 'POST',
+    headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const { url } = (await response.json()) as { url: string };
