@@ -36,11 +36,12 @@ function FundAccessFlow() {
   // Membership checks belong in the signed-in branch; session handling stays shared.
   return (
     <SignInGate signedOut={(onSignedIn) => <FundSignIn onSignedIn={onSignedIn} />}>
-      {(session) => (
+      {(session, refetch) => (
         <FundOverview
           key={session.session.id}
           userId={session.user.id}
           sessionId={session.session.id}
+          onSignIn={refetch}
         />
       )}
     </SignInGate>
