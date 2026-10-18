@@ -1,3 +1,4 @@
+import type { ReportRejection } from '@/components/report/useReportVerification';
 import type { ContributeSource } from '@/lib/contribute-modal';
 import type { GeolocationPermissionState } from '@/lib/location-prompt';
 import { enqueuePostHog } from '@/lib/posthog-client';
@@ -24,7 +25,7 @@ type AnalyticsEvents = {
     directionId: string | null;
   };
   report_rejected: {
-    reason: 'too_soon' | 'too_far';
+    reason: ReportRejection;
     stationId: string;
   };
   screenshot_taken: Record<string, never>;
