@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router';
 import {
   ChevronRight,
   HeartHandshake,
@@ -17,8 +16,7 @@ import { openConsentSettings } from '@/lib/consent';
 import { openContributeModal } from '@/lib/contribute-modal';
 import { openFeedbackModal } from '@/lib/feedback-modal';
 import { openLegalDisclaimer } from '@/lib/legal-disclaimer';
-import { privacyPolicyUrl } from '@/lib/privacy-policy';
-import { Route as ImpressumRoute } from '@/routes/impressum';
+import { imprintUrl, privacyPolicyUrl } from '@/lib/privacy-policy';
 
 import { CitySwitcher } from './CitySwitcher';
 import { DetailCard } from './DetailCard';
@@ -30,12 +28,10 @@ const WEBSITE_URL = 'https://freifahren.org';
 const SHOP_URL = 'https://freifahren.myspreadshop.de/';
 
 function LegalLink({
-  to,
   href,
   onClick,
   children,
 }: {
-  to?: typeof ImpressumRoute.to;
   href?: string;
   onClick?: () => void;
   children: React.ReactNode;
@@ -50,17 +46,6 @@ function LegalLink({
       >
         {children}
       </a>
-    );
-  }
-  if (to) {
-    return (
-      <Link
-        to={to}
-        preload={false}
-        className="text-muted-foreground hover:text-foreground text-xs underline"
-      >
-        {children}
-      </Link>
     );
   }
   return (
@@ -151,7 +136,7 @@ export function SettingsCard({ onClose }: SettingsCardProps) {
         >
           {t('association')}
         </a>
-        <LegalLink to={ImpressumRoute.to}>{t('imprint')}</LegalLink>
+        <LegalLink href={imprintUrl(i18n.resolvedLanguage)}>{t('imprint')}</LegalLink>
         <LegalLink href={privacyPolicyUrl(i18n.resolvedLanguage)}>{t('privacy')}</LegalLink>
         <LegalLink onClick={openLegalDisclaimer}>{t('terms')}</LegalLink>
         <LegalLink onClick={openConsentSettings}>{t('analytics')}</LegalLink>

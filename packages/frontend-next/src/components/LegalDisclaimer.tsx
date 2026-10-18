@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router';
 import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -13,9 +12,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { closeLegalDisclaimer, useLegalDisclaimerReview } from '@/lib/legal-disclaimer';
-import { privacyPolicyUrl } from '@/lib/privacy-policy';
+import { imprintUrl, privacyPolicyUrl } from '@/lib/privacy-policy';
 import { cn } from '@/lib/utils';
-import { Route as ImpressumRoute } from '@/routes/impressum';
 
 import { NAMESPACE } from './LegalDisclaimer.i18n';
 
@@ -49,14 +47,15 @@ export function LegalLinks({
 
   return (
     <div className={cn('flex gap-4', className)}>
-      <Link
-        to={ImpressumRoute.to}
-        preload={false}
+      <a
+        href={imprintUrl(i18n.resolvedLanguage)}
+        target="_blank"
+        rel="noopener noreferrer"
         onClick={onNavigate}
         className="text-muted-foreground hover:text-foreground text-xs underline"
       >
         {t('imprint')}
-      </Link>
+      </a>
       <a
         href={privacyPolicyUrl(i18n.resolvedLanguage)}
         target="_blank"
