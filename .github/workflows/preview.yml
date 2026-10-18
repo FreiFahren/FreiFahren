@@ -221,6 +221,7 @@ jobs:
               env:
                   VITE_API_URL: ${{ env.API_URL }}
                   VITE_AUTH_URL: https://auth-worker-preview.freifahren.workers.dev
+                  VITE_FUND_URL: https://fund-worker-preview.freifahren.workers.dev
                   VITE_PREVIEW: 'true'
                   VITE_POSTHOG_KEY: ''
                   VITE_TURNSTILE_SITE_KEY: '1x00000000000000000000AA'
