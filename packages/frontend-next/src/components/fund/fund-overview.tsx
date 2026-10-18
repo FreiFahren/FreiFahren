@@ -6,6 +6,7 @@ import { SectionHeading } from '@/components/ui/section-heading';
 import { useFundHistory, type Fine } from '@/hooks/use-fund-history';
 import { cn } from '@/lib/utils';
 
+import { FineUpload } from './fine-upload';
 import { NAMESPACE } from './fund.i18n';
 
 const STATUS_STYLES = {
@@ -99,11 +100,20 @@ function UploadHistory({ userId, sessionId }: { userId: string; sessionId: strin
   );
 }
 
-export function FundOverview({ userId, sessionId }: { userId: string; sessionId: string }) {
+export function FundOverview({
+  userId,
+  sessionId,
+  onSignIn,
+}: {
+  userId: string;
+  sessionId: string;
+  onSignIn: () => void;
+}) {
   const { t } = useTranslation(NAMESPACE);
 
   return (
-    <div className="pb-4">
+    <div className="pb-20">
+      <FineUpload userId={userId} sessionId={sessionId} onSignIn={onSignIn} />
       <section aria-label={t('uploadsTitle')}>
         <SectionHeading className="mb-4">{t('uploadsTitle')}</SectionHeading>
         <UploadHistory userId={userId} sessionId={sessionId} />
