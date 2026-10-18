@@ -139,12 +139,24 @@
   --map-bleed: 160px;
 }
 
-/* An installed PWA has no browser bars to bleed under, and its status bar is opaque (theme-color):
-   drawing under it scrolls the document, which makes iOS blur the status bar area over the search
-   bar. */
+/* An installed PWA has no browser bars to bleed under, so it skips the bleed. */
 @media (display-mode: standalone) {
   :root {
     --map-bleed: 0px;
+  }
+  /* iOS 26+ draws a Liquid Glass scroll-edge blur over the top of an installed web app, right
+     where the search bar sits. An opaque, full-width fixed layer at the top edge makes iOS tint the
+     status bar with its color and skip the blur, but only once it's taller than ~5px. This one
+     fills the gap above the search bar (pt-safe-3), so the status bar color runs into it. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+    height: calc(var(--spacing) * 3);
+    background: var(--card);
+    z-index: 1;
+    pointer-events: none;
   }
 }
 
