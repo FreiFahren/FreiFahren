@@ -35,8 +35,14 @@ export function FundPage() {
 function FundAccessFlow() {
   // Membership checks belong in the signed-in branch; session handling stays shared.
   return (
-    <SignInGate loading={null} signedOut={(onSignedIn) => <FundSignIn onSignedIn={onSignedIn} />}>
-      {() => <FundOverview />}
+    <SignInGate signedOut={(onSignedIn) => <FundSignIn onSignedIn={onSignedIn} />}>
+      {(session) => (
+        <FundOverview
+          key={session.session.id}
+          userId={session.user.id}
+          sessionId={session.session.id}
+        />
+      )}
     </SignInGate>
   );
 }

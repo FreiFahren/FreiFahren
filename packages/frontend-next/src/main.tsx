@@ -173,7 +173,8 @@ const persistedApp = (
         // refuse to persist it and overwrite the good snapshot with an empty one, so the data
         // would vanish after a couple of reloads. Keying on `data` keeps the last-known reports/
         // risk/transit across cold starts; once back online the refetch succeeds and refreshes.
-        shouldDehydrateQuery: (query) => query.state.data !== undefined,
+        shouldDehydrateQuery: (query) =>
+          query.meta?.persist !== false && query.state.data !== undefined,
       },
     }}
   >
