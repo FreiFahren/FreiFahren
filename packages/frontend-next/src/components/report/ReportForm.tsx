@@ -53,7 +53,8 @@ function normalize(value: string): string {
 const NEARBY_COUNT = 3;
 
 const REJECTION_MESSAGE: Record<ReportRejection, string> = {
-  too_soon: 'errorTooSoon',
+  too_fast: 'errorTooSoon',
+  rate_limited: 'errorTooSoon',
   too_far: 'errorTooFar',
 };
 
@@ -314,81 +315,73 @@ function SubmitFooter({
 
   const canSubmit = stationId !== null;
 
-  const handleSubmit = () => {
-    /*
-     * The button reads as disabled but stays clickable (aria-disabled, not disabled), because a
-     * truly disabled button swallows the tap and a user who has not noticed the station picker
-     * gets no feedback at all. Tell them what is missing instead.
-     */
-    if (stationId === null) {
-      toast.custom(
-        () => (
-          <ToastPill className="bg-destructive flex w-fit items-center gap-2 text-sm font-semibold text-white">
-            <TriangleAlert className="size-4" />
-            {t('errorNoStation')}
-          </ToastPill>
-        ),
-        { id: 'report-station-required' },
-      );
-      return;
+  const showErrorToast = (message: string, id: string) => {
+    toast.custom(
+      () => (
+        <ToastPill className="bg-destructive flex w-fit items-center gap-2 text-sm font-semibold text-white">
+          <TriangleAlert className="size-4" />
+          {message}
+        </ToastPill>
+      ),
+      { id },
+    );
+  };
+
+  const validateSubmission = (selectedStationId: string | null): selectedStationId is string => {
+    // Keep an empty selection clickable so the user can learn what is missing.
+    if (selectedStationId === null) {
+      showErrorToast(t('errorNoStation'), 'report-station-required');
+      return false;
     }
-    const rejection = verify(stationId);
+
+    const rejection = verify(selectedStationId);
     if (rejection) {
-      track('report_rejected', { reason: rejection, stationId });
-      toast.custom(
-        () => (
-          <ToastPill className="bg-destructive flex w-fit items-center gap-2 text-sm font-semibold text-white">
-            <TriangleAlert className="size-4" />
-            {t(REJECTION_MESSAGE[rejection])}
-          </ToastPill>
-        ),
-        { id: 'report-verification' },
-      );
+      track('report_rejected', { reason: rejection, stationId: selectedStationId });
+      showErrorToast(t(REJECTION_MESSAGE[rejection]), 'report-verification');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleOptimisticSubmission = (result: SubmitReportResponse) => {
+    setConsecutiveFailures(0);
+    notifySuccess();
+    getFeatureFlagVariant(FEATURE_FLAGS.contributeModalTiming);
+    track('report_submitted', {
+      stationId: result.stationId,
+      lineId: result.lineId,
+      directionId: result.directionId,
+    });
+    onSubmitted(result);
+  };
+
+  const handleSubmissionError = (error: unknown) => {
+    onSubmissionError();
+    captureIssue('Report submit failed', {
+      status: error instanceof SubmitReportError ? error.status : undefined,
+    });
+
+    const failureCount = consecutiveFailures + 1;
+    setConsecutiveFailures(failureCount);
+    if (failureCount >= REPEATED_FAILURE_THRESHOLD) {
+      onRepeatedFailure();
       return;
     }
+
+    showErrorToast(t('errorSubmitFailed'), 'report-submit-error');
+  };
+
+  const handleSubmit = () => {
+    if (!validateSubmission(stationId)) return;
+
+    recordSubmission(stationId);
     submitReport.mutate({
       stationId,
       lineName,
       directionStationId,
-      onOptimistic: (result) => {
-        setConsecutiveFailures(0);
-        notifySuccess();
-        recordSubmission();
-        getFeatureFlagVariant(FEATURE_FLAGS.contributeModalTiming);
-        track('report_submitted', {
-          stationId: result.stationId,
-          lineId: result.lineId,
-          directionId: result.directionId,
-        });
-        onSubmitted(result);
-      },
-      onSubmissionError: (error) => {
-        onSubmissionError();
-        /*
-         * Every other failure (network error, an edge block before the token is even checked,
-         * an unexpected 5xx, …) must still tell the user something happened — otherwise the
-         * button just re-enables silently and a tap that produced no report reads as tapping
-         * nothing at all.
-         */
-        captureIssue('Report submit failed', {
-          status: error instanceof SubmitReportError ? error.status : undefined,
-        });
-        const failureCount = consecutiveFailures + 1;
-        setConsecutiveFailures(failureCount);
-        if (failureCount >= REPEATED_FAILURE_THRESHOLD) {
-          onRepeatedFailure();
-          return;
-        }
-        toast.custom(
-          () => (
-            <ToastPill className="bg-destructive flex w-fit items-center gap-2 text-sm font-semibold text-white">
-              <TriangleAlert className="size-4" />
-              {t('errorSubmitFailed')}
-            </ToastPill>
-          ),
-          { id: 'report-submit-error' },
-        );
-      },
+      onOptimistic: handleOptimisticSubmission,
+      onSubmissionError: handleSubmissionError,
     });
   };
 
