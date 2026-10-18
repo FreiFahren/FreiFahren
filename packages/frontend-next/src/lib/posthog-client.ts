@@ -22,6 +22,26 @@ let loadPromise: Promise<void> | null = null;
 const queue: PostHogOp[] = [];
 // Cap the buffer so a session that never loads the SDK (dev without a key) can't grow it unbounded.
 const MAX_QUEUED = 500;
+let flagAccountId: string | null = null;
+const flagAccountListeners = new Set<(changing: boolean) => void>();
+
+export function setPostHogFlagAccount(next: string | null): void {
+  if (next === flagAccountId) return;
+  flagAccountId = next;
+  enqueuePostHog(syncPostHogFlagAccount);
+}
+
+export function subscribePostHogFlagAccount(listener: (changing: boolean) => void): () => void {
+  flagAccountListeners.add(listener);
+  return () => flagAccountListeners.delete(listener);
+}
+
+export function syncPostHogFlagAccount(posthog: PostHog): void {
+  for (const listener of flagAccountListeners) listener(true);
+  // Evaluation overrides do not identify the account in analytics or update its person profile.
+  posthog.setPersonPropertiesForFlags({ account_id: flagAccountId });
+  for (const listener of flagAccountListeners) listener(false);
+}
 
 export function getDistinctId(): string | undefined {
   const distinctId = instance?.get_distinct_id();
@@ -87,7 +107,7 @@ export function loadPostHog(persistent: boolean): Promise<void> {
       // api_host is our reverse proxy in prod; keep PostHog UI/toolbar links on the real app.
       ui_host: 'https://eu.posthog.com',
       defaults: '2025-05-24',
-      // We never call identify() (the app has no login), so under the default 'identified_only'
+      // We never call identify() (accounts are used only for flag evaluation), so under the default 'identified_only'
       // mode PostHog ingests every event personless and builds no person profiles at all — which
       // leaves lifecycle, retention, and stickiness permanently empty. 'always' lets the persistent
       // anonymous distinct_id form a person profile so returning visits are measurable. Consent still
@@ -105,6 +125,8 @@ export function loadPostHog(persistent: boolean): Promise<void> {
       // Pageviews are captured manually from the router so they don't depend on when this
       // lazily-loaded SDK initializes; capture_pageleave stays on by default.
       capture_pageview: false,
+      // Replace persisted overrides before any startup flag request can use a previous account.
+      loaded: () => syncPostHogFlagAccount(posthog),
     });
     // Stamp every event with the runtime so funnels can be split by web vs native.
     // city is a registered super property (not derived from $host) because native

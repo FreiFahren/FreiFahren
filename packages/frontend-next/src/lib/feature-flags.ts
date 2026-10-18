@@ -1,13 +1,12 @@
 import { useSyncExternalStore } from 'react';
 
-import { enqueuePostHog } from '@/lib/posthog-client';
-import { isPreviewBuild } from '@/lib/utils';
+import { enqueuePostHog, subscribePostHogFlagAccount } from '@/lib/posthog-client';
+import { isPreviewBuild, optionalEnv } from '@/lib/utils';
 
 // PostHog feature flags read through the same lazy-loaded client as analytics, so components never
 // touch the SDK directly. Flags gate UI that ships in the bundle but isn't launched yet; the value
-// is false until the SDK loads and PostHog resolves flags, and false forever when analytics is
-// disabled (no key, or a 'denied'/DNT session that never initializes the SDK). Fail-closed: a
-// gated feature stays hidden unless PostHog affirmatively turns it on.
+// is false until the SDK loads and PostHog resolves flags. Account targeting uses the `account_id`
+// evaluation property, independently of consent to account-linked analytics.
 export const FEATURE_FLAGS = {
   citySwitcher: 'city-switcher',
   contributeModalTiming: 'contribute-modal-timing',
@@ -24,6 +23,7 @@ const values = new Map<FlagKey, boolean>();
 const variants = new Map<FlagKey, string | boolean>();
 const listeners = new Set<() => void>();
 let subscribed = false;
+const bypassFlags = (import.meta.env.DEV || isPreviewBuild) && !optionalEnv('VITE_POSTHOG_KEY');
 
 function notify(): void {
   for (const listener of listeners) listener();
@@ -36,11 +36,19 @@ function ensureSubscribed(): void {
   if (subscribed) return;
   subscribed = true;
   enqueuePostHog((posthog) => {
+    let changingIdentity = false;
+    let confirmIdentity = true;
+    let registering = true;
+    const clear = () => {
+      values.clear();
+      variants.clear();
+      notify();
+    };
     const sync = () => {
       let changed = false;
       for (const key of Object.values(FEATURE_FLAGS)) {
-        const next = posthog.isFeatureEnabled(key) ?? false;
-        const nextVariant = posthog.getFeatureFlag(key) ?? false;
+        const next = posthog.isFeatureEnabled(key, { fresh: true }) ?? false;
+        const nextVariant = posthog.getFeatureFlag(key, { fresh: true }) ?? false;
         if (values.get(key) !== next) {
           values.set(key, next);
           changed = true;
@@ -52,8 +60,26 @@ function ensureSubscribed(): void {
       }
       if (changed) notify();
     };
-    posthog.onFeatureFlags(sync);
-    sync();
+    posthog.on('featureFlagsReloading', clear);
+    subscribePostHogFlagAccount((changing) => {
+      changingIdentity = changing;
+      if (changing) {
+        confirmIdentity = true;
+        clear();
+      }
+    });
+    posthog.onFeatureFlags((_flags, _variants, context) => {
+      if (registering || changingIdentity) return;
+      if (context?.errorsLoading) clear();
+      else if (confirmIdentity) {
+        // The SDK serializes requests but can deliver an old account's in-flight response.
+        // Drain that response, then accept only a follow-up requested for the current identity.
+        confirmIdentity = false;
+        posthog.reloadFeatureFlags();
+      } else sync();
+    });
+    registering = false;
+    posthog.reloadFeatureFlags();
   });
 }
 
@@ -63,18 +89,17 @@ export function subscribeToFeatureFlags(listener: () => void): () => void {
   return () => listeners.delete(listener);
 }
 
-// In dev and on a PR preview every flag reads on, so gated work is visible without touching PostHog
-// (a preview has no PostHog key). In prod the value comes from the resolved flag.
+// Keyless dev/previews show all features. A configured key exercises real targeting locally too.
 export function getFeatureFlag(flag: FlagKey): boolean {
   ensureSubscribed();
-  return import.meta.env.DEV || isPreviewBuild ? true : (values.get(flag) ?? false);
+  return bypassFlags || (values.get(flag) ?? false);
 }
 
 export function getFeatureFlagVariant(
   flag: typeof FEATURE_FLAGS.contributeModalTiming,
 ): ContributeModalTimingVariant | false {
   ensureSubscribed();
-  if (import.meta.env.DEV || isPreviewBuild) return 'control';
+  if (bypassFlags) return 'control';
   const value = variants.get(flag);
   return value === 'control' || value === 'test' ? value : false;
 }
