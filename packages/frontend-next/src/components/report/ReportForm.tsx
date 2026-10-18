@@ -81,7 +81,7 @@ function LinePicker() {
         lines={visibleLines}
         selectedLine={lineName}
         onSelect={selectLine}
-        wrap={Boolean(stationId || previewStationId)}
+        wrap={Boolean(stationId ?? previewStationId)}
       />
     </section>
   );
@@ -157,7 +157,10 @@ function StationPicker() {
   return (
     <section className={cn('mt-6 flex flex-col px-4', !stationId && 'min-h-0 flex-1')}>
       <div className="mb-3 flex items-center justify-between">
-        <SectionHeading hint={stationId ? undefined : t('required')} hintTone="destructive">
+        <SectionHeading
+          hint={stationId !== null ? undefined : t('required')}
+          hintTone="destructive"
+        >
           {t('station')}
         </SectionHeading>
         {stationId && <ClearSelectionButton onClick={clear} />}
