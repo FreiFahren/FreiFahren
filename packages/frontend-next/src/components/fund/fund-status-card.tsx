@@ -6,14 +6,11 @@ import { cn } from '@/lib/utils';
 // Green while covered, orange while coverage is about to end or not started, red when not covered.
 export type FundStatusTone = 'ok' | 'warn' | 'danger';
 
+// Only the icon carries the tone; the card itself stays neutral.
 const TONES = {
-  ok: { Icon: ShieldCheck, card: 'border-ok/40 bg-ok/10', icon: 'text-ok' },
-  warn: { Icon: ShieldAlert, card: 'border-warn/40 bg-warn/10', icon: 'text-warn' },
-  danger: {
-    Icon: ShieldOff,
-    card: 'border-destructive/50 bg-destructive/10',
-    icon: 'text-destructive',
-  },
+  ok: { Icon: ShieldCheck, icon: 'text-ok' },
+  warn: { Icon: ShieldAlert, icon: 'text-warn' },
+  danger: { Icon: ShieldOff, icon: 'text-destructive' },
 } as const;
 
 type FundStatusCardProps = {
@@ -25,15 +22,17 @@ type FundStatusCardProps = {
 };
 
 export function FundStatusCard({ tone, title, body, details }: FundStatusCardProps) {
-  const { Icon, card, icon } = TONES[tone];
+  const { Icon, icon } = TONES[tone];
 
   return (
-    <div role="status" className={cn('flex flex-col gap-2 rounded-lg border p-4', card)}>
+    <div role="status" className="border-border flex flex-col gap-2 rounded-lg border p-4">
       <div className="flex items-center gap-2.5">
-        <Icon aria-hidden="true" className={cn('size-6 shrink-0', icon)} />
-        <p className="font-heading text-lg leading-snug font-semibold">{title}</p>
+        <Icon aria-hidden="true" className={cn('size-5 shrink-0', icon)} />
+        <p className="font-heading text-base leading-snug font-semibold">{title}</p>
       </div>
-      {body !== undefined && <p className="text-sm leading-relaxed">{body}</p>}
+      {body !== undefined && (
+        <p className="text-muted-foreground text-sm leading-relaxed">{body}</p>
+      )}
       {details !== undefined && <div className="text-muted-foreground text-sm">{details}</div>}
     </div>
   );

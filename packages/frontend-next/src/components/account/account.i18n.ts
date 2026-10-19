@@ -4,6 +4,7 @@ export const NAMESPACE = 'account';
 
 i18n.addResourceBundle('en', NAMESPACE, {
   open: 'Open account',
+  fundMember: 'Fund member',
   title: 'Account',
   emailIntro: "Sign in with your email address. We'll send you a 6-digit code.",
   privacyNotice: 'We use your email address only for your account and to send sign-in codes.',
@@ -47,6 +48,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
 
 i18n.addResourceBundle('de', NAMESPACE, {
   open: 'Konto öffnen',
+  fundMember: 'Fonds-Mitglied',
   title: 'Konto',
   emailIntro: 'Melde dich mit deiner E-Mail-Adresse an. Wir schicken dir einen 6-stelligen Code.',
   privacyNotice: 'Wir nutzen deine E-Mail-Adresse nur für dein Konto und für Anmeldecodes.',

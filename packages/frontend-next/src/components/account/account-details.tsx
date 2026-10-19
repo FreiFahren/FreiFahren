@@ -3,6 +3,7 @@ import { LogOut, Mail, Pencil, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { FundAccountStatus } from '@/components/fund/fund-account-status';
 import { authClient } from '@/lib/auth-client';
 import { clearSessionToken } from '@/lib/session';
 import { Route as MapIndexRoute } from '@/routes/_map/index';
@@ -12,7 +13,7 @@ import { NAMESPACE } from './account.i18n';
 import { DeleteAccount } from './delete-account';
 import { UsernameForm } from './username-form';
 
-type User = { name: string; email: string; createdAt: Date | string };
+type User = { id: string; name: string; email: string; createdAt: Date | string };
 
 // The settings card's rows.
 const ROW =
@@ -58,6 +59,8 @@ export function AccountDetails({ user }: { user: User }) {
           onCancel={() => setEditingName(false)}
         />
       )}
+
+      <FundAccountStatus userId={user.id} />
 
       <div className="-mx-3 flex flex-col">
         <div className={ROW}>

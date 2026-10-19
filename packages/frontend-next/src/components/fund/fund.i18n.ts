@@ -57,6 +57,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   contribution: '{{amount}} a month',
   renewsOn: 'Renews on {{date}}',
   rulesTitle: 'What you need to know',
+  rulesDone: 'Got it',
   ruleDontPayTitle: 'Don’t pay the fine yourself',
   ruleDontPayBody:
     'Submit it to the Fund and wait for us. We can’t refund anything you’ve already paid yourself.',
@@ -126,6 +127,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
   contribution: '{{amount}} im Monat',
   renewsOn: 'Verlängert sich am {{date}}',
   rulesTitle: 'Was du wissen musst',
+  rulesDone: 'Verstanden',
   ruleDontPayTitle: 'Zahl das Bußgeld nicht selbst',
   ruleDontPayBody:
     'Reich es beim Fonds ein und warte auf uns. Was du schon selbst bezahlt hast, können wir nicht erstatten.',

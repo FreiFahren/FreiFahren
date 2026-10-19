@@ -106,17 +106,26 @@ export function FundOverview({
   sessionId,
   onSignIn,
   canUpload = true,
+  onUploaded,
 }: {
   userId: string;
   sessionId: string;
   onSignIn: () => void;
   canUpload?: boolean;
+  onUploaded?: () => void;
 }) {
   const { t } = useTranslation(NAMESPACE);
 
   return (
     <div className={canUpload ? 'pb-20' : 'pb-4'}>
-      {canUpload && <FineUpload userId={userId} sessionId={sessionId} onSignIn={onSignIn} />}
+      {canUpload && (
+        <FineUpload
+          userId={userId}
+          sessionId={sessionId}
+          onSignIn={onSignIn}
+          onUploaded={onUploaded}
+        />
+      )}
       <section aria-label={t('uploadsTitle')}>
         <SectionHeading className="mb-4">{t('uploadsTitle')}</SectionHeading>
         <UploadHistory userId={userId} sessionId={sessionId} />
