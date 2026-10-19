@@ -49,7 +49,7 @@ function MemberCheck({ userId }: { userId: string }) {
   });
   if (data?.status !== 'active' && data?.status !== 'past_due') return null;
   return (
-    <span className="bg-ok ring-card absolute -bottom-0 -right-0 flex size-4 items-center justify-center rounded-full ring-2">
+    <span className="bg-ok ring-card absolute -right-0 -bottom-0 flex size-4 items-center justify-center rounded-full ring-2">
       <Check className="size-3 text-white" strokeWidth={3} aria-hidden="true" />
       <span className="sr-only">{t('fundMember')}</span>
     </span>
