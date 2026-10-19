@@ -11,6 +11,7 @@ import { NAMESPACE } from './fund.i18n';
 const UPLOAD_ERRORS = {
   400: 'uploadEmpty',
   401: 'uploadSessionExpired',
+  403: 'uploadMembershipEnded',
   413: 'uploadTooLarge',
   415: 'uploadWrongType',
   503: 'uploadUnavailable',

@@ -100,20 +100,23 @@ function UploadHistory({ userId, sessionId }: { userId: string; sessionId: strin
   );
 }
 
+// Former members keep their history: fines uploaded while covered are still handled.
 export function FundOverview({
   userId,
   sessionId,
   onSignIn,
+  canUpload = true,
 }: {
   userId: string;
   sessionId: string;
   onSignIn: () => void;
+  canUpload?: boolean;
 }) {
   const { t } = useTranslation(NAMESPACE);
 
   return (
-    <div className="pb-20">
-      <FineUpload userId={userId} sessionId={sessionId} onSignIn={onSignIn} />
+    <div className={canUpload ? 'pb-20' : 'pb-4'}>
+      {canUpload && <FineUpload userId={userId} sessionId={sessionId} onSignIn={onSignIn} />}
       <section aria-label={t('uploadsTitle')}>
         <SectionHeading className="mb-4">{t('uploadsTitle')}</SectionHeading>
         <UploadHistory userId={userId} sessionId={sessionId} />

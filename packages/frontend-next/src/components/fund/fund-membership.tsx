@@ -54,16 +54,21 @@ export function FundMembership({
     );
   }
   return (
-    <FundIntroduction>
-      {status !== 'none' && (
-        <FundStatusCard
-          tone={status === 'pending' ? 'warn' : 'danger'}
-          title={t(`${status}Title`)}
-          body={t(`${status}Body`)}
-        />
+    <div className="flex flex-col gap-6">
+      <FundIntroduction>
+        {status !== 'none' && (
+          <FundStatusCard
+            tone={status === 'pending' ? 'warn' : 'danger'}
+            title={t(`${status}Title`)}
+            body={t(`${status}Body`)}
+          />
+        )}
+        <JoinForm onAlreadyMember={() => void membership.refetch()} />
+      </FundIntroduction>
+      {status === 'canceled' && (
+        <FundOverview userId={userId} sessionId={sessionId} onSignIn={onSignIn} canUpload={false} />
       )}
-      <JoinForm onAlreadyMember={() => void membership.refetch()} />
-    </FundIntroduction>
+    </div>
   );
 }
 

@@ -20,6 +20,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   uploadWrongType: 'Please choose a JPEG, PNG, HEIC or WebP photo.',
   uploadSessionExpired: 'Please sign in again to upload your photo.',
   uploadUnavailable: 'Uploads are temporarily unavailable. Please try again.',
+  uploadMembershipEnded: 'Your membership has ended, so new fines can’t be uploaded.',
   uploadInterrupted:
     'We could not confirm your upload. Check your uploads below before trying again.',
   uploadSignIn: 'Sign in again',
@@ -45,7 +46,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
     'We haven’t received your first payment yet. If you just paid, this updates in a moment.',
   canceledTitle: 'You’re not protected',
   canceledBody:
-    'Your membership has ended, so new fines aren’t covered. You can join again whenever you like.',
+    'Your membership has ended, so new fines aren’t covered. Fines you uploaded before are still handled. You can join again whenever you like.',
   statusProtected: 'You’re protected',
   statusEnding: 'Protected until {{date}}',
   statusEndingBody:
@@ -87,6 +88,8 @@ i18n.addResourceBundle('de', NAMESPACE, {
   uploadWrongType: 'Bitte wähle ein Foto im Format JPEG, PNG, HEIC oder WebP.',
   uploadSessionExpired: 'Bitte melde dich erneut an, um dein Foto hochzuladen.',
   uploadUnavailable: 'Uploads sind vorübergehend nicht verfügbar. Bitte versuche es erneut.',
+  uploadMembershipEnded:
+    'Deine Mitgliedschaft ist beendet, du kannst keine neuen Knöllchen hochladen.',
   uploadInterrupted:
     'Wir konnten den Upload nicht bestätigen. Prüfe deine Uploads unten, bevor du es erneut versuchst.',
   uploadSignIn: 'Erneut anmelden',
@@ -112,7 +115,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
     'Deine erste Zahlung ist noch nicht bei uns. Wenn du gerade bezahlt hast, aktualisiert sich das gleich.',
   canceledTitle: 'Du bist nicht abgesichert',
   canceledBody:
-    'Deine Mitgliedschaft ist beendet, neue Bußgelder sind nicht mehr gedeckt. Du kannst jederzeit wieder beitreten.',
+    'Deine Mitgliedschaft ist beendet, neue Bußgelder sind nicht mehr gedeckt. Bereits hochgeladene Knöllchen bearbeiten wir weiter. Du kannst jederzeit wieder beitreten.',
   statusProtected: 'Du bist abgesichert',
   statusEnding: 'Abgesichert bis {{date}}',
   statusEndingBody:
