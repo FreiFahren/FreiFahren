@@ -1,4 +1,3 @@
-import { Capacitor } from '@capacitor/core';
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -41,8 +40,8 @@ export async function openStripe(
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const { url } = (await response.json()) as { url: string };
-  if (Capacitor.isNativePlatform()) window.open(url, '_blank');
-  else window.location.assign(url);
+  // In the native app, Capacitor hands navigation to another domain over to Safari.
+  window.location.assign(url);
 }
 
 export function useOpenStripe(onAlreadyMember?: () => void) {
