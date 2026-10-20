@@ -5,6 +5,17 @@ import { useTranslation } from 'react-i18next';
 import { fetchFund, FundRequestError } from '@/lib/fund-api';
 import { safeLocalStorage } from '@/lib/safe-storage';
 
+// What a member has to do before their account can be deleted, as the Fund Worker reports it.
+export const ACCOUNT_DELETION_BLOCKERS = [
+  'membership',
+  'overdue_payment',
+  'unfinished_signup',
+] as const;
+export type AccountDeletionBlocker = (typeof ACCOUNT_DELETION_BLOCKERS)[number];
+
+export const isAccountDeletionBlocker = (value: unknown): value is AccountDeletionBlocker =>
+  ACCOUNT_DELETION_BLOCKERS.some((blocker) => blocker === value);
+
 export type Membership = {
   status: 'none' | 'pending' | 'active' | 'past_due' | 'canceled';
   legalName: string | null;
@@ -12,7 +23,7 @@ export type Membership = {
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
   // Why the auth-worker would refuse to delete the account, since Stripe can still charge it.
-  accountDeletionBlockedBy: 'membership' | 'overdue_payment' | 'unfinished_signup' | null;
+  accountDeletionBlockedBy: AccountDeletionBlocker | null;
 };
 
 export const membershipQueryOptions = (userId: string) =>
