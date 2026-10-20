@@ -36,7 +36,7 @@ function AccountContent() {
                 onSaved={refetch}
               />
               <FundAccountStatus userId={user.id} />
-              <AccountActions email={user.email} />
+              <AccountActions userId={user.id} email={user.email} />
             </>
           );
         }
