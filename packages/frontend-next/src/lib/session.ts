@@ -80,5 +80,6 @@ export function setSessionAccountId(accountId: string): void {
 export async function refreshSessionAccount(): Promise<void> {
   if (!AUTH_URL || safeLocalStorage.getItem(STORAGE_KEY) === null) return;
   const { authClient } = await import('@/lib/auth-client');
-  await authClient.getSession();
+  // Through the shared session atom, so a useSession() mount right after reuses this request.
+  await authClient.$store.atoms.session.get().refetch();
 }

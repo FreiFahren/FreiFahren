@@ -4,6 +4,7 @@ import { createAuthClient } from 'better-auth/react';
 import {
   AUTH_URL,
   clearSessionToken,
+  getSessionAccountId,
   getSessionToken,
   setSessionAccountId,
   setSessionToken,
@@ -23,13 +24,17 @@ export const authClient = createAuthClient({
     onSuccess: async ({ response, request, data }) => {
       const token = response.headers.get('set-auth-token');
       if (token) await setSessionToken(token);
-      // Sign-in and get-session responses carry the account the token belongs to.
-      const accountId = (data as { user?: { id?: unknown } } | null)?.user?.id;
-      // A sign-in sets a new token; any other response must still belong to the current one.
-      if (typeof accountId === 'string' && (token || (await sentCurrentToken(request)))) {
+      if (data === null) {
+        await clearRejectedSession(request);
+        return;
+      }
+      // Sign-in and get-session responses carry the account the token belongs to. A sign-in sets
+      // a new token; any other response must still belong to the current one.
+      const accountId = (data as { user?: { id?: unknown } }).user?.id;
+      if (typeof accountId !== 'string' || accountId === getSessionAccountId()) return;
+      if (token || (await sentCurrentToken(request))) {
         setSessionAccountId(accountId);
       }
-      if (data === null) await clearRejectedSession(request);
     },
     onError: async ({ response, request }) => {
       if (response.status === 401) await clearRejectedSession(request);
