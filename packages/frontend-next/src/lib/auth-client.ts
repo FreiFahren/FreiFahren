@@ -11,7 +11,8 @@ import {
 import { captureIssue } from '@/lib/error-monitoring';
 import { getTurnstileToken } from '@/lib/turnstile';
 
-// Only the account routes import this, so it stays out of the main bundle.
+// Loaded lazily by account routes and the startup session refresh, so it stays out of the main
+// bundle.
 export const authClient = createAuthClient({
   baseURL: AUTH_URL,
   plugins: [emailOTPClient()],
@@ -24,7 +25,10 @@ export const authClient = createAuthClient({
       if (token) await setSessionToken(token);
       // Sign-in and get-session responses carry the account the token belongs to.
       const accountId = (data as { user?: { id?: unknown } } | null)?.user?.id;
-      if (typeof accountId === 'string') setSessionAccountId(accountId);
+      // A sign-in sets a new token; any other response must still belong to the current one.
+      if (typeof accountId === 'string' && (token || (await sentCurrentToken(request)))) {
+        setSessionAccountId(accountId);
+      }
       if (data === null) await clearRejectedSession(request);
     },
     onError: async ({ response, request }) => {
@@ -33,13 +37,17 @@ export const authClient = createAuthClient({
   },
 });
 
-async function clearRejectedSession(request: { url: URL | string; headers: Headers }) {
-  if (!new URL(request.url).pathname.endsWith('/get-session')) return;
+type AuthRequest = { url: URL | string; headers: Headers };
+
+async function sentCurrentToken(request: AuthRequest): Promise<boolean> {
   const token = await getSessionToken();
+  return token !== undefined && request.headers.get('authorization') === `Bearer ${token}`;
+}
+
+async function clearRejectedSession(request: AuthRequest) {
+  if (!new URL(request.url).pathname.endsWith('/get-session')) return;
   // A response for an old token must not sign out an account that has since signed in.
-  if (token && request.headers.get('authorization') === `Bearer ${token}`) {
-    await clearSessionToken();
-  }
+  if (await sentCurrentToken(request)) await clearSessionToken();
 }
 
 // The auth-worker requires a Turnstile token to send a code (skipped where no site key is set).

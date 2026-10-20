@@ -1,3 +1,5 @@
+import { useSyncExternalStore } from 'react';
+
 import { FEATURE_FLAGS, useFeatureFlag } from '@/lib/feature-flags';
 import {
   removeNativePreference,
@@ -19,30 +21,48 @@ export const AUTH_URL = optionalEnv('VITE_AUTH_URL');
 const STORAGE_KEY = 'freifahren-session-token';
 // Kept beside the token so feature flags can target the account without a session lookup on boot.
 const ACCOUNT_ID_KEY = 'freifahren-account-id';
+const listeners = new Set<() => void>();
+
+function notify(): void {
+  for (const listener of listeners) listener();
+}
+
+function subscribe(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
 
 // Signed-in devices keep their account controls when the flag is off or PostHog doesn't load.
 export function useAccountsEnabled(): boolean {
   const flagged = useFeatureFlag(FEATURE_FLAGS.accounts);
-  return AUTH_URL !== undefined && (flagged || safeLocalStorage.getItem(STORAGE_KEY) !== null);
+  const token = useSyncExternalStore(subscribe, () => safeLocalStorage.getItem(STORAGE_KEY));
+  return AUTH_URL !== undefined && (flagged || token !== null);
 }
 
 // Purges only happen while the app isn't running, so one restore per start is enough.
 let restored: Promise<boolean> | undefined;
 
 export async function getSessionToken(): Promise<string | undefined> {
-  restored ??= restoreNativePreference(STORAGE_KEY);
+  restored ??= restoreNativePreference(STORAGE_KEY).then((changed) => {
+    if (changed) notify();
+    return changed;
+  });
   await restored;
   return safeLocalStorage.getItem(STORAGE_KEY) ?? undefined;
 }
 
 export function setSessionToken(token: string): Promise<void> {
-  return saveNativePreference(STORAGE_KEY, token);
+  const saved = saveNativePreference(STORAGE_KEY, token);
+  notify();
+  return saved;
 }
 
 export function clearSessionToken(): Promise<void> {
   safeLocalStorage.removeItem(ACCOUNT_ID_KEY);
   setPostHogFlagAccount(null);
-  return removeNativePreference(STORAGE_KEY);
+  const removed = removeNativePreference(STORAGE_KEY);
+  notify();
+  return removed;
 }
 
 export function getSessionAccountId(): string | null {
@@ -54,10 +74,11 @@ export function setSessionAccountId(accountId: string): void {
   setPostHogFlagAccount(accountId);
 }
 
-// A token without a stored id (signed in by an older build, or restored after a WebView purge)
-// learns it from one session lookup; auth-client stores the id from the response.
-export async function restoreSessionAccountId(): Promise<void> {
-  if (!AUTH_URL || getSessionAccountId() !== null || !(await getSessionToken())) return;
+// Confirms a stored session once per start: auth-client stores the account id from the response, or
+// clears an expired or revoked token. Signed-out devices skip it; a token lost to a WebView purge
+// is restored when the auth client is next used.
+export async function refreshSessionAccount(): Promise<void> {
+  if (!AUTH_URL || safeLocalStorage.getItem(STORAGE_KEY) === null) return;
   const { authClient } = await import('@/lib/auth-client');
   await authClient.getSession();
 }
