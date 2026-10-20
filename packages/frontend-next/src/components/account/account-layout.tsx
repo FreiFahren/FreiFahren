@@ -29,14 +29,19 @@ export function AccountLayout({ title, children }: { title: string; children: Re
   );
 }
 
+export function SupportEmailLink() {
+  return (
+    <a href={`mailto:${SUPPORT_EMAIL}`} className="text-foreground underline">
+      {SUPPORT_EMAIL}
+    </a>
+  );
+}
+
 function SupportHint() {
   const { t } = useTranslation(NAMESPACE);
   return (
     <p className="text-muted-foreground mt-auto pt-4 text-center text-xs">
-      {t('support')}{' '}
-      <a href={`mailto:${SUPPORT_EMAIL}`} className="text-foreground underline">
-        {SUPPORT_EMAIL}
-      </a>
+      {t('support')} <SupportEmailLink />
     </p>
   );
 }

@@ -55,7 +55,14 @@ function MembershipStatus({ userId }: { userId: string }) {
 }
 
 // Opens the Stripe billing portal, where members change, pay or cancel their membership.
-export function ManageMembershipButton() {
+export function ManageMembershipButton({
+  label,
+  returnTo,
+}: {
+  label?: string;
+  // Web visitors come back to the account page instead of /fund.
+  returnTo?: 'account';
+}) {
   const { t } = useTranslation(NAMESPACE);
   const { state, open } = useOpenStripe();
 
@@ -65,9 +72,9 @@ export function ManageMembershipButton() {
         size="lg"
         className={SECONDARY_BUTTON}
         disabled={state === 'opening'}
-        onClick={() => void open('/billing-portal-sessions')}
+        onClick={() => void open('/billing-portal-sessions', { returnTo })}
       >
-        {t('manage')}
+        {label ?? t('manage')}
       </Button>
       {state === 'failed' && (
         <p role="alert" className="text-destructive text-sm">

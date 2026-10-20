@@ -6,42 +6,37 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { ToastPill } from '@/components/ui/toast-pill';
+import { ManageMembershipButton } from '@/components/fund/fund-account-status';
 import { useFundEnabled } from '@/hooks/use-fund-enabled';
-import { type Membership, membershipQueryOptions, useOpenStripe } from '@/hooks/use-membership';
+import { type Membership, membershipQueryOptions } from '@/hooks/use-membership';
 import { authClient, sendSignInCode } from '@/lib/auth-client';
 import { clearSessionToken } from '@/lib/session';
 import { toast } from '@/lib/toast';
 import { Route as MapIndexRoute } from '@/routes/_map/index';
 
-import { BUTTON_SHAPE, DevEmailHint, SECONDARY_BUTTON } from './account-layout';
+import { BUTTON_SHAPE, DevEmailHint, SupportEmailLink } from './account-layout';
 import { NAMESPACE } from './account.i18n';
 import { type AuthError, AuthErrorMessage, CodeField } from './code-field';
+import { SessionLoadError } from './session-load-error';
 
-// Stripe would keep charging a deleted account, which could then no longer sign in to cancel.
-const blocksDeletion = (membership: Membership) =>
-  (membership.status === 'active' || membership.status === 'past_due') &&
-  !membership.cancelAtPeriodEnd;
+type Blocker = NonNullable<Membership['accountDeletionBlockedBy']>;
 
 // The auth-worker only deletes within minutes of a sign-in, so this signs in again with a new code.
 export function DeleteAccount({ userId, email }: { userId: string; email: string }) {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
-  const fundEnabled = useFundEnabled();
+  /*
+   * The auth-worker's refusal says what blocks deletion. It stands until the membership has been
+   * read again, e.g. on returning from Stripe.
+   */
+  const [refusal, setRefusal] = useState<{ blockedBy: Blocker; at: number } | null>(null);
+  const gated = useFundEnabled() || refusal !== null;
   // Only a hint for the person; the auth-worker enforces the rule with FUND_MEMBERSHIP_ACTIVE.
-  const [refusedAt, setRefusedAt] = useState<number | null>(null);
-  const membership = useQuery({
-    ...membershipQueryOptions(userId),
-    enabled: fundEnabled || refusedAt !== null,
-  });
+  const membership = useQuery({ ...membershipQueryOptions(userId), enabled: gated });
   const [step, setStep] = useState<'closed' | 'start' | 'code' | 'signed-in'>('closed');
   const [code, setCode] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<AuthError>(null);
-  /*
-   * When the auth-worker refused because of a membership this page didn't know about (it changed
-   * since, or isn't shown as running), the refusal holds until the membership has been read again.
-   */
-  const refused = refusedAt !== null && membership.dataUpdatedAt <= refusedAt;
   // Leaving the page while the code is checked must not delete afterwards.
   const mounted = useRef(true);
   useEffect(() => {
@@ -88,8 +83,18 @@ export function DeleteAccount({ userId, email }: { userId: string; email: string
     if (error) {
       setPending(false);
       if (error.code === 'SESSION_EXPIRED') restart(error);
-      else if (error.code === 'FUND_MEMBERSHIP_ACTIVE') setRefusedAt(Date.now());
-      else setError(error);
+      else if (error.code === 'FUND_MEMBERSHIP_ACTIVE') {
+        const blockedBy = 'blockedBy' in error ? error.blockedBy : undefined;
+        setRefusal({
+          blockedBy:
+            typeof blockedBy === 'string' && blockedBy in BLOCKED_COPY
+              ? (blockedBy as Blocker)
+              : 'membership',
+          at: Date.now(),
+        });
+        // A read already in flight predates the refusal and must not lift it; refetching cancels it.
+        void membership.refetch();
+      } else setError(error);
       return;
     }
     await clearSessionToken();
@@ -100,23 +105,21 @@ export function DeleteAccount({ userId, email }: { userId: string; email: string
 
   // What stands in for the current step while the membership is unknown or can still charge.
   const membershipGate = () => {
-    if (refused || (membership.data !== undefined && blocksDeletion(membership.data))) {
-      return <MembershipBlocksDeletion onClose={() => restart()} />;
-    }
-    if (membership.isError) {
+    const blockedBy =
+      refusal !== null && membership.dataUpdatedAt <= refusal.at
+        ? refusal.blockedBy
+        : membership.data?.accountDeletionBlockedBy;
+    if (blockedBy)
+      return <MembershipBlocksDeletion blockedBy={blockedBy} onClose={() => restart()} />;
+    // A failed refetch keeps the last answer, so a network blip doesn't interrupt the flow.
+    if (membership.data === undefined && membership.isError) {
       return (
         <>
-          <p role="alert" className="text-destructive text-sm">
-            {t('membershipCheckFailed')}
-          </p>
-          <Button
-            size="lg"
-            className={SECONDARY_BUTTON}
-            disabled={membership.isFetching}
-            onClick={() => void membership.refetch()}
-          >
-            {t('retry')}
-          </Button>
+          <SessionLoadError
+            message={t('membershipCheckFailed')}
+            retrying={membership.isFetching}
+            onRetry={() => void membership.refetch()}
+          />
           <Button type="button" variant="ghost" onClick={() => restart()}>
             {t('cancel')}
           </Button>
@@ -146,7 +149,7 @@ export function DeleteAccount({ userId, email }: { userId: string; email: string
     );
   }
 
-  const gate = fundEnabled || refused ? membershipGate() : null;
+  const gate = gated ? membershipGate() : null;
 
   return (
     <section className="flex flex-col gap-3">
@@ -193,30 +196,37 @@ export function DeleteAccount({ userId, email }: { userId: string; email: string
   );
 }
 
-/*
- * Stripe's portal sends web visitors back to /fund. The native app stays where it was, and the
- * membership refetches on focus, so the flow continues here once cancellation is scheduled.
- */
-function MembershipBlocksDeletion({ onClose }: { onClose: () => void }) {
+const BLOCKED_COPY = {
+  membership: { intro: 'deleteBlockedIntro', action: 'deleteBlockedAction', support: null },
+  overdue_payment: {
+    intro: 'deleteBlockedOverdueIntro',
+    action: 'deleteBlockedOverdueAction',
+    support: 'deleteBlockedOverdueSupport',
+  },
+  // Stripe's portal can't cancel a signup whose first payment never went through.
+  unfinished_signup: { intro: 'deleteBlockedSignupIntro', action: null, support: null },
+} as const satisfies Record<Blocker, unknown>;
+
+// The membership refetches on focus, so the flow continues here once nothing blocks deletion.
+function MembershipBlocksDeletion({
+  blockedBy,
+  onClose,
+}: {
+  blockedBy: Blocker;
+  onClose: () => void;
+}) {
   const { t } = useTranslation(NAMESPACE);
-  const { state, open } = useOpenStripe();
+  const copy = BLOCKED_COPY[blockedBy];
 
   return (
     <>
-      <p className="text-muted-foreground text-sm">{t('deleteBlockedIntro')}</p>
-      <Button
-        size="lg"
-        className={SECONDARY_BUTTON}
-        disabled={state === 'opening'}
-        onClick={() => void open('/billing-portal-sessions')}
-      >
-        {t('deleteBlockedAction')}
-      </Button>
-      {state === 'failed' && (
-        <p role="alert" className="text-destructive text-sm">
-          {t('stripeFailed')}
+      <p className="text-muted-foreground text-sm">{t(copy.intro)}</p>
+      {copy.support !== null && (
+        <p className="text-muted-foreground text-sm">
+          {t(copy.support)} <SupportEmailLink />
         </p>
       )}
+      {copy.action !== null && <ManageMembershipButton label={t(copy.action)} returnTo="account" />}
       <Button type="button" variant="ghost" onClick={onClose}>
         {t('cancel')}
       </Button>
