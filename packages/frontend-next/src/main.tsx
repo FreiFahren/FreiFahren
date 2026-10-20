@@ -1,4 +1,4 @@
-import { lazy, StrictMode, Suspense } from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -9,8 +9,8 @@ import { registerSW } from 'virtual:pwa-register';
 import { queryClient, PERSISTED_CACHE_MAX_AGE } from './api/queryClient';
 import { capturePageview } from './lib/analytics';
 import { getConsent, syncConsentToPostHog } from './lib/consent';
-import { loadPostHog } from './lib/posthog-client';
-import { AUTH_URL } from './lib/session';
+import { loadPostHog, setPostHogFlagAccount } from './lib/posthog-client';
+import { getSessionAccountId, restoreSessionAccountId } from './lib/session';
 import { initErrorMonitoring } from './lib/error-monitoring';
 import { initNativePlatform } from './lib/native';
 import { safeSessionStorage } from './lib/safe-storage';
@@ -147,19 +147,7 @@ router.subscribe('onResolved', ({ toLocation }) => {
   capturePageview(toLocation.href);
 });
 
-// eslint-disable-next-line react-refresh/only-export-components
-const AuthSession = lazy(() => import('./components/account/auth-session'));
-
-const routes = (
-  <>
-    {AUTH_URL && (
-      <Suspense fallback={null}>
-        <AuthSession />
-      </Suspense>
-    )}
-    <RouterProvider router={router} />
-  </>
-);
+const routes = <RouterProvider router={router} />;
 
 const persistedApp = (
   <PersistQueryClientProvider
@@ -208,12 +196,14 @@ const app = (
 createRoot(document.getElementById('root')!).render(app);
 
 // Load PostHog when the main thread is idle, off the critical render path. Calls made before it
-// resolves are buffered; syncConsentToPostHog reapplies the stored choice once it initializes.
+// resolves are buffered; syncConsentToPostHog reapplies the stored choice once it's initialized.
 const onIdle = (cb: () => void) =>
   typeof window.requestIdleCallback === 'function'
     ? window.requestIdleCallback(cb)
     : window.setTimeout(cb, 1);
 onIdle(() => {
   if (window.name === PRELOAD_RELOAD_MARK) window.name = '';
+  setPostHogFlagAccount(getSessionAccountId());
+  void restoreSessionAccountId();
   void loadPostHog(getConsent() === 'granted').then(syncConsentToPostHog);
 });

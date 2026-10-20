@@ -23,24 +23,20 @@ const queue: PostHogOp[] = [];
 // Cap the buffer so a session that never loads the SDK (dev without a key) can't grow it unbounded.
 const MAX_QUEUED = 500;
 let flagAccountId: string | null = null;
-const flagAccountListeners = new Set<(changing: boolean) => void>();
+// Set from init's loaded hook, which runs before `instance` (awaiting registerVersion) is ready.
+let flagTarget: PostHog | null = null;
 
+// Before init the id is only stored; the loaded hook applies it ahead of the first /flags request.
 export function setPostHogFlagAccount(next: string | null): void {
   if (next === flagAccountId) return;
   flagAccountId = next;
-  enqueuePostHog(syncPostHogFlagAccount);
+  if (flagTarget) syncPostHogFlagAccount(flagTarget);
 }
 
-export function subscribePostHogFlagAccount(listener: (changing: boolean) => void): () => void {
-  flagAccountListeners.add(listener);
-  return () => flagAccountListeners.delete(listener);
-}
-
+// An evaluation-only property: it reloads flags but neither identifies the account in analytics
+// nor writes to its person profile.
 export function syncPostHogFlagAccount(posthog: PostHog): void {
-  for (const listener of flagAccountListeners) listener(true);
-  // Evaluation overrides do not identify the account in analytics or update its person profile.
   posthog.setPersonPropertiesForFlags({ account_id: flagAccountId });
-  for (const listener of flagAccountListeners) listener(false);
 }
 
 export function getDistinctId(): string | undefined {
@@ -107,12 +103,13 @@ export function loadPostHog(persistent: boolean): Promise<void> {
       // api_host is our reverse proxy in prod; keep PostHog UI/toolbar links on the real app.
       ui_host: 'https://eu.posthog.com',
       defaults: '2025-05-24',
-      // We never call identify() (accounts are used only for flag evaluation), so under the default 'identified_only'
-      // mode PostHog ingests every event personless and builds no person profiles at all — which
-      // leaves lifecycle, retention, and stickiness permanently empty. 'always' lets the persistent
-      // anonymous distinct_id form a person profile so returning visits are measurable. Consent still
-      // governs persistence: the id is only persisted once cookies are allowed (see consent.ts), so
-      // undecided and declined users stay un-retained by design, and respect_dnt keeps DNT users out.
+      // We never call identify() (accounts only feed flag evaluation), so under the default
+      // 'identified_only' mode PostHog ingests every event personless and builds no person profiles
+      // at all — which leaves lifecycle, retention, and stickiness permanently empty. 'always' lets
+      // the persistent anonymous distinct_id form a person profile so returning visits are
+      // measurable. Consent still governs persistence: the id is only persisted once cookies are
+      // allowed (see consent.ts), so undecided and declined users stay un-retained by design, and
+      // respect_dnt keeps DNT users out.
       person_profiles: 'always',
       persistence: persistent ? PERSISTENT_PERSISTENCE : 'memory',
       // Explicit so the cross-subdomain intent can't be silently flipped to per-host. posthog-js
@@ -126,7 +123,10 @@ export function loadPostHog(persistent: boolean): Promise<void> {
       // lazily-loaded SDK initializes; capture_pageleave stays on by default.
       capture_pageview: false,
       // Replace persisted overrides before any startup flag request can use a previous account.
-      loaded: () => syncPostHogFlagAccount(posthog),
+      loaded: () => {
+        flagTarget = posthog;
+        syncPostHogFlagAccount(posthog);
+      },
     });
     // Stamp every event with the runtime so funnels can be split by web vs native.
     // city is a registered super property (not derived from $host) because native

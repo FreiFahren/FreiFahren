@@ -1,12 +1,14 @@
 import { useSyncExternalStore } from 'react';
 
-import { enqueuePostHog, subscribePostHogFlagAccount } from '@/lib/posthog-client';
+import { enqueuePostHog } from '@/lib/posthog-client';
 import { isPreviewBuild, optionalEnv } from '@/lib/utils';
 
 // PostHog feature flags read through the same lazy-loaded client as analytics, so components never
 // touch the SDK directly. Flags gate UI that ships in the bundle but isn't launched yet; the value
-// is false until the SDK loads and PostHog resolves flags. Account targeting uses the `account_id`
-// evaluation property, independently of consent to account-linked analytics.
+// is false until the SDK loads and PostHog resolves flags, and false forever when analytics is
+// disabled (no key, or a 'denied'/DNT session that never initializes the SDK). Fail-closed: a
+// gated feature stays hidden unless PostHog affirmatively turns it on. Signed-in accounts can be
+// targeted through the `account_id` person property (see setPostHogFlagAccount).
 export const FEATURE_FLAGS = {
   citySwitcher: 'city-switcher',
   contributeModalTiming: 'contribute-modal-timing',
@@ -23,6 +25,7 @@ const values = new Map<FlagKey, boolean>();
 const variants = new Map<FlagKey, string | boolean>();
 const listeners = new Set<() => void>();
 let subscribed = false;
+// Keyless dev and PR previews show every feature; setting a key there exercises real targeting.
 const bypassFlags = (import.meta.env.DEV || isPreviewBuild) && !optionalEnv('VITE_POSTHOG_KEY');
 
 function notify(): void {
@@ -36,19 +39,11 @@ function ensureSubscribed(): void {
   if (subscribed) return;
   subscribed = true;
   enqueuePostHog((posthog) => {
-    let changingIdentity = false;
-    let confirmIdentity = true;
-    let registering = true;
-    const clear = () => {
-      values.clear();
-      variants.clear();
-      notify();
-    };
     const sync = () => {
       let changed = false;
       for (const key of Object.values(FEATURE_FLAGS)) {
-        const next = posthog.isFeatureEnabled(key, { fresh: true }) ?? false;
-        const nextVariant = posthog.getFeatureFlag(key, { fresh: true }) ?? false;
+        const next = posthog.isFeatureEnabled(key) ?? false;
+        const nextVariant = posthog.getFeatureFlag(key) ?? false;
         if (values.get(key) !== next) {
           values.set(key, next);
           changed = true;
@@ -60,26 +55,8 @@ function ensureSubscribed(): void {
       }
       if (changed) notify();
     };
-    posthog.on('featureFlagsReloading', clear);
-    subscribePostHogFlagAccount((changing) => {
-      changingIdentity = changing;
-      if (changing) {
-        confirmIdentity = true;
-        clear();
-      }
-    });
-    posthog.onFeatureFlags((_flags, _variants, context) => {
-      if (registering || changingIdentity) return;
-      if (context?.errorsLoading) clear();
-      else if (confirmIdentity) {
-        // The SDK serializes requests but can deliver an old account's in-flight response.
-        // Drain that response, then accept only a follow-up requested for the current identity.
-        confirmIdentity = false;
-        posthog.reloadFeatureFlags();
-      } else sync();
-    });
-    registering = false;
-    posthog.reloadFeatureFlags();
+    posthog.onFeatureFlags(sync);
+    sync();
   });
 }
 
@@ -89,7 +66,6 @@ export function subscribeToFeatureFlags(listener: () => void): () => void {
   return () => listeners.delete(listener);
 }
 
-// Keyless dev/previews show all features. A configured key exercises real targeting locally too.
 export function getFeatureFlag(flag: FlagKey): boolean {
   ensureSubscribed();
   return bypassFlags || (values.get(flag) ?? false);

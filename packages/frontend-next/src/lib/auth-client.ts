@@ -1,11 +1,17 @@
 import { emailOTPClient } from 'better-auth/client/plugins';
 import { createAuthClient } from 'better-auth/react';
 
-import { AUTH_URL, clearSessionToken, getSessionToken, setSessionToken } from '@/lib/session';
+import {
+  AUTH_URL,
+  clearSessionToken,
+  getSessionToken,
+  setSessionAccountId,
+  setSessionToken,
+} from '@/lib/session';
 import { captureIssue } from '@/lib/error-monitoring';
 import { getTurnstileToken } from '@/lib/turnstile';
 
-// Account routes and the global startup observer share Better Auth’s session store.
+// Only the account routes import this, so it stays out of the main bundle.
 export const authClient = createAuthClient({
   baseURL: AUTH_URL,
   plugins: [emailOTPClient()],
@@ -16,6 +22,9 @@ export const authClient = createAuthClient({
     onSuccess: async ({ response, request, data }) => {
       const token = response.headers.get('set-auth-token');
       if (token) await setSessionToken(token);
+      // Sign-in and get-session responses carry the account the token belongs to.
+      const accountId = (data as { user?: { id?: unknown } } | null)?.user?.id;
+      if (typeof accountId === 'string') setSessionAccountId(accountId);
       if (data === null) await clearRejectedSession(request);
     },
     onError: async ({ response, request }) => {
