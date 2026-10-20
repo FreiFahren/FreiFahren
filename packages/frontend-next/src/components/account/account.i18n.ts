@@ -34,6 +34,13 @@ i18n.addResourceBundle('en', NAMESPACE, {
     'Enter the code we sent to {{email}}. This permanently deletes your FreiFahren account and cannot be undone.',
   deleteConfirm: 'Delete my account',
   deleteDone: 'Your account has been deleted.',
+  deleteBlockedIntro:
+    "Your Fund membership is still running, so your account can't be deleted yet. Cancel the membership first: that stops all future payments. Once the cancellation is scheduled, you can delete your account.",
+  deleteBlockedAction: 'Cancel membership',
+  membershipChecking: 'Checking your Fund membership…',
+  membershipCheckFailed:
+    "We couldn't check your Fund membership, so your account can't be deleted right now. Please try again.",
+  stripeFailed: 'Stripe couldn’t be opened. Please try again.',
   cancel: 'Cancel',
   verificationFailed: "We couldn't verify this request. Please try again.",
   support: 'Problems or questions? Email us at',
@@ -79,6 +86,13 @@ i18n.addResourceBundle('de', NAMESPACE, {
     'Gib den Code ein, den wir an {{email}} geschickt haben. Damit wird dein FreiFahren-Konto endgültig gelöscht. Das lässt sich nicht rückgängig machen.',
   deleteConfirm: 'Mein Konto löschen',
   deleteDone: 'Dein Konto wurde gelöscht.',
+  deleteBlockedIntro:
+    'Deine Fonds-Mitgliedschaft läuft noch, deshalb kann dein Konto noch nicht gelöscht werden. Kündige zuerst die Mitgliedschaft, dann wird nichts mehr abgebucht. Sobald die Kündigung vorgemerkt ist, kannst du dein Konto löschen.',
+  deleteBlockedAction: 'Mitgliedschaft kündigen',
+  membershipChecking: 'Deine Fonds-Mitgliedschaft wird geprüft …',
+  membershipCheckFailed:
+    'Wir konnten deine Fonds-Mitgliedschaft nicht prüfen, deshalb kann dein Konto gerade nicht gelöscht werden. Bitte versuche es erneut.',
+  stripeFailed: 'Stripe konnte nicht geöffnet werden. Bitte versuche es erneut.',
   cancel: 'Abbrechen',
   verificationFailed: 'Wir konnten die Anfrage nicht bestätigen. Bitte versuche es erneut.',
   support: 'Probleme oder Fragen? Schreib uns an',

@@ -73,7 +73,7 @@ export function AccountDetails({ user }: { user: User }) {
         <SignOutRow />
       </div>
 
-      <DeleteAccount email={user.email} />
+      <DeleteAccount userId={user.id} email={user.email} />
     </>
   );
 }
@@ -105,13 +105,13 @@ function SignOutRow() {
 }
 
 // Before a new account has a username.
-export function AccountActions({ email }: { email: string }) {
+export function AccountActions({ userId, email }: { userId: string; email: string }) {
   return (
     <>
       <div className="-mx-3 flex flex-col">
         <SignOutRow />
       </div>
-      <DeleteAccount email={email} />
+      <DeleteAccount userId={userId} email={email} />
     </>
   );
 }
