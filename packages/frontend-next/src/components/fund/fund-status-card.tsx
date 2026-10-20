@@ -25,7 +25,7 @@ export function FundStatusCard({ tone, title, body, details }: FundStatusCardPro
   const { Icon, icon } = TONES[tone];
 
   return (
-    <div role="status" className="border-border flex flex-col gap-2 rounded-lg border p-4">
+    <div className="border-border flex flex-col gap-2 rounded-lg border p-4">
       <div className="flex items-center gap-2.5">
         <Icon aria-hidden="true" className={cn('size-5 shrink-0', icon)} />
         <p className="font-heading text-base leading-snug font-semibold">{title}</p>

@@ -12,6 +12,7 @@ import {
   useOpenStripe,
 } from '@/hooks/use-membership';
 
+import { ManageMembershipButton } from './fund-account-status';
 import { FundIntroduction } from './fund-introduction';
 import { FundOverview } from './fund-overview';
 import { FundRulesSlide } from './fund-rules';
@@ -65,11 +66,13 @@ export function FundMembership({
     }
     return (
       <div className="flex flex-col gap-4">
-        {/* The full status and "Manage membership" live on the account page. */}
         {status === 'past_due' && (
-          <p role="alert" className="text-destructive text-sm">
-            {t('memberPastDueBody')}
-          </p>
+          <>
+            <p role="alert" className="text-destructive text-sm">
+              {t('memberPastDueBody')}
+            </p>
+            <ManageMembershipButton />
+          </>
         )}
         <button
           type="button"

@@ -53,7 +53,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
     'Your membership won’t renew. Fines after that date aren’t covered unless you resume it.',
   statusPastDue: 'Payment overdue',
   memberPastDueBody:
-    'Your last contribution couldn’t be collected. Update your payment method so your membership keeps running.',
+    'Your last contribution couldn’t be collected. Pay the open amount under “Manage membership” to stay protected.',
   contribution: '{{amount}} a month',
   renewsOn: 'Renews on {{date}}',
   rulesTitle: 'What you need to know',
@@ -67,6 +67,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   ruleRepeatTitle: 'Repeatedly riding without a ticket can be a crime',
   ruleRepeatBody:
     'Getting caught without a ticket again and again can lead to criminal charges for fare evasion (§ 265a StGB).',
+  legalName: 'Name as on your ID: {{name}}',
   manage: 'Manage membership',
   stripeFailed: 'Stripe couldn’t be opened. Please try again.',
 });
@@ -75,22 +76,22 @@ i18n.addResourceBundle('de', NAMESPACE, {
   open: 'Solidaritätsfonds öffnen',
   title: 'FreiFahren Fonds',
   intro: 'Deine Uploads.',
-  headline: 'Knöllchen bekommen? Lade es hoch, der Fonds zahlt.',
-  photoTitle: 'Fotografiere dein Knölchen',
+  headline: 'Erhöhtes Beförderungsentgelt bekommen? Lade es hoch, der Fonds zahlt.',
+  photoTitle: 'Fotografiere dein erhöhtes Beförderungsentgelt',
   paymentTitle: 'Wir kümmern uns um die Zahlung',
   freeTitle: 'Halte FreiFahren kostenlos',
   signInTitle: 'Zum Fortfahren anmelden',
-  uploadTitle: 'Knöllchen hochladen',
+  uploadTitle: 'Erhöhtes Beförderungsentgelt hochladen',
   takePhoto: 'Foto aufnehmen',
   uploadingPhoto: 'Dein Foto wird hochgeladen…',
-  uploadSuccess: 'Foto hochgeladen. Dein Knöllchen ist jetzt in Prüfung.',
+  uploadSuccess: 'Foto hochgeladen. Dein erhöhtes Beförderungsentgelt ist jetzt in Prüfung.',
   uploadEmpty: 'Dieses Foto ist leer. Bitte wähle ein anderes Foto.',
   uploadTooLarge: 'Dieses Foto ist zu groß. Bitte wähle eines mit weniger als 10 MB.',
   uploadWrongType: 'Bitte wähle ein Foto im Format JPEG, PNG, HEIC oder WebP.',
   uploadSessionExpired: 'Bitte melde dich erneut an, um dein Foto hochzuladen.',
   uploadUnavailable: 'Uploads sind vorübergehend nicht verfügbar. Bitte versuche es erneut.',
   uploadMembershipEnded:
-    'Deine Mitgliedschaft ist beendet, du kannst keine neuen Knöllchen hochladen.',
+    'Deine Mitgliedschaft ist beendet, du kannst keine neuen erhöhten Beförderungsentgelte hochladen.',
   uploadInterrupted:
     'Wir konnten den Upload nicht bestätigen. Prüfe deine Uploads unten, bevor du es erneut versuchst.',
   uploadSignIn: 'Erneut anmelden',
@@ -98,37 +99,38 @@ i18n.addResourceBundle('de', NAMESPACE, {
   uploadedAt: 'Hochgeladen',
   status: 'Status',
   fineStatus: { in_review: 'In Prüfung', paid: 'Vom Fonds bezahlt', declined: 'Abgelehnt' },
-  emptyUploads: 'Du hast noch keine Knöllchen hochgeladen. Deine Einreichungen erscheinen hier.',
+  emptyUploads:
+    'Du hast noch keine erhöhten Beförderungsentgelte hochgeladen. Deine Einreichungen erscheinen hier.',
   loadingHistory: 'Dein Verlauf wird geladen…',
   historyError: 'Dein Verlauf konnte nicht geladen werden. Bitte versuche es erneut.',
   retry: 'Erneut versuchen',
   loadFailed: 'Deine Mitgliedschaft konnte nicht geladen werden. Bitte versuche es erneut.',
   priceTitle: 'Zahl, was du fair findest',
   amountBody:
-    'Aus allen Beiträgen bezahlt der Fonds die Bußgelder seiner Mitglieder. Ab {{amount}} im Monat bist du dabei. Wer mehr geben kann, trägt die mit, die weniger haben.',
+    'Aus allen Beiträgen bezahlt der Fonds die erhöhten Beförderungsentgelte seiner Mitglieder. Ab {{amount}} im Monat bist du dabei. Wer mehr geben kann, trägt die mit, die weniger haben.',
   amountField: 'Monatlicher Beitrag',
   perMonth: 'im Monat',
   join: 'Weiter zur Zahlung',
   joinHint:
-    'Du zahlst über Stripe und kannst jederzeit kündigen. Gib dort deinen Namen genau wie im Ausweis an: Bußgelder werden auf ihn ausgestellt.',
+    'Du zahlst über Stripe und kannst jederzeit kündigen. Gib dort deinen Namen genau wie im Ausweis an: Erhöhte Beförderungsentgelte werden auf ihn ausgestellt.',
   pendingTitle: 'Dein Beitritt ist noch nicht abgeschlossen',
   pendingBody:
     'Deine erste Zahlung ist noch nicht bei uns. Wenn du gerade bezahlt hast, aktualisiert sich das gleich.',
   canceledTitle: 'Du bist nicht abgesichert',
   canceledBody:
-    'Deine Mitgliedschaft ist beendet, neue Bußgelder sind nicht mehr gedeckt. Bereits hochgeladene Knöllchen bearbeiten wir weiter. Du kannst jederzeit wieder beitreten.',
+    'Deine Mitgliedschaft ist beendet, neue erhöhte Beförderungsentgelte sind nicht mehr gedeckt. Bereits hochgeladene bearbeiten wir weiter. Du kannst jederzeit wieder beitreten.',
   statusProtected: 'Du bist abgesichert',
   statusEnding: 'Abgesichert bis {{date}}',
   statusEndingBody:
-    'Deine Mitgliedschaft verlängert sich nicht. Bußgelder nach diesem Datum sind nicht gedeckt, außer du setzt sie fort.',
+    'Deine Mitgliedschaft verlängert sich nicht. Erhöhte Beförderungsentgelte nach diesem Datum sind nicht gedeckt, außer du setzt sie fort.',
   statusPastDue: 'Zahlung überfällig',
   memberPastDueBody:
-    'Dein letzter Beitrag konnte nicht eingezogen werden. Aktualisiere deine Zahlungsart, damit deine Mitgliedschaft weiterläuft.',
+    'Dein letzter Beitrag konnte nicht eingezogen werden. Zahl den offenen Betrag unter „Mitgliedschaft verwalten“, damit du abgesichert bleibst.',
   contribution: '{{amount}} im Monat',
   renewsOn: 'Verlängert sich am {{date}}',
   rulesTitle: 'Was du wissen musst',
   rulesDone: 'Verstanden',
-  ruleDontPayTitle: 'Zahl das Bußgeld nicht selbst',
+  ruleDontPayTitle: 'Zahl das erhöhte Beförderungsentgelt nicht selbst',
   ruleDontPayBody:
     'Reich es beim Fonds ein und warte auf uns. Was du schon selbst bezahlt hast, können wir nicht erstatten.',
   ruleNoTicketTitle: 'Der Fonds ersetzt kein Ticket',
@@ -137,6 +139,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
   ruleRepeatTitle: 'Wiederholtes Fahren ohne Ticket kann strafbar sein',
   ruleRepeatBody:
     'Wer mehrfach ohne Fahrschein erwischt wird, riskiert eine Anzeige wegen Erschleichens von Leistungen (§ 265a StGB).',
+  legalName: 'Name laut Ausweis: {{name}}',
   manage: 'Mitgliedschaft verwalten',
   stripeFailed: 'Stripe konnte nicht geöffnet werden. Bitte versuche es erneut.',
 });

@@ -16,7 +16,6 @@ export function FundAccountStatus({ userId }: { userId: string }) {
 function MembershipStatus({ userId }: { userId: string }) {
   const { t, i18n } = useTranslation(NAMESPACE);
   const euro = useEuro();
-  const { state, open } = useOpenStripe();
   const membership = useMembership(userId).data;
   if (membership?.status !== 'active' && membership?.status !== 'past_due') return null;
 
@@ -40,6 +39,9 @@ function MembershipStatus({ userId }: { userId: string }) {
         body={pastDue ? t('memberPastDueBody') : ending ? t('statusEndingBody') : undefined}
         details={
           <>
+            {membership.legalName !== null && (
+              <p>{t('legalName', { name: membership.legalName })}</p>
+            )}
             {membership.amountCents !== null && (
               <p>{t('contribution', { amount: euro(membership.amountCents) })}</p>
             )}
@@ -47,6 +49,18 @@ function MembershipStatus({ userId }: { userId: string }) {
           </>
         }
       />
+      <ManageMembershipButton />
+    </section>
+  );
+}
+
+// Opens the Stripe billing portal, where members change, pay or cancel their membership.
+export function ManageMembershipButton() {
+  const { t } = useTranslation(NAMESPACE);
+  const { state, open } = useOpenStripe();
+
+  return (
+    <>
       <Button
         size="lg"
         className={SECONDARY_BUTTON}
@@ -60,6 +74,6 @@ function MembershipStatus({ userId }: { userId: string }) {
           {t('stripeFailed')}
         </p>
       )}
-    </section>
+    </>
   );
 }
