@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
+import { FundAccountStatus } from '@/components/fund/fund-account-status';
 import { useAccountsEnabled } from '@/lib/session';
 
 import { AccountActions, AccountDetails } from './account-details';
@@ -34,6 +35,7 @@ function AccountContent() {
                 submitClassName={PRIMARY_BUTTON}
                 onSaved={refetch}
               />
+              <FundAccountStatus userId={user.id} />
               <AccountActions email={user.email} />
             </>
           );

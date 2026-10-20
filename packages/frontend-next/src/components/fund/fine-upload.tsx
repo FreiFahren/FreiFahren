@@ -11,6 +11,7 @@ import { NAMESPACE } from './fund.i18n';
 const UPLOAD_ERRORS = {
   400: 'uploadEmpty',
   401: 'uploadSessionExpired',
+  403: 'uploadMembershipEnded',
   413: 'uploadTooLarge',
   415: 'uploadWrongType',
   503: 'uploadUnavailable',
@@ -20,9 +21,10 @@ type FineUploadProps = {
   userId: string;
   sessionId: string;
   onSignIn: () => void;
+  onUploaded?: () => void;
 };
 
-export function FineUpload({ userId, sessionId, onSignIn }: FineUploadProps) {
+export function FineUpload({ userId, sessionId, onSignIn, onUploaded }: FineUploadProps) {
   const { t } = useTranslation(NAMESPACE);
   const camera = useRef<HTMLInputElement>(null);
   const upload = useFineUpload(userId, sessionId);
@@ -30,7 +32,7 @@ export function FineUpload({ userId, sessionId, onSignIn }: FineUploadProps) {
   const selectPhoto = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = '';
-    if (file && !upload.isPending) upload.mutate(file);
+    if (file && !upload.isPending) upload.mutate(file, { onSuccess: onUploaded });
   };
 
   let errorKey = 'uploadInterrupted';
@@ -88,7 +90,10 @@ export function FineUpload({ userId, sessionId, onSignIn }: FineUploadProps) {
             </Button>
           )}
           {canRetry && upload.variables && (
-            <Button variant="outline" onClick={() => upload.mutate(upload.variables!)}>
+            <Button
+              variant="outline"
+              onClick={() => upload.mutate(upload.variables!, { onSuccess: onUploaded })}
+            >
               {t('retry')}
             </Button>
           )}

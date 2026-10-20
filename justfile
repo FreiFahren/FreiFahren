@@ -20,6 +20,6 @@ env:
 seed city="":
     bun scripts/dev/seed.ts {{ city }}
 
-# Run the auth-worker, the API (with report-gate and telegram-worker) and the frontend together
+# Run the auth-worker, the Fund Worker, the API (with report-gate and telegram-worker) and the frontend together
 dev:
     bun scripts/dev/start.ts

@@ -7,7 +7,7 @@ import { useFundEnabled } from '@/hooks/use-fund-enabled';
 import { useKeyboardScrollArea } from '@/hooks/use-keyboard-scroll-area';
 import { Route as MapIndexRoute } from '@/routes/_map/index';
 
-import { FundOverview } from './fund-overview';
+import { FundMembership } from './fund-membership';
 import { FundSignIn } from './fund-sign-in';
 import { NAMESPACE } from './fund.i18n';
 
@@ -33,11 +33,11 @@ export function FundPage() {
 }
 
 function FundAccessFlow() {
-  // Membership checks belong in the signed-in branch; session handling stays shared.
+  // An account isn't a membership: signed-in users join or manage it through Stripe's hosted pages.
   return (
     <SignInGate signedOut={(onSignedIn) => <FundSignIn onSignedIn={onSignedIn} />}>
       {(session, refetch) => (
-        <FundOverview
+        <FundMembership
           key={session.session.id}
           userId={session.user.id}
           sessionId={session.session.id}
