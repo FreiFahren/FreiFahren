@@ -1,5 +1,11 @@
 import { logger } from '../../../common/logger'
-import { ROUTE_TYPE_PRIORITY, isSeedLineRefIncluded, type RouteType } from '../config'
+import {
+    ROUTE_TYPE_PRIORITY,
+    STATION_CODE_FROM_REF,
+    canonicalStationName,
+    isSeedLineRefIncluded,
+    type RouteType,
+} from '../config'
 
 import type { Coordinates } from './merge-proximate'
 import type { OsmElement, OsmNode, OsmRelation } from './overpass'
@@ -55,7 +61,7 @@ const collectNodes = (elements: OsmElement[], nodes: Map<number, RawStation>) =>
         /* Platform-number guard: on OSM platform / stop_position nodes, a bare numeric
          * `ref` is the platform number (e.g. "2"), not a station code. Accepting it
          * collapses unrelated stations across the city under one id. */
-        const refLooksLikeStationCode = ref !== undefined && ref !== '' && /[^0-9]/u.test(ref)
+        const refLooksLikeStationCode = STATION_CODE_FROM_REF && ref !== undefined && ref !== '' && /[^0-9]/u.test(ref)
         const code =
             (ds100 !== undefined && ds100 !== '' ? ds100 : undefined) ??
             (railwayRef !== undefined && railwayRef !== '' ? railwayRef : undefined) ??
@@ -63,7 +69,7 @@ const collectNodes = (elements: OsmElement[], nodes: Map<number, RawStation>) =>
             `n${node.id}`
         nodes.set(node.id, {
             code,
-            name: tags.name ?? '',
+            name: canonicalStationName(tags.name ?? ''),
             coordinates: { latitude: node.lat, longitude: node.lon },
         })
     }

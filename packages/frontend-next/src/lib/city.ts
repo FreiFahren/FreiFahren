@@ -54,7 +54,11 @@ const resolveWebCity = (hostname: string): CityConfig => {
   if (preview) return preview;
 
   const label = hostname.split('.')[0];
-  return Object.values(CITIES).find((city) => city.subdomain === label) ?? defaultCity();
+  return (
+    Object.values(CITIES).find(
+      (city) => city.subdomain === label || city.subdomainAliases?.includes(label),
+    ) ?? defaultCity()
+  );
 };
 
 export function hostForCity(hostname: string, city: CityConfig): string {

@@ -6,7 +6,7 @@ import { lineStations } from '../schema/lines'
 import { reports } from '../schema/reports'
 import { stations } from '../schema/stations'
 
-import { SEED_CONFIG } from './config'
+import { SEED_CONFIG, toSeedRouteType } from './config'
 import { seedLinesFromRelations } from './lines'
 import { seedSegmentsFromGeometry } from './segments/index'
 import { seedStationsFromElements } from './stations'
@@ -41,6 +41,14 @@ const extractRouteRelations = (elements: OsmElement[]): OsmRelation[] => {
     }
     return out
 }
+
+// Snapshots keep raw OSM tags; every transform downstream reads `route` as the app's route type.
+const normalizeRouteTypes = (elements: OsmElement[]): OsmElement[] =>
+    elements.map((element) => {
+        if (element.type !== 'relation' || element.tags?.route === undefined) return element
+        const route = toSeedRouteType(element.tags.route)
+        return route === element.tags.route ? element : { ...element, tags: { ...element.tags, route } }
+    })
 
 const filterStationElementsToBounds = (elements: OsmElement[]): OsmElement[] => {
     const bounds = SEED_CONFIG.stationBounds
@@ -94,12 +102,12 @@ const pruneOrphanStations = async (db: DbConnection): Promise<void> => {
 
 export const seedBaseData = async (db: DbConnection) => {
     logger.info('[seed] Loading bundled stations snapshot...')
-    const rawStationElements = await loadSnapshot<OsmElement[]>('stations')
+    const rawStationElements = normalizeRouteTypes(await loadSnapshot<OsmElement[]>('stations'))
     const stationElements = filterStationElementsToBounds(rawStationElements)
     logger.info(`[seed]   ${rawStationElements.length} elements → ${stationElements.length} within city service area`)
 
     logger.info('[seed] Loading bundled route geometries snapshot...')
-    const routeGeometryElements = await loadSnapshot<OsmElement[]>('route_geometries')
+    const routeGeometryElements = normalizeRouteTypes(await loadSnapshot<OsmElement[]>('route_geometries'))
     logger.info(`[seed]   ${routeGeometryElements.length} elements`)
 
     logger.info('[seed] Seeding stations...')
