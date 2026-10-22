@@ -75,10 +75,10 @@ export function setSessionAccountId(accountId: string): void {
 }
 
 // Confirms a stored session once per start: auth-client stores the account id from the response, or
-// clears an expired or revoked token. Signed-out devices skip it; a token lost to a WebView purge
-// is restored when the auth client is next used.
+// clears an expired or revoked token. Signed-out devices skip it. The token is restored first, so
+// after a WebView purge the response stores the account id again.
 export async function refreshSessionAccount(): Promise<void> {
-  if (!AUTH_URL || safeLocalStorage.getItem(STORAGE_KEY) === null) return;
+  if (!AUTH_URL || (await getSessionToken()) === undefined) return;
   const { authClient } = await import('@/lib/auth-client');
   // Through the shared session atom, so a useSession() mount right after reuses this request.
   await authClient.$store.atoms.session.get().refetch();
