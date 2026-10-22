@@ -8,7 +8,7 @@ import { authClient, sendSignInCode } from '@/lib/auth-client';
 import { privacyPolicyUrl } from '@/lib/privacy-policy';
 import { preloadTurnstile } from '@/lib/turnstile';
 
-import { DevEmailHint, INPUT, PRIMARY_BUTTON } from './account-layout';
+import { DevEmailHint, INPUT, PRIMARY_BUTTON, SECONDARY_BUTTON } from './account-layout';
 import { NAMESPACE } from './account.i18n';
 import { type AuthError, AuthErrorMessage, CodeField } from './code-field';
 
@@ -109,7 +109,12 @@ export function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
           {t('codeResent')}
         </p>
       )}
-      <Button type="submit" size="lg" disabled={pending} className={PRIMARY_BUTTON}>
+      <Button
+        type="submit"
+        size="lg"
+        disabled={pending}
+        className={code.length === 6 ? PRIMARY_BUTTON : SECONDARY_BUTTON}
+      >
         {t('signIn')}
       </Button>
       <div className="flex flex-col">
