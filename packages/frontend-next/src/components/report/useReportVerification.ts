@@ -3,7 +3,7 @@ import { useGeolocation } from '@/contexts/Geolocation.context';
 import { distanceMeters } from '@/lib/geo';
 import { safeLocalStorage } from '@/lib/safe-storage';
 
-export type ReportRejection = 'too_far' | 'too_fast' | 'rate_limited';
+export type ReportRejection = 'too_far' | 'too_fast' | 'rate_limited' | 'location_pending';
 
 const MAX_REPORT_DISTANCE_M = 2000;
 const TRAVEL_TOLERANCE_M = 500;
@@ -51,10 +51,14 @@ function readHistory(): ReportHistoryEntry[] {
  * `verify` returns the first failing rule, or null when the report may be sent.
  */
 export function useReportVerification() {
-  const { position } = useGeolocation();
+  const { position, status } = useGeolocation();
   const { data: stations } = useStations();
 
   const verify = (stationId: string): ReportRejection | null => {
+    // A location fetch is in flight and hasn't resolved yet: don't silently skip the distance
+    // check below just because `position` happens to still be null.
+    if (!position && status === 'loading') return 'location_pending';
+
     const coordinates = stations?.[stationId]?.coordinates;
     if (
       coordinates &&
