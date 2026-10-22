@@ -9,7 +9,8 @@ import { registerSW } from 'virtual:pwa-register';
 import { queryClient, PERSISTED_CACHE_MAX_AGE } from './api/queryClient';
 import { capturePageview } from './lib/analytics';
 import { getConsent, syncConsentToPostHog } from './lib/consent';
-import { loadPostHog } from './lib/posthog-client';
+import { loadPostHog, setPostHogFlagAccount } from './lib/posthog-client';
+import { getSessionAccountId, refreshSessionAccount } from './lib/session';
 import { initErrorMonitoring } from './lib/error-monitoring';
 import { initNativePlatform } from './lib/native';
 import { safeSessionStorage } from './lib/safe-storage';
@@ -202,5 +203,7 @@ const onIdle = (cb: () => void) =>
     : window.setTimeout(cb, 1);
 onIdle(() => {
   if (window.name === PRELOAD_RELOAD_MARK) window.name = '';
+  setPostHogFlagAccount(getSessionAccountId());
+  void refreshSessionAccount();
   void loadPostHog(getConsent() === 'granted').then(syncConsentToPostHog);
 });
