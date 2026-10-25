@@ -151,9 +151,8 @@ export function ReportSelectionProvider({
   })();
 
   const stationId = tappedStationId ?? uniqueMatch?.id ?? null;
-  const isStationLocked = tappedStationId !== null;
   const derivedStation = stationId ? stations?.[stationId] : undefined;
-  const visibleStations = isStationLocked && derivedStation ? [derivedStation] : matchPool;
+  const visibleStations = tappedStationId !== null && derivedStation ? [derivedStation] : matchPool;
 
   const derivedLineNames = derivedStation
     ? resolveStationLineNames(derivedStation.lines, lines)
@@ -209,7 +208,7 @@ export function ReportSelectionProvider({
     activeLineName,
     lineFilter,
     stationId,
-    isStationLocked,
+    tappedStationId,
     stationQuery,
     directionStationId,
     selectLine,

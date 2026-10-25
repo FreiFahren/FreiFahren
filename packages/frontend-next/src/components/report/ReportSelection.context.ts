@@ -31,8 +31,8 @@ export type ReportSelectionContextValue = {
   activeLineName: string | null;
   lineFilter: LineFilter;
   stationId: string | null;
-  /** Whether the station was explicitly confirmed (manual tap / deep link) vs. a live unique search match. */
-  isStationLocked: boolean;
+  /** Set by a tap or deep link; null while `stationId` is only a live unique search match. */
+  tappedStationId: string | null;
   stationQuery: string;
   directionStationId: string | null;
 

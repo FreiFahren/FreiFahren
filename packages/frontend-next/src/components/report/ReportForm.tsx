@@ -99,7 +99,7 @@ function StationPicker() {
   const { t } = useTranslation(NAMESPACE);
   const {
     stationId,
-    isStationLocked,
+    tappedStationId,
     stationQuery,
     setStationQuery,
     lineName,
@@ -157,10 +157,10 @@ function StationPicker() {
       selectedValue={stationId}
       onSelect={(nextId) => {
         // A tap on a freshly chosen row always confirms it. A tap on the row already shown as
-        // selected either confirms a live (unlocked) match, or clears a locked-in one.
+        // selected either confirms a live search match, or clears a tapped one.
         if (nextId !== null) {
           selectStation(nextId);
-        } else if (isStationLocked) {
+        } else if (tappedStationId !== null) {
           clear();
         } else if (stationId) {
           selectStation(stationId);
@@ -183,7 +183,7 @@ function StationPicker() {
 
   return (
     <section
-      className={cn('mt-6 flex flex-col px-4', !(stationId && isStationLocked) && 'min-h-0 flex-1')}
+      className={cn('mt-6 flex flex-col px-4', tappedStationId === null && 'min-h-0 flex-1')}
     >
       <div className="mb-3 flex items-center justify-between">
         <SectionHeading
@@ -195,8 +195,8 @@ function StationPicker() {
         {stationId && <ClearSelectionButton onClick={clear} />}
       </div>
 
-      {stationId && isStationLocked ? (
-        renderStationButton(stationId, visibleStations[0]?.name)
+      {tappedStationId !== null ? (
+        renderStationButton(tappedStationId, visibleStations[0]?.name)
       ) : (
         <>
           <div className="relative mb-2">
