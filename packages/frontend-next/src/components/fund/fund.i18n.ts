@@ -60,13 +60,11 @@ i18n.addResourceBundle('en', NAMESPACE, {
   retry: 'Try again',
   loadFailed: 'Your membership couldn’t be loaded. Please try again.',
   priceTitle: 'Pay what you think is fair',
-  amountBody:
-    'All contributions together pay the members’ fines. From {{amount}} a month you’re in; whoever can give more carries those who have less.',
   amountField: 'Monthly contribution',
+  peopleCovered_one: 'You cover {{people}} person',
+  peopleCovered_other: 'You cover {{people}} people',
   perMonth: 'a month',
   join: 'Continue to payment',
-  joinHint:
-    'You pay with Stripe and can cancel any time. Enter your name exactly as on your ID there: fines are issued to it.',
   pendingTitle: 'Your signup isn’t finished',
   pendingBody:
     'We haven’t received your first payment yet. If you just paid, this updates in a moment.',
@@ -161,13 +159,11 @@ i18n.addResourceBundle('de', NAMESPACE, {
   retry: 'Erneut versuchen',
   loadFailed: 'Deine Mitgliedschaft konnte nicht geladen werden. Bitte versuche es erneut.',
   priceTitle: 'Zahl, was du fair findest',
-  amountBody:
-    'Aus allen Beiträgen bezahlt der Fonds die erhöhten Beförderungsentgelte seiner Mitglieder. Ab {{amount}} im Monat bist du dabei. Wer mehr geben kann, trägt die mit, die weniger haben.',
   amountField: 'Monatlicher Beitrag',
+  peopleCovered_one: 'Du deckst {{people}} Person ab',
+  peopleCovered_other: 'Du deckst {{people}} Personen ab',
   perMonth: 'im Monat',
   join: 'Weiter zur Zahlung',
-  joinHint:
-    'Du zahlst über Stripe und kannst jederzeit kündigen. Gib dort deinen Namen genau wie im Ausweis an: Erhöhte Beförderungsentgelte werden auf ihn ausgestellt.',
   pendingTitle: 'Dein Beitritt ist noch nicht abgeschlossen',
   pendingBody:
     'Deine erste Zahlung ist noch nicht bei uns. Wenn du gerade bezahlt hast, aktualisiert sich das gleich.',

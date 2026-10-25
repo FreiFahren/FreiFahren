@@ -26,7 +26,7 @@ export function FundIntroduction({ children }: { children: ReactNode }) {
             <div className="bg-muted flex size-8 shrink-0 items-center justify-center rounded-lg">
               <Icon aria-hidden="true" className="size-4" />
             </div>
-            <h3 className="font-heading min-w-0 text-sm font-semibold">{t(title)}</h3>
+            <p className="min-w-0 text-sm">{t(title)}</p>
           </li>
         ))}
       </ul>

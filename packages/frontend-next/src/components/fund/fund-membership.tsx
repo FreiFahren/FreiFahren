@@ -1,4 +1,4 @@
-import { LoaderCircle } from 'lucide-react';
+import { LoaderCircle, UsersRound } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -110,29 +110,37 @@ export function FundMembership({
 }
 
 function JoinForm({ onAlreadyMember }: { onAlreadyMember: () => void }) {
-  const { t } = useTranslation(NAMESPACE);
+  const { t, i18n } = useTranslation(NAMESPACE);
   const euro = useEuro();
   const { state, open } = useOpenStripe(onAlreadyMember);
   const [amount, setAmount] = useState(MIN_EUR);
+  const peopleCovered = amount / MIN_EUR;
+  const coverage = t('peopleCovered', {
+    count: peopleCovered,
+    people: new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 1 }).format(
+      peopleCovered,
+    ),
+  });
 
   return (
     <section aria-labelledby="fund-price-title" className="flex flex-col gap-3">
       <h3 id="fund-price-title" className="font-heading text-base font-semibold">
         {t('priceTitle')}
       </h3>
-      <p className="text-muted-foreground text-sm leading-relaxed">
-        {t('amountBody', { amount: euro(MIN_EUR * 100) })}
-      </p>
       <p aria-live="polite" className="flex items-baseline gap-2">
         <span className="font-heading text-3xl font-semibold tabular-nums">
           {euro(amount * 100)}
         </span>
         <span className="text-muted-foreground text-sm">{t('perMonth')}</span>
       </p>
+      <p className="flex items-center gap-2 text-sm">
+        <UsersRound aria-hidden="true" className="size-4 shrink-0" />
+        {coverage}
+      </p>
       <input
         type="range"
         aria-label={t('amountField')}
-        aria-valuetext={t('contribution', { amount: euro(amount * 100) })}
+        aria-valuetext={`${t('contribution', { amount: euro(amount * 100) })} · ${coverage}`}
         min={MIN_EUR}
         max={MAX_EUR}
         step={1}
@@ -152,7 +160,6 @@ function JoinForm({ onAlreadyMember }: { onAlreadyMember: () => void }) {
       >
         {state === 'opening' ? <LoaderCircle className="animate-spin" /> : t('join')}
       </Button>
-      <p className="text-muted-foreground text-xs leading-relaxed">{t('joinHint')}</p>
       {state === 'failed' && (
         <p role="alert" className="text-destructive text-sm">
           {t('stripeFailed')}
