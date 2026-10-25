@@ -17,12 +17,15 @@ export type ReportSelectionContextValue = {
   lineName: string | null;
   lineFilter: LineFilter;
   stationId: string | null;
+  /** Whether stationId was explicitly confirmed (manual tap / deep link) vs. just an auto-matched preview. */
+  isStationLocked: boolean;
   stationQuery: string;
   directionStationId: string | null;
 
   selectLine: (name: string | null) => void;
   setLineFilter: (filter: LineFilter) => void;
-  selectStation: (id: string | null) => void;
+  /** `locked` defaults to true (manual tap); pass false for a non-committing auto-match preview. */
+  selectStation: (id: string | null, locked?: boolean) => void;
   setStationQuery: (query: string) => void;
   selectDirection: (id: string | null) => void;
   stationForSubmit: () => {

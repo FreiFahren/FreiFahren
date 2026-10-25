@@ -28,6 +28,10 @@ export function ReportSelectionProvider({
   const [lineName, setLineName] = useState<string | null>(null);
   const [lineFilter, setLineFilter] = useState<LineFilter>('all');
   const [stationId, setStationId] = useState<string | null>(initialStationId);
+  // Whether stationId was explicitly confirmed (manual tap, or a prefilled deep link) rather than
+  // just mirroring a unique search match. Locked collapses the picker into a single result;
+  // unlocked keeps the search box open so a stray extra keystroke doesn't get the user stuck.
+  const [isStationLocked, setIsStationLocked] = useState(initialStationId !== null);
   const [stationQuery, setStationQueryState] = useState('');
   const [directionStationId, setDirectionStationId] = useState<string | null>(null);
 
@@ -44,13 +48,18 @@ export function ReportSelectionProvider({
   };
 
   // Clearing the station also clears the chosen line so the user starts fresh.
-  const selectStation = (id: string | null) => {
+  const selectStation = (id: string | null, locked = true) => {
     setStationId(id);
+    setIsStationLocked(locked && id !== null);
     setDirectionStationId(null);
     if (id === null) {
       setLineName(null);
       return;
     }
+    // Only commit line/type side effects once the station is actually confirmed — while merely
+    // auto-matched (unlocked), leave lineName alone so further typing can still reach stations on
+    // other lines.
+    if (!locked) return;
     // A station served by a single line: pick that line so the user can skip the line step.
     const names = resolveStationLineNames(stations?.[id]?.lines ?? [], lines);
     if (names.length === 1) selectLine(names[0]);
@@ -97,7 +106,9 @@ export function ReportSelectionProvider({
   }
   const allLines = [...typeByName].map(([name, type]) => ({ name, type })).sort(compareLineOrder);
 
-  const selectedStation = stationId ? stations?.[stationId] : undefined;
+  // Only treated as "selected" (narrows the list, collapses the UI) once locked — an unlocked
+  // auto-match still behaves like a live preview.
+  const selectedStation = stationId && isStationLocked ? stations?.[stationId] : undefined;
 
   const stationsAlongLine = () => {
     // Walk every variant of the selected line and emit stations in their stored order,
@@ -140,6 +151,19 @@ export function ReportSelectionProvider({
   };
 
   const previewStation = selectedStation ?? stationMatchingQuery(stationQuery);
+
+  // A unique search match only *looks* unselected (nothing highlighted), which reads as if the
+  // station isn't actually registered yet. Mirror it into stationId so Submit lights up and the
+  // match is highlighted in the list — but without locking, so the search box stays open and a
+  // stray extra keystroke (or one that stops matching) can still change or drop it.
+  if (!isStationLocked) {
+    const matchedId = previewStation?.id ?? null;
+    if (stationId !== matchedId) {
+      setStationId(matchedId);
+      setDirectionStationId(null);
+    }
+  }
+
   const previewLineNames = previewStation
     ? resolveStationLineNames(previewStation.lines, lines)
     : null;
@@ -151,10 +175,6 @@ export function ReportSelectionProvider({
 
   const setStationQuery = (query: string) => {
     setStationQueryState(query);
-    if (stationId) return;
-    const nextId = stationMatchingQuery(query)?.id ?? null;
-    const currentId = selectedStation ? null : (stationMatchingQuery(stationQuery)?.id ?? null);
-    if (nextId !== currentId) setDirectionStationId(null);
   };
 
   // Circular lines (e.g. the Ringbahn) loop back on themselves, so picking a terminus as a
@@ -204,6 +224,7 @@ export function ReportSelectionProvider({
     lineName,
     lineFilter,
     stationId,
+    isStationLocked,
     stationQuery,
     directionStationId,
     selectLine,

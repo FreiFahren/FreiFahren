@@ -89,8 +89,15 @@ function LinePicker() {
 
 function StationPicker() {
   const { t } = useTranslation(NAMESPACE);
-  const { stationId, stationQuery, setStationQuery, lineName, selectStation, visibleStations } =
-    useReportSelection();
+  const {
+    stationId,
+    isStationLocked,
+    stationQuery,
+    setStationQuery,
+    lineName,
+    selectStation,
+    visibleStations,
+  } = useReportSelection();
   const { position } = useGeolocation();
 
   const needle = normalizeStationQuery(stationQuery.trim());
@@ -140,9 +147,21 @@ function StationPicker() {
     <SelectionButton
       value={id}
       selectedValue={stationId}
-      onSelect={(nextId) => (nextId === null ? clear() : selectStation(nextId))}
+      onSelect={(nextId) => {
+        // A tap on a freshly chosen row always confirms it. A tap on the row already shown as
+        // selected either confirms a live (unlocked) match, or clears a locked-in one.
+        if (nextId !== null) {
+          selectStation(nextId);
+        } else if (isStationLocked) {
+          clear();
+        } else if (stationId) {
+          selectStation(stationId);
+        }
+      }}
       className="hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-3 py-2.5 text-left text-sm"
-      selectedClassName="bg-muted"
+      // Inset: this button can render inside the scrollable result list, whose overflow-y
+      // forces overflow-x into a clipping context too, cutting off an outset ring's bleed.
+      selectedClassName="bg-muted ring-inset"
     >
       <span className="truncate">{name}</span>
     </SelectionButton>
@@ -155,7 +174,9 @@ function StationPicker() {
   );
 
   return (
-    <section className={cn('mt-6 flex flex-col px-4', !stationId && 'min-h-0 flex-1')}>
+    <section
+      className={cn('mt-6 flex flex-col px-4', !(stationId && isStationLocked) && 'min-h-0 flex-1')}
+    >
       <div className="mb-3 flex items-center justify-between">
         <SectionHeading
           hint={stationId !== null ? undefined : t('required')}
@@ -166,7 +187,7 @@ function StationPicker() {
         {stationId && <ClearSelectionButton onClick={clear} />}
       </div>
 
-      {stationId ? (
+      {stationId && isStationLocked ? (
         renderStationButton(stationId, visibleStations[0]?.name)
       ) : (
         <>
@@ -217,7 +238,13 @@ function StationPicker() {
                         width: '100%',
                         transform: `translateY(${virtualRow.start - virtualizer.options.scrollMargin}px)`,
                       }}
-                      className="border-border/60 border-b"
+                      className={cn(
+                        'border-border/60',
+                        // Virtualized rows can't rely on CSS :last-child (the window only
+                        // covers visible rows), so the true last row is picked by index —
+                        // otherwise its divider sticks out past the selected ring below it.
+                        virtualRow.index !== rest.length - 1 && 'border-b',
+                      )}
                     >
                       {renderStationButton(station.id, station.name)}
                     </li>
