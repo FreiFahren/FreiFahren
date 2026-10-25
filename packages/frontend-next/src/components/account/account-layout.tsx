@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { FullScreenPage } from '@/components/templates/full-screen-page';
 import { PageHeader } from '@/components/templates/PageHeader';
+import type { PageBreadcrumb } from '@/components/templates/page-breadcrumbs';
 import { Route as MapIndexRoute } from '@/routes/_map/index';
 
 import { NAMESPACE } from './account.i18n';
@@ -19,16 +20,22 @@ export function AccountLayout({
   title,
   children,
   onBack,
+  breadcrumbs,
 }: {
   title: string;
   children: React.ReactNode;
   onBack?: () => void;
+  breadcrumbs?: PageBreadcrumb[];
 }) {
   const navigate = useNavigate();
 
   return (
     <FullScreenPage>
-      <PageHeader title={title} onBack={onBack ?? (() => navigate({ to: MapIndexRoute.to }))} />
+      <PageHeader
+        title={title}
+        onBack={onBack ?? (() => navigate({ to: MapIndexRoute.to }))}
+        breadcrumbs={breadcrumbs}
+      />
       <div className="pb-safe-6 flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-4 pt-2">
         {children}
         <SupportHint />

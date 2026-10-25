@@ -1,4 +1,4 @@
-import { Link, useNavigate } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 import { LoaderCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -13,17 +13,18 @@ import { Route as AccountRoute } from '@/routes/account/index';
 import { Route as FundRoute } from '@/routes/fund/index';
 
 import { AccountLayout, SECONDARY_BUTTON } from './account-layout';
+import { NAMESPACE as ACCOUNT_NAMESPACE } from './account.i18n';
 import { SignInGate } from './sign-in-gate';
 
 export function MembershipPage() {
   const { t } = useTranslation(NAMESPACE);
-  const navigate = useNavigate();
+  const { t: tAccount } = useTranslation(ACCOUNT_NAMESPACE);
   const enabled = useFundEnabled();
 
   return (
     <AccountLayout
       title={t('membershipTitle')}
-      onBack={() => void navigate({ to: AccountRoute.to })}
+      breadcrumbs={[{ label: tAccount('title'), to: AccountRoute.to }]}
     >
       {enabled && (
         <SignInGate>
