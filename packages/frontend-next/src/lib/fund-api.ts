@@ -6,6 +6,7 @@ export type Fine = {
   status: 'in_review' | 'paid' | 'declined';
   createdAt: string;
   paidAt: string | null;
+  declineReason: string | null;
 };
 
 export class FundRequestError extends Error {

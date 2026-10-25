@@ -15,10 +15,18 @@ const STATUS_STYLES = {
   declined: { icon: X, color: 'text-destructive' },
 };
 
-function Status({ status, label }: { status: Fine['status']; label: string }) {
+function Status({
+  status,
+  label,
+  descriptionId,
+}: {
+  status: Fine['status'];
+  label: string;
+  descriptionId?: string;
+}) {
   const { icon: Icon, color } = STATUS_STYLES[status];
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs">
+    <span className="inline-flex items-center gap-1.5 text-xs" aria-describedby={descriptionId}>
       <Icon className={cn('size-3.5 shrink-0', color)} aria-hidden="true" />
       {label}
     </span>
@@ -54,23 +62,51 @@ function FineRow({ fine }: { fine: Fine }) {
   const time = new Intl.DateTimeFormat(i18n.language, { timeStyle: 'short' }).format(
     new Date(fine.createdAt),
   );
+  let declineReason: string | undefined;
+  let descriptionId: string | undefined;
+  if (fine.status === 'declined') {
+    declineReason = fine.declineReason?.trim() || t('declineReasonMissing');
+    descriptionId = `fine-${fine.id}-decline-reason`;
+  }
+
   return (
-    <tr className="border-border border-b">
-      <td className="py-3 pr-2">
-        <time dateTime={fine.createdAt} className="block text-xs">
-          {date}
-          <span className="text-muted-foreground mt-0.5 block">{time}</span>
-        </time>
-      </td>
-      <td className="py-3 pr-2">
-        <Status status={fine.status} label={t(`fineStatus.${fine.status}`)} />
-        {fine.status === 'paid' && fine.paidAt && (
-          <time dateTime={fine.paidAt} className="text-muted-foreground mt-0.5 block pl-5 text-xs">
-            {dateFormatter.format(new Date(fine.paidAt))}
+    <tbody className="border-border border-b">
+      <tr>
+        <td className="py-3 pr-2 align-top">
+          <time dateTime={fine.createdAt} className="block text-xs">
+            {date}
+            <span className="text-muted-foreground mt-0.5 block">{time}</span>
           </time>
-        )}
-      </td>
-    </tr>
+        </td>
+        <td className="py-3 pr-2 align-top">
+          <Status
+            status={fine.status}
+            label={t(`fineStatus.${fine.status}`)}
+            descriptionId={descriptionId}
+          />
+          {fine.status === 'paid' && fine.paidAt && (
+            <time
+              dateTime={fine.paidAt}
+              className="text-muted-foreground mt-0.5 block pl-5 text-xs"
+            >
+              {dateFormatter.format(new Date(fine.paidAt))}
+            </time>
+          )}
+        </td>
+      </tr>
+      {declineReason !== undefined && (
+        <tr>
+          <td colSpan={2} className="pb-3">
+            <p
+              id={descriptionId}
+              className="text-muted-foreground text-sm leading-relaxed wrap-anywhere whitespace-pre-wrap"
+            >
+              {declineReason}
+            </p>
+          </td>
+        </tr>
+      )}
+    </tbody>
   );
 }
 
@@ -88,18 +124,16 @@ function UploadHistory({ userId, sessionId }: { userId: string; sessionId: strin
   }
 
   return (
-    <table className="w-full" aria-label={t('uploadsTitle')}>
+    <table className="w-full table-fixed" aria-label={t('uploadsTitle')}>
       <thead className={TABLE_HEAD}>
         <tr>
           <th scope="col">{t('uploadedAt')}</th>
           <th scope="col">{t('status')}</th>
         </tr>
       </thead>
-      <tbody>
-        {fines.data.map((fine) => (
-          <FineRow key={fine.id} fine={fine} />
-        ))}
-      </tbody>
+      {fines.data.map((fine) => (
+        <FineRow key={fine.id} fine={fine} />
+      ))}
     </table>
   );
 }
