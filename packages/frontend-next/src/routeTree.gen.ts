@@ -22,6 +22,7 @@ import { Route as MapIndexRouteImport } from './routes/_map/index'
 import { Route as ReportsStationsRouteImport } from './routes/reports/stations'
 import { Route as ReportsLinesRouteImport } from './routes/reports/lines'
 import { Route as AnnouncementsAnnouncementIdRouteImport } from './routes/announcements/$announcementId'
+import { Route as AccountMembershipRouteImport } from './routes/account/membership'
 import { Route as MapSettingsIndexRouteImport } from './routes/_map/settings/index'
 import { Route as MapStationStationIdRouteImport } from './routes/_map/station/$stationId'
 import { Route as MapReportsStationIdRouteImport } from './routes/_map/reports/$stationId'
@@ -93,6 +94,11 @@ const AnnouncementsAnnouncementIdRoute =
     path: '/announcements/$announcementId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AccountMembershipRoute = AccountMembershipRouteImport.update({
+  id: '/account/membership',
+  path: '/account/membership',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MapSettingsIndexRoute = MapSettingsIndexRouteImport.update({
   id: '/settings/',
   path: '/settings/',
@@ -125,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reports': typeof ReportsRouteWithChildren
+  '/account/membership': typeof AccountMembershipRoute
   '/announcements/$announcementId': typeof AnnouncementsAnnouncementIdRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByTo {
   '/impressum': typeof ImpressumRoute
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
+  '/account/membership': typeof AccountMembershipRoute
   '/announcements/$announcementId': typeof AnnouncementsAnnouncementIdRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
@@ -163,6 +171,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/report': typeof ReportRoute
   '/reports': typeof ReportsRouteWithChildren
+  '/account/membership': typeof AccountMembershipRoute
   '/announcements/$announcementId': typeof AnnouncementsAnnouncementIdRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
@@ -185,6 +194,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/report'
     | '/reports'
+    | '/account/membership'
     | '/announcements/$announcementId'
     | '/reports/lines'
     | '/reports/stations'
@@ -202,6 +212,7 @@ export interface FileRouteTypes {
     | '/impressum'
     | '/privacy'
     | '/report'
+    | '/account/membership'
     | '/announcements/$announcementId'
     | '/reports/lines'
     | '/reports/stations'
@@ -222,6 +233,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/report'
     | '/reports'
+    | '/account/membership'
     | '/announcements/$announcementId'
     | '/reports/lines'
     | '/reports/stations'
@@ -243,6 +255,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ReportRoute: typeof ReportRoute
   ReportsRoute: typeof ReportsRouteWithChildren
+  AccountMembershipRoute: typeof AccountMembershipRoute
   AnnouncementsAnnouncementIdRoute: typeof AnnouncementsAnnouncementIdRoute
   AccountIndexRoute: typeof AccountIndexRoute
   AnnouncementsIndexRoute: typeof AnnouncementsIndexRoute
@@ -342,6 +355,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnnouncementsAnnouncementIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account/membership': {
+      id: '/account/membership'
+      path: '/account/membership'
+      fullPath: '/account/membership'
+      preLoaderRoute: typeof AccountMembershipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_map/settings/': {
       id: '/_map/settings/'
       path: '/settings'
@@ -421,6 +441,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ReportRoute: ReportRoute,
   ReportsRoute: ReportsRouteWithChildren,
+  AccountMembershipRoute: AccountMembershipRoute,
   AnnouncementsAnnouncementIdRoute: AnnouncementsAnnouncementIdRoute,
   AccountIndexRoute: AccountIndexRoute,
   AnnouncementsIndexRoute: AnnouncementsIndexRoute,
