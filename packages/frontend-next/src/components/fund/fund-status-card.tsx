@@ -19,9 +19,10 @@ type FundStatusCardProps = {
   body?: string;
   // Secondary facts such as the contribution and the next renewal, deliberately small.
   details?: ReactNode;
+  action?: ReactNode;
 };
 
-export function FundStatusCard({ tone, title, body, details }: FundStatusCardProps) {
+export function FundStatusCard({ tone, title, body, details, action }: FundStatusCardProps) {
   const { Icon, icon } = TONES[tone];
 
   return (
@@ -34,6 +35,7 @@ export function FundStatusCard({ tone, title, body, details }: FundStatusCardPro
         <p className="text-muted-foreground text-sm leading-relaxed">{body}</p>
       )}
       {details !== undefined && <div className="text-muted-foreground text-sm">{details}</div>}
+      {action}
     </div>
   );
 }
