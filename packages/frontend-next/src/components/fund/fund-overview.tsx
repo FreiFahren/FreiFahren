@@ -49,9 +49,8 @@ function LoadingHistory() {
 
 function FineRow({ fine }: { fine: Fine }) {
   const { t, i18n } = useTranslation(NAMESPACE);
-  const date = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(
-    new Date(fine.createdAt),
-  );
+  const dateFormatter = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' });
+  const date = dateFormatter.format(new Date(fine.createdAt));
   const time = new Intl.DateTimeFormat(i18n.language, { timeStyle: 'short' }).format(
     new Date(fine.createdAt),
   );
@@ -65,6 +64,11 @@ function FineRow({ fine }: { fine: Fine }) {
       </td>
       <td className="py-3 pr-2">
         <Status status={fine.status} label={t(`fineStatus.${fine.status}`)} />
+        {fine.status === 'paid' && fine.paidAt && (
+          <time dateTime={fine.paidAt} className="text-muted-foreground mt-0.5 block pl-5 text-xs">
+            {dateFormatter.format(new Date(fine.paidAt))}
+          </time>
+        )}
       </td>
     </tr>
   );
