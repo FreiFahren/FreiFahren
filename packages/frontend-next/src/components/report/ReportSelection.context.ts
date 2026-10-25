@@ -11,6 +11,18 @@ export function normalizeStationQuery(value: string): string {
     .toLowerCase();
 }
 
+const normalizedNames = new WeakMap<Station, string>();
+
+/** Cached per station object so filtering on every keystroke doesn't re-normalize every name. */
+export function normalizedStationName(station: Station): string {
+  let name = normalizedNames.get(station);
+  if (name === undefined) {
+    name = normalizeStationQuery(station.name);
+    normalizedNames.set(station, name);
+  }
+  return name;
+}
+
 export type LineFilter = 'all' | LineType;
 
 export type ReportSelectionContextValue = {
@@ -19,15 +31,14 @@ export type ReportSelectionContextValue = {
   activeLineName: string | null;
   lineFilter: LineFilter;
   stationId: string | null;
-  /** Whether stationId was explicitly confirmed (manual tap / deep link) vs. just an auto-matched preview. */
+  /** Whether the station was explicitly confirmed (manual tap / deep link) vs. a live unique search match. */
   isStationLocked: boolean;
   stationQuery: string;
   directionStationId: string | null;
 
   selectLine: (name: string | null) => void;
   setLineFilter: (filter: LineFilter) => void;
-  /** `locked` defaults to true (manual tap); pass false for a non-committing auto-match preview. */
-  selectStation: (id: string | null, locked?: boolean) => void;
+  selectStation: (id: string | null) => void;
   setStationQuery: (query: string) => void;
   selectDirection: (id: string | null) => void;
   stationForSubmit: () => {
@@ -39,7 +50,6 @@ export type ReportSelectionContextValue = {
   visibleLines: { name: string; type: LineType }[];
   visibleStations: Station[];
   directionOptions: Station[];
-  previewStationId: string | null;
 };
 
 export const ReportSelectionContext = createContext<ReportSelectionContextValue | null>(null);

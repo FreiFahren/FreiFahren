@@ -1,7 +1,8 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 
 import {
   compareLineOrder,
+  type Line,
   type LineType,
   resolveStationLineNames,
   type Station,
@@ -11,10 +12,45 @@ import {
 
 import {
   type LineFilter,
+  normalizedStationName,
   normalizeStationQuery,
   ReportSelectionContext,
   type ReportSelectionContextValue,
 } from './ReportSelection.context';
+
+type StationMap = Record<string, Station> | undefined;
+
+// Every variant of the line, in stored order, deduplicated across direction variants.
+function stationsAlongLine(lines: Line[] | undefined, stations: StationMap, lineName: string) {
+  const seen = new Set<string>();
+  const ordered: Station[] = [];
+  for (const line of lines ?? []) {
+    if (line.name !== lineName) continue;
+    for (const id of line.stations) {
+      if (seen.has(id)) continue;
+      seen.add(id);
+      const station = stations?.[id];
+      if (station) ordered.push(station);
+    }
+  }
+  return ordered;
+}
+
+function stationsByType(lines: Line[] | undefined, stations: StationMap, lineFilter: LineFilter) {
+  const typeByName = new Map<string, LineType>();
+  for (const line of lines ?? []) {
+    if (!typeByName.has(line.name)) typeByName.set(line.name, line.type);
+  }
+  return Object.values(stations ?? {})
+    .filter(
+      (station) =>
+        lineFilter === 'all' ||
+        resolveStationLineNames(station.lines, lines).some(
+          (name) => typeByName.get(name) === lineFilter,
+        ),
+    )
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
 
 export function ReportSelectionProvider({
   children,
@@ -27,13 +63,9 @@ export function ReportSelectionProvider({
 }) {
   const [lineName, setLineName] = useState<string | null>(null);
   const [lineFilter, setLineFilter] = useState<LineFilter>('all');
-  const [stationId, setStationId] = useState<string | null>(initialStationId);
-  // Whether stationId was explicitly confirmed (manual tap, or a prefilled deep link) rather than
-  // just mirroring a unique search match. Locked collapses the picker into a single result;
-  // unlocked keeps the search box open so a stray extra keystroke doesn't get the user stuck.
-  const [isStationLocked, setIsStationLocked] = useState(initialStationId !== null);
+  const [tappedStationId, setTappedStationId] = useState<string | null>(initialStationId);
   const [stationQuery, setStationQueryState] = useState('');
-  const [directionStationId, setDirectionStationId] = useState<string | null>(null);
+  const [directionStationIdState, setDirectionStationId] = useState<string | null>(null);
 
   const { data: lines } = useLines();
   const { data: stations } = useStations();
@@ -48,18 +80,13 @@ export function ReportSelectionProvider({
   };
 
   // Clearing the station also clears the chosen line so the user starts fresh.
-  const selectStation = (id: string | null, locked = true) => {
-    setStationId(id);
-    setIsStationLocked(locked && id !== null);
+  const selectStation = (id: string | null) => {
+    setTappedStationId(id);
     setDirectionStationId(null);
     if (id === null) {
       setLineName(null);
       return;
     }
-    // Only commit line/type side effects once the station is actually confirmed — while merely
-    // auto-matched (unlocked), leave lineName alone so further typing can still reach stations on
-    // other lines.
-    if (!locked) return;
     // A station served by a single line: pick that line so the user can skip the line step.
     const names = resolveStationLineNames(stations?.[id]?.lines ?? [], lines);
     if (names.length === 1) selectLine(names[0]);
@@ -69,7 +96,7 @@ export function ReportSelectionProvider({
     setDirectionStationId(id);
   };
 
-  // The prefilled station is seeded into stationId above; once the transit data is available,
+  // The prefilled station is seeded into tappedStationId above; once the transit data is available,
   // mirror selectStation's single-line shortcut so a station served by exactly one line preselects
   // that line (and its type filter), letting the user skip the line step.
   const [appliedInitialStationId, setAppliedInitialStationId] = useState<string | null>(null);
@@ -106,72 +133,35 @@ export function ReportSelectionProvider({
   }
   const allLines = [...typeByName].map(([name, type]) => ({ name, type })).sort(compareLineOrder);
 
-  // Only treated as "selected" (narrows the list, collapses the UI) once locked — an unlocked
-  // auto-match still behaves like a live preview.
-  const selectedStation = stationId && isStationLocked ? stations?.[stationId] : undefined;
+  // Rebuilding and re-sorting ~1k stations on every keystroke is noticeable on slow phones.
+  const matchPool = useMemo(
+    () =>
+      lineName
+        ? stationsAlongLine(lines, stations, lineName)
+        : stationsByType(lines, stations, lineFilter),
+    [lines, stations, lineName, lineFilter],
+  );
 
-  const stationsAlongLine = () => {
-    // Walk every variant of the selected line and emit stations in their stored order,
-    // deduplicating across direction variants.
-    const seen = new Set<string>();
-    const ordered: Station[] = [];
-    for (const line of lines ?? []) {
-      if (line.name !== lineName) continue;
-      for (const id of line.stations) {
-        if (seen.has(id)) continue;
-        seen.add(id);
-        const station = stations?.[id];
-        if (station) ordered.push(station);
-      }
-    }
-    return ordered;
-  };
-
-  const stationsByType = () =>
-    Object.values(stations ?? {})
-      .filter((station) => {
-        if (lineFilter === 'all') return true;
-        const names = resolveStationLineNames(station.lines, lines);
-        return names.some((name) => typeByName.get(name) === lineFilter);
-      })
-      .sort((a, b) => a.name.localeCompare(b.name));
-
-  let visibleStations: Station[];
-  if (selectedStation) visibleStations = [selectedStation];
-  else if (lineName) visibleStations = stationsAlongLine();
-  else visibleStations = stationsByType();
-
-  const stationMatchingQuery = (query: string): Station | undefined => {
-    const needle = normalizeStationQuery(query.trim());
+  const uniqueMatch = (() => {
+    if (tappedStationId !== null) return undefined;
+    const needle = normalizeStationQuery(stationQuery.trim());
     if (!needle) return undefined;
-    const matches = visibleStations.filter((station) =>
-      normalizeStationQuery(station.name).includes(needle),
-    );
+    const matches = matchPool.filter((station) => normalizedStationName(station).includes(needle));
     return matches.length === 1 ? matches[0] : undefined;
-  };
+  })();
 
-  const previewStation = selectedStation ?? stationMatchingQuery(stationQuery);
+  const stationId = tappedStationId ?? uniqueMatch?.id ?? null;
+  const isStationLocked = tappedStationId !== null;
+  const derivedStation = stationId ? stations?.[stationId] : undefined;
+  const visibleStations = isStationLocked && derivedStation ? [derivedStation] : matchPool;
 
-  // A unique search match only *looks* unselected (nothing highlighted), which reads as if the
-  // station isn't actually registered yet. Mirror it into stationId so Submit lights up and the
-  // match is highlighted in the list — but without locking, so the search box stays open and a
-  // stray extra keystroke (or one that stops matching) can still change or drop it.
-  if (!isStationLocked) {
-    const matchedId = previewStation?.id ?? null;
-    if (stationId !== matchedId) {
-      setStationId(matchedId);
-      setDirectionStationId(null);
-    }
-  }
-
-  const previewLineNames = previewStation
-    ? resolveStationLineNames(previewStation.lines, lines)
+  const derivedLineNames = derivedStation
+    ? resolveStationLineNames(derivedStation.lines, lines)
     : null;
-  const stationLineNames = previewLineNames ? new Set(previewLineNames) : null;
   const visibleLines = allLines
     .filter((l) => lineFilter === 'all' || l.type === lineFilter)
-    .filter((l) => !stationLineNames || stationLineNames.has(l.name));
-  const activeLineName = lineName ?? (previewLineNames?.length === 1 ? previewLineNames[0] : null);
+    .filter((l) => !derivedLineNames || derivedLineNames.includes(l.name));
+  const activeLineName = lineName ?? (derivedLineNames?.length === 1 ? derivedLineNames[0] : null);
 
   const setStationQuery = (query: string) => {
     setStationQueryState(query);
@@ -188,11 +178,11 @@ export function ReportSelectionProvider({
   // those variants, deduplicated. The variant a chosen endpoint belongs to can be resolved at
   // submit time from (lineName, stationId, directionStationId).
   const directionOptions: Station[] = [];
-  if (activeLineName && previewStation && !selectedLineIsCircular) {
+  if (activeLineName && derivedStation && !selectedLineIsCircular) {
     const seen = new Set<string>();
     for (const variant of lines ?? []) {
       if (variant.name !== activeLineName) continue;
-      if (!variant.stations.includes(previewStation.id)) continue;
+      if (!variant.stations.includes(derivedStation.id)) continue;
       if (variant.stations.length < 2) continue;
       const endpointIds = [variant.stations[0], variant.stations[variant.stations.length - 1]];
       for (const id of endpointIds) {
@@ -205,19 +195,13 @@ export function ReportSelectionProvider({
     }
   }
 
+  const directionStationId = directionOptions.some((s) => s.id === directionStationIdState)
+    ? directionStationIdState
+    : null;
+
   const stationForSubmit = () => {
-    if (stationId) return { stationId, lineName: activeLineName, directionStationId };
-    const match = stationMatchingQuery(stationQuery);
-    if (!match) return null;
-    const names = resolveStationLineNames(stations?.[match.id]?.lines ?? [], lines);
-    const submittedLine = lineName ?? (names.length === 1 ? names[0] : null);
-    const submittedDirection = directionStationId;
-    selectStation(match.id);
-    return {
-      stationId: match.id,
-      lineName: submittedLine,
-      directionStationId: submittedDirection,
-    };
+    if (stationId === null) return null;
+    return { stationId, lineName: activeLineName, directionStationId };
   };
 
   const value: ReportSelectionContextValue = {
@@ -237,7 +221,6 @@ export function ReportSelectionProvider({
     visibleLines,
     visibleStations,
     directionOptions,
-    previewStationId: stationId ? null : (previewStation?.id ?? null),
   };
 
   return <ReportSelectionContext value={value}>{children}</ReportSelectionContext>;

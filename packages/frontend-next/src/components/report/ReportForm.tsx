@@ -32,12 +32,20 @@ import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 
 import { NAMESPACE } from './ReportForm.i18n';
-import { normalizeStationQuery, useReportSelection } from './ReportSelection.context';
+import {
+  normalizedStationName,
+  normalizeStationQuery,
+  useReportSelection,
+} from './ReportSelection.context';
 import { ReportSelectionProvider } from './ReportSelectionProvider';
 import { ReportSuccess } from './ReportSuccess';
 import { ClearSelectionButton, LineBadgePicker, LineTypeTabs } from './line-picker-controls';
 import { SelectionButton } from './selection-button';
-import { type ReportRejection, useReportVerification } from './useReportVerification';
+import {
+  type ReportRejection,
+  useReportVerification,
+  type VerifyLocation,
+} from './useReportVerification';
 
 const routeApi = getRouteApi('/report');
 
@@ -60,7 +68,6 @@ function LinePicker() {
     selectLine,
     visibleLines,
     stationId,
-    previewStationId,
   } = useReportSelection();
 
   return (
@@ -82,7 +89,7 @@ function LinePicker() {
         lines={visibleLines}
         selectedLine={activeLineName}
         onSelect={selectLine}
-        wrap={Boolean(stationId ?? previewStationId)}
+        wrap={stationId !== null}
       />
     </section>
   );
@@ -103,7 +110,7 @@ function StationPicker() {
 
   const needle = normalizeStationQuery(stationQuery.trim());
   const filtered = needle
-    ? visibleStations.filter((s) => normalizeStationQuery(s.name).includes(needle))
+    ? visibleStations.filter((s) => normalizedStationName(s).includes(needle))
     : visibleStations;
 
   // Closest stations, only while sharing location, not searching, and not browsing a line.
@@ -328,6 +335,8 @@ function SubmitFailureNotice({ title, body }: { title: string; body: string }) {
 
 const REPEATED_FAILURE_THRESHOLD = 3;
 
+const LOCATION_WAIT_MS = 4000;
+
 function SubmitFooter({
   onSubmitted,
   onSubmissionError,
@@ -338,14 +347,14 @@ function SubmitFooter({
   onRepeatedFailure: () => void;
 }) {
   const { t } = useTranslation(NAMESPACE);
-  const { stationId, previewStationId, stationForSubmit } = useReportSelection();
+  const { stationId, stationForSubmit } = useReportSelection();
   const submitReport = useSubmitReport();
   const { verify, recordSubmission } = useReportVerification();
+  const { position, status, requestLocation } = useGeolocation();
   const [consecutiveFailures, setConsecutiveFailures] = useState(0);
+  const [isLocating, setIsLocating] = useState(false);
 
-  // A unique in-progress search match counts too, so the button lights up before the user has to
-  // tap a result — but only for a match that's actually unique, not just any non-empty text.
-  const canSubmit = stationId !== null || previewStationId !== null;
+  const canSubmit = stationId !== null;
 
   const showErrorToast = (message: string, id: string) => {
     toast.custom(
@@ -387,7 +396,7 @@ function SubmitFooter({
     showErrorToast(t('errorSubmitFailed'), 'report-submit-error');
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Keep an empty selection clickable so the user can learn what is missing.
     const selection = stationForSubmit();
     if (selection === null) {
@@ -395,7 +404,28 @@ function SubmitFooter({
       return;
     }
 
-    const rejection = verify(selection.stationId);
+    let location: VerifyLocation | undefined;
+    if (!position && status === 'loading') {
+      setIsLocating(true);
+      try {
+        // requestLocation returns the fetch already in flight, so this doesn't start a second one.
+        const coords = await Promise.race([
+          requestLocation('report'),
+          new Promise<'timeout'>((resolve) => setTimeout(resolve, LOCATION_WAIT_MS, 'timeout')),
+        ]);
+        location =
+          coords === 'timeout'
+            ? { position: null, pending: true }
+            : {
+                position: coords && { lat: coords.latitude, lng: coords.longitude },
+                pending: false,
+              };
+      } finally {
+        setIsLocating(false);
+      }
+    }
+
+    const rejection = verify(selection.stationId, location);
     if (rejection) {
       track('report_rejected', { reason: rejection, stationId: selection.stationId });
       showErrorToast(t(REJECTION_MESSAGE[rejection]), 'report-verification');
@@ -417,7 +447,7 @@ function SubmitFooter({
       <Button
         type="button"
         size="lg"
-        disabled={submitReport.isPending}
+        disabled={submitReport.isPending || isLocating}
         aria-disabled={!canSubmit}
         onClick={handleSubmit}
         className={cn(
