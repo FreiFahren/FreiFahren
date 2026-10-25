@@ -3,6 +3,32 @@ import { i18n } from '@/lib/i18n';
 export const NAMESPACE = 'fund';
 
 i18n.addResourceBundle('en', NAMESPACE, {
+  membershipTitle: 'Membership',
+  showDetails: 'Show details',
+  loadingMembership: 'Loading your membership…',
+  joinFund: 'Join the Fund',
+  paymentSummary: 'Payment summary',
+  contributionsTitle: 'Your contributions',
+  contributionPeriod: 'Period',
+  contributionAmount: 'Amount',
+  emptyContributions: 'No contributions yet. Your payments will appear here.',
+  loadingContributions: 'Loading your payments…',
+  contributionsError: 'Your payments couldn’t be loaded. Please try again.',
+  paymentStatus: {
+    paid: 'Paid',
+    pending: 'Pending',
+    failed: 'Failed',
+    action_required: 'Action needed',
+    void: 'Canceled',
+    uncollectible: 'Unpaid',
+  },
+  paymentFailure: {
+    insufficient_funds: 'Insufficient funds. Check your payment method under “Manage membership”.',
+    expired_card: 'Your card has expired. Update it under “Manage membership”.',
+    declined: 'Your payment was declined. Check your payment method under “Manage membership”.',
+    payment_failed: 'The payment failed. Check your payment method under “Manage membership”.',
+  },
+  paymentActionRequired: 'Confirm your payment under “Manage membership”.',
   open: 'Open Fund',
   title: 'FreiFahren Fund',
   intro: 'Your uploads.',
@@ -74,6 +100,35 @@ i18n.addResourceBundle('en', NAMESPACE, {
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
+  membershipTitle: 'Mitgliedschaft',
+  showDetails: 'Details anzeigen',
+  loadingMembership: 'Deine Mitgliedschaft wird geladen…',
+  joinFund: 'Dem Fonds beitreten',
+  paymentSummary: 'Zahlungsübersicht',
+  contributionsTitle: 'Deine Beiträge',
+  contributionPeriod: 'Zeitraum',
+  contributionAmount: 'Betrag',
+  emptyContributions: 'Noch keine Beiträge. Deine Zahlungen erscheinen hier.',
+  loadingContributions: 'Deine Zahlungen werden geladen…',
+  contributionsError: 'Deine Zahlungen konnten nicht geladen werden. Bitte versuche es erneut.',
+  paymentStatus: {
+    paid: 'Bezahlt',
+    pending: 'Ausstehend',
+    failed: 'Fehlgeschlagen',
+    action_required: 'Aktion nötig',
+    void: 'Storniert',
+    uncollectible: 'Unbezahlt',
+  },
+  paymentFailure: {
+    insufficient_funds:
+      'Nicht ausreichend Guthaben. Prüfe deine Zahlungsart unter „Mitgliedschaft verwalten“.',
+    expired_card: 'Deine Karte ist abgelaufen. Aktualisiere sie unter „Mitgliedschaft verwalten“.',
+    declined:
+      'Deine Zahlung wurde abgelehnt. Prüfe deine Zahlungsart unter „Mitgliedschaft verwalten“.',
+    payment_failed:
+      'Die Zahlung ist fehlgeschlagen. Prüfe deine Zahlungsart unter „Mitgliedschaft verwalten“.',
+  },
+  paymentActionRequired: 'Bestätige deine Zahlung unter „Mitgliedschaft verwalten“.',
   open: 'Solidaritätsfonds öffnen',
   title: 'FreiFahren Fonds',
   intro: 'Deine Uploads.',

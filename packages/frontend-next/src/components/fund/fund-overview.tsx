@@ -3,10 +3,18 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { SectionHeading } from '@/components/ui/section-heading';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { useFundHistory, type Fine } from '@/hooks/use-fund-history';
-import { cn } from '@/lib/utils';
 
 import { FineUpload } from './fine-upload';
+import { FundHistoryStatus } from './fund-history-status';
 import { NAMESPACE } from './fund.i18n';
 
 const STATUS_STYLES = {
@@ -14,24 +22,6 @@ const STATUS_STYLES = {
   paid: { icon: Check, color: 'text-ok' },
   declined: { icon: X, color: 'text-destructive' },
 };
-
-function Status({
-  status,
-  label,
-  descriptionId,
-}: {
-  status: Fine['status'];
-  label: string;
-  descriptionId?: string;
-}) {
-  const { icon: Icon, color } = STATUS_STYLES[status];
-  return (
-    <span className="inline-flex items-center gap-1.5 text-xs" aria-describedby={descriptionId}>
-      <Icon className={cn('size-3.5 shrink-0', color)} aria-hidden="true" />
-      {label}
-    </span>
-  );
-}
 
 function HistoryError({ retry }: { retry: () => void }) {
   const { t } = useTranslation(NAMESPACE);
@@ -62,6 +52,8 @@ function FineRow({ fine }: { fine: Fine }) {
   const time = new Intl.DateTimeFormat(i18n.language, { timeStyle: 'short' }).format(
     new Date(fine.createdAt),
   );
+  const { icon, color } = STATUS_STYLES[fine.status];
+  const paidAt = fine.status === 'paid' ? fine.paidAt : null;
   let declineReason: string | undefined;
   let descriptionId: string | undefined;
   if (fine.status === 'declined') {
@@ -70,48 +62,39 @@ function FineRow({ fine }: { fine: Fine }) {
   }
 
   return (
-    <tbody className="border-border border-b">
-      <tr>
-        <td className="py-3 pr-2 align-top">
-          <time dateTime={fine.createdAt} className="block text-xs">
+    <TableBody className="border-border border-b last:border-b-0 [&_tr]:border-0">
+      <TableRow>
+        <TableCell>
+          <time dateTime={fine.createdAt} className="block">
             {date}
-            <span className="text-muted-foreground mt-0.5 block">{time}</span>
+            <span className="text-muted-foreground mt-1 block text-xs leading-relaxed">{time}</span>
           </time>
-        </td>
-        <td className="py-3 pr-2 align-top">
-          <Status
-            status={fine.status}
+        </TableCell>
+        <TableCell>
+          <FundHistoryStatus
+            icon={icon}
+            iconClassName={color}
             label={t(`fineStatus.${fine.status}`)}
+            paidAt={paidAt}
             descriptionId={descriptionId}
           />
-          {fine.status === 'paid' && fine.paidAt && (
-            <time
-              dateTime={fine.paidAt}
-              className="text-muted-foreground mt-0.5 block pl-5 text-xs"
-            >
-              {dateFormatter.format(new Date(fine.paidAt))}
-            </time>
-          )}
-        </td>
-      </tr>
+        </TableCell>
+      </TableRow>
       {declineReason !== undefined && (
-        <tr>
-          <td colSpan={2} className="pb-3">
+        <TableRow>
+          <TableCell colSpan={2} className="pt-0">
             <p
               id={descriptionId}
               className="text-muted-foreground text-sm leading-relaxed wrap-anywhere whitespace-pre-wrap"
             >
               {declineReason}
             </p>
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       )}
-    </tbody>
+    </TableBody>
   );
 }
-
-const TABLE_HEAD =
-  'text-muted-foreground border-border border-b text-left text-xs [&_th]:pb-2 [&_th]:font-normal';
 
 function UploadHistory({ userId, sessionId }: { userId: string; sessionId: string }) {
   const { t } = useTranslation(NAMESPACE);
@@ -124,17 +107,17 @@ function UploadHistory({ userId, sessionId }: { userId: string; sessionId: strin
   }
 
   return (
-    <table className="w-full table-fixed" aria-label={t('uploadsTitle')}>
-      <thead className={TABLE_HEAD}>
-        <tr>
-          <th scope="col">{t('uploadedAt')}</th>
-          <th scope="col">{t('status')}</th>
-        </tr>
-      </thead>
+    <Table className="table-fixed" aria-label={t('uploadsTitle')}>
+      <TableHeader>
+        <TableRow>
+          <TableHead>{t('uploadedAt')}</TableHead>
+          <TableHead>{t('status')}</TableHead>
+        </TableRow>
+      </TableHeader>
       {fines.data.map((fine) => (
         <FineRow key={fine.id} fine={fine} />
       ))}
-    </table>
+    </Table>
   );
 }
 
