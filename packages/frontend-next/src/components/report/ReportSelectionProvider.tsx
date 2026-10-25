@@ -1,7 +1,8 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 
 import {
   compareLineOrder,
+  type Line,
   type LineType,
   resolveStationLineNames,
   type Station,
@@ -11,9 +12,45 @@ import {
 
 import {
   type LineFilter,
+  normalizedStationName,
+  normalizeStationQuery,
   ReportSelectionContext,
   type ReportSelectionContextValue,
 } from './ReportSelection.context';
+
+type StationMap = Record<string, Station> | undefined;
+
+// Every variant of the line, in stored order, deduplicated across direction variants.
+function stationsAlongLine(lines: Line[] | undefined, stations: StationMap, lineName: string) {
+  const seen = new Set<string>();
+  const ordered: Station[] = [];
+  for (const line of lines ?? []) {
+    if (line.name !== lineName) continue;
+    for (const id of line.stations) {
+      if (seen.has(id)) continue;
+      seen.add(id);
+      const station = stations?.[id];
+      if (station) ordered.push(station);
+    }
+  }
+  return ordered;
+}
+
+function stationsByType(lines: Line[] | undefined, stations: StationMap, lineFilter: LineFilter) {
+  const typeByName = new Map<string, LineType>();
+  for (const line of lines ?? []) {
+    if (!typeByName.has(line.name)) typeByName.set(line.name, line.type);
+  }
+  return Object.values(stations ?? {})
+    .filter(
+      (station) =>
+        lineFilter === 'all' ||
+        resolveStationLineNames(station.lines, lines).some(
+          (name) => typeByName.get(name) === lineFilter,
+        ),
+    )
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
 
 export function ReportSelectionProvider({
   children,
@@ -26,8 +63,9 @@ export function ReportSelectionProvider({
 }) {
   const [lineName, setLineName] = useState<string | null>(null);
   const [lineFilter, setLineFilter] = useState<LineFilter>('all');
-  const [stationId, setStationId] = useState<string | null>(initialStationId);
-  const [directionStationId, setDirectionStationId] = useState<string | null>(null);
+  const [tappedStationId, setTappedStationId] = useState<string | null>(initialStationId);
+  const [stationQuery, setStationQuery] = useState('');
+  const [directionStationIdState, setDirectionStationId] = useState<string | null>(null);
 
   const { data: lines } = useLines();
   const { data: stations } = useStations();
@@ -43,7 +81,7 @@ export function ReportSelectionProvider({
 
   // Clearing the station also clears the chosen line so the user starts fresh.
   const selectStation = (id: string | null) => {
-    setStationId(id);
+    setTappedStationId(id);
     setDirectionStationId(null);
     if (id === null) {
       setLineName(null);
@@ -58,7 +96,7 @@ export function ReportSelectionProvider({
     setDirectionStationId(id);
   };
 
-  // The prefilled station is seeded into stationId above; once the transit data is available,
+  // The prefilled station is seeded into tappedStationId above; once the transit data is available,
   // mirror selectStation's single-line shortcut so a station served by exactly one line preselects
   // that line (and its type filter), letting the user skip the line step.
   const [appliedInitialStationId, setAppliedInitialStationId] = useState<string | null>(null);
@@ -95,49 +133,39 @@ export function ReportSelectionProvider({
   }
   const allLines = [...typeByName].map(([name, type]) => ({ name, type })).sort(compareLineOrder);
 
-  const selectedStation = stationId ? stations?.[stationId] : undefined;
-  const stationLineNames = selectedStation
-    ? new Set(resolveStationLineNames(selectedStation.lines, lines))
+  // Rebuilding and re-sorting ~1k stations on every keystroke is noticeable on slow phones.
+  const matchPool = useMemo(
+    () =>
+      lineName
+        ? stationsAlongLine(lines, stations, lineName)
+        : stationsByType(lines, stations, lineFilter),
+    [lines, stations, lineName, lineFilter],
+  );
+
+  const uniqueMatch = (() => {
+    if (tappedStationId !== null) return undefined;
+    const needle = normalizeStationQuery(stationQuery.trim());
+    if (!needle) return undefined;
+    const matches = matchPool.filter((station) => normalizedStationName(station).includes(needle));
+    return matches.length === 1 ? matches[0] : undefined;
+  })();
+
+  const stationId = tappedStationId ?? uniqueMatch?.id ?? null;
+  const derivedStation = stationId ? stations?.[stationId] : undefined;
+  const visibleStations = tappedStationId !== null && derivedStation ? [derivedStation] : matchPool;
+
+  const derivedLineNames = derivedStation
+    ? resolveStationLineNames(derivedStation.lines, lines)
     : null;
   const visibleLines = allLines
     .filter((l) => lineFilter === 'all' || l.type === lineFilter)
-    .filter((l) => !stationLineNames || stationLineNames.has(l.name));
-
-  const stationsAlongLine = () => {
-    // Walk every variant of the selected line and emit stations in their stored order,
-    // deduplicating across direction variants.
-    const seen = new Set<string>();
-    const ordered: Station[] = [];
-    for (const line of lines ?? []) {
-      if (line.name !== lineName) continue;
-      for (const id of line.stations) {
-        if (seen.has(id)) continue;
-        seen.add(id);
-        const station = stations?.[id];
-        if (station) ordered.push(station);
-      }
-    }
-    return ordered;
-  };
-
-  const stationsByType = () =>
-    Object.values(stations ?? {})
-      .filter((station) => {
-        if (lineFilter === 'all') return true;
-        const names = resolveStationLineNames(station.lines, lines);
-        return names.some((name) => typeByName.get(name) === lineFilter);
-      })
-      .sort((a, b) => a.name.localeCompare(b.name));
-
-  let visibleStations: Station[];
-  if (selectedStation) visibleStations = [selectedStation];
-  else if (lineName) visibleStations = stationsAlongLine();
-  else visibleStations = stationsByType();
+    .filter((l) => !derivedLineNames || derivedLineNames.includes(l.name));
+  const activeLineName = lineName ?? (derivedLineNames?.length === 1 ? derivedLineNames[0] : null);
 
   // Circular lines (e.g. the Ringbahn) loop back on themselves, so picking a terminus as a
   // "direction" is meaningless — leave directionOptions empty so the picker is skipped entirely.
   const selectedLineIsCircular =
-    lineName !== null && (lines ?? []).some((l) => l.name === lineName && l.isCircular);
+    activeLineName !== null && (lines ?? []).some((l) => l.name === activeLineName && l.isCircular);
 
   // Direction picker exposes every endpoint reachable from the selected station along the
   // chosen line. If the station sits on a single variant we get the two termini of that variant;
@@ -145,11 +173,11 @@ export function ReportSelectionProvider({
   // those variants, deduplicated. The variant a chosen endpoint belongs to can be resolved at
   // submit time from (lineName, stationId, directionStationId).
   const directionOptions: Station[] = [];
-  if (lineName && selectedStation && !selectedLineIsCircular) {
+  if (activeLineName && derivedStation && !selectedLineIsCircular) {
     const seen = new Set<string>();
     for (const variant of lines ?? []) {
-      if (variant.name !== lineName) continue;
-      if (!variant.stations.includes(selectedStation.id)) continue;
+      if (variant.name !== activeLineName) continue;
+      if (!variant.stations.includes(derivedStation.id)) continue;
       if (variant.stations.length < 2) continue;
       const endpointIds = [variant.stations[0], variant.stations[variant.stations.length - 1]];
       for (const id of endpointIds) {
@@ -162,15 +190,29 @@ export function ReportSelectionProvider({
     }
   }
 
+  const directionStationId = directionOptions.some((s) => s.id === directionStationIdState)
+    ? directionStationIdState
+    : null;
+
+  const stationForSubmit = () => {
+    if (stationId === null) return null;
+    return { stationId, lineName: activeLineName, directionStationId };
+  };
+
   const value: ReportSelectionContextValue = {
     lineName,
+    activeLineName,
     lineFilter,
     stationId,
+    tappedStationId,
+    stationQuery,
     directionStationId,
     selectLine,
     setLineFilter,
     selectStation,
+    setStationQuery,
     selectDirection,
+    stationForSubmit,
     visibleLines,
     visibleStations,
     directionOptions,
