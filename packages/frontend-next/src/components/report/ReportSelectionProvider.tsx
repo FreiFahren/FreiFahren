@@ -64,7 +64,7 @@ export function ReportSelectionProvider({
   const [lineName, setLineName] = useState<string | null>(null);
   const [lineFilter, setLineFilter] = useState<LineFilter>('all');
   const [tappedStationId, setTappedStationId] = useState<string | null>(initialStationId);
-  const [stationQuery, setStationQueryState] = useState('');
+  const [stationQuery, setStationQuery] = useState('');
   const [directionStationIdState, setDirectionStationId] = useState<string | null>(null);
 
   const { data: lines } = useLines();
@@ -161,10 +161,6 @@ export function ReportSelectionProvider({
     .filter((l) => lineFilter === 'all' || l.type === lineFilter)
     .filter((l) => !derivedLineNames || derivedLineNames.includes(l.name));
   const activeLineName = lineName ?? (derivedLineNames?.length === 1 ? derivedLineNames[0] : null);
-
-  const setStationQuery = (query: string) => {
-    setStationQueryState(query);
-  };
 
   // Circular lines (e.g. the Ringbahn) loop back on themselves, so picking a terminus as a
   // "direction" is meaningless — leave directionOptions empty so the picker is skipped entirely.
