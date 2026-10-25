@@ -21,6 +21,7 @@ import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as MapIndexRouteImport } from './routes/_map/index'
 import { Route as ReportsStationsRouteImport } from './routes/reports/stations'
 import { Route as ReportsLinesRouteImport } from './routes/reports/lines'
+import { Route as FundFineIdRouteImport } from './routes/fund/$fineId'
 import { Route as AnnouncementsAnnouncementIdRouteImport } from './routes/announcements/$announcementId'
 import { Route as AccountMembershipRouteImport } from './routes/account/membership'
 import { Route as MapSettingsIndexRouteImport } from './routes/_map/settings/index'
@@ -88,6 +89,11 @@ const ReportsLinesRoute = ReportsLinesRouteImport.update({
   path: '/lines',
   getParentRoute: () => ReportsRoute,
 } as any)
+const FundFineIdRoute = FundFineIdRouteImport.update({
+  id: '/fund/$fineId',
+  path: '/fund/$fineId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnnouncementsAnnouncementIdRoute =
   AnnouncementsAnnouncementIdRouteImport.update({
     id: '/announcements/$announcementId',
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRouteWithChildren
   '/account/membership': typeof AccountMembershipRoute
   '/announcements/$announcementId': typeof AnnouncementsAnnouncementIdRoute
+  '/fund/$fineId': typeof FundFineIdRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/account/': typeof AccountIndexRoute
@@ -151,6 +158,7 @@ export interface FileRoutesByTo {
   '/report': typeof ReportRoute
   '/account/membership': typeof AccountMembershipRoute
   '/announcements/$announcementId': typeof AnnouncementsAnnouncementIdRoute
+  '/fund/$fineId': typeof FundFineIdRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/': typeof MapIndexRoute
@@ -173,6 +181,7 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRouteWithChildren
   '/account/membership': typeof AccountMembershipRoute
   '/announcements/$announcementId': typeof AnnouncementsAnnouncementIdRoute
+  '/fund/$fineId': typeof FundFineIdRoute
   '/reports/lines': typeof ReportsLinesRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/_map/': typeof MapIndexRoute
@@ -196,6 +205,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/account/membership'
     | '/announcements/$announcementId'
+    | '/fund/$fineId'
     | '/reports/lines'
     | '/reports/stations'
     | '/account/'
@@ -214,6 +224,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/account/membership'
     | '/announcements/$announcementId'
+    | '/fund/$fineId'
     | '/reports/lines'
     | '/reports/stations'
     | '/'
@@ -235,6 +246,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/account/membership'
     | '/announcements/$announcementId'
+    | '/fund/$fineId'
     | '/reports/lines'
     | '/reports/stations'
     | '/_map/'
@@ -257,6 +269,7 @@ export interface RootRouteChildren {
   ReportsRoute: typeof ReportsRouteWithChildren
   AccountMembershipRoute: typeof AccountMembershipRoute
   AnnouncementsAnnouncementIdRoute: typeof AnnouncementsAnnouncementIdRoute
+  FundFineIdRoute: typeof FundFineIdRoute
   AccountIndexRoute: typeof AccountIndexRoute
   AnnouncementsIndexRoute: typeof AnnouncementsIndexRoute
   FundIndexRoute: typeof FundIndexRoute
@@ -347,6 +360,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/reports/lines'
       preLoaderRoute: typeof ReportsLinesRouteImport
       parentRoute: typeof ReportsRoute
+    }
+    '/fund/$fineId': {
+      id: '/fund/$fineId'
+      path: '/fund/$fineId'
+      fullPath: '/fund/$fineId'
+      preLoaderRoute: typeof FundFineIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/announcements/$announcementId': {
       id: '/announcements/$announcementId'
@@ -443,6 +463,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportsRoute: ReportsRouteWithChildren,
   AccountMembershipRoute: AccountMembershipRoute,
   AnnouncementsAnnouncementIdRoute: AnnouncementsAnnouncementIdRoute,
+  FundFineIdRoute: FundFineIdRoute,
   AccountIndexRoute: AccountIndexRoute,
   AnnouncementsIndexRoute: AnnouncementsIndexRoute,
   FundIndexRoute: FundIndexRoute,
