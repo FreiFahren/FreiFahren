@@ -54,6 +54,7 @@ function LinePicker() {
   const { t } = useTranslation(NAMESPACE);
   const {
     lineName,
+    activeLineName,
     lineFilter,
     setLineFilter,
     selectLine,
@@ -79,7 +80,7 @@ function LinePicker() {
 
       <LineBadgePicker
         lines={visibleLines}
-        selectedLine={lineName}
+        selectedLine={activeLineName}
         onSelect={selectLine}
         wrap={Boolean(stationId ?? previewStationId)}
       />

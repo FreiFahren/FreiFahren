@@ -15,6 +15,8 @@ export type LineFilter = 'all' | LineType;
 
 export type ReportSelectionContextValue = {
   lineName: string | null;
+  /** The explicit line, or the single line of the auto-matched/selected station. */
+  activeLineName: string | null;
   lineFilter: LineFilter;
   stationId: string | null;
   /** Whether stationId was explicitly confirmed (manual tap / deep link) vs. just an auto-matched preview. */

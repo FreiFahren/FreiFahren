@@ -222,6 +222,7 @@ export function ReportSelectionProvider({
 
   const value: ReportSelectionContextValue = {
     lineName,
+    activeLineName,
     lineFilter,
     stationId,
     isStationLocked,
