@@ -16,6 +16,7 @@ import { useContributeModalOpen } from '@/lib/contribute-modal';
 import { useOnboardingComplete } from '@/lib/onboarding';
 import { optionalEnv } from '@/lib/utils';
 
+import { CenterOnUserButton } from './center-on-user-button';
 import { NAMESPACE } from './location-permission-prompt.i18n';
 import { PopupCard } from './PopupCard';
 import { UserLocationLayer } from './UserLocationLayer';
@@ -168,6 +169,7 @@ export function UserLocationControl() {
   return (
     <>
       <UserLocationLayer />
+      <CenterOnUserButton />
       {sharing.visible && (
         <LocationPermissionPrompt
           source="map"

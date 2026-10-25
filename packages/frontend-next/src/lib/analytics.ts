@@ -29,6 +29,7 @@ type AnalyticsEvents = {
     stationId: string;
   };
   screenshot_taken: Record<string, never>;
+  map_centered_on_user: Record<string, never>;
   risk_layer_toggled: { to: SuperProperties['map_layer'] };
   contribute_modal_opened: { source: ContributeSource };
   contribute_method_viewed: { method: 'stripe' | 'bank_transfer' };
