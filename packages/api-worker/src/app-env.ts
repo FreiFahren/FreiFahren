@@ -34,6 +34,7 @@ export type Bindings = {
     DB_HANNOVER?: D1Database
     DB_DUESSELDORF?: D1Database
     DB_DRESDEN?: D1Database
+    DB_KARLSRUHE?: D1Database
     TRUSTED_REPORT_GATE?: TrustedReportGate
     REPORT_GATE?: PublicReportGate
     REPORT_GATE_MODE?: 'preview-open'

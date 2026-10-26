@@ -1,7 +1,12 @@
 import { LEIPZIG, isExcludedLineRef } from '@freifahren/cities'
 import { describe, expect, it } from 'vitest'
 
-import { buildRefRegex, findMissingRouteRefs, type OsmElement } from '../src/db/seed/stations/overpass'
+import {
+    buildRefRegex,
+    findMissingRouteRefs,
+    inheritRouteMasterTags,
+    type OsmElement,
+} from '../src/db/seed/stations/overpass'
 
 const routeRelation = (id: number, ref: string): OsmElement => ({
     type: 'relation',
@@ -52,5 +57,38 @@ describe('findMissingRouteRefs', () => {
             members: [],
         }
         expect(findMissingRouteRefs(['S15'], [stopArea])).toEqual(['S15'])
+    })
+})
+
+describe('inheritRouteMasterTags', () => {
+    it('fills route and operator from the route_master and drops the master', () => {
+        // Karlsruhe's tram 8 carries route=tram only on its route_master, Frankfurt's
+        // tram 11 carries its operator only there.
+        const child: OsmElement = { type: 'relation', id: 1, tags: { type: 'route', ref: '8' }, members: [] }
+        const master: OsmElement = {
+            type: 'relation',
+            id: 2,
+            tags: { type: 'route_master', route_master: 'tram', operator: 'VGF', ref: '8' },
+            members: [{ type: 'relation', ref: 1, role: '' }],
+        }
+        const out = inheritRouteMasterTags([child, master])
+        expect(out).toHaveLength(1)
+        expect(out[0].tags).toMatchObject({ route: 'tram', operator: 'VGF' })
+    })
+
+    it('keeps tags the route already has', () => {
+        const child: OsmElement = {
+            type: 'relation',
+            id: 1,
+            tags: { type: 'route', route: 'light_rail', operator: 'AVG', ref: 'S8' },
+            members: [],
+        }
+        const master: OsmElement = {
+            type: 'relation',
+            id: 2,
+            tags: { type: 'route_master', route_master: 'train', operator: 'KVV', ref: 'S8' },
+            members: [{ type: 'relation', ref: 1, role: '' }],
+        }
+        expect(inheritRouteMasterTags([child, master])[0].tags).toMatchObject({ route: 'light_rail', operator: 'AVG' })
     })
 })
