@@ -54,6 +54,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   uploadedAt: 'Uploaded',
   status: 'Status',
   fineStatus: { in_review: 'In review', paid: 'Paid by the Fund', declined: 'Declined' },
+  declineReasonMissing: 'No reason was recorded for this decision.',
   emptyUploads: 'You have not uploaded any fines yet. Your submissions will appear here.',
   loadingHistory: 'Loading your history…',
   historyError: 'Your history could not be loaded. Please try again.',
@@ -154,6 +155,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
   uploadedAt: 'Hochgeladen',
   status: 'Status',
   fineStatus: { in_review: 'In Prüfung', paid: 'Vom Fonds bezahlt', declined: 'Abgelehnt' },
+  declineReasonMissing: 'Für diese Entscheidung wurde kein Grund hinterlegt.',
   emptyUploads:
     'Du hast noch keine erhöhten Beförderungsentgelte hochgeladen. Deine Einreichungen erscheinen hier.',
   loadingHistory: 'Dein Verlauf wird geladen…',
