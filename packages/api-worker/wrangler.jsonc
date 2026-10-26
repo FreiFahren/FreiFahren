@@ -89,10 +89,16 @@
             "database_id": "11dc43cb-2416-43a1-bc3c-51066ed0f783",
             "migrations_dir": "drizzle",
         },
+        {
+            "binding": "DB_DUESSELDORF",
+            "database_name": "api-worker-db-duesseldorf-eu",
+            "database_id": "53a6cac6-6a73-45da-b848-a5be578cb620",
+            "migrations_dir": "drizzle",
+        },
     ],
     "vars": {
         "NODE_ENV": "production",
-        "CORS_ORIGINS": "https://freifahren.org,https://app.freifahren.org,https://www.freifahren.org,https://berlin.freifahren.org,https://hamburg.freifahren.org,https://leipzig.freifahren.org,https://muenchen.freifahren.org,https://munich.freifahren.org,https://koeln.freifahren.org,https://cologne.freifahren.org,https://nuernberg.freifahren.org,https://nuremberg.freifahren.org,https://hannover.freifahren.org,http://localhost:1871,http://hamburg.localhost:1871,http://leipzig.localhost:1871,http://muenchen.localhost:1871,http://munich.localhost:1871,http://koeln.localhost:1871,http://cologne.localhost:1871,http://nuernberg.localhost:1871,http://nuremberg.localhost:1871,http://hannover.localhost:1871,capacitor://localhost",
+        "CORS_ORIGINS": "https://freifahren.org,https://app.freifahren.org,https://www.freifahren.org,https://berlin.freifahren.org,https://hamburg.freifahren.org,https://leipzig.freifahren.org,https://muenchen.freifahren.org,https://munich.freifahren.org,https://koeln.freifahren.org,https://cologne.freifahren.org,https://nuernberg.freifahren.org,https://nuremberg.freifahren.org,https://hannover.freifahren.org,https://duesseldorf.freifahren.org,https://dusseldorf.freifahren.org,http://localhost:1871,http://hamburg.localhost:1871,http://leipzig.localhost:1871,http://muenchen.localhost:1871,http://munich.localhost:1871,http://koeln.localhost:1871,http://cologne.localhost:1871,http://nuernberg.localhost:1871,http://nuremberg.localhost:1871,http://hannover.localhost:1871,http://duesseldorf.localhost:1871,http://dusseldorf.localhost:1871,capacitor://localhost",
         // Scopes frontend preview CORS to `frontend-pr-<n>.freifahren.workers.dev` (our account only).
         "PREVIEW_WORKERS_SUBDOMAIN": "freifahren",
         "SENTRY_DSN": "https://8f49e71a73d689efdcaabfd8794457b6@o4508609338867712.ingest.de.sentry.io/4511638467051600",
