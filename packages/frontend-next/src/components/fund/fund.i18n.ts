@@ -61,13 +61,11 @@ i18n.addResourceBundle('en', NAMESPACE, {
   retry: 'Try again',
   loadFailed: 'Your membership couldn’t be loaded. Please try again.',
   priceTitle: 'Pay what you think is fair',
-  amountBody:
-    'All contributions together pay the members’ fines. From {{amount}} a month you’re in; whoever can give more carries those who have less.',
   amountField: 'Monthly contribution',
+  peopleCovered_one: 'You cover {{people}} person',
+  peopleCovered_other: 'You cover {{people}} people',
   perMonth: 'a month',
   join: 'Continue to payment',
-  joinHint:
-    'You pay with Stripe and can cancel any time. Enter your name exactly as on your ID there: fines are issued to it.',
   pendingTitle: 'Your signup isn’t finished',
   pendingBody:
     'We haven’t received your first payment yet. If you just paid, this updates in a moment.',
@@ -132,22 +130,22 @@ i18n.addResourceBundle('de', NAMESPACE, {
   open: 'Solidaritätsfonds öffnen',
   title: 'FreiFahren Fonds',
   intro: 'Deine Uploads.',
-  headline: 'Erhöhtes Beförderungsentgelt bekommen? Lade es hoch, der Fonds zahlt.',
-  photoTitle: 'Fotografiere dein erhöhtes Beförderungsentgelt',
+  headline: 'Knöllchen bekommen? Lade es hoch, der Fonds zahlt.',
+  photoTitle: 'Fotografiere dein Knöllchen',
   paymentTitle: 'Wir kümmern uns um die Zahlung',
   freeTitle: 'Halte FreiFahren kostenlos',
   signInTitle: 'Zum Fortfahren anmelden',
-  uploadTitle: 'Erhöhtes Beförderungsentgelt hochladen',
+  uploadTitle: 'Knöllchen hochladen',
   takePhoto: 'Foto aufnehmen',
   uploadingPhoto: 'Dein Foto wird hochgeladen…',
-  uploadSuccess: 'Foto hochgeladen. Dein erhöhtes Beförderungsentgelt ist jetzt in Prüfung.',
+  uploadSuccess: 'Foto hochgeladen. Dein Knöllchen ist jetzt in Prüfung.',
   uploadEmpty: 'Dieses Foto ist leer. Bitte wähle ein anderes Foto.',
   uploadTooLarge: 'Dieses Foto ist zu groß. Bitte wähle eines mit weniger als 10 MB.',
   uploadWrongType: 'Bitte wähle ein Foto im Format JPEG, PNG, HEIC oder WebP.',
   uploadSessionExpired: 'Bitte melde dich erneut an, um dein Foto hochzuladen.',
   uploadUnavailable: 'Uploads sind vorübergehend nicht verfügbar. Bitte versuche es erneut.',
   uploadMembershipEnded:
-    'Deine Mitgliedschaft ist beendet, du kannst keine neuen erhöhten Beförderungsentgelte hochladen.',
+    'Deine Mitgliedschaft ist beendet, du kannst keine neuen Knöllchen hochladen.',
   uploadInterrupted:
     'Wir konnten den Upload nicht bestätigen. Prüfe deine Uploads unten, bevor du es erneut versuchst.',
   uploadSignIn: 'Erneut anmelden',
@@ -156,30 +154,27 @@ i18n.addResourceBundle('de', NAMESPACE, {
   status: 'Status',
   fineStatus: { in_review: 'In Prüfung', paid: 'Vom Fonds bezahlt', declined: 'Abgelehnt' },
   declineReasonMissing: 'Für diese Entscheidung wurde kein Grund hinterlegt.',
-  emptyUploads:
-    'Du hast noch keine erhöhten Beförderungsentgelte hochgeladen. Deine Einreichungen erscheinen hier.',
+  emptyUploads: 'Du hast noch keine Knöllchen hochgeladen. Deine Einreichungen erscheinen hier.',
   loadingHistory: 'Dein Verlauf wird geladen…',
   historyError: 'Dein Verlauf konnte nicht geladen werden. Bitte versuche es erneut.',
   retry: 'Erneut versuchen',
   loadFailed: 'Deine Mitgliedschaft konnte nicht geladen werden. Bitte versuche es erneut.',
   priceTitle: 'Zahl, was du fair findest',
-  amountBody:
-    'Aus allen Beiträgen bezahlt der Fonds die erhöhten Beförderungsentgelte seiner Mitglieder. Ab {{amount}} im Monat bist du dabei. Wer mehr geben kann, trägt die mit, die weniger haben.',
   amountField: 'Monatlicher Beitrag',
+  peopleCovered_one: 'Du deckst {{people}} Person ab',
+  peopleCovered_other: 'Du deckst {{people}} Personen ab',
   perMonth: 'im Monat',
   join: 'Weiter zur Zahlung',
-  joinHint:
-    'Du zahlst über Stripe und kannst jederzeit kündigen. Gib dort deinen Namen genau wie im Ausweis an: Erhöhte Beförderungsentgelte werden auf ihn ausgestellt.',
   pendingTitle: 'Dein Beitritt ist noch nicht abgeschlossen',
   pendingBody:
     'Deine erste Zahlung ist noch nicht bei uns. Wenn du gerade bezahlt hast, aktualisiert sich das gleich.',
   canceledTitle: 'Du bist nicht abgesichert',
   canceledBody:
-    'Deine Mitgliedschaft ist beendet, neue erhöhte Beförderungsentgelte sind nicht mehr gedeckt. Bereits hochgeladene bearbeiten wir weiter. Du kannst jederzeit wieder beitreten.',
+    'Deine Mitgliedschaft ist beendet, neue Knöllchen sind nicht mehr gedeckt. Bereits hochgeladene bearbeiten wir weiter. Du kannst jederzeit wieder beitreten.',
   statusProtected: 'Du bist abgesichert',
   statusEnding: 'Abgesichert bis {{date}}',
   statusEndingBody:
-    'Deine Mitgliedschaft verlängert sich nicht. Erhöhte Beförderungsentgelte nach diesem Datum sind nicht gedeckt, außer du setzt sie fort.',
+    'Deine Mitgliedschaft verlängert sich nicht. Knöllchen nach diesem Datum sind nicht gedeckt, außer du setzt sie fort.',
   statusPastDue: 'Zahlung überfällig',
   memberPastDueBody:
     'Dein letzter Beitrag konnte nicht eingezogen werden. Zahl den offenen Betrag unter „Mitgliedschaft verwalten“, damit du abgesichert bleibst.',
@@ -187,7 +182,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
   renewsOn: 'Verlängert sich am {{date}}',
   rulesTitle: 'Was du wissen musst',
   rulesDone: 'Verstanden',
-  ruleDontPayTitle: 'Zahl das erhöhte Beförderungsentgelt nicht selbst',
+  ruleDontPayTitle: 'Zahl das Knöllchen nicht selbst',
   ruleDontPayBody:
     'Reich es beim Fonds ein und warte auf uns. Was du schon selbst bezahlt hast, können wir nicht erstatten.',
   ruleNoTicketTitle: 'Der Fonds ersetzt kein Ticket',
