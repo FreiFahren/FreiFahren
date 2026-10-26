@@ -41,10 +41,10 @@ Message: "Kick die mal raus"
 
 export const NUREMBERG: CityConfig = {
     slug: 'nuremberg',
-    subdomain: 'nuernberg',
-    subdomainAliases: ['nuremberg'],
+    subdomain: 'nuremberg',
+    subdomainAliases: ['nuernberg'],
     displayName: 'Nürnberg',
-    publicAppUrl: 'https://nuernberg.freifahren.org',
+    publicAppUrl: 'https://nuremberg.freifahren.org',
     listed: false,
     dbName: CITY_DATABASES.nuremberg.dbName,
     dbBinding: CITY_DATABASES.nuremberg.dbBinding,
