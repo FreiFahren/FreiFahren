@@ -387,8 +387,30 @@ const NUMERIC_NON_LINE_BEFORE = new Set([
     'bahnsteig',
 ])
 
+const terminusWords = (name: string): string[] => foldWord(name).split(/[^\p{L}\d]+/u).filter(Boolean)
+
+/** Each line's first and last stops, as folded words, for spotting "5 anderten". */
+export function buildLineTermini(index: TransitIndex): Map<string, string[][]> {
+    const termini = new Map<string, string[][]>()
+    for (const variant of index.variants) {
+        const ends = [variant.stations[0], variant.stations[variant.stations.length - 1]]
+        const list = termini.get(variant.name) ?? []
+        for (const id of ends) {
+            const name = id === undefined ? undefined : index.stations[id]?.name
+            if (name !== undefined) list.push(terminusWords(name))
+        }
+        termini.set(variant.name, list)
+    }
+    return termini
+}
+
+// "5 anderten": a bare number followed by one of that line's termini. Short first words like
+// "am" only count when they are the whole name ("11 zoo").
+const terminusFollows = (after: string, termini: string[][] | undefined): boolean =>
+    termini?.some((words) => words[0] === after && (words.length === 1 || after.length >= 4)) ?? false
+
 /** Distinguish numeric lines from counts, times, platform numbers, and similar values. */
-function numericLineContextOk(message: string, start: number, end: number): boolean {
+function numericLineContextOk(message: string, start: number, end: number, termini?: string[][]): boolean {
     const before = wordBefore(message, start)
     const after = wordAfter(message, end)
     if (isCountMarker(after)) {
@@ -397,7 +419,7 @@ function numericLineContextOk(message: string, start: number, end: number): bool
     if (NUMERIC_NON_LINE_BEFORE.has(before)) {
         return false
     }
-    return NUMERIC_LINE_CUE_BEFORE.has(before) || NUMERIC_LINE_CUE_AFTER.has(after)
+    return NUMERIC_LINE_CUE_BEFORE.has(before) || NUMERIC_LINE_CUE_AFTER.has(after) || terminusFollows(after, termini)
 }
 
 export function detectLineName(
@@ -406,6 +428,7 @@ export function detectLineName(
     linePattern: RegExp,
     circularLineNames: string[],
     profile: CityProfile,
+    lineTermini?: Map<string, string[][]>,
 ): string | null {
     const normalizedLines = new Map<string, string>()
     for (const lineName of lineNames) {
@@ -419,7 +442,7 @@ export function detectLineName(
         }
         if (/^\d+$/.test(hit)) {
             const start = match.index ?? 0
-            if (!numericLineContextOk(message, start, start + match[0].length)) {
+            if (!numericLineContextOk(message, start, start + match[0].length, lineTermini?.get(hit))) {
                 continue
             }
         }

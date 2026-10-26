@@ -5,6 +5,7 @@ import { isSpam } from './spam'
 import { getTransitIndex } from './transit'
 import {
     buildLinePattern,
+    buildLineTermini,
     buildSystemPrompt,
     detectLineName,
     extractWithMistral,
@@ -31,7 +32,14 @@ export async function processMessage(text: string, env: Env, city: CitySlug): Pr
     const index = await getTransitIndex(cfg.backendUrl, profile, cfg.city.slug, env.TRANSIT_API)
 
     const linePattern = buildLinePattern(index.lineNames)
-    const detectedLine = detectLineName(text, index.lineNames, linePattern, index.circularLineNames, profile)
+    const detectedLine = detectLineName(
+        text,
+        index.lineNames,
+        linePattern,
+        index.circularLineNames,
+        profile,
+        buildLineTermini(index)
+    )
 
     const systemPrompt = buildSystemPrompt(index, profile)
     const parsed = await extractWithMistral(text, systemPrompt, cfg.mistralApiKey, cfg.mistralModel)

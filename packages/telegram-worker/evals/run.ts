@@ -6,6 +6,7 @@ import { profileFor, type CityProfile } from '../src/config'
 import { getTransitIndex } from '../src/transit'
 import {
     buildLinePattern,
+    buildLineTermini,
     buildSystemPrompt,
     detectLineName,
     extractWithMistral,
@@ -299,7 +300,14 @@ async function runOne(
     let result: ExtractionResult = NULL_RESULT
     let error: string | null = null
     try {
-        const detectedLine = detectLineName(row.text, index.lineNames, linePattern, index.circularLineNames, profile)
+        const detectedLine = detectLineName(
+            row.text,
+            index.lineNames,
+            linePattern,
+            index.circularLineNames,
+            profile,
+            buildLineTermini(index)
+        )
         const parsed = await extractWithRetry(row.text, systemPrompt, apiKey, model)
         result = parsed === null ? NULL_RESULT : resolveExtraction(index, parsed, detectedLine, profile)
     } catch (exc) {
