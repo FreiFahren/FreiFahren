@@ -1,4 +1,3 @@
-import { useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,7 +17,6 @@ import {
 
 export function AnnouncementDetail({ id }: { id: string }) {
   const { t } = useTranslation(NAMESPACE);
-  const navigate = useNavigate();
   const language = useAnnouncementLanguage();
   const { data: announcement, isError, refetch } = useAnnouncement(id);
 
@@ -32,7 +30,10 @@ export function AnnouncementDetail({ id }: { id: string }) {
 
   return (
     <FullScreenPage>
-      <PageHeader title={t('title')} onBack={() => navigate({ to: AnnouncementsRoute.to })} />
+      <PageHeader
+        title={announcement?.title ?? t('article')}
+        breadcrumbs={[{ label: t('title'), to: AnnouncementsRoute.to }]}
+      />
       <div className="pb-safe-6 min-h-0 flex-1 overflow-y-auto">
         {isError && !announcement && <LoadError onRetry={() => void refetch()} />}
         {announcement === null && (

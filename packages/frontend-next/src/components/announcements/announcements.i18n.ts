@@ -4,6 +4,7 @@ export const NAMESPACE = 'announcements';
 
 i18n.addResourceBundle('en', NAMESPACE, {
   title: 'News',
+  article: 'Article',
   open: 'Open news',
   openUnread: 'Open news, unread items',
   empty: 'No news yet.',
@@ -14,6 +15,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
 
 i18n.addResourceBundle('de', NAMESPACE, {
   title: 'Neuigkeiten',
+  article: 'Artikel',
   open: 'Neuigkeiten öffnen',
   openUnread: 'Neuigkeiten öffnen, ungelesene Einträge',
   empty: 'Noch keine Neuigkeiten.',
