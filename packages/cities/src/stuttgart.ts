@@ -80,7 +80,7 @@ export const STUTTGART: CityConfig = {
         // The Stadtbahn is tagged light_rail like the S-Bahn, which comes in as train.
         osmRouteTypeAliases: { train: 'light_rail' },
         // DB Regio also runs the RE/RB lines here; only its S-Bahn is seeded. Tram 10 is the
-        // Zacke; 21 and 23 are heritage and event lines. SSB buses run as two-digit lines and the X1.
+        // Zacke; 21 and 23 are heritage and event lines. SSB buses run as two-digit lines and X lines.
         routeRefPatterns: {
             light_rail: String.raw`^[US]\d+$`,
             tram: String.raw`^10$`,
