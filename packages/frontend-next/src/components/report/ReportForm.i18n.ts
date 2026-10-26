@@ -24,6 +24,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   errorNoStation: 'Please select a station first.',
   errorTooSoon: 'You reported very recently. Please wait a moment.',
   errorTooFar: "You're not close enough to the station.",
+  errorLocationPending: 'Still getting your location. Please try again in a moment.',
   errorSubmitFailed: 'Report could not be sent. Please try again.',
   submitFailedTitle: "Reports aren't going through",
   submitFailedBody:
@@ -53,6 +54,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
   errorNoStation: 'Bitte wähle zuerst eine Station aus.',
   errorTooSoon: 'Du hast gerade erst gemeldet. Bitte warte einen Moment.',
   errorTooFar: 'Du bist nicht nah genug an der Station.',
+  errorLocationPending: 'Dein Standort wird noch ermittelt. Bitte versuche es gleich noch einmal.',
   errorSubmitFailed: 'Meldung konnte nicht gesendet werden. Bitte versuche es erneut.',
   submitFailedTitle: 'Melden klappt gerade nicht',
   submitFailedBody:

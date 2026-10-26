@@ -1,6 +1,10 @@
 import { useSyncExternalStore } from 'react';
 
-import { enqueuePostHog, PERSISTENT_PERSISTENCE } from '@/lib/posthog-client';
+import {
+  enqueuePostHog,
+  PERSISTENT_PERSISTENCE,
+  syncPostHogFlagAccount,
+} from '@/lib/posthog-client';
 import { safeLocalStorage } from '@/lib/safe-storage';
 
 // Capture is ON by default (see main.tsx). The banner asks for cookie consent specifically; every
@@ -85,6 +89,8 @@ function applyToPostHog(value: ConsentChoice | null): void {
       posthog.set_config({ persistence: 'memory' });
       // register() after reset() so the super-property survives the clear (in memory for this session).
       posthog.register({ cookie_consent: 'denied', persistence_mode: 'memory' });
+      // reset() clears evaluation overrides too; keep the signed-in account eligible.
+      syncPostHogFlagAccount(posthog);
     });
   } else if (value === 'granted') {
     enqueuePostHog((posthog) => {

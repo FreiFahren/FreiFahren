@@ -3,7 +3,7 @@ export type SessionRequest = {
 }
 
 export type AuthSession = {
-    user: { id: string; email: string; name: string | null }
+    user: { id: string; email: string }
     session: { id: string; expiresAt: string }
 }
 

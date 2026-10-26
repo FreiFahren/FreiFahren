@@ -128,9 +128,8 @@ export function useReportLocationSharing() {
       const action = await getLocationSharingAction();
       if (cancelled) return;
       if (action === 'request') {
-        await requestLocationRef.current('report');
-        if (cancelled) return;
-        setPhase('complete');
+        if (!cancelled) setPhase('complete');
+        void requestLocationRef.current('report');
         return;
       }
 

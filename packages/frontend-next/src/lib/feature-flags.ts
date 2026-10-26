@@ -1,13 +1,14 @@
 import { useSyncExternalStore } from 'react';
 
 import { enqueuePostHog } from '@/lib/posthog-client';
-import { isPreviewBuild } from '@/lib/utils';
+import { isPreviewBuild, optionalEnv } from '@/lib/utils';
 
 // PostHog feature flags read through the same lazy-loaded client as analytics, so components never
 // touch the SDK directly. Flags gate UI that ships in the bundle but isn't launched yet; the value
 // is false until the SDK loads and PostHog resolves flags, and false forever when analytics is
 // disabled (no key, or a 'denied'/DNT session that never initializes the SDK). Fail-closed: a
-// gated feature stays hidden unless PostHog affirmatively turns it on.
+// gated feature stays hidden unless PostHog affirmatively turns it on. Signed-in accounts can be
+// targeted through the `account_id` person property (see setPostHogFlagAccount).
 export const FEATURE_FLAGS = {
   citySwitcher: 'city-switcher',
   contributeModalTiming: 'contribute-modal-timing',
@@ -24,6 +25,8 @@ const values = new Map<FlagKey, boolean>();
 const variants = new Map<FlagKey, string | boolean>();
 const listeners = new Set<() => void>();
 let subscribed = false;
+// Keyless dev and PR previews show every feature; setting a key there exercises real targeting.
+const bypassFlags = (import.meta.env.DEV || isPreviewBuild) && !optionalEnv('VITE_POSTHOG_KEY');
 
 function notify(): void {
   for (const listener of listeners) listener();
@@ -63,18 +66,16 @@ export function subscribeToFeatureFlags(listener: () => void): () => void {
   return () => listeners.delete(listener);
 }
 
-// In dev and on a PR preview every flag reads on, so gated work is visible without touching PostHog
-// (a preview has no PostHog key). In prod the value comes from the resolved flag.
 export function getFeatureFlag(flag: FlagKey): boolean {
   ensureSubscribed();
-  return import.meta.env.DEV || isPreviewBuild ? true : (values.get(flag) ?? false);
+  return bypassFlags || (values.get(flag) ?? false);
 }
 
 export function getFeatureFlagVariant(
   flag: typeof FEATURE_FLAGS.contributeModalTiming,
 ): ContributeModalTimingVariant | false {
   ensureSubscribed();
-  if (import.meta.env.DEV || isPreviewBuild) return 'control';
+  if (bypassFlags) return 'control';
   const value = variants.get(flag);
   return value === 'control' || value === 'test' ? value : false;
 }

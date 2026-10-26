@@ -32,23 +32,22 @@ import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 
 import { NAMESPACE } from './ReportForm.i18n';
-import { useReportSelection } from './ReportSelection.context';
+import {
+  normalizedStationName,
+  normalizeStationQuery,
+  useReportSelection,
+} from './ReportSelection.context';
 import { ReportSelectionProvider } from './ReportSelectionProvider';
 import { ReportSuccess } from './ReportSuccess';
 import { ClearSelectionButton, LineBadgePicker, LineTypeTabs } from './line-picker-controls';
 import { SelectionButton } from './selection-button';
-import { type ReportRejection, useReportVerification } from './useReportVerification';
+import {
+  type ReportRejection,
+  useReportVerification,
+  type VerifyLocation,
+} from './useReportVerification';
 
 const routeApi = getRouteApi('/report');
-
-/** Diacritic-insensitive match so "moritzplatz" finds "Möritzplatz" and "strasse" finds "Straße". */
-function normalize(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/ß/g, 'ss')
-    .toLowerCase();
-}
 
 const NEARBY_COUNT = 3;
 
@@ -56,12 +55,20 @@ const REJECTION_MESSAGE: Record<ReportRejection, string> = {
   too_fast: 'errorTooSoon',
   rate_limited: 'errorTooSoon',
   too_far: 'errorTooFar',
+  location_pending: 'errorLocationPending',
 };
 
 function LinePicker() {
   const { t } = useTranslation(NAMESPACE);
-  const { lineName, lineFilter, setLineFilter, selectLine, visibleLines, stationId } =
-    useReportSelection();
+  const {
+    lineName,
+    activeLineName,
+    lineFilter,
+    setLineFilter,
+    selectLine,
+    visibleLines,
+    stationId,
+  } = useReportSelection();
 
   return (
     <section className="px-4">
@@ -80,9 +87,9 @@ function LinePicker() {
 
       <LineBadgePicker
         lines={visibleLines}
-        selectedLine={lineName}
+        selectedLine={activeLineName}
         onSelect={selectLine}
-        wrap={Boolean(stationId)}
+        wrap={stationId !== null}
       />
     </section>
   );
@@ -90,18 +97,25 @@ function LinePicker() {
 
 function StationPicker() {
   const { t } = useTranslation(NAMESPACE);
-  const { stationId, lineName, selectStation, visibleStations } = useReportSelection();
+  const {
+    stationId,
+    tappedStationId,
+    stationQuery,
+    setStationQuery,
+    selectStation,
+    visibleStations,
+  } = useReportSelection();
   const { position } = useGeolocation();
-  const [query, setQuery] = useState('');
 
-  const needle = normalize(query.trim());
+  const needle = normalizeStationQuery(stationQuery.trim());
   const filtered = needle
-    ? visibleStations.filter((s) => normalize(s.name).includes(needle))
+    ? visibleStations.filter((s) => normalizedStationName(s).includes(needle))
     : visibleStations;
 
-  // Closest stations, only while sharing location, not searching, and not browsing a line.
+  // Closest stations while sharing location and not searching. `visibleStations` is already
+  // narrowed to the selected line, so this only surfaces nearby stations on that line.
   const nearby =
-    position && !needle && !lineName
+    position && !needle
       ? visibleStations
           .map((station) => ({
             station,
@@ -134,16 +148,28 @@ function StationPicker() {
 
   const clear = () => {
     selectStation(null);
-    setQuery('');
+    setStationQuery('');
   };
 
   const renderStationButton = (id: string, name?: string) => (
     <SelectionButton
       value={id}
       selectedValue={stationId}
-      onSelect={(nextId) => (nextId === null ? clear() : selectStation(nextId))}
+      onSelect={(nextId) => {
+        // A tap on a freshly chosen row always confirms it. A tap on the row already shown as
+        // selected either confirms a live search match, or clears a tapped one.
+        if (nextId !== null) {
+          selectStation(nextId);
+        } else if (tappedStationId !== null) {
+          clear();
+        } else if (stationId) {
+          selectStation(stationId);
+        }
+      }}
       className="hover:bg-muted focus-visible:bg-muted flex w-full items-center rounded-md px-3 py-2.5 text-left text-sm"
-      selectedClassName="bg-muted"
+      // Inset: this button can render inside the scrollable result list, whose overflow-y
+      // forces overflow-x into a clipping context too, cutting off an outset ring's bleed.
+      selectedClassName="bg-muted ring-inset"
     >
       <span className="truncate">{name}</span>
     </SelectionButton>
@@ -156,23 +182,28 @@ function StationPicker() {
   );
 
   return (
-    <section className={cn('mt-6 flex flex-col px-4', !stationId && 'min-h-0 flex-1')}>
+    <section
+      className={cn('mt-6 flex flex-col px-4', tappedStationId === null && 'min-h-0 flex-1')}
+    >
       <div className="mb-3 flex items-center justify-between">
-        <SectionHeading hint={t('required')} hintTone="destructive">
+        <SectionHeading
+          hint={stationId !== null ? undefined : t('required')}
+          hintTone="destructive"
+        >
           {t('station')}
         </SectionHeading>
         {stationId && <ClearSelectionButton onClick={clear} />}
       </div>
 
-      {stationId ? (
-        renderStationButton(stationId, visibleStations[0]?.name)
+      {tappedStationId !== null ? (
+        renderStationButton(tappedStationId, visibleStations[0]?.name)
       ) : (
         <>
           <div className="relative mb-2">
             <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
             <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              value={stationQuery}
+              onChange={(e) => setStationQuery(e.target.value)}
               placeholder={t('searchStation')}
               className="h-10 pl-9 text-base"
               autoComplete="off"
@@ -194,7 +225,7 @@ function StationPicker() {
             )}
             {needle && filtered.length === 0 ? (
               <p className="text-muted-foreground px-3 py-6 text-center text-sm">
-                {t('noMatch', { query })}
+                {t('noMatch', { query: stationQuery })}
               </p>
             ) : (
               <ul
@@ -215,7 +246,13 @@ function StationPicker() {
                         width: '100%',
                         transform: `translateY(${virtualRow.start - virtualizer.options.scrollMargin}px)`,
                       }}
-                      className="border-border/60 border-b"
+                      className={cn(
+                        'border-border/60',
+                        // Virtualized rows can't rely on CSS :last-child (the window only
+                        // covers visible rows), so the true last row is picked by index —
+                        // otherwise its divider sticks out past the selected ring below it.
+                        virtualRow.index !== rest.length - 1 && 'border-b',
+                      )}
                     >
                       {renderStationButton(station.id, station.name)}
                     </li>
@@ -298,6 +335,8 @@ function SubmitFailureNotice({ title, body }: { title: string; body: string }) {
 
 const REPEATED_FAILURE_THRESHOLD = 3;
 
+const LOCATION_WAIT_MS = 4000;
+
 function SubmitFooter({
   onSubmitted,
   onSubmissionError,
@@ -308,10 +347,12 @@ function SubmitFooter({
   onRepeatedFailure: () => void;
 }) {
   const { t } = useTranslation(NAMESPACE);
-  const { stationId, lineName, directionStationId } = useReportSelection();
+  const { stationId, stationForSubmit } = useReportSelection();
   const submitReport = useSubmitReport();
   const { verify, recordSubmission } = useReportVerification();
+  const { position, status, requestLocation } = useGeolocation();
   const [consecutiveFailures, setConsecutiveFailures] = useState(0);
+  const [isLocating, setIsLocating] = useState(false);
 
   const canSubmit = stationId !== null;
 
@@ -325,23 +366,6 @@ function SubmitFooter({
       ),
       { id },
     );
-  };
-
-  const validateSubmission = (selectedStationId: string | null): selectedStationId is string => {
-    // Keep an empty selection clickable so the user can learn what is missing.
-    if (selectedStationId === null) {
-      showErrorToast(t('errorNoStation'), 'report-station-required');
-      return false;
-    }
-
-    const rejection = verify(selectedStationId);
-    if (rejection) {
-      track('report_rejected', { reason: rejection, stationId: selectedStationId });
-      showErrorToast(t(REJECTION_MESSAGE[rejection]), 'report-verification');
-      return false;
-    }
-
-    return true;
   };
 
   const handleOptimisticSubmission = (result: SubmitReportResponse) => {
@@ -372,14 +396,47 @@ function SubmitFooter({
     showErrorToast(t('errorSubmitFailed'), 'report-submit-error');
   };
 
-  const handleSubmit = () => {
-    if (!validateSubmission(stationId)) return;
+  const handleSubmit = async () => {
+    // Keep an empty selection clickable so the user can learn what is missing.
+    const selection = stationForSubmit();
+    if (selection === null) {
+      showErrorToast(t('errorNoStation'), 'report-station-required');
+      return;
+    }
 
-    recordSubmission(stationId);
+    let location: VerifyLocation | undefined;
+    if (!position && status === 'loading') {
+      setIsLocating(true);
+      try {
+        // requestLocation returns the fetch already in flight, so this doesn't start a second one.
+        const coords = await Promise.race([
+          requestLocation('report'),
+          new Promise<'timeout'>((resolve) => setTimeout(resolve, LOCATION_WAIT_MS, 'timeout')),
+        ]);
+        location =
+          coords === 'timeout'
+            ? { position: null, pending: true }
+            : {
+                position: coords && { lat: coords.latitude, lng: coords.longitude },
+                pending: false,
+              };
+      } finally {
+        setIsLocating(false);
+      }
+    }
+
+    const rejection = verify(selection.stationId, location);
+    if (rejection) {
+      track('report_rejected', { reason: rejection, stationId: selection.stationId });
+      showErrorToast(t(REJECTION_MESSAGE[rejection]), 'report-verification');
+      return;
+    }
+
+    recordSubmission(selection.stationId);
     submitReport.mutate({
-      stationId,
-      lineName,
-      directionStationId,
+      stationId: selection.stationId,
+      lineName: selection.lineName,
+      directionStationId: selection.directionStationId,
       onOptimistic: handleOptimisticSubmission,
       onSubmissionError: handleSubmissionError,
     });
@@ -390,7 +447,7 @@ function SubmitFooter({
       <Button
         type="button"
         size="lg"
-        disabled={submitReport.isPending}
+        disabled={submitReport.isPending || isLocating}
         aria-disabled={!canSubmit}
         onClick={handleSubmit}
         className={cn(

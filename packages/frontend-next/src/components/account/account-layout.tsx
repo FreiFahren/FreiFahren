@@ -15,12 +15,20 @@ export const PRIMARY_BUTTON = `bg-accent-bright text-primary-foreground hover:bg
 export const SECONDARY_BUTTON = `bg-muted hover:bg-muted/80 ${BUTTON_SHAPE}`;
 export const INPUT = 'h-12 rounded-lg text-base';
 
-export function AccountLayout({ title, children }: { title: string; children: React.ReactNode }) {
+export function AccountLayout({
+  title,
+  children,
+  onBack,
+}: {
+  title: string;
+  children: React.ReactNode;
+  onBack?: () => void;
+}) {
   const navigate = useNavigate();
 
   return (
     <FullScreenPage>
-      <PageHeader title={title} onBack={() => navigate({ to: MapIndexRoute.to })} />
+      <PageHeader title={title} onBack={onBack ?? (() => navigate({ to: MapIndexRoute.to }))} />
       <div className="pb-safe-6 flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-4 pt-2">
         {children}
         <SupportHint />

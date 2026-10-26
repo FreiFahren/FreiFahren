@@ -8,7 +8,7 @@ import type { AuthSession } from './auth-contract'
 
 const authSessionSchema = z
     .object({
-        user: z.object({ id: z.string(), email: z.string(), name: z.string().nullable() }),
+        user: z.object({ id: z.string(), email: z.string() }),
         session: z.object({ id: z.string(), expiresAt: z.iso.datetime() }),
     })
     .nullable()

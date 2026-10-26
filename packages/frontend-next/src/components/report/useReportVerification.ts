@@ -1,9 +1,9 @@
 import { useStations } from '@/api/transit';
-import { useGeolocation } from '@/contexts/Geolocation.context';
+import { useGeolocation, type UserPosition } from '@/contexts/Geolocation.context';
 import { distanceMeters } from '@/lib/geo';
 import { safeLocalStorage } from '@/lib/safe-storage';
 
-export type ReportRejection = 'too_far' | 'too_fast' | 'rate_limited';
+export type ReportRejection = 'too_far' | 'too_fast' | 'rate_limited' | 'location_pending';
 
 const MAX_REPORT_DISTANCE_M = 2000;
 const TRAVEL_TOLERANCE_M = 500;
@@ -16,6 +16,11 @@ type Coordinates = { latitude: number; longitude: number };
 type ReportHistoryEntry = {
   timestamp: number;
   coordinates: Coordinates | null;
+};
+
+export type VerifyLocation = {
+  position: UserPosition | null;
+  pending: boolean;
 };
 
 function isCoordinates(value: unknown): value is Coordinates {
@@ -51,16 +56,30 @@ function readHistory(): ReportHistoryEntry[] {
  * `verify` returns the first failing rule, or null when the report may be sent.
  */
 export function useReportVerification() {
-  const { position } = useGeolocation();
+  const { position, status } = useGeolocation();
   const { data: stations } = useStations();
 
-  const verify = (stationId: string): ReportRejection | null => {
+  const verify = (stationId: string, location?: VerifyLocation): ReportRejection | null => {
+    const resolved = location ?? {
+      position,
+      pending: !position && status === 'loading',
+    };
+
+    // A location fetch is in flight and hasn't resolved yet: don't silently skip the distance
+    // check below just because `position` happens to still be null.
+    if (resolved.pending) return 'location_pending';
+
     const coordinates = stations?.[stationId]?.coordinates;
+    const userPosition = resolved.position;
     if (
       coordinates &&
-      position &&
-      distanceMeters(position.lat, position.lng, coordinates.latitude, coordinates.longitude) >
-        MAX_REPORT_DISTANCE_M
+      userPosition &&
+      distanceMeters(
+        userPosition.lat,
+        userPosition.lng,
+        coordinates.latitude,
+        coordinates.longitude,
+      ) > MAX_REPORT_DISTANCE_M
     ) {
       return 'too_far';
     }
