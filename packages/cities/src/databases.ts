@@ -47,6 +47,10 @@ export const CITY_DATABASES = {
         dbName: 'api-worker-db-frankfurt-eu',
         dbBinding: 'DB_FRANKFURT',
     },
+    stuttgart: {
+        dbName: 'api-worker-db-stuttgart-eu',
+        dbBinding: 'DB_STUTTGART',
+    },
 } as const satisfies Record<string, CityDatabaseConfig>
 
 export type CityDatabaseSlug = keyof typeof CITY_DATABASES

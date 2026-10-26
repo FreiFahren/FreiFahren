@@ -55,6 +55,9 @@ const collectNodes = (elements: OsmElement[], nodes: Map<number, RawStation>) =>
         const isStation =
             STATION_RAILWAY_TAGS.has(tags.railway ?? '') || STATION_PT_TAGS.has(tags.public_transport ?? '')
         if (!isStation) continue
+        // An unnamed stop_position would become a station without a name. Its stop_area still
+        // hands its lines to the named station node (see processStopArea).
+        if (tags.name === undefined || tags.name.trim() === '') continue
 
         const ds100 = tags['ref:ds100']
         const railwayRef = tags['railway:ref']
