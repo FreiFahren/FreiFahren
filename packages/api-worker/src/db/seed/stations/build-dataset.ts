@@ -3,6 +3,7 @@ import {
     ROUTE_TYPE_PRIORITY,
     STATION_CODE_FROM_REF,
     canonicalStationName,
+    seedLineRef,
     isSeedLineRefIncluded,
     type RouteType,
 } from '../config'
@@ -99,7 +100,7 @@ const processRoute = (
     nodeToRouteTypes: Map<number, Set<RouteType>>
 ) => {
     const tags = rel.tags ?? {}
-    const ref = tags.ref || tags.name
+    const ref = tags.ref ? seedLineRef(tags.ref) : tags.name
     if (!ref) return
     if (tags.ref !== undefined && tags.ref !== '' && !isSeedLineRefIncluded(tags.ref, tags.route)) return
 
