@@ -29,11 +29,11 @@ Message: "fährt die 1 wieder bis weiden west?"
 
 export const COLOGNE: CityConfig = {
     slug: 'cologne',
-    subdomain: 'koeln',
-    subdomainAliases: ['cologne'],
+    subdomain: 'cologne',
+    subdomainAliases: ['koeln'],
     // Also the OSM boundary name the seed's Overpass area query matches on.
     displayName: 'Köln',
-    publicAppUrl: 'https://koeln.freifahren.org',
+    publicAppUrl: 'https://cologne.freifahren.org',
     listed: false,
     dbName: CITY_DATABASES.cologne.dbName,
     dbBinding: CITY_DATABASES.cologne.dbBinding,
