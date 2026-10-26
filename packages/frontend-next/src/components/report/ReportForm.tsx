@@ -102,7 +102,6 @@ function StationPicker() {
     tappedStationId,
     stationQuery,
     setStationQuery,
-    lineName,
     selectStation,
     visibleStations,
   } = useReportSelection();
@@ -113,9 +112,10 @@ function StationPicker() {
     ? visibleStations.filter((s) => normalizedStationName(s).includes(needle))
     : visibleStations;
 
-  // Closest stations, only while sharing location, not searching, and not browsing a line.
+  // Closest stations while sharing location and not searching. `visibleStations` is already
+  // narrowed to the selected line, so this only surfaces nearby stations on that line.
   const nearby =
-    position && !needle && !lineName
+    position && !needle
       ? visibleStations
           .map((station) => ({
             station,

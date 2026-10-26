@@ -54,24 +54,45 @@ function FineRow({ fine }: { fine: Fine }) {
   );
   const { icon, color } = STATUS_STYLES[fine.status];
   const paidAt = fine.status === 'paid' ? fine.paidAt : null;
+  let declineReason: string | undefined;
+  let descriptionId: string | undefined;
+  if (fine.status === 'declined') {
+    declineReason = fine.declineReason?.trim() || t('declineReasonMissing');
+    descriptionId = `fine-${fine.id}-decline-reason`;
+  }
 
   return (
-    <TableRow>
-      <TableCell>
-        <time dateTime={fine.createdAt} className="block">
-          {date}
-          <span className="text-muted-foreground mt-1 block text-xs leading-relaxed">{time}</span>
-        </time>
-      </TableCell>
-      <TableCell>
-        <FundHistoryStatus
-          icon={icon}
-          iconClassName={color}
-          label={t(`fineStatus.${fine.status}`)}
-          paidAt={paidAt}
-        />
-      </TableCell>
-    </TableRow>
+    <TableBody className="border-border border-b last:border-b-0 [&_tr]:border-0">
+      <TableRow>
+        <TableCell>
+          <time dateTime={fine.createdAt} className="block">
+            {date}
+            <span className="text-muted-foreground mt-1 block text-xs leading-relaxed">{time}</span>
+          </time>
+        </TableCell>
+        <TableCell>
+          <FundHistoryStatus
+            icon={icon}
+            iconClassName={color}
+            label={t(`fineStatus.${fine.status}`)}
+            paidAt={paidAt}
+            descriptionId={descriptionId}
+          />
+        </TableCell>
+      </TableRow>
+      {declineReason !== undefined && (
+        <TableRow>
+          <TableCell colSpan={2} className="pt-0">
+            <p
+              id={descriptionId}
+              className="text-muted-foreground text-sm leading-relaxed wrap-anywhere whitespace-pre-wrap"
+            >
+              {declineReason}
+            </p>
+          </TableCell>
+        </TableRow>
+      )}
+    </TableBody>
   );
 }
 
@@ -86,18 +107,16 @@ function UploadHistory({ userId, sessionId }: { userId: string; sessionId: strin
   }
 
   return (
-    <Table aria-label={t('uploadsTitle')}>
+    <Table className="table-fixed" aria-label={t('uploadsTitle')}>
       <TableHeader>
         <TableRow>
           <TableHead>{t('uploadedAt')}</TableHead>
           <TableHead>{t('status')}</TableHead>
         </TableRow>
       </TableHeader>
-      <TableBody>
-        {fines.data.map((fine) => (
-          <FineRow key={fine.id} fine={fine} />
-        ))}
-      </TableBody>
+      {fines.data.map((fine) => (
+        <FineRow key={fine.id} fine={fine} />
+      ))}
     </Table>
   );
 }

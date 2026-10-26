@@ -10,6 +10,7 @@ type FundHistoryStatusProps = {
   paidAt?: string | null;
   showTime?: boolean;
   description?: string;
+  descriptionId?: string;
 };
 
 export function FundHistoryStatus({
@@ -19,12 +20,13 @@ export function FundHistoryStatus({
   paidAt,
   showTime = false,
   description,
+  descriptionId,
 }: FundHistoryStatusProps) {
   const { i18n } = useTranslation();
 
   return (
     <div className="flex flex-col gap-1">
-      <span className="flex items-start gap-1.5">
+      <span className="flex items-start gap-1.5" aria-describedby={descriptionId}>
         <Icon aria-hidden="true" className={cn('mt-0.5 size-4 shrink-0', iconClassName)} />
         {label}
       </span>
