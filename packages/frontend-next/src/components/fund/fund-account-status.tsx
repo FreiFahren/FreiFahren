@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { SECONDARY_BUTTON } from '@/components/account/account-layout';
 import { Button } from '@/components/ui/button';
+import { useAuthSession } from '@/hooks/use-auth-session';
 import { useFundEnabled } from '@/hooks/use-fund-enabled';
 import { useEuro, useMembership, useOpenStripe } from '@/hooks/use-membership';
 
@@ -9,8 +10,11 @@ import { FundStatusCard } from './fund-status-card';
 import { NAMESPACE } from './fund.i18n';
 
 // The member's Fund status on the account page, with the way to change or cancel it.
-export function FundAccountStatus({ userId }: { userId: string }) {
-  return useFundEnabled() ? <MembershipStatus userId={userId} /> : null;
+export function FundAccountStatus() {
+  const auth = useAuthSession();
+  const fundEnabled = useFundEnabled();
+  if (!fundEnabled || auth.status !== 'signed-in') return null;
+  return <MembershipStatus userId={auth.session.user.id} />;
 }
 
 function MembershipStatus({ userId }: { userId: string }) {

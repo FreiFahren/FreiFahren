@@ -1,4 +1,5 @@
 import { LoaderCircle } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ManageMembershipButton } from '@/components/fund/fund-account-status';
@@ -10,15 +11,18 @@ import { SupportEmailLink } from './account-layout';
 import { NAMESPACE } from './account.i18n';
 import { SessionLoadError } from './session-load-error';
 
-export function MembershipGateContent({
-  gate,
-  onClose,
-}: {
-  gate: NonNullable<MembershipGate>;
+type AccountDeletionGateProps = {
+  gate: MembershipGate;
   onClose: () => void;
-}) {
+  // The current deletion step, shown once nothing about the membership blocks deletion.
+  children: ReactNode;
+};
+
+// Like SignInGate: the deletion steps only render once the membership lets the account go.
+export function AccountDeletionGate({ gate, onClose, children }: AccountDeletionGateProps) {
   const { t } = useTranslation(NAMESPACE);
 
+  if (gate === null) return children;
   if (gate.kind === 'checking') {
     return (
       <p role="status" className="text-muted-foreground flex items-center gap-2 text-sm">
@@ -39,7 +43,7 @@ export function MembershipGateContent({
           onRetry={gate.retry}
         />
       )}
-      <Button type="button" variant="ghost" onClick={onClose}>
+      <Button type="button" variant="ghost" onClick={() => onClose()}>
         {t('cancel')}
       </Button>
     </>

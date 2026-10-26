@@ -35,8 +35,8 @@ function AccountContent() {
                 submitClassName={PRIMARY_BUTTON}
                 onSaved={refetch}
               />
-              <FundAccountStatus userId={user.id} />
-              <AccountActions userId={user.id} email={user.email} />
+              <FundAccountStatus />
+              <AccountActions />
             </>
           );
         }

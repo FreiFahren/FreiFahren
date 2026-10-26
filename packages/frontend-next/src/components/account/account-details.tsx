@@ -13,7 +13,7 @@ import { NAMESPACE } from './account.i18n';
 import { DeleteAccount } from './delete-account';
 import { UsernameForm } from './username-form';
 
-type User = { id: string; name: string; email: string; createdAt: Date | string };
+type User = { name: string; email: string; createdAt: Date | string };
 
 // The settings card's rows.
 const ROW =
@@ -60,7 +60,7 @@ export function AccountDetails({ user }: { user: User }) {
         />
       )}
 
-      <FundAccountStatus userId={user.id} />
+      <FundAccountStatus />
 
       <div className="-mx-3 flex flex-col">
         <div className={ROW}>
@@ -73,7 +73,7 @@ export function AccountDetails({ user }: { user: User }) {
         <SignOutRow />
       </div>
 
-      <DeleteAccount userId={user.id} email={user.email} />
+      <DeleteAccount />
     </>
   );
 }
@@ -105,13 +105,13 @@ function SignOutRow() {
 }
 
 // Before a new account has a username.
-export function AccountActions({ userId, email }: { userId: string; email: string }) {
+export function AccountActions() {
   return (
     <>
       <div className="-mx-3 flex flex-col">
         <SignOutRow />
       </div>
-      <DeleteAccount userId={userId} email={email} />
+      <DeleteAccount />
     </>
   );
 }
