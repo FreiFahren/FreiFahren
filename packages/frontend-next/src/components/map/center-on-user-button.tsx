@@ -9,6 +9,8 @@ import { type MapRef, useControl, useMap } from 'react-map-gl/maplibre';
 import { Button } from '@/components/ui/button';
 import { useGeolocation } from '@/contexts/Geolocation.context';
 import { track } from '@/lib/analytics';
+import { currentCity } from '@/lib/city';
+import { pointInBounds } from '@/lib/city-for-position';
 import { selectionTap } from '@/lib/haptics';
 import { prefersReducedMotion } from '@/lib/reduced-motion';
 
@@ -35,7 +37,13 @@ function moveCamera(map: MapRef, camera: Parameters<MapRef['jumpTo']>[0], animat
 export function CenterOnUserButton() {
   const { t } = useTranslation(NAMESPACE);
   const { current: map } = useMap();
-  const { position } = useGeolocation();
+  const { position: rawPosition } = useGeolocation();
+  // The basemap only covers the current city, so a fix elsewhere (e.g. right after switching to
+  // another city) is neither followed nor offered as a re-center target.
+  const position =
+    rawPosition && pointInBounds(rawPosition.lng, rawPosition.lat, currentCity)
+      ? rawPosition
+      : null;
   const stationId = useParams({ strict: false, select: (params) => params.stationId });
   const container = useControl(
     () => {

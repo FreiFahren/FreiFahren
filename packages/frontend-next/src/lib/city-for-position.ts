@@ -1,6 +1,6 @@
 import type { CityConfig } from '@freifahren/cities';
 
-function pointInBounds(lng: number, lat: number, city: CityConfig): boolean {
+export function pointInBounds(lng: number, lat: number, city: CityConfig): boolean {
   const [west, south, east, north] = city.map.bounds;
   return lng >= west && lng <= east && lat >= south && lat <= north;
 }
