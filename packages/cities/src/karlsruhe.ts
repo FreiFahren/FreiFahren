@@ -1,17 +1,23 @@
 import { CITY_DATABASES } from './databases'
 import type { CityConfig } from './types'
 
-// Synthetic until there is a group export to tune on, as Leipzig started out.
-const promptExamples = `Message: "2 kontrolleure in der 4 europaplatz richtung oberreut"
-{"stationName": "Europaplatz (Kaiserstraße)", "directionName": "Oberreut Zentrum"}
+// Real messages from the group's export, none of them in the eval sample.
+const promptExamples = `Message: "S2 Spöck, gerade am Gottesauer Platz"
+{"stationName": "Gottesauer Platz/BGV", "directionName": "Spöck Hochhaus"}
 
-Message: "S1 Richtung Hochstetten gerade Europaplatz"
-{"stationName": "Europaplatz (U)", "directionName": "Hochstetten Grenzstraße"}
+Message: "S11 hochstetten 3 bigs. Gerade hbf"
+{"stationName": "Hauptbahnhof", "directionName": "Hochstetten Altenheim"}
 
-Message: "Sind Hbf ausgestiegen"
+Message: "3 K in der 1 Richtung Durlach auf Höhe Euro"
+{"stationName": "Europaplatz (U)", "directionName": "Durlach Turmberg"}
+
+Message: "2 stück in der S5 Richtung pforzheim am kronenplatz"
+{"stationName": "Kronenplatz (U)", "directionName": null}
+
+Message: "2 am hbf, s steig stadteinwärts"
 {"stationName": "Hauptbahnhof", "directionName": null}
 
-Message: "zwei männlich gelesen, schwarze jacken"
+Message: "Männlich gelesen,  weiße Haare in zivil"
 {"stationName": null, "directionName": null}
 `
 
@@ -87,6 +93,34 @@ export const KARLSRUHE: CityConfig = {
             [String.raw`\bbhf\.?\b`, 'bahnhof'],
             [String.raw`\bhbf\.?\b`, 'hauptbahnhof'],
             [String.raw`\bpl\.?\b`, 'platz'],
+            // Termini go by their district alone ("1 Richtung Heide", "S2 Spöck").
+            [String.raw`^(neureut[\s-])?heide$`, 'neureut-heide'],
+            [String.raw`^hochstetten$`, 'hochstetten altenheim'],
+            [String.raw`^durlach$`, 'durlach turmberg'],
+            [String.raw`^knielingen$`, 'knielingen nord'],
+            [String.raw`^ober+eu[rt]$`, 'oberreut zentrum'],
+            [String.raw`^wolfartswei(h)?er$`, 'wolfartsweier nord'],
+            [String.raw`^waldstadt$`, 'waldstadt zentrum'],
+            [String.raw`^ittersbach$`, 'ittersbach rathaus'],
+            [String.raw`^spock$`, 'spock hochhaus'],
+            [String.raw`^sollingen$`, 'sollingen (pfinztal)'],
+            [String.raw`^berghausen$`, 'berghausen (baden)'],
+            [String.raw`^rheinstetten$`, 'morsch bach west'],
+            [String.raw`^(ka|karlsruhe)$`, 'hauptbahnhof'],
+            // Regional destinations outside the seeded area would otherwise match "Hauptbahnhof".
+            [String.raw`^(pforzheim|mannheim|speyer|heidelberg|stuttgart|germersheim)\b.*`, ''],
+            // No longer a stop, and it would match Herweghstraße.
+            [String.raw`^herrenstrasse$`, ''],
+            // Stops shortened to their first word.
+            [String.raw`^euro$`, 'europaplatz (u)'],
+            [String.raw`^tulla(\s+strasse)?$`, 'tullastrasse/alter schlachthof'],
+            [String.raw`^bgv$`, 'gottesauer platz/bgv'],
+            [String.raw`^werder$`, 'werderstrasse'],
+            [
+                String.raw`^(auer(\s*strasse)?\s*/?\s*)?(dr\.?\s*)?will?mar\s*schwabe$`,
+                'auer strasse/dr. willmar schwabe',
+            ],
+            [String.raw`^auer\s*strasse$`, 'auer strasse/dr. willmar schwabe'],
         ],
         promptExamples,
     },
