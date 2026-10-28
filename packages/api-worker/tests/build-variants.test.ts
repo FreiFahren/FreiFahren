@@ -44,3 +44,14 @@ describe('buildLineVariants — route ref patterns', () => {
         expect(refsOf([routeRelation(1, 'tram', 'M10')])).toEqual(['M10'])
     })
 })
+
+describe('buildLineVariants — ref spelling', () => {
+    // Dresden tags its S-Bahn "S 1"; the app and the Telegram line matcher expect "S1".
+    it('drops the space between letters and number', () => {
+        expect(refsOf([routeRelation(1, 'light_rail', 'S 1')])).toEqual(['S1'])
+    })
+
+    it('leaves other refs alone', () => {
+        expect(refsOf([routeRelation(1, 'tram', '12'), routeRelation(2, 'light_rail', 'S41')])).toEqual(['12', 'S41'])
+    })
+})

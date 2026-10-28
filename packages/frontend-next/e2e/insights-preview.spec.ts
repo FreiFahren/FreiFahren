@@ -55,6 +55,7 @@ for (const city of [
   'nuremberg',
   'hannover',
   'duesseldorf',
+  'dresden',
 ]) {
   test(`${city}: batch agrees with individual line responses`, async ({ request }) => {
     const station = await stationFixture(request, city);

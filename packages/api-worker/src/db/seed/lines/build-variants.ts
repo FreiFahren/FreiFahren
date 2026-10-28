@@ -1,5 +1,5 @@
 import { logger } from '../../../common/logger'
-import { ROUTE_TYPE_PRIORITY, isSeedLineRefIncluded, resolveLineColor, type RouteType } from '../config'
+import { ROUTE_TYPE_PRIORITY, isSeedLineRefIncluded, resolveLineColor, seedLineRef, type RouteType } from '../config'
 import type { OsmRelation } from '../stations/overpass'
 
 export interface LineVariant {
@@ -117,7 +117,7 @@ export const buildLineVariants = (relations: OsmRelation[], nodeIdToStationId: M
 
     for (const rel of relations) {
         const tags: Record<string, string | undefined> = rel.tags ?? {}
-        const ref = tags.ref
+        const ref = tags.ref === undefined ? undefined : seedLineRef(tags.ref)
         if (ref === undefined || ref === '') {
             skippedNoRef++
             continue

@@ -36,6 +36,9 @@ const OSM_ROUTE_TYPE_ALIASES: Readonly<Record<string, RouteType>> = CITY.seed.os
 export const toSeedRouteType = (osmRoute: string): string =>
     Object.hasOwn(OSM_ROUTE_TYPE_ALIASES, osmRoute) ? OSM_ROUTE_TYPE_ALIASES[osmRoute] : osmRoute
 
+/** "S 1" -> "S1": some networks tag refs with a space, the app writes line names without one. */
+export const seedLineRef = (osmRef: string): string => osmRef.replace(/^([A-Za-z]+)\s+(\d+)$/u, '$1$2')
+
 const STATION_NAME_OVERRIDES: Readonly<Record<string, string>> = CITY.seed.stationNameOverrides ?? {}
 
 export const canonicalStationName = (osmName: string): string =>
