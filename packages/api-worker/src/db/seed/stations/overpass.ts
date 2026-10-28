@@ -75,44 +75,54 @@ const chunk = <T>(items: readonly T[], size: number): T[][] => {
     return chunks
 }
 
-const buildLineRefsQuery = (): string => {
-    const { city, adminLevel, overpass, operators, osmRouteValues } = SEED_CONFIG
+/* Selects the city's route relations into `.routes`, plus the route_masters they inherit
+ * tags from into `.masters`. Some networks tag operator or route type only on the
+ * route_master (Frankfurt's tram 11, Karlsruhe's tram 8), so its child routes are taken too
+ * and get the missing tags filled in by inheritRouteMasterTags. */
+const buildRouteSelection = (refRegex?: string): string => {
+    const { operators, osmRouteValues } = SEED_CONFIG
     const operatorRegex = buildOperatorRegex(operators)
     const routeTypeRegex = buildRouteTypeRegex(osmRouteValues)
+    const refFilter = refRegex === undefined ? '' : `["ref"~"${refRegex}"]`
 
     return `
-[out:json][timeout:${overpass.timeoutSeconds}];
-
-area["name"="${city}"]["boundary"="administrative"]["admin_level"~"${adminLevel}"]->.a;
-
 relation
   ["type"="route"]
   ["route"~"${routeTypeRegex}"]
   ["operator"~"${operatorRegex}"]
-  (area.a);
-out tags;
+  ${refFilter}
+  (area.a)
+  ->.direct;
+
+relation
+  ["type"="route_master"]
+  ["route_master"~"${routeTypeRegex}"]
+  ["operator"~"${operatorRegex}"]
+  ->.masters;
+
+relation(r.masters)["type"="route"]${refFilter}(area.a)->.inherited;
+
+(.direct; .inherited;)->.routes;
 `
 }
 
-const buildStationsQuery = (refs: readonly string[]): string => {
-    const { city, adminLevel, overpass, operators, osmRouteValues } = SEED_CONFIG
-    const operatorRegex = buildOperatorRegex(operators)
-    const routeTypeRegex = buildRouteTypeRegex(osmRouteValues)
-    const refRegex = buildRefRegex(refs)
-
+const buildAreaHeader = (): string => {
+    const { city, adminLevel, overpass } = SEED_CONFIG
     return `
 [out:json][timeout:${overpass.timeoutSeconds}];
 
 area["name"="${city}"]["boundary"="administrative"]["admin_level"~"${adminLevel}"]->.a;
+`
+}
 
-relation
-  ["type"="route"]
-  ["route"~"${routeTypeRegex}"]
-  ["operator"~"${operatorRegex}"]
-  ["ref"~"${refRegex}"]
-  (area.a)
-  ->.routes;
+const buildLineRefsQuery = (): string => `${buildAreaHeader()}${buildRouteSelection()}
+.routes out tags;
+.masters out body;
+`
 
+const buildStationsQuery = (
+    refs: readonly string[]
+): string => `${buildAreaHeader()}${buildRouteSelection(buildRefRegex(refs))}
     node(r.routes)->.routeNodes;
 
 rel
@@ -124,33 +134,17 @@ rel
 
 (
   .routes;
+  .masters;
   .stopAreas;
   .routeNodes;
   .stopNodes;
 );
 out body;
 `
-}
 
-const buildGeometryQuery = (refs: readonly string[]): string => {
-    const { city, adminLevel, overpass, operators, osmRouteValues } = SEED_CONFIG
-    const operatorRegex = buildOperatorRegex(operators)
-    const routeTypeRegex = buildRouteTypeRegex(osmRouteValues)
-    const refRegex = buildRefRegex(refs)
-
-    return `
-[out:json][timeout:${overpass.timeoutSeconds}];
-
-area["name"="${city}"]["boundary"="administrative"]["admin_level"~"${adminLevel}"]->.a;
-
-relation
-  ["type"="route"]
-  ["route"~"${routeTypeRegex}"]
-  ["operator"~"${operatorRegex}"]
-  ["ref"~"${refRegex}"]
-  (area.a)
-  ->.routes;
-
+const buildGeometryQuery = (
+    refs: readonly string[]
+): string => `${buildAreaHeader()}${buildRouteSelection(buildRefRegex(refs))}
 way(r.routes)->.routeWays;
 
 (
@@ -158,7 +152,28 @@ way(r.routes)->.routeWays;
   .routeWays;
 );
 out geom;
+.masters out body;
 `
+
+/* Fill a route's missing `route` and `operator` tags from its route_master, then drop
+ * the route_masters, which nothing downstream reads. */
+export const inheritRouteMasterTags = (elements: OsmElement[]): OsmElement[] => {
+    const byId = new Map<number, OsmRelation>()
+    for (const el of elements) {
+        if (el.type === 'relation' && el.tags?.type === 'route') byId.set(el.id, el)
+    }
+    for (const el of elements) {
+        if (el.type !== 'relation' || el.tags?.type !== 'route_master') continue
+        for (const member of el.members) {
+            if (member.type !== 'relation') continue
+            const route = byId.get(member.ref)
+            if (route === undefined) continue
+            const tags = (route.tags ??= {})
+            if ((tags.route ?? '') === '' && el.tags.route_master !== undefined) tags.route = el.tags.route_master
+            if ((tags.operator ?? '') === '' && el.tags.operator !== undefined) tags.operator = el.tags.operator
+        }
+    }
+    return elements.filter((el) => el.type !== 'relation' || el.tags?.type !== 'route_master')
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -266,7 +281,7 @@ export const fetchLineRefs = async (): Promise<string[]> => {
     console.log(
         `[seed] Discovering line refs for operators: ${SEED_CONFIG.operators.join(', ')} (OSM route types: ${SEED_CONFIG.osmRouteValues.join(', ')})`
     )
-    const elements = await fetchWithRetry(buildLineRefsQuery(), fetchTimeoutMs)
+    const elements = inheritRouteMasterTags(await fetchWithRetry(buildLineRefsQuery(), fetchTimeoutMs))
     const refs = new Set<string>()
     let filtered = 0
     /* Filter during discovery, not just downstream: each surviving ref costs a
@@ -328,7 +343,7 @@ const fetchInBatches = async (
         console.log(`[${label}] Batch ${i + 1}/${batches.length}: ${batch.join(', ')}`)
         let elements: OsmElement[] = []
         for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-            elements = await fetchWithRetry(buildQuery(batch), fetchTimeoutMs)
+            elements = inheritRouteMasterTags(await fetchWithRetry(buildQuery(batch), fetchTimeoutMs))
             const missing = findMissingRouteRefs(batch, elements)
             if (missing.length === 0) break
             console.warn(
