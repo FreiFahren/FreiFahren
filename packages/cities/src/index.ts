@@ -10,6 +10,7 @@ import { DRESDEN } from './dresden'
 import { KARLSRUHE } from './karlsruhe'
 import { FRANKFURT } from './frankfurt'
 import { STUTTGART } from './stuttgart'
+import { POTSDAM } from './potsdam'
 import type { CityConfig } from './types'
 
 export * from './types'
@@ -25,6 +26,7 @@ export { DRESDEN }
 export { KARLSRUHE }
 export { FRANKFURT }
 export { STUTTGART }
+export { POTSDAM }
 export { CITY_DATABASES, CITY_DATABASE_SLUGS, getCityDatabase } from './databases'
 export type { CityDatabaseSlug } from './databases'
 
@@ -46,6 +48,7 @@ export const CITIES = {
     karlsruhe: KARLSRUHE,
     frankfurt: FRANKFURT,
     stuttgart: STUTTGART,
+    potsdam: POTSDAM,
 } as const satisfies Record<string, CityConfig>
 
 export type CitySlug = keyof typeof CITIES
