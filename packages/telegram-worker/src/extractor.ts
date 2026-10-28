@@ -419,7 +419,9 @@ function numericLineContextOk(message: string, start: number, end: number, termi
     if (NUMERIC_NON_LINE_BEFORE.has(before)) {
         return false
     }
-    return NUMERIC_LINE_CUE_BEFORE.has(before) || NUMERIC_LINE_CUE_AFTER.has(after) || terminusFollows(after, termini)
+    // "gleis 1 / 2 berliner tor": a number right after another number is a platform or a range.
+    const terminusCue = !/^\d+$/.test(before) && terminusFollows(after, termini)
+    return NUMERIC_LINE_CUE_BEFORE.has(before) || NUMERIC_LINE_CUE_AFTER.has(after) || terminusCue
 }
 
 export function detectLineName(

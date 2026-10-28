@@ -47,6 +47,8 @@ describe('detectLineName — number before a terminus', () => {
         ['5 leute anderten'],
         // Anderten is the 5's terminus, not the 11's.
         ['11 anderten'],
+        // A platform pair, not the 5.
+        ['am gleis 1 / 5 anderten'],
     ])('leaves %j alone', (message) => {
         expect(detect(message)).toBeNull()
     })
