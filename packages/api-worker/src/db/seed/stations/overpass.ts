@@ -1,4 +1,4 @@
-import { SEED_CONFIG, isSeedLineRefIncluded } from '../config'
+import { SEED_CONFIG, isSeedLineRefIncluded, toSeedRouteType } from '../config'
 
 export interface OsmNode {
     type: 'node'
@@ -76,9 +76,9 @@ const chunk = <T>(items: readonly T[], size: number): T[][] => {
 }
 
 const buildLineRefsQuery = (): string => {
-    const { city, adminLevel, overpass, operators, routeTypes } = SEED_CONFIG
+    const { city, adminLevel, overpass, operators, osmRouteValues } = SEED_CONFIG
     const operatorRegex = buildOperatorRegex(operators)
-    const routeTypeRegex = buildRouteTypeRegex(routeTypes)
+    const routeTypeRegex = buildRouteTypeRegex(osmRouteValues)
 
     return `
 [out:json][timeout:${overpass.timeoutSeconds}];
@@ -95,9 +95,9 @@ out tags;
 }
 
 const buildStationsQuery = (refs: readonly string[]): string => {
-    const { city, adminLevel, overpass, operators, routeTypes } = SEED_CONFIG
+    const { city, adminLevel, overpass, operators, osmRouteValues } = SEED_CONFIG
     const operatorRegex = buildOperatorRegex(operators)
-    const routeTypeRegex = buildRouteTypeRegex(routeTypes)
+    const routeTypeRegex = buildRouteTypeRegex(osmRouteValues)
     const refRegex = buildRefRegex(refs)
 
     return `
@@ -133,9 +133,9 @@ out body;
 }
 
 const buildGeometryQuery = (refs: readonly string[]): string => {
-    const { city, adminLevel, overpass, operators, routeTypes } = SEED_CONFIG
+    const { city, adminLevel, overpass, operators, osmRouteValues } = SEED_CONFIG
     const operatorRegex = buildOperatorRegex(operators)
-    const routeTypeRegex = buildRouteTypeRegex(routeTypes)
+    const routeTypeRegex = buildRouteTypeRegex(osmRouteValues)
     const refRegex = buildRefRegex(refs)
 
     return `
@@ -264,7 +264,7 @@ const fetchWithRetry = async (query: string, fetchTimeoutMs: number): Promise<Os
 export const fetchLineRefs = async (): Promise<string[]> => {
     const { fetchTimeoutMs } = SEED_CONFIG.overpass
     console.log(
-        `[seed] Discovering line refs for operators: ${SEED_CONFIG.operators.join(', ')} (route types: ${SEED_CONFIG.routeTypes.join(', ')})`
+        `[seed] Discovering line refs for operators: ${SEED_CONFIG.operators.join(', ')} (OSM route types: ${SEED_CONFIG.osmRouteValues.join(', ')})`
     )
     const elements = await fetchWithRetry(buildLineRefsQuery(), fetchTimeoutMs)
     const refs = new Set<string>()
@@ -277,7 +277,8 @@ export const fetchLineRefs = async (): Promise<string[]> => {
         if (el.type !== 'relation') continue
         const ref = el.tags?.ref
         if (ref === undefined || ref === '') continue
-        if (!isSeedLineRefIncluded(ref, el.tags?.route)) {
+        const route = el.tags?.route
+        if (!isSeedLineRefIncluded(ref, route !== undefined ? toSeedRouteType(route) : undefined)) {
             filtered++
             continue
         }

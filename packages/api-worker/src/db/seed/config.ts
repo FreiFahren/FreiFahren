@@ -30,6 +30,19 @@ export const ROUTE_REF_PATTERNS: Partial<Record<RouteType, string>> = CITY.seed.
 export const ROUTE_COLORS: Partial<Record<RouteType, string>> = CITY.seed.colors
 export const DEFAULT_LINE_COLOR = CITY.seed.defaultLineColor
 
+const OSM_ROUTE_TYPE_ALIASES: Readonly<Record<string, RouteType>> = CITY.seed.osmRouteTypeAliases ?? {}
+
+/** Maps an OSM `route` value onto the app's route type; values without an alias pass through. */
+export const toSeedRouteType = (osmRoute: string): string =>
+    Object.hasOwn(OSM_ROUTE_TYPE_ALIASES, osmRoute) ? OSM_ROUTE_TYPE_ALIASES[osmRoute] : osmRoute
+
+const STATION_NAME_OVERRIDES: Readonly<Record<string, string>> = CITY.seed.stationNameOverrides ?? {}
+
+export const canonicalStationName = (osmName: string): string =>
+    Object.hasOwn(STATION_NAME_OVERRIDES, osmName) ? STATION_NAME_OVERRIDES[osmName] : osmName
+
+export const STATION_CODE_FROM_REF = CITY.seed.stationCodeFromRef ?? true
+
 /*
  * Two independent ref filters, both city config:
  * - `excludeLineRefPatterns` blacklists refs regardless of route type (Leipzig
@@ -64,6 +77,7 @@ export const SEED_CONFIG = {
     operators: CITY.seed.operators,
     stationBounds: CITY.seed.stationBounds,
     routeTypes: ROUTE_TYPE_PRIORITY,
+    osmRouteValues: [...ROUTE_TYPE_PRIORITY, ...Object.keys(OSM_ROUTE_TYPE_ALIASES)],
 
     // The Overpass API configuration.
     overpass: {

@@ -43,6 +43,13 @@ export interface CitySeedConfig {
      */
     routeTypePriority: readonly [RouteType, ...RouteType[]]
     /**
+     * OSM `route` values to fetch and seed as one of `routeTypePriority`, for
+     * networks that tag a mode differently from how the app models it (Munich's
+     * S-Bahn is `route=train`, but the app shows S-Bahn as `light_rail`). The
+     * operator filter still decides which of those relations are seeded.
+     */
+    osmRouteTypeAliases?: Readonly<Record<string, RouteType>>
+    /**
      * Optional per-route-type regex a line's `ref` must match to be seeded.
      * Route types absent from this map include every ref. Used to scope bus
      * coverage to a curated subset (e.g. Berlin MetroBus `^M\d+$`) — seeding
@@ -63,6 +70,18 @@ export interface CitySeedConfig {
      */
     defaultLineColor: string
     excludeLineRefPatterns?: readonly string[]
+    /**
+     * OSM station name -> name to seed, for stations OSM names inconsistently across modes
+     * (DB's "München Ost" vs. MVG's "Ostbahnhof"). Proximate stations only merge when
+     * their names match, so this is also what joins such a split station back together.
+     */
+    stationNameOverrides?: Readonly<Record<string, string>>
+    /**
+     * Use a node's plain `ref` tag as the station id when it has no DS100/railway ref.
+     * Defaults to true. Set false where `ref` carries line or track numbers instead of a
+     * station code (Munich tags "U3;U6" and "6/4"); those stations then fall back to `n<nodeId>`.
+     */
+    stationCodeFromRef?: boolean
 }
 
 /**
@@ -150,6 +169,8 @@ export interface CityConfig extends CityDatabaseConfig {
     slug: string
     /** Subdomain the city is served from (`<subdomain>.freifahren.org`). */
     subdomain: string
+    /** Further subdomains that resolve to this city, e.g. an English name next to the local one. */
+    subdomainAliases?: readonly string[]
     /** Human-readable name shown in the UI. */
     displayName: string
     /** Canonical web app origin used in links for this city. */

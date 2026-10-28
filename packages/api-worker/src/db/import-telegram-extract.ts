@@ -22,6 +22,9 @@ type D1Row = Record<string, unknown>
 
 const CHUNK = 400
 
+// Writes go to prod D1 unless --local targets the wrangler dev database.
+const TARGET = process.argv.includes('--local') ? '--local' : '--remote'
+
 const parseFileArg = (argv: string[] = process.argv): string => {
     const flag = argv.indexOf('--file')
     if (flag === -1 || !argv[flag + 1]) {
@@ -35,7 +38,7 @@ const query = (binding: string, sql: string, configPath?: string): D1Row[] => {
     const configArgs = configPath !== undefined ? ['--config', configPath] : []
     const stdout = execFileSync(
         'npx',
-        ['wrangler', 'd1', 'execute', binding, '--remote', '--json', '--command', sql, ...configArgs],
+        ['wrangler', 'd1', 'execute', binding, TARGET, '--json', '--command', sql, ...configArgs],
         { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'inherit'], maxBuffer: 64 * 1024 * 1024 }
     )
     const resultSets = JSON.parse(stdout.slice(stdout.indexOf('['))) as Array<{ results?: D1Row[] } | undefined>
@@ -44,13 +47,9 @@ const query = (binding: string, sql: string, configPath?: string): D1Row[] => {
 
 const executeFile = (binding: string, sqlPath: string, configPath?: string): void => {
     const configArgs = configPath !== undefined ? ['--config', configPath] : []
-    execFileSync(
-        'npx',
-        ['wrangler', 'd1', 'execute', binding, '--remote', `--file=${sqlPath}`, '--yes', ...configArgs],
-        {
-            stdio: 'inherit',
-        }
-    )
+    execFileSync('npx', ['wrangler', 'd1', 'execute', binding, TARGET, `--file=${sqlPath}`, '--yes', ...configArgs], {
+        stdio: 'inherit',
+    })
 }
 
 const loadJsonl = (path: string): ExtractRow[] => {
@@ -148,9 +147,6 @@ if (cities.length !== 1) {
     throw new Error('--city <slug> is required (one city)')
 }
 const city = cities[0]
-if (city !== 'leipzig') {
-    throw new Error('telegram extract import is Leipzig-only')
-}
 
 importCity(
     city,

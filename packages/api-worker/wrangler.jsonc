@@ -65,10 +65,16 @@
             "database_id": "78b57951-828b-4673-a63f-4f5de233b184",
             "migrations_dir": "drizzle",
         },
+        {
+            "binding": "DB_MUNICH",
+            "database_name": "api-worker-db-munich-eu",
+            "database_id": "0393cd96-5f0c-4373-914a-7fcf36684afd",
+            "migrations_dir": "drizzle",
+        },
     ],
     "vars": {
         "NODE_ENV": "production",
-        "CORS_ORIGINS": "https://freifahren.org,https://app.freifahren.org,https://www.freifahren.org,https://berlin.freifahren.org,https://hamburg.freifahren.org,https://leipzig.freifahren.org,http://localhost:1871,http://hamburg.localhost:1871,http://leipzig.localhost:1871,capacitor://localhost",
+        "CORS_ORIGINS": "https://freifahren.org,https://app.freifahren.org,https://www.freifahren.org,https://berlin.freifahren.org,https://hamburg.freifahren.org,https://leipzig.freifahren.org,https://muenchen.freifahren.org,https://munich.freifahren.org,http://localhost:1871,http://hamburg.localhost:1871,http://leipzig.localhost:1871,http://muenchen.localhost:1871,http://munich.localhost:1871,capacitor://localhost",
         // Scopes frontend preview CORS to `frontend-pr-<n>.freifahren.workers.dev` (our account only).
         "PREVIEW_WORKERS_SUBDOMAIN": "freifahren",
         "SENTRY_DSN": "https://8f49e71a73d689efdcaabfd8794457b6@o4508609338867712.ingest.de.sentry.io/4511638467051600",
