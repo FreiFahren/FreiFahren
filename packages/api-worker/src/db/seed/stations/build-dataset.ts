@@ -46,18 +46,19 @@ const getHighestRouteType = (types: Set<RouteType>): RouteType => {
     return 'tram'
 }
 
+const isNamedStation = (tags: Record<string, string | undefined>): boolean => {
+    const isStation = STATION_RAILWAY_TAGS.has(tags.railway ?? '') || STATION_PT_TAGS.has(tags.public_transport ?? '')
+    // An unnamed stop_position would become a station without a name. Its stop_area still
+    // hands its lines to the named station node (see processStopArea).
+    return isStation && tags.name !== undefined && tags.name.trim() !== ''
+}
+
 const collectNodes = (elements: OsmElement[], nodes: Map<number, RawStation>) => {
     for (const el of elements) {
         if (el.type !== 'node') continue
         const node = el as OsmNode
         const tags: Record<string, string | undefined> = node.tags ?? {}
-
-        const isStation =
-            STATION_RAILWAY_TAGS.has(tags.railway ?? '') || STATION_PT_TAGS.has(tags.public_transport ?? '')
-        if (!isStation) continue
-        // An unnamed stop_position would become a station without a name. Its stop_area still
-        // hands its lines to the named station node (see processStopArea).
-        if (tags.name === undefined || tags.name.trim() === '') continue
+        if (!isNamedStation(tags)) continue
 
         const ds100 = tags['ref:ds100']
         const railwayRef = tags['railway:ref']
