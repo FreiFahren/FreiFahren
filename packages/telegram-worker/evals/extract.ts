@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { profileFor } from '../src/config'
 import {
     buildLinePattern,
+    buildLineTermini,
     buildSystemPrompt,
     detectLineName,
     resolveExtraction,
@@ -119,6 +120,7 @@ async function main(): Promise<void> {
                     linePattern,
                     index.circularLineNames,
                     profile,
+                    buildLineTermini(index),
                 )
                 const parsedNames = await extractWithRetry(msg.text, systemPrompt, apiKey, model)
                 const result = parsedNames === null ? NULL_RESULT : resolveExtraction(index, parsedNames, detectedLine, profile)
