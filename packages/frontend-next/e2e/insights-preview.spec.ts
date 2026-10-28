@@ -46,7 +46,7 @@ function historicalData(insight: Record<string, unknown>) {
   return data;
 }
 
-for (const city of ['berlin', 'hamburg', 'leipzig', 'munich', 'cologne']) {
+for (const city of ['berlin', 'hamburg', 'leipzig', 'munich', 'cologne', 'nuremberg']) {
   test(`${city}: batch agrees with individual line responses`, async ({ request }) => {
     const station = await stationFixture(request, city);
     const batch = await request.get(
