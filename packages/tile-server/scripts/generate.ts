@@ -58,22 +58,51 @@ type TilemakerConfig = {
 const baseConfig = (await Bun.file(BASE_CONFIG).json()) as TilemakerConfig
 
 for (const city of selected) {
-  // 1. OSM extract — download once if not already present locally.
-  const sourcePbf = resolve(SOURCE, basename(new URL(city.tiles.osmUrl).pathname))
-  if (!(await Bun.file(sourcePbf).exists())) {
+  // 1. OSM extracts — each downloaded once if not already present locally.
+  const sourcePbfs: string[] = []
+  for (const osmUrl of [city.tiles.osmUrl, ...(city.tiles.extraOsmUrls ?? [])]) {
+    const sourcePbf = resolve(SOURCE, basename(new URL(osmUrl).pathname))
+    sourcePbfs.push(sourcePbf)
+    if (await Bun.file(sourcePbf).exists()) continue
     const partialSourcePbf = `${sourcePbf}.part`
     await unlink(partialSourcePbf).catch((error: unknown) => {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
     })
-    console.log(`↓ ${city.slug}: ${city.tiles.osmUrl}`)
+    console.log(`↓ ${city.slug}: ${osmUrl}`)
     // A .part file is only renamed after curl succeeds, so an interrupted download cannot be
     // mistaken for a cached source extract on the next build.
-    const dl = Bun.spawn(['curl', '-fSL', '--retry', '3', '--remove-on-error', '-o', partialSourcePbf, city.tiles.osmUrl], {
+    const dl = Bun.spawn(['curl', '-fSL', '--retry', '3', '--remove-on-error', '-o', partialSourcePbf, osmUrl], {
       stdout: 'inherit',
       stderr: 'inherit',
     })
     if ((await dl.exited) !== 0) throw new Error(`OSM download failed for ${city.slug}`)
     await rename(partialSourcePbf, sourcePbf)
+  }
+
+  let sourcePbf = sourcePbfs[0]
+  if (sourcePbfs.length > 1) {
+    sourcePbf = resolve(SOURCE, `${city.slug}.merged.osm.pbf`)
+    console.log(`⊕ ${city.slug}: merge ${sourcePbfs.length} extracts`)
+    const merge = Bun.spawn(
+      [
+        'docker',
+        'run',
+        '--rm',
+        '-v',
+        `${REPO}:/work`,
+        '-w',
+        '/work',
+        OSMIUM_IMAGE,
+        'osmium',
+        'merge',
+        '--overwrite',
+        '--output',
+        inContainer(sourcePbf),
+        ...sourcePbfs.map(inContainer),
+      ],
+      { stdout: 'inherit', stderr: 'inherit' }
+    )
+    if ((await merge.exited) !== 0) throw new Error(`OSM merge failed for ${city.slug}`)
   }
 
   const pbf = city.tiles.clipToMapBounds ? resolve(SOURCE, `${city.slug}.osm.pbf`) : sourcePbf

@@ -20,6 +20,11 @@ export type BBox = readonly [number, number, number, number]
  */
 export interface CitySeedConfig {
     /**
+     * OSM `name` of the city boundary relation, when it differs from `displayName`
+     * ("Frankfurt am Main" vs. "Frankfurt"). Defaults to `displayName`.
+     */
+    osmAreaName?: string
+    /**
      * OSM `admin_level` regex identifying the city boundary relation. Usually
      * 4–6 for a city-sized boundary.
      */
@@ -143,6 +148,8 @@ export interface CityReportingConfig {
 export interface CityTiles {
     /** Geofabrik OSM extract the basemap is built from. */
     osmUrl: string
+    /** Further extracts merged in before cropping, for areas that straddle a Geofabrik border. */
+    extraOsmUrls?: readonly string[]
     /** Crop this regional extract to `map.bounds` before generating the archive. */
     clipToMapBounds?: boolean
 }

@@ -133,6 +133,7 @@ export const testEnv = (): Bindings => ({
     DB_DUESSELDORF: workerEnv.DB,
     DB_DRESDEN: workerEnv.DB,
     DB_KARLSRUHE: workerEnv.DB,
+    DB_FRANKFURT: workerEnv.DB,
     CORS_ORIGINS: overrides.CORS_ORIGINS ?? workerEnv.CORS_ORIGINS,
     PREVIEW_WORKERS_SUBDOMAIN: overrides.PREVIEW_WORKERS_SUBDOMAIN ?? workerEnv.PREVIEW_WORKERS_SUBDOMAIN,
     REPORT_GATE_MODE: overrides.REPORT_GATE_MODE,

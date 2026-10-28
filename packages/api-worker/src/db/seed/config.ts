@@ -75,7 +75,7 @@ export const resolveLineColor = (tags: Record<string, string | undefined>): stri
 }
 
 export const SEED_CONFIG = {
-    city: CITY.displayName,
+    city: CITY.seed.osmAreaName ?? CITY.displayName,
     adminLevel: CITY.seed.adminLevel,
     operators: CITY.seed.operators,
     stationBounds: CITY.seed.stationBounds,
