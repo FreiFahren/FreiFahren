@@ -1,7 +1,20 @@
+import { CITIES } from '@freifahren/cities';
+
 // Reverse proxy so PostHog traffic goes through our own domain, not *.posthog.com (which ad blockers block).
 const API_HOST = 'eu.i.posthog.com';
 const ASSET_HOST = 'eu-assets.i.posthog.com';
 const PREFIX = '/relay';
+
+// Alias hosts ("koeln.freifahren.org") redirect to the city's main host, so search engines see one
+// page per city instead of two copies that each claim to be canonical.
+const ALIAS_HOSTS = new Map(
+  Object.values(CITIES).flatMap((city) =>
+    (city.subdomainAliases ?? []).map((alias) => [
+      `${alias}.freifahren.org`,
+      new URL(city.publicAppUrl).host,
+    ]),
+  ),
+);
 
 function withHostMetadata(response: Response, url: URL, method: string): Response {
   if (method !== 'GET' || !response.headers.get('content-type')?.includes('text/html')) {
@@ -59,6 +72,11 @@ interface Ctx {
 export default {
   async fetch(request: Request, env: Env, ctx: Ctx): Promise<Response> {
     const url = new URL(request.url);
+    const mainHost = ALIAS_HOSTS.get(url.host);
+    if (mainHost !== undefined) {
+      url.host = mainHost;
+      return Response.redirect(url.toString(), 301);
+    }
     if (!url.pathname.startsWith(`${PREFIX}/`)) {
       return withHostMetadata(await env.ASSETS.fetch(request), url, request.method);
     }
