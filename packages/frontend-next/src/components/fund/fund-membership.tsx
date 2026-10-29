@@ -4,18 +4,11 @@ import { useTranslation } from 'react-i18next';
 
 import { PRIMARY_BUTTON, SECONDARY_BUTTON } from '@/components/account/account-layout';
 import { Button } from '@/components/ui/button';
-import {
-  markRulesSeen,
-  rulesSeen,
-  useEuro,
-  useMembership,
-  useOpenStripe,
-} from '@/hooks/use-membership';
+import { useEuro, useMembership, useOpenStripe } from '@/hooks/use-membership';
 
 import { ManageMembershipButton } from './fund-account-status';
 import { FundIntroduction } from './fund-introduction';
 import { FundOverview } from './fund-overview';
-import { FundRulesSlide } from './fund-rules';
 import { FundStatusCard } from './fund-status-card';
 import { NAMESPACE } from './fund.i18n';
 
@@ -34,8 +27,6 @@ export function FundMembership({
 }) {
   const { t } = useTranslation(NAMESPACE);
   const membership = useMembership(userId);
-  // 'uploaded' also confirms the upload above the rules.
-  const [showRules, setShowRules] = useState<boolean | 'uploaded'>(() => !rulesSeen(userId));
 
   if (membership.isPending) {
     return <LoaderCircle role="status" className="mx-auto mt-8 size-6 animate-spin" />;
@@ -53,17 +44,6 @@ export function FundMembership({
 
   const { status } = membership.data;
   if (status === 'active' || status === 'past_due') {
-    if (showRules) {
-      return (
-        <FundRulesSlide
-          intro={showRules === 'uploaded' ? t('uploadSuccess') : undefined}
-          onDone={() => {
-            markRulesSeen(userId);
-            setShowRules(false);
-          }}
-        />
-      );
-    }
     return (
       <div className="flex flex-col gap-4">
         {status === 'past_due' && (
@@ -74,19 +54,7 @@ export function FundMembership({
             <ManageMembershipButton />
           </>
         )}
-        <button
-          type="button"
-          onClick={() => setShowRules(true)}
-          className="text-muted-foreground hover:text-foreground self-start text-sm underline underline-offset-4"
-        >
-          {t('rulesTitle')}
-        </button>
-        <FundOverview
-          userId={userId}
-          sessionId={sessionId}
-          onSignIn={onSignIn}
-          onUploaded={() => setShowRules('uploaded')}
-        />
+        <FundOverview userId={userId} sessionId={sessionId} onSignIn={onSignIn} />
       </div>
     );
   }

@@ -1,11 +1,13 @@
-import { Check, LoaderCircle, Plus } from 'lucide-react';
-import { useRef, type ChangeEvent } from 'react';
+import { Camera, Check, LoaderCircle } from 'lucide-react';
+import { useRef, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { PRIMARY_BUTTON } from '@/components/account/account-layout';
 import { Button } from '@/components/ui/button';
 import { useFineUpload } from '@/hooks/use-fine-upload';
 import { FundRequestError } from '@/lib/fund-api';
 
+import { FundRulesDialog } from './fund-rules';
 import { NAMESPACE } from './fund.i18n';
 
 const UPLOAD_ERRORS = {
@@ -21,18 +23,31 @@ type FineUploadProps = {
   userId: string;
   sessionId: string;
   onSignIn: () => void;
-  onUploaded?: () => void;
 };
 
-export function FineUpload({ userId, sessionId, onSignIn, onUploaded }: FineUploadProps) {
+export function FineUpload({ userId, sessionId, onSignIn }: FineUploadProps) {
   const { t } = useTranslation(NAMESPACE);
   const camera = useRef<HTMLInputElement>(null);
   const upload = useFineUpload(userId, sessionId);
+  const [showRules, setShowRules] = useState(false);
+  const awaitingConfirmation = useRef(false);
+
+  const changeRulesOpen = (open: boolean) => {
+    awaitingConfirmation.current = open;
+    setShowRules(open);
+  };
+
+  const confirmPhoto = () => {
+    if (!awaitingConfirmation.current || upload.isPending) return;
+    changeRulesOpen(false);
+    // Keep this synchronous: mobile browsers require the approval's user gesture for the picker.
+    camera.current?.click();
+  };
 
   const selectPhoto = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = '';
-    if (file && !upload.isPending) upload.mutate(file, { onSuccess: onUploaded });
+    if (file && !upload.isPending) upload.mutate(file);
   };
 
   let errorKey = 'uploadInterrupted';
@@ -46,7 +61,7 @@ export function FineUpload({ userId, sessionId, onSignIn, onUploaded }: FineUplo
   }
 
   return (
-    <section aria-label={t('uploadTitle')}>
+    <section aria-label={t('uploadTitle')} className="mt-6 space-y-4">
       <input
         ref={camera}
         type="file"
@@ -57,18 +72,17 @@ export function FineUpload({ userId, sessionId, onSignIn, onUploaded }: FineUplo
         onChange={selectPhoto}
         disabled={upload.isPending}
       />
-      <div className="pb-safe-3 pointer-events-none fixed right-0 bottom-0 z-20 px-3 pt-3">
+      <FundRulesDialog open={showRules} onOpenChange={changeRulesOpen} onConfirm={confirmPhoto}>
         <Button
           type="button"
-          size="icon"
-          aria-label={t('takePhoto')}
-          className="bg-accent-bright text-primary-foreground hover:bg-accent-press pointer-events-auto size-14 rounded-lg shadow-[0_6px_16px_rgba(214,59,59,0.28)] [&_svg:not([class*='size-'])]:size-6"
-          onClick={() => camera.current?.click()}
+          size="lg"
+          className={`${PRIMARY_BUTTON} mx-auto flex max-w-xs gap-3`}
           disabled={upload.isPending}
         >
-          <Plus aria-hidden="true" />
+          <Camera className="size-5" aria-hidden="true" />
+          {t('uploadTitle')}
         </Button>
-      </div>
+      </FundRulesDialog>
       {upload.isPending && (
         <p role="status" className="text-muted-foreground mb-4 flex items-center gap-2 text-sm">
           <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
@@ -90,10 +104,7 @@ export function FineUpload({ userId, sessionId, onSignIn, onUploaded }: FineUplo
             </Button>
           )}
           {canRetry && upload.variables && (
-            <Button
-              variant="outline"
-              onClick={() => upload.mutate(upload.variables!, { onSuccess: onUploaded })}
-            >
+            <Button variant="outline" onClick={() => upload.mutate(upload.variables!)}>
               {t('retry')}
             </Button>
           )}

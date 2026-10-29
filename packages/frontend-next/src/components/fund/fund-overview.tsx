@@ -96,14 +96,31 @@ function FineRow({ fine }: { fine: Fine }) {
   );
 }
 
-function UploadHistory({ userId, sessionId }: { userId: string; sessionId: string }) {
+function UploadHistory({
+  userId,
+  sessionId,
+  canUpload,
+}: {
+  userId: string;
+  sessionId: string;
+  canUpload: boolean;
+}) {
   const { t } = useTranslation(NAMESPACE);
   const fines = useFundHistory(userId, sessionId);
 
   if (fines.isPending) return <LoadingHistory />;
   if (fines.isError) return <HistoryError retry={() => void fines.refetch()} />;
   if (fines.data.length === 0) {
-    return <p className="text-muted-foreground py-4 text-sm">{t('emptyUploads')}</p>;
+    return (
+      <div className="mx-auto flex max-w-sm flex-col gap-3 pt-8 text-center">
+        <h3 className="font-heading text-2xl leading-tight font-semibold">
+          {t('emptyUploadsTitle')}
+        </h3>
+        <p className="text-muted-foreground text-base leading-relaxed">
+          {t(canUpload ? 'emptyUploadsPrompt' : 'emptyUploads')}
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -127,30 +144,21 @@ export function FundOverview({
   sessionId,
   onSignIn,
   canUpload = true,
-  onUploaded,
 }: {
   userId: string;
   sessionId: string;
   onSignIn: () => void;
   canUpload?: boolean;
-  onUploaded?: () => void;
 }) {
   const { t } = useTranslation(NAMESPACE);
 
   return (
-    <div className={canUpload ? 'pb-20' : 'pb-4'}>
-      {canUpload && (
-        <FineUpload
-          userId={userId}
-          sessionId={sessionId}
-          onSignIn={onSignIn}
-          onUploaded={onUploaded}
-        />
-      )}
+    <div className="pb-4">
       <section aria-label={t('uploadsTitle')}>
         <SectionHeading className="mb-4">{t('uploadsTitle')}</SectionHeading>
-        <UploadHistory userId={userId} sessionId={sessionId} />
+        <UploadHistory userId={userId} sessionId={sessionId} canUpload={canUpload} />
       </section>
+      {canUpload && <FineUpload userId={userId} sessionId={sessionId} onSignIn={onSignIn} />}
     </div>
   );
 }
