@@ -2,8 +2,8 @@ import { Dialog } from 'radix-ui';
 import { useEffect, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { PRIMARY_BUTTON, SECONDARY_BUTTON } from '@/components/account/account-layout';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { NAMESPACE } from './fund.i18n';
 
@@ -12,48 +12,6 @@ const RULES = [
   { title: 'ruleNoTicketTitle', body: 'ruleNoTicketBody' },
   { title: 'ruleRepeatTitle', body: 'ruleRepeatBody' },
 ] as const;
-
-export function FundRulesSlide({ onDone, onCancel }: { onDone: () => void; onCancel: () => void }) {
-  const { t } = useTranslation(NAMESPACE);
-
-  return (
-    <section className="flex min-h-0 flex-col gap-4">
-      <Dialog.Title className="font-heading shrink-0 text-xl leading-snug font-semibold">
-        {t('rulesTitle')}
-      </Dialog.Title>
-      {/* eslint-disable jsx-a11y/no-noninteractive-tabindex -- Keyboard users must be able to scroll the rules on small screens. */}
-      <ol
-        tabIndex={0}
-        aria-label={t('rulesTitle')}
-        className="flex min-h-0 flex-col gap-5 overflow-y-auto pr-1"
-      >
-        {RULES.map(({ title, body }, index) => (
-          <li key={title} className="flex gap-3">
-            <span
-              aria-hidden="true"
-              className="bg-muted flex size-7 shrink-0 items-center justify-center rounded-full text-sm font-semibold"
-            >
-              {index + 1}
-            </span>
-            <div className="flex min-w-0 flex-col gap-1">
-              <p className="leading-snug font-semibold">{t(title)}</p>
-              <p className="text-muted-foreground text-sm leading-relaxed">{t(body)}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
-      {/* eslint-enable jsx-a11y/no-noninteractive-tabindex */}
-      <div className="flex shrink-0 flex-col gap-2">
-        <Button type="button" size="lg" className={PRIMARY_BUTTON} onClick={onDone}>
-          {t('rulesDone')}
-        </Button>
-        <Button type="button" size="lg" className={SECONDARY_BUTTON} onClick={onCancel}>
-          {t('rulesCancel')}
-        </Button>
-      </div>
-    </section>
-  );
-}
 
 export function FundRulesDialog({
   open,
@@ -66,6 +24,8 @@ export function FundRulesDialog({
   onConfirm: () => void;
   children: ReactNode;
 }) {
+  const { t } = useTranslation(NAMESPACE);
+
   useEffect(() => {
     if (!open) return;
     const dismiss = () => onOpenChange(false);
@@ -77,13 +37,43 @@ export function FundRulesDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Trigger asChild>{children}</Dialog.Trigger>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-black/60" />
-        <Dialog.Content
-          aria-describedby={undefined}
-          className="bg-card fixed top-1/2 right-4 left-4 z-50 mx-auto flex max-h-[calc(100dvh-2rem)] max-w-md -translate-y-1/2 flex-col overflow-hidden rounded-xl p-4 shadow-xl"
-        >
-          <FundRulesSlide onDone={onConfirm} onCancel={() => onOpenChange(false)} />
-        </Dialog.Content>
+        {/* Mirrors the legal disclaimer modal so both rule sheets read as the same kind of notice. */}
+        <Dialog.Overlay className="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 duration-150">
+          <Dialog.Content aria-describedby={undefined} asChild>
+            <Card className="animate-in zoom-in-95 fade-in shadow-2 relative z-10 max-h-[85vh] w-full max-w-md duration-200">
+              <CardHeader>
+                <Dialog.Title asChild>
+                  <CardTitle className="font-heading text-lg font-semibold">
+                    {t('rulesTitle')}
+                  </CardTitle>
+                </Dialog.Title>
+              </CardHeader>
+              <CardContent tabIndex={0} className="min-h-0 flex-1 overflow-y-auto">
+                <ol className="marker:text-muted-foreground list-decimal space-y-3 pl-5">
+                  {RULES.map(({ title, body }) => (
+                    <li key={title}>
+                      <strong className="font-semibold">{t(title)}</strong>
+                      <p className="text-muted-foreground mt-1 text-sm">{t(body)}</p>
+                    </li>
+                  ))}
+                </ol>
+              </CardContent>
+              <CardFooter className="flex-col items-stretch gap-2">
+                <Button
+                  type="button"
+                  size="lg"
+                  onClick={onConfirm}
+                  className="bg-accent-bright text-primary-foreground hover:bg-accent-press"
+                >
+                  {t('rulesDone')}
+                </Button>
+                <Button type="button" size="lg" variant="ghost" onClick={() => onOpenChange(false)}>
+                  {t('rulesCancel')}
+                </Button>
+              </CardFooter>
+            </Card>
+          </Dialog.Content>
+        </Dialog.Overlay>
       </Dialog.Portal>
     </Dialog.Root>
   );

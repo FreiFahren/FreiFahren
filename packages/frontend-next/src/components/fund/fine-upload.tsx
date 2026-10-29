@@ -1,4 +1,4 @@
-import { Camera, Check, LoaderCircle } from 'lucide-react';
+import { Camera, Check, LoaderCircle, Plus } from 'lucide-react';
 import { useRef, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -23,23 +23,17 @@ type FineUploadProps = {
   userId: string;
   sessionId: string;
   onSignIn: () => void;
+  floating: boolean;
 };
 
-export function FineUpload({ userId, sessionId, onSignIn }: FineUploadProps) {
+export function FineUpload({ userId, sessionId, onSignIn, floating }: FineUploadProps) {
   const { t } = useTranslation(NAMESPACE);
   const camera = useRef<HTMLInputElement>(null);
   const upload = useFineUpload(userId, sessionId);
   const [showRules, setShowRules] = useState(false);
-  const awaitingConfirmation = useRef(false);
-
-  const changeRulesOpen = (open: boolean) => {
-    awaitingConfirmation.current = open;
-    setShowRules(open);
-  };
 
   const confirmPhoto = () => {
-    if (!awaitingConfirmation.current || upload.isPending) return;
-    changeRulesOpen(false);
+    setShowRules(false);
     // Keep this synchronous: mobile browsers require the approval's user gesture for the picker.
     camera.current?.click();
   };
@@ -60,8 +54,10 @@ export function FineUpload({ userId, sessionId, onSignIn }: FineUploadProps) {
     canRetry = upload.error.status >= 500;
   }
 
+  // Ordered first while floating so upload status shows above a long history, without remounting
+  // (and losing the upload's state) when the first upload fills the history.
   return (
-    <section aria-label={t('uploadTitle')} className="mt-6 space-y-4">
+    <section aria-label={t('uploadTitle')} className={floating ? 'order-first' : 'mt-6 space-y-4'}>
       <input
         ref={camera}
         type="file"
@@ -72,17 +68,33 @@ export function FineUpload({ userId, sessionId, onSignIn }: FineUploadProps) {
         onChange={selectPhoto}
         disabled={upload.isPending}
       />
-      <FundRulesDialog open={showRules} onOpenChange={changeRulesOpen} onConfirm={confirmPhoto}>
-        <Button
-          type="button"
-          size="lg"
-          className={`${PRIMARY_BUTTON} mx-auto flex max-w-xs gap-3`}
-          disabled={upload.isPending}
-        >
-          <Camera className="size-5" aria-hidden="true" />
-          {t('uploadTitle')}
-        </Button>
-      </FundRulesDialog>
+      {floating ? (
+        <div className="pb-safe-3 pointer-events-none fixed right-0 bottom-0 z-20 px-3 pt-3">
+          <FundRulesDialog open={showRules} onOpenChange={setShowRules} onConfirm={confirmPhoto}>
+            <Button
+              type="button"
+              size="icon"
+              aria-label={t('uploadTitle')}
+              className="bg-accent-bright text-primary-foreground hover:bg-accent-press pointer-events-auto size-14 rounded-lg shadow-[0_6px_16px_rgba(214,59,59,0.28)] [&_svg:not([class*='size-'])]:size-6"
+              disabled={upload.isPending}
+            >
+              <Plus aria-hidden="true" />
+            </Button>
+          </FundRulesDialog>
+        </div>
+      ) : (
+        <FundRulesDialog open={showRules} onOpenChange={setShowRules} onConfirm={confirmPhoto}>
+          <Button
+            type="button"
+            size="lg"
+            className={`${PRIMARY_BUTTON} mx-auto flex max-w-xs gap-3`}
+            disabled={upload.isPending}
+          >
+            <Camera className="size-5" aria-hidden="true" />
+            {t('uploadTitle')}
+          </Button>
+        </FundRulesDialog>
+      )}
       {upload.isPending && (
         <p role="status" className="text-muted-foreground mb-4 flex items-center gap-2 text-sm">
           <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />

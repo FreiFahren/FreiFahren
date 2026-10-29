@@ -151,14 +151,20 @@ export function FundOverview({
   canUpload?: boolean;
 }) {
   const { t } = useTranslation(NAMESPACE);
+  const fines = useFundHistory(userId, sessionId);
+  // An empty history centres a prominent upload action under the empty state; once there are
+  // uploads, the action floats so it stays reachable however long the list grows.
+  const floating = fines.data?.length !== 0;
 
   return (
-    <div className="pb-4">
+    <div className={`flex flex-col ${canUpload && floating ? 'pb-20' : 'pb-4'}`}>
       <section aria-label={t('uploadsTitle')}>
         <SectionHeading className="mb-4">{t('uploadsTitle')}</SectionHeading>
         <UploadHistory userId={userId} sessionId={sessionId} canUpload={canUpload} />
       </section>
-      {canUpload && <FineUpload userId={userId} sessionId={sessionId} onSignIn={onSignIn} />}
+      {canUpload && (
+        <FineUpload userId={userId} sessionId={sessionId} onSignIn={onSignIn} floating={floating} />
+      )}
     </div>
   );
 }
