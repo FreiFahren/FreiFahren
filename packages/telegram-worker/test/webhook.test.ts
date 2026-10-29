@@ -78,6 +78,18 @@ describe('acceptUpdate (filtering)', () => {
         const update = makeUpdate({ text: '/start', entities: [{ type: 'bot_command', offset: 0, length: 6 }] })
         expect(acceptUpdate(update, testEnv)).toBeNull()
     })
+
+    it.each([
+        ['-1001394169627', 'munich'],
+        ['-1001407366881', 'nuremberg'],
+        ['-1001233085691', 'hannover'],
+        ['-1001342076099', 'dresden'],
+        ['-1001233800320', 'karlsruhe'],
+        ['-1001104664549', 'stuttgart'],
+        ['-1001466597831', 'frankfurt'],
+    ])('routes chat %s to %s', (chatId, city) => {
+        expect(acceptUpdate(makeUpdate({ text: 'kontrolle hbf', chatId }), testEnv)?.city).toBe(city)
+    })
 })
 
 function webhookRequest(body: unknown, secret = 'webhook-secret'): Request {
