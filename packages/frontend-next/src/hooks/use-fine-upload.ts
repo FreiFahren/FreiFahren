@@ -1,21 +1,22 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 
-import { fetchFund, FundRequestError, type Fine } from '@/lib/fund-api';
+import { fetchFund, FundRequestError, type Fine, type FineDetails } from '@/lib/fund-api';
 
 import { fundHistoryKey } from './use-fund-history';
+import { fineDetailsKey } from './use-fine-details';
 
 const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
 const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
 
-export function useFineUpload(userId: string, sessionId: string) {
+export function useFineUpload(userId: string, sessionId: string, fineId?: string) {
   const queryClient = useQueryClient();
   const controller = useRef<AbortController | null>(null);
 
   useEffect(() => () => controller.current?.abort(), []);
 
   return useMutation({
-    mutationFn: async (file: File): Promise<Fine> => {
+    mutationFn: async (file: File): Promise<FineDetails> => {
       if (file.size === 0) throw new FundRequestError(400);
       if (file.size > MAX_PHOTO_BYTES) throw new FundRequestError(413);
       // Some mobile pickers omit the MIME type. The server verifies the actual image bytes.
@@ -25,7 +26,7 @@ export function useFineUpload(userId: string, sessionId: string) {
 
       controller.current = new AbortController();
       const response = await fetchFund(
-        '/fines',
+        fineId ? `/fines/${fineId}/uploads` : '/fines',
         {
           method: 'POST',
           body: file,
@@ -41,12 +42,16 @@ export function useFineUpload(userId: string, sessionId: string) {
     retry: false,
     gcTime: 0,
     onSuccess: (fine) => {
+      if (fineId) queryClient.setQueryData(fineDetailsKey(userId, sessionId, fineId), fine);
       queryClient.setQueryData<Fine[]>(fundHistoryKey(userId, sessionId), (current) => {
         if (!current) return current;
+        if (fineId) return current.map((item) => (item.id === fine.id ? fine : item));
         return [fine, ...current.filter((item) => item.id !== fine.id)];
       });
     },
     onSettled: () => {
+      if (fineId)
+        void queryClient.invalidateQueries({ queryKey: fineDetailsKey(userId, sessionId, fineId) });
       void queryClient.invalidateQueries({ queryKey: fundHistoryKey(userId, sessionId) });
     },
   });

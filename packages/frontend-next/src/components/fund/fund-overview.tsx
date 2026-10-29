@@ -1,4 +1,5 @@
-import { Check, Clock3, LoaderCircle, X } from 'lucide-react';
+import { ChevronRight, LoaderCircle } from 'lucide-react';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -12,16 +13,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useFundHistory, type Fine } from '@/hooks/use-fund-history';
+import { Route as FineDetailsRoute } from '@/routes/fund/$fineId';
 
 import { FineUpload } from './fine-upload';
-import { FundHistoryStatus } from './fund-history-status';
+import { FineStatus } from './fine-status';
 import { NAMESPACE } from './fund.i18n';
-
-const STATUS_STYLES = {
-  in_review: { icon: Clock3, color: 'text-muted-foreground' },
-  paid: { icon: Check, color: 'text-ok' },
-  declined: { icon: X, color: 'text-destructive' },
-};
 
 function HistoryError({ retry }: { retry: () => void }) {
   const { t } = useTranslation(NAMESPACE);
@@ -47,13 +43,12 @@ function LoadingHistory() {
 
 function FineRow({ fine }: { fine: Fine }) {
   const { t, i18n } = useTranslation(NAMESPACE);
+  const navigate = useNavigate();
   const dateFormatter = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' });
   const date = dateFormatter.format(new Date(fine.createdAt));
   const time = new Intl.DateTimeFormat(i18n.language, { timeStyle: 'short' }).format(
     new Date(fine.createdAt),
   );
-  const { icon, color } = STATUS_STYLES[fine.status];
-  const paidAt = fine.status === 'paid' ? fine.paidAt : null;
   let declineReason: string | undefined;
   let descriptionId: string | undefined;
   if (fine.status === 'declined') {
@@ -62,22 +57,35 @@ function FineRow({ fine }: { fine: Fine }) {
   }
 
   return (
-    <TableBody className="border-border border-b last:border-b-0 [&_tr]:border-0">
+    <TableBody
+      className="border-border hover:bg-muted/40 cursor-pointer border-b last:border-b-0 [&_tr]:border-0"
+      onClick={() => void navigate({ to: FineDetailsRoute.to, params: { fineId: fine.id } })}
+    >
       <TableRow>
         <TableCell>
-          <time dateTime={fine.createdAt} className="block">
-            {date}
-            <span className="text-muted-foreground mt-1 block text-xs leading-relaxed">{time}</span>
-          </time>
+          <Link
+            to={FineDetailsRoute.to}
+            params={{ fineId: fine.id }}
+            className="focus-visible:ring-ring rounded-sm text-left focus-visible:ring-2 focus-visible:outline-none"
+            aria-label={t('openFineDetails', { date })}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <time dateTime={fine.createdAt} className="block">
+              {date}
+              <span className="text-muted-foreground mt-1 block text-xs leading-relaxed">
+                {time}
+              </span>
+            </time>
+          </Link>
         </TableCell>
         <TableCell>
-          <FundHistoryStatus
-            icon={icon}
-            iconClassName={color}
-            label={t(`fineStatus.${fine.status}`)}
-            paidAt={paidAt}
-            descriptionId={descriptionId}
-          />
+          <div className="flex items-start justify-between gap-2">
+            <FineStatus status={fine.status} paidAt={fine.paidAt} descriptionId={descriptionId} />
+            <ChevronRight
+              className="text-muted-foreground mt-0.5 size-4 shrink-0"
+              aria-hidden="true"
+            />
+          </div>
         </TableCell>
       </TableRow>
       {declineReason !== undefined && (
@@ -107,7 +115,10 @@ function UploadHistory({ userId, sessionId }: { userId: string; sessionId: strin
   }
 
   return (
-    <Table className="table-fixed" aria-label={t('uploadsTitle')}>
+    <Table
+      className="table-fixed [&_tr>:first-child]:pl-3 [&_tr>:last-child]:pr-3"
+      aria-label={t('uploadsTitle')}
+    >
       <TableHeader>
         <TableRow>
           <TableHead>{t('uploadedAt')}</TableHead>

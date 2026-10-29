@@ -3,6 +3,26 @@ import { i18n } from '@/lib/i18n';
 export const NAMESPACE = 'fund';
 
 i18n.addResourceBundle('en', NAMESPACE, {
+  fineDetailsTitle: 'Fine details',
+  openFineDetails: 'Show details for the fine uploaded on {{date}}',
+  loadingFineDetails: 'Loading fine details…',
+  fineDetailsError: 'This fine could not be loaded. Please try again.',
+  fineNotFound: 'This fine could not be found in your account.',
+  fineReference: 'Reference',
+  fineUploadHistory: 'Upload history',
+  invoiceUploaded: 'You uploaded an invoice',
+  invoiceReuploaded: 'You uploaded a corrected invoice',
+  invoiceDeclined: 'The Fund declined this invoice',
+  invoicePaid: 'The Fund paid this fine',
+  reviewDateUnknown: 'Decision date not recorded',
+  fineSupportHelp: 'Questions about this fine or the review decision? Contact us.',
+  reuploadFine: 'Upload a corrected invoice',
+  reuploadExplanation:
+    'Upload a clear, complete photo to send this fine back for review. Your previous invoice and the review decision will be kept.',
+  reuploadSuccess: 'New invoice uploaded. Your fine is back in review.',
+  reuploadConflict: 'This fine has already changed. Refresh the details before trying again.',
+  reuploadInterrupted:
+    'We could not confirm the upload. Refresh this page to check before trying again.',
   membershipTitle: 'Membership',
   showDetails: 'Show details',
   loadingMembership: 'Loading your membership…',
@@ -98,6 +118,27 @@ i18n.addResourceBundle('en', NAMESPACE, {
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
+  fineDetailsTitle: 'Details zur Einreichung',
+  openFineDetails: 'Details zur Einreichung vom {{date}} anzeigen',
+  loadingFineDetails: 'Die Details werden geladen…',
+  fineDetailsError: 'Diese Einreichung konnte nicht geladen werden. Bitte versuche es erneut.',
+  fineNotFound: 'Diese Einreichung wurde in deinem Konto nicht gefunden.',
+  fineReference: 'Referenz',
+  fineUploadHistory: 'Upload-Verlauf',
+  invoiceUploaded: 'Du hast einen Beleg hochgeladen',
+  invoiceReuploaded: 'Du hast einen korrigierten Beleg hochgeladen',
+  invoiceDeclined: 'Der Fonds hat diesen Beleg abgelehnt',
+  invoicePaid: 'Der Fonds hat dieses erhöhte Beförderungsentgelt bezahlt',
+  reviewDateUnknown: 'Zeitpunkt der Entscheidung nicht erfasst',
+  fineSupportHelp: 'Fragen zu dieser Einreichung oder zur Entscheidung? Schreib uns.',
+  reuploadFine: 'Korrigierten Beleg hochladen',
+  reuploadExplanation:
+    'Lade ein gut lesbares, vollständiges Foto hoch, damit wir deine Einreichung erneut prüfen können. Dein bisheriger Beleg und die Entscheidung bleiben gespeichert.',
+  reuploadSuccess: 'Neuer Beleg hochgeladen. Deine Einreichung ist wieder in Prüfung.',
+  reuploadConflict:
+    'Diese Einreichung wurde bereits geändert. Aktualisiere die Details, bevor du es erneut versuchst.',
+  reuploadInterrupted:
+    'Wir konnten den Upload nicht bestätigen. Lade diese Seite erneut, um den Stand vor einem weiteren Versuch zu prüfen.',
   membershipTitle: 'Mitgliedschaft',
   showDetails: 'Details anzeigen',
   loadingMembership: 'Deine Mitgliedschaft wird geladen…',

@@ -9,6 +9,10 @@ export type Fine = {
   declineReason: string | null;
 };
 
+export type FineUploadVersion = Fine & { version: number; current: boolean };
+
+export type FineDetails = Fine & { uploads: FineUploadVersion[] };
+
 export class FundRequestError extends Error {
   readonly status: number;
 
