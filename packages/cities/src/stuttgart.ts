@@ -145,5 +145,7 @@ export const STUTTGART: CityConfig = {
         ],
         promptExamples,
     },
-    community: {},
+    community: {
+        telegramChatId: '-1001104664549',
+    },
 }

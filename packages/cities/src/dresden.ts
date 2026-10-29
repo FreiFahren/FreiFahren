@@ -130,5 +130,7 @@ export const DRESDEN: CityConfig = {
         ],
         promptExamples,
     },
-    community: {},
+    community: {
+        telegramChatId: '-1001342076099',
+    },
 }

@@ -125,5 +125,7 @@ export const MUNICH: CityConfig = {
         ],
         promptExamples,
     },
-    community: {},
+    community: {
+        telegramChatId: '-1001394169627',
+    },
 }

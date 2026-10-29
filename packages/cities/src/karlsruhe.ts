@@ -124,5 +124,7 @@ export const KARLSRUHE: CityConfig = {
         ],
         promptExamples,
     },
-    community: {},
+    community: {
+        telegramChatId: '-1001233800320',
+    },
 }

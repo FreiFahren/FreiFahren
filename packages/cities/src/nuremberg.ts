@@ -133,5 +133,7 @@ export const NUREMBERG: CityConfig = {
         ],
         promptExamples,
     },
-    community: {},
+    community: {
+        telegramChatId: '-1001407366881',
+    },
 }

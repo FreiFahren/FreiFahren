@@ -128,5 +128,7 @@ export const HANNOVER: CityConfig = {
         ],
         promptExamples,
     },
-    community: {},
+    community: {
+        telegramChatId: '-1001233085691',
+    },
 }
