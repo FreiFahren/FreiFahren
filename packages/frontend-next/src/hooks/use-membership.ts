@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { fetchFund, FundRequestError } from '@/lib/fund-api';
-import { safeLocalStorage } from '@/lib/safe-storage';
 
 export type Membership = {
   status: 'none' | 'pending' | 'active' | 'past_due' | 'canceled';
@@ -69,9 +68,3 @@ export function useEuro() {
       minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
     }).format(cents / 100);
 }
-
-const seenKey = (userId: string) => `fund-rules-seen-${userId}`;
-
-// Members confirm the rules once on this device before they see the Fund page.
-export const rulesSeen = (userId: string) => safeLocalStorage.getItem(seenKey(userId)) !== null;
-export const markRulesSeen = (userId: string) => safeLocalStorage.setItem(seenKey(userId), '1');
