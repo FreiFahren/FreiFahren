@@ -45,7 +45,7 @@ export const HANNOVER: CityConfig = {
     // Also the OSM boundary name the seed's Overpass area query matches on.
     displayName: 'Hannover',
     publicAppUrl: 'https://hannover.freifahren.org',
-    listed: false,
+    listed: true,
     dbName: CITY_DATABASES.hannover.dbName,
     dbBinding: CITY_DATABASES.hannover.dbBinding,
     lang: 'de',

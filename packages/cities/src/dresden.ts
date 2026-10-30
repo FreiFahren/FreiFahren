@@ -30,7 +30,7 @@ export const DRESDEN: CityConfig = {
     // Also the OSM boundary name the seed's Overpass area query matches on.
     displayName: 'Dresden',
     publicAppUrl: 'https://dresden.freifahren.org',
-    listed: false,
+    listed: true,
     dbName: CITY_DATABASES.dresden.dbName,
     dbBinding: CITY_DATABASES.dresden.dbBinding,
     lang: 'de',

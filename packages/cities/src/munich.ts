@@ -53,7 +53,7 @@ export const MUNICH: CityConfig = {
     // Also the OSM boundary name the seed's Overpass area query matches on.
     displayName: 'München',
     publicAppUrl: 'https://muenchen.freifahren.org',
-    listed: false,
+    listed: true,
     dbName: CITY_DATABASES.munich.dbName,
     dbBinding: CITY_DATABASES.munich.dbBinding,
     lang: 'de',

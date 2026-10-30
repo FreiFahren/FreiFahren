@@ -22,7 +22,7 @@ export const DUESSELDORF: CityConfig = {
     // Also the OSM boundary name the seed's Overpass area query matches on.
     displayName: 'Düsseldorf',
     publicAppUrl: 'https://duesseldorf.freifahren.org',
-    listed: false,
+    listed: true,
     dbName: CITY_DATABASES.duesseldorf.dbName,
     dbBinding: CITY_DATABASES.duesseldorf.dbBinding,
     lang: 'de',

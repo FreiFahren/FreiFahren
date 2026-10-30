@@ -21,7 +21,7 @@ export const POTSDAM: CityConfig = {
     // Also the OSM boundary name the seed's Overpass area query matches on.
     displayName: 'Potsdam',
     publicAppUrl: 'https://potsdam.freifahren.org',
-    listed: false,
+    listed: true,
     dbName: CITY_DATABASES.potsdam.dbName,
     dbBinding: CITY_DATABASES.potsdam.dbBinding,
     lang: 'de',

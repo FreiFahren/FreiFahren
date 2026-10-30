@@ -45,7 +45,7 @@ export const NUREMBERG: CityConfig = {
     subdomainAliases: ['nuernberg'],
     displayName: 'Nürnberg',
     publicAppUrl: 'https://nuremberg.freifahren.org',
-    listed: false,
+    listed: true,
     dbName: CITY_DATABASES.nuremberg.dbName,
     dbBinding: CITY_DATABASES.nuremberg.dbBinding,
     lang: 'de',

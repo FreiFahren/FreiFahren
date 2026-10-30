@@ -53,7 +53,7 @@ export const STUTTGART: CityConfig = {
     // Also the OSM boundary name the seed's Overpass area query matches on.
     displayName: 'Stuttgart',
     publicAppUrl: 'https://stuttgart.freifahren.org',
-    listed: false,
+    listed: true,
     dbName: CITY_DATABASES.stuttgart.dbName,
     dbBinding: CITY_DATABASES.stuttgart.dbBinding,
     lang: 'de',
