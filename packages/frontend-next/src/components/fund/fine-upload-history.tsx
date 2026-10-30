@@ -6,9 +6,16 @@ import type { FineUploadVersion } from '@/lib/fund-api';
 import { cn } from '@/lib/utils';
 
 import { FineStatus } from './fine-status';
+import { FinePhoto } from './fine-photo';
 import { NAMESPACE } from './fund.i18n';
 
-export function FineUploadHistory({ uploads }: { uploads: FineUploadVersion[] }) {
+export function FineUploadHistory({
+  fineId,
+  uploads,
+}: {
+  fineId: string;
+  uploads: FineUploadVersion[];
+}) {
   const { t } = useTranslation(NAMESPACE);
   if (uploads.length === 0) return null;
 
@@ -26,6 +33,7 @@ export function FineUploadHistory({ uploads }: { uploads: FineUploadVersion[] })
               <div className="text-muted-foreground mt-1">
                 <FineStatus status="in_review" />
               </div>
+              <FinePhoto fineId={fineId} upload={upload} />
             </ActivityItem>
             <ReviewActivity upload={upload} />
           </Fragment>

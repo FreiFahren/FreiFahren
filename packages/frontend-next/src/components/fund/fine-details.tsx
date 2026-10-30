@@ -113,7 +113,7 @@ function FineDetailsContent({ userId, sessionId, fineId, onSignIn }: FineDetails
           <dd className="font-mono text-xs break-all">{fine.id}</dd>
         </div>
       </dl>
-      <FineUploadHistory uploads={fine.uploads} />
+      <FineUploadHistory fineId={fine.id} uploads={fine.uploads} />
       <ReuploadFine userId={userId} sessionId={sessionId} fine={fine} onSignIn={onSignIn} />
     </>
   );
