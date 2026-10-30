@@ -41,7 +41,7 @@ export const FRANKFURT: CityConfig = {
     subdomain: 'frankfurt',
     displayName: 'Frankfurt',
     publicAppUrl: 'https://frankfurt.freifahren.org',
-    listed: false,
+    listed: true,
     dbName: CITY_DATABASES.frankfurt.dbName,
     dbBinding: CITY_DATABASES.frankfurt.dbBinding,
     lang: 'de',

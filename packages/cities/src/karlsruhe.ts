@@ -27,7 +27,7 @@ export const KARLSRUHE: CityConfig = {
     // Also the OSM boundary name the seed's Overpass area query matches on.
     displayName: 'Karlsruhe',
     publicAppUrl: 'https://karlsruhe.freifahren.org',
-    listed: false,
+    listed: true,
     dbName: CITY_DATABASES.karlsruhe.dbName,
     dbBinding: CITY_DATABASES.karlsruhe.dbBinding,
     lang: 'de',
