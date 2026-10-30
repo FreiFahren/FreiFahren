@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
-import { fetchFund, type FineUploadVersion } from '@/lib/fund-api';
+import { FundRequestError, fetchFund, type FineUploadVersion } from '@/lib/fund-api';
 
 import { NAMESPACE } from './fund.i18n';
 
@@ -11,7 +11,7 @@ export function FinePhoto({ fineId, upload }: { fineId: string; upload: FineUplo
   const { t } = useTranslation(NAMESPACE);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasError, setHasError] = useState(false);
+  const [errorStatus, setErrorStatus] = useState<number | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [extension, setExtension] = useState('');
   const [isUnsupported, setIsUnsupported] = useState(false);
@@ -38,7 +38,7 @@ export function FinePhoto({ fineId, upload }: { fineId: string; upload: FineUplo
     request.current = controller;
     setIsOpen(true);
     setIsLoading(true);
-    setHasError(false);
+    setErrorStatus(null);
 
     try {
       const response = await fetchFund(
@@ -50,8 +50,10 @@ export function FinePhoto({ fineId, upload }: { fineId: string; upload: FineUplo
       setPhotoUrl(URL.createObjectURL(blob));
       setExtension(extensionFor(blob.type));
       setIsUnsupported(false);
-    } catch {
-      if (!controller.signal.aborted) setHasError(true);
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        setErrorStatus(error instanceof FundRequestError ? error.status : 0);
+      }
     } finally {
       if (!controller.signal.aborted) {
         request.current = null;
@@ -65,7 +67,7 @@ export function FinePhoto({ fineId, upload }: { fineId: string; upload: FineUplo
     request.current = null;
     setIsOpen(false);
     setIsLoading(false);
-    setHasError(false);
+    setErrorStatus(null);
     setPhotoUrl(null);
     setIsUnsupported(false);
   };
@@ -104,7 +106,7 @@ export function FinePhoto({ fineId, upload }: { fineId: string; upload: FineUplo
           photoUrl={photoUrl}
           downloadFilename={`fine-${fineId}-upload-${upload.version}${extension}`}
           isLoading={isLoading}
-          hasError={hasError}
+          errorStatus={errorStatus}
           isUnsupported={isUnsupported}
           onRetry={() => void loadPhoto()}
           onUnsupported={() => setIsUnsupported(true)}
@@ -119,7 +121,7 @@ function FinePhotoPanel({
   photoUrl,
   downloadFilename,
   isLoading,
-  hasError,
+  errorStatus,
   isUnsupported,
   onRetry,
   onUnsupported,
@@ -128,7 +130,7 @@ function FinePhotoPanel({
   photoUrl: string | null;
   downloadFilename: string;
   isLoading: boolean;
-  hasError: boolean;
+  errorStatus: number | null;
   isUnsupported: boolean;
   onRetry: () => void;
   onUnsupported: () => void;
@@ -142,7 +144,12 @@ function FinePhotoPanel({
           {t('loadingFinePhoto')}
         </p>
       )}
-      {hasError && (
+      {errorStatus === 404 && (
+        <p role="alert" className="text-xs">
+          {t('finePhotoUnavailable')}
+        </p>
+      )}
+      {errorStatus !== null && errorStatus !== 404 && (
         <div role="alert" className="space-y-2 text-xs">
           <p>{t('finePhotoError')}</p>
           <Button type="button" variant="outline" size="sm" onClick={onRetry}>
