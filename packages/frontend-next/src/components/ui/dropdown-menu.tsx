@@ -14,18 +14,51 @@ function DropdownMenuTrigger(props: React.ComponentProps<typeof DropdownMenuPrim
   return <DropdownMenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...props} />;
 }
 
+const EDGE_GAP = 8;
+
+// Radix keeps the menu inside the viewport, but on iOS the viewport runs under the status bar
+// and the home indicator. Reading env() needs a probe element; custom properties stay unresolved.
+function readSafeAreaInsets(): { top: number; bottom: number } {
+  const probe = document.createElement('div');
+  probe.style.cssText =
+    'position:fixed;visibility:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
+  document.body.appendChild(probe);
+  const style = getComputedStyle(probe);
+  const insets = {
+    top: parseFloat(style.paddingTop) || 0,
+    bottom: parseFloat(style.paddingBottom) || 0,
+  };
+  probe.remove();
+  return insets;
+}
+
 function DropdownMenuContent({
   className,
   sideOffset = 6,
+  collisionPadding,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
+  // Content only mounts while open, so this runs once per opening.
+  const padding = React.useMemo(() => {
+    if (collisionPadding !== undefined) return collisionPadding;
+    const insets = readSafeAreaInsets();
+    return {
+      top: insets.top + EDGE_GAP,
+      bottom: insets.bottom + EDGE_GAP,
+      left: EDGE_GAP,
+      right: EDGE_GAP,
+    };
+  }, [collisionPadding]);
+
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
+        collisionPadding={padding}
         className={cn(
-          'bg-popover text-popover-foreground animate-in fade-in zoom-in-95 z-50 min-w-[9rem] origin-[var(--radix-dropdown-menu-content-transform-origin)] overflow-hidden rounded-lg p-1 shadow-[0_6px_16px_rgba(0,0,0,0.28)] duration-150',
+          // Long lists scroll inside the space Radix measured between the trigger and the edge.
+          'bg-popover text-popover-foreground animate-in fade-in zoom-in-95 z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[9rem] origin-[var(--radix-dropdown-menu-content-transform-origin)] overflow-x-hidden overflow-y-auto overscroll-contain rounded-lg p-1 shadow-[0_6px_16px_rgba(0,0,0,0.28)] duration-150',
           className,
         )}
         {...props}

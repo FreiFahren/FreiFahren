@@ -33,7 +33,11 @@ export function CitySwitcher() {
           <ChevronDown className="size-4" />
         </span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      {/* A short scrolling list: the cut-off last row shows there is more as cities are added. */}
+      <DropdownMenuContent
+        align="end"
+        className="max-h-[min(var(--radix-dropdown-menu-content-available-height),19.5rem)]"
+      >
         <DropdownMenuRadioGroup
           value={currentCity.slug}
           onValueChange={(slug) => {
