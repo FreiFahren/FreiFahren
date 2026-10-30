@@ -7,16 +7,28 @@ import { ToastPill } from '@/components/ui/toast-pill';
 import { authClient, sendSignInCode } from '@/lib/auth-client';
 import { clearSessionToken } from '@/lib/session';
 import { toast } from '@/lib/toast';
+import { useAuthSession } from '@/hooks/use-auth-session';
+import { useMembershipGate } from '@/hooks/use-membership-gate';
 import { Route as MapIndexRoute } from '@/routes/_map/index';
 
 import { BUTTON_SHAPE, DevEmailHint } from './account-layout';
 import { NAMESPACE } from './account.i18n';
 import { type AuthError, AuthErrorMessage, CodeField } from './code-field';
+import { AccountDeletionGate } from './account-deletion-gate';
+
+// Only shown to a signed-in account, which it reads itself rather than from its parents.
+export function DeleteAccount() {
+  const auth = useAuthSession();
+  if (auth.status !== 'signed-in') return null;
+  const { id, email } = auth.session.user;
+  return <DeletionFlow userId={id} email={email} />;
+}
 
 // The auth-worker only deletes within minutes of a sign-in, so this signs in again with a new code.
-export function DeleteAccount({ email }: { email: string }) {
+function DeletionFlow({ userId, email }: { userId: string; email: string }) {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
+  const { gate, refuse } = useMembershipGate(userId);
   const [step, setStep] = useState<'closed' | 'start' | 'code' | 'signed-in'>('closed');
   const [code, setCode] = useState('');
   const [pending, setPending] = useState(false);
@@ -67,6 +79,7 @@ export function DeleteAccount({ email }: { email: string }) {
     if (error) {
       setPending(false);
       if (error.code === 'SESSION_EXPIRED') restart(error);
+      else if (error.code === 'FUND_MEMBERSHIP_ACTIVE') refuse(error);
       else setError(error);
       return;
     }
@@ -88,46 +101,50 @@ export function DeleteAccount({ email }: { email: string }) {
     );
   }
 
+  const cancel = (
+    <Button type="button" variant="ghost" disabled={pending} onClick={() => restart()}>
+      {t('cancel')}
+    </Button>
+  );
+
   return (
     <section className="flex flex-col gap-3">
       <h2 className="text-sm font-semibold">{t('deleteTitle')}</h2>
-      {step === 'start' ? (
-        <>
-          <p className="text-muted-foreground text-sm">{t('deleteIntro')}</p>
-          <AuthErrorMessage error={error} />
-          <Button
-            variant="destructive"
-            size="lg"
-            disabled={pending}
-            onClick={() => void requestCode()}
-            className={BUTTON_SHAPE}
-          >
-            {t('deleteRequest')}
-          </Button>
-          <Button type="button" variant="ghost" disabled={pending} onClick={() => restart()}>
-            {t('cancel')}
-          </Button>
-        </>
-      ) : (
-        <form onSubmit={(event) => void deleteAccount(event)} className="flex flex-col gap-3">
-          <p className="text-sm">{t('deleteConfirmIntro', { email })}</p>
-          <DevEmailHint />
-          {step === 'code' && <CodeField value={code} onChange={setCode} />}
-          <AuthErrorMessage error={error} />
-          <Button
-            type="submit"
-            variant="destructive"
-            size="lg"
-            disabled={pending}
-            className={BUTTON_SHAPE}
-          >
-            {t('deleteConfirm')}
-          </Button>
-          <Button type="button" variant="ghost" disabled={pending} onClick={() => restart()}>
-            {t('cancel')}
-          </Button>
-        </form>
-      )}
+      <AccountDeletionGate gate={gate} onClose={() => restart()}>
+        {step === 'start' ? (
+          <>
+            <p className="text-muted-foreground text-sm">{t('deleteIntro')}</p>
+            <AuthErrorMessage error={error} />
+            <Button
+              variant="destructive"
+              size="lg"
+              disabled={pending}
+              onClick={() => void requestCode()}
+              className={BUTTON_SHAPE}
+            >
+              {t('deleteRequest')}
+            </Button>
+            {cancel}
+          </>
+        ) : (
+          <form onSubmit={(event) => void deleteAccount(event)} className="flex flex-col gap-3">
+            <p className="text-sm">{t('deleteConfirmIntro', { email })}</p>
+            <DevEmailHint />
+            {step === 'code' && <CodeField value={code} onChange={setCode} />}
+            <AuthErrorMessage error={error} />
+            <Button
+              type="submit"
+              variant="destructive"
+              size="lg"
+              disabled={pending}
+              className={BUTTON_SHAPE}
+            >
+              {t('deleteConfirm')}
+            </Button>
+            {cancel}
+          </form>
+        )}
+      </AccountDeletionGate>
     </section>
   );
 }

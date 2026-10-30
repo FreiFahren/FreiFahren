@@ -4,12 +4,25 @@ import { useTranslation } from 'react-i18next';
 
 import { fetchFund, FundRequestError } from '@/lib/fund-api';
 
+// What a member has to do before their account can be deleted, as the Fund Worker reports it.
+export const ACCOUNT_DELETION_BLOCKERS = [
+  'membership',
+  'overdue_payment',
+  'unfinished_signup',
+] as const;
+export type AccountDeletionBlocker = (typeof ACCOUNT_DELETION_BLOCKERS)[number];
+
+export const isAccountDeletionBlocker = (value: unknown): value is AccountDeletionBlocker =>
+  ACCOUNT_DELETION_BLOCKERS.some((blocker) => blocker === value);
+
 export type Membership = {
   status: 'none' | 'pending' | 'active' | 'past_due' | 'canceled';
   legalName: string | null;
   amountCents: number | null;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
+  // Why the auth-worker would refuse to delete the account, since Stripe can still charge it.
+  accountDeletionBlockedBy: AccountDeletionBlocker | null;
 };
 
 export const membershipQueryOptions = (userId: string) =>
@@ -26,14 +39,15 @@ export const membershipQueryOptions = (userId: string) =>
 export const useMembership = (userId: string) => useQuery(membershipQueryOptions(userId));
 
 /*
- * Opens Stripe's hosted Checkout or billing portal, which send people back to `/fund`. The native
- * app hands it to the browser; Stripe can't return to its WebView, so membership refetches on focus.
+ * Opens Stripe's hosted Checkout or billing portal, which send people back to `/fund`, or to the
+ * account page for the portal with `returnTo`. The native app hands it to the browser; Stripe can't
+ * return to its WebView, so membership refetches on focus.
  */
 export async function openStripe(
   path: '/checkout-sessions' | '/billing-portal-sessions',
-  body?: { amountCents: number },
+  { body, returnTo }: { body?: { amountCents: number }; returnTo?: 'account' } = {},
 ) {
-  const response = await fetchFund(path, {
+  const response = await fetchFund(returnTo === undefined ? path : `${path}?returnTo=${returnTo}`, {
     method: 'POST',
     headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),

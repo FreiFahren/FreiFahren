@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { SECONDARY_BUTTON } from '@/components/account/account-layout';
 import { Button } from '@/components/ui/button';
+import { useAuthSession } from '@/hooks/use-auth-session';
 import { useFundEnabled } from '@/hooks/use-fund-enabled';
 import { useMembership, useOpenStripe } from '@/hooks/use-membership';
 import { Route as MembershipRoute } from '@/routes/account/membership';
@@ -12,8 +13,11 @@ import { FundMembershipCard } from './fund-membership-card';
 import { NAMESPACE } from './fund.i18n';
 
 // The member's Fund status on the account page, with the way to change or cancel it.
-export function FundAccountStatus({ userId }: { userId: string }) {
-  return useFundEnabled() ? <MembershipStatus userId={userId} /> : null;
+export function FundAccountStatus() {
+  const auth = useAuthSession();
+  const fundEnabled = useFundEnabled();
+  if (!fundEnabled || auth.status !== 'signed-in') return null;
+  return <MembershipStatus userId={auth.session.user.id} />;
 }
 
 function MembershipStatus({ userId }: { userId: string }) {
@@ -41,7 +45,14 @@ function MembershipStatus({ userId }: { userId: string }) {
 }
 
 // Opens the Stripe billing portal, where members change, pay or cancel their membership.
-export function ManageMembershipButton() {
+export function ManageMembershipButton({
+  label,
+  returnTo,
+}: {
+  label?: string;
+  // Web visitors come back to the account page instead of /fund.
+  returnTo?: 'account';
+}) {
   const { t } = useTranslation(NAMESPACE);
   const { state, open } = useOpenStripe();
 
@@ -51,9 +62,9 @@ export function ManageMembershipButton() {
         size="lg"
         className={SECONDARY_BUTTON}
         disabled={state === 'opening'}
-        onClick={() => void open('/billing-portal-sessions')}
+        onClick={() => void open('/billing-portal-sessions', { returnTo })}
       >
-        {t('manage')}
+        {label ?? t('manage')}
       </Button>
       {state === 'failed' && (
         <p role="alert" className="text-destructive text-sm">

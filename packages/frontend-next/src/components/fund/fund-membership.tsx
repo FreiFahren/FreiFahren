@@ -124,7 +124,7 @@ function JoinForm({ onAlreadyMember }: { onAlreadyMember: () => void }) {
         size="lg"
         className={`${PRIMARY_BUTTON} mt-2`}
         disabled={state === 'opening'}
-        onClick={() => void open('/checkout-sessions', { amountCents: amount * 100 })}
+        onClick={() => void open('/checkout-sessions', { body: { amountCents: amount * 100 } })}
       >
         {state === 'opening' ? <LoaderCircle className="animate-spin" /> : t('join')}
       </Button>

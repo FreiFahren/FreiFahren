@@ -11,7 +11,7 @@ import { Route as MapIndexRoute } from '@/routes/_map/index';
 import { NAMESPACE } from './account.i18n';
 import { DeleteAccount } from './delete-account';
 
-type User = { id: string; email: string; createdAt: Date | string };
+type User = { email: string; createdAt: Date | string };
 
 // The settings card's rows.
 const ROW =
@@ -37,13 +37,13 @@ export function AccountDetails({ user }: { user: User }) {
         </div>
       </div>
 
-      <FundAccountStatus userId={user.id} />
+      <FundAccountStatus />
 
       <div className="-mx-3 flex flex-col">
         <SignOutRow />
       </div>
 
-      <DeleteAccount email={user.email} />
+      <DeleteAccount />
     </>
   );
 }
