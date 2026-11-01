@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { PRIMARY_BUTTON, SECONDARY_BUTTON } from '@/components/account/account-layout';
 import { Button } from '@/components/ui/button';
 import { useEuro, useMembership, useOpenStripe } from '@/hooks/use-membership';
+import { fundTermsUrl } from '@/lib/privacy-policy';
 
 import { ManageMembershipButton } from './fund-account-status';
 import { FundIntroduction } from './fund-introduction';
@@ -81,6 +82,8 @@ export function FundMembership({
 function JoinForm({ onAlreadyMember }: { onAlreadyMember: () => void }) {
   const { t, i18n } = useTranslation(NAMESPACE);
   const euro = useEuro();
+  // Unticked by default: an acceptance must be the member's own act.
+  const [accepted, setAccepted] = useState(false);
   const { state, open } = useOpenStripe(onAlreadyMember);
   const [amount, setAmount] = useState(MIN_EUR);
   const peopleCovered = amount / MIN_EUR;
@@ -121,10 +124,30 @@ function JoinForm({ onAlreadyMember }: { onAlreadyMember: () => void }) {
         <span>{euro(MIN_EUR * 100)}</span>
         <span>{euro(MAX_EUR * 100)}</span>
       </div>
+      <label className="mt-2 flex items-start gap-3 text-sm">
+        <input
+          type="checkbox"
+          checked={accepted}
+          onChange={(event) => setAccepted(event.target.checked)}
+          className="accent-accent-bright mt-0.5 size-4 shrink-0 rounded border"
+        />
+        <span>
+          {t('termsAccept')}{' '}
+          <a
+            href={fundTermsUrl(i18n.resolvedLanguage)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-foreground underline"
+          >
+            {t('termsLink')}
+          </a>
+          {t('termsAcceptEnd')}
+        </span>
+      </label>
       <Button
         size="lg"
-        className={`${PRIMARY_BUTTON} mt-2`}
-        disabled={state === 'opening'}
+        className={PRIMARY_BUTTON}
+        disabled={state === 'opening' || !accepted}
         onClick={() => void open('/checkout-sessions', { amountCents: amount * 100 })}
       >
         {state === 'opening' ? <LoaderCircle className="animate-spin" /> : t('join')}

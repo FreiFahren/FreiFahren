@@ -98,6 +98,9 @@ i18n.addResourceBundle('en', NAMESPACE, {
   peopleCovered_other: 'You cover {{people}} people',
   perMonth: 'a month',
   join: 'Continue to payment',
+  termsAccept: 'I have read and confirm the',
+  termsLink: 'Fund terms',
+  termsAcceptEnd: '.',
   pendingTitle: 'Your signup isn’t finished',
   pendingBody:
     'We haven’t received your first payment yet. If you just paid, this updates in a moment.',
@@ -234,6 +237,9 @@ i18n.addResourceBundle('de', NAMESPACE, {
   peopleCovered_other: 'Du deckst {{people}} Personen ab',
   perMonth: 'im Monat',
   join: 'Weiter zur Zahlung',
+  termsAccept: 'Ich habe die',
+  termsLink: 'Fondsbedingungen',
+  termsAcceptEnd: ' gelesen und bestätige sie.',
   pendingTitle: 'Dein Beitritt ist noch nicht abgeschlossen',
   pendingBody:
     'Deine erste Zahlung ist noch nicht bei uns. Wenn du gerade bezahlt hast, aktualisiert sich das gleich.',

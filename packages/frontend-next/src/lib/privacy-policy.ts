@@ -16,5 +16,12 @@ export const privacyPolicyUrl = (language: string | undefined = i18n.resolvedLan
 export const fundPrivacyUrl = (language: string | undefined = i18n.resolvedLanguage): string =>
   language === 'de' ? `${GERMAN_PRIVACY_URL}#fonds` : `${ENGLISH_PRIVACY_URL}#fund`;
 
+// Versioned Fund terms; the version shown next to the join checkbox comes from the Fund backend.
+const GERMAN_FUND_TERMS_URL = 'https://freifahren.org/fund/bedingungen';
+const ENGLISH_FUND_TERMS_URL = 'https://freifahren.org/en/fund/terms';
+
+export const fundTermsUrl = (language: string | undefined = i18n.resolvedLanguage): string =>
+  language === 'de' ? GERMAN_FUND_TERMS_URL : ENGLISH_FUND_TERMS_URL;
+
 export const imprintUrl = (language: string | undefined = i18n.resolvedLanguage): string =>
   language === 'de' ? GERMAN_IMPRINT_URL : ENGLISH_IMPRINT_URL;
