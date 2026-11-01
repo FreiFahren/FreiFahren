@@ -103,6 +103,10 @@ export const postStripeWebhook = async (c: Context<Env>) => {
     }
 
     const session = event.data?.object ?? {}
+    if (session.mode === 'subscription') {
+        return c.json({ received: true })
+    }
+
     if (eventType === 'checkout.session.completed' && session.payment_status === 'unpaid') {
         return c.json({ received: true })
     }

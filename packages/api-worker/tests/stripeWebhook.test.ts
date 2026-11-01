@@ -41,6 +41,7 @@ const paidSession = (overrides: Record<string, unknown> = {}) => ({
         object: {
             id: 'cs_test_1',
             object: 'checkout.session',
+            mode: 'payment',
             amount_total: 500,
             currency: 'eur',
             payment_status: 'paid',
@@ -146,6 +147,25 @@ describe('POST /webhooks/stripe', () => {
         const response = await postWebhook(body, await sign(JSON.stringify(body)))
         expect(response.status).toBe(200)
         expect(captures).toEqual([])
+    })
+
+    it.each(['checkout.session.completed', 'checkout.session.async_payment_succeeded'])(
+        'acknowledges subscription checkout events without capturing (%s)',
+        async (type) => {
+            const body = { ...paidSession({ mode: 'subscription' }), type }
+            const response = await postWebhook(body, await sign(JSON.stringify(body)))
+            expect(response.status).toBe(200)
+            expect(await response.json()).toEqual({ received: true })
+            expect(captures).toEqual([])
+        }
+    )
+
+    it('keeps accepting legacy checkout events without a mode', async () => {
+        const body = paidSession()
+        delete (body.data.object as Record<string, unknown>).mode
+        const response = await postWebhook(body, await sign(JSON.stringify(body)))
+        expect(response.status).toBe(200)
+        expect(captures).toHaveLength(1)
     })
 
     it('captures contribute_paid with the PostHog distinct id from client_reference_id', async () => {
