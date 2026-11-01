@@ -26,6 +26,18 @@ i18n.addResourceBundle('en', NAMESPACE, {
     'Enter the code we sent to {{email}}. This permanently deletes your FreiFahren account and cannot be undone.',
   deleteConfirm: 'Delete my account',
   deleteDone: 'Your account has been deleted.',
+  deleteBlockedIntro:
+    "Your Fund membership can still be charged, so your account can't be deleted yet. Cancel the membership first so no more payments are taken. Once the cancellation is scheduled and nothing is owed, you can delete your account.",
+  deleteBlockedAction: 'Cancel membership',
+  deleteBlockedOverdueIntro:
+    "Your last Fund contribution couldn't be collected, so your account can't be deleted yet. While a payment is overdue, cancelling isn't enough. In Stripe, pay the open amount or update your payment method. Stripe may take a few days to collect it again. Once it's paid, cancel the membership and delete your account.",
+  deleteBlockedOverdueAction: 'Open billing in Stripe',
+  deleteBlockedSignupIntro:
+    "Your Fund signup isn't finished: the first payment hasn't gone through. Stripe drops an unfinished signup within a day, and then you can delete your account.",
+  deleteBlockedOverdueSupport: "Can't pay or stuck? Email us at",
+  membershipChecking: 'Checking your Fund membership…',
+  membershipCheckFailed:
+    "We couldn't check your Fund membership, so your account can't be deleted right now. Please try again.",
   cancel: 'Cancel',
   verificationFailed: "We couldn't verify this request. Please try again.",
   support: 'Problems or questions? Email us at',
@@ -63,6 +75,18 @@ i18n.addResourceBundle('de', NAMESPACE, {
     'Gib den Code ein, den wir an {{email}} geschickt haben. Damit wird dein FreiFahren-Konto endgültig gelöscht. Das lässt sich nicht rückgängig machen.',
   deleteConfirm: 'Mein Konto löschen',
   deleteDone: 'Dein Konto wurde gelöscht.',
+  deleteBlockedIntro:
+    'Über deine Fonds-Mitgliedschaft kann noch abgebucht werden, deshalb kann dein Konto noch nicht gelöscht werden. Kündige zuerst die Mitgliedschaft, damit nichts mehr abgebucht wird. Sobald die Kündigung vorgemerkt ist und nichts mehr offen ist, kannst du dein Konto löschen.',
+  deleteBlockedAction: 'Mitgliedschaft kündigen',
+  deleteBlockedOverdueIntro:
+    'Dein letzter Fonds-Beitrag konnte nicht eingezogen werden, deshalb kann dein Konto noch nicht gelöscht werden. Solange eine Zahlung offen ist, reicht Kündigen nicht. Bezahl bei Stripe den offenen Betrag oder aktualisiere deine Zahlungsmethode. Es kann ein paar Tage dauern, bis Stripe erneut abbucht. Sobald alles bezahlt ist, kannst du die Mitgliedschaft kündigen und dein Konto löschen.',
+  deleteBlockedOverdueAction: 'Zahlungen bei Stripe öffnen',
+  deleteBlockedSignupIntro:
+    'Deine Anmeldung beim Fonds ist nicht abgeschlossen: Die erste Zahlung ist nicht durchgegangen. Stripe verwirft eine unvollständige Anmeldung innerhalb eines Tages, danach kannst du dein Konto löschen.',
+  deleteBlockedOverdueSupport: 'Du kannst nicht zahlen oder kommst nicht weiter? Schreib uns an',
+  membershipChecking: 'Deine Fonds-Mitgliedschaft wird geprüft …',
+  membershipCheckFailed:
+    'Wir konnten deine Fonds-Mitgliedschaft nicht prüfen, deshalb kann dein Konto gerade nicht gelöscht werden. Bitte versuche es erneut.',
   cancel: 'Abbrechen',
   verificationFailed: 'Wir konnten die Anfrage nicht bestätigen. Bitte versuche es erneut.',
   support: 'Probleme oder Fragen? Schreib uns an',

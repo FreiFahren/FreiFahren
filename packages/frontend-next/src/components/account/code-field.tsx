@@ -16,6 +16,8 @@ const MESSAGE_FOR_CODE: Record<string, string> = {
   CAPTCHA_FAILED: 'verificationFailed',
   MISSING_RESPONSE: 'verificationFailed',
   VERIFICATION_FAILED: 'verificationFailed',
+  // The auth-worker couldn't ask the Fund whether a membership still charges.
+  FUND_UNAVAILABLE: 'membershipCheckFailed',
 };
 
 export function AuthErrorMessage({ error }: { error: AuthError }) {
