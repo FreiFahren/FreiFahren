@@ -12,5 +12,9 @@ const ENGLISH_IMPRINT_URL = 'https://freifahren.org/en/imprint';
 export const privacyPolicyUrl = (language: string | undefined = i18n.resolvedLanguage): string =>
   language === 'de' ? GERMAN_PRIVACY_URL : ENGLISH_PRIVACY_URL;
 
+// The Fund section of the same policy; the anchor differs per language.
+export const fundPrivacyUrl = (language: string | undefined = i18n.resolvedLanguage): string =>
+  language === 'de' ? `${GERMAN_PRIVACY_URL}#fonds` : `${ENGLISH_PRIVACY_URL}#fund`;
+
 export const imprintUrl = (language: string | undefined = i18n.resolvedLanguage): string =>
   language === 'de' ? GERMAN_IMPRINT_URL : ENGLISH_IMPRINT_URL;

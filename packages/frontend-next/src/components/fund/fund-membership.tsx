@@ -9,6 +9,7 @@ import { useEuro, useMembership, useOpenStripe } from '@/hooks/use-membership';
 import { ManageMembershipButton } from './fund-account-status';
 import { FundIntroduction } from './fund-introduction';
 import { FundOverview } from './fund-overview';
+import { FundPrivacyNote } from './fund-privacy-note';
 import { FundStatusCard } from './fund-status-card';
 import { NAMESPACE } from './fund.i18n';
 
@@ -133,6 +134,7 @@ function JoinForm({ onAlreadyMember }: { onAlreadyMember: () => void }) {
           {t('stripeFailed')}
         </p>
       )}
+      <FundPrivacyNote />
     </section>
   );
 }

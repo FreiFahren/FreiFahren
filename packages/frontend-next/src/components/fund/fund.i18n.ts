@@ -128,6 +128,9 @@ i18n.addResourceBundle('en', NAMESPACE, {
   legalName: 'Name as on your ID: {{name}}',
   manage: 'Manage membership',
   stripeFailed: 'Stripe couldn’t be opened. Please try again.',
+  privacyNotice:
+    'Your name, your contributions and the fines you upload are processed as described in our privacy policy.',
+  privacyLink: 'Privacy policy',
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
@@ -261,4 +264,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
   legalName: 'Name laut Ausweis: {{name}}',
   manage: 'Mitgliedschaft verwalten',
   stripeFailed: 'Stripe konnte nicht geöffnet werden. Bitte versuche es erneut.',
+  privacyNotice:
+    'Dein Name, deine Beiträge und die hochgeladenen Knöllchen werden verarbeitet, wie in unserer Datenschutzerklärung beschrieben.',
+  privacyLink: 'Datenschutzerklärung',
 });
