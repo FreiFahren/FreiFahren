@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
+import { FundPrivacyNote } from './fund-privacy-note';
 import { NAMESPACE } from './fund.i18n';
 
 const RULES = [
@@ -57,6 +58,7 @@ export function FundRulesDialog({
                     </li>
                   ))}
                 </ol>
+                <FundPrivacyNote className="mt-4" />
               </CardContent>
               <CardFooter className="flex-col items-stretch gap-2">
                 <Button
