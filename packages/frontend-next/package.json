@@ -8,6 +8,7 @@
     "build": "tsr generate && tsc -b && vite build",
     "build:ios": "CAPACITOR=true bun run build && bunx cap sync ios",
     "lint": "eslint .",
+    "test": "node --experimental-vm-modules --test tests/*.test.mjs",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

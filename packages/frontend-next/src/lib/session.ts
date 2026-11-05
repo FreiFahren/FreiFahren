@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 
+import { captureException } from '@/lib/error-monitoring';
 import { FEATURE_FLAGS, useFeatureFlag } from '@/lib/feature-flags';
 import {
   removeNativePreference,
@@ -78,8 +79,13 @@ export function setSessionAccountId(accountId: string): void {
 // clears an expired or revoked token. Signed-out devices skip it. The token is restored first, so
 // after a WebView purge the response stores the account id again.
 export async function refreshSessionAccount(): Promise<void> {
-  if (!AUTH_URL || (await getSessionToken()) === undefined) return;
-  const { authClient } = await import('@/lib/auth-client');
-  // Through the shared session atom, so a useSession() mount right after reuses this request.
-  await authClient.$store.atoms.session.get().refetch();
+  try {
+    if (!AUTH_URL || (await getSessionToken()) === undefined) return;
+    const { authClient } = await import('@/lib/auth-client');
+    // Through the shared session atom, so a useSession() mount right after reuses this request.
+    await authClient.$store.atoms.session.get().refetch();
+  } catch (error) {
+    // Startup refresh is best-effort. A failed import or request does not invalidate the session.
+    captureException(error);
+  }
 }

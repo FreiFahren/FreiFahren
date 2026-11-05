@@ -34,6 +34,9 @@ jobs:
             - name: Run ESLint
               run: bun run lint
 
+            - name: Run regression tests
+              run: bun run test
+
             # `bun run build` runs `tsc -b` then `vite build`, so this gates both type errors and
             # build failures — neither of which the lint/format steps above catch.
             - name: Run build
