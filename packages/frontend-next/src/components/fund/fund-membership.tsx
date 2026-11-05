@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { PRIMARY_BUTTON, SECONDARY_BUTTON } from '@/components/account/account-layout';
 import { Button } from '@/components/ui/button';
 import { useEuro, useMembership, useOpenStripe } from '@/hooks/use-membership';
+import { FundRequestError } from '@/lib/fund-api';
 import { fundTermsUrl } from '@/lib/privacy-policy';
 
 import { ManageMembershipButton } from './fund-account-status';
@@ -31,14 +32,28 @@ export function FundMembership({
   const membership = useMembership(userId);
 
   if (membership.isPending) {
-    return <LoaderCircle role="status" className="mx-auto mt-8 size-6 animate-spin" />;
+    return (
+      <LoaderCircle
+        role="status"
+        aria-label={t('loadingMembership')}
+        className="mx-auto mt-8 size-6 animate-spin"
+      />
+    );
   }
   if (membership.isError) {
+    const accessDenied =
+      membership.error instanceof FundRequestError && membership.error.status === 403;
+    const sessionExpired =
+      membership.error instanceof FundRequestError && membership.error.status === 401;
     return (
       <div role="alert" className="flex flex-col gap-4 text-sm">
-        <p>{t('loadFailed')}</p>
-        <Button size="lg" className={SECONDARY_BUTTON} onClick={() => void membership.refetch()}>
-          {t('retry')}
+        <p>{t(sessionExpired ? 'sessionExpired' : accessDenied ? 'accessDenied' : 'loadFailed')}</p>
+        <Button
+          size="lg"
+          className={SECONDARY_BUTTON}
+          onClick={sessionExpired ? onSignIn : () => void membership.refetch()}
+        >
+          {t(sessionExpired ? 'uploadSignIn' : 'retry')}
         </Button>
       </div>
     );

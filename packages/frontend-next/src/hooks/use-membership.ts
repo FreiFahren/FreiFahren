@@ -21,6 +21,8 @@ export const membershipQueryOptions = (userId: string) =>
     meta: { persist: false },
     staleTime: 0,
     refetchOnWindowFocus: true,
+    retry: (failureCount, error) =>
+      !(error instanceof FundRequestError && [401, 403].includes(error.status)) && failureCount < 3,
   });
 
 export const useMembership = (userId: string) => useQuery(membershipQueryOptions(userId));
