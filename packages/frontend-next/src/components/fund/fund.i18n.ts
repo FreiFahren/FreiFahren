@@ -92,6 +92,9 @@ i18n.addResourceBundle('en', NAMESPACE, {
   historyError: 'Your history could not be loaded. Please try again.',
   retry: 'Try again',
   loadFailed: 'Your membership couldn’t be loaded. Please try again.',
+  accessDenied:
+    'The Fund is not enabled for this account yet. If you received an invitation, check that you signed in with the same email address.',
+  sessionExpired: 'Your session has expired. Please sign in again.',
   priceTitle: 'Pay what you think is fair',
   amountField: 'Monthly contribution',
   peopleCovered_one: 'You cover {{people}} person',
@@ -231,6 +234,9 @@ i18n.addResourceBundle('de', NAMESPACE, {
   historyError: 'Dein Verlauf konnte nicht geladen werden. Bitte versuche es erneut.',
   retry: 'Erneut versuchen',
   loadFailed: 'Deine Mitgliedschaft konnte nicht geladen werden. Bitte versuche es erneut.',
+  accessDenied:
+    'Der Fonds ist für dieses Konto noch nicht freigeschaltet. Wenn du eine Einladung erhalten hast, prüfe, ob du mit derselben E-Mail-Adresse angemeldet bist.',
+  sessionExpired: 'Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.',
   priceTitle: 'Zahl, was du fair findest',
   amountField: 'Monatlicher Beitrag',
   peopleCovered_one: 'Du deckst {{people}} Person ab',

@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 
 import { SignInGate } from '@/components/account/sign-in-gate';
 import { PageHeader } from '@/components/templates/PageHeader';
-import { useFundEnabled } from '@/hooks/use-fund-enabled';
 import { useKeyboardScrollArea } from '@/hooks/use-keyboard-scroll-area';
 import { Route as MapIndexRoute } from '@/routes/_map/index';
 
@@ -14,7 +13,6 @@ import { NAMESPACE } from './fund.i18n';
 export function FundPage() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
-  const enabled = useFundEnabled();
   const scrollAreaRef = useKeyboardScrollArea();
 
   return (
@@ -25,7 +23,7 @@ export function FundPage() {
           ref={scrollAreaRef}
           className="pb-safe-6 mb-[max(var(--keyboard-inset),var(--browser-keyboard-inset,0px))] min-h-0 flex-1 overflow-y-auto px-4 pt-4"
         >
-          {enabled && <FundAccessFlow />}
+          <FundAccessFlow />
         </div>
       </div>
     </div>
@@ -33,7 +31,8 @@ export function FundPage() {
 }
 
 function FundAccessFlow() {
-  // An account isn't a membership: signed-in users join or manage it through Stripe's hosted pages.
+  // Invitation links must reach sign-in before we know the account. The authenticated Fund API
+  // checks access; a browser flag must not hide sign-in or block a delayed account flag refresh.
   return (
     <SignInGate signedOut={(onSignedIn) => <FundSignIn onSignedIn={onSignedIn} />}>
       {(session, refetch) => (
