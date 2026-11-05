@@ -67,6 +67,11 @@ i18n.addResourceBundle('en', NAMESPACE, {
   paymentTitle: 'We take care of the payment',
   freeTitle: 'Keep FreiFahren free',
   signInTitle: 'Sign in to continue',
+  checkingAccess: 'Checking your Fund access…',
+  accessDenied:
+    'The Fund is currently available to a limited group. This account does not have access yet.',
+  accessUnavailable: 'Fund access could not be checked. Please try again.',
+  accessSignInAgain: 'Your session has expired. Please sign in again to continue.',
   uploadTitle: 'Upload a fine',
   takePhoto: 'Take photo',
   uploadingPhoto: 'Uploading your photo…',
@@ -205,6 +210,11 @@ i18n.addResourceBundle('de', NAMESPACE, {
   paymentTitle: 'Wir kümmern uns um die Zahlung',
   freeTitle: 'Halte FreiFahren kostenlos',
   signInTitle: 'Zum Fortfahren anmelden',
+  checkingAccess: 'Dein Zugang zum Fonds wird geprüft…',
+  accessDenied:
+    'Der Fonds ist derzeit nur für eine begrenzte Gruppe verfügbar. Dieses Konto hat noch keinen Zugang.',
+  accessUnavailable: 'Dein Zugang zum Fonds konnte nicht geprüft werden. Bitte versuche es erneut.',
+  accessSignInAgain: 'Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.',
   uploadTitle: 'Knöllchen hochladen',
   takePhoto: 'Foto aufnehmen',
   uploadingPhoto: 'Dein Foto wird hochgeladen…',
