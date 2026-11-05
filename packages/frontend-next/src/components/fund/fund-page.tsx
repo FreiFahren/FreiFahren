@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { SignInGate } from '@/components/account/sign-in-gate';
 import { PageHeader } from '@/components/templates/PageHeader';
-import { useFundEnabled } from '@/hooks/use-fund-enabled';
 import { useKeyboardScrollArea } from '@/hooks/use-keyboard-scroll-area';
+import { AUTH_URL } from '@/lib/session';
 import { Route as MapIndexRoute } from '@/routes/_map/index';
 
 import { FundMembership } from './fund-membership';
@@ -14,7 +14,6 @@ import { NAMESPACE } from './fund.i18n';
 export function FundPage() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
-  const enabled = useFundEnabled();
   const scrollAreaRef = useKeyboardScrollArea();
 
   return (
@@ -25,7 +24,13 @@ export function FundPage() {
           ref={scrollAreaRef}
           className="pb-safe-6 mb-[max(var(--keyboard-inset),var(--browser-keyboard-inset,0px))] min-h-0 flex-1 overflow-y-auto px-4 pt-4"
         >
-          {enabled && <FundAccessFlow />}
+          {AUTH_URL ? (
+            <FundAccessFlow />
+          ) : (
+            <p role="status" className="text-muted-foreground text-sm">
+              {t('accessUnavailable')}
+            </p>
+          )}
         </div>
       </div>
     </div>
@@ -33,7 +38,8 @@ export function FundPage() {
 }
 
 function FundAccessFlow() {
-  // An account isn't a membership: signed-in users join or manage it through Stripe's hosted pages.
+  // Invite links must reach sign-in before rollout evaluation. The Fund API checks the flag
+  // against the verified account before returning membership data.
   return (
     <SignInGate signedOut={(onSignedIn) => <FundSignIn onSignedIn={onSignedIn} />}>
       {(session, refetch) => (

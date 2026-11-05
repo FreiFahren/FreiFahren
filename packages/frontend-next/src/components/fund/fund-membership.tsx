@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { PRIMARY_BUTTON, SECONDARY_BUTTON } from '@/components/account/account-layout';
 import { Button } from '@/components/ui/button';
 import { useEuro, useMembership, useOpenStripe } from '@/hooks/use-membership';
+import { FundRequestError } from '@/lib/fund-api';
 import { fundTermsUrl } from '@/lib/privacy-policy';
 
 import { ManageMembershipButton } from './fund-account-status';
@@ -28,17 +29,47 @@ export function FundMembership({
   onSignIn: () => void;
 }) {
   const { t } = useTranslation(NAMESPACE);
-  const membership = useMembership(userId);
+  const membership = useMembership(userId, sessionId);
+  const needsSignIn =
+    membership.error instanceof FundRequestError && membership.error.status === 401;
+  const accessDenied =
+    membership.error instanceof FundRequestError && membership.error.status === 403;
 
-  if (membership.isPending) {
-    return <LoaderCircle role="status" className="mx-auto mt-8 size-6 animate-spin" />;
+  if (membership.fetchStatus === 'paused') {
+    return (
+      <p role="alert" className="text-muted-foreground text-sm">
+        {t('accessUnavailable')}
+      </p>
+    );
+  }
+
+  // Never reuse another session's grant or briefly show cached content on a return visit.
+  if (membership.isPending || !membership.isFetchedAfterMount) {
+    return (
+      <div role="status" className="text-muted-foreground flex items-center gap-2 py-6 text-sm">
+        <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+        {t('checkingAccess')}
+      </div>
+    );
   }
   if (membership.isError) {
     return (
       <div role="alert" className="flex flex-col gap-4 text-sm">
-        <p>{t('loadFailed')}</p>
-        <Button size="lg" className={SECONDARY_BUTTON} onClick={() => void membership.refetch()}>
-          {t('retry')}
+        <p>
+          {t(
+            needsSignIn ? 'accessSignInAgain' : accessDenied ? 'accessDenied' : 'accessUnavailable',
+          )}
+        </p>
+        <Button
+          size="lg"
+          className={SECONDARY_BUTTON}
+          disabled={membership.isFetching}
+          onClick={() => {
+            if (needsSignIn) onSignIn();
+            void membership.refetch();
+          }}
+        >
+          {t(needsSignIn ? 'uploadSignIn' : 'retry')}
         </Button>
       </div>
     );

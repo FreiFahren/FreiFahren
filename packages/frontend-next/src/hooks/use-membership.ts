@@ -12,18 +12,21 @@ export type Membership = {
   cancelAtPeriodEnd: boolean;
 };
 
-export const membershipQueryOptions = (userId: string) =>
+export const membershipQueryOptions = (userId: string, sessionId?: string) =>
   queryOptions({
-    queryKey: ['fund', userId, 'membership'],
+    queryKey: ['fund', userId, 'membership', sessionId],
     queryFn: async ({ signal }): Promise<Membership> =>
       (await fetchFund('/membership', { signal })).json(),
     // It carries the legal name, and must be fresh when someone comes back from Stripe.
     meta: { persist: false },
     staleTime: 0,
+    retry: (failureCount, error) =>
+      !(error instanceof FundRequestError && error.status < 500) && failureCount < 1,
     refetchOnWindowFocus: true,
   });
 
-export const useMembership = (userId: string) => useQuery(membershipQueryOptions(userId));
+export const useMembership = (userId: string, sessionId?: string) =>
+  useQuery(membershipQueryOptions(userId, sessionId));
 
 /*
  * Opens Stripe's hosted Checkout or billing portal, which send people back to `/fund`. The native
