@@ -4,21 +4,14 @@ import { lazy, Suspense, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { notifyNativeAppReady } from '@/lib/native';
 
-// Load the map + maplibre-gl in parallel only once the map first mounts, keeping the
-// heavy bundle out of the shell and off map-less routes (/report, /impressum).
-const stalledMapImport = new Promise<never>(() => {});
+// Load the map + maplibre-gl together without putting their heavy bundles in the shell.
+// Map-less routes defer loading until the map first mounts.
 const importMap = () =>
-  Promise.all([import('@/components/map/Map'), import('maplibre-gl')]).then(
-    ([mapModule, maplibreModule]) => {
-      // Vite resolves a failed preload with undefined when vite:preloadError is prevented. Keep the
-      // Suspense boundary pending while the page reloads instead of replacing the whole app with
-      // the router error screen. Native deliberately remains unconfirmed so Capgo rolls it back.
-      if (!mapModule || !maplibreModule) return stalledMapImport;
-
-      void notifyNativeAppReady();
-      return { default: mapModule.MapView };
-    },
-  );
+  Promise.all([import('@/components/map/Map'), import('maplibre-gl')]).then(([mapModule]) => {
+    // Failed imports reject to the render boundary and leave native updates unconfirmed.
+    void notifyNativeAppReady();
+    return { default: mapModule.MapView };
+  });
 
 const MapView = lazy(importMap);
 
@@ -30,7 +23,10 @@ const MapView = lazy(importMap);
 // Other map routes (e.g. /settings) keep the lazy-on-mount path; they're rarely the entry point.
 if (typeof window !== 'undefined') {
   const { pathname } = window.location;
-  if (pathname === '/' || pathname.startsWith('/station/')) void importMap();
+  if (pathname === '/' || pathname.startsWith('/station/')) {
+    // This speculative call has no consumer. React.lazy handles the render-time rejection.
+    void importMap().catch(() => {});
+  }
 }
 
 // Map routes share the `/_map` id prefix; the `/reports` overview does not.
