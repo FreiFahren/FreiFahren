@@ -23,7 +23,7 @@ const queue: PostHogOp[] = [];
 // Cap the buffer so a session that never loads the SDK (dev without a key) can't grow it unbounded.
 const MAX_QUEUED = 500;
 let flagAccountId: string | null = null;
-// Set from init's loaded hook, which runs before `instance` (awaiting registerVersion) is ready.
+// Set from init's loaded hook, which runs before `instance` (awaiting loadVersion) is ready.
 let flagTarget: PostHog | null = null;
 
 // Before init the id is only stored; the loaded hook applies it ahead of the first /flags request.
@@ -54,15 +54,30 @@ export function enqueuePostHog(op: PostHogOp): void {
   queue.push(op);
 }
 
+let versionProperties: { app_version?: string; app_build?: string; bundle_build: string } = {
+  bundle_build: __BUILD_ID__,
+};
+
+// Keep only runtime context, never identity or persisted properties. Resetting consent must be
+// able to restore it synchronously before the next event, including on native.
+export function registerPostHogRuntimeContext(posthog: PostHog): void {
+  posthog.register({
+    platform: Capacitor.getPlatform(),
+    is_native: Capacitor.isNativePlatform(),
+    city: currentCitySlug,
+    ...versionProperties,
+  });
+}
+
 // On native, app_version/app_build track the store binary; bundle_build tracks the OTA bundle.
-async function registerVersion(posthog: PostHog): Promise<void> {
+async function loadVersion(): Promise<void> {
   try {
     if (Capacitor.isNativePlatform()) {
       const { App } = await import('@capacitor/app');
       const { version, build } = await App.getInfo();
-      posthog.register({ app_version: version, app_build: build, bundle_build: __BUILD_ID__ });
+      versionProperties = { app_version: version, app_build: build, bundle_build: __BUILD_ID__ };
     } else {
-      posthog.register({ app_version: __BUILD_ID__, bundle_build: __BUILD_ID__ });
+      versionProperties = { app_version: __BUILD_ID__, bundle_build: __BUILD_ID__ };
     }
   } catch {
     /* ignore */
@@ -128,18 +143,10 @@ export function loadPostHog(persistent: boolean): Promise<void> {
         syncPostHogFlagAccount(posthog);
       },
     });
-    // Stamp every event with the runtime so funnels can be split by web vs native.
-    // city is a registered super property (not derived from $host) because native
-    // (Capacitor) events have no meaningful host. Resolved at boot from the hostname
-    // (web) or the stored preference (native).
-    posthog.register({
-      platform: Capacitor.getPlatform(),
-      is_native: Capacitor.isNativePlatform(),
-      city: currentCitySlug,
-    });
     // Native version discovery awaits @capacitor/app. Finish it before startup events become
     // observable so the first pageview has the same super properties as later events.
-    await registerVersion(posthog);
+    await loadVersion();
+    registerPostHogRuntimeContext(posthog);
     instance = posthog;
     for (const op of queue) op(posthog);
     queue.length = 0;
