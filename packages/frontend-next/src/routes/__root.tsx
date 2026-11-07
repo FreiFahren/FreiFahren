@@ -8,6 +8,7 @@ import { LegalDisclaimer } from '@/components/LegalDisclaimer';
 import { CityLocationPrompt } from '@/components/map/city-location-prompt';
 import { PersistentMapView } from '@/components/map/PersistentMapView';
 import { Onboarding } from '@/components/onboarding/Onboarding';
+import { SafeAreaBackground } from '@/components/safe-area-background';
 import { ScreenshotBranding } from '@/components/ScreenshotBranding';
 import { GeolocationProvider } from '@/contexts/GeolocationProvider';
 import { ReportSimulationProvider } from '@/contexts/ReportSimulationProvider';
@@ -41,6 +42,7 @@ export const Route = createRootRoute({
         <ContributeCard />
         <FeedbackCard />
         <ConsentBanner />
+        <SafeAreaBackground />
         <ScreenshotBranding />
       </ReportSimulationProvider>
     </GeolocationProvider>
