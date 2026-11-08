@@ -48,6 +48,15 @@ With access to the private [FreiFahren/internal](https://github.com/FreiFahren/i
 cloned next to this one (or `FREIFAHREN_INTERNAL` pointing at it), `just dev` also runs the
 auth-worker on :8788 and report-gate, wired to the API.
 
+## Contributing
+
+Pull requests are welcome. FreiFahren's maintainers develop this repository together with some private services in an internal repository, and [Copybara](https://github.com/google/copybara) keeps the two in sync:
+
+1. Once a maintainer has had a first look and labeled your pull request `import`, a bot copies it into the internal repository for review, and again whenever you push to it.
+2. Once it's accepted, the change is published back here, with you as its author, and your pull request shows as merged.
+
+So open and update pull requests here as usual; you don't need access to anything else.
+
 ## Contact
 
 Questions or feedback? Reach us at [contact@freifahren.org](mailto:contact@freifahren.org).

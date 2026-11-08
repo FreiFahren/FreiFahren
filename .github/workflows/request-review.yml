@@ -1,0 +1,37 @@
+name: Request review
+
+# Pull requests are reviewed in FreiFahren's internal repository, which imports one once a maintainer
+# labels it `import`, and again on every push after that, and drops its copy when it's closed or
+# unlabeled. pull_request_target runs this file as it is on main, with the bot's key; it must never
+# check out or run the pull request's code. Forks of this repository without the bot skip it.
+on:
+    pull_request_target:
+        types: [labeled, unlabeled, synchronize, reopened, closed]
+
+permissions: {}
+
+jobs:
+    request:
+        # Other labels being added or removed don't matter.
+        if: >-
+            vars.MONOREPO != '' && (
+                (github.event.action == 'unlabeled' && github.event.label.name == 'import') ||
+                (contains(github.event.pull_request.labels.*.name, 'import') &&
+                    (github.event.action != 'labeled' || github.event.label.name == 'import'))
+            )
+        runs-on: ubuntu-latest
+        steps:
+            - name: Get the bot's token
+              id: token
+              uses: actions/create-github-app-token@v1
+              with:
+                  app-id: ${{ vars.APP_ID }}
+                  private-key: ${{ secrets.APP_PRIVATE_KEY }}
+                  repositories: ${{ vars.MONOREPO }}
+
+            - name: Ask for an import
+              run: gh api "repos/$GITHUB_REPOSITORY_OWNER/$MONOREPO/dispatches" --silent -f event_type=public-pull-request -F "client_payload[number]=$NUMBER"
+              env:
+                  GH_TOKEN: ${{ steps.token.outputs.token }}
+                  MONOREPO: ${{ vars.MONOREPO }}
+                  NUMBER: ${{ github.event.pull_request.number }}
