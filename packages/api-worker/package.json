@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@freifahren/contracts": "workspace:*",
+    "@freifahren/worker-kit": "workspace:*",
     "@sentry/cloudflare": "^10.62.0",
     "@types/lodash": "^4.17.20",
     "@types/luxon": "^3.7.1",

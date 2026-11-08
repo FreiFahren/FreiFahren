@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { createLogger, setSentryLogSink, type SentryLogSink } from '../src/common/logger'
+import { createLogger, setSentryLogSink, type SentryLogSink } from '../src/logger'
 
 describe('structured logger', () => {
     afterEach(() => {

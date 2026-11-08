@@ -1,7 +1,7 @@
 import type { Context } from 'hono'
 
 import type { Env } from '../../app-env'
-import type { Logger } from '../../common/logger'
+import type { Logger } from '@freifahren/worker-kit/logger'
 
 import { verifyStripeSignature } from './stripe-signature'
 

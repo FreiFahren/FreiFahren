@@ -8,7 +8,7 @@ import {
 
 import { type Bindings, createCityDatabase, createCityServices, reportError, resolveCityBySlug } from '../../app-env'
 import { AppError } from '../../common/errors'
-import { createLogger } from '../../common/logger'
+import { createLogger } from '@freifahren/worker-kit/logger'
 
 import { ReportSubmissionService } from './report-submission-service'
 import { invalidateStationReportsCache } from './reports-cache-middleware'

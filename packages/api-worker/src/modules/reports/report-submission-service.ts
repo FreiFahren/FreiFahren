@@ -7,7 +7,7 @@ import type {
 } from '@freifahren/contracts/report-gate'
 
 import { reportError } from '../../app-env'
-import type { Logger } from '../../common/logger'
+import type { Logger } from '@freifahren/worker-kit/logger'
 import { submitTrustedReportToGate } from '../report-gate/report-gate-client'
 
 import type { RawReport } from './post-process-report'

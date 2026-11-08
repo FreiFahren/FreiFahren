@@ -2,7 +2,7 @@
 import { captureException, logger as sentryLogger, setTag, withSentry } from '@sentry/cloudflare'
 
 import { Bindings, setErrorReporter, setScopeTagger } from './app-env'
-import { setSentryLogSink } from './common/logger'
+import { setSentryLogSink } from '@freifahren/worker-kit/logger'
 import { normalizeTransactionName } from './common/normalize-transaction-name'
 import { clearExpiredReportMetadataForAllCities } from './modules/reports/report-metadata-retention'
 import { TelegramReportsEntrypoint } from './modules/reports/telegram-reports-entrypoint'

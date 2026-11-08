@@ -2,7 +2,7 @@ import { CITY_DATABASES } from '@freifahren/cities'
 import { and, inArray, isNotNull, lt, or } from 'drizzle-orm'
 
 import { type Bindings, reportError } from '../../app-env'
-import { createLogger } from '../../common/logger'
+import { createLogger } from '@freifahren/worker-kit/logger'
 import { createD1Db, type DbConnection, reports } from '../../db'
 
 // The privacy policy promises this period.

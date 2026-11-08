@@ -1,0 +1,21 @@
+{
+    "name": "@freifahren/worker-kit",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Plumbing the FreiFahren Workers share.",
+    "type": "module",
+    "exports": {
+        "./logger": "./src/logger.ts"
+    },
+    "scripts": {
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run"
+    },
+    "devDependencies": {
+        "prettier": "^3.6.2",
+        "typescript": "~6.0.2",
+        "vitest": "~3.2.0"
+    }
+}

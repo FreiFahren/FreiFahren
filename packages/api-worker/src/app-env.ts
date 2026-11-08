@@ -5,7 +5,7 @@ import type { PublicReportGate, TrustedReportGate } from '@freifahren/contracts/
 import { Context, Hono } from 'hono'
 
 import { AppError } from './common/errors'
-import { createLogger, Logger, LogLevel } from './common/logger'
+import { createLogger, type Logger, type LogLevel } from '@freifahren/worker-kit/logger'
 import { createD1Db, DbConnection } from './db'
 import { InsightsService } from './modules/insights'
 import { ReportsService } from './modules/reports'
