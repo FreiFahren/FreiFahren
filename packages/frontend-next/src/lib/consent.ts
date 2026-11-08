@@ -3,6 +3,7 @@ import { useSyncExternalStore } from 'react';
 import {
   enqueuePostHog,
   PERSISTENT_PERSISTENCE,
+  registerPostHogRuntimeContext,
   syncPostHogFlagAccount,
 } from '@/lib/posthog-client';
 import { safeLocalStorage } from '@/lib/safe-storage';
@@ -87,6 +88,7 @@ function applyToPostHog(value: ConsentChoice | null): void {
     enqueuePostHog((posthog) => {
       posthog.reset();
       posthog.set_config({ persistence: 'memory' });
+      registerPostHogRuntimeContext(posthog);
       // register() after reset() so the super-property survives the clear (in memory for this session).
       posthog.register({ cookie_consent: 'denied', persistence_mode: 'memory' });
       // reset() clears evaluation overrides too; keep the signed-in account eligible.
