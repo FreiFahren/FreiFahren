@@ -19,7 +19,7 @@
 
 ## What is FreiFahren?
 
-FreiFahren crowdsources real-time sightings of ticket inspectors across the Berlin public transport network. Reports flow in from the in-app form or the [Freifahren Telegram group](https://t.me/freifahren_BE); The community keeps the map accurate.
+FreiFahren crowdsources real-time sightings of ticket inspectors across the Berlin public transport network. Reports flow in from the in-app form or the [FreiFahren Telegram group](https://t.me/freifahren_BE); the community keeps the map accurate.
 
 <div align="center">
   <img src="docs/readme_assets/screenshot1.png" alt="FreiFahren map with reports" width="240" />
