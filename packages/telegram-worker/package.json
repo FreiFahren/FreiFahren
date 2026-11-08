@@ -15,6 +15,7 @@
         "extract": "bun run evals/extract.ts"
     },
     "dependencies": {
+        "@freifahren/cities": "workspace:*",
         "@freifahren/contracts": "workspace:*",
         "@sentry/cloudflare": "^10.62.0",
         "zod": "^3.25.0"

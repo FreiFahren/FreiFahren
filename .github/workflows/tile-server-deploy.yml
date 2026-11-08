@@ -41,6 +41,10 @@ jobs:
               with:
                   bun-version: latest
 
+            # generate.ts imports @freifahren/cities, which resolves through the workspace install.
+            - name: Install dependencies
+              run: bun install --frozen-lockfile
+
             # Downloads each city's OSM extract, runs tilemaker, and writes dist/<city>.pmtiles +
             # dist/styles/<city>.json — the same script local dev uses. The commit sha is the single
             # version lever: it goes into both the style's archive URL (here) and the upload key

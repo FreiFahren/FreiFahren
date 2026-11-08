@@ -8,10 +8,6 @@
         "types": ["@cloudflare/vitest-pool-workers", "bun"],
         "jsx": "react-jsx",
         "jsxImportSource": "hono/jsx",
-        "esModuleInterop": true,
-        "paths": {
-            "@freifahren/cities": ["../cities/src/index.ts"],
-            "@freifahren/report-privacy": ["../report-privacy/src/index.ts"]
-        }
+        "esModuleInterop": true
     }
 }

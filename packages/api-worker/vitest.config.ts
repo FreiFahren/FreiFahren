@@ -14,12 +14,6 @@ export default defineWorkersConfig(async () => {
                     id.endsWith('.md') ? `export default ${JSON.stringify(code)}` : undefined,
             },
         ],
-        resolve: {
-            alias: {
-                '@freifahren/cities': new URL('../cities/src/index.ts', import.meta.url).pathname,
-                '@freifahren/report-privacy': new URL('../report-privacy/src/index.ts', import.meta.url).pathname,
-            },
-        },
         test: {
             setupFiles: ['./tests/setup.ts'],
             poolOptions: {

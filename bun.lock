@@ -7,7 +7,9 @@
     "packages/api-worker": {
       "name": "api-worker",
       "dependencies": {
+        "@freifahren/cities": "workspace:*",
         "@freifahren/contracts": "workspace:*",
+        "@freifahren/report-privacy": "workspace:*",
         "@freifahren/worker-kit": "workspace:*",
         "@sentry/cloudflare": "^10.62.0",
         "@types/lodash": "^4.17.20",
@@ -90,6 +92,7 @@
         "@capacitor/status-bar": "^8.0.2",
         "@capgo/capacitor-updater": "^8.49.7",
         "@fontsource/ibm-plex-mono": "^5.2.7",
+        "@freifahren/cities": "workspace:*",
         "@freifahren/contracts": "workspace:*",
         "@freifahren/ui": "workspace:*",
         "@sentry/capacitor": "4.1.0",
@@ -158,6 +161,7 @@
     "packages/telegram-worker": {
       "name": "telegram-worker",
       "dependencies": {
+        "@freifahren/cities": "workspace:*",
         "@freifahren/contracts": "workspace:*",
         "@sentry/cloudflare": "^10.62.0",
         "zod": "^3.25.0",
@@ -173,6 +177,9 @@
     "packages/tile-server": {
       "name": "tile-server",
       "version": "0.1.0",
+      "dependencies": {
+        "@freifahren/cities": "workspace:*",
+      },
       "devDependencies": {
         "@types/bun": "^1.3.10",
         "typescript": "~6.0.2",
