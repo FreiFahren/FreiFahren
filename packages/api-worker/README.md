@@ -70,13 +70,9 @@ use `bunx wrangler d1 execute DB --local|--remote --command "..."`.
 The public API validates and normalizes reports, then sends them to the separately deployed private
 `report-gate` Worker through its public-intake Service Binding entrypoint. The gate owns persistence
 and abuse controls; the Telegram Worker uses a separate trusted entrypoint with no shared password.
-Per-city public intake and Telegram forwarding switches live in `@freifahren/cities`. For local
-development, run all three Worker configs together (report-gate comes from FreiFahren/internal,
-cloned next to this repository; `just dev` does this too); only this API is exposed:
-
-```sh
-bun run dev:with-report-gate
-```
+Per-city public intake and Telegram forwarding switches live in `@freifahren/cities`. Locally,
+`just dev` runs the API without report-gate and with `REPORT_GATE_MODE=preview-open`, which stores
+reports directly, unscored, as pull request previews do.
 
 The Stripe webhook signing secret remains an API Worker secret:
 

@@ -10,8 +10,9 @@ const LOCAL_ONLY = 'SENTRY_DSN=\nNODE_ENV=development\n'
  * overrides from .dev.vars. Without one, local errors reach production Sentry, so new files always
  * blank the DSN.
  */
-export function env() {
-    for (const dir of WORKERS) {
+// `workers` adds Workers from outside this repository, like the private services.
+export function env(workers: string[] = []) {
+    for (const dir of [...WORKERS, ...workers]) {
         const devVars = join(dir, '.dev.vars')
         if (!exists(dir) || exists(devVars)) continue
 
@@ -26,8 +27,8 @@ export function env() {
     }
 }
 
-export function warnAboutSentry() {
-    for (const dir of WORKERS) {
+export function warnAboutSentry(workers: string[] = []) {
+    for (const dir of [...WORKERS, ...workers]) {
         const devVars = join(dir, '.dev.vars')
         if (exists(devVars) && /^SENTRY_DSN=.+/m.test(readFileSync(devVars, 'utf8'))) {
             console.warn(`${show(devVars)} sets SENTRY_DSN, so local errors from it reach Sentry`)

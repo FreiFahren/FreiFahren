@@ -44,9 +44,8 @@ just setup   # dependencies, local env files, seeded local databases
 just dev     # API on :8787, frontend on :1871
 ```
 
-With access to the private [FreiFahren/internal](https://github.com/FreiFahren/internal) repository
-cloned next to this one (or `FREIFAHREN_INTERNAL` pointing at it), `just dev` also runs the
-auth-worker on :8788 and report-gate, wired to the API.
+Sign-in, the Fund and report scoring are private services, so locally sign-in and the Fund are
+hidden and the API accepts reports without scoring them, the way pull request previews do.
 
 ## Contributing
 
