@@ -5,6 +5,9 @@ on:
         branches: [main]
         paths:
             - 'packages/frontend-next/**'
+            - 'package.json'
+            - 'bun.lock'
+            - 'bunfig.toml'
             - '.github/workflows/frontend-next-ci.yml'
 
 jobs:

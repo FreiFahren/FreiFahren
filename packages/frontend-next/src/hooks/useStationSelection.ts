@@ -40,8 +40,7 @@ export function useStationSelection(): UseStationSelectionResult {
     }
 
     const stationId = event.features?.find((feature) => feature.properties?.id)?.properties?.id as
-      | string
-      | undefined;
+      string | undefined;
     if (!stationId) return;
     track('station_selected', { source: 'map' });
     selectionTap();

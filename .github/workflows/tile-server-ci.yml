@@ -5,6 +5,9 @@ on:
         branches: [main]
         paths:
             - 'packages/tile-server/**'
+            - 'package.json'
+            - 'bun.lock'
+            - 'bunfig.toml'
             - '.github/workflows/tile-server-ci.yml'
 
 jobs:

@@ -1,0 +1,4 @@
+[install]
+# Pinned because the default linker differs between Bun versions; isolated links only what each
+# package declares, so a package can't work by accident through another one's dependencies.
+linker = "isolated"

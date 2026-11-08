@@ -5,6 +5,9 @@ on:
         branches: [main]
         paths:
             - 'packages/telegram-worker/**'
+            - 'package.json'
+            - 'bun.lock'
+            - 'bunfig.toml'
             - '.github/workflows/telegram-worker-ci.yml'
 
 jobs:

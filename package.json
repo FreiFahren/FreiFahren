@@ -1,0 +1,13 @@
+{
+    "name": "freifahren",
+    "private": true,
+    "workspaces": [
+        "packages/*"
+    ],
+    "trustedDependencies": [
+        "esbuild",
+        "sharp",
+        "unrs-resolver",
+        "workerd"
+    ]
+}

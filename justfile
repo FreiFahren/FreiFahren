@@ -8,7 +8,7 @@ default:
 setup:
     bun scripts/dev/setup.ts
 
-# Install dependencies in every package that has its own lockfile
+# Install every package's dependencies from the lockfile
 install:
     bun scripts/dev/install.ts
 

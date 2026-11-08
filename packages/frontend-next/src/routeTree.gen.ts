@@ -9,40 +9,29 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ReportsRouteImport } from './routes/reports'
-import { Route as ReportRouteImport } from './routes/report'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as ImpressumRouteImport } from './routes/impressum'
 import { Route as MapRouteImport } from './routes/_map'
-import { Route as ReportsIndexRouteImport } from './routes/reports/index'
-import { Route as FundIndexRouteImport } from './routes/fund/index'
-import { Route as AnnouncementsIndexRouteImport } from './routes/announcements/index'
-import { Route as AccountIndexRouteImport } from './routes/account/index'
+import { Route as ImpressumRouteImport } from './routes/impressum'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ReportRouteImport } from './routes/report'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as MapIndexRouteImport } from './routes/_map/index'
-import { Route as ReportsStationsRouteImport } from './routes/reports/stations'
-import { Route as ReportsLinesRouteImport } from './routes/reports/lines'
-import { Route as FundFineIdRouteImport } from './routes/fund/$fineId'
-import { Route as AnnouncementsAnnouncementIdRouteImport } from './routes/announcements/$announcementId'
+import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as AccountMembershipRouteImport } from './routes/account/membership'
+import { Route as AnnouncementsIndexRouteImport } from './routes/announcements/index'
+import { Route as AnnouncementsAnnouncementIdRouteImport } from './routes/announcements/$announcementId'
+import { Route as FundIndexRouteImport } from './routes/fund/index'
+import { Route as FundFineIdRouteImport } from './routes/fund/$fineId'
+import { Route as ReportsIndexRouteImport } from './routes/reports/index'
+import { Route as ReportsLinesRouteImport } from './routes/reports/lines'
+import { Route as ReportsStationsRouteImport } from './routes/reports/stations'
+import { Route as MapDebugReportDecayRouteImport } from './routes/_map/debug/report-decay'
+import { Route as MapLineLineNameRouteImport } from './routes/_map/line/$lineName'
+import { Route as MapReportsStationIdRouteImport } from './routes/_map/reports/$stationId'
 import { Route as MapSettingsIndexRouteImport } from './routes/_map/settings/index'
 import { Route as MapStationStationIdRouteImport } from './routes/_map/station/$stationId'
-import { Route as MapReportsStationIdRouteImport } from './routes/_map/reports/$stationId'
-import { Route as MapLineLineNameRouteImport } from './routes/_map/line/$lineName'
-import { Route as MapDebugReportDecayRouteImport } from './routes/_map/debug/report-decay'
 
-const ReportsRoute = ReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportRoute = ReportRouteImport.update({
-  id: '/report',
-  path: '/report',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
+const MapRoute = MapRouteImport.update({
+  id: '/_map',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ImpressumRoute = ImpressumRouteImport.update({
@@ -50,28 +39,19 @@ const ImpressumRoute = ImpressumRouteImport.update({
   path: '/impressum',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MapRoute = MapRouteImport.update({
-  id: '/_map',
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ReportsIndexRoute = ReportsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ReportsRoute,
-} as any)
-const FundIndexRoute = FundIndexRouteImport.update({
-  id: '/fund/',
-  path: '/fund/',
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AnnouncementsIndexRoute = AnnouncementsIndexRouteImport.update({
-  id: '/announcements/',
-  path: '/announcements/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AccountIndexRoute = AccountIndexRouteImport.update({
-  id: '/account/',
-  path: '/account/',
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MapIndexRoute = MapIndexRouteImport.update({
@@ -79,19 +59,19 @@ const MapIndexRoute = MapIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MapRoute,
 } as any)
-const ReportsStationsRoute = ReportsStationsRouteImport.update({
-  id: '/stations',
-  path: '/stations',
-  getParentRoute: () => ReportsRoute,
+const AccountIndexRoute = AccountIndexRouteImport.update({
+  id: '/account/',
+  path: '/account/',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const ReportsLinesRoute = ReportsLinesRouteImport.update({
-  id: '/lines',
-  path: '/lines',
-  getParentRoute: () => ReportsRoute,
+const AccountMembershipRoute = AccountMembershipRouteImport.update({
+  id: '/account/membership',
+  path: '/account/membership',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const FundFineIdRoute = FundFineIdRouteImport.update({
-  id: '/fund/$fineId',
-  path: '/fund/$fineId',
+const AnnouncementsIndexRoute = AnnouncementsIndexRouteImport.update({
+  id: '/announcements/',
+  path: '/announcements/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnnouncementsAnnouncementIdRoute =
@@ -100,10 +80,45 @@ const AnnouncementsAnnouncementIdRoute =
     path: '/announcements/$announcementId',
     getParentRoute: () => rootRouteImport,
   } as any)
-const AccountMembershipRoute = AccountMembershipRouteImport.update({
-  id: '/account/membership',
-  path: '/account/membership',
+const FundIndexRoute = FundIndexRouteImport.update({
+  id: '/fund/',
+  path: '/fund/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const FundFineIdRoute = FundFineIdRouteImport.update({
+  id: '/fund/$fineId',
+  path: '/fund/$fineId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsIndexRoute = ReportsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsLinesRoute = ReportsLinesRouteImport.update({
+  id: '/lines',
+  path: '/lines',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsStationsRoute = ReportsStationsRouteImport.update({
+  id: '/stations',
+  path: '/stations',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const MapDebugReportDecayRoute = MapDebugReportDecayRouteImport.update({
+  id: '/debug/report-decay',
+  path: '/debug/report-decay',
+  getParentRoute: () => MapRoute,
+} as any)
+const MapLineLineNameRoute = MapLineLineNameRouteImport.update({
+  id: '/line/$lineName',
+  path: '/line/$lineName',
+  getParentRoute: () => MapRoute,
+} as any)
+const MapReportsStationIdRoute = MapReportsStationIdRouteImport.update({
+  id: '/reports/$stationId',
+  path: '/reports/$stationId',
+  getParentRoute: () => MapRoute,
 } as any)
 const MapSettingsIndexRoute = MapSettingsIndexRouteImport.update({
   id: '/settings/',
@@ -113,21 +128,6 @@ const MapSettingsIndexRoute = MapSettingsIndexRouteImport.update({
 const MapStationStationIdRoute = MapStationStationIdRouteImport.update({
   id: '/station/$stationId',
   path: '/station/$stationId',
-  getParentRoute: () => MapRoute,
-} as any)
-const MapReportsStationIdRoute = MapReportsStationIdRouteImport.update({
-  id: '/reports/$stationId',
-  path: '/reports/$stationId',
-  getParentRoute: () => MapRoute,
-} as any)
-const MapLineLineNameRoute = MapLineLineNameRouteImport.update({
-  id: '/line/$lineName',
-  path: '/line/$lineName',
-  getParentRoute: () => MapRoute,
-} as any)
-const MapDebugReportDecayRoute = MapDebugReportDecayRouteImport.update({
-  id: '/debug/report-decay',
-  path: '/debug/report-decay',
   getParentRoute: () => MapRoute,
 } as any)
 
@@ -277,25 +277,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/reports': {
-      id: '/reports'
-      path: '/reports'
-      fullPath: '/reports'
-      preLoaderRoute: typeof ReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/report': {
-      id: '/report'
-      path: '/report'
-      fullPath: '/report'
-      preLoaderRoute: typeof ReportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
+    '/_map': {
+      id: '/_map'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof MapRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/impressum': {
@@ -305,39 +291,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImpressumRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_map': {
-      id: '/_map'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof MapRouteImport
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reports/': {
-      id: '/reports/'
-      path: '/'
-      fullPath: '/reports/'
-      preLoaderRoute: typeof ReportsIndexRouteImport
-      parentRoute: typeof ReportsRoute
-    }
-    '/fund/': {
-      id: '/fund/'
-      path: '/fund'
-      fullPath: '/fund/'
-      preLoaderRoute: typeof FundIndexRouteImport
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/announcements/': {
-      id: '/announcements/'
-      path: '/announcements'
-      fullPath: '/announcements/'
-      preLoaderRoute: typeof AnnouncementsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/account/': {
-      id: '/account/'
-      path: '/account'
-      fullPath: '/account/'
-      preLoaderRoute: typeof AccountIndexRouteImport
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_map/': {
@@ -347,25 +319,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MapIndexRouteImport
       parentRoute: typeof MapRoute
     }
-    '/reports/stations': {
-      id: '/reports/stations'
-      path: '/stations'
-      fullPath: '/reports/stations'
-      preLoaderRoute: typeof ReportsStationsRouteImport
-      parentRoute: typeof ReportsRoute
+    '/account/': {
+      id: '/account/'
+      path: '/account'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AccountIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/reports/lines': {
-      id: '/reports/lines'
-      path: '/lines'
-      fullPath: '/reports/lines'
-      preLoaderRoute: typeof ReportsLinesRouteImport
-      parentRoute: typeof ReportsRoute
+    '/account/membership': {
+      id: '/account/membership'
+      path: '/account/membership'
+      fullPath: '/account/membership'
+      preLoaderRoute: typeof AccountMembershipRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/fund/$fineId': {
-      id: '/fund/$fineId'
-      path: '/fund/$fineId'
-      fullPath: '/fund/$fineId'
-      preLoaderRoute: typeof FundFineIdRouteImport
+    '/announcements/': {
+      id: '/announcements/'
+      path: '/announcements'
+      fullPath: '/announcements/'
+      preLoaderRoute: typeof AnnouncementsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/announcements/$announcementId': {
@@ -375,12 +347,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnnouncementsAnnouncementIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/account/membership': {
-      id: '/account/membership'
-      path: '/account/membership'
-      fullPath: '/account/membership'
-      preLoaderRoute: typeof AccountMembershipRouteImport
+    '/fund/': {
+      id: '/fund/'
+      path: '/fund'
+      fullPath: '/fund/'
+      preLoaderRoute: typeof FundIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/fund/$fineId': {
+      id: '/fund/$fineId'
+      path: '/fund/$fineId'
+      fullPath: '/fund/$fineId'
+      preLoaderRoute: typeof FundFineIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports/': {
+      id: '/reports/'
+      path: '/'
+      fullPath: '/reports/'
+      preLoaderRoute: typeof ReportsIndexRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/lines': {
+      id: '/reports/lines'
+      path: '/lines'
+      fullPath: '/reports/lines'
+      preLoaderRoute: typeof ReportsLinesRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/stations': {
+      id: '/reports/stations'
+      path: '/stations'
+      fullPath: '/reports/stations'
+      preLoaderRoute: typeof ReportsStationsRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/_map/debug/report-decay': {
+      id: '/_map/debug/report-decay'
+      path: '/debug/report-decay'
+      fullPath: '/debug/report-decay'
+      preLoaderRoute: typeof MapDebugReportDecayRouteImport
+      parentRoute: typeof MapRoute
+    }
+    '/_map/line/$lineName': {
+      id: '/_map/line/$lineName'
+      path: '/line/$lineName'
+      fullPath: '/line/$lineName'
+      preLoaderRoute: typeof MapLineLineNameRouteImport
+      parentRoute: typeof MapRoute
+    }
+    '/_map/reports/$stationId': {
+      id: '/_map/reports/$stationId'
+      path: '/reports/$stationId'
+      fullPath: '/reports/$stationId'
+      preLoaderRoute: typeof MapReportsStationIdRouteImport
+      parentRoute: typeof MapRoute
     }
     '/_map/settings/': {
       id: '/_map/settings/'
@@ -394,27 +415,6 @@ declare module '@tanstack/react-router' {
       path: '/station/$stationId'
       fullPath: '/station/$stationId'
       preLoaderRoute: typeof MapStationStationIdRouteImport
-      parentRoute: typeof MapRoute
-    }
-    '/_map/reports/$stationId': {
-      id: '/_map/reports/$stationId'
-      path: '/reports/$stationId'
-      fullPath: '/reports/$stationId'
-      preLoaderRoute: typeof MapReportsStationIdRouteImport
-      parentRoute: typeof MapRoute
-    }
-    '/_map/line/$lineName': {
-      id: '/_map/line/$lineName'
-      path: '/line/$lineName'
-      fullPath: '/line/$lineName'
-      preLoaderRoute: typeof MapLineLineNameRouteImport
-      parentRoute: typeof MapRoute
-    }
-    '/_map/debug/report-decay': {
-      id: '/_map/debug/report-decay'
-      path: '/debug/report-decay'
-      fullPath: '/debug/report-decay'
-      preLoaderRoute: typeof MapDebugReportDecayRouteImport
       parentRoute: typeof MapRoute
     }
   }

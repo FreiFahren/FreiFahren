@@ -14,8 +14,7 @@ import { NAMESPACE } from './LineDetail.i18n';
 type HotspotStation = LineInsights['hotspots']['stations'][number];
 type QuietGroup = { id: string; stations: HotspotStation[] };
 type ListEntry =
-  | { kind: 'hotspot'; station: HotspotStation }
-  | { kind: 'quiet'; group: QuietGroup };
+  { kind: 'hotspot'; station: HotspotStation } | { kind: 'quiet'; group: QuietGroup };
 
 type HotspotListProps = {
   lineName: string;
