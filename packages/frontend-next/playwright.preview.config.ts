@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './e2e',
-  testMatch: 'insights-preview.spec.ts',
+  testMatch: ['insights-preview.spec.ts', 'browser-chrome-preview.spec.ts'],
   timeout: 60_000,
   workers: 1,
   use: {
@@ -13,5 +13,10 @@ export default defineConfig({
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
     { name: 'mobile-safari', use: { ...devices['iPhone 13'] } },
+    {
+      name: 'mobile-chrome',
+      testMatch: 'browser-chrome-preview.spec.ts',
+      use: { ...devices['Pixel 7'] },
+    },
   ],
 });
