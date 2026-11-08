@@ -1,4 +1,4 @@
-import type { AcceptedReportNotification } from './types'
+import type { AcceptedReportNotification } from '@freifahren/contracts/report-notifications'
 import { DELIVERY_POLICY as policy } from './delivery-policy'
 
 type Report = AcceptedReportNotification['report']

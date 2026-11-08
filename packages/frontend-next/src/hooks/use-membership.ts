@@ -1,16 +1,11 @@
+import type { CheckoutSessionRequest, Membership, StripeSession } from '@freifahren/contracts/fund';
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { fetchFund, FundRequestError } from '@/lib/fund-api';
 
-export type Membership = {
-  status: 'none' | 'pending' | 'active' | 'past_due' | 'canceled';
-  legalName: string | null;
-  amountCents: number | null;
-  currentPeriodEnd: string | null;
-  cancelAtPeriodEnd: boolean;
-};
+export type { Membership };
 
 export const membershipQueryOptions = (userId: string) =>
   queryOptions({
@@ -33,14 +28,14 @@ export const useMembership = (userId: string) => useQuery(membershipQueryOptions
  */
 export async function openStripe(
   path: '/checkout-sessions' | '/billing-portal-sessions',
-  body?: { amountCents: number },
+  body?: CheckoutSessionRequest,
 ) {
   const response = await fetchFund(path, {
     method: 'POST',
     headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
-  const { url } = (await response.json()) as { url: string };
+  const { url } = (await response.json()) as StripeSession;
   // In the native app, Capacitor hands navigation to another domain over to Safari.
   window.location.assign(url);
 }

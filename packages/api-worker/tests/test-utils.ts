@@ -4,10 +4,11 @@ import { vi } from 'vitest'
 import type { Bindings } from '../src/app-env'
 import { app } from '../src/index'
 import type {
+    IntakeRequest,
+    NormalizedReport,
     PublicReportGate,
-    ReportGateIntakeRequest,
     TrustedReportGate,
-} from '../src/modules/report-gate/report-gate-contract'
+} from '@freifahren/contracts/report-gate'
 
 const overrides: Partial<Bindings> = {}
 
@@ -41,7 +42,7 @@ const reportGateBinding: PublicReportGate = {
             },
         }
     },
-    async intake(body: ReportGateIntakeRequest) {
+    async intake(body: IntakeRequest) {
         if (fakeReportGate.unavailable) throw new Error('Fake report gate unavailable')
 
         fakeReportGate.lastIntake = body as unknown as Record<string, unknown>
@@ -50,7 +51,7 @@ const reportGateBinding: PublicReportGate = {
 }
 
 const persistFakeReport = async (
-    body: ReportGateIntakeRequest,
+    body: Omit<IntakeRequest, 'report'> & { report: NormalizedReport },
     trust = fakeReportGate.intakeTrust,
     clientHash: string | null = hashFor(body.request)
 ) => {

@@ -1,34 +1,24 @@
 import type { Context } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
+import {
+    createdReportSchema,
+    type PublicNormalizedReport,
+    reportGateResultSchema,
+    type ReportGateResult,
+    reportViewerSchema,
+    type TrustedReportGate,
+    type TrustedTelegramIntakeRequest,
+} from '@freifahren/contracts/report-gate'
 import { z } from 'zod'
 
 import type { Env } from '../../app-env'
 import { AppError, normalizeInternalCode } from '../../common/errors'
 
 import { isOpenReportPreview, submitOpenPreviewReport } from './preview-report-gate'
-import type {
-    NormalizedReport,
-    ReportGateResult,
-    TrustedReportGate,
-    TrustedReportGateIntakeRequest,
-} from './report-gate-contract'
 
-export type { NormalizedReport } from './report-gate-contract'
+export type { NormalizedReport } from '@freifahren/contracts/report-gate'
 
 export const TURNSTILE_TOKEN_HEADER = 'cf-turnstile-response'
-
-const createdReportSchema = z.object({
-    reportId: z.number().int(),
-    stationId: z.string(),
-    lineId: z.string().nullable(),
-    directionId: z.string().nullable(),
-    timestamp: z.string(),
-})
-
-const viewerSchema = z.object({
-    clientHash: z.string().nullable(),
-    minStationTrust: z.number().nonnegative(),
-})
 
 const cityDescriptor = (c: Context<Env>) => {
     const city = c.get('city')
@@ -50,18 +40,6 @@ const requestMetadata = (c: Context<Env>) => {
     }
 }
 
-const gateResultSchema = z.discriminatedUnion('ok', [
-    z.object({ ok: z.literal(true), data: z.unknown() }),
-    z.object({
-        ok: z.literal(false),
-        error: z.object({
-            message: z.string(),
-            statusCode: z.number().int().min(400).max(599),
-            internalCode: z.string(),
-        }),
-    }),
-])
-
 const reportGateUnavailable = (error?: unknown) =>
     new AppError({
         message: 'Reporting service is unavailable',
@@ -79,7 +57,7 @@ const callGate = async <Gate, Data>(
 
     let result: ReportGateResult<unknown>
     try {
-        result = gateResultSchema.parse(await call(gate))
+        result = reportGateResultSchema.parse(await call(gate))
     } catch (error) {
         throw reportGateUnavailable(error)
     }
@@ -98,7 +76,7 @@ const callGate = async <Gate, Data>(
     }
 }
 
-export const submitToReportGate = async (c: Context<Env>, report: NormalizedReport) => {
+export const submitToReportGate = async (c: Context<Env>, report: PublicNormalizedReport) => {
     if (isOpenReportPreview(c)) return submitOpenPreviewReport(c, report)
     return callGate(
         c.env.REPORT_GATE,
@@ -119,9 +97,9 @@ export const resolveReportViewer = async (c: Context<Env>) => {
     return callGate(
         c.env.REPORT_GATE,
         (gate) => gate.viewer({ city: cityDescriptor(c), request: requestMetadata(c) }),
-        viewerSchema
+        reportViewerSchema
     )
 }
 
-export const submitTrustedReportToGate = (gate: TrustedReportGate | undefined, input: TrustedReportGateIntakeRequest) =>
+export const submitTrustedReportToGate = (gate: TrustedReportGate | undefined, input: TrustedTelegramIntakeRequest) =>
     callGate(gate, (gate) => gate.intake(input), createdReportSchema)

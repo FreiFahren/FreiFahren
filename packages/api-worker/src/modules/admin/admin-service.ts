@@ -16,7 +16,7 @@ import {
     stations,
 } from '../../db'
 
-import type { AdminDashboard, AdminReport, ModerationStatus, ReportCounts } from './admin-contract'
+import type { AdminDashboard, AdminReport, ModerationStatus, ReportCounts } from '@freifahren/contracts/admin'
 
 const DAY = 86_400_000
 const MAX_ROWS = 100_000

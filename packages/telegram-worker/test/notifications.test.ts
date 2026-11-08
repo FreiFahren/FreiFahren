@@ -10,7 +10,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { CITIES } from '@freifahren/cities'
 import { CityDelivery } from '../src/city-delivery'
 import { TelegramNotificationsEntrypoint } from '../src/index'
-import type { AcceptedReportNotification, Env } from '../src/types'
+import type { AcceptedReportNotification } from '@freifahren/contracts/report-notifications'
+import type { Env } from '../src/types'
 import { DELIVERY_POLICY as policy } from '../src/delivery-policy'
 
 const start = Date.parse('2030-09-06T12:00:00Z')
@@ -392,20 +393,28 @@ describe('automatic city delivery through notification RPC and durable storage',
         expect(String(messages[0].text).length).toBeLessThan(4096)
     })
 
-    it.each([3, 10])('shows all %s stations without an omission notice when every station fits', async (stationCount) => {
-        for (let id = 1; id <= stationCount * 3; id++) {
-            await accept({
-                ...report(id),
-                report: { ...report(id).report, stationId: `station-${Math.ceil(id / 3)}`, lineId: null, directionId: null },
-            })
+    it.each([3, 10])(
+        'shows all %s stations without an omission notice when every station fits',
+        async (stationCount) => {
+            for (let id = 1; id <= stationCount * 3; id++) {
+                await accept({
+                    ...report(id),
+                    report: {
+                        ...report(id).report,
+                        stationId: `station-${Math.ceil(id / 3)}`,
+                        lineId: null,
+                        directionId: null,
+                    },
+                })
+            }
+            await tick(start + policy.creditRefillMs)
+            expect(messages).toHaveLength(1)
+            expect(messages[0].text).toContain(`${stationCount * 3} neue Meldungen an ${stationCount} Stationen`)
+            expect(String(messages[0].text).match(/· 3 Meldungen/g)).toHaveLength(stationCount)
+            expect(messages[0].text).not.toContain('Weitere')
+            expect(String(messages[0].text).length).toBeLessThan(4096)
         }
-        await tick(start + policy.creditRefillMs)
-        expect(messages).toHaveLength(1)
-        expect(messages[0].text).toContain(`${stationCount * 3} neue Meldungen an ${stationCount} Stationen`)
-        expect(String(messages[0].text).match(/· 3 Meldungen/g)).toHaveLength(stationCount)
-        expect(messages[0].text).not.toContain('Weitere')
-        expect(String(messages[0].text).length).toBeLessThan(4096)
-    })
+    )
 
     it.each([200, 400, 403])('does not retry permanent Telegram rejections (%s)', async (code) => {
         status = code

@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { type Bindings, type Env, registerContext } from '../src/app-env'
 import { handleError } from '../src/common/error-handler'
-import type { SessionsService } from '../src/modules/auth/auth-contract'
+import type { SessionsService } from '@freifahren/contracts/auth'
 import { requireSession } from '../src/modules/auth'
 
 import { testEnv } from './test-utils'

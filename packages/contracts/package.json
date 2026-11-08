@@ -1,0 +1,27 @@
+{
+    "name": "@freifahren/contracts",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Every request that crosses a Worker boundary or reaches the app from a Worker, defined once for both sides.",
+    "type": "module",
+    "exports": {
+        "./admin": "./src/admin.ts",
+        "./auth": "./src/auth.ts",
+        "./fund": "./src/fund.ts",
+        "./report-gate": "./src/report-gate.ts",
+        "./report-notifications": "./src/report-notifications.ts",
+        "./telegram-reports": "./src/telegram-reports.ts"
+    },
+    "scripts": {
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "zod": "^4.1.12"
+    },
+    "devDependencies": {
+        "prettier": "^3.6.2",
+        "typescript": "~6.0.2"
+    }
+}

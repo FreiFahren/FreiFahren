@@ -1,5 +1,8 @@
 import { DurableObject } from 'cloudflare:workers'
-import { AcceptedReportNotification } from './types'
+import {
+    type AcceptedReportNotification,
+    acceptedReportNotificationSchema,
+} from '@freifahren/contracts/report-notifications'
 import { DELIVERY_POLICY as policy } from './delivery-policy'
 import { DeliveryStore, type DeliveryState } from './delivery-store'
 import { deliveryEnabled, notificationCity, renderDelivery } from './forwarding'
@@ -10,7 +13,7 @@ export class CityDelivery extends DurableObject<Cloudflare.Env & { TELEGRAM_BOT_
     private store = new DeliveryStore(this.ctx.storage.sql)
 
     async accept(input: AcceptedReportNotification): Promise<void> {
-        const { city, report } = AcceptedReportNotification.parse(input)
+        const { city, report } = acceptedReportNotificationSchema.parse(input)
         const config = notificationCity(city)
         if (report.source === 'telegram' || !deliveryEnabled(config, this.env)) return
         if (!this.env.TELEGRAM_BOT_TOKEN) throw new Error('Telegram bot token is not configured')
@@ -106,8 +109,7 @@ export class CityDelivery extends DurableObject<Cloudflare.Env & { TELEGRAM_BOT_
         batch.attempts++
         this.store.save(state)
         const text =
-            batch.text ??
-            (await renderDelivery(state.city, this.store.batchReports(), batch.mode, this.env, this.ctx))
+            batch.text ?? (await renderDelivery(state.city, this.store.batchReports(), batch.mode, this.env, this.ctx))
 
         // Intake can run while transit/Telegram I/O is pending; reload state before writing it.
         state = this.store.state()!

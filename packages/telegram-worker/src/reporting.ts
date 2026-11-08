@@ -1,6 +1,6 @@
 import type { CityConfig } from '@freifahren/cities'
+import type { TelegramReports } from '@freifahren/contracts/telegram-reports'
 
-import type { TelegramReportsApi } from './report-api-contract'
 import type { TransitIndex } from './types'
 import { type ExtractionResult, extractionToLog, isEmpty } from './extractor'
 import { resolveLineVariant } from './transit'
@@ -43,11 +43,7 @@ export function reportIdentifiers(index: TransitIndex, extraction: ExtractionRes
 }
 
 // Throws on a rejected RPC result; the caller reports it (no retry).
-export async function postReport(
-    reportApi: TelegramReportsApi,
-    ids: ReportIdentifiers,
-    city: CityConfig
-): Promise<void> {
+export async function postReport(reportApi: TelegramReports, ids: ReportIdentifiers, city: CityConfig): Promise<void> {
     const result = await reportApi.intake({
         city: city.slug,
         report: buildReportPayload(ids),

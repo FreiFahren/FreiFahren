@@ -6,7 +6,7 @@ import { requestId } from 'hono/request-id'
 import { corsAllowOrigin, Env, registerContext } from './app-env'
 import { handleError } from './common/error-handler'
 import { registerVersionedRoutes } from './common/router'
-import { ADMIN_API_PATH } from './modules/admin/admin-contract'
+import { ADMIN_API_PATH } from '@freifahren/contracts/admin'
 import { adminRoutes } from './modules/admin/admin-routes'
 import { getAnnouncementById, getAnnouncements } from './modules/announcements'
 import {

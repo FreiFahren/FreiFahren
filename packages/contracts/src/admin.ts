@@ -1,3 +1,5 @@
+// The API's admin routes, read by the report-admin dashboard.
+
 export type ReportCounts = {
     total: number
     positive: number

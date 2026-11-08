@@ -1,9 +1,14 @@
 import type { CityConfig } from '@freifahren/cities'
+import type {
+    CreatedReport,
+    NormalizedReport,
+    PublicNormalizedReport,
+    TrustedReportGate,
+} from '@freifahren/contracts/report-gate'
 
 import { reportError } from '../../app-env'
 import type { Logger } from '../../common/logger'
 import { submitTrustedReportToGate } from '../report-gate/report-gate-client'
-import type { CreatedReport, NormalizedReport, TrustedReportGate } from '../report-gate/report-gate-contract'
 
 import type { RawReport } from './post-process-report'
 import type { ReportsService } from './reports-service'
@@ -20,9 +25,9 @@ export class ReportSubmissionService {
 
     submitPublicReport(
         input: Omit<RawReport, 'source'> & { source: Exclude<RawReport['source'], 'telegram'> },
-        submit: (report: NormalizedReport) => Promise<CreatedReport>
+        submit: (report: PublicNormalizedReport) => Promise<CreatedReport>
     ) {
-        return this.submit(input, submit)
+        return this.submit(input, (report) => submit({ ...report, source: input.source }))
     }
 
     submitTelegramReport(input: Omit<RawReport, 'source'>, gate: TrustedReportGate | undefined) {

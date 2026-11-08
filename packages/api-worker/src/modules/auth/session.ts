@@ -1,20 +1,8 @@
+import { type AuthSession, authSessionSchema, MAX_AUTHORIZATION_LENGTH } from '@freifahren/contracts/auth'
 import type { Context } from 'hono'
-import { z } from 'zod'
 
 import type { Env } from '../../app-env'
 import { AppError } from '../../common/errors'
-
-import type { AuthSession } from './auth-contract'
-
-const authSessionSchema = z
-    .object({
-        user: z.object({ id: z.string(), email: z.string() }),
-        session: z.object({ id: z.string(), expiresAt: z.iso.datetime() }),
-    })
-    .nullable()
-
-// The auth-worker's RPC rejects longer headers as invalid input, which would read as an outage here.
-const MAX_AUTHORIZATION_LENGTH = 4096
 
 const authUnavailable = (error?: unknown) =>
     new AppError({
@@ -36,7 +24,7 @@ export const resolveSession = async (c: Context<Env>): Promise<AuthSession | nul
         throw authUnavailable(error)
     }
     // A response that doesn't match is a contract bug, not an outage: it surfaces as a 500.
-    return authSessionSchema.parse(result)
+    return authSessionSchema.nullable().parse(result)
 }
 
 export const requireSession = async (c: Context<Env>): Promise<AuthSession> => {

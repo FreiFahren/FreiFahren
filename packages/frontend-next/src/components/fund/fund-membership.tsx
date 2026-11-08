@@ -1,3 +1,4 @@
+import { MIN_AMOUNT_CENTS } from '@freifahren/contracts/fund';
 import { LoaderCircle, UsersRound } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,7 +17,7 @@ import { FundStatusCard } from './fund-status-card';
 import { NAMESPACE } from './fund.i18n';
 
 // Pay what you think is fair: the Fund Worker's floor up to the usual range.
-const MIN_EUR = 9;
+const MIN_EUR = MIN_AMOUNT_CENTS / 100;
 const MAX_EUR = 30;
 
 export function FundMembership({

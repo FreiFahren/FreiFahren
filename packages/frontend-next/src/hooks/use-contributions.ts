@@ -1,30 +1,17 @@
+import type { Contribution, Contributions } from '@freifahren/contracts/fund';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 
 import { fetchFund } from '@/lib/fund-api';
 
-export type ContributionPeriod = { start: string; end: string };
-export type Contribution = {
-  id: string;
-  amountCents: number;
-  currency: string;
-  createdAt: string;
-  paidAt: string | null;
-  periods: ContributionPeriod[];
-  status: 'paid' | 'pending' | 'failed' | 'action_required' | 'void' | 'uncollectible';
-  failureReason: 'insufficient_funds' | 'expired_card' | 'declined' | 'payment_failed' | null;
-};
-export type ContributionsResponse = {
-  contributions: Contribution[];
-  paidPeriod: ContributionPeriod | null;
-};
+export type { Contribution };
 
 export function useContributions(
   userId: string,
   sessionId: string,
-): UseQueryResult<ContributionsResponse, Error> {
-  return useQuery<ContributionsResponse, Error>({
+): UseQueryResult<Contributions, Error> {
+  return useQuery<Contributions, Error>({
     queryKey: ['fund', userId, sessionId, 'contributions'],
-    queryFn: async ({ signal }): Promise<ContributionsResponse> =>
+    queryFn: async ({ signal }): Promise<Contributions> =>
       (await fetchFund('/contributions', { signal })).json(),
     meta: { persist: false },
     staleTime: 0,

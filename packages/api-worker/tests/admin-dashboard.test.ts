@@ -2,7 +2,7 @@ import { createExecutionContext, waitOnExecutionContext } from 'cloudflare:test'
 import { eq, sql } from 'drizzle-orm'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { AdminDashboard, AdminStatus, ModerationStatus } from '../src/modules/admin/admin-contract'
+import type { AdminDashboard, AdminStatus, ModerationStatus } from '@freifahren/contracts/admin'
 import { QUARANTINE_CONFIRMATION } from '../src/modules/admin/admin-service'
 import { TelegramReportsEntrypoint } from '../src/modules/reports/telegram-reports-entrypoint'
 import { db, reports, stations } from './test-db'

@@ -1,12 +1,11 @@
+import type { TelegramReports } from '@freifahren/contracts/telegram-reports'
 import { z } from 'zod'
-
-import type { TelegramReportsApi } from './report-api-contract'
 
 export type Env = Omit<Cloudflare.Env, 'NODE_ENV' | 'BACKEND_URL' | 'MISTRAL_MODEL' | 'SENTRY_DSN' | 'REPORT_API'> & {
     BACKEND_URL: string
     MISTRAL_MODEL: string
     SENTRY_DSN: string
-    REPORT_API: TelegramReportsApi
+    REPORT_API: TelegramReports
     NODE_ENV?: string
     // Git SHA injected at deploy via `wrangler deploy --var SENTRY_RELEASE:<sha>`; tags Sentry
     // Events with a release so issues can be resolved in the next release. Absent locally.
@@ -86,21 +85,3 @@ export interface TransitIndex {
     circularLineNames: string[]
     variants: IndexVariant[]
 }
-
-export const AcceptedReportNotification = z
-    .object({
-        city: z.string().min(1).max(64),
-        report: z
-            .object({
-                reportId: z.number().int().positive(),
-                stationId: z.string().min(1).max(16),
-                lineId: z.string().min(1).max(16).nullable(),
-                directionId: z.string().min(1).max(16).nullable(),
-                timestamp: z.string().datetime(),
-                source: z.enum(['web_app', 'mini_app', 'mobile_app', 'telegram']),
-            })
-            .strict(),
-    })
-    .strict()
-
-export type AcceptedReportNotification = z.infer<typeof AcceptedReportNotification>

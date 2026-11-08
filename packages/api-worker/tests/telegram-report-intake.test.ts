@@ -1,11 +1,9 @@
 import { createExecutionContext, waitOnExecutionContext } from 'cloudflare:test'
 import { eq } from 'drizzle-orm'
+import type { TelegramReportIntake } from '@freifahren/contracts/telegram-reports'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import {
-    TelegramReportsEntrypoint,
-    type TelegramReportIntake,
-} from '../src/modules/reports/telegram-reports-entrypoint'
+import { TelegramReportsEntrypoint } from '../src/modules/reports/telegram-reports-entrypoint'
 import { referenceCacheKey } from '../src/modules/transit/reference-cache'
 import { TransitNetworkDataService } from '../src/modules/transit/transit-network-data-service'
 import { db, reports, stations } from './test-db'

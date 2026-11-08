@@ -1,34 +1,23 @@
 import { WorkerEntrypoint } from 'cloudflare:workers'
-import { z } from 'zod'
+import type { CreatedReport, ReportGateResult } from '@freifahren/contracts/report-gate'
+import {
+    type TelegramReportIntake,
+    telegramReportIntakeSchema,
+    type TelegramReports,
+} from '@freifahren/contracts/telegram-reports'
 
 import { type Bindings, createCityDatabase, createCityServices, reportError, resolveCityBySlug } from '../../app-env'
 import { AppError } from '../../common/errors'
 import { createLogger } from '../../common/logger'
-import type { CreatedReport, ReportGateResult } from '../report-gate/report-gate-contract'
 
 import { ReportSubmissionService } from './report-submission-service'
 import { invalidateStationReportsCache } from './reports-cache-middleware'
 
-const telegramReportSchema = z
-    .object({
-        city: z.string().min(1),
-        report: z
-            .object({
-                stationId: z.string().min(1),
-                lineId: z.string().nullable(),
-                directionId: z.string().nullable(),
-            })
-            .strict(),
-    })
-    .strict()
-
-export type TelegramReportIntake = z.infer<typeof telegramReportSchema>
-
-export class TelegramReportsEntrypoint extends WorkerEntrypoint<Bindings> {
+export class TelegramReportsEntrypoint extends WorkerEntrypoint<Bindings> implements TelegramReports {
     async intake(input: TelegramReportIntake): Promise<ReportGateResult<CreatedReport>> {
         const logger = createLogger(this.env.LOG_LEVEL ?? 'info')
         try {
-            const parsed = telegramReportSchema.safeParse(input)
+            const parsed = telegramReportIntakeSchema.safeParse(input)
             if (!parsed.success) {
                 throw new AppError({
                     message: 'Invalid Telegram report',

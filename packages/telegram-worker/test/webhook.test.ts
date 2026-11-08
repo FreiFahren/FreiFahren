@@ -28,7 +28,12 @@ const testEnv: Env = {
             throw new Error('Unused')
         },
     },
-    REPORT_API: { intake: async () => ({ ok: true, data: {} }) },
+    REPORT_API: {
+        intake: async ({ report }) => ({
+            ok: true,
+            data: { reportId: 1, ...report, timestamp: '2026-01-01T00:00:00.000Z' },
+        }),
+    },
 }
 
 function makeUpdate(opts: {

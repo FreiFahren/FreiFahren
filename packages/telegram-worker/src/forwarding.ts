@@ -1,6 +1,6 @@
 import { getCity } from '@freifahren/cities'
 import type { Env, TransitIndex } from './types'
-import type { AcceptedReportNotification } from './types'
+import type { AcceptedReportNotification } from '@freifahren/contracts/report-notifications'
 import { profileFor } from './config'
 import { getTransitIndex, lineNameForId } from './transit'
 import { DELIVERY_POLICY } from './delivery-policy'

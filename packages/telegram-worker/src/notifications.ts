@@ -1,11 +1,18 @@
 import { WorkerEntrypoint } from 'cloudflare:workers'
-import { AcceptedReportNotification } from './types'
+import {
+    type AcceptedReportNotification,
+    acceptedReportNotificationSchema,
+    type ReportNotifications,
+} from '@freifahren/contracts/report-notifications'
 
 import { deliveryEnabled, notificationCity } from './forwarding'
 
-export class TelegramNotifications extends WorkerEntrypoint<Cloudflare.Env & { TELEGRAM_BOT_TOKEN?: string }> {
+export class TelegramNotifications
+    extends WorkerEntrypoint<Cloudflare.Env & { TELEGRAM_BOT_TOKEN?: string }>
+    implements ReportNotifications
+{
     async reportAccepted(input: AcceptedReportNotification): Promise<void> {
-        const parsed = AcceptedReportNotification.safeParse(input)
+        const parsed = acceptedReportNotificationSchema.safeParse(input)
         if (!parsed.success) throw new Error('Invalid accepted report notification')
         const { city, report } = parsed.data
         if (report.source === 'telegram' || !deliveryEnabled(notificationCity(city), this.env)) return

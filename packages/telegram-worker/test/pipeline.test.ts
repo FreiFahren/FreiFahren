@@ -25,7 +25,10 @@ const withReportApi = (capture?: { body?: Record<string, unknown> }, status = 20
                     error: { message: 'Rejected', statusCode: status, internalCode: 'UNKNOWN_ERROR' },
                 } as const
             }
-            return { ok: true, data: {} } as const
+            return {
+                ok: true,
+                data: { reportId: 1, ...body.report, timestamp: '2026-01-01T00:00:00.000Z' },
+            } as const
         },
     },
 })

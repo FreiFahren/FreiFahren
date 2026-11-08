@@ -5,7 +5,7 @@ import { z } from 'zod'
 import type { Env } from '../../app-env'
 import { AppError } from '../../common/errors'
 
-import type { AdminStatus } from './admin-contract'
+import type { AdminStatus } from '@freifahren/contracts/admin'
 import { getDashboard, moderationStatus, QUARANTINE_CONFIRMATION, setQuarantine } from './admin-service'
 
 const querySchema = z
