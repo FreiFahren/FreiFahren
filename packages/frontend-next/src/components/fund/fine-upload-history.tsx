@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { FineUploadVersion } from '@/lib/fund-api';
 import { cn } from '@/lib/utils';
 
+import { FineConfirmationDate } from './fine-confirmation-date';
 import { FineStatus } from './fine-status';
 import { FinePhoto } from './fine-photo';
 import { NAMESPACE } from './fund.i18n';
@@ -28,7 +29,10 @@ export function FineUploadHistory({
         {chronologicalUploads.map((upload, index) => (
           <Fragment key={upload.id}>
             <ActivityItem icon={Upload}>
-              <p>{t(index === 0 ? 'invoiceUploaded' : 'invoiceReuploaded')}</p>
+              <p>
+                {index === 0 && t('invoiceUploaded')}
+                {index > 0 && t('invoiceReuploaded')}
+              </p>
               <ActivityDate value={upload.createdAt} />
               <div className="text-muted-foreground mt-1">
                 <FineStatus status="in_review" />
@@ -84,11 +88,17 @@ function ActivityDate({ value }: { value: string | null }) {
 function ReviewActivity({ upload }: { upload: FineUploadVersion }) {
   const { t } = useTranslation(NAMESPACE);
   if (upload.status === 'in_review') return null;
-  if (upload.status === 'paid')
+  if (upload.status === 'payment_sent' || upload.status === 'settled')
     return (
       <ActivityItem icon={Check} iconClassName="text-ok">
         <p>{t('invoicePaid')}</p>
         <ActivityDate value={upload.paidAt} />
+        {upload.status === 'settled' && upload.confirmation && (
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <p>{t('fineStatus.settled')}</p>
+            <FineConfirmationDate confirmation={upload.confirmation} />
+          </div>
+        )}
       </ActivityItem>
     );
   return (

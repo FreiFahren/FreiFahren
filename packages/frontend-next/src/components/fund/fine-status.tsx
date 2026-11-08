@@ -7,10 +7,11 @@ import { FundHistoryStatus } from './fund-history-status';
 import { NAMESPACE } from './fund.i18n';
 
 const STATUS_STYLES = {
-  in_review: { icon: Clock3, color: 'text-muted-foreground' },
-  paid: { icon: Check, color: 'text-ok' },
-  declined: { icon: X, color: 'text-destructive' },
-};
+  in_review: { icon: Clock3, color: 'text-muted-foreground', label: 'in_review' },
+  payment_sent: { icon: Check, color: 'text-ok', label: 'payment_sent' },
+  settled: { icon: Check, color: 'text-ok', label: 'payment_sent' },
+  declined: { icon: X, color: 'text-destructive', label: 'declined' },
+} as const;
 
 export function FineStatus({
   status,
@@ -24,13 +25,15 @@ export function FineStatus({
   descriptionId?: string;
 }) {
   const { t } = useTranslation(NAMESPACE);
-  const { icon, color } = STATUS_STYLES[status];
+  const { icon, color, label } = STATUS_STYLES[status];
+  let transferDate = null;
+  if (status === 'payment_sent' || status === 'settled') transferDate = paidAt;
   return (
     <FundHistoryStatus
       icon={icon}
       iconClassName={color}
-      label={t(`fineStatus.${status}`)}
-      paidAt={status === 'paid' ? paidAt : null}
+      label={t(`fineStatus.${label}`)}
+      paidAt={transferDate}
       showTime={showTime}
       descriptionId={descriptionId}
     />

@@ -3,7 +3,18 @@ import { i18n } from '@/lib/i18n';
 export const NAMESPACE = 'fund';
 
 i18n.addResourceBundle('en', NAMESPACE, {
+  transferUnverifiable:
+    'Receipt cannot be verified with this provider. The transfer receipt documents our bank transfer, not receipt by the creditor.',
+  viewTransferReceipt: 'View transfer receipt',
+  loadingTransferReceipt: 'Loading receipt…',
+  transferReceiptError: 'Could not load the receipt. Please try again.',
+
   fineDetailsTitle: 'Fine details',
+  settlementLink: 'Check status with {{provider}}',
+  settlementChecked: 'Confirmed on {{date}}',
+  settlementManuallyChecked: 'Manually confirmed by our team on {{date}}',
+  settlementLinkExpiry:
+    'The provider may remove this case later. Your saved confirmation remains available here.',
   openFineDetails: 'Show details for the fine uploaded on {{date}}',
   loadingFineDetails: 'Loading fine details…',
   fineDetailsError: 'This fine could not be loaded. Please try again.',
@@ -83,7 +94,12 @@ i18n.addResourceBundle('en', NAMESPACE, {
   uploadsTitle: 'Your uploads',
   uploadedAt: 'Uploaded',
   status: 'Status',
-  fineStatus: { in_review: 'In review', paid: 'Paid by the Fund', declined: 'Declined' },
+  fineStatus: {
+    in_review: 'In review',
+    payment_sent: 'Transfer executed',
+    settled: 'Payment receipt confirmed',
+    declined: 'Declined',
+  },
   declineReasonMissing: 'No reason was recorded for this decision.',
   emptyUploadsTitle: 'No fines yet',
   emptyUploads: 'You have not uploaded any fines yet. Your submissions will appear here.',
@@ -140,7 +156,18 @@ i18n.addResourceBundle('en', NAMESPACE, {
 });
 
 i18n.addResourceBundle('de', NAMESPACE, {
+  transferUnverifiable:
+    'Bei diesem Anbieter können wir den Zahlungseingang nicht überprüfen. Der Überweisungsbeleg dokumentiert unsere Überweisung, nicht den Eingang beim Empfänger.',
+  viewTransferReceipt: 'Überweisungsbeleg ansehen',
+  loadingTransferReceipt: 'Beleg wird geladen…',
+  transferReceiptError: 'Der Beleg konnte nicht geladen werden. Bitte versuche es erneut.',
+
   fineDetailsTitle: 'Details zur Einreichung',
+  settlementLink: 'Status bei {{provider}} prüfen',
+  settlementChecked: 'Bestätigung festgestellt am {{date}}',
+  settlementManuallyChecked: 'Von unserem Team bestätigt am {{date}}',
+  settlementLinkExpiry:
+    'Der Anbieter kann den Vorgang später entfernen. Deine gespeicherte Bestätigung bleibt hier erhalten.',
   openFineDetails: 'Details zur Einreichung vom {{date}} anzeigen',
   loadingFineDetails: 'Die Details werden geladen…',
   fineDetailsError: 'Diese Einreichung konnte nicht geladen werden. Bitte versuche es erneut.',
@@ -225,7 +252,12 @@ i18n.addResourceBundle('de', NAMESPACE, {
   uploadsTitle: 'Deine Uploads',
   uploadedAt: 'Hochgeladen',
   status: 'Status',
-  fineStatus: { in_review: 'In Prüfung', paid: 'Vom Fonds bezahlt', declined: 'Abgelehnt' },
+  fineStatus: {
+    in_review: 'In Prüfung',
+    payment_sent: 'Überweisung ausgeführt',
+    settled: 'Zahlungseingang bestätigt',
+    declined: 'Abgelehnt',
+  },
   declineReasonMissing: 'Für diese Entscheidung wurde kein Grund hinterlegt.',
   emptyUploadsTitle: 'Noch keine Knöllchen',
   emptyUploads: 'Du hast noch keine Knöllchen hochgeladen. Deine Einreichungen erscheinen hier.',

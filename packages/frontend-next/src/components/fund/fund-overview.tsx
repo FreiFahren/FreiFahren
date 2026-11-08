@@ -13,6 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useFundHistory, type Fine } from '@/hooks/use-fund-history';
+import { cn } from '@/lib/utils';
 import { Route as FineDetailsRoute } from '@/routes/fund/$fineId';
 
 import { FineUpload } from './fine-upload';
@@ -125,7 +126,8 @@ function UploadHistory({
           {t('emptyUploadsTitle')}
         </h3>
         <p className="text-muted-foreground text-base leading-relaxed">
-          {t(canUpload ? 'emptyUploadsPrompt' : 'emptyUploads')}
+          {canUpload && t('emptyUploadsPrompt')}
+          {!canUpload && t('emptyUploads')}
         </p>
       </div>
     );
@@ -168,7 +170,12 @@ export function FundOverview({
   const floating = fines.data?.length !== 0;
 
   return (
-    <div className={`flex flex-col ${canUpload && floating ? 'pb-20' : 'pb-4'}`}>
+    <div
+      className={cn('flex flex-col', {
+        'pb-20': canUpload && floating,
+        'pb-4': !canUpload || !floating,
+      })}
+    >
       <section aria-label={t('uploadsTitle')}>
         <SectionHeading className="mb-4">{t('uploadsTitle')}</SectionHeading>
         <UploadHistory userId={userId} sessionId={sessionId} canUpload={canUpload} />

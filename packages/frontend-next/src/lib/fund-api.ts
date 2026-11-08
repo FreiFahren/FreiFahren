@@ -3,14 +3,22 @@ import { optionalEnv } from '@/lib/utils';
 
 export type Fine = {
   id: string;
-  status: 'in_review' | 'paid' | 'declined';
+  status: 'in_review' | 'payment_sent' | 'settled' | 'declined';
   createdAt: string;
   paidAt: string | null;
   declineReason: string | null;
+  confirmation: FineConfirmation | null;
+  transfer: { verificationAvailable: boolean; receiptPath: string | null } | null;
 };
 
 export type FineUploadVersion = Fine & { version: number; current: boolean };
 
+export type FineConfirmation = {
+  confirmedAt: string;
+  source: 'provider' | 'manual';
+  providerLabel: string | null;
+  verificationUrl: string | null;
+};
 export type FineDetails = Fine & { uploads: FineUploadVersion[] };
 
 export class FundRequestError extends Error {

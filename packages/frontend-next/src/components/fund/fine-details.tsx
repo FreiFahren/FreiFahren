@@ -14,7 +14,7 @@ import { useKeyboardScrollArea } from '@/hooks/use-keyboard-scroll-area';
 import { FundRequestError, type Fine } from '@/lib/fund-api';
 import { Route as FundRoute } from '@/routes/fund/index';
 
-import { FineStatus } from './fine-status';
+import { FinePaymentDetails } from './fine-payment-details';
 import { FineUploadHistory } from './fine-upload-history';
 import { NAMESPACE } from './fund.i18n';
 
@@ -105,7 +105,7 @@ function FineDetailsContent({ userId, sessionId, fineId, onSignIn }: FineDetails
         <div>
           <dt className="text-muted-foreground mb-1">{t('status')}</dt>
           <dd>
-            <FineStatus status={fine.status} paidAt={fine.paidAt} showTime />
+            <FinePaymentDetails fine={fine} />
           </dd>
         </div>
         <div>
@@ -179,7 +179,8 @@ function ReuploadFine({
       >
         {upload.isPending && <LoaderCircle className="animate-spin" aria-hidden="true" />}
         {!upload.isPending && <Upload aria-hidden="true" />}
-        {t(upload.isPending ? 'uploadingPhoto' : 'reuploadFine')}
+        {!upload.isPending && t('reuploadFine')}
+        {upload.isPending && t('uploadingPhoto')}
       </Button>
       {upload.isError && (
         <p role="alert" className="text-destructive text-sm">
