@@ -7,10 +7,9 @@
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
     // HTML needs to pass through the Worker so it can set the host-specific canonical and Open
-    // Graph tags. Keep Vite's hashed bundle files on Cloudflare's direct asset path.
+    // Graph tags. Bundles also pass through the Worker to reject missing-asset SPA fallbacks.
     "run_worker_first": [
       "/*",
-      "!/assets/*",
       "!/favicon*",
       "!/icons.svg",
       "!/manifest.webmanifest",

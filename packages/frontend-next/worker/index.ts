@@ -78,7 +78,15 @@ export default {
       return Response.redirect(url.toString(), 301);
     }
     if (!url.pathname.startsWith(`${PREFIX}/`)) {
-      return withHostMetadata(await env.ASSETS.fetch(request), url, request.method);
+      const response = await env.ASSETS.fetch(request);
+      // SPA fallback must not turn a missing bundle into HTML cached as immutable JavaScript.
+      if (
+        url.pathname.startsWith('/assets/') &&
+        response.headers.get('content-type')?.includes('text/html')
+      ) {
+        return new Response(null, { status: 404, headers: { 'Cache-Control': 'no-store' } });
+      }
+      return withHostMetadata(response, url, request.method);
     }
 
     const upstreamPath = url.pathname.slice(PREFIX.length) + url.search;
