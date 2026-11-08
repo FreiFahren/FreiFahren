@@ -77,3 +77,9 @@ export function captureIssue(message: string, context?: Record<string, unknown>)
     extra: context,
   });
 }
+
+export function captureException(error: unknown): void {
+  SentryReact.captureException(error, {
+    tags: { platform: Capacitor.getPlatform() },
+  });
+}
