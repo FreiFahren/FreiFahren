@@ -3,7 +3,7 @@ import { ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { LineBadge } from '@/components/transit/LineBadge';
-import { CardContent } from '@/components/ui/card';
+import { CardContent } from '@freifahren/ui/card';
 import { track } from '@/lib/analytics';
 import { Route as LineDetailRoute } from '@/routes/_map/line/$lineName';
 

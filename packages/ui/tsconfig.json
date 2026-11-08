@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    // The shadcn CLI reads its aliases from here; bundlers resolve them through the package's own exports.
+    "paths": {
+      "@freifahren/ui": ["./src/components"],
+      "@freifahren/ui/cn": ["./src/cn.ts"],
+      "@freifahren/ui/*": ["./src/components/*"]
+    }
+  },
+  "include": ["src"]
+}

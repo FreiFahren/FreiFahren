@@ -8,10 +8,10 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@/components/ui/button';
-import { CardContent } from '@/components/ui/card';
-import { SectionHeading } from '@/components/ui/section-heading';
-import { Separator } from '@/components/ui/separator';
+import { Button } from '@freifahren/ui/button';
+import { CardContent } from '@freifahren/ui/card';
+import { SectionHeading } from '@freifahren/ui/section-heading';
+import { Separator } from '@freifahren/ui/separator';
 import { openConsentSettings } from '@/lib/consent';
 import { openContributeModal } from '@/lib/contribute-modal';
 import { openFeedbackModal } from '@/lib/feedback-modal';

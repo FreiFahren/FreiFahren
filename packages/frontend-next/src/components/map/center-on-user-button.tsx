@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { type MapRef, useControl, useMap } from 'react-map-gl/maplibre';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@freifahren/ui/button';
 import { useGeolocation } from '@/contexts/Geolocation.context';
 import { track } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';

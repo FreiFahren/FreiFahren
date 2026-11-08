@@ -5,12 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { useLineInsights } from '@/api/insights';
 import { DAY_MS, HOUR_MS, useReports } from '@/api/reports';
 import { useStations } from '@/api/transit';
-import { Button } from '@/components/ui/button';
-import { CardContent } from '@/components/ui/card';
+import { Button } from '@freifahren/ui/button';
+import { CardContent } from '@freifahren/ui/card';
 import { useModalViewDuration } from '@/hooks/useModalViewDuration';
 import { track, type LineDetailSource } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';
-import { cn } from '@/lib/utils';
+import { cn } from '@freifahren/ui/cn';
 import { Route as ReportRoute } from '@/routes/report';
 
 import { DetailCard } from './DetailCard';

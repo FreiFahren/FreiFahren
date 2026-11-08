@@ -2,7 +2,7 @@ import { Link, useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
 import { track } from '@/lib/analytics';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@freifahren/ui/tabs';
 import { Route as LinesRoute } from '@/routes/reports/lines';
 import { Route as StationsRoute } from '@/routes/reports/stations';
 import { Route as SummaryRoute } from '@/routes/reports/index';

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { CardContent } from '@/components/ui/card';
+import { CardContent } from '@freifahren/ui/card';
 
 import { NAMESPACE } from './LineDetail.i18n';
 

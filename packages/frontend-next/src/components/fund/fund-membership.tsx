@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { PRIMARY_BUTTON, SECONDARY_BUTTON } from '@/components/account/account-layout';
-import { Button } from '@/components/ui/button';
+import { Button } from '@freifahren/ui/button';
 import { useEuro, useMembership, useOpenStripe } from '@/hooks/use-membership';
 import { FundRequestError } from '@/lib/fund-api';
 import { fundTermsUrl } from '@/lib/privacy-policy';

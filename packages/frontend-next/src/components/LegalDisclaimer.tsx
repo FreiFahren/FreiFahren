@@ -1,8 +1,8 @@
 import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { Backdrop } from '@/components/ui/backdrop';
-import { Button } from '@/components/ui/button';
+import { Backdrop } from '@freifahren/ui/backdrop';
+import { Button } from '@freifahren/ui/button';
 import {
   Card,
   CardAction,
@@ -10,10 +10,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from '@freifahren/ui/card';
 import { closeLegalDisclaimer, useLegalDisclaimerReview } from '@/lib/legal-disclaimer';
 import { imprintUrl, privacyPolicyUrl } from '@/lib/privacy-policy';
-import { cn } from '@/lib/utils';
+import { cn } from '@freifahren/ui/cn';
 
 import { NAMESPACE } from './LegalDisclaimer.i18n';
 

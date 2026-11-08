@@ -2,8 +2,8 @@ import { useNavigate } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@/components/ui/button';
-import { ToastPill } from '@/components/ui/toast-pill';
+import { Button } from '@freifahren/ui/button';
+import { ToastPill } from '@freifahren/ui/toast-pill';
 import { authClient, sendSignInCode } from '@/lib/auth-client';
 import { clearSessionToken } from '@/lib/session';
 import { toast } from '@/lib/toast';

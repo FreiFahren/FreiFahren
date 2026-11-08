@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@/components/ui/button';
-import { CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@freifahren/ui/button';
+import { CardContent, CardFooter } from '@freifahren/ui/card';
 import { useCityLocationPrompt } from '@/hooks/use-city-location-prompt';
 
 import { NAMESPACE } from './city-location-prompt.i18n';

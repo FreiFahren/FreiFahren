@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn } from '@freifahren/ui/cn';
 
 type PulseDotProps = {
   /** Length of one ping cycle. Share it with any animation that should beat in time with the dot. */

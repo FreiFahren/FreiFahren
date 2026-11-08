@@ -7,8 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { Capacitor } from '@capacitor/core';
 import { useMap } from 'react-map-gl/maplibre';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@freifahren/ui/button';
+import { Card, CardContent, CardFooter } from '@freifahren/ui/card';
 import { useGeolocation } from '@/contexts/Geolocation.context';
 import { useMapLocationSharing, useReportLocationSharing } from '@/hooks/use-location-sharing';
 import { useConsentPrompt, useConsentReview } from '@/lib/consent';

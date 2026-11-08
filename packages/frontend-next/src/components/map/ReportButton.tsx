@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@freifahren/ui/button';
 import { Route as ReportRoute } from '@/routes/report';
 
 import { NAMESPACE } from './ReportButton.i18n';

@@ -3,7 +3,7 @@ import { useRef, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { PRIMARY_BUTTON } from '@/components/account/account-layout';
-import { Button } from '@/components/ui/button';
+import { Button } from '@freifahren/ui/button';
 import { useFineUpload } from '@/hooks/use-fine-upload';
 import { FundRequestError } from '@/lib/fund-api';
 

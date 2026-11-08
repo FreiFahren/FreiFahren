@@ -6,7 +6,7 @@ import {
   useLines,
 } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
-import { cn } from '@/lib/utils';
+import { cn } from '@freifahren/ui/cn';
 
 type StationListItemProps = {
   station: Station;

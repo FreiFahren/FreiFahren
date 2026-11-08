@@ -1,7 +1,7 @@
 import { MessageSquarePlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@freifahren/ui/button';
 import { openFeedbackModal, type FeedbackSource } from '@/lib/feedback-modal';
 
 import { NAMESPACE } from './FeedbackCard.i18n';

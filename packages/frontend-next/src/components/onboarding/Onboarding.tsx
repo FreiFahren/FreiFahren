@@ -1,6 +1,6 @@
 import { useRouterState } from '@tanstack/react-router';
 
-import { Card } from '@/components/ui/card';
+import { Card } from '@freifahren/ui/card';
 import { useCurrentOnboardingStep } from '@/lib/onboarding';
 
 /**

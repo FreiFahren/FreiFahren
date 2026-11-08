@@ -8,7 +8,7 @@ import { lineInsightsQueryOptions, stationInsightsQueryOptions } from '@/api/ins
 import { formatElapsed, HOUR_MS, useReports, useStationReportCount } from '@/api/reports';
 import { type Station, useLines, useStations, useStationDistance } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
-import { CardContent } from '@/components/ui/card';
+import { CardContent } from '@freifahren/ui/card';
 import { useGeolocation } from '@/contexts/Geolocation.context';
 import { useModalViewDuration } from '@/hooks/useModalViewDuration';
 import { track } from '@/lib/analytics';

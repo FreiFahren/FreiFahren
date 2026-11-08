@@ -1,10 +1,3 @@
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
 export function optionalEnv(key: string): string | undefined {
   const raw = import.meta.env[key];
   return typeof raw === 'string' && raw.length > 0 ? raw : undefined;

@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import type { LineInsights } from '@/api/insights';
 import type { Stations } from '@/api/transit';
 import { track } from '@/lib/analytics';
-import { cn } from '@/lib/utils';
+import { cn } from '@freifahren/ui/cn';
 import { Route as StationDetailRoute } from '@/routes/_map/station/$stationId';
 
 import { NAMESPACE } from './LineDetail.i18n';

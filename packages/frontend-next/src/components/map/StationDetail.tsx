@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { prefetchLineInsights } from '@/api/insights';
 import { DAY_MS, useReports } from '@/api/reports';
 import { resolveStationLineNames, type Station, useLines } from '@/api/transit';
-import { Button } from '@/components/ui/button';
-import { CardContent } from '@/components/ui/card';
+import { Button } from '@freifahren/ui/button';
+import { CardContent } from '@freifahren/ui/card';
 import { useModalViewDuration } from '@/hooks/useModalViewDuration';
 import { Route as ReportRoute } from '@/routes/report';
 

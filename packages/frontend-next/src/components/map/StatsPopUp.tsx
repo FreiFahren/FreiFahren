@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { DAY_MS, useReports } from '@/api/reports';
-import { ToastPill } from '@/components/ui/toast-pill';
+import { ToastPill } from '@freifahren/ui/toast-pill';
 import { currentCity } from '@/lib/city';
 import { pickReporterCount } from '@/lib/reporters';
 import { toast } from '@/lib/toast';

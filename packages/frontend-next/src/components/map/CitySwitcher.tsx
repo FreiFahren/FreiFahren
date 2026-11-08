@@ -10,7 +10,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@freifahren/ui/dropdown-menu';
 
 import { NAMESPACE } from './CitySwitcher.i18n';
 

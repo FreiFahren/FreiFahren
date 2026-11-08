@@ -11,8 +11,8 @@ import {
   LineTypeTabs,
 } from '@/components/report/line-picker-controls';
 import { LineBadge } from '@/components/transit/LineBadge';
-import { Button } from '@/components/ui/button';
-import { SectionHeading } from '@/components/ui/section-heading';
+import { Button } from '@freifahren/ui/button';
+import { SectionHeading } from '@freifahren/ui/section-heading';
 import { Route as LineDetailRoute } from '@/routes/_map/line/$lineName';
 
 import { NAMESPACE } from './Reports.i18n';

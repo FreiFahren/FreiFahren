@@ -2,7 +2,7 @@ import { RefreshCw } from 'lucide-react';
 import { useEffect } from 'react';
 
 import { useReportsRefreshSignal } from '@/api/reports';
-import { ToastPill } from '@/components/ui/toast-pill';
+import { ToastPill } from '@freifahren/ui/toast-pill';
 import { i18n } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 

@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { DAY_MS, useReports } from '@/api/reports';
 import { useLines, useStations } from '@/api/transit';
-import { SectionHeading } from '@/components/ui/section-heading';
+import { SectionHeading } from '@freifahren/ui/section-heading';
 
 import { computeLineScores } from './lineScores';
 import { LineScoreList } from './LineScoreList';

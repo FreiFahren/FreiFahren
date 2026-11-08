@@ -5,7 +5,7 @@
   "tsx": true,
   "tailwind": {
     "config": "",
-    "css": "src/index.css",
+    "css": "src/styles.css",
     "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
@@ -13,11 +13,11 @@
   "iconLibrary": "lucide-react",
   "rtl": false,
   "aliases": {
-    "components": "@/components",
-    "utils": "@/lib/utils",
-    "ui": "@/components/ui",
-    "lib": "@/lib",
-    "hooks": "@/hooks"
+    "components": "@freifahren/ui",
+    "utils": "@freifahren/ui/cn",
+    "ui": "@freifahren/ui",
+    "lib": "@freifahren/ui/lib",
+    "hooks": "@freifahren/ui/hooks"
   },
   "menuColor": "default",
   "menuAccent": "subtle",

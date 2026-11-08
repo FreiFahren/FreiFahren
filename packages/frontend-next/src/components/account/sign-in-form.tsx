@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from '@freifahren/ui/button';
+import { Input } from '@freifahren/ui/input';
 import { track } from '@/lib/analytics';
 import { authClient, sendSignInCode } from '@/lib/auth-client';
 import { privacyPolicyUrl } from '@/lib/privacy-policy';

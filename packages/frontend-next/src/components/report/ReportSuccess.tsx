@@ -6,7 +6,7 @@ import type { SubmitReportResponse } from '@/api/reports';
 import { useLines, useStations } from '@/api/transit';
 import { SocialLinks } from '@/components/map/SocialLinks';
 import { LineBadge } from '@/components/transit/LineBadge';
-import { Button } from '@/components/ui/button';
+import { Button } from '@freifahren/ui/button';
 import { useCountAnimation } from '@/hooks/useCountAnimation';
 import { currentCity } from '@/lib/city';
 import { pickReporterCount } from '@/lib/reporters';

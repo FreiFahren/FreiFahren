@@ -7,7 +7,7 @@ import { SettingsButton } from '@/components/map/SettingsButton';
 import { StationSearch } from '@/components/map/StationSearch';
 import { StatsPopUp } from '@/components/map/StatsPopUp';
 import { RefreshNotification } from '@/components/RefreshNotification';
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster } from '@/components/toaster';
 
 export const Route = createFileRoute('/_map')({
   // Pathless layout — never the active leaf; its children declare their own flag.

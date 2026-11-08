@@ -4,7 +4,7 @@ import { Check, UserRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '@/components/account/account.i18n';
-import { Button } from '@/components/ui/button';
+import { Button } from '@freifahren/ui/button';
 import { useAuthSession } from '@/hooks/use-auth-session';
 import { useFundEnabled } from '@/hooks/use-fund-enabled';
 import { membershipQueryOptions } from '@/hooks/use-membership';

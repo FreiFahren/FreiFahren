@@ -2,8 +2,8 @@ import { Dialog } from 'radix-ui';
 import { useEffect, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@freifahren/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@freifahren/ui/card';
 
 import { FundPrivacyNote } from './fund-privacy-note';
 import { NAMESPACE } from './fund.i18n';

@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import type { AnnouncementSummary } from '@/api/announcements';
 import { FullScreenPage } from '@/components/templates/full-screen-page';
 import { PageHeader } from '@/components/templates/PageHeader';
-import { PulseDot } from '@/components/ui/pulse-dot';
+import { PulseDot } from '@freifahren/ui/pulse-dot';
 import { getReadAnnouncementIds, markAllAnnouncementsRead } from '@/lib/read-announcements';
 import { Route as MapIndexRoute } from '@/routes/_map/index';
 import { Route as AnnouncementDetailRoute } from '@/routes/announcements/$announcementId';

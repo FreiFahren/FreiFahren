@@ -3,7 +3,7 @@ import { Fragment, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { FineUploadVersion } from '@/lib/fund-api';
-import { cn } from '@/lib/utils';
+import { cn } from '@freifahren/ui/cn';
 
 import { FineConfirmationDate } from './fine-confirmation-date';
 import { FineStatus } from './fine-status';

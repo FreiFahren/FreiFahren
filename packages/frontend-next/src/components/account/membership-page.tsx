@@ -6,7 +6,7 @@ import { ManageMembershipButton } from '@/components/fund/fund-account-status';
 import { FundContributions } from '@/components/fund/fund-contributions';
 import { FundMembershipCard } from '@/components/fund/fund-membership-card';
 import { NAMESPACE } from '@/components/fund/fund.i18n';
-import { Button } from '@/components/ui/button';
+import { Button } from '@freifahren/ui/button';
 import { useFundEnabled } from '@/hooks/use-fund-enabled';
 import { useMembership } from '@/hooks/use-membership';
 import { Route as AccountRoute } from '@/routes/account/index';

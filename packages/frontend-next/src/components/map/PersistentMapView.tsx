@@ -1,7 +1,7 @@
 import { useRouterState } from '@tanstack/react-router';
 import { lazy, Suspense, useState } from 'react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@freifahren/ui/cn';
 import { notifyNativeAppReady } from '@/lib/native';
 
 // Load the map + maplibre-gl together without putting their heavy bundles in the shell.

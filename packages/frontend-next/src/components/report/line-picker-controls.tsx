@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 
 import { LineBadge } from '@/components/transit/LineBadge';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { cn } from '@/lib/utils';
+import { ToggleGroup, ToggleGroupItem } from '@freifahren/ui/toggle-group';
+import { cn } from '@freifahren/ui/cn';
 
 import { NAMESPACE } from './ReportForm.i18n';
 import { type LineFilter } from './ReportSelection.context';

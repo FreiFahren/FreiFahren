@@ -10,12 +10,12 @@ import { FeedbackButton } from '@/components/feedback/FeedbackButton';
 import { ReportLocationStep } from '@/components/map/UserLocationControl';
 import { FullScreenPage } from '@/components/templates/full-screen-page';
 import { PageHeader } from '@/components/templates/PageHeader';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { SectionHeading } from '@/components/ui/section-heading';
-import { Separator } from '@/components/ui/separator';
-import { ToastPill } from '@/components/ui/toast-pill';
-import { Toaster } from '@/components/ui/toaster';
+import { Button } from '@freifahren/ui/button';
+import { Input } from '@freifahren/ui/input';
+import { SectionHeading } from '@freifahren/ui/section-heading';
+import { Separator } from '@freifahren/ui/separator';
+import { ToastPill } from '@freifahren/ui/toast-pill';
+import { Toaster } from '@/components/toaster';
 import { useGeolocation } from '@/contexts/Geolocation.context';
 import { track } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';
@@ -29,7 +29,7 @@ import { FEATURE_FLAGS, getFeatureFlagVariant } from '@/lib/feature-flags';
 import { distanceMeters } from '@/lib/geo';
 import { notifySuccess } from '@/lib/haptics';
 import { toast } from '@/lib/toast';
-import { cn } from '@/lib/utils';
+import { cn } from '@freifahren/ui/cn';
 
 import { NAMESPACE } from './ReportForm.i18n';
 import {

@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 import { PopupCard } from '@/components/map/PopupCard';
-import { Button } from '@/components/ui/button';
-import { CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@freifahren/ui/button';
+import { CardContent, CardFooter } from '@freifahren/ui/card';
 import {
   setConsent,
   syncConsentToPostHog,

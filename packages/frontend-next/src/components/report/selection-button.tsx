@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 
 import { selectionTap } from '@/lib/haptics';
-import { cn } from '@/lib/utils';
+import { cn } from '@freifahren/ui/cn';
 
 export function SelectionButton({
   value,

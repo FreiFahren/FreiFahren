@@ -8,8 +8,8 @@ import {
   useAnnouncementBurst,
   useHasUnreadAnnouncements,
 } from '@/components/announcements/use-announcements';
-import { Button } from '@/components/ui/button';
-import { PulseDot } from '@/components/ui/pulse-dot';
+import { Button } from '@freifahren/ui/button';
+import { PulseDot } from '@freifahren/ui/pulse-dot';
 import { track } from '@/lib/analytics';
 import { FEATURE_FLAGS, useFeatureFlag } from '@/lib/feature-flags';
 import { useOnboardingComplete } from '@/lib/onboarding';

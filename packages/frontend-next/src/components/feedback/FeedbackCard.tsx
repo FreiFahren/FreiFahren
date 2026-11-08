@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import { DetailCard } from '@/components/map/DetailCard';
-import { CardContent } from '@/components/ui/card';
+import { CardContent } from '@freifahren/ui/card';
 import { closeFeedbackModal, useFeedbackModalOpen } from '@/lib/feedback-modal';
 
 import { FeedbackForm } from './FeedbackForm';

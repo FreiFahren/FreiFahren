@@ -2,14 +2,14 @@ import { useTranslation } from 'react-i18next';
 
 import { LegalDisclaimerPoints, LegalLinks } from '@/components/LegalDisclaimer';
 import { NAMESPACE } from '@/components/LegalDisclaimer.i18n';
-import { Button } from '@/components/ui/button';
+import { Button } from '@freifahren/ui/button';
 import {
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from '@freifahren/ui/card';
 import { acceptLegalDisclaimer } from '@/lib/legal-disclaimer';
 
 // The explicitly labeled accept button (clickwrap) is what makes the acceptance legally

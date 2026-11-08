@@ -9,7 +9,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
+} from '@freifahren/ui/breadcrumb';
 
 import { NAMESPACE } from './PageHeader.i18n';
 

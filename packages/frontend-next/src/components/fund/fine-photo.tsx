@@ -2,7 +2,7 @@ import { Download, Eye, LoaderCircle } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@freifahren/ui/button';
 import { FundRequestError, fetchFund, type FineUploadVersion } from '@/lib/fund-api';
 
 import { NAMESPACE } from './fund.i18n';

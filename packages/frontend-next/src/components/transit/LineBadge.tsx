@@ -1,6 +1,6 @@
 import { useLines } from '@/api/transit';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { Badge } from '@freifahren/ui/badge';
+import { cn } from '@freifahren/ui/cn';
 
 type LineBadgeProps = {
   name: string;

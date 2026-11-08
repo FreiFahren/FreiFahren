@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { Backdrop } from '@/components/ui/backdrop';
-import { Card } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { Backdrop } from '@freifahren/ui/backdrop';
+import { Card } from '@freifahren/ui/card';
+import { cn } from '@freifahren/ui/cn';
 
 type PopupCardProps = {
   /**

@@ -1,8 +1,8 @@
 import { ChevronRight, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@/components/ui/button';
-import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@freifahren/ui/button';
+import { CardContent, CardDescription, CardHeader, CardTitle } from '@freifahren/ui/card';
 import { setCityPreference } from '@/lib/city';
 import { selectableCities } from '@/lib/city-switching';
 

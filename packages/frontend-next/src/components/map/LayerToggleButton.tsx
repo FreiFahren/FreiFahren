@@ -2,7 +2,7 @@ import { Layers } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { RISK_COLORS } from '@/api/risk';
-import { Button } from '@/components/ui/button';
+import { Button } from '@freifahren/ui/button';
 import { useRiskLayer } from '@/hooks/useRiskLayer';
 import { selectionTap } from '@/lib/haptics';
 

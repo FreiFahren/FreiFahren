@@ -2,7 +2,7 @@ import { Check, Clock3, CircleAlert, LoaderCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { SECONDARY_BUTTON } from '@/components/account/account-layout';
-import { Button } from '@/components/ui/button';
+import { Button } from '@freifahren/ui/button';
 import {
   Table,
   TableBody,
@@ -11,7 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '@freifahren/ui/table';
 import { type Contribution, useContributions } from '@/hooks/use-contributions';
 
 import { FundHistoryStatus } from './fund-history-status';

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { FeedbackForm } from '@/components/feedback/FeedbackForm';
-import { Button } from '@/components/ui/button';
+import { Button } from '@freifahren/ui/button';
 import { captureSurveyShown, type FeedbackSentiment, track } from '@/lib/analytics';
 import { FEEDBACK_SURVEY_ID } from '@/lib/feedback-modal';
 

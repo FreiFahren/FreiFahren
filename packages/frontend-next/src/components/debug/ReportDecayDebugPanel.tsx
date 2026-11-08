@@ -2,9 +2,9 @@ import { useNavigate } from '@tanstack/react-router';
 import { useEffect, useMemo, useState } from 'react';
 
 import { compareLineOrder, useLines, useStations } from '@/api/transit';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { Button } from '@freifahren/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@freifahren/ui/card';
+import { Separator } from '@freifahren/ui/separator';
 import { useReportSimulation } from '@/contexts/ReportSimulation.context';
 import {
   annotateReportExpiry,
@@ -19,7 +19,7 @@ import {
   FALLBACK_LINES,
   FALLBACK_STATIONS,
 } from '@/lib/report-decay-simulation';
-import { cn } from '@/lib/utils';
+import { cn } from '@freifahren/ui/cn';
 
 const SIM_RANGE_MINUTES = { min: -10, max: 90 };
 const HOP_COUNT = 8;

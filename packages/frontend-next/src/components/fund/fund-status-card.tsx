@@ -1,7 +1,7 @@
 import { ShieldAlert, ShieldCheck, ShieldOff } from 'lucide-react';
 import type { ReactNode } from 'react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@freifahren/ui/cn';
 
 // Green while covered, orange while coverage is about to end or not started, red when not covered.
 export type FundStatusTone = 'ok' | 'warn' | 'danger';

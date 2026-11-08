@@ -1,8 +1,8 @@
 import { X } from 'lucide-react';
 import * as React from 'react';
 
-import { Button } from '@/components/ui/button';
-import { CardContent } from '@/components/ui/card';
+import { Button } from '@freifahren/ui/button';
+import { CardContent } from '@freifahren/ui/card';
 
 import { PopupCard } from './PopupCard';
 

@@ -3,7 +3,7 @@ import { HeartHandshake } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '@/components/fund/fund.i18n';
-import { Button } from '@/components/ui/button';
+import { Button } from '@freifahren/ui/button';
 import { useFundEnabled } from '@/hooks/use-fund-enabled';
 import { Route as FundRoute } from '@/routes/fund/index';
 

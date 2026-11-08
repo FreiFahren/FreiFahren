@@ -2,8 +2,9 @@ import { ChevronRight, LoaderCircle } from 'lucide-react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@/components/ui/button';
-import { SectionHeading } from '@/components/ui/section-heading';
+import { Button } from '@freifahren/ui/button';
+import { cn } from '@freifahren/ui/cn';
+import { SectionHeading } from '@freifahren/ui/section-heading';
 import {
   Table,
   TableBody,
@@ -11,9 +12,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '@freifahren/ui/table';
 import { useFundHistory, type Fine } from '@/hooks/use-fund-history';
-import { cn } from '@/lib/utils';
 import { Route as FineDetailsRoute } from '@/routes/fund/$fineId';
 
 import { FineUpload } from './fine-upload';

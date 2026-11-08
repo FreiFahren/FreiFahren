@@ -3,11 +3,11 @@ import { Check } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@/components/ui/button';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Button } from '@freifahren/ui/button';
+import { ToggleGroup, ToggleGroupItem } from '@freifahren/ui/toggle-group';
 import { captureSurveySent, type FeedbackSentiment, type FeedbackType } from '@/lib/analytics';
 import { FEEDBACK_SURVEY_ID } from '@/lib/feedback-modal';
-import { cn } from '@/lib/utils';
+import { cn } from '@freifahren/ui/cn';
 
 import { NAMESPACE } from './FeedbackCard.i18n';
 

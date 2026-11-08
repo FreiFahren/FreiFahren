@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Input } from '@/components/ui/input';
+import { Input } from '@freifahren/ui/input';
 
 import { INPUT } from './account-layout';
 import { NAMESPACE } from './account.i18n';

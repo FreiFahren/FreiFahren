@@ -15,10 +15,10 @@ import { track } from '@/lib/analytics';
 import { selectionTap } from '@/lib/haptics';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { StationListItem } from '@/components/transit/StationListItem';
-import { Backdrop } from '@/components/ui/backdrop';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Backdrop } from '@freifahren/ui/backdrop';
+import { Button } from '@freifahren/ui/button';
+import { Card } from '@freifahren/ui/card';
+import { Input } from '@freifahren/ui/input';
 import { Route as LineDetailRoute } from '@/routes/_map/line/$lineName';
 import { Route as StationDetailRoute } from '@/routes/_map/station/$stationId';
 

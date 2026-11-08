@@ -3,7 +3,7 @@ import { ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { SECONDARY_BUTTON } from '@/components/account/account-layout';
-import { Button } from '@/components/ui/button';
+import { Button } from '@freifahren/ui/button';
 import { useFundEnabled } from '@/hooks/use-fund-enabled';
 import { useMembership, useOpenStripe } from '@/hooks/use-membership';
 import { Route as MembershipRoute } from '@/routes/account/membership';

@@ -13,7 +13,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@freifahren/ui/dropdown-menu';
 
 import { NAMESPACE } from './LanguageSwitcher.i18n';
 

@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { SignInGate } from '@/components/account/sign-in-gate';
 import { FullScreenPage } from '@/components/templates/full-screen-page';
 import { PageHeader } from '@/components/templates/PageHeader';
-import { Button } from '@/components/ui/button';
+import { Button } from '@freifahren/ui/button';
 import { useFineDetails } from '@/hooks/use-fine-details';
 import { useFineUpload } from '@/hooks/use-fine-upload';
 import { useFundEnabled } from '@/hooks/use-fund-enabled';

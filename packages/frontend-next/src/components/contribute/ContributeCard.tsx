@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { DetailCard } from '@/components/map/DetailCard';
-import { Button } from '@/components/ui/button';
-import { CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@freifahren/ui/button';
+import { CardContent } from '@freifahren/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@freifahren/ui/tabs';
 import { track } from '@/lib/analytics';
 import {
   closeContributeModal,

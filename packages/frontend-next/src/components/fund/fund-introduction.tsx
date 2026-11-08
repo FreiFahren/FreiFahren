@@ -2,7 +2,7 @@ import { Camera, Heart, ShieldCheck } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Separator } from '@/components/ui/separator';
+import { Separator } from '@freifahren/ui/separator';
 
 import { NAMESPACE } from './fund.i18n';
 
