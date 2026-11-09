@@ -36,6 +36,13 @@
       "when": 1788811664183,
       "tag": "0004_add_report_emergency_quarantine",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1794229101928,
+      "tag": "0005_add_report_statistics_snapshots",
+      "breakpoints": true
     }
   ]
 }
