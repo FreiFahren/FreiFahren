@@ -23,6 +23,11 @@ import { TURNSTILE_TOKEN_HEADER } from './modules/report-gate'
 import { getReports, getReportsByStation, postReport } from './modules/reports/'
 import { reportsCacheMiddleware, VERSIONED_REPORTS_CACHEABLE_PATHS } from './modules/reports/reports-cache-middleware'
 import { getRisk } from './modules/risk/risk-routes'
+import { getStatistics } from './modules/statistics'
+import {
+    statisticsCacheMiddleware,
+    VERSIONED_STATISTICS_CACHEABLE_PATHS,
+} from './modules/statistics/statistics-cache-middleware'
 import { postStripeWebhook } from './modules/stripe/stripe-webhook'
 import {
     transitCacheMiddleware,
@@ -90,6 +95,9 @@ export const createApp = () => {
     for (const path of VERSIONED_REPORTS_CACHEABLE_PATHS) {
         app.use(path, reportsCacheMiddleware)
     }
+    for (const path of VERSIONED_STATISTICS_CACHEABLE_PATHS) {
+        app.use(path, statisticsCacheMiddleware)
+    }
     app.use(VERSIONED_ANNOUNCEMENTS_PATH, announcementsCacheMiddleware)
     app.use('*', async (c, next) => {
         await next()
@@ -122,6 +130,9 @@ export const createApp = () => {
     })
     registerVersionedRoutes(app, 'insights', 'v0', {
         v0: [getStationInsights, getLinesInsights, getLineInsights],
+    })
+    registerVersionedRoutes(app, 'statistics', 'v0', {
+        v0: [getStatistics],
     })
     registerVersionedRoutes(app, 'announcements', 'v0', {
         v0: [getAnnouncements, getAnnouncementById],

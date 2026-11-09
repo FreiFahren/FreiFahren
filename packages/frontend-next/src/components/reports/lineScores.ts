@@ -1,53 +1,41 @@
-import type { Report } from '@/api/reports';
-import {
-  compareLineOrder,
-  type Line,
-  resolveStationLineNames,
-  type LineType,
-  type Stations,
-} from '@/api/transit';
+import type { ReportStatistics } from '@/api/statistics';
+import { compareLineOrder, type Line, type LineType } from '@/api/transit';
 
-export type LineScore = { name: string; type: LineType; score: number; fill: string };
+export type LineScore = {
+  name: string;
+  type: LineType;
+  score: number;
+  fill: string;
+  /** Local hour (0–23) with the most reports, or null when there are none. */
+  peakHour: number | null;
+};
 
-/**
- * A report that names a line counts as a full point for that line. A report without a line
- * is spread evenly across every line the station serves — a station on U2 and U3 adds 0.5 to each.
- */
-export function computeLineScores(
-  reports: Report[],
-  stations: Stations | undefined,
+/** Joins the server's per-line statistics with the line styling the list renders. */
+export function toLineScores(
+  statistics: ReportStatistics | undefined,
   lines: Line[] | undefined,
 ): LineScore[] {
-  if (!lines) return [];
+  if (!statistics || !lines) return [];
 
-  const scores = new Map<string, number>();
-  const add = (name: string, value: number) => scores.set(name, (scores.get(name) ?? 0) + value);
-  const lineById = new Map(lines.map((line) => [line.id, line]));
   const lineByName = new Map<string, Line>();
   for (const line of lines) {
     if (!lineByName.has(line.name)) lineByName.set(line.name, line);
   }
 
-  for (const report of reports) {
-    if (report.lineId) {
-      const name = lineById.get(report.lineId)?.name;
-      if (name) add(name, 1);
-      continue;
-    }
-
-    const stationLines = stations?.[report.stationId]?.lines ?? [];
-    const names = resolveStationLineNames(stationLines, lines);
-    if (names.length === 0) continue;
-    const share = 1 / names.length;
-    for (const name of names) {
-      if (lineByName.has(name)) add(name, share);
-    }
-  }
-
-  return [...scores.entries()]
-    .flatMap(([name, score]) => {
-      const line = lineByName.get(name);
-      return line ? [{ name, type: line.type, score, fill: line.color }] : [];
+  return statistics.lines
+    .flatMap((entry) => {
+      const line = lineByName.get(entry.name);
+      if (!line) return [];
+      const peak = Math.max(...entry.hours);
+      return [
+        {
+          name: entry.name,
+          type: line.type,
+          score: entry.score,
+          fill: line.color,
+          peakHour: peak > 0 ? entry.hours.indexOf(peak) : null,
+        },
+      ];
     })
     .sort((a, b) => b.score - a.score || compareLineOrder(a, b));
 }
