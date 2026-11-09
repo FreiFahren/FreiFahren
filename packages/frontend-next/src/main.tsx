@@ -17,6 +17,7 @@ import { initPreloadRecovery, PRELOAD_RELOAD_MARK } from './lib/preload-recovery
 import { isTelegramInAppBrowser } from './lib/utils';
 import './lib/i18n';
 import { routeTree } from './routeTree.gen';
+import { RouteError } from './components/route-error';
 import './index.css';
 
 // Initialize error monitoring before anything else renders so errors during startup are captured.
@@ -115,7 +116,11 @@ const persister = createAsyncStoragePersister({
 
 // 'viewport' preloads each <Link>'s route (chunk + loader data) once it's on screen via an
 // IntersectionObserver — so the pages reachable from the current view warm in the background
-const router = createRouter({ routeTree, defaultPreload: 'viewport' });
+const router = createRouter({
+  routeTree,
+  defaultPreload: 'viewport',
+  defaultErrorComponent: RouteError,
+});
 
 declare module '@tanstack/react-router' {
   interface Register {
