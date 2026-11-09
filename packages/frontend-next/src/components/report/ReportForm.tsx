@@ -17,6 +17,7 @@ import { Separator } from '@freifahren/ui/separator';
 import { ToastPill } from '@freifahren/ui/toast-pill';
 import { Toaster } from '@/components/toaster';
 import { useGeolocation } from '@/contexts/Geolocation.context';
+import { useKeyboardScrollArea } from '@/hooks/use-keyboard-scroll-area';
 import { track } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';
 import {
@@ -183,7 +184,7 @@ function StationPicker() {
 
   return (
     <section
-      className={cn('mt-6 flex flex-col px-4', tappedStationId === null && 'min-h-0 flex-1')}
+      className={cn('mt-6 flex flex-col px-4', tappedStationId === null && 'min-h-56 flex-1')}
     >
       <div className="mb-3 flex items-center justify-between">
         <SectionHeading
@@ -470,6 +471,7 @@ export function ReportForm() {
   const { stationId: initialStationId, lineName: initialLineName } = routeApi.useSearch();
   const [result, setResult] = useState<SubmitReportResponse | null>(null);
   const [repeatedFailure, setRepeatedFailure] = useState(false);
+  const scrollAreaRef = useKeyboardScrollArea();
 
   const handleSuccessClose = () => {
     navigate({ to: '/' });
@@ -481,38 +483,44 @@ export function ReportForm() {
 
   return (
     <ReportSelectionProvider initialStationId={initialStationId} initialLineName={initialLineName}>
-      <FullScreenPage className="pb-(--keyboard-inset)">
-        {result ? (
-          <ReportSuccess result={result} onClose={handleSuccessClose} />
-        ) : (
-          <>
-            <PageHeader
-              title={t('title')}
-              onBack={() => navigate({ to: '/' })}
-              action={
-                <FeedbackButton
-                  source="report_form"
-                  size="xs"
-                  className="text-muted-foreground hover:text-foreground"
-                />
-              }
-            />
-            {!repeatedFailure ? (
-              <ReportLocationStep>
-                <LinePicker />
-                <StationPicker />
-                <DirectionPicker />
-                <SubmitFooter
-                  onSubmitted={setResult}
-                  onSubmissionError={() => setResult(null)}
-                  onRepeatedFailure={() => setRepeatedFailure(true)}
-                />
-              </ReportLocationStep>
-            ) : (
-              <SubmitFailureNotice title={t('submitFailedTitle')} body={t('submitFailedBody')} />
-            )}
-          </>
-        )}
+      <FullScreenPage>
+        {/* The whole form must scroll when directions or the keyboard leave too little room. */}
+        <div
+          ref={scrollAreaRef}
+          className="mb-[max(var(--keyboard-inset),var(--browser-keyboard-inset,0px))] flex min-h-0 flex-1 flex-col overflow-y-auto"
+        >
+          {result ? (
+            <ReportSuccess result={result} onClose={handleSuccessClose} />
+          ) : (
+            <>
+              <PageHeader
+                title={t('title')}
+                onBack={() => navigate({ to: '/' })}
+                action={
+                  <FeedbackButton
+                    source="report_form"
+                    size="xs"
+                    className="text-muted-foreground hover:text-foreground"
+                  />
+                }
+              />
+              {!repeatedFailure ? (
+                <ReportLocationStep>
+                  <LinePicker />
+                  <StationPicker />
+                  <DirectionPicker />
+                  <SubmitFooter
+                    onSubmitted={setResult}
+                    onSubmissionError={() => setResult(null)}
+                    onRepeatedFailure={() => setRepeatedFailure(true)}
+                  />
+                </ReportLocationStep>
+              ) : (
+                <SubmitFailureNotice title={t('submitFailedTitle')} body={t('submitFailedBody')} />
+              )}
+            </>
+          )}
+        </div>
         {/* /report is outside the _map layout that hosts the app's Toaster, so mount one here. */}
         <Toaster />
       </FullScreenPage>
