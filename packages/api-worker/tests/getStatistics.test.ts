@@ -1,6 +1,6 @@
 import { createExecutionContext, waitOnExecutionContext } from 'cloudflare:test'
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { eq } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 
 import { reportStatisticsSchema, type ReportStatistics } from '../src/modules/statistics'
 import { refreshReportStatisticsForAllCities } from '../src/modules/statistics/statistics-refresh'
@@ -21,8 +21,12 @@ const DAY_MS = 24 * HOUR_MS
 // A station served by a single line name, and one shared by at least two line names.
 let singleLine: { stationId: string; lineId: string; lineName: string }
 let sharedStation: { stationId: string; lineNames: string[] }
+// The stations of a line with a single, non-circular variant, in line order.
+let straightLine: { lineId: string; lineName: string; stations: string[] }
+// Two neighbouring stations that more than one line runs between.
+let sharedTrack: { stationId: string; neighbourId: string; lines: Array<{ id: string; name: string }> }
 
-const reportAt = async (timestamp: Date, report: { stationId: string; lineId?: string }) => {
+const reportAt = async (timestamp: Date, report: { stationId: string; lineId?: string; directionId?: string }) => {
     setSystemTime(timestamp)
     expect((await sendReportRequest({ ...report, source: 'web_app' })).status).toBe(200)
 }
@@ -53,6 +57,37 @@ beforeAll(async () => {
     if (!single || !shared) throw new Error('Expected seeded data with single-line and shared stations')
     singleLine = single
     sharedStation = { stationId: shared[0], lineNames: [...shared[1]] }
+
+    const seededLines = await db.select().from(lines)
+    const straight = seededLines.find(
+        (line) => !line.isCircular && seededLines.filter((other) => other.name === line.name).length === 1
+    )
+    if (!straight) throw new Error('Expected seeded data with a single-variant linear line')
+    const ordered = await db
+        .select({ stationId: lineStations.stationId })
+        .from(lineStations)
+        .where(eq(lineStations.lineId, straight.id))
+        .orderBy(asc(lineStations.order))
+    straightLine = { lineId: straight.id, lineName: straight.name, stations: ordered.map((row) => row.stationId) }
+
+    const allOrdered = await db
+        .select({ lineId: lineStations.lineId, stationId: lineStations.stationId })
+        .from(lineStations)
+        .orderBy(asc(lineStations.lineId), asc(lineStations.order))
+    const linesByPair = new Map<string, Map<string, { id: string; name: string }>>()
+    for (let i = 1; i < allOrdered.length; i++) {
+        const [previous, current] = [allOrdered[i - 1]!, allOrdered[i]!]
+        if (previous.lineId !== current.lineId) continue
+        const name = seededLines.find((line) => line.id === current.lineId)!.name
+        const pair = [previous.stationId, current.stationId].sort().join('|')
+        const byName = linesByPair.get(pair) ?? new Map()
+        if (!byName.has(name)) byName.set(name, { id: current.lineId, name })
+        linesByPair.set(pair, byName)
+    }
+    const sharedPair = [...linesByPair].find(([, byName]) => byName.size >= 2)
+    if (!sharedPair) throw new Error('Expected seeded data with two lines sharing a stretch of track')
+    const [stationId, neighbourId] = sharedPair[0].split('|') as [string, string]
+    sharedTrack = { stationId, neighbourId, lines: [...sharedPair[1].values()].slice(0, 2) }
 })
 
 beforeEach(async () => {
@@ -209,6 +244,72 @@ describe('GET /statistics', () => {
         const response = await appRequestWithRedirect('/statistics?period=3d')
 
         expect(response.status).toBe(400)
+    })
+})
+
+describe('GET /statistics sections', () => {
+    const sectionScore = (statistics: ReportStatistics, from: string, to: string) =>
+        statistics.sections.find((section) => section.from.id === from && section.to.id === to)?.score ?? 0
+
+    it('splits a report across both neighbouring sections, whatever its direction', async () => {
+        const [first, second, third] = straightLine.stations
+        const now = new Date('2026-07-15T12:00:00.000Z')
+        await reportAt(new Date(now.getTime() - 2 * HOUR_MS), { stationId: second!, lineId: straightLine.lineId })
+        await reportAt(new Date(now.getTime() - HOUR_MS), {
+            stationId: second!,
+            lineId: straightLine.lineId,
+            directionId: straightLine.stations.at(-1)!,
+        })
+        setSystemTime(now)
+
+        const { body } = await getStatistics('24h')
+
+        expect(body.sections).toEqual([
+            expect.objectContaining({ from: expect.objectContaining({ id: first }), score: 1, share: 0.5 }),
+            expect.objectContaining({ from: expect.objectContaining({ id: second }), score: 1, share: 0.5 }),
+        ])
+        expect(sectionScore(body, second!, third!)).toBe(1)
+        expect(body.sections[0]!.from.name).not.toBe(first)
+    })
+
+    it('gives a terminus its only section in full and ranks sections by score', async () => {
+        const [first, second, third] = straightLine.stations
+        const now = new Date('2026-07-15T12:00:00.000Z')
+        await reportAt(new Date(now.getTime() - 2 * HOUR_MS), { stationId: first!, lineId: straightLine.lineId })
+        await reportAt(new Date(now.getTime() - HOUR_MS), { stationId: second!, lineId: straightLine.lineId })
+        setSystemTime(now)
+
+        const { body } = await getStatistics('24h')
+
+        expect(body.sections.map((section) => [section.from.id, section.to.id, section.score])).toEqual([
+            [first, second, 1.5],
+            [second, third, 0.5],
+        ])
+    })
+})
+
+describe('GET /statistics shared track', () => {
+    it('merges lines running between the same two stations into one section', async () => {
+        const [first, second] = sharedTrack.lines
+        const now = new Date('2026-07-15T12:00:00.000Z')
+        await reportAt(new Date(now.getTime() - 2 * HOUR_MS), { stationId: sharedTrack.stationId, lineId: first!.id })
+        await reportAt(new Date(now.getTime() - HOUR_MS), { stationId: sharedTrack.stationId, lineId: second!.id })
+        setSystemTime(now)
+
+        const { body } = await getStatistics('24h')
+
+        const matching = body.sections.filter(
+            (section) =>
+                [section.from.id, section.to.id].sort().join('|') ===
+                [sharedTrack.stationId, sharedTrack.neighbourId].sort().join('|')
+        )
+        expect(matching).toHaveLength(1)
+        const [section] = matching
+        expect(section!.lines.map((line) => line.name).sort()).toEqual([first!.name, second!.name].sort())
+        expect(section!.score).toBeCloseTo(
+            section!.lines.reduce((sum, line) => sum + line.score, 0),
+            3
+        )
     })
 })
 
