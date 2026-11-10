@@ -12,6 +12,7 @@ import { useIsReportViewed } from '@/lib/viewed-reports';
 import { Route as ReportDetailRoute } from '@/routes/_map/reports/$stationId';
 
 const PULSE_AGE_MS = 60 * 15 * 1000;
+const PULSE_EXPIRY_LEAD_MS = 3 * 60 * 1000;
 
 /** How often anything showing live reports re-reads the clock to roll expiry and fade forward. */
 export const REPORT_RECOMPUTE_INTERVAL_MS = 30 * 1000;
@@ -52,9 +53,9 @@ function reportsToGeoJSON(
     if (opacity === null) return [];
     const age = nowMs - new Date(report.timestamp).getTime();
     // A report on its way out has stopped being news, so it stops pulsing before it stops showing.
-    const isFadingOut = opacity < MIN_OPACITY;
+    const isExpiring = expiresAtMs !== null && expiresAtMs - nowMs < PULSE_EXPIRY_LEAD_MS;
     const pulse =
-      age < PULSE_AGE_MS && !isFadingOut && !isViewed(report.stationId, report.timestamp);
+      age < PULSE_AGE_MS && !isExpiring && !isViewed(report.stationId, report.timestamp);
     return [
       {
         type: 'Feature' as const,
