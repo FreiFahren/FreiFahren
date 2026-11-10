@@ -90,7 +90,7 @@ export type ViewerContext = {
     minStationTrust: number
     clientHash?: string
     /*
-     * Called when any station in the result failed the threshold, whether or not the viewer owned
+     * Called when any report in the result failed the threshold, whether or not the viewer owned
      * a report there. The station-scoped route uses it to skip edge caching.
      *
      * It fires for an empty result too because the edge cache is keyed by URL, not by viewer.
@@ -110,14 +110,18 @@ type ScoredRow = {
 // Pending rows are owner-only. Legacy null values retain their historical neutral weight.
 // Avoid hiding a station when floating-point summation lands immediately below the threshold.
 const TRUST_SUM_TOLERANCE = 1e-9
+const CORROBORATION_WINDOW_MS = 45 * 60 * 1000
 
 export const selectVisibleReports = (
     rows: ScoredRow[],
-    viewer: ViewerContext
+    viewer: ViewerContext,
+    evidence: ScoredRow[] = rows
 ): { rows: ScoredRow[]; suppressed: boolean } => {
-    const trustByStation = new Map<string, number>()
-    for (const row of rows) {
-        trustByStation.set(row.stationId, (trustByStation.get(row.stationId) ?? 0) + (row.trust ?? 1))
+    const reportsByStation = new Map<string, ScoredRow[]>()
+    for (const row of evidence) {
+        const stationReports = reportsByStation.get(row.stationId) ?? []
+        stationReports.push(row)
+        reportsByStation.set(row.stationId, stationReports)
     }
 
     let suppressed = false
@@ -128,9 +132,18 @@ export const selectVisibleReports = (
         }
 
         if (viewer.minStationTrust <= 0) return true
-        if ((trustByStation.get(row.stationId) ?? 0) >= viewer.minStationTrust - TRUST_SUM_TOLERANCE) return true
+        // Anchor corroboration to the sighting, so requesting more history cannot unlock an unrelated report.
+        const timestamp = row.timestamp.getTime()
+        const trust = (reportsByStation.get(row.stationId) ?? []).reduce(
+            (sum, candidate) =>
+                Math.abs(candidate.timestamp.getTime() - timestamp) <= CORROBORATION_WINDOW_MS
+                    ? sum + (candidate.trust ?? 1)
+                    : sum,
+            0
+        )
+        if (trust >= viewer.minStationTrust - TRUST_SUM_TOLERANCE) return true
 
-        // This station did not clear the bar, so what we return for it depends on who is asking —
+        // This report did not clear the bar, so what we return for it depends on who is asking —
         // True even when the answer is an empty list, which is why this is set before the ownership
         // Check rather than inside it.
         suppressed = true
@@ -169,13 +182,17 @@ export class ReportsService {
             .from(reports)
             .where(
                 and(
-                    gte(reports.timestamp, from.toJSDate()),
-                    lte(reports.timestamp, to.toJSDate()),
+                    gte(reports.timestamp, new Date(from.toMillis() - CORROBORATION_WINDOW_MS)),
+                    lte(reports.timestamp, new Date(to.toMillis() + CORROBORATION_WINDOW_MS)),
                     stationId !== undefined ? eq(reports.stationId, stationId) : undefined
                 )
             )
 
-        const visible = selectVisibleReports(dbResults, viewer ?? { minStationTrust: 0 })
+        // A confirmation just outside the displayed range still counts, but is not itself returned.
+        const requestedReports = dbResults.filter(
+            (row) => row.timestamp.getTime() >= from.toMillis() && row.timestamp.getTime() <= to.toMillis()
+        )
+        const visible = selectVisibleReports(requestedReports, viewer ?? { minStationTrust: 0 }, dbResults)
         if (visible.suppressed) viewer?.onSuppressed?.()
 
         // Internal visibility fields never belong in the public response DTO.
