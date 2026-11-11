@@ -39,6 +39,7 @@ Example: `fix: return 404 instead of 500 when station id is unknown`
 ## Backend conventions
 
 - **Throw `AppError` at service boundaries**, not raw `Error` or ad-hoc `c.json({ error: ... })`. `AppError` (see `packages/api-worker/src/common/errors.ts`) carries a `statusCode` and an `internalCode`, and the central error handler strips descriptions in production so internal details don't leak. Domain-specific errors should be converted to `AppError` before they reach the response.
+- **Never change a shipped response shape in place.** Adding fields is safe; renaming, removing, or retyping one is not. The API and the frontend deploy separately, the edge caches responses, and installed PWAs and the iOS app run old builds for weeks, so an app will meet a response shape it wasn't built for. Put breaking changes in a new API version (`registerVersionedRoutes` already supports `v1` alongside `v0`) and keep the old one serving until no supported client uses it.
 - **Use the logger from context** (`c.get('logger')`) instead of `console.log`. It's a thin structured logger (`packages/api-worker/src/common/logger.ts`); on Workers, `@sentry/cloudflare`'s console integration forwards it to Sentry Logs, which is the only observability sink. Log structured objects (`logger.info({ reportId }, 'report created')`), not interpolated strings, so the output stays queryable.
 
 ## City-agnostic code
