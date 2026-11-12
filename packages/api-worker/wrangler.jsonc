@@ -20,8 +20,9 @@
             "head_sampling_rate": 0.1,
         },
     },
-    // Report metadata retention, see report-metadata-retention.ts.
-    "triggers": { "crons": ["23 3 * * *"] },
+    // Report metadata retention (see report-metadata-retention.ts), then the hourly report statistics
+    // refresh (see statistics-refresh.ts). worker.ts dispatches on the cron string.
+    "triggers": { "crons": ["23 3 * * *", "7 * * * *"] },
     "workers_dev": true,
     "routes": [
         {

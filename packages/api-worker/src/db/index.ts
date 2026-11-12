@@ -2,6 +2,7 @@ import { drizzle, type DrizzleD1Database } from 'drizzle-orm/d1'
 
 import { lines, lineStations } from './schema/lines'
 import { reportModeration, reportModerationEvents, reportQuarantines } from './schema/report-moderation'
+import { reportStatistics, reportStatisticsRefreshes } from './schema/report-statistics'
 import { reports } from './schema/reports'
 import { segments } from './schema/segments'
 import { stations } from './schema/stations'
@@ -15,6 +16,8 @@ export const schema = {
     reportModeration,
     reportModerationEvents,
     reportQuarantines,
+    reportStatistics,
+    reportStatisticsRefreshes,
 }
 export type Schema = typeof schema
 
@@ -32,3 +35,4 @@ export * from './schema/lines'
 export * from './schema/stations'
 export * from './schema/segments'
 export * from './schema/report-moderation'
+export * from './schema/report-statistics'

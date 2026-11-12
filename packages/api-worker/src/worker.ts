@@ -6,6 +6,7 @@ import { setSentryLogSink } from '@freifahren/worker-kit/logger'
 import { normalizeTransactionName } from './common/normalize-transaction-name'
 import { clearExpiredReportMetadataForAllCities } from './modules/reports/report-metadata-retention'
 import { TelegramReportsEntrypoint } from './modules/reports/telegram-reports-entrypoint'
+import { refreshReportStatisticsForAllCities } from './modules/statistics/statistics-refresh'
 
 import { app } from './index'
 
@@ -18,6 +19,9 @@ setSentryLogSink(sentryLogger)
 
 // Same reason: let app-env tag the request scope (e.g. the resolved city) without importing the SDK.
 setScopeTagger((key, value) => setTag(key, value))
+
+// Must match the crons in wrangler.jsonc; every other cron refreshes the report statistics.
+const REPORT_METADATA_RETENTION_CRON = '23 3 * * *'
 
 // Cloudflare Worker entry. The Hono app lives in index.ts so tests can run it without the Sentry SDK.
 export default withSentry(
@@ -45,8 +49,12 @@ export default withSentry(
             return app.fetch(request, env, ctx)
         },
         // Awaited rather than handed to waitUntil so withSentry sees a failure.
-        scheduled: async (_controller, env) => {
-            await clearExpiredReportMetadataForAllCities(env)
+        scheduled: async (controller, env) => {
+            if (controller.cron === REPORT_METADATA_RETENTION_CRON) {
+                await clearExpiredReportMetadataForAllCities(env)
+                return
+            }
+            await refreshReportStatisticsForAllCities(env)
         },
     } satisfies ExportedHandler<Bindings>
 )
