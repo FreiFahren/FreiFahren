@@ -1,11 +1,13 @@
 import { Link } from '@tanstack/react-router';
 import { ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { LineBadge } from '@/components/transit/LineBadge';
 import { track } from '@/lib/analytics';
 import { Route as StationsRoute } from '@/routes/reports/stations';
 
 import type { LineScore } from './lineScores';
+import { NAMESPACE } from './Reports.i18n';
 
 type LineScoreListProps = {
   scores: LineScore[];
@@ -14,9 +16,12 @@ type LineScoreListProps = {
    * day's total when `scores` is only a top-N slice so the percentages stay true shares.
    */
   total?: number;
+  /** Show each line's busiest hour of day under its bar. */
+  showPeakHour?: boolean;
 };
 
-export function LineScoreList({ scores, total }: LineScoreListProps) {
+export function LineScoreList({ scores, total, showPeakHour = false }: LineScoreListProps) {
+  const { t } = useTranslation(NAMESPACE);
   // The most-checked line fills the full bar width; every other line scales against it.
   const maxScore = Math.max(...scores.map((entry) => entry.score), 0);
   const denominator = total ?? scores.reduce((sum, entry) => sum + entry.score, 0);
@@ -41,11 +46,18 @@ export function LineScoreList({ scores, total }: LineScoreListProps) {
               className="hover:bg-muted/70 focus-visible:ring-ring flex h-14 items-center gap-3 px-4 outline-none focus-visible:ring-2"
             >
               <LineBadge name={entry.name} />
-              <div className="bg-muted h-2.5 flex-1 overflow-hidden rounded-full">
-                <div
-                  className="h-full rounded-full"
-                  style={{ width: `${width}%`, backgroundColor: entry.fill }}
-                />
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <div className="bg-muted h-2.5 overflow-hidden rounded-full">
+                  <div
+                    className="h-full rounded-full"
+                    style={{ width: `${width}%`, backgroundColor: entry.fill }}
+                  />
+                </div>
+                {showPeakHour && entry.peakHour !== null && (
+                  <span className="text-muted-foreground text-xs">
+                    {t('peakHour', { hour: String(entry.peakHour).padStart(2, '0') })}
+                  </span>
+                )}
               </div>
               <span className="w-9 shrink-0 text-right text-sm font-semibold tabular-nums">
                 {percent}%

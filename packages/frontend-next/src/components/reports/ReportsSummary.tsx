@@ -1,28 +1,30 @@
 import { useTranslation } from 'react-i18next';
 
-import { DAY_MS, HOUR_MS, useReports } from '@/api/reports';
-import { useLines, useStations } from '@/api/transit';
+import { HOUR_MS, useReports } from '@/api/reports';
+import { useReportStatistics } from '@/api/statistics';
+import { useLines } from '@/api/transit';
 import { SectionHeading } from '@freifahren/ui/section-heading';
 
-import { computeLineScores } from './lineScores';
+import { toLineScores } from './lineScores';
 import { LineScoreList } from './LineScoreList';
 import { NAMESPACE } from './Reports.i18n';
 import { ReportRow } from './ReportRow';
+import { useStatisticsPeriod } from './use-statistics-period';
 
 const TOP_LINES_LIMIT = 4;
 const RECENT_LIMIT = 6;
 
 export function ReportsSummary() {
   const { t } = useTranslation(NAMESPACE);
-  // Top lines summarise the full day; the recent list only shows the still-"live" last hour.
-  const { data: dayReports } = useReports(DAY_MS);
+  // Top lines follow the selected period; the recent list only shows the still-"live" last hour.
+  const [period] = useStatisticsPeriod();
+  const { data: statistics } = useReportStatistics(period);
   const { data: recentReports } = useReports(HOUR_MS);
-  const { data: stations } = useStations();
   const { data: lines } = useLines();
 
-  const lineScores = computeLineScores(dayReports ?? [], stations, lines);
+  const lineScores = toLineScores(statistics, lines);
   const topLines = lineScores.slice(0, TOP_LINES_LIMIT);
-  // Percentages are shares of all checks in the window, not just the shown top lines.
+  // Percentages are shares of all checks in the period, not just the shown top lines.
   const totalLineScore = lineScores.reduce((sum, line) => sum + line.score, 0);
   const recent = (recentReports ?? [])
     .slice()
@@ -33,7 +35,9 @@ export function ReportsSummary() {
     <div className="pb-6">
       {topLines.length > 0 && (
         <section>
-          <SectionHeading className="px-4 pt-3">{t('sectionTopLines')}</SectionHeading>
+          <SectionHeading className="px-4 pt-3">
+            {t('sectionTopLines', { period: t(`periodLong.${period}`) })}
+          </SectionHeading>
           <LineScoreList scores={topLines} total={totalLineScore} />
         </section>
       )}
