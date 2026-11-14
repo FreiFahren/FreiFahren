@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { app } from '../src/index'
 import { TURNSTILE_TOKEN_HEADER } from '../src/modules/report-gate'
-import { appRequestWithRedirect, testEnv } from './test-utils'
+import { appRequestWithRedirect, resetTestEnv, setTestEnv, testEnv } from './test-utils'
 
 describe('Versioning', () => {
     it('serves GET /v0/reports directly', async () => {
@@ -241,5 +241,38 @@ describe('dynamic API cache headers', () => {
 
         expect(response.status).toBe(200)
         expect(response.headers.get('Cache-Control')).toBe('no-store')
+    })
+})
+
+describe('request validation errors', () => {
+    type ErrorResponse = { message: string; details: { internal_code: string; description?: string } }
+
+    it.each([
+        ['an invalid query', '/reports?from=not-a-date&to=2024-01-02T00:00:00Z'],
+        ['an incomplete range', '/reports?from=2024-01-01T00:00:00Z'],
+        ['a missing required query param', '/transit/distance'],
+        ['an invalid list param', '/insights/lines?names=U1,,U2'],
+    ])('answers %s with the standard AppError body', async (_, path) => {
+        const response = await appRequestWithRedirect(path)
+
+        expect(response.status).toBe(400)
+        const body = (await response.json()) as ErrorResponse
+        expect(body.details.internal_code).toBe('VALIDATION_FAILED')
+        expect(body).not.toHaveProperty('success')
+        expect(body).not.toHaveProperty('error')
+    })
+
+    it('does not leak the Zod issue list in production', async () => {
+        setTestEnv({ NODE_ENV: 'production' })
+        try {
+            const response = await appRequestWithRedirect('/reports?from=not-a-date&to=2024-01-02T00:00:00Z')
+
+            expect(response.status).toBe(400)
+            const body = (await response.json()) as ErrorResponse
+            expect(body.details.internal_code).toBe('VALIDATION_FAILED')
+            expect(body.details.description).toBeUndefined()
+        } finally {
+            resetTestEnv()
+        }
     })
 })

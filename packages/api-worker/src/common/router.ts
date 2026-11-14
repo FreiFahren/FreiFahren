@@ -2,6 +2,8 @@ import { zValidator } from '@hono/zod-validator'
 import { Context, Handler, Hono, Env } from 'hono'
 import { z } from 'zod'
 
+import { AppError } from './errors'
+
 type HttpMethod = 'get' | 'post' | 'put'
 type RouteSchemas = {
     json?: z.ZodTypeAny
@@ -24,6 +26,22 @@ type DefineRouteInput<E extends Env, M extends HttpMethod, S extends RouteSchema
     handler: Handler<E, string, HonoInputFromRouteSchemas<S>>
 }
 
+/*
+ * Without a hook, @hono/zod-validator answers a failed validation itself with
+ * `{ success: false, error: ZodError }`. That bypasses the central error handler, so clients get a
+ * different body shape than every other error (no `details.internal_code`) and production leaks
+ * the full Zod issue list, including internal regex patterns. Throwing routes it through handleError.
+ */
+const throwValidationError = (result: { success: boolean; error?: unknown }) => {
+    if (result.success) return
+    throw new AppError({
+        message: 'Invalid request',
+        statusCode: 400,
+        internalCode: 'VALIDATION_FAILED',
+        description: result.error instanceof z.ZodError ? z.prettifyError(result.error) : undefined,
+    })
+}
+
 export const defineRoute =
     <E extends Env>() =>
     <M extends HttpMethod, S extends RouteSchemas>(def: DefineRouteInput<E, M, S>) => {
@@ -33,9 +51,9 @@ export const defineRoute =
             mws.push(...(def.middlewares ?? []))
         }
 
-        if (def.schemas?.param) mws.push(zValidator('param', def.schemas.param))
-        if (def.schemas?.query) mws.push(zValidator('query', def.schemas.query))
-        if (def.schemas?.json) mws.push(zValidator('json', def.schemas.json))
+        if (def.schemas?.param) mws.push(zValidator('param', def.schemas.param, throwValidationError))
+        if (def.schemas?.query) mws.push(zValidator('query', def.schemas.query, throwValidationError))
+        if (def.schemas?.json) mws.push(zValidator('json', def.schemas.json, throwValidationError))
 
         return {
             method: def.method,
