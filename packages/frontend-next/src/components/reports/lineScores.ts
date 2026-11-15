@@ -1,4 +1,4 @@
-import type { ReportStatistics } from '@/api/statistics';
+import type { ReportSummary } from '@/api/insights';
 import { compareLineOrder, type Line, type LineType } from '@/api/transit';
 
 export type LineScore = {
@@ -12,7 +12,7 @@ export type LineScore = {
 
 /** Joins the server's per-line statistics with the line styling the list renders. */
 export function toLineScores(
-  statistics: ReportStatistics | undefined,
+  statistics: ReportSummary | undefined,
   lines: Line[] | undefined,
 ): LineScore[] {
   if (!statistics || !lines) return [];

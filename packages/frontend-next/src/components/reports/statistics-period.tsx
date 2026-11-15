@@ -1,7 +1,7 @@
 import { type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { STATISTICS_PERIODS, type StatisticsPeriod } from '@/api/statistics';
+import { REPORT_SUMMARY_PERIODS, type ReportSummaryPeriod } from '@/api/insights';
 import { ToggleGroup, ToggleGroupItem } from '@freifahren/ui/toggle-group';
 import { track } from '@/lib/analytics';
 import { cn } from '@freifahren/ui/cn';
@@ -11,7 +11,7 @@ import { StatisticsPeriodContext, useStatisticsPeriod } from './use-statistics-p
 
 /** Shares the selected period across the reports tabs, which all render inside one layout. */
 export function StatisticsPeriodProvider({ children }: { children: ReactNode }) {
-  const state = useState<StatisticsPeriod>('24h');
+  const state = useState<ReportSummaryPeriod>('24h');
   return (
     <StatisticsPeriodContext.Provider value={state}>{children}</StatisticsPeriodContext.Provider>
   );
@@ -28,13 +28,13 @@ export function StatisticsPeriodPicker({ className }: { className?: string }) {
       value={period}
       onValueChange={(next) => {
         if (!next) return;
-        setPeriod(next as StatisticsPeriod);
-        track('reports_period_selected', { period: next as StatisticsPeriod });
+        setPeriod(next as ReportSummaryPeriod);
+        track('reports_period_selected', { period: next as ReportSummaryPeriod });
       }}
       aria-label={t('periodPickerLabel')}
       className={cn('bg-surface-solid border-border border', className)}
     >
-      {STATISTICS_PERIODS.map((option) => (
+      {REPORT_SUMMARY_PERIODS.map((option) => (
         <ToggleGroupItem
           key={option}
           value={option}

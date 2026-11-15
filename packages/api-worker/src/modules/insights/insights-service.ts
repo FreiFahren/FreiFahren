@@ -4,9 +4,11 @@ import { z } from 'zod'
 
 import { AppError } from '../../common/errors'
 import { DbConnection, reports } from '../../db'
-import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
 import { cachedReference, type CacheCtx } from '../transit/reference-cache'
+import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
 import type { StationId, Stations } from '../transit/types'
+
+import { computeReportSummary, type ReportSummary, type ReportSummaryPeriod } from './report-summary'
 
 const notQuarantined = sql`${reports.trust} IS NOT 0`
 
@@ -114,6 +116,10 @@ export class InsightsService {
                 population,
             },
         })
+    }
+
+    async getReportSummary(period: ReportSummaryPeriod, now: Date = new Date()): Promise<ReportSummary> {
+        return computeReportSummary(this.db, this.transitNetworkDataService, this.timezone, period, now)
     }
 
     async getLineInsights(lineName: string, now: Date = new Date()): Promise<LineInsights> {

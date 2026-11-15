@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import { HOUR_MS, useReports } from '@/api/reports';
-import { useReportStatistics } from '@/api/statistics';
+import { useReportSummary } from '@/api/insights';
 import { useLines } from '@/api/transit';
 import { SectionHeading } from '@freifahren/ui/section-heading';
 
@@ -18,7 +18,7 @@ export function ReportsSummary() {
   const { t } = useTranslation(NAMESPACE);
   // Top lines follow the selected period; the recent list only shows the still-"live" last hour.
   const [period] = useStatisticsPeriod();
-  const { data: statistics } = useReportStatistics(period);
+  const { data: statistics } = useReportSummary(period);
   const { data: recentReports } = useReports(HOUR_MS);
   const { data: lines } = useLines();
 

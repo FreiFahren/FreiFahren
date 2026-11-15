@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { useReportStatistics } from '@/api/statistics';
+import { useReportSummary } from '@/api/insights';
 import { useLines } from '@/api/transit';
 import { SectionHeading } from '@freifahren/ui/section-heading';
 
@@ -12,7 +12,7 @@ import { useStatisticsPeriod } from './use-statistics-period';
 export function LinesChart() {
   const { t } = useTranslation(NAMESPACE);
   const [period] = useStatisticsPeriod();
-  const { data: statistics } = useReportStatistics(period);
+  const { data: statistics } = useReportSummary(period);
   const { data: lines } = useLines();
 
   const data = toLineScores(statistics, lines);
