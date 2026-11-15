@@ -13,19 +13,21 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Literal palette values let Tailwind emit opacity fallbacks for Safari 15 and Chromium <111.
+   Routing these through var(--token) leaves color-mix() dependent styles opaque in those browsers. */
 @theme inline {
   --font-sans: 'IBM Plex Sans', -apple-system, system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
   --font-heading: var(--font-sans);
 
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
+  --color-sidebar-ring: rgba(255, 255, 255, 0.28);
+  --color-sidebar-border: rgba(255, 255, 255, 0.12);
+  --color-sidebar-accent-foreground: #f3f4f6;
+  --color-sidebar-accent: #25272b;
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-primary: #d63b3b;
+  --color-sidebar-foreground: #f3f4f6;
+  --color-sidebar: #1a1b1e;
 
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
@@ -33,41 +35,41 @@
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
 
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --color-foreground: var(--foreground);
-  --color-background: var(--background);
+  --color-ring: rgba(255, 255, 255, 0.28);
+  --color-input: rgba(255, 255, 255, 0.12);
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-destructive: #d63b3b;
+  --color-accent-foreground: #f3f4f6;
+  --color-accent: #25272b;
+  --color-muted-foreground: rgba(243, 244, 246, 0.55);
+  --color-muted: #1a1b1e;
+  --color-secondary-foreground: #f3f4f6;
+  --color-secondary: #25272b;
+  --color-primary-foreground: #f3f4f6;
+  --color-primary: #25272b;
+  --color-popover-foreground: #f3f4f6;
+  --color-popover: #25272b;
+  --color-card-foreground: #f3f4f6;
+  --color-card: #25272b;
+  --color-foreground: #f3f4f6;
+  --color-background: #0f1012;
 
   /* Project-specific tokens — surfaces, risk, accent variants */
-  --color-bg: var(--bg);
-  --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
-  --color-surface-solid: var(--surface-solid);
-  --color-surface-elev: var(--surface-elev);
-  --color-border-soft: var(--border-soft);
-  --color-border-strong: var(--border-strong);
-  --color-text-2: var(--text-2);
-  --color-text-3: var(--text-3);
-  --color-text-4: var(--text-4);
-  --color-accent-bright: var(--accent-bright);
-  --color-accent-press: var(--accent-press);
-  --color-accent-dim: var(--accent-dim);
-  --color-ok: var(--ok);
-  --color-warn: var(--warn);
+  --color-bg: #1a1b1e;
+  --color-surface: rgba(26, 27, 30, 0.86);
+  --color-surface-2: rgba(38, 40, 44, 0.86);
+  --color-surface-solid: #1f2024;
+  --color-surface-elev: #25272b;
+  --color-border-soft: rgba(255, 255, 255, 0.06);
+  --color-border-strong: rgba(255, 255, 255, 0.28);
+  --color-text-2: rgba(243, 244, 246, 0.78);
+  --color-text-3: rgba(243, 244, 246, 0.55);
+  --color-text-4: rgba(243, 244, 246, 0.36);
+  --color-accent-bright: #f04848;
+  --color-accent-press: #c22020;
+  --color-accent-dim: rgba(240, 72, 72, 0.16);
+  --color-ok: #3fb27f;
+  --color-warn: #d7a008;
 
   --radius-sm: calc(var(--radius) * 0.5); /* ~4px → matches --r-1 */
   --radius-md: var(--radius); /* 8px → --r-2 (buttons, inputs) */
@@ -82,60 +84,63 @@
 }
 
 :root {
+  /* Preserve semantic variables for inline styles; the palette above remains the single source. */
   /* shadcn semantic tokens — primary = neutral elevated, destructive = the reserved red */
-  --background: #0f1012;
-  --foreground: #f3f4f6;
+  --background: var(--color-background);
+  --foreground: var(--color-foreground);
 
-  --card: #25272b;
-  --card-foreground: #f3f4f6;
-  --popover: #25272b;
-  --popover-foreground: #f3f4f6;
+  --card: var(--color-card);
+  --card-foreground: var(--color-card-foreground);
+  --popover: var(--color-popover);
+  --popover-foreground: var(--color-popover-foreground);
 
-  --primary: #25272b;
-  --primary-foreground: #f3f4f6;
+  --primary: var(--color-primary);
+  --primary-foreground: var(--color-primary-foreground);
 
-  --secondary: #25272b;
-  --secondary-foreground: #f3f4f6;
+  --secondary: var(--color-secondary);
+  --secondary-foreground: var(--color-secondary-foreground);
 
-  --muted: #1a1b1e;
-  --muted-foreground: rgba(243, 244, 246, 0.55);
+  --muted: var(--color-muted);
+  --muted-foreground: var(--color-muted-foreground);
 
-  --accent: #25272b;
-  --accent-foreground: #f3f4f6;
+  --accent: var(--color-accent);
+  --accent-foreground: var(--color-accent-foreground);
 
-  --destructive: #d63b3b;
+  --destructive: var(--color-destructive);
 
-  --border: rgba(255, 255, 255, 0.12);
-  --input: rgba(255, 255, 255, 0.12);
-  --ring: rgba(255, 255, 255, 0.28);
+  --border: var(--color-border);
+  --input: var(--color-input);
+  --ring: var(--color-ring);
 
   --radius: 0.5rem; /* 8px — --r-2 */
 
-  --sidebar: #1a1b1e;
-  --sidebar-foreground: #f3f4f6;
-  --sidebar-primary: #d63b3b;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #25272b;
-  --sidebar-accent-foreground: #f3f4f6;
-  --sidebar-border: rgba(255, 255, 255, 0.12);
-  --sidebar-ring: rgba(255, 255, 255, 0.28);
+  --sidebar: var(--color-sidebar);
+  --sidebar-foreground: var(--color-sidebar-foreground);
+  --sidebar-primary: var(--color-sidebar-primary);
+  --sidebar-primary-foreground: var(--color-sidebar-primary-foreground);
+  --sidebar-accent: var(--color-sidebar-accent);
+  --sidebar-accent-foreground: var(--color-sidebar-accent-foreground);
+  --sidebar-border: var(--color-sidebar-border);
+  --sidebar-ring: var(--color-sidebar-ring);
 
-  --bg: #1a1b1e;
-  --surface: rgba(26, 27, 30, 0.86);
-  --surface-2: rgba(38, 40, 44, 0.86);
-  --surface-solid: #1f2024;
-  --surface-elev: #25272b;
-  --border-soft: rgba(255, 255, 255, 0.06);
-  --border-strong: rgba(255, 255, 255, 0.28);
-  --text-2: rgba(243, 244, 246, 0.78);
-  --text-3: rgba(243, 244, 246, 0.55);
-  --text-4: rgba(243, 244, 246, 0.36);
-  --accent-bright: #f04848;
-  --accent-press: #c22020;
-  --accent-dim: rgba(240, 72, 72, 0.16);
-  --ok: #3fb27f;
-  --warn: #d7a008;
+  --bg: var(--color-bg);
+  --surface: var(--color-surface);
+  --surface-2: var(--color-surface-2);
+  --surface-solid: var(--color-surface-solid);
+  --surface-elev: var(--color-surface-elev);
+  --border-soft: var(--color-border-soft);
+  --border-strong: var(--color-border-strong);
+  --text-2: var(--color-text-2);
+  --text-3: var(--color-text-3);
+  --text-4: var(--color-text-4);
+  --accent-bright: var(--color-accent-bright);
+  --accent-press: var(--color-accent-press);
+  --accent-dim: var(--color-accent-dim);
+  --ok: var(--color-ok);
+  --warn: var(--color-warn);
   --keyboard-inset: 0px;
+  /* Chromium 99–107 has no dvh; constrain popups with vh until dynamic units are available. */
+  --viewport-height: 100vh;
 }
 
 @layer base {
@@ -149,5 +154,11 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@supports (height: 100dvh) {
+  :root {
+    --viewport-height: 100dvh;
   }
 }

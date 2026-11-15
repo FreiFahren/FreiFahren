@@ -6,6 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
+import { buildTargets } from './browser-support.mjs';
 
 // Stamped into the bundle so the React Query cache persister can `buster` (drop) a persisted
 // cache whose query shapes predate this build, rather than hydrating an incompatible snapshot.
@@ -67,7 +68,13 @@ export default defineConfig({
   },
   // 'hidden' emits source maps for the upload but ships no sourceMappingURL comment, so the maps are
   // never referenced by (or served to) clients; the Sentry plugin deletes them after upload.
-  build: { sourcemap: sentryAuthToken ? 'hidden' : false },
+  build: {
+    // New dependency syntax (e.g. class static blocks) can fail before React or monitoring starts.
+    // CSS needs the same floor so nested rules/colors are lowered for older engines as well.
+    target: buildTargets,
+    cssTarget: buildTargets,
+    sourcemap: sentryAuthToken ? 'hidden' : false,
+  },
   plugins: [
     tanstackRouter({ target: 'react', autoCodeSplitting: true }),
     react(),

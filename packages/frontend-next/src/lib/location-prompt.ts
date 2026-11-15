@@ -28,6 +28,8 @@ export async function queryGeolocationPermission(): Promise<GeolocationPermissio
     }
   }
   try {
+    // Safari 15 lacks Permissions; failure falls back to the geolocation call's own prompt.
+    // eslint-disable-next-line compat/compat
     const status = await navigator.permissions.query({ name: 'geolocation' });
     return status.state; // 'granted' | 'denied' | 'prompt'
   } catch {

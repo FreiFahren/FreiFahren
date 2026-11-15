@@ -40,7 +40,7 @@ export function StationDetail({ station, onClose }: StationDetailProps) {
       title={station.name}
       closeLabel={t('close')}
       onClose={onClose}
-      cardClassName="max-h-[calc(100dvh-6rem)]"
+      cardClassName="max-h-[calc(var(--viewport-height)-6rem)]"
     >
       <StationHistoricalInsights stationId={station.id} />
       {hasLiveReports && lineReports.length > 0 && <StationLineReports lineReports={lineReports} />}

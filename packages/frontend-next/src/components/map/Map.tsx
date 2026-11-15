@@ -106,6 +106,8 @@ export function MapView() {
   return (
     <div className="fixed inset-0">
       <MapGL
+        // Retain MapLibre v5's WebGL1 fallback when upgrading: older mobile GPUs may lack WebGL2
+        // even when their browser supports the rest of the app. Do not force contextType: 'webgl2'.
         initialViewState={INITIAL_VIEW}
         minZoom={MIN_ZOOM}
         mapStyle={mapStyle}

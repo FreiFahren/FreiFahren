@@ -5,6 +5,8 @@
     "lib": ["ES2023"],
     "module": "esnext",
     "types": ["node"],
+    "allowJs": true,
+    "checkJs": true,
     "skipLibCheck": true,
 
     /* Bundler mode */
@@ -20,5 +22,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "browser-support.mjs"]
 }

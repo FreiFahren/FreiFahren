@@ -47,7 +47,7 @@ export function StationLineReports({ lineReports }: StationLineReportsProps) {
   return (
     <CardContent className="space-y-2">
       <p className="text-muted-foreground text-xs">{t('lineReportsDescription')}</p>
-      <div className="divide-border max-h-[30dvh] overflow-y-auto overscroll-contain rounded-md border">
+      <div className="divide-border max-h-[calc(var(--viewport-height)*0.3)] overflow-y-auto overscroll-contain rounded-md border">
         {rankedLines.map((line) => (
           <LineReportRow key={line.name} line={line} />
         ))}

@@ -183,10 +183,13 @@ createRoot(document.getElementById('root')!).render(app);
 
 // Load PostHog when the main thread is idle, off the critical render path. Calls made before it
 // resolves are buffered; syncConsentToPostHog reapplies the stored choice once it's initialized.
-const onIdle = (cb: () => void) =>
-  typeof window.requestIdleCallback === 'function'
-    ? window.requestIdleCallback(cb)
+const onIdle = (cb: () => void) => {
+  // eslint-disable-next-line compat/compat -- Safari 15 uses the timer fallback below.
+  const requestIdle = window.requestIdleCallback;
+  return typeof requestIdle === 'function'
+    ? requestIdle.call(window, cb)
     : window.setTimeout(cb, 1);
+};
 onIdle(() => {
   if (window.name === PRELOAD_RELOAD_MARK) window.name = '';
   setPostHogFlagAccount(getSessionAccountId());

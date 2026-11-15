@@ -1,0 +1,7 @@
+# Fixed floors prevent tooling upgrades from silently dropping older devices.
+# Safari 15.4 is the CSS-layer/Array.at floor; Chrome 99 covers Android 6's last Chrome (106).
+chrome 99
+edge 99
+firefox 102
+safari 15.4
+ios_saf 15.4

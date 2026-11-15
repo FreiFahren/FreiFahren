@@ -8,6 +8,7 @@ import pluginQuery from '@tanstack/eslint-plugin-query';
 import pluginRouter from '@tanstack/eslint-plugin-router';
 import tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier/flat';
+import compat from 'eslint-plugin-compat';
 import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
@@ -34,6 +35,30 @@ export default defineConfig([
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true, allowExportNames: ['Route'] },
+      ],
+    },
+  },
+  {
+    // Vite lowers syntax, not missing APIs. Keep browser-only checks off Node build/config code.
+    files: ['src/**/*.{ts,tsx}'],
+    plugins: { compat },
+    settings: { lintAllEsApis: true },
+    rules: {
+      'compat/compat': 'error',
+      // The compatibility plugin misses these static methods; TypeScript's DOM types allow
+      // them even though Safari 15/Chromium 99 do not. Keep the fetchFund controller fallback.
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'AbortSignal',
+          property: 'timeout',
+          message: 'Use AbortController and a timer for Safari 15/older Chromium compatibility.',
+        },
+        {
+          object: 'AbortSignal',
+          property: 'any',
+          message: 'Use AbortController with abort listeners for our older-browser floor.',
+        },
       ],
     },
   },

@@ -21,7 +21,8 @@ export function FineUploadHistory({
   if (uploads.length === 0) return null;
 
   // The API returns the current upload first, followed by earlier versions.
-  const chronologicalUploads = uploads.toReversed();
+  // Safari 15 and older Chromium/Firefox lack toReversed; copying also keeps query data immutable.
+  const chronologicalUploads = uploads.slice().reverse();
   return (
     <section aria-label={t('fineUploadHistory')} className="space-y-4">
       <h2 className="font-semibold">{t('fineUploadHistory')}</h2>

@@ -29,16 +29,37 @@ export async function fetchFund(
 
   const headers = new Headers(options.headers);
   headers.set('Authorization', `Bearer ${token}`);
-  const signals = [AbortSignal.timeout(timeoutMs)];
-  if (options.signal) signals.push(options.signal);
+  // AbortSignal.timeout/any are newer than our browser floor. Keep this controller-based path:
+  // the build target transforms syntax, but cannot supply missing browser APIs.
+  const controller = new AbortController();
+  const cleanup = () => {
+    window.clearTimeout(timeout);
+    options.signal?.removeEventListener('abort', abort);
+  };
+  const abort = () => {
+    controller.abort(options.signal?.reason);
+    cleanup();
+  };
+  const timeout = window.setTimeout(() => {
+    controller.abort(new DOMException('The request timed out.', 'TimeoutError'));
+    cleanup();
+  }, timeoutMs);
+  if (options.signal?.aborted) abort();
+  else options.signal?.addEventListener('abort', abort, { once: true });
 
-  const response = await fetch(`${baseUrl.replace(/\/$/, '')}${path}`, {
-    ...options,
-    headers,
-    credentials: 'omit',
-    cache: 'no-store',
-    signal: AbortSignal.any(signals),
-  });
-  if (!response.ok) throw new FundRequestError(response.status);
-  return response;
+  try {
+    const response = await fetch(`${baseUrl.replace(/\/$/, '')}${path}`, {
+      ...options,
+      headers,
+      credentials: 'omit',
+      cache: 'no-store',
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new FundRequestError(response.status);
+    // Fetch resolves at headers; keep cancellation active while the caller reads the body.
+    return response;
+  } catch (error) {
+    cleanup();
+    throw error;
+  }
 }

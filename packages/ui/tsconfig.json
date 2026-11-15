@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "target": "es2023",
-    "lib": ["ES2023", "DOM"],
+    // Match the app's older-browser API floor; build targets do not polyfill newer built-ins.
+    "lib": ["ES2022", "DOM"],
     "module": "esnext",
     "moduleResolution": "bundler",
     "verbatimModuleSyntax": true,
