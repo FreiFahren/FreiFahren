@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { Env } from '../../app-env'
 import { defineRoute } from '../../common/router'
 
+import { REPORT_SUMMARY_PERIODS } from './report-summary'
+
 export const getStationInsights = defineRoute<Env>()({
     method: 'get',
     path: '/station/:stationId',
@@ -41,5 +43,17 @@ export const getLinesInsights = defineRoute<Env>()({
     handler: async (c) => {
         const { names } = c.req.valid('query')
         return c.json(await c.get('insightsService').getLinesInsights(names))
+    },
+})
+
+export const getReportSummary = defineRoute<Env>()({
+    method: 'get',
+    path: '/summary',
+    schemas: {
+        query: z.object({ period: z.enum(REPORT_SUMMARY_PERIODS).default('24h') }),
+    },
+    handler: async (c) => {
+        const { period } = c.req.valid('query')
+        return c.json(await c.get('insightsService').getReportSummary(period))
     },
 })
