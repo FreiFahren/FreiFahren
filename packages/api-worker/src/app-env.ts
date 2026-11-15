@@ -12,7 +12,6 @@ import { ReportsService } from './modules/reports'
 import { ReportSubmissionService } from './modules/reports/report-submission-service'
 import { invalidateStationReportsCache } from './modules/reports/reports-cache-middleware'
 import { RiskService } from './modules/risk'
-import { StatisticsService } from './modules/statistics'
 import type { CacheCtx } from './modules/transit/reference-cache'
 import { TransitNetworkDataService } from './modules/transit/transit-network-data-service'
 
@@ -103,7 +102,6 @@ export type Services = {
     reportsService: ReportsService
     insightsService: InsightsService
     riskService: RiskService
-    statisticsService: StatisticsService
     transitNetworkDataService: TransitNetworkDataService
 }
 
@@ -121,8 +119,6 @@ export type Env = {
          * so storing it would serve one client's answer to another.
          */
         reportsUncacheable?: boolean
-        // When the served statistics snapshot is next recomputed; bounds its edge cache lifetime.
-        statisticsRefreshAt?: number
         // The city resolved for this request (from `?city=`), the single source for
         // Which DB the request talks to and how downstream code scopes per-city work.
         city: CityConfig
@@ -209,7 +205,6 @@ export const createCityServices = (db: DbConnection, city: CityConfig, ctx: Cach
         reportsService,
         insightsService: new InsightsService(db, transitNetworkDataService, city.timezone, city.slug, cacheCtx),
         riskService: new RiskService(reportsService, transitNetworkDataService),
-        statisticsService: new StatisticsService(db, transitNetworkDataService, city.timezone),
     }
 }
 
@@ -238,7 +233,6 @@ const applyServices = (c: Context<Env>, db: DbConnection, config: AppConfig) => 
     )
     c.set('insightsService', services.insightsService)
     c.set('riskService', services.riskService)
-    c.set('statisticsService', services.statisticsService)
     c.set('transitNetworkDataService', services.transitNetworkDataService)
 }
 

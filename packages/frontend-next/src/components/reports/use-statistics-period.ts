@@ -1,8 +1,8 @@
 import { createContext, useContext } from 'react';
 
-import type { StatisticsPeriod } from '@/api/statistics';
+import type { ReportSummaryPeriod } from '@/api/insights';
 
-export type PeriodState = [StatisticsPeriod, (period: StatisticsPeriod) => void];
+export type PeriodState = [ReportSummaryPeriod, (period: ReportSummaryPeriod) => void];
 
 export const StatisticsPeriodContext = createContext<PeriodState | null>(null);
 

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { queryClient } from '@/api/queryClient';
 import { DAY_MS, HOUR_MS, reportsQueryOptions } from '@/api/reports';
-import { reportStatisticsQueryOptions, useReportStatistics } from '@/api/statistics';
+import { reportSummaryQueryOptions, useReportSummary } from '@/api/insights';
 import { linesQueryOptions, stationsQueryOptions } from '@/api/transit';
 import { FeedbackButton } from '@/components/feedback/FeedbackButton';
 import { ReportsTabBar } from '@/components/reports/ReportsTabBar';
@@ -25,7 +25,7 @@ export const Route = createFileRoute('/reports')({
   // Fire-and-forget so it never blocks the transition; already-cached queries are no-ops. Covers
   // all tabs, so they need no loader of their own.
   loader: () => {
-    void queryClient.prefetchQuery(reportStatisticsQueryOptions('24h'));
+    void queryClient.prefetchQuery(reportSummaryQueryOptions('24h'));
     void queryClient.prefetchQuery(
       reportsQueryOptions({ mode: 'history', fromAgo: HOUR_MS, toAgo: 0 }),
     );
@@ -50,7 +50,7 @@ function ReportsOverview() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
   const [period] = useStatisticsPeriod();
-  const { data: statistics } = useReportStatistics(period);
+  const { data: statistics } = useReportSummary(period);
 
   // One open event per visit, fired once the count is known (so report_count is the real figure
   // shown, not 0 before the prefetch resolves). The ref guards against re-firing on data refetch
