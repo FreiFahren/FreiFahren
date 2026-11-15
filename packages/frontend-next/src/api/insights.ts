@@ -88,6 +88,16 @@ export type ReportSummary = {
     /** Score per local hour of day, index 0–23. */
     hours: number[];
   }>;
+  /** The busiest sections between two neighbouring stations, highest score first. */
+  sections: Array<{
+    /** Every line running between the two stations, the biggest contributor first. */
+    lines: Array<{ name: string; score: number }>;
+    from: { id: string; name: string };
+    to: { id: string; name: string };
+    score: number;
+    /** Share of all section scores in the period, not just the listed ones. */
+    share: number;
+  }>;
 };
 
 // The CDN keeps each summary for an hour, so refetching more often mostly returns the same response.
