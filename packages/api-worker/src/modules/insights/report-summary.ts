@@ -5,6 +5,8 @@ import { z } from 'zod'
 import { DbConnection, reports } from '../../db'
 import type { TransitNetworkDataService } from '../transit/transit-network-data-service'
 
+import { createSectionResolver, type Section, stationPairKey } from './report-sections'
+
 const HOUR_MS = 60 * 60 * 1000
 const DAY_MS = 24 * HOUR_MS
 
@@ -21,6 +23,21 @@ const PERIOD_DURATION_MS: Record<ReportSummaryPeriod, number> = {
 // UTC quarter-hours preserve local hour boundaries, including DST and fractional offsets.
 const QUARTER_HOUR_MS = 15 * 60 * 1000
 const quarterHourBucket = sql<number>`cast(${reports.timestamp} / ${sql.raw(String(QUARTER_HOUR_MS))} as integer)`
+
+// The busiest sections only: the list is read top-down, and the full network would dwarf the payload.
+export const SECTION_LIMIT = 50
+
+const stationRefSchema = z.object({ id: z.string(), name: z.string() })
+
+const sectionEntrySchema = z.object({
+    // Every line running between the two stations, the biggest contributor first.
+    lines: z.array(z.object({ name: z.string(), score: z.number().nonnegative() })).min(1),
+    from: stationRefSchema,
+    to: stationRefSchema,
+    score: z.number().nonnegative(),
+    // Share of all section scores in the period, not just the listed ones.
+    share: z.number().min(0).max(1),
+})
 
 export const reportSummarySchema = z.object({
     period: z.enum(REPORT_SUMMARY_PERIODS),
@@ -39,6 +56,7 @@ export const reportSummarySchema = z.object({
             hours: z.array(z.number().nonnegative()).length(24),
         })
     ),
+    sections: z.array(sectionEntrySchema).max(SECTION_LIMIT),
 })
 
 export type ReportSummary = z.infer<typeof reportSummarySchema>
@@ -96,6 +114,20 @@ export const computeReportSummary = async (
     const nameByLineId = new Map(lines.map((line) => [line.id, line.name]))
     const byName = new Map<string, { score: number; hours: number[] }>()
     const localHourOf = createLocalHourOf(timezone)
+    const resolveSections = createSectionResolver(lines)
+    // Keyed by station pair, so lines sharing a stretch of track add up to one entry.
+    const bySection = new Map<string, { score: number; lines: Map<string, { section: Section; score: number }> }>()
+    const addToSections = (sections: Section[], value: number) => {
+        for (const section of sections) {
+            const key = stationPairKey(section)
+            const entry = bySection.get(key) ?? { score: 0, lines: new Map() }
+            const line = entry.lines.get(section.lineName) ?? { section, score: 0 }
+            entry.score += value / sections.length
+            line.score += value / sections.length
+            entry.lines.set(section.lineName, line)
+            bySection.set(key, entry)
+        }
+    }
 
     let reportCount = 0
     for (const row of rows) {
@@ -125,10 +157,13 @@ export const computeReportSummary = async (
             }
             entry.score += share
             entry.hours[hour]! += share
+            addToSections(resolveSections(name, row.stationId), share)
         }
     }
 
     const totalScore = [...byName.values()].reduce((sum, entry) => sum + entry.score, 0)
+    const totalSectionScore = [...bySection.values()].reduce((sum, entry) => sum + entry.score, 0)
+    const stationRef = (id: string) => ({ id, name: Object.hasOwn(stations, id) ? stations[id]!.name : id })
     return reportSummarySchema.parse({
         period,
         range: { start: rangeStart.toISOString(), end: now.toISOString() },
@@ -140,5 +175,20 @@ export const computeReportSummary = async (
             share: totalScore === 0 ? 0 : round(entry.score / totalScore),
             hours: entry.hours.map(round),
         })),
+        sections: [...bySection]
+            .sort(byScore)
+            .slice(0, SECTION_LIMIT)
+            .map(([, { score, lines: sectionLines }]) => {
+                const ranked = [...sectionLines].sort(byScore)
+                // Station order follows the biggest contributor, so it doesn't flip between cache refreshes.
+                const { section } = ranked[0]![1]
+                return {
+                    lines: ranked.map(([name, line]) => ({ name, score: round(line.score) })),
+                    from: stationRef(section.fromStationId),
+                    to: stationRef(section.toStationId),
+                    score: round(score),
+                    share: totalSectionScore === 0 ? 0 : round(score / totalSectionScore),
+                }
+            }),
     })
 }
