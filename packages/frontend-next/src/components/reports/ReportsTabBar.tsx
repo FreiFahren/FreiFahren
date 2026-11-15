@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { track } from '@/lib/analytics';
 import { Tabs, TabsList, TabsTrigger } from '@freifahren/ui/tabs';
 import { Route as LinesRoute } from '@/routes/reports/lines';
+import { Route as SectionsRoute } from '@/routes/reports/sections';
 import { Route as StationsRoute } from '@/routes/reports/stations';
 import { Route as SummaryRoute } from '@/routes/reports/index';
 
@@ -12,6 +13,7 @@ import { NAMESPACE } from './Reports.i18n';
 const TABS = [
   { route: SummaryRoute, labelKey: 'tabSummary', tab: 'summary' },
   { route: LinesRoute, labelKey: 'tabLines', tab: 'lines' },
+  { route: SectionsRoute, labelKey: 'tabSections', tab: 'sections' },
   { route: StationsRoute, labelKey: 'tabReports', tab: 'reports' },
 ] as const;
 
@@ -25,7 +27,7 @@ export function ReportsTabBar() {
 
   return (
     <Tabs value={activeRouteId ?? SummaryRoute.id} className="px-4">
-      <TabsList className="border-border grid w-full grid-cols-3 border-b">
+      <TabsList className="border-border grid w-full grid-cols-4 border-b">
         {TABS.map((tab) => (
           <TabsTrigger
             key={tab.route.id}
