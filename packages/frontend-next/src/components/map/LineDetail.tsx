@@ -58,8 +58,11 @@ function countReportsOnLine(
 export function LineDetail({ line, onClose, source }: LineDetailProps) {
   const { t, i18n } = useTranslation(NAMESPACE);
   const { data: insights } = useLineInsights(line.name);
-  const { data: reports, isSuccess: hasLiveReports } = useReports(DAY_MS);
-  const { data: lastHourReports } = useReports(HOUR_MS);
+  const { data: reports, isSuccess: hasLiveReports } = useReports({
+    mode: 'history',
+    timeframeMs: DAY_MS,
+  });
+  const { data: lastHourReports } = useReports({ mode: 'history', timeframeMs: HOUR_MS });
   const { data: stations } = useStations();
   useModalViewDuration('line');
 

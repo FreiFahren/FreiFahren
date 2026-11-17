@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { queryClient } from '@/api/queryClient';
-import { DAY_MS, HOUR_MS, reportsSliceQueryOptions, useReports } from '@/api/reports';
+import { DAY_MS, HOUR_MS, reportsQueryOptions, useReports } from '@/api/reports';
 import { linesQueryOptions, stationsQueryOptions } from '@/api/transit';
 import { FeedbackButton } from '@/components/feedback/FeedbackButton';
 import { ReportsTabBar } from '@/components/reports/ReportsTabBar';
@@ -18,8 +18,12 @@ export const Route = createFileRoute('/reports')({
   // tab on preload (it's the shared layout). Fire-and-forget so it never blocks the transition;
   // already-cached queries are no-ops. Covers all tabs, so they need no loader of their own.
   loader: () => {
-    void queryClient.prefetchQuery(reportsSliceQueryOptions(HOUR_MS, 0));
-    void queryClient.prefetchQuery(reportsSliceQueryOptions(DAY_MS, HOUR_MS));
+    void queryClient.prefetchQuery(
+      reportsQueryOptions({ mode: 'history', fromAgo: HOUR_MS, toAgo: 0 }),
+    );
+    void queryClient.prefetchQuery(
+      reportsQueryOptions({ mode: 'history', fromAgo: DAY_MS, toAgo: HOUR_MS }),
+    );
     void queryClient.prefetchQuery(stationsQueryOptions());
     void queryClient.prefetchQuery(linesQueryOptions());
   },
@@ -29,7 +33,7 @@ export const Route = createFileRoute('/reports')({
 function ReportsOverviewLayout() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
-  const { data: reports } = useReports(DAY_MS);
+  const { data: reports } = useReports({ mode: 'history', timeframeMs: DAY_MS });
 
   // One open event per visit, fired once the count is known (so report_count is the real figure
   // shown, not 0 before the prefetch resolves). The ref guards against re-firing on data refetch.

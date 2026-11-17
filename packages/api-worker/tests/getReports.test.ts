@@ -852,9 +852,7 @@ describe('Report decay', () => {
         expect(realReports.every((report) => new Date(report.expiresAt!).getTime() <= now.toMillis())).toBe(true)
     })
 
-    // Predictions exist to fill a genuine hole in the data. A window full of expired reports is not
-    // a hole — decay hiding stale reports is a statement about them, not missing data — so it must
-    // not be answered with synthesised ones.
+    // Historical windows count expired reports too; only the live map fills gaps left by expiry.
     it('does not backfill a historical window that already has real reports', async () => {
         const now = DateTime.utc(2024, 1, 15, 12, 0)
 

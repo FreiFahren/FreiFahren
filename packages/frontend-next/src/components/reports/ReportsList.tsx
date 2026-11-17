@@ -21,9 +21,9 @@ import { useReportLineFilter } from './use-report-line-filter';
 
 export function ReportsList() {
   const { t } = useTranslation(NAMESPACE);
-  const { data: reports } = useReports(DAY_MS);
+  const { data: reports } = useReports({ mode: 'history', timeframeMs: DAY_MS });
   // A report is "recent" if it falls in the last-hour window (shares the cache, no extra fetch).
-  const { data: recentReports } = useReports(HOUR_MS);
+  const { data: recentReports } = useReports({ mode: 'history', timeframeMs: HOUR_MS });
   const {
     activeLine,
     filteredReports: filtered,

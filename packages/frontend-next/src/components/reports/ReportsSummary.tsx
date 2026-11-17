@@ -15,8 +15,8 @@ const RECENT_LIMIT = 6;
 export function ReportsSummary() {
   const { t } = useTranslation(NAMESPACE);
   // Top lines summarise the full day; the recent list only shows the still-"live" last hour.
-  const { data: dayReports } = useReports(DAY_MS);
-  const { data: recentReports } = useReports(HOUR_MS);
+  const { data: dayReports } = useReports({ mode: 'history', timeframeMs: DAY_MS });
+  const { data: recentReports } = useReports({ mode: 'history', timeframeMs: HOUR_MS });
   const { data: stations } = useStations();
   const { data: lines } = useLines();
 

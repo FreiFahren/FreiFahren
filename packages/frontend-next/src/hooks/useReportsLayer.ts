@@ -2,7 +2,7 @@ import { useRouter } from '@tanstack/react-router';
 import type { FeatureCollection, Point } from 'geojson';
 import { useEffect } from 'react';
 
-import { HOUR_MS, type Report, useReports } from '@/api/reports';
+import { type Report, useReports } from '@/api/reports';
 import { type Line, type Stations, useLines, useStations } from '@/api/transit';
 import { useReportSimulation } from '@/contexts/ReportSimulation.context';
 import { useNow } from '@/hooks/useNow';
@@ -81,7 +81,7 @@ function reportsToGeoJSON(
  * stations have loaded.
  */
 export function useReportsLayer(): FeatureCollection<Point, ReportPointProps> | null {
-  const { data: liveReports } = useReports(HOUR_MS);
+  const { data: liveReports } = useReports({ mode: 'live' });
   const { data: stations } = useStations();
   const { data: lines } = useLines();
   const isViewed = useIsReportViewed();

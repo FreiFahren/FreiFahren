@@ -70,7 +70,9 @@ function withPendingOptimisticReports(
   return [...pending, ...reports];
 }
 
-function isReportListQuery(queryKey: readonly unknown[]): queryKey is ['reports', number, number] {
+function isReportListQuery(
+  queryKey: readonly unknown[],
+): queryKey is ['reports', number, number, ...unknown[]] {
   return (
     queryKey[0] === 'reports' && typeof queryKey[1] === 'number' && typeof queryKey[2] === 'number'
   );
@@ -178,8 +180,7 @@ export const DAY_MS = 24 * 60 * 60 * 1000;
  * Split a window into one or more `[fromAgo, toAgo]` slices (millis-ago, where `0` is now).
  *
  * Windows up to an hour are a single slice. Longer windows reuse the last-hour slice
- * (`[HOUR_MS, 0]`) — the very same query the map and overview button already cache — and
- * fetch only the remaining older slice (`[timeframeMs, HOUR_MS]`). Stitching them back
+ * (`[HOUR_MS, 0]`) from other history views and fetch only the remaining older slice (`[timeframeMs, HOUR_MS]`). Stitching them back
  * together keeps the recent hour consistent everywhere and reuses its cache, while hiding
  * that split from callers.
  */
@@ -209,7 +210,7 @@ function mergeReportSlices(
   return merged;
 }
 
-// The live last-hour slice (`toAgo === 0`) powers the map and recent-reports views, so it polls
+// The live map and the recent-history slice (`toAgo === 0`) both poll
 // every 30 s. The older `[DAY_MS, HOUR_MS]` remainder changes slowly: no interval polling, fresh
 // for an hour. Either way the shared last-hour slice keeps recent reports current without a full
 // 24 h refetch. PWA cold-start freshness is handled once by invalidating on cache restore (see
@@ -230,43 +231,52 @@ const OLDER_SLICE_POLLING = {
   staleTime: HOUR_MS,
 } as const;
 
+type ReportsQuery =
+  { mode: 'live'; timeframeMs?: never } | { mode: 'history'; timeframeMs: number };
+
+type ReportsSliceQuery =
+  | { mode: 'live'; fromAgo?: never; toAgo?: never }
+  | { mode: 'history'; fromAgo: number; toAgo: number };
+
 /**
- * React Query options for a single report slice (`['reports', fromAgo, toAgo]`). `fromAgo`/`toAgo`
- * are millis-ago (`0` is now). The cache key is stable while the actual `from`/`to` window is
- * recomputed inside `queryFn` on every refetch, so the window rolls forward over time without
- * churning the key. A slice ending at "now" (`toAgo === 0`) is the live last-hour window and polls;
- * anything ending in the past is the older 1 h–24 h remainder, fetched once and kept fresh for an
- * hour. Shared by `useReports` and route loaders so a loader prefetch reuses the map's cache entry.
+ * Mode belongs in the cache key: live fallback predictions must never backfill history.
+ * History windows roll forward on refetch while their millis-ago keys stay stable.
+ * Live requests leave the window to the server so client clock skew cannot change it.
  */
-export const reportsSliceQueryOptions = (fromAgo: number, toAgo: number) => {
-  const isLiveSlice = toAgo === 0;
+export const reportsQueryOptions = (options: ReportsSliceQuery) => {
+  const { mode } = options;
+  const fromAgo = options.mode === 'live' ? HOUR_MS : options.fromAgo;
+  const toAgo = options.mode === 'live' ? 0 : options.toAgo;
   return {
-    queryKey: ['reports', fromAgo, toAgo] as const,
+    queryKey: ['reports', fromAgo, toAgo, mode] as const,
     queryFn: async () => {
       const now = Date.now();
-      const params = new URLSearchParams({
-        from: new Date(now - fromAgo).toISOString(),
-        to: new Date(now - toAgo).toISOString(),
-      });
+      const params = new URLSearchParams({ mode });
+      if (mode === 'history') {
+        params.set('from', new Date(now - fromAgo).toISOString());
+        params.set('to', new Date(now - toAgo).toISOString());
+      }
       const reports = await fetchJson<Report[]>(`/v0/reports?${params.toString()}`);
       return withPendingOptimisticReports(reports, now - fromAgo, now - toAgo);
     },
-    ...(isLiveSlice ? LIVE_SLICE_POLLING : OLDER_SLICE_POLLING),
+    ...(toAgo === 0 ? LIVE_SLICE_POLLING : OLDER_SLICE_POLLING),
   };
 };
 
 /**
- * Fetch reports from the last `timeframeMs` (e.g. `HOUR_MS` for the map, `DAY_MS` for the
- * overview page). Longer timeframes are stitched from the cached last-hour slice plus the
- * older remainder (see `reportSlices`), so the recent hour is shared with the map.
+ * Every caller chooses live or history explicitly. Longer history windows share the
+ * cached recent-history slice and fetch only the older remainder (see `reportSlices`).
  */
-export const useReports = (timeframeMs: number) =>
+export const useReports = (options: ReportsQuery) =>
   useQueries({
-    queries: reportSlices(timeframeMs).map(([fromAgo, toAgo]) =>
-      reportsSliceQueryOptions(fromAgo, toAgo),
-    ),
+    queries:
+      options.mode === 'live'
+        ? [reportsQueryOptions({ mode: 'live' })]
+        : reportSlices(options.timeframeMs).map(([fromAgo, toAgo]) =>
+            reportsQueryOptions({ mode: 'history', fromAgo, toAgo }),
+          ),
     combine: (results) => ({
-      data: mergeReportSlices(results),
+      data: options.mode === 'live' ? results[0]?.data : mergeReportSlices(results),
       isLoading: results.some((result) => result.isLoading),
       isError: results.some((result) => result.isError),
       isSuccess: results.every((result) => result.isSuccess),
@@ -305,7 +315,7 @@ export const stationReportCountQueryOptions = (stationId: string) => {
   return {
     queryKey: ['reports', stationId, from, to] as const,
     queryFn: async () => {
-      const params = new URLSearchParams({ from, to });
+      const params = new URLSearchParams({ mode: 'history', from, to });
       const reports = await fetchJson<Report[]>(`/v0/reports/${stationId}?${params.toString()}`);
       return withPendingOptimisticReports(
         reports,

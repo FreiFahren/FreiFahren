@@ -26,7 +26,10 @@ export function StationDetail({ station, onClose }: StationDetailProps) {
   const { t } = useTranslation(NAMESPACE);
   const queryClient = useQueryClient();
   const { data: lines } = useLines();
-  const { data: reports, isSuccess: hasLiveReports } = useReports(DAY_MS);
+  const { data: reports, isSuccess: hasLiveReports } = useReports({
+    mode: 'history',
+    timeframeMs: DAY_MS,
+  });
   const { lineReports } = stationLiveData(station, lines, reports);
   useModalViewDuration('station');
 

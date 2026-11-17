@@ -47,6 +47,9 @@ jobs:
             - name: Run ESLint
               run: bun run lint
 
+            - name: Run tests
+              run: bun run test
+
             - name: Build (type-checks via tsc; fails the job on any error)
               run: bun run build
               # Enables Sentry source-map upload during the build. If unset, the build still

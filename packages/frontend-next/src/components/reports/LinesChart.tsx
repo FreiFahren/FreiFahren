@@ -10,7 +10,7 @@ import { NAMESPACE } from './Reports.i18n';
 
 export function LinesChart() {
   const { t } = useTranslation(NAMESPACE);
-  const { data: reports } = useReports(DAY_MS);
+  const { data: reports } = useReports({ mode: 'history', timeframeMs: DAY_MS });
   const { data: stations } = useStations();
   const { data: lines } = useLines();
 

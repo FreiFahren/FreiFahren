@@ -12,6 +12,7 @@ import { resolveViewer } from './viewer'
 
 const reportsQuerySchema = z
     .object({
+        mode: z.enum(['live', 'history']).default('history'),
         from: z.iso
             .datetime()
             .transform((str) => DateTime.fromISO(str))
@@ -21,7 +22,9 @@ const reportsQuerySchema = z
             .transform((str) => DateTime.fromISO(str))
             .optional(),
     })
-    .refine(({ to, from }) => {
+    .refine(({ mode, to, from }) => {
+        // Live requests use the server clock; accepting a client range would make the intent ambiguous.
+        if (mode === 'live') return isNil(from) && isNil(to)
         if (isNil(to) && isNil(from)) return true
         if (isNil(to) || isNil(from)) return false
 
@@ -30,16 +33,6 @@ const reportsQuerySchema = z
         const range = to.diff(from)
 
         return range.toMillis() > 0 && range.as('days') <= MAX_REPORTS_TIMEFRAME
-    })
-    .transform((query) => {
-        if (!isNil(query.from) && !isNil(query.to)) {
-            return {
-                from: query.from,
-                to: query.to,
-            }
-        }
-
-        return getDefaultReportsRange(DateTime.now())
     })
 
 export const getReports = defineRoute<Env>()({
@@ -55,11 +48,11 @@ export const getReports = defineRoute<Env>()({
 
         c.header('Cache-Control', 'no-store')
 
-        // The query schema fills in the default range when from/to are absent.
+        const range = query.from && query.to ? { from: query.from, to: query.to } : getDefaultReportsRange(now)
         return c.json(
             await reportsService.getReports({
-                from: query.from,
-                to: query.to,
+                ...range,
+                mode: query.mode,
                 currentTime: now,
                 viewer: await resolveViewer(c),
             })
@@ -81,13 +74,15 @@ export const getReportsByStation = defineRoute<Env>()({
 
         const query = c.req.valid('query')
         const { stationId } = c.req.valid('param')
+        const now = DateTime.now().setZone(c.get('city').timezone)
+        const range = query.from && query.to ? { from: query.from, to: query.to } : getDefaultReportsRange(now)
 
         return c.json(
             await reportsService.getReports({
-                from: query.from,
-                to: query.to,
+                ...range,
+                mode: query.mode,
                 stationId,
-                currentTime: DateTime.now().setZone(c.get('city').timezone),
+                currentTime: now,
                 viewer: await resolveViewer(c),
             })
         )

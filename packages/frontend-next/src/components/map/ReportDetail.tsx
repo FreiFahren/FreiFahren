@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { lineInsightsQueryOptions, stationInsightsQueryOptions } from '@/api/insights';
-import { formatElapsed, HOUR_MS, useReports, useStationReportCount } from '@/api/reports';
+import { formatElapsed, useReports, useStationReportCount } from '@/api/reports';
 import { type Station, useLines, useStations, useStationDistance } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { CardContent } from '@freifahren/ui/card';
@@ -32,7 +32,7 @@ export function ReportDetail({ station, onClose }: ReportDetailProps) {
   const { t } = useTranslation(NAMESPACE);
   const queryClient = useQueryClient();
   useModalViewDuration('report');
-  const { data: reports } = useReports(HOUR_MS);
+  const { data: reports } = useReports({ mode: 'live' });
   const { data: lines } = useLines();
   const { data: stations } = useStations();
   const { data: numberOfReports } = useStationReportCount(station.id);

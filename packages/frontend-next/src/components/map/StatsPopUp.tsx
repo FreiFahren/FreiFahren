@@ -15,10 +15,10 @@ const DURATION_MS = 7_000;
 const REPORTERS_AT = 3_500;
 
 export function StatsPopUp() {
-  const { data: reports, isLoading } = useReports(DAY_MS);
+  const { data: reports, isLoading } = useReports({ mode: 'history', timeframeMs: DAY_MS });
   const firedRef = useRef(false);
 
-  // `useReports(DAY_MS)` resolves a partial last-hour slice before the full day, so gating on
+  // Day history resolves a partial last-hour slice before the full day, so gating on
   // `isLoading` avoids showing an incomplete count.
   const ready = !isLoading && reports !== undefined && reports.length > 0;
 

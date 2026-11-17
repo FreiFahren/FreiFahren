@@ -211,12 +211,14 @@ export class ReportsService {
         stationId,
         currentTime,
         viewer,
+        mode = 'history',
     }: {
         from: DateTime
         to: DateTime
         stationId?: StationId
         currentTime: DateTime
         viewer?: ViewerContext
+        mode?: 'live' | 'history'
     }): Promise<ReportSummary[]> {
         const result: ReportSummary[] = await this.getReportsWithExpiry({
             from,
@@ -227,19 +229,21 @@ export class ReportsService {
         })
 
         /*
-         * Predict reports if we don't have enough, so that users always see at least some data.
+         * History counts every real report in its range, including expired ones. An expired report
+         * is still an observation that happened, not a gap to paper over with something invented.
+         * This keeps populated historical windows from being backfilled just because they aged.
          *
-         * The threshold counts every report in range, not just the ones still live. An expired
-         * report is not a gap in the data to paper over — decay hiding a stale report is a
-         * deliberate statement that it is stale, and answering that with synthesised reports would
-         * replace "we hid something stale" with "here is something invented". It also keeps
-         * historical windows honest: a 24h range full of expired reports has plenty of data and
-         * must not be backfilled with predictions.
+         * The live map answers a different question: where might inspections be happening now?
+         * Its prediction target counts only current sightings, so expired reports neither satisfy
+         * that target nor exclude their stations from fallback predictions. The caller chooses
+         * this policy explicitly; timestamps alone cannot tell us whether a view is live or history.
          */
+        const quotaReports =
+            mode === 'live' ? result.filter((report) => isLive(report, currentTime.toMillis())) : result
         const predictedReportsThreshold = calculatePredictedReportsThreshold(currentTime)
-        if (result.length < predictedReportsThreshold) {
-            const numberOfReportsToFetch = predictedReportsThreshold - result.length
-            const reportedStationIds = new Set(result.map((r) => r.stationId as StationId))
+        if (quotaReports.length < predictedReportsThreshold) {
+            const numberOfReportsToFetch = predictedReportsThreshold - quotaReports.length
+            const reportedStationIds = new Set(quotaReports.map((r) => r.stationId as StationId))
 
             if (stationId !== undefined && reportedStationIds.has(stationId)) return result
 

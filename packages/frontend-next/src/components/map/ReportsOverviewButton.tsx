@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
-import { HOUR_MS, isReportLive, useReports } from '@/api/reports';
+import { isReportLive, useReports } from '@/api/reports';
 import { useLines, useStations } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { Button } from '@freifahren/ui/button';
@@ -16,7 +16,7 @@ import { SocialLinks } from './SocialLinks';
 
 export function ReportsOverviewButton() {
   const { t } = useTranslation(NAMESPACE);
-  const { data: reports } = useReports(HOUR_MS);
+  const { data: reports } = useReports({ mode: 'live' });
   const { data: lines } = useLines();
   const { data: stations } = useStations();
   // Matches the map layer's cadence, so the count and the markers roll over together.

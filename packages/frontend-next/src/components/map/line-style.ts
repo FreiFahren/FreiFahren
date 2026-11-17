@@ -4,7 +4,7 @@ import type {
 } from '@maplibre/maplibre-gl-style-spec';
 import type { FeatureCollection, LineString, Point } from 'geojson';
 
-import { HOUR_MS, useReports } from '@/api/reports';
+import { useReports } from '@/api/reports';
 import {
   LINE_TYPE_PRIORITY,
   type SegmentProperties,
@@ -62,7 +62,7 @@ function useSecondaryTypes(): Set<string> {
 
 /** Line and station ids with an active report, from the same last-hour window as the markers. */
 function useReportedIds(): { lines: Set<string>; stations: Set<string> } {
-  const { data: reports } = useReports(HOUR_MS);
+  const { data: reports } = useReports({ mode: 'live' });
   const lines = new Set<string>();
   const stations = new Set<string>();
   if (reports)
