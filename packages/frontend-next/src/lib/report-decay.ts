@@ -26,17 +26,15 @@ export const CHAIN_SLACK_FACTOR = 2.5;
 export const SUPERSEDED_FADE_MS = 3 * 60 * 1000;
 export const CHAIN_HEAD_TTL_BOOST = 1.25;
 
-/** Faintest a report gets while it is still live; it fades from here to nothing as it expires. */
+/** Faintest a report gets while it is still live. */
 export const MIN_OPACITY = 0.4;
-/** How long before expiry a report starts fading out completely, rather than snapping away. */
-export const FADE_OUT_MS = 3 * 60 * 1000;
 
 /**
  * How opaque a report should render right now, or `null` if it is no longer live and should not be
  * drawn at all. Reports with no expiry (predicted ones) never fade.
  *
  * The ramp runs from full opacity at the moment of reporting down to `MIN_OPACITY`, where it holds
- * until the last `FADE_OUT_MS` before expiry and then fades to nothing.
+ * until expiry.
  */
 export function reportOpacity(
   timestampMs: number,
@@ -47,7 +45,6 @@ export function reportOpacity(
 
   const remaining = expiresAtMs - nowMs;
   if (remaining <= 0) return null;
-  if (remaining < FADE_OUT_MS) return MIN_OPACITY * (remaining / FADE_OUT_MS);
 
   const lifetime = expiresAtMs - timestampMs;
   if (lifetime <= 0) return MIN_OPACITY;
