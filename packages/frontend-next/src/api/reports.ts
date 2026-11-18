@@ -10,8 +10,9 @@ import type { TFunction } from 'i18next';
 import { useEffect, useState } from 'react';
 
 import { currentCitySlug } from '@/lib/city';
-import { getTurnstileToken, TURNSTILE_TOKEN_HEADER } from '@/lib/turnstile';
+import { TURNSTILE_TOKEN_HEADER } from '@/lib/turnstile';
 import { captureIssue, traceAction } from '@/lib/error-monitoring';
+import { safeLocalStorage } from '@/lib/safe-storage';
 
 import { API_URL, fetchJson } from './client';
 import { type Line, useLines } from './transit';
@@ -36,7 +37,39 @@ export type Report = {
 
 type OptimisticReport = Report & { optimisticId: string };
 
-const pendingOptimisticReports = new Map<string, OptimisticReport>();
+const LOCAL_REPORTS_KEY = 'localReports';
+const LOCAL_REPORT_TTL_MS = 24 * 60 * 60 * 1000;
+
+/*
+ * Reports the API did not accept, kept on this device so the reporter keeps seeing their own pin
+ * across reloads for as long as any list view would still show a report that age.
+ */
+function readLocalReports(): OptimisticReport[] {
+  try {
+    const entries: unknown = JSON.parse(safeLocalStorage.getItem(LOCAL_REPORTS_KEY) ?? '[]');
+    if (!Array.isArray(entries)) return [];
+    const cutoff = Date.now() - LOCAL_REPORT_TTL_MS;
+    return entries.filter(
+      (entry): entry is OptimisticReport =>
+        typeof entry === 'object' &&
+        entry !== null &&
+        typeof entry.optimisticId === 'string' &&
+        typeof entry.stationId === 'string' &&
+        typeof entry.timestamp === 'string' &&
+        new Date(entry.timestamp).getTime() > cutoff,
+    );
+  } catch {
+    return [];
+  }
+}
+
+function persistLocalReport(report: OptimisticReport): void {
+  safeLocalStorage.setItem(LOCAL_REPORTS_KEY, JSON.stringify([...readLocalReports(), report]));
+}
+
+const pendingOptimisticReports = new Map<string, OptimisticReport>(
+  readLocalReports().map((report) => [report.optimisticId, report]),
+);
 
 function isInRange(report: Report, fromMs: number, toMs: number): boolean {
   const timestamp = new Date(report.timestamp).getTime();
@@ -114,16 +147,6 @@ function updateOptimisticReportsInCache(queryClient: QueryClient) {
       reports === undefined
         ? reports
         : withPendingOptimisticReports(reports, ...range, reportsCacheStationId(query.queryKey)),
-    );
-  }
-}
-
-function removeOptimisticReportFromCache(queryClient: QueryClient, optimisticId: string) {
-  for (const query of queryClient.getQueryCache().findAll({
-    predicate: (query) => reportsCacheRange(query.queryKey) !== null,
-  })) {
-    queryClient.setQueryData<Report[]>(query.queryKey, (reports) =>
-      reports?.filter((report) => report.optimisticId !== optimisticId),
     );
   }
 }
@@ -346,11 +369,16 @@ export type SubmitReportResponse = {
   lineId: string | null;
   directionId: string | null;
   timestamp: string;
+  /** The API never accepted it; the report exists only in this device's cache. */
+  local?: boolean;
 };
 
 type SubmitReportMutationInput = SubmitReportInput & {
-  onOptimistic: (report: SubmitReportResponse) => void;
-  onSubmissionError: (error: unknown) => void;
+  /*
+   * Minted by the form's verification step, single-use. Undefined only when no site key is
+   * configured: a configured check that yields no token stops the submission before it gets here.
+   */
+  turnstileToken?: string;
 };
 
 /*
@@ -415,40 +443,45 @@ export function useSubmitReport() {
         // report `source` — which the Reports dashboard splits on — must be derived at runtime.
         // `getPlatform()` is 'ios' | 'android' | 'web'; only 'web' is the browser build.
         const isNative = Capacitor.isNativePlatform();
-        /*
-         * Minted per submission: the API rejects a replayed token, so it cannot be cached. Resolves
-         * to undefined when no site key is configured (dev, previews) and the API skips the check.
-         *
-         * A failure here is reported and then swallowed, and the report is sent without a token, so
-         * the accept/reject decision stays solely with the API. Throwing instead would hide native
-         * challenge failures as generic submit errors, with nothing recorded anywhere.
-         */
-        let turnstileToken: string | undefined;
+        const { turnstileToken } = input;
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15_000);
         try {
-          turnstileToken = await getTurnstileToken('submit-report');
-        } catch (error) {
-          captureIssue('Turnstile token could not be obtained', {
-            reason: error instanceof Error ? error.message : String(error),
+          const response = await fetch(submitUrl, {
+            method: 'POST',
+            signal: controller.signal,
+            headers: {
+              'Content-Type': 'application/json',
+              'ff-platform': Capacitor.getPlatform(),
+              ...(turnstileToken === undefined ? {} : { [TURNSTILE_TOKEN_HEADER]: turnstileToken }),
+            },
+            body: JSON.stringify({
+              stationId: input.stationId,
+              lineId,
+              directionId: input.directionStationId ?? null,
+              source: isNative ? 'mobile_app' : 'web_app',
+            }),
           });
-        }
-        const response = await fetch(submitUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'ff-platform': Capacitor.getPlatform(),
-            ...(turnstileToken === undefined ? {} : { [TURNSTILE_TOKEN_HEADER]: turnstileToken }),
-          },
-          body: JSON.stringify({
+          if (!response.ok) {
+            throw new SubmitReportError(response.status);
+          }
+          return await response.json();
+        } catch (error) {
+          // Keep the local copy, but distinguish it from a report acknowledged by the API.
+          captureIssue('Report submit failed', {
+            status: error instanceof SubmitReportError ? error.status : undefined,
+          });
+          return {
+            reportId: -1,
             stationId: input.stationId,
             lineId,
             directionId: input.directionStationId ?? null,
-            source: isNative ? 'mobile_app' : 'web_app',
-          }),
-        });
-        if (!response.ok) {
-          throw new SubmitReportError(response.status);
+            timestamp: new Date().toISOString(),
+            local: true,
+          };
+        } finally {
+          clearTimeout(timeout);
         }
-        return response.json();
       }),
     onMutate: async (input) => {
       const timestamp = new Date().toISOString();
@@ -468,29 +501,22 @@ export function useSubmitReport() {
       // An in-flight or interval refetch must not overwrite a report that is still pending.
       await queryClient.cancelQueries({ queryKey: ['reports'] });
       updateOptimisticReportsInCache(queryClient);
-      input.onOptimistic({
-        reportId: -1,
-        stationId: optimisticReport.stationId,
-        lineId: optimisticReport.lineId,
-        directionId: optimisticReport.directionId,
-        timestamp,
-      });
       return optimisticReport;
     },
     // Replace in place before invalidating. The active view keeps a record during the refetch,
     // then receives the server's calculated expiry without a blank or duplicate state.
     onSuccess: (result, _input, optimisticReport) => {
+      // A local report keeps its pending entry, which every refetch merges back in.
+      if (result.local) {
+        persistLocalReport(optimisticReport);
+        // The screen shows the moment the user reported, which is the optimistic entry's time.
+        result.timestamp = optimisticReport.timestamp;
+        return;
+      }
       pendingOptimisticReports.delete(optimisticReport.optimisticId);
       replaceOptimisticReportInCache(queryClient, optimisticReport.optimisticId, result);
       void queryClient.invalidateQueries({ queryKey: ['reports'] });
       void queryClient.invalidateQueries({ queryKey: ['risk'] });
-    },
-    onError: (error, input, optimisticReport) => {
-      if (optimisticReport) {
-        pendingOptimisticReports.delete(optimisticReport.optimisticId);
-        removeOptimisticReportFromCache(queryClient, optimisticReport.optimisticId);
-      }
-      input.onSubmissionError(error);
     },
   });
 }

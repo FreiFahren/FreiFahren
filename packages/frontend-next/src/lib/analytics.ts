@@ -1,4 +1,4 @@
-import type { ReportRejection } from '@/components/report/useReportVerification';
+import type { ReportRejection } from '@/components/report/report-verification';
 import type { ContributeSource } from '@/lib/contribute-modal';
 import type { GeolocationPermissionState } from '@/lib/location-prompt';
 import { enqueuePostHog } from '@/lib/posthog-client';
@@ -27,6 +27,14 @@ type AnalyticsEvents = {
   report_rejected: {
     reason: ReportRejection;
     stationId: string;
+  };
+  // Outcome of the pre-submit verification step. `location` says which fix the distance rule ran
+  // on ('coarse' = a refinement was tried and the rule sat out); `turnstile` whether the token
+  // needed a second attempt. `durationMs` is how long the verifying screen was up.
+  report_verified: {
+    location: 'accurate' | 'refined' | 'coarse' | 'none';
+    turnstile: 'passed' | 'retried' | 'failed' | 'disabled';
+    durationMs: number;
   };
   screenshot_taken: Record<string, never>;
   map_centered_on_user: Record<string, never>;

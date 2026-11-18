@@ -16,12 +16,21 @@ import {
   type UserPosition,
 } from './Geolocation.context';
 
+function geolocationFailureReason(code: number) {
+  if (code === 1) return 'denied';
+  if (code === 3) return 'timeout';
+  return 'unavailable';
+}
+
+const REFINE_TIMEOUT_MS = 8_000;
+
 export function GeolocationProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<GeolocationStatus>('idle');
   const [position, setPosition] = useState<UserPosition | null>(null);
   const [accuracy, setAccuracy] = useState<number | null>(null);
 
   const requestRef = useRef<Promise<GeolocationCoords | null> | null>(null);
+  const refineRef = useRef<Promise<GeolocationCoords | null> | null>(null);
 
   const notifyLoading = () => setStatus('loading');
 
@@ -89,7 +98,7 @@ export function GeolocationProvider({ children }: { children: ReactNode }) {
         notifyError(code);
         track('location_failed', {
           trigger,
-          reason: code === 1 ? 'denied' : code === 3 ? 'timeout' : 'unavailable',
+          reason: geolocationFailureReason(code),
         });
         return null;
       } finally {
@@ -101,11 +110,45 @@ export function GeolocationProvider({ children }: { children: ReactNode }) {
     return requestRef.current;
   };
 
+  /*
+   * Deliberately bypasses `notifyLoading`: the map watch tears down on any tracking → loading hop,
+   * and a refinement that fails must not downgrade a position we already have.
+   */
+  const refineLocation = (): Promise<GeolocationCoords | null> => {
+    if (refineRef.current) return refineRef.current;
+
+    const options = { enableHighAccuracy: true, timeout: REFINE_TIMEOUT_MS, maximumAge: 0 };
+    const refine = async () => {
+      try {
+        let coords: GeolocationCoords;
+        if (Capacitor.isNativePlatform()) {
+          const { Geolocation } = await import('@capacitor/geolocation');
+          coords = (await Geolocation.getCurrentPosition(options)).coords;
+        } else {
+          if (!navigator.geolocation) return null;
+          coords = await new Promise<GeolocationCoordinates>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition((p) => resolve(p.coords), reject, options);
+          });
+        }
+        notifyPosition(coords);
+        return coords;
+      } catch {
+        return null;
+      } finally {
+        refineRef.current = null;
+      }
+    };
+
+    refineRef.current = refine();
+    return refineRef.current;
+  };
+
   const value: GeolocationContextValue = {
     status,
     position,
     accuracy,
     requestLocation,
+    refineLocation,
     notifyLoading,
     notifyPosition,
     notifyError,

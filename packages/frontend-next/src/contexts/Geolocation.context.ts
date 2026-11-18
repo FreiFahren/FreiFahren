@@ -16,6 +16,9 @@ export type GeolocationContextValue = {
   accuracy: number | null; // metres, from GeolocationCoordinates.accuracy
 
   requestLocation: (trigger: LocationRequestTrigger) => Promise<GeolocationCoords | null>;
+  // One fresh high-accuracy fix on top of an existing one. A failure changes nothing, so the coarse
+  // fix stays in place; a success lands like any other position update.
+  refineLocation: () => Promise<GeolocationCoords | null>;
 
   // Internal setters, driven by the shared request and the live map watch.
   notifyLoading: () => void;

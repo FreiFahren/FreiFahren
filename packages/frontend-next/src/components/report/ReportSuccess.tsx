@@ -1,4 +1,4 @@
-import { Check, Users } from 'lucide-react';
+import { Check, HardDrive, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -16,9 +16,12 @@ import { NAMESPACE } from './ReportSuccess.i18n';
 
 export function ReportSuccess({
   result,
+  savedLocally = false,
   onClose,
 }: {
   result: SubmitReportResponse;
+  /** The API never confirmed receipt: this is the "saved on this device" confirmation. */
+  savedLocally?: boolean;
   onClose: () => void;
 }) {
   const { t } = useTranslation(NAMESPACE);
@@ -31,13 +34,15 @@ export function ReportSuccess({
   const lineName = result.lineId ? lines?.find((l) => l.id === result.lineId)?.name : null;
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="animate-in fade-in motion-safe:slide-in-from-bottom-1 mx-auto flex min-h-full w-full max-w-lg flex-col duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]">
       <div className="flex flex-1 flex-col items-center overflow-y-auto px-6 pt-14 pb-4 text-center">
         <div className="flex items-center gap-3">
-          <div className="bg-accent-bright text-primary-foreground animate-in zoom-in-50 fade-in flex size-10 items-center justify-center rounded-full shadow-[0_6px_16px_rgba(214,59,59,0.28)] duration-300">
-            <Check className="size-6" />
+          <div className="bg-accent-bright text-primary-foreground flex size-10 items-center justify-center rounded-full shadow-[0_6px_16px_rgba(214,59,59,0.28)]">
+            {savedLocally ? <HardDrive className="size-6" /> : <Check className="size-6" />}
           </div>
-          <h1 className="font-heading text-xl font-semibold">{t('title')}</h1>
+          <h1 className="font-heading text-xl font-semibold">
+            {t(savedLocally ? 'localTitle' : 'title')}
+          </h1>
         </div>
 
         {stationName && (
@@ -47,7 +52,11 @@ export function ReportSuccess({
           </div>
         )}
 
-        {reporters !== null && (
+        <p className="text-muted-foreground mt-3 text-sm leading-relaxed" role="status">
+          {t(savedLocally ? 'localBody' : 'sentBody')}
+        </p>
+
+        {!savedLocally && reporters !== null && (
           <div className="mt-5 flex flex-col items-center gap-1">
             <div className="text-foreground flex items-center gap-2">
               <Users className="text-muted-foreground size-6" />
@@ -59,24 +68,17 @@ export function ReportSuccess({
           </div>
         )}
 
-        <div className="mt-6 w-full">
-          <ReportFeedback onDone={onClose} />
-        </div>
+        <div className="mt-6 w-full">{!savedLocally && <ReportFeedback onDone={onClose} />}</div>
       </div>
 
       <div className="border-border/60 bg-card flex shrink-0 flex-col items-center border-t px-6 pt-3 pb-6">
-        {currentCity.community.telegramHandle && (
-          <p className="text-muted-foreground text-[0.6875rem]">
-            {t('syncText', { handle: currentCity.community.telegramHandle })}
-          </p>
-        )}
         <Button
           type="button"
           size="lg"
           onClick={onClose}
           className="bg-accent-bright text-primary-foreground hover:bg-accent-press mt-2 h-12 w-full rounded-lg text-base font-semibold shadow-[0_6px_16px_rgba(214,59,59,0.28)]"
         >
-          {t('continue')}
+          {t('backToMap')}
         </Button>
         <SocialLinks appearance="inline" className="mt-3 justify-center" />
       </div>

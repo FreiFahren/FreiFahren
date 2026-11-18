@@ -2,6 +2,7 @@ import { ChevronLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@freifahren/ui/button';
+import { cn } from '@freifahren/ui/cn';
 import { Separator } from '@freifahren/ui/separator';
 import { Route as MapIndexRoute } from '@/routes/_map/index';
 
@@ -11,12 +12,19 @@ import { PageBreadcrumbs, type PageBreadcrumb } from './page-breadcrumbs';
 type PageHeaderProps = {
   title: string;
   onBack?: () => void;
+  reserveBackSpace?: boolean;
   breadcrumbs?: PageBreadcrumb[];
   /** Optional trailing content, right-aligned in the header (e.g. a feedback button). */
   action?: React.ReactNode;
 };
 
-export function PageHeader({ title, onBack, breadcrumbs, action }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  onBack,
+  reserveBackSpace,
+  breadcrumbs,
+  action,
+}: PageHeaderProps) {
   const { t } = useTranslation(NAMESPACE);
 
   return (
@@ -32,13 +40,14 @@ export function PageHeader({ title, onBack, breadcrumbs, action }: PageHeaderPro
           </>
         ) : (
           <>
-            {onBack && (
+            {(onBack || reserveBackSpace) && (
               <Button
                 variant="ghost"
                 size="icon-sm"
                 onClick={onBack}
                 aria-label={t('back')}
-                className="-ml-2"
+                disabled={!onBack}
+                className={cn('-ml-2', !onBack && 'invisible')}
               >
                 {/* ml-2 cancels the icon button's optical inset so the chevron lines up with the page's px-4 content edge */}
                 <ChevronLeft className="size-5" />{' '}

@@ -1,16 +1,14 @@
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ChevronRight, MapPin, Search, Send, TriangleAlert } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { ChevronRight, MapPin, Search, TriangleAlert } from 'lucide-react';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { SubmitReportError, type SubmitReportResponse, useSubmitReport } from '@/api/reports';
 import { type Station } from '@/api/transit';
 import { FeedbackButton } from '@/components/feedback/FeedbackButton';
 import { ReportLocationStep } from '@/components/map/UserLocationControl';
 import { FullScreenPage } from '@/components/templates/full-screen-page';
 import { PageHeader } from '@/components/templates/PageHeader';
-import { Button } from '@freifahren/ui/button';
 import { Input } from '@freifahren/ui/input';
 import { SectionHeading } from '@freifahren/ui/section-heading';
 import { Separator } from '@freifahren/ui/separator';
@@ -18,17 +16,13 @@ import { ToastPill } from '@freifahren/ui/toast-pill';
 import { Toaster } from '@/components/toaster';
 import { useGeolocation } from '@/contexts/Geolocation.context';
 import { useKeyboardScrollArea } from '@/hooks/use-keyboard-scroll-area';
-import { track } from '@/lib/analytics';
-import { currentCity } from '@/lib/city';
 import {
   markContributeShownAfterReport,
   openContributeModal,
   shouldOpenContributeAfterReport,
 } from '@/lib/contribute-modal';
-import { captureIssue } from '@/lib/error-monitoring';
 import { FEATURE_FLAGS, getFeatureFlagVariant } from '@/lib/feature-flags';
 import { distanceMeters } from '@/lib/geo';
-import { notifySuccess } from '@/lib/haptics';
 import { toast } from '@/lib/toast';
 import { cn } from '@freifahren/ui/cn';
 
@@ -39,25 +33,16 @@ import {
   useReportSelection,
 } from './ReportSelection.context';
 import { ReportSelectionProvider } from './ReportSelectionProvider';
+import { ReportActionFooter } from './report-action-footer';
 import { ReportSuccess } from './ReportSuccess';
 import { ClearSelectionButton, LineBadgePicker, LineTypeTabs } from './line-picker-controls';
+import { ReportVerifying } from './report-verifying';
 import { SelectionButton } from './selection-button';
-import {
-  type ReportRejection,
-  useReportVerification,
-  type VerifyLocation,
-} from './useReportVerification';
+import { type ReportSelection, useReportSubmission } from './use-report-submission';
 
 const routeApi = getRouteApi('/report');
 
 const NEARBY_COUNT = 3;
-
-const REJECTION_MESSAGE: Record<ReportRejection, string> = {
-  too_fast: 'errorTooSoon',
-  rate_limited: 'errorTooSoon',
-  too_far: 'errorTooFar',
-  location_pending: 'errorLocationPending',
-};
 
 function LinePicker() {
   const { t } = useTranslation(NAMESPACE);
@@ -196,9 +181,8 @@ function StationPicker() {
         {stationId && <ClearSelectionButton onClick={clear} />}
       </div>
 
-      {tappedStationId !== null ? (
-        renderStationButton(tappedStationId, visibleStations[0]?.name)
-      ) : (
+      {tappedStationId !== null && renderStationButton(tappedStationId, visibleStations[0]?.name)}
+      {tappedStationId === null && (
         <>
           <div className="relative mb-2">
             <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
@@ -304,164 +288,41 @@ function DirectionPicker() {
   );
 }
 
-function SubmitFailureNotice({ title, body }: { title: string; body: string }) {
-  const { t } = useTranslation(NAMESPACE);
-  const telegramHandle = currentCity.community.telegramHandle;
-  const telegramUrl = telegramHandle
-    ? `https://t.me/${telegramHandle.replace(/^@/, '')}`
-    : undefined;
-
-  return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-      <TriangleAlert className="text-muted-foreground size-8" />
-      <div className="space-y-2">
-        <p className="font-heading text-base font-semibold">{title}</p>
-        <p className="text-muted-foreground text-sm">{body}</p>
-      </div>
-      {telegramUrl && (
-        <Button
-          asChild
-          size="lg"
-          className="bg-accent-bright text-primary-foreground hover:bg-accent-press h-12 rounded-lg px-6 text-base font-semibold shadow-[0_6px_16px_rgba(214,59,59,0.28)]"
-        >
-          <a href={telegramUrl} target="_blank" rel="noopener noreferrer">
-            <Send data-icon="inline-start" />
-            {t('telegramFallbackCta')}
-          </a>
-        </Button>
-      )}
-    </div>
+function showErrorToast(message: string, id: string) {
+  toast.custom(
+    () => (
+      <ToastPill className="bg-destructive flex w-fit items-center gap-2 text-sm font-semibold text-white">
+        <TriangleAlert className="size-4" />
+        {message}
+      </ToastPill>
+    ),
+    { id },
   );
 }
 
-const REPEATED_FAILURE_THRESHOLD = 3;
-
-const LOCATION_WAIT_MS = 4000;
-
-function SubmitFooter({
-  onSubmitted,
-  onSubmissionError,
-  onRepeatedFailure,
-}: {
-  onSubmitted: (result: SubmitReportResponse) => void;
-  onSubmissionError: () => void;
-  onRepeatedFailure: () => void;
-}) {
+function SubmitFooter({ onSubmit }: { onSubmit: (selection: ReportSelection) => void }) {
   const { t } = useTranslation(NAMESPACE);
   const { stationId, stationForSubmit } = useReportSelection();
-  const submitReport = useSubmitReport();
-  const { verify, recordSubmission } = useReportVerification();
-  const { position, status, requestLocation } = useGeolocation();
-  const [consecutiveFailures, setConsecutiveFailures] = useState(0);
-  const [isLocating, setIsLocating] = useState(false);
 
   const canSubmit = stationId !== null;
 
-  const showErrorToast = (message: string, id: string) => {
-    toast.custom(
-      () => (
-        <ToastPill className="bg-destructive flex w-fit items-center gap-2 text-sm font-semibold text-white">
-          <TriangleAlert className="size-4" />
-          {message}
-        </ToastPill>
-      ),
-      { id },
-    );
-  };
-
-  const handleOptimisticSubmission = (result: SubmitReportResponse) => {
-    setConsecutiveFailures(0);
-    notifySuccess();
-    getFeatureFlagVariant(FEATURE_FLAGS.contributeModalTiming);
-    track('report_submitted', {
-      stationId: result.stationId,
-      lineId: result.lineId,
-      directionId: result.directionId,
-    });
-    onSubmitted(result);
-  };
-
-  const handleSubmissionError = (error: unknown) => {
-    onSubmissionError();
-    captureIssue('Report submit failed', {
-      status: error instanceof SubmitReportError ? error.status : undefined,
-    });
-
-    const failureCount = consecutiveFailures + 1;
-    setConsecutiveFailures(failureCount);
-    if (failureCount >= REPEATED_FAILURE_THRESHOLD) {
-      onRepeatedFailure();
-      return;
-    }
-
-    showErrorToast(t('errorSubmitFailed'), 'report-submit-error');
-  };
-
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     // Keep an empty selection clickable so the user can learn what is missing.
     const selection = stationForSubmit();
     if (selection === null) {
       showErrorToast(t('errorNoStation'), 'report-station-required');
       return;
     }
-
-    let location: VerifyLocation | undefined;
-    if (!position && status === 'loading') {
-      setIsLocating(true);
-      try {
-        // requestLocation returns the fetch already in flight, so this doesn't start a second one.
-        const coords = await Promise.race([
-          requestLocation('report'),
-          new Promise<'timeout'>((resolve) => setTimeout(resolve, LOCATION_WAIT_MS, 'timeout')),
-        ]);
-        location =
-          coords === 'timeout'
-            ? { position: null, pending: true }
-            : {
-                position: coords && { lat: coords.latitude, lng: coords.longitude },
-                pending: false,
-              };
-      } finally {
-        setIsLocating(false);
-      }
-    }
-
-    const rejection = verify(selection.stationId, location);
-    if (rejection) {
-      track('report_rejected', { reason: rejection, stationId: selection.stationId });
-      showErrorToast(t(REJECTION_MESSAGE[rejection]), 'report-verification');
-      return;
-    }
-
-    recordSubmission(selection.stationId);
-    submitReport.mutate({
-      stationId: selection.stationId,
-      lineName: selection.lineName,
-      directionStationId: selection.directionStationId,
-      onOptimistic: handleOptimisticSubmission,
-      onSubmissionError: handleSubmissionError,
-    });
+    onSubmit(selection);
   };
 
   return (
-    <footer className="pb-safe-4 mt-auto px-4 pt-6">
-      <Button
-        type="button"
-        size="lg"
-        disabled={submitReport.isPending || isLocating}
-        aria-disabled={!canSubmit}
-        onClick={handleSubmit}
-        className={cn(
-          'h-12 w-full rounded-lg text-base font-semibold',
-          canSubmit
-            ? 'bg-accent-bright text-primary-foreground hover:bg-accent-press shadow-[0_6px_16px_rgba(214,59,59,0.28)]'
-            : 'bg-surface-solid text-muted-foreground border-border border',
-        )}
-      >
-        {t('submit')}
-      </Button>
-      <p className="text-muted-foreground mt-2 text-center text-[0.6875rem]">{t('disclaimer')}</p>
-    </footer>
+    <ReportActionFooter
+      label={t('submit')}
+      onClick={handleSubmit}
+      inactive={!canSubmit}
+      showDisclaimer
+    />
   );
 }
 
@@ -469,8 +330,7 @@ export function ReportForm() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
   const { stationId: initialStationId, lineName: initialLineName } = routeApi.useSearch();
-  const [result, setResult] = useState<SubmitReportResponse | null>(null);
-  const [repeatedFailure, setRepeatedFailure] = useState(false);
+  const { phase, submit, reset, showSuccess } = useReportSubmission();
   const scrollAreaRef = useKeyboardScrollArea();
 
   const handleSuccessClose = () => {
@@ -489,35 +349,40 @@ export function ReportForm() {
           ref={scrollAreaRef}
           className="mb-[max(var(--keyboard-inset),var(--browser-keyboard-inset,0px))] flex min-h-0 flex-1 flex-col overflow-y-auto"
         >
-          {result ? (
-            <ReportSuccess result={result} onClose={handleSuccessClose} />
+          {phase.kind === 'success' || phase.kind === 'saved_locally' ? (
+            <ReportSuccess
+              result={phase.result}
+              savedLocally={phase.kind === 'saved_locally'}
+              onClose={handleSuccessClose}
+            />
           ) : (
             <>
-              <PageHeader
-                title={t('title')}
-                onBack={() => navigate({ to: '/' })}
-                action={
-                  <FeedbackButton
-                    source="report_form"
-                    size="xs"
-                    className="text-muted-foreground hover:text-foreground"
-                  />
-                }
-              />
-              {!repeatedFailure ? (
+              {phase.kind !== 'form' && (
+                <ReportVerifying phase={phase} onBack={reset} onResultsRead={showSuccess} />
+              )}
+              {/* Hidden rather than unmounted while verifying, so the location step does not re-run
+                  its permission prompt when the user comes back to the form. */}
+              <div
+                className={cn('flex min-h-0 flex-1 flex-col', phase.kind !== 'form' && 'hidden')}
+              >
+                <PageHeader
+                  title={t('title')}
+                  onBack={() => navigate({ to: '/' })}
+                  action={
+                    <FeedbackButton
+                      source="report_form"
+                      size="xs"
+                      className="text-muted-foreground hover:text-foreground"
+                    />
+                  }
+                />
                 <ReportLocationStep>
                   <LinePicker />
                   <StationPicker />
                   <DirectionPicker />
-                  <SubmitFooter
-                    onSubmitted={setResult}
-                    onSubmissionError={() => setResult(null)}
-                    onRepeatedFailure={() => setRepeatedFailure(true)}
-                  />
+                  <SubmitFooter onSubmit={(selection) => void submit(selection)} />
                 </ReportLocationStep>
-              ) : (
-                <SubmitFailureNotice title={t('submitFailedTitle')} body={t('submitFailedBody')} />
-              )}
+              </div>
             </>
           )}
         </div>

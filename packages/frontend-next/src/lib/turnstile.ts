@@ -87,11 +87,24 @@ export function preloadTurnstile(): void {
  * Rejects if the challenge fails or takes too long, so the caller can surface a normal error
  * instead of sending a request the server will refuse.
  */
-export async function getTurnstileToken(action: TurnstileAction): Promise<string | undefined> {
+export async function getTurnstileToken(
+  action: TurnstileAction,
+  options: { timeoutMs?: number } = {},
+): Promise<string | undefined> {
   const key = siteKey();
+  const timeoutMs = options.timeoutMs ?? TOKEN_TIMEOUT_MS;
   if (key === undefined) return undefined;
 
-  const turnstile = await loadTurnstile();
+  // Include script loading in the attempt budget; a blocked script must not hang forever.
+  const startedAt = Date.now();
+  let loadTimer: ReturnType<typeof setTimeout> | undefined;
+  const turnstile = await Promise.race([
+    loadTurnstile(),
+    new Promise<never>((_, reject) => {
+      loadTimer = setTimeout(() => reject(new Error('Turnstile script timed out')), timeoutMs);
+    }),
+  ]).finally(() => clearTimeout(loadTimer));
+  const remainingMs = Math.max(1, timeoutMs - (Date.now() - startedAt));
 
   // Off-screen rather than display:none — Turnstile refuses to run in a hidden container, and an
   // interactive challenge still needs somewhere real to paint if managed mode escalates.
@@ -111,7 +124,7 @@ export async function getTurnstileToken(action: TurnstileAction): Promise<string
 
   try {
     return await new Promise<string>((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error('Turnstile timed out')), TOKEN_TIMEOUT_MS);
+      const timer = setTimeout(() => reject(new Error('Turnstile timed out')), remainingMs);
       const settle = (fn: () => void) => {
         clearTimeout(timer);
         fn();
