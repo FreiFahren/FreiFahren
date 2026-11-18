@@ -29,7 +29,6 @@ jobs:
             pull-requests: read
         outputs:
             api: ${{ steps.filter.outputs.api }}
-            subdomain: ${{ steps.subdomain.outputs.subdomain }}
         steps:
             - name: Detect what changed
               id: filter
@@ -70,21 +69,6 @@ jobs:
                           : 'false'
                       )
 
-            # Resolved once and shared, so both deploys and the recorded deployment URL agree on the
-            # hostnames without each recomputing them.
-            - name: Resolve workers.dev subdomain
-              id: subdomain
-              env:
-                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-              run: |
-                  set -euo pipefail
-                  subdomain=$(curl --fail --silent --show-error \
-                    --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-                    "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" \
-                    | jq --exit-status --raw-output '.result.subdomain')
-                  echo "subdomain=$subdomain" >> "$GITHUB_OUTPUT"
-
     api:
         needs: plan
         if: >-
@@ -103,7 +87,7 @@ jobs:
             # Passed via env (not interpolated into a run script) to avoid shell injection.
             PR_NUMBER: ${{ github.event.pull_request.number }}
             PREVIEW_CONFIG: wrangler.preview.json
-            PREVIEW_URL: https://api-pr-${{ github.event.pull_request.number }}.${{ needs.plan.outputs.subdomain }}.workers.dev
+            PREVIEW_URL: https://pr-${{ github.event.pull_request.number }}-api-worker.freifahren.workers.dev
 
         steps:
             - name: Check out code
@@ -143,14 +127,7 @@ jobs:
               run: bun run db:copy-reports --config "$PREVIEW_CONFIG"
 
             - name: Deploy preview API worker
-              uses: cloudflare/wrangler-action@v3
-              with:
-                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                  workingDirectory: packages/api-worker
-                  # The generated config enables the open preview adapter and binds only the
-                  # temporary per-PR databases; it never references the production private gate.
-                  command: deploy --config wrangler.preview.json
+              run: bun run wrangler preview --config "$PREVIEW_CONFIG" --name "pr-$PR_NUMBER" --ignore-base-config
 
             - name: Smoke test every city
               run: |
@@ -197,9 +174,9 @@ jobs:
             CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
             CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
             PR_NUMBER: ${{ github.event.pull_request.number }}
-            APP_URL: https://frontend-pr-${{ github.event.pull_request.number }}.${{ needs.plan.outputs.subdomain }}.workers.dev
+            APP_URL: https://pr-${{ github.event.pull_request.number }}-frontend.freifahren.workers.dev
             # Every rendered preview has its own API and databases, including frontend-only PRs.
-            API_URL: https://api-pr-${{ github.event.pull_request.number }}.${{ needs.plan.outputs.subdomain }}.workers.dev
+            API_URL: https://pr-${{ github.event.pull_request.number }}-api-worker.freifahren.workers.dev
 
         steps:
             - name: Check out code
@@ -227,7 +204,9 @@ jobs:
                   VITE_TURNSTILE_SITE_KEY: '1x00000000000000000000AA'
 
             - name: Deploy preview frontend
-              run: bunx wrangler@latest deploy --config wrangler.preview.jsonc --name "frontend-pr-${PR_NUMBER}"
+              run: |
+                  ../api-worker/node_modules/.bin/wrangler preview --name "pr-$PR_NUMBER" --ignore-base-config
+                  curl --fail --silent --show-error --retry 8 --retry-delay 3 --retry-all-errors "$APP_URL/" -o /dev/null
 
             # A deployment rather than a comment. GitHub renders it in the PR's merge box and against
             # the commit, supersedes the previous one on every push instead of leaving a trail, and —

@@ -72,7 +72,7 @@ const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\
 // Subdomain (rather than accepting any `*.workers.dev` tenant) keeps a Worker in someone else's
 // Cloudflare account from claiming the same name pattern and being granted production API CORS.
 const buildPreviewOriginPattern = (subdomain: string) =>
-    new RegExp(`^https:\\/\\/frontend-pr-\\d+\\.${escapeRegExp(subdomain)}\\.workers\\.dev$`)
+    new RegExp(`^https:\\/\\/(?:frontend-pr-\\d+|pr-\\d+-frontend)\\.${escapeRegExp(subdomain)}\\.workers\\.dev$`)
 
 const PRIVATE_HTTP_ORIGIN =
     /^http:\/\/(?:localhost|127\.0\.0\.1|10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?::\d+)?$/

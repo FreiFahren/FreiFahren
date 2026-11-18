@@ -1,6 +1,8 @@
 {
   "name": "frontend",
   "compatibility_date": "2026-05-31",
+  "previews": {},
+  "preview_urls": true,
   "main": "./worker/index.ts",
   "assets": {
     "directory": "./dist",

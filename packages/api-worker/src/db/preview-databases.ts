@@ -1,9 +1,10 @@
 import { execFileSync } from 'node:child_process'
-import { readFileSync, writeFileSync } from 'node:fs'
+import { writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { CITY_DATABASES } from '@freifahren/cities'
+import { experimental_readRawConfig } from 'wrangler'
 
 import { logger } from '../common/logger'
 
@@ -14,10 +15,6 @@ import { logger } from '../common/logger'
 // CLI, and a per-PR database's id only exists once the database does.
 
 const PACKAGE_ROOT = resolve(fileURLToPath(new URL('.', import.meta.url)), '../..')
-
-// Must match wrangler.jsonc so a preview runs the production runtime.
-const COMPATIBILITY_DATE = '2025-10-11'
-const COMPATIBILITY_FLAGS = ['nodejs_compat']
 
 // Scopes preview CORS to our own account (see PREVIEW_WORKERS_SUBDOMAIN in src/app-env.ts).
 const WORKERS_SUBDOMAIN = 'freifahren'
@@ -38,15 +35,6 @@ const parseFlag = (name: string, argv: string[] = process.argv): string | undefi
 const previewSuffix = (pr: string) => `-pr-${pr}`
 
 const previewDatabaseName = (dbName: string, pr: string) => `${dbName}${previewSuffix(pr)}`
-
-const assertCompatibilityDateMatchesProduction = () => {
-    const production = readFileSync(resolve(PACKAGE_ROOT, 'wrangler.jsonc'), 'utf-8')
-    if (!production.includes(`"compatibility_date": "${COMPATIBILITY_DATE}"`)) {
-        throw new Error(
-            `COMPATIBILITY_DATE (${COMPATIBILITY_DATE}) no longer matches wrangler.jsonc — update it so previews keep running the production runtime`
-        )
-    }
-}
 
 const listDatabases = (): D1ListEntry[] => {
     const stdout = execFileSync('npx', ['wrangler', 'd1', 'list', '--json'], {
@@ -75,8 +63,6 @@ const destroy = (pr: string): Set<string> => {
 }
 
 const provision = (pr: string, out: string) => {
-    assertCompatibilityDateMatchesProduction()
-
     // Every run rebuilds from empty. Reusing a database would show something other than the revision
     // Under review: wrangler's ledger records applied migration *filenames*, so a migration edited
     // During review is never reapplied, and the seed's additive load keeps the previous revision's
@@ -106,18 +92,13 @@ const provision = (pr: string, out: string) => {
         return { binding, database_name: name, database_id: database.uuid, migrations_dir: 'drizzle' }
     })
 
-    const config = {
-        $schema: 'node_modules/wrangler/config-schema.json',
-        name: `api-pr-${pr}`,
-        main: 'src/worker.ts',
-        compatibility_date: COMPATIBILITY_DATE,
-        compatibility_flags: COMPATIBILITY_FLAGS,
-        cache: { enabled: true },
-        // Must match wrangler.jsonc: announcement bodies are Markdown imported as text.
-        rules: [{ type: 'Text', globs: ['**/*.md'], fallthrough: true }],
-        version_metadata: { binding: 'CF_VERSION_METADATA' },
-        // No `routes`, so a preview can never take traffic on the production hostname.
-        workers_dev: true,
+    const { name, main, compatibility_date, compatibility_flags, rules, version_metadata, cache } =
+        experimental_readRawConfig({
+            config: resolve(PACKAGE_ROOT, 'wrangler.jsonc'),
+        }).rawConfig
+    const previews = {
+        cache,
+        version_metadata,
         d1_databases: d1Databases,
         // Its own accounts, so unreviewed PR code never sees a production session.
         services: [{ binding: 'AUTH', service: 'auth-worker-preview', entrypoint: 'SessionsEntrypoint' }],
@@ -126,12 +107,14 @@ const provision = (pr: string, out: string) => {
             // They go only into isolated per-PR databases, without private scoring or forwarding.
             NODE_ENV: 'production',
             REPORT_GATE_MODE: 'preview-open',
-            CORS_ORIGINS: `https://frontend-pr-${pr}.${WORKERS_SUBDOMAIN}.workers.dev`,
+            CORS_ORIGINS: `https://pr-${pr}-frontend.${WORKERS_SUBDOMAIN}.workers.dev`,
             PREVIEW_WORKERS_SUBDOMAIN: WORKERS_SUBDOMAIN,
             // No SENTRY_DSN: previews would otherwise report into the production issue stream.
         },
     }
 
+    // D1 CLI commands read top-level bindings. Both views target the same isolated databases.
+    const config = { name, main, compatibility_date, compatibility_flags, rules, d1_databases: d1Databases, previews }
     writeFileSync(resolve(PACKAGE_ROOT, out), `${JSON.stringify(config, null, 2)}\n`)
     logger.info({ out, databases: d1Databases.map(({ database_name }) => database_name) }, 'Preview config written')
 }

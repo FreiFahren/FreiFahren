@@ -24,7 +24,7 @@ export async function cleanupPreviews({ env = process.env, fetchImpl = fetch, lo
             cf &&
             path.startsWith('/workers/scripts/') &&
             data.errors?.some(({ code }) => code === 10007 || code === 10090)
-        if (missing && (response.status === 404 || missingWorker)) return null
+        if (missing && (response.status === 404 || missingWorker || (path.includes('/previews/') && data.errors?.some(({ code }) => code === 10025)))) return null
         if (!response.ok || (cf && data.success !== true)) {
             throw new Error(`${provider} ${method} ${path} failed (${response.status})`)
         }
@@ -50,8 +50,14 @@ export async function cleanupPreviews({ env = process.env, fetchImpl = fetch, lo
     const candidates = new Map()
     const add = (pr, type, resource) => {
         if (!pr || openPRs.has(pr)) return
-        if (!candidates.has(pr)) candidates.set(pr, { workers: [], databases: [], deployments: [] })
+        if (!candidates.has(pr)) candidates.set(pr, { previews: [], workers: [], databases: [], deployments: [] })
         if (type) candidates.get(pr)[type].push(resource)
+    }
+    for (const parent of ['frontend', 'api-worker']) {
+        const path = `/workers/workers/${parent}/previews`
+        for (const { name, id } of await list('cloudflare', path)) {
+            add(/^pr-([1-9]\d*)$/.exec(name)?.[1], 'previews', `${path}/${encodeURIComponent(id)}`)
+        }
     }
     for (const worker of workers) add(/^(?:api|frontend)-pr-([1-9]\d*)$/.exec(worker.id)?.[1], 'workers', worker)
     // Keep the preview namespace but allow old city names, including cities removed from the registry.
@@ -76,9 +82,16 @@ export async function cleanupPreviews({ env = process.env, fetchImpl = fetch, lo
             }
             if (pull && pull.state !== 'closed') throw new Error(`Unexpected PR state for #${pr}`)
             log(
-                `${dryRun ? 'Would clean' : 'Cleaning'} PR #${pr}: ${resources.workers.length} workers, ${resources.databases.length} databases, ${resources.deployments.length} deployments`
+                `${dryRun ? 'Would clean' : 'Cleaning'} PR #${pr}: ${resources.previews.length} previews, ${resources.workers.length} legacy workers, ${resources.databases.length} databases, ${resources.deployments.length} deployments`
             )
             if (dryRun) continue
+            for (const path of resources.previews) {
+                await request('cloudflare', path, {
+                    method: 'DELETE',
+                    missing: true,
+                })
+            }
+            // Retire standalone Workers belonging to previews created before the migration.
             for (const { id } of resources.workers) {
                 await request('cloudflare', `/workers/scripts/${encodeURIComponent(id)}?force=true`, {
                     method: 'DELETE',

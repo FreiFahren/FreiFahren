@@ -116,7 +116,7 @@ describe('ETag 304 + CORS', () => {
 
 describe('CORS', () => {
     const ALLOWED_ORIGIN = 'http://localhost:1871'
-    const PREVIEW_ORIGIN = 'https://frontend-pr-744.freifahren.workers.dev'
+    const PREVIEW_ORIGIN = 'https://pr-744-frontend.freifahren.workers.dev'
     const DISALLOWED_ORIGIN = 'https://not-on-the-list.example'
     const MALFORMED_PREVIEW_ORIGIN = 'https://frontend-pr-not-a-number.freifahren.workers.dev'
 
