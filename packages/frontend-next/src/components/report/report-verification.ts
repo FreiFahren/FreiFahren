@@ -17,7 +17,8 @@ export type VerificationChecks = {
 type FailedCheck = Extract<VerificationChecks[keyof VerificationChecks], { status: 'failed' }>;
 export type ReportRejection = FailedCheck['reason'];
 export type Coordinates = { latitude: number; longitude: number };
-export type ReportHistoryEntry = { timestamp: number; coordinates: Coordinates | null };
+// Only verified submissions carry a station coordinate (or null when the station was unknown).
+export type ReportHistoryEntry = { timestamp: number; coordinates?: Coordinates | null };
 export type VerifyLocation = {
   position: { lat: number; lng: number } | null;
   accuracy: number | null;
@@ -26,8 +27,8 @@ export type VerifyLocation = {
 export const MAX_REPORT_DISTANCE_M = 2000;
 const TRAVEL_TOLERANCE_M = 500;
 const TRAVEL_SPEED_M_PER_MS = 1000 / 60_000;
-const REPORT_WINDOW_MS = 10 * 60_000;
-export const MAX_REPORTS_PER_WINDOW = 4;
+export const REPORT_WINDOW_MS = 10 * 60_000;
+const MAX_ATTEMPTS_PER_WINDOW = 4;
 
 export const isUsableFix = (accuracy: number | null): boolean =>
   accuracy !== null &&
@@ -35,12 +36,10 @@ export const isUsableFix = (accuracy: number | null): boolean =>
   accuracy >= 0 &&
   accuracy <= MAX_REPORT_DISTANCE_M;
 
-export function evaluateReportChecks(
+function checkLocation(
   coordinates: Coordinates | undefined,
   location: VerifyLocation,
-  history: ReportHistoryEntry[],
-  now: number,
-): Pick<VerificationChecks, 'location' | 'activity'> {
+): LocationCheck {
   const usable = coordinates && location.position && isUsableFix(location.accuracy);
   if (
     usable &&
@@ -53,10 +52,30 @@ export function evaluateReportChecks(
       location.accuracy! >
       MAX_REPORT_DISTANCE_M
   ) {
-    return { location: { status: 'failed', reason: 'too_far' }, activity: { status: 'pending' } };
+    return { status: 'failed', reason: 'too_far' };
   }
-  const locationCheck: LocationCheck = { status: usable ? 'passed' : 'unavailable' };
-  const last = history.at(-1);
+  return { status: usable ? 'passed' : 'unavailable' };
+}
+
+export function lastSubmission(history: ReportHistoryEntry[]) {
+  return history.filter((entry) => entry.coordinates !== undefined).at(-1);
+}
+
+export function evaluateReportChecks(
+  coordinates: Coordinates | undefined,
+  location: VerifyLocation,
+  history: ReportHistoryEntry[],
+  now: number,
+): Pick<VerificationChecks, 'location' | 'activity'> {
+  const locationCheck = checkLocation(coordinates, location);
+  const recent = history.filter((entry) => entry.timestamp > now - REPORT_WINDOW_MS);
+  if (recent.length >= MAX_ATTEMPTS_PER_WINDOW) {
+    return { location: locationCheck, activity: { status: 'failed', reason: 'rate_limited' } };
+  }
+  if (locationCheck.status === 'failed') {
+    return { location: locationCheck, activity: { status: 'skipped' } };
+  }
+  const last = lastSubmission(history);
   if (coordinates && last?.coordinates) {
     const distance = distanceMeters(
       last.coordinates.latitude,
@@ -68,14 +87,7 @@ export function evaluateReportChecks(
       return { location: locationCheck, activity: { status: 'failed', reason: 'too_fast' } };
     }
   }
-  const recent = history.filter((entry) => entry.timestamp > now - REPORT_WINDOW_MS);
-  return {
-    location: locationCheck,
-    activity:
-      recent.length >= MAX_REPORTS_PER_WINDOW
-        ? { status: 'failed', reason: 'rate_limited' }
-        : { status: 'passed' },
-  };
+  return { location: locationCheck, activity: { status: 'passed' } };
 }
 
 export function failedCheck(checks: VerificationChecks): FailedCheck | undefined {

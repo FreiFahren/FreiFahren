@@ -1,5 +1,4 @@
 import { useEffect, useEffectEvent } from 'react';
-import { LoaderCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useStations } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
@@ -54,26 +53,13 @@ export function ReportVerifying({
     };
   }, [delivered]);
 
-  const busy = phase.kind === 'verifying' || phase.kind === 'sending';
   const stationName = stations?.[phase.selection.stationId]?.name;
   const { title, body } = COPY[phase.kind];
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-md flex-col">
       <div role="status" aria-live="polite">
-        <PageHeader
-          title={t(title)}
-          reserveBackSpace
-          onBack={rejected ? onBack : undefined}
-          action={
-            busy ? (
-              <LoaderCircle
-                aria-hidden="true"
-                className="text-muted-foreground mr-2 size-5 animate-spin motion-reduce:animate-none"
-              />
-            ) : undefined
-          }
-        />
+        <PageHeader title={t(title)} reserveBackSpace onBack={rejected ? onBack : undefined} />
       </div>
       <div className="flex flex-1 flex-col px-4 pt-4 pb-6">
         {stationName && (

@@ -2,7 +2,8 @@ import { useStations } from '@/api/transit';
 import { safeLocalStorage } from '@/lib/safe-storage';
 import {
   evaluateReportChecks,
-  MAX_REPORTS_PER_WINDOW,
+  lastSubmission,
+  REPORT_WINDOW_MS,
   type Coordinates,
   type ReportHistoryEntry,
   type VerifyLocation,
@@ -31,27 +32,50 @@ function readHistory(): ReportHistoryEntry[] {
         entry !== null &&
         Number.isFinite(entry.timestamp) &&
         entry.timestamp >= 0 &&
-        (entry.coordinates === null || isCoordinates(entry.coordinates)),
+        (entry.coordinates === undefined ||
+          entry.coordinates === null ||
+          isCoordinates(entry.coordinates)),
     );
   } catch {
     return [];
   }
 }
 
+function recordAttempt(entry: ReportHistoryEntry) {
+  const history = [...readHistory(), entry];
+  const last = lastSubmission(history);
+  // A verified station can still rule out implausible travel after the attempt window expires.
+  const retained = history.filter(
+    (attempt) => attempt === last || attempt.timestamp > entry.timestamp - REPORT_WINDOW_MS,
+  );
+  safeLocalStorage.setItem(STORAGE_KEY, JSON.stringify(retained));
+}
+
 export function useReportVerification() {
   const { data: stations } = useStations();
-  const verify = (stationId: string, location: VerifyLocation) =>
-    evaluateReportChecks(stations?.[stationId]?.coordinates, location, readHistory(), Date.now());
-
-  const recordSubmission = (stationId: string) => {
-    const history = [
-      ...readHistory(),
-      {
-        timestamp: Date.now(),
-        coordinates: stations?.[stationId]?.coordinates ?? null,
-      },
-    ].slice(-MAX_REPORTS_PER_WINDOW);
-    safeLocalStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+  const verify = (stationId: string, location: VerifyLocation) => {
+    const now = Date.now();
+    const checks = evaluateReportChecks(
+      stations?.[stationId]?.coordinates,
+      location,
+      readHistory(),
+      now,
+    );
+    if (
+      checks.location.status === 'failed' &&
+      checks.location.reason === 'too_far' &&
+      checks.activity.status !== 'failed'
+    ) {
+      recordAttempt({ timestamp: now });
+    }
+    return checks;
   };
+
+  const recordSubmission = (stationId: string) =>
+    recordAttempt({
+      timestamp: Date.now(),
+      coordinates: stations?.[stationId]?.coordinates ?? null,
+    });
+
   return { verify, recordSubmission };
 }

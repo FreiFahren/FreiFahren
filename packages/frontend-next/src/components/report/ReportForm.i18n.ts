@@ -45,7 +45,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
     'Your location is too far from this station. Check the selected station or try again when you are nearby.',
   reason_too_fast:
     'We could not verify this report against recent activity. Check the selected station.',
-  reason_rate_limited: 'Several reports were submitted recently. Please wait before trying again.',
+  reason_rate_limited: 'Too many recent attempts. Please wait before trying again.',
   reason_device_failed:
     'The spam-protection check could not finish. Check your connection and try again.',
   reason_verification_failed: 'This check could not finish. Please try again.',
@@ -106,7 +106,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
     'Dein Standort ist zu weit von dieser Station entfernt. Prüfe die gewählte Station oder versuche es erneut, wenn du in der Nähe bist.',
   reason_too_fast: 'Die Plausibilitätsprüfung war nicht erfolgreich. Prüfe die gewählte Station.',
   reason_rate_limited:
-    'Du hast zuletzt mehrere Meldungen gesendet. Bitte warte, bevor du es erneut versuchst.',
+    'Zu viele Meldeversuche in kurzer Zeit. Bitte warte, bevor du es erneut versuchst.',
   reason_device_failed:
     'Der Spam-Schutz konnte nicht abgeschlossen werden. Prüfe deine Verbindung und versuche es erneut.',
   reason_verification_failed:
