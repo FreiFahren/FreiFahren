@@ -101,11 +101,27 @@ jobs:
             - name: Install dependencies
               run: bun install --frozen-lockfile
 
+            # Hash Git tree IDs so even large transit snapshots need no second read.
+            - name: Identify database initialization inputs
+              id: inputs
+              run: |
+                  fingerprint=$(git ls-tree HEAD -- drizzle src/db ../cities ../report-privacy ../worker-kit package.json wrangler.jsonc ../../.github/workflows/preview.yml ../../package.json ../../bun.lock ../../bunfig.toml | sha256sum | cut -d' ' -f1)
+                  echo "prefix=d1-v1-pr-$PR_NUMBER-$fingerprint-" >> "$GITHUB_OUTPUT"
+
+            - name: Restore initialized database IDs
+              uses: actions/cache/restore@v4
+              with:
+                  path: packages/api-worker/.preview-databases.json
+                  key: ${{ steps.inputs.outputs.prefix }}${{ github.run_id }}-${{ github.run_attempt }}
+                  restore-keys: ${{ steps.inputs.outputs.prefix }}
+
             # Every step below passes this config, which is what keeps them off production.
             - name: Provision preview databases
+              id: databases
               run: bun run preview:databases --pr "$PR_NUMBER" --out "$PREVIEW_CONFIG"
 
             - name: Apply migrations
+              if: steps.databases.outputs.reused != 'true'
               run: bun run db:migrate:remote --config "$PREVIEW_CONFIG"
 
             # Only cities in both registries: a database can be provisioned before its transit
@@ -117,6 +133,7 @@ jobs:
                   echo "CITY_SLUGS=$slugs" >> "$GITHUB_ENV"
 
             - name: Seed reference data
+              if: steps.databases.outputs.reused != 'true'
               run: |
                   set -euo pipefail
                   for city in $CITY_SLUGS; do
@@ -124,7 +141,15 @@ jobs:
                   done
 
             - name: Copy recent production reports
+              if: steps.databases.outputs.reused != 'true'
               run: bun run db:copy-reports --config "$PREVIEW_CONFIG"
+
+            - name: Remember initialized database IDs
+              if: steps.databases.outputs.reused != 'true'
+              uses: actions/cache/save@v4
+              with:
+                  path: packages/api-worker/.preview-databases.json
+                  key: ${{ steps.inputs.outputs.prefix }}${{ github.run_id }}-${{ github.run_attempt }}
 
             - name: Deploy preview API worker
               run: bun run wrangler preview --config "$PREVIEW_CONFIG" --name "pr-$PR_NUMBER" --ignore-base-config
@@ -155,18 +180,14 @@ jobs:
                   done
 
     frontend:
-        needs: [plan, api]
-        # Runs whenever either side changed, so every preview is the clickable app backed by the
-        # isolated API that just completed.
+        needs: plan
         if: >-
             github.event.action != 'closed' &&
-            needs.api.result == 'success' &&
             needs.plan.outputs.api == 'true' &&
             github.event.pull_request.head.repo.full_name == github.repository
         runs-on: ubuntu-latest
         permissions:
             contents: read
-            deployments: write
         defaults:
             run:
                 working-directory: packages/frontend-next
@@ -174,8 +195,8 @@ jobs:
             CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
             CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
             PR_NUMBER: ${{ github.event.pull_request.number }}
-            APP_URL: https://pr-${{ github.event.pull_request.number }}-frontend.freifahren.workers.dev
             # Every rendered preview has its own API and databases, including frontend-only PRs.
+            APP_URL: https://pr-${{ github.event.pull_request.number }}-frontend.freifahren.workers.dev
             API_URL: https://pr-${{ github.event.pull_request.number }}-api-worker.freifahren.workers.dev
 
         steps:
@@ -208,11 +229,15 @@ jobs:
                   ../api-worker/node_modules/.bin/wrangler preview --name "pr-$PR_NUMBER" --ignore-base-config
                   curl --fail --silent --show-error --retry 8 --retry-delay 3 --retry-all-errors "$APP_URL/" -o /dev/null
 
-            # A deployment rather than a comment. GitHub renders it in the PR's merge box and against
-            # the commit, supersedes the previous one on every push instead of leaving a trail, and —
-            # because it is transient — can be retired by cleanup, so a link never outlives the Worker
-            # it points at. A comment does none of those, and the previous one had to hunt for its own
-            # marker to avoid piling up.
+    ready:
+        needs: [api, frontend]
+        runs-on: ubuntu-latest
+        permissions:
+            deployments: write
+        env:
+            PR_NUMBER: ${{ github.event.pull_request.number }}
+            APP_URL: https://pr-${{ github.event.pull_request.number }}-frontend.freifahren.workers.dev
+        steps:
             - name: Record preview deployment
               uses: actions/github-script@v7
               with:

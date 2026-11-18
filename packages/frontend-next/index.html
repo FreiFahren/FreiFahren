@@ -11,7 +11,7 @@
          data (otherwise those connections open ~3-4s in, on the critical path to LCP).
          crossorigin is required: both origins are reached via CORS fetch (vector tiles / JSON). -->
     <link rel="preconnect" href="https://tiles.freifahren.org" crossorigin />
-    <link rel="preconnect" href="https://api.freifahren.org" crossorigin />
+    <link rel="preconnect" href="%VITE_API_URL%" crossorigin />
     <!-- Paints the iOS status-bar / dynamic-island area with the card color (matches the
          report form and the map search bar). Keep in sync with --card in src/index.css. -->
     <meta name="theme-color" content="#25272b" />

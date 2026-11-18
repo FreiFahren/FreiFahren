@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { writeFileSync } from 'node:fs'
+import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -49,9 +49,9 @@ const listDatabases = (): D1ListEntry[] => {
 // Matched by PR suffix rather than derived from the registry, so a database created under a name that
 // A later revision renamed or removed is still torn down. Listing first also keeps this idempotent
 // Without parsing wrangler's error output. Returns the ids removed.
-const destroy = (pr: string): Set<string> => {
+const destroy = (pr: string, inventory = listDatabases()): Set<string> => {
     const deleted = new Set<string>()
-    for (const { name, uuid } of listDatabases().filter(({ name }) => name.endsWith(previewSuffix(pr)))) {
+    for (const { name, uuid } of inventory.filter(({ name }) => name.endsWith(previewSuffix(pr)))) {
         logger.info({ database: name }, 'Deleting preview database...')
         execFileSync('npx', ['wrangler', 'd1', 'delete', name, '--skip-confirmation'], { stdio: 'inherit' })
         deleted.add(uuid)
@@ -63,22 +63,29 @@ const destroy = (pr: string): Set<string> => {
 }
 
 const provision = (pr: string, out: string) => {
-    // Every run rebuilds from empty. Reusing a database would show something other than the revision
-    // Under review: wrangler's ledger records applied migration *filenames*, so a migration edited
-    // During review is never reapplied, and the seed's additive load keeps the previous revision's
-    // Reference rows.
-    const deleted = destroy(pr)
-
     const wanted = Object.values(CITY_DATABASES).map(({ dbName, dbBinding }) => ({
         binding: dbBinding,
         name: previewDatabaseName(dbName, pr),
     }))
-    for (const { name } of wanted) {
-        logger.info({ database: name }, 'Creating preview database...')
-        execFileSync('npx', ['wrangler', 'd1', 'create', name, '--jurisdiction', 'eu'], { stdio: 'inherit' })
+    const inventory = listDatabases()
+    const receiptPath = resolve(PACKAGE_ROOT, '.preview-databases.json')
+    const receipt: Record<string, string> = existsSync(receiptPath) ? JSON.parse(readFileSync(receiptPath, 'utf8')) : {}
+    // CI restores only receipts for these initialization inputs, saved after the full report import.
+    // UUIDs catch deleted or replaced databases, including a PR reopened after cleanup.
+    const reusable =
+        wanted.length > 0 &&
+        wanted.every(({ name }) => inventory.some((db) => db.name === name && db.uuid === receipt[name]))
+    let existing = inventory
+    let deleted = new Set<string>()
+    if (!reusable) {
+        deleted = destroy(pr, inventory)
+        for (const { name } of wanted) {
+            logger.info({ database: name }, 'Creating preview database...')
+            execFileSync('npx', ['wrangler', 'd1', 'create', name, '--jurisdiction', 'eu'], { stdio: 'inherit' })
+        }
+        existing = listDatabases()
     }
 
-    const existing = listDatabases()
     const d1Databases = wanted.map(({ binding, name }) => {
         const database = existing.find((candidate) => candidate.name === name)
         if (!database) {
@@ -116,6 +123,12 @@ const provision = (pr: string, out: string) => {
     // D1 CLI commands read top-level bindings. Both views target the same isolated databases.
     const config = { name, main, compatibility_date, compatibility_flags, rules, d1_databases: d1Databases, previews }
     writeFileSync(resolve(PACKAGE_ROOT, out), `${JSON.stringify(config, null, 2)}\n`)
+    writeFileSync(
+        receiptPath,
+        JSON.stringify(Object.fromEntries(d1Databases.map((db) => [db.database_name, db.database_id])))
+    )
+    const outputPath = process.env.GITHUB_OUTPUT
+    if (outputPath !== undefined && outputPath !== '') appendFileSync(outputPath, `reused=${reusable}\n`)
     logger.info({ out, databases: d1Databases.map(({ database_name }) => database_name) }, 'Preview config written')
 }
 
