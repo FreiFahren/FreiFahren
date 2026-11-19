@@ -30,7 +30,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   checkActivity: 'Reporting activity',
   rejectedBody: 'Your report has not been sent. Review the highlighted check below.',
   sendingTitle: 'Sending your report',
-  sendingBody: 'The checks are complete. Waiting for the server to receive your report.',
+  sendingBody: 'Waiting for the server to receive your report.',
   checksLabel: 'Report checks',
   checkWaiting: 'Waiting for the previous check.',
   checkNotRun: 'Not checked because another check needs attention.',
@@ -46,8 +46,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   reason_too_fast:
     'We could not verify this report against recent activity. Check the selected station.',
   reason_rate_limited: 'Too many recent attempts. Please wait before trying again.',
-  reason_device_failed:
-    'The spam-protection check could not finish. Check your connection and try again.',
+  device_unavailable: 'This check could not finish. Your report can still be sent for review.',
   reason_verification_failed: 'This check could not finish. Please try again.',
   status_pending: 'Waiting',
   status_skipped: 'Not checked',
@@ -90,7 +89,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
   checkActivity: 'Meldeaktivität',
   rejectedBody: 'Deine Meldung wurde nicht gesendet. Schau dir die markierte Prüfung an.',
   sendingTitle: 'Meldung wird gesendet',
-  sendingBody: 'Die Prüfungen sind abgeschlossen. Wir warten auf den Empfang durch den Server.',
+  sendingBody: 'Wir warten auf den Empfang durch den Server.',
   checksLabel: 'Prüfungen deiner Meldung',
   checkWaiting: 'Wartet auf die vorherige Prüfung.',
   checkNotRun: 'Nicht geprüft, weil eine andere Prüfung Aufmerksamkeit braucht.',
@@ -107,8 +106,8 @@ i18n.addResourceBundle('de', NAMESPACE, {
   reason_too_fast: 'Die Plausibilitätsprüfung war nicht erfolgreich. Prüfe die gewählte Station.',
   reason_rate_limited:
     'Zu viele Meldeversuche in kurzer Zeit. Bitte warte, bevor du es erneut versuchst.',
-  reason_device_failed:
-    'Der Spam-Schutz konnte nicht abgeschlossen werden. Prüfe deine Verbindung und versuche es erneut.',
+  device_unavailable:
+    'Diese Prüfung konnte nicht abgeschlossen werden. Deine Meldung kann trotzdem zur Prüfung gesendet werden.',
   reason_verification_failed:
     'Diese Prüfung konnte nicht abgeschlossen werden. Bitte versuche es erneut.',
   status_pending: 'Wartet',

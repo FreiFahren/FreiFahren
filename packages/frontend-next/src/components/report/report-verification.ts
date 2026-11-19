@@ -5,8 +5,7 @@ type Failed<Reason extends string> = { status: 'failed'; reason: Reason };
 // Each row lists only the states it can reach, so a combination no row produces does not typecheck.
 export type LocationCheck =
   { status: 'running' | 'passed' | 'unavailable' } | Failed<'too_far' | 'verification_failed'>;
-export type DeviceCheck =
-  { status: 'running' | 'passed' | 'not_required' } | Failed<'device_failed'>;
+export type DeviceCheck = { status: 'running' | 'passed' | 'not_required' | 'unavailable' };
 export type ActivityCheck =
   { status: 'pending' | 'passed' | 'skipped' } | Failed<'too_fast' | 'rate_limited'>;
 export type VerificationChecks = {

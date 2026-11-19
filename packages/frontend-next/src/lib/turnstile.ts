@@ -11,11 +11,32 @@
  */
 
 const SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-const TOKEN_TIMEOUT_MS = 20_000;
+export const TOKEN_TIMEOUT_MS = 20_000;
 
 // Bound into the token; the API only accepts 'submit-report' tokens for reports.
 export type TurnstileAction = 'submit-report' | 'sign-in';
 export const TURNSTILE_TOKEN_HEADER = 'cf-turnstile-response';
+
+export type TurnstileFailureReason =
+  | 'script_load_failed'
+  | 'script_api_missing'
+  | 'script_timeout'
+  | 'token_timeout'
+  | 'challenge_expired'
+  | 'widget_error'
+  | 'unknown';
+
+export class TurnstileError extends Error {
+  readonly reason: TurnstileFailureReason;
+  readonly code?: string;
+
+  constructor(message: string, reason: TurnstileFailureReason, code?: string) {
+    super(message);
+    this.name = 'TurnstileError';
+    this.reason = reason;
+    this.code = code;
+  }
+}
 
 type TurnstileApi = {
   render: (
@@ -59,7 +80,9 @@ function loadTurnstile(): Promise<TurnstileApi> {
     script.defer = true;
     script.onload = () => {
       if (window.turnstile === undefined) {
-        reject(new Error('Turnstile loaded without exposing its API'));
+        reject(
+          new TurnstileError('Turnstile loaded without exposing its API', 'script_api_missing'),
+        );
         return;
       }
       resolve(window.turnstile);
@@ -67,7 +90,7 @@ function loadTurnstile(): Promise<TurnstileApi> {
     script.onerror = () => {
       // Let a later attempt retry rather than caching the failure forever.
       scriptPromise = null;
-      reject(new Error('Failed to load Turnstile'));
+      reject(new TurnstileError('Failed to load Turnstile', 'script_load_failed'));
     };
     document.head.appendChild(script);
   });
@@ -84,8 +107,7 @@ export function preloadTurnstile(): void {
  * Mint a single-use Turnstile token, or `undefined` when no site key is configured (local dev and
  * PR previews, where the API has no secret either and skips verification).
  *
- * Rejects if the challenge fails or takes too long, so the caller can surface a normal error
- * instead of sending a request the server will refuse.
+ * Rejects with a structured reason when the check fails. Each caller chooses its fallback.
  */
 export async function getTurnstileToken(
   action: TurnstileAction,
@@ -101,7 +123,10 @@ export async function getTurnstileToken(
   const turnstile = await Promise.race([
     loadTurnstile(),
     new Promise<never>((_, reject) => {
-      loadTimer = setTimeout(() => reject(new Error('Turnstile script timed out')), timeoutMs);
+      loadTimer = setTimeout(
+        () => reject(new TurnstileError('Turnstile script timed out', 'script_timeout')),
+        timeoutMs,
+      );
     }),
   ]).finally(() => clearTimeout(loadTimer));
   const remainingMs = Math.max(1, timeoutMs - (Date.now() - startedAt));
@@ -124,7 +149,10 @@ export async function getTurnstileToken(
 
   try {
     return await new Promise<string>((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error('Turnstile timed out')), remainingMs);
+      const timer = setTimeout(
+        () => reject(new TurnstileError('Turnstile timed out', 'token_timeout')),
+        remainingMs,
+      );
       const settle = (fn: () => void) => {
         clearTimeout(timer);
         fn();
@@ -137,9 +165,18 @@ export async function getTurnstileToken(
         callback: (token) => settle(() => resolve(token)),
         'error-callback': (code) =>
           settle(() =>
-            reject(new Error(`Turnstile failed${code === undefined ? '' : `: ${code}`}`)),
+            reject(
+              new TurnstileError(
+                `Turnstile failed${code === undefined ? '' : `: ${code}`}`,
+                'widget_error',
+                code,
+              ),
+            ),
           ),
-        'timeout-callback': () => settle(() => reject(new Error('Turnstile challenge expired'))),
+        'timeout-callback': () =>
+          settle(() =>
+            reject(new TurnstileError('Turnstile challenge expired', 'challenge_expired')),
+          ),
       });
     });
   } finally {

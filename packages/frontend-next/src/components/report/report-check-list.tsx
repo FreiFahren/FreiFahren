@@ -24,6 +24,7 @@ const DETAIL = {
     running: 'device_running',
     passed: 'device_passed',
     not_required: 'device_not_required',
+    unavailable: 'device_unavailable',
   },
   activity: { pending: 'checkWaiting', passed: 'activity_passed', skipped: 'checkNotRun' },
 } satisfies {
@@ -33,7 +34,6 @@ const DETAIL = {
 const REASON: Record<ReportRejection, string> = {
   too_far: 'reason_too_far',
   verification_failed: 'reason_verification_failed',
-  device_failed: 'reason_device_failed',
   too_fast: 'reason_too_fast',
   rate_limited: 'reason_rate_limited',
 };
@@ -77,6 +77,7 @@ function ReportCheckRow<Key extends Row>({
   check: VerificationChecks[Key];
 }) {
   const { t } = useTranslation(NAMESPACE);
+  if (row === 'device' && check.status === 'unavailable') return null;
   const failed = check.status === 'failed';
   return (
     <li

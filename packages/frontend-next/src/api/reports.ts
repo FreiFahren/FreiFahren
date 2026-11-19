@@ -9,6 +9,7 @@ import {
 import type { TFunction } from 'i18next';
 import { useEffect, useState } from 'react';
 
+import { track } from '@/lib/analytics';
 import { currentCitySlug } from '@/lib/city';
 import { TURNSTILE_TOKEN_HEADER } from '@/lib/turnstile';
 import { captureIssue, traceAction } from '@/lib/error-monitoring';
@@ -375,10 +376,10 @@ export type SubmitReportResponse = {
 
 type SubmitReportMutationInput = SubmitReportInput & {
   /*
-   * Minted by the form's verification step, single-use. Undefined only when no site key is
-   * configured: a configured check that yields no token stops the submission before it gets here.
+   * Minted by the form's verification step. Missing tokens are sent to the server for assessment.
    */
   turnstileToken?: string;
+  attemptId?: string;
 };
 
 /*
@@ -444,6 +445,12 @@ export function useSubmitReport() {
         // `getPlatform()` is 'ios' | 'android' | 'web'; only 'web' is the browser build.
         const isNative = Capacitor.isNativePlatform();
         const { turnstileToken } = input;
+        const startedAt = Date.now();
+        const telemetry = () => ({
+          attemptId: input.attemptId,
+          tokenPresent: Boolean(turnstileToken),
+          durationMs: Date.now() - startedAt,
+        });
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 15_000);
         try {
@@ -465,12 +472,25 @@ export function useSubmitReport() {
           if (!response.ok) {
             throw new SubmitReportError(response.status);
           }
-          return await response.json();
+          const result = await response.json();
+          track('report_delivery_completed', { ...telemetry(), outcome: 'received' });
+          return result;
         } catch (error) {
           // Keep the local copy, but distinguish it from a report acknowledged by the API.
-          captureIssue('Report submit failed', {
+          const reason = controller.signal.aborted
+            ? 'timeout'
+            : error instanceof SubmitReportError
+              ? 'http_error'
+              : error instanceof SyntaxError
+                ? 'invalid_response'
+                : 'network_error';
+          const failure = {
+            ...telemetry(),
+            reason,
             status: error instanceof SubmitReportError ? error.status : undefined,
-          });
+          } as const;
+          captureIssue('Report submit failed', failure);
+          track('report_delivery_completed', { ...failure, outcome: 'saved_locally' });
           return {
             reportId: -1,
             stationId: input.stationId,

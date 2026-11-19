@@ -1,3 +1,4 @@
+vi.mock('../src/lib/analytics', () => ({ track: vi.fn() }));
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient } from '@tanstack/react-query';
 

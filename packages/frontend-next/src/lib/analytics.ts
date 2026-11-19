@@ -1,3 +1,4 @@
+import type { TurnstileFailureReason } from '@/lib/turnstile';
 import type { ReportRejection } from '@/components/report/report-verification';
 import type { ContributeSource } from '@/lib/contribute-modal';
 import type { GeolocationPermissionState } from '@/lib/location-prompt';
@@ -19,19 +20,40 @@ type SuperProperties = {
  * both the event name and its properties.
  */
 type AnalyticsEvents = {
+  report_started: { attemptId: string; stationId: string };
+  report_turnstile_completed: {
+    attemptId: string;
+    outcome: 'passed' | 'failed' | 'disabled';
+    reason?: TurnstileFailureReason;
+    errorCode?: string;
+    durationMs: number;
+    timeoutMs: number;
+  };
+  report_delivery_completed: {
+    attemptId?: string;
+    outcome: 'received' | 'saved_locally';
+    tokenPresent: boolean;
+    durationMs: number;
+    reason?: 'http_error' | 'network_error' | 'timeout' | 'invalid_response';
+    status?: number;
+  };
   report_submitted: {
+    attemptId: string;
     stationId: string;
     lineId: string | null;
     directionId: string | null;
   };
   report_rejected: {
+    attemptId: string;
     reason: ReportRejection;
+    durationMs: number;
     stationId: string;
   };
   // Outcome of the pre-submit verification step. `location` says which fix the distance rule ran
-  // on ('coarse' = a refinement was tried and the rule sat out); `turnstile` whether the token
-  // needed a second attempt. `durationMs` is how long the verifying screen was up.
+  // on ('coarse' = a refinement was tried and the rule sat out). A failed Turnstile check
+  // can still proceed to delivery. 'retried' is retained for historical analytics.
   report_verified: {
+    attemptId: string;
     location: 'accurate' | 'refined' | 'coarse' | 'none';
     turnstile: 'passed' | 'retried' | 'failed' | 'disabled';
     durationMs: number;

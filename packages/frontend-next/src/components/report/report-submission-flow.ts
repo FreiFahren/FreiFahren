@@ -36,7 +36,8 @@ export type DeviceOutcome = {
 function deviceCheck(device: DeviceOutcome): VerificationChecks['device'] {
   if (device.outcome === 'disabled') return { status: 'not_required' };
   if (device.token) return { status: 'passed' };
-  return { status: 'failed', reason: 'device_failed' };
+  // The server assesses reports whose token check could not complete.
+  return { status: 'unavailable' };
 }
 
 type Dependencies = {

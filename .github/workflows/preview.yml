@@ -222,7 +222,8 @@ jobs:
                   VITE_FUND_URL: https://fund-worker-preview.freifahren.workers.dev
                   VITE_PREVIEW: 'true'
                   VITE_POSTHOG_KEY: ''
-                  VITE_TURNSTILE_SITE_KEY: '1x00000000000000000000AA'
+                  # Exercise the real checkbox and mobile layout during preview testing.
+                  VITE_TURNSTILE_SITE_KEY: '3x00000000000000000000FF'
 
             - name: Deploy preview frontend
               run: |

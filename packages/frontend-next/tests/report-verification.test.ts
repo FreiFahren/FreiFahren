@@ -104,9 +104,10 @@ describe('Truthful verification outcomes', () => {
       const f = flow({ mintToken: async () => ({ token: undefined, outcome }) });
       await f.run();
       expect(f.phases.at(-1)).toMatchObject({
-        checks: { device: { status: outcome === 'failed' ? 'failed' : 'not_required' } },
+        checks: { device: { status: outcome === 'failed' ? 'unavailable' : 'not_required' } },
       });
-      expect(f.deps.send).toHaveBeenCalledTimes(outcome === 'failed' ? 0 : 1);
+      expect(f.deps.send).toHaveBeenCalledExactlyOnceWith(undefined);
+      expect(f.phases.at(-1)?.kind).toBe('delivered');
     }
   });
 
@@ -151,9 +152,33 @@ describe('Truthful verification outcomes', () => {
     expect(confirmation).toMatchObject({ kind: 'success', result: accepted });
     expect(showReportConfirmation(confirmation)).toBe(confirmation);
     expect(f.deps.send).toHaveBeenCalledTimes(1);
-    const rejected = flow({ mintToken: async () => ({ token: undefined, outcome: 'failed' }) });
+    const rejected = flow({
+      resolveLocation: async () => ({ ...near, position: { lat: 53, lng: 13.4 } }),
+    });
     await rejected.run();
     expect(showReportConfirmation(rejected.phases.at(-1)!)).toBe(rejected.phases.at(-1));
+  });
+
+  it('still enforces location rules when token acquisition fails', async () => {
+    const f = flow({
+      mintToken: async () => ({ token: undefined, outcome: 'failed' }),
+      resolveLocation: async () => ({ ...near, position: { lat: 53, lng: 13.4 } }),
+    });
+    await f.run();
+    expect(f.phases.at(-1)).toMatchObject({ kind: 'rejected' });
+    expect(f.deps.send).not.toHaveBeenCalled();
+  });
+
+  it('sends once after a token exception and preserves an unconfirmed delivery', async () => {
+    const f = flow({
+      mintToken: async () => {
+        throw new Error('token unavailable');
+      },
+      send: vi.fn(async () => ({ ...accepted, local: true })),
+    });
+    await f.run();
+    expect(f.deps.send).toHaveBeenCalledExactlyOnceWith(undefined);
+    expect(f.phases.at(-1)?.kind).toBe('saved_locally');
   });
 
   it('preserves the local-only delivery outcome for the confirmation screen', async () => {
