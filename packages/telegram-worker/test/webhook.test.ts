@@ -92,6 +92,7 @@ describe('acceptUpdate (filtering)', () => {
         ['-1001233800320', 'karlsruhe'],
         ['-1001104664549', 'stuttgart'],
         ['-1001466597831', 'frankfurt'],
+        ['-1001360550269', 'cologne'],
     ])('routes chat %s to %s', (chatId, city) => {
         expect(acceptUpdate(makeUpdate({ text: 'kontrolle hbf', chatId }), testEnv)?.city).toBe(city)
     })
