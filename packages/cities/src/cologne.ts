@@ -1,27 +1,39 @@
 import { CITY_DATABASES } from './databases'
 import type { CityConfig } from './types'
 
-// Synthetic until there is a Köln group export to tune on, as Leipzig started out.
-const promptExamples = `Message: "2 kontrolleure linie 3 neumarkt richtung thielenbruch"
-{"stationName": "Neumarkt", "directionName": "Thielenbruch"}
+// Real messages from the Köln group, none of them in the eval sample.
+const promptExamples = `Message: "Kontrolle in der u18 Richtung Bonn gerade ebertplatz. Kontrolleur weiblich orangefarbener parker."
+{"stationName": "Ebertplatz", "directionName": "Bonn Hauptbahnhof"}
 
-Message: "s12 richtung horrem gerade köln messe/deutz 3 in db uniform"
-{"stationName": "Bf Deutz/Messe", "directionName": "Horrem"}
+Message: "Kontis in s19 Richtung Düren gleich Trimbornstraße"
+{"stationName": "Trimbornstraße", "directionName": "Düren"}
 
-Message: "16 Bonn gleich Barba, zwei in zivil"
-{"stationName": "Barbarossaplatz", "directionName": "Bonn Hauptbahnhof"}
+Message: "Kontrolleurin Undercover in der 16 Richtung Niel Sebastianstraße. Nächste Station Dom HBF."
+{"stationName": "Dom/Hbf", "directionName": "Niehl Sebastianstraße"}
 
-Message: "kvb kontrolle am ebertplatz bahnsteig 12/15"
-{"stationName": "Ebertplatz", "directionName": null}
+Message: "4 kontros in uniform lanxess/deutz gehen zu u3/4"
+{"stationName": "Bahnhof Deutz / LANXESS arena", "directionName": null}
 
-Message: "Sind Rudolfplatz ausgestiegen"
+Message: "RE 9 nach Siegen. Gerade Messe deutz los."
+{"stationName": "Bf Deutz/Messe", "directionName": null}
+
+Message: "s6 richtung ddorf kontros drin, grad köln hbf"
+{"stationName": "Hauptbahnhof", "directionName": null}
+
+Message: "RE 5 (RRX) Ri. Köln Hbf., gerade in Brühl losgefahren."
+{"stationName": null, "directionName": "Hauptbahnhof"}
+
+Message: "Kontrollierende im RB26 nach Sinzig, grad aus Köln Süd raus gefahren."
+{"stationName": null, "directionName": null}
+
+Message: "Bonn// 4 kotros am Bertha-von-Suttner-Platz an den Bussen Richtung Beuel"
+{"stationName": null, "directionName": null}
+
+Message: "Zwei Kontos am Rudolfplatz, Linien 12/15 unklar welche Richtung"
 {"stationName": "Rudolfplatz", "directionName": null}
 
 Message: "Richtung Bensberg"
 {"stationName": null, "directionName": "Bensberg"}
-
-Message: "zwei männlich gelesen, schwarze jacken"
-{"stationName": null, "directionName": null}
 
 Message: "fährt die 1 wieder bis weiden west?"
 {"stationName": null, "directionName": null}
@@ -101,7 +113,9 @@ export const COLOGNE: CityConfig = {
         untrackedLinesNote:
             'Sightings on OTHER lines (bus lines, night lines, regional trains, ' +
             'replacement services) are still reports if a station name is mentioned: ' +
-            'extract the station.',
+            'extract the station. The group covers the whole VRS region, so RE/RB trains and ' +
+            'Bonn often name places outside this network (Koblenz, Aachen, Wesel, Brühl, Köln Süd, ' +
+            'Bonn bus stops): return null for those instead of a similar sounding Köln station.',
         circularLineAlias: '',
         circularLinePattern: '',
         abbreviations: [
@@ -114,8 +128,13 @@ export const COLOGNE: CityConfig = {
             [String.raw`\bbarba\b`, 'barbarossaplatz'],
             // "Dom/Hbf" is the KVB name of the Hauptbahnhof stop.
             [String.raw`^dom(\s*/\s*hauptbahnhof)?$`, 'hauptbahnhof'],
+            // Regional trains name other cities' main stations ("RE5 nach Koblenz Hbf"); without this
+            // they contain "hauptbahnhof" and snap onto Köln Hbf.
+            [String.raw`^(?!(koln|kolner|bonn|dom)\b)[a-z'-]+\.?\s+hauptbahnhof\.?$`, ''],
         ],
         promptExamples,
     },
-    community: {},
+    community: {
+        telegramChatId: '-1001360550269',
+    },
 }
