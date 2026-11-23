@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from '@tanstack/react-router';
 
+import { queryClient } from '@/api/queryClient';
 import { Button } from '@freifahren/ui/button';
 import { captureException } from '@/lib/error-monitoring';
 
@@ -27,7 +28,12 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
      * the router's failed loader state, and refetching every query would also wait on unrelated
      * requests; invalidate() retries exactly what this route loads and clears that state. A
      * failed retry (e.g. offline) keeps the cached data the app relies on to work offline.
+     *
+     * Whatever broke this route usually broke other requests too (e.g. the map's lines during an
+     * outage), and nothing retries those on its own. Re-request every failed query in the
+     * background so they recover with this retry, without making the retry wait for them.
      */
+    void queryClient.refetchQueries({ predicate: (query) => query.state.status === 'error' });
     try {
       await router.invalidate();
     } finally {
