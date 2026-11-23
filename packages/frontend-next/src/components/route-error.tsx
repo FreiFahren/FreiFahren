@@ -2,10 +2,12 @@ import type { ErrorComponentProps } from '@tanstack/react-router';
 import { TriangleAlert } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useRouter } from '@tanstack/react-router';
+import { useMatch, useNavigate, useRouter } from '@tanstack/react-router';
 
 import { queryClient } from '@/api/queryClient';
 import { Button } from '@freifahren/ui/button';
+import { cn } from '@freifahren/ui/cn';
+import { PopupCard } from '@/components/map/PopupCard';
 import { captureException } from '@/lib/error-monitoring';
 
 import { NAMESPACE } from './route-error.i18n';
@@ -14,6 +16,10 @@ import { NAMESPACE } from './route-error.i18n';
 export function RouteError({ error, reset }: ErrorComponentProps) {
   const { t } = useTranslation(NAMESPACE);
   const router = useRouter();
+  const navigate = useNavigate();
+  // The map is a fixed full-screen layer, so an error rendered in place on a map page sits behind it
+  // and is never seen. Map pages open as a popup card above the map, so the error does the same.
+  const onMap = useMatch({ from: '/_map', shouldThrow: false }) !== undefined;
 
   useEffect(() => {
     captureException(error);
@@ -42,8 +48,11 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
     reset();
   };
 
-  return (
-    <div role="alert" className="flex flex-col items-center gap-3 px-6 py-12 text-center">
+  const content = (
+    <div
+      role="alert"
+      className={cn('flex flex-col items-center gap-3 px-6 text-center', onMap ? 'py-4' : 'py-12')}
+    >
       <TriangleAlert className="text-destructive size-6" aria-hidden />
       <h2 className="text-base font-semibold">{t('title')}</h2>
       <p className="text-muted-foreground max-w-xs text-sm">{t('description')}</p>
@@ -51,5 +60,12 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
         {t('retry')}
       </Button>
     </div>
+  );
+
+  if (!onMap) return content;
+  return (
+    <PopupCard onClose={() => navigate({ to: '/' })} closeLabel={t('close')}>
+      {content}
+    </PopupCard>
   );
 }
