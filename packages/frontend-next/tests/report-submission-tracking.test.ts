@@ -4,6 +4,7 @@ vi.mock('react', () => ({
   useRef: (current: unknown) => ({ current }),
   useState: () => [null, vi.fn()],
 }));
+vi.mock('../src/api/transit', () => ({ useStations: () => ({ data: {} }) }));
 vi.mock('../src/api/reports', () => ({ useSubmitReport: () => ({ mutateAsync: send }) }));
 vi.mock('../src/contexts/Geolocation.context', () => ({
   useGeolocation: () => ({ position: null, status: 'idle', accuracy: null }),

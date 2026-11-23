@@ -12,7 +12,13 @@ vi.mock('@/api/transit', () => ({ useStations: () => ({ data: stations }) }));
 
 const start = Date.UTC(2026, 0, 1, 12);
 const minute = 60_000;
-const nearRosenthaler = { position: { lat: 52.53, lng: 13.401 }, accuracy: 20 };
+const nearRosenthaler = {
+  position: { lat: 52.53, lng: 13.401 },
+  accuracy: 20,
+  get timestamp() {
+    return Date.now();
+  },
+};
 
 describe('report attempt history', () => {
   beforeEach(() => {

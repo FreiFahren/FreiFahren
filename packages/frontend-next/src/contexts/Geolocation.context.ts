@@ -10,19 +10,22 @@ export type UserPosition = { lng: number; lat: number };
 // Capacitor plugin's coords (which lacks toJSON).
 export type GeolocationCoords = Pick<GeolocationCoordinates, 'longitude' | 'latitude' | 'accuracy'>;
 
+export type GeolocationFix = { coords: GeolocationCoords; timestamp: number };
+
 export type GeolocationContextValue = {
   status: GeolocationStatus;
   position: UserPosition | null;
   accuracy: number | null; // metres, from GeolocationCoordinates.accuracy
+  timestamp: number | null; // Device fix time, not the time we received it.
 
-  requestLocation: (trigger: LocationRequestTrigger) => Promise<GeolocationCoords | null>;
+  requestLocation: (trigger: LocationRequestTrigger) => Promise<GeolocationFix | null>;
   // One fresh high-accuracy fix on top of an existing one. A failure changes nothing, so the coarse
   // fix stays in place; a success lands like any other position update.
-  refineLocation: () => Promise<GeolocationCoords | null>;
+  refineLocation: () => Promise<GeolocationFix | null>;
 
   // Internal setters, driven by the shared request and the live map watch.
   notifyLoading: () => void;
-  notifyPosition: (coords: GeolocationCoords) => void;
+  notifyPosition: (coords: GeolocationCoords, timestamp: number) => void;
   notifyError: (code: number) => void; // GeolocationPositionError.code
 };
 

@@ -137,7 +137,8 @@ export function UserLocationControl() {
         const id = await Geolocation.watchPosition(
           { enableHighAccuracy: false, timeout: 20_000, maximumAge: 60_000 },
           (position) => {
-            if (!cancelled && position) notifyPositionRef.current(position.coords);
+            if (!cancelled && position)
+              notifyPositionRef.current(position.coords, position.timestamp);
           },
         );
         if (cancelled) void Geolocation.clearWatch({ id });
@@ -145,7 +146,7 @@ export function UserLocationControl() {
       });
     } else if (navigator.geolocation) {
       watchIdRef.current = navigator.geolocation.watchPosition(
-        (position) => notifyPositionRef.current(position.coords),
+        (position) => notifyPositionRef.current(position.coords, position.timestamp),
         () => {},
         { enableHighAccuracy: false, timeout: 20_000, maximumAge: 60_000 },
       );

@@ -16,6 +16,7 @@ const station = { latitude: 52.5, longitude: 13.4 };
 const near: LocationOutcome = {
   position: { lat: 52.5, lng: 13.4 },
   accuracy: 20,
+  timestamp: now,
   outcome: 'accurate',
 };
 const selection = { stationId: 'station', lineName: null, directionStationId: null };

@@ -12,6 +12,7 @@ import {
   GeolocationContext,
   type GeolocationContextValue,
   type GeolocationCoords,
+  type GeolocationFix,
   type GeolocationStatus,
   type UserPosition,
 } from './Geolocation.context';
@@ -28,13 +29,15 @@ export function GeolocationProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<GeolocationStatus>('idle');
   const [position, setPosition] = useState<UserPosition | null>(null);
   const [accuracy, setAccuracy] = useState<number | null>(null);
+  const [timestamp, setTimestamp] = useState<number | null>(null);
 
-  const requestRef = useRef<Promise<GeolocationCoords | null> | null>(null);
-  const refineRef = useRef<Promise<GeolocationCoords | null> | null>(null);
+  const requestRef = useRef<Promise<GeolocationFix | null> | null>(null);
+  const refineRef = useRef<Promise<GeolocationFix | null> | null>(null);
 
   const notifyLoading = () => setStatus('loading');
 
-  const notifyPosition = (coords: GeolocationCoords) => {
+  const notifyPosition = (coords: GeolocationCoords, timestamp: number) => {
+    setTimestamp(timestamp);
     rememberLocationSuccess();
     setPosition({ lng: coords.longitude, lat: coords.latitude });
     setAccuracy(coords.accuracy);
@@ -47,7 +50,7 @@ export function GeolocationProvider({ children }: { children: ReactNode }) {
     setStatus(code === 1 ? 'denied' : 'unavailable');
   };
 
-  const requestLocation = (trigger: LocationRequestTrigger): Promise<GeolocationCoords | null> => {
+  const requestLocation = (trigger: LocationRequestTrigger): Promise<GeolocationFix | null> => {
     if (requestRef.current) return requestRef.current;
 
     const request = async () => {
@@ -55,7 +58,7 @@ export function GeolocationProvider({ children }: { children: ReactNode }) {
       notifyLoading();
 
       try {
-        let coords: GeolocationCoords;
+        let fix: GeolocationFix;
         if (Capacitor.isNativePlatform()) {
           if (trigger !== 'auto') {
             const permission = await requestGeolocationPermission();
@@ -66,32 +69,26 @@ export function GeolocationProvider({ children }: { children: ReactNode }) {
             }
           }
           const { Geolocation } = await import('@capacitor/geolocation');
-          coords = (
-            await Geolocation.getCurrentPosition({
-              enableHighAccuracy: false,
-              timeout: 20_000,
-              maximumAge: 60_000,
-            })
-          ).coords;
+          fix = await Geolocation.getCurrentPosition({
+            enableHighAccuracy: false,
+            timeout: 20_000,
+            maximumAge: 60_000,
+          });
         } else {
           if (!navigator.geolocation)
             throw Object.assign(new Error('Geolocation unavailable'), { code: 2 });
-          coords = await new Promise<GeolocationCoordinates>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(
-              (position) => resolve(position.coords),
-              reject,
-              {
-                enableHighAccuracy: false,
-                timeout: 20_000,
-                maximumAge: 60_000,
-              },
-            );
+          fix = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition((position) => resolve(position), reject, {
+              enableHighAccuracy: false,
+              timeout: 20_000,
+              maximumAge: 60_000,
+            });
           });
         }
 
-        notifyPosition(coords);
+        notifyPosition(fix.coords, fix.timestamp);
         track('location_acquired', { trigger });
-        return coords;
+        return fix;
       } catch (error) {
         const code =
           typeof error === 'object' && error !== null && 'code' in error ? Number(error.code) : 2;
@@ -114,24 +111,24 @@ export function GeolocationProvider({ children }: { children: ReactNode }) {
    * Deliberately bypasses `notifyLoading`: the map watch tears down on any tracking → loading hop,
    * and a refinement that fails must not downgrade a position we already have.
    */
-  const refineLocation = (): Promise<GeolocationCoords | null> => {
+  const refineLocation = (): Promise<GeolocationFix | null> => {
     if (refineRef.current) return refineRef.current;
 
     const options = { enableHighAccuracy: true, timeout: REFINE_TIMEOUT_MS, maximumAge: 0 };
     const refine = async () => {
       try {
-        let coords: GeolocationCoords;
+        let fix: GeolocationFix;
         if (Capacitor.isNativePlatform()) {
           const { Geolocation } = await import('@capacitor/geolocation');
-          coords = (await Geolocation.getCurrentPosition(options)).coords;
+          fix = await Geolocation.getCurrentPosition(options);
         } else {
           if (!navigator.geolocation) return null;
-          coords = await new Promise<GeolocationCoordinates>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition((p) => resolve(p.coords), reject, options);
+          fix = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition((p) => resolve(p), reject, options);
           });
         }
-        notifyPosition(coords);
-        return coords;
+        notifyPosition(fix.coords, fix.timestamp);
+        return fix;
       } catch {
         return null;
       } finally {
@@ -147,6 +144,7 @@ export function GeolocationProvider({ children }: { children: ReactNode }) {
     status,
     position,
     accuracy,
+    timestamp,
     requestLocation,
     refineLocation,
     notifyLoading,

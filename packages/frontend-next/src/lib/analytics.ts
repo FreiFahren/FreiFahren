@@ -1,3 +1,4 @@
+import type { LocationDiagnostics } from '@/components/report/report-location';
 import type { TurnstileFailureReason } from '@/lib/turnstile';
 import type { ReportRejection } from '@/components/report/report-verification';
 import type { ContributeSource } from '@/lib/contribute-modal';
@@ -20,6 +21,7 @@ type SuperProperties = {
  * both the event name and its properties.
  */
 type AnalyticsEvents = {
+  report_location_completed: LocationDiagnostics & { attemptId: string; durationMs: number };
   report_started: { attemptId: string; stationId: string };
   report_turnstile_completed: {
     attemptId: string;
@@ -54,7 +56,7 @@ type AnalyticsEvents = {
   // can still proceed to delivery. 'retried' is retained for historical analytics.
   report_verified: {
     attemptId: string;
-    location: 'accurate' | 'refined' | 'coarse' | 'none';
+    location: 'accurate' | 'refined' | 'coarse' | 'stale' | 'none';
     turnstile: 'passed' | 'retried' | 'failed' | 'disabled';
     durationMs: number;
   };

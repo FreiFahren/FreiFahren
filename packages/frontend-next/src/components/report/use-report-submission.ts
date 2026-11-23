@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
 
+import { useStations } from '@/api/transit';
+import { resolveReportLocation } from './report-location';
 import { useSubmitReport } from '@/api/reports';
 import { useGeolocation } from '@/contexts/Geolocation.context';
 import { track } from '@/lib/analytics';
@@ -14,7 +16,7 @@ import {
 } from '@/lib/turnstile';
 
 import { useReportVerification } from './useReportVerification';
-import { failedCheck, isUsableFix } from './report-verification';
+import { failedCheck } from './report-verification';
 import {
   runReportSubmission,
   showReportConfirmation,
@@ -36,35 +38,39 @@ export function useReportSubmission() {
   const inFlightRef = useRef(false);
   const geolocation = useGeolocation();
   const submitReport = useSubmitReport();
+  const { data: stations } = useStations();
   const { verify, recordSubmission } = useReportVerification();
 
-  const resolveLocation = async (): Promise<LocationOutcome> => {
-    let { position, accuracy } = geolocation;
+  const resolveLocation = async (
+    stationId: string,
+    attemptId: string,
+  ): Promise<LocationOutcome> => {
+    const startedAt = Date.now();
+    let { position, accuracy, timestamp } = geolocation;
 
     if (!position && geolocation.status === 'loading') {
-      const coords = await Promise.race([
+      const fix = await Promise.race([
         geolocation.requestLocation('report'),
         wait(LOCATION_WAIT_MS, null),
       ]);
-      if (coords) {
-        position = { lat: coords.latitude, lng: coords.longitude };
-        accuracy = coords.accuracy;
+      if (fix) {
+        position = { lat: fix.coords.latitude, lng: fix.coords.longitude };
+        accuracy = fix.coords.accuracy;
+        timestamp = fix.timestamp;
       }
     }
 
-    if (!position) return { position: null, accuracy: null, outcome: 'none' };
-    if (isUsableFix(accuracy)) return { position, accuracy, outcome: 'accurate' };
-
-    const refined = await geolocation.refineLocation();
-    if (refined && isUsableFix(refined.accuracy)) {
-      return {
-        position: { lat: refined.latitude, lng: refined.longitude },
-        accuracy: refined.accuracy,
-        outcome: 'refined',
-      };
-    }
-    // Still too coarse to place the user: the distance rule sits out rather than guessing.
-    return { position: null, accuracy: null, outcome: 'coarse' };
+    const result = await resolveReportLocation(
+      { position, accuracy, timestamp },
+      stations?.[stationId]?.coordinates,
+      () => geolocation.refineLocation(),
+    );
+    track('report_location_completed', {
+      attemptId,
+      durationMs: Date.now() - startedAt,
+      ...result.diagnostics,
+    });
+    return result.location;
   };
 
   const mintToken = async (attemptId: string): Promise<DeviceOutcome> => {
@@ -112,10 +118,14 @@ export function useReportSubmission() {
     const attemptId = crypto.randomUUID();
     track('report_started', { attemptId, stationId: selection.stationId });
     await runReportSubmission(selection, {
-      resolveLocation,
+      resolveLocation: () => resolveLocation(selection.stationId, attemptId),
       mintToken: () => mintToken(attemptId),
       verify: (location) =>
-        verify(selection.stationId, { position: location.position, accuracy: location.accuracy }),
+        verify(selection.stationId, {
+          position: location.position,
+          accuracy: location.accuracy,
+          timestamp: location.timestamp,
+        }),
       send: (turnstileToken) =>
         submitReport
           .mutateAsync({ ...selection, turnstileToken, attemptId })

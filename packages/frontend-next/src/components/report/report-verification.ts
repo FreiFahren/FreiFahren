@@ -21,9 +21,18 @@ export type ReportHistoryEntry = { timestamp: number; coordinates?: Coordinates 
 export type VerifyLocation = {
   position: { lat: number; lng: number } | null;
   accuracy: number | null;
+  timestamp?: number | null;
 };
 
 export const MAX_REPORT_DISTANCE_M = 2000;
+export const MAX_FIX_AGE_MS = 30_000;
+
+export const isFreshFix = (timestamp: number | null | undefined, now: number): boolean =>
+  timestamp != null &&
+  Number.isFinite(timestamp) &&
+  timestamp <= now &&
+  now - timestamp <= MAX_FIX_AGE_MS;
+
 const TRAVEL_TOLERANCE_M = 500;
 const TRAVEL_SPEED_M_PER_MS = 1000 / 60_000;
 export const REPORT_WINDOW_MS = 10 * 60_000;
@@ -35,11 +44,16 @@ export const isUsableFix = (accuracy: number | null): boolean =>
   accuracy >= 0 &&
   accuracy <= MAX_REPORT_DISTANCE_M;
 
-function checkLocation(
+export function checkLocation(
   coordinates: Coordinates | undefined,
   location: VerifyLocation,
+  now: number,
 ): LocationCheck {
-  const usable = coordinates && location.position && isUsableFix(location.accuracy);
+  const usable =
+    coordinates &&
+    location.position &&
+    isUsableFix(location.accuracy) &&
+    isFreshFix(location.timestamp, now);
   if (
     usable &&
     distanceMeters(
@@ -66,7 +80,7 @@ export function evaluateReportChecks(
   history: ReportHistoryEntry[],
   now: number,
 ): Pick<VerificationChecks, 'location' | 'activity'> {
-  const locationCheck = checkLocation(coordinates, location);
+  const locationCheck = checkLocation(coordinates, location, now);
   const recent = history.filter((entry) => entry.timestamp > now - REPORT_WINDOW_MS);
   if (recent.length >= MAX_ATTEMPTS_PER_WINDOW) {
     return { location: locationCheck, activity: { status: 'failed', reason: 'rate_limited' } };

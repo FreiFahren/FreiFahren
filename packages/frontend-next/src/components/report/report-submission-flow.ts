@@ -26,7 +26,8 @@ export type SubmissionPhase =
 export type LocationOutcome = {
   position: { lat: number; lng: number } | null;
   accuracy: number | null;
-  outcome: 'accurate' | 'refined' | 'coarse' | 'none';
+  timestamp?: number | null;
+  outcome: 'accurate' | 'refined' | 'coarse' | 'stale' | 'none';
 };
 export type DeviceOutcome = {
   token: string | undefined;
