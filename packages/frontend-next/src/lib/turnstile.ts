@@ -1,19 +1,6 @@
-/*
- * Cloudflare Turnstile, loaded on first use.
- *
- * The widget renders in managed mode, which is invisible for almost every client and only escalates
- * to something the user has to touch when the request looks suspicious. Reporting an inspector is
- * time-critical, so the cost has to stay at one round trip rather than a puzzle.
- *
- * Every call mints a fresh token: Cloudflare rejects a replayed one, so a token cannot be cached
- * and reused across requests. That single-use property is the whole point — it prices the attack
- * per request instead of per IP address, which is the axis address rotation cannot beat.
- */
-
 const SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 export const TOKEN_TIMEOUT_MS = 20_000;
 
-// Bound into the token; the API only accepts 'submit-report' tokens for reports.
 export type TurnstileAction = 'submit-report' | 'sign-in';
 export const TURNSTILE_TOKEN_HEADER = 'cf-turnstile-response';
 
@@ -48,6 +35,7 @@ type TurnstileApi = {
       callback: (token: string) => void;
       'error-callback': (code?: string) => void;
       'timeout-callback'?: () => void;
+      'before-interactive-callback'?: () => void;
     },
   ) => string;
   remove: (widgetId: string) => void;
@@ -103,83 +91,84 @@ export function preloadTurnstile(): void {
   if (siteKey() !== undefined) loadTurnstile().catch(() => {});
 }
 
-/**
- * Mint a single-use Turnstile token, or `undefined` when no site key is configured (local dev and
- * PR previews, where the API has no secret either and skips verification).
- *
- * Rejects with a structured reason when the check fails. Each caller chooses its fallback.
- */
+/** Mint one token. The caller chooses how to handle a failed or cancelled check. */
 export async function getTurnstileToken(
   action: TurnstileAction,
-  options: { timeoutMs?: number } = {},
+  options: {
+    timeoutMs?: number;
+    container?: HTMLElement;
+    signal?: AbortSignal;
+    onInteractionRequired?: () => void;
+  } = {},
 ): Promise<string | undefined> {
   const key = siteKey();
-  const timeoutMs = options.timeoutMs ?? TOKEN_TIMEOUT_MS;
   if (key === undefined) return undefined;
 
-  // Include script loading in the attempt budget; a blocked script must not hang forever.
-  const startedAt = Date.now();
-  let loadTimer: ReturnType<typeof setTimeout> | undefined;
-  const turnstile = await Promise.race([
-    loadTurnstile(),
-    new Promise<never>((_, reject) => {
-      loadTimer = setTimeout(
-        () => reject(new TurnstileError('Turnstile script timed out', 'script_timeout')),
-        timeoutMs,
-      );
-    }),
-  ]).finally(() => clearTimeout(loadTimer));
-  const remainingMs = Math.max(1, timeoutMs - (Date.now() - startedAt));
+  return new Promise<string>((resolve, reject) => {
+    let settled = false;
+    let api: TurnstileApi | undefined;
+    let widgetId: string | undefined;
+    let container = options.container;
+    let timeoutReason: TurnstileFailureReason = 'script_timeout';
+    const cleanup = () => {
+      clearTimeout(timer);
+      options.signal?.removeEventListener('abort', cancel);
+      if (widgetId !== undefined) {
+        api?.remove(widgetId);
+        widgetId = undefined;
+      }
+      if (!options.container) {
+        container?.remove();
+        container = undefined;
+      }
+    };
+    const settle = (complete: () => void) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      complete();
+    };
+    const cancel = () =>
+      settle(() => reject(new DOMException('Turnstile cancelled', 'AbortError')));
+    const timer = setTimeout(
+      () => settle(() => reject(new TurnstileError('Turnstile timed out', timeoutReason))),
+      options.timeoutMs ?? TOKEN_TIMEOUT_MS,
+    );
+    if (options.signal?.aborted) {
+      cancel();
+      return;
+    }
+    options.signal?.addEventListener('abort', cancel, { once: true });
 
-  // Off-screen rather than display:none — Turnstile refuses to run in a hidden container, and an
-  // interactive challenge still needs somewhere real to paint if managed mode escalates.
-  const container = document.createElement('div');
-  container.style.position = 'fixed';
-  container.style.bottom = '1rem';
-  container.style.left = '50%';
-  container.style.transform = 'translateX(-50%)';
-  container.style.zIndex = '9999';
-  document.body.appendChild(container);
-
-  let widgetId: string | undefined;
-  const cleanup = () => {
-    if (widgetId !== undefined) turnstile.remove(widgetId);
-    container.remove();
-  };
-
-  try {
-    return await new Promise<string>((resolve, reject) => {
-      const timer = setTimeout(
-        () => reject(new TurnstileError('Turnstile timed out', 'token_timeout')),
-        remainingMs,
-      );
-      const settle = (fn: () => void) => {
-        clearTimeout(timer);
-        fn();
-      };
-      widgetId = turnstile.render(container, {
-        sitekey: key,
-        action,
-        // Stay invisible unless the challenge actually needs the user.
-        appearance: 'interaction-only',
-        callback: (token) => settle(() => resolve(token)),
-        'error-callback': (code) =>
-          settle(() =>
-            reject(
-              new TurnstileError(
-                `Turnstile failed${code === undefined ? '' : `: ${code}`}`,
-                'widget_error',
-                code,
-              ),
+    void loadTurnstile()
+      .then((turnstile) => {
+        if (settled) return;
+        api = turnstile;
+        timeoutReason = 'token_timeout';
+        if (!container) {
+          container = document.createElement('div');
+          container.style.position = 'fixed';
+          container.style.bottom = '1rem';
+          container.style.left = '50%';
+          container.style.transform = 'translateX(-50%)';
+          container.style.zIndex = '9999';
+          document.body.appendChild(container);
+        }
+        widgetId = turnstile.render(container, {
+          sitekey: key,
+          action,
+          appearance: 'interaction-only',
+          callback: (token) => settle(() => resolve(token)),
+          'before-interactive-callback': options.onInteractionRequired,
+          'error-callback': (code) =>
+            settle(() => reject(new TurnstileError('Turnstile failed', 'widget_error', code))),
+          'timeout-callback': () =>
+            settle(() =>
+              reject(new TurnstileError('Turnstile challenge expired', 'challenge_expired')),
             ),
-          ),
-        'timeout-callback': () =>
-          settle(() =>
-            reject(new TurnstileError('Turnstile challenge expired', 'challenge_expired')),
-          ),
-      });
-    });
-  } finally {
-    cleanup();
-  }
+        });
+        if (settled) cleanup();
+      })
+      .catch((error: unknown) => settle(() => reject(error)));
+  });
 }

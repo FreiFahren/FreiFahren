@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useStations } from '@/api/transit';
 import { resolveReportLocation } from './report-location';
@@ -26,16 +26,60 @@ import {
   type SubmissionPhase,
 } from './report-submission-flow';
 export type { ReportSelection } from './report-submission-flow';
+import type { VerificationChecks } from './report-verification';
 
 // Cap on waiting for a first fix that was already in flight when the user pressed submit.
 const LOCATION_WAIT_MS = 4_000;
 const wait = <T>(ms: number, value: T) =>
   new Promise<T>((resolve) => setTimeout(resolve, ms, value));
 
+type EarlyToken = { token: string; createdAt: number };
+type SubmissionAttempt = {
+  selection: ReportSelection;
+  attemptId: string;
+  startedAt: number;
+  earlyToken?: EarlyToken;
+  interactionRequired: boolean;
+};
+
+// Turnstile tokens expire after five minutes; reserve one minute for delivery and validation.
+const TOKEN_MAX_AGE_MS = 240_000;
+
 export function useReportSubmission() {
   const [phase, setPhase] = useState<SubmissionPhase>({ kind: 'form' });
-  // Two taps in the same frame both see the stale `form` phase; the ref is what stops the second.
-  const inFlightRef = useRef(false);
+  const earlyTurnstileContainerRef = useRef<HTMLDivElement>(null);
+  const earlyTokenRef = useRef<EarlyToken | null>(null);
+  const earlyControllerRef = useRef<AbortController | null>(null);
+  const interactionRequiredRef = useRef(false);
+  const attemptRef = useRef<SubmissionAttempt | null>(null);
+  const isForm = phase.kind === 'form';
+  useEffect(() => {
+    if (!isForm) return;
+    const container = earlyTurnstileContainerRef.current;
+    if (!container) return;
+    const controller = new AbortController();
+    earlyControllerRef.current = controller;
+    earlyTokenRef.current = null;
+    interactionRequiredRef.current = false;
+    void getTurnstileToken('submit-report', {
+      container,
+      signal: controller.signal,
+      onInteractionRequired: () => {
+        interactionRequiredRef.current = true;
+        controller.abort();
+      },
+    })
+      .then((token) => {
+        if (token && !controller.signal.aborted) {
+          earlyTokenRef.current = { token, createdAt: Date.now() };
+        }
+      })
+      .catch(() => {});
+    return () => {
+      controller.abort();
+      if (earlyControllerRef.current === controller) earlyControllerRef.current = null;
+    };
+  }, [isForm]);
   const geolocation = useGeolocation();
   const submitReport = useSubmitReport();
   const { data: stations } = useStations();
@@ -44,6 +88,7 @@ export function useReportSubmission() {
   const resolveLocation = async (
     stationId: string,
     attemptId: string,
+    signal: AbortSignal,
   ): Promise<LocationOutcome> => {
     const startedAt = Date.now();
     let { position, accuracy, timestamp } = geolocation;
@@ -65,30 +110,61 @@ export function useReportSubmission() {
       stations?.[stationId]?.coordinates,
       () => geolocation.refineLocation(),
     );
-    track('report_location_completed', {
-      attemptId,
-      durationMs: Date.now() - startedAt,
-      ...result.diagnostics,
-    });
+    if (!signal.aborted) {
+      track('report_location_completed', {
+        attemptId,
+        durationMs: Date.now() - startedAt,
+        ...result.diagnostics,
+      });
+    }
     return result.location;
   };
 
-  const mintToken = async (attemptId: string): Promise<DeviceOutcome> => {
+  const mintToken = async (
+    attempt: SubmissionAttempt,
+    container: HTMLDivElement,
+    signal: AbortSignal,
+  ): Promise<DeviceOutcome> => {
     const startedAt = Date.now();
+    const tokenAgeMs = attempt.earlyToken ? Date.now() - attempt.earlyToken.createdAt : undefined;
+    const reusableToken =
+      attempt.earlyToken &&
+      tokenAgeMs !== undefined &&
+      tokenAgeMs >= 0 &&
+      tokenAgeMs < TOKEN_MAX_AGE_MS
+        ? attempt.earlyToken
+        : undefined;
+    const earlyTokenUsed = reusableToken !== undefined;
+    let interactionRequired = attempt.interactionRequired;
     const timing = () => ({
-      attemptId,
+      attemptId: attempt.attemptId,
       durationMs: Date.now() - startedAt,
       timeoutMs: TOKEN_TIMEOUT_MS,
+      earlyTokenUsed,
+      tokenAgeMs,
+      interactionRequired,
     });
-    if (!isTurnstileConfigured()) {
-      track('report_turnstile_completed', { ...timing(), outcome: 'disabled' });
-      return { token: undefined, outcome: 'disabled' };
-    }
+    const configured = isTurnstileConfigured();
     try {
-      const token = await getTurnstileToken('submit-report');
-      track('report_turnstile_completed', { ...timing(), outcome: 'passed' });
-      return { token, outcome: 'passed' };
+      const token = await (reusableToken?.token ??
+        getTurnstileToken('submit-report', {
+          container,
+          signal,
+          onInteractionRequired: () => {
+            interactionRequired = true;
+          },
+        }));
+      if (signal.aborted) throw new DOMException('Cancelled', 'AbortError');
+      if (configured && !token) {
+        throw new TurnstileError('Turnstile returned no token', 'unknown');
+      }
+      track('report_turnstile_completed', {
+        ...timing(),
+        outcome: configured ? 'passed' : 'disabled',
+      });
+      return { token, outcome: configured ? 'passed' : 'disabled' };
     } catch (error) {
+      if (signal.aborted) throw error;
       const failure = {
         ...timing(),
         reason: error instanceof TurnstileError ? error.reason : ('unknown' as const),
@@ -103,23 +179,14 @@ export function useReportSubmission() {
     }
   };
 
-  const submit = async (selection: ReportSelection) => {
-    if (inFlightRef.current) return;
-    inFlightRef.current = true;
-    try {
-      await run(selection);
-    } finally {
-      inFlightRef.current = false;
-    }
-  };
-
-  const run = async (selection: ReportSelection) => {
-    const startedAt = Date.now();
-    const attemptId = crypto.randomUUID();
-    track('report_started', { attemptId, stationId: selection.stationId });
+  const start = async (container: HTMLDivElement, signal: AbortSignal) => {
+    const attempt = attemptRef.current;
+    if (!attempt) return;
+    const { selection, attemptId, startedAt } = attempt;
     await runReportSubmission(selection, {
-      resolveLocation: () => resolveLocation(selection.stationId, attemptId),
-      mintToken: () => mintToken(attemptId),
+      signal,
+      resolveLocation: () => resolveLocation(selection.stationId, attemptId, signal),
+      mintToken: () => mintToken(attempt, container, signal),
       verify: (location) =>
         verify(selection.stationId, {
           position: location.position,
@@ -147,6 +214,7 @@ export function useReportSubmission() {
       },
       onPhase: (next) => {
         setPhase(next);
+        if (next.kind === 'form') attemptRef.current = null;
         if (next.kind === 'rejected') {
           track('report_rejected', {
             attemptId,
@@ -169,9 +237,36 @@ export function useReportSubmission() {
     });
   };
 
-  const reset = () => setPhase({ kind: 'form' });
+  const submit = (selection: ReportSelection) => {
+    if (attemptRef.current) return;
+    const cached = earlyTokenRef.current;
+    const attempt: SubmissionAttempt = {
+      selection,
+      attemptId: crypto.randomUUID(),
+      startedAt: Date.now(),
+      earlyToken: cached ?? undefined,
+      interactionRequired: interactionRequiredRef.current,
+    };
+    earlyTokenRef.current = null;
+    earlyControllerRef.current?.abort();
+    attemptRef.current = attempt;
+    track('report_started', { attemptId: attempt.attemptId, stationId: selection.stationId });
+    const checks: VerificationChecks = {
+      location: { status: 'running' },
+      device: { status: 'running' },
+      activity: { status: 'pending' },
+    };
+    setPhase({ kind: 'verifying', selection, checks });
+  };
+
+  const reset = () => {
+    attemptRef.current = null;
+    earlyTokenRef.current = null;
+    interactionRequiredRef.current = false;
+    setPhase({ kind: 'form' });
+  };
 
   const showSuccess = () => setPhase(showReportConfirmation);
 
-  return { phase, submit, reset, showSuccess };
+  return { phase, submit, start, reset, showSuccess, earlyTurnstileContainerRef };
 }

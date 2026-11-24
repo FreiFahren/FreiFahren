@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent } from 'react';
+import { useEffect, useEffectEvent, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStations } from '@/api/transit';
 import { LineBadge } from '@/components/transit/LineBadge';
@@ -26,13 +26,25 @@ export function ReportVerifying({
   phase,
   onBack,
   onResultsRead,
+  onStart,
 }: {
   phase: VerifyingPhase;
   onBack: () => void;
   onResultsRead: () => void;
+  onStart: (container: HTMLDivElement, signal: AbortSignal) => void;
 }) {
   const { t } = useTranslation(NAMESPACE);
   const { data: stations } = useStations();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const start = useEffectEvent(onStart);
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const controller = new AbortController();
+    void start(container, controller.signal);
+    return () => controller.abort();
+  }, []);
+
   const rejected = phase.kind === 'rejected';
   const delivered = phase.kind === 'delivered';
   const advance = useEffectEvent(onResultsRead);
@@ -54,12 +66,12 @@ export function ReportVerifying({
   }, [delivered]);
 
   const stationName = stations?.[phase.selection.stationId]?.name;
-  const { title, body } = COPY[phase.kind];
+  const copy = COPY[phase.kind];
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-md flex-col">
       <div role="status" aria-live="polite">
-        <PageHeader title={t(title)} reserveBackSpace onBack={rejected ? onBack : undefined} />
+        <PageHeader title={t(copy.title)} reserveBackSpace onBack={rejected ? onBack : undefined} />
       </div>
       <div className="flex flex-1 flex-col px-4 pt-4 pb-6">
         {stationName && (
@@ -68,10 +80,15 @@ export function ReportVerifying({
             <span>{stationName}</span>
           </div>
         )}
-        <p className="text-muted-foreground mt-3 text-sm leading-relaxed">{t(body)}</p>
+        <p className="text-muted-foreground mt-3 text-sm leading-relaxed">{t(copy.body)}</p>
         <div className="mt-6">
           <ReportCheckList checks={phase.checks} />
         </div>
+        <div
+          ref={containerRef}
+          data-turnstile="report"
+          className="relative left-1/2 mt-6 w-[300px] max-w-[calc(100vw-1rem)] -translate-x-1/2"
+        />
       </div>
       <ReportActionFooter label={t('reviewReport')} onClick={rejected ? onBack : undefined} />
     </div>

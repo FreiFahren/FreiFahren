@@ -331,7 +331,8 @@ export function ReportForm() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
   const { stationId: initialStationId, lineName: initialLineName } = routeApi.useSearch();
-  const { phase, submit, reset, showSuccess } = useReportSubmission();
+  const { phase, submit, start, reset, showSuccess, earlyTurnstileContainerRef } =
+    useReportSubmission();
   const scrollAreaRef = useKeyboardScrollArea();
 
   const handleSuccessClose = () => {
@@ -359,7 +360,12 @@ export function ReportForm() {
           ) : (
             <>
               {phase.kind !== 'form' && (
-                <ReportVerifying phase={phase} onBack={reset} onResultsRead={showSuccess} />
+                <ReportVerifying
+                  phase={phase}
+                  onBack={reset}
+                  onResultsRead={showSuccess}
+                  onStart={start}
+                />
               )}
               {/* Hidden rather than unmounted while verifying, so the location step does not re-run
                   its permission prompt when the user comes back to the form. */}
@@ -383,6 +389,11 @@ export function ReportForm() {
                   <DirectionPicker />
                   <SubmitFooter onSubmit={(selection) => void submit(selection)} />
                 </ReportLocationStep>
+                <div
+                  ref={earlyTurnstileContainerRef}
+                  data-turnstile="early-report"
+                  className="fixed bottom-4 left-1/2 z-[9999] w-[300px] max-w-[calc(100vw-1rem)] -translate-x-1/2"
+                />
               </div>
             </>
           )}

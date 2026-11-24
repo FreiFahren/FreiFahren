@@ -30,6 +30,9 @@ type AnalyticsEvents = {
     errorCode?: string;
     durationMs: number;
     timeoutMs: number;
+    earlyTokenUsed: boolean;
+    tokenAgeMs?: number;
+    interactionRequired?: boolean;
   };
   report_delivery_completed: {
     attemptId?: string;

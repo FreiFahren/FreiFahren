@@ -42,6 +42,7 @@ function deviceCheck(device: DeviceOutcome): VerificationChecks['device'] {
 }
 
 type Dependencies = {
+  signal?: AbortSignal;
   resolveLocation: () => Promise<LocationOutcome>;
   mintToken: () => Promise<DeviceOutcome>;
   verify: (location: LocationOutcome) => Pick<VerificationChecks, 'location' | 'activity'>;
@@ -58,6 +59,7 @@ export async function runReportSubmission(selection: ReportSelection, deps: Depe
     activity: { status: 'pending' },
   };
   const mark = (patch: Partial<VerificationChecks>) => {
+    if (deps.signal?.aborted) return;
     checks = { ...checks, ...patch };
     deps.onPhase({ kind: 'verifying', selection, checks });
   };
@@ -66,7 +68,7 @@ export async function runReportSubmission(selection: ReportSelection, deps: Depe
     deps
       .resolveLocation()
       .then((location) => {
-        mark(deps.verify(location));
+        if (!deps.signal?.aborted) mark(deps.verify(location));
         return location;
       })
       .catch(() => {
@@ -81,6 +83,7 @@ export async function runReportSubmission(selection: ReportSelection, deps: Depe
         return device;
       }),
   ]);
+  if (deps.signal?.aborted) return;
   if (failedCheck(checks) || !location) {
     // A check that never ran says so, rather than leaving `pending` to mean two things.
     if (checks.activity.status === 'pending') {
@@ -93,12 +96,14 @@ export async function runReportSubmission(selection: ReportSelection, deps: Depe
   deps.onPhase({ kind: 'sending', selection, checks });
   try {
     const result = await deps.send(device.token);
+    if (deps.signal?.aborted) return;
     deps.onPhase(
       result.local
         ? { kind: 'saved_locally', result }
         : { kind: 'delivered', selection, checks, result },
     );
   } catch {
+    if (deps.signal?.aborted) return;
     // `send` resolves for every delivery outcome, including an unconfirmed one, so only a defect
     // lands here. The form is the one state the reporter can always recover from.
     deps.onPhase({ kind: 'form' });
