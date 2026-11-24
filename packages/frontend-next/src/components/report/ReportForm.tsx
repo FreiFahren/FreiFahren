@@ -23,6 +23,7 @@ import {
 } from '@/lib/contribute-modal';
 import { FEATURE_FLAGS, getFeatureFlagVariant } from '@/lib/feature-flags';
 import { distanceMeters } from '@/lib/geo';
+import { stationMatcher } from '@/lib/station-search';
 import { toast } from '@/lib/toast';
 import { cn } from '@freifahren/ui/cn';
 
@@ -93,15 +94,15 @@ function StationPicker() {
   } = useReportSelection();
   const { position } = useGeolocation();
 
-  const needle = normalizeStationQuery(stationQuery.trim());
-  const filtered = needle
-    ? visibleStations.filter((s) => normalizedStationName(s).includes(needle))
+  const matches = stationMatcher(stationQuery, normalizeStationQuery);
+  const filtered = matches
+    ? visibleStations.filter((s) => matches(normalizedStationName(s)))
     : visibleStations;
 
   // Closest stations while sharing location and not searching. `visibleStations` is already
   // narrowed to the selected line, so this only surfaces nearby stations on that line.
   const nearby =
-    position && !needle
+    position && !matches
       ? visibleStations
           .map((station) => ({
             station,
@@ -208,7 +209,7 @@ function StationPicker() {
                 {rest.length > 0 && <Separator className="bg-border my-2 data-horizontal:h-0.5" />}
               </>
             )}
-            {needle && filtered.length === 0 ? (
+            {matches && filtered.length === 0 ? (
               <p className="text-muted-foreground px-3 py-6 text-center text-sm">
                 {t('noMatch', { query: stationQuery })}
               </p>

@@ -29,6 +29,7 @@ export { STUTTGART }
 export { POTSDAM }
 export { CITY_DATABASES, CITY_DATABASE_SLUGS, getCityDatabase } from './databases'
 export type { CityDatabaseSlug } from './databases'
+export { stripModeMarker, stripTypedModeMarker } from './station-names'
 
 /**
  * The city registry: the single source of truth for everything that differs

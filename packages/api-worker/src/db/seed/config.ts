@@ -3,7 +3,7 @@
 // Pipeline-global tuning below (Overpass endpoint, merge threshold, geometry
 // Tolerance) doesn't vary by city and stays here with the pipeline.
 
-import { getCity, isExcludedLineRef, type CityConfig, type RouteType } from '@freifahren/cities'
+import { getCity, isExcludedLineRef, stripModeMarker, type CityConfig, type RouteType } from '@freifahren/cities'
 
 // The seed pipeline runs as a single-city process. The city is selected via the
 // SEED_CITY env var (the seed entry points set it from their `--city` flag),
@@ -41,8 +41,9 @@ export const seedLineRef = (osmRef: string): string => osmRef.replace(/^([A-Za-z
 
 const STATION_NAME_OVERRIDES: Readonly<Record<string, string>> = CITY.seed.stationNameOverrides ?? {}
 
+// Overrides are used as written, which keeps a name that really starts with a lone "S" or "U".
 export const canonicalStationName = (osmName: string): string =>
-    Object.hasOwn(STATION_NAME_OVERRIDES, osmName) ? STATION_NAME_OVERRIDES[osmName] : osmName
+    Object.hasOwn(STATION_NAME_OVERRIDES, osmName) ? STATION_NAME_OVERRIDES[osmName] : stripModeMarker(osmName)
 
 export const STATION_CODE_FROM_REF = CITY.seed.stationCodeFromRef ?? true
 

@@ -9,6 +9,7 @@ import {
   useLines,
   useStations,
 } from '@/api/transit';
+import { stationMatcher } from '@/lib/station-search';
 
 import {
   type LineFilter,
@@ -144,10 +145,10 @@ export function ReportSelectionProvider({
 
   const uniqueMatch = (() => {
     if (tappedStationId !== null) return undefined;
-    const needle = normalizeStationQuery(stationQuery.trim());
-    if (!needle) return undefined;
-    const matches = matchPool.filter((station) => normalizedStationName(station).includes(needle));
-    return matches.length === 1 ? matches[0] : undefined;
+    const matches = stationMatcher(stationQuery, normalizeStationQuery);
+    if (!matches) return undefined;
+    const matched = matchPool.filter((station) => matches(normalizedStationName(station)));
+    return matched.length === 1 ? matched[0] : undefined;
   })();
 
   const stationId = tappedStationId ?? uniqueMatch?.id ?? null;

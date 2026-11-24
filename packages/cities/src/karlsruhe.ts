@@ -9,10 +9,10 @@ Message: "S11 hochstetten 3 bigs. Gerade hbf"
 {"stationName": "Hauptbahnhof", "directionName": "Hochstetten Altenheim"}
 
 Message: "3 K in der 1 Richtung Durlach auf Höhe Euro"
-{"stationName": "Europaplatz (U)", "directionName": "Durlach Turmberg"}
+{"stationName": "Europaplatz", "directionName": "Durlach Turmberg"}
 
 Message: "2 stück in der S5 Richtung pforzheim am kronenplatz"
-{"stationName": "Kronenplatz (U)", "directionName": null}
+{"stationName": "Kronenplatz", "directionName": null}
 
 Message: "2 am hbf, s steig stadteinwärts"
 {"stationName": "Hauptbahnhof", "directionName": null}
@@ -74,6 +74,11 @@ export const KARLSRUHE: CityConfig = {
             'Karlsruhe-Hagsfeld': 'Bahnhof Hagsfeld',
             'Karlsruhe-Knielingen': 'Knielingen',
             'Karlsruhe-Mühlburg': 'Mühlburg Bahnhof',
+            // One station once the tunnel stop's "(U)" is dropped: the stops merge, and would
+            // otherwise carry the name of whichever street stop represents them.
+            'Europaplatz (U)': 'Europaplatz',
+            'Europaplatz (Karlstraße)': 'Europaplatz',
+            'Europaplatz (Kaiserstraße)': 'Europaplatz',
         },
     },
     telegram: {

@@ -13,6 +13,7 @@ import {
 } from '@/api/transit';
 import { track } from '@/lib/analytics';
 import { selectionTap } from '@/lib/haptics';
+import { stationMatcher } from '@/lib/station-search';
 import { LineBadge } from '@/components/transit/LineBadge';
 import { StationListItem } from '@/components/transit/StationListItem';
 import { Backdrop } from '@freifahren/ui/backdrop';
@@ -30,11 +31,11 @@ const MAX_RESULTS = 8;
 const MAX_LINE_RESULTS = 3;
 
 function matchStations(stations: Station[], query: string, limit: number): Station[] {
-  const needle = query.trim().toLowerCase();
-  if (!needle || limit <= 0) return [];
+  const matches = stationMatcher(query, (value) => value.toLowerCase());
+  if (!matches || limit <= 0) return [];
   const results: Station[] = [];
   for (const station of stations) {
-    if (station.name.toLowerCase().includes(needle)) {
+    if (matches(station.name.toLowerCase())) {
       results.push(station);
       if (results.length === limit) break;
     }
