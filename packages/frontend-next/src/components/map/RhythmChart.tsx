@@ -27,18 +27,23 @@ export function RhythmChart({ hours, currentHour, label }: RhythmChartProps) {
         />
       </div>
       <div className="text-text-4 relative mt-1 text-[10px]">
-        {[0, 6, 12, 18, 24].map((hour) => (
-          <span
-            key={hour}
-            className="absolute"
-            style={{
-              left: `${(hour / 24) * 100}%`,
-              transform: `translateX(${hour === 0 ? 0 : hour === 24 ? -100 : -50}%)`,
-            }}
-          >
-            {hour}h
-          </span>
-        ))}
+        {[0, 6, 12, 18, 24].map((hour) => {
+          let offset = -50;
+          if (hour === 0) offset = 0;
+          else if (hour === 24) offset = -100;
+          return (
+            <span
+              key={hour}
+              className="absolute"
+              style={{
+                left: `${(hour / 24) * 100}%`,
+                transform: `translateX(${offset}%)`,
+              }}
+            >
+              {hour}h
+            </span>
+          );
+        })}
       </div>
     </div>
   );

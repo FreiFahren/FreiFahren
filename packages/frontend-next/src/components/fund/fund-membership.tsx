@@ -46,9 +46,12 @@ export function FundMembership({
       membership.error instanceof FundRequestError && membership.error.status === 403;
     const sessionExpired =
       membership.error instanceof FundRequestError && membership.error.status === 401;
+    let errorMessage: 'sessionExpired' | 'accessDenied' | 'loadFailed' = 'loadFailed';
+    if (sessionExpired) errorMessage = 'sessionExpired';
+    else if (accessDenied) errorMessage = 'accessDenied';
     return (
       <div role="alert" className="flex flex-col gap-4 text-sm">
-        <p>{t(sessionExpired ? 'sessionExpired' : accessDenied ? 'accessDenied' : 'loadFailed')}</p>
+        <p>{t(errorMessage)}</p>
         <Button
           size="lg"
           className={SECONDARY_BUTTON}

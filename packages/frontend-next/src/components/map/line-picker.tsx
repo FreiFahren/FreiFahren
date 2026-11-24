@@ -29,7 +29,9 @@ function LineRow({ name }: { name: string }) {
   const start = stations?.[line?.stations[0] ?? '']?.name;
   const end = stations?.[line?.stations.at(-1) ?? '']?.name;
   // A ring has no ends to tell it apart by.
-  const route = line?.isCircular ? t('circular') : start && end ? `${start} – ${end}` : '';
+  let route = '';
+  if (line?.isCircular) route = t('circular');
+  else if (start && end) route = `${start} – ${end}`;
 
   return (
     <Link

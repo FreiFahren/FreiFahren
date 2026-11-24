@@ -110,16 +110,14 @@ export async function resolveReportLocation(
     ? { ...candidate, outcome }
     : { position: null, accuracy: null, timestamp: null, outcome };
   const check = checkLocation(station, location, Date.now());
+  let decision: LocationDiagnostics['decision'] = 'unavailable';
+  if (check.status === 'failed') decision = 'too_far';
+  else if (check.status === 'passed') decision = 'passed';
   return {
     location,
     diagnostics: {
       outcome,
-      decision:
-        check.status === 'failed'
-          ? 'too_far'
-          : check.status === 'passed'
-            ? 'passed'
-            : 'unavailable',
+      decision,
       refreshReason,
       refreshOutcome,
       initialAccuracyBand: first.accuracy,

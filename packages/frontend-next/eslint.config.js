@@ -32,6 +32,7 @@ export default defineConfig([
       'react-refresh': reactRefresh,
     },
     rules: {
+      'no-nested-ternary': 'error',
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true, allowExportNames: ['Route'] },

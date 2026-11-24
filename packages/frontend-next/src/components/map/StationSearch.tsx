@@ -82,7 +82,9 @@ function LineResult({
   const { t } = useTranslation(NAMESPACE);
   const first = stations?.[line.stations[0]!]?.name;
   const last = stations?.[line.stations.at(-1)!]?.name;
-  const termini = line.isCircular ? t('circularLine') : first && last ? `${first} ↔ ${last}` : '';
+  let termini = '';
+  if (line.isCircular) termini = t('circularLine');
+  else if (first && last) termini = `${first} ↔ ${last}`;
 
   return (
     <button

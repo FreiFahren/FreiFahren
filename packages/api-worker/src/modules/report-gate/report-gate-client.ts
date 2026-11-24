@@ -40,13 +40,17 @@ const requestMetadata = (c: Context<Env>) => {
     }
 }
 
-const reportGateUnavailable = (error?: unknown) =>
-    new AppError({
+const reportGateUnavailable = (error?: unknown) => {
+    let description: string | undefined
+    if (error instanceof Error) description = error.message
+    else if (error !== undefined) description = String(error)
+    return new AppError({
         message: 'Reporting service is unavailable',
         statusCode: 503,
         internalCode: 'REPORT_GATE_UNAVAILABLE',
-        description: error === undefined ? undefined : error instanceof Error ? error.message : String(error),
+        description,
     })
+}
 
 const callGate = async <Gate, Data>(
     gate: Gate | undefined,

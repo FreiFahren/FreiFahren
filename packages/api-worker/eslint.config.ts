@@ -48,7 +48,7 @@ export default [
             'no-empty-function': 'error',
             'no-eq-null': 'error',
             'no-lonely-if': 'warn',
-            'no-nested-ternary': 'warn',
+            'no-nested-ternary': 'error',
             'no-redeclare': 'error',
             'no-useless-catch': 'error',
             'no-var': 'warn',

@@ -68,6 +68,9 @@ export function FeedbackForm({
   }
 
   const sending = status === 'sending';
+  let submitLabel = t('submit');
+  if (sending) submitLabel = t('submitting');
+  else if (status === 'error') submitLabel = t('retry');
   const canSubmit = message.trim().length > 0 && !sending;
 
   return (
@@ -126,7 +129,7 @@ export function FeedbackForm({
           !canSubmit && 'bg-surface-solid text-muted-foreground border-border border',
         )}
       >
-        {sending ? t('submitting') : status === 'error' ? t('retry') : t('submit')}
+        {submitLabel}
       </Button>
     </div>
   );

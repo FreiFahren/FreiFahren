@@ -477,13 +477,11 @@ export function useSubmitReport() {
           return result;
         } catch (error) {
           // Keep the local copy, but distinguish it from a report acknowledged by the API.
-          const reason = controller.signal.aborted
-            ? 'timeout'
-            : error instanceof SubmitReportError
-              ? 'http_error'
-              : error instanceof SyntaxError
-                ? 'invalid_response'
-                : 'network_error';
+          let reason: 'timeout' | 'http_error' | 'invalid_response' | 'network_error' =
+            'network_error';
+          if (controller.signal.aborted) reason = 'timeout';
+          else if (error instanceof SubmitReportError) reason = 'http_error';
+          else if (error instanceof SyntaxError) reason = 'invalid_response';
           const failure = {
             ...telemetry(),
             reason,

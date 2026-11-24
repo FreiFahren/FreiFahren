@@ -41,22 +41,20 @@ function LocationPermissionPrompt({
   onDismiss,
 }: LocationPermissionPromptProps) {
   const { t } = useTranslation(NAMESPACE);
+  let title = source === 'map' ? 'mapTitle' : 'reportTitle';
+  let description = source === 'map' ? 'mapDescription' : 'reportDescription';
+  if (denied) {
+    title = 'deniedTitle';
+    description = 'deniedDescription';
+  }
   const content = (
     <>
       <CardContent className="flex flex-col gap-1">
         <h2 className="font-heading flex items-center gap-2 text-lg font-semibold">
           <MapPin className="text-accent-bright size-5" />
-          {t(denied ? 'deniedTitle' : source === 'map' ? 'mapTitle' : 'reportTitle')}
+          {t(title)}
         </h2>
-        <p className="text-muted-foreground text-sm">
-          {t(
-            denied
-              ? 'deniedDescription'
-              : source === 'map'
-                ? 'mapDescription'
-                : 'reportDescription',
-          )}
-        </p>
+        <p className="text-muted-foreground text-sm">{t(description)}</p>
       </CardContent>
       <CardFooter className="gap-2">
         <Button

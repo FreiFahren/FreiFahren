@@ -73,26 +73,28 @@ export function AnnouncementsList() {
     if (announcements) markAllAnnouncementsRead(announcements);
   }, [announcements]);
 
+  let content;
+  if (isError && !announcements) {
+    content = <LoadError onRetry={() => void refetch()} />;
+  } else if (!isPending && announcements?.length === 0) {
+    content = <p className="text-muted-foreground px-4 py-10 text-center text-sm">{t('empty')}</p>;
+  } else {
+    content = (
+      <ul className="divide-border-soft divide-y">
+        {announcements?.map((announcement) => (
+          <AnnouncementRow
+            key={announcement.id}
+            announcement={announcement}
+            isNew={!readOnOpen.has(announcement.id)}
+          />
+        ))}
+      </ul>
+    );
+  }
   return (
     <FullScreenPage>
       <PageHeader title={t('title')} onBack={() => navigate({ to: MapIndexRoute.to })} />
-      <div className="pb-safe-6 min-h-0 flex-1 overflow-y-auto">
-        {isError && !announcements ? (
-          <LoadError onRetry={() => void refetch()} />
-        ) : !isPending && announcements?.length === 0 ? (
-          <p className="text-muted-foreground px-4 py-10 text-center text-sm">{t('empty')}</p>
-        ) : (
-          <ul className="divide-border-soft divide-y">
-            {announcements?.map((announcement) => (
-              <AnnouncementRow
-                key={announcement.id}
-                announcement={announcement}
-                isNew={!readOnOpen.has(announcement.id)}
-              />
-            ))}
-          </ul>
-        )}
-      </div>
+      <div className="pb-safe-6 min-h-0 flex-1 overflow-y-auto">{content}</div>
     </FullScreenPage>
   );
 }
