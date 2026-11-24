@@ -190,6 +190,20 @@ export function stationHitRadius(selectedId: string): ExpressionSpecification {
   ];
 }
 
+// Lines are thin, so their tap target is a wider invisible band. Like the stations' target it tracks
+// the fade: a faint secondary line at the overview isn't tappable, or a tap there would hit a dozen
+// tram and bus lines at once.
+const LINE_HIT_WIDTH_PX = 20;
+export const LINE_HIT_WIDTH: DataDrivenPropertyValueSpecification<number> = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  SECONDARY_FADE_START,
+  ['case', ['any', ['get', 'reported'], ['!', ['get', 'secondary']]], LINE_HIT_WIDTH_PX, 0],
+  SECONDARY_FADE_END,
+  LINE_HIT_WIDTH_PX,
+];
+
 export const LINE_OPACITY: DataDrivenPropertyValueSpecification<number> = [
   'interpolate',
   ['linear'],

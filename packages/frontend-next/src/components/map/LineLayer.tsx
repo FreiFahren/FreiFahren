@@ -1,5 +1,6 @@
 import { Layer, Source } from 'react-map-gl/maplibre';
 
+import { LineHitLayer } from './line-hit-layer';
 import { STATIONS_BASE_LAYER_ID } from './StationsLayer';
 import { LINE_OPACITY, LINE_WIDTH, useTypedSegments } from './line-style';
 
@@ -21,6 +22,7 @@ export function LineLayer() {
           'line-opacity': LINE_OPACITY,
         }}
       />
+      <LineHitLayer source="segments" />
     </Source>
   );
 }

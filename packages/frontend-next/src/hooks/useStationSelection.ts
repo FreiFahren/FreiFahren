@@ -4,12 +4,17 @@ import type { MapLayerMouseEvent, MapLayerTouchEvent } from 'react-map-gl/maplib
 
 import { stationInsightsQueryOptions } from '@/api/insights';
 import { queryClient } from '@/api/queryClient';
-import { type Station, useStations } from '@/api/transit';
+import { compareLineOrder, type Station, useLines, useStations } from '@/api/transit';
+import { LINES_HIT_LAYER_IDS } from '@/components/map/line-hit-layer';
+import { STATIONS_LAYER_ID } from '@/components/map/StationsLayer';
 import { track } from '@/lib/analytics';
 import { selectionTap } from '@/lib/haptics';
 import { createTapConfirmation } from '@/lib/tap-confirmation';
+import { tappedLines } from '@/lib/tapped-lines';
 import { markReportViewed } from '@/lib/viewed-reports';
 import { REPORTS_HIT_LAYER_ID, type ReportPointProps } from '@/hooks/useReportsLayer';
+import { Route as LineDetailRoute } from '@/routes/_map/line/$lineName';
+import { Route as LinePickerRoute } from '@/routes/_map/line/index';
 import { Route as ReportDetailRoute } from '@/routes/_map/reports/$stationId';
 import { Route as StationDetailRoute } from '@/routes/_map/station/$stationId';
 
@@ -22,6 +27,7 @@ type UseStationSelectionResult = {
 
 export function useStationSelection(): UseStationSelectionResult {
   const { data: stations } = useStations();
+  const { data: lines } = useLines();
   const navigate = useNavigate();
   const router = useRouter();
   const match = useMatch({ from: StationDetailRoute.id, shouldThrow: false });
@@ -40,19 +46,13 @@ export function useStationSelection(): UseStationSelectionResult {
     [taps],
   );
 
-  const selectOnceConfirmed = (
-    point: { x: number; y: number },
-    to: typeof StationDetailRoute.to | typeof ReportDetailRoute.to,
-    stationId: string,
-    onSelect: () => void,
-  ) => {
+  const selectOnceConfirmed = (point: { x: number; y: number }, onSelect: () => void) => {
     const { href } = router.state.location;
     taps.tap(point, () => {
       // The user navigated elsewhere during the wait, e.g. through a control over the map.
       if (router.state.location.href !== href) return;
       selectionTap();
       onSelect();
-      void navigate({ to, params: { stationId } });
     });
   };
 
@@ -68,26 +68,59 @@ export function useStationSelection(): UseStationSelectionResult {
     );
     if (reportFeature) {
       const { stationId, timestamp } = reportFeature.properties as ReportPointProps;
-      selectOnceConfirmed(event.point, ReportDetailRoute.to, stationId, () => {
+      selectOnceConfirmed(event.point, () => {
         const ageMinutes = Math.round((Date.now() - new Date(timestamp).getTime()) / 60000);
         track('report_marker_selected', { report_age_minutes: ageMinutes });
         markReportViewed(stationId, timestamp);
+        void navigate({ to: ReportDetailRoute.to, params: { stationId } });
       });
       return;
     }
 
-    const stationId = event.features?.find((feature) => feature.properties?.id)?.properties?.id as
-      string | undefined;
-    if (!stationId) return;
     // The wait is used to load the detail route's code and data, so the sheet can open filled the
     // moment the tap is confirmed. A double tap wastes the preload, which is cheap. Reports need
     // none of this: useReportsLayer already warms every visible report's route.
-    void router
-      .preloadRoute({ to: StationDetailRoute.to, params: { stationId } })
-      .catch(() => undefined);
-    void queryClient.prefetchQuery(stationInsightsQueryOptions(stationId));
-    selectOnceConfirmed(event.point, StationDetailRoute.to, stationId, () => {
-      track('station_selected', { source: 'map' });
+    const stationId = event.features?.find((feature) => feature.layer.id === STATIONS_LAYER_ID)
+      ?.properties.id as string | undefined;
+    if (stationId) {
+      const destination = { to: StationDetailRoute.to, params: { stationId } };
+      void router.preloadRoute(destination).catch(() => undefined);
+      void queryClient.prefetchQuery(stationInsightsQueryOptions(stationId));
+      selectOnceConfirmed(event.point, () => {
+        track('station_selected', { source: 'map' });
+        void navigate(destination);
+      });
+      return;
+    }
+
+    // Lines come last: a station or report on a line is the more specific target.
+    const lineNames = tappedLines(event.features, LINES_HIT_LAYER_IDS, lines)
+      .sort(compareLineOrder)
+      .map((line) => line.name);
+    const [lineName] = lineNames;
+    if (!lineName) return;
+    const onSelect = () => track('map_line_selected', { line_count: lineNames.length });
+
+    if (lineNames.length === 1) {
+      const destination = {
+        to: LineDetailRoute.to,
+        params: { lineName },
+        search: { source: 'map' },
+      } as const;
+      void router.preloadRoute(destination).catch(() => undefined);
+      selectOnceConfirmed(event.point, () => {
+        onSelect();
+        void navigate(destination);
+      });
+      return;
+    }
+
+    // Several lines under the tap, as on a shared track: the user picks which one they meant.
+    const destination = { to: LinePickerRoute.to, search: { names: lineNames } };
+    void router.preloadRoute(destination).catch(() => undefined);
+    selectOnceConfirmed(event.point, () => {
+      onSelect();
+      void navigate(destination);
     });
   };
 

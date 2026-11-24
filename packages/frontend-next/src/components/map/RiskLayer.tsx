@@ -3,6 +3,7 @@ import { Layer, Source } from 'react-map-gl/maplibre';
 
 import { riskColor, useRisk } from '@/api/risk';
 
+import { LineHitLayer } from './line-hit-layer';
 import { STATIONS_BASE_LAYER_ID } from './StationsLayer';
 import {
   LINE_OPACITY,
@@ -44,6 +45,7 @@ export function RiskLayer() {
           'line-opacity': LINE_OPACITY,
         }}
       />
+      <LineHitLayer source="risk-segments" />
     </Source>
   );
 }

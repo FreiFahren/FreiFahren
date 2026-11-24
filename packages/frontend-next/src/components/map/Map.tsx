@@ -18,6 +18,7 @@ import { useSegments } from '@/api/transit';
 import { track } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';
 
+import { LINES_HIT_LAYER_IDS } from './line-hit-layer';
 import { LineLayer } from './LineLayer';
 import { SECONDARY_REVEAL_ZOOM } from './line-style';
 import { MapCameraController } from './MapCameraController';
@@ -117,7 +118,7 @@ export function MapView() {
         // pan/zoom and tile load — needless CPU churn on a dense transit map.
         fadeDuration={0}
         attributionControl={{ compact: true }}
-        interactiveLayerIds={[REPORTS_HIT_LAYER_ID, STATIONS_LAYER_ID]}
+        interactiveLayerIds={[REPORTS_HIT_LAYER_ID, STATIONS_LAYER_ID, ...LINES_HIT_LAYER_IDS]}
         onClick={handleMapClick}
         onTouchStart={handleMapTouchStart}
         onDragStart={handleMapDragStart}

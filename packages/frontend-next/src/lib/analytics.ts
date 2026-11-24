@@ -84,6 +84,9 @@ type AnalyticsEvents = {
   secondary_lines_revealed: { zoom: number };
   station_selected: { source: 'map' | 'search' | 'report' | 'reports_list' };
   report_marker_selected: { report_age_minutes: number };
+  // A tap on a line on the map. `line_count` above 1 means several lines ran under the tap and
+  // the picker opened instead of a line's detail.
+  map_line_selected: { line_count: number };
   reports_overview_opened: { report_count: number };
   reports_line_filter_used: {
     action: 'opened' | 'selected' | 'cleared';
