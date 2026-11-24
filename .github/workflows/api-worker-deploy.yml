@@ -14,7 +14,9 @@ concurrency:
     cancel-in-progress: false
 
 jobs:
-    migrate:
+    # Migrates and reseeds in one job. A job per city spent most of its minute checking out and
+    # installing, and GitHub bills every job rounded up to a full minute.
+    database:
         runs-on: ubuntu-latest
         permissions:
             contents: read
@@ -62,8 +64,35 @@ jobs:
                     latest_migration="$applied"
                   done < <(bun -e 'import { CITY_DATABASES } from "../../packages/cities/src/index.ts"; for (const [slug, { dbBinding }] of Object.entries(CITY_DATABASES)) console.log(`${slug} ${dbBinding}`)')
 
+            # Reseed every city in the @freifahren/cities registry with the bundled reference data
+            # before deploying the Worker. This keeps reseeding automatic: a change to the seeding
+            # logic (e.g. how stations are merged) propagates to every city's live reference data
+            # without a manual trigger. seed-d1.ts resolves the city's D1 binding from the registry,
+            # applies migrations, builds the data via the report-preserving seed and loads it with
+            # INSERT OR IGNORE — additive and idempotent, so reports stay intact and re-running is a
+            # no-op if unchanged. Preconditions: the city's D1 binding exists.
+            #
+            # One city at a time: keeps D1 writes and cache purges from interleaving. The first
+            # failure stops the loop, and with it the deploy.
+            - name: Seed remote D1 and purge the transit reference cache, city by city
+              env:
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+              run: |
+                  set -euo pipefail
+                  # The registry is dependency-free plain TS.
+                  cities=$(bun -e 'import { CITY_SLUGS } from "../cities/src/index.ts"; console.log(CITY_SLUGS.join(" "))')
+                  for city in $cities; do
+                    echo "::group::$city"
+                    bun run seed --city "$city" --remote
+                    # Purge only this city's cache.default Cache-Tag, so reseeding one city leaves the others' entries intact.
+                    bun run db:purge-cache --city "$city"
+                    echo "::endgroup::"
+                  done
+
     deploy:
-        needs: [migrate, seed]
+        needs: database
         runs-on: ubuntu-latest
         # Records a GitHub deployment for this worker so it shows in the repo's Deployments tab.
         environment:
@@ -112,75 +141,3 @@ jobs:
                   bunx @sentry/cli releases set-commits "$GITHUB_SHA" --auto --ignore-missing || echo "set-commits skipped"
                   bunx @sentry/cli releases finalize "$GITHUB_SHA"
                   bunx @sentry/cli releases deploys "$GITHUB_SHA" new --env production
-
-    # List every city in the @freifahren/cities registry so the seed job can fan out over
-    # them. This keeps reseeding automatic: a change to the seeding logic (e.g. how stations
-    # are merged) propagates to every city's live reference data without a manual trigger.
-    plan:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-        outputs:
-            cities: ${{ steps.cities.outputs.list }}
-        steps:
-            - name: Check out code
-              uses: actions/checkout@v4
-
-            - name: Set up Bun
-              uses: oven-sh/setup-bun@v1
-              with:
-                  bun-version: latest
-
-            # The registry is dependency-free plain TS, so it imports without `bun install`.
-            - name: Resolve city matrix
-              id: cities
-              run: |
-                  list=$(bun -e 'import { CITY_SLUGS } from "./packages/cities/src/index.ts"; console.log(JSON.stringify(CITY_SLUGS))')
-                  echo "list=$list" >> "$GITHUB_OUTPUT"
-
-    # Reseed each city's remote D1 with the bundled reference data before deploying the Worker.
-    # Builds the data via the report-preserving seed and loads it with INSERT OR IGNORE —
-    # additive and idempotent, so reports stay intact and re-running is a no-op if unchanged.
-    # Each matrix leg touches only that city's isolated DB. Preconditions: the city's D1 binding exists.
-    seed:
-        needs: [migrate, plan]
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-        strategy:
-            # One city at a time: keeps D1 writes and cache purges from interleaving.
-            max-parallel: 1
-            matrix:
-                city: ${{ fromJSON(needs.plan.outputs.cities) }}
-        defaults:
-            run:
-                working-directory: packages/api-worker
-        env:
-            # Passed via env (not interpolated into the run script) to avoid shell injection.
-            SEED_CITY_INPUT: ${{ matrix.city }}
-        steps:
-            - name: Check out code
-              uses: actions/checkout@v4
-
-            - name: Set up Bun
-              uses: oven-sh/setup-bun@v1
-              with:
-                  bun-version: latest
-
-            - name: Install dependencies
-              run: bun install --frozen-lockfile
-
-            # seed-d1.ts resolves the city's D1 binding from the registry, applies migrations,
-            # and loads the reference data into the remote DB.
-            - name: Seed remote D1
-              env:
-                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-              run: bun run seed --city "$SEED_CITY_INPUT" --remote
-
-            # Purge only this city's cache.default Cache-Tag, so reseeding one city leaves the others' entries intact.
-            - name: Purge transit reference cache
-              env:
-                  CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
-                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-              run: bun run db:purge-cache --city "$SEED_CITY_INPUT"

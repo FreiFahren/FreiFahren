@@ -2,7 +2,7 @@ name: Preview
 
 # No `paths:` filter here on purpose: it would also gate the `closed` event, so a PR that provisioned
 # a preview and then moved its changes out of the diff before closing would never trigger cleanup,
-# leaving the Workers and databases behind. The path check lives on the `plan` job.
+# leaving the Workers and databases behind. The path check is the `preview` job's first step.
 on:
     pull_request:
         types: [opened, reopened, ready_for_review, synchronize, closed]
@@ -21,15 +21,32 @@ concurrency:
     cancel-in-progress: false
 
 jobs:
-    plan:
-        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    # One job rather than one each for planning, the API, the frontend and the deployment record:
+    # GitHub bills every job rounded up to a full minute, and most pushes only redeploy two Workers.
+    preview:
+        if: >-
+            github.event_name == 'pull_request' &&
+            github.event.action != 'closed' &&
+            github.event.pull_request.head.repo.full_name == github.repository
         runs-on: ubuntu-latest
         permissions:
             contents: read
             pull-requests: read
-        outputs:
-            api: ${{ steps.filter.outputs.api }}
+            deployments: write
+        defaults:
+            run:
+                working-directory: packages/api-worker
+        env:
+            CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+            CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+            # Passed via env (not interpolated into a run script) to avoid shell injection.
+            PR_NUMBER: ${{ github.event.pull_request.number }}
+            PREVIEW_CONFIG: wrangler.preview.json
+            PREVIEW_URL: https://pr-${{ github.event.pull_request.number }}-api-worker.freifahren.workers.dev
+            APP_URL: https://pr-${{ github.event.pull_request.number }}-frontend.freifahren.workers.dev
+
         steps:
+            # Every step below is skipped when this finds nothing to preview.
             - name: Detect what changed
               id: filter
               uses: actions/github-script@v7
@@ -56,7 +73,7 @@ jobs:
                         core.setOutput('api', 'true')
                         return
                       }
-                      const workflow = /^\.github\/workflows\/preview\.yml$/
+                      const workflow = /^(\.github\/workflows\/preview\.yml|\.github\/scripts\/each-city\.sh)$/
                       const registry = /^packages\/cities\//
                       const touches = (...patterns) =>
                         files.some((file) => patterns.some((pattern) => pattern.test(file.filename)))
@@ -69,46 +86,57 @@ jobs:
                           : 'false'
                       )
 
-    api:
-        needs: plan
-        if: >-
-            github.event.action != 'closed' &&
-            needs.plan.outputs.api == 'true' &&
-            github.event.pull_request.head.repo.full_name == github.repository
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-        defaults:
-            run:
-                working-directory: packages/api-worker
-        env:
-            CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-            CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-            # Passed via env (not interpolated into a run script) to avoid shell injection.
-            PR_NUMBER: ${{ github.event.pull_request.number }}
-            PREVIEW_CONFIG: wrangler.preview.json
-            PREVIEW_URL: https://pr-${{ github.event.pull_request.number }}-api-worker.freifahren.workers.dev
-
-        steps:
+            # The job's token can also record deployments, so it is kept out of the checkout, where
+            # the pull request's install and build scripts could read it.
             - name: Check out code
+              if: steps.filter.outputs.api == 'true'
               uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
 
             - name: Set up Bun
+              if: steps.filter.outputs.api == 'true'
               uses: oven-sh/setup-bun@v2
               with:
                   bun-version: latest
 
             - name: Install dependencies
+              if: steps.filter.outputs.api == 'true'
               run: bun install --frozen-lockfile
+
+            # In the background, so the build overlaps with the API steps the way the separate
+            # frontend job used to; "Deploy preview frontend" picks up the result.
+            #
+            # VITE_PREVIEW switches city resolution to `?city=` and opens the feature flags, both of
+            # which a single workers.dev host cannot get from the subdomain or from PostHog. The blank
+            # PostHog key keeps preview traffic out of the production project.
+            - name: Start building the frontend preview
+              id: frontend
+              if: steps.filter.outputs.api == 'true'
+              working-directory: packages/frontend-next
+              run: |
+                  nohup bash -c 'bun run build; echo $? > "$RUNNER_TEMP/frontend-build.status"' \
+                    > "$RUNNER_TEMP/frontend-build.log" 2>&1 &
+              env:
+                  # Every rendered preview has its own API and databases, including frontend-only PRs.
+                  VITE_API_URL: ${{ env.PREVIEW_URL }}
+                  VITE_AUTH_URL: https://auth-worker-preview.freifahren.workers.dev
+                  VITE_FUND_URL: https://fund-worker-preview.freifahren.workers.dev
+                  VITE_PREVIEW: 'true'
+                  VITE_POSTHOG_KEY: ''
+                  # Exercise the real checkbox and mobile layout during preview testing.
+                  VITE_TURNSTILE_SITE_KEY: '3x00000000000000000000FF'
 
             # Hash Git tree IDs so even large transit snapshots need no second read.
             - name: Identify database initialization inputs
               id: inputs
+              if: steps.filter.outputs.api == 'true'
               run: |
-                  fingerprint=$(git ls-tree HEAD -- drizzle src/db ../cities ../report-privacy ../worker-kit package.json wrangler.jsonc ../../.github/workflows/preview.yml ../../package.json ../../bun.lock ../../bunfig.toml | sha256sum | cut -d' ' -f1)
+                  fingerprint=$(git ls-tree HEAD -- drizzle src/db ../cities ../report-privacy ../worker-kit package.json wrangler.jsonc ../../.github/workflows/preview.yml ../../.github/scripts/each-city.sh ../../package.json ../../bun.lock ../../bunfig.toml | sha256sum | cut -d' ' -f1)
                   echo "prefix=d1-v1-pr-$PR_NUMBER-$fingerprint-" >> "$GITHUB_OUTPUT"
 
             - name: Restore initialized database IDs
+              if: steps.filter.outputs.api == 'true'
               uses: actions/cache/restore@v4
               with:
                   path: packages/api-worker/.preview-databases.json
@@ -118,52 +146,60 @@ jobs:
             # Every step below passes this config, which is what keeps them off production.
             - name: Provision preview databases
               id: databases
+              if: steps.filter.outputs.api == 'true'
               run: bun run preview:databases --pr "$PR_NUMBER" --out "$PREVIEW_CONFIG"
 
+            # SEEDED_CITIES are only the cities in both registries: a database can be provisioned
+            # before its transit configuration lands, and such a city can be migrated but not seeded
+            # or served.
+            - name: Resolve city lists
+              if: steps.filter.outputs.api == 'true'
+              run: |
+                  set -euo pipefail
+                  # Assigned first: a registry that fails to load must fail this step, and inside the
+                  # echo it would leave an empty list that every step below passes on.
+                  database_cities=$(bun -e 'import { CITY_DATABASE_SLUGS } from "../cities/src/index.ts"; console.log(CITY_DATABASE_SLUGS.join(" "))')
+                  seeded_cities=$(bun -e 'import { CITY_SLUGS, CITY_DATABASE_SLUGS } from "../cities/src/index.ts"; const provisioned = new Set<string>(CITY_DATABASE_SLUGS); console.log(CITY_SLUGS.filter((slug) => provisioned.has(slug)).join(" "))')
+                  echo "DATABASE_CITIES=$database_cities" >> "$GITHUB_ENV"
+                  echo "SEEDED_CITIES=$seeded_cities" >> "$GITHUB_ENV"
+
+            # The three steps below take the cities several at a time; see each-city.sh.
             - name: Apply migrations
-              if: steps.databases.outputs.reused != 'true'
-              run: bun run db:migrate:remote --config "$PREVIEW_CONFIG"
+              if: steps.filter.outputs.api == 'true' && steps.databases.outputs.reused != 'true'
+              run: ../../.github/scripts/each-city.sh 6 "$DATABASE_CITIES" bun run db:migrate:remote --city {} --config "$PREVIEW_CONFIG"
 
-            # Only cities in both registries: a database can be provisioned before its transit
-            # configuration lands, and such a city can be migrated but not seeded or served.
-            - name: Resolve city list
-              run: |
-                  set -euo pipefail
-                  slugs=$(bun -e 'import { CITY_SLUGS, CITY_DATABASE_SLUGS } from "../cities/src/index.ts"; const provisioned = new Set<string>(CITY_DATABASE_SLUGS); for (const slug of CITY_SLUGS) if (provisioned.has(slug)) console.log(slug)' | tr '\n' ' ')
-                  echo "CITY_SLUGS=$slugs" >> "$GITHUB_ENV"
-
+            # Building a city's reference data is the CPU-bound part, hence fewer at a time. Each
+            # city builds in a local database directory of its own.
             - name: Seed reference data
-              if: steps.databases.outputs.reused != 'true'
-              run: |
-                  set -euo pipefail
-                  for city in $CITY_SLUGS; do
-                    bun run seed --city "$city" --remote --config "$PREVIEW_CONFIG"
-                  done
+              if: steps.filter.outputs.api == 'true' && steps.databases.outputs.reused != 'true'
+              run: ../../.github/scripts/each-city.sh 4 "$SEEDED_CITIES" bun run seed --city {} --remote --config "$PREVIEW_CONFIG" --persist-to "$RUNNER_TEMP/seed/{}"
 
             - name: Copy recent production reports
-              if: steps.databases.outputs.reused != 'true'
-              run: bun run db:copy-reports --config "$PREVIEW_CONFIG"
+              if: steps.filter.outputs.api == 'true' && steps.databases.outputs.reused != 'true'
+              run: ../../.github/scripts/each-city.sh 6 "$DATABASE_CITIES" bun run db:copy-reports --city {} --config "$PREVIEW_CONFIG"
 
             - name: Remember initialized database IDs
-              if: steps.databases.outputs.reused != 'true'
+              if: steps.filter.outputs.api == 'true' && steps.databases.outputs.reused != 'true'
               uses: actions/cache/save@v4
               with:
                   path: packages/api-worker/.preview-databases.json
                   key: ${{ steps.inputs.outputs.prefix }}${{ github.run_id }}-${{ github.run_attempt }}
 
             - name: Deploy preview API worker
+              if: steps.filter.outputs.api == 'true'
               run: bun run wrangler preview --config "$PREVIEW_CONFIG" --name "pr-$PR_NUMBER" --ignore-base-config
 
             - name: Smoke test every city
+              if: steps.filter.outputs.api == 'true'
               run: |
                   set -euo pipefail
 
-                  for city in $CITY_SLUGS; do
+                  for city in $SEEDED_CITIES; do
                     # A freshly deployed workers.dev hostname can briefly return 404 at the edge. Each
                     # city must become reachable before the preview can be considered ready.
                     # 12 attempts (60s) was not enough on a cold deploy: the edge served 404s and then
-                  # 500s past the budget while the Worker and its D1 settled.
-                  for attempt in $(seq 1 30); do
+                    # 500s past the budget while the Worker and its D1 settled.
+                    for attempt in $(seq 1 30); do
                       if stations=$(curl --fail --silent --show-error --location \
                         "${PREVIEW_URL}/v0/transit/stations?city=${city}" | jq 'length'); then
                         if [ "$stations" -ge 1 ]; then
@@ -179,67 +215,29 @@ jobs:
                     done
                   done
 
-    frontend:
-        needs: plan
-        if: >-
-            github.event.action != 'closed' &&
-            needs.plan.outputs.api == 'true' &&
-            github.event.pull_request.head.repo.full_name == github.repository
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-        defaults:
-            run:
-                working-directory: packages/frontend-next
-        env:
-            CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-            CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-            PR_NUMBER: ${{ github.event.pull_request.number }}
-            # Every rendered preview has its own API and databases, including frontend-only PRs.
-            APP_URL: https://pr-${{ github.event.pull_request.number }}-frontend.freifahren.workers.dev
-            API_URL: https://pr-${{ github.event.pull_request.number }}-api-worker.freifahren.workers.dev
-
-        steps:
-            - name: Check out code
-              uses: actions/checkout@v4
-
-            - name: Set up Bun
-              uses: oven-sh/setup-bun@v2
-              with:
-                  bun-version: latest
-
-            - name: Install dependencies
-              run: bun install --frozen-lockfile
-
-            # VITE_PREVIEW switches city resolution to `?city=` and opens the feature flags, both of
-            # which a single workers.dev host cannot get from the subdomain or from PostHog. The blank
-            # PostHog key keeps preview traffic out of the production project.
-            - name: Build preview
-              run: bun run build
-              env:
-                  VITE_API_URL: ${{ env.API_URL }}
-                  VITE_AUTH_URL: https://auth-worker-preview.freifahren.workers.dev
-                  VITE_FUND_URL: https://fund-worker-preview.freifahren.workers.dev
-                  VITE_PREVIEW: 'true'
-                  VITE_POSTHOG_KEY: ''
-                  # Exercise the real checkbox and mobile layout during preview testing.
-                  VITE_TURNSTILE_SITE_KEY: '3x00000000000000000000FF'
-
+            # Runs even when an API step failed, as the frontend job did: the two previews deploy
+            # independently, and only the deployment record below needs both.
             - name: Deploy preview frontend
+              if: ${{ !cancelled() && steps.frontend.outcome == 'success' }}
+              working-directory: packages/frontend-next
               run: |
+                  set -euo pipefail
+                  for attempt in $(seq 1 600); do
+                    [ -f "$RUNNER_TEMP/frontend-build.status" ] && break
+                    sleep 1
+                  done
+                  echo "::group::bun run build"
+                  cat "$RUNNER_TEMP/frontend-build.log"
+                  echo "::endgroup::"
+                  if [ "$(cat "$RUNNER_TEMP/frontend-build.status" 2>/dev/null)" != 0 ]; then
+                    echo "::error::The frontend build failed or did not finish"
+                    exit 1
+                  fi
                   ../api-worker/node_modules/.bin/wrangler preview --name "pr-$PR_NUMBER" --ignore-base-config
                   curl --fail --silent --show-error --retry 8 --retry-delay 3 --retry-all-errors "$APP_URL/" -o /dev/null
 
-    ready:
-        needs: [api, frontend]
-        runs-on: ubuntu-latest
-        permissions:
-            deployments: write
-        env:
-            PR_NUMBER: ${{ github.event.pull_request.number }}
-            APP_URL: https://pr-${{ github.event.pull_request.number }}-frontend.freifahren.workers.dev
-        steps:
             - name: Record preview deployment
+              if: steps.filter.outputs.api == 'true'
               uses: actions/github-script@v7
               with:
                   script: |
