@@ -51,7 +51,8 @@ const PIXEL_RATIO = Math.min(
 );
 
 export function MapView() {
-  const { selectedStation, handleMapClick } = useStationSelection();
+  const { selectedStation, handleMapClick, handleMapTouchStart, handleMapDragStart } =
+    useStationSelection();
   const { visible: riskVisible } = useRiskLayer();
   const [baseMapReady, setBaseMapReady] = useState(false);
 
@@ -118,6 +119,8 @@ export function MapView() {
         attributionControl={{ compact: true }}
         interactiveLayerIds={[REPORTS_HIT_LAYER_ID, STATIONS_LAYER_ID]}
         onClick={handleMapClick}
+        onTouchStart={handleMapTouchStart}
+        onDragStart={handleMapDragStart}
         onZoomEnd={trackSecondaryReveal}
         // Let the base map render its first frame before we add the GeoJSON sources and the
         // report markers, so that overlay setup doesn't compete with the heaviest part of map

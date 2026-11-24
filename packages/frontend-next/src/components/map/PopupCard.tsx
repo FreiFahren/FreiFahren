@@ -25,13 +25,13 @@ export function PopupCard({ onClose, closeLabel, cardClassName, children }: Popu
           onClose={onClose}
           // z-40 lifts the backdrop above the map controls (z-20), the search bar (z-30) and the
           // toasts (z-25) so it dims and blocks all of them, not just the map.
-          className="animate-in fade-in z-40 duration-150"
+          className="animate-in fade-in z-40 duration-100"
         />
       )}
       <div className="pb-safe-3 pointer-events-none fixed inset-x-0 bottom-(--keyboard-inset) z-40 flex justify-center px-3 pt-3 transition-[bottom] duration-200 ease-out">
         <Card
           className={cn(
-            'animate-in slide-in-from-bottom-4 fade-in pointer-events-auto max-h-[calc(var(--viewport-height)-var(--keyboard-inset)-env(safe-area-inset-bottom)-1.5rem)] w-full max-w-md gap-1 overflow-y-auto py-4 duration-200 ease-out',
+            'animate-in slide-in-from-bottom-4 fade-in pointer-events-auto max-h-[calc(var(--viewport-height)-var(--keyboard-inset)-env(safe-area-inset-bottom)-1.5rem)] w-full max-w-md gap-1 overflow-y-auto py-4 duration-100 ease-out',
             cardClassName,
           )}
         >

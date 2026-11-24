@@ -1,5 +1,5 @@
 import { useParams } from '@tanstack/react-router';
-import { useEffect, useRef } from 'react';
+import { useDeferredValue, useEffect, useRef } from 'react';
 import { useMap } from 'react-map-gl/maplibre';
 
 import { useStations } from '@/api/transit';
@@ -13,7 +13,11 @@ const DETAIL_PANEL_PADDING_BOTTOM = 320;
 export function MapCameraController() {
   const { current: map } = useMap();
   const { data: stations } = useStations();
-  const targetId = useParams({ strict: false, select: (params) => params.stationId });
+  // Moving the camera re-renders the map on the main thread. Deferring it lets the detail sheet,
+  // which mounts in the same navigation, paint first.
+  const targetId = useDeferredValue(
+    useParams({ strict: false, select: (params) => params.stationId }),
+  );
 
   // The id last framed. Guards against re-flying to a station already in view — including when the
   // panel closes and the same station is re-selected, or when `stations`/`map` change identity.
