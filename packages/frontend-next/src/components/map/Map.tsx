@@ -19,6 +19,7 @@ import { track } from '@/lib/analytics';
 import { currentCity } from '@/lib/city';
 
 import { LINES_HIT_LAYER_IDS } from './line-hit-layer';
+import { LineLabelsLayer } from './line-labels-layer';
 import { LineLayer } from './LineLayer';
 import { SECONDARY_REVEAL_ZOOM } from './line-style';
 import { MapCameraController } from './MapCameraController';
@@ -139,6 +140,7 @@ export function MapView() {
           <>
             <StationsLayer selectedStation={selectedStation} />
             {riskVisible ? <RiskLayer /> : <LineLayer />}
+            <LineLabelsLayer />
             <ReportsLayer />
             <UserLocationControl />
             <MapCameraController />

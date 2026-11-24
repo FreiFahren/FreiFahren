@@ -6,6 +6,7 @@ import type { FeatureCollection, LineString, Point } from 'geojson';
 
 import { useReports } from '@/api/reports';
 import {
+  type Line,
   LINE_TYPE_PRIORITY,
   type SegmentProperties,
   useLines,
@@ -18,7 +19,7 @@ import { currentCity } from '@/lib/city';
 // zoom. Rapid transit (the "trunk") stays visible; street-level surface modes (tram, bus, …) form a
 // "secondary" tier drawn faintly at the metro-area overview (a "we cover this" hint) and revealed
 // at full strength on a small zoom-in. The split is derived per city from LINE_TYPE_PRIORITY (see
-// useSecondaryTypes), so it adapts to whichever modes a city has.
+// secondaryTypesOf), so it adapts to whichever modes a city has.
 
 // Where rapid transit ends and surface modes begin. Anchored to tram so a lower-ranked mode (bus)
 // joins the surface tier automatically.
@@ -37,8 +38,7 @@ export type TypedSegments = FeatureCollection<LineString, TypedSegmentProperties
  * every surface mode is secondary; an all-surface city (e.g. tram+bus) keeps its top mode as trunk.
  * Single-mode cities and types absent from the priority map hide nothing.
  */
-function useSecondaryTypes(): Set<string> {
-  const { data: lines } = useLines();
+export function secondaryTypesOf(lines: Line[] | undefined): Set<string> {
   const secondary = new Set<string>();
   if (!lines) return secondary;
 
@@ -58,6 +58,10 @@ function useSecondaryTypes(): Set<string> {
     if (priority > trunkAnchor) secondary.add(type);
   }
   return secondary;
+}
+
+function useSecondaryTypes(): Set<string> {
+  return secondaryTypesOf(useLines().data);
 }
 
 /** Line and station ids with an active report, from the same last-hour window as the markers. */
@@ -144,6 +148,11 @@ const SECONDARY_FADE_END = SECONDARY_FADE_START + 1.5;
 // Faint overview opacity for the secondary tier — enough to hint coverage, not enough to compete
 // with the trunk network. A teaser that invites zooming; full legibility is at _END. Tune here.
 const SECONDARY_MIN_OPACITY = 0.2;
+
+// Line-name badges follow the same tiers: rapid transit is named half a level into the overview,
+// once its lines have room for a badge, and the surface tier when it has fully faded in.
+export const TRUNK_LABEL_MIN_ZOOM = SECONDARY_FADE_START + 0.5;
+export const SECONDARY_LABEL_MIN_ZOOM = SECONDARY_FADE_END;
 
 // Zoom at which the secondary tier is fully shown — the point a user has "discovered" it. Exported
 // so discovery analytics track the same threshold the rendering uses.
