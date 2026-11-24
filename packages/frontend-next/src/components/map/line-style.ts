@@ -15,6 +15,8 @@ import {
 } from '@/api/transit';
 import { currentCity } from '@/lib/city';
 
+import { stationLabel, type StationLabel } from './station-labels';
+
 // A dense multi-modal network is unreadable if every line draws at full width/opacity at every
 // zoom. Rapid transit (the "trunk") stays visible; street-level surface modes (tram, bus, …) form a
 // "secondary" tier drawn faintly at the metro-area overview (a "we cover this" hint) and revealed
@@ -104,7 +106,12 @@ export function useTypedSegments(): TypedSegments | undefined {
 
 // Per-station flags for the fade: `trunk` = serves a non-secondary line; `reported` = has a report.
 // Either keeps the dot, and its tap target, visible.
-export type StationPointProps = { id: string; name: string; trunk: boolean; reported: boolean };
+export type StationPointProps = {
+  id: string;
+  name: string;
+  trunk: boolean;
+  reported: boolean;
+} & Pick<StationLabel, 'labelTier' | 'labelSortKey'>;
 
 /** Station points tagged for the fade; `undefined` until stations load. */
 export function useTrunkStationsGeoJSON(): FeatureCollection<Point, StationPointProps> | undefined {
@@ -115,26 +122,35 @@ export function useTrunkStationsGeoJSON(): FeatureCollection<Point, StationPoint
 
   if (!stations) return undefined;
 
-  const trunkLineIds = new Set<string>();
+  const trunkNameById = new Map<string, string>();
   if (lines)
-    for (const line of lines) if (!secondaryTypes.has(line.type)) trunkLineIds.add(line.id);
+    for (const line of lines)
+      if (!secondaryTypes.has(line.type)) trunkNameById.set(line.id, line.name);
   const linesLoaded = Boolean(lines);
 
   return {
     type: 'FeatureCollection',
-    features: Object.values(stations).map((station) => ({
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: [station.coordinates.longitude, station.coordinates.latitude],
-      },
-      properties: {
-        id: station.id,
-        name: station.name,
-        trunk: linesLoaded ? station.lines.some((id) => trunkLineIds.has(id)) : true,
-        reported: reported.stations.has(station.id),
-      },
-    })),
+    features: Object.values(stations).map((station) => {
+      const { trunkLineCount, labelTier, labelSortKey } = stationLabel(
+        station.lines,
+        trunkNameById,
+      );
+      return {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [station.coordinates.longitude, station.coordinates.latitude],
+        },
+        properties: {
+          id: station.id,
+          name: station.name,
+          trunk: linesLoaded ? trunkLineCount > 0 : true,
+          reported: reported.stations.has(station.id),
+          labelTier,
+          labelSortKey,
+        },
+      };
+    }),
   };
 }
 
@@ -153,6 +169,34 @@ const SECONDARY_MIN_OPACITY = 0.2;
 // once its lines have room for a badge, and the surface tier when it has fully faded in.
 export const TRUNK_LABEL_MIN_ZOOM = SECONDARY_FADE_START + 0.5;
 export const SECONDARY_LABEL_MIN_ZOOM = SECONDARY_FADE_END;
+
+// Station names come in three steps, each well after the dots and line badges it joins, so a zoom
+// level only ever adds a handful of names: interchanges first, then the rest of the trunk network,
+// then surface stops once the map is close enough to tell neighbouring stops apart.
+const INTERCHANGE_NAME_MIN_ZOOM = SECONDARY_FADE_START + 1.5;
+// Whole levels: a filter is evaluated per tile, so it only ever sees integer zooms.
+const TRUNK_NAME_MIN_ZOOM = Math.ceil(SECONDARY_FADE_START) + 3;
+const SURFACE_NAME_MIN_ZOOM = Math.ceil(SECONDARY_FADE_START) + 5;
+export const STATION_NAME_MIN_ZOOM = INTERCHANGE_NAME_MIN_ZOOM;
+
+// `zoom` has to be the input of a top-level `step`. The selected station is left out: it has a
+// layer of its own, and a second name would land on the other side of its dot.
+export function stationNameFilter(selectedId: string): ExpressionSpecification {
+  const upToTier = (tier: number): ExpressionSpecification => [
+    'all',
+    ['!=', ['get', 'id'], selectedId],
+    ['<=', ['get', 'labelTier'], tier],
+  ];
+  return [
+    'step',
+    ['zoom'],
+    upToTier(0),
+    TRUNK_NAME_MIN_ZOOM,
+    upToTier(1),
+    SURFACE_NAME_MIN_ZOOM,
+    upToTier(2),
+  ];
+}
 
 // Zoom at which the secondary tier is fully shown — the point a user has "discovered" it. Exported
 // so discovery analytics track the same threshold the rendering uses.

@@ -1,14 +1,15 @@
 import type { DataDrivenPropertyValueSpecification } from '@maplibre/maplibre-gl-style-spec';
 import type { Map as MapLibreMap, SymbolLayerSpecification } from 'maplibre-gl';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Layer, Source, useMap } from 'react-map-gl/maplibre';
 
 import { compareLineOrder, useLines, useSegments } from '@/api/transit';
 
 import { REPORTS_CIRCLE_LAYER_ID } from '../../hooks/useReportsLayer';
 
-import { buildLineLabels, type LineLabels } from './line-labels';
+import { buildLineLabels } from './line-labels';
 import { SECONDARY_LABEL_MIN_ZOOM, secondaryTypesOf, TRUNK_LABEL_MIN_ZOOM } from './line-style';
+import { LABEL_FONT_BOLD, useLocalGlyphs } from './use-local-glyphs';
 
 const BADGE_IMAGE_PREFIX = 'line-badge-';
 
@@ -72,10 +73,7 @@ const LAYOUT: SymbolLayerSpecification['layout'] = {
   'symbol-spacing': 376,
   'symbol-sort-key': ['get', 'sortKey'],
   'text-field': ['get', 'label'],
-  // With no glyph server (see below) the stack is used as a CSS font family, falling back to the
-  // device's sans-serif, and "Bold" in it picks the weight. It must not contain a generic family
-  // keyword such as `system-ui`: the canvas then rejects the font and draws 10px glyphs.
-  'text-font': ['Line Label Bold'],
+  'text-font': LABEL_FONT_BOLD,
   'text-size': ['interpolate', ['linear'], ['zoom'], 11, 10, 16, 13],
   'text-offset': TEXT_OFFSET,
   'text-letter-spacing': 0.02,
@@ -94,54 +92,40 @@ const LAYOUT: SymbolLayerSpecification['layout'] = {
 
 const PAINT: SymbolLayerSpecification['paint'] = { 'text-color': ['get', 'textColor'] };
 
-type DrawableLabels = { labels: LineLabels; beforeId: string | undefined };
-
-/** The labels, once the map can draw them: badge images added and glyphs switched to local. */
-function useDrawableLabels(): DrawableLabels | undefined {
+/** Draws each badge background the first time a label asks for it. */
+function useBadgeImages() {
   const { current: mapRef } = useMap();
-  const { data: segments } = useSegments();
-  const { data: lines } = useLines();
-  const [drawable, setDrawable] = useState<DrawableLabels>();
 
   useEffect(() => {
     const map = mapRef?.getMap();
-    if (!map || !segments || !lines) return;
+    if (!map) return;
 
-    const prepare = () => {
-      // The basemap style names a glyph server that doesn't exist (it has no text layers of its
-      // own). Without one MapLibre draws glyphs from the device's fonts, which costs no request
-      // and works offline; a handful of short line names don't justify hosting a font.
-      if (map.getGlyphs()) map.setGlyphs(null);
-      const labels = buildLineLabels(
-        segments,
-        [...lines].sort(compareLineOrder),
-        secondaryTypesOf(lines),
-      );
-      for (const color of new Set(labels.features.map((f) => f.properties.color))) {
-        addBadgeImage(map, color);
-      }
-      // Badges go under the report markers. The reports usually load first; when they haven't, the
-      // report layers are added later and land on top anyway.
-      const beforeId = map.getLayer(REPORTS_CIRCLE_LAYER_ID) ? REPORTS_CIRCLE_LAYER_ID : undefined;
-      setDrawable({ labels, beforeId });
+    const addMissing = ({ id }: { id: string }) => {
+      if (id.startsWith(BADGE_IMAGE_PREFIX))
+        addBadgeImage(map, id.slice(BADGE_IMAGE_PREFIX.length));
     };
-
-    if (map.isStyleLoaded()) {
-      prepare();
-      return;
-    }
-    map.once('idle', prepare);
-    return () => void map.off('idle', prepare);
-  }, [mapRef, segments, lines]);
-
-  return drawable;
+    map.on('styleimagemissing', addMissing);
+    return () => void map.off('styleimagemissing', addMissing);
+  }, [mapRef]);
 }
 
 export function LineLabelsLayer() {
-  const drawable = useDrawableLabels();
+  const { current: mapRef } = useMap();
+  const { data: segments } = useSegments();
+  const { data: lines } = useLines();
+  const glyphsReady = useLocalGlyphs();
+  useBadgeImages();
 
-  if (!drawable) return null;
-  const { labels, beforeId } = drawable;
+  if (!mapRef || !segments || !lines || !glyphsReady) return null;
+
+  const labels = buildLineLabels(
+    segments,
+    [...lines].sort(compareLineOrder),
+    secondaryTypesOf(lines),
+  );
+  // Badges go under the report markers. The reports usually load first; when they haven't, the
+  // report layers are added later and land on top anyway.
+  const beforeId = mapRef.getLayer(REPORTS_CIRCLE_LAYER_ID) ? REPORTS_CIRCLE_LAYER_ID : undefined;
 
   return (
     <Source id="line-labels" type="geojson" data={labels}>
