@@ -16,7 +16,12 @@ export function stationLabel(lineIds: string[], trunkNameById: Map<string, strin
   const trunkLineCount = new Set(
     lineIds.map((id) => trunkNameById.get(id)).filter((name) => name !== undefined),
   ).size;
-  const labelTier = trunkLineCount >= INTERCHANGE_MIN_LINES ? 0 : trunkLineCount > 0 ? 1 : 2;
+  let labelTier: StationLabel['labelTier'] = 2;
+  if (trunkLineCount >= INTERCHANGE_MIN_LINES) {
+    labelTier = 0;
+  } else if (trunkLineCount > 0) {
+    labelTier = 1;
+  }
   return {
     trunkLineCount,
     labelTier,
