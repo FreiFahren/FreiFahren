@@ -54,6 +54,32 @@
   transform-origin: 50% 10%;
 }
 
+/* Report checks: a faint light passes over the row whose check is running, and a passed check's
+   tick draws itself in. Both are transform/stroke-only and skipped under reduced motion. */
+@keyframes check-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+@utility animate-check-sweep {
+  animation: check-sweep 1.4s ease-in-out infinite;
+}
+@keyframes check-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@utility animate-check-draw {
+  stroke-dasharray: 1;
+  animation: check-draw 260ms cubic-bezier(0.23, 1, 0.32, 1) 60ms both;
+}
+
 /* Announcement bodies are Markdown rendered to HTML by the API; these few rules stand in for
    a typography plugin, which would cost far more CSS than the handful of elements used here. */
 .announcement-body {

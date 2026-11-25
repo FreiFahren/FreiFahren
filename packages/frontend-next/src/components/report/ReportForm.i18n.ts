@@ -57,6 +57,7 @@ i18n.addResourceBundle('en', NAMESPACE, {
   status_not_required: 'Not required',
   checkPrivacy: 'Your location is checked on this device. It is not included in your report.',
   reviewReport: 'Review report',
+  openingConfirmation: 'Opening confirmation',
   verifiedTitle: 'Report checks',
   verifiedBody: 'Here are the results of the checks.',
 });
@@ -120,6 +121,7 @@ i18n.addResourceBundle('de', NAMESPACE, {
   checkPrivacy:
     'Dein Standort wird auf diesem Gerät geprüft und nicht mit deiner Meldung gesendet.',
   reviewReport: 'Meldung überprüfen',
+  openingConfirmation: 'Bestätigung wird geöffnet',
   verifiedTitle: 'Prüfung deiner Meldung',
   verifiedBody: 'Hier siehst du die Ergebnisse der Prüfung.',
 });

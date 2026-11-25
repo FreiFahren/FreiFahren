@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@freifahren/ui/button';
 import { cn } from '@freifahren/ui/cn';
@@ -8,17 +9,20 @@ export function ReportActionFooter({
   onClick,
   inactive = false,
   showDisclaimer = false,
+  children,
 }: {
   label?: string;
   onClick?: () => void;
   inactive?: boolean;
   showDisclaimer?: boolean;
+  /** Shown in the button's place when there is no action to offer. */
+  children?: ReactNode;
 }) {
   const { t } = useTranslation(NAMESPACE);
   // Reserve the translated caption’s height on both screens, including when it wraps.
   return (
     <footer className="bg-card pb-safe-4 sticky bottom-0 mt-auto shrink-0 px-4 pt-6">
-      {onClick && (
+      {onClick ? (
         <Button
           type="button"
           size="lg"
@@ -33,6 +37,8 @@ export function ReportActionFooter({
         >
           {label}
         </Button>
+      ) : (
+        children
       )}
       <div className="text-muted-foreground mt-2 grid text-center text-[0.6875rem]">
         {(['disclaimer', 'checkPrivacy'] as const).map((key) => (
