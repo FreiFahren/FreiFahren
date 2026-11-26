@@ -1,3 +1,4 @@
+import type { ReportSummaryPeriod } from '@/api/insights';
 import type { LocationDiagnostics } from '@/components/report/report-location';
 import type { TurnstileFailureReason } from '@/lib/turnstile';
 import type { ReportRejection } from '@/components/report/report-verification';
@@ -97,6 +98,7 @@ type AnalyticsEvents = {
     line_type: 'subway' | 'light_rail' | 'tram' | 'bus' | null;
   };
   reports_tab_selected: { tab: 'summary' | 'lines' | 'reports' };
+  reports_period_selected: { period: ReportSummaryPeriod };
   report_row_selected: { report_age_minutes: number; has_line: boolean; has_direction: boolean };
   detail_modal_closed: { modal: 'station' | 'line' | 'report'; duration_ms: number };
   line_detail_opened: { line_id: string; source: LineDetailSource };
