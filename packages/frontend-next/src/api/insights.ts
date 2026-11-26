@@ -72,3 +72,41 @@ export function prefetchLineInsights(queryClient: QueryClient, lineNames: string
     });
   }
 }
+
+export const REPORT_SUMMARY_PERIODS = ['24h', '7d', '30d'] as const;
+export type ReportSummaryPeriod = (typeof REPORT_SUMMARY_PERIODS)[number];
+
+export type ReportSummary = {
+  period: ReportSummaryPeriod;
+  range: { start: string; end: string };
+  timezone: string;
+  reportCount: number;
+  lines: Array<{
+    name: string;
+    score: number;
+    share: number;
+    /** Score per local hour of day, index 0–23. */
+    hours: number[];
+  }>;
+  /** The busiest sections between two neighbouring stations, highest score first. */
+  sections: Array<{
+    /** Every line running between the two stations, the biggest contributor first. */
+    lines: Array<{ name: string; score: number }>;
+    from: { id: string; name: string };
+    to: { id: string; name: string };
+    score: number;
+    /** Share of all section scores in the period, not just the listed ones. */
+    share: number;
+  }>;
+};
+
+// The CDN keeps each summary for an hour, so refetching more often mostly returns the same response.
+export const reportSummaryQueryOptions = (period: ReportSummaryPeriod) => ({
+  queryKey: ['insights', 'summary', period] as const,
+  queryFn: () => fetchJson<ReportSummary>(`/v0/insights/summary?period=${period}`),
+  staleTime: 5 * 60 * 1000,
+  refetchOnWindowFocus: true,
+});
+
+export const useReportSummary = (period: ReportSummaryPeriod) =>
+  useQuery(reportSummaryQueryOptions(period));

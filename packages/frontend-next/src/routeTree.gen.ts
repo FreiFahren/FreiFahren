@@ -23,6 +23,7 @@ import { Route as FundIndexRouteImport } from './routes/fund/index'
 import { Route as FundFineIdRouteImport } from './routes/fund/$fineId'
 import { Route as ReportsIndexRouteImport } from './routes/reports/index'
 import { Route as ReportsLinesRouteImport } from './routes/reports/lines'
+import { Route as ReportsSectionsRouteImport } from './routes/reports/sections'
 import { Route as ReportsStationsRouteImport } from './routes/reports/stations'
 import { Route as MapDebugReportDecayRouteImport } from './routes/_map/debug/report-decay'
 import { Route as MapLineIndexRouteImport } from './routes/_map/line/index'
@@ -101,6 +102,11 @@ const ReportsLinesRoute = ReportsLinesRouteImport.update({
   path: '/lines',
   getParentRoute: () => ReportsRoute,
 } as any)
+const ReportsSectionsRoute = ReportsSectionsRouteImport.update({
+  id: '/sections',
+  path: '/sections',
+  getParentRoute: () => ReportsRoute,
+} as any)
 const ReportsStationsRoute = ReportsStationsRouteImport.update({
   id: '/stations',
   path: '/stations',
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/announcements/$announcementId': typeof AnnouncementsAnnouncementIdRoute
   '/fund/$fineId': typeof FundFineIdRoute
   '/reports/lines': typeof ReportsLinesRoute
+  '/reports/sections': typeof ReportsSectionsRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/account/': typeof AccountIndexRoute
   '/announcements/': typeof AnnouncementsIndexRoute
@@ -167,6 +174,7 @@ export interface FileRoutesByTo {
   '/announcements/$announcementId': typeof AnnouncementsAnnouncementIdRoute
   '/fund/$fineId': typeof FundFineIdRoute
   '/reports/lines': typeof ReportsLinesRoute
+  '/reports/sections': typeof ReportsSectionsRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/': typeof MapIndexRoute
   '/account': typeof AccountIndexRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/announcements/$announcementId': typeof AnnouncementsAnnouncementIdRoute
   '/fund/$fineId': typeof FundFineIdRoute
   '/reports/lines': typeof ReportsLinesRoute
+  '/reports/sections': typeof ReportsSectionsRoute
   '/reports/stations': typeof ReportsStationsRoute
   '/_map/': typeof MapIndexRoute
   '/account/': typeof AccountIndexRoute
@@ -216,6 +225,7 @@ export interface FileRouteTypes {
     | '/announcements/$announcementId'
     | '/fund/$fineId'
     | '/reports/lines'
+    | '/reports/sections'
     | '/reports/stations'
     | '/account/'
     | '/announcements/'
@@ -236,6 +246,7 @@ export interface FileRouteTypes {
     | '/announcements/$announcementId'
     | '/fund/$fineId'
     | '/reports/lines'
+    | '/reports/sections'
     | '/reports/stations'
     | '/'
     | '/account'
@@ -259,6 +270,7 @@ export interface FileRouteTypes {
     | '/announcements/$announcementId'
     | '/fund/$fineId'
     | '/reports/lines'
+    | '/reports/sections'
     | '/reports/stations'
     | '/_map/'
     | '/account/'
@@ -387,6 +399,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsLinesRouteImport
       parentRoute: typeof ReportsRoute
     }
+    '/reports/sections': {
+      id: '/reports/sections'
+      path: '/sections'
+      fullPath: '/reports/sections'
+      preLoaderRoute: typeof ReportsSectionsRouteImport
+      parentRoute: typeof ReportsRoute
+    }
     '/reports/stations': {
       id: '/reports/stations'
       path: '/stations'
@@ -463,12 +482,14 @@ const MapRouteWithChildren = MapRoute._addFileChildren(MapRouteChildren)
 
 interface ReportsRouteChildren {
   ReportsLinesRoute: typeof ReportsLinesRoute
+  ReportsSectionsRoute: typeof ReportsSectionsRoute
   ReportsStationsRoute: typeof ReportsStationsRoute
   ReportsIndexRoute: typeof ReportsIndexRoute
 }
 
 const ReportsRouteChildren: ReportsRouteChildren = {
   ReportsLinesRoute: ReportsLinesRoute,
+  ReportsSectionsRoute: ReportsSectionsRoute,
   ReportsStationsRoute: ReportsStationsRoute,
   ReportsIndexRoute: ReportsIndexRoute,
 }

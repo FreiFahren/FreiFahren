@@ -1,3 +1,4 @@
+import { ADMIN_API_PATH } from '@freifahren/contracts/admin'
 import { Context, Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { etag, RETAINED_304_HEADERS } from 'hono/etag'
@@ -6,7 +7,6 @@ import { requestId } from 'hono/request-id'
 import { corsAllowOrigin, Env, registerContext } from './app-env'
 import { handleError } from './common/error-handler'
 import { registerVersionedRoutes } from './common/router'
-import { ADMIN_API_PATH } from '@freifahren/contracts/admin'
 import { adminRoutes } from './modules/admin/admin-routes'
 import { getAnnouncementById, getAnnouncements } from './modules/announcements'
 import {
@@ -14,7 +14,7 @@ import {
     VERSIONED_ANNOUNCEMENTS_PATH,
 } from './modules/announcements/announcements-cache-middleware'
 import { getConfig } from './modules/config'
-import { getLineInsights, getLinesInsights, getStationInsights } from './modules/insights'
+import { getLineInsights, getLinesInsights, getReportSummary, getStationInsights } from './modules/insights'
 import {
     insightsCacheMiddleware,
     VERSIONED_INSIGHTS_CACHEABLE_PATHS,
@@ -121,7 +121,7 @@ export const createApp = () => {
         v0: [getRisk],
     })
     registerVersionedRoutes(app, 'insights', 'v0', {
-        v0: [getStationInsights, getLinesInsights, getLineInsights],
+        v0: [getStationInsights, getLinesInsights, getLineInsights, getReportSummary],
     })
     registerVersionedRoutes(app, 'announcements', 'v0', {
         v0: [getAnnouncements, getAnnouncementById],
