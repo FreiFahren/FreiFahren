@@ -69,12 +69,20 @@ export function traceAction<T>(name: string, callback: () => Promise<T>): Promis
  * Record a handled problem. Token acquisition failures are captured here so their reason remains
  * visible even when the caller continues to submit without a token.
  */
-export function captureIssue(message: string, context?: Record<string, unknown>): void {
-  SentryReact.captureMessage(message, {
-    level: 'warning',
-    tags: { platform: Capacitor.getPlatform() },
-    extra: context,
-  });
+export function captureIssue(
+  message: string,
+  context?: Record<string, unknown>,
+  tags?: Record<string, string>,
+): void {
+  try {
+    SentryReact.captureMessage(message, {
+      level: 'warning',
+      tags: { ...tags, platform: Capacitor.getPlatform() },
+      extra: context,
+    });
+  } catch {
+    // Reporting a handled failure must not prevent its fallback from running.
+  }
 }
 
 export function captureException(error: unknown): void {

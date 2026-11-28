@@ -1,5 +1,9 @@
 import type { LocationDiagnostics } from '@/components/report/report-location';
-import type { TurnstileFailureReason } from '@/lib/turnstile';
+import type {
+  ReportTurnstileCompletedEvent,
+  ReportTurnstileStageEvent,
+} from '@/components/report/report-turnstile-session';
+import type { DeviceOutcome } from '@/components/report/report-submission-flow';
 import type { ReportRejection } from '@/components/report/report-verification';
 import type { ContributeSource } from '@/lib/contribute-modal';
 import type { GeolocationPermissionState } from '@/lib/location-prompt';
@@ -22,18 +26,9 @@ type SuperProperties = {
  */
 type AnalyticsEvents = {
   report_location_completed: LocationDiagnostics & { attemptId: string; durationMs: number };
-  report_started: { attemptId: string; stationId: string };
-  report_turnstile_completed: {
-    attemptId: string;
-    outcome: 'passed' | 'failed' | 'disabled';
-    reason?: TurnstileFailureReason;
-    errorCode?: string;
-    durationMs: number;
-    timeoutMs: number;
-    earlyTokenUsed: boolean;
-    tokenAgeMs?: number;
-    interactionRequired?: boolean;
-  };
+  report_started: { attemptId: string; stationId: string; checkId?: string };
+  report_turnstile_stage: ReportTurnstileStageEvent;
+  report_turnstile_completed: ReportTurnstileCompletedEvent;
   report_delivery_completed: {
     attemptId?: string;
     outcome: 'received' | 'saved_locally';
@@ -56,11 +51,11 @@ type AnalyticsEvents = {
   };
   // Outcome of the pre-submit verification step. `location` says which fix the distance rule ran
   // on ('coarse' = a refinement was tried and the rule sat out). A failed Turnstile check
-  // can still proceed to delivery. 'retried' is retained for historical analytics.
+  // can still proceed to delivery.
   report_verified: {
     attemptId: string;
     location: 'accurate' | 'refined' | 'coarse' | 'stale' | 'none';
-    turnstile: 'passed' | 'retried' | 'failed' | 'disabled';
+    turnstile: DeviceOutcome['outcome'];
     durationMs: number;
   };
   screenshot_taken: Record<string, never>;
@@ -129,7 +124,13 @@ export function track<E extends keyof AnalyticsEvents>(
     console.log('[analytics]', event, properties);
   }
   const timestamp = new Date();
-  enqueuePostHog((posthog) => posthog.capture(event, properties, { timestamp }));
+  enqueuePostHog((posthog) => {
+    try {
+      posthog.capture(event, properties, { timestamp });
+    } catch {
+      // The SDK can run later when a queued event is flushed.
+    }
+  });
 }
 
 // Pageviews are driven manually from the router; PostHog's automatic capture is off so they don't

@@ -80,7 +80,7 @@ const callGate = async <Gate, Data>(
     }
 }
 
-export const submitToReportGate = async (c: Context<Env>, report: PublicNormalizedReport) => {
+export const submitToReportGate = async (c: Context<Env>, report: PublicNormalizedReport, attemptId?: string) => {
     if (isOpenReportPreview(c)) return submitOpenPreviewReport(c, report)
     return callGate(
         c.env.REPORT_GATE,
@@ -90,6 +90,7 @@ export const submitToReportGate = async (c: Context<Env>, report: PublicNormaliz
                 report,
                 request: requestMetadata(c),
                 turnstileToken: c.req.header(TURNSTILE_TOKEN_HEADER),
+                attemptId,
             }),
         createdReportSchema
     )

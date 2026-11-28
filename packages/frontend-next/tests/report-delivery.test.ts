@@ -60,6 +60,9 @@ describe('Delivery acknowledgement', () => {
       }),
     );
     expect(vi.mocked(fetch).mock.calls[0][1]?.headers).not.toHaveProperty('cf-turnstile-response');
+    expect(JSON.parse(String(vi.mocked(fetch).mock.calls[0][1]?.body))).toMatchObject({
+      attemptId: input.attemptId,
+    });
   });
 
   it.each([400, 503])('does not claim delivery after HTTP %s', async (status) => {

@@ -51,6 +51,7 @@ export const intakeRequestSchema = z.object({
     report: publicNormalizedReportSchema,
     request: requestMetadataSchema,
     turnstileToken: z.string().max(4096).optional(),
+    attemptId: z.uuid().optional().catch(undefined),
 })
 
 export type IntakeRequest = z.infer<typeof intakeRequestSchema>

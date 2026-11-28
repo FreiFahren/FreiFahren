@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { Env } from '../../app-env'
 import { defineRoute } from '../../common/router'
-import { insertReportSchema } from '../../db'
+import { insertReportDbSchema } from '../../db'
 import { submitToReportGate } from '../report-gate'
 
 import { getDefaultReportsRange, MAX_REPORTS_TIMEFRAME } from './constants'
@@ -89,17 +89,37 @@ export const getReportsByStation = defineRoute<Env>()({
     },
 })
 
+// API input schema:
+// - Allows missing stationId so normalization can infer it
+// - Defaults public submissions to web_app; Telegram uses private RPC
+// - Requires at least one of stationId, lineId, or directionId
+const submitReportRequestSchema = insertReportDbSchema
+    .extend({
+        source: z.enum(['mini_app', 'web_app', 'mobile_app']).default('web_app'),
+        stationId: insertReportDbSchema.shape.stationId.optional(),
+        attemptId: z.uuid().optional().catch(undefined),
+    })
+    .superRefine((data, ctx) => {
+        if (data.stationId === undefined && data.lineId === undefined && data.directionId === undefined) {
+            ctx.addIssue({
+                code: 'custom',
+                message: 'At least one of stationId, lineId, or directionId must be provided',
+                path: [],
+            })
+        }
+    })
+
 export const postReport = defineRoute<Env>()({
     method: 'post',
     path: '/',
     schemas: {
-        json: insertReportSchema,
+        json: submitReportRequestSchema,
     },
     handler: async (c) => {
-        const input = c.req.valid('json')
+        const { attemptId, ...input } = c.req.valid('json')
         const report = await c
             .get('reportSubmissionService')
-            .submitPublicReport(input, (normalized) => submitToReportGate(c, normalized))
+            .submitPublicReport(input, (normalized) => submitToReportGate(c, normalized, attemptId))
 
         return c.json(report)
     },

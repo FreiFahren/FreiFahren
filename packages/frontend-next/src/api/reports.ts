@@ -463,6 +463,7 @@ export function useSubmitReport() {
               ...(turnstileToken === undefined ? {} : { [TURNSTILE_TOKEN_HEADER]: turnstileToken }),
             },
             body: JSON.stringify({
+              attemptId: input.attemptId,
               stationId: input.stationId,
               lineId,
               directionId: input.directionStationId ?? null,

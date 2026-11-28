@@ -331,9 +331,10 @@ export function ReportForm() {
   const { t } = useTranslation(NAMESPACE);
   const navigate = useNavigate();
   const { stationId: initialStationId, lineName: initialLineName } = routeApi.useSearch();
-  const { phase, submit, start, reset, showSuccess, earlyTurnstileContainerRef } =
-    useReportSubmission();
+  const { phase, submit, start, reset, showSuccess, turnstileContainerRef } = useReportSubmission();
   const scrollAreaRef = useKeyboardScrollArea();
+  const hideTurnstileHost =
+    phase.kind === 'form' || phase.kind === 'success' || phase.kind === 'saved_locally';
 
   const handleSuccessClose = () => {
     navigate({ to: '/' });
@@ -389,15 +390,22 @@ export function ReportForm() {
                   <DirectionPicker />
                   <SubmitFooter onSubmit={(selection) => void submit(selection)} />
                 </ReportLocationStep>
-                <div
-                  ref={earlyTurnstileContainerRef}
-                  data-turnstile="early-report"
-                  className="fixed bottom-4 left-1/2 z-[9999] w-[300px] max-w-[calc(100vw-1rem)] -translate-x-1/2"
-                />
               </div>
             </>
           )}
         </div>
+        <div
+          ref={turnstileContainerRef}
+          data-turnstile="report"
+          role="group"
+          aria-label={t('checkDevice')}
+          aria-hidden={hideTurnstileHost}
+          inert={hideTurnstileHost}
+          className={cn(
+            'pointer-events-none relative z-[9999] flex w-full flex-none justify-center [&>*]:pointer-events-auto',
+            hideTurnstileHost ? 'sr-only' : 'pb-safe-4',
+          )}
+        />
         {/* /report is outside the _map layout that hosts the app's Toaster, so mount one here. */}
         <Toaster />
       </FullScreenPage>

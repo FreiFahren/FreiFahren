@@ -49,31 +49,12 @@ export const reports = sqliteTable(
     ]
 )
 
-const insertReportDbSchema = createInsertSchema(reports).pick({
+export const insertReportDbSchema = createInsertSchema(reports).pick({
     stationId: true,
     lineId: true,
     directionId: true,
     source: true,
 })
-
-// API input schema:
-// - Allows missing stationId so normalization can infer it
-// - Defaults public submissions to web_app; Telegram uses private RPC
-// - Requires at least one of stationId, lineId, or directionId
-export const insertReportSchema = insertReportDbSchema
-    .extend({
-        source: z.enum(['mini_app', 'web_app', 'mobile_app']).default('web_app'),
-        stationId: insertReportDbSchema.shape.stationId.optional(),
-    })
-    .superRefine((data, ctx) => {
-        if (data.stationId === undefined && data.lineId === undefined && data.directionId === undefined) {
-            ctx.addIssue({
-                code: 'custom',
-                message: 'At least one of stationId, lineId, or directionId must be provided',
-                path: [],
-            })
-        }
-    })
 
 // Database insert type (internal use): stationId + source are required
 export type InsertReport = z.infer<typeof insertReportDbSchema>

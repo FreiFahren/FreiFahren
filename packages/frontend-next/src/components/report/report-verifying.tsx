@@ -31,17 +31,14 @@ export function ReportVerifying({
   phase: VerifyingPhase;
   onBack: () => void;
   onResultsRead: () => void;
-  onStart: (container: HTMLDivElement, signal: AbortSignal) => void;
+  onStart: (signal: AbortSignal) => void;
 }) {
   const { t } = useTranslation(NAMESPACE);
   const { data: stations } = useStations();
-  const containerRef = useRef<HTMLDivElement>(null);
   const start = useEffectEvent(onStart);
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
     const controller = new AbortController();
-    void start(container, controller.signal);
+    void start(controller.signal);
     return () => controller.abort();
   }, []);
 
@@ -95,11 +92,6 @@ export function ReportVerifying({
         <div className="mt-6">
           <ReportCheckList checks={phase.checks} />
         </div>
-        <div
-          ref={containerRef}
-          data-turnstile="report"
-          className="relative left-1/2 mt-6 w-[300px] max-w-[calc(100vw-1rem)] -translate-x-1/2"
-        />
       </div>
       <ReportActionFooter label={t('reviewReport')} onClick={rejected ? onBack : undefined}>
         {delivered && (

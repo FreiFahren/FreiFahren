@@ -79,6 +79,31 @@ describe('Report API contract', () => {
         expect(fakeReportGate.lastIntake).not.toHaveProperty('relayPassword')
     })
 
+    it('forwards the report attempt ID to the report gate without storing or returning it', async () => {
+        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
+        const attemptId = '11111111-1111-4111-8111-111111111111'
+
+        const response = await sendReportRequest({ stationId: station.id, source: 'web_app', attemptId })
+
+        expect(response.status).toBe(200)
+        expect(fakeReportGate.lastIntake).toHaveProperty('attemptId', attemptId)
+        expect(await response.json()).not.toHaveProperty('attemptId')
+        const persisted = await db
+            .select()
+            .from(reports)
+            .where(eq(reports.stationId, station.id))
+            .orderBy(desc(reports.timestamp))
+            .limit(1)
+        expect(persisted[0]).not.toHaveProperty('attemptId')
+    })
+
+    it('ignores malformed telemetry IDs without rejecting the report', async () => {
+        const [station] = await db.select({ id: stations.id }).from(stations).limit(1)
+        const response = await sendReportRequest({ stationId: station.id, source: 'web_app', attemptId: 'bad-id' })
+        expect(response.status).toBe(200)
+        expect(fakeReportGate.lastIntake?.attemptId).toBeUndefined()
+    })
+
     it('guesses the station when a line is provided without a station', async () => {
         // Ensure deterministic history for this test
         await db.delete(reports)

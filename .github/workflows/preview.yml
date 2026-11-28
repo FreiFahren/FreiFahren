@@ -168,11 +168,13 @@ jobs:
               if: steps.filter.outputs.api == 'true' && steps.databases.outputs.reused != 'true'
               run: ../../.github/scripts/each-city.sh 6 "$DATABASE_CITIES" bun run db:migrate:remote --city {} --config "$PREVIEW_CONFIG"
 
-            # Building a city's reference data is the CPU-bound part, hence fewer at a time. Each
-            # city builds in a local database directory of its own.
+            # Four concurrent city seeds are intentional: on the two-core runner this cut the cold
+            # seed step from 153s to 114s. Each city has its own Miniflare database. If a socket
+            # closes, retry only that city after the batch. Benchmark cold previews before changing
+            # concurrency; a single flaky city should not serialize every successful build.
             - name: Seed reference data
               if: steps.filter.outputs.api == 'true' && steps.databases.outputs.reused != 'true'
-              run: ../../.github/scripts/each-city.sh 4 "$SEEDED_CITIES" bun run seed --city {} --remote --config "$PREVIEW_CONFIG" --persist-to "$RUNNER_TEMP/seed/{}"
+              run: ../../.github/scripts/each-city.sh 4 "$SEEDED_CITIES" --retry-on UND_ERR_SOCKET bun run seed --city {} --remote --config "$PREVIEW_CONFIG" --persist-to "$RUNNER_TEMP/seed/{}"
 
             - name: Copy recent production reports
               if: steps.filter.outputs.api == 'true' && steps.databases.outputs.reused != 'true'

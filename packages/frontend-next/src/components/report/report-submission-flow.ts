@@ -29,10 +29,9 @@ export type LocationOutcome = {
   timestamp?: number | null;
   outcome: 'accurate' | 'refined' | 'coarse' | 'stale' | 'none';
 };
-export type DeviceOutcome = {
-  token: string | undefined;
-  outcome: 'passed' | 'retried' | 'failed' | 'disabled';
-};
+export type DeviceOutcome =
+  | { outcome: 'passed'; token: string }
+  | { outcome: 'failed' | 'unavailable' | 'disabled'; token: undefined };
 
 function deviceCheck(device: DeviceOutcome): VerificationChecks['device'] {
   if (device.outcome === 'disabled') return { status: 'not_required' };
@@ -77,7 +76,7 @@ export async function runReportSubmission(selection: ReportSelection, deps: Depe
       }),
     deps
       .mintToken()
-      .catch((): DeviceOutcome => ({ token: undefined, outcome: 'failed' }))
+      .catch((): DeviceOutcome => ({ token: undefined, outcome: 'unavailable' }))
       .then((device) => {
         mark({ device: deviceCheck(device) });
         return device;
